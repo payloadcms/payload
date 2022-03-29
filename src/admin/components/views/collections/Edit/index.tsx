@@ -42,7 +42,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const history = useHistory();
   const { setStepNav } = useStepNav();
   const [initialState, setInitialState] = useState({});
-  const { permissions } = useAuth();
+  const { permissions, user } = useAuth();
   const { getVersions } = useDocumentInfo();
 
   const onSave = useCallback(async (json: any) => {
@@ -50,10 +50,10 @@ const EditView: React.FC<IndexProps> = (props) => {
     if (!isEditing) {
       history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
-      const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc });
+      const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc, user, id, operation: 'update' });
       setInitialState(state);
     }
-  }, [admin, collection, history, isEditing, getVersions]);
+  }, [admin, collection, history, isEditing, getVersions, user, id]);
 
   const [{ data, isLoading, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
@@ -97,12 +97,12 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: isEditing ? 'update' : 'create', id });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields]);
+  }, [dataToRender, fields, isEditing, id, user]);
 
   if (isError) {
     return (

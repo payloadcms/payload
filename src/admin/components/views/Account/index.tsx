@@ -9,6 +9,7 @@ import DefaultAccount from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
 
 const AccountView: React.FC = () => {
   const { state: locationState } = useLocation<{ data: unknown }>();
@@ -16,6 +17,8 @@ const AccountView: React.FC = () => {
   const { setStepNav } = useStepNav();
   const { user, permissions } = useAuth();
   const [initialState, setInitialState] = useState({});
+  const { id } = useDocumentInfo();
+
   const {
     serverURL,
     routes: { api },
@@ -61,12 +64,12 @@ const AccountView: React.FC = () => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields]);
+  }, [dataToRender, fields, id, user]);
 
   return (
     <NegativeFieldGutterProvider allow>

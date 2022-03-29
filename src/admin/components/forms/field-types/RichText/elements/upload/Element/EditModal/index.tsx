@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Transforms, Element } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';
 import { Modal } from '@faceless-ui/modal';
+import { useAuth } from '@payloadcms/config-provider';
 import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types';
 import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema';
 import MinimalTemplate from '../../../../../../../templates/Minimal';
@@ -29,6 +30,7 @@ type Props = {
 export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollectionConfig, fieldSchema, element }) => {
   const editor = useSlateStatic();
   const [initialState, setInitialState] = useState({});
+  const { user } = useAuth();
 
   const handleUpdateEditData = useCallback((fields) => {
     const newNode = {
@@ -47,12 +49,12 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema, data: element?.fields });
+      const state = await buildStateFromSchema({ fieldSchema, data: element?.fields, user, operation: 'update' });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [fieldSchema, element.fields]);
+  }, [fieldSchema, element.fields, user]);
 
   return (
     <Modal

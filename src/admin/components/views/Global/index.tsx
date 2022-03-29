@@ -17,7 +17,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{data?: Record<string, unknown>}>();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
-  const { permissions } = useAuth();
+  const { permissions, user } = useAuth();
   const [initialState, setInitialState] = useState({});
   const { getVersions } = useDocumentInfo();
 
@@ -45,9 +45,9 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   const onSave = useCallback(async (json) => {
     getVersions();
-    const state = await buildStateFromSchema({ fieldSchema: fields, data: json.result });
+    const state = await buildStateFromSchema({ fieldSchema: fields, data: json.result, operation: 'update', user });
     setInitialState(state);
-  }, [getVersions, fields]);
+  }, [getVersions, fields, user]);
 
   const [{ data, isLoading }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
@@ -66,12 +66,12 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: 'update' });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields]);
+  }, [dataToRender, fields, user]);
 
   const globalPermissions = permissions?.globals?.[slug];
 

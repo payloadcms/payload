@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
+import { useAuth } from '@payloadcms/config-provider';
 import { usePreferences } from '../../../utilities/Preferences';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
@@ -18,6 +19,7 @@ import Banner from '../../../elements/Banner';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
 import { DocumentPreferences } from '../../../../../preferences/types';
+import { useOperation } from '../../../utilities/OperationProvider';
 
 import './index.scss';
 
@@ -55,6 +57,9 @@ const Blocks: React.FC<Props> = (props) => {
   const { getPreference, setPreference } = usePreferences();
   const [rows, dispatchRows] = useReducer(reducer, []);
   const formContext = useForm();
+  const { user } = useAuth();
+  const { id } = useDocumentInfo();
+  const operation = useOperation();
   const { dispatchFields } = formContext;
 
   const memoizedValidate = useCallback((value, options) => {
@@ -79,12 +84,12 @@ const Blocks: React.FC<Props> = (props) => {
   const addRow = useCallback(async (rowIndex, blockType) => {
     const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
 
-    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields });
+    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, operation, id, user });
 
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
     dispatchRows({ type: 'ADD', rowIndex, blockType });
     setValue(value as number + 1);
-  }, [path, setValue, value, blocks, dispatchFields]);
+  }, [path, setValue, value, blocks, dispatchFields, operation, id, user]);
 
   const removeRow = useCallback((rowIndex) => {
     dispatchRows({ type: 'REMOVE', rowIndex });
@@ -97,8 +102,8 @@ const Blocks: React.FC<Props> = (props) => {
     dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
   }, [dispatchRows, dispatchFields, path]);
 
-  const setCollapse = useCallback(async (id: string, collapsed: boolean) => {
-    dispatchRows({ type: 'SET_COLLAPSE', id, collapsed });
+  const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
+    dispatchRows({ type: 'SET_COLLAPSE', rowID, collapsed });
 
     if (preferencesKey) {
       const preferences: DocumentPreferences = await getPreference(preferencesKey);
@@ -108,9 +113,9 @@ const Blocks: React.FC<Props> = (props) => {
         || [];
 
       if (!collapsed) {
-        newCollapsedState = newCollapsedState.filter((existingID) => existingID !== id);
+        newCollapsedState = newCollapsedState.filter((existingID) => existingID !== rowID);
       } else {
-        newCollapsedState.push(id);
+        newCollapsedState.push(rowID);
       }
 
       setPreference(preferencesKey, {

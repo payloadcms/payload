@@ -39,7 +39,6 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
   const {
     fieldSchema,
     data: fullData = {},
-    siblingData = {},
     user,
     id,
     operation,
@@ -48,7 +47,7 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
   if (fieldSchema) {
     const validationPromises = [];
 
-    const structureFieldState = (field, passesCondition, data = {}) => {
+    const structureFieldState = (field, passesCondition, data = {}, siblingData = {}) => {
       const value = typeof data?.[field.name] !== 'undefined' ? data[field.name] : field.defaultValue;
 
       const fieldState = {
@@ -156,7 +155,7 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
 
           return {
             ...state,
-            [`${path}${field.name}`]: structureFieldState(field, passesCondition, data),
+            [`${path}${field.name}`]: structureFieldState(field, passesCondition, fullData, data),
           };
         }
 
@@ -173,7 +172,7 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
         // Handle normal fields
         return {
           ...state,
-          [`${path}${namedField.name}`]: structureFieldState(field, passesCondition, data),
+          [`${path}${namedField.name}`]: structureFieldState(field, passesCondition, fullData, data),
         };
       }
 
