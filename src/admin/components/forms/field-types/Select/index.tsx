@@ -25,6 +25,7 @@ const Select: React.FC<Props> = (props) => {
     label,
     options: optionsFromProps,
     hasMany,
+    required,
     admin: {
       readOnly,
       style,
@@ -44,8 +45,8 @@ const Select: React.FC<Props> = (props) => {
   }, [optionsFromProps]);
 
   const memoizedValidate = useCallback((value, validationOptions) => {
-    return validate(value, validationOptions);
-  }, [validate]);
+    return validate(value, { ...validationOptions, options, hasMany, required });
+  }, [validate, required, hasMany, options]);
 
   const {
     value,

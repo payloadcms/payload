@@ -33,8 +33,8 @@ const NumberField: React.FC<Props> = (props) => {
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value, options) => {
-    return validate(value, options);
-  }, [validate]);
+    return validate(value, { ...options, min, max, required });
+  }, [validate, min, max, required]);
 
   const {
     value,

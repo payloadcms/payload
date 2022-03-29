@@ -16,7 +16,7 @@ import reduceFieldsToValues from './reduceFieldsToValues';
 import getSiblingDataFunc from './getSiblingData';
 import getDataByPathFunc from './getDataByPath';
 import wait from '../../../../utilities/wait';
-import { Field, FieldAffectingData } from '../../../../fields/config/types';
+import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
 import { Context as FormContextType, Props, SubmitOptions } from './types';
@@ -86,7 +86,6 @@ const Form: React.FC<Props> = (props) => {
 
         if (typeof field.validate === 'function') {
           validationResult = await field.validate(field.value, {
-            field: (field.field as unknown as FieldAffectingData),
             data,
             siblingData: contextRef.current.getSiblingData(path),
             user,

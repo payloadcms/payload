@@ -2,7 +2,6 @@ import { Field as FieldConfig, Condition, Validate } from '../../../../fields/co
 
 export type Field = {
   value: unknown
-  field: Field
   initialValue: unknown
   errorMessage?: string
   valid: boolean

@@ -63,8 +63,8 @@ const Blocks: React.FC<Props> = (props) => {
   const { dispatchFields } = formContext;
 
   const memoizedValidate = useCallback((value, options) => {
-    return validate(value, options);
-  }, [validate]);
+    return validate(value, { ...options, minRows, maxRows, required });
+  }, [maxRows, minRows, required, validate]);
 
   const [disableFormData, setDisableFormData] = useState(false);
 

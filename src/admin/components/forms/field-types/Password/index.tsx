@@ -24,9 +24,9 @@ const Password: React.FC<Props> = (props) => {
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value, options) => {
-    debugger;
-    return validate(value, options);
-  }, [validate]);
+    const validationResult = validate(value, { ...options, required });
+    return validationResult;
+  }, [validate, required]);
 
   const {
     value,

@@ -62,8 +62,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value, options) => {
-    return validate(value, options);
-  }, [validate]);
+    return validate(value, { ...options, minRows, maxRows, required });
+  }, [maxRows, minRows, required, validate]);
 
   const [disableFormData, setDisableFormData] = useState(false);
 

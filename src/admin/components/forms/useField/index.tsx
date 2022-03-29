@@ -65,7 +65,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
     const validateOptions = {
       id,
-      field: field?.field,
       user,
       data: getData(),
       siblingData: getSiblingData(path),
@@ -88,7 +87,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     condition,
     disableFormData,
     dispatchFields,
-    field,
     getData,
     getSiblingData,
     id,

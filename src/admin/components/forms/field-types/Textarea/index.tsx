@@ -13,6 +13,8 @@ const Textarea: React.FC<Props> = (props) => {
     name,
     required,
     validate = textarea,
+    maxLength,
+    minLength,
     admin: {
       readOnly,
       style,
@@ -28,9 +30,9 @@ const Textarea: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const memoizedValidate = useCallback((value, validationOptions) => {
-    return validate(value, validationOptions);
-  }, [validate]);
+  const memoizedValidate = useCallback((value, options) => {
+    return validate(value, { ...options, required, maxLength, minLength });
+  }, [validate, required, maxLength, minLength]);
 
   const {
     value,

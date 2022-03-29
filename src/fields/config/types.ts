@@ -52,15 +52,14 @@ export type Labels = {
 };
 
 export type ValidateOptions<T, S, F> = {
-  field: F
   data: Partial<T>
   siblingData: Partial<S>
   id?: string | number
   user?: Partial<User>
   operation?: Operation
-}
+} & F;
 
-export type Validate<T = any, S = any, F = any, TT = any> = (value?: T, options?: ValidateOptions<F, S, TT>) => string | true | Promise<string | true>;
+export type Validate<T = any, S = any, F = any> = (value?: T, options?: ValidateOptions<F, S, F>) => string | true | Promise<string | true>;
 
 export type OptionObject = {
   label: string

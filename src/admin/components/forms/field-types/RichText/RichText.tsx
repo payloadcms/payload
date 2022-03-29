@@ -3,6 +3,7 @@ import isHotkey from 'is-hotkey';
 import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
+import { options } from 'joi';
 import { richText } from '../../../../../fields/validations';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
@@ -118,8 +119,8 @@ const RichText: React.FC<Props> = (props) => {
   }, [enabledLeaves, path, props]);
 
   const memoizedValidate = useCallback((value, validationOptions) => {
-    return validate(value, validationOptions);
-  }, [validate]);
+    return validate(value, { ...validationOptions, required });
+  }, [validate, required]);
 
   const fieldType = useField({
     path,
@@ -271,7 +272,6 @@ const RichText: React.FC<Props> = (props) => {
               ref={editorRef}
             >
               <Editable
-                className={`${baseClass}__input`}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}
                 placeholder={placeholder}

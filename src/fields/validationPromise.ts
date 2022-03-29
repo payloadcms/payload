@@ -42,7 +42,7 @@ const validationPromise = async ({
   if (valueToValidate === undefined) valueToValidate = field.defaultValue;
 
   const result = shouldValidate ? await field.validate(valueToValidate, {
-    field,
+    ...field,
     data: merge(fullOriginalDoc, fullData),
     siblingData: merge(originalDoc, data),
     id,

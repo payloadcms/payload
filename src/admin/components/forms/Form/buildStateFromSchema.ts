@@ -9,13 +9,13 @@ import {
 } from '../../../../fields/config/types';
 import { Fields, Field, Data } from './types';
 
-const buildValidationPromise = async (fieldState: Field, options: ValidateOptions<unknown, unknown, FieldSchema>) => {
+const buildValidationPromise = async (fieldState: Field, options: ValidateOptions<unknown, unknown>) => {
   const validatedFieldState = fieldState;
 
   let validationResult: boolean | string = true;
 
-  if (fieldAffectsData(options.field) && typeof options.field.validate === 'function') {
-    validationResult = await options.field.validate(fieldState.value, options);
+  if (typeof fieldState.validate === 'function') {
+    validationResult = await fieldState.validate(fieldState.value, options);
   }
 
   if (typeof validationResult === 'string') {
@@ -51,7 +51,6 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
       const value = typeof data?.[field.name] !== 'undefined' ? data[field.name] : field.defaultValue;
 
       const fieldState = {
-        field,
         value,
         initialValue: value,
         valid: true,
@@ -61,7 +60,6 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
       };
 
       validationPromises.push(buildValidationPromise(fieldState, {
-        field,
         data: fullData,
         user,
         siblingData,
