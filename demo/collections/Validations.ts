@@ -11,6 +11,20 @@ const Validations: CollectionConfig = {
   },
   fields: [
     {
+      name: 'textWithOptions',
+      type: 'text',
+      label: 'Text with Options',
+      required: true,
+      // validate: (value: string, args) => {
+      //   console.log(args);
+      //   console.log(value);
+      //   if (args?.data?.text !== 'test') {
+      //     return 'The next field should be test';
+      //   }
+      //   return true;
+      // },
+    },
+    {
       name: 'text',
       type: 'text',
       label: 'Text',
@@ -58,7 +72,7 @@ const Validations: CollectionConfig = {
       name: 'atLeast3Rows',
       required: true,
       validate: (value) => {
-        const result = value && value.length >= 3;
+        const result = value >= 3;
 
         if (!result) {
           return 'This array needs to have at least 3 rows.';

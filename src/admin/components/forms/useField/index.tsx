@@ -1,9 +1,12 @@
 import {
   useCallback, useEffect, useState,
 } from 'react';
+import { useAuth } from '@payloadcms/config-provider';
 import { useFormProcessing, useFormSubmitted, useFormModified, useForm } from '../Form/context';
 import useDebounce from '../../../hooks/useDebounce';
 import { Options, FieldType } from './types';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import { useRenderedFields } from '../RenderFields';
 
 const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const {
@@ -19,6 +22,9 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const submitted = useFormSubmitted();
   const processing = useFormProcessing();
   const modified = useFormModified();
+  const { user } = useAuth();
+  const { id } = useDocumentInfo();
+  const { operation } = useRenderedFields();
 
   const {
     dispatchFields,
@@ -55,7 +61,16 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       errorMessage: undefined,
     };
 
-    const validationResult = typeof validate === 'function' ? await validate(valueToSend) : true;
+    const validateOptions = {
+      id,
+      field: field?.field,
+      user,
+      data: formContext.getData(),
+      siblingData: formContext.getSiblingData(path),
+      operation,
+    };
+
+    const validationResult = typeof validate === 'function' ? await validate(valueToSend, validateOptions) : true;
 
     if (typeof validationResult === 'string') {
       fieldToDispatch.errorMessage = validationResult;
@@ -68,13 +83,18 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       dispatchFields(fieldToDispatch);
     }
   }, [
-    path,
-    dispatchFields,
-    validate,
+    condition,
     disableFormData,
+    dispatchFields,
+    field,
+    formContext,
+    id,
     ignoreWhileFlattening,
     initialValue,
-    condition,
+    operation,
+    path,
+    user,
+    validate,
   ]);
 
   // Method to return from `useField`, used to

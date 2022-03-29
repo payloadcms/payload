@@ -1,14 +1,21 @@
 import ObjectID from 'bson-objectid';
-import { Field as FieldSchema, fieldAffectsData, FieldAffectingData, fieldIsPresentationalOnly } from '../../../../fields/config/types';
+import { User } from '../../../../auth';
+import {
+  Field as FieldSchema,
+  fieldAffectsData,
+  FieldAffectingData,
+  fieldIsPresentationalOnly,
+  ValidateOptions,
+} from '../../../../fields/config/types';
 import { Fields, Field, Data } from './types';
 
-const buildValidationPromise = async (fieldState: Field, field: FieldAffectingData) => {
+const buildValidationPromise = async (fieldState: Field, options: ValidateOptions<FieldAffectingData, unknown, unknown>) => {
   const validatedFieldState = fieldState;
 
   let validationResult: boolean | string = true;
 
-  if (typeof field.validate === 'function') {
-    validationResult = await field.validate(fieldState.value, field);
+  if (typeof options.field.validate === 'function') {
+    validationResult = await options.field.validate(fieldState.value, options);
   }
 
   if (typeof validationResult === 'string') {
@@ -19,7 +26,24 @@ const buildValidationPromise = async (fieldState: Field, field: FieldAffectingDa
   }
 };
 
-const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data = {}): Promise<Fields> => {
+type Props = {
+  fieldSchema: FieldSchema[]
+  data?: Data,
+  siblingData?: Data,
+  user?: User,
+  id?: string | number,
+  operation?: 'create' | 'update'
+}
+
+const buildStateFromSchema = async (props: Props): Promise<Fields> => {
+  const {
+    fieldSchema,
+    data: fullData = {},
+    siblingData = {},
+    user,
+    id,
+    operation,
+  } = props;
   if (fieldSchema) {
     const validationPromises = [];
 
@@ -27,6 +51,7 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
       const value = typeof data?.[field.name] !== 'undefined' ? data[field.name] : field.defaultValue;
 
       const fieldState = {
+        field,
         value,
         initialValue: value,
         valid: true,
@@ -35,7 +60,14 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
         passesCondition,
       };
 
-      validationPromises.push(buildValidationPromise(fieldState, field));
+      validationPromises.push(buildValidationPromise(fieldState, {
+        field,
+        data: fullData,
+        user,
+        siblingData,
+        id,
+        operation,
+      }));
 
       return fieldState;
     };

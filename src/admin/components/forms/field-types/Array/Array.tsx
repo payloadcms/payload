@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 import withCondition from '../../withCondition';
@@ -54,10 +54,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { minRows, maxRows, required });
-    return validationResult;
-  }, [validate, maxRows, minRows, required]);
+  const memoizedValidate = useCallback((value, options) => {
+    return validate(value, options);
+  }, [validate]);
 
   const [disableFormData, setDisableFormData] = useState(false);
 
@@ -75,7 +74,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   });
 
   const addRow = useCallback(async (rowIndex) => {
-    const subFieldState = await buildStateFromSchema(fields);
+    const subFieldState = await buildStateFromSchema({ fieldSchema: fields });
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     dispatchRows({ type: 'ADD', rowIndex });
     setValue(value as number + 1);

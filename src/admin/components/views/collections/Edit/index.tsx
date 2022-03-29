@@ -50,7 +50,7 @@ const EditView: React.FC<IndexProps> = (props) => {
     if (!isEditing) {
       history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
-      const state = await buildStateFromSchema(collection.fields, json.doc);
+      const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc });
       setInitialState(state);
     }
   }, [admin, collection, history, isEditing, getVersions]);
@@ -97,7 +97,7 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema(fields, dataToRender);
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender });
       setInitialState(state);
     };
 

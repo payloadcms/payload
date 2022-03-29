@@ -45,7 +45,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   const onSave = useCallback(async (json) => {
     getVersions();
-    const state = await buildStateFromSchema(fields, json.result);
+    const state = await buildStateFromSchema({ fieldSchema: fields, data: json.result });
     setInitialState(state);
   }, [getVersions, fields]);
 
@@ -66,7 +66,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema(fields, dataToRender);
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender });
       setInitialState(state);
     };
 

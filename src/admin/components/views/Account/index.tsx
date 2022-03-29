@@ -61,7 +61,7 @@ const AccountView: React.FC = () => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema(fields, dataToRender);
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender });
       setInitialState(state);
     };
 

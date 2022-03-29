@@ -58,6 +58,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
           onSuccess={onSave}
           disabled={!hasSavePermission}
           initialState={initialState}
+          validationOperation="update"
         >
           <div className={`${baseClass}__main`}>
             <Meta

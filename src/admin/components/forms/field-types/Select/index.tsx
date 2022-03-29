@@ -21,7 +21,6 @@ const Select: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,
     name,
-    required,
     validate = select,
     label,
     options: optionsFromProps,
@@ -44,10 +43,9 @@ const Select: React.FC<Props> = (props) => {
     setOptions(formatOptions(optionsFromProps));
   }, [optionsFromProps]);
 
-  const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { required, options });
-    return validationResult;
-  }, [validate, required, options]);
+  const memoizedValidate = useCallback((value, validationOptions) => {
+    return validate(value, validationOptions);
+  }, [validate]);
 
   const {
     value,

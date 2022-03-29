@@ -61,6 +61,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
           action={action}
           initialState={initialState}
           disabled={!hasSavePermission}
+          validationOperation="update"
         >
           <div className={`${baseClass}__main`}>
             <Meta

@@ -1,10 +1,12 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
+import { Operation } from '../../types';
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
+import { User } from '../../auth';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   value?: P,
@@ -49,7 +51,16 @@ export type Labels = {
   plural: string;
 };
 
-export type Validate<T = any> = (value?: T, options?: any) => string | true | Promise<string | true>;
+export type ValidateOptions<F, T, S> = {
+  field: F
+  data: Partial<T>
+  siblingData: Partial<S>
+  id?: string | number
+  user?: Partial<User>
+  operation: Operation
+}
+
+export type Validate<F = any, T = any, S = any, TT = any> = (value?: T, options?: ValidateOptions<F, S, TT>) => string | true | Promise<string | true>;
 
 export type OptionObject = {
   label: string

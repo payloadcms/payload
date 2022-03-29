@@ -47,7 +47,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema(fieldSchema, element?.fields);
+      const state = await buildStateFromSchema({ fieldSchema, data: element?.fields });
       setInitialState(state);
     };
 
@@ -80,6 +80,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
           <Form
             onSubmit={handleUpdateEditData}
             initialState={initialState}
+            validationOperation="update"
           >
             <RenderFields
               readOnly={false}

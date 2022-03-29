@@ -117,10 +117,9 @@ const RichText: React.FC<Props> = (props) => {
     );
   }, [enabledLeaves, path, props]);
 
-  const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { required });
-    return validationResult;
-  }, [validate, required]);
+  const memoizedValidate = useCallback((value, validationOptions) => {
+    return validate(value, validationOptions);
+  }, [validate]);
 
   const fieldType = useField({
     path,
