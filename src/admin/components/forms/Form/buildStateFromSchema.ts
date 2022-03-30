@@ -60,6 +60,7 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
       };
 
       validationPromises.push(buildValidationPromise(fieldState, {
+        ...field,
         data: fullData,
         user,
         siblingData,

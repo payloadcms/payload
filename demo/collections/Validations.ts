@@ -11,18 +11,16 @@ const Validations: CollectionConfig = {
   },
   fields: [
     {
-      name: 'textWithOptions',
+      name: 'textWithSiblingValidation',
       type: 'text',
-      label: 'Text with Options',
+      label: 'Text with siblingData Validation',
       required: true,
-      // validate: (value: string, args) => {
-      //   console.log(args);
-      //   console.log(value);
-      //   if (args?.data?.text !== 'test') {
-      //     return 'The next field should be test';
-      //   }
-      //   return true;
-      // },
+      validate: (value: string, { data }) => {
+        if (data?.text !== 'test') {
+          return 'The next field should be test';
+        }
+        return true;
+      },
     },
     {
       name: 'text',
