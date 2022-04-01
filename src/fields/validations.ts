@@ -1,13 +1,19 @@
 import defaultRichTextValue from './richText/defaultValue';
 import {
-  ArrayField, BlockField,
+  ArrayField,
+  BlockField,
   CheckboxField,
   CodeField, DateField,
   EmailField,
-  NumberField, PointField, RadioField, RelationshipField,
-  RichTextField, SelectField,
+  NumberField,
+  PointField,
+  RadioField,
+  RelationshipField,
+  RichTextField,
+  SelectField,
   TextareaField,
-  TextField, UploadField,
+  TextField,
+  UploadField,
   Validate,
 } from './config/types';
 

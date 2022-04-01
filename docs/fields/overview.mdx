@@ -101,6 +101,26 @@ Example:
 }
 ```
 
+When supplying a field `validate` function, Payload will use yours in place of the default. To make use of the default field validation in your custom logic you can import, call and return the result as needed.
+
+For example:
+```js
+import { text } from 'payload/fields/validations';
+const field =
+  {
+    name: 'notBad',
+    type: 'text',
+    validate: (val, args) => {
+      if (value === 'bad') {
+        return 'This cannot be "bad"';
+      }
+      // highlight-start
+      return text(val, args);
+      // highlight-end
+    },
+}
+```
+
 ### Customizable ID
 
 Collections ID fields are generated automatically by default. An explicit `id` field can be declared in the `fields` array to override this behavior.
