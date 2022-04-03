@@ -63,5 +63,6 @@ module.exports = {
         tsx: 'never',
       },
     ],
+    'operator-linbreak': 'off',
   },
 };
