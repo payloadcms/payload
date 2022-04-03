@@ -37,6 +37,7 @@
     "build",
     "tests",
     "**/*.spec.js",
+    "**/*.spec.ts",
     "node_modules",
     ".eslintrc.js"
   ]
