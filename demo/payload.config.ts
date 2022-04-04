@@ -166,7 +166,9 @@ export default buildConfig({
   // indexSortableFields: true,
   hooks: {
     afterError: (err) => {
-      console.error('global error config handler', err);
+      if (process.env.DISABLE_LOGGING !== 'true') {
+        console.error('global error config handler', err);
+      }
     },
   },
   upload: {

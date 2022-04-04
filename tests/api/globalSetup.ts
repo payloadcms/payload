@@ -1,11 +1,14 @@
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
+import { email, password } from '../../src/mongoose/testCredentials';
+import { fileExists } from './utils/fileExists';
+import loadConfig from '../../src/config/load';
+
+process.env.PAYLOAD_CONFIG_PATH = 'demo/payload.config.ts';
+process.env.DISABLE_LOGGING = 'true';
+
 require('isomorphic-fetch');
 require('../../demo/server');
-
-const loadConfig = require('../../src/config/load').default;
-const { email, password } = require('../../src/mongoose/testCredentials');
-const fileExists = require('./utils/fileExists');
 
 const { serverURL } = loadConfig();
 

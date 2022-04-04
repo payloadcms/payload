@@ -2,9 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import FormData from 'form-data';
 import { GraphQLClient } from 'graphql-request';
+import { promisify } from 'util';
 import getConfig from '../../config/load';
-import fileExists from '../../../tests/api/utils/fileExists';
 import { email, password } from '../../mongoose/testCredentials';
+
+const stat = promisify(fs.stat);
 
 require('isomorphic-fetch');
 
@@ -59,11 +61,14 @@ describe('Collections - Uploads', () => {
     describe('create', () => {
       it('creates', async () => {
         const formData = new FormData();
-        formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/image.png')));
+        formData.append(
+          'file',
+          fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/image.png')),
+        );
         formData.append('alt', 'test media');
         formData.append('locale', 'en');
         const response = await fetch(`${api}/media`, {
-          body: formData,
+          body: formData as unknown as BodyInit,
           headers,
           method: 'post',
         });
@@ -113,12 +118,15 @@ describe('Collections - Uploads', () => {
 
       it('creates media without storing a file', async () => {
         const formData = new FormData();
-        formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/image.png')));
+        formData.append(
+          'file',
+          fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/image.png')),
+        );
         formData.append('alt', 'test media');
         formData.append('locale', 'en');
 
         const response = await fetch(`${api}/unstored-media`, {
-          body: formData,
+          body: formData as unknown as BodyInit,
           headers,
           method: 'post',
         });
@@ -150,12 +158,15 @@ describe('Collections - Uploads', () => {
 
       it('creates with same name', async () => {
         const formData = new FormData();
-        formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/samename.png')));
+        formData.append(
+          'file',
+          fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/samename.png')),
+        );
         formData.append('alt', 'test media');
         formData.append('locale', 'en');
 
         const firstResponse = await fetch(`${api}/media`, {
-          body: formData,
+          body: formData as unknown as BodyInit,
           headers,
           method: 'post',
         });
@@ -163,12 +174,15 @@ describe('Collections - Uploads', () => {
         expect(firstResponse.status).toBe(201);
 
         const sameForm = new FormData();
-        sameForm.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/samename.png')));
+        sameForm.append(
+          'file',
+          fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/samename.png')),
+        );
         sameForm.append('alt', 'test media');
         sameForm.append('locale', 'en');
 
         const response = await fetch(`${api}/media`, {
-          body: sameForm,
+          body: sameForm as unknown as BodyInit,
           headers,
           method: 'post',
         });
@@ -211,15 +225,16 @@ describe('Collections - Uploads', () => {
 
     it('update', async () => {
       const formData = new FormData();
-      formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/update.png')));
+      formData.append(
+        'file',
+        fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/update.png')),
+      );
       formData.append('alt', 'test media');
       formData.append('locale', 'en');
 
       const response = await fetch(`${api}/media`, {
-        body: formData,
-        headers: {
-          Authorization: `JWT ${token}`,
-        },
+        body: formData as unknown as BodyInit,
+        headers,
         method: 'post',
       });
 
@@ -233,10 +248,8 @@ describe('Collections - Uploads', () => {
       updateFormData.append('filename', data.doc.filename);
       updateFormData.append('alt', newAlt);
       const updateResponse = await fetch(`${api}/media/${data.doc.id}`, {
-        body: updateFormData,
-        headers: {
-          Authorization: `JWT ${token}`,
-        },
+        body: updateFormData as unknown as BodyInit,
+        headers,
         method: 'put',
       });
 
@@ -280,15 +293,16 @@ describe('Collections - Uploads', () => {
 
     it('delete', async () => {
       const formData = new FormData();
-      formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/delete.png')));
+      formData.append(
+        'file',
+        fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/delete.png')),
+      );
       formData.append('alt', 'test media');
       formData.append('locale', 'en');
 
       const createResponse = await fetch(`${api}/media`, {
-        body: formData,
-        headers: {
-          Authorization: `JWT ${token}`,
-        },
+        body: formData as unknown as BodyInit,
+        headers,
         method: 'post',
       });
 
@@ -297,9 +311,7 @@ describe('Collections - Uploads', () => {
       const docId = createData.doc.id;
 
       const response = await fetch(`${api}/media/${docId}`, {
-        headers: {
-          Authorization: `JWT ${token}`,
-        },
+        headers,
         method: 'delete',
       });
 
@@ -318,15 +330,20 @@ describe('Collections - Uploads', () => {
     let image;
     const alt = 'alt text';
     beforeAll(async (done) => {
-      client = new GraphQLClient(`${api}${config.routes.graphQL}`, { headers: { Authorization: `JWT ${token}` } });
+      client = new GraphQLClient(`${api}${config.routes.graphQL}`, {
+        headers: { Authorization: `JWT ${token}` },
+      });
 
       // create media using REST
       const formData = new FormData();
-      formData.append('file', fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/image.png')));
+      formData.append(
+        'file',
+        fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/image.png')),
+      );
       formData.append('alt', alt);
       formData.append('locale', 'en');
       const mediaResponse = await fetch(`${api}/media`, {
-        body: formData,
+        body: formData as unknown as BodyInit,
         headers,
         method: 'post',
       });
@@ -364,3 +381,12 @@ describe('Collections - Uploads', () => {
     });
   });
 });
+
+async function fileExists(fileName: string): Promise<boolean> {
+  try {
+    await stat(fileName);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}

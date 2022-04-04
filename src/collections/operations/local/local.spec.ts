@@ -14,10 +14,13 @@ describe('Collections - Local', () => {
   describe('Create', () => {
     it('should allow an upload-enabled file to be created and uploaded', async () => {
       const alt = 'Alt Text Here';
-      const filePath = path.resolve(__dirname, '../../../admin/assets/images/generic-block-image.svg');
+      const filePath = path.resolve(
+        __dirname,
+        '../../../admin/assets/images/generic-block-image.svg',
+      );
       const { size } = fs.statSync(filePath);
 
-      const result = await payload.create({
+      const result: Media = await payload.create({
         collection: 'media',
         data: {
           alt,
@@ -37,7 +40,7 @@ describe('Collections - Local', () => {
     it('should allow an upload-enabled file to be re-uploaded and alt-text to be changed.', async () => {
       const newAltText = 'New Alt Text Here';
 
-      const result = await payload.update({
+      const result: Media = await payload.update({
         collection: 'media',
         id: createdMediaID,
         data: {
@@ -115,7 +118,9 @@ describe('Collections - Local', () => {
         showHiddenFields: true,
       });
 
-      expect(relationshipBWithHiddenNestedField.post[0].demoHiddenField).toStrictEqual(demoHiddenField);
+      expect(relationshipBWithHiddenNestedField.post[0].demoHiddenField).toStrictEqual(
+        demoHiddenField,
+      );
     });
     describe('Find', () => {
       const title = 'local-find';
@@ -139,9 +144,11 @@ describe('Collections - Local', () => {
             {
               blockType: 'richTextBlock',
               blockName: 'Test Block Name',
-              content: [{
-                children: [{ text: 'english' }],
-              }],
+              content: [
+                {
+                  children: [{ text: 'english' }],
+                },
+              ],
             },
           ],
         };
@@ -185,3 +192,27 @@ describe('Collections - Local', () => {
     });
   });
 });
+
+interface ImageSize {
+  url?: string;
+  width?: number;
+  height?: number;
+  mimeType?: string;
+  filesize?: number;
+  filename?: string;
+}
+
+interface Media {
+  id?: string;
+  filename?: string;
+  filesize?: number;
+  width?: number;
+  height?: number;
+  sizes?: {
+    maintainedAspectRatio?: ImageSize;
+    tablet?: ImageSize;
+    mobile?: ImageSize;
+    icon?: ImageSize;
+  };
+  alt: string;
+}
