@@ -40,6 +40,12 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ['*.spec.ts'],
+      rules: {
+        '@typescript-eslint/no-use-before-define': 'off',
+      },
+    },
   ],
   rules: {
     'no-sparse-arrays': 'off',

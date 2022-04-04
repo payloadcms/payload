@@ -135,7 +135,7 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
         ];
       }
 
-      return null;
+      return acc;
     }, []),
   };
 

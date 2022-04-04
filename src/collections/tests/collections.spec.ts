@@ -63,9 +63,11 @@ describe('Collections - REST', () => {
             {
               blockType: 'richTextBlock',
               blockName: 'Test Block Name',
-              content: [{
-                children: [{ text: 'english' }],
-              }],
+              content: [
+                {
+                  children: [{ text: 'english' }],
+                },
+              ],
             },
           ],
         }),
@@ -106,9 +108,11 @@ describe('Collections - REST', () => {
         body: JSON.stringify({
           title: 'newTitle',
           description: 'original description',
-          richText: [{
-            children: [{ text: 'english' }],
-          }],
+          richText: [
+            {
+              children: [{ text: 'english' }],
+            },
+          ],
           priority: 1,
         }),
         headers,
@@ -120,9 +124,11 @@ describe('Collections - REST', () => {
       const { id } = createData.doc;
 
       const updatedDesc = 'updated description';
-      const updatedRichText = [{
-        children: [{ text: 'english update' }],
-      }];
+      const updatedRichText = [
+        {
+          children: [{ text: 'english update' }],
+        },
+      ];
       const updatedNonLocalizedArray = [
         {
           localizedEmbeddedText: 'english',
@@ -152,10 +158,12 @@ describe('Collections - REST', () => {
       expect(data.doc.richText[0].children[0].text).toBe('english update');
 
       // make certain the stored object is exactly the same as the returned object
-      const stored = await (await fetch(`${url}/api/localized-posts/${id}`, {
-        method: 'get',
-        headers,
-      })).json();
+      const stored = await (
+        await fetch(`${url}/api/localized-posts/${id}`, {
+          method: 'get',
+          headers,
+        })
+      ).json();
 
       expect(data.doc).toMatchObject(stored);
     });
@@ -181,9 +189,11 @@ describe('Collections - REST', () => {
             {
               blockType: 'richTextBlock',
               blockName: 'Test Block Name',
-              content: [{
-                children: [{ text: 'spanish' }],
-              }],
+              content: [
+                {
+                  children: [{ text: 'spanish' }],
+                },
+              ],
             },
           ],
         }),
@@ -289,14 +299,18 @@ describe('Collections - REST', () => {
       });
 
       expect(response.status).toBe(201);
-      const getResponse = await fetch(`${url}/api/localized-posts?where[description][equals]=${desc}`);
+      const getResponse = await fetch(
+        `${url}/api/localized-posts?where[description][equals]=${desc}`,
+      );
       const data = await getResponse.json();
 
       expect(getResponse.status).toBe(200);
       expect(data.docs[0].description).toBe(desc);
       expect(data.docs).toHaveLength(1);
 
-      const getResponse2 = await fetch(`${url}/api/localized-posts?where[nonLocalizedGroup.text][equals]=sample content`);
+      const getResponse2 = await fetch(
+        `${url}/api/localized-posts?where[nonLocalizedGroup.text][equals]=sample content`,
+      );
       const data2 = await getResponse2.json();
 
       expect(getResponse2.status).toBe(200);
@@ -330,7 +344,9 @@ describe('Collections - REST', () => {
       expect(response.status).toBe(201);
       expect(response2.status).toBe(201);
 
-      const queryResponse = await fetch(`${url}/api/localized-posts?where[or][0][title][equals]=${title1}&where[or][1][title][equals]=${title2}`);
+      const queryResponse = await fetch(
+        `${url}/api/localized-posts?where[or][0][title][equals]=${title1}&where[or][1][title][equals]=${title2}`,
+      );
       const data = await queryResponse.json();
 
       expect(queryResponse.status).toBe(200);
@@ -365,7 +381,9 @@ describe('Collections - REST', () => {
       expect(response.status).toBe(201);
       expect(response2.status).toBe(201);
 
-      const queryResponse = await fetch(`${url}/api/localized-posts?where[or][0][title][equals]=${title1}&where[or][1][title][equals]=nonexistent`);
+      const queryResponse = await fetch(
+        `${url}/api/localized-posts?where[or][0][title][equals]=${title1}&where[or][1][title][equals]=nonexistent`,
+      );
       const data = await queryResponse.json();
 
       expect(queryResponse.status).toBe(200);
@@ -395,10 +413,12 @@ describe('Collections - REST', () => {
 
       const additionalRelationshipARes = await fetch(`${url}/api/relationship-a?depth=0`, {
         body: JSON.stringify({
-          postLocalizedMultiple: [{
-            relationTo: 'localized-posts',
-            value: localizedPostID,
-          }],
+          postLocalizedMultiple: [
+            {
+              relationTo: 'localized-posts',
+              value: localizedPostID,
+            },
+          ],
         }),
         headers,
         method: 'post',
@@ -410,7 +430,9 @@ describe('Collections - REST', () => {
       expect(additionalRelationshipARes.status).toBe(201);
       expect(relationshipAData.doc.post).toBe(relationshipBData.doc.id);
 
-      const queryRes = await fetch(`${url}/api/relationship-a?where[post.title][equals]=${relationshipBTitle}`);
+      const queryRes = await fetch(
+        `${url}/api/relationship-a?where[post.title][equals]=${relationshipBTitle}`,
+      );
       const data = await queryRes.json();
 
       expect(data.docs).toHaveLength(1);
@@ -427,7 +449,9 @@ describe('Collections - REST', () => {
 
       expect(res.status).toBe(201);
 
-      const queryRes1 = await fetch(`${url}/api/relationship-a?where[LocalizedPost.title][in]=${localizedPostTitle}`);
+      const queryRes1 = await fetch(
+        `${url}/api/relationship-a?where[LocalizedPost.title][in]=${localizedPostTitle}`,
+      );
       const data1 = await queryRes1.json();
 
       expect(data1.docs).toHaveLength(1);
@@ -458,7 +482,9 @@ describe('Collections - REST', () => {
 
       expect(res.status).toBe(201);
 
-      const queryRes = await fetch(`${url}/api/relationship-a?where[postManyRelationships.value][equals]=${relationshipB.doc.id}`);
+      const queryRes = await fetch(
+        `${url}/api/relationship-a?where[postManyRelationships.value][equals]=${relationshipB.doc.id}`,
+      );
       const data = await queryRes.json();
       expect(data.docs).toHaveLength(1);
     });
@@ -478,7 +504,9 @@ describe('Collections - REST', () => {
 
       expect(relationshipB.doc.id).toBeDefined();
 
-      const queryRes = await fetch(`${url}/api/relationship-b?where[nonLocalizedRelationToMany.value][equals]=${localizedPostID}`);
+      const queryRes = await fetch(
+        `${url}/api/relationship-b?where[nonLocalizedRelationToMany.value][equals]=${localizedPostID}`,
+      );
       const data = await queryRes.json();
       expect(data.docs).toHaveLength(1);
     });
@@ -540,12 +568,16 @@ describe('Collections - REST', () => {
         method: 'post',
       });
 
-      const queryRes1 = await fetch(`${url}/api/localized-posts?where[nonLocalizedGroup.text][equals]=${text}`);
+      const queryRes1 = await fetch(
+        `${url}/api/localized-posts?where[nonLocalizedGroup.text][equals]=${text}`,
+      );
       const data1 = await queryRes1.json();
 
       expect(data1.docs).toHaveLength(1);
 
-      const queryRes2 = await fetch(`${url}/api/localized-posts?where[localizedGroup.text][equals]=${text}`);
+      const queryRes2 = await fetch(
+        `${url}/api/localized-posts?where[localizedGroup.text][equals]=${text}`,
+      );
       const data2 = await queryRes2.json();
 
       expect(queryRes2.status).toBe(200);
@@ -600,7 +632,9 @@ describe('Collections - REST', () => {
         await createPost(null, desc);
       }
 
-      const getResponse = await fetch(`${url}/api/localized-posts?where[description][equals]=${desc}`);
+      const getResponse = await fetch(
+        `${url}/api/localized-posts?where[description][equals]=${desc}`,
+      );
       const data = await getResponse.json();
 
       expect(getResponse.status).toBe(200);
@@ -647,7 +681,9 @@ describe('Collections - REST', () => {
       const id2 = req2data.doc.id;
 
       // Query on shared desc and sort ascending
-      const getResponse = await fetch(`${url}/api/localized-posts?where[description][equals]=${desc}&sort=title`);
+      const getResponse = await fetch(
+        `${url}/api/localized-posts?where[description][equals]=${desc}&sort=title`,
+      );
       const data = await getResponse.json();
 
       expect(getResponse.status).toBe(200);
@@ -656,7 +692,9 @@ describe('Collections - REST', () => {
       expect(data.docs[1].id).toStrictEqual(id2);
 
       // Query on shared desc and sort descending
-      const getResponseSorted = await fetch(`${url}/api/localized-posts?where[description][equals]=${desc}&sort=-title`);
+      const getResponseSorted = await fetch(
+        `${url}/api/localized-posts?where[description][equals]=${desc}&sort=-title`,
+      );
       const sortedData = await getResponseSorted.json();
 
       expect(getResponse.status).toBe(200);
@@ -768,7 +806,6 @@ describe('Collections - REST', () => {
       data = await create.json();
       done();
     });
-
 
     it('should create collections with custom ID', async () => {
       expect(data.doc.id).toBe(document.id);
