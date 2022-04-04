@@ -2,6 +2,7 @@
 import React, {
   useReducer, useEffect, useRef, useState, useCallback,
 } from 'react';
+import isDeepEqual from 'deep-equal';
 import { serialize } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -106,7 +107,9 @@ const Form: React.FC<Props> = (props) => {
 
     await Promise.all(validationPromises);
 
-    dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState });
+    if (!isDeepEqual(contextRef.current.fields, validatedFieldState)) {
+      dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState });
+    }
 
     return isValid;
   }, [contextRef, id, user, operation]);
@@ -364,6 +367,10 @@ const Form: React.FC<Props> = (props) => {
   useThrottledEffect(() => {
     refreshCookie();
   }, 15000, [fields]);
+
+  useThrottledEffect(() => {
+    validateForm();
+  }, 1000, [validateForm, fields]);
 
   useEffect(() => {
     contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form

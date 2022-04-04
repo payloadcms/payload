@@ -48,56 +48,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const valid = (field && typeof field.valid === 'boolean') ? field.valid : true;
   const showError = valid === false && submitted;
 
-  // Method to send update field values from field component(s)
-  // Should only be used internally
-  const sendField = useCallback(async (valueToSend) => {
-    const fieldToDispatch = {
-      path,
-      disableFormData,
-      ignoreWhileFlattening,
-      initialValue,
-      validate,
-      condition,
-      value: valueToSend,
-      valid: false,
-      errorMessage: undefined,
-    };
-
-    const validateOptions = {
-      id,
-      user,
-      data: getData(),
-      siblingData: getSiblingData(path),
-      operation,
-    };
-
-    const validationResult = typeof validate === 'function' ? await validate(valueToSend, validateOptions) : true;
-
-    if (typeof validationResult === 'string') {
-      fieldToDispatch.errorMessage = validationResult;
-      fieldToDispatch.valid = false;
-    } else {
-      fieldToDispatch.valid = validationResult;
-    }
-
-    if (typeof dispatchFields === 'function') {
-      dispatchFields(fieldToDispatch);
-    }
-  }, [
-    condition,
-    disableFormData,
-    dispatchFields,
-    getData,
-    getSiblingData,
-    id,
-    ignoreWhileFlattening,
-    initialValue,
-    operation,
-    path,
-    user,
-    validate,
-  ]);
-
   // Method to return from `useField`, used to
   // update internal field values from field component(s)
   // as fast as they arrive. NOTE - this method is NOT debounced
@@ -127,13 +77,38 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const valueToSend = enableDebouncedValue ? debouncedValue : internalValue;
 
   useEffect(() => {
-    if (field?.value !== valueToSend && valueToSend !== undefined) {
-      sendField(valueToSend);
-    }
+    const sendField = async () => {
+      if (field?.value !== valueToSend && valueToSend !== undefined) {
+        if (typeof dispatchFields === 'function') {
+          dispatchFields({
+            ...field,
+            path,
+            disableFormData,
+            ignoreWhileFlattening,
+            initialValue,
+            validate,
+            condition,
+            value: valueToSend,
+          });
+        }
+      }
+    };
+
+    sendField();
   }, [
+    condition,
+    disableFormData,
+    dispatchFields,
+    getData,
+    getSiblingData,
+    id,
+    ignoreWhileFlattening,
+    initialValue,
+    operation,
     path,
+    user,
+    validate,
     valueToSend,
-    sendField,
     field,
   ]);
 
