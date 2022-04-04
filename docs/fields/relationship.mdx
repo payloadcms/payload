@@ -22,6 +22,7 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 | ---------------- | ----------- |
 | **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
 | **`relationTo`** *   | Provide one or many collection `slug`s to be able to assign relationships to. |
+| **`filterOptions`**  | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options). |
 | **`hasMany`**        | Boolean when, if set to `true`, allows this field to have many relations instead of only one. |
 | **`maxDepth`**       | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth) |
 | **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type. |
@@ -42,6 +43,45 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 <Banner type="success">
   <strong>Tip:</strong><br/>
   The <a href="/docs/getting-started/concepts#depth">Depth</a> parameter can be used to automatically populate related documents that are returned by the API.
+</Banner>
+
+### Filtering relationship options
+
+Options can be dynamically limited by supply a query that is used for validating input and querying relationships in the UI. The `filterOptions` property can be a `Where` query or a function that returns one. When using a function, it will be called with an argument object with the following properties:
+
+| Property      | Description  |
+| ------------- | -------------|
+| `relationTo`       | The `slug` of the collection of the items relation |
+| `data`             | An object of the full collection or global document |
+| `siblingData`      | An object of the document data limited to fields within the same parent to the field |
+| `id`               | The value of the collection `id`, will be `undefined` on create request |
+| `user`             | The currently authenticated user object |
+
+```js
+  const relationshipField = {
+    name: 'purchase',
+    type: 'relationship',
+    relationTo: ['products', 'services'],
+    filterOptions: ({relationTo, siblingData, }) => {
+      // returns a Where query dynamically by the type of relationship
+      if (relationTo === 'products') {
+        return {
+          'product.stock': { is_greater_than: siblingData.quantity }
+        }
+      }
+      if (relationTo === 'services') {
+        return {
+          'services.isAvailable': { equals: true }
+        }
+      }
+    },
+  };
+```
+
+You can learn more about writing queries [here](/docs/queries/overview).
+
+<Banner type="warning">
+  When a relationship field has both `filterOptions` and `validate` the server side validation will not enforce `filterOptions` unless you call the relationship field validate imported from `payload/fields/validations` in the validate function.
 </Banner>
 
 ### How the data is saved

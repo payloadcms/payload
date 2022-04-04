@@ -3,7 +3,8 @@ import {
   ArrayField,
   BlockField,
   CheckboxField,
-  CodeField, DateField,
+  CodeField,
+  DateField,
   EmailField,
   NumberField,
   PointField,
@@ -16,6 +17,9 @@ import {
   UploadField,
   Validate,
 } from './config/types';
+import canUseDOM from '../utilities/canUseDOM';
+import payload from '../index';
+import { TypeWithID } from '../collections/config/types';
 
 const defaultMessage = 'This field is required.';
 
@@ -148,9 +152,39 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, {
   return defaultMessage;
 };
 
-export const relationship: Validate<unknown, unknown, RelationshipField> = (value, { required }) => {
-  if (value || !required) return true;
-  return defaultMessage;
+export const relationship: Validate<unknown, unknown, RelationshipField> = async (value: string | string[], { required, relationTo, filterOptions, id, data, siblingData, user }) => {
+  if ((!value || (Array.isArray(value) && value.length === 0)) && required) {
+    return defaultMessage;
+  }
+  if (!canUseDOM && typeof filterOptions !== 'undefined' && value) {
+    const options = [];
+    const collections = typeof relationTo === 'string' ? [relationTo] : relationTo;
+    const values: string[] = typeof value === 'string' ? [value] : value;
+    await Promise.all(collections.map(async (collection) => {
+      const optionFilter = typeof filterOptions === 'function' ? filterOptions({
+        id,
+        data,
+        siblingData,
+        user,
+        relationTo: collection,
+      }) : filterOptions;
+      const result = await payload.find({
+        collection,
+        depth: 0,
+        where: {
+          and: [
+            { id: { in: values } },
+            optionFilter,
+          ],
+        },
+      });
+      options.concat(result.docs.map((item: TypeWithID) => String(item.id)));
+    }));
+    if (values.some((input) => options.some((option) => (option === input)))) {
+      return 'This field has an invalid selection';
+    }
+    return true;
+  }
 };
 
 export const array: Validate<unknown, unknown, ArrayField> = (value, { minRows, maxRows, required }) => {

@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
-import { Operation } from '../../types';
+import { Operation, Where } from '../../types';
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
@@ -202,11 +202,20 @@ export type SelectField = FieldBase & {
   hasMany?: boolean
 }
 
+export type filterOptionsProps = {
+  id: string | number,
+  user: Partial<User>,
+  data: unknown,
+  siblingData: unknown,
+  relationTo: string,
+}
+
 export type RelationshipField = FieldBase & {
   type: 'relationship';
   relationTo: string | string[];
   hasMany?: boolean;
   maxDepth?: number;
+  filterOptions?: Where | ((options: filterOptionsProps) => Where);
 }
 
 type RichTextPlugin = (editor: Editor) => Editor;

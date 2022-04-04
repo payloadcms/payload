@@ -57,6 +57,16 @@ const RelationshipA: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'filterRelationship',
+      type: 'relationship',
+      relationTo: 'relationship-b',
+      filterOptions: {
+        disableRelation: {
+          not_equals: true,
+        },
+      },
+    },
+    {
       name: 'demoHiddenField',
       type: 'text',
       hidden: true,

@@ -208,6 +208,10 @@ export const relationship = baseField.keys({
   ),
   name: joi.string().required(),
   maxDepth: joi.number(),
+  filterOptions: joi.alternatives().try(
+    joi.object(),
+    joi.func(),
+  ),
 });
 
 export const blocks = baseField.keys({

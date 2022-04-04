@@ -1,7 +1,8 @@
 import React, {
   useCallback, useEffect, useState, useReducer,
 } from 'react';
-import { useConfig } from '@payloadcms/config-provider';
+import equal from 'deep-equal';
+import { useAuth, useConfig } from '@payloadcms/config-provider';
 import qs from 'qs';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
@@ -13,17 +14,30 @@ import FieldDescription from '../../FieldDescription';
 import { relationship } from '../../../../../fields/validations';
 import { Where } from '../../../../../types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
-import { useFormProcessing } from '../../Form/context';
+import { useFormProcessing, useWatchForm } from '../../Form/context';
 import optionsReducer from './optionsReducer';
 import { Props, Option, ValueWithRelation, GetResults } from './types';
 import { createRelationMap } from './createRelationMap';
 import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
 
 import './index.scss';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo';
+import { filterOptionsProps } from '../../../../../fields/config/types';
 
 const maxResultsPerRequest = 10;
 
 const baseClass = 'relationship';
+
+const getFilterOptionsQuery = (filterOptions, options: filterOptionsProps): Where => {
+  let query = {};
+  if (typeof filterOptions === 'object') {
+    query = filterOptions;
+  }
+  if (typeof filterOptions === 'function') {
+    query = filterOptions(options);
+  }
+  return query;
+};
 
 const Relationship: React.FC<Props> = (props) => {
   const {
@@ -34,6 +48,7 @@ const Relationship: React.FC<Props> = (props) => {
     required,
     label,
     hasMany,
+    filterOptions,
     admin: {
       readOnly,
       style,
@@ -52,6 +67,10 @@ const Relationship: React.FC<Props> = (props) => {
     collections,
   } = useConfig();
 
+  const { id } = useDocumentInfo();
+  const { user } = useAuth();
+  const { getData, getSiblingData } = useWatchForm();
+
   const formProcessing = useFormProcessing();
 
   const hasMultipleRelations = Array.isArray(relationTo);
@@ -59,6 +78,7 @@ const Relationship: React.FC<Props> = (props) => {
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [errorLoading, setErrorLoading] = useState('');
+  const [optionFilters, setOptionFilters] = useState<{[relation: string]: Where}>({});
   const [hasLoadedValueOptions, setHasLoadedValueOptions] = useState(false);
   const [search, setSearch] = useState('');
 
@@ -107,9 +127,13 @@ const Relationship: React.FC<Props> = (props) => {
             where: Where
           } = {
             where: {
-              id: {
-                not_in: relationMap[relation],
-              },
+              and: [
+                {
+                  id: {
+                    not_in: relationMap[relation],
+                  },
+                },
+              ],
             },
             limit: maxResultsPerRequest,
             page: lastLoadedPageToUse,
@@ -118,9 +142,15 @@ const Relationship: React.FC<Props> = (props) => {
           };
 
           if (searchArg) {
-            query.where[fieldToSearch] = {
-              like: searchArg,
-            };
+            query.where.and.push({
+              [fieldToSearch]: {
+                like: searchArg,
+              },
+            });
+          }
+
+          if (optionFilters[relation]) {
+            query.where.and.push(optionFilters[relation]);
           }
 
           const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
@@ -148,7 +178,7 @@ const Relationship: React.FC<Props> = (props) => {
         }
       }, Promise.resolve());
     }
-  }, [api, collections, serverURL, errorLoading, relationTo, hasMany, hasMultipleRelations]);
+  }, [relationTo, hasMany, errorLoading, collections, optionFilters, serverURL, api, hasMultipleRelations]);
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
@@ -260,6 +290,25 @@ const Relationship: React.FC<Props> = (props) => {
       setHasLoadedValueOptions(true);
     }
   }, [hasMany, hasMultipleRelations, relationTo, initialValue, hasLoadedValueOptions, errorLoading, collections, api, serverURL]);
+
+  useEffect(() => {
+    const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
+    const newOptionFilters = {};
+    if (typeof filterOptions !== 'undefined') {
+      relations.forEach((relation) => {
+        newOptionFilters[relation] = getFilterOptionsQuery(filterOptions, {
+          id,
+          data: getData(),
+          siblingData: getSiblingData(path),
+          relationTo: relation,
+          user,
+        });
+      });
+    }
+    if (!equal(newOptionFilters, optionFilters)) {
+      setOptionFilters(newOptionFilters);
+    }
+  }, [relationTo, filterOptions, optionFilters, id, getData, getSiblingData, path, user]);
 
   useEffect(() => {
     setHasLoadedValueOptions(false);
