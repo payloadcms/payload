@@ -1,3 +1,10 @@
+## [0.15.2](https://github.com/payloadcms/payload/compare/v0.15.1...v0.15.2) (2022-04-04)
+
+
+### Bug Fixes
+
+* [#495](https://github.com/payloadcms/payload/issues/495), avoids appending version to id queries ([a703e05](https://github.com/payloadcms/payload/commit/a703e0582df3f4706ee051cf1752c79ff4b551ef))
+
 ## [0.15.1](https://github.com/payloadcms/payload/compare/v0.15.0...v0.15.1) (2022-03-28)
 
 
