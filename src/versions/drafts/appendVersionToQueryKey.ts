@@ -9,9 +9,13 @@ export const appendVersionToQueryKey = (query: Where): Where => {
       };
     }
 
-    return {
-      ...res,
-      [`version.${key}`]: val,
-    };
+    if (key !== 'id') {
+      return {
+        ...res,
+        [`version.${key}`]: val,
+      };
+    }
+
+    return res;
   }, {});
 };
