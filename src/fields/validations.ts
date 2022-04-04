@@ -1,13 +1,19 @@
 import defaultRichTextValue from './richText/defaultValue';
 import {
-  ArrayField, BlockField,
+  ArrayField,
+  BlockField,
   CheckboxField,
   CodeField, DateField,
   EmailField,
-  NumberField, PointField, RadioField, RelationshipField,
-  RichTextField, SelectField,
+  NumberField,
+  PointField,
+  RadioField,
+  RelationshipField,
+  RichTextField,
+  SelectField,
   TextareaField,
-  TextField, UploadField,
+  TextField,
+  UploadField,
   Validate,
 } from './config/types';
 
@@ -206,16 +212,16 @@ export const blocks: Validate<unknown, unknown, BlockField> = (value, { maxRows,
 export const point: Validate<unknown, unknown, PointField> = (value: [number | string, number | string] = ['', ''], { required }) => {
   const lng = parseFloat(String(value[0]));
   const lat = parseFloat(String(value[1]));
-  if (
+  if (required && (
     (value[0] && value[1] && typeof lng !== 'number' && typeof lat !== 'number')
-    || (required && (Number.isNaN(lng) || Number.isNaN(lat)))
+    || (Number.isNaN(lng) || Number.isNaN(lat))
     || (Array.isArray(value) && value.length !== 2)
-  ) {
+  )) {
     return 'This field requires two numbers';
   }
 
-  if (!required && typeof value[0] !== typeof value[1]) {
-    return 'This field requires two numbers or both can be empty';
+  if ((value[1] && Number.isNaN(lng)) || (value[0] && Number.isNaN(lat))) {
+    return 'This field has an invalid input';
   }
 
   return true;

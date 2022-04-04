@@ -1,4 +1,4 @@
-import { text, textarea, password, select } from './validations';
+import { text, textarea, password, select, point } from './validations';
 import { ValidateOptions } from './config/types';
 
 const minLengthMessage = (length: number) => `This value must be longer than the minimum length of ${length} characters.`;
@@ -127,6 +127,61 @@ describe('Field Validations', () => {
       const val = undefined;
       const result = password(val, { ...options, minLength: 10 });
       expect(result).toBe(true);
+    });
+  });
+
+  describe('point', () => {
+    options.type = 'point';
+    options.name = 'point';
+    it('should validate numbers', () => {
+      const val = ['0.1', '0.2'];
+      const result = point(val, options);
+      expect(result).toBe(true);
+    });
+    it('should validate strings that could be numbers', () => {
+      const val = ['0.1', '0.2'];
+      const result = point(val, options);
+      expect(result).toBe(true);
+    });
+    it('should show required message when undefined', () => {
+      const val = undefined;
+      const result = point(val, { ...options, required: true });
+      expect(result).not.toBe(true);
+    });
+    it('should show required message when array', () => {
+      const val = [];
+      const result = point(val, { ...options, required: true });
+      expect(result).not.toBe(true);
+    });
+    it('should show required message when array of undefined', () => {
+      const val = [undefined, undefined];
+      const result = point(val, { ...options, required: true });
+      expect(result).not.toBe(true);
+    });
+    it('should handle undefined not required', () => {
+      const val = undefined;
+      const result = password(val, options);
+      expect(result).toBe(true);
+    });
+    it('should handle empty array not required', () => {
+      const val = [];
+      const result = point(val, options);
+      expect(result).toBe(true);
+    });
+    it('should handle array of undefined not required', () => {
+      const val = [undefined, undefined];
+      const result = point(val, options);
+      expect(result).toBe(true);
+    });
+    it('should prevent text input', () => {
+      const val = ['bad', 'input'];
+      const result = point(val, options);
+      expect(result).not.toBe(true);
+    });
+    it('should prevent missing value', () => {
+      const val = [0.1];
+      const result = point(val, options);
+      expect(result).not.toBe(true);
     });
   });
 

@@ -34,7 +34,7 @@ describe('GeoJSON', () => {
   });
 
   describe('Point Field - REST', () => {
-    const location = [10, 20];
+    let location = [10, 20];
     const localizedPoint = [30, 40];
     const group = { point: [15, 25] };
     let doc;
@@ -115,7 +115,23 @@ describe('GeoJSON', () => {
       expect(hitDocs).toHaveLength(1);
       expect(missDocs).toHaveLength(0);
     });
+
+    it('should save with non-required point', async () => {
+      location = undefined;
+
+      const create = await fetch(`${serverURL}/api/geolocation`, {
+        body: JSON.stringify({ location }),
+        headers,
+        method: 'post',
+      });
+
+      const { doc } = await create.json();
+
+      expect(doc.id).toBeDefined();
+      expect(doc.location).toStrictEqual(location);
+    });
   });
+
 
   describe('Point Field - GraphQL', () => {
     const url = `${serverURL}${routes.api}${routes.graphQL}`;
@@ -130,20 +146,20 @@ describe('GeoJSON', () => {
 
       // language=graphQL
       const query = `mutation {
-            createGeolocation (
-              data: {
-                location: [${location[0]}, ${location[1]}],
-                localizedPoint: [${localizedPoint[0]}, ${localizedPoint[1]}],
-                group: {
-                  point: [${group.point[0]}, ${group.point[1]}]
-                }
-              }
-              ) {
-            id
-            location
-            localizedPoint
+        createGeolocation (
+          data: {
+            location: [${location[0]}, ${location[1]}],
+            localizedPoint: [${localizedPoint[0]}, ${localizedPoint[1]}],
+            group: {
+              point: [${group.point[0]}, ${group.point[1]}]
+            }
           }
-        }`;
+        ) {
+          id
+          location
+          localizedPoint
+        }
+      }`;
 
       const response = await client.request(query);
 

@@ -62,7 +62,19 @@ In addition to being able to define access control on a document-level, you can 
 
 ### Validation
 
-You can provide your own validation function for all field types. It will be used on both the frontend and the backend, so it should not rely on any Node-specific packages. The validation function can be either synchronous or asynchronous and accepts the field's value and expects to return either `true` or a string error message to display in both API responses and within the Admin panel.
+Field validation is enforced automatically based on the field type and other properties such as `required` or `min` and `max` value constraints on certain field types. This default behavior can be replaced by providing your own validate function for any field. It will be used on both the frontend and the backend, so it should not rely on any Node-specific packages. The validation function can be either synchronous or asynchronous and expects to return either `true` or a string error message to display in both API responses and within the Admin panel.
+
+There are two arguments available to custom validation functions.
+1. The value which is currently assigned to the field
+2. An optional object with dynamic properties for more complex validation having the following:
+
+| Property      | Description  |
+| ------------- | -------------|
+| `data`             | An object of the full collection or global document |
+| `siblingData`      | An object of the document data limited to fields within the same parent to the field |
+| `operation`        | Will be "create" or "update" depending on the UI action or API call |
+| `id`               | The value of the collection `id`, will be `undefined` on create request |
+| `user`             | The currently authenticated user object |
 
 Example:
 ```js
@@ -72,7 +84,11 @@ Example:
     {
       name: 'customerNumber',
       type: 'text',
-      validate: async (val) => {
+      validate: async (val, { operation }) => {
+        if (operation !== 'create') {
+          // skip validation on update
+          return true;
+        }
         const response = await fetch(`https://your-api.com/customers/${val}`);
         if (response.ok) {
           return true;
@@ -82,6 +98,26 @@ Example:
       },
     },
   ],
+}
+```
+
+When supplying a field `validate` function, Payload will use yours in place of the default. To make use of the default field validation in your custom logic you can import, call and return the result as needed.
+
+For example:
+```js
+import { text } from 'payload/fields/validations';
+const field =
+  {
+    name: 'notBad',
+    type: 'text',
+    validate: (val, args) => {
+      if (value === 'bad') {
+        return 'This cannot be "bad"';
+      }
+      // highlight-start
+      return text(val, args);
+      // highlight-end
+    },
 }
 ```
 
@@ -198,7 +234,7 @@ A description can be configured three ways.
 - As a function that accepts an object containing the field's value, which returns a string
 - As a React component that accepts value as a prop
 
-As shown above, you can simply provide a string that will show by the field, but there are use cases where you may want to create some dynamic feedback. By using a function or a component for the `description` property you can provide rich feedback in realtime the user interacts with the form.
+As shown above, you can simply provide a string that will show by the field, but there are use cases where you may want to create some dynamic feedback. By using a function or a component for the `description` property you can provide realtime feedback as the user interacts with the form.
 
 **Function Example:**
 

@@ -1,5 +1,4 @@
 import { CollectionConfig } from '../../src/collections/config/types';
-import { Where } from '../../src/types';
 
 const RelationshipA: CollectionConfig = {
   slug: 'relationship-a',
@@ -24,9 +23,6 @@ const RelationshipA: CollectionConfig = {
       relationTo: 'localized-posts',
       hasMany: true,
       localized: true,
-      // filterOptions: (args: Args): Where => ({
-      //
-      // }),
     },
     {
       name: 'postLocalizedMultiple',

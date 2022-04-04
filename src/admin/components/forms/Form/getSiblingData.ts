@@ -1,26 +1,23 @@
-import reduceFieldsToValues from './reduceFieldsToValues';
+import { unflatten } from 'flatley';
 import { Fields, Data } from './types';
+import reduceFieldsToValues from './reduceFieldsToValues';
 
 const getSiblingData = (fields: Fields, path: string): Data => {
-  let siblingFields = fields;
+  if (path.indexOf('.') === -1) {
+    return reduceFieldsToValues(fields, true);
+  }
+  const siblingFields = {};
 
   // If this field is nested
   // We can provide a list of sibling fields
-  if (path.indexOf('.') > 0) {
-    const parentFieldPath = path.substring(0, path.lastIndexOf('.') + 1);
-    siblingFields = Object.keys(fields).reduce((siblings, fieldKey) => {
-      if (fieldKey.indexOf(parentFieldPath) === 0) {
-        return {
-          ...siblings,
-          [fieldKey.replace(parentFieldPath, '')]: fields[fieldKey],
-        };
-      }
+  const parentFieldPath = path.substring(0, path.lastIndexOf('.') + 1);
+  Object.keys(fields).forEach((fieldKey) => {
+    if (!fields[fieldKey].disableFormData && fieldKey.indexOf(parentFieldPath) === 0) {
+      siblingFields[fieldKey.replace(parentFieldPath, '')] = fields[fieldKey].value;
+    }
+  });
 
-      return siblings;
-    }, {});
-  }
-
-  return reduceFieldsToValues(siblingFields, true);
+  return unflatten(siblingFields, { safe: true });
 };
 
 export default getSiblingData;
