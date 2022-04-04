@@ -1,3 +1,10 @@
+## [0.15.3](https://github.com/payloadcms/payload/compare/v0.15.2...v0.15.3) (2022-04-04)
+
+
+### Bug Fixes
+
+* [#499](https://github.com/payloadcms/payload/issues/499), graphql row / ui field bug ([f4a2dff](https://github.com/payloadcms/payload/commit/f4a2dff892e6e8a6aa201c2a66b4db4fa2cd98b8))
+
 ## [0.15.2](https://github.com/payloadcms/payload/compare/v0.15.1...v0.15.2) (2022-04-04)
 
 
