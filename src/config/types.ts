@@ -7,6 +7,7 @@ import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
 import { ConnectionOptions } from 'mongoose';
 import React from 'react';
+import { LoggerOptions } from 'pino';
 import { Payload } from '..';
 import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
 import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
@@ -68,6 +69,8 @@ export type InitOptions = {
   email?: EmailOptions;
   local?: boolean;
   onInit?: (payload: Payload) => void;
+  /** Pino LoggerOptions */
+  loggerOptions?: LoggerOptions;
 };
 
 export type AccessResult = boolean | Where;

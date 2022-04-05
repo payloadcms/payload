@@ -1,13 +1,11 @@
 import nodemailer, { Transporter } from 'nodemailer';
+import { Logger } from 'pino';
 import { EmailOptions, EmailTransport, hasTransport, hasTransportOptions } from '../config/types';
 import { InvalidConfiguration } from '../errors';
 import mockHandler from './mockHandler';
-import Logger from '../utilities/logger';
 import { BuildEmailResult, MockEmailHandler } from './types';
 
-const logger = Logger();
-
-async function handleTransport(transport: Transporter, email: EmailTransport): BuildEmailResult {
+async function handleTransport(transport: Transporter, email: EmailTransport, logger: Logger): BuildEmailResult {
   try {
     await transport.verify();
   } catch (err) {
@@ -26,7 +24,7 @@ const ensureConfigHasFrom = (emailConfig) => {
   }
 };
 
-const handleMockAccount = async (emailConfig: EmailOptions) => {
+const handleMockAccount = async (emailConfig: EmailOptions, logger: Logger) => {
   let mockAccount: MockEmailHandler;
   try {
     mockAccount = await mockHandler(emailConfig);
@@ -38,28 +36,25 @@ const handleMockAccount = async (emailConfig: EmailOptions) => {
       logger.info(`Mock email account password: ${pass}`);
     }
   } catch (err) {
-    logger.error(
-      'There was a problem setting up the mock email handler',
-      err,
-    );
+    logger.error('There was a problem setting up the mock email handler', err);
   }
   return mockAccount;
 };
 
-export default async function buildEmail(emailConfig: EmailOptions): BuildEmailResult {
+export default async function buildEmail(emailConfig: EmailOptions, logger: Logger): BuildEmailResult {
   if (hasTransport(emailConfig) && emailConfig.transport) {
     ensureConfigHasFrom(emailConfig);
     const email = { ...emailConfig };
     const { transport } : {transport: Transporter} = emailConfig;
-    return handleTransport(transport, email);
+    return handleTransport(transport, email, logger);
   }
 
   if (hasTransportOptions(emailConfig) && emailConfig.transportOptions) {
     ensureConfigHasFrom(emailConfig);
     const email = { ...emailConfig } as EmailTransport;
     const transport = nodemailer.createTransport(emailConfig.transportOptions);
-    return handleTransport(transport, email);
+    return handleTransport(transport, email, logger);
   }
 
-  return handleMockAccount(emailConfig);
+  return handleMockAccount(emailConfig, logger);
 }

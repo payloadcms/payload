@@ -1,4 +1,5 @@
 import express, { Express, Router } from 'express';
+import pino from 'pino';
 import crypto from 'crypto';
 import {
   TypeWithID,
@@ -78,7 +79,7 @@ export class Payload {
 
   globals: Globals;
 
-  logger = Logger();
+  logger: pino.Logger;
 
   express: Express
 
@@ -117,6 +118,7 @@ export class Payload {
    * @param options
    */
   init(options: InitOptions): void {
+    this.logger = Logger('payload', options.loggerOptions);
     this.logger.info('Starting Payload...');
     if (!options.secret) {
       throw new Error(
@@ -139,7 +141,7 @@ export class Payload {
     this.mongoURL = options.mongoURL;
     this.local = options.local;
 
-    this.config = loadConfig();
+    this.config = loadConfig(this.logger);
 
     bindOperations(this);
     bindRequestHandlers(this);
@@ -155,7 +157,7 @@ export class Payload {
     }
 
     // Configure email service
-    this.email = buildEmail(this.emailOptions);
+    this.email = buildEmail(this.emailOptions, this.logger);
     this.sendEmail = sendEmail.bind(this);
 
     // Initialize collections & globals
@@ -165,8 +167,7 @@ export class Payload {
 
     // Connect to database
 
-
-    connectMongoose(this.mongoURL, options.mongoOptions, options.local);
+    connectMongoose(this.mongoURL, options.mongoOptions, options.local, this.logger);
 
     // If not initializing locally, set up HTTP routing
     if (!this.local) {

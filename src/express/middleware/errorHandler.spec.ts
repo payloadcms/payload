@@ -5,7 +5,7 @@ import { APIError } from '../../errors';
 import { PayloadRequest } from '../types';
 import { SanitizedConfig } from '../../config/types';
 
-const logger = Logger();
+const logger = Logger('payload');
 
 const testError = new APIError('test error', 503);
 

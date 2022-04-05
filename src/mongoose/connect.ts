@@ -1,10 +1,13 @@
 import mongoose, { ConnectOptions } from 'mongoose';
-import Logger from '../utilities/logger';
+import pino from 'pino';
 import { connection } from './testCredentials';
 
-const logger = Logger();
-
-const connectMongoose = async (url: string, options: ConnectOptions, local: boolean): Promise<void> => {
+const connectMongoose = async (
+  url: string,
+  options: ConnectOptions,
+  local: boolean,
+  logger: pino.Logger,
+): Promise<void> => {
   let urlToConnect = url;
   let successfulConnectionMessage = 'Connected to Mongo server successfully!';
   const connectionOptions = {
