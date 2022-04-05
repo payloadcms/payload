@@ -29,6 +29,16 @@ export type FieldAccess<T extends TypeWithID = any, P = any> = (args: {
 
 export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>) => boolean;
 
+export type FilterOptionsProps = {
+  id: string | number,
+  user: Partial<User>,
+  data: unknown,
+  siblingData: unknown,
+  relationTo: string | string[],
+}
+
+export type FilterOptions = Where | ((options: FilterOptionsProps) => Where);
+
 type Admin = {
   position?: 'sidebar';
   width?: string;
@@ -183,6 +193,7 @@ export type UploadField = FieldBase & {
   type: 'upload'
   relationTo: string
   maxDepth?: number
+  filterOptions?: FilterOptions;
 }
 
 type CodeAdmin = Admin & {
@@ -202,20 +213,12 @@ export type SelectField = FieldBase & {
   hasMany?: boolean
 }
 
-export type filterOptionsProps = {
-  id: string | number,
-  user: Partial<User>,
-  data: unknown,
-  siblingData: unknown,
-  relationTo: string,
-}
-
 export type RelationshipField = FieldBase & {
   type: 'relationship';
   relationTo: string | string[];
   hasMany?: boolean;
   maxDepth?: number;
-  filterOptions?: Where | ((options: filterOptionsProps) => Where);
+  filterOptions?: FilterOptions;
 }
 
 export type ValueWithRelation = {

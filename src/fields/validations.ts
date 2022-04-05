@@ -17,7 +17,6 @@ import {
   UploadField,
   Validate,
   RelationshipValue,
-  ValueWithRelation,
 } from './config/types';
 import canUseDOM from '../utilities/canUseDOM';
 import payload from '../index';
@@ -90,7 +89,11 @@ export const email: Validate<unknown, unknown, EmailField> = (value: string, { r
   return true;
 };
 
-export const textarea: Validate<unknown, unknown, TextareaField> = (value: string, { required, maxLength, minLength }) => {
+export const textarea: Validate<unknown, unknown, TextareaField> = (value: string, {
+  required,
+  maxLength,
+  minLength,
+}) => {
   if (value && maxLength && value.length > maxLength) {
     return `This value must be shorter than the max length of ${maxLength} characters.`;
   }
@@ -149,16 +152,7 @@ export const date: Validate<unknown, unknown, DateField> = (value, { required })
   return true;
 };
 
-export const upload: Validate<unknown, unknown, UploadField> = (value: string, { required }) => {
-  if (value || !required) return true;
-  return defaultMessage;
-};
-
-export const relationship: Validate<unknown, unknown, RelationshipField> = async (value: RelationshipValue, { required, relationTo, filterOptions, id, data, siblingData, user }) => {
-  if ((!value || (Array.isArray(value) && value.length === 0)) && required) {
-    return defaultMessage;
-  }
-
+const validateFilterOptions: Validate = async (value, { filterOptions, id, user, data, siblingData, relationTo }) => {
   if (!canUseDOM && typeof filterOptions !== 'undefined' && value) {
     const options: {
       [collection: string]: (string | number)[]
@@ -232,6 +226,22 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
   }
 
   return true;
+};
+
+export const upload: Validate<unknown, unknown, UploadField> = (value: string, options) => {
+  if ((!value || (Array.isArray(value) && value.length === 0)) && options.required) {
+    return defaultMessage;
+  }
+
+  return validateFilterOptions(value, options);
+};
+
+export const relationship: Validate<unknown, unknown, RelationshipField> = async (value: RelationshipValue, options) => {
+  if ((!value || (Array.isArray(value) && value.length === 0)) && options.required) {
+    return defaultMessage;
+  }
+
+  return validateFilterOptions(value, options);
 };
 
 export const array: Validate<unknown, unknown, ArrayField> = (value, { minRows, maxRows, required }) => {

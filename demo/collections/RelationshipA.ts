@@ -67,6 +67,14 @@ const RelationshipA: CollectionConfig = {
       },
     },
     {
+      name: 'files',
+      type: 'upload',
+      relationTo: 'files',
+      filterOptions: {
+        type: { equals: 'Type 2' },
+      },
+    },
+    {
       name: 'demoHiddenField',
       type: 'text',
       hidden: true,

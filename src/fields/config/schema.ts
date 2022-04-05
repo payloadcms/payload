@@ -185,6 +185,10 @@ export const upload = baseField.keys({
   relationTo: joi.string().required(),
   name: joi.string().required(),
   maxDepth: joi.number(),
+  filterOptions: joi.alternatives().try(
+    joi.object(),
+    joi.func(),
+  ),
 });
 
 export const checkbox = baseField.keys({

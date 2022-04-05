@@ -5,7 +5,7 @@ import Label from '../../Label';
 import Error from '../../Error';
 import FileDetails from '../../../elements/FileDetails';
 import FieldDescription from '../../FieldDescription';
-import { UploadField } from '../../../../../fields/config/types';
+import { FilterOptions, UploadField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
 import { FieldTypes } from '..';
 import AddModal from './Add';
@@ -33,6 +33,7 @@ export type UploadInputProps = Omit<UploadField, 'type'> & {
   collection?: SanitizedCollectionConfig
   serverURL?: string
   api?: string
+  filterOptions: FilterOptions
 }
 
 const UploadInput: React.FC<UploadInputProps> = (props) => {
@@ -54,6 +55,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     api = '/api',
     collection,
     errorMessage,
+    filterOptions,
   } = props;
 
   const { toggle } = useModal();
@@ -160,6 +162,8 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
               slug: selectExistingModalSlug,
               setValue: onChange,
               addModalSlug,
+              filterOptions,
+              path,
             }}
           />
           <FieldDescription

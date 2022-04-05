@@ -19,25 +19,14 @@ import optionsReducer from './optionsReducer';
 import { Props, Option, ValueWithRelation, GetResults } from './types';
 import { createRelationMap } from './createRelationMap';
 import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo';
+import { getFilterOptionsQuery } from '../getFilterOptionsQuery';
 
 import './index.scss';
-import { useDocumentInfo } from '../../../utilities/DocumentInfo';
-import { filterOptionsProps } from '../../../../../fields/config/types';
 
 const maxResultsPerRequest = 10;
 
 const baseClass = 'relationship';
-
-const getFilterOptionsQuery = (filterOptions, options: filterOptionsProps): Where => {
-  let query = {};
-  if (typeof filterOptions === 'object') {
-    query = filterOptions;
-  }
-  if (typeof filterOptions === 'function') {
-    query = filterOptions(options);
-  }
-  return query;
-};
 
 const Relationship: React.FC<Props> = (props) => {
   const {
@@ -70,9 +59,7 @@ const Relationship: React.FC<Props> = (props) => {
   const { id } = useDocumentInfo();
   const { user } = useAuth();
   const { getData, getSiblingData } = useWatchForm();
-
   const formProcessing = useFormProcessing();
-
   const hasMultipleRelations = Array.isArray(relationTo);
   const [options, dispatchOptions] = useReducer(optionsReducer, required || hasMany ? [] : [{ value: 'null', label: 'None' }]);
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
@@ -292,19 +279,16 @@ const Relationship: React.FC<Props> = (props) => {
   }, [hasMany, hasMultipleRelations, relationTo, initialValue, hasLoadedValueOptions, errorLoading, collections, api, serverURL]);
 
   useEffect(() => {
-    const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
-    const newOptionFilters = {};
-    if (typeof filterOptions !== 'undefined') {
-      relations.forEach((relation) => {
-        newOptionFilters[relation] = getFilterOptionsQuery(filterOptions, {
-          id,
-          data: getData(),
-          siblingData: getSiblingData(path),
-          relationTo: relation,
-          user,
-        });
-      });
+    if (!filterOptions) {
+      return;
     }
+    const newOptionFilters = getFilterOptionsQuery(filterOptions, {
+      id,
+      data: getData(),
+      relationTo,
+      siblingData: getSiblingData(path),
+      user,
+    });
     if (!equal(newOptionFilters, optionFilters)) {
       setOptionFilters(newOptionFilters);
     }

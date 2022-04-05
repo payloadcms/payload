@@ -1,6 +1,8 @@
 import React, { Fragment, useState, useEffect } from 'react';
+import equal from 'deep-equal';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { useConfig } from '@payloadcms/config-provider';
+import { useAuth, useConfig } from '@payloadcms/config-provider';
+import { Where } from '../../../../../../types';
 import MinimalTemplate from '../../../../templates/Minimal';
 import Button from '../../../../elements/Button';
 import usePayloadAPI from '../../../../../hooks/usePayloadAPI';
@@ -12,6 +14,9 @@ import PerPage from '../../../../elements/PerPage';
 import formatFields from '../../../../views/collections/List/formatFields';
 
 import './index.scss';
+import { getFilterOptionsQuery } from '../../getFilterOptionsQuery';
+import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
+import { useWatchForm } from '../../../Form/context';
 
 const baseClass = 'select-existing-upload-modal';
 
@@ -29,15 +34,21 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
       } = {},
     } = {},
     slug: modalSlug,
+    path,
+    filterOptions,
   } = props;
 
   const { serverURL, routes: { api } } = useConfig();
+  const { id } = useDocumentInfo();
+  const { user } = useAuth();
+  const { getData, getSiblingData } = useWatchForm();
   const { closeAll, currentModal } = useModal();
   const [fields] = useState(() => formatFields(collection));
   const [limit, setLimit] = useState(defaultLimit);
   const [sort, setSort] = useState(null);
   const [where, setWhere] = useState(null);
   const [page, setPage] = useState(null);
+  const [optionFilters, setOptionFilters] = useState<Where>();
 
   const classes = [
     baseClass,
@@ -58,12 +69,29 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
     } = {};
 
     if (page) params.page = page;
-    if (where) params.where = where;
+    if (where) params.where = { and: [where, optionFilters] };
     if (sort) params.sort = sort;
     if (limit) params.limit = limit;
 
     setParams(params);
-  }, [setParams, page, sort, where, limit]);
+  }, [setParams, page, sort, where, limit, optionFilters]);
+
+  useEffect(() => {
+    if (!filterOptions || !isOpen) {
+      return;
+    }
+
+    const newOptionFilters = getFilterOptionsQuery(filterOptions, {
+      id,
+      relationTo: collectionSlug,
+      data: getData(),
+      siblingData: getSiblingData(path),
+      user,
+    })[collectionSlug];
+    if (!equal(newOptionFilters, optionFilters)) {
+      setOptionFilters(newOptionFilters);
+    }
+  }, [collectionSlug, filterOptions, optionFilters, id, getData, getSiblingData, path, user, isOpen]);
 
   return (
     <Modal
