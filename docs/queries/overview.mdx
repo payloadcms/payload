@@ -59,7 +59,8 @@ The above example demonstrates a simple query but you can get much more complex.
 | `greater_than_equal` | For numeric or date-based fields. |
 | `less_than`          | For numeric or date-based fields. |
 | `less_than_equal`    | For numeric or date-based fields. |
-| `like`               | The value must partially match. |
+| `like`               | Case-insensitive string must be present. If string of words, all words must be present, in any order. |
+| `contains`           | Must contain the value entered, case-insensitive. |
 | `in`                 | The value must be found within the provided comma-delimited list of values. |
 | `not_in`             | The value must NOT be within the provided comma-delimited list of values. |
 | `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`). |

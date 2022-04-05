@@ -62,26 +62,31 @@ const like = {
   value: 'like',
 };
 
+const contains = {
+  label: 'contains',
+  value: 'contains',
+};
+
 const fieldTypeConditions = {
   text: {
     component: 'Text',
-    operators: [...base, like],
+    operators: [...base, like, contains],
   },
   email: {
     component: 'Text',
-    operators: [...base, like],
+    operators: [...base, contains],
   },
   textarea: {
     component: 'Text',
-    operators: [...base, like],
-  },
-  wysiwyg: {
-    component: 'Text',
-    operators: [...base, like],
+    operators: [...base, like, contains],
   },
   code: {
     component: 'Text',
-    operators: [...base, like],
+    operators: [...base, like, contains],
+  },
+  richText: {
+    component: 'Text',
+    operators: [...base, like, contains],
   },
   number: {
     component: 'Number',

@@ -8,7 +8,7 @@ import { getSchemaTypeOptions } from './getSchemaTypeOptions';
 import { operatorMap } from './operatorMap';
 import { sanitizeQueryValue } from './sanitizeFormattedValue';
 
-const validOperators = ['like', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
+const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
 
 const subQueryOptions = {
   limit: 50,

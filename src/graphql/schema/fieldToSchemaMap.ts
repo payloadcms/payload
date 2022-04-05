@@ -44,7 +44,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         field,
         type,
         parentName,
-        [...operators.equality, 'like'],
+        [...operators.equality, 'like', 'contains'],
       ),
     };
   },
@@ -55,7 +55,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         field,
         type,
         parentName,
-        [...operators.equality, 'like'],
+        [...operators.equality, 'like', 'contains'],
       ),
     };
   },
@@ -66,7 +66,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         field,
         type,
         parentName,
-        [...operators.equality, 'like'],
+        [...operators.equality, 'like', 'contains'],
       ),
     };
   },
@@ -77,7 +77,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         field,
         type,
         parentName,
-        [...operators.equality, 'like'],
+        [...operators.equality, 'like', 'contains'],
       ),
     };
   },
@@ -88,7 +88,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         field,
         type,
         parentName,
-        [...operators.equality, 'like'],
+        [...operators.equality, 'like', 'contains'],
       ),
     };
   },
@@ -116,7 +116,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         }, {}),
       }),
       parentName,
-      [...operators.equality, 'like'],
+      [...operators.equality, 'like', 'contains'],
     ),
   }),
   date: (field: DateField) => {

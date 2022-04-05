@@ -90,8 +90,19 @@ export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operato
     }
   }
 
-  if (operator === 'like' && path !== '_id') {
-    formattedValue = { $regex: formattedValue, $options: 'i' };
+  if (path !== '_id') {
+    if (operator === 'contains') {
+      formattedValue = { $regex: formattedValue, $options: 'i' };
+    }
+
+    if (operator === 'like' && typeof formattedValue === 'string') {
+      const words = formattedValue.split(' ');
+      const regex = words.reduce((pattern, word, i) => {
+        return `${pattern}(?=.*\\b${word}\\b)${i + 1 === words.length ? '.+' : ''}`;
+      }, '');
+
+      formattedValue = { $regex: new RegExp(regex), $options: 'i' };
+    }
   }
 
   if (operator === 'exists') {
