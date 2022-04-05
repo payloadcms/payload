@@ -88,15 +88,19 @@ app.listen(3000, async () => {
 
 ```
 
-As you can see above, the required arguments to the `init` function are as follows:
+Here is a list of all properties available to pass through `payload.init`:
+
+##### `express`
+
+**Required**. This is your Express app as shown above. Payload will tie into your existing `app` and scope all of its functionalities to sub-routers. By default, Payload will add an `/admin` router and an `/api` router, but you can customize these paths.
 
 ##### `secret`
 
-This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess. Often, it's smart to store this value in an `env` and set different values for each of your environments (local, stage, prod, etc). The `dotenv` package is very handy and works well alongside of Payload.
+**Required**. This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess. Often, it's smart to store this value in an `env` and set different values for each of your environments (local, stage, prod, etc). The `dotenv` package is very handy and works well alongside of Payload.
 
 ##### `mongoURL`
 
-This is a fully qualified MongoDB connection string that points to your Mongo database. If you don't have Mongo installed locally, you can [follow these steps for Mac OSX](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/) and [these steps](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/) for Windows 10. If you want to use a local database and you know you have MongoDB installed locally, a typical connection string will look like this:
+**Required**. This is a fully qualified MongoDB connection string that points to your Mongo database. If you don't have Mongo installed locally, you can [follow these steps for Mac OSX](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/) and [these steps](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/) for Windows 10. If you want to use a local database and you know you have MongoDB installed locally, a typical connection string will look like this:
 
 `mongodb://localhost/payload`
 
@@ -104,11 +108,7 @@ In contrast to running Mongo locally, a popular option is to sign up for a free 
 
 ##### `mongoOptions`
 
-An optional object to customize connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.
-
-##### `express`
-
-This is your Express app as shown above. Payload will tie into your existing `app` and scope all of its functionalities to sub-routers. By default, Payload will add an `/admin` router and an `/api` router, but you can customize these paths.
+Customize Mongo connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.
 
 ##### `license`
 
@@ -116,15 +116,19 @@ Your Payload license key. Not needed for development purposes, but when it's tim
 
 ##### `email`
 
-An Optional object used to configure SMTP. [Read more](/docs/email/overview).
+An object used to configure SMTP. [Read more](/docs/email/overview).
 
 ##### `local`
 
 A boolean that when set to `true` tells Payload to start in local-only mode which will bypass setting up API routes. When set to `true`, `express` is not required. This is useful when running scripts that need to use Payload's [local-api](/docs/local-api/overview).
 
+##### `loggerOptions`
+
+Specify options for the built-in Pino logger that Payload uses for internal logging. See [Pino Docs](https://getpino.io/#/docs/api?id=options) for more info on what is available.
+
 ##### `onInit`
 
-An optional function that is called immediately following startup that receives the Payload instance as it's only argument.
+A function that is called immediately following startup that receives the Payload instance as it's only argument.
 
 ### Test it out
 
