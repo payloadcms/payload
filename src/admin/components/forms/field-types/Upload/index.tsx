@@ -33,6 +33,7 @@ const Upload: React.FC<Props> = (props) => {
     validate = upload,
     relationTo,
     fieldTypes,
+    filterOptions,
   } = props;
 
   const collection = collections.find((coll) => coll.slug === relationTo);
@@ -82,6 +83,7 @@ const Upload: React.FC<Props> = (props) => {
         fieldTypes={fieldTypes}
         name={name}
         relationTo={relationTo}
+        filterOptions={filterOptions}
       />
     );
   }

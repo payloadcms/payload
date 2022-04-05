@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
-import { Operation } from '../../types';
+import { Operation, Where } from '../../types';
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
@@ -28,6 +28,16 @@ export type FieldAccess<T extends TypeWithID = any, P = any> = (args: {
 }) => Promise<boolean> | boolean;
 
 export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>) => boolean;
+
+export type FilterOptionsProps = {
+  id: string | number,
+  user: Partial<User>,
+  data: unknown,
+  siblingData: unknown,
+  relationTo: string | string[],
+}
+
+export type FilterOptions = Where | ((options: FilterOptionsProps) => Where);
 
 type Admin = {
   position?: 'sidebar';
@@ -183,6 +193,7 @@ export type UploadField = FieldBase & {
   type: 'upload'
   relationTo: string
   maxDepth?: number
+  filterOptions?: FilterOptions;
 }
 
 type CodeAdmin = Admin & {
@@ -207,7 +218,18 @@ export type RelationshipField = FieldBase & {
   relationTo: string | string[];
   hasMany?: boolean;
   maxDepth?: number;
+  filterOptions?: FilterOptions;
 }
+
+export type ValueWithRelation = {
+  relationTo: string
+  value: string | number
+}
+
+export type RelationshipValue = (string | number)
+  | (string | number)[]
+  | ValueWithRelation
+  | ValueWithRelation[]
 
 type RichTextPlugin = (editor: Editor) => Editor;
 

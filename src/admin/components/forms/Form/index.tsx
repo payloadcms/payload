@@ -368,6 +368,10 @@ const Form: React.FC<Props> = (props) => {
     refreshCookie();
   }, 15000, [fields]);
 
+  useThrottledEffect(() => {
+    validateForm();
+  }, 1000, [validateForm, fields]);
+
   useEffect(() => {
     contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form
     setModified(false);

@@ -1,9 +1,12 @@
 import {
   useCallback, useEffect, useState,
 } from 'react';
+import { useAuth } from '@payloadcms/config-provider';
 import { useFormProcessing, useFormSubmitted, useFormModified, useForm } from '../Form/context';
 import useDebounce from '../../../hooks/useDebounce';
 import { Options, FieldType } from './types';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import { useOperation } from '../../utilities/OperationProvider';
 
 const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const {
@@ -19,10 +22,15 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const submitted = useFormSubmitted();
   const processing = useFormProcessing();
   const modified = useFormModified();
+  const { user } = useAuth();
+  const { id } = useDocumentInfo();
+  const operation = useOperation();
 
   const {
     dispatchFields,
     getField,
+    getData,
+    getSiblingData,
     setModified,
   } = formContext || {};
 
@@ -39,43 +47,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   // Valid could be a string equal to an error message
   const valid = (field && typeof field.valid === 'boolean') ? field.valid : true;
   const showError = valid === false && submitted;
-
-  // Method to send update field values from field component(s)
-  // Should only be used internally
-  const sendField = useCallback(async (valueToSend) => {
-    const fieldToDispatch = {
-      path,
-      disableFormData,
-      ignoreWhileFlattening,
-      initialValue,
-      validate,
-      condition,
-      value: valueToSend,
-      valid: false,
-      errorMessage: undefined,
-    };
-
-    const validationResult = typeof validate === 'function' ? await validate(valueToSend) : true;
-
-    if (typeof validationResult === 'string') {
-      fieldToDispatch.errorMessage = validationResult;
-      fieldToDispatch.valid = false;
-    } else {
-      fieldToDispatch.valid = validationResult;
-    }
-
-    if (typeof dispatchFields === 'function') {
-      dispatchFields(fieldToDispatch);
-    }
-  }, [
-    path,
-    dispatchFields,
-    validate,
-    disableFormData,
-    ignoreWhileFlattening,
-    initialValue,
-    condition,
-  ]);
 
   // Method to return from `useField`, used to
   // update internal field values from field component(s)
@@ -106,13 +77,38 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const valueToSend = enableDebouncedValue ? debouncedValue : internalValue;
 
   useEffect(() => {
-    if (field?.value !== valueToSend && valueToSend !== undefined) {
-      sendField(valueToSend);
-    }
+    const sendField = async () => {
+      if (field?.value !== valueToSend && valueToSend !== undefined) {
+        if (typeof dispatchFields === 'function') {
+          dispatchFields({
+            ...field,
+            path,
+            disableFormData,
+            ignoreWhileFlattening,
+            initialValue,
+            validate,
+            condition,
+            value: valueToSend,
+          });
+        }
+      }
+    };
+
+    sendField();
   }, [
+    condition,
+    disableFormData,
+    dispatchFields,
+    getData,
+    getSiblingData,
+    id,
+    ignoreWhileFlattening,
+    initialValue,
+    operation,
     path,
+    user,
+    validate,
     valueToSend,
-    sendField,
     field,
   ]);
 
