@@ -47,31 +47,36 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 
 ### Filtering relationship options
 
-Options can be dynamically limited by supply a query that is used for validating input and querying relationships in the UI. The `filterOptions` property can be a `Where` query or a function that returns one. When using a function, it will be called with an argument object with the following properties:
+Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both for validating input and filtering available relationships in the UI.
+
+The `filterOptions` property can either be a `Where` query directly, or a function that returns one. When using a function, it will be called with an argument object with the following properties:
 
 | Property      | Description  |
 | ------------- | -------------|
-| `relationTo`       | The `slug` of the collection of the items relation |
-| `data`             | An object of the full collection or global document |
+| `relationTo`       | The `relationTo` to filter against (as defined on the field) |
+| `data`             | An object of the full collection or global document currently being edited |
 | `siblingData`      | An object of the document data limited to fields within the same parent to the field |
 | `id`               | The value of the collection `id`, will be `undefined` on create request |
 | `user`             | The currently authenticated user object |
+
+**Example:**
 
 ```js
   const relationshipField = {
     name: 'purchase',
     type: 'relationship',
     relationTo: ['products', 'services'],
-    filterOptions: ({relationTo, siblingData, }) => {
+    filterOptions: ({ relationTo, siblingData }) => {
       // returns a Where query dynamically by the type of relationship
       if (relationTo === 'products') {
         return {
-          'product.stock': { is_greater_than: siblingData.quantity }
+          'stock': { is_greater_than: siblingData.quantity }
         }
       }
+
       if (relationTo === 'services') {
         return {
-          'services.isAvailable': { equals: true }
+          'isAvailable': { equals: true }
         }
       }
     },
@@ -81,7 +86,7 @@ Options can be dynamically limited by supply a query that is used for validating
 You can learn more about writing queries [here](/docs/queries/overview).
 
 <Banner type="warning">
-  When a relationship field has both `filterOptions` and `validate` the server side validation will not enforce `filterOptions` unless you call the relationship field validate imported from `payload/fields/validations` in the validate function.
+  When a relationship field has both <strong>filterOptions</strong> and a custom <strong>validate</strong> function, the server-side validation will not enforce <strong>filterOptions</strong>unless you call the default relationship field validation function imported from <strong>payload/fields/validations</strong> within your custom function.
 </Banner>
 
 ### How the data is saved
