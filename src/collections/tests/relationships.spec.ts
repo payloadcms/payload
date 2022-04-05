@@ -189,5 +189,29 @@ describe('Collections - REST', () => {
       expect(custom.doc.id).toBe(parseFloat(customID.id));
       expect(doc.customID[0].id).toBe(parseFloat(customID.id));
     });
+
+    it('should use filterOptions to limit relationship options', async () => {
+      // update documentB to disable relations
+      await fetch(`${url}/api/relationship-b/${documentB.id}`, {
+        headers,
+        body: JSON.stringify({
+          disableRelation: true,
+        }),
+        method: 'put',
+      });
+
+      // attempt to save relationship to documentB
+      const response = await fetch(`${url}/api/relationship-a/${documentA.id}`, {
+        headers,
+        body: JSON.stringify({
+          filterRelationship: documentB.id,
+        }),
+        method: 'put',
+      });
+
+      const result = await response.json();
+
+      expect(result.errors).toBeDefined();
+    });
   });
 });
