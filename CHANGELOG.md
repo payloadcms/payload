@@ -1,3 +1,24 @@
+## [0.15.4](https://github.com/payloadcms/payload/compare/v0.15.3...v0.15.4) (2022-04-05)
+
+
+### Bug Fixes
+
+* [#495](https://github.com/payloadcms/payload/issues/495), avoids appending version to id queries ([ab432a4](https://github.com/payloadcms/payload/commit/ab432a43dc568da0b7e65e275aed335d729600fa))
+* default point validation allows not required and some edge cases ([29405bb](https://github.com/payloadcms/payload/commit/29405bbc0e3a5c3c1f3dadb2386a68e1fe159c42))
+* maintains field validation internally for speed ([b99f6b1](https://github.com/payloadcms/payload/commit/b99f6b16af1573185bb8de07c6e54ac02caf6de8))
+
+
+### Features
+
+* allows like to search by many words, adds contain to match exact strings ([ec91757](https://github.com/payloadcms/payload/commit/ec91757257ed062c7743fca3d07d1b6af21cacb4))
+* extended validation function arguments ([#494](https://github.com/payloadcms/payload/issues/494)) ([1b4b570](https://github.com/payloadcms/payload/commit/1b4b5707bfa731bedc5d9ca49ac9f425932b999c)), closes [#495](https://github.com/payloadcms/payload/issues/495)
+* filter relationship options in admin ui using filterOptions ([485991b](https://github.com/payloadcms/payload/commit/485991bd48c3512acca8dd94b3ab6c160bf1f153))
+* **logging:** allow pino logger options to be passed into init ([6620a4f](https://github.com/payloadcms/payload/commit/6620a4f682f0a3169218dd83e1de315f95726287))
+* support className config for row, block and array fields ([#504](https://github.com/payloadcms/payload/issues/504)) ([0461c21](https://github.com/payloadcms/payload/commit/0461c2109bea76742f94ae6f830c655ec67d1428))
+* upload field implements filterOptions ([1482fde](https://github.com/payloadcms/payload/commit/1482fded9a2e700416e7d0b0c753a05f56f4aee1))
+* WIP extended validation function arguments ([647cac3](https://github.com/payloadcms/payload/commit/647cac3612c02dc164254e050ef589a88077b55f))
+* working PoC for reusing relationship filters in validate ([df934df](https://github.com/payloadcms/payload/commit/df934dfeff8b12857d133b2da9f441bc0285dee4))
+
 ## [0.15.3](https://github.com/payloadcms/payload/compare/v0.15.2...v0.15.3) (2022-04-04)
 
 
