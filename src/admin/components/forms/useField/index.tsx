@@ -35,6 +35,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   } = formContext || {};
 
   const [internalValue, setInternalValue] = useState(undefined);
+  const [internallyValid, setInternallyValid] = useState<boolean>(undefined);
 
   // Debounce internal values to update form state only every 60ms
   const debouncedValue = useDebounce(internalValue, 120);
@@ -44,8 +45,19 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
   const initialValue = field?.initialValue as T;
 
-  // Valid could be a string equal to an error message
-  const valid = (field && typeof field.valid === 'boolean') ? field.valid : true;
+  // Validation is defined by two ways -
+  // 1. by field state
+  // 2. maintained locally to reflect instant validation state changes
+  let valid = true;
+
+  if (field && typeof field.valid === 'boolean') {
+    valid = field.valid;
+  }
+
+  if (typeof internallyValid === 'boolean') {
+    valid = internallyValid;
+  }
+
   const showError = valid === false && submitted;
 
   // Method to send update field values from field component(s)
@@ -76,9 +88,11 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     if (typeof validationResult === 'string') {
       fieldToDispatch.errorMessage = validationResult;
       fieldToDispatch.valid = false;
+      setInternallyValid(false);
     } else {
       fieldToDispatch.valid = validationResult;
       fieldToDispatch.errorMessage = undefined;
+      setInternallyValid(true);
     }
 
     if (typeof dispatchFields === 'function') {
@@ -119,6 +133,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
   useEffect(() => {
     setInternalValue(initialValue);
+    setInternallyValid(undefined);
   }, [initialValue]);
 
   // The only time that the FORM value should be updated
