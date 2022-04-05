@@ -38,7 +38,6 @@ export type Props = {
   initialData?: Data
   waitForAutocomplete?: boolean
   log?: boolean
-  validationOperation?: 'create' | 'update'
 }
 
 export type SubmitOptions = {

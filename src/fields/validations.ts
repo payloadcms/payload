@@ -16,6 +16,8 @@ import {
   TextField,
   UploadField,
   Validate,
+  RelationshipValue,
+  ValueWithRelation,
 } from './config/types';
 import canUseDOM from '../utilities/canUseDOM';
 import payload from '../index';
@@ -152,14 +154,19 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, {
   return defaultMessage;
 };
 
-export const relationship: Validate<unknown, unknown, RelationshipField> = async (value: string | string[], { required, relationTo, filterOptions, id, data, siblingData, user }) => {
+export const relationship: Validate<unknown, unknown, RelationshipField> = async (value: RelationshipValue, { required, relationTo, filterOptions, id, data, siblingData, user }) => {
   if ((!value || (Array.isArray(value) && value.length === 0)) && required) {
     return defaultMessage;
   }
+
   if (!canUseDOM && typeof filterOptions !== 'undefined' && value) {
-    const options = [];
+    const options: {
+      [collection: string]: (string | number)[]
+    } = {};
+
     const collections = typeof relationTo === 'string' ? [relationTo] : relationTo;
-    const values: string[] = typeof value === 'string' ? [value] : value;
+    const values = Array.isArray(value) ? value : [value];
+
     await Promise.all(collections.map(async (collection) => {
       const optionFilter = typeof filterOptions === 'function' ? filterOptions({
         id,
@@ -168,23 +175,63 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
         user,
         relationTo: collection,
       }) : filterOptions;
-      const result = await payload.find({
+
+      const valueIDs: (string | number)[] = [];
+
+      values.forEach((val) => {
+        if (typeof val === 'object' && val?.value) {
+          valueIDs.push(val.value);
+        }
+
+        if (typeof val === 'string' || typeof val === 'number') {
+          valueIDs.push(val);
+        }
+      });
+
+      const result = await payload.find<TypeWithID>({
         collection,
         depth: 0,
         where: {
           and: [
-            { id: { in: values } },
+            { id: { in: valueIDs } },
             optionFilter,
           ],
         },
       });
-      options.concat(result.docs.map((item: TypeWithID) => String(item.id)));
+
+      options[collection] = result.docs.map((doc) => doc.id);
     }));
-    if (values.some((input) => options.some((option) => (option === input)))) {
-      return 'This field has an invalid selection';
+
+    const invalidRelationships = values.filter((val) => {
+      let collection: string;
+      let requestedID: string | number;
+
+      if (typeof relationTo === 'string') {
+        collection = relationTo;
+
+        if (typeof val === 'string' || typeof val === 'number') {
+          requestedID = val;
+        }
+      }
+
+      if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
+        collection = val.relationTo;
+        requestedID = val.value;
+      }
+
+      return options[collection].indexOf(requestedID) === -1;
+    });
+
+    if (invalidRelationships.length > 0) {
+      return invalidRelationships.reduce((err, invalid, i) => {
+        return `${err} ${JSON.stringify(invalid)}${invalidRelationships.length === i + 1 ? ',' : ''} `;
+      }, 'This field has the following invalid selections:') as string;
     }
+
     return true;
   }
+
+  return true;
 };
 
 export const array: Validate<unknown, unknown, ArrayField> = (value, { minRows, maxRows, required }) => {

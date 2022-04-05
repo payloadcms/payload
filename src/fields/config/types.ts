@@ -218,6 +218,16 @@ export type RelationshipField = FieldBase & {
   filterOptions?: Where | ((options: filterOptionsProps) => Where);
 }
 
+export type ValueWithRelation = {
+  relationTo: string
+  value: string | number
+}
+
+export type RelationshipValue = (string | number)
+  | (string | number)[]
+  | ValueWithRelation
+  | ValueWithRelation[]
+
 type RichTextPlugin = (editor: Editor) => Editor;
 
 export type RichTextCustomElement = {

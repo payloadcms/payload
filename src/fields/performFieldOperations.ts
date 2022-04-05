@@ -116,8 +116,8 @@ export default async function performFieldOperations(this: Payload, entityConfig
   const hookResults = hookPromises.map((promise) => promise());
   await Promise.all(hookResults);
 
-  validationPromises.forEach((promise) => promise());
-  await Promise.all(validationPromises);
+  const validationResults = validationPromises.map((promise) => promise());
+  await Promise.all(validationResults);
 
   if (errors.length > 0) {
     throw new ValidationError(errors);

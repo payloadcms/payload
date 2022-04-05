@@ -78,7 +78,7 @@ const Relationship: React.FC<Props> = (props) => {
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [errorLoading, setErrorLoading] = useState('');
-  const [optionFilters, setOptionFilters] = useState<{[relation: string]: Where}>({});
+  const [optionFilters, setOptionFilters] = useState<{[relation: string]: Where}>();
   const [hasLoadedValueOptions, setHasLoadedValueOptions] = useState(false);
   const [search, setSearch] = useState('');
 
@@ -311,11 +311,13 @@ const Relationship: React.FC<Props> = (props) => {
   }, [relationTo, filterOptions, optionFilters, id, getData, getSiblingData, path, user]);
 
   useEffect(() => {
-    setHasLoadedValueOptions(false);
-    getResults({
-      value: initialValue,
-    });
-  }, [initialValue, getResults]);
+    if (optionFilters) {
+      setHasLoadedValueOptions(false);
+      getResults({
+        value: initialValue,
+      });
+    }
+  }, [initialValue, getResults, optionFilters]);
 
   const classes = [
     'field-type',
