@@ -1,15 +1,13 @@
 import { ValidationResult } from 'joi';
+import { Logger } from 'pino';
 import schema from './schema';
 import collectionSchema from '../collections/config/schema';
-import Logger from '../utilities/logger';
 import { SanitizedConfig } from './types';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import fieldSchema, { idField } from '../fields/config/schema';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 import globalSchema from '../globals/config/schema';
 import { fieldAffectsData } from '../fields/config/types';
-
-const logger = Logger();
 
 const validateFields = (context: string, entity: SanitizedCollectionConfig | SanitizedGlobalConfig): string[] => {
   const errors: string[] = [];
@@ -65,7 +63,7 @@ const validateGlobals = (globals: SanitizedGlobalConfig[]): string[] => {
   return errors;
 };
 
-const validateSchema = (config: SanitizedConfig): SanitizedConfig => {
+const validateSchema = (config: SanitizedConfig, logger: Logger): SanitizedConfig => {
   const result = schema.validate(config, {
     abortEarly: false,
   });
