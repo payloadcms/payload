@@ -47,6 +47,7 @@ const Blocks: React.FC<Props> = (props) => {
       readOnly,
       description,
       condition,
+      className,
     },
   } = props;
 
@@ -168,10 +169,15 @@ const Blocks: React.FC<Props> = (props) => {
 
   const hasMaxRows = maxRows && rows.length >= maxRows;
 
+  const classes = [
+    baseClass,
+    className,
+  ].filter(Boolean).join(' ');
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div
-        className={baseClass}
+        className={classes}
       >
         <div className={`${baseClass}__error-wrap`}>
           <Error

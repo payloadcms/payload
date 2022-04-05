@@ -14,13 +14,20 @@ const Row: React.FC<Props> = (props) => {
     permissions,
     admin: {
       readOnly,
+      className,
     },
   } = props;
+
+  const classes = [
+    'field-type',
+    'row',
+    className,
+  ].filter(Boolean).join(' ');
 
   return (
     <RenderFields
       readOnly={readOnly}
-      className="field-type row"
+      className={classes}
       permissions={permissions?.fields}
       fieldTypes={fieldTypes}
       fieldSchema={fields.map((field) => ({
