@@ -15,11 +15,11 @@ const Checkbox: React.FC<Props> = (props) => {
   const {
     name,
     path: pathFromProps,
-    required,
     validate = checkbox,
     label,
     onChange,
     disableFormData,
+    required,
     admin: {
       readOnly,
       style,
@@ -32,9 +32,8 @@ const Checkbox: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { required });
-    return validationResult;
+  const memoizedValidate = useCallback((value, options) => {
+    return validate(value, { ...options, required });
   }, [validate, required]);
 
   const {

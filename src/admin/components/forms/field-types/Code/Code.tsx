@@ -29,8 +29,6 @@ const Code: React.FC<Props> = (props) => {
       condition,
     } = {},
     label,
-    minLength,
-    maxLength,
   } = props;
 
   const [highlighter] = useState(() => {
@@ -43,10 +41,9 @@ const Code: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { minLength, maxLength, required });
-    return validationResult;
-  }, [validate, maxLength, minLength, required]);
+  const memoizedValidate = useCallback((value, options) => {
+    return validate(value, { ...options, required });
+  }, [validate, required]);
 
   const {
     value,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
 import { text } from '../../../../../fields/validations';
@@ -12,6 +12,8 @@ const Text: React.FC<Props> = (props) => {
     required,
     validate = text,
     label,
+    minLength,
+    maxLength,
     admin: {
       placeholder,
       readOnly,
@@ -25,9 +27,13 @@ const Text: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
+  const memoizedValidate = useCallback((value, options) => {
+    return validate(value, { ...options, minLength, maxLength, required });
+  }, [validate, minLength, maxLength, required]);
+
   const field = useField<string>({
     path,
-    validate,
+    validate: memoizedValidate,
     enableDebouncedValue: true,
     condition,
   });

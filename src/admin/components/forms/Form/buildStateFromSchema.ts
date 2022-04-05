@@ -1,14 +1,21 @@
 import ObjectID from 'bson-objectid';
-import { Field as FieldSchema, fieldAffectsData, FieldAffectingData, fieldIsPresentationalOnly } from '../../../../fields/config/types';
+import { User } from '../../../../auth';
+import {
+  Field as FieldSchema,
+  fieldAffectsData,
+  FieldAffectingData,
+  fieldIsPresentationalOnly,
+  ValidateOptions,
+} from '../../../../fields/config/types';
 import { Fields, Field, Data } from './types';
 
-const buildValidationPromise = async (fieldState: Field, field: FieldAffectingData) => {
+const buildValidationPromise = async (fieldState: Field, options: ValidateOptions<unknown, unknown, unknown>) => {
   const validatedFieldState = fieldState;
 
   let validationResult: boolean | string = true;
 
-  if (typeof field.validate === 'function') {
-    validationResult = await field.validate(fieldState.value, field);
+  if (typeof fieldState.validate === 'function') {
+    validationResult = await fieldState.validate(fieldState.value, options);
   }
 
   if (typeof validationResult === 'string') {
@@ -19,7 +26,24 @@ const buildValidationPromise = async (fieldState: Field, field: FieldAffectingDa
   }
 };
 
-const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data = {}): Promise<Fields> => {
+type Args = {
+  fieldSchema: FieldSchema[]
+  data?: Data,
+  siblingData?: Data,
+  user?: User,
+  id?: string | number,
+  operation?: 'create' | 'update'
+}
+
+const buildStateFromSchema = async (args: Args): Promise<Fields> => {
+  const {
+    fieldSchema,
+    data: fullData = {},
+    user,
+    id,
+    operation,
+  } = args;
+
   if (fieldSchema) {
     const validationPromises = [];
 
@@ -35,7 +59,14 @@ const buildStateFromSchema = async (fieldSchema: FieldSchema[], fullData: Data =
         passesCondition,
       };
 
-      validationPromises.push(buildValidationPromise(fieldState, field));
+      validationPromises.push(buildValidationPromise(fieldState, {
+        ...field,
+        fullData,
+        user,
+        siblingData: data,
+        id,
+        operation,
+      }));
 
       return fieldState;
     };

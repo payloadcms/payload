@@ -11,7 +11,7 @@ describe('Form - buildStateFromSchema', () => {
         defaultValue,
       },
     ];
-    const state = await buildStateFromSchema(fieldSchema, {});
+    const state = await buildStateFromSchema({ fieldSchema });
     expect(state.text.value).toBe(defaultValue);
   });
 });

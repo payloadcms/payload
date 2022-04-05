@@ -15,6 +15,7 @@ import Meta from '../../utilities/Meta';
 import Auth from '../collections/Edit/Auth';
 import Loading from '../../elements/Loading';
 import { Props } from './types';
+import { OperationContext } from '../../utilities/OperationProvider';
 
 import './index.scss';
 
@@ -55,115 +56,115 @@ const DefaultAccount: React.FC<Props> = (props) => {
         <Loading />
       )}
       {!isLoading && (
-        <Form
-          className={`${baseClass}__form`}
-          method="put"
-          action={action}
-          initialState={initialState}
-          disabled={!hasSavePermission}
-        >
-          <div className={`${baseClass}__main`}>
-            <Meta
-              title="Account"
-              description="Account of current user"
-              keywords="Account, Dashboard, Payload, CMS"
-            />
-            <Eyebrow />
-            {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && (
+        <OperationContext.Provider value="update">
+          <Form
+            className={`${baseClass}__form`}
+            method="put"
+            action={action}
+            initialState={initialState}
+            disabled={!hasSavePermission}
+          >
+            <div className={`${baseClass}__main`}>
+              <Meta
+                title="Account"
+                description="Account of current user"
+                keywords="Account, Dashboard, Payload, CMS"
+              />
+              <Eyebrow />
+              {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && (
               <LeaveWithoutSaving />
-            )}
-            <div className={`${baseClass}__edit`}>
-              <header className={`${baseClass}__header`}>
-                <h1>
-                  <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
-                </h1>
-              </header>
-              <Auth
-                useAPIKey={auth.useAPIKey}
-                collection={collection}
-                email={data?.email}
-                operation="update"
-              />
-              <RenderFields
-                operation="update"
-                permissions={permissions.fields}
-                readOnly={!hasSavePermission}
-                filter={(field) => field?.admin?.position !== 'sidebar'}
-                fieldTypes={fieldTypes}
-                fieldSchema={fields}
-              />
-            </div>
-          </div>
-          <div className={`${baseClass}__sidebar-wrap`}>
-            <div className={`${baseClass}__sidebar`}>
-              <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                <ul className={`${baseClass}__collection-actions`}>
-                  {(permissions?.create?.permission) && (
-                  <React.Fragment>
-                    <li><Link to={`${admin}/collections/${slug}/create`}>Create New</Link></li>
-                  </React.Fragment>
-                  )}
-                </ul>
-                <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
-                  <PreviewButton
-                    generatePreviewURL={preview}
-                    data={data}
-                  />
-                  {hasSavePermission && (
-                  <FormSubmit>Save</FormSubmit>
-                  )}
-                </div>
-                <div className={`${baseClass}__sidebar-fields`}>
-                  <RenderFields
-                    operation="update"
-                    permissions={permissions.fields}
-                    readOnly={!hasSavePermission}
-                    filter={(field) => field?.admin?.position === 'sidebar'}
-                    fieldTypes={fieldTypes}
-                    fieldSchema={fields}
-                  />
-                </div>
-                <ul className={`${baseClass}__meta`}>
-                  <li className={`${baseClass}__api-url`}>
-                    <span className={`${baseClass}__label`}>
-                      API URL
-                      {' '}
-                      <CopyToClipboard value={apiURL} />
-                    </span>
-                    <a
-                      href={apiURL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {apiURL}
-                    </a>
-                  </li>
-                  <li>
-                    <div className={`${baseClass}__label`}>ID</div>
-                    <div>{data?.id}</div>
-                  </li>
-                  {timestamps && (
-                  <React.Fragment>
-                    {data.updatedAt && (
-                    <li>
-                      <div className={`${baseClass}__label`}>Last Modified</div>
-                      <div>{format(new Date(data.updatedAt), dateFormat)}</div>
-                    </li>
-                    )}
-                    {data.createdAt && (
-                    <li>
-                      <div className={`${baseClass}__label`}>Created</div>
-                      <div>{format(new Date(data.createdAt), dateFormat)}</div>
-                    </li>
-                    )}
-                  </React.Fragment>
-                  )}
-
-                </ul>
+              )}
+              <div className={`${baseClass}__edit`}>
+                <header className={`${baseClass}__header`}>
+                  <h1>
+                    <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
+                  </h1>
+                </header>
+                <Auth
+                  useAPIKey={auth.useAPIKey}
+                  collection={collection}
+                  email={data?.email}
+                  operation="update"
+                />
+                <RenderFields
+                  permissions={permissions.fields}
+                  readOnly={!hasSavePermission}
+                  filter={(field) => field?.admin?.position !== 'sidebar'}
+                  fieldTypes={fieldTypes}
+                  fieldSchema={fields}
+                />
               </div>
             </div>
-          </div>
-        </Form>
+            <div className={`${baseClass}__sidebar-wrap`}>
+              <div className={`${baseClass}__sidebar`}>
+                <div className={`${baseClass}__sidebar-sticky-wrap`}>
+                  <ul className={`${baseClass}__collection-actions`}>
+                    {(permissions?.create?.permission) && (
+                    <React.Fragment>
+                      <li><Link to={`${admin}/collections/${slug}/create`}>Create New</Link></li>
+                    </React.Fragment>
+                    )}
+                  </ul>
+                  <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
+                    <PreviewButton
+                      generatePreviewURL={preview}
+                      data={data}
+                    />
+                    {hasSavePermission && (
+                    <FormSubmit>Save</FormSubmit>
+                    )}
+                  </div>
+                  <div className={`${baseClass}__sidebar-fields`}>
+                    <RenderFields
+                      permissions={permissions.fields}
+                      readOnly={!hasSavePermission}
+                      filter={(field) => field?.admin?.position === 'sidebar'}
+                      fieldTypes={fieldTypes}
+                      fieldSchema={fields}
+                    />
+                  </div>
+                  <ul className={`${baseClass}__meta`}>
+                    <li className={`${baseClass}__api-url`}>
+                      <span className={`${baseClass}__label`}>
+                        API URL
+                        {' '}
+                        <CopyToClipboard value={apiURL} />
+                      </span>
+                      <a
+                        href={apiURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {apiURL}
+                      </a>
+                    </li>
+                    <li>
+                      <div className={`${baseClass}__label`}>ID</div>
+                      <div>{data?.id}</div>
+                    </li>
+                    {timestamps && (
+                    <React.Fragment>
+                      {data.updatedAt && (
+                      <li>
+                        <div className={`${baseClass}__label`}>Last Modified</div>
+                        <div>{format(new Date(data.updatedAt), dateFormat)}</div>
+                      </li>
+                      )}
+                      {data.createdAt && (
+                      <li>
+                        <div className={`${baseClass}__label`}>Created</div>
+                        <div>{format(new Date(data.createdAt), dateFormat)}</div>
+                      </li>
+                      )}
+                    </React.Fragment>
+                    )}
+
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </Form>
+        </OperationContext.Provider>
       )}
     </div>
   );

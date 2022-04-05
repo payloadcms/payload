@@ -1,6 +1,7 @@
-import React, { useEffect, useReducer, useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
+import { useAuth } from '@payloadcms/config-provider';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import DraggableSection from '../../DraggableSection';
@@ -13,6 +14,9 @@ import { array } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
+
+import { useDocumentInfo } from '../../../utilities/DocumentInfo';
+import { useOperation } from '../../../utilities/OperationProvider';
 
 import './index.scss';
 
@@ -49,15 +53,17 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const [rows, dispatchRows] = useReducer(reducer, []);
   const formContext = useForm();
+  const { user } = useAuth();
+  const { id } = useDocumentInfo();
+  const operation = useOperation();
 
   const { dispatchFields } = formContext;
 
   const path = pathFromProps || name;
 
-  const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { minRows, maxRows, required });
-    return validationResult;
-  }, [validate, maxRows, minRows, required]);
+  const memoizedValidate = useCallback((value, options) => {
+    return validate(value, { ...options, minRows, maxRows, required });
+  }, [maxRows, minRows, required, validate]);
 
   const [disableFormData, setDisableFormData] = useState(false);
 
@@ -75,11 +81,11 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   });
 
   const addRow = useCallback(async (rowIndex) => {
-    const subFieldState = await buildStateFromSchema(fields);
+    const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user });
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     dispatchRows({ type: 'ADD', rowIndex });
     setValue(value as number + 1);
-  }, [dispatchRows, dispatchFields, fields, path, setValue, value]);
+  }, [dispatchRows, dispatchFields, fields, path, setValue, value, operation, id, user]);
 
   const removeRow = useCallback((rowIndex) => {
     dispatchRows({ type: 'REMOVE', rowIndex });

@@ -53,6 +53,7 @@ const AddUploadModal: React.FC<Props> = (props) => {
           action={`${serverURL}${api}/${collection.slug}`}
           onSuccess={onSuccess}
           disableSuccessStatus
+          validationOperation="create"
         >
           <header className={`${baseClass}__header`}>
             <div>

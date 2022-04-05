@@ -32,9 +32,8 @@ const PointField: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { required });
-    return validationResult;
+  const memoizedValidate = useCallback((value, options) => {
+    return validate(value, { ...options, required });
   }, [validate, required]);
 
   const {

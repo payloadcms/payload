@@ -2,11 +2,13 @@
 import React, {
   useReducer, useEffect, useRef, useState, useCallback,
 } from 'react';
+import isDeepEqual from 'deep-equal';
 import { serialize } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '@payloadcms/config-provider';
 import { useLocale } from '../../utilities/Locale';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { requests } from '../../../api';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import fieldReducer from './fieldReducer';
@@ -15,13 +17,13 @@ import reduceFieldsToValues from './reduceFieldsToValues';
 import getSiblingDataFunc from './getSiblingData';
 import getDataByPathFunc from './getDataByPath';
 import wait from '../../../../utilities/wait';
+import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
 import { Context as FormContextType, Props, SubmitOptions } from './types';
-
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
-import { Field } from '../../../../fields/config/types';
+import { useOperation } from '../../utilities/OperationProvider';
 
 const baseClass = 'form';
 
@@ -45,7 +47,9 @@ const Form: React.FC<Props> = (props) => {
 
   const history = useHistory();
   const locale = useLocale();
-  const { refreshCookie } = useAuth();
+  const { refreshCookie, user } = useAuth();
+  const { id } = useDocumentInfo();
+  const operation = useOperation();
 
   const [modified, setModified] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -70,6 +74,7 @@ const Form: React.FC<Props> = (props) => {
   const validateForm = useCallback(async () => {
     const validatedFieldState = {};
     let isValid = true;
+    const data = contextRef.current.getData();
 
     const validationPromises = Object.entries(contextRef.current.fields).map(async ([path, field]) => {
       const validatedField = {
@@ -81,7 +86,13 @@ const Form: React.FC<Props> = (props) => {
         let validationResult: boolean | string = true;
 
         if (typeof field.validate === 'function') {
-          validationResult = await field.validate(field.value);
+          validationResult = await field.validate(field.value, {
+            data,
+            siblingData: contextRef.current.getSiblingData(path),
+            user,
+            id,
+            operation,
+          });
         }
 
         if (typeof validationResult === 'string') {
@@ -96,10 +107,12 @@ const Form: React.FC<Props> = (props) => {
 
     await Promise.all(validationPromises);
 
-    dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState });
+    if (!isDeepEqual(contextRef.current.fields, validatedFieldState)) {
+      dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState });
+    }
 
     return isValid;
-  }, [contextRef]);
+  }, [contextRef, id, user, operation]);
 
   const submit = useCallback(async (options: SubmitOptions = {}, e): Promise<void> => {
     const {
@@ -313,10 +326,10 @@ const Form: React.FC<Props> = (props) => {
   }, [contextRef]);
 
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
-    const state = await buildStateFromSchema(fieldSchema, data);
+    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation });
     contextRef.current = { ...initContextState } as FormContextType;
     dispatchFields({ type: 'REPLACE_STATE', state });
-  }, []);
+  }, [id, user, operation]);
 
   contextRef.current.dispatchFields = dispatchFields;
   contextRef.current.submit = submit;

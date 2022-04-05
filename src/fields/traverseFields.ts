@@ -1,7 +1,14 @@
 import validationPromise from './validationPromise';
 import accessPromise from './accessPromise';
 import hookPromise from './hookPromise';
-import { Field, fieldHasSubFields, fieldIsArrayType, fieldIsBlockType, fieldAffectsData, HookName } from './config/types';
+import {
+  Field,
+  fieldHasSubFields,
+  fieldIsArrayType,
+  fieldIsBlockType,
+  fieldAffectsData,
+  HookName,
+} from './config/types';
 import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
 import { Payload } from '..';
@@ -372,21 +379,31 @@ const traverseFields = (args: Arguments): void => {
         validationPromises.push(() => validationPromise({
           errors,
           hook,
-          newData: { [field.name]: newRowCount },
-          existingData: { [field.name]: existingRowCount },
+          data: { [field.name]: newRowCount },
+          fullData,
+          originalDoc: { [field.name]: existingRowCount },
+          fullOriginalDoc,
           field,
           path,
           skipValidation: skipValidationFromHere,
+          user: req.user,
+          operation,
+          id,
         }));
       } else if (fieldAffectsData(field)) {
         validationPromises.push(() => validationPromise({
           errors,
           hook,
-          newData: data,
-          existingData: originalDoc,
+          data,
+          fullData,
+          originalDoc,
+          fullOriginalDoc,
           field,
           path,
           skipValidation: skipValidationFromHere,
+          user: req.user,
+          operation,
+          id,
         }));
       }
     }

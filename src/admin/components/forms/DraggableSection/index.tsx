@@ -8,7 +8,7 @@ import PositionPanel from './PositionPanel';
 import Button from '../../elements/Button';
 import { NegativeFieldGutterProvider } from '../FieldTypeGutter/context';
 import FieldTypeGutter from '../FieldTypeGutter';
-import RenderFields, { useRenderedFields } from '../RenderFields';
+import RenderFields from '../RenderFields';
 import { Props } from './types';
 import HiddenInput from '../field-types/HiddenInput';
 
@@ -38,7 +38,6 @@ const DraggableSection: React.FC<Props> = (props) => {
   } = props;
 
   const [isHovered, setIsHovered] = useState(false);
-  const { operation } = useRenderedFields();
 
   const classes = [
     baseClass,
@@ -105,7 +104,6 @@ const DraggableSection: React.FC<Props> = (props) => {
               >
                 <NegativeFieldGutterProvider allow={false}>
                   <RenderFields
-                    operation={operation}
                     readOnly={readOnly}
                     fieldTypes={fieldTypes}
                     key={rowIndex}

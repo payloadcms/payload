@@ -11,6 +11,34 @@ const Validations: CollectionConfig = {
   },
   fields: [
     {
+      name: 'validationOptions',
+      type: 'text',
+      label: 'Text with siblingData Validation',
+      required: true,
+      validate: (value: string, { data, siblingData, id, operation, user }) => {
+        if (typeof value === 'undefined') {
+          return 'Validation is missing value';
+        }
+        if (data?.text !== 'test') {
+          return 'The next field should be test';
+        }
+        if (siblingData?.text !== 'test') {
+          return 'The next field should be test';
+        }
+        if (!user) {
+          return 'ValidationOptions is missing "user"';
+        }
+        if (typeof operation === 'undefined') {
+          return 'ValidationOptions is missing "operation"';
+        }
+        if (operation === 'update' && typeof id === 'undefined') {
+          return 'ValidationOptions is missing "id"';
+        }
+
+        return true;
+      },
+    },
+    {
       name: 'text',
       type: 'text',
       label: 'Text',
@@ -58,7 +86,7 @@ const Validations: CollectionConfig = {
       name: 'atLeast3Rows',
       required: true,
       validate: (value) => {
-        const result = value && value.length >= 3;
+        const result = value >= 3;
 
         if (!result) {
           return 'This array needs to have at least 3 rows.';
@@ -96,7 +124,7 @@ const Validations: CollectionConfig = {
           label: 'Number should be less than 20',
           required: true,
           validate: (value) => {
-            const result = value < 30;
+            const result = value < 20;
 
             if (!result) {
               return 'This value of this field needs to be less than 20.';

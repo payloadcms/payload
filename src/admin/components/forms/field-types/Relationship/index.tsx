@@ -62,9 +62,8 @@ const Relationship: React.FC<Props> = (props) => {
   const [hasLoadedValueOptions, setHasLoadedValueOptions] = useState(false);
   const [search, setSearch] = useState('');
 
-  const memoizedValidate = useCallback((value) => {
-    const validationResult = validate(value, { required });
-    return validationResult;
+  const memoizedValidate = useCallback((value, validationOptions) => {
+    return validate(value, { ...validationOptions, required });
   }, [validate, required]);
 
   const {
