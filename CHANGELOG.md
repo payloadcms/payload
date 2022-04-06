@@ -1,3 +1,10 @@
+## [0.15.5](https://github.com/payloadcms/payload/compare/v0.15.4...v0.15.5) (2022-04-06)
+
+
+### Bug Fixes
+
+* relationship component showing no results ([#508](https://github.com/payloadcms/payload/issues/508)) ([e1c6d9d](https://github.com/payloadcms/payload/commit/e1c6d9dd7d390c671edb0430d04aa0f194bf43e3))
+
 ## [0.15.4](https://github.com/payloadcms/payload/compare/v0.15.3...v0.15.4) (2022-04-05)
 
 
