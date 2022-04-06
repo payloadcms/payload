@@ -136,7 +136,7 @@ const Relationship: React.FC<Props> = (props) => {
             });
           }
 
-          if (optionFilters[relation]) {
+          if (optionFilters?.[relation]) {
             query.where.and.push(optionFilters[relation]);
           }
 
@@ -295,13 +295,13 @@ const Relationship: React.FC<Props> = (props) => {
   }, [relationTo, filterOptions, optionFilters, id, getData, getSiblingData, path, user]);
 
   useEffect(() => {
-    if (optionFilters) {
+    if (optionFilters || !filterOptions) {
       setHasLoadedValueOptions(false);
       getResults({
         value: initialValue,
       });
     }
-  }, [initialValue, getResults, optionFilters]);
+  }, [initialValue, getResults, optionFilters, filterOptions]);
 
   const classes = [
     'field-type',
