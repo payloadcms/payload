@@ -1,3 +1,10 @@
+## [0.15.6](https://github.com/payloadcms/payload/compare/v0.15.5...v0.15.6) (2022-04-06)
+
+
+### Bug Fixes
+
+* new up separate logger for generateTypes script ([cf54b33](https://github.com/payloadcms/payload/commit/cf54b336d17a79d775dd673c0eda361b356d159c))
+
 ## [0.15.5](https://github.com/payloadcms/payload/compare/v0.15.4...v0.15.5) (2022-04-06)
 
 
