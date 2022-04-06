@@ -3,6 +3,7 @@ import fs from 'fs';
 import type { JSONSchema4 } from 'json-schema';
 import { compile } from 'json-schema-to-typescript';
 import payload from '..';
+import Logger from '../utilities/logger';
 import { fieldAffectsData, Field, Option, FieldAffectingData } from '../fields/config/types';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { SanitizedConfig } from '../config/types';
@@ -355,9 +356,10 @@ function configToJsonSchema(config: SanitizedConfig): JSONSchema4 {
 }
 
 export function generateTypes(): void {
+  const logger = Logger();
   const config = loadConfig();
 
-  payload.logger.info('Compiling TS types for Collections and Globals...');
+  logger.info('Compiling TS types for Collections and Globals...');
 
   const jsonSchema = configToJsonSchema(config);
 
@@ -369,7 +371,7 @@ export function generateTypes(): void {
     },
   }).then((compiled) => {
     fs.writeFileSync(config.typescript.outputFile, compiled);
-    payload.logger.info(`Types written to ${config.typescript.outputFile}`);
+    logger.info(`Types written to ${config.typescript.outputFile}`);
   });
 }
 
