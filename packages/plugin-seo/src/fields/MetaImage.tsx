@@ -126,6 +126,7 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = (props) => {
           api={api}
           collection={collection}
           serverURL={serverURL}
+          filterOptions={{}}
           style={{
             marginBottom: 0,
           }}

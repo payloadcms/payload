@@ -9,3 +9,10 @@ export type SEOConfig = {
   generateImage?: (args: { doc: any }) => string | Promise<string>
   generateURL?: (args: { doc: any }) => string | Promise<string>
 }
+
+export type Meta = {
+  title?: string
+  description?: string
+  keywords?: string
+  image?: any // TODO: type this
+}
