@@ -131,6 +131,7 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
               required: true,
               admin: {
                 width: '50%',
+                placeholder: 'Email Sender <sender@email.com>'
               },
             },
             {
@@ -139,7 +140,7 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
               label: 'Email From',
               admin: {
                 width: '50%',
-                placeholder: '{{email}}',
+                placeholder: 'Email Recipient <{{email}}>',
               },
             },
           ],
@@ -177,7 +178,7 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
           name: 'message',
           label: 'Message',
           admin: {
-            description: 'Enter the email message that should be sent in this email.',
+            description: 'Enter the message that should be sent in this email.',
           },
         },
       ],
