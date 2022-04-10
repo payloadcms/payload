@@ -21,11 +21,11 @@
   "author": "dev@trbl.design",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^0.14.30-beta.0",
+    "payload": "^0.15.6",
     "react": "^17.0.2"
   },
   "devDependencies": {
-    "payload": "^0.14.30-beta.0",
+    "payload": "^0.15.6",
     "react": "^17.0.2",
     "typescript": "^4.5.5"
   },
