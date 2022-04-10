@@ -22,12 +22,12 @@
   "author": "dev@trbl.design",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^0.14.24-beta.0",
+    "payload": "^0.15.6",
     "react": "^17.0.2"
   },
   "devDependencies": {
     "@types/escape-html": "^1.0.1",
-    "payload": "^0.14.24-beta.0",
+    "payload": "^0.15.6",
     "react": "^17.0.2",
     "typescript": "^4.5.5"
   },
