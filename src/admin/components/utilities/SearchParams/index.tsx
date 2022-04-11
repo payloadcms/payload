@@ -4,7 +4,7 @@ import qs from 'qs';
 
 const Context = createContext({});
 
-export const SearchParamsProvider: React.FC = ({ children }) => {
+export const SearchParamsProvider: React.FC<{children?: React.ReactNode}> = ({ children }) => {
   const location = useLocation();
 
   const params = qs.parse(

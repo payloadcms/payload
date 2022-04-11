@@ -4,7 +4,7 @@ import { useWindowInfo } from '@faceless-ui/window-info';
 const context = createContext(false);
 const { Provider } = context;
 
-export const NegativeFieldGutterProvider: React.FC<{allow?: boolean}> = ({ children, allow }) => {
+export const NegativeFieldGutterProvider: React.FC<{allow?: boolean, children?: React.ReactNode}> = ({ children, allow }) => {
   const { breakpoints: { m: midBreak } } = useWindowInfo();
 
   return (

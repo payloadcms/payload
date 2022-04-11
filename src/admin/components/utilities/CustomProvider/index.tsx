@@ -21,7 +21,7 @@ const NestProviders = ({ providers, children }) => {
   );
 };
 
-export const CustomProvider: React.FC<{ children }> = ({ children }) => {
+export const CustomProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const config = useConfig();
 
   const {

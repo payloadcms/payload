@@ -1,3 +1,4 @@
+import React from 'react';
 import { SanitizedCollectionConfig, TypeWithID, TypeWithTimestamps } from '../../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 import { PaginatedDocs } from '../../../../mongoose/types';
@@ -21,4 +22,5 @@ export type Props = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
   id?: string | number
+  children?: React.ReactNode
 }

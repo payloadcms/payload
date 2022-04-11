@@ -3,7 +3,6 @@ import isHotkey from 'is-hotkey';
 import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
-import { options } from 'joi';
 import { richText } from '../../../../../fields/validations';
 import useField from '../../useField';
 import withCondition from '../../withCondition';

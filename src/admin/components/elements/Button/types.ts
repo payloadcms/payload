@@ -1,4 +1,4 @@
-import { MouseEvent } from 'react';
+import React, { MouseEvent } from 'react';
 
 export type Props = {
   className?: string,

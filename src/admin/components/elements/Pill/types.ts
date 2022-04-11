@@ -1,4 +1,5 @@
 export type Props = {
+  children?: React.ReactNode,
   className?: string,
   to?: string,
   icon?: React.ReactNode,
