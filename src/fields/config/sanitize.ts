@@ -18,6 +18,10 @@ const sanitizeFields = (fields, validRelationships: string[]) => {
       field.label = toWords(field.name);
     }
 
+    if (field.type === 'checkbox' && typeof field.defaulValue === 'undefined' && field.required === true) {
+      field.defaultValue = false;
+    }
+
     if (field.type === 'relationship') {
       const relationships = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo];
       relationships.forEach((relationship: string) => {

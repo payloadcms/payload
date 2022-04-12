@@ -6,6 +6,9 @@
 
   .tooltip {
     right: auto;
+    position: relative;
+    margin-bottom: .2em;
+    max-width: fit-content;
   }
 
   &__error-wrap {
