@@ -56,6 +56,7 @@ const Index = () => (
     <ToastContainer
       position="bottom-center"
       transition={Slide}
+      icon={false}
     />
   </React.Fragment>
 );

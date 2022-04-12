@@ -17,22 +17,33 @@
 
   .Toastify__close-button {
     align-self: center;
+    opacity: .7;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
   .Toastify__toast--success {
     color: $color-dark-gray;
+    background: $color-green;
   }
 
   .Toastify__close-button--success {
     color: $color-dark-gray;
   }
 
-  .Toastify__toast--success {
-    background: $color-green;
+  .Toastify__progress-bar {
+    background-color: rgba(255,255,255, 0.7);
   }
 
   .Toastify__toast--error {
     background: $color-red;
+    color: #fff;
+  }
+
+  .Toastify__close-button--light {
+    color: inherit;
   }
 
   @include mid-break {
