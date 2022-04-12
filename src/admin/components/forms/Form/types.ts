@@ -1,3 +1,4 @@
+import React from 'react';
 import { Field as FieldConfig, Condition, Validate } from '../../../../fields/config/types';
 
 export type Field = {
@@ -39,6 +40,7 @@ export type Props = {
   waitForAutocomplete?: boolean
   log?: boolean
   validationOperation?: 'create' | 'update'
+  children?: React.ReactNode
 }
 
 export type SubmitOptions = {

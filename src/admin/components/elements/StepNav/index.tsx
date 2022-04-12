@@ -9,7 +9,7 @@ import './index.scss';
 
 const Context = createContext({} as ContextType);
 
-const StepNavProvider: React.FC = ({ children }) => {
+const StepNavProvider: React.FC<{children?: React.ReactNode}> = ({ children }) => {
   const [stepNav, setStepNav] = useState([]);
 
   return (

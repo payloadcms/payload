@@ -7,7 +7,7 @@ import { useSearchParams } from '../SearchParams';
 
 const Context = createContext('');
 
-export const LocaleProvider: React.FC = ({ children }) => {
+export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { localization } = useConfig();
   const { user } = useAuth();
   const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';

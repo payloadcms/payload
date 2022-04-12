@@ -1,3 +1,4 @@
+import React from 'react';
 import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 export type Props = {
@@ -5,4 +6,5 @@ export type Props = {
   verticalAlignment?: 'top' | 'center' | 'sticky'
   dragHandleProps?: DraggableProvidedDragHandleProps
   className?: string
+  children?: React.ReactNode
 }

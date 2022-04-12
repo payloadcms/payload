@@ -31,7 +31,7 @@ const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ collection, global, id, d
   );
 };
 
-const TextCell: React.FC = ({ children }) => (
+const TextCell: React.FC<{children?: React.ReactNode}> = ({ children }) => (
   <span>
     {children}
   </span>
