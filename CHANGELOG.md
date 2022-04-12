@@ -1,5 +1,13 @@
 ## [0.15.7](https://github.com/payloadcms/payload/compare/v0.15.6...v0.15.7) (2022-04-12)
 
+### Bug Fixes
+
+* checkbox validation error positioning ([9af89b6](https://github.com/payloadcms/payload/commit/9af89b6c03bc4e82a0c3e353f0d53ec14a847ee2))
+
+### Features
+
+* sanitize defaultValue to false when field is required ([6f84c0a](https://github.com/payloadcms/payload/commit/6f84c0a86943e9d99edde21b1d448e7ece3dd83c))
+
 ## [0.15.6](https://github.com/payloadcms/payload/compare/v0.15.5...v0.15.6) (2022-04-06)
 
 
