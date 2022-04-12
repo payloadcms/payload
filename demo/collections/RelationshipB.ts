@@ -20,6 +20,7 @@ const RelationshipB: CollectionConfig = {
     {
       name: 'disableRelation', // used on RelationshipA.filterRelationship field
       type: 'checkbox',
+      required: true,
       admin: {
         position: 'sidebar',
       },

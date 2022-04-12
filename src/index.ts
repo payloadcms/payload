@@ -3,7 +3,8 @@ import pino from 'pino';
 import crypto from 'crypto';
 import {
   TypeWithID,
-  Collection, CollectionModel,
+  Collection,
+  CollectionModel,
 } from './collections/config/types';
 import {
   SanitizedConfig,
