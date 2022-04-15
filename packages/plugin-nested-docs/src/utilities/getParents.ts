@@ -19,6 +19,7 @@ const getParents = async (
         id: parent,
         collection: collection.slug,
         depth: 0,
+        disableErrors: true,
       });
     }
 
