@@ -1,4 +1,6 @@
 {
   "testFiles": "**/*spec.ts",
-  "ignoreTestFiles": "**/examples/*spec.js"
+  "ignoreTestFiles": "**/examples/*spec.js",
+  "viewportWidth": 1440,
+  "viewportHeight": 900
 }
