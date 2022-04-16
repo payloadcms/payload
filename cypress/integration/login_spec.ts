@@ -1,35 +1,9 @@
-import credentials from './common/credentials';
+import { adminURL } from './common/constants';
+import { credentials } from './common/credentials';
 
-const adminURL = 'http://localhost:3000/admin'
 const viewportSizes: Cypress.ViewportPreset[] = ['macbook-15', 'iphone-x', 'ipad-2'];
 
 describe('Payload Login', () => {
-
-  before('first login', () => {
-    cy.visit(adminURL)
-
-    cy.get('#email').type(credentials.email);
-    cy.get('#password').type(credentials.password);
-    cy.get('#confirm-password').type(credentials.password);
-
-    cy.get('.rs__indicators').first()
-      .click();
-    cy.get('.rs__menu').first().contains('admin')
-      .click();
-
-    cy.get('form')
-      .contains('form', 'Create')
-      .should('be.visible')
-      .submit();
-
-    cy.get('.template-default')
-      .should('be.visible');
-
-    cy.visit(`${adminURL}/logout`);
-    cy.get('.logout__wrap')
-      .contains('You have been logged out successfully.')
-      .should('be.visible')
-  })
 
   viewportSizes.forEach((viewportSize) => {
 
