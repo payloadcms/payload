@@ -271,6 +271,7 @@ const RichText: React.FC<Props> = (props) => {
               ref={editorRef}
             >
               <Editable
+                className={`${baseClass}__input`}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}
                 placeholder={placeholder}
