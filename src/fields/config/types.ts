@@ -181,9 +181,9 @@ export type UIField = {
     width?: string
     condition?: Condition
     components?: {
-      Filter?: React.ComponentType;
-      Cell?: React.ComponentType;
-      Field: React.ComponentType;
+      Filter?: React.ComponentType<any>;
+      Cell?: React.ComponentType<any>;
+      Field: React.ComponentType<any>;
     }
   }
   type: 'ui';

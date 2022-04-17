@@ -9,6 +9,7 @@ export type Props = {
 }
 
 export type RenderedTypeProps = {
+  children: React.ReactNode
   className?: string,
   to: string,
   onClick?: () => void,

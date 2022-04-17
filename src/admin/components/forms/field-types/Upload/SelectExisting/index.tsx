@@ -12,11 +12,12 @@ import UploadGallery from '../../../../elements/UploadGallery';
 import { Props } from './types';
 import PerPage from '../../../../elements/PerPage';
 import formatFields from '../../../../views/collections/List/formatFields';
-
-import './index.scss';
 import { getFilterOptionsQuery } from '../../getFilterOptionsQuery';
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
 import { useWatchForm } from '../../../Form/context';
+import ViewDescription from '../../../../elements/ViewDescription';
+
+import './index.scss';
 
 const baseClass = 'select-existing-upload-modal';
 
@@ -117,7 +118,9 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
               />
             </div>
             {description && (
-              <div className={`${baseClass}__sub-header`}>{description}</div>
+              <div className={`${baseClass}__sub-header`}>
+                <ViewDescription description={description} />
+              </div>
             )}
           </header>
           <ListControls

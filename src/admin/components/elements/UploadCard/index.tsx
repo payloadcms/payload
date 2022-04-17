@@ -32,7 +32,7 @@ const UploadCard: React.FC<Props> = (props) => {
         collection={collection}
       />
       <div className={`${baseClass}__filename`}>
-        {doc?.filename}
+        {typeof doc?.filename === 'string' ? doc?.filename : '[Untitled]'}
       </div>
     </div>
   );

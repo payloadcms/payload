@@ -33,3 +33,5 @@ export type ValueWithRelation = {
   relationTo: string
   value: string
 }
+
+export type GetResults = (args: { lastFullyLoadedRelation?: number, lastLoadedPage?: number, search?: string }) => Promise<void>

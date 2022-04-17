@@ -20,7 +20,7 @@ import wait from '../../../../utilities/wait';
 import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Context as FormContextType, Props, SubmitOptions } from './types';
+import { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types';
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
@@ -298,7 +298,7 @@ const Form: React.FC<Props> = (props) => {
   const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef]);
   const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [contextRef]);
   const getSiblingData = useCallback((path: string) => getSiblingDataFunc(contextRef.current.fields, path), [contextRef]);
-  const getDataByPath = useCallback((path: string) => getDataByPathFunc(contextRef.current.fields, path), [contextRef]);
+  const getDataByPath = useCallback<GetDataByPath>((path: string) => getDataByPathFunc(contextRef.current.fields, path), [contextRef]);
   const getUnflattenedValues = useCallback(() => reduceFieldsToValues(contextRef.current.fields), [contextRef]);
 
   const createFormData = useCallback((overrides: any = {}) => {

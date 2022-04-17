@@ -1,6 +1,6 @@
 import React, { useReducer, useState, useCallback, useEffect } from 'react';
 import { useConfig } from '@payloadcms/config-provider';
-import { Props, Option, ValueWithRelation } from './types';
+import { Props, Option, ValueWithRelation, GetResults } from './types';
 import optionsReducer from './optionsReducer';
 import useDebounce from '../../../../../hooks/useDebounce';
 import ReactSelect from '../../../ReactSelect';
@@ -38,7 +38,7 @@ const RelationshipField: React.FC<Props> = (props) => {
     dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection });
   }, [collections, hasMultipleRelations]);
 
-  const getResults = useCallback(async ({
+  const getResults = useCallback<GetResults>(async ({
     lastFullyLoadedRelation: lastFullyLoadedRelationArg,
     lastLoadedPage: lastLoadedPageArg,
     search: searchArg,

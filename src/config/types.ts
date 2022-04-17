@@ -5,7 +5,7 @@ import { Options } from 'express-fileupload';
 import { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
-import { ConnectionOptions } from 'mongoose';
+import { ConnectOptions } from 'mongoose';
 import React from 'react';
 import { LoggerOptions } from 'pino';
 import { Payload } from '..';
@@ -63,7 +63,7 @@ export function hasTransportOptions(emailConfig: EmailOptions): emailConfig is E
 export type InitOptions = {
   express?: Express;
   mongoURL: string;
-  mongoOptions?: ConnectionOptions;
+  mongoOptions?: ConnectOptions;
   secret: string;
   license?: string;
   email?: EmailOptions;
@@ -187,3 +187,5 @@ export type SanitizedConfig = Omit<DeepRequired<Config>, 'collections' | 'global
   globals: SanitizedGlobalConfig[]
   paths: { [key: string]: string };
 }
+
+export type EntityDescription = string | (() => string) | React.ComponentType
