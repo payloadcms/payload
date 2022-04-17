@@ -26,7 +26,7 @@ In the `plugins` array of your [Payload config](https://payloadcms.com/docs/conf
 
 ```js
 import { buildConfig } from 'payload/config';
-import seo from 'payload-seo';
+import seo from 'payload-plugin-seo';
 
 const config = buildConfig({
   collections: [
