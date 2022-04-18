@@ -115,5 +115,6 @@ export default config;
   ```
 
   ## Screenshots
+  ![image](https://user-images.githubusercontent.com/70709113/163850633-f3da5f8e-2527-4688-bc79-17233307a883.png)
 
   <!-- ![screenshot 1](https://github.com/trouble/payload-plugin-seo/blob/main/images/screenshot-1.jpg?raw=true) -->
