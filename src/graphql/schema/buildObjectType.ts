@@ -81,7 +81,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
       // that is currently being created.
 
       if (!this.collections[relationTo]) {
-        throw new Error(`Error: the relationTo collection "${relationTo}" for the field "${field.name}" of collection "${parentName}" does not exist.`);
+        throw new Error(`The relationTo collection "${relationTo}" for the field "${field.name}" of collection "${parentName}" does not exist.`);
       }
 
       const type = this.collections[relationTo].graphQL.type || newlyCreatedBlockType;
