@@ -48,7 +48,7 @@ const config = buildConfig({
         'pages',
       ],
       uploadsCollection: 'media',
-      generateTitle: ({ doc }) => `Website.com — ${doc.title}`,
+      generateTitle: ({ doc }) => `Website.com — ${doc.title.value}`,
       generateDescription: ({ doc }) => doc.excerpt
     })
   ]
