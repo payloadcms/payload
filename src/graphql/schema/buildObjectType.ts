@@ -73,10 +73,6 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
     upload: (field: UploadField) => {
       const { relationTo, label } = field;
 
-      if (!this.collections[relationTo]) {
-        throw new Error(`The relationTo collection "${relationTo}" for the field "${field.name}" of collection "${parentName}" does not exist.`);
-      }
-
       const uploadName = combineParentName(parentName, label === false ? toWords(field.name, true) : label);
 
       // If the relationshipType is undefined at this point,
