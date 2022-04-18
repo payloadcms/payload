@@ -73,16 +73,16 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
     upload: (field: UploadField) => {
       const { relationTo, label } = field;
 
+      if (!this.collections[relationTo]) {
+        throw new Error(`The relationTo collection "${relationTo}" for the field "${field.name}" of collection "${parentName}" does not exist.`);
+      }
+
       const uploadName = combineParentName(parentName, label === false ? toWords(field.name, true) : label);
 
       // If the relationshipType is undefined at this point,
       // it can be assumed that this blockType can have a relationship
       // to itself. Therefore, we set the relationshipType equal to the blockType
       // that is currently being created.
-
-      if (!this.collections[relationTo]) {
-        throw new Error(`The relationTo collection "${relationTo}" for the field "${field.name}" of collection "${parentName}" does not exist.`);
-      }
 
       const type = this.collections[relationTo].graphQL.type || newlyCreatedBlockType;
 
