@@ -13,8 +13,13 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
+import '@bahmutov/cy-api';
 // Import commands.js using ES2015 syntax:
 import './commands';
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
+
+Cypress.Cookies.defaults({
+  preserve: 'payload-token',
+});

@@ -1,19 +1,25 @@
+/* eslint-disable jest/expect-expect */
 import { adminURL } from './common/constants';
 import { credentials } from './common/credentials';
 
 const viewportSizes: Cypress.ViewportPreset[] = ['macbook-15', 'iphone-x', 'ipad-2'];
 
 describe('Payload Login', () => {
+  beforeEach(() => {
+    cy.clearCookies();
+  });
+
+  after(() => {
+    cy.apiLogin();
+  });
 
   viewportSizes.forEach((viewportSize) => {
-
     describe(`Login (${viewportSize})`, () => {
-
       beforeEach(() => {
         cy.visit(adminURL);
-      })
+      });
 
-      it('Success', () => {
+      it('success', () => {
         cy.viewport(viewportSize);
 
         cy.get('#email').type(credentials.email);
@@ -28,7 +34,7 @@ describe('Payload Login', () => {
         cy.url().should('eq', adminURL);
       });
 
-      it('Bad Password', () => {
+      it('bad Password', () => {
         cy.viewport(viewportSize);
 
         cy.visit(adminURL);
@@ -44,7 +50,7 @@ describe('Payload Login', () => {
           .should('be.visible');
       });
 
-      it('Bad Password - Retry Success', () => {
+      it('bad Password - Retry Success', () => {
         cy.viewport(viewportSize);
 
         cy.visit(adminURL);
@@ -80,5 +86,4 @@ describe('Payload Login', () => {
       });
     });
   });
-
 });
