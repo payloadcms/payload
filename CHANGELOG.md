@@ -1,3 +1,10 @@
+## [0.15.9](https://github.com/payloadcms/payload/compare/v0.15.8...v0.15.9) (2022-04-20)
+
+
+### Bug Fixes
+
+* intermittent blocks UI issue ([3c1dfb8](https://github.com/payloadcms/payload/commit/3c1dfb88df8651b26cb1dbc102a34cd0aad722bc))
+
 ## [0.15.8](https://github.com/payloadcms/payload/compare/v0.15.7...v0.15.8) (2022-04-20)
 
 
