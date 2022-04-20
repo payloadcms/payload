@@ -104,7 +104,7 @@ const Blocks: React.FC<Props> = (props) => {
   }, [dispatchRows, dispatchFields, path]);
 
   const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
-    dispatchRows({ type: 'SET_COLLAPSE', rowID, collapsed });
+    dispatchRows({ type: 'SET_COLLAPSE', id: rowID, collapsed });
 
     if (preferencesKey) {
       const preferences: DocumentPreferences = await getPreference(preferencesKey);
@@ -142,13 +142,16 @@ const Blocks: React.FC<Props> = (props) => {
   // Get preferences, and once retrieved,
   // Reset rows with preferences included
   useEffect(() => {
-    const fetchPreferences = async () => {
-      const preferences = preferencesKey ? await getPreference<DocumentPreferences>(preferencesKey) : undefined;
-      const data = formContext.getDataByPath(path);
-      dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
-    };
+    const data = formContext.getDataByPath(path);
 
-    fetchPreferences();
+    if (Array.isArray(data)) {
+      const fetchPreferences = async () => {
+        const preferences = preferencesKey ? await getPreference<DocumentPreferences>(preferencesKey) : undefined;
+        dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
+      };
+
+      fetchPreferences();
+    }
   }, [formContext, path, preferencesKey, getPreference]);
 
   // Set row count on mount and when form context is reset
