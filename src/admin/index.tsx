@@ -2,7 +2,7 @@
 // @ts-ignore - need to do this because this file doesn't actually exist
 import config from 'payload-config';
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info';
 import { WindowInfoProvider } from '@faceless-ui/window-info';
@@ -61,7 +61,9 @@ const Index = () => (
   </React.Fragment>
 );
 
-render(<Index />, document.getElementById('app'));
+const container = document.getElementById('app');
+const root = createRoot(container); // createRoot(container!) if you use TypeScript
+root.render(<Index />);
 
 // Needed for Hot Module Replacement
 if (typeof (module.hot) !== 'undefined') {
