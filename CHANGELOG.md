@@ -1,3 +1,11 @@
+## [0.15.8](https://github.com/payloadcms/payload/compare/v0.15.7...v0.15.8) (2022-04-20)
+
+
+### Bug Fixes
+
+* ensure relationTo is valid in upload fields ([#533](https://github.com/payloadcms/payload/issues/533)) ([9e324be](https://github.com/payloadcms/payload/commit/9e324be0577447965ee2f87c3a3943cd4f0c0a1c))
+* richtext editor input height ([#529](https://github.com/payloadcms/payload/issues/529)) ([3dcd8a2](https://github.com/payloadcms/payload/commit/3dcd8a24cb8cbb77aae82a1f841429e7149e3182))
+
 ## [0.15.7](https://github.com/payloadcms/payload/compare/v0.15.6...v0.15.7) (2022-04-12)
 
 ### Bug Fixes
