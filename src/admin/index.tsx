@@ -22,10 +22,10 @@ const Index = () => (
   <React.Fragment>
     <ConfigProvider config={config}>
       <WindowInfoProvider breakpoints={{
-        xs: 400,
-        s: 768,
-        m: 1024,
-        l: 1440,
+        xs: '400',
+        s: '768',
+        m: '1024',
+        l: '1440',
       }}
       >
         <ScrollInfoProvider>
