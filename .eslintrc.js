@@ -27,7 +27,6 @@ module.exports = {
       extends: [
         'plugin:@typescript-eslint/recommended',
       ],
-      ignorePatterns: ["cypress"]
       rules: {
         'no-shadow': 'off',
         '@typescript-eslint/no-shadow': ['error'],
@@ -45,6 +44,13 @@ module.exports = {
       files: ['*.spec.ts'],
       rules: {
         '@typescript-eslint/no-use-before-define': 'off',
+      },
+    },
+    {
+      files: ['*.e2e.ts'],
+      rules: {
+        '@typescript-eslint/no-use-before-define': 'off',
+        'jest/expect-expect': 'off',
       },
     },
   ],

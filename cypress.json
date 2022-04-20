@@ -1,6 +1,6 @@
 {
   "$schema": "https://on.cypress.io/cypress.schema.json",
-  "testFiles": "**/*spec.ts",
+  "testFiles": "**/*e2e.ts",
   "ignoreTestFiles": "**/examples/*spec.js",
   "viewportWidth": 1440,
   "viewportHeight": 900,

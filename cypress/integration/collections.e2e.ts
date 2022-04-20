@@ -1,4 +1,3 @@
-/* eslint-disable jest/expect-expect */
 import { adminURL } from './common/constants';
 import { credentials } from './common/credentials';
 
@@ -10,8 +9,6 @@ describe('Collections', () => {
   });
 
   beforeEach(() => {
-    // Cypress.Cookies.preserveOnce('payload-token');
-    // cy.visit(adminURL);
     cy.visitAdmin();
   });
 
