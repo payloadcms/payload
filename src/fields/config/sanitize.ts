@@ -22,7 +22,7 @@ const sanitizeFields = (fields, validRelationships: string[]) => {
       field.defaultValue = false;
     }
 
-    if (field.type === 'relationship') {
+    if (field.type === 'relationship' || field.type === 'upload') {
       const relationships = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo];
       relationships.forEach((relationship: string) => {
         if (!validRelationships.includes(relationship)) {
