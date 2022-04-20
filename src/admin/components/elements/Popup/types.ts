@@ -2,7 +2,7 @@ import { CSSProperties } from 'react';
 
 export type Props = {
     className?: string
-    render?: (any) => void,
+    render?: (any) => React.ReactNode,
     children?: React.ReactNode,
     verticalAlign?: 'top' | 'bottom'
     horizontalAlign?: 'left' | 'center' | 'right',

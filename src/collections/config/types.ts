@@ -1,15 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
-import { PaginateModel, PassportLocalModel } from 'mongoose';
+import { PaginateModel } from 'mongoose';
 import { GraphQLType } from 'graphql';
-import { Access, GeneratePreviewURL } from '../../config/types';
+import { Access, GeneratePreviewURL, EntityDescription } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 
-export interface CollectionModel extends PaginateModel<any>, PassportLocalModel<any> {
+type Register<T = any> = (doc: T, password: string) => T;
+
+interface PassportLocalModel {
+  register: Register
+  authenticate: any
+}
+
+export interface CollectionModel extends PaginateModel<any>, PassportLocalModel {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
 }
 
@@ -128,7 +135,7 @@ export type CollectionAdminOptions = {
   /**
    * Custom description for collection
    */
-  description?: string | (() => string) | React.FC;
+  description?: EntityDescription;
   disableDuplicate?: boolean;
   /**
    * Hide the API URL within the Edit view

@@ -16,4 +16,5 @@ export type RenderedTypeProps = {
   className?: string
   onClick?: onClick
   to: string
+  children?: React.ReactNode
 }

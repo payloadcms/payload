@@ -33,7 +33,7 @@ const CompareVersion: React.FC<Props> = (props) => {
 
   const getResults = useCallback(async ({
     lastLoadedPage: lastLoadedPageArg,
-  } = {}) => {
+  }) => {
     const query: {
       [key: string]: unknown
       where: Where

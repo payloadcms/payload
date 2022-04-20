@@ -20,7 +20,7 @@ const DefaultCell: React.FC<Props> = (props) => {
 
   const { routes: { admin } } = useConfig();
 
-  let WrapElement: React.ComponentType | string = 'span';
+  let WrapElement: React.ComponentType<any> | string = 'span';
 
   const wrapElementProps: {
     to?: string
