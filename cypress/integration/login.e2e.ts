@@ -4,7 +4,7 @@ import { credentials } from './common/credentials';
 
 const viewportSizes: Cypress.ViewportPreset[] = ['macbook-15', 'iphone-x', 'ipad-2'];
 
-describe('Payload Login', () => {
+describe.skip('Payload Login', () => {
   beforeEach(() => {
     cy.clearCookies();
   });
