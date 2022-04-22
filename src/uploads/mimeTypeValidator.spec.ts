@@ -52,4 +52,11 @@ describe('mimeTypeValidator', () => {
     expect(validate('video/mp4')).toBe('Invalid file type: \'video/mp4\'');
     expect(validate('application/pdf')).toBe('Invalid file type: \'application/pdf\'');
   });
+
+  it('should not error when mimeType is missing', () => {
+    const mimeTypes = ['image/*', 'application/pdf'];
+    const validate = mimeTypeValidator(mimeTypes);
+    let value;
+    expect(validate(value)).toBe('Invalid file type');
+  });
 });
