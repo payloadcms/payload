@@ -1,5 +1,6 @@
 import mkdirp from 'mkdirp';
 import path from 'path';
+import mime from 'mime';
 import { SanitizedConfig } from '../config/types';
 import { Collection } from '../collections/config/types';
 import { FileUploadError, MissingFile } from '../errors';
@@ -64,7 +65,7 @@ const uploadFile = async ({
 
         fileData.filename = fsSafeName;
         fileData.filesize = file.size;
-        fileData.mimeType = file.mimetype;
+        fileData.mimeType = file.mimetype || mime.getType(fsSafeName);
 
         if (isImage(file.mimetype)) {
           const dimensions = await getImageSize(file);
