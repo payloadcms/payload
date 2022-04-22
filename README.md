@@ -11,6 +11,10 @@
   <a href="https://twitter.com/intent/tweet?text=Payload%20-%20A%20self-hosted%2C%20headless%20JavaScript%20CMS%20%26%20application%20framework&url=https%3A%2F%2Fgithub.com%2Fpayloadcms%2Fpayload">
   <img alt="Tweet Payload" src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social">
   </a>
+
+  <a href="https://discord.com/invite/agbr9KJz">
+    <img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord">
+  </a>
 </p>
 
 <a href="https://payloadcms.com">
