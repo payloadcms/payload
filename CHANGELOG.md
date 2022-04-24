@@ -1,3 +1,10 @@
+## [0.15.10](https://github.com/payloadcms/payload/compare/v0.15.9...v0.15.10) (2022-04-24)
+
+
+### Bug Fixes
+
+* block form-data bug ([3b70560](https://github.com/payloadcms/payload/commit/3b70560e2566de5294eb15945120ffd6f1f5f1c4))
+
 ## [0.15.9](https://github.com/payloadcms/payload/compare/v0.15.8...v0.15.9) (2022-04-20)
 
 
