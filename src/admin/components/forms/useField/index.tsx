@@ -143,7 +143,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const valueToSend = enableDebouncedValue ? debouncedValue : internalValue;
 
   useEffect(() => {
-    if (field?.value !== valueToSend && valueToSend !== undefined) {
+    if ((field?.value !== valueToSend && valueToSend !== undefined) || disableFormData !== field?.disableFormData) {
       sendField(valueToSend);
     }
   }, [
@@ -151,6 +151,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     valueToSend,
     sendField,
     field,
+    disableFormData,
   ]);
 
   return {
