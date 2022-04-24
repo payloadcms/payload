@@ -41,6 +41,9 @@
     "pretest": "yarn build",
     "test:int": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test DISABLE_LOGGING=true jest --forceExit --runInBand",
     "test:client": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test jest --config=jest.react.config.js",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test:e2e": "DISABLE_LOGGING=true MONGO_URL=mongodb://localhost/payload-integration start-server-and-test dev http-get://localhost:3000/admin cy:run",
     "clean": "rimraf dist",
     "release": "release-it",
     "release:beta": "release-it prepatch --config .release-it.beta.json",
@@ -182,6 +185,7 @@
     "webpack-hot-middleware": "^2.25.0"
   },
   "devDependencies": {
+    "@bahmutov/cy-api": "^2.1.3",
     "@release-it/conventional-changelog": "^2.0.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^13.0.1",
@@ -251,6 +255,7 @@
     "babel-plugin-ignore-html-and-css-imports": "^0.1.0",
     "copyfiles": "^2.4.0",
     "cross-env": "^7.0.2",
+    "cypress": "9.2.0",
     "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-jest": "^23.16.0",
@@ -267,6 +272,7 @@
     "release-it": "^14.2.2",
     "rimraf": "^3.0.2",
     "serve-static": "^1.14.2",
+    "start-server-and-test": "^1.14.0",
     "typescript": "^4.1.2"
   },
   "files": [

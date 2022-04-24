@@ -2,14 +2,18 @@
 <p align="center">A self-hosted, TypeScript / JavaScript headless CMS & application framework built with Express, MongoDB and React.</p>
 <p align="center">
   <a href="https://github.com/payloadcms/payload/actions">
-    <img src="https://github.com/payloadcms/payload/workflows/build/badge.svg">
+    <img src="https://github.com/payloadcms/payload/workflows/build/badge.svg" />
   </a>
   <a href="https://www.npmjs.com/package/payload">
-    <img alt="npm" src="https://img.shields.io/npm/v/payload">
+    <img alt="npm" src="https://img.shields.io/npm/v/payload" />
   </a>
 
   <a href="https://twitter.com/intent/tweet?text=Payload%20-%20A%20self-hosted%2C%20headless%20JavaScript%20CMS%20%26%20application%20framework&url=https%3A%2F%2Fgithub.com%2Fpayloadcms%2Fpayload">
-  <img alt="Tweet Payload" src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social">
+  <img alt="Tweet Payload" src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" />
+  </a>
+
+  <a href="https://discord.com/invite/r6sCXqVk3v">
+    <img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord" />
   </a>
 </p>
 
