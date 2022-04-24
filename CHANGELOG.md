@@ -1,3 +1,10 @@
+## [0.15.11](https://github.com/payloadcms/payload/compare/v0.15.10...v0.15.11) (2022-04-24)
+
+
+### Bug Fixes
+
+* improperly typed access control ([b99ec06](https://github.com/payloadcms/payload/commit/b99ec060cacf7a05c20ba0a05dd6ef6ab60df304))
+
 ## [0.15.10](https://github.com/payloadcms/payload/compare/v0.15.9...v0.15.10) (2022-04-24)
 
 
