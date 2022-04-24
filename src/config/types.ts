@@ -78,7 +78,7 @@ export type AccessResult = boolean | Where;
 /**
  * Access function
  */
-export type Access = (args?: any) => AccessResult;
+export type Access = (args?: any) => AccessResult | Promise<AccessResult>;
 
 export type AdminView = React.ComponentType<{ user: User, canAccessAdmin: boolean }>
 
