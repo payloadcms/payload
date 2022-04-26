@@ -8,7 +8,7 @@ const HiddenInput: React.FC<Props> = (props) => {
     name,
     path: pathFromProps,
     value: valueFromProps,
-    modifyForm = true,
+    disableModifyingForm = true,
   } = props;
 
   const path = pathFromProps || name;
@@ -19,9 +19,9 @@ const HiddenInput: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (valueFromProps !== undefined) {
-      setValue(valueFromProps, modifyForm);
+      setValue(valueFromProps, disableModifyingForm);
     }
-  }, [valueFromProps, setValue, modifyForm]);
+  }, [valueFromProps, setValue, disableModifyingForm]);
 
   return (
     <input

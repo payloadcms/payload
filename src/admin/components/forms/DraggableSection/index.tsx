@@ -80,7 +80,6 @@ const DraggableSection: React.FC<Props> = (props) => {
                   <HiddenInput
                     name={`${parentPath}.${rowIndex}.id`}
                     value={id}
-                    modifyForm={false}
                   />
                   <SectionTitle
                     label={label}

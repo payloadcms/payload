@@ -21,13 +21,21 @@ const HiddenFields: CollectionConfig = {
         hidden: true,
       },
       required: true,
+      defaultValue: 'should be hidden from admin, visible in API',
     },
     {
       name: 'hiddenAPI',
       type: 'text',
       label: 'Hidden on API',
       hidden: true,
-      required: true, // this should not matter
+      required: true,
+      hooks: {
+        beforeValidate: [
+          ({ value }) => {
+            return value || 'should be hidden from API';
+          },
+        ],
+      },
     },
   ],
 };

@@ -8,7 +8,6 @@ export type Field = {
   valid: boolean
   validate?: Validate
   disableFormData?: boolean
-  ignoreWhileFlattening?: boolean
   condition?: Condition
   passesCondition?: boolean
 }

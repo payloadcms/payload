@@ -18,7 +18,7 @@ const unflattenRowsFromState = (state: Fields, path) => {
   // Add value to rowsFromStateObject and delete it from remaining state
   Object.keys(state).forEach((key) => {
     if (key.indexOf(`${path}.`) === 0) {
-      if (!state[key].ignoreWhileFlattening) {
+      if (!state[key].disableFormData) {
         const name = key.replace(pathPrefixToRemove, '');
         rowsFromStateObject[name] = state[key];
         rowsFromStateObject[name].initialValue = rowsFromStateObject[name].value;
@@ -167,7 +167,6 @@ function fieldReducer(state: Fields, action): Fields {
         valid: action.valid,
         errorMessage: action.errorMessage,
         disableFormData: action.disableFormData,
-        ignoreWhileFlattening: action.ignoreWhileFlattening,
         initialValue: action.initialValue,
         validate: action.validate,
         condition: action.condition,

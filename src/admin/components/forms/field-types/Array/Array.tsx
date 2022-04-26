@@ -77,7 +77,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     path,
     validate: memoizedValidate,
     disableFormData,
-    ignoreWhileFlattening: true,
     condition,
   });
 
@@ -111,7 +110,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   }, [formContext, path]);
 
   useEffect(() => {
-    setValue(rows?.length || 0);
+    setValue(rows?.length || 0, true);
 
     if (rows?.length === 0) {
       setDisableFormData(false);
