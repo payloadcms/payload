@@ -1,3 +1,5 @@
+## [0.15.13](https://github.com/payloadcms/payload/compare/v0.15.12...v0.15.13) (2022-04-26)
+
 ## [0.15.12](https://github.com/payloadcms/payload/compare/v0.15.11...v0.15.12) (2022-04-26)
 
 
