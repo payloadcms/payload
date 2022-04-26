@@ -90,7 +90,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const removeRow = useCallback((rowIndex) => {
     dispatchRows({ type: 'REMOVE', rowIndex });
     dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
-  }, [dispatchRows, dispatchFields, path]);
+    setValue(value as number - 1);
+  }, [dispatchRows, dispatchFields, path, value, setValue]);
 
   const moveRow = useCallback((moveFromIndex, moveToIndex) => {
     dispatchRows({ type: 'MOVE', moveFromIndex, moveToIndex });
