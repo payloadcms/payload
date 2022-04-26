@@ -1,3 +1,10 @@
+## [0.15.12](https://github.com/payloadcms/payload/compare/v0.15.11...v0.15.12) (2022-04-26)
+
+
+### Bug Fixes
+
+* ensures adding array / block rows modifies form state ([8bdbd0d](https://github.com/payloadcms/payload/commit/8bdbd0dd418cd665441703fa4fd87becafd26170))
+
 ## [0.15.11](https://github.com/payloadcms/payload/compare/v0.15.10...v0.15.11) (2022-04-24)
 
 
