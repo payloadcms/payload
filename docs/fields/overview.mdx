@@ -7,7 +7,8 @@ keywords: overview, fields, config, configuration, documentation, Content Manage
 ---
 
 <Banner type="info">
-	Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data that they store. Payload offers a wide variety of field types - both simple and complex.
+  Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data
+  that they store. Payload offers a wide variety of field types - both simple and complex.
 </Banner>
 
 Fields are defined as an array on Collections and Globals via the `fields` key. They define the shape of the data that will be stored as well as automatically construct the corresponding Admin UI.
@@ -229,33 +230,38 @@ const customFieldWithCondition = {
 
 ### DefaultValue
 
-Fields that support a `defaultValue` can be configured either as the value you wish to pre-populate the field value with or a function that return it dynamically.
+Fields can be prefilled with a starting value using the `defaultValue` property. You can assign the defaultValue directly in the field configuration or make it dynamic by supplying a function.
 
-When using a function, it will be called with an optional argument object containing:
+Functions are given an optional argument object containing:
 
-- `user` - the currently logged in user object
-- `locale` - the currently selected locale
+- `user` - the authenticated user object
+- `locale` - the currently selected locale string
+
+An example of when to use a function is when you need to supply fields with locale specific defaults.
 
 ```js
+const localizedDefaults = {
+  welcome: {
+    en: 'Hello World',
+    es: 'Hola Mundo',
+  },
+};
 
-const localizedDefault = {
-  en: 'Hello World',
-  es: 'Hola Mundo',
-}
-
-{
-  fields: [
-    {
-      name: 'message',
-      type: 'text',
-      maxLength: 20,
-      admin: {
-        description: ({ user, locale }) => (localizedDefault[locale])
-      }
+const field = {
+    name: 'welcome',
+    type: 'text',
+    maxLength: 20,
+    admin: {
+      // highlight-start
+      description: ({ user, locale }) => (localizedDefaults.welcome[locale])
+      // highlight-end
     }
-  ]
-}
+  };
 ```
+
+<Banner>
+  defaultValue functions also support `async` callbacks allowing requests to be made to pre-populate field data further.
+</Banner>
 
 ### Description
 
