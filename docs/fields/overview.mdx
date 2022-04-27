@@ -230,7 +230,7 @@ const customFieldWithCondition = {
 
 ### DefaultValue
 
-Fields can be prefilled with a starting value using the `defaultValue` property. You can assign the defaultValue directly in the field configuration or make it dynamic by supplying a function.
+Fields can be prefilled with starting values using the `defaultValue` property. This is used in the admin UI and also on the backend as API requests will be populated with missing or undefined field values. You can assign the defaultValue directly in the field configuration or supply a function for dynamic behavior.
 
 Functions are given an optional argument object containing:
 
@@ -260,7 +260,7 @@ const field = {
 ```
 
 <Banner>
-  defaultValue functions also support `async` callbacks allowing requests to be made to pre-populate field data further.
+  `defaultValue` functions can use `async` callbacks allowing requests to be made to populate field data from other sources.
 </Banner>
 
 ### Description

@@ -286,14 +286,14 @@ const DefaultValues: CollectionConfig = {
       type: 'text',
       defaultValue: async (): Promise<string> => {
         return new Promise((resolve) => setTimeout(() => {
-          resolve('async');
+          resolve('asyncFunction');
         }, 50));
       },
     },
     {
       name: 'function',
       type: 'text',
-      defaultValue: (args) => {
+      defaultValue: (args): string => {
         const { locale } = args;
         if (locale === 'en') {
           return 'function';
