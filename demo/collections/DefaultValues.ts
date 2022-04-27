@@ -281,6 +281,26 @@ const DefaultValues: CollectionConfig = {
         children: [{ text: 'Cookin now' }],
       }],
     },
+    {
+      name: 'asyncFunction',
+      type: 'text',
+      defaultValue: async (): Promise<string> => {
+        return new Promise((resolve) => setTimeout(() => {
+          resolve('async');
+        }, 50));
+      },
+    },
+    {
+      name: 'function',
+      type: 'text',
+      defaultValue: (args) => {
+        const { locale } = args;
+        if (locale === 'en') {
+          return 'function';
+        }
+        return '';
+      },
+    },
   ],
   timestamps: true,
 };

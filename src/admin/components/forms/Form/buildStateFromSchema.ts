@@ -1,5 +1,6 @@
 import ObjectID from 'bson-objectid';
 import { User } from '../../../../auth';
+import getDefaultValue from './getDefaultValue';
 import {
   Field as FieldSchema,
   fieldAffectsData,
@@ -27,6 +28,7 @@ const buildValidationPromise = async (fieldState: Field, options: ValidateOption
 };
 
 type Args = {
+  locale: string | undefined,
   fieldSchema: FieldSchema[]
   data?: Data,
   siblingData?: Data,
@@ -42,13 +44,15 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
     user,
     id,
     operation,
+    locale,
   } = args;
 
   if (fieldSchema) {
     const validationPromises = [];
+    const defaultValuePromises = [];
 
-    const structureFieldState = (field, passesCondition, data = {}) => {
-      const value = typeof data?.[field.name] !== 'undefined' ? data[field.name] : field.defaultValue;
+    const structureFieldState = async (field, passesCondition, data = {}) => {
+      const value = await getDefaultValue({ value: data?.[field.name], defaultValue: field.defaultValue, locale, user });
 
       const fieldState = {
         value,
@@ -58,6 +62,7 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
         condition: field.admin?.condition,
         passesCondition,
       };
+
 
       validationPromises.push(buildValidationPromise(fieldState, {
         ...field,
@@ -71,12 +76,13 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
       return fieldState;
     };
 
-    const iterateFields = (fields: FieldSchema[], data: Data, parentPassesCondition: boolean, path = '') => fields.reduce((state, field) => {
-      let initialData = data;
+    const iterateFields = async (fields: FieldSchema[], data: Data, parentPassesCondition: boolean, path = '') => fields.reduce(async (state: Promise<Record<string, unknown>>, field) => {
+      const initialData = data;
 
       if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
         if (fieldAffectsData(field) && field.defaultValue && typeof initialData?.[field.name] === 'undefined') {
-          initialData = { [field.name]: field.defaultValue };
+          const defaultValue = await getDefaultValue({ defaultValue: field.defaultValue, locale, user });
+          initialData[field.name] = defaultValue;
         }
 
         const passesCondition = Boolean((field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}) : true) && parentPassesCondition);
@@ -92,18 +98,18 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
 
               if (field.type === 'array') {
                 return {
-                  ...state,
-                  ...rows.reduce((rowState, row, i) => {
+                  ...(await state),
+                  ...rows.reduce(async (rowState, row, i) => {
                     const rowPath = `${path}${field.name}.${i}.`;
 
                     return {
-                      ...rowState,
+                      ...(await rowState),
                       [`${rowPath}id`]: {
                         value: row.id,
                         initialValue: row.id || new ObjectID().toHexString(),
                         valid: true,
                       },
-                      ...iterateFields(field.fields, row, passesCondition, rowPath),
+                      ...(await iterateFields(field.fields, row, passesCondition, rowPath)),
                     };
                   }, {}),
                 };
@@ -111,8 +117,8 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
 
               if (field.type === 'blocks') {
                 return {
-                  ...state,
-                  ...rows.reduce((rowState, row, i) => {
+                  ...(await state),
+                  ...rows.reduce(async (rowState, row, i) => {
                     const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
                     const rowPath = `${path}${field.name}.${i}.`;
                     return {
@@ -132,7 +138,7 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
                         initialValue: row.id || new ObjectID().toHexString(),
                         valid: true,
                       },
-                      ...(block?.fields ? iterateFields(block.fields, row, passesCondition, rowPath) : {}),
+                      ...(block?.fields ? (await iterateFields(block.fields, row, passesCondition, rowPath)) : {}),
                     };
                   }, {}),
                 };
@@ -147,22 +153,22 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
             const subFieldData = initialData?.[field.name] as Data;
 
             return {
-              ...state,
-              ...iterateFields(field.fields, subFieldData, passesCondition, `${path}${field.name}.`),
+              ...(await state),
+              ...(await iterateFields(field.fields, subFieldData, passesCondition, `${path}${field.name}.`)),
             };
           }
 
           return {
-            ...state,
-            [`${path}${field.name}`]: structureFieldState(field, passesCondition, data),
+            ...(await state),
+            [`${path}${field.name}`]: await structureFieldState(field, passesCondition, data),
           };
         }
 
         // Handle field types that do not use names (row, etc)
         if (field.type === 'row') {
           return {
-            ...state,
-            ...iterateFields(field.fields, data, passesCondition, path),
+            ...(await state),
+            ...(await iterateFields(field.fields, data, passesCondition, path)),
           };
         }
 
@@ -170,15 +176,15 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
 
         // Handle normal fields
         return {
-          ...state,
-          [`${path}${namedField.name}`]: structureFieldState(field, passesCondition, data),
+          ...(await state),
+          [`${path}${namedField.name}`]: await structureFieldState(field, passesCondition, data),
         };
       }
 
       return state;
-    }, {});
+    }, {} as Promise<Record<string, unknown>>);
 
-    const resultingState = iterateFields(fieldSchema, fullData, true);
+    const resultingState = await iterateFields(fieldSchema, fullData, true);
     await Promise.all(validationPromises);
     return resultingState;
   }

@@ -45,9 +45,9 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   const onSave = useCallback(async (json) => {
     getVersions();
-    const state = await buildStateFromSchema({ fieldSchema: fields, data: json.result, operation: 'update', user });
+    const state = await buildStateFromSchema({ fieldSchema: fields, data: json.result, operation: 'update', user, locale });
     setInitialState(state);
-  }, [getVersions, fields, user]);
+  }, [getVersions, fields, user, locale]);
 
   const [{ data, isLoading }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
@@ -66,12 +66,12 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: 'update' });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: 'update', locale });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, user]);
+  }, [dataToRender, fields, user, locale]);
 
   const globalPermissions = permissions?.globals?.[slug];
 

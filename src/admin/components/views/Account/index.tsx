@@ -64,12 +64,12 @@ const AccountView: React.FC = () => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user, locale });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, id, user]);
+  }, [dataToRender, fields, id, user, locale]);
 
   return (
     <NegativeFieldGutterProvider allow>

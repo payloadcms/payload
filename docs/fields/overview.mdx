@@ -227,6 +227,36 @@ const customFieldWithCondition = {
 
 ```
 
+### DefaultValue
+
+Fields that support a `defaultValue` can be configured either as the value you wish to pre-populate the field value with or a function that return it dynamically.
+
+When using a function, it will be called with an optional argument object containing:
+
+- `user` - the currently logged in user object
+- `locale` - the currently selected locale
+
+```js
+
+const localizedDefault = {
+  en: 'Hello World',
+  es: 'Hola Mundo',
+}
+
+{
+  fields: [
+    {
+      name: 'message',
+      type: 'text',
+      maxLength: 20,
+      admin: {
+        description: ({ user, locale }) => (localizedDefault[locale])
+      }
+    }
+  ]
+}
+```
+
 ### Description
 
 A description can be configured three ways.
