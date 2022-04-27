@@ -1,4 +1,4 @@
-import { User } from '../../../../auth';
+import { User } from '../auth';
 
 type Args = {
   value?: unknown,
@@ -7,7 +7,7 @@ type Args = {
   locale: string | undefined,
 };
 
-const getDefaultValue = async ({ value, defaultValue, locale, user }: Args): Promise<unknown> => {
+const getValueWithDefault = async ({ value, defaultValue, locale, user }: Args): Promise<unknown> => {
   if (typeof value !== 'undefined') {
     return value;
   }
@@ -20,4 +20,4 @@ const getDefaultValue = async ({ value, defaultValue, locale, user }: Args): Pro
   return undefined;
 };
 
-export default getDefaultValue;
+export default getValueWithDefault;

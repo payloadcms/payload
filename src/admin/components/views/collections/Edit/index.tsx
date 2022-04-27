@@ -96,9 +96,6 @@ const EditView: React.FC<IndexProps> = (props) => {
   }, [setStepNav, isEditing, pluralLabel, dataToRender, slug, useAsTitle, admin]);
 
   useEffect(() => {
-    if (isLoading) {
-      return;
-    }
     const awaitInitialState = async () => {
       const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: isEditing ? 'update' : 'create', id, locale });
       setInitialState(state);

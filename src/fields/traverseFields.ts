@@ -13,6 +13,7 @@ import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
 import { Payload } from '..';
 import richTextRelationshipPromise from './richText/relationshipPromise';
+import getValueWithDefault from './getDefaultValue';
 
 type Arguments = {
   fields: Field[]
@@ -34,6 +35,7 @@ type Arguments = {
   hookPromises: (() => Promise<void>)[]
   fullOriginalDoc: Record<string, any>
   fullData: Record<string, any>
+  valuePromises: (() => Promise<void>)[]
   validationPromises: (() => Promise<string | boolean>)[]
   errors: { message: string, field: string }[]
   payload: Payload
@@ -67,6 +69,7 @@ const traverseFields = (args: Arguments): void => {
     hookPromises,
     fullOriginalDoc,
     fullData,
+    valuePromises,
     validationPromises,
     errors,
     payload,
@@ -309,7 +312,16 @@ const traverseFields = (args: Arguments): void => {
       const updatedData = data;
 
       if (data?.[field.name] === undefined && originalDoc?.[field.name] === undefined && field.defaultValue) {
-        updatedData[field.name] = field.defaultValue;
+        valuePromises.push(async () => {
+          let valueToUpdate = data?.[field.name];
+
+          if (typeof valueToUpdate === 'undefined' && typeof originalDoc?.[field.name] !== 'undefined') {
+            valueToUpdate = originalDoc?.[field.name];
+          }
+
+          const value = await getValueWithDefault({ value: valueToUpdate, defaultValue: field.defaultValue, locale, user: req.user });
+          updatedData[field.name] = value;
+        });
       }
 
       if (field.type === 'relationship' || field.type === 'upload') {
