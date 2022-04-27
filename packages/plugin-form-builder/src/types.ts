@@ -155,6 +155,7 @@ export type FormattedEmail = {
   from: string
   subject: string
   html: string
+  replyTo: string
 }
 
 export type Redirect = {

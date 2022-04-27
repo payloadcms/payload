@@ -45,16 +45,19 @@ const sendEmail = async (beforeChangeData: any, formConfig: FormConfig) => {
               message,
               subject,
               emailTo,
-              emailFrom
+              emailFrom,
+              replyTo: emailReplyTo,
             } = email;
 
             const to = replaceDoubleCurlys(emailTo, submissionData);
             const from = replaceDoubleCurlys(emailFrom, submissionData);
+            const replyTo = replaceDoubleCurlys(emailReplyTo || emailFrom, submissionData);
 
             if (to && from) {
               return ({
                 to,
                 from,
+                replyTo,
                 subject: replaceDoubleCurlys(subject, submissionData),
                 html: `<div>${serialize(message, submissionData)}`
               });
