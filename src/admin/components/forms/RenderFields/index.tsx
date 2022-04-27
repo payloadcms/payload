@@ -73,7 +73,7 @@ const RenderFields: React.FC<Props> = (props) => {
 
                 let { admin: { readOnly } = {} } = field;
 
-                if (readOnlyOverride) readOnly = true;
+                if (readOnlyOverride && readOnly !== false) readOnly = true;
 
                 if ((isFieldAffectingData && permissions?.[field?.name]?.read?.permission !== false) || !isFieldAffectingData) {
                   if (isFieldAffectingData && permissions?.[field?.name]?.[operation]?.permission === false) {
