@@ -37,7 +37,7 @@ describe('Global Versions - GraphQL', () => {
 
     // language=graphql
     const query = `mutation {
-      updateBlocksGlobal(draft: true, data: {
+      updateBlocksGlobal(data: {
         title: "${title}"
         blocks: [{ quote: "Test quote", color: "red", blockName: "Some block title", blockType: "quote"}]
       }) {
@@ -63,7 +63,7 @@ describe('Global Versions - GraphQL', () => {
 
       // language=graphql
       const query = `mutation {
-        updateBlocksGlobal(draft: true, data: {
+        updateBlocksGlobal(data: {
           title: "${updatedTitle}"
         }) {
           _status
