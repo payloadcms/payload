@@ -1,3 +1,16 @@
+# [0.16.0](https://github.com/payloadcms/payload/compare/v0.15.13...v0.16.0) (2022-04-29)
+
+
+### Bug Fixes
+
+* file upload safely handles missing mimeTypes ([#540](https://github.com/payloadcms/payload/issues/540)) ([bf48fdf](https://github.com/payloadcms/payload/commit/bf48fdf18961a2e57bcc5aae73de4c569e97e42b))
+
+
+### Features
+
+* allow subfield readOnly to override parent readOnly ([#546](https://github.com/payloadcms/payload/issues/546)) ([834f4c2](https://github.com/payloadcms/payload/commit/834f4c270020bf32852c00a3abbb908853689006))
+* allows defaultValue to accept async function to calculate defaultValue ([#547](https://github.com/payloadcms/payload/issues/547)) ([e297eb9](https://github.com/payloadcms/payload/commit/e297eb90907d933524d220255d5f8dc4276358c5))
+
 ## [0.15.13](https://github.com/payloadcms/payload/compare/v0.15.12...v0.15.13) (2022-04-26)
 
 ## [0.15.12](https://github.com/payloadcms/payload/compare/v0.15.11...v0.15.12) (2022-04-26)

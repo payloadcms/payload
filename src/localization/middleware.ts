@@ -34,4 +34,4 @@ export default function localizationMiddleware(localization) {
   };
 
   return middleware;
-};
+}

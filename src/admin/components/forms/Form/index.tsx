@@ -382,14 +382,6 @@ const Form: React.FC<Props> = (props) => {
     baseClass,
   ].filter(Boolean).join(' ');
 
-  if (log) {
-    // eslint-disable-next-line no-console
-    console.log(fields);
-  }
-
-  console.log(fields);
-
-
   return (
     <form
       noValidate
