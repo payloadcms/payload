@@ -54,7 +54,6 @@ const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: Bui
   sparse: field.unique && field.localized,
   unique: (!buildSchemaOptions.disableUnique && field.unique) || false,
   required: false,
-  default: field.defaultValue || undefined,
   index: field.index || field.unique || false,
 });
 
