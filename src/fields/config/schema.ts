@@ -58,7 +58,10 @@ export const idField = baseField.keys({
 export const text = baseField.keys({
   type: joi.string().valid('text').required(),
   name: joi.string().required(),
-  defaultValue: joi.string(),
+  defaultValue: joi.alternatives().try(
+    joi.string(),
+    joi.func(),
+  ),
   minLength: joi.number(),
   maxLength: joi.number(),
   admin: baseAdminFields.keys({
@@ -70,7 +73,10 @@ export const text = baseField.keys({
 export const number = baseField.keys({
   type: joi.string().valid('number').required(),
   name: joi.string().required(),
-  defaultValue: joi.number(),
+  defaultValue: joi.alternatives().try(
+    joi.number(),
+    joi.func(),
+  ),
   min: joi.number(),
   max: joi.number(),
   admin: baseAdminFields.keys({
@@ -83,7 +89,10 @@ export const number = baseField.keys({
 export const textarea = baseField.keys({
   type: joi.string().valid('textarea').required(),
   name: joi.string().required(),
-  defaultValue: joi.string(),
+  defaultValue: joi.alternatives().try(
+    joi.string(),
+    joi.func(),
+  ),
   minLength: joi.number(),
   maxLength: joi.number(),
   admin: baseAdminFields.keys({
@@ -95,7 +104,10 @@ export const textarea = baseField.keys({
 export const email = baseField.keys({
   type: joi.string().valid('email').required(),
   name: joi.string().required(),
-  defaultValue: joi.string(),
+  defaultValue: joi.alternatives().try(
+    joi.string(),
+    joi.func(),
+  ),
   minLength: joi.number(),
   maxLength: joi.number(),
   admin: baseAdminFields.keys({
@@ -107,7 +119,10 @@ export const email = baseField.keys({
 export const code = baseField.keys({
   type: joi.string().valid('code').required(),
   name: joi.string().required(),
-  defaultValue: joi.string(),
+  defaultValue: joi.alternatives().try(
+    joi.string(),
+    joi.func(),
+  ),
   admin: baseAdminFields.keys({
     language: joi.string(),
   }),
@@ -127,6 +142,7 @@ export const select = baseField.keys({
   defaultValue: joi.alternatives().try(
     joi.string().allow(''),
     joi.array().items(joi.string().allow('')),
+    joi.func(),
   ),
 });
 
@@ -140,7 +156,10 @@ export const radio = baseField.keys({
       label: joi.string().required(),
     }),
   )).required(),
-  defaultValue: joi.string().allow(''),
+  defaultValue: joi.alternatives().try(
+    joi.string().allow(''),
+    joi.func(),
+  ),
   admin: baseAdminFields.keys({
     layout: joi.string().valid('vertical', 'horizontal'),
   }),
@@ -160,7 +179,10 @@ export const group = baseField.keys({
   type: joi.string().valid('group').required(),
   name: joi.string().required(),
   fields: joi.array().items(joi.link('#field')),
-  defaultValue: joi.object(),
+  defaultValue: joi.alternatives().try(
+    joi.object(),
+    joi.func(),
+  ),
   admin: baseAdminFields.keys({
     hideGutter: joi.boolean().default(false),
     description: joi.string(),
@@ -177,7 +199,10 @@ export const array = baseField.keys({
     singular: joi.string(),
     plural: joi.string(),
   }),
-  defaultValue: joi.array().items(joi.object()),
+  defaultValue: joi.alternatives().try(
+    joi.array().items(joi.object()),
+    joi.func(),
+  ),
 });
 
 export const upload = baseField.keys({
@@ -194,13 +219,19 @@ export const upload = baseField.keys({
 export const checkbox = baseField.keys({
   type: joi.string().valid('checkbox').required(),
   name: joi.string().required(),
-  defaultValue: joi.boolean(),
+  defaultValue: joi.alternatives().try(
+    joi.boolean(),
+    joi.func(),
+  ),
 });
 
 export const point = baseField.keys({
   type: joi.string().valid('point').required(),
   name: joi.string().required(),
-  defaultValue: joi.array().items(joi.number()).max(2).min(2),
+  defaultValue: joi.alternatives().try(
+    joi.array().items(joi.number()).max(2).min(2),
+    joi.func(),
+  ),
 });
 
 export const relationship = baseField.keys({
@@ -214,6 +245,9 @@ export const relationship = baseField.keys({
   maxDepth: joi.number(),
   filterOptions: joi.alternatives().try(
     joi.object(),
+    joi.func(),
+  ),
+  defaultValue: joi.alternatives().try(
     joi.func(),
   ),
 });
@@ -239,13 +273,19 @@ export const blocks = baseField.keys({
       fields: joi.array().items(joi.link('#field')),
     }),
   ),
-  defaultValue: joi.array().items(joi.object()),
+  defaultValue: joi.alternatives().try(
+    joi.array().items(joi.object()),
+    joi.func(),
+  ),
 });
 
 export const richText = baseField.keys({
   type: joi.string().valid('richText').required(),
   name: joi.string().required(),
-  defaultValue: joi.array().items(joi.object()),
+  defaultValue: joi.alternatives().try(
+    joi.array().items(joi.object()),
+    joi.func(),
+  ),
   admin: baseAdminFields.keys({
     placeholder: joi.string(),
     elements: joi.array().items(
@@ -282,7 +322,10 @@ export const richText = baseField.keys({
 export const date = baseField.keys({
   type: joi.string().valid('date').required(),
   name: joi.string().required(),
-  defaultValue: joi.string(),
+  defaultValue: joi.alternatives().try(
+    joi.string(),
+    joi.func(),
+  ),
   admin: baseAdminFields.keys({
     placeholder: joi.string(),
     date: joi.object({

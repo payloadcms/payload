@@ -7,7 +7,8 @@ keywords: overview, fields, config, configuration, documentation, Content Manage
 ---
 
 <Banner type="info">
-	Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data that they store. Payload offers a wide variety of field types - both simple and complex.
+  Fields are the building blocks of Payload. Collections and Globals both use Fields to define the shape of the data
+  that they store. Payload offers a wide variety of field types - both simple and complex.
 </Banner>
 
 Fields are defined as an array on Collections and Globals via the `fields` key. They define the shape of the data that will be stored as well as automatically construct the corresponding Admin UI.
@@ -226,6 +227,41 @@ const customFieldWithCondition = {
 }
 
 ```
+
+### DefaultValue
+
+Fields can be prefilled with starting values using the `defaultValue` property. This is used in the admin UI and also on the backend as API requests will be populated with missing or undefined field values. You can assign the defaultValue directly in the field configuration or supply a function for dynamic behavior.
+
+Functions are given an optional argument object containing:
+
+- `user` - the authenticated user object
+- `locale` - the currently selected locale string
+
+An example of when to use a function is when you need to supply fields with locale specific defaults.
+
+```js
+const localizedDefaults = {
+  welcome: {
+    en: 'Hello World',
+    es: 'Hola Mundo',
+  },
+};
+
+const field = {
+    name: 'welcome',
+    type: 'text',
+    maxLength: 20,
+    admin: {
+      // highlight-start
+      description: ({ user, locale }) => (localizedDefaults.welcome[locale])
+      // highlight-end
+    }
+  };
+```
+
+<Banner>
+  `defaultValue` functions can use `async` callbacks allowing requests to be made to populate field data from other sources.
+</Banner>
 
 ### Description
 

@@ -65,6 +65,7 @@ export default async function performFieldOperations(this: Payload, entityConfig
   // Maintain a top-level list of promises
   // so that all async field access / validations / hooks
   // can run in parallel
+  const valuePromises = [];
   const validationPromises = [];
   const accessPromises = [];
   const relationshipPopulations = [];
@@ -97,6 +98,7 @@ export default async function performFieldOperations(this: Payload, entityConfig
     hookPromises,
     fullOriginalDoc,
     fullData,
+    valuePromises,
     validationPromises,
     errors,
     payload: this,
@@ -115,6 +117,9 @@ export default async function performFieldOperations(this: Payload, entityConfig
 
   const hookResults = hookPromises.map((promise) => promise());
   await Promise.all(hookResults);
+
+  const valueResults = valuePromises.map((promise) => promise());
+  await Promise.all(valueResults);
 
   const validationResults = validationPromises.map((promise) => promise());
   await Promise.all(validationResults);

@@ -9,6 +9,7 @@ import reducer from '../rowReducer';
 import { useForm } from '../../Form/context';
 import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import useField from '../../useField';
+import { useLocale } from '../../../utilities/Locale';
 import Error from '../../Error';
 import { array } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
@@ -56,6 +57,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const formContext = useForm();
   const { user } = useAuth();
   const { id } = useDocumentInfo();
+  const locale = useLocale();
   const operation = useOperation();
 
   const { dispatchFields } = formContext;
@@ -81,11 +83,11 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   });
 
   const addRow = useCallback(async (rowIndex) => {
-    const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user });
+    const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user, locale });
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     dispatchRows({ type: 'ADD', rowIndex });
     setValue(value as number + 1);
-  }, [dispatchRows, dispatchFields, fields, path, setValue, value, operation, id, user]);
+  }, [dispatchRows, dispatchFields, fields, path, setValue, value, operation, id, user, locale]);
 
   const removeRow = useCallback((rowIndex) => {
     dispatchRows({ type: 'REMOVE', rowIndex });

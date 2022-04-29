@@ -50,10 +50,10 @@ const EditView: React.FC<IndexProps> = (props) => {
     if (!isEditing) {
       history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
-      const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc, user, id, operation: 'update' });
+      const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc, user, id, operation: 'update', locale });
       setInitialState(state);
     }
-  }, [admin, collection, history, isEditing, getVersions, user, id]);
+  }, [admin, collection, history, isEditing, getVersions, user, id, locale]);
 
   const [{ data, isLoading, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
@@ -96,13 +96,16 @@ const EditView: React.FC<IndexProps> = (props) => {
   }, [setStepNav, isEditing, pluralLabel, dataToRender, slug, useAsTitle, admin]);
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: isEditing ? 'update' : 'create', id });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: isEditing ? 'update' : 'create', id, locale });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, isEditing, id, user]);
+  }, [dataToRender, fields, isEditing, id, user, locale, isLoading]);
 
   if (isError) {
     return (

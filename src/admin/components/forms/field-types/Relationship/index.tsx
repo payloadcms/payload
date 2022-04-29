@@ -61,7 +61,7 @@ const Relationship: React.FC<Props> = (props) => {
   const { getData, getSiblingData } = useWatchForm();
   const formProcessing = useFormProcessing();
   const hasMultipleRelations = Array.isArray(relationTo);
-  const [options, dispatchOptions] = useReducer(optionsReducer, required || hasMany ? [] : [{ value: 'null', label: 'None' }]);
+  const [options, dispatchOptions] = useReducer(optionsReducer, required || hasMany ? [] : [{ value: null, label: 'None' }]);
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [errorLoading, setErrorLoading] = useState('');
@@ -313,6 +313,7 @@ const Relationship: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   const valueToRender = (findOptionsByValue() || value) as Value;
+  if (valueToRender?.value === 'null') valueToRender.value = null;
 
   return (
     <div

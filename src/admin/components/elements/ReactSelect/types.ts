@@ -4,7 +4,7 @@ export type Options = OptionsType<Value> | GroupedOptionsType<Value>;
 
 export type Value = {
   label: string
-  value: string
+  value: string | null
   options?: Options
 }
 

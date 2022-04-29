@@ -326,10 +326,10 @@ const Form: React.FC<Props> = (props) => {
   }, [contextRef]);
 
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
-    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation });
+    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation, locale });
     contextRef.current = { ...initContextState } as FormContextType;
     dispatchFields({ type: 'REPLACE_STATE', state });
-  }, [id, user, operation]);
+  }, [id, user, operation, locale]);
 
   contextRef.current.dispatchFields = dispatchFields;
   contextRef.current.submit = submit;
@@ -386,6 +386,9 @@ const Form: React.FC<Props> = (props) => {
     // eslint-disable-next-line no-console
     console.log(fields);
   }
+
+  console.log(fields);
+
 
   return (
     <form

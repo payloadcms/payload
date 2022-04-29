@@ -3,6 +3,7 @@ import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 import { useAuth } from '@payloadcms/config-provider';
 import { usePreferences } from '../../../utilities/Preferences';
+import { useLocale } from '../../../utilities/Locale';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import reducer from '../rowReducer';
@@ -60,6 +61,7 @@ const Blocks: React.FC<Props> = (props) => {
   const formContext = useForm();
   const { user } = useAuth();
   const { id } = useDocumentInfo();
+  const locale = useLocale();
   const operation = useOperation();
   const { dispatchFields } = formContext;
 
@@ -84,12 +86,12 @@ const Blocks: React.FC<Props> = (props) => {
   const addRow = useCallback(async (rowIndex, blockType) => {
     const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
 
-    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, operation, id, user });
+    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, operation, id, user, locale });
 
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
     dispatchRows({ type: 'ADD', rowIndex, blockType });
     setValue(value as number + 1);
-  }, [path, setValue, value, blocks, dispatchFields, operation, id, user]);
+  }, [path, setValue, value, blocks, dispatchFields, operation, id, user, locale]);
 
   const removeRow = useCallback((rowIndex) => {
     dispatchRows({ type: 'REMOVE', rowIndex });

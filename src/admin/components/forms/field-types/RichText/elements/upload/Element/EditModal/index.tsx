@@ -15,6 +15,7 @@ import Submit from '../../../../../../Submit';
 import { Field } from '../../../../../../../../../fields/config/types';
 
 import './index.scss';
+import { useLocale } from '../../../../../../../utilities/Locale';
 
 const baseClass = 'edit-upload-modal';
 
@@ -31,6 +32,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
   const editor = useSlateStatic();
   const [initialState, setInitialState] = useState({});
   const { user } = useAuth();
+  const locale = useLocale();
 
   const handleUpdateEditData = useCallback((fields) => {
     const newNode = {
@@ -49,12 +51,12 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema, data: element?.fields, user, operation: 'update' });
+      const state = await buildStateFromSchema({ fieldSchema, data: element?.fields, user, operation: 'update', locale });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [fieldSchema, element.fields, user]);
+  }, [fieldSchema, element.fields, user, locale]);
 
   return (
     <Modal
