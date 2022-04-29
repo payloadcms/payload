@@ -24,33 +24,26 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
   } = args;
 
   if (fieldSchema) {
-    const validationPromises = [];
-    const valuePromises = [];
+    const fieldPromises = [];
+    const state: Fields = {};
 
-    const resultingState = iterateFields({
+    iterateFields({
+      state,
       fields: fieldSchema,
       id,
       locale,
       operation,
       path: '',
       user,
-      validationPromises,
-      valuePromises,
-      data: {},
+      fieldPromises,
+      data: fullData,
       fullData,
       parentPassesCondition: true,
     });
-    await Promise.all(validationPromises);
 
-    // Calculate default values first
-    const valueResults = valuePromises.map((promise) => promise());
-    await Promise.all(valueResults);
+    await Promise.all(fieldPromises);
 
-    // Then validate once values have been calculated
-    const validationResults = validationPromises.map((promise) => promise());
-    await Promise.all(validationResults);
-
-    return resultingState;
+    return state;
   }
 
   return {};

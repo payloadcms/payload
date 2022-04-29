@@ -387,6 +387,9 @@ const Form: React.FC<Props> = (props) => {
     console.log(fields);
   }
 
+  console.log(fields);
+
+
   return (
     <form
       noValidate
