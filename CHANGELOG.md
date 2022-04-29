@@ -1,3 +1,10 @@
+## [0.16.1](https://github.com/payloadcms/payload/compare/v0.16.0...v0.16.1) (2022-04-29)
+
+
+### Features
+
+* exposes payload within server-side validation args ([e46b942](https://github.com/payloadcms/payload/commit/e46b94225957bba7758a0a2c22776c44a2d2d633))
+
 # [0.16.0](https://github.com/payloadcms/payload/compare/v0.15.13...v0.16.0) (2022-04-29)
 
 
