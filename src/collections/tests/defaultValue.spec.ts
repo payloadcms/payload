@@ -49,8 +49,11 @@ describe('DefaultValue - REST', () => {
     it('should create with defaultValues saved', async () => {
       expect(document.id).toBeDefined();
       expect(document.function).toStrictEqual('function');
-      expect(document.asyncFunction).toStrictEqual('asyncFunction');
+      expect(document.asyncText).toStrictEqual('asyncFunction');
       expect(document.array[0].arrayText1).toStrictEqual('Get out');
+      expect(document.group.nestedText1).toStrictEqual('this should take priority');
+      expect(document.group.nestedText2).toStrictEqual('nested default text 2');
+      expect(document.group.nestedText3).toStrictEqual('neat');
     });
   });
 });
