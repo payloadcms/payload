@@ -18,7 +18,7 @@ const sanitizeFields = (fields, validRelationships: string[]) => {
       field.label = toWords(field.name);
     }
 
-    if (field.type === 'checkbox' && typeof field.defaulValue === 'undefined' && field.required === true) {
+    if (field.type === 'checkbox' && typeof field.defaultValue === 'undefined' && field.required === true) {
       field.defaultValue = false;
     }
 
