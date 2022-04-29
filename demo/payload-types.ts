@@ -421,6 +421,7 @@ export interface DefaultValueTest {
   group?: {
     nestedText1?: string;
     nestedText2?: string;
+    nestedText3?: string;
   };
   array?: {
     arrayText1?: string;
@@ -474,6 +475,12 @@ export interface DefaultValueTest {
   richText?: {
     [k: string]: unknown;
   }[];
+  asyncArray?: {
+    child?: string;
+    id?: string;
+  }[];
+  asyncText?: string;
+  function?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -615,7 +622,7 @@ export interface RelationshipA {
 export interface RelationshipB {
   id: string;
   title?: string;
-  disableRelation?: boolean;
+  disableRelation: boolean;
   post?: (string | RelationshipA)[];
   postManyRelationships?:
     | {

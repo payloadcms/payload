@@ -230,37 +230,34 @@ const customFieldWithCondition = {
 
 ### DefaultValue
 
-Fields can be prefilled with starting values using the `defaultValue` property. This is used in the admin UI and also on the backend as API requests will be populated with missing or undefined field values. You can assign the defaultValue directly in the field configuration or supply a function for dynamic behavior.
+Fields can be prefilled with starting values using the `defaultValue` property. This is used in the admin UI and also on the backend as API requests will be populated with missing or undefined field values. You can assign the defaultValue directly in the field configuration or supply a function for dynamic behavior. Values assigned during a create request on the server are added before validation occurs.
 
-Functions are given an optional argument object containing:
+Functions are called with an optional argument object containing:
 
 - `user` - the authenticated user object
 - `locale` - the currently selected locale string
 
-An example of when to use a function is when you need to supply fields with locale specific defaults.
+Here is an example of a defaultValue function that uses both:
 
 ```js
-const localizedDefaults = {
-  welcome: {
-    en: 'Hello World',
-    es: 'Hola Mundo',
-  },
+const translation: {
+    en: 'Written by',
+    es: 'escrito por',
 };
 
 const field = {
-    name: 'welcome',
+    name: 'attribution',
     type: 'text',
-    maxLength: 20,
     admin: {
       // highlight-start
-      description: ({ user, locale }) => (localizedDefaults.welcome[locale])
+      description: ({ user, locale }) => (`${translation[locale]} ${user.name}`)
       // highlight-end
     }
   };
 ```
 
-<Banner>
-  `defaultValue` functions can use `async` callbacks allowing requests to be made to populate field data from other sources.
+<Banner type="success">
+  `defaultValue` also supports `async` functions allowing requests to be made to populate field data from a query.
 </Banner>
 
 ### Description

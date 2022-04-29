@@ -292,16 +292,13 @@ const DefaultValues: CollectionConfig = {
       type: 'array',
       name: 'asyncArray',
       defaultValue: () => {
-        console.log('asyncArray called');
-        return [{ child: 'ok' }, { }];
-        // return [{ child: 'ok', id: '384884' }, { id: '1111' }];
+        return [{ child: 'ok' }];
       },
       fields: [
         {
           name: 'child',
           type: 'text',
           defaultValue: () => {
-            console.log('async child callded');
             return 'async child';
           },
         },
