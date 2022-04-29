@@ -76,6 +76,7 @@ There are two arguments available to custom validation functions.
 | `operation`        | Will be "create" or "update" depending on the UI action or API call |
 | `id`               | The value of the collection `id`, will be `undefined` on create request |
 | `user`             | The currently authenticated user object |
+| `payload`          | If the `validate` function is being executed on the server, Payload will be exposed for easily running local operations. |
 
 Example:
 ```js

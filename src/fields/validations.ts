@@ -20,7 +20,6 @@ import {
 } from './config/types';
 import { TypeWithID } from '../collections/config/types';
 import canUseDOM from '../utilities/canUseDOM';
-import payload from '../index';
 
 const defaultMessage = 'This field is required.';
 
@@ -152,7 +151,7 @@ export const date: Validate<unknown, unknown, DateField> = (value, { required })
   return true;
 };
 
-const validateFilterOptions: Validate = async (value, { filterOptions, id, user, data, siblingData, relationTo }) => {
+const validateFilterOptions: Validate = async (value, { filterOptions, id, user, data, siblingData, relationTo, payload }) => {
   if (!canUseDOM && typeof filterOptions !== 'undefined' && value) {
     const options: {
       [collection: string]: (string | number)[]

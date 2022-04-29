@@ -1,4 +1,5 @@
 import merge from 'deepmerge';
+import { Payload } from '..';
 import { User } from '../auth';
 import { Operation } from '../types';
 import { HookName, FieldAffectingData } from './config/types';
@@ -16,6 +17,7 @@ type Arguments = {
   skipValidation?: boolean
   user: User
   operation: Operation
+  payload: Payload
 }
 
 const validationPromise = async ({
@@ -31,6 +33,7 @@ const validationPromise = async ({
   skipValidation,
   user,
   operation,
+  payload,
 }: Arguments): Promise<string | boolean> => {
   if (hook !== 'beforeChange' || skipValidation) return true;
 
@@ -48,6 +51,7 @@ const validationPromise = async ({
     id,
     operation,
     user,
+    payload,
   }) : true;
 
   if (typeof result === 'string') {

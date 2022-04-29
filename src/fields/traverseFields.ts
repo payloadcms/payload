@@ -398,6 +398,7 @@ const traverseFields = (args: Arguments): void => {
           field,
           path,
           skipValidation: skipValidationFromHere,
+          payload: req.payload,
           user: req.user,
           operation,
           id,
@@ -416,6 +417,7 @@ const traverseFields = (args: Arguments): void => {
           user: req.user,
           operation,
           id,
+          payload: req.payload,
         }));
       }
     }

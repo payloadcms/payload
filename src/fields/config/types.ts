@@ -7,6 +7,7 @@ import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
+import { Payload } from '../..';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   value?: P,
@@ -67,6 +68,7 @@ export type ValidateOptions<T, S, F> = {
   id?: string | number
   user?: Partial<User>
   operation?: Operation
+  payload?: Payload
 } & F;
 
 export type Validate<T = any, S = any, F = any> = (value?: T, options?: ValidateOptions<F, S, Partial<F>>) => string | true | Promise<string | true>;
