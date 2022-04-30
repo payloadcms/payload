@@ -46,6 +46,9 @@
     "test:e2e": "DISABLE_LOGGING=true MONGO_URL=mongodb://localhost/payload-integration start-server-and-test dev http-get://localhost:3000/admin cy:run",
     "clean": "rimraf dist",
     "release": "release-it",
+    "release:patch": "release-it patch",
+    "release:minor": "release-it minor",
+    "release:major": "release-it major",
     "release:beta": "release-it prepatch --config .release-it.beta.json",
     "lint": "eslint \"src/**/*.ts\""
   },
