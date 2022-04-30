@@ -251,14 +251,14 @@ const field = {
     type: 'text',
     admin: {
       // highlight-start
-      description: ({ user, locale }) => (`${translation[locale]} ${user.name}`)
+      defaultValue: ({ user, locale }) => (`${translation[locale]} ${user.name}`)
       // highlight-end
     }
   };
 ```
 
 <Banner type="success">
-  `defaultValue` also supports `async` functions allowing requests to be made to populate field data from a query.
+  You can use async defaultValue functions to fill fields with data from API requests.
 </Banner>
 
 ### Description
@@ -280,7 +280,8 @@ As shown above, you can simply provide a string that will show by the field, but
       type: 'text',
       maxLength: 20,
       admin: {
-        description: ({ value }) => (`${typeof value === 'string' ? 20 - value.length : '20'} characters left`)
+        description: ({ value }) =>
+          (`${typeof value === 'string' ? 20 - value.length : '20'} characters left`)
       }
     }
   ]
