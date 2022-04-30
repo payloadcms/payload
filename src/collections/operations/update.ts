@@ -12,6 +12,7 @@ import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
 import uploadFile from '../../uploads/uploadFile';
 import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
 import { ensurePublishedCollectionVersion } from '../../versions/ensurePublishedCollectionVersion';
+import { beforeChange } from '../../fields/hooks/beforeChange';
 
 export type Arguments = {
   collection: Collection
@@ -183,16 +184,14 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  let result = await this.performFieldOperations(collectionConfig, {
+  let result = await beforeChange({
+    entityConfig: collectionConfig,
     data,
     req,
     id,
-    originalDoc,
-    hook: 'beforeChange',
+    doc: docWithLocales,
     operation: 'update',
     overrideAccess,
-    unflattenLocales: true,
-    docWithLocales,
     skipValidation: shouldSaveDraft,
   });
 
