@@ -112,7 +112,6 @@ const DefaultValues: CollectionConfig = {
       label: 'Group',
       name: 'group',
       defaultValue: {
-        nestedText1: 'this should take priority',
         nestedText2: 'nested default text 2',
         nestedText3: 'neat',
       },
@@ -124,6 +123,7 @@ const DefaultValues: CollectionConfig = {
               name: 'nestedText1',
               label: 'Nested Text 1',
               type: 'text',
+              defaultValue: 'this should take priority',
             },
             {
               name: 'nestedText2',

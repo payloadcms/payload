@@ -244,7 +244,7 @@ const traverseFields = (args: Arguments): void => {
     }
 
 
-    const passesCondition = (field.admin?.condition && hook === 'beforeChange') ? field.admin.condition(fullData, data) : true;
+    const passesCondition = true;
     const skipValidationFromHere = skipValidation || !passesCondition;
 
     if (fieldHasSubFields(field)) {
@@ -308,22 +308,7 @@ const traverseFields = (args: Arguments): void => {
       }
     }
 
-    if (hook === 'beforeChange' && fieldAffectsData(field)) {
-      const updatedData = data;
-
-      if (data?.[field.name] === undefined && originalDoc?.[field.name] === undefined && field.defaultValue) {
-        valuePromises.push(async () => {
-          let valueToUpdate = data?.[field.name];
-
-          if (typeof valueToUpdate === 'undefined' && typeof originalDoc?.[field.name] !== 'undefined') {
-            valueToUpdate = originalDoc?.[field.name];
-          }
-
-          const value = await getValueWithDefault({ value: valueToUpdate, defaultValue: field.defaultValue, locale, user: req.user });
-          updatedData[field.name] = value;
-        });
-      }
-
+    if (hook === 'beforeValidate' && fieldAffectsData(field)) {
       if (field.type === 'relationship' || field.type === 'upload') {
         if (Array.isArray(field.relationTo)) {
           if (Array.isArray(dataCopy[field.name])) {
@@ -360,65 +345,6 @@ const traverseFields = (args: Arguments): void => {
             }
           }
         }
-      }
-
-      if (field.type === 'point' && data[field.name]) {
-        transformActions.push(() => {
-          if (Array.isArray(data[field.name]) && data[field.name][0] !== null && data[field.name][1] !== null) {
-            data[field.name] = {
-              type: 'Point',
-              coordinates: [
-                parseFloat(data[field.name][0]),
-                parseFloat(data[field.name][1]),
-              ],
-            };
-          }
-        });
-      }
-
-      if (field.type === 'array' || field.type === 'blocks') {
-        const hasRowsOfNewData = Array.isArray(data[field.name]);
-        const newRowCount = hasRowsOfNewData ? (data[field.name] as Record<string, unknown>[]).length : undefined;
-
-        // Handle cases of arrays being intentionally set to 0
-        if (data[field.name] === '0' || data[field.name] === 0 || data[field.name] === null) {
-          updatedData[field.name] = [];
-        }
-
-        const hasRowsOfExistingData = Array.isArray(originalDoc[field.name]);
-        const existingRowCount = hasRowsOfExistingData ? originalDoc[field.name].length : 0;
-
-        validationPromises.push(() => validationPromise({
-          errors,
-          hook,
-          data: { [field.name]: newRowCount },
-          fullData,
-          originalDoc: { [field.name]: existingRowCount },
-          fullOriginalDoc,
-          field,
-          path,
-          skipValidation: skipValidationFromHere,
-          payload: req.payload,
-          user: req.user,
-          operation,
-          id,
-        }));
-      } else if (fieldAffectsData(field)) {
-        validationPromises.push(() => validationPromise({
-          errors,
-          hook,
-          data,
-          fullData,
-          originalDoc,
-          fullOriginalDoc,
-          field,
-          path,
-          skipValidation: skipValidationFromHere,
-          user: req.user,
-          operation,
-          id,
-          payload: req.payload,
-        }));
       }
     }
   });

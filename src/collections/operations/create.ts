@@ -12,6 +12,7 @@ import { Document } from '../../types';
 import { Payload } from '../..';
 import { fieldAffectsData } from '../../fields/config/types';
 import uploadFile from '../../uploads/uploadFile';
+import { beforeChange } from '../../fields/hooks/beforeChange';
 
 export type Arguments = {
   collection: Collection
@@ -139,13 +140,13 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  const resultWithLocales = await this.performFieldOperations(collectionConfig, {
+  const resultWithLocales = await beforeChange({
     data,
-    hook: 'beforeChange',
+    doc: {},
+    docWithLocales: {},
+    entityConfig: collectionConfig,
     operation: 'create',
     req,
-    overrideAccess,
-    unflattenLocales: true,
     skipValidation: shouldSaveDraft,
   });
 

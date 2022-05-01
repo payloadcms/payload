@@ -1,5 +1,5 @@
-import { Field } from '../config/types';
-import { promise } from './beforeChange/promise';
+import { Field } from '../../config/types';
+import { promise } from './promise';
 
 type Args = {
   fields: Field[]

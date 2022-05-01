@@ -8,6 +8,7 @@ import { saveGlobalDraft } from '../../versions/drafts/saveGlobalDraft';
 import { ensurePublishedGlobalVersion } from '../../versions/ensurePublishedGlobalVersion';
 import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
 import { hasWhereAccessResult } from '../../auth';
+import { beforeChange } from '../../fields/hooks/beforeChange';
 
 async function update<T extends TypeWithID = any>(this: Payload, args): Promise<T> {
   const { globals: { Model } } = this;
@@ -131,15 +132,13 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  const result = await this.performFieldOperations(globalConfig, {
+  const result = await beforeChange({
     data,
-    req,
-    hook: 'beforeChange',
-    operation: 'update',
-    unflattenLocales: true,
-    originalDoc,
+    doc: originalDoc,
     docWithLocales: globalJSON,
-    overrideAccess,
+    entityConfig: globalConfig,
+    operation: 'update',
+    req,
     skipValidation: shouldSaveDraft,
   });
 

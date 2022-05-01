@@ -185,13 +185,13 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // /////////////////////////////////////
 
   let result = await beforeChange({
-    entityConfig: collectionConfig,
     data,
-    req,
+    doc: originalDoc,
+    docWithLocales,
+    entityConfig: collectionConfig,
     id,
-    doc: docWithLocales,
     operation: 'update',
-    overrideAccess,
+    req,
     skipValidation: shouldSaveDraft,
   });
 
@@ -265,8 +265,8 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
         : error;
     }
 
-    result = JSON.stringify(result);
-    result = JSON.parse(result);
+    const resultString = JSON.stringify(result);
+    result = JSON.parse(resultString);
 
     // custom id type reset
     result.id = result._id;

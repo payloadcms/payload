@@ -18,7 +18,7 @@ export const saveCollectionDraft = async ({
   id,
   data,
   autosave,
-}: Args): Promise<void> => {
+}: Args): Promise<Record<string, unknown>> => {
   const VersionsModel = payload.versions[config.slug];
 
   let existingAutosaveVersion;

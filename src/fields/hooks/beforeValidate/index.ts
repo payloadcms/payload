@@ -2,7 +2,7 @@ import { SanitizedCollectionConfig } from '../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../globals/config/types';
 import { Operation } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
-import { traverseFields } from '../traverseFields';
+import { traverseFields } from './traverseFields';
 
 type Args = {
   data: Record<string, unknown>
@@ -12,11 +12,12 @@ type Args = {
   operation: Operation
   overrideAccess: boolean
   req: PayloadRequest
-  skipValidation?: boolean
 }
 
 // This hook is responsible for the following actions, in order:
-// 1. Execute field hooks
+// 1. Sanitize incoming data
+// 2. Execute field hooks
+// 3. Execute field access control
 
 export const beforeValidate = async ({
   data,
@@ -26,7 +27,6 @@ export const beforeValidate = async ({
   operation,
   overrideAccess,
   req,
-  skipValidation,
 }: Args): Promise<Record<string, unknown>> => {
   const promises = [];
 

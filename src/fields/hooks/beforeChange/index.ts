@@ -2,48 +2,59 @@ import { SanitizedCollectionConfig } from '../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../globals/config/types';
 import { Operation } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
-import { traverseFields } from '../traverseFields';
+import { traverseFields } from './traverseFields';
+import { ValidationError } from '../../../errors';
 
 type Args = {
   data: Record<string, unknown>
-  doc?: Record<string, unknown>
+  doc: Record<string, unknown>
+  docWithLocales: Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   id?: string | number
   operation: Operation
-  overrideAccess: boolean
   req: PayloadRequest
   skipValidation?: boolean
 }
 
-// This hook is responsible for the following actions, in order:
-// 1. Merge data to change into original document, if it exists
-// 2. Execute create / update field access control
-// 3. Sanitize incoming values
-// 4. Execute field hooks
-// 5. Get default values for undefined fields
-// 6. Validate data
-
 export const beforeChange = async ({
-  data,
-  doc,
+  data = {},
+  doc = {},
+  docWithLocales = {},
   entityConfig,
   id,
   operation,
-  overrideAccess,
   req,
   skipValidation,
 }: Args): Promise<Record<string, unknown>> => {
   const promises = [];
-
-  const result = { ...data };
+  const mergeLocaleActions = [];
+  const errors: { message: string, field: string }[] = [];
 
   traverseFields({
-    siblingData: result,
-    fields: entityConfig.fields,
+    data,
+    doc,
+    docWithLocales,
+    errors,
+    id,
+    operation,
+    path: '',
+    mergeLocaleActions,
     promises,
+    req,
+    siblingData: data,
+    siblingDoc: doc,
+    siblingDocWithLocales: docWithLocales,
+    fields: entityConfig.fields,
+    skipValidation,
   });
 
   await Promise.all(promises);
+
+  if (errors.length > 0) {
+    throw new ValidationError(errors);
+  }
+
+  mergeLocaleActions.forEach((action) => action());
 
   return data;
 };
