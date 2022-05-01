@@ -13,6 +13,7 @@ import uploadFile from '../../uploads/uploadFile';
 import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
 import { ensurePublishedCollectionVersion } from '../../versions/ensurePublishedCollectionVersion';
 import { beforeChange } from '../../fields/hooks/beforeChange';
+import { beforeValidate } from '../../fields/hooks/beforeValidate';
 
 export type Arguments = {
   collection: Collection
@@ -140,14 +141,14 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  data = await this.performFieldOperations(collectionConfig, {
+  data = await beforeValidate({
     data,
-    req,
+    doc: originalDoc,
+    entityConfig: collectionConfig,
     id,
-    originalDoc,
-    hook: 'beforeValidate',
     operation: 'update',
     overrideAccess,
+    req,
   });
 
   // // /////////////////////////////////////

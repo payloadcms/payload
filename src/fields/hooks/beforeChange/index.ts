@@ -4,6 +4,7 @@ import { Operation } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import { ValidationError } from '../../../errors';
+import deepCopyObject from '../../../utilities/deepCopyObject';
 
 type Args = {
   data: Record<string, unknown>
@@ -17,9 +18,9 @@ type Args = {
 }
 
 export const beforeChange = async ({
-  data = {},
-  doc = {},
-  docWithLocales = {},
+  data: incomingData,
+  doc,
+  docWithLocales,
   entityConfig,
   id,
   operation,
@@ -29,6 +30,8 @@ export const beforeChange = async ({
   const promises = [];
   const mergeLocaleActions = [];
   const errors: { message: string, field: string }[] = [];
+
+  const data = deepCopyObject(incomingData);
 
   traverseFields({
     data,

@@ -13,6 +13,7 @@ import { Payload } from '../..';
 import { fieldAffectsData } from '../../fields/config/types';
 import uploadFile from '../../uploads/uploadFile';
 import { beforeChange } from '../../fields/hooks/beforeChange';
+import { beforeValidate } from '../../fields/hooks/beforeValidate';
 
 export type Arguments = {
   collection: Collection
@@ -100,12 +101,13 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  data = await this.performFieldOperations(collectionConfig, {
+  data = await beforeValidate({
     data,
-    req,
-    hook: 'beforeValidate',
+    doc: {},
+    entityConfig: collectionConfig,
     operation: 'create',
     overrideAccess,
+    req,
   });
 
   // /////////////////////////////////////

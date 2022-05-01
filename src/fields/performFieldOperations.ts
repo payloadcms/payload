@@ -1,5 +1,4 @@
 import { Payload } from '..';
-import { ValidationError } from '../errors';
 import sanitizeFallbackLocale from '../localization/sanitizeFallbackLocale';
 import traverseFields from './traverseFields';
 import { SanitizedCollectionConfig } from '../collections/config/types';
@@ -16,7 +15,6 @@ type Arguments = {
   req: PayloadRequest
   overrideAccess: boolean
   flattenLocales?: boolean
-  unflattenLocales?: boolean
   originalDoc?: Record<string, unknown>
   docWithLocales?: Record<string, unknown>
   id?: string | number
@@ -42,7 +40,6 @@ export default async function performFieldOperations(this: Payload, entityConfig
     },
     overrideAccess,
     flattenLocales,
-    unflattenLocales = false,
     showHiddenFields = false,
     isVersion = false,
     skipValidation = false,
@@ -65,14 +62,10 @@ export default async function performFieldOperations(this: Payload, entityConfig
   // Maintain a top-level list of promises
   // so that all async field access / validations / hooks
   // can run in parallel
-  const valuePromises = [];
-  const validationPromises = [];
   const accessPromises = [];
   const relationshipPopulations = [];
   const hookPromises = [];
-  const unflattenLocaleActions = [];
   const transformActions = [];
-  const errors: { message: string, field: string }[] = [];
 
   // //////////////////////////////////////////
   // Entry point for field validation
@@ -98,13 +91,8 @@ export default async function performFieldOperations(this: Payload, entityConfig
     hookPromises,
     fullOriginalDoc,
     fullData,
-    valuePromises,
-    validationPromises,
-    errors,
     payload: this,
     showHiddenFields,
-    unflattenLocales,
-    unflattenLocaleActions,
     transformActions,
     docWithLocales,
     isVersion,
@@ -117,18 +105,6 @@ export default async function performFieldOperations(this: Payload, entityConfig
 
   const hookResults = hookPromises.map((promise) => promise());
   await Promise.all(hookResults);
-
-  const valueResults = valuePromises.map((promise) => promise());
-  await Promise.all(valueResults);
-
-  const validationResults = validationPromises.map((promise) => promise());
-  await Promise.all(validationResults);
-
-  if (errors.length > 0) {
-    throw new ValidationError(errors);
-  }
-
-  unflattenLocaleActions.forEach((action) => action());
 
   const accessResults = accessPromises.map((promise) => promise());
   await Promise.all(accessResults);

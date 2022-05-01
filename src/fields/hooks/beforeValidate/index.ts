@@ -1,26 +1,21 @@
 import { SanitizedCollectionConfig } from '../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../globals/config/types';
-import { Operation } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import { traverseFields } from './traverseFields';
+import deepCopyObject from '../../../utilities/deepCopyObject';
 
 type Args = {
   data: Record<string, unknown>
-  doc?: Record<string, unknown>
+  doc: Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   id?: string | number
-  operation: Operation
+  operation: 'create' | 'update'
   overrideAccess: boolean
   req: PayloadRequest
 }
 
-// This hook is responsible for the following actions, in order:
-// 1. Sanitize incoming data
-// 2. Execute field hooks
-// 3. Execute field access control
-
 export const beforeValidate = async ({
-  data,
+  data: incomingData,
   doc,
   entityConfig,
   id,
@@ -30,12 +25,19 @@ export const beforeValidate = async ({
 }: Args): Promise<Record<string, unknown>> => {
   const promises = [];
 
-  const result = { ...data };
+  const data = deepCopyObject(incomingData);
 
   traverseFields({
-    siblingData: result,
+    data,
+    doc,
     fields: entityConfig.fields,
+    id,
+    operation,
+    overrideAccess,
     promises,
+    req,
+    siblingData: data,
+    siblingDoc: doc,
   });
 
   await Promise.all(promises);

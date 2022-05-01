@@ -1,4 +1,3 @@
-import validationPromise from './validationPromise';
 import accessPromise from './accessPromise';
 import hookPromise from './hookPromise';
 import {
@@ -13,7 +12,6 @@ import { Operation } from '../types';
 import { PayloadRequest } from '../express/types';
 import { Payload } from '..';
 import richTextRelationshipPromise from './richText/relationshipPromise';
-import getValueWithDefault from './getDefaultValue';
 
 type Arguments = {
   fields: Field[]
@@ -35,13 +33,8 @@ type Arguments = {
   hookPromises: (() => Promise<void>)[]
   fullOriginalDoc: Record<string, any>
   fullData: Record<string, any>
-  valuePromises: (() => Promise<void>)[]
-  validationPromises: (() => Promise<string | boolean>)[]
-  errors: { message: string, field: string }[]
   payload: Payload
   showHiddenFields: boolean
-  unflattenLocales: boolean
-  unflattenLocaleActions: (() => void)[]
   transformActions: (() => void)[]
   docWithLocales?: Record<string, any>
   skipValidation?: boolean
@@ -69,13 +62,8 @@ const traverseFields = (args: Arguments): void => {
     hookPromises,
     fullOriginalDoc,
     fullData,
-    valuePromises,
-    validationPromises,
-    errors,
     payload,
     showHiddenFields,
-    unflattenLocaleActions,
-    unflattenLocales,
     transformActions,
     docWithLocales = {},
     skipValidation,
@@ -107,50 +95,7 @@ const traverseFields = (args: Arguments): void => {
       }
     }
 
-    if ((field.type === 'upload' || field.type === 'relationship')
-      && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null')) {
-      if (field.type === 'relationship' && field.hasMany === true) {
-        dataCopy[field.name] = [];
-      } else {
-        dataCopy[field.name] = null;
-      }
-    }
-
-    if (field.type === 'relationship' && field.hasMany && (data[field.name] === '' || data[field.name] === 'none' || data[field.name] === 'null' || data[field.name] === null)) {
-      dataCopy[field.name] = [];
-    }
-
-    if (field.type === 'number' && typeof data[field.name] === 'string') {
-      const trimmed = data[field.name].trim();
-      dataCopy[field.name] = (trimmed.length === 0) ? null : parseFloat(trimmed);
-    }
-
-    if (fieldAffectsData(field) && field.name === 'id') {
-      if (field.type === 'number' && typeof data[field.name] === 'string') {
-        dataCopy[field.name] = parseFloat(data[field.name]);
-      }
-      if (field.type === 'text' && typeof data[field.name]?.toString === 'function' && typeof data[field.name] !== 'string') {
-        dataCopy[field.name] = dataCopy[field.name].toString();
-      }
-    }
-
-    if (field.type === 'checkbox') {
-      if (data[field.name] === 'true') dataCopy[field.name] = true;
-      if (data[field.name] === 'false') dataCopy[field.name] = false;
-      if (data[field.name] === '') dataCopy[field.name] = false;
-    }
-
     if (field.type === 'richText') {
-      if (typeof data[field.name] === 'string') {
-        try {
-          const richTextJSON = JSON.parse(data[field.name] as string);
-          dataCopy[field.name] = richTextJSON;
-        } catch {
-          // Disregard this data as it is not valid.
-          // Will be reported to user by field validation
-        }
-      }
-
       if (((field.admin?.elements?.includes('relationship') || field.admin?.elements?.includes('upload')) || !field?.admin?.elements) && hook === 'afterRead') {
         relationshipPopulations.push(richTextRelationshipPromise({
           req,
@@ -178,38 +123,6 @@ const traverseFields = (args: Arguments): void => {
       if (typeof localizedValue === 'undefined' && field.type === 'group') localizedValue = {};
       if (typeof localizedValue === 'undefined') localizedValue = null;
       dataCopy[field.name] = localizedValue;
-    }
-
-    if (fieldAffectsData(field) && field.localized && unflattenLocales) {
-      unflattenLocaleActions.push(() => {
-        const localeData = payload.config.localization.locales.reduce((locales, localeID) => {
-          let valueToSet;
-
-          if (localeID === locale) {
-            if (typeof data[field.name] !== 'undefined') {
-              valueToSet = data[field.name];
-            } else if (docWithLocales?.[field.name]?.[localeID]) {
-              valueToSet = docWithLocales?.[field.name]?.[localeID];
-            }
-          } else {
-            valueToSet = docWithLocales?.[field.name]?.[localeID];
-          }
-
-          if (typeof valueToSet !== 'undefined') {
-            return {
-              ...locales,
-              [localeID]: valueToSet,
-            };
-          }
-
-          return locales;
-        }, {});
-
-        // If there are locales with data, set the data
-        if (Object.keys(localeData).length > 0) {
-          data[field.name] = localeData;
-        }
-      });
     }
 
     if (fieldAffectsData(field)) {
@@ -305,46 +218,6 @@ const traverseFields = (args: Arguments): void => {
             });
           }
         });
-      }
-    }
-
-    if (hook === 'beforeValidate' && fieldAffectsData(field)) {
-      if (field.type === 'relationship' || field.type === 'upload') {
-        if (Array.isArray(field.relationTo)) {
-          if (Array.isArray(dataCopy[field.name])) {
-            dataCopy[field.name].forEach((relatedDoc: { value: unknown, relationTo: string }, i) => {
-              const relatedCollection = payload.config.collections.find((collection) => collection.slug === relatedDoc.relationTo);
-              const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
-              if (relationshipIDField?.type === 'number') {
-                dataCopy[field.name][i] = { ...relatedDoc, value: parseFloat(relatedDoc.value as string) };
-              }
-            });
-          }
-          if (field.type === 'relationship' && field.hasMany !== true && dataCopy[field.name]?.relationTo) {
-            const relatedCollection = payload.config.collections.find((collection) => collection.slug === dataCopy[field.name].relationTo);
-            const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
-            if (relationshipIDField?.type === 'number') {
-              dataCopy[field.name] = { ...dataCopy[field.name], value: parseFloat(dataCopy[field.name].value as string) };
-            }
-          }
-        } else {
-          if (Array.isArray(dataCopy[field.name])) {
-            dataCopy[field.name].forEach((relatedDoc: unknown, i) => {
-              const relatedCollection = payload.config.collections.find((collection) => collection.slug === field.relationTo);
-              const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
-              if (relationshipIDField?.type === 'number') {
-                dataCopy[field.name][i] = parseFloat(relatedDoc as string);
-              }
-            });
-          }
-          if (field.type === 'relationship' && field.hasMany !== true && dataCopy[field.name]) {
-            const relatedCollection = payload.config.collections.find((collection) => collection.slug === field.relationTo);
-            const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
-            if (relationshipIDField?.type === 'number') {
-              dataCopy[field.name] = parseFloat(dataCopy[field.name]);
-            }
-          }
-        }
       }
     }
   });
