@@ -1,3 +1,16 @@
+## [0.16.2](https://github.com/payloadcms/payload/compare/v0.16.1...v0.16.2) (2022-05-02)
+
+
+### Bug Fixes
+
+* checkbox defaultValues and more typing of sanitize ([#550](https://github.com/payloadcms/payload/issues/550)) ([1e4a68f](https://github.com/payloadcms/payload/commit/1e4a68f76eeaab58ced0cc500223a1b86d66668e))
+
+
+### Features
+
+* exposes findMany argument to afterRead hooks to discern between find and findByID ([b3832e2](https://github.com/payloadcms/payload/commit/b3832e21c91fa5d52067cfc24a0b4f8aa6e178ec))
+* optimizes field operations ([18489fa](https://github.com/payloadcms/payload/commit/18489facebe5d7b0abc87dcc30fae28510b6bb19))
+
 ## [0.16.1](https://github.com/payloadcms/payload/compare/v0.16.0...v0.16.1) (2022-04-29)
 
 
