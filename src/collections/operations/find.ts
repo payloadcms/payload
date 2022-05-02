@@ -9,6 +9,7 @@ import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { AccessResult } from '../../config/types';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
@@ -169,20 +170,14 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
 
   result = {
     ...result,
-    docs: await Promise.all(result.docs.map(async (data) => this.performFieldOperations(
-      collectionConfig,
-      {
-        depth,
-        data,
-        req,
-        id: data.id,
-        hook: 'afterRead',
-        operation: 'read',
-        overrideAccess,
-        flattenLocales: true,
-        showHiddenFields,
-      },
-    ))),
+    docs: await Promise.all(result.docs.map(async (doc) => afterRead<T>({
+      depth,
+      doc,
+      entityConfig: collectionConfig,
+      overrideAccess,
+      req,
+      showHiddenFields,
+    }))),
   };
 
   // /////////////////////////////////////

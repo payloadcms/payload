@@ -12,6 +12,10 @@ import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
 import uploadFile from '../../uploads/uploadFile';
 import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
 import { ensurePublishedCollectionVersion } from '../../versions/ensurePublishedCollectionVersion';
+import { beforeChange } from '../../fields/hooks/beforeChange';
+import { beforeValidate } from '../../fields/hooks/beforeValidate';
+import { afterChange } from '../../fields/hooks/afterChange';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
@@ -110,15 +114,12 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   docWithLocales = JSON.stringify(docWithLocales);
   docWithLocales = JSON.parse(docWithLocales);
 
-  const originalDoc = await this.performFieldOperations(collectionConfig, {
-    id,
+  const originalDoc = await afterRead({
     depth: 0,
+    doc: docWithLocales,
+    entityConfig: collectionConfig,
     req,
-    data: docWithLocales,
-    hook: 'afterRead',
-    operation: 'update',
     overrideAccess: true,
-    flattenLocales: true,
     showHiddenFields,
   });
 
@@ -139,14 +140,14 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  data = await this.performFieldOperations(collectionConfig, {
+  data = await beforeValidate({
     data,
-    req,
+    doc: originalDoc,
+    entityConfig: collectionConfig,
     id,
-    originalDoc,
-    hook: 'beforeValidate',
     operation: 'update',
     overrideAccess,
+    req,
   });
 
   // // /////////////////////////////////////
@@ -183,16 +184,14 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  let result = await this.performFieldOperations(collectionConfig, {
+  let result = await beforeChange({
     data,
-    req,
-    id,
-    originalDoc,
-    hook: 'beforeChange',
-    operation: 'update',
-    overrideAccess,
-    unflattenLocales: true,
+    doc: originalDoc,
     docWithLocales,
+    entityConfig: collectionConfig,
+    id,
+    operation: 'update',
+    req,
     skipValidation: shouldSaveDraft,
   });
 
@@ -266,8 +265,8 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
         : error;
     }
 
-    result = JSON.stringify(result);
-    result = JSON.parse(result);
+    const resultString = JSON.stringify(result);
+    result = JSON.parse(resultString);
 
     // custom id type reset
     result.id = result._id;
@@ -279,15 +278,12 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result = await this.performFieldOperations(collectionConfig, {
-    id,
+  result = await afterRead({
     depth,
+    doc: result,
+    entityConfig: collectionConfig,
     req,
-    data: result,
-    hook: 'afterRead',
-    operation: 'update',
     overrideAccess,
-    flattenLocales: true,
     showHiddenFields,
   });
 
@@ -308,15 +304,12 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // afterChange - Fields
   // /////////////////////////////////////
 
-  result = await this.performFieldOperations(collectionConfig, {
-    data: result,
-    hook: 'afterChange',
+  result = await afterChange({
+    data,
+    doc: result,
+    entityConfig: collectionConfig,
     operation: 'update',
     req,
-    id,
-    depth,
-    overrideAccess,
-    showHiddenFields,
   });
 
   // /////////////////////////////////////

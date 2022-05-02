@@ -10,6 +10,7 @@ import { Document, Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { FileData } from '../../uploads/types';
 import fileExists from '../../uploads/fileExists';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   depth?: number
@@ -173,14 +174,12 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result = await this.performFieldOperations(collectionConfig, {
+  result = await afterRead({
     depth,
-    req,
-    data: result,
-    hook: 'afterRead',
-    operation: 'delete',
+    doc: result,
+    entityConfig: collectionConfig,
     overrideAccess,
-    flattenLocales: true,
+    req,
     showHiddenFields,
   });
 

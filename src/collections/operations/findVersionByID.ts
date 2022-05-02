@@ -9,6 +9,7 @@ import executeAccess from '../../auth/executeAccess';
 import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { TypeWithVersion } from '../../versions/types';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
@@ -113,16 +114,13 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(this: Payload
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result.version = await this.performFieldOperations(collectionConfig, {
-    depth,
-    req,
-    id,
-    data: result.version,
-    hook: 'afterRead',
-    operation: 'read',
+  result.version = await afterRead({
     currentDepth,
+    depth,
+    doc: result.version,
+    entityConfig: collectionConfig,
     overrideAccess,
-    flattenLocales: true,
+    req,
     showHiddenFields,
   });
 

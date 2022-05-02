@@ -12,6 +12,10 @@ import { Document } from '../../types';
 import { Payload } from '../..';
 import { fieldAffectsData } from '../../fields/config/types';
 import uploadFile from '../../uploads/uploadFile';
+import { beforeChange } from '../../fields/hooks/beforeChange';
+import { beforeValidate } from '../../fields/hooks/beforeValidate';
+import { afterChange } from '../../fields/hooks/afterChange';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
@@ -99,12 +103,13 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  data = await this.performFieldOperations(collectionConfig, {
+  data = await beforeValidate({
     data,
-    req,
-    hook: 'beforeValidate',
+    doc: {},
+    entityConfig: collectionConfig,
     operation: 'create',
     overrideAccess,
+    req,
   });
 
   // /////////////////////////////////////
@@ -139,13 +144,13 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  const resultWithLocales = await this.performFieldOperations(collectionConfig, {
+  const resultWithLocales = await beforeChange({
     data,
-    hook: 'beforeChange',
+    doc: {},
+    docWithLocales: {},
+    entityConfig: collectionConfig,
     operation: 'create',
     req,
-    overrideAccess,
-    unflattenLocales: true,
     skipValidation: shouldSaveDraft,
   });
 
@@ -214,14 +219,12 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result = await this.performFieldOperations(collectionConfig, {
+  result = await afterRead({
     depth,
-    req,
-    data: result,
-    hook: 'afterRead',
-    operation: 'create',
+    doc: result,
+    entityConfig: collectionConfig,
     overrideAccess,
-    flattenLocales: true,
+    req,
     showHiddenFields,
   });
 
@@ -242,14 +245,12 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // afterChange - Fields
   // /////////////////////////////////////
 
-  result = await this.performFieldOperations(collectionConfig, {
-    data: result,
-    hook: 'afterChange',
+  result = await afterChange({
+    data,
+    doc: result,
+    entityConfig: collectionConfig,
     operation: 'create',
     req,
-    depth,
-    overrideAccess,
-    showHiddenFields,
   });
 
   // /////////////////////////////////////

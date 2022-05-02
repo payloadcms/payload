@@ -22,7 +22,7 @@ export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: Fie
 
 export type FieldAccess<T extends TypeWithID = any, P = any> = (args: {
   req: PayloadRequest
-  id?: string
+  id?: string | number
   data?: Partial<T>
   siblingData?: Partial<P>
   doc?: T
@@ -226,6 +226,10 @@ export type RelationshipField = FieldBase & {
 export type ValueWithRelation = {
   relationTo: string
   value: string | number
+}
+
+export function valueIsValueWithRelation(value: unknown): value is ValueWithRelation {
+  return typeof value === 'object' && 'relationTo' in value && 'value' in value;
 }
 
 export type RelationshipValue = (string | number)

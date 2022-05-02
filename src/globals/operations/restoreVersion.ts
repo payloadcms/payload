@@ -6,6 +6,8 @@ import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { Payload } from '../..';
 import { NotFound } from '../../errors';
+import { afterChange } from '../../fields/hooks/afterChange';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -83,22 +85,20 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(this: Payload,
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result = await this.performFieldOperations(globalConfig, {
-    data: result,
-    hook: 'afterRead',
-    operation: 'read',
-    req,
+  result = await afterRead({
     depth,
-    showHiddenFields,
-    flattenLocales: true,
+    doc: result,
+    entityConfig: globalConfig,
+    req,
     overrideAccess,
+    showHiddenFields,
   });
 
   // /////////////////////////////////////
   // afterRead - Global
   // /////////////////////////////////////
 
-  await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+  await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
     await priorHook;
 
     result = await hook({
@@ -111,14 +111,12 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(this: Payload,
   // afterChange - Fields
   // /////////////////////////////////////
 
-  result = await this.performFieldOperations(globalConfig, {
+  result = await afterChange({
     data: result,
-    hook: 'afterChange',
+    doc: result,
+    entityConfig: globalConfig,
     operation: 'update',
     req,
-    depth,
-    overrideAccess,
-    showHiddenFields,
   });
 
   // /////////////////////////////////////

@@ -9,6 +9,7 @@ import executeAccess from '../../auth/executeAccess';
 import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
@@ -149,16 +150,13 @@ async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs:
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result = await this.performFieldOperations(collectionConfig, {
-    depth,
-    req,
-    id,
-    data: result,
-    hook: 'afterRead',
-    operation: 'read',
+  result = await afterRead({
     currentDepth,
+    doc: result,
+    depth,
+    entityConfig: collectionConfig,
     overrideAccess,
-    flattenLocales: true,
+    req,
     showHiddenFields,
   });
 

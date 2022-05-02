@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { Collection } from '../../collections/config/types';
-import { Payload } from '../..';
 import { RichTextField, Field } from '../config/types';
 import { PayloadRequest } from '../../express/types';
 
@@ -10,7 +9,6 @@ type Arguments = {
   key: string | number
   depth: number
   currentDepth?: number
-  payload: Payload
   field: RichTextField
   req: PayloadRequest
   showHiddenFields: boolean
@@ -24,7 +22,6 @@ export const populate = async ({
   overrideAccess,
   depth,
   currentDepth,
-  payload,
   req,
   showHiddenFields,
 }: Omit<Arguments, 'field'> & {
@@ -34,7 +31,7 @@ export const populate = async ({
 }): Promise<void> => {
   const dataRef = data as Record<string, unknown>;
 
-  const doc = await payload.findByID({
+  const doc = await req.payload.findByID({
     req,
     collection: collection.config.slug,
     id,

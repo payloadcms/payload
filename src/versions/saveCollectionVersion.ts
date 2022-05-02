@@ -3,6 +3,7 @@ import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
+import { afterRead } from '../fields/hooks/afterRead';
 
 type Args = {
   payload: Payload
@@ -55,16 +56,14 @@ export const saveCollectionVersion = async ({
     }
   }
 
-  version = await payload.performFieldOperations(config, {
-    id,
+  version = await afterRead({
     depth: 0,
+    doc: version,
+    entityConfig: config,
     req,
-    data: version,
-    hook: 'afterRead',
-    operation: 'update',
     overrideAccess: true,
-    flattenLocales: false,
     showHiddenFields: true,
+    flattenLocales: false,
   });
 
   if (version._id) delete version._id;

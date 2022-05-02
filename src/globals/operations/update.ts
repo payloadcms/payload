@@ -8,6 +8,10 @@ import { saveGlobalDraft } from '../../versions/drafts/saveGlobalDraft';
 import { ensurePublishedGlobalVersion } from '../../versions/ensurePublishedGlobalVersion';
 import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
 import { hasWhereAccessResult } from '../../auth';
+import { beforeChange } from '../../fields/hooks/beforeChange';
+import { beforeValidate } from '../../fields/hooks/beforeValidate';
+import { afterChange } from '../../fields/hooks/afterChange';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 async function update<T extends TypeWithID = any>(this: Payload, args): Promise<T> {
   const { globals: { Model } } = this;
@@ -63,26 +67,24 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   // /////////////////////////////////////
 
   let global: any = await Model.findOne(query);
-  let globalJSON;
+  let globalJSON: Record<string, unknown> = {};
 
   if (global) {
     globalJSON = global.toJSON({ virtuals: true });
-    globalJSON = JSON.stringify(globalJSON);
-    globalJSON = JSON.parse(globalJSON);
+    const globalJSONString = JSON.stringify(globalJSON);
+    globalJSON = JSON.parse(globalJSONString);
 
     if (globalJSON._id) {
       delete globalJSON._id;
     }
   }
 
-  const originalDoc = await this.performFieldOperations(globalConfig, {
+  const originalDoc = await afterRead({
     depth,
+    doc: globalJSON,
+    entityConfig: globalConfig,
     req,
-    data: globalJSON,
-    hook: 'afterRead',
-    operation: 'update',
     overrideAccess: true,
-    flattenLocales: true,
     showHiddenFields,
   });
 
@@ -90,13 +92,13 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  data = await this.performFieldOperations(globalConfig, {
+  data = await beforeValidate({
     data,
-    req,
-    originalDoc,
-    hook: 'beforeValidate',
+    doc: originalDoc,
+    entityConfig: globalConfig,
     operation: 'update',
     overrideAccess,
+    req,
   });
 
   // /////////////////////////////////////
@@ -131,15 +133,13 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  const result = await this.performFieldOperations(globalConfig, {
+  const result = await beforeChange({
     data,
-    req,
-    hook: 'beforeChange',
-    operation: 'update',
-    unflattenLocales: true,
-    originalDoc,
+    doc: originalDoc,
     docWithLocales: globalJSON,
-    overrideAccess,
+    entityConfig: globalConfig,
+    operation: 'update',
+    req,
     skipValidation: shouldSaveDraft,
   });
 
@@ -205,15 +205,13 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   // afterRead - Fields
   // /////////////////////////////////////
 
-  global = await this.performFieldOperations(globalConfig, {
-    data: global,
-    hook: 'afterRead',
-    operation: 'read',
-    req,
+  global = await afterRead({
     depth,
-    showHiddenFields,
-    flattenLocales: true,
+    doc: global,
+    entityConfig: globalConfig,
+    req,
     overrideAccess,
+    showHiddenFields,
   });
 
   // /////////////////////////////////////
@@ -233,14 +231,12 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   // afterChange - Fields
   // /////////////////////////////////////
 
-  global = await this.performFieldOperations(globalConfig, {
-    data: global,
-    hook: 'afterChange',
+  global = await afterChange({
+    data,
+    doc: global,
+    entityConfig: globalConfig,
     operation: 'update',
     req,
-    depth,
-    overrideAccess,
-    showHiddenFields,
   });
 
   // /////////////////////////////////////

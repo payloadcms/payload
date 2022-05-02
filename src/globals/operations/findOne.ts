@@ -4,6 +4,7 @@ import { Where } from '../../types';
 import { AccessResult } from '../../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 async function findOne(args) {
   const { globals: { Model } } = this;
@@ -79,7 +80,7 @@ async function findOne(args) {
   }
 
   // /////////////////////////////////////
-  // 3. Execute before collection hook
+  // Execute before global hook
   // /////////////////////////////////////
 
   await globalConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
@@ -92,21 +93,20 @@ async function findOne(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 4. Execute field-level hooks and access
+  // Execute field-level hooks and access
   // /////////////////////////////////////
 
-  doc = await this.performFieldOperations(globalConfig, {
-    data: doc,
-    hook: 'afterRead',
-    operation: 'read',
-    req,
+  doc = await afterRead({
     depth,
-    flattenLocales: true,
+    doc,
+    entityConfig: globalConfig,
+    req,
+    overrideAccess,
     showHiddenFields,
   });
 
   // /////////////////////////////////////
-  // 5. Execute after collection hook
+  // Execute after global hook
   // /////////////////////////////////////
 
   await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
@@ -119,7 +119,7 @@ async function findOne(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 6. Return results
+  // Return results
   // /////////////////////////////////////
 
   return doc;
