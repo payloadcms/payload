@@ -21,9 +21,11 @@ type Args = {
 
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response
+// - Flatten locales into requested locale
+// - Sanitize outgoing data (point field, etc)
 // - Execute field hooks
-// - Transform data for readability
-// - Flatten locales
+// - Execute read access control
+// - Populate relationships
 
 export const promise = async ({
   currentDepth,
