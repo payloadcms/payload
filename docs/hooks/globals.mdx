@@ -96,6 +96,7 @@ Runs as the last step before a global is returned. Flattens locales, hides prote
 const afterReadHook = async ({
   doc, // full document data
   req, // full express request
+  findMany, // boolean to denote if this hook is running against finding one, or finding many (useful in versions)
 }) => {...}
 ```
 

@@ -34,9 +34,10 @@ export type BeforeReadHook = (args: {
 }) => any;
 
 export type AfterReadHook = (args: {
-  doc: any;
-  req: PayloadRequest;
-  query?: { [key: string]: any };
+  doc: any
+  req: PayloadRequest
+  query?: { [key: string]: any }
+  findMany?: boolean
 }) => any;
 
 export interface GlobalModel extends Model<Document> {

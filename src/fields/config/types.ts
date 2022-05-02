@@ -10,12 +10,13 @@ import { User } from '../../auth';
 import { Payload } from '../..';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
-  value?: P,
-  originalDoc?: T,
   data?: Partial<T>,
-  siblingData: Partial<S>
+  findMany?: boolean
+  originalDoc?: T,
   operation?: 'create' | 'read' | 'update' | 'delete',
   req: PayloadRequest
+  siblingData: Partial<S>
+  value?: P,
 }
 
 export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;

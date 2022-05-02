@@ -139,6 +139,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(this: Payload, a
         overrideAccess,
         req,
         showHiddenFields,
+        findMany: true,
       }),
     }))),
   };
@@ -155,7 +156,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(this: Payload, a
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef.version = await hook({ req, query, doc: doc.version }) || doc.version;
+        docRef.version = await hook({ req, query, doc: doc.version, findMany: true }) || doc.version;
       }, Promise.resolve());
 
       return docRef;

@@ -177,6 +177,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
       overrideAccess,
       req,
       showHiddenFields,
+      findMany: true,
     }))),
   };
 
@@ -192,7 +193,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef = await hook({ req, query, doc }) || doc;
+        docRef = await hook({ req, query, doc, findMany: true }) || doc;
       }, Promise.resolve());
 
       return docRef;

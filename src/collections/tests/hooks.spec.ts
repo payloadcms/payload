@@ -99,6 +99,12 @@ describe('Collections - REST', () => {
         const getResponseData = await getResponse.json();
         expect(getResponse.status).toBe(200);
         expect(getResponseData.afterReadHook).toStrictEqual(true);
+        expect(getResponseData.findMany).toBeUndefined();
+
+        const getManyResponse = await fetch(`${url}/api/hooks`);
+        const getManyResponseData = await getManyResponse.json();
+
+        expect(getManyResponseData.docs[0].findMany).toStrictEqual(true);
       });
 
       it('afterChange', async () => {

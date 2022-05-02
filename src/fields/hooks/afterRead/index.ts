@@ -9,6 +9,7 @@ type Args = {
   depth: number
   doc: Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
+  findMany?: boolean
   flattenLocales?: boolean
   req: PayloadRequest
   overrideAccess: boolean
@@ -21,6 +22,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     depth: incomingDepth,
     doc: incomingDoc,
     entityConfig,
+    findMany,
     flattenLocales = true,
     req,
     overrideAccess,
@@ -47,6 +49,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     doc,
     fields: entityConfig.fields,
     fieldPromises,
+    findMany,
     flattenLocales,
     overrideAccess,
     populationPromises,

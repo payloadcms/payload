@@ -45,11 +45,12 @@ const Hooks: CollectionConfig = {
     ],
     afterRead: [
       ((operation) => {
-        const { doc } = operation;
+        const { doc, findMany } = operation;
         doc.afterReadHook = true;
+        doc.findMany = findMany;
 
         return doc;
-      }) as AfterReadHook<Hook & { afterReadHook: boolean }>,
+      }) as AfterReadHook<Hook & { afterReadHook: boolean, findMany: boolean }>,
     ],
     afterChange: [
       ((operation) => {

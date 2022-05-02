@@ -94,6 +94,7 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   query?: { [key: string]: any };
+  findMany?: boolean
 }) => any;
 
 export type BeforeDeleteHook = (args: {

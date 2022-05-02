@@ -11,6 +11,7 @@ type Args = {
   doc: Record<string, unknown>
   field: Field
   fieldPromises: Promise<void>[]
+  findMany: boolean
   flattenLocales: boolean
   populationPromises: Promise<void>[]
   req: PayloadRequest
@@ -33,6 +34,7 @@ export const promise = async ({
   doc,
   field,
   fieldPromises,
+  findMany,
   flattenLocales,
   overrideAccess,
   populationPromises,
@@ -130,12 +132,13 @@ export const promise = async ({
           await Promise.all(hookPromises);
         } else {
           const hookedValue = await currentHook({
-            value: siblingDoc[field.name],
-            originalDoc: doc,
             data: doc,
-            siblingData: siblingDoc[field.name],
+            findMany,
+            originalDoc: doc,
             operation: 'read',
+            siblingData: siblingDoc[field.name],
             req,
+            value: siblingDoc[field.name],
           });
 
           if (hookedValue !== undefined) {
@@ -178,6 +181,7 @@ export const promise = async ({
         doc,
         fieldPromises,
         fields: field.fields,
+        findMany,
         flattenLocales,
         overrideAccess,
         populationPromises,
@@ -200,6 +204,7 @@ export const promise = async ({
             doc,
             fields: field.fields,
             fieldPromises,
+            findMany,
             flattenLocales,
             overrideAccess,
             populationPromises,
@@ -226,6 +231,7 @@ export const promise = async ({
               doc,
               fields: block.fields,
               fieldPromises,
+              findMany,
               flattenLocales,
               overrideAccess,
               populationPromises,
@@ -247,6 +253,7 @@ export const promise = async ({
         doc,
         fieldPromises,
         fields: field.fields,
+        findMany,
         flattenLocales,
         overrideAccess,
         populationPromises,

@@ -8,6 +8,7 @@ type Args = {
   doc: Record<string, unknown>
   fieldPromises: Promise<void>[]
   fields: Field[]
+  findMany: boolean
   flattenLocales: boolean
   populationPromises: Promise<void>[]
   req: PayloadRequest
@@ -22,6 +23,7 @@ export const traverseFields = ({
   doc,
   fieldPromises,
   fields,
+  findMany,
   flattenLocales,
   overrideAccess,
   populationPromises,
@@ -36,6 +38,7 @@ export const traverseFields = ({
       doc,
       field,
       fieldPromises,
+      findMany,
       flattenLocales,
       overrideAccess,
       populationPromises,
