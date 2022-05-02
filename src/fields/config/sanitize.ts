@@ -3,22 +3,22 @@ import { MissingFieldType, InvalidFieldRelationship } from '../../errors';
 import { baseBlockFields } from '../baseFields/baseBlockFields';
 import validations from '../validations';
 import { baseIDField } from '../baseFields/baseIDField';
-import { fieldAffectsData } from './types';
+import { Field, fieldAffectsData } from './types';
 
-const sanitizeFields = (fields, validRelationships: string[]) => {
+const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] => {
   if (!fields) return [];
 
   return fields.map((unsanitizedField) => {
-    const field = { ...unsanitizedField };
+    const field: Field = { ...unsanitizedField };
 
     if (!field.type) throw new MissingFieldType(field);
 
     // Auto-label
-    if (field.name && typeof field.label !== 'string' && field.label !== false) {
+    if ('name' in field && field.name && typeof field.label !== 'string' && field.label !== false) {
       field.label = toWords(field.name);
     }
 
-    if (field.type === 'checkbox' && typeof field.defaulValue === 'undefined' && field.required === true) {
+    if (field.type === 'checkbox' && typeof field.defaultValue === 'undefined' && field.required === true) {
       field.defaultValue = false;
     }
 
@@ -59,9 +59,9 @@ const sanitizeFields = (fields, validRelationships: string[]) => {
 
     if (!field.admin) field.admin = {};
 
-    if (field.fields) field.fields = sanitizeFields(field.fields, validRelationships);
+    if ('fields' in field && field.fields) field.fields = sanitizeFields(field.fields, validRelationships);
 
-    if (field.blocks) {
+    if ('blocks' in field && field.blocks) {
       field.blocks = field.blocks.map((block) => {
         const unsanitizedBlock = { ...block };
         unsanitizedBlock.labels = !unsanitizedBlock.labels ? formatLabels(unsanitizedBlock.slug) : unsanitizedBlock.labels;
