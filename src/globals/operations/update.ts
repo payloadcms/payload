@@ -11,6 +11,7 @@ import { hasWhereAccessResult } from '../../auth';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 async function update<T extends TypeWithID = any>(this: Payload, args): Promise<T> {
   const { globals: { Model } } = this;
@@ -78,14 +79,12 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
     }
   }
 
-  const originalDoc = await this.performFieldOperations(globalConfig, {
+  const originalDoc = await afterRead({
     depth,
+    doc: globalJSON,
+    entityConfig: globalConfig,
     req,
-    data: globalJSON,
-    hook: 'afterRead',
-    operation: 'update',
     overrideAccess: true,
-    flattenLocales: true,
     showHiddenFields,
   });
 
@@ -206,15 +205,13 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   // afterRead - Fields
   // /////////////////////////////////////
 
-  global = await this.performFieldOperations(globalConfig, {
-    data: global,
-    hook: 'afterRead',
-    operation: 'read',
-    req,
+  global = await afterRead({
     depth,
-    showHiddenFields,
-    flattenLocales: true,
+    doc: global,
+    entityConfig: globalConfig,
+    req,
     overrideAccess,
+    showHiddenFields,
   });
 
   // /////////////////////////////////////

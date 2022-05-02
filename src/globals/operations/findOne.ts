@@ -4,6 +4,7 @@ import { Where } from '../../types';
 import { AccessResult } from '../../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 async function findOne(args) {
   const { globals: { Model } } = this;
@@ -95,13 +96,12 @@ async function findOne(args) {
   // Execute field-level hooks and access
   // /////////////////////////////////////
 
-  doc = await this.performFieldOperations(globalConfig, {
-    data: doc,
-    hook: 'afterRead',
-    operation: 'read',
-    req,
+  doc = await afterRead({
     depth,
-    flattenLocales: true,
+    doc,
+    entityConfig: globalConfig,
+    req,
+    overrideAccess,
     showHiddenFields,
   });
 

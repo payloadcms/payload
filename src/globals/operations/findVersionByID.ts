@@ -7,6 +7,7 @@ import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -105,16 +106,12 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result.version = await this.performFieldOperations(globalConfig, {
+  result.version = await afterRead({
     depth,
+    doc: result.version,
+    entityConfig: globalConfig,
     req,
-    id,
-    data: result.version,
-    hook: 'afterRead',
-    operation: 'read',
-    currentDepth,
     overrideAccess,
-    flattenLocales: true,
     showHiddenFields,
   });
 

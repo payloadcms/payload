@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { Payload } from '../..';
 import { Field, fieldHasSubFields, fieldIsArrayType, fieldAffectsData } from '../config/types';
 import { PayloadRequest } from '../../express/types';
 import { populate } from './populate';
@@ -10,7 +9,6 @@ type NestedRichTextFieldsArgs = {
   data: unknown
   fields: Field[]
   req: PayloadRequest
-  payload: Payload
   overrideAccess: boolean
   depth: number
   currentDepth?: number
@@ -22,7 +20,6 @@ export const recurseNestedFields = ({
   data,
   fields,
   req,
-  payload,
   overrideAccess = false,
   depth,
   currentDepth = 0,
@@ -34,7 +31,7 @@ export const recurseNestedFields = ({
         if (field.hasMany && Array.isArray(data[field.name])) {
           if (Array.isArray(field.relationTo)) {
             data[field.name].forEach(({ relationTo, value }, i) => {
-              const collection = payload.collections[relationTo];
+              const collection = req.payload.collections[relationTo];
               if (collection) {
                 promises.push(populate({
                   id: value,
@@ -45,7 +42,6 @@ export const recurseNestedFields = ({
                   overrideAccess,
                   depth,
                   currentDepth,
-                  payload,
                   req,
                   showHiddenFields,
                 }));
@@ -53,7 +49,7 @@ export const recurseNestedFields = ({
             });
           } else {
             data[field.name].forEach((id, i) => {
-              const collection = payload.collections[field.relationTo as string];
+              const collection = req.payload.collections[field.relationTo as string];
               if (collection) {
                 promises.push(populate({
                   id,
@@ -64,7 +60,6 @@ export const recurseNestedFields = ({
                   overrideAccess,
                   depth,
                   currentDepth,
-                  payload,
                   req,
                   showHiddenFields,
                 }));
@@ -72,7 +67,7 @@ export const recurseNestedFields = ({
             });
           }
         } else if (Array.isArray(field.relationTo) && data[field.name]?.value && data[field.name]?.relationTo) {
-          const collection = payload.collections[data[field.name].relationTo];
+          const collection = req.payload.collections[data[field.name].relationTo];
           promises.push(populate({
             id: data[field.name].value,
             field,
@@ -82,14 +77,13 @@ export const recurseNestedFields = ({
             overrideAccess,
             depth,
             currentDepth,
-            payload,
             req,
             showHiddenFields,
           }));
         }
       }
       if (typeof data[field.name] !== 'undefined' && typeof field.relationTo === 'string') {
-        const collection = payload.collections[field.relationTo];
+        const collection = req.payload.collections[field.relationTo];
         promises.push(populate({
           id: data[field.name],
           field,
@@ -99,7 +93,6 @@ export const recurseNestedFields = ({
           overrideAccess,
           depth,
           currentDepth,
-          payload,
           req,
           showHiddenFields,
         }));
@@ -111,7 +104,6 @@ export const recurseNestedFields = ({
           data: data[field.name],
           fields: field.fields,
           req,
-          payload,
           overrideAccess,
           depth,
           currentDepth,
@@ -123,7 +115,6 @@ export const recurseNestedFields = ({
           data,
           fields: field.fields,
           req,
-          payload,
           overrideAccess,
           depth,
           currentDepth,
@@ -140,7 +131,6 @@ export const recurseNestedFields = ({
               data: data[field.name][i],
               fields: block.fields,
               req,
-              payload,
               overrideAccess,
               depth,
               currentDepth,
@@ -157,7 +147,6 @@ export const recurseNestedFields = ({
             data: data[field.name][i],
             fields: field.fields,
             req,
-            payload,
             overrideAccess,
             depth,
             currentDepth,
@@ -173,7 +162,6 @@ export const recurseNestedFields = ({
           recurseRichText({
             req,
             children: node.children,
-            payload,
             overrideAccess,
             depth,
             currentDepth,

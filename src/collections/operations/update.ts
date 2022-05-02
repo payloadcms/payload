@@ -15,6 +15,7 @@ import { ensurePublishedCollectionVersion } from '../../versions/ensurePublished
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
@@ -113,15 +114,12 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   docWithLocales = JSON.stringify(docWithLocales);
   docWithLocales = JSON.parse(docWithLocales);
 
-  const originalDoc = await this.performFieldOperations(collectionConfig, {
-    id,
+  const originalDoc = await afterRead({
     depth: 0,
+    doc: docWithLocales,
+    entityConfig: collectionConfig,
     req,
-    data: docWithLocales,
-    hook: 'afterRead',
-    operation: 'update',
     overrideAccess: true,
-    flattenLocales: true,
     showHiddenFields,
   });
 
@@ -280,15 +278,12 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result = await this.performFieldOperations(collectionConfig, {
-    id,
+  result = await afterRead({
     depth,
+    doc: result,
+    entityConfig: collectionConfig,
     req,
-    data: result,
-    hook: 'afterRead',
-    operation: 'update',
     overrideAccess,
-    flattenLocales: true,
     showHiddenFields,
   });
 

@@ -14,7 +14,7 @@ import {
   GraphQLUnionType,
 } from 'graphql';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { Field, RadioField, RelationshipField, SelectField, UploadField, optionIsObject, ArrayField, GroupField, RichTextField, fieldAffectsData, NumberField, TextField, EmailField, TextareaField, CodeField, DateField, PointField, CheckboxField, BlockField, RowField, fieldIsPresentationalOnly } from '../../fields/config/types';
+import { Field, RadioField, RelationshipField, SelectField, UploadField, ArrayField, GroupField, RichTextField, fieldAffectsData, NumberField, TextField, EmailField, TextareaField, CodeField, DateField, PointField, CheckboxField, BlockField, RowField, fieldIsPresentationalOnly } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
@@ -50,16 +50,13 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
       type: withNullableType(field, GraphQLJSON),
       async resolve(parent, args, context) {
         if (args.depth > 0) {
-          const richTextRelationshipPromise = createRichTextRelationshipPromise({
+          await createRichTextRelationshipPromise({
             req: context.req,
-            data: parent,
-            payload: context.req.payload,
+            siblingDoc: parent,
             depth: args.depth,
             field,
             showHiddenFields: false,
           });
-
-          await richTextRelationshipPromise();
         }
 
         return parent[field.name];

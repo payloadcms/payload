@@ -9,6 +9,7 @@ import { Field, fieldHasSubFields, fieldAffectsData } from '../../fields/config/
 import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 import { Payload } from '../..';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Result = {
   user?: User,
@@ -171,15 +172,12 @@ async function login(this: Payload, incomingArgs: Arguments): Promise<Result> {
   // afterRead - Fields
   // /////////////////////////////////////
 
-  user = await this.performFieldOperations(collectionConfig, {
+  user = await afterRead({
     depth,
-    req,
-    id: user.id,
-    data: user,
-    hook: 'afterRead',
-    operation: 'read',
+    doc: user,
+    entityConfig: collectionConfig,
     overrideAccess,
-    flattenLocales: true,
+    req,
     showHiddenFields,
   });
 

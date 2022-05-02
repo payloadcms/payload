@@ -2,6 +2,7 @@ import { Payload } from '..';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
+import { afterRead } from '../fields/hooks/afterRead';
 
 type Args = {
   payload: Payload
@@ -43,15 +44,12 @@ export const ensurePublishedCollectionVersion = async ({
     });
 
     if (moreRecentDrafts?.length === 0) {
-      const version = await payload.performFieldOperations(config, {
-        id,
+      const version = await afterRead({
         depth: 0,
+        doc: docWithLocales,
+        entityConfig: config,
         req,
-        data: docWithLocales,
-        hook: 'afterRead',
-        operation: 'update',
         overrideAccess: true,
-        flattenLocales: false,
         showHiddenFields: true,
       });
 

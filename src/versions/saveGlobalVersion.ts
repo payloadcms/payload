@@ -3,6 +3,7 @@ import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
+import { afterRead } from '../fields/hooks/afterRead';
 
 type Args = {
   payload: Payload
@@ -50,14 +51,13 @@ export const saveGlobalVersion = async ({
     }
   }
 
-  version = await payload.performFieldOperations(config, {
+  version = await afterRead({
     depth: 0,
-    req,
-    data: version,
-    hook: 'afterRead',
-    operation: 'update',
-    overrideAccess: true,
+    doc: version,
+    entityConfig: config,
     flattenLocales: false,
+    overrideAccess: true,
+    req,
     showHiddenFields: true,
   });
 

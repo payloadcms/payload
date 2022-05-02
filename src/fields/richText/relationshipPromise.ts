@@ -1,17 +1,15 @@
-import { Payload } from '../..';
 import { RichTextField } from '../config/types';
 import { PayloadRequest } from '../../express/types';
 import { recurseNestedFields } from './recurseNestedFields';
 import { populate } from './populate';
 
-type Arguments = {
-  data: unknown
-  overrideAccess?: boolean
-  depth: number
+type Args = {
   currentDepth?: number
-  payload: Payload
+  depth: number
   field: RichTextField
+  overrideAccess?: boolean
   req: PayloadRequest
+  siblingDoc: Record<string, unknown>
   showHiddenFields: boolean
 }
 
@@ -20,7 +18,6 @@ type RecurseRichTextArgs = {
   overrideAccess: boolean
   depth: number
   currentDepth: number
-  payload: Payload
   field: RichTextField
   req: PayloadRequest
   promises: Promise<void>[]
@@ -30,7 +27,6 @@ type RecurseRichTextArgs = {
 export const recurseRichText = ({
   req,
   children,
-  payload,
   overrideAccess = false,
   depth,
   currentDepth = 0,
@@ -40,7 +36,7 @@ export const recurseRichText = ({
 }: RecurseRichTextArgs): void => {
   if (Array.isArray(children)) {
     (children as any[]).forEach((element) => {
-      const collection = payload.collections[element?.relationTo];
+      const collection = req.payload.collections[element?.relationTo];
 
       if ((element.type === 'relationship' || element.type === 'upload')
         && element?.value?.id
@@ -52,7 +48,6 @@ export const recurseRichText = ({
             data: element.fields || {},
             fields: field.admin.upload.collections[element.relationTo].fields,
             req,
-            payload,
             overrideAccess,
             depth,
             currentDepth,
@@ -67,7 +62,6 @@ export const recurseRichText = ({
           overrideAccess,
           depth,
           currentDepth,
-          payload,
           field,
           collection,
           showHiddenFields,
@@ -76,14 +70,13 @@ export const recurseRichText = ({
 
       if (element?.children) {
         recurseRichText({
-          req,
           children: element.children,
-          payload,
-          overrideAccess,
-          depth,
           currentDepth,
+          depth,
           field,
+          overrideAccess,
           promises,
+          req,
           showHiddenFields,
         });
       }
@@ -91,27 +84,25 @@ export const recurseRichText = ({
   }
 };
 
-const richTextRelationshipPromise = ({
-  req,
-  data,
-  payload,
-  overrideAccess,
-  depth,
+const richTextRelationshipPromise = async ({
   currentDepth,
+  depth,
   field,
+  overrideAccess,
+  req,
+  siblingDoc,
   showHiddenFields,
-}: Arguments) => async (): Promise<void> => {
+}: Args): Promise<void> => {
   const promises = [];
 
   recurseRichText({
-    req,
-    children: data[field.name],
-    payload,
-    overrideAccess,
-    depth,
+    children: siblingDoc[field.name] as unknown[],
     currentDepth,
+    depth,
     field,
+    overrideAccess,
     promises,
+    req,
     showHiddenFields,
   });
 

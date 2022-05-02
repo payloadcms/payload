@@ -15,6 +15,7 @@ import uploadFile from '../../uploads/uploadFile';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
+import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
@@ -218,14 +219,12 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   // afterRead - Fields
   // /////////////////////////////////////
 
-  result = await this.performFieldOperations(collectionConfig, {
+  result = await afterRead({
     depth,
-    req,
-    data: result,
-    hook: 'afterRead',
-    operation: 'create',
+    doc: result,
+    entityConfig: collectionConfig,
     overrideAccess,
-    flattenLocales: true,
+    req,
     showHiddenFields,
   });
 

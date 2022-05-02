@@ -1,6 +1,5 @@
-import { PayloadRequest } from '../express/types';
-import { RelationshipField, fieldSupportsMany, fieldHasMaxDepth, UploadField } from './config/types';
-import { Payload } from '..';
+import { PayloadRequest } from '../../../express/types';
+import { RelationshipField, fieldSupportsMany, fieldHasMaxDepth, UploadField } from '../../config/types';
 
 type PopulateArgs = {
   depth: number
@@ -11,7 +10,6 @@ type PopulateArgs = {
   data: Record<string, unknown>
   field: RelationshipField | UploadField
   index?: number
-  payload: Payload
   showHiddenFields: boolean
 }
 
@@ -24,13 +22,12 @@ const populate = async ({
   data,
   field,
   index,
-  payload,
   showHiddenFields,
 }: PopulateArgs) => {
   const dataToUpdate = dataReference;
 
   const relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo;
-  const relatedCollection = payload.collections[relation];
+  const relatedCollection = req.payload.collections[relation];
 
   if (relatedCollection) {
     let idString = Array.isArray(field.relationTo) ? data.value : data;
@@ -42,7 +39,7 @@ const populate = async ({
     let populatedRelationship;
 
     if (depth && currentDepth <= depth) {
-      populatedRelationship = await payload.findByID({
+      populatedRelationship = await req.payload.findByID({
         req,
         collection: relatedCollection.config.slug,
         id: idString as string,
@@ -72,33 +69,31 @@ const populate = async ({
 };
 
 type PromiseArgs = {
-  data: Record<string, any>
+  siblingDoc: Record<string, any>
   field: RelationshipField | UploadField
   depth: number
   currentDepth: number
   req: PayloadRequest
   overrideAccess: boolean
-  payload: Payload
   showHiddenFields: boolean
 }
 
-const relationshipPopulationPromise = ({
-  data,
+const relationshipPopulationPromise = async ({
+  siblingDoc,
   field,
   depth,
   currentDepth,
   req,
   overrideAccess,
-  payload,
   showHiddenFields,
-}: PromiseArgs) => async (): Promise<void> => {
-  const resultingData = data;
+}: PromiseArgs): Promise<void> => {
+  const resultingDoc = siblingDoc;
   const populateDepth = fieldHasMaxDepth(field) && field.maxDepth < depth ? field.maxDepth : depth;
 
-  if (fieldSupportsMany(field) && field.hasMany && Array.isArray(data[field.name])) {
+  if (fieldSupportsMany(field) && field.hasMany && Array.isArray(siblingDoc[field.name])) {
     const rowPromises = [];
 
-    data[field.name].forEach((relatedDoc, index) => {
+    siblingDoc[field.name].forEach((relatedDoc, index) => {
       const rowPromise = async () => {
         if (relatedDoc) {
           await populate({
@@ -107,10 +102,9 @@ const relationshipPopulationPromise = ({
             req,
             overrideAccess,
             data: relatedDoc,
-            dataReference: resultingData,
+            dataReference: resultingDoc,
             field,
             index,
-            payload,
             showHiddenFields,
           });
         }
@@ -120,16 +114,15 @@ const relationshipPopulationPromise = ({
     });
 
     await Promise.all(rowPromises);
-  } else if (data[field.name]) {
+  } else if (siblingDoc[field.name]) {
     await populate({
       depth: populateDepth,
       currentDepth,
       req,
       overrideAccess,
-      dataReference: resultingData,
-      data: data[field.name],
+      dataReference: resultingDoc,
+      data: siblingDoc[field.name],
       field,
-      payload,
       showHiddenFields,
     });
   }
