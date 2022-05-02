@@ -79,7 +79,7 @@ async function findOne(args) {
   }
 
   // /////////////////////////////////////
-  // 3. Execute before collection hook
+  // Execute before global hook
   // /////////////////////////////////////
 
   await globalConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
@@ -92,7 +92,7 @@ async function findOne(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 4. Execute field-level hooks and access
+  // Execute field-level hooks and access
   // /////////////////////////////////////
 
   doc = await this.performFieldOperations(globalConfig, {
@@ -106,7 +106,7 @@ async function findOne(args) {
   });
 
   // /////////////////////////////////////
-  // 5. Execute after collection hook
+  // Execute after global hook
   // /////////////////////////////////////
 
   await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
@@ -119,7 +119,7 @@ async function findOne(args) {
   }, Promise.resolve());
 
   // /////////////////////////////////////
-  // 6. Return results
+  // Return results
   // /////////////////////////////////////
 
   return doc;

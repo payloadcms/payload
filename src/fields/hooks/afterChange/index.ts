@@ -8,38 +8,33 @@ type Args = {
   data: Record<string, unknown>
   doc: Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
-  id?: string | number
   operation: 'create' | 'update'
-  overrideAccess: boolean
   req: PayloadRequest
 }
 
-export const beforeValidate = async ({
-  data: incomingData,
-  doc,
+export const afterChange = async ({
+  data,
+  doc: incomingDoc,
   entityConfig,
-  id,
   operation,
-  overrideAccess,
   req,
 }: Args): Promise<Record<string, unknown>> => {
   const promises = [];
-  const data = deepCopyObject(incomingData);
+
+  const doc = deepCopyObject(incomingDoc);
 
   traverseFields({
     data,
     doc,
     fields: entityConfig.fields,
-    id,
     operation,
-    overrideAccess,
     promises,
     req,
-    siblingData: data,
     siblingDoc: doc,
+    siblingData: data,
   });
 
   await Promise.all(promises);
 
-  return data;
+  return doc;
 };

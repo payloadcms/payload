@@ -27,11 +27,10 @@ export const beforeChange = async ({
   req,
   skipValidation,
 }: Args): Promise<Record<string, unknown>> => {
+  const data = deepCopyObject(incomingData);
   const promises = [];
   const mergeLocaleActions = [];
   const errors: { message: string, field: string }[] = [];
-
-  const data = deepCopyObject(incomingData);
 
   traverseFields({
     data,

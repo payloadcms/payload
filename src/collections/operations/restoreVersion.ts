@@ -8,6 +8,7 @@ import { Payload } from '../../index';
 import { hasWhereAccessResult } from '../../auth/types';
 import { Where } from '../../types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
+import { afterChange } from '../../fields/hooks/afterChange';
 
 export type Arguments = {
   collection: Collection
@@ -143,15 +144,12 @@ async function restoreVersion<T extends TypeWithID = any>(this: Payload, args: A
   // afterChange - Fields
   // /////////////////////////////////////
 
-  result = await this.performFieldOperations(collectionConfig, {
+  result = await afterChange({
     data: result,
-    hook: 'afterChange',
+    doc: result,
+    entityConfig: collectionConfig,
     operation: 'update',
     req,
-    id: parentDocID,
-    depth,
-    overrideAccess,
-    showHiddenFields,
   });
 
   // /////////////////////////////////////

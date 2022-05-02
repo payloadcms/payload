@@ -14,6 +14,7 @@ import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
 import { ensurePublishedCollectionVersion } from '../../versions/ensurePublishedCollectionVersion';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
+import { afterChange } from '../../fields/hooks/afterChange';
 
 export type Arguments = {
   collection: Collection
@@ -308,15 +309,12 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
   // afterChange - Fields
   // /////////////////////////////////////
 
-  result = await this.performFieldOperations(collectionConfig, {
-    data: result,
-    hook: 'afterChange',
+  result = await afterChange({
+    data,
+    doc: result,
+    entityConfig: collectionConfig,
     operation: 'update',
     req,
-    id,
-    depth,
-    overrideAccess,
-    showHiddenFields,
   });
 
   // /////////////////////////////////////

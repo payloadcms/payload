@@ -34,7 +34,6 @@ export const promise = async ({
   siblingDoc,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
-    // Sanitize incoming data
     if (field.name === 'id') {
       if (field.type === 'number' && typeof siblingData[field.name] === 'string') {
         const value = siblingData[field.name] as string;
@@ -47,6 +46,7 @@ export const promise = async ({
       }
     }
 
+    // Sanitize incoming data
     switch (field.type) {
       case 'number': {
         if (typeof siblingData[field.name] === 'string') {
@@ -163,6 +163,15 @@ export const promise = async ({
           siblingData[field.name] = hookedValue;
         }
       }, Promise.resolve());
+    }
+
+    // Execute access control
+    if (field.access && field.access[operation]) {
+      const result = overrideAccess ? true : await field.access[operation]({ req, id, siblingData, data, doc });
+
+      if (!result) {
+        delete siblingData[field.name];
+      }
     }
   }
 

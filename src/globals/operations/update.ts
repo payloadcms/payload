@@ -10,6 +10,7 @@ import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
 import { hasWhereAccessResult } from '../../auth';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
+import { afterChange } from '../../fields/hooks/afterChange';
 
 async function update<T extends TypeWithID = any>(this: Payload, args): Promise<T> {
   const { globals: { Model } } = this;
@@ -233,14 +234,12 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
   // afterChange - Fields
   // /////////////////////////////////////
 
-  global = await this.performFieldOperations(globalConfig, {
-    data: global,
-    hook: 'afterChange',
+  global = await afterChange({
+    data,
+    doc: global,
+    entityConfig: globalConfig,
     operation: 'update',
     req,
-    depth,
-    overrideAccess,
-    showHiddenFields,
   });
 
   // /////////////////////////////////////

@@ -22,7 +22,7 @@ export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: Fie
 
 export type FieldAccess<T extends TypeWithID = any, P = any> = (args: {
   req: PayloadRequest
-  id?: string
+  id?: string | number
   data?: Partial<T>
   siblingData?: Partial<P>
   doc?: T
