@@ -17,9 +17,9 @@ Core features:
 ## Installation
 
 ```bash
-  yarn add payload-plugin-form-builder
+  yarn add @payloadcms/plugin-form-builder
   # OR
-  npm i payload-plugin-form-builder
+  npm i @payloadcms/plugin-form-builder
 ```
 
 ## Basic Usage
@@ -207,7 +207,7 @@ Each form field is defined as a [Payload Block](https://payloadcms.com/docs/fiel
     FieldsConfig,
     BeforePayment,
     HandlePayment
-   } from 'payload-plugin-form-builder/dist/types';
+   } from '@payloadcms/plugin-form-builder/dist/types';
   ```
 
   ## Screenshots
