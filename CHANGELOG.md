@@ -1,3 +1,10 @@
+## [0.16.3](https://github.com/payloadcms/payload/compare/v0.16.2...v0.16.3) (2022-05-04)
+
+
+### Bug Fixes
+
+* rare bug while merging locale data ([47c37e0](https://github.com/payloadcms/payload/commit/47c37e015300be4f9d5d4387f26a0adb39b8379c))
+
 ## [0.16.2](https://github.com/payloadcms/payload/compare/v0.16.1...v0.16.2) (2022-05-02)
 
 
