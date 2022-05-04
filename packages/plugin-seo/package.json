@@ -1,6 +1,6 @@
 {
-  "name": "payload-plugin-seo",
-  "version": "0.0.4",
+  "name": "@payloadcms/plugin-seo",
+  "version": "1.0.0",
   "description": "SEO plugin for Payload CMS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,7 @@
     "seo",
     "yoast"
   ],
-  "author": "dev@trbl.design",
+  "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
     "payload": "^0.15.6",

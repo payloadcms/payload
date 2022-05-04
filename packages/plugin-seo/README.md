@@ -1,11 +1,11 @@
 # Payload SEO Plugin
 
-[![NPM](https://img.shields.io/npm/v/payload-plugin-seo)](https://www.npmjs.com/package/payload-plugin-seo)
+[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-seo)](https://www.npmjs.com/package/@payloadcms/plugin-seo)
 
-A plugin for [Payload CMS](https://github.com/payloadcms/payload) to auto-generate custom meta data based on the content of your documents.
+A plugin for [Payload CMS](https://github.com/payloadcms/payload) to auto-generate SEO meta data based on the content of your documents.
 
 Core features:
-  - Adds a `meta` field to every seo-enabled collection that:
+  - Adds a `meta` field to every SEO-enabled collection that:
     - Includes title, description, and image subfields
     - Auto-generates meta data from your document's content
     - Displays hints and indicators to help content editors
@@ -15,9 +15,9 @@ Core features:
 ## Installation
 
 ```bash
-  yarn add payload-plugin-seo
+  yarn add @payloadcms/plugin-seo
   # OR
-  npm i payload-plugin-seo
+  npm i @payloadcms/plugin-seo
 ```
 
 ## Basic Usage
@@ -26,7 +26,7 @@ In the `plugins` array of your [Payload config](https://payloadcms.com/docs/conf
 
 ```js
 import { buildConfig } from 'payload/config';
-import seo from 'payload-plugin-seo';
+import seo from '@payloadcms/plugin-seo';
 
 const config = buildConfig({
   collections: [
@@ -111,10 +111,10 @@ export default config;
     GenerateTitle,
     GenerateDescription
     GenerateURL
-   } from 'payload-plugin-seo/dist/types';
+   } from '@payloadcms/plugin-seo/dist/types';
   ```
 
   ## Screenshots
   ![image](https://user-images.githubusercontent.com/70709113/163850633-f3da5f8e-2527-4688-bc79-17233307a883.png)
 
-  <!-- ![screenshot 1](https://github.com/trouble/payload-plugin-seo/blob/main/images/screenshot-1.jpg?raw=true) -->
+  <!-- ![screenshot 1](https://github.com/trouble/@payloadcms/plugin-seo/blob/main/images/screenshot-1.jpg?raw=true) -->
