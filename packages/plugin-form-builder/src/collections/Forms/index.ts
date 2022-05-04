@@ -1,188 +1,202 @@
-import { Block, CollectionConfig } from 'payload/types';
+import { Block, CollectionConfig, Field } from 'payload/types';
 import { FieldConfig, FormConfig } from '../../types';
 import fields from './fields';
 
 // all settings can be overridden by the config
-export const generateFormCollection = (formConfig: FormConfig): CollectionConfig => ({
-  slug: formConfig?.formOverrides?.slug || 'forms',
-  admin: {
-    useAsTitle: 'title',
-    enableRichTextRelationship: false,
-  },
-  access: {
-    read: () => true,
-    ...formConfig?.formOverrides?.access || {}
-  },
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-      required: true,
-    },
-    {
-      name: 'fields',
-      type: 'blocks',
-      blocks: Object.entries(formConfig?.fields || {}).map(([fieldKey, fieldConfig]) => {
-        // let the config enable/disable fields with either boolean values or objects
-        if (fieldConfig !== false) {
-          let block = fields[fieldKey];
-          if (typeof block === 'function') {
-            block = block(fieldConfig as FieldConfig);
-          }
-          return block;
-        }
+export const generateFormCollection = (formConfig: FormConfig): CollectionConfig => {
 
-        return null;
-      }).filter(Boolean) as Block[],
+  const redirect: Field = {
+    name: 'redirect',
+    type: 'group',
+    admin: {
+      hideGutter: true,
+      condition: (_, siblingData) => siblingData?.confirmationType === 'redirect',
     },
-    {
-      name: 'submitButtonLabel',
-      type: 'text',
-    },
-    {
-      name: 'confirmationType',
-      type: 'radio',
-      admin: {
-        description: 'Choose whether to display an on-page message or redirect to a different page after they submit the form.',
-        layout: 'horizontal',
+    fields: [
+      {
+        name: 'url',
+        label: 'URL to redirect to',
+        type: 'text',
+        required: true,
       },
+    ],
+  };
+
+  if (formConfig.redirectRelationships) {
+    redirect.fields.unshift({
+      name: 'reference',
+      label: 'Document to link to',
+      type: 'relationship',
+      relationTo: formConfig.redirectRelationships,
+      required: true,
+      maxDepth: 2,
+      admin: {
+        condition: (_, siblingData) => siblingData?.type === 'reference',
+      },
+    });
+
+    redirect.fields.unshift({
+      name: 'type',
+      type: 'radio',
       options: [
         {
-          label: 'Message',
-          value: 'message',
+          label: 'Internal link',
+          value: 'reference',
         },
         {
-          label: 'Redirect',
-          value: 'redirect',
-        },
-      ],
-      defaultValue: 'message',
-    },
-    {
-      name: 'confirmationMessage',
-      type: 'richText',
-      required: true,
-      admin: {
-        condition: (_, siblingData) => siblingData?.confirmationType === 'message',
-      },
-    },
-    {
-      name: 'redirect',
-      type: 'group',
-      admin: {
-        hideGutter: true,
-        condition: (_, siblingData) => siblingData?.confirmationType === 'redirect',
-      },
-      fields: [
-        {
-          name: 'type',
-          type: 'radio',
-          options: [
-            {
-              label: 'Internal link',
-              value: 'reference',
-            },
-            {
-              label: 'Custom URL',
-              value: 'custom',
-            },
-          ],
-          defaultValue: 'reference',
-          admin: {
-            layout: 'horizontal',
-          },
-        },
-        {
-          name: 'reference',
-          label: 'Document to link to',
-          type: 'relationship',
-          relationTo: formConfig.redirectRelationships || [],
-          required: true,
-          maxDepth: 2,
-          admin: {
-            condition: (_, siblingData) => siblingData?.type === 'reference',
-          },
-        },
-        {
-          name: 'url',
           label: 'Custom URL',
-          type: 'text',
-          required: true,
-          admin: {
-            condition: (_, siblingData) => siblingData?.type === 'custom',
-          },
+          value: 'custom',
         },
       ],
-    },
-    {
-      name: 'emails',
-      type: 'array',
+      defaultValue: 'reference',
       admin: {
-        description: 'Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field\'s name with double curly brackets, i.e. {{firstName}}.',
+        layout: 'horizontal',
       },
-      fields: [
-        {
-          type: 'row',
-          fields: [
-            {
-              type: 'text',
-              name: 'emailTo',
-              label: 'Email To',
-              required: true,
-              admin: {
-                width: '50%',
-                placeholder: 'Email Sender <sender@email.com>'
-              },
-            },
-            {
-              type: 'text',
-              name: 'emailFrom',
-              label: 'Email From',
-              admin: {
-                width: '50%',
-                placeholder: 'Email Recipient <{{email}}>',
-              },
-            },
-          ],
-        },
-        {
-          type: 'row',
-          fields: [
-            {
-              type: 'text',
-              name: 'replyTo',
-              label: 'Reply To',
-              admin: {
-                width: '50%',
-              },
-            },
-            {
-              type: 'text',
-              name: 'bcc',
-              label: 'BCC',
-              admin: {
-                width: '50%',
-              },
-            },
-          ],
-        },
-        {
-          type: 'text',
-          name: 'subject',
-          label: 'Subject',
-          defaultValue: 'You\'ve received a new message.',
-          required: true,
-        },
-        {
-          type: 'richText',
-          name: 'message',
-          label: 'Message',
-          admin: {
-            description: 'Enter the message that should be sent in this email.',
-          },
-        },
-      ],
+    });
+
+    redirect.fields[2].label = 'Custom URL';
+
+    redirect.fields[2].admin = {
+      condition: (_, siblingData) => siblingData?.type === 'custom',
+    };
+  }
+
+  const config: CollectionConfig = {
+    slug: formConfig?.formOverrides?.slug || 'forms',
+    admin: {
+      useAsTitle: 'title',
+      enableRichTextRelationship: false,
     },
-    ...formConfig?.formOverrides?.fields || []
-  ],
-});
+    access: {
+      read: () => true,
+      ...formConfig?.formOverrides?.access || {}
+    },
+    fields: [
+      {
+        name: 'title',
+        type: 'text',
+        required: true,
+      },
+      {
+        name: 'fields',
+        type: 'blocks',
+        blocks: Object.entries(formConfig?.fields || {}).map(([fieldKey, fieldConfig]) => {
+          // let the config enable/disable fields with either boolean values or objects
+          if (fieldConfig !== false) {
+            let block = fields[fieldKey];
+            if (typeof block === 'function') {
+              block = block(fieldConfig as FieldConfig);
+            }
+            return block;
+          }
+
+          return null;
+        }).filter(Boolean) as Block[],
+      },
+      {
+        name: 'submitButtonLabel',
+        type: 'text',
+      },
+      {
+        name: 'confirmationType',
+        type: 'radio',
+        admin: {
+          description: 'Choose whether to display an on-page message or redirect to a different page after they submit the form.',
+          layout: 'horizontal',
+        },
+        options: [
+          {
+            label: 'Message',
+            value: 'message',
+          },
+          {
+            label: 'Redirect',
+            value: 'redirect',
+          },
+        ],
+        defaultValue: 'message',
+      },
+      {
+        name: 'confirmationMessage',
+        type: 'richText',
+        required: true,
+        admin: {
+          condition: (_, siblingData) => siblingData?.confirmationType === 'message',
+        },
+      },
+      redirect,
+      {
+        name: 'emails',
+        type: 'array',
+        admin: {
+          description: 'Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field\'s name with double curly brackets, i.e. {{firstName}}.',
+        },
+        fields: [
+          {
+            type: 'row',
+            fields: [
+              {
+                type: 'text',
+                name: 'emailTo',
+                label: 'Email To',
+                required: true,
+                admin: {
+                  width: '50%',
+                  placeholder: 'Email Sender <sender@email.com>'
+                },
+              },
+              {
+                type: 'text',
+                name: 'emailFrom',
+                label: 'Email From',
+                admin: {
+                  width: '50%',
+                  placeholder: 'Email Recipient <{{email}}>',
+                },
+              },
+            ],
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                type: 'text',
+                name: 'replyTo',
+                label: 'Reply To',
+                admin: {
+                  width: '50%',
+                },
+              },
+              {
+                type: 'text',
+                name: 'bcc',
+                label: 'BCC',
+                admin: {
+                  width: '50%',
+                },
+              },
+            ],
+          },
+          {
+            type: 'text',
+            name: 'subject',
+            label: 'Subject',
+            defaultValue: 'You\'ve received a new message.',
+            required: true,
+          },
+          {
+            type: 'richText',
+            name: 'message',
+            label: 'Message',
+            admin: {
+              description: 'Enter the message that should be sent in this email.',
+            },
+          },
+        ],
+      },
+      ...formConfig?.formOverrides?.fields || []
+    ],
+  }
+
+  return config;
+};
