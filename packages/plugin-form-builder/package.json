@@ -23,7 +23,7 @@
   "license": "MIT",
   "peerDependencies": {
     "payload": "^0.15.6",
-    "react": "^17.0.2"
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
     "@types/escape-html": "^1.0.1",
