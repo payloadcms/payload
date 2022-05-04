@@ -1,6 +1,6 @@
 {
-  "name": "payload-plugin-form-builder",
-  "version": "1.0.7",
+  "name": "@payloadcms/plugin-form-builder",
+  "version": "1.0.0",
   "description": "Form builder plugin for Payload CMS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,7 +19,7 @@
     "form builder",
     "payments"
   ],
-  "author": "dev@trbl.design",
+  "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
     "payload": "^0.15.6",

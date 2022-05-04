@@ -1,6 +1,6 @@
 # Payload Form Builder Plugin
 
-[![NPM](https://img.shields.io/npm/v/payload-plugin-form-builder)](https://www.npmjs.com/package/payload-plugin-form-builder)
+[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-form-builder)](https://www.npmjs.com/package/@payloadcms/plugin-form-builder)
 
 A plugin for [Payload CMS](https://github.com/payloadcms/payload) to easily allow your admin editors to build and manage forms from the admin panel.
 
@@ -28,7 +28,7 @@ In the  `plugins` array of your [Payload config](https://payloadcms.com/docs/con
 
 ```js
 import { buildConfig } from 'payload/config';
-import formBuilder from 'payload-plugin-form-builder';
+import formBuilder from '@payloadcms/plugin-form-builder';
 
 const config = buildConfig({
   collections: [
@@ -80,7 +80,7 @@ export default config;
    A [beforeChange]([beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange)) hook that is called upon form submissions. You can integrate into any third-party payment processing API here. There is a `getPaymentTotal` function that will calculate the total cost after all conditions have been applied.
 
     ```
-    import { getPaymentTotal } from 'payload-plugin-form-builder';
+    import { getPaymentTotal } from '@payloadcms/plugin-form-builder';
     ...
     handlePayment: async ({ form, submissionData }) => {
       // first calculate the price
@@ -110,10 +110,10 @@ export default config;
 
 - `formOverrides`
 
-    Override anything on the form collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections).
+    Override anything on the form collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections). Your overrides will be merged into the default `forms` collection.
 
     ```
-    formSubmissionOverrides: {
+    formOverrides: {
       slug: 'contact-forms'
     }
     ```
@@ -121,7 +121,7 @@ export default config;
 - `formSubmissionOverrides`
     By default, this plugin relies on [Payload access control](https://payloadcms.com/docs/access-control/collections) to restrict the `update` and `read` operations. This is because anyone should be able to create a form submission, even from a public-facing website - but no one should be able to update a submission one it has been created, or read a submission unless they have permission.
 
-    You can verride access control and anything else on the form submission collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections).
+    You can override access control and anything else on the form submission collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections). Your overrides will be merged into the default `formSubmissions` collection.
 
     ```
     formSubmissionOverrides: {
@@ -131,7 +131,7 @@ export default config;
 
 ## Fields
 
-Each field is a [Payload Block](https://payloadcms.com/docs/fields/blocks) with the following fields:
+Each form field is defined as a [Payload Block](https://payloadcms.com/docs/fields/blocks) with the following subfields:
 
   - Text
     - `name`: string
@@ -212,9 +212,9 @@ Each field is a [Payload Block](https://payloadcms.com/docs/fields/blocks) with 
 
   ## Screenshots
 
-  ![screenshot 1](https://github.com/trouble/payload-plugin-form-builder/blob/main/images/screenshot-1.jpg?raw=true)
-  ![screenshot 2](https://github.com/trouble/payload-plugin-form-builder/blob/main/images/screenshot-2.jpg?raw=true)
-  ![screenshot 3](https://github.com/trouble/payload-plugin-form-builder/blob/main/images/screenshot-3.jpg?raw=true)
-  ![screenshot 4](https://github.com/trouble/payload-plugin-form-builder/blob/main/images/screenshot-4.jpg?raw=true)
-  ![screenshot 5](https://github.com/trouble/payload-plugin-form-builder/blob/main/images/screenshot-5.jpg?raw=true)
-  ![screenshot 6](https://github.com/trouble/payload-plugin-form-builder/blob/main/images/screenshot-6.jpg?raw=true)
+  ![screenshot 1](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-1.jpg?raw=true)
+  ![screenshot 2](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-2.jpg?raw=true)
+  ![screenshot 3](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-3.jpg?raw=true)
+  ![screenshot 4](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-4.jpg?raw=true)
+  ![screenshot 5](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-5.jpg?raw=true)
+  ![screenshot 6](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-6.jpg?raw=true)
