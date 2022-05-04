@@ -6,7 +6,7 @@ import populateBreadcrumbs from './utilities/populateBreadcrumbs';
 import resaveChildren from './hooks/resaveChildren';
 import resaveSelfAfterCreate from './hooks/resaveSelfAfterCreate';
 
-const breadcrumbs = (options: Options) => (config: Config): Config => ({
+const nestedDocs = (options: Options) => (config: Config): Config => ({
   ...config,
   collections: (config.collections || []).map((collection) => {
     if (options.collections.indexOf(collection.slug) > -1) {
@@ -42,4 +42,4 @@ const breadcrumbs = (options: Options) => (config: Config): Config => ({
   }),
 });
 
-export default breadcrumbs;
+export default nestedDocs;

@@ -1,6 +1,6 @@
-# Payload Nested Pages Plugin
+# Payload Nested Docs Plugin
 
-[![NPM](https://img.shields.io/npm/v/payload-plugin-nested-pages)](https://www.npmjs.com/package/payload-plugin-nested-pages)
+[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-nested-docs)](https://www.npmjs.com/package/@payloadcms/plugin-nested-docs)
 
 A plugin for [Payload CMS](https://github.com/payloadcms/payload) to easily allow for documents to be nested inside one another.
 
@@ -11,9 +11,9 @@ Core features:
 ## Installation
 
 ```bash
-  yarn add payload-plugin-nested-pages
+  yarn add @payloadcms/plugin-nested-docs
   # OR
-  npm i payload-plugin-nested-pages
+  npm i @payloadcms/plugin-nested-docs
 ```
 
 ## Basic Usage
@@ -22,7 +22,7 @@ In the `plugins` array of your [Payload config](https://payloadcms.com/docs/conf
 
 ```js
 import { buildConfig } from 'payload/config';
-import nestedPages from 'payload-plugin-nestedPages';
+import nestedDocs from '@payloadcms/plugin-nested-docs';
 
 const config = buildConfig({
   collections: [
@@ -41,7 +41,7 @@ const config = buildConfig({
     }
   ],
   plugins: [
-    nestedPages({
+    nestedDocs({
       collections: ['pages'],
       generateLabel: (_, doc) => doc.title,
       generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
@@ -76,7 +76,7 @@ The `breadcrumbs` array stores the following fields:
 
 #### `collections`
 
-  An array of collections slugs to enable nested pages.
+  An array of collections slugs to enable nested docs.
 
 #### `generateLabel`
 
@@ -88,7 +88,7 @@ You can also pass a function to dynamically set the `label` of your breadcrumb.
 {
 plugins: [
   ...
-  nestedPages({
+  nestedDocs({
     ...
     generateLabel: (_, doc) => doc.title // NOTE: 'title' is a hypothetical field
   })
@@ -107,7 +107,7 @@ A function that allows you to dynamically generate each breadcrumb `url`. Each `
 ```js
 plugins: [
   ...
-  nestedPages({
+  nestedDocs({
     ...
     generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''), // NOTE: 'slug' is a hypothetical field
   })
@@ -135,8 +135,8 @@ You can also extend the built-in `parent` and `breadcrumbs` fields on a page-by-
 
 ```js
 import { CollectionConfig } from 'payload/types';
-import createParentField from 'payload-plugin-nested-pages/fields/parent';
-import createBreadcrumbsField from 'payload-plugin-nested-pages/fields/breadcrumbs';
+import createParentField from '@payloadcms/plugin-nested-docs/fields/parent';
+import createBreadcrumbsField from '@payloadcms/plugin-nested-docs/fields/breadcrumbs';
 
 const examplePageConfig: CollectionConfig = {
   slug: 'pages',
@@ -174,12 +174,12 @@ const examplePageConfig: CollectionConfig = {
 All types can be directly imported:
 ```js
 import {
-  NestedPagesConfig,
+  nestedDocsConfig,
   GenerateURL,
   GenerateLabel
-} from 'payload-plugin-nested-pages/dist/types';
+} from '@payloadcms/plugin-nested-docs/dist/types';
 ```
 
 ## Screenshots
 
-<!-- ![screenshot 1](https://github.com/trouble/payload-plugin-nested-pages/blob/main/images/screenshot-1.jpg?raw=true) -->
+<!-- ![screenshot 1](https://github.com/trouble/@payloadcms/plugin-nested-docs/blob/main/images/screenshot-1.jpg?raw=true) -->

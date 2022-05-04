@@ -1,7 +1,7 @@
 {
-  "name": "payload-plugin-nested-pages",
-  "version": "0.0.2",
-  "description": "Nested pages plugin for Payload CMS",
+  "name": "@payloadcms/plugin-nested-docs",
+  "version": "1.0.0",
+  "description": "Nested documents plugin for Payload CMS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -18,7 +18,7 @@
     "nested pages",
     "parent pages"
   ],
-  "author": "dev@trbl.design",
+  "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
     "payload": "^0.15.6",
