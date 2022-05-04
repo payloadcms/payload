@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { useConfig } from '@payloadcms/config-provider';
+import { useLocale } from 'payload/components/utilities';
 import { Props as UploadFieldType } from 'payload/dist/admin/components/forms/field-types/Upload/types';
 import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/Input';
 import { useField, useWatchForm } from 'payload/components/forms';
@@ -24,6 +25,7 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = (props) => {
   const field: FieldType<string> = useField(props as Options);
 
   const { fields } = useWatchForm();
+  const locale = useLocale();
 
   const {
     value,
@@ -36,7 +38,7 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = (props) => {
     const getDescription = async () => {
       let generatedImage;
       if (typeof generateImage === 'function') {
-        generatedImage = await generateImage({ doc: { ...fields } });
+        generatedImage = await generateImage({ doc: { ...fields }, locale });
       }
       setValue(generatedImage);
     }
@@ -44,7 +46,8 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = (props) => {
   }, [
     fields,
     setValue,
-    seoConfig
+    seoConfig,
+    locale,
   ]);
 
   const hasImage = Boolean(value);

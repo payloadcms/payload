@@ -27,6 +27,7 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
         {
           name: 'title',
           type: 'text',
+          localized: true,
           admin: {
             components: {
               Field: (props) => getMetaTitleField({ ...props, seoConfig }),
@@ -36,6 +37,7 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
         {
           name: 'description',
           type: 'textarea',
+          localized: true,
           admin: {
             components: {
               Field: (props) => getMetaDescriptionField({ ...props, seoConfig }),
@@ -46,6 +48,7 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
           name: 'image',
           label: 'Meta Image',
           type: 'upload',
+          localized: true,
           relationTo: seoConfig?.uploadsCollection,
           admin: {
             description: 'Maximum upload file size: 12MB. Recommended file size for images is <500KB.',

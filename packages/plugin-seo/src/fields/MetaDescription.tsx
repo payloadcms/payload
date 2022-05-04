@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { useField, useWatchForm } from 'payload/components/forms';
+import { useLocale } from 'payload/components/utilities';
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { LengthIndicator } from '../ui/LengthIndicator';
 import { defaults } from '../defaults';
@@ -27,6 +28,7 @@ export const MetaDescription: React.FC<(TextareaFieldWithProps | {}) & {
     seoConfig,
   } = props as TextareaFieldWithProps || {}; // TODO: this typing is temporary until payload types are updated for custom field props
 
+  const locale = useLocale();
   const { fields } = useWatchForm();
 
   const field: FieldType<string> = useField({
@@ -47,7 +49,7 @@ export const MetaDescription: React.FC<(TextareaFieldWithProps | {}) & {
     const getDescription = async () => {
       let generatedDescription;
       if (typeof generateDescription === 'function') {
-        generatedDescription = await generateDescription({ doc: { ...fields } });
+        generatedDescription = await generateDescription({ doc: { ...fields }, locale });
       }
       setValue(generatedDescription);
     }
@@ -55,7 +57,8 @@ export const MetaDescription: React.FC<(TextareaFieldWithProps | {}) & {
   }, [
     fields,
     setValue,
-    seoConfig
+    seoConfig,
+    locale
   ]);
 
   return (

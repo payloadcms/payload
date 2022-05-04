@@ -4,10 +4,10 @@ export type SEOConfig = {
   collections?: string[]
   uploadsCollection?: string
   fields?: Partial<Field>[]
-  generateTitle?: (args: { doc: any }) => string | Promise<string>
-  generateDescription?: (args: { doc: any }) => string | Promise<string>
-  generateImage?: (args: { doc: any }) => string | Promise<string>
-  generateURL?: (args: { doc: any }) => string | Promise<string>
+  generateTitle?: <T = any>(args: { doc: T, locale?: string }) => string | Promise<string>
+  generateDescription?: <T = any>(args: { doc: T, locale?: string }) => string | Promise<string>
+  generateImage?: <T = any>(args: { doc: T, locale?: string }) => string | Promise<string>
+  generateURL?: <T = any>(args: { doc: T, locale?: string }) => string | Promise<string>
 }
 
 export type Meta = {

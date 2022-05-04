@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';
+import { useLocale } from 'payload/components/utilities';
 import TextInputField from 'payload/dist/admin/components/forms/field-types/Text/Input';
 import { useField, useWatchForm } from 'payload/components/forms';
 import { FieldType as FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
@@ -31,6 +32,7 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
     path
   } as Options);
 
+  const locale = useLocale();
   const { fields } = useWatchForm();
 
   const {
@@ -45,7 +47,7 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
     const getTitle = async () => {
       let generatedTitle;
       if (typeof generateTitle === 'function') {
-        generatedTitle = await generateTitle({ doc: { ...fields } });
+        generatedTitle = await generateTitle({ doc: { ...fields }, locale });
       }
       setValue(generatedTitle);
     }
@@ -53,7 +55,8 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
   }, [
     fields,
     setValue,
-    seoConfig
+    seoConfig,
+    locale,
   ]);
 
   return (

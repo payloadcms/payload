@@ -75,7 +75,7 @@ export default config;
     ```js
     seo({
       ...
-      generateTitle: ({ doc }) => `Website.com — ${doc?.title?.value}`,
+      generateTitle: ({ doc, locale }) => `Website.com — ${doc?.title?.value}`,
     })
     ```
 
@@ -86,7 +86,7 @@ export default config;
     ```js
     seo({
       ...
-      generateDescription: ({ doc }) => doc?.excerpt?.value
+      generateDescription: ({ doc, locale }) => doc?.excerpt?.value
     })
     ```
 
@@ -97,7 +97,7 @@ export default config;
     ```js
     seo({
       ...
-      generateURL: ({ doc }) => `https://yoursite.com/${doc?.slug?.value}`
+      generateURL: ({ doc, locale }) => `https://yoursite.com/${doc?.slug?.value}`
     })
     ```
 
