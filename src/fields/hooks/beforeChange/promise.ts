@@ -57,7 +57,7 @@ export const promise = async ({
     if (typeof siblingData[field.name] === 'undefined') {
       // If no incoming data, but existing document data is found, merge it in
       if (typeof siblingDoc[field.name] !== 'undefined') {
-        if (field.localized && typeof siblingDoc[field.name] === 'object') {
+        if (field.localized && typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null) {
           siblingData[field.name] = siblingDoc[field.name][req.locale];
         } else {
           siblingData[field.name] = siblingDoc[field.name];
