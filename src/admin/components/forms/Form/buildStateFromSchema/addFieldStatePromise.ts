@@ -43,13 +43,15 @@ export const addFieldStatePromise = async ({
       passesCondition,
     };
 
-    const valueWithDefault = await getValueWithDefault({ value: data[field.name], defaultValue: field.defaultValue, locale, user });
-    data[field.name] = valueWithDefault;
+    const valueWithDefault = await getValueWithDefault({ value: data?.[field.name], defaultValue: field.defaultValue, locale, user });
+    if (data?.[field.name]) {
+      data[field.name] = valueWithDefault;
+    }
 
     let validationResult: boolean | string = true;
 
     if (typeof fieldState.validate === 'function') {
-      validationResult = await fieldState.validate(data[field.name], {
+      validationResult = await fieldState.validate(data?.[field.name], {
         ...field,
         data: fullData,
         user,
