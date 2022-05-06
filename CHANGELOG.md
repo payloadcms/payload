@@ -1,3 +1,11 @@
+## [0.16.4](https://github.com/payloadcms/payload/compare/v0.16.3...v0.16.4) (2022-05-06)
+
+
+### Bug Fixes
+
+* fields in groups causing console error in browser ([#553](https://github.com/payloadcms/payload/issues/553)) ([78edac6](https://github.com/payloadcms/payload/commit/78edac684e54d335b15303d8348c8abcb2bba716))
+* save resized image file when equal to upload size ([#555](https://github.com/payloadcms/payload/issues/555)) ([46f4bc2](https://github.com/payloadcms/payload/commit/46f4bc2a077ce668e9b30c187092b9b0c6d83f86))
+
 ## [0.16.3](https://github.com/payloadcms/payload/compare/v0.16.2...v0.16.3) (2022-05-04)
 
 
