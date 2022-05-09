@@ -87,7 +87,9 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
             let block = fields[fieldKey];
 
             if (typeof block === 'object' && typeof fieldConfig === 'object') {
-              return merge<FieldConfig>(block, fieldConfig);
+              return merge<FieldConfig>(block, fieldConfig, {
+                arrayMerge: (_, sourceArray) => sourceArray
+              });
             }
 
             if (typeof block === 'function') {
