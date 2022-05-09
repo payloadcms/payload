@@ -35,6 +35,7 @@
     "dist"
   ],
   "dependencies": {
+    "deepmerge": "^4.2.2",
     "escape-html": "^1.0.3"
   }
 }

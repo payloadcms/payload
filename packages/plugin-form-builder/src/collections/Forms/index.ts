@@ -1,4 +1,5 @@
 import { Block, CollectionConfig, Field } from 'payload/types';
+import merge from 'deepmerge';
 import { FieldConfig, FormConfig } from '../../types';
 import fields from './fields';
 
@@ -84,9 +85,15 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
           // let the config enable/disable fields with either boolean values or objects
           if (fieldConfig !== false) {
             let block = fields[fieldKey];
-            if (typeof block === 'function') {
-              block = block(fieldConfig as FieldConfig);
+
+            if (typeof block === 'object' && typeof fieldConfig === 'object') {
+              return merge<FieldConfig>(block, fieldConfig);
             }
+
+            if (typeof block === 'function') {
+              return block(fieldConfig as FieldConfig);
+            }
+
             return block;
           }
 
