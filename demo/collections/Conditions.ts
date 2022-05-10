@@ -3,6 +3,7 @@ import Email from '../blocks/Email';
 import Quote from '../blocks/Quote';
 import NumberBlock from '../blocks/Number';
 import CallToAction from '../blocks/CallToAction';
+import Text from './CustomComponents/components/fields/Text/Field';
 
 const Conditions: CollectionConfig = {
   slug: 'conditions',
@@ -65,6 +66,18 @@ const Conditions: CollectionConfig = {
       required: true,
       admin: {
         condition: (_, siblings) => siblings?.enableTest === true,
+      },
+    },
+    {
+      name: 'customComponent',
+      type: 'text',
+      label: 'Custom Component with Enable Test is checked',
+      required: true,
+      admin: {
+        condition: (_, siblings) => siblings?.enableTest === true,
+        components: {
+          Field: Text,
+        },
       },
     },
   ],
