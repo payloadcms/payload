@@ -43,7 +43,7 @@
     "test:client": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test jest --config=jest.react.config.js",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "test:e2e": "DISABLE_LOGGING=true MONGO_URL=mongodb://localhost/payload-integration start-server-and-test dev http-get://localhost:3000/admin cy:run",
+    "test:e2e": "cross-env DISABLE_LOGGING=true MONGO_URL=mongodb://localhost/payload-integration start-server-and-test dev http-get://localhost:3000/admin cy:run",
     "clean": "rimraf dist",
     "release": "release-it",
     "release:patch": "release-it patch",
