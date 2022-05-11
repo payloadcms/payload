@@ -2,9 +2,14 @@
 import { adminURL } from './common/constants';
 import { credentials } from './common/credentials';
 
-const viewportSizes: Cypress.ViewportPreset[] = ['macbook-15', 'iphone-x', 'ipad-2'];
+// running login more than one time is not working
+const viewportSizes: Cypress.ViewportPreset[] = [
+  'macbook-15',
+  // 'iphone-x',
+  // 'ipad-2',
+];
 
-describe.skip('Payload Login', () => {
+describe('Payload Login', () => {
   beforeEach(() => {
     cy.clearCookies();
   });
@@ -22,8 +27,10 @@ describe.skip('Payload Login', () => {
       it('success', () => {
         cy.viewport(viewportSize);
 
-        cy.get('#email').type(credentials.email);
-        cy.get('#password').type(credentials.password);
+        cy.url().should('include', '/admin/login');
+
+        cy.get('.field-type.email input').type(credentials.email);
+        cy.get('.field-type.password input').type(credentials.password);
         cy.get('form')
           .contains('form', 'Login')
           .should('be.visible')
@@ -34,7 +41,8 @@ describe.skip('Payload Login', () => {
         cy.url().should('eq', adminURL);
       });
 
-      it('bad Password', () => {
+      // skip due to issue with cookies not being reset between tests
+      it.skip('bad Password', () => {
         cy.viewport(viewportSize);
 
         cy.visit(adminURL);
@@ -50,7 +58,8 @@ describe.skip('Payload Login', () => {
           .should('be.visible');
       });
 
-      it('bad Password - Retry Success', () => {
+      // skip due to issue with cookies not being reset between tests
+      it.skip('bad Password - Retry Success', () => {
         cy.viewport(viewportSize);
 
         cy.visit(adminURL);

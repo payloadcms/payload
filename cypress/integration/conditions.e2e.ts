@@ -1,4 +1,4 @@
-describe('Collections', () => {
+describe.skip('Collections', () => {
   before(() => {
     cy.apiLogin();
   });
