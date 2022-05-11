@@ -16,7 +16,7 @@ const connectMongoose = async (
     autoIndex: true,
   };
 
-  if (process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === 'test' || process.env.MEMORY_SERVER) {
     if (local) {
       urlToConnect = `${connection.url}:${connection.port}/${connection.name}`;
     } else {
