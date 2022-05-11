@@ -1,7 +1,7 @@
 import { adminURL } from './common/constants';
 import { credentials } from './common/credentials';
 
-describe('Collections', () => {
+describe.skip('Collections', () => {
   const collectionName = 'Admins';
 
   before(() => {
