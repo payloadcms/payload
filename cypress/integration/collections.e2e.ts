@@ -30,7 +30,7 @@ describe('Collections', () => {
     cy.contains(collectionName).click();
 
     cy.contains('Create New').click();
-    cy.url().should('eq', `${adminURL}/collections/${collectionName.toLowerCase()}/create`);
+    cy.url().should('contain', `${adminURL}/collections/${collectionName.toLowerCase()}/create`);
   });
   it('can create new - plus button', () => {
     cy.contains(collectionName)
@@ -38,6 +38,6 @@ describe('Collections', () => {
       .first()
       .click();
 
-    cy.url().should('eq', `${adminURL}/collections/${collectionName.toLowerCase()}/create`);
+    cy.url().should('contain', `${adminURL}/collections/${collectionName.toLowerCase()}/create`);
   });
 });
