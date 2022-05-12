@@ -1,4 +1,4 @@
-describe.skip('Collections', () => {
+describe('Collections', () => {
   before(() => {
     cy.apiLogin();
   });
@@ -9,12 +9,12 @@ describe.skip('Collections', () => {
 
   it('can see conditional fields', () => {
     cy.get('#simpleCondition')
-      .should('not.be.visible');
+      .should('not.exist');
 
     cy.get('#customComponent')
-      .should('not.be.visible');
+      .should('not.exist');
 
-    cy.get('#enableTest').click();
+    cy.contains('Enable Test').click();
 
     cy.get('#simpleCondition')
       .should('be.visible');
