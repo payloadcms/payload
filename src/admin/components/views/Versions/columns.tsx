@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useRouteMatch } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
 import format from 'date-fns/format';
+import { useConfig } from '../../utilities/Config';
 import { Column } from '../../elements/Table/types';
 import SortColumn from '../../elements/SortColumn';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';

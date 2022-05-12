@@ -1,5 +1,5 @@
 import React from 'react';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../Config';
 
 const NestProviders = ({ providers, children }) => {
   const Component = providers[0];

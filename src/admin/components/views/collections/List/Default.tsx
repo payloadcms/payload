@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../utilities/Config';
 import UploadGallery from '../../../elements/UploadGallery';
 import Eyebrow from '../../../elements/Eyebrow';
 import Paginator from '../../../elements/Paginator';

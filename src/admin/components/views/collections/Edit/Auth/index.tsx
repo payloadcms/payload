@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../utilities/Config';
 import Email from '../../../../forms/field-types/Email';
 import Password from '../../../../forms/field-types/Password';
 import Checkbox from '../../../../forms/field-types/Checkbox';

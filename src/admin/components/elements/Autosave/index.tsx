@@ -1,8 +1,8 @@
-import { useConfig } from '@payloadcms/config-provider';
 import { formatDistance } from 'date-fns';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useConfig } from '../../utilities/Config';
 import { useWatchForm, useFormModified } from '../../forms/Form/context';
 import { useLocale } from '../../utilities/Locale';
 import { Props } from './types';

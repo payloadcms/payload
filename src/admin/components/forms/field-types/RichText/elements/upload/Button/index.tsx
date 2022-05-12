@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../../../utilities/Config';
 import ElementButton from '../../Button';
 import UploadIcon from '../../../../../../icons/Upload';
 import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';

@@ -1,6 +1,6 @@
 import React from 'react';
 import NavigationPrompt from 'react-router-navigation-prompt';
-import { useAuth } from '@payloadcms/config-provider';
+import { useAuth } from '../../utilities/Auth';
 import { useFormModified } from '../../forms/Form/context';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';

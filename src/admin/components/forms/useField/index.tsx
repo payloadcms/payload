@@ -1,7 +1,7 @@
 import {
   useCallback, useEffect, useState,
 } from 'react';
-import { useAuth } from '@payloadcms/config-provider';
+import { useAuth } from '../../utilities/Auth';
 import { useFormProcessing, useFormSubmitted, useFormModified, useForm } from '../Form/context';
 import useDebounce from '../../../hooks/useDebounce';
 import { Options, FieldType } from './types';

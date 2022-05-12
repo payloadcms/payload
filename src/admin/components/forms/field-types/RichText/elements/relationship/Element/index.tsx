@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFocused, useSelected } from 'slate-react';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../../../utilities/Config';
 import RelationshipIcon from '../../../../../../icons/Relationship';
 import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
 

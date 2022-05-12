@@ -1,6 +1,6 @@
 import React from 'react';
 import Helmet from 'react-helmet';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../Config';
 import { Props } from './types';
 import payloadFavicon from '../../../assets/images/favicon.svg';
 import payloadOgImage from '../../../assets/images/og-image.png';

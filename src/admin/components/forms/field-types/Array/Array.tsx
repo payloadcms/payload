@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-
-import { useAuth } from '@payloadcms/config-provider';
+import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import DraggableSection from '../../DraggableSection';

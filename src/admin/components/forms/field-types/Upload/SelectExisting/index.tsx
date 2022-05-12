@@ -1,7 +1,8 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import equal from 'deep-equal';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { useAuth, useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../utilities/Config';
+import { useAuth } from '../../../../utilities/Auth';
 import { Where } from '../../../../../../types';
 import MinimalTemplate from '../../../../templates/Minimal';
 import Button from '../../../../elements/Button';

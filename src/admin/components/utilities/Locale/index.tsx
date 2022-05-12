@@ -1,7 +1,8 @@
 import React, {
   createContext, useContext, useState, useEffect,
 } from 'react';
-import { useAuth, useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../Config';
+import { useAuth } from '../Auth';
 import { usePreferences } from '../Preferences';
 import { useSearchParams } from '../SearchParams';
 

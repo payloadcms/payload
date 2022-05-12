@@ -97,7 +97,6 @@ async function accessOperation(this: Payload, args: Arguments): Promise<Permissi
 
   if (userCollectionConfig) {
     results.canAccessAdmin = userCollectionConfig.access.admin ? userCollectionConfig.access.admin(args) : isLoggedIn;
-    if (results.canAccessAdmin) results.license = this.license;
   } else {
     results.canAccessAdmin = false;
   }

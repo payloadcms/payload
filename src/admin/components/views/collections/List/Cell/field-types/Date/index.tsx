@@ -1,6 +1,6 @@
 import React from 'react';
 import format from 'date-fns/format';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../../../utilities/Config';
 
 const DateCell = ({ data }) => {
   const { admin: { dateFormat } } = useConfig();

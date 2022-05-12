@@ -1,6 +1,6 @@
-import { useConfig } from '@payloadcms/config-provider';
 import React from 'react';
 import ReactDiffViewer from 'react-diff-viewer';
+import { useConfig } from '../../../../../utilities/Config';
 import { useLocale } from '../../../../../utilities/Locale';
 import { SanitizedCollectionConfig } from '../../../../../../../collections/config/types';
 import { fieldAffectsData, fieldIsPresentationalOnly, RelationshipField } from '../../../../../../../fields/config/types';

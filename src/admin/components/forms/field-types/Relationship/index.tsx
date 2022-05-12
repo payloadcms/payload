@@ -2,8 +2,9 @@ import React, {
   useCallback, useEffect, useState, useReducer,
 } from 'react';
 import equal from 'deep-equal';
-import { useAuth, useConfig } from '@payloadcms/config-provider';
 import qs from 'qs';
+import { useConfig } from '../../../utilities/Config';
+import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
 import { Value } from '../../../elements/ReactSelect/types';

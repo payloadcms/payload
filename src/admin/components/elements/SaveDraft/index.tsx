@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
 import FormSubmit from '../../forms/Submit';
 import { useForm, useFormModified } from '../../forms/Form/context';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';

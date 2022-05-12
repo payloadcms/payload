@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import qs from 'qs';
-import { useConfig } from '@payloadcms/config-provider';
 import format from 'date-fns/format';
+import { useConfig } from '../../../utilities/Config';
 import { Props } from './types';
 import ReactSelect from '../../../elements/ReactSelect';
 import { PaginatedDocs } from '../../../../../mongoose/types';

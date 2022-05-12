@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
 import { Props } from './types';
 import Button from '../Button';
 import { useForm } from '../../forms/Form/context';

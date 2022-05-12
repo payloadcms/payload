@@ -1,4 +1,4 @@
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../components/utilities/Config';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import isImage from '../../uploads/isImage';
 

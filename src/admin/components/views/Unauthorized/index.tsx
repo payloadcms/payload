@@ -1,5 +1,5 @@
 import React from 'react';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 import MinimalTemplate from '../../templates/Minimal';

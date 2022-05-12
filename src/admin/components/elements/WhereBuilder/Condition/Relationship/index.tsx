@@ -1,5 +1,5 @@
 import React, { useReducer, useState, useCallback, useEffect } from 'react';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../utilities/Config';
 import { Props, Option, ValueWithRelation, GetResults } from './types';
 import optionsReducer from './optionsReducer';
 import useDebounce from '../../../../../hooks/useDebounce';

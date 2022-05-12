@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../utilities/Config';
 import RenderCustomComponent from '../../../../utilities/RenderCustomComponent';
 import cellComponents from './field-types';
 import { Props } from './types';

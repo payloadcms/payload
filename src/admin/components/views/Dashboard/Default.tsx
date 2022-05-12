@@ -1,6 +1,6 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
 
 import Eyebrow from '../../elements/Eyebrow';
 import Card from '../../elements/Card';

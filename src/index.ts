@@ -91,8 +91,6 @@ export class Payload {
 
   sendEmail: (message: Message) => Promise<unknown>;
 
-  license: string;
-
   secret: string;
 
   mongoURL: string;
@@ -128,7 +126,6 @@ export class Payload {
       throw new Error('Error: missing MongoDB connection URL.');
     }
 
-    this.license = options.license;
     this.emailOptions = { ...(options.email) };
     this.secret = crypto
       .createHash('sha256')

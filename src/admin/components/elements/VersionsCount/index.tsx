@@ -1,5 +1,5 @@
-import { useConfig } from '@payloadcms/config-provider';
 import React from 'react';
+import { useConfig } from '../../utilities/Config';
 import Button from '../Button';
 import { Props } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../../../utilities/Config';
 
 const RelationshipCell = (props) => {
   const { field, data: cellData } = props;

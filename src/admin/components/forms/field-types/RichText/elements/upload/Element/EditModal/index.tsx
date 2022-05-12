@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Transforms, Element } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';
 import { Modal } from '@faceless-ui/modal';
-import { useAuth } from '@payloadcms/config-provider';
+import { useAuth } from '../../../../../../../utilities/Auth';
 import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types';
 import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema';
 import MinimalTemplate from '../../../../../../../templates/Minimal';
