@@ -33,6 +33,7 @@ jobs:
     - run: yarn build
     - run: yarn test:client
     - run: yarn test:int # In-memory db + api tests
+    - run: yarn test:e2e # Cypress tests
     - run: yarn demo:generate:types
       env:
         CI: true
