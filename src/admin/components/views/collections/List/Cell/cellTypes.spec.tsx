@@ -7,6 +7,10 @@ import Checkbox from './field-types/Checkbox';
 import Textarea from './field-types/Textarea';
 import Select from './field-types/Select';
 
+jest.mock('../../../../utilities/Config', () => ({
+  useConfig: () => ({ admin: { dateFormat: 'MMMM do yyyy, h:mm a' } }),
+}));
+
 describe('Cell Types', () => {
   describe('Blocks', () => {
     const field = {

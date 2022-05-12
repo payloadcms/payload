@@ -1,13 +1,14 @@
 import React from 'react';
-import { useConfig } from '@payloadcms/config-provider';
 
 // As this is the demo project, we import our dependencies from the `src` directory.
 import MinimalTemplate from '../../../../../src/admin/components/templates/Minimal';
 import Button from '../../../../../src/admin/components/elements/Button';
+import { useConfig } from '../../../../../src/admin/components/utilities/Config';
 
 // In your projects, you can import as follows:
 // import { MinimalTemplate } from 'payload/components/templates';
 // import { Button } from 'payload/components/elements';
+// import { useConfig } from 'payload/components/utilities';
 
 import './index.scss';
 

@@ -1,9 +1,9 @@
-import { useConfig } from '@payloadcms/config-provider';
 import React, { useCallback } from 'react';
 import UploadInput from '../../../../../../../src/admin/components/forms/field-types/Upload/Input';
 import { Props as UploadFieldType } from '../../../../../../../src/admin/components/forms/field-types/Upload/types';
 import useField from '../../../../../../../src/admin/components/forms/useField';
 import { SanitizedCollectionConfig } from '../../../../../../../src/collections/config/types';
+import { useConfig } from '../../../../../../../src/admin/components/utilities/Config';
 
 const Text: React.FC<UploadFieldType> = (props) => {
   const {
