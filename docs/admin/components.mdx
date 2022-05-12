@@ -96,7 +96,7 @@ All Payload fields support the ability to swap in your own React components. So,
 | **`Cell`**      | Used in the `List` view's table to represent a table-based preview of the data stored in the field. |
 | **`Field`**     | Swap out the field itself within all `Edit` views. |
 
-#### Sending and receiving values from the form
+### Sending and receiving values from the form
 
 When swapping out the `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useField` hook as follows:
 
@@ -104,7 +104,9 @@ When swapping out the `Field` component, you'll be responsible for sending and r
 import { useField } from 'payload/components/forms';
 
 const CustomTextField = ({ path }) => {
+  // highlight-start
   const { value, setValue } = useField({ path });
+  // highlight-end
 
   return (
     <input
@@ -113,6 +115,52 @@ const CustomTextField = ({ path }) => {
     />
   )
 }
+```
+
+### Getting other field values from the form
+
+There are times when a custom field component needs to have access to data from other fields. This can be done using `getDataByPath` from `useWatchForm` as follows:
+
+```js
+import { useWatchForm } from 'payload/components/forms';
+
+const DisplayFee = () => {
+  const { getDataByPath } = useWatchForm();
+
+  const amount = getDataByPath('amount');
+  const feePercentage = getDataByPath('feePercentage');
+
+  if (amount && feePercentage) {
+    return (
+      <span>The fee is ${ amount * feePercentage / 100 }</span>
+    );
+  }
+};
+```
+
+### Getting the document ID
+
+The document ID can be very useful for certain custom components. You can get the `id` from the `useDocumentInfo` hook. Here is an example of a `UI` field using `id` to link to related collections:
+
+```js
+import { useDocumentInfo } from 'payload/components/utilities';
+
+const LinkFromCategoryToPosts = () => {
+  // highlight-start
+  const { id } = useDocumentInfo();
+  // highlight-end
+
+  // id will be undefined on the create form
+  if (!id) {
+    return null;
+  }
+
+  return (
+    <a href={`/admin/collections/posts?where[or][0][and][0][category][in][0]=[${id}]`} >
+      View posts
+    </a>
+  )
+};
 ```
 
 ## Custom routes
@@ -158,14 +206,37 @@ To see how to pass in your custom views to create custom routes of your own, tak
 
 As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to do add your own context to any Payload app for use in other custom components within the admin panel. Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. Read the [React context](https://reactjs.org/docs/context.html) docs to learn more.
 
-<Banner>Remember to pass the `children` prop in to your provider component and return it within to render the admin UI</Banner>
+<Banner type="warning"><strong>Reminder:</strong> Don't forget to pass the **children** prop through the provider component for the admin UI to show</Banner>
 
 ### Styling Custom Components
 
-Payload exports its SCSS variables and mixins for reuse in your own custom components. This is helpful in cases where you might want to style a custom input similarly to Payload's built-ini styling so it blends more thoroughly into the existing admin UI.
+Payload exports its SCSS variables and mixins for reuse in your own custom components. This is helpful in cases where you might want to style a custom input similarly to Payload's built-ini styling, so it blends more thoroughly into the existing admin UI.
 
 To make use of Payload SCSS variables / mixins to use directly in your own components, you can import them as follows:
 
 ```
 @import '~payload/scss';
+```
+
+### Getting the current locale
+
+In any custom component you can get the selected locale with the `useLocale` hook. Here is a simple example:
+
+```js
+import { useLocale } from 'payload/components/utilities';
+
+const Greeting = () => {
+  // highlight-start
+  const locale = useLocale();
+  // highlight-end
+
+  const trans = {
+    en: 'Hello',
+    es: 'Hola',
+  };
+
+  return (
+    <span> { trans[locale] } </span>
+  )
+}
 ```
