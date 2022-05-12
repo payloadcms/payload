@@ -70,6 +70,7 @@ const DraggableSection: React.FC<Props> = (props) => {
                 moveRow={moveRow}
                 rowCount={rowCount}
                 positionIndex={rowIndex}
+                readOnly={readOnly}
               />
             </FieldTypeGutter>
 

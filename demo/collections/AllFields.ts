@@ -203,7 +203,7 @@ const AllFields: CollectionConfig = {
     },
     {
       type: 'array',
-      label: 'Array',
+      label: 'Editable Array',
       name: 'array',
       minRows: 2,
       maxRows: 4,
@@ -247,6 +247,26 @@ const AllFields: CollectionConfig = {
           name: 'checkbox',
           label: 'Checkbox',
           type: 'checkbox',
+        },
+      ],
+    },
+    {
+      type: 'array',
+      name: 'readOnlyArray',
+      label: 'readOnly Array',
+      admin: {
+        readOnly: true,
+      },
+      defaultValue: [{
+        text: 'text in readOnly array one',
+      },
+      {
+        text: 'text in readOnly array two',
+      }],
+      fields: [
+        {
+          type: 'text',
+          name: 'text',
         },
       ],
     },
