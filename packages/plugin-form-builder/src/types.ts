@@ -144,8 +144,10 @@ export type FormFieldBlock = TextField | SelectField | EmailField | StateField |
 export type Email = {
   emailTo: string
   emailFrom: string
+  emailFromName?: string
   bcc?: string
   replyTo?: string
+  replyToName?: string
   subject: string
   message?: any // TODO: configure rich text type
 }

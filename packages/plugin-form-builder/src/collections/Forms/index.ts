@@ -156,11 +156,10 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
               },
               {
                 type: 'text',
-                name: 'emailFrom',
-                label: 'Email From',
+                name: 'bcc',
+                label: 'BCC',
                 admin: {
                   width: '50%',
-                  placeholder: 'Email Recipient <{{email}}>',
                 },
               },
             ],
@@ -178,8 +177,30 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
               },
               {
                 type: 'text',
-                name: 'bcc',
-                label: 'BCC',
+                name: 'replyToName',
+                label: 'Reply To Name',
+                admin: {
+                  width: '50%',
+                },
+              },
+            ],
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                type: 'text',
+                name: 'emailFrom',
+                label: 'Email From',
+                admin: {
+                  width: '50%',
+                  placeholder: 'Email Recipient <{{email}}>',
+                },
+              },
+              {
+                type: 'text',
+                name: 'emailFromName',
+                label: 'Email From Name',
                 admin: {
                   width: '50%',
                 },

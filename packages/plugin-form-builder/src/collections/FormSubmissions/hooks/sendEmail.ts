@@ -46,12 +46,14 @@ const sendEmail = async (beforeChangeData: any, formConfig: FormConfig) => {
               subject,
               emailTo,
               emailFrom,
+              emailFromName,
               replyTo: emailReplyTo,
+              replyToName,
             } = email;
 
             const to = replaceDoubleCurlys(emailTo, submissionData);
-            const from = replaceDoubleCurlys(emailFrom, submissionData);
-            const replyTo = replaceDoubleCurlys(emailReplyTo || emailFrom, submissionData);
+            const from = replaceDoubleCurlys(emailFromName ? `"${emailFromName}" ` + emailFrom : emailFrom, submissionData);
+            const replyTo = replaceDoubleCurlys(replyToName ? `"${replyToName}" ` + emailReplyTo :  emailReplyTo || emailFrom, submissionData);
 
             if (to && from) {
               return ({
