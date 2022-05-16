@@ -1,3 +1,11 @@
+# [0.17.0](https://github.com/payloadcms/payload/compare/v0.16.4...v0.17.0) (2022-05-16)
+
+
+### Bug Fixes
+
+* apply field condition to custom components ([#560](https://github.com/payloadcms/payload/issues/560)) ([1dfe2b8](https://github.com/payloadcms/payload/commit/1dfe2b892947411ff5295f5818befe28c4972915))
+* prevent changing order of readOnly arrays ([#563](https://github.com/payloadcms/payload/issues/563)) ([16b7edb](https://github.com/payloadcms/payload/commit/16b7edbc9782dcfb3bef77f1ff312e041d66922c))
+
 ## [0.16.4](https://github.com/payloadcms/payload/compare/v0.16.3...v0.16.4) (2022-05-06)
 
 
