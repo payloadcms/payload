@@ -1,5 +1,6 @@
 import React, { Fragment, useState, useEffect } from 'react';
-import { useConfig, useAuth } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../../../../utilities/Config';
+import { useAuth } from '../../../../../../../utilities/Auth';
 import { useWatchForm } from '../../../../../../Form/context';
 import Relationship from '../../../../../Relationship';
 import Select from '../../../../../Select';

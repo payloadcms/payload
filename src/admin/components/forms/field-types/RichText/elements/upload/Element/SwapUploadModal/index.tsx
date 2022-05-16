@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Modal } from '@faceless-ui/modal';
-import { useConfig } from '@payloadcms/config-provider';
 import { Element, Transforms } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';
+import { useConfig } from '../../../../../../../utilities/Config';
 import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types';
 import usePayloadAPI from '../../../../../../../../hooks/usePayloadAPI';
 import MinimalTemplate from '../../../../../../../templates/Minimal';

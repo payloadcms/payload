@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useModal, Modal } from '@faceless-ui/modal';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';
 import { Props } from './types';

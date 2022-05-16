@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { useHistory } from 'react-router-dom';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
 import Button from '../Button';
 import MinimalTemplate from '../../templates/Minimal';
 import { useForm } from '../../forms/Form/context';

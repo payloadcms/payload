@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useConfig, useAuth } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
+import { useAuth } from '../../utilities/Auth';
 import Logo from '../../graphics/Logo';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';

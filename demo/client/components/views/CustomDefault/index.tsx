@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../../src/admin/components/utilities/Config';
 
 // As this is the demo project, we import our dependencies from the `src` directory.
 import DefaultTemplate from '../../../../../src/admin/components/templates/Default';

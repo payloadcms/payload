@@ -65,7 +65,6 @@ export type InitOptions = {
   mongoURL: string;
   mongoOptions?: ConnectOptions;
   secret: string;
-  license?: string;
   email?: EmailOptions;
   local?: boolean;
   onInit?: (payload: Payload) => void;

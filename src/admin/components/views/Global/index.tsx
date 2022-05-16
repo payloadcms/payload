@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useConfig, useAuth } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
+import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 

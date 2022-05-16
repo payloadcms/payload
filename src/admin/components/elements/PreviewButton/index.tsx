@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '@payloadcms/config-provider';
+import { useAuth } from '../../utilities/Auth';
 import Button from '../Button';
 import { Props } from './types';
 import { useLocale } from '../../utilities/Locale';

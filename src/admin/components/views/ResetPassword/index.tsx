@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import { useConfig, useAuth } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
+import { useAuth } from '../../utilities/Auth';
 import MinimalTemplate from '../../templates/Minimal';
 import Form from '../../forms/Form';
 import Password from '../../forms/field-types/Password';

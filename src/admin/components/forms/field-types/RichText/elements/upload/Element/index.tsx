@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
 import { ReactEditor, useSlateStatic, useFocused, useSelected } from 'slate-react';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../../../utilities/Config';
 import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
 import FileGraphic from '../../../../../../graphics/File';
 import useThumbnail from '../../../../../../../hooks/useThumbnail';

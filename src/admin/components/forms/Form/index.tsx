@@ -6,7 +6,7 @@ import isDeepEqual from 'deep-equal';
 import { serialize } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAuth } from '@payloadcms/config-provider';
+import { useAuth } from '../../utilities/Auth';
 import { useLocale } from '../../utilities/Locale';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { requests } from '../../../api';

@@ -1,8 +1,8 @@
 import React, {
   createContext, useCallback, useContext, useEffect, useState,
 } from 'react';
-import { useConfig } from '@payloadcms/config-provider';
 import qs from 'qs';
+import { useConfig } from '../Config';
 import { PaginatedDocs } from '../../../../mongoose/types';
 import { ContextType, Props, Version } from './types';
 import { TypeWithID } from '../../../../globals/config/types';

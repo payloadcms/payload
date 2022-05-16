@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useConfig, useAuth } from '@payloadcms/config-provider';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
-
+import { useConfig } from '../../../utilities/Config';
+import { useAuth } from '../../../utilities/Auth';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
 import DefaultList from './Default';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';

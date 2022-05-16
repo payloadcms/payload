@@ -1,5 +1,5 @@
 import React from 'react';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../utilities/Config';
 import CopyToClipboard from '../../CopyToClipboard';
 import formatFilesize from '../../../../../uploads/formatFilesize';
 import { Props } from './types';

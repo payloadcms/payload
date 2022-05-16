@@ -1,5 +1,5 @@
 import React from 'react';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 const PayloadLogo: React.FC = () => (

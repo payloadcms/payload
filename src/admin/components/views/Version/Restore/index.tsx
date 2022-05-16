@@ -1,8 +1,8 @@
 import React, { Fragment, useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { useConfig } from '@payloadcms/config-provider';
 import { useHistory } from 'react-router-dom';
+import { useConfig } from '../../../utilities/Config';
 import { Button, MinimalTemplate, Pill } from '../../..';
 import { Props } from './types';
 import { requests } from '../../../../api';

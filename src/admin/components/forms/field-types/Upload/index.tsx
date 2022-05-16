@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../../utilities/Config';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
 import { upload } from '../../../../../fields/validations';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
 import DefaultNav from '../../elements/Nav';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import Meta from '../../utilities/Meta';

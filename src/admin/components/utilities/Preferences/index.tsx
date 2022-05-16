@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 
-import { useAuth, useConfig } from '@payloadcms/config-provider';
+import { useConfig } from '../Config';
+import { useAuth } from '../Auth';
 import { requests } from '../../../api';
 
 type PreferencesContext = {

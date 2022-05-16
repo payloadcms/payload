@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
-import { useConfig } from '@payloadcms/config-provider';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
+import { useConfig } from '../../utilities/Config';
 import { Props } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import Button from '../Button';

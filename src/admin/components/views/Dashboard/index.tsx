@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useConfig, useAuth } from '@payloadcms/config-provider';
-
+import { useConfig } from '../../utilities/Config';
+import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultDashboard from './Default';

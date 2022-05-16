@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth, useConfig } from '@payloadcms/config-provider';
 import { useRouteMatch } from 'react-router-dom';
 import format from 'date-fns/format';
+import { useConfig } from '../../utilities/Config';
+import { useAuth } from '../../utilities/Auth';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import Eyebrow from '../../elements/Eyebrow';
 import Loading from '../../elements/Loading';

@@ -2,13 +2,13 @@ import React, { Suspense, lazy, useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
-import { useConfig, useAuth } from '@payloadcms/config-provider';
+import { useAuth } from './utilities/Auth';
+import { useConfig } from './utilities/Config';
 import List from './views/collections/List';
 import DefaultTemplate from './templates/Default';
 import { requests } from '../api';
 import Loading from './elements/Loading';
 import StayLoggedIn from './modals/StayLoggedIn';
-import Unlicensed from './views/Unlicensed';
 import Versions from './views/Versions';
 import Version from './views/Version';
 import { DocumentInfoProvider } from './utilities/DocumentInfo';
@@ -24,7 +24,6 @@ const Edit = lazy(() => import('./views/collections/Edit'));
 const EditGlobal = lazy(() => import('./views/Global'));
 const ResetPassword = lazy(() => import('./views/ResetPassword'));
 const Unauthorized = lazy(() => import('./views/Unauthorized'));
-const UnauthorizedUser = lazy(() => import('./views/UnauthorizedUser'));
 const Account = lazy(() => import('./views/Account'));
 
 const Routes = () => {
@@ -107,12 +106,6 @@ const Routes = () => {
                 </Route>
                 <Route path={`${match.url}/reset/:token`}>
                   <ResetPassword />
-                </Route>
-                <Route path={`${match.url}/unlicensed-domain`}>
-                  <Unlicensed />
-                </Route>
-                <Route path={`${match.url}/unauthorized-user`}>
-                  <UnauthorizedUser />
                 </Route>
 
                 {collections.map((collection) => {

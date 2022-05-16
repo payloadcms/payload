@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { useConfig, useAuth } from '@payloadcms/config-provider';
-
+import { useConfig } from '../../utilities/Config';
+import { useAuth } from '../../utilities/Auth';
 import Minimal from '../../templates/Minimal';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';

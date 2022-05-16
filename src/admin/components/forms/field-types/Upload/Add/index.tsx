@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { useConfig, useAuth } from '@payloadcms/config-provider';
+import { useConfig } from '../../../../utilities/Config';
+import { useAuth } from '../../../../utilities/Auth';
 import MinimalTemplate from '../../../../templates/Minimal';
 import Form from '../../../Form';
 import Button from '../../../../elements/Button';

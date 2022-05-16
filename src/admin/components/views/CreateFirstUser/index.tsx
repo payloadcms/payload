@@ -1,5 +1,6 @@
 import React from 'react';
-import { useConfig, useAuth } from '@payloadcms/config-provider';
+import { useConfig } from '../../utilities/Config';
+import { useAuth } from '../../utilities/Auth';
 import MinimalTemplate from '../../templates/Minimal';
 import Meta from '../../utilities/Meta';
 import Form from '../../forms/Form';
