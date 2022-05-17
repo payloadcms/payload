@@ -20,15 +20,14 @@
   "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^0.15.6",
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
-    "@payloadcms/config-provider": "^1.0.0"
+    "payload": "^0.17.0",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.8",
     "@types/react-dom": "^18.0.3",
-    "payload": "^0.15.6",
-    "react": "^17.0.2",
+    "payload": "^0.17.0",
+    "react": "^18.0.0",
     "typescript": "^4.5.5"
   },
   "files": [

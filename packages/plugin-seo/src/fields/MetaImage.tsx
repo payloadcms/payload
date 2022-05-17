@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
-import { useConfig } from '@payloadcms/config-provider';
-import { useLocale } from 'payload/components/utilities';
+import { useLocale, useConfig } from 'payload/components/utilities';
 import { Props as UploadFieldType } from 'payload/dist/admin/components/forms/field-types/Upload/types';
 import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/Input';
 import { useField, useWatchForm } from 'payload/components/forms';
