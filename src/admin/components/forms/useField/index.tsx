@@ -7,6 +7,7 @@ import useDebounce from '../../../hooks/useDebounce';
 import { Options, FieldType } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useOperation } from '../../utilities/OperationProvider';
+import reduceFieldsToValues from '../Form/reduceFieldsToValues';
 
 const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const {
@@ -30,6 +31,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     getField,
     getData,
     getSiblingData,
+    initialState,
     setModified,
   } = formContext || {};
 
@@ -78,6 +80,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       user,
       data: getData(),
       siblingData: getSiblingData(path),
+      originalDoc: initialState ? reduceFieldsToValues(initialState) : {},
       operation,
     };
 
@@ -103,6 +106,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     getData,
     getSiblingData,
     id,
+    initialState,
     initialValue,
     operation,
     path,

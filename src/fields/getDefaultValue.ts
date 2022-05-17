@@ -16,8 +16,6 @@ const getValueWithDefault = async ({ value, defaultValue, locale, user }: Args):
     return defaultValue({ locale, user });
   }
   return defaultValue;
-
-  return undefined;
 };
 
 export default getValueWithDefault;

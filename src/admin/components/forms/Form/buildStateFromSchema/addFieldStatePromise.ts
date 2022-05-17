@@ -51,6 +51,7 @@ export const addFieldStatePromise = async ({
     let validationResult: boolean | string = true;
 
     if (typeof fieldState.validate === 'function') {
+      const originalDoc = { ...fullData };
       validationResult = await fieldState.validate(data?.[field.name], {
         ...field,
         data: fullData,
@@ -58,6 +59,7 @@ export const addFieldStatePromise = async ({
         siblingData: data,
         id,
         operation,
+        originalDoc,
       });
     }
 

@@ -73,6 +73,7 @@ There are two arguments available to custom validation functions.
 | ------------- | -------------|
 | `data`             | An object of the full collection or global document |
 | `siblingData`      | An object of the document data limited to fields within the same parent to the field |
+| `originalDoc`      | The full original document in `update` operations |
 | `operation`        | Will be "create" or "update" depending on the UI action or API call |
 | `id`               | The value of the collection `id`, will be `undefined` on create request |
 | `user`             | The currently authenticated user object |

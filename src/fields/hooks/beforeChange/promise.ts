@@ -113,6 +113,7 @@ export const promise = async ({
         operation,
         user: req.user,
         payload: req.payload,
+        originalDoc: doc,
       });
 
       if (typeof validationResult === 'string') {

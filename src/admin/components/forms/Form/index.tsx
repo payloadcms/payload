@@ -42,7 +42,6 @@ const Form: React.FC<Props> = (props) => {
     initialState, // fully formed initial field state
     initialData, // values only, paths are required as key - form should build initial state as convenience
     waitForAutocomplete,
-    log,
   } = props;
 
   const history = useHistory();
@@ -54,6 +53,7 @@ const Form: React.FC<Props> = (props) => {
   const [modified, setModified] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [originalDoc, setOriginalDoc] = useState<Record<string, unknown> | undefined>();
   const [formattedInitialData, setFormattedInitialData] = useState(buildInitialState(initialData));
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -89,6 +89,7 @@ const Form: React.FC<Props> = (props) => {
           validationResult = await field.validate(field.value, {
             data,
             siblingData: contextRef.current.getSiblingData(path),
+            originalDoc,
             user,
             id,
             operation,
@@ -112,7 +113,7 @@ const Form: React.FC<Props> = (props) => {
     }
 
     return isValid;
-  }, [contextRef, id, user, operation]);
+  }, [contextRef, id, user, originalDoc, operation]);
 
   const submit = useCallback(async (options: SubmitOptions = {}, e): Promise<void> => {
     const {
@@ -208,6 +209,7 @@ const Form: React.FC<Props> = (props) => {
 
           history.push(destination);
         } else if (!disableSuccessStatus) {
+          setOriginalDoc(json);
           toast.success(json.message || 'Submission successful.', { autoClose: 3000 });
         }
       } else {
@@ -350,6 +352,7 @@ const Form: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (initialState) {
+      setOriginalDoc(reduceFieldsToValues(initialState, true));
       contextRef.current = { ...initContextState } as FormContextType;
       dispatchFields({ type: 'REPLACE_STATE', state: initialState });
     }

@@ -15,7 +15,14 @@ const Validations: CollectionConfig = {
       type: 'text',
       label: 'Text with siblingData Validation',
       required: true,
-      validate: (value: string, { data, siblingData, id, operation, user }) => {
+      validate: (value: string, {
+        data,
+        siblingData,
+        id,
+        operation,
+        user,
+        originalDoc,
+      }): string | true => {
         if (typeof value === 'undefined') {
           return 'Validation is missing value';
         }
@@ -33,6 +40,9 @@ const Validations: CollectionConfig = {
         }
         if (operation === 'update' && typeof id === 'undefined') {
           return 'ValidationOptions is missing "id"';
+        }
+        if (!originalDoc?.validationOptions && operation === 'update') {
+          return 'ValidationOptions is missing "originalDoc"';
         }
 
         return true;

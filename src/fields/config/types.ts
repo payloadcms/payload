@@ -66,6 +66,7 @@ export type Labels = {
 export type ValidateOptions<T, S, F> = {
   data: Partial<T>
   siblingData: Partial<S>
+  originalDoc: Partial<T>
   id?: string | number
   user?: Partial<User>
   operation?: Operation
