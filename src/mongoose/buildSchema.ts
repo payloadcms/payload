@@ -58,7 +58,7 @@ const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: Bui
 });
 
 const localizeSchema = (field: NonPresentationalField, schema, locales) => {
-  if (field.localized) {
+  if (field.localized && Array.isArray(locales)) {
     return {
       type: locales.reduce((localeSchema, locale) => ({
         ...localeSchema,
