@@ -1,3 +1,10 @@
+## [0.17.1](https://github.com/payloadcms/payload/compare/v0.17.0...v0.17.1) (2022-05-17)
+
+
+### Bug Fixes
+
+* only localizes schema if both field and top-level config are enabled ([e1a5547](https://github.com/payloadcms/payload/commit/e1a5547fea065f5590930cbeb6d07bf59d62d21d))
+
 # [0.17.0](https://github.com/payloadcms/payload/compare/v0.16.4...v0.17.0) (2022-05-16)
 
 
