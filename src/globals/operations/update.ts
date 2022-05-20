@@ -32,7 +32,7 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
 
   let { data } = args;
 
-  const shouldSaveDraft = Boolean(draftArg && globalConfig.versions.drafts);
+  const shouldSaveDraft = Boolean(draftArg && globalConfig?.versions?.drafts);
 
   // /////////////////////////////////////
   // 1. Retrieve and execute access
@@ -149,7 +149,7 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
 
   let createdVersion;
 
-  if (globalConfig.versions && !shouldSaveDraft) {
+  if (globalConfig?.versions && !shouldSaveDraft) {
     createdVersion = await saveGlobalVersion({
       payload: this,
       config: globalConfig,

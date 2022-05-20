@@ -24,7 +24,7 @@ async function findOne(args) {
   // Retrieve and execute access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where} = {
+  const queryToBuild: { where?: Where } = {
     where: {
       and: [
         {
@@ -69,7 +69,7 @@ async function findOne(args) {
   // Replace document with draft if available
   // /////////////////////////////////////
 
-  if (globalConfig.versions?.drafts && draftEnabled) {
+  if (globalConfig?.versions?.drafts && draftEnabled) {
     doc = await replaceWithDraftIfAvailable({
       payload: this,
       entity: globalConfig,
