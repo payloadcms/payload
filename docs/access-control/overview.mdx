@@ -62,9 +62,11 @@ The Payload Admin UI responds dynamically to the access control that you define.
 
 To accomplish this, Payload ships with an `Access` operation, which is executed when a user logs into the Admin UI. Payload will execute each one of your access control functions, across all collections, globals, and fields, at the top level and return a response that contains a reflection of what the currently authenticated user can do with your application.
 
+### Argument Availability
+
 <Banner type="warning">
   <strong>Important:</strong><br/>
   When your access control functions are executed via the <strong>access</strong> operation, the <strong>id</strong> and <strong>data</strong> arguments will be <strong>undefined</strong>, because Payload is executing your functions without referencing a specific document.
 <Banner />
 
-If you use <strong>id</strong> or <strong>data</strong> within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your access control is being executed to determine solely what the user can do within the Admin UI.
+If you use `id` or `data` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your access control is being executed via the `access` operation, to determine solely what the user can do within the Admin UI.
