@@ -90,6 +90,7 @@ const Select: React.FC<Props> = (props) => {
       label={label}
       showError={showError}
       errorMessage={errorMessage}
+      required={required}
       description={description}
       style={style}
       className={className}
