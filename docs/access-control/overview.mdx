@@ -43,3 +43,28 @@ You can manage access within Payload on three different levels:
 - [Collections](/docs/access-control/collections)
 - [Fields](/docs/access-control/fields)
 - [Globals](/docs/access-control/globals)
+
+
+### When Access Control is Executed
+
+<Banner type="success">
+  <strong>Note:</strong><br/>
+  Access control functions are utilized in two places. It's important to understand how and when your access control is executed.
+<Banner />
+
+#### As you execute operations
+
+When you perform Payload operations like `create`, `read`, `update`, and `delete`, your access control functions will be executed before any changes or operations are completed.
+
+#### Within the Admin UI
+
+The Payload Admin UI responds dynamically to the access control that you define. For example, if you restrict editing a `ExampleCollection` to only users that feature a `role` of `admin`, the Payload Admin UI will **hide** the `ExampleCollection` from the Admin UI entirely. This is super powerful and allows you to control who can do what with your Admin UI.
+
+To accomplish this, Payload ships with an `Access` operation, which is executed when a user logs into the Admin UI. Payload will execute each one of your access control functions, across all collections, globals, and fields, at the top level and return a response that contains a reflection of what the currently authenticated user can do with your application.
+
+<Banner type="warning">
+  <strong>Important:</strong><br/>
+  When your access control functions are executed via the <strong>access</strong> operation, the <strong>id</strong> and <strong>data</strong> arguments will be <strong>undefined</strong>, because Payload is executing your functions without referencing a specific document.
+<Banner />
+
+If you use <strong>id</strong> or <strong>data</strong> within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your access control is being executed to determine solely what the user can do within the Admin UI.
