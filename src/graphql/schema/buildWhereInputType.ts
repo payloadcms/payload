@@ -15,7 +15,7 @@ import {
 import formatName from '../utilities/formatName';
 import withOperators from './withOperators';
 import operators from './operators';
-import fieldToSchemaMap from './fieldToSchemaMap';
+import fieldToSchemaMap from './fieldToWhereInputSchemaMap';
 
 // buildWhereInputType is similar to buildObjectType and operates
 // on a field basis with a few distinct differences.
