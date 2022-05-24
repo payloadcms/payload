@@ -169,12 +169,6 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
       });
     }
 
-    if (field.hasMany) {
-      return {
-        type: new GraphQLList(type),
-      };
-    }
-
     return { type };
   },
   upload: (field: UploadField) => ({
