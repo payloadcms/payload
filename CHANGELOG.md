@@ -1,3 +1,12 @@
+## [0.17.2](https://github.com/payloadcms/payload/compare/v0.17.1...v0.17.2) (2022-05-24)
+
+
+### Bug Fixes
+
+* [#576](https://github.com/payloadcms/payload/issues/576), graphql where on hasMany relationship not working ([#582](https://github.com/payloadcms/payload/issues/582)) ([20d251f](https://github.com/payloadcms/payload/commit/20d251fd5dabd06f8d58ffcd5acec4dbd64ee515))
+* adds optional chaining to safely read drafts setting on versions ([#577](https://github.com/payloadcms/payload/issues/577)) ([982b3f0](https://github.com/payloadcms/payload/commit/982b3f0582d9f64bd560e96b0df3cc505cc86a2a))
+* passes required prop for select field ([#579](https://github.com/payloadcms/payload/issues/579)) ([734e905](https://github.com/payloadcms/payload/commit/734e905c186ebf96ff659008cb240f5adaa2b5b5))
+
 ## [0.17.1](https://github.com/payloadcms/payload/compare/v0.17.0...v0.17.1) (2022-05-17)
 
 
