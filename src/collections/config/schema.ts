@@ -17,6 +17,7 @@ const collectionSchema = joi.object().keys({
     admin: joi.func(),
   }),
   timestamps: joi.boolean(),
+  preRoute: joi.func(),
   admin: joi.object({
     useAsTitle: joi.string(),
     defaultColumns: joi.array().items(joi.string()),

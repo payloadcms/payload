@@ -98,6 +98,10 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
     ];
   }
 
+  if (!sanitized.preRoute) {
+    sanitized.preRoute = () => null;
+  }
+
   // /////////////////////////////////
   // Sanitize fields
   // /////////////////////////////////

@@ -2,6 +2,7 @@
 import { DeepRequired } from 'ts-essentials';
 import { PaginateModel } from 'mongoose';
 import { GraphQLType } from 'graphql';
+import { Router } from 'express';
 import { Access, GeneratePreviewURL, EntityDescription } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
@@ -217,6 +218,7 @@ export type CollectionConfig = {
   upload?: IncomingUploadType | boolean;
   versions?: IncomingCollectionVersions | boolean;
   timestamps?: boolean
+  preRoute?: (router: Router) => void;
 };
 
 export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions'> {

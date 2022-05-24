@@ -95,9 +95,11 @@ export default function registerCollections(ctx: Payload): void {
     // If not local, open routes
     if (!ctx.local) {
       const router = express.Router();
-      const { slug } = collection;
+      const { slug, preRoute } = collection;
 
-      router.all(`/${slug}*`, bindCollectionMiddleware(ctx.collections[formattedCollection.slug]));
+      router.all('*', bindCollectionMiddleware(ctx.collections[formattedCollection.slug]));
+
+      preRoute(router);
 
       const {
         create,
@@ -133,68 +135,68 @@ export default function registerCollections(ctx: Payload): void {
 
         if (collection.auth.verify) {
           router
-            .route(`/${slug}/verify/:token`)
+            .route('/verify/:token')
             .post(verifyEmail);
         }
 
         if (collection.auth.maxLoginAttempts > 0) {
           router
-            .route(`/${slug}/unlock`)
+            .route('/unlock')
             .post(unlock);
         }
 
         router
-          .route(`/${slug}/init`)
+          .route('/init')
           .get(init);
 
         router
-          .route(`/${slug}/login`)
+          .route('/login')
           .post(login);
 
         router
-          .route(`/${slug}/logout`)
+          .route('/logout')
           .post(logout);
 
         router
-          .route(`/${slug}/refresh-token`)
+          .route('/refresh-token')
           .post(refresh);
 
         router
-          .route(`/${slug}/me`)
+          .route('/me')
           .get(me);
 
         router
-          .route(`/${slug}/first-register`)
+          .route('/first-register')
           .post(registerFirstUser);
 
         router
-          .route(`/${slug}/forgot-password`)
+          .route('/forgot-password')
           .post(forgotPassword);
 
         router
-          .route(`/${slug}/reset-password`)
+          .route('/reset-password')
           .post(resetPassword);
       }
 
       if (collection.versions) {
-        router.route(`/${slug}/versions`)
+        router.route('/versions')
           .get(findVersions);
 
-        router.route(`/${slug}/versions/:id`)
+        router.route('/versions/:id')
           .get(findVersionByID)
           .post(restoreVersion);
       }
 
-      router.route(`/${slug}`)
-        .get(find)
-        .post(create);
-
-      router.route(`/${slug}/:id`)
+      router.route('/:id')
         .put(update)
         .get(findByID)
         .delete(deleteHandler);
 
-      ctx.router.use(router);
+      router.route('/')
+        .get(find)
+        .post(create);
+
+      ctx.router.use(`/${slug}`, router);
     }
 
     return formattedCollection;
