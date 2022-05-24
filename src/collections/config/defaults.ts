@@ -35,6 +35,7 @@ export const defaults = {
   auth: false,
   upload: false,
   versions: false,
+  preRoute: (): unknown => null,
 };
 
 export const authDefaults = {
