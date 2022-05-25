@@ -107,8 +107,8 @@ export const promise = async ({
 
       const validationResult = await field.validate(valueToValidate, {
         ...field,
-        data: merge(doc, data),
-        siblingData: merge(siblingDoc, siblingData),
+        data: merge(doc, data, { arrayMerge: (_, source) => source }),
+        siblingData: merge(siblingDoc, siblingData, { arrayMerge: (_, source) => source }),
         id,
         operation,
         user: req.user,
