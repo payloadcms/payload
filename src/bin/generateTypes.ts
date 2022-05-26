@@ -8,6 +8,7 @@ import { SanitizedCollectionConfig } from '../collections/config/types';
 import { SanitizedConfig } from '../config/types';
 import loadConfig from '../config/load';
 import { SanitizedGlobalConfig } from '../globals/config/types';
+import deepCopyObject from '../utilities/deepCopyObject';
 
 function getCollectionIDType(collections: SanitizedCollectionConfig[], slug: string): 'string' | 'number' {
   const matchedCollection = collections.find((collection) => collection.slug === slug);
@@ -316,7 +317,8 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
   };
 }
 
-function entityToJsonSchema(config: SanitizedConfig, entity: SanitizedCollectionConfig | SanitizedGlobalConfig): JSONSchema4 {
+function entityToJsonSchema(config: SanitizedConfig, incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig): JSONSchema4 {
+  const entity = deepCopyObject(incomingEntity);
   const title = 'label' in entity ? entity.label : entity.labels.singular;
 
   const idField: FieldAffectingData = { type: 'text', name: 'id', required: true };
