@@ -1,4 +1,4 @@
-import { Express } from 'express';
+import { Express, Response } from 'express';
 import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import { Options } from 'express-fileupload';
@@ -78,6 +78,16 @@ export type AccessResult = boolean | Where;
  * Access function
  */
 export type Access = (args?: any) => AccessResult | Promise<AccessResult>;
+
+export type EndpointMethod = 'get' | 'head' | 'post' | 'put' | 'delete' | 'connect' | 'options';
+
+export type EndpointHandler = (req: PayloadRequest, res: Response) => Promise<any> | any;
+
+export interface Endpoint{
+  route: string
+  method: EndpointMethod,
+  handlers: EndpointHandler[]
+}
 
 export type AdminView = React.ComponentType<{ user: User, canAccessAdmin: boolean }>
 

@@ -53,6 +53,11 @@ const collectionSchema = joi.object().keys({
     afterLogin: joi.array().items(joi.func()),
     afterForgotPassword: joi.array().items(joi.func()),
   }),
+  endpoints: joi.array().items(joi.object({
+    route: joi.string(),
+    method: joi.string().valid('get', 'head', 'post', 'put', 'delete', 'connect', 'options'),
+    handlers: joi.array().items(joi.func()),
+  })),
   auth: joi.alternatives().try(
     joi.object({
       tokenExpiration: joi.number(),

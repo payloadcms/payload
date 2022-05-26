@@ -1,3 +1,4 @@
+import { EndpointHandler } from '../../src/config/types';
 import { GlobalConfig } from '../../src/globals/config/types';
 import checkRole from '../access/checkRole';
 
@@ -10,6 +11,17 @@ const NavigationArray: GlobalConfig = {
   admin: {
     description: 'A description for the editor',
   },
+  endpoints: [
+    {
+      route: '/count',
+      method: 'get',
+      handlers: [
+        ((req, res) => {
+          return res.json({ message: `Count: ${Math.random()}` });
+        }) as EndpointHandler,
+      ],
+    },
+  ],
   fields: [
     {
       name: 'array',
