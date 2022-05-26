@@ -12,11 +12,12 @@ import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType'
 import { BaseFields } from './types';
 import { getCollectionIDType } from '../../graphql/schema/buildMutationInputType';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
+import create from './resolvers/create';
 
 function registerCollections(): void {
   const {
     findVersions, findVersionByID, restoreVersion,
-    create, find, findByID, deleteResolver, update,
+    find, findByID, deleteResolver, update,
   } = this.graphQL.resolvers.collections;
 
   const {
@@ -159,7 +160,7 @@ function registerCollections(): void {
         data: { type: collection.graphQL.mutationInputType },
         draft: { type: GraphQLBoolean },
       },
-      resolve: create(collection),
+      resolve: create(this, collection),
     };
 
     this.Mutation.fields[`update${singularLabel}`] = {

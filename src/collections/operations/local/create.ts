@@ -1,6 +1,9 @@
+import { UploadedFile } from 'express-fileupload';
+import { Payload } from '../../..';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
+import create from '../create';
 
 export type Options<T> = {
   collection: string
@@ -18,11 +21,11 @@ export type Options<T> = {
   draft?: boolean
 }
 
-export default async function create<T = any>(options: Options<T>): Promise<T> {
+export default async function createLocal<T = any>(payload: Payload, options: Options<T>): Promise<T> {
   const {
     collection: collectionSlug,
     depth,
-    locale = this?.config?.localization?.defaultLocale,
+    locale = payload?.config?.localization?.defaultLocale,
     fallbackLocale = null,
     data,
     user,
@@ -35,9 +38,10 @@ export default async function create<T = any>(options: Options<T>): Promise<T> {
     draft,
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
-  return this.operations.collections.create({
+  return create({
+    payload,
     depth,
     data,
     collection,
@@ -52,10 +56,10 @@ export default async function create<T = any>(options: Options<T>): Promise<T> {
       payloadAPI: 'local',
       locale,
       fallbackLocale,
-      payload: this,
+      payload,
       files: {
-        file: getFileByPath(filePath),
+        file: getFileByPath(filePath) as UploadedFile,
       },
-    },
+    } as PayloadRequest,
   });
 }

@@ -18,6 +18,7 @@ import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
+  payload: Payload
   collection: Collection
   req: PayloadRequest
   depth?: number
@@ -29,10 +30,10 @@ export type Arguments = {
   draft?: boolean
 }
 
-async function create(this: Payload, incomingArgs: Arguments): Promise<Document> {
-  const { config, emailOptions } = this;
-
+async function create(incomingArgs: Arguments): Promise<Document> {
   let args = incomingArgs;
+  const { payload } = args;
+  const { config, emailOptions } = payload;
 
   // /////////////////////////////////////
   // beforeOperation - Collection
@@ -205,8 +206,8 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   if (collectionConfig.auth && collectionConfig.auth.verify) {
     sendVerificationEmail({
       emailOptions,
-      config: this.config,
-      sendEmail: this.sendEmail,
+      config: payload.config,
+      sendEmail: payload.sendEmail,
       collection: { config: collectionConfig, Model },
       user: result,
       token: verificationToken,
