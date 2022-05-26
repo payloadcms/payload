@@ -215,9 +215,8 @@ export class Payload {
    * @returns created document
    */
   create = async <T = any>(options: CreateOptions<T>): Promise<T> => {
-    let { create } = localOperations;
-    create = create.bind(this);
-    return create(options);
+    const { create } = localOperations;
+    return create(this, options);
   }
 
   /**
