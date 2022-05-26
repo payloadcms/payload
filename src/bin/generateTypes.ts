@@ -2,7 +2,6 @@
 import fs from 'fs';
 import type { JSONSchema4 } from 'json-schema';
 import { compile } from 'json-schema-to-typescript';
-import payload from '..';
 import Logger from '../utilities/logger';
 import { fieldAffectsData, Field, Option, FieldAffectingData } from '../fields/config/types';
 import { SanitizedCollectionConfig } from '../collections/config/types';
@@ -327,6 +326,21 @@ function entityToJsonSchema(config: SanitizedConfig, entity: SanitizedCollection
     customIdField.required = true;
   } else {
     entity.fields.unshift(idField);
+  }
+
+  if ('timestamps' in entity && entity.timestamps !== false) {
+    entity.fields.push(
+      {
+        type: 'text',
+        name: 'createdAt',
+        required: true,
+      },
+      {
+        type: 'text',
+        name: 'updatedAt',
+        required: true,
+      },
+    );
   }
 
   return {
