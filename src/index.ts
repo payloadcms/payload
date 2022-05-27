@@ -280,9 +280,8 @@ export class Payload {
    * @returns document with specified ID
    */
   findByID = async <T extends TypeWithID = any>(options: FindByIDOptions): Promise<T> => {
-    let { findByID } = localOperations;
-    findByID = findByID.bind(this);
-    return findByID<T>(options);
+    const { findByID } = localOperations;
+    return findByID<T>(this, options);
   }
 
   /**

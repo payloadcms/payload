@@ -12,6 +12,7 @@ import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftI
 import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
+  payload: Payload
   collection: Collection
   id: string
   req: PayloadRequest
@@ -23,7 +24,8 @@ export type Arguments = {
   draft?: boolean
 }
 
-async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs: Arguments): Promise<T> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<T> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -40,6 +42,7 @@ async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs:
   }, Promise.resolve());
 
   const {
+    payload,
     depth,
     collection: {
       Model,
@@ -124,7 +127,7 @@ async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs:
 
   if (collectionConfig.versions?.drafts && draftEnabled) {
     result = await replaceWithDraftIfAvailable({
-      payload: this,
+      payload,
       entity: collectionConfig,
       doc: result,
       accessResult,
