@@ -14,11 +14,12 @@ import { getCollectionIDType } from '../../graphql/schema/buildMutationInputType
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
 import create from './resolvers/create';
 import find from './resolvers/find';
+import findByID from './resolvers/findByID';
 
 function registerCollections(): void {
   const {
     findVersions, findVersionByID, restoreVersion,
-    findByID, deleteResolver, update,
+    deleteResolver, update,
   } = this.graphQL.resolvers.collections;
 
   const {
@@ -136,7 +137,7 @@ function registerCollections(): void {
           fallbackLocale: { type: this.types.fallbackLocaleInputType },
         } : {}),
       },
-      resolve: findByID(collection),
+      resolve: findByID(this, collection),
     };
 
     this.Query.fields[pluralLabel] = {
