@@ -10,8 +10,10 @@ import { buildSortParam } from '../../mongoose/buildSortParam';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { Payload } from '../..';
 
 export type Arguments = {
+  payload: Payload
   collection: Collection
   where?: Where
   page?: number
@@ -25,6 +27,7 @@ export type Arguments = {
   draft?: boolean
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<PaginatedDocs<T>> {
   let args = incomingArgs;
 
@@ -42,6 +45,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   }, Promise.resolve());
 
   const {
+    payload,
     where,
     page,
     limit,
@@ -136,7 +140,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
       ...result,
       docs: await Promise.all(result.docs.map(async (doc) => replaceWithDraftIfAvailable({
         accessResult,
-        payload: this,
+        payload,
         entity: collectionConfig,
         doc,
         locale,
