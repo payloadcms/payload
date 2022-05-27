@@ -45,6 +45,15 @@ const Endpoints: CollectionConfig = {
         }) as EndpointHandler,
       ],
     },
+    {
+      route: '/whoami',
+      method: 'post',
+      handlers: [
+        ((req, res) => {
+          return res.json({ message: `${req.body.name ? `You're ${req.body.name}` : 'I don\'t know who you are'} ${!!req.body.name !== !!req.body.age ? 'but' : 'and'} ${req.body.age ? `you're ${req.body.age} years old.` : 'I don\'t know how old you are'}` });
+        }) as EndpointHandler,
+      ],
+    },
   ],
   fields: [
     {

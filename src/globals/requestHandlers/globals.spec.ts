@@ -174,4 +174,19 @@ describe('Globals - REST', () => {
       expect(textarea).toStrictEqual(navData.es.nav1.textarea);
     });
   });
+
+  describe('Endpoints', () => {
+    it('should respond with number of navigation items', async () => {
+      const response = await fetch(`${url}/api/globals/navigation-array/count`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data.count).toStrictEqual(2);
+    });
+  });
 });

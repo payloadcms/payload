@@ -1,5 +1,6 @@
-import defaultAccess from '../../auth/defaultAccess';
 import { Endpoint } from '../../config/types';
+
+import defaultAccess from '../../auth/defaultAccess';
 
 export const defaults = {
   access: {

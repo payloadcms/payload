@@ -1,4 +1,4 @@
-import { Express, Response } from 'express';
+import { Express, NextFunction, Response } from 'express';
 import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import { Options } from 'express-fileupload';
@@ -81,7 +81,7 @@ export type Access = (args?: any) => AccessResult | Promise<AccessResult>;
 
 export type EndpointMethod = 'get' | 'head' | 'post' | 'put' | 'delete' | 'connect' | 'options';
 
-export type EndpointHandler = (req: PayloadRequest, res: Response) => Promise<any> | any;
+export type EndpointHandler = (this:Payload, req: PayloadRequest, res: Response, next: NextFunction) => Promise<any> | any;
 
 export interface Endpoint{
   route: string

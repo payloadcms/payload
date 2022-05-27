@@ -1,6 +1,7 @@
 import { EndpointHandler } from '../../src/config/types';
 import { GlobalConfig } from '../../src/globals/config/types';
 import checkRole from '../access/checkRole';
+import { NavigationArray as TNavigationArray } from '../payload-types';
 
 const NavigationArray: GlobalConfig = {
   slug: 'navigation-array',
@@ -16,8 +17,12 @@ const NavigationArray: GlobalConfig = {
       route: '/count',
       method: 'get',
       handlers: [
-        ((req, res) => {
-          return res.json({ message: `Count: ${Math.random()}` });
+        (async function getNavigationArrayCount(req, res) {
+          const { array } = await this.findGlobal<TNavigationArray>({
+            slug: 'navigation-array',
+          });
+
+          return res.json({ count: array.length });
         }) as EndpointHandler,
       ],
     },
