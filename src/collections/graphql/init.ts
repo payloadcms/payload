@@ -13,11 +13,12 @@ import { BaseFields } from './types';
 import { getCollectionIDType } from '../../graphql/schema/buildMutationInputType';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
 import create from './resolvers/create';
+import find from './resolvers/find';
 
 function registerCollections(): void {
   const {
     findVersions, findVersionByID, restoreVersion,
-    find, findByID, deleteResolver, update,
+    findByID, deleteResolver, update,
   } = this.graphQL.resolvers.collections;
 
   const {
@@ -151,7 +152,7 @@ function registerCollections(): void {
         limit: { type: GraphQLInt },
         sort: { type: GraphQLString },
       },
-      resolve: find(collection),
+      resolve: find(this, collection),
     };
 
     this.Mutation.fields[`create${singularLabel}`] = {
