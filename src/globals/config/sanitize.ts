@@ -19,6 +19,7 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
     // /////////////////////////////////
 
     if (!sanitizedGlobal.hooks) sanitizedGlobal.hooks = {};
+    if (!sanitizedGlobal.endpoints) sanitizedGlobal.endpoints = [];
     if (!sanitizedGlobal.access) sanitizedGlobal.access = {};
     if (!sanitizedGlobal.admin) sanitizedGlobal.admin = {};
 

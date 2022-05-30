@@ -43,6 +43,8 @@ The `find` endpoint supports the following additional query parameters:
 
 ## Auth Operations
 
+Auth enabled collections are also given the following endpoints:
+
 | Method   | Path                        | Description |
 | -------- | --------------------------- | ----------- |
 | `POST`   | `/api/{collectionSlug}/verify/:token`   | [Email verification](/docs/authentication/operations#verify-by-email), if enabled. |
@@ -72,3 +74,47 @@ In addition to the dynamically generated endpoints above Payload also has REST e
 | `GET`    | `/api/_preferences/{key}` | Get a preference by key   |
 | `POST`   | `/api/_preferences/{key}` | Create or update by key   |
 | `DELETE` | `/api/_preferences/{key}` | Delete a user preference by key |
+
+## Custom Endpoints
+
+Additional REST API endpoints can be added to `collections` and `globals` by providing array of `endpoints` in the configuration. These can be used to write additional middleware on existing routes or build custom functionality into Payload apps and plugins.
+
+Each endpoint object needs to have:
+
+| Property   | Description                               |
+| ---------- | ----------------------------------------- |
+| **`path`**     | A string for the endpoint route after the collection or globals slug |
+| **`method`**   | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options' |
+| **`handler`**  | A function or array of functions to be called with **req**, **res** and **next** arguments. [Express](https://expressjs.com/en/guide/routing.html#route-handlers) |
+
+Example:
+
+```js
+
+// a collection of 'orders' with an additional route for tracking details, reachable at /api/orders/:id/tracking
+const Orders = {
+	slug: 'orders',
+	fields: [ /* ... */ ],
+  // highlight-start
+  endpoints: [
+    {
+      path: '/:id/tracking',
+      method: 'get',
+      handler: async (req, res, next) => {
+        const tracking = await getTrackingInfo(req.params.id);
+        if (tracking) {
+          res.status('200').send({ tracking });
+        } else {
+          res.status('404').send({ error: 'not found' });
+        }
+      }
+    }
+  ],
+  // highlight-end
+}
+```
+
+<Banner>
+  <strong>Note:</strong><br/>
+  **req** will have the **payload** object and can be used inside your endpoint handlers for making calls like req.payload.find() that will make use of access control and hooks.
+</Banner>

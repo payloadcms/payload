@@ -32,6 +32,7 @@ export const defaults = {
     afterLogin: [],
     afterForgotPassword: [],
   },
+  endpoints: [],
   auth: false,
   upload: false,
   versions: false,

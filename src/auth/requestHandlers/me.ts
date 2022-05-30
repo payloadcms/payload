@@ -3,7 +3,9 @@ import { PayloadRequest } from '../../express/types';
 
 export default async function me(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {
-    const collectionSlug = req.route.path.split('/').filter((r) => r !== '')[0];
+    const collectionSlugMatch = req.originalUrl.match(/\/([^/]+)\/me\/?$/);
+    const [, collectionSlug] = collectionSlugMatch;
+
     const response = await this.operations.collections.auth.me({
       req,
       collectionSlug,
