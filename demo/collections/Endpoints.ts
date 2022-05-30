@@ -1,6 +1,6 @@
-import { Payload } from '../../src';
+import { Response } from 'express';
 import { CollectionConfig } from '../../src/collections/config/types';
-import { EndpointHandler } from '../../src/config/types';
+import { PayloadRequest } from '../../src/express/types';
 
 const Endpoints: CollectionConfig = {
   slug: 'endpoints',
@@ -19,40 +19,35 @@ const Endpoints: CollectionConfig = {
   },
   endpoints: [
     {
-      route: '/say-hello/joe-bloggs',
+      path: '/say-hello/joe-bloggs',
       method: 'get',
-      handlers: [
-        (function sayHelloJoeBloggs(this: Payload, req, res) {
-          return res.json({ message: `Hey Joey! Welcome to ${this.getAPIURL()}` });
-        }) as EndpointHandler,
-      ],
+      handler: (req: PayloadRequest, res: Response): void => {
+        res.json({ message: `Hey Joey! Welcome to ${req.payload.getAPIURL()}` });
+      },
     },
     {
-      route: '/say-hello/:group/:name',
+      path: '/say-hello/:group/:name',
       method: 'get',
-      handlers: [
-        ((req, res) => {
-          return res.json({ message: `Hello ${req.params.name} @ ${req.params.group}` });
-        }) as EndpointHandler,
-      ],
+      handler: (req: PayloadRequest, res: Response): void => {
+        res.json({ message: `Hello ${req.params.name} @ ${req.params.group}` });
+      },
     },
     {
-      route: '/say-hello/:name',
+      path: '/say-hello/:name',
       method: 'get',
-      handlers: [
-        ((req, res) => {
-          return res.json({ message: `Hello ${req.params.name}!` });
-        }) as EndpointHandler,
-      ],
+      handler: (req: PayloadRequest, res: Response): void => {
+        res.json({ message: `Hello ${req.params.name}!` });
+      },
     },
     {
-      route: '/whoami',
+      path: '/whoami',
       method: 'post',
-      handlers: [
-        ((req, res) => {
-          return res.json({ message: `${req.body.name ? `You're ${req.body.name}` : 'I don\'t know who you are'} ${!!req.body.name !== !!req.body.age ? 'but' : 'and'} ${req.body.age ? `you're ${req.body.age} years old.` : 'I don\'t know how old you are'}` });
-        }) as EndpointHandler,
-      ],
+      handler: (req: PayloadRequest, res: Response): void => {
+        res.json({
+          name: req.body.name,
+          age: req.body.age,
+        });
+      },
     },
   ],
   fields: [

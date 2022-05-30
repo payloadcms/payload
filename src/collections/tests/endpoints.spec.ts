@@ -56,12 +56,9 @@ describe('Collections - REST', () => {
       expect(data.message).toStrictEqual('Hello George!');
     });
     it('should POST an endpoint with data', async () => {
-      const param = 'George';
+      const params = { name: 'George', age: 29 };
       const response = await fetch(`${url}/api/endpoints/whoami`, {
-        body: JSON.stringify({
-          name: 'George',
-          age: 29,
-        }),
+        body: JSON.stringify(params),
         headers: {
           ...headers,
         },
@@ -69,7 +66,8 @@ describe('Collections - REST', () => {
       });
       const data = await response.json();
       expect(response.status).toBe(200);
-      expect(data.message).toStrictEqual("You're George and you're 29 years old.");
+      expect(data.name).toStrictEqual(params.name);
+      expect(data.age).toStrictEqual(params.age);
     });
   });
 });

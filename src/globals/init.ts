@@ -45,7 +45,7 @@ export default function initGlobals(ctx: Payload): void {
         const router = express.Router();
         const { slug, endpoints } = global;
 
-        mountEndpoints(router, endpoints, ctx);
+        mountEndpoints(router, endpoints);
 
         router
           .route('/')

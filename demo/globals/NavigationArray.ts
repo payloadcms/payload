@@ -1,7 +1,8 @@
-import { EndpointHandler } from '../../src/config/types';
+import { Response } from 'express';
 import { GlobalConfig } from '../../src/globals/config/types';
 import checkRole from '../access/checkRole';
 import { NavigationArray as TNavigationArray } from '../payload-types';
+import { PayloadRequest } from '../../src/express/types';
 
 const NavigationArray: GlobalConfig = {
   slug: 'navigation-array',
@@ -14,17 +15,15 @@ const NavigationArray: GlobalConfig = {
   },
   endpoints: [
     {
-      route: '/count',
+      path: '/count',
       method: 'get',
-      handlers: [
-        (async function getNavigationArrayCount(req, res) {
-          const { array } = await this.findGlobal<TNavigationArray>({
-            slug: 'navigation-array',
-          });
+      handler: async (req: PayloadRequest, res: Response): Promise<void> => {
+        const { array } = await req.payload.findGlobal<TNavigationArray>({
+          slug: 'navigation-array',
+        });
 
-          return res.json({ count: array.length });
-        }) as EndpointHandler,
-      ],
+        res.json({ count: array.length });
+      },
     },
   ],
   fields: [

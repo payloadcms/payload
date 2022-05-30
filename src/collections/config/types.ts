@@ -194,7 +194,7 @@ export type CollectionConfig = {
     afterForgotPassword?: AfterForgotPasswordHook[];
   };
   /**
-   * Custom router endpoints
+   * Custom rest api endpoints
    */
   endpoints?: Endpoint[]
   /**

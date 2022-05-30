@@ -25,6 +25,7 @@ It's often best practice to write your Collections in separate files and then im
 | **`upload`**     | Specify options if you would like this Collection to support file uploads. For more, consult the [Uploads](/docs/upload/overview) documentation. |
 | **`timestamps`** | Set to false to disable documents' automatically generated `createdAt` and `updatedAt` timestamps. |
 | **`versions`**   | Set to true to enable default options, or configure with object properties. [More](/docs/versions/overview#collection-config)|
+| **`endpoints`**  | Add custom routes to the REST API. [More](/docs/rest-api#custom-endpoints) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -80,25 +81,25 @@ If the function is specified, a Preview button will automatically appear in the 
 **Example collection with preview function:**
 
 ```js
-{
+const Posts = {
 	slug: 'posts',
 	fields: [
 		{
 			name: 'slug',
 			type: 'text',
 			required: true,
-		}
-	]
+		},
+	],
 	admin: {
 		preview: (doc, { locale }) => {
 			if (doc?.slug) {
-				return `https://bigbird.com/preview/posts/${doc.slug}?locale=${locale}`,
+				return `https://bigbird.com/preview/posts/${doc.slug}?locale=${locale}`;
 			}
 
 			return null;
-		}
-	}
-}
+		},
+	},
+};
 ```
 
 ### Access control

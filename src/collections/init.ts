@@ -100,7 +100,7 @@ export default function registerCollections(ctx: Payload): void {
 
       router.all('*', bindCollectionMiddleware(ctx.collections[formattedCollection.slug]));
 
-      mountEndpoints(router, endpoints, ctx);
+      mountEndpoints(router, endpoints);
 
       const {
         create,

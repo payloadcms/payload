@@ -54,9 +54,12 @@ const collectionSchema = joi.object().keys({
     afterForgotPassword: joi.array().items(joi.func()),
   }),
   endpoints: joi.array().items(joi.object({
-    route: joi.string(),
-    method: joi.string().valid('get', 'head', 'post', 'put', 'delete', 'connect', 'options'),
-    handlers: joi.array().items(joi.func()),
+    path: joi.string(),
+    method: joi.string().valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
+    handler: joi.alternatives().try(
+      joi.array().items(joi.func()),
+      joi.func(),
+    ),
   })),
   auth: joi.alternatives().try(
     joi.object({
