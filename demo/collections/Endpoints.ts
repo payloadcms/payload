@@ -53,13 +53,7 @@ const Endpoints: CollectionConfig = {
   fields: [
     {
       name: 'title',
-      label: 'Title',
       type: 'text',
-    },
-    {
-      name: 'description',
-      label: 'Description',
-      type: 'textarea',
     },
   ],
 };
