@@ -81,6 +81,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
           className={`${baseClass}__toggle`}
           onClick={(e) => {
             e.preventDefault();
+            setDeleting(false);
             toggle(modalSlug);
           }}
         >
