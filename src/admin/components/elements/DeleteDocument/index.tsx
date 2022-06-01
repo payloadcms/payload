@@ -62,9 +62,10 @@ const DeleteDocument: React.FC<Props> = (props) => {
         closeAll();
 
         if (json.errors) {
-          toast.error(json.errors);
+          json.errors.forEach((error) => toast.error(error.message));
+        } else {
+          addDefaultError();
         }
-        addDefaultError();
         return false;
       } catch (e) {
         return addDefaultError();
