@@ -7,6 +7,12 @@ export default (payloadConfig: SanitizedConfig): Configuration => {
 
   let config: Configuration = {
     ...baseConfig,
+    cache: {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [__filename],
+      },
+    },
     entry: {
       ...baseConfig.entry,
       main: [
