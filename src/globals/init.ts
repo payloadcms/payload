@@ -8,6 +8,7 @@ import { getVersionsModelName } from '../versions/getVersionsModelName';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 import buildSchema from '../mongoose/buildSchema';
 import { CollectionModel } from '../collections/config/types';
+import mountEndpoints from '../init/mountEndpoints';
 
 export default function initGlobals(ctx: Payload): void {
   if (ctx.config.globals) {
@@ -40,25 +41,28 @@ export default function initGlobals(ctx: Payload): void {
 
     // If not local, open routes
     if (!ctx.local) {
-      const router = express.Router();
-
       ctx.config.globals.forEach((global) => {
+        const router = express.Router();
+        const { slug, endpoints } = global;
+
+        mountEndpoints(router, endpoints);
+
         router
-          .route(`/globals/${global.slug}`)
+          .route('/')
           .get(ctx.requestHandlers.globals.findOne(global))
           .post(ctx.requestHandlers.globals.update(global));
 
         if (global.versions) {
-          router.route(`/globals/${global.slug}/versions`)
+          router.route('/versions')
             .get(ctx.requestHandlers.globals.findVersions(global));
 
-          router.route(`/globals/${global.slug}/versions/:id`)
+          router.route('/versions/:id')
             .get(ctx.requestHandlers.globals.findVersionByID(global))
             .post(ctx.requestHandlers.globals.restoreVersion(global));
         }
-      });
 
-      ctx.router.use(router);
+        ctx.router.use(`/globals/${slug}`, router);
+      });
     }
   }
 }

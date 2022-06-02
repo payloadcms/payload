@@ -8,6 +8,7 @@ import Autosave from './collections/Autosave';
 import Code from './collections/Code';
 import Conditions from './collections/Conditions';
 // import CustomComponents from './collections/CustomComponents';
+import Endpoints from './collections/Endpoints';
 import File from './collections/File';
 import Blocks from './collections/Blocks';
 import CustomID from './collections/CustomID';
@@ -100,6 +101,7 @@ export default buildConfig({
     // CustomComponents,
     CustomID,
     DefaultValues,
+    Endpoints,
     File,
     Geolocation,
     HiddenFields,

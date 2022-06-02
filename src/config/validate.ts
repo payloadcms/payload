@@ -24,7 +24,6 @@ const validateFields = (context: string, entity: SanitizedCollectionConfig | San
       });
     }
     if (result.error) {
-      console.log(result.error);
       result.error.details.forEach(({ message }) => {
         errors.push(`${context} "${entity.slug}" > Field${fieldAffectsData(field) ? ` "${field.name}" >` : ''} ${message}`);
       });
