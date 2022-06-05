@@ -21,9 +21,10 @@ export type Arguments = {
   req?: PayloadRequest
   overrideAccess?: boolean
   showHiddenFields?: boolean
+  payload: Payload
 }
 
-async function findVersions<T extends TypeWithVersion<T> = any>(this: Payload, args: Arguments): Promise<PaginatedDocs<T>> {
+async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<PaginatedDocs<T>> {
   const {
     where,
     page,
@@ -38,9 +39,10 @@ async function findVersions<T extends TypeWithVersion<T> = any>(this: Payload, a
     },
     overrideAccess,
     showHiddenFields,
+    payload,
   } = args;
 
-  const VersionsModel = this.versions[collectionConfig.slug] as CollectionModel;
+  const VersionsModel = payload.versions[collectionConfig.slug] as CollectionModel;
 
   // /////////////////////////////////////
   // Access

@@ -15,6 +15,13 @@ import { CollectionModel, SanitizedCollectionConfig } from './config/types';
 import { Payload } from '../index';
 import { getVersionsModelName } from '../versions/getVersionsModelName';
 import mountEndpoints from '../init/mountEndpoints';
+import createHandler from './requestHandlers/create';
+import findHandler from './requestHandlers/find';
+import updateHandler from './requestHandlers/update';
+import findByIDHandler from './requestHandlers/findByID';
+import findVersionsHandler from './requestHandlers/findVersions';
+import findVersionByIDHandler from './requestHandlers/findVersionByID';
+import restoreVersionHandler from './requestHandlers/restoreVersion';
 
 const LocalStrategy = Passport.Strategy;
 
@@ -103,13 +110,6 @@ export default function registerCollections(ctx: Payload): void {
       mountEndpoints(router, endpoints);
 
       const {
-        create,
-        find,
-        update,
-        findByID,
-        findVersions,
-        findVersionByID,
-        restoreVersion,
         delete: deleteHandler,
       } = ctx.requestHandlers.collections;
 
@@ -181,20 +181,20 @@ export default function registerCollections(ctx: Payload): void {
 
       if (collection.versions) {
         router.route('/versions')
-          .get(findVersions);
+          .get(findVersionsHandler);
 
         router.route('/versions/:id')
-          .get(findVersionByID)
-          .post(restoreVersion);
+          .get(findVersionByIDHandler)
+          .post(restoreVersionHandler);
       }
 
       router.route('/')
-        .get(find)
-        .post(create);
+        .get(findHandler)
+        .post(createHandler);
 
       router.route('/:id')
-        .put(update)
-        .get(findByID)
+        .put(updateHandler)
+        .get(findByIDHandler)
         .delete(deleteHandler);
 
       ctx.router.use(`/${slug}`, router);

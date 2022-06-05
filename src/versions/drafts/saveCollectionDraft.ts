@@ -60,7 +60,7 @@ export const saveCollectionDraft = async ({
   if (config.versions.maxPerDoc) {
     enforceMaxVersions({
       id,
-      payload: this,
+      payload,
       Model: VersionsModel,
       entityLabel: config.labels.plural,
       entityType: 'collection',

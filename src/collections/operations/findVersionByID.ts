@@ -13,8 +13,9 @@ import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
-  id: string
+  id: string | number
   req: PayloadRequest
+  payload: Payload
   disableErrors?: boolean
   currentDepth?: number
   overrideAccess?: boolean
@@ -22,7 +23,7 @@ export type Arguments = {
   depth?: number
 }
 
-async function findVersionByID<T extends TypeWithVersion<T> = any>(this: Payload, args: Arguments): Promise<T> {
+async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
   const {
     depth,
     collection: {
@@ -37,13 +38,14 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(this: Payload
     currentDepth,
     overrideAccess,
     showHiddenFields,
+    payload,
   } = args;
 
   if (!id) {
     throw new APIError('Missing ID of version.', httpStatus.BAD_REQUEST);
   }
 
-  const VersionsModel = (this.versions[collectionConfig.slug]) as CollectionModel;
+  const VersionsModel = (payload.versions[collectionConfig.slug]) as CollectionModel;
 
   // /////////////////////////////////////
   // Access

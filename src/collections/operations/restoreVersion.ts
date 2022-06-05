@@ -13,16 +13,17 @@ import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
-  id: string
+  id: string | number
   req: PayloadRequest
   disableErrors?: boolean
   currentDepth?: number
   overrideAccess?: boolean
   showHiddenFields?: boolean
   depth?: number
+  payload: Payload
 }
 
-async function restoreVersion<T extends TypeWithID = any>(this: Payload, args: Arguments): Promise<T> {
+async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
   const {
     collection: {
       Model,
@@ -36,6 +37,7 @@ async function restoreVersion<T extends TypeWithID = any>(this: Payload, args: A
       locale,
     },
     req,
+    payload,
   } = args;
 
   if (!id) {
@@ -46,7 +48,7 @@ async function restoreVersion<T extends TypeWithID = any>(this: Payload, args: A
   // Retrieve original raw version
   // /////////////////////////////////////
 
-  const VersionModel = this.versions[collectionConfig.slug];
+  const VersionModel = payload.versions[collectionConfig.slug];
 
   let rawVersion = await VersionModel.findOne({
     _id: id,

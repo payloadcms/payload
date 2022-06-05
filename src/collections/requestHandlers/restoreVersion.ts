@@ -3,22 +3,24 @@ import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
 import formatSuccessResponse from '../../express/responses/formatSuccess';
+import restoreVersion from '../operations/restoreVersion';
 
 export type RestoreResult = {
   message: string
   doc: Document
 };
 
-export default async function restoreVersion(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<RestoreResult> | void> {
+export default async function restoreVersionHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<RestoreResult> | void> {
   const options = {
     req,
     collection: req.collection,
     id: req.params.id,
-    depth: req.query.depth,
+    depth: Number(req.query.depth),
+    payload: req.payload,
   };
 
   try {
-    const doc = await this.operations.collections.restoreVersion(options);
+    const doc = await restoreVersion(options);
     return res.status(httpStatus.OK).json({
       ...formatSuccessResponse('Restored successfully.', 'message'),
       doc,

@@ -290,9 +290,8 @@ export class Payload {
    * @returns Updated document
    */
   update = async <T = any>(options: UpdateOptions<T>): Promise<T> => {
-    let { update } = localOperations;
-    update = update.bind(this);
-    return update<T>(options);
+    const { update } = localOperations;
+    return update<T>(this, options);
   }
 
   delete = async <T extends TypeWithID = any>(options: DeleteOptions): Promise<T> => {
@@ -307,9 +306,8 @@ export class Payload {
    * @returns versions satisfying query
    */
   findVersions = async <T extends TypeWithVersion<T> = any>(options: FindVersionsOptions): Promise<PaginatedDocs<T>> => {
-    let { findVersions } = localOperations;
-    findVersions = findVersions.bind(this);
-    return findVersions<T>(options);
+    const { findVersions } = localOperations;
+    return findVersions<T>(this, options);
   }
 
   /**
@@ -318,9 +316,8 @@ export class Payload {
    * @returns version with specified ID
    */
   findVersionByID = async <T extends TypeWithVersion<T> = any>(options: FindVersionByIDOptions): Promise<T> => {
-    let { findVersionByID } = localOperations;
-    findVersionByID = findVersionByID.bind(this);
-    return findVersionByID(options);
+    const { findVersionByID } = localOperations;
+    return findVersionByID(this, options);
   }
 
   /**
@@ -329,9 +326,8 @@ export class Payload {
    * @returns version with specified ID
    */
   restoreVersion = async <T extends TypeWithVersion<T> = any>(options: RestoreVersionOptions): Promise<T> => {
-    let { restoreVersion } = localOperations;
-    restoreVersion = restoreVersion.bind(this);
-    return restoreVersion(options);
+    const { restoreVersion } = localOperations;
+    return restoreVersion(this, options);
   }
 
   login = async <T extends TypeWithID = any>(options): Promise<Result & { user: T}> => {

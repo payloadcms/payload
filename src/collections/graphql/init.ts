@@ -12,14 +12,17 @@ import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType'
 import { BaseFields } from './types';
 import { getCollectionIDType } from '../../graphql/schema/buildMutationInputType';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
-import create from './resolvers/create';
 import find from './resolvers/find';
 import findByID from './resolvers/findByID';
+import findVersionByIDResolver from './resolvers/findVersionByID';
+import restoreVersionResolver from './resolvers/restoreVersion';
+import createResolver from './resolvers/create';
+import updateResolver from './resolvers/update';
+import findVersionsResolver from './resolvers/findVersions';
 
 function registerCollections(): void {
   const {
-    findVersions, findVersionByID, restoreVersion,
-    deleteResolver, update,
+    deleteResolver,
   } = this.graphQL.resolvers.collections;
 
   const {
@@ -162,7 +165,7 @@ function registerCollections(): void {
         data: { type: collection.graphQL.mutationInputType },
         draft: { type: GraphQLBoolean },
       },
-      resolve: create(this, collection),
+      resolve: createResolver(this, collection),
     };
 
     this.Mutation.fields[`update${singularLabel}`] = {
@@ -173,7 +176,7 @@ function registerCollections(): void {
         draft: { type: GraphQLBoolean },
         autosave: { type: GraphQLBoolean },
       },
-      resolve: update(collection),
+      resolve: updateResolver(this, collection),
     };
 
     this.Mutation.fields[`delete${singularLabel}`] = {
@@ -217,7 +220,7 @@ function registerCollections(): void {
             fallbackLocale: { type: this.types.fallbackLocaleInputType },
           } : {}),
         },
-        resolve: findVersionByID(collection),
+        resolve: findVersionByIDResolver(this, collection),
       };
       this.Query.fields[`versions${pluralLabel}`] = {
         type: buildPaginatedListType(`versions${formatName(pluralLabel)}`, collection.graphQL.versionType),
@@ -237,14 +240,14 @@ function registerCollections(): void {
           limit: { type: GraphQLInt },
           sort: { type: GraphQLString },
         },
-        resolve: findVersions(collection),
+        resolve: findVersionsResolver(this, collection),
       };
       this.Mutation.fields[`restoreVersion${formatName(singularLabel)}`] = {
         type: collection.graphQL.type,
         args: {
           id: { type: GraphQLString },
         },
-        resolve: restoreVersion(collection),
+        resolve: restoreVersionResolver(this, collection),
       };
     }
 
