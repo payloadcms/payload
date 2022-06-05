@@ -175,7 +175,6 @@ export class Payload {
     // Initialize collections & globals
     initCollections(this);
     initGlobals(this);
-    initPreferences(this);
 
     // Connect to database
     connectMongoose(this.mongoURL, options.mongoOptions, options.local, this.logger);
@@ -188,11 +187,13 @@ export class Payload {
       });
 
       this.express = options.express;
+
       if (this.config.rateLimit.trustProxy) {
         this.express.set('trust proxy', 1);
       }
 
       initAdmin(this);
+      initPreferences(this);
 
       this.router.get('/access', access);
 
