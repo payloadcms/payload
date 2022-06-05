@@ -2,8 +2,8 @@ import express from 'express';
 
 import { Payload } from '../index';
 import Model from './model';
-import findOne from './operations/findOne';
-import update from './operations/update';
+import findOne from './requestHandlers/findOne';
+import update from './requestHandlers/update';
 import deleteHandler from './requestHandlers/delete';
 
 export default function initPreferences(ctx: Payload): void {
