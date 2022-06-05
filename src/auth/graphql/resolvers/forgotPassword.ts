@@ -1,6 +1,8 @@
+import { Payload } from '../../..';
 import { Collection } from '../../../collections/config/types';
+import forgotPassword from '../../operations/forgotPassword';
 
-function forgotPassword(collection: Collection): any {
+function forgotPasswordResolver(payload: Payload, collection: Collection): any {
   async function resolver(_, args, context) {
     const options = {
       collection,
@@ -10,13 +12,11 @@ function forgotPassword(collection: Collection): any {
       expiration: args.expiration,
     };
 
-    await this.operations.collections.auth.forgotPassword(options);
+    await forgotPassword(options);
     return true;
   }
 
-  const forgotPasswordResolver = resolver.bind(this);
-
-  return forgotPasswordResolver;
+  return resolver;
 }
 
-export default forgotPassword;
+export default forgotPasswordResolver;

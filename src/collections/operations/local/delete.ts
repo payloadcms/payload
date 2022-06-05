@@ -1,5 +1,8 @@
 import { TypeWithID } from '../../config/types';
 import { Document } from '../../../types';
+import { PayloadRequest } from '../../../express/types';
+import { Payload } from '../../../index';
+import deleteOperation from '../delete';
 
 export type Options = {
   collection: string
@@ -12,7 +15,7 @@ export type Options = {
   showHiddenFields?: boolean
 }
 
-export default async function localDelete<T extends TypeWithID = any>(options: Options): Promise<T> {
+export default async function deleteLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<T> {
   const {
     collection: collectionSlug,
     depth,
@@ -26,7 +29,7 @@ export default async function localDelete<T extends TypeWithID = any>(options: O
 
   const collection = this.collections[collectionSlug];
 
-  return this.operations.collections.delete({
+  return deleteOperation({
     depth,
     id,
     collection,
@@ -37,7 +40,7 @@ export default async function localDelete<T extends TypeWithID = any>(options: O
       payloadAPI: 'local',
       locale,
       fallbackLocale,
-      payload: this,
-    },
+      payload,
+    } as PayloadRequest,
   });
 }

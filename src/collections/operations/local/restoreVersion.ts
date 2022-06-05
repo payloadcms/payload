@@ -1,5 +1,8 @@
+import { Payload } from '../../..';
 import { Document } from '../../../types';
 import { TypeWithVersion } from '../../../versions/types';
+import { PayloadRequest } from '../../../express/types';
+import restoreVersion from '../restoreVersion';
 
 export type Options = {
   collection: string
@@ -13,7 +16,7 @@ export type Options = {
   showHiddenFields?: boolean
 }
 
-export default async function restoreVersion<T extends TypeWithVersion<T> = any>(options: Options): Promise<T> {
+export default async function restoreVersionHandler<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<T> {
   const {
     collection: collectionSlug,
     depth,
@@ -40,9 +43,9 @@ export default async function restoreVersion<T extends TypeWithVersion<T> = any>
       payloadAPI: 'local',
       locale,
       fallbackLocale,
-      payload: this,
-    },
+      payload,
+    } as PayloadRequest,
   };
 
-  return this.operations.collections.restoreVersion(args);
+  return restoreVersion(args);
 }

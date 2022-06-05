@@ -1,6 +1,9 @@
+import { Payload } from '../../..';
+import { Collection } from '../../../collections/config/types';
+import refresh from '../../operations/refresh';
 import getExtractJWT from '../../getExtractJWT';
 
-function refresh(collection) {
+function refreshResolver(payload: Payload, collection: Collection) {
   async function resolver(_, args, context) {
     let token;
 
@@ -18,13 +21,12 @@ function refresh(collection) {
       res: context.res,
     };
 
-    const result = await this.operations.collections.auth.refresh(options);
+    const result = await refresh(options);
 
     return result;
   }
 
-  const refreshResolver = resolver.bind(this);
-  return refreshResolver;
+  return resolver;
 }
 
-export default refresh;
+export default refreshResolver;

@@ -6,7 +6,8 @@ import { Where } from '../../../types';
 import { Collection } from '../../config/types';
 import find from '../../operations/find';
 
-export type Resolver = (_: unknown, args: {
+export type Resolver = (_: unknown,
+  args: {
   data: Record<string, unknown>,
   locale?: string
   draft: boolean

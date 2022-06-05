@@ -1,5 +1,6 @@
 import { PayloadRequest } from '../../../express/types';
-import { Result } from '../forgotPassword';
+import forgotPassword, { Result } from '../forgotPassword';
+import { Payload } from '../../..';
 
 export type Options = {
   collection: string
@@ -11,29 +12,27 @@ export type Options = {
   req?: PayloadRequest
 }
 
-async function forgotPassword(options: Options): Promise<Result> {
+async function localForgotPassword(payload: Payload, options: Options): Promise<Result> {
   const {
     collection: collectionSlug,
     data,
     expiration,
     disableEmail,
-    req,
+    req = {},
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
-  return this.operations.collections.auth.forgotPassword({
+  return forgotPassword({
     data,
     collection,
-    overrideAccess: true,
     disableEmail,
     expiration,
     req: {
       ...req,
       payloadAPI: 'local',
-      payload: this,
-    },
+    } as PayloadRequest,
   });
 }
 
-export default forgotPassword;
+export default localForgotPassword;

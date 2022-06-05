@@ -1,0 +1,48 @@
+import { Endpoint } from '../config/types';
+import findVersions from './requestHandlers/findVersions';
+import findVersionByID from './requestHandlers/findVersionByID';
+import restoreVersion from './requestHandlers/restoreVersion';
+import { SanitizedGlobalConfig } from './config/types';
+import update from './requestHandlers/update';
+import findOne from './requestHandlers/findOne';
+
+const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
+  const { endpoints } = global;
+
+  if (global.versions) {
+    endpoints.push(...[
+      {
+        path: '/versions',
+        method: 'get',
+        handler: findVersions(global),
+      },
+      {
+        path: '/versions/:id',
+        method: 'get',
+        handler: findVersionByID(global),
+      },
+      {
+        path: '/versions/:id',
+        method: 'post',
+        handler: restoreVersion(global),
+      },
+    ]);
+  }
+
+  endpoints.push(...[
+    {
+      path: '/',
+      method: 'get',
+      handler: findOne(global),
+    },
+    {
+      path: '/',
+      method: 'post',
+      handler: update(global),
+    },
+  ]);
+
+  return endpoints;
+};
+
+export default buildEndpoints;

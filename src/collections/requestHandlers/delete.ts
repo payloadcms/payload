@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { NotFound } from '../../errors';
 import { Document } from '../../types';
+import deleteOperation from '../operations/delete';
 
 export type DeleteResult = {
   message: string;
@@ -11,11 +12,11 @@ export type DeleteResult = {
 
 export default async function deleteHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<DeleteResult> | void> {
   try {
-    const doc = await this.operations.collections.delete({
+    const doc = await deleteOperation({
       req,
       collection: req.collection,
       id: req.params.id,
-      depth: req.query.depth,
+      depth: parseInt(String(req.query.depth), 10),
     });
 
     if (!doc) {

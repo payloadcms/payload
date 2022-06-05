@@ -15,16 +15,22 @@ import { buildVersionCollectionFields } from '../../versions/buildCollectionFiel
 import create from './resolvers/create';
 import find from './resolvers/find';
 import findByID from './resolvers/findByID';
+import me from '../../auth/graphql/resolvers/me';
+import init from '../../auth/graphql/resolvers/init';
+import login from '../../auth/graphql/resolvers/login';
+import logout from '../../auth/graphql/resolvers/logout';
+import forgotPassword from '../../auth/graphql/resolvers/forgotPassword';
+import resetPassword from '../../auth/graphql/resolvers/resetPassword';
+import verifyEmail from '../../auth/graphql/resolvers/verifyEmail';
+import unlock from '../../auth/graphql/resolvers/unlock';
+import refresh from '../../auth/graphql/resolvers/refresh';
+
 
 function registerCollections(): void {
   const {
     findVersions, findVersionByID, restoreVersion,
     deleteResolver, update,
   } = this.graphQL.resolvers.collections;
-
-  const {
-    login, logout, me, init, refresh, forgotPassword, resetPassword, verifyEmail, unlock,
-  } = this.graphQL.resolvers.collections.auth;
 
   Object.keys(this.collections).forEach((slug) => {
     const collection = this.collections[slug];
@@ -173,7 +179,7 @@ function registerCollections(): void {
         draft: { type: GraphQLBoolean },
         autosave: { type: GraphQLBoolean },
       },
-      resolve: update(collection),
+      resolve: update(this, collection),
     };
 
     this.Mutation.fields[`delete${singularLabel}`] = {
@@ -284,7 +290,7 @@ function registerCollections(): void {
             },
           },
         }),
-        resolve: me(slug),
+        resolve: me(this, slug),
       };
 
       if (collection.config.auth.maxLoginAttempts > 0) {
@@ -293,13 +299,13 @@ function registerCollections(): void {
           args: {
             email: { type: new GraphQLNonNull(GraphQLString) },
           },
-          resolve: unlock(collection),
+          resolve: unlock(this, collection),
         };
       }
 
       this.Query.fields[`initialized${singularLabel}`] = {
         type: GraphQLBoolean,
-        resolve: init(collection),
+        resolve: init(this, collection),
       };
 
       this.Mutation.fields[`login${singularLabel}`] = {
@@ -321,12 +327,12 @@ function registerCollections(): void {
           email: { type: GraphQLString },
           password: { type: GraphQLString },
         },
-        resolve: login(collection),
+        resolve: login(this, collection),
       };
 
       this.Mutation.fields[`logout${singularLabel}`] = {
         type: GraphQLString,
-        resolve: logout(collection),
+        resolve: logout(this, collection),
       };
 
       this.Mutation.fields[`forgotPassword${singularLabel}`] = {
@@ -336,7 +342,7 @@ function registerCollections(): void {
           disableEmail: { type: GraphQLBoolean },
           expiration: { type: GraphQLInt },
         },
-        resolve: forgotPassword(collection),
+        resolve: forgotPassword(this, collection),
       };
 
       this.Mutation.fields[`resetPassword${singularLabel}`] = {
@@ -351,7 +357,7 @@ function registerCollections(): void {
           token: { type: GraphQLString },
           password: { type: GraphQLString },
         },
-        resolve: resetPassword(collection),
+        resolve: resetPassword(this, collection),
       };
 
       this.Mutation.fields[`verifyEmail${singularLabel}`] = {
@@ -359,7 +365,7 @@ function registerCollections(): void {
         args: {
           token: { type: GraphQLString },
         },
-        resolve: verifyEmail(collection),
+        resolve: verifyEmail(this, collection),
       };
 
       this.Mutation.fields[`refreshToken${singularLabel}`] = {
@@ -380,7 +386,7 @@ function registerCollections(): void {
         args: {
           token: { type: GraphQLString },
         },
-        resolve: refresh(collection),
+        resolve: refresh(this, collection),
       };
     }
   });

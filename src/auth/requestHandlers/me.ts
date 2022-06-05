@@ -1,12 +1,13 @@
 import { NextFunction, Response } from 'express';
 import { PayloadRequest } from '../../express/types';
+import me from '../operations/me';
 
-export default async function me(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
+export default async function meHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {
     const collectionSlugMatch = req.originalUrl.match(/\/([^/]+)\/me\/?$/);
     const [, collectionSlug] = collectionSlugMatch;
 
-    const response = await this.operations.collections.auth.me({
+    const response = await me({
       req,
       collectionSlug,
     });

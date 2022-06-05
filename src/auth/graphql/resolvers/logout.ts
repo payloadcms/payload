@@ -1,20 +1,21 @@
 import { Collection } from '../../../collections/config/types';
+import { Payload } from '../../../index';
+import logout from '../../operations/logout';
 
-function logout(collection: Collection): any {
-  async function resolver(_, __, context) {
+function logoutResolver(payload: Payload, collection: Collection): any {
+  async function resolver(_, args, context) {
     const options = {
       collection,
       res: context.res,
       req: context.req,
     };
 
-    const result = await this.operations.collections.auth.logout(options);
+    const result = await logout(options);
 
     return result;
   }
 
-  const logoutResolver = resolver.bind(this);
-  return logoutResolver;
+  return resolver;
 }
 
-export default logout;
+export default logoutResolver;

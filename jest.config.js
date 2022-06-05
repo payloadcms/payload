@@ -1,5 +1,6 @@
 module.exports = {
   verbose: true,
+  bail: true,
   testEnvironment: 'node',
   globalSetup: '<rootDir>/tests/api/globalSetup.ts',
   testPathIgnorePatterns: [

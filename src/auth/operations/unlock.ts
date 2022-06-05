@@ -1,7 +1,18 @@
 import { APIError } from '../../errors';
 import executeAccess from '../executeAccess';
+import { Collection } from '../../collections/config/types';
+import { PayloadRequest } from '../../express/types';
 
-async function unlock(args) {
+export type Args = {
+  collection: Collection
+  data: {
+    email: string
+  }
+  req: PayloadRequest
+  overrideAccess?: boolean
+}
+
+async function unlock(args: Args): Promise<boolean> {
   if (!Object.prototype.hasOwnProperty.call(args.data, 'email')) {
     throw new APIError('Missing email.');
   }

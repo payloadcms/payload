@@ -253,9 +253,9 @@ describe('Collections - Uploads', () => {
         method: 'put',
       });
 
-      expect(updateResponse.status).toBe(200);
 
       const updateResponseData = await updateResponse.json();
+      expect(updateResponse.status).toBe(200);
 
       // Check that files weren't affected
       expect(await fileExists(path.join(mediaDir, 'update.png'))).toBe(true);

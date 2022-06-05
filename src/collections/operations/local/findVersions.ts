@@ -1,6 +1,9 @@
+import { Payload } from '../../..';
 import { Document, Where } from '../../../types';
 import { PaginatedDocs } from '../../../mongoose/types';
 import { TypeWithVersion } from '../../../versions/types';
+import { PayloadRequest } from '../../../express/types';
+import findVersions from '../findVersions';
 
 export type Options = {
   collection: string
@@ -16,14 +19,14 @@ export type Options = {
   where?: Where
 }
 
-export default async function findVersions<T extends TypeWithVersion<T> = any>(options: Options): Promise<PaginatedDocs<T>> {
+export default async function findVersionsLocal<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<PaginatedDocs<T>> {
   const {
     collection: collectionSlug,
     depth,
     page,
     limit,
     where,
-    locale = this?.config?.localization?.defaultLocale,
+    locale = payload.config?.localization?.defaultLocale,
     fallbackLocale = null,
     user,
     overrideAccess = true,
@@ -31,9 +34,9 @@ export default async function findVersions<T extends TypeWithVersion<T> = any>(o
     sort,
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
-  return this.operations.collections.findVersions({
+  return findVersions({
     where,
     page,
     limit,
@@ -47,7 +50,7 @@ export default async function findVersions<T extends TypeWithVersion<T> = any>(o
       payloadAPI: 'local',
       locale,
       fallbackLocale,
-      payload: this,
-    },
+      payload,
+    } as PayloadRequest,
   });
 }

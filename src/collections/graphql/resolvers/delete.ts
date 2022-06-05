@@ -1,7 +1,9 @@
 /* eslint-disable no-param-reassign */
 import { Response } from 'express';
+import { Payload } from '../../..';
 import { PayloadRequest } from '../../../express/types';
 import { Collection } from '../../config/types';
+import deleteOperation from '../../operations/delete';
 
 export type Resolver = (
   _: unknown,
@@ -15,7 +17,7 @@ export type Resolver = (
   }
 ) => Promise<Document>
 
-export default function getDeleteResolver(collection: Collection): Resolver {
+export default function getDeleteResolver(payload: Payload, collection: Collection): Resolver {
   async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
@@ -26,11 +28,10 @@ export default function getDeleteResolver(collection: Collection): Resolver {
       req: context.req,
     };
 
-    const result = await this.operations.collections.delete(options);
+    const result = await deleteOperation(options);
 
     return result;
   }
 
-  const deleteResolver = resolver.bind(this);
-  return deleteResolver;
+  return resolver;
 }
