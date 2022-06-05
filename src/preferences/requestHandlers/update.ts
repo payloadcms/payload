@@ -2,13 +2,14 @@ import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import formatSuccessResponse from '../../express/responses/formatSuccess';
+import update from '../operations/update';
 
 export type UpdatePreferenceResult = Promise<Response<Document> | void>;
 export type UpdatePreferenceResponse = (req: PayloadRequest, res: Response, next: NextFunction) => UpdatePreferenceResult;
 
-export default async function update(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<any> | void> {
+export default async function updateHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<any> | void> {
   try {
-    const doc = await this.operations.preferences.update({
+    const doc = await update({
       req,
       user: req.user,
       key: req.params.key,

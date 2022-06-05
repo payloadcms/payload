@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { GraphQLJSON } from 'graphql-type-json';
 import {
   GraphQLNonNull,
@@ -5,13 +6,12 @@ import {
   GraphQLString,
 } from 'graphql';
 import { DateTimeResolver } from 'graphql-scalars';
+import findOne from '../operations/findOne';
+import update from '../operations/update';
+import deleteOperation from '../operations/delete';
+import { Payload } from '../..';
 
-function registerPreferences(): void {
-  const {
-    findOne, update, delete: deleteOperation,
-  } = this.operations.preferences;
-
-
+function initCollectionsGraphQL(payload: Payload): void {
   const valueType = GraphQLJSON;
 
   const preferenceType = new GraphQLObjectType({
@@ -26,7 +26,7 @@ function registerPreferences(): void {
     },
   });
 
-  this.Query.fields.Preference = {
+  payload.Query.fields.Preference = {
     type: preferenceType,
     args: {
       key: { type: GraphQLString },
@@ -37,7 +37,7 @@ function registerPreferences(): void {
     },
   };
 
-  this.Mutation.fields.updatePreference = {
+  payload.Mutation.fields.updatePreference = {
     type: preferenceType,
     args: {
       key: { type: new GraphQLNonNull(GraphQLString) },
@@ -49,7 +49,7 @@ function registerPreferences(): void {
     },
   };
 
-  this.Mutation.fields.deletePreference = {
+  payload.Mutation.fields.deletePreference = {
     type: preferenceType,
     args: {
       key: { type: new GraphQLNonNull(GraphQLString) },
@@ -61,4 +61,4 @@ function registerPreferences(): void {
   };
 }
 
-export default registerPreferences;
+export default initCollectionsGraphQL;

@@ -5,6 +5,7 @@ import formatName from '../utilities/formatName';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
 import { Field } from '../../fields/config/types';
+import { Payload } from '../..';
 
 type OperationType = 'create' | 'read' | 'update' | 'delete' | 'unlock' | 'readVersions';
 
@@ -96,14 +97,14 @@ const buildEntity = (label: string, entityFields: Field[], operations: Operation
   return fields;
 };
 
-export default function buildPoliciesType(): GraphQLObjectType {
+export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
   const fields = {
     canAccessAdmin: {
       type: new GraphQLNonNull(GraphQLBoolean),
     },
   };
 
-  Object.values(this.config.collections).forEach((collection: SanitizedCollectionConfig) => {
+  Object.values(payload.config.collections).forEach((collection: SanitizedCollectionConfig) => {
     const collectionOperations: OperationType[] = ['create', 'read', 'update', 'delete'];
 
     if (collection.auth && (typeof collection.auth.maxLoginAttempts !== 'undefined' && collection.auth.maxLoginAttempts !== 0)) {
@@ -122,7 +123,7 @@ export default function buildPoliciesType(): GraphQLObjectType {
     };
   });
 
-  Object.values(this.config.globals).forEach((global: SanitizedGlobalConfig) => {
+  Object.values(payload.config.globals).forEach((global: SanitizedGlobalConfig) => {
     const globalOperations: OperationType[] = ['read', 'update'];
 
     if (global.versions) {

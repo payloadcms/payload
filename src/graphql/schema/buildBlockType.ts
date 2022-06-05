@@ -1,7 +1,10 @@
+/* eslint-disable no-param-reassign */
+import { Payload } from '../..';
 import { Block } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
+import buildObjectType from './buildObjectType';
 
-function buildBlockType(block: Block): void {
+function buildBlockType(payload: Payload, block: Block): void {
   const {
     slug,
     labels: {
@@ -9,9 +12,10 @@ function buildBlockType(block: Block): void {
     },
   } = block;
 
-  if (!this.types.blockTypes[slug]) {
+  if (!payload.types.blockTypes[slug]) {
     const formattedBlockName = formatName(singular);
-    this.types.blockTypes[slug] = this.buildObjectType(
+    payload.types.blockTypes[slug] = buildObjectType(
+      payload,
       formattedBlockName,
       [
         ...block.fields,

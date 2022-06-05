@@ -17,7 +17,6 @@ const formatConfigNames = (results, configs) => {
 function accessResolver(payload: Payload) {
   async function resolver(_, args, context) {
     const options = {
-      payload,
       req: context.req,
     };
 

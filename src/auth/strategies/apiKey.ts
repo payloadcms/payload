@@ -1,7 +1,11 @@
 import PassportAPIKey from 'passport-headerapikey';
 import crypto from 'crypto';
+import { PayloadRequest } from '../../express/types';
+import { Payload } from '../..';
+import find from '../../collections/operations/find';
 
-export default ({ operations, secret }, { Model, config }): PassportAPIKey => {
+export default (payload: Payload, { Model, config }): PassportAPIKey => {
+  const { secret } = payload;
   const opts = {
     header: 'Authorization',
     prefix: `${config.labels.singular} API-Key `,
@@ -33,13 +37,13 @@ export default ({ operations, secret }, { Model, config }): PassportAPIKey => {
           equals: apiKeyIndex,
         };
       }
-      const userQuery = await operations.collections.find({
+      const userQuery = await find({
         where,
         collection: {
           Model,
           config,
         },
-        req,
+        req: req as PayloadRequest,
         overrideAccess: true,
         depth: config.auth.depth,
       });

@@ -1,6 +1,6 @@
-import { Request } from 'express';
 import { Model } from 'mongoose';
 import { User } from '../auth';
+import { PayloadRequest } from '../express/types';
 
 export type Preference = {
   user: string;
@@ -17,7 +17,7 @@ export type Preferences = {
 
 export type PreferenceRequest = {
   overrideAccess?: boolean;
-  req: Request;
+  req: PayloadRequest;
   user: User;
   key: string;
 };

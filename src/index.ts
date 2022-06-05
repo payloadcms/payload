@@ -1,6 +1,7 @@
 import express, { Express, Router } from 'express';
 import pino from 'pino';
 import crypto from 'crypto';
+import { GraphQLError, GraphQLFormattedError, GraphQLSchema } from 'graphql';
 import {
   TypeWithID,
   Collection,
@@ -15,8 +16,6 @@ import { TypeWithVersion } from './versions/types';
 import { PaginatedDocs } from './mongoose/types';
 
 import Logger from './utilities/logger';
-import bindOperations, { Operations } from './init/bindOperations';
-import bindRequestHandlers, { RequestHandlers } from './init/bindRequestHandlers';
 import loadConfig from './config/load';
 import authenticate, { PayloadAuthenticate } from './express/middleware/authenticate';
 import connectMongoose from './mongoose/connect';
@@ -30,8 +29,7 @@ import initGlobals from './globals/init';
 import { Globals, TypeWithID as GlobalTypeWithID } from './globals/config/types';
 import initGraphQLPlayground from './graphql/initPlayground';
 import initStatic from './express/static';
-import GraphQL from './graphql';
-import bindResolvers, { GraphQLResolvers } from './graphql/bindResolvers';
+import initializeGraphQL from './graphql';
 import buildEmail from './email/build';
 import identifyAPI from './express/middleware/identifyAPI';
 import errorHandler, { ErrorHandler } from './express/middleware/errorHandler';
@@ -81,10 +79,6 @@ export class Payload {
     [slug: string]: CollectionModel;
   } = {}
 
-  graphQL: {
-    resolvers: GraphQLResolvers
-  };
-
   preferences: Preferences;
 
   globals: Globals;
@@ -111,13 +105,32 @@ export class Payload {
 
   decrypt = decrypt;
 
-  operations: Operations;
-
   errorHandler: ErrorHandler;
 
   authenticate: PayloadAuthenticate;
 
-  requestHandlers: RequestHandlers;
+  types: {
+    blockTypes: any;
+    blockInputTypes: any;
+    localeInputType: any;
+    fallbackLocaleInputType: any;
+  };
+
+  Query: { name: string; fields: { [key: string]: any } } = { name: 'Query', fields: {} };
+
+  Mutation: { name: string; fields: { [key: string]: any } } = { name: 'Mutation', fields: {} };
+
+  schema: GraphQLSchema;
+
+  extensions: (info: any) => Promise<any>;
+
+  customFormatErrorFn: (error: GraphQLError) => GraphQLFormattedError;
+
+  validationRules: any;
+
+  errorResponses: GraphQLFormattedError[] = [];
+
+  errorIndex: number;
 
   /**
    * @description Initializes Payload
@@ -148,10 +161,6 @@ export class Payload {
 
     this.config = loadConfig(this.logger);
 
-    bindOperations(this);
-    bindRequestHandlers(this);
-    bindResolvers(this);
-
     // If not initializing locally, scaffold router
     if (!this.local) {
       this.router = express.Router();
@@ -169,7 +178,6 @@ export class Payload {
     initPreferences(this);
 
     // Connect to database
-
     connectMongoose(this.mongoURL, options.mongoOptions, options.local, this.logger);
 
     // If not initializing locally, set up HTTP routing
@@ -188,17 +196,14 @@ export class Payload {
 
       this.router.get('/access', access);
 
-      const graphQLHandler = new GraphQL(this);
-
       if (!this.config.graphQL.disable) {
         this.router.use(
           this.config.routes.graphQL,
           identifyAPI('GraphQL'),
-          (req, res) => graphQLHandler.init(req, res)(req, res),
+          (req, res) => initializeGraphQL(req, res)(req, res),
         );
         initGraphQLPlayground(this);
       }
-
 
       // Bind router to API
       this.express.use(this.config.routes.api, this.router);

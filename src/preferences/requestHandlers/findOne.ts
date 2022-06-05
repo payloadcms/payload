@@ -2,10 +2,11 @@ import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { Preference } from '../types';
+import findOne from '../operations/findOne';
 
-export default async function findOne(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<Preference> | void> {
+export default async function findOneHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<Preference> | void> {
   try {
-    const result = await this.operations.preferences.findOne({
+    const result = await findOne({
       req,
       user: req.user,
       key: req.params.key,

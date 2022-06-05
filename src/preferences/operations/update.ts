@@ -4,11 +4,17 @@ import executeAccess from '../../auth/executeAccess';
 import UnauthorizedError from '../../errors/UnathorizedError';
 
 async function update(args: PreferenceUpdateRequest) {
-  const { preferences: { Model } } = this;
   const {
     overrideAccess,
     user,
     req,
+    req: {
+      payload: {
+        preferences: {
+          Model,
+        },
+      },
+    },
     key,
     value,
   } = args;

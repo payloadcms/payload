@@ -22,6 +22,10 @@ import { BaseFields } from '../../collections/graphql/types';
 import { toWords } from '../../utilities/formatLabels';
 import createRichTextRelationshipPromise from '../../fields/richText/relationshipPromise';
 import formatOptions from '../utilities/formatOptions';
+import { Payload } from '../..';
+import find from '../../collections/operations/find';
+import buildWhereInputType from './buildWhereInputType';
+import buildBlockType from './buildBlockType';
 
 type LocaleInputType = {
   locale: {
@@ -35,9 +39,7 @@ type LocaleInputType = {
   }
 }
 
-function buildObjectType(name: string, fields: Field[], parentName: string, baseFields: BaseFields = {}): GraphQLType {
-  const recursiveBuildObjectType = buildObjectType.bind(this);
-
+function buildObjectType(payload: Payload, name: string, fields: Field[], parentName: string, baseFields: BaseFields = {}): GraphQLObjectType {
   const fieldToSchemaMap = {
     number: (field: NumberField) => ({ type: withNullableType(field, GraphQLFloat) }),
     text: (field: TextField) => ({ type: withNullableType(field, GraphQLString) }),
@@ -77,24 +79,22 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
       // to itself. Therefore, we set the relationshipType equal to the blockType
       // that is currently being created.
 
-      const type = this.collections[relationTo].graphQL.type || newlyCreatedBlockType;
+      const type = payload.collections[relationTo].graphQL.type || newlyCreatedBlockType;
 
       const uploadArgs = {} as LocaleInputType;
 
-      if (this.config.localization) {
+      if (payload.config.localization) {
         uploadArgs.locale = {
-          type: this.types.localeInputType,
+          type: payload.types.localeInputType,
         };
 
         uploadArgs.fallbackLocale = {
-          type: this.types.fallbackLocaleInputType,
+          type: payload.types.fallbackLocaleInputType,
         };
       }
 
       const relatedCollectionSlug = field.relationTo;
-      const relatedCollection = this.collections[relatedCollectionSlug];
-
-      const { find } = this.operations.collections;
+      const relatedCollection = payload.collections[relatedCollectionSlug];
 
       const upload = {
         args: uploadArgs,
@@ -139,10 +139,10 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
         },
       };
 
-      const whereFields = this.collections[relationTo].config.fields;
+      const whereFields = payload.collections[relationTo].config.fields;
 
       upload.args.where = {
-        type: this.buildWhereInputType(
+        type: buildWhereInputType(
           uploadName,
           whereFields,
           uploadName,
@@ -194,7 +194,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
           }), {}),
         });
 
-        const types = relationTo.map((relation) => this.collections[relation].graphQL.type);
+        const types = relationTo.map((relation) => payload.collections[relation].graphQL.type);
 
         type = new GraphQLObjectType({
           name: `${relationshipName}_Relationship`,
@@ -206,7 +206,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
               type: new GraphQLUnionType({
                 name: relationshipName,
                 types,
-                async resolveType(data, { req: { payload } }) {
+                async resolveType(data, { req }) {
                   return payload.collections[data.collection].graphQL.type.name;
                 },
               }),
@@ -214,7 +214,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
           },
         });
       } else {
-        ({ type } = this.collections[relationTo as string].graphQL);
+        ({ type } = payload.collections[relationTo as string].graphQL);
       }
 
       // If the relationshipType is undefined at this point,
@@ -232,24 +232,19 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
         limit?: unknown
       } = {};
 
-      if (this.config.localization) {
+      if (payload.config.localization) {
         relationshipArgs.locale = {
-          type: this.types.localeInputType,
+          type: payload.types.localeInputType,
         };
 
         relationshipArgs.fallbackLocale = {
-          type: this.types.fallbackLocaleInputType,
+          type: payload.types.fallbackLocaleInputType,
         };
       }
 
       const {
         collections,
-        operations: {
-          collections: {
-            find,
-          },
-        },
-      } = this;
+      } = payload;
 
       const relationship = {
         args: relationshipArgs,
@@ -282,7 +277,6 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
                     equals: id,
                   },
                 },
-                res: context.res,
                 req: {
                   ...context.req,
                   locale,
@@ -376,17 +370,17 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
         ], []);
 
         relationship.args.where = {
-          type: this.buildWhereInputType(
+          type: buildWhereInputType(
             relationshipName,
             relatedCollectionFields,
             relationshipName,
           ),
         };
       } else {
-        const whereFields = this.collections[relationTo].config.fields;
+        const whereFields = payload.collections[relationTo].config.fields;
 
         relationship.args.where = {
-          type: this.buildWhereInputType(
+          type: buildWhereInputType(
             relationshipName,
             whereFields,
             relationshipName,
@@ -398,21 +392,21 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
     },
     array: (field: ArrayField) => {
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
-      let type = recursiveBuildObjectType(fullName, field.fields, fullName);
-      type = new GraphQLList(withNullableType(field, type));
+      const type = buildObjectType(payload, fullName, field.fields, fullName);
+      const arrayType = new GraphQLList(withNullableType(field, type));
 
-      return { type };
+      return { type: arrayType };
     },
     group: (field: GroupField) => {
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
-      const type = recursiveBuildObjectType(fullName, field.fields, fullName);
+      const type = buildObjectType(payload, fullName, field.fields, fullName);
 
       return { type };
     },
     blocks: (field: BlockField) => {
       const blockTypes = field.blocks.map((block) => {
-        this.buildBlockType(block);
-        return this.types.blockTypes[block.slug];
+        buildBlockType(payload, block);
+        return payload.types.blockTypes[block.slug];
       });
 
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
@@ -420,7 +414,7 @@ function buildObjectType(name: string, fields: Field[], parentName: string, base
       const type = new GraphQLList(new GraphQLUnionType({
         name: fullName,
         types: blockTypes,
-        resolveType: (data) => this.types.blockTypes[data.blockType].name,
+        resolveType: (data) => payload.types.blockTypes[data.blockType].name,
       }));
 
       return { type };
