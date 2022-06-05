@@ -12,7 +12,7 @@ async function localVerifyEmail(payload: Payload, options: Options): Promise<boo
     token,
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
   return verifyEmail({
     token,

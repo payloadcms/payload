@@ -1,3 +1,4 @@
+/* eslint-disable react/destructuring-assignment */
 import { Request } from 'express';
 import { SanitizedConfig } from '../config/types';
 import parseCookies from '../utilities/parseCookies';

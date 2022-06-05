@@ -20,14 +20,14 @@ export default async function deleteLocal<T extends TypeWithID = any>(payload: P
     collection: collectionSlug,
     depth,
     id,
-    locale = this?.config?.localization?.defaultLocale,
+    locale = payload.config?.localization?.defaultLocale,
     fallbackLocale = null,
     user,
     overrideAccess = true,
     showHiddenFields,
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
   return deleteOperation({
     depth,

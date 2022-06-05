@@ -19,7 +19,7 @@ async function localUnlock(payload: Payload, options: Options): Promise<boolean>
     req,
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
   return unlock({
     data,
