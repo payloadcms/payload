@@ -42,7 +42,6 @@ export default async function findLocal<T extends TypeWithID = any>(payload: Pay
   const collection = payload.collections[collectionSlug];
 
   return find({
-    payload,
     depth,
     sort,
     page,

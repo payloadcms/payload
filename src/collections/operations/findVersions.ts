@@ -8,7 +8,6 @@ import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithVersion } from '../../versions/types';
-import { Payload } from '../../index';
 import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
@@ -21,7 +20,6 @@ export type Arguments = {
   req?: PayloadRequest
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  payload: Payload
 }
 
 async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<PaginatedDocs<T>> {
@@ -36,10 +34,10 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
     req,
     req: {
       locale,
+      payload,
     },
     overrideAccess,
     showHiddenFields,
-    payload,
   } = args;
 
   const VersionsModel = payload.versions[collectionConfig.slug] as CollectionModel;

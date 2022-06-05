@@ -2,6 +2,7 @@
 import { Response } from 'express';
 import { PayloadRequest } from '../../../express/types';
 import { Collection } from '../../config/types';
+import deleteOperation from '../../operations/delete';
 
 export type Resolver = (
   _: unknown,
@@ -26,11 +27,10 @@ export default function getDeleteResolver(collection: Collection): Resolver {
       req: context.req,
     };
 
-    const result = await this.operations.collections.delete(options);
+    const result = await deleteOperation(options);
 
     return result;
   }
 
-  const deleteResolver = resolver.bind(this);
-  return deleteResolver;
+  return resolver;
 }

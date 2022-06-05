@@ -23,10 +23,11 @@ import connectMongoose from './mongoose/connect';
 import expressMiddleware from './express/middleware';
 import initAdmin from './express/admin';
 import initAuth from './auth/init';
+import access from './auth/requestHandlers/access';
 import initCollections from './collections/init';
 import initPreferences from './preferences/init';
 import initGlobals from './globals/init';
-import { Globals } from './globals/config/types';
+import { Globals, TypeWithID as GlobalTypeWithID } from './globals/config/types';
 import initGraphQLPlayground from './graphql/initPlayground';
 import initStatic from './express/static';
 import GraphQL from './graphql';
@@ -53,7 +54,16 @@ import { Options as RestoreVersionOptions } from './collections/operations/local
 import { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions';
 import { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID';
 import { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion';
-import { Result } from './auth/operations/login';
+import { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword';
+import { Options as LoginOptions } from './auth/operations/local/login';
+import { Options as ResetPasswordOptions } from './auth/operations/local/resetPassword';
+import { Options as UnlockOptions } from './auth/operations/local/unlock';
+import { Options as VerifyEmailOptions } from './auth/operations/local/verifyEmail';
+import { Result as ForgotPasswordResult } from './auth/operations/forgotPassword';
+import { Result as ResetPasswordResult } from './auth/operations/resetPassword';
+import { Result as LoginResult } from './auth/operations/login';
+import { Options as FindGlobalOptions } from './globals/operations/local/findOne';
+import { Options as UpdateGlobalOptions } from './globals/operations/local/update';
 
 require('isomorphic-fetch');
 
@@ -176,7 +186,7 @@ export class Payload {
 
       initAdmin(this);
 
-      this.router.get('/access', this.requestHandlers.collections.auth.access);
+      this.router.get('/access', access);
 
       const graphQLHandler = new GraphQL(this);
 
@@ -229,16 +239,14 @@ export class Payload {
     return find(this, options);
   }
 
-  findGlobal = async <T>(options): Promise<T> => {
-    let { findOne } = localGlobalOperations;
-    findOne = findOne.bind(this);
-    return findOne(options);
+  findGlobal = async <T extends GlobalTypeWithID = any>(options: FindGlobalOptions): Promise<T> => {
+    const { findOne } = localGlobalOperations;
+    return findOne(this, options);
   }
 
-  updateGlobal = async <T>(options): Promise<T> => {
-    let { update } = localGlobalOperations;
-    update = update.bind(this);
-    return update(options);
+  updateGlobal = async <T extends GlobalTypeWithID = any>(options: UpdateGlobalOptions): Promise<T> => {
+    const { update } = localGlobalOperations;
+    return update(this, options);
   }
 
   /**
@@ -247,9 +255,8 @@ export class Payload {
    * @returns versions satisfying query
    */
   findGlobalVersions = async <T extends TypeWithVersion<T> = any>(options: FindGlobalVersionsOptions): Promise<PaginatedDocs<T>> => {
-    let { findVersions } = localGlobalOperations;
-    findVersions = findVersions.bind(this);
-    return findVersions<T>(options);
+    const { findVersions } = localGlobalOperations;
+    return findVersions<T>(this, options);
   }
 
   /**
@@ -258,9 +265,8 @@ export class Payload {
    * @returns global version with specified ID
    */
   findGlobalVersionByID = async <T extends TypeWithVersion<T> = any>(options: FindGlobalVersionByIDOptions): Promise<T> => {
-    let { findVersionByID } = localGlobalOperations;
-    findVersionByID = findVersionByID.bind(this);
-    return findVersionByID(options);
+    const { findVersionByID } = localGlobalOperations;
+    return findVersionByID(this, options);
   }
 
   /**
@@ -269,9 +275,8 @@ export class Payload {
    * @returns version with specified ID
    */
   restoreGlobalVersion = async <T extends TypeWithVersion<T> = any>(options: RestoreGlobalVersionOptions): Promise<T> => {
-    let { restoreVersion } = localGlobalOperations;
-    restoreVersion = restoreVersion.bind(this);
-    return restoreVersion(options);
+    const { restoreVersion } = localGlobalOperations;
+    return restoreVersion(this, options);
   }
 
   /**
@@ -295,9 +300,8 @@ export class Payload {
   }
 
   delete = async <T extends TypeWithID = any>(options: DeleteOptions): Promise<T> => {
-    let { localDelete: deleteOperation } = localOperations;
-    deleteOperation = deleteOperation.bind(this);
-    return deleteOperation<T>(options);
+    const { localDelete } = localOperations;
+    return localDelete<T>(this, options);
   }
 
   /**
@@ -330,34 +334,29 @@ export class Payload {
     return restoreVersion(this, options);
   }
 
-  login = async <T extends TypeWithID = any>(options): Promise<Result & { user: T}> => {
-    let { login } = localOperations.auth;
-    login = login.bind(this);
-    return login(options);
+  login = async <T extends TypeWithID = any>(options: LoginOptions): Promise<LoginResult & { user: T}> => {
+    const { login } = localOperations.auth;
+    return login(this, options);
   }
 
-  forgotPassword = async (options): Promise<any> => {
-    let { forgotPassword } = localOperations.auth;
-    forgotPassword = forgotPassword.bind(this);
-    return forgotPassword(options);
+  forgotPassword = async (options: ForgotPasswordOptions): Promise<ForgotPasswordResult> => {
+    const { forgotPassword } = localOperations.auth;
+    return forgotPassword(this, options);
   }
 
-  resetPassword = async (options): Promise<any> => {
-    let { resetPassword } = localOperations.auth;
-    resetPassword = resetPassword.bind(this);
-    return resetPassword(options);
+  resetPassword = async (options: ResetPasswordOptions): Promise<ResetPasswordResult> => {
+    const { resetPassword } = localOperations.auth;
+    return resetPassword(this, options);
   }
 
-  unlock = async (options): Promise<any> => {
-    let { unlock } = localOperations.auth;
-    unlock = unlock.bind(this);
-    return unlock(options);
+  unlock = async (options: UnlockOptions): Promise<boolean> => {
+    const { unlock } = localOperations.auth;
+    return unlock(this, options);
   }
 
-  verifyEmail = async (options): Promise<any> => {
-    let { verifyEmail } = localOperations.auth;
-    verifyEmail = verifyEmail.bind(this);
-    return verifyEmail(options);
+  verifyEmail = async (options: VerifyEmailOptions): Promise<boolean> => {
+    const { verifyEmail } = localOperations.auth;
+    return verifyEmail(this, options);
   }
 }
 

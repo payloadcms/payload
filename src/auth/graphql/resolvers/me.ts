@@ -1,14 +1,14 @@
-function me(collectionSlug: string): any {
-  async function resolver(_, __, context) {
-    return this.operations.collections.auth.me({
+import me from '../../operations/me';
+
+function meResolver(collectionSlug: string): any {
+  async function resolver(_, args, context) {
+    const options = {
       req: context.req,
       collectionSlug,
-    });
+    };
+    return me(options);
   }
-
-  const meResolver = resolver.bind(this);
-
-  return meResolver;
+  return resolver;
 }
 
-export default me;
+export default meResolver;

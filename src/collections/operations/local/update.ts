@@ -1,8 +1,8 @@
 import { Payload } from '../../..';
-import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import update from '../update';
+import { PayloadRequest } from '../../../express/types';
 
 export type Options<T> = {
   collection: string
@@ -24,7 +24,7 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
   const {
     collection: collectionSlug,
     depth,
-    locale = payload?.config?.localization?.defaultLocale,
+    locale = payload.config?.localization?.defaultLocale,
     fallbackLocale = null,
     data,
     id,

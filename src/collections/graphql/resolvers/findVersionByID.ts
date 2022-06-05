@@ -2,7 +2,6 @@
 import { Response } from 'express';
 import { Collection } from '../../config/types';
 import { PayloadRequest } from '../../../express/types';
-import { Payload } from '../../..';
 import findVersionByID from '../../operations/findVersionByID';
 
 export type Resolver = (
@@ -19,7 +18,7 @@ export type Resolver = (
   }
 ) => Promise<Document>
 
-export default function findVersionByIDResolver(payload: Payload, collection: Collection): Resolver {
+export default function findVersionByIDResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
@@ -29,7 +28,6 @@ export default function findVersionByIDResolver(payload: Payload, collection: Co
       id: args.id,
       req: context.req,
       draft: args.draft,
-      payload,
     };
 
     const result = await findVersionByID(options);

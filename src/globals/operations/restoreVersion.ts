@@ -1,31 +1,35 @@
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
-import { Payload } from '../..';
 import { NotFound } from '../../errors';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
-  id: string
+  id: string | number
   depth?: number
   req?: PayloadRequest
   overrideAccess?: boolean
   showHiddenFields?: boolean
 }
 
-async function restoreVersion<T extends TypeWithVersion<T> = any>(this: Payload, args: Arguments): Promise<PaginatedDocs<T>> {
-  const { globals: { Model } } = this;
-
+async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
   const {
     id,
     depth,
     globalConfig,
     req,
+    req: {
+      payload,
+      payload: {
+        globals: {
+          Model,
+        },
+      },
+    },
     overrideAccess,
     showHiddenFields,
   } = args;
@@ -42,7 +46,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(this: Payload,
   // Retrieve original raw version
   // /////////////////////////////////////
 
-  const VersionModel = this.versions[globalConfig.slug];
+  const VersionModel = payload.versions[globalConfig.slug];
 
   let rawVersion = await VersionModel.findOne({
     _id: id,

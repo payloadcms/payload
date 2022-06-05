@@ -20,7 +20,6 @@ export default async function findHandler<T extends TypeWithID = any>(req: Paylo
     }
 
     const result = await find({
-      payload: req.payload,
       req,
       collection: req.collection,
       where: req.query.where as Where, // This is a little shady

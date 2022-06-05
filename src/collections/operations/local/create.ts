@@ -41,7 +41,6 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
   const collection = payload.collections[collectionSlug];
 
   return create({
-    payload,
     depth,
     data,
     collection,

@@ -11,7 +11,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
-  id: string
+  id: string | number
   req: PayloadRequest
   disableErrors?: boolean
   currentDepth?: number
@@ -27,6 +27,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     id,
     req,
     req: {
+      payload,
       locale,
     },
     disableErrors,
@@ -35,7 +36,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     showHiddenFields,
   } = args;
 
-  const VersionsModel = this.versions[globalConfig.slug];
+  const VersionsModel = payload.versions[globalConfig.slug];
 
   // /////////////////////////////////////
   // Access
@@ -97,7 +98,6 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
     result.version = await hook({
       req,
-      query,
       doc: result.version,
     }) || result.version;
   }, Promise.resolve());
@@ -107,6 +107,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
   // /////////////////////////////////////
 
   result.version = await afterRead({
+    currentDepth,
     depth,
     doc: result.version,
     entityConfig: globalConfig,

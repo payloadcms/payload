@@ -12,22 +12,28 @@ import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType'
 import { BaseFields } from './types';
 import { getCollectionIDType } from '../../graphql/schema/buildMutationInputType';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
-import find from './resolvers/find';
-import findByID from './resolvers/findByID';
-import findVersionByIDResolver from './resolvers/findVersionByID';
-import restoreVersionResolver from './resolvers/restoreVersion';
 import createResolver from './resolvers/create';
 import updateResolver from './resolvers/update';
+import findResolver from './resolvers/find';
+import findByIDResolver from './resolvers/findByID';
+import findVersionByIDResolver from './resolvers/findVersionByID';
 import findVersionsResolver from './resolvers/findVersions';
+import restoreVersionResolver from './resolvers/restoreVersion';
+import me from '../../auth/graphql/resolvers/me';
+import init from '../../auth/graphql/resolvers/init';
+import login from '../../auth/graphql/resolvers/login';
+import logout from '../../auth/graphql/resolvers/logout';
+import forgotPassword from '../../auth/graphql/resolvers/forgotPassword';
+import resetPassword from '../../auth/graphql/resolvers/resetPassword';
+import verifyEmail from '../../auth/graphql/resolvers/verifyEmail';
+import unlock from '../../auth/graphql/resolvers/unlock';
+import refresh from '../../auth/graphql/resolvers/refresh';
+
 
 function registerCollections(): void {
   const {
     deleteResolver,
   } = this.graphQL.resolvers.collections;
-
-  const {
-    login, logout, me, init, refresh, forgotPassword, resetPassword, verifyEmail, unlock,
-  } = this.graphQL.resolvers.collections.auth;
 
   Object.keys(this.collections).forEach((slug) => {
     const collection = this.collections[slug];
@@ -140,7 +146,7 @@ function registerCollections(): void {
           fallbackLocale: { type: this.types.fallbackLocaleInputType },
         } : {}),
       },
-      resolve: findByID(this, collection),
+      resolve: findByIDResolver(collection),
     };
 
     this.Query.fields[pluralLabel] = {
@@ -156,7 +162,7 @@ function registerCollections(): void {
         limit: { type: GraphQLInt },
         sort: { type: GraphQLString },
       },
-      resolve: find(this, collection),
+      resolve: findResolver(collection),
     };
 
     this.Mutation.fields[`create${singularLabel}`] = {
@@ -165,7 +171,7 @@ function registerCollections(): void {
         data: { type: collection.graphQL.mutationInputType },
         draft: { type: GraphQLBoolean },
       },
-      resolve: createResolver(this, collection),
+      resolve: createResolver(collection),
     };
 
     this.Mutation.fields[`update${singularLabel}`] = {
@@ -176,7 +182,7 @@ function registerCollections(): void {
         draft: { type: GraphQLBoolean },
         autosave: { type: GraphQLBoolean },
       },
-      resolve: updateResolver(this, collection),
+      resolve: updateResolver(collection),
     };
 
     this.Mutation.fields[`delete${singularLabel}`] = {
@@ -220,7 +226,7 @@ function registerCollections(): void {
             fallbackLocale: { type: this.types.fallbackLocaleInputType },
           } : {}),
         },
-        resolve: findVersionByIDResolver(this, collection),
+        resolve: findVersionByIDResolver(collection),
       };
       this.Query.fields[`versions${pluralLabel}`] = {
         type: buildPaginatedListType(`versions${formatName(pluralLabel)}`, collection.graphQL.versionType),
@@ -240,14 +246,14 @@ function registerCollections(): void {
           limit: { type: GraphQLInt },
           sort: { type: GraphQLString },
         },
-        resolve: findVersionsResolver(this, collection),
+        resolve: findVersionsResolver(collection),
       };
       this.Mutation.fields[`restoreVersion${formatName(singularLabel)}`] = {
         type: collection.graphQL.type,
         args: {
           id: { type: GraphQLString },
         },
-        resolve: restoreVersionResolver(this, collection),
+        resolve: restoreVersionResolver(collection),
       };
     }
 

@@ -32,12 +32,13 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
     req,
     req: {
       locale,
+      payload,
     },
     overrideAccess,
     showHiddenFields,
   } = args;
 
-  const VersionsModel = this.versions[globalConfig.slug];
+  const VersionsModel = payload.versions[globalConfig.slug];
 
   // /////////////////////////////////////
   // Access
@@ -119,7 +120,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
         findMany: true,
       }),
     }))),
-  };
+  } as PaginatedDocs<T>;
 
   // /////////////////////////////////////
   // afterRead - Global

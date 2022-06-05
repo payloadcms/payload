@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status';
-import { Payload } from '../../index';
 import { PayloadRequest } from '../../express/types';
 import { Collection, CollectionModel } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -15,7 +14,6 @@ export type Arguments = {
   collection: Collection
   id: string | number
   req: PayloadRequest
-  payload: Payload
   disableErrors?: boolean
   currentDepth?: number
   overrideAccess?: boolean
@@ -33,12 +31,12 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     req,
     req: {
       locale,
+      payload,
     },
     disableErrors,
     currentDepth,
     overrideAccess,
     showHiddenFields,
-    payload,
   } = args;
 
   if (!id) {

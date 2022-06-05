@@ -9,7 +9,6 @@ import sendVerificationEmail from '../../auth/sendVerificationEmail';
 import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } from '../config/types';
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
-import { Payload } from '../..';
 import { fieldAffectsData } from '../../fields/config/types';
 import uploadFile from '../../uploads/uploadFile';
 import { beforeChange } from '../../fields/hooks/beforeChange';
@@ -18,7 +17,6 @@ import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
-  payload: Payload
   collection: Collection
   req: PayloadRequest
   depth?: number
@@ -32,8 +30,6 @@ export type Arguments = {
 
 async function create(incomingArgs: Arguments): Promise<Document> {
   let args = incomingArgs;
-  const { payload } = args;
-  const { config, emailOptions } = payload;
 
   // /////////////////////////////////////
   // beforeOperation - Collection
@@ -55,6 +51,13 @@ async function create(incomingArgs: Arguments): Promise<Document> {
       config: collectionConfig,
     },
     req,
+    req: {
+      payload,
+      payload: {
+        config,
+        emailOptions,
+      },
+    },
     disableVerificationEmail,
     depth,
     overrideAccess,

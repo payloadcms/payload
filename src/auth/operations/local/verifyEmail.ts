@@ -1,4 +1,12 @@
-async function verifyEmail(options) {
+import { Payload } from '../../../index';
+import verifyEmail from '../verifyEmail';
+
+export type Options = {
+  token: string,
+  collection: string
+}
+
+async function localVerifyEmail(payload: Payload, options: Options): Promise<boolean> {
   const {
     collection: collectionSlug,
     token,
@@ -6,10 +14,10 @@ async function verifyEmail(options) {
 
   const collection = this.collections[collectionSlug];
 
-  return this.operations.collections.auth.verifyEmail({
+  return verifyEmail({
     token,
     collection,
   });
 }
 
-export default verifyEmail;
+export default localVerifyEmail;

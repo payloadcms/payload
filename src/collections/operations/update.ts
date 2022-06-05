@@ -1,5 +1,4 @@
 import httpStatus from 'http-status';
-import { Payload } from '../..';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -29,7 +28,6 @@ export type Arguments = {
   overwriteExistingFiles?: boolean
   draft?: boolean
   autosave?: boolean
-  payload: Payload
 }
 
 async function update(incomingArgs: Arguments): Promise<Document> {
@@ -59,16 +57,17 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     req,
     req: {
       locale,
+      payload,
+      payload: {
+        config,
+      },
     },
     overrideAccess,
     showHiddenFields,
     overwriteExistingFiles = false,
     draft: draftArg = false,
     autosave = false,
-    payload,
   } = args;
-
-  const { config } = payload;
 
   let { data } = args;
 

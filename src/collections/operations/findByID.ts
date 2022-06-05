@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle */
 import memoize from 'micro-memoize';
-import { Payload } from '../..';
 import { PayloadRequest } from '../../express/types';
 import { Collection, TypeWithID } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -12,7 +11,6 @@ import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftI
 import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
-  payload: Payload
   collection: Collection
   id: string
   req: PayloadRequest
@@ -42,7 +40,6 @@ async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Pr
   }, Promise.resolve());
 
   const {
-    payload,
     depth,
     collection: {
       Model,
@@ -52,6 +49,7 @@ async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Pr
     req,
     req: {
       locale,
+      payload,
     },
     disableErrors,
     currentDepth,

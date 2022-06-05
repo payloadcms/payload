@@ -1,4 +1,3 @@
-import { Payload } from '../../..';
 import { PayloadRequest } from '../../../express/types';
 import { Collection } from '../../config/types';
 import findByID from '../../operations/findByID';
@@ -15,14 +14,13 @@ export type Resolver = (_: unknown, args: {
   }
 ) => Promise<Document>
 
-export default function findByIDResolver(payload: Payload, collection: Collection): Resolver {
+export default function findByIDResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context) {
     const { req } = context;
     if (args.locale) req.locale = args.locale;
     if (args.fallbackLocale) req.fallbackLocale = args.fallbackLocale;
 
     const options = {
-      payload,
       collection,
       id: args.id,
       req,

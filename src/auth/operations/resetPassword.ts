@@ -5,6 +5,8 @@ import { APIError } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import { UserDocument } from '../types';
 import { fieldAffectsData } from '../../fields/config/types';
+import { PayloadRequest } from '../../express/types';
+import executeAccess from '../executeAccess';
 
 export type Result = {
   token: string
@@ -17,12 +19,12 @@ export type Arguments = {
     password: string
   }
   collection: Collection
+  req: PayloadRequest
+  overrideAccess?: boolean
   res?: Response
 }
 
 async function resetPassword(args: Arguments): Promise<Result> {
-  const { config, secret } = this;
-
   if (!Object.prototype.hasOwnProperty.call(args.data, 'token')
     || !Object.prototype.hasOwnProperty.call(args.data, 'password')) {
     throw new APIError('Missing required data.');
@@ -33,8 +35,29 @@ async function resetPassword(args: Arguments): Promise<Result> {
       Model,
       config: collectionConfig,
     },
+    req: {
+      payload: {
+        config,
+        secret,
+      },
+      payload,
+    },
+    req,
+    overrideAccess,
     data,
   } = args;
+
+  // /////////////////////////////////////
+  // Access
+  // /////////////////////////////////////
+
+  if (!overrideAccess) {
+    await executeAccess({ req }, collectionConfig.access.unlock);
+  }
+
+  // /////////////////////////////////////
+  // Reset Password
+  // /////////////////////////////////////
 
   const user = await Model.findOne({
     resetPasswordToken: data.token,
@@ -89,7 +112,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }
 
-  const fullUser = await this.findByID({ collection: collectionConfig.slug, id: user.id });
+  const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess });
   return { token, user: fullUser };
 }
 

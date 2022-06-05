@@ -30,7 +30,6 @@ export type AfterChangeHook = (args: {
 export type BeforeReadHook = (args: {
   doc: any;
   req: PayloadRequest;
-  query: { [key: string]: any };
 }) => any;
 
 export type AfterReadHook = (args: {

@@ -4,7 +4,6 @@ import { PayloadRequest } from '../../express/types';
 import { Collection, TypeWithID } from '../config/types';
 import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import { Payload } from '../../index';
 import { hasWhereAccessResult } from '../../auth/types';
 import { Where } from '../../types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -20,7 +19,6 @@ export type Arguments = {
   overrideAccess?: boolean
   showHiddenFields?: boolean
   depth?: number
-  payload: Payload
 }
 
 async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
@@ -35,9 +33,9 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     depth,
     req: {
       locale,
+      payload,
     },
     req,
-    payload,
   } = args;
 
   if (!id) {

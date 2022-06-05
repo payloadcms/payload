@@ -2,13 +2,14 @@ import { GraphQLNonNull, GraphQLBoolean, GraphQLInt, GraphQLString } from 'graph
 import formatName from '../../graphql/utilities/formatName';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
+import findOneResolver from './resolvers/findOne';
+import updateResolver from './resolvers/update';
+import findVersionByIDResolver from './resolvers/findVersionByID';
+import findVersionsResolver from './resolvers/findVersions';
+import restoreVersionResolver from './resolvers/restoreVersion';
 
 function registerGlobals() {
   if (this.config.globals) {
-    const {
-      findOne, update, findVersionByID, findVersions, restoreVersion,
-    } = this.graphQL.resolvers.globals;
-
     Object.keys(this.globals.config).forEach((slug) => {
       const global = this.globals.config[slug];
       const {
@@ -41,7 +42,7 @@ function registerGlobals() {
             fallbackLocale: { type: this.types.fallbackLocaleInputType },
           } : {}),
         },
-        resolve: findOne(global),
+        resolve: findOneResolver(global),
       };
 
       this.Mutation.fields[`update${formattedLabel}`] = {
@@ -50,7 +51,7 @@ function registerGlobals() {
           data: { type: global.graphQL.mutationInputType },
           draft: { type: GraphQLBoolean },
         },
-        resolve: update(global),
+        resolve: updateResolver(global),
       };
 
       if (global.versions) {
@@ -86,7 +87,7 @@ function registerGlobals() {
               fallbackLocale: { type: this.types.fallbackLocaleInputType },
             } : {}),
           },
-          resolve: findVersionByID(global),
+          resolve: findVersionByIDResolver(global),
         };
         this.Query.fields[`versions${formattedLabel}`] = {
           type: buildPaginatedListType(`versions${formatName(formattedLabel)}`, global.graphQL.versionType),
@@ -106,14 +107,14 @@ function registerGlobals() {
             limit: { type: GraphQLInt },
             sort: { type: GraphQLString },
           },
-          resolve: findVersions(global),
+          resolve: findVersionsResolver(global),
         };
         this.Mutation.fields[`restoreVersion${formatName(formattedLabel)}`] = {
           type: global.graphQL.type,
           args: {
             id: { type: GraphQLString },
           },
-          resolve: restoreVersion(global),
+          resolve: restoreVersionResolver(global),
         };
       }
     });

@@ -1,6 +1,6 @@
+import { Response } from 'express';
 import { Document } from '../../types';
 import { Forbidden } from '../../errors';
-import { Payload } from '../..';
 import { PayloadRequest } from '../../express/types';
 import { Collection, TypeWithID } from '../../collections/config/types';
 
@@ -11,6 +11,7 @@ export type Arguments = {
     password: string
   }
   req: PayloadRequest
+  res: Response
 }
 
 export type Result = {
@@ -18,7 +19,7 @@ export type Result = {
   user: Document
 }
 
-async function registerFirstUser(this: Payload, args: Arguments): Promise<Result> {
+async function registerFirstUser(args: Arguments): Promise<Result> {
   const {
     collection: {
       Model,

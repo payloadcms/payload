@@ -50,7 +50,6 @@ export default async function findByIDLocal<T extends TypeWithID = any>(payload:
   if (typeof user !== 'undefined') reqToUse.user = user;
 
   return findByID({
-    payload,
     depth,
     currentDepth,
     id,

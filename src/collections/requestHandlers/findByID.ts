@@ -11,7 +11,6 @@ export type FindByIDResult = {
 export default async function findByIDHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<FindByIDResult> | void> {
   try {
     const doc = await findByID({
-      payload: req.payload,
       req,
       collection: req.collection,
       id: req.params.id,

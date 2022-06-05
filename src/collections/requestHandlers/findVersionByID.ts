@@ -13,8 +13,8 @@ export default async function findVersionByIDHandler(req: PayloadRequest, res: R
     req,
     collection: req.collection,
     id: req.params.id,
-    depth: Number(req.query.depth),
     payload: req.payload,
+    depth: parseInt(String(req.query.depth), 10),
   };
 
   try {

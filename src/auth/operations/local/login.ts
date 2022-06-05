@@ -1,7 +1,8 @@
 import { Response } from 'express';
-import { Result } from '../login';
+import login, { Result } from '../login';
 import { PayloadRequest } from '../../../express/types';
 import { TypeWithID } from '../../../collections/config/types';
+import { Payload } from '../../..';
 
 export type Options = {
   collection: string
@@ -18,7 +19,7 @@ export type Options = {
   showHiddenFields?: boolean
 }
 
-async function login<T extends TypeWithID = any>(options: Options): Promise<Result & { user: T}> {
+async function localLogin<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<Result & { user: T}> {
   const {
     collection: collectionSlug,
     req = {},
@@ -31,7 +32,7 @@ async function login<T extends TypeWithID = any>(options: Options): Promise<Resu
     showHiddenFields,
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
   const args = {
     depth,
@@ -42,17 +43,17 @@ async function login<T extends TypeWithID = any>(options: Options): Promise<Resu
     req: {
       ...req,
       payloadAPI: 'local',
-      payload: this,
+      payload,
       locale: undefined,
       fallbackLocale: undefined,
-    },
+    } as PayloadRequest,
     res,
   };
 
   if (locale) args.req.locale = locale;
   if (fallbackLocale) args.req.fallbackLocale = fallbackLocale;
 
-  return this.operations.collections.auth.login(args);
+  return login(args);
 }
 
-export default login;
+export default localLogin;

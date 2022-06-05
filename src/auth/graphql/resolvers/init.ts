@@ -1,17 +1,19 @@
-function init({ Model }) {
-  async function resolver(_, __, context) {
+import init from '../../operations/init';
+import { Collection } from '../../../collections/config/types';
+
+function initResolver(collection: Collection) {
+  async function resolver(_, args, context) {
     const options = {
-      Model,
+      Model: collection.Model,
       req: context.req,
     };
 
-    const result = await this.operations.collections.auth.init(options);
+    const result = await init(options);
 
     return result;
   }
 
-  const initResolver = resolver.bind(this);
-  return initResolver;
+  return resolver;
 }
 
-export default init;
+export default initResolver;

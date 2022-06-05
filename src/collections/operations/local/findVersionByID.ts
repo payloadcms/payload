@@ -1,8 +1,8 @@
+import { Payload } from '../../..';
 import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import { TypeWithVersion } from '../../../versions/types';
 import findVersionByID from '../findVersionByID';
-import { Payload } from '../../..';
 
 export type Options = {
   collection: string
@@ -22,7 +22,7 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
     collection: collectionSlug,
     depth,
     id,
-    locale = payload?.config?.localization?.defaultLocale,
+    locale = payload.config?.localization?.defaultLocale,
     fallbackLocale = null,
     overrideAccess = true,
     disableErrors = false,
@@ -39,7 +39,6 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
     overrideAccess,
     disableErrors,
     showHiddenFields,
-    payload,
     req: {
       ...req,
       payloadAPI: 'local',

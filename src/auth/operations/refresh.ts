@@ -4,6 +4,7 @@ import { Collection, BeforeOperationHook } from '../../collections/config/types'
 import { Forbidden } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import { Document } from '../../types';
+import { PayloadRequest } from '../../express/types';
 
 export type Result = {
   exp: number,
@@ -14,6 +15,7 @@ export type Result = {
 export type Arguments = {
   collection: Collection,
   token: string
+  req: PayloadRequest
   res?: Response
 }
 
@@ -41,6 +43,12 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     collection: {
       config: collectionConfig,
     },
+    req: {
+      payload: {
+        secret,
+        config,
+      },
+    },
   } = args;
 
   const opts = {
@@ -49,10 +57,10 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
 
   if (typeof args.token !== 'string') throw new Forbidden();
 
-  const payload = jwt.verify(args.token, this.secret, {}) as Record<string, unknown>;
+  const payload = jwt.verify(args.token, secret, {}) as Record<string, unknown>;
   delete payload.iat;
   delete payload.exp;
-  const refreshedToken = jwt.sign(payload, this.secret, opts);
+  const refreshedToken = jwt.sign(payload, secret, opts);
 
   if (args.res) {
     const cookieOptions = {
@@ -66,7 +74,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
 
     if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
 
-    args.res.cookie(`${this.config.cookiePrefix}-token`, refreshedToken, cookieOptions);
+    args.res.cookie(`${config.cookiePrefix}-token`, refreshedToken, cookieOptions);
   }
 
   // /////////////////////////////////////

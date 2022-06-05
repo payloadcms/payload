@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { Document, Where } from '../../../types';
 import { SanitizedGlobalConfig } from '../../config/types';
 import { PayloadRequest } from '../../../express/types';
+import findVersions from '../../operations/findVersions';
 
 export type Resolver = (
   _: unknown,
@@ -19,8 +20,8 @@ export type Resolver = (
   }
 ) => Promise<Document>
 
-function findVersions(globalConfig: SanitizedGlobalConfig) {
-  async function resolver(_, args, context) {
+export default function findVersionsResolver(globalConfig: SanitizedGlobalConfig): Resolver {
+  return async function resolver(_, args, context) {
     const options = {
       globalConfig,
       where: args.where,
@@ -30,13 +31,8 @@ function findVersions(globalConfig: SanitizedGlobalConfig) {
       req: context.req,
     };
 
-    const result = await this.operations.globals.findVersions(options);
+    const result = await findVersions(options);
 
     return result;
-  }
-
-  const findVersionsResolver = resolver.bind(this);
-  return findVersionsResolver;
+  };
 }
-
-export default findVersions;

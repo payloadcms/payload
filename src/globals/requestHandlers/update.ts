@@ -3,22 +3,23 @@ import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { Document } from '../../types';
+import update from '../operations/update';
 
 export type UpdateGlobalResult = Promise<Response<Document> | void>;
 export type UpdateGlobalResponse = (req: PayloadRequest, res: Response, next: NextFunction) => UpdateGlobalResult;
 
-function update(globalConfig: SanitizedGlobalConfig): UpdateGlobalResponse {
-  async function handler(req: PayloadRequest, res: Response, next: NextFunction) {
+export default function updateHandler(globalConfig: SanitizedGlobalConfig): UpdateGlobalResponse {
+  return async function handler(req: PayloadRequest, res: Response, next: NextFunction) {
     try {
       const { slug } = globalConfig;
       const draft = req.query.draft === 'true';
       const autosave = req.query.autosave === 'true';
 
-      const result = await this.operations.globals.update({
+      const result = await update({
         req,
         globalConfig,
         slug,
-        depth: req.query.depth,
+        depth: Number(req.query.depth),
         data: req.body,
         draft,
         autosave,
@@ -33,10 +34,5 @@ function update(globalConfig: SanitizedGlobalConfig): UpdateGlobalResponse {
     } catch (error) {
       return next(error);
     }
-  }
-
-  const updateHandler = handler.bind(this);
-  return updateHandler;
+  };
 }
-
-export default update;

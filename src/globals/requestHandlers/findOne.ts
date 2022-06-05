@@ -3,20 +3,21 @@ import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { Document } from '../../types';
+import findOne from '../operations/findOne';
 
 export type FindOneGlobalResult = Promise<Response<Document> | void>;
 export type FindOneGlobalResponse = (req: PayloadRequest, res: Response, next: NextFunction) => FindOneGlobalResult;
 
-export default function findOne(globalConfig: SanitizedGlobalConfig): FindOneGlobalResponse {
-  async function handler(req: PayloadRequest, res: Response, next: NextFunction): FindOneGlobalResult {
+export default function findOneHandler(globalConfig: SanitizedGlobalConfig): FindOneGlobalResponse {
+  return async function handler(req: PayloadRequest, res: Response, next: NextFunction): FindOneGlobalResult {
     try {
       const { slug } = globalConfig;
 
-      const result = await this.operations.globals.findOne({
+      const result = await findOne({
         req,
         globalConfig,
         slug,
-        depth: req.query.depth,
+        depth: Number(req.query.depth),
         draft: req.query.draft === 'true',
       });
 
@@ -24,9 +25,5 @@ export default function findOne(globalConfig: SanitizedGlobalConfig): FindOneGlo
     } catch (error) {
       return next(error);
     }
-  }
-
-  const findOneHandler = handler.bind(this);
-
-  return findOneHandler;
+  };
 }

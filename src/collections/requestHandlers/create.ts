@@ -13,7 +13,6 @@ export type CreateResult = {
 export default async function createHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<CreateResult> | void> {
   try {
     const doc = await create({
-      payload: req.payload,
       req,
       collection: req.collection,
       data: req.body,

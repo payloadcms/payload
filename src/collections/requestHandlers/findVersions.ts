@@ -1,10 +1,10 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
+import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import { TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
 import findVersions from '../operations/findVersions';
-import { Where } from '../../types';
 
 export default async function findVersionsHandler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
   try {
@@ -23,9 +23,9 @@ export default async function findVersionsHandler<T extends TypeWithID = any>(re
       collection: req.collection,
       where: req.query.where as Where, // This is a little shady,
       page,
-      limit: Number(req.query.limit),
+      limit: parseInt(String(req.query.limit), 10),
       sort: req.query.sort as string,
-      depth: Number(req.query.depth),
+      depth: parseInt(String(req.query.depth), 10),
       payload: req.payload,
     };
 

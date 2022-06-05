@@ -15,13 +15,7 @@ import { CollectionModel, SanitizedCollectionConfig } from './config/types';
 import { Payload } from '../index';
 import { getVersionsModelName } from '../versions/getVersionsModelName';
 import mountEndpoints from '../init/mountEndpoints';
-import createHandler from './requestHandlers/create';
-import findHandler from './requestHandlers/find';
-import updateHandler from './requestHandlers/update';
-import findByIDHandler from './requestHandlers/findByID';
-import findVersionsHandler from './requestHandlers/findVersions';
-import findVersionByIDHandler from './requestHandlers/findVersionByID';
-import restoreVersionHandler from './requestHandlers/restoreVersion';
+import buildEndpoints from './buildEndpoints';
 
 const LocalStrategy = Passport.Strategy;
 
@@ -103,15 +97,12 @@ export default function registerCollections(ctx: Payload): void {
     // If not local, open routes
     if (!ctx.local) {
       const router = express.Router();
-      const { slug, endpoints } = collection;
+      const { slug } = collection;
 
       router.all('*', bindCollectionMiddleware(ctx.collections[formattedCollection.slug]));
 
+      const endpoints = buildEndpoints(collection);
       mountEndpoints(router, endpoints);
-
-      const {
-        delete: deleteHandler,
-      } = ctx.requestHandlers.collections;
 
       if (collection.auth) {
         const AuthCollection = ctx.collections[formattedCollection.slug];
@@ -120,82 +111,7 @@ export default function registerCollections(ctx: Payload): void {
         if (collection.auth.useAPIKey) {
           passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(ctx, AuthCollection));
         }
-
-        const {
-          init,
-          login,
-          logout,
-          refresh,
-          me,
-          registerFirstUser,
-          forgotPassword,
-          resetPassword,
-          verifyEmail,
-          unlock,
-        } = ctx.requestHandlers.collections.auth;
-
-        if (collection.auth.verify) {
-          router
-            .route('/verify/:token')
-            .post(verifyEmail);
-        }
-
-        if (collection.auth.maxLoginAttempts > 0) {
-          router
-            .route('/unlock')
-            .post(unlock);
-        }
-
-        router
-          .route('/init')
-          .get(init);
-
-        router
-          .route('/login')
-          .post(login);
-
-        router
-          .route('/logout')
-          .post(logout);
-
-        router
-          .route('/refresh-token')
-          .post(refresh);
-
-        router
-          .route('/me')
-          .get(me);
-
-        router
-          .route('/first-register')
-          .post(registerFirstUser);
-
-        router
-          .route('/forgot-password')
-          .post(forgotPassword);
-
-        router
-          .route('/reset-password')
-          .post(resetPassword);
       }
-
-      if (collection.versions) {
-        router.route('/versions')
-          .get(findVersionsHandler);
-
-        router.route('/versions/:id')
-          .get(findVersionByIDHandler)
-          .post(restoreVersionHandler);
-      }
-
-      router.route('/')
-        .get(findHandler)
-        .post(createHandler);
-
-      router.route('/:id')
-        .put(updateHandler)
-        .get(findByIDHandler)
-        .delete(deleteHandler);
 
       ctx.router.use(`/${slug}`, router);
     }

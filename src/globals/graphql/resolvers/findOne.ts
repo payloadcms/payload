@@ -2,9 +2,10 @@
 
 import { SanitizedGlobalConfig } from '../../config/types';
 import { Document } from '../../../types';
+import findOne from '../../operations/findOne';
 
-function findOne(globalConfig: SanitizedGlobalConfig): Document {
-  async function resolver(_, args, context) {
+export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Document {
+  return async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
@@ -18,12 +19,7 @@ function findOne(globalConfig: SanitizedGlobalConfig): Document {
       draft: args.draft,
     };
 
-    const result = await this.operations.globals.findOne(options);
+    const result = await findOne(options);
     return result;
-  }
-
-  const findOneResolver = resolver.bind(this);
-  return findOneResolver;
+  };
 }
-
-export default findOne;

@@ -21,7 +21,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
+async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -47,6 +47,10 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
     req,
     req: {
       locale,
+      payload: {
+        config,
+        preferences,
+      },
     },
     overrideAccess,
     showHiddenFields,
@@ -110,7 +114,7 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
   if (collectionConfig.upload) {
     const { staticDir } = collectionConfig.upload;
 
-    const staticPath = path.resolve(this.config.paths.configDir, staticDir);
+    const staticPath = path.resolve(config.paths.configDir, staticDir);
 
     const fileToDelete = `${staticPath}/${resultToDelete.filename}`;
 
@@ -155,9 +159,9 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
   // /////////////////////////////////////
 
   if (collectionConfig.auth) {
-    await this.preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug });
+    await preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug });
   }
-  await this.preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
+  await preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
 
   // /////////////////////////////////////
   // afterDelete - Collection
@@ -203,4 +207,4 @@ async function deleteQuery(incomingArgs: Arguments): Promise<Document> {
   return result;
 }
 
-export default deleteQuery;
+export default deleteOperation;

@@ -1,8 +1,26 @@
-async function update(options) {
+import { Payload } from '../../..';
+import { Document } from '../../../types';
+import { PayloadRequest } from '../../../express/types';
+import { TypeWithID } from '../../config/types';
+import update from '../update';
+
+export type Options = {
+  slug: string
+  depth?: number
+  locale?: string
+  fallbackLocale?: string
+  data: Record<string, unknown>
+  user?: Document
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+  draft?: boolean
+}
+
+export default async function updateLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<T> {
   const {
     slug: globalSlug,
     depth,
-    locale = this?.config?.localization?.defaultLocale,
+    locale = payload.config.localization?.defaultLocale,
     fallbackLocale = null,
     data,
     user,
@@ -11,9 +29,9 @@ async function update(options) {
     draft,
   } = options;
 
-  const globalConfig = this.globals.config.find((config) => config.slug === globalSlug);
+  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
 
-  return this.operations.globals.update({
+  return update({
     slug: globalSlug,
     data,
     depth,
@@ -26,9 +44,7 @@ async function update(options) {
       payloadAPI: 'local',
       locale,
       fallbackLocale,
-      payload: this,
-    },
+      payload,
+    } as PayloadRequest,
   });
 }
-
-export default update;
