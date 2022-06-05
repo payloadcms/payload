@@ -14,7 +14,7 @@ import bindCollectionMiddleware from './bindCollection';
 import { CollectionModel, SanitizedCollectionConfig } from './config/types';
 import { Payload } from '../index';
 import { getVersionsModelName } from '../versions/getVersionsModelName';
-import mountEndpoints from '../init/mountEndpoints';
+import mountEndpoints from '../express/mountEndpoints';
 import buildEndpoints from './buildEndpoints';
 
 const LocalStrategy = Passport.Strategy;

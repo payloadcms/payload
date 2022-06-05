@@ -8,7 +8,7 @@ import { getVersionsModelName } from '../versions/getVersionsModelName';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 import buildSchema from '../mongoose/buildSchema';
 import { CollectionModel } from '../collections/config/types';
-import mountEndpoints from '../init/mountEndpoints';
+import mountEndpoints from '../express/mountEndpoints';
 import buildEndpoints from './buildEndpoints';
 import { SanitizedGlobalConfig } from './config/types';
 
