@@ -147,6 +147,10 @@ export interface AllFields {
     checkbox?: boolean;
     id?: string;
   }[];
+  readOnlyArray?: {
+    text?: string;
+    id?: string;
+  }[];
   blocks: (
     | {
         testEmail: string;
@@ -283,6 +287,7 @@ export interface Conditions {
         blockType: 'cta';
       }
   )[];
+  customComponent: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -481,6 +486,14 @@ export interface DefaultValueTest {
   }[];
   asyncText?: string;
   function?: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "endpoints".
+ */
+export interface Endpoint {
+  id: string;
+  title?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

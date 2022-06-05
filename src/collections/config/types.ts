@@ -2,7 +2,7 @@
 import { DeepRequired } from 'ts-essentials';
 import { PaginateModel } from 'mongoose';
 import { GraphQLType } from 'graphql';
-import { Access, GeneratePreviewURL, EntityDescription } from '../../config/types';
+import { Access, GeneratePreviewURL, EntityDescription, Endpoint } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
@@ -193,6 +193,10 @@ export type CollectionConfig = {
     afterLogin?: AfterLoginHook[];
     afterForgotPassword?: AfterForgotPasswordHook[];
   };
+  /**
+   * Custom rest api endpoints
+   */
+  endpoints?: Endpoint[]
   /**
    * Access control
    */

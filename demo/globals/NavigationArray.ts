@@ -1,5 +1,8 @@
+import { Response } from 'express';
 import { GlobalConfig } from '../../src/globals/config/types';
 import checkRole from '../access/checkRole';
+import { NavigationArray as TNavigationArray } from '../payload-types';
+import { PayloadRequest } from '../../src/express/types';
 
 const NavigationArray: GlobalConfig = {
   slug: 'navigation-array',
@@ -10,6 +13,19 @@ const NavigationArray: GlobalConfig = {
   admin: {
     description: 'A description for the editor',
   },
+  endpoints: [
+    {
+      path: '/count',
+      method: 'get',
+      handler: async (req: PayloadRequest, res: Response): Promise<void> => {
+        const { array } = await req.payload.findGlobal<TNavigationArray>({
+          slug: 'navigation-array',
+        });
+
+        res.json({ count: array.length });
+      },
+    },
+  ],
   fields: [
     {
       name: 'array',

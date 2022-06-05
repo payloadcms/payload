@@ -18,6 +18,14 @@ const globalSchema = joi.object().keys({
     beforeRead: joi.array().items(joi.func()),
     afterRead: joi.array().items(joi.func()),
   }),
+  endpoints: joi.array().items(joi.object({
+    path: joi.string(),
+    method: joi.string().valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
+    handler: joi.alternatives().try(
+      joi.array().items(joi.func()),
+      joi.func(),
+    ),
+  })),
   access: joi.object({
     read: joi.func(),
     readVersions: joi.func(),

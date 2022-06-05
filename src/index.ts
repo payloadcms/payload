@@ -225,9 +225,8 @@ export class Payload {
    * @returns documents satisfying query
    */
   find = async <T extends TypeWithID = any>(options: FindOptions): Promise<PaginatedDocs<T>> => {
-    let { find } = localOperations;
-    find = find.bind(this);
-    return find(options);
+    const { find } = localOperations;
+    return find(this, options);
   }
 
   findGlobal = async <T>(options): Promise<T> => {
@@ -281,9 +280,8 @@ export class Payload {
    * @returns document with specified ID
    */
   findByID = async <T extends TypeWithID = any>(options: FindByIDOptions): Promise<T> => {
-    let { findByID } = localOperations;
-    findByID = findByID.bind(this);
-    return findByID<T>(options);
+    const { findByID } = localOperations;
+    return findByID<T>(this, options);
   }
 
   /**
