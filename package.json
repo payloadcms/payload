@@ -2,7 +2,7 @@
   "name": "payload",
   "version": "0.17.2",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
-  "license": "SEE LICENSE IN license.md",
+  "license": "MIT",
   "author": {
     "email": "info@payloadcms.com",
     "name": "Payload CMS",
