@@ -70,7 +70,7 @@ After a global is updated, the `afterChange` hook runs. Use this hook to purge c
 
 ```js
 const afterChangeHook = async ({
-  doc, // full document data
+  data, // full document data
   req, // full express request
 }) => {
   return data;
