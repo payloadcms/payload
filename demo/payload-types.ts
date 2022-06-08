@@ -85,6 +85,8 @@ export interface LocalizedPost {
     blockName?: string;
     blockType: 'richTextBlock';
   }[];
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -102,6 +104,8 @@ export interface Admin {
   lockUntil?: string;
   roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   publicUser?: (string | PublicUser)[];
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -117,6 +121,8 @@ export interface PublicUser {
   loginAttempts?: number;
   lockUntil?: string;
   adminOnly?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -197,6 +203,8 @@ export interface AllFields {
   slug: string;
   checkbox?: boolean;
   dateFieldExample?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -246,6 +254,8 @@ export interface Media {
   };
   alt: string;
   foundUploadSizes?: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -288,6 +298,8 @@ export interface Conditions {
       }
   )[];
   customComponent: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -319,6 +331,8 @@ export interface AutoLabel {
     textField?: string;
     id?: string;
   }[];
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -329,6 +343,8 @@ export interface AutosavePost {
   _status?: 'draft' | 'published';
   title: string;
   description: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -393,6 +409,8 @@ export interface Blocks {
         blockType: 'cta';
       }
   )[];
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -401,6 +419,8 @@ export interface Blocks {
 export interface Code {
   id: string;
   code: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -409,6 +429,8 @@ export interface Code {
 export interface CustomID {
   id: number;
   name: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -486,6 +508,8 @@ export interface DefaultValueTest {
   }[];
   asyncText?: string;
   function?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -494,6 +518,8 @@ export interface DefaultValueTest {
 export interface Endpoint {
   id: string;
   title?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -507,6 +533,8 @@ export interface File {
   filesize?: number;
   type: 'Type 1' | 'Type 2' | 'Type 3';
   owner: string | Admin;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -519,6 +547,8 @@ export interface Geolocation {
   group?: {
     point?: [number, number];
   };
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -529,6 +559,8 @@ export interface HiddenFields {
   title: string;
   hiddenAdmin: string;
   hiddenAPI: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -538,6 +570,8 @@ export interface Hook {
   id: string;
   title: string;
   description: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -552,6 +586,8 @@ export interface LocalizedArray {
     arrayText3?: string;
     id?: string;
   }[];
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -560,6 +596,8 @@ export interface LocalizedArray {
 export interface LocalOperation {
   id: string;
   title: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -568,6 +606,8 @@ export interface LocalOperation {
 export interface Image {
   id: string;
   upload?: string | Media;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -587,6 +627,8 @@ export interface NestedArray {
     }[];
     id?: string;
   }[];
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -595,6 +637,8 @@ export interface NestedArray {
 export interface PreviewablePost {
   id: string;
   title: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -627,6 +671,8 @@ export interface RelationshipA {
   filterRelationship?: string | RelationshipB;
   files?: string | File;
   demoHiddenField?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -666,6 +712,8 @@ export interface RelationshipB {
         relationTo: 'relationship-a';
       };
   strictAccess?: string | StrictAccess;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -677,6 +725,8 @@ export interface StrictAccess {
   city: string;
   state: string;
   zip: number;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -692,6 +742,8 @@ export interface RichText {
   customRichText: {
     [k: string]: unknown;
   }[];
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -705,6 +757,8 @@ export interface Select {
   selectWithEmptyString: '' | 'option';
   radio: 'one' | 'two' | 'three';
   radioWithEmptyString: '' | 'one' | 'two';
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -724,6 +778,8 @@ export interface Validation {
     lessThan20: number;
     id?: string;
   }[];
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -733,6 +789,8 @@ export interface Unique {
   id: string;
   title: string;
   description?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -757,4 +815,6 @@ export interface UnstoredMedia {
     };
   };
   alt: string;
+  createdAt: string;
+  updatedAt: string;
 }

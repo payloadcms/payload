@@ -25,8 +25,8 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
   const {
     collection: collectionSlug,
     depth,
-    locale = payload?.config?.localization?.defaultLocale,
-    fallbackLocale = null,
+    locale,
+    fallbackLocale,
     data,
     user,
     overrideAccess = true,
@@ -50,11 +50,11 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
     overwriteExistingFiles,
     draft,
     req: {
-      ...req,
+      ...req || {},
       user,
       payloadAPI: 'local',
-      locale,
-      fallbackLocale,
+      locale: locale || req?.locale || payload?.config?.localization?.defaultLocale,
+      fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
       payload,
       files: {
         file: getFileByPath(filePath) as UploadedFile,

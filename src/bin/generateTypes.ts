@@ -2,13 +2,13 @@
 import fs from 'fs';
 import type { JSONSchema4 } from 'json-schema';
 import { compile } from 'json-schema-to-typescript';
-import payload from '..';
 import Logger from '../utilities/logger';
 import { fieldAffectsData, Field, Option, FieldAffectingData } from '../fields/config/types';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { SanitizedConfig } from '../config/types';
 import loadConfig from '../config/load';
 import { SanitizedGlobalConfig } from '../globals/config/types';
+import deepCopyObject from '../utilities/deepCopyObject';
 
 function getCollectionIDType(collections: SanitizedCollectionConfig[], slug: string): 'string' | 'number' {
   const matchedCollection = collections.find((collection) => collection.slug === slug);
@@ -317,7 +317,8 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
   };
 }
 
-function entityToJsonSchema(config: SanitizedConfig, entity: SanitizedCollectionConfig | SanitizedGlobalConfig): JSONSchema4 {
+function entityToJsonSchema(config: SanitizedConfig, incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig): JSONSchema4 {
+  const entity = deepCopyObject(incomingEntity);
   const title = 'label' in entity ? entity.label : entity.labels.singular;
 
   const idField: FieldAffectingData = { type: 'text', name: 'id', required: true };
@@ -327,6 +328,21 @@ function entityToJsonSchema(config: SanitizedConfig, entity: SanitizedCollection
     customIdField.required = true;
   } else {
     entity.fields.unshift(idField);
+  }
+
+  if ('timestamps' in entity && entity.timestamps !== false) {
+    entity.fields.push(
+      {
+        type: 'text',
+        name: 'createdAt',
+        required: true,
+      },
+      {
+        type: 'text',
+        name: 'updatedAt',
+        required: true,
+      },
+    );
   }
 
   return {

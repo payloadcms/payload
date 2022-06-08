@@ -26,13 +26,13 @@ export default async function findByIDLocal<T extends TypeWithID = any>(payload:
     depth,
     currentDepth,
     id,
-    locale = payload?.config?.localization?.defaultLocale,
-    fallbackLocale = null,
+    locale,
+    fallbackLocale,
     user,
     overrideAccess = true,
     disableErrors = false,
     showHiddenFields,
-    req = {},
+    req,
     draft = false,
   } = options;
 
@@ -42,8 +42,8 @@ export default async function findByIDLocal<T extends TypeWithID = any>(payload:
     user: undefined,
     ...req || {},
     payloadAPI: 'local',
-    locale,
-    fallbackLocale,
+    locale: locale || req?.locale || payload?.config?.localization?.defaultLocale,
+    fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
     payload,
   };
 

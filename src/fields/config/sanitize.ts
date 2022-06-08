@@ -4,6 +4,7 @@ import { baseBlockFields } from '../baseFields/baseBlockFields';
 import validations from '../validations';
 import { baseIDField } from '../baseFields/baseIDField';
 import { Field, fieldAffectsData } from './types';
+import withCondition from '../../admin/components/forms/withCondition';
 
 const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] => {
   if (!fields) return [];
@@ -57,7 +58,13 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
       if (!field.access) field.access = {};
     }
 
-    if (!field.admin) field.admin = {};
+    if (field.admin) {
+      if (field.admin.condition && field.admin.components?.Field) {
+        field.admin.components.Field = withCondition(field.admin.components?.Field);
+      }
+    } else {
+      field.admin = {};
+    }
 
     if ('fields' in field && field.fields) field.fields = sanitizeFields(field.fields, validRelationships);
 

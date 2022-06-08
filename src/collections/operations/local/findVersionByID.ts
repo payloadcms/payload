@@ -40,10 +40,10 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
     disableErrors,
     showHiddenFields,
     req: {
-      ...req,
+      ...req || {},
       payloadAPI: 'local',
-      locale,
-      fallbackLocale,
+      locale: locale || req?.locale || this?.config?.localization?.defaultLocale,
+      fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
       payload,
     } as PayloadRequest,
   });
