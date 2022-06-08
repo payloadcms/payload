@@ -50,7 +50,7 @@ You can manage access within Payload on three different levels:
 <Banner type="success">
   <strong>Note:</strong><br/>
   Access control functions are utilized in two places. It's important to understand how and when your access control is executed.
-<Banner />
+</Banner>
 
 #### As you execute operations
 
@@ -67,6 +67,6 @@ To accomplish this, Payload ships with an `Access` operation, which is executed 
 <Banner type="warning">
   <strong>Important:</strong><br/>
   When your access control functions are executed via the <strong>access</strong> operation, the <strong>id</strong> and <strong>data</strong> arguments will be <strong>undefined</strong>, because Payload is executing your functions without referencing a specific document.
-<Banner />
+</Banner>
 
 If you use `id` or `data` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your access control is being executed via the `access` operation, to determine solely what the user can do within the Admin UI.
