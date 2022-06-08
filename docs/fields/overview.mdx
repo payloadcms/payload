@@ -200,35 +200,6 @@ The `condition` function should return a boolean that will control if the field 
 }
 ```
 
-If you are building custom components, and you'd like for your custom components to support conditional logic as well, you can utilize Payload's `withCondition` higher-order function by importing it and using it as follows:
-
-```js
-import { withCondition } from 'payload/components/forms';
-
-const CustomComponent = () => {
-  return (
-    <div>
-      <p>Hello, on my own, I won't respect my field's conditional logic.<p/>
-      <p>But, I will if I'm wrapped with the withCondition HOC as shown below!</p>
-    </div>
-  )
-}
-
-const CustomComponentWithCondition = withCondition(CustomComponent);
-
-const customFieldWithCondition = {
-  name: 'myCustomField',
-  type: 'text',
-  admin: {
-    condition: (data) => Boolean(data.enableCustomField),
-    components: {
-      Field: CustomComponentWithCondition,
-    }
-  }
-}
-
-```
-
 ### Default values
 
 Fields can be prefilled with starting values using the `defaultValue` property. This is used in the admin UI and also on the backend as API requests will be populated with missing or undefined field values. You can assign the defaultValue directly in the field configuration or supply a function for dynamic behavior. Values assigned during a create request on the server are added before validation occurs.
@@ -243,7 +214,7 @@ Here is an example of a defaultValue function that uses both:
 ```js
 const translation: {
     en: 'Written by',
-    es: 'escrito por',
+    es: 'Escrito por',
 };
 
 const field = {
