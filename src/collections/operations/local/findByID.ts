@@ -23,13 +23,13 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
     depth,
     currentDepth,
     id,
-    locale = this?.config?.localization?.defaultLocale,
-    fallbackLocale = null,
+    locale,
+    fallbackLocale,
     user,
     overrideAccess = true,
     disableErrors = false,
     showHiddenFields,
-    req = {},
+    req,
     draft = false,
   } = options;
 
@@ -39,8 +39,8 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
     user: undefined,
     ...req || {},
     payloadAPI: 'local',
-    locale,
-    fallbackLocale,
+    locale: locale || req?.locale || this?.config?.localization?.defaultLocale,
+    fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
     payload: this,
   };
 

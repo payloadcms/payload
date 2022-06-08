@@ -35,8 +35,8 @@ export default async function localDelete<T extends TypeWithID = any>(options: O
     req: {
       user,
       payloadAPI: 'local',
-      locale,
-      fallbackLocale,
+      locale: locale || this?.config?.localization?.defaultLocale,
+      fallbackLocale: fallbackLocale || null,
       payload: this,
     },
   });

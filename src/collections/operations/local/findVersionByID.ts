@@ -38,10 +38,10 @@ export default async function findVersionByID<T extends TypeWithVersion<T> = any
     disableErrors,
     showHiddenFields,
     req: {
-      ...req,
+      ...req || {},
       payloadAPI: 'local',
-      locale,
-      fallbackLocale,
+      locale: locale || req?.locale || this?.config?.localization?.defaultLocale,
+      fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
       payload: this,
     },
   });
