@@ -1,3 +1,11 @@
+## [0.17.3](https://github.com/payloadcms/payload/compare/v0.17.2...v0.17.3) (2022-06-08)
+
+
+### Bug Fixes
+
+* duplicate objects in array fields in validate data and siblingData ([#599](https://github.com/payloadcms/payload/issues/599)) ([20bbda9](https://github.com/payloadcms/payload/commit/20bbda95c67efb985f08b0380c6f21c13068a8b5))
+* ensures unflattening locales only happens if config specifies locales ([c18cc23](https://github.com/payloadcms/payload/commit/c18cc23c71bf8147a0cebed8415642c81f38eb0f))
+
 ## [0.17.2](https://github.com/payloadcms/payload/compare/v0.17.1...v0.17.2) (2022-05-24)
 
 
