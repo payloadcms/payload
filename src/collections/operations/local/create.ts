@@ -22,8 +22,8 @@ export default async function create<T = any>(options: Options<T>): Promise<T> {
   const {
     collection: collectionSlug,
     depth,
-    locale = this?.config?.localization?.defaultLocale,
-    fallbackLocale = null,
+    locale,
+    fallbackLocale,
     data,
     user,
     overrideAccess = true,
@@ -47,11 +47,11 @@ export default async function create<T = any>(options: Options<T>): Promise<T> {
     overwriteExistingFiles,
     draft,
     req: {
-      ...req,
+      ...req || {},
       user,
       payloadAPI: 'local',
-      locale,
-      fallbackLocale,
+      locale: locale || req?.locale || this?.config?.localization?.defaultLocale,
+      fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
       payload: this,
       files: {
         file: getFileByPath(filePath),

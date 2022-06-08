@@ -7,6 +7,7 @@ export type Options = {
   id: string
   depth?: number
   currentDepth?: number
+  locale?: string
   fallbackLocale?: string
   user?: Document
   overrideAccess?: boolean
@@ -16,14 +17,14 @@ export type Options = {
   draft?: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function findByID<T extends TypeWithID = any>(options: Options): Promise<T> {
   const {
     collection: collectionSlug,
     depth,
     currentDepth,
     id,
-    fallbackLocale = null,
+    locale,
+    fallbackLocale,
     user,
     overrideAccess = true,
     disableErrors = false,
@@ -32,16 +33,14 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
     draft = false,
   } = options;
 
-  const locale = req.locale || this?.config?.localization?.defaultLocale;
-
   const collection = this.collections[collectionSlug];
 
   const reqToUse = {
     user: undefined,
     ...req || {},
     payloadAPI: 'local',
-    locale,
-    fallbackLocale,
+    locale: locale || req?.locale || this?.config?.localization?.defaultLocale,
+    fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
     payload: this,
   };
 
