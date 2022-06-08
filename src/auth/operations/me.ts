@@ -19,7 +19,7 @@ async function me({
   req,
   collectionSlug,
 }: Arguments): Promise<Result> {
-  const extractJWT = getExtractJWT(this.config);
+  const extractJWT = getExtractJWT(req.payload.config);
 
   if (req.user) {
     const user = { ...req.user };

@@ -1,6 +1,9 @@
 import { Document, Where } from '../../../types';
 import { PaginatedDocs } from '../../../mongoose/types';
 import { TypeWithVersion } from '../../../versions/types';
+import { Payload } from '../../..';
+import { PayloadRequest } from '../../../express/types';
+import findVersions from '../findVersions';
 
 export type Options = {
   slug: string
@@ -12,30 +15,28 @@ export type Options = {
   user?: Document
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  disableErrors?: boolean
   sort?: string
   where?: Where
 }
 
-export default async function findVersions<T extends TypeWithVersion<T> = any>(options: Options): Promise<PaginatedDocs<T>> {
+export default async function findVersionsLocal<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<PaginatedDocs<T>> {
   const {
     slug: globalSlug,
     depth,
     page,
     limit,
     where,
-    locale = this?.config?.localization?.defaultLocale,
+    locale = payload.config.localization?.defaultLocale,
     fallbackLocale = null,
     user,
     overrideAccess = true,
     showHiddenFields,
-    disableErrors = false,
     sort,
   } = options;
 
-  const globalConfig = this.globals.config.find((config) => config.slug === globalSlug);
+  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
 
-  return this.operations.globals.findVersions({
+  return findVersions({
     where,
     page,
     limit,
@@ -44,13 +45,12 @@ export default async function findVersions<T extends TypeWithVersion<T> = any>(o
     sort,
     overrideAccess,
     showHiddenFields,
-    disableErrors,
     req: {
       user,
       payloadAPI: 'local',
       locale,
       fallbackLocale,
-      payload: this,
-    },
+      payload,
+    } as PayloadRequest,
   });
 }

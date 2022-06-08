@@ -1,5 +1,8 @@
+import { Payload } from '../../..';
+import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import { TypeWithVersion } from '../../../versions/types';
+import restoreVersion from '../restoreVersion';
 
 export type Options = {
   slug: string
@@ -10,7 +13,7 @@ export type Options = {
   showHiddenFields?: boolean
 }
 
-export default async function restoreVersion<T extends TypeWithVersion<T> = any>(options: Options): Promise<T> {
+export default async function restoreVersionLocal<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<T> {
   const {
     slug: globalSlug,
     depth,
@@ -20,9 +23,9 @@ export default async function restoreVersion<T extends TypeWithVersion<T> = any>
     showHiddenFields,
   } = options;
 
-  const globalConfig = this.globals[globalSlug];
+  const globalConfig = payload.globals[globalSlug];
 
-  return this.operations.globals.restoreVersion({
+  return restoreVersion({
     depth,
     globalConfig,
     overrideAccess,
@@ -31,7 +34,7 @@ export default async function restoreVersion<T extends TypeWithVersion<T> = any>
     req: {
       user,
       payloadAPI: 'local',
-      payload: this,
-    },
+      payload,
+    } as PayloadRequest,
   });
 }

@@ -1,24 +1,37 @@
-async function resetPassword(options) {
+import { Payload } from '../../..';
+import resetPassword, { Result } from '../resetPassword';
+import { PayloadRequest } from '../../../express/types';
+
+export type Options = {
+  collection: string
+  data: {
+    token: string
+    password: string
+  }
+  overrideAccess: boolean
+  req?: PayloadRequest
+}
+
+async function localResetPassword(payload: Payload, options: Options): Promise<Result> {
   const {
     collection: collectionSlug,
     data,
-    req = {},
-    res,
+    overrideAccess,
+    req,
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
-  return this.operations.collections.auth.resetPassword({
-    data,
+  return resetPassword({
     collection,
-    overrideAccess: true,
+    data,
+    overrideAccess,
     req: {
       ...req,
+      payload,
       payloadAPI: 'local',
-      payload: this,
-    },
-    res,
+    } as PayloadRequest,
   });
 }
 
-export default resetPassword;
+export default localResetPassword;

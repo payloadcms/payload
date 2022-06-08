@@ -76,12 +76,12 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
         let method: string;
 
         if (collection && id) {
-          url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true`;
+          url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true&locale=${locale}`;
           method = 'PUT';
         }
 
         if (global) {
-          url = `${serverURL}${api}/globals/${global.slug}?draft=true&autosave=true`;
+          url = `${serverURL}${api}/globals/${global.slug}?draft=true&autosave=true&locale=${locale}`;
           method = 'POST';
         }
 
@@ -112,7 +112,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
     };
 
     autosave();
-  }, [debouncedFields, modified, serverURL, api, collection, global, id, dispatchFields, getVersions]);
+  }, [debouncedFields, modified, serverURL, api, collection, global, id, dispatchFields, getVersions, locale]);
 
   useEffect(() => {
     if (versions?.docs?.[0]) {

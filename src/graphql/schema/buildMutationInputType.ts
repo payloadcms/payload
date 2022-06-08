@@ -17,7 +17,7 @@ import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import { ArrayField, CodeField, DateField, EmailField, Field, fieldHasSubFields, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
-import payload from '../../index';
+import { Payload } from '../../index';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 
 export const getCollectionIDType = (config: SanitizedCollectionConfig): GraphQLScalarType => {
@@ -31,7 +31,7 @@ export const getCollectionIDType = (config: SanitizedCollectionConfig): GraphQLS
   }
 };
 
-function buildMutationInputType(name: string, fields: Field[], parentName: string, forceNullable = false): GraphQLInputObjectType {
+function buildMutationInputType(payload: Payload, name: string, fields: Field[], parentName: string, forceNullable = false): GraphQLInputObjectType {
   const fieldToSchemaMap = {
     number: (field: NumberField) => {
       const type = field.name === 'id' ? GraphQLInt : GraphQLFloat;
@@ -111,14 +111,14 @@ function buildMutationInputType(name: string, fields: Field[], parentName: strin
     },
     array: (field: ArrayField) => {
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
-      let type: GraphQLType | GraphQLList<GraphQLType> = buildMutationInputType(fullName, field.fields, fullName);
+      let type: GraphQLType | GraphQLList<GraphQLType> = buildMutationInputType(payload, fullName, field.fields, fullName);
       type = new GraphQLList(withNullableType(field, type, forceNullable));
       return { type };
     },
     group: (field: GroupField) => {
       const requiresAtLeastOneField = field.fields.some((subField) => (!fieldIsPresentationalOnly(subField) && subField.required && !subField.localized));
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
-      let type: GraphQLType = buildMutationInputType(fullName, field.fields, fullName);
+      let type: GraphQLType = buildMutationInputType(payload, fullName, field.fields, fullName);
       if (requiresAtLeastOneField) type = new GraphQLNonNull(type);
       return { type };
     },

@@ -1,15 +1,20 @@
-import { DeleteWriteOpResultObject } from 'mongodb';
 import executeAccess from '../../auth/executeAccess';
 import defaultAccess from '../../auth/defaultAccess';
+import { Document } from '../../types';
 import UnauthorizedError from '../../errors/UnathorizedError';
-import { NotFound } from '../../errors';
 import { PreferenceRequest } from '../types';
 
-async function handleDelete(args: PreferenceRequest): Promise<DeleteWriteOpResultObject> {
-  const { preferences: { Model } } = this;
+async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   const {
     overrideAccess,
     req,
+    req: {
+      payload: {
+        preferences: {
+          Model,
+        },
+      },
+    },
     user,
     key,
   } = args;
@@ -30,11 +35,7 @@ async function handleDelete(args: PreferenceRequest): Promise<DeleteWriteOpResul
 
   const result = await Model.findOneAndDelete(filter);
 
-  if (result.deletedCount === 0) {
-    throw new NotFound();
-  }
-
   return result;
 }
 
-export default handleDelete;
+export default deleteOperation;

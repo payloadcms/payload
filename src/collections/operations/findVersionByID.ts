@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status';
-import { Payload } from '../../index';
 import { PayloadRequest } from '../../express/types';
 import { Collection, CollectionModel } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -13,7 +12,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
-  id: string
+  id: string | number
   req: PayloadRequest
   disableErrors?: boolean
   currentDepth?: number
@@ -22,7 +21,7 @@ export type Arguments = {
   depth?: number
 }
 
-async function findVersionByID<T extends TypeWithVersion<T> = any>(this: Payload, args: Arguments): Promise<T> {
+async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
   const {
     depth,
     collection: {
@@ -32,6 +31,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(this: Payload
     req,
     req: {
       locale,
+      payload,
     },
     disableErrors,
     currentDepth,
@@ -43,7 +43,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(this: Payload
     throw new APIError('Missing ID of version.', httpStatus.BAD_REQUEST);
   }
 
-  const VersionsModel = (this.versions[collectionConfig.slug]) as CollectionModel;
+  const VersionsModel = (payload.versions[collectionConfig.slug]) as CollectionModel;
 
   // /////////////////////////////////////
   // Access

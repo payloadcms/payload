@@ -9,7 +9,6 @@ import sendVerificationEmail from '../../auth/sendVerificationEmail';
 import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } from '../config/types';
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
-import { Payload } from '../..';
 import { fieldAffectsData } from '../../fields/config/types';
 import uploadFile from '../../uploads/uploadFile';
 import { beforeChange } from '../../fields/hooks/beforeChange';
@@ -29,9 +28,7 @@ export type Arguments = {
   draft?: boolean
 }
 
-async function create(this: Payload, incomingArgs: Arguments): Promise<Document> {
-  const { config, emailOptions } = this;
-
+async function create(incomingArgs: Arguments): Promise<Document> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -54,6 +51,13 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
       config: collectionConfig,
     },
     req,
+    req: {
+      payload,
+      payload: {
+        config,
+        emailOptions,
+      },
+    },
     disableVerificationEmail,
     depth,
     overrideAccess,
@@ -205,8 +209,8 @@ async function create(this: Payload, incomingArgs: Arguments): Promise<Document>
   if (collectionConfig.auth && collectionConfig.auth.verify) {
     sendVerificationEmail({
       emailOptions,
-      config: this.config,
-      sendEmail: this.sendEmail,
+      config: payload.config,
+      sendEmail: payload.sendEmail,
       collection: { config: collectionConfig, Model },
       user: result,
       token: verificationToken,

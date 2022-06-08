@@ -1,15 +1,13 @@
-import { Collection } from '../../collections/config/types';
+import { CollectionModel } from '../../collections/config/types';
 
-async function init(args: Collection): Promise<boolean> {
+async function init(args: { Model: CollectionModel }): Promise<boolean> {
   const {
     Model,
   } = args;
 
   const count = await Model.countDocuments({});
 
-  if (count >= 1) return true;
-
-  return false;
+  return count >= 1;
 }
 
 export default init;

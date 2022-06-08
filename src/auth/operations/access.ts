@@ -1,4 +1,3 @@
-import { Payload } from '../..';
 import { PayloadRequest } from '../../express/types';
 import { Permissions } from '../types';
 
@@ -8,12 +7,15 @@ type Arguments = {
   req: PayloadRequest
 }
 
-async function accessOperation(this: Payload, args: Arguments): Promise<Permissions> {
-  const { config } = this;
-
+async function accessOperation(args: Arguments): Promise<Permissions> {
   const {
     req,
-    req: { user },
+    req: {
+      user,
+      payload: {
+        config,
+      },
+    },
   } = args;
 
   const results = {} as Permissions;

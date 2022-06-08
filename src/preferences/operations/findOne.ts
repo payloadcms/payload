@@ -4,10 +4,14 @@ import defaultAccess from '../../auth/defaultAccess';
 import UnauthorizedError from '../../errors/UnathorizedError';
 
 async function findOne(args: PreferenceRequest): Promise<Preference> {
-  const { preferences: { Model } } = this;
   const {
     overrideAccess,
     req,
+    req: {
+      payload: {
+        preferences: { Model },
+      },
+    },
     user,
     key,
   } = args;

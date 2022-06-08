@@ -2,8 +2,10 @@
 
 import { Response } from 'express';
 import { Where } from '../../../types';
+import type { PaginatedDocs } from '../../../mongoose/types';
 import { PayloadRequest } from '../../../express/types';
 import { Collection } from '../../config/types';
+import findVersions from '../../operations/findVersions';
 
 export type Resolver = (
   _: unknown,
@@ -19,9 +21,9 @@ export type Resolver = (
     req: PayloadRequest,
     res: Response
   }
-) => Promise<Document>
+) => Promise<PaginatedDocs<any>>
 
-export default function findVersions(collection: Collection): Resolver {
+export default function findVersionsResolver(collection: Collection): Resolver {
   async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
@@ -35,11 +37,10 @@ export default function findVersions(collection: Collection): Resolver {
       req: context.req,
     };
 
-    const result = await this.operations.collections.findVersions(options);
+    const result = await findVersions(options);
 
     return result;
   }
 
-  const findVersionsResolver = resolver.bind(this);
-  return findVersionsResolver;
+  return resolver;
 }

@@ -7,6 +7,7 @@ import { Collection } from '../../collections/config/types';
 export type Arguments = {
   collection: Collection
   data: {
+    email: string
     [key: string]: unknown
   }
   disableEmail?: boolean
@@ -17,8 +18,6 @@ export type Arguments = {
 export type Result = string;
 
 async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
-  const { config, sendEmail: email, emailOptions } = this;
-
   if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {
     throw new APIError('Missing email.', 400);
   }
@@ -46,6 +45,13 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     data,
     disableEmail,
     expiration,
+    req: {
+      payload: {
+        config,
+        sendEmail: email,
+        emailOptions,
+      },
+    },
     req,
   } = args;
 

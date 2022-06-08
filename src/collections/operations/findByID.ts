@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle */
 import memoize from 'micro-memoize';
-import { Payload } from '../..';
 import { PayloadRequest } from '../../express/types';
 import { Collection, TypeWithID } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -23,7 +22,8 @@ export type Arguments = {
   draft?: boolean
 }
 
-async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs: Arguments): Promise<T> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<T> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -49,6 +49,7 @@ async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs:
     req,
     req: {
       locale,
+      payload,
     },
     disableErrors,
     currentDepth,
@@ -124,7 +125,7 @@ async function findByID<T extends TypeWithID = any>(this: Payload, incomingArgs:
 
   if (collectionConfig.versions?.drafts && draftEnabled) {
     result = await replaceWithDraftIfAvailable({
-      payload: this,
+      payload,
       entity: collectionConfig,
       doc: result,
       accessResult,

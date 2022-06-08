@@ -1,4 +1,17 @@
-async function unlock(options) {
+import { PayloadRequest } from '../../../express/types';
+import { Payload } from '../../..';
+import unlock from '../unlock';
+
+export type Options = {
+  collection: string
+  data: {
+    email
+  }
+  req?: PayloadRequest
+  overrideAccess: boolean
+}
+
+async function localUnlock(payload: Payload, options: Options): Promise<boolean> {
   const {
     collection: collectionSlug,
     data,
@@ -6,14 +19,18 @@ async function unlock(options) {
     req,
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
-  return this.operations.collections.auth.unlock({
+  return unlock({
     data,
     collection,
     overrideAccess,
-    req,
+    req: {
+      ...req,
+      payload,
+      payloadAPI: 'local',
+    } as PayloadRequest,
   });
 }
 
-export default unlock;
+export default localUnlock;

@@ -1,6 +1,8 @@
 import { TypeWithID } from '../../config/types';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
+import findByID from '../findByID';
+import { Payload } from '../../..';
 
 export type Options = {
   collection: string
@@ -17,7 +19,8 @@ export type Options = {
   draft?: boolean
 }
 
-export default async function findByID<T extends TypeWithID = any>(options: Options): Promise<T> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function findByIDLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<T> {
   const {
     collection: collectionSlug,
     depth,
@@ -33,20 +36,20 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
     draft = false,
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
   const reqToUse = {
     user: undefined,
     ...req || {},
     payloadAPI: 'local',
-    locale: locale || req?.locale || this?.config?.localization?.defaultLocale,
+    locale: locale || req?.locale || payload?.config?.localization?.defaultLocale,
     fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
-    payload: this,
+    payload,
   };
 
   if (typeof user !== 'undefined') reqToUse.user = user;
 
-  return this.operations.collections.findByID({
+  return findByID({
     depth,
     currentDepth,
     id,
@@ -54,7 +57,7 @@ export default async function findByID<T extends TypeWithID = any>(options: Opti
     overrideAccess,
     disableErrors,
     showHiddenFields,
-    req: reqToUse,
+    req: reqToUse as PayloadRequest,
     draft,
   });
 }

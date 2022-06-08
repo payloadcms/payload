@@ -1,6 +1,5 @@
-import { Payload } from '../..';
 import { Where } from '../../types';
-import { TypeWithID } from '../config/types';
+import { SanitizedGlobalConfig, TypeWithID } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { saveGlobalVersion } from '../../versions/saveGlobalVersion';
@@ -12,16 +11,33 @@ import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { PayloadRequest } from '../../express/types';
 
-async function update<T extends TypeWithID = any>(this: Payload, args): Promise<T> {
-  const { globals: { Model } } = this;
+type Args = {
+  globalConfig: SanitizedGlobalConfig
+  slug: string
+  req: PayloadRequest
+  depth?: number
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+  draft?: boolean
+  autosave?: boolean
+  data: Record<string, unknown>
+}
 
+async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   const {
     globalConfig,
     slug,
     req,
     req: {
       locale,
+      payload,
+      payload: {
+        globals: {
+          Model,
+        },
+      },
     },
     depth,
     overrideAccess,
@@ -151,7 +167,7 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
 
   if (globalConfig.versions && !shouldSaveDraft) {
     createdVersion = await saveGlobalVersion({
-      payload: this,
+      payload,
       config: globalConfig,
       req,
       docWithLocales: result,
@@ -164,14 +180,14 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
 
   if (shouldSaveDraft) {
     await ensurePublishedGlobalVersion({
-      payload: this,
+      payload,
       config: globalConfig,
       req,
       docWithLocales: result,
     });
 
     global = await saveGlobalDraft({
-      payload: this,
+      payload,
       config: globalConfig,
       data: result,
       autosave,
@@ -190,7 +206,7 @@ async function update<T extends TypeWithID = any>(this: Payload, args): Promise<
       }
     } catch (error) {
       cleanUpFailedVersion({
-        payload: this,
+        payload,
         entityConfig: globalConfig,
         version: createdVersion,
       });

@@ -1,6 +1,30 @@
 /* eslint-disable no-param-reassign */
-export default function find(collection) {
-  async function resolver(_, args, context) {
+import { PayloadRequest } from '../../../express/types';
+import type { PaginatedDocs } from '../../../mongoose/types';
+import { Where } from '../../../types';
+import { Collection } from '../../config/types';
+import find from '../../operations/find';
+
+export type Resolver = (_: unknown,
+  args: {
+  data: Record<string, unknown>,
+  locale?: string
+  draft: boolean
+  where?: Where
+  limit?: number,
+  page?: number,
+  sort?: string
+  fallbackLocale?: string
+},
+  context: {
+    req: PayloadRequest,
+    res: Response
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+) => Promise<PaginatedDocs<any>>
+
+export default function findResolver(collection: Collection): Resolver {
+  return async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
@@ -14,10 +38,7 @@ export default function find(collection) {
       draft: args.draft,
     };
 
-    const results = await this.operations.collections.find(options);
+    const results = await find(options);
     return results;
-  }
-
-  const findResolver = resolver.bind(this);
-  return findResolver;
+  };
 }

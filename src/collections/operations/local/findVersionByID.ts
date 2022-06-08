@@ -1,6 +1,8 @@
+import { Payload } from '../../..';
 import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import { TypeWithVersion } from '../../../versions/types';
+import findVersionByID from '../findVersionByID';
 
 export type Options = {
   collection: string
@@ -15,12 +17,12 @@ export type Options = {
   req?: PayloadRequest
 }
 
-export default async function findVersionByID<T extends TypeWithVersion<T> = any>(options: Options): Promise<T> {
+export default async function findVersionByIDLocal<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<T> {
   const {
     collection: collectionSlug,
     depth,
     id,
-    locale = this?.config?.localization?.defaultLocale,
+    locale = payload.config?.localization?.defaultLocale,
     fallbackLocale = null,
     overrideAccess = true,
     disableErrors = false,
@@ -28,9 +30,9 @@ export default async function findVersionByID<T extends TypeWithVersion<T> = any
     req,
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
-  return this.operations.collections.findVersionByID({
+  return findVersionByID({
     depth,
     id,
     collection,
@@ -42,7 +44,7 @@ export default async function findVersionByID<T extends TypeWithVersion<T> = any
       payloadAPI: 'local',
       locale: locale || req?.locale || this?.config?.localization?.defaultLocale,
       fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
-      payload: this,
-    },
+      payload,
+    } as PayloadRequest,
   });
 }

@@ -1,5 +1,8 @@
 /* eslint-disable no-param-reassign */
-function resetPassword(collection) {
+import { Collection } from '../../../collections/config/types';
+import resetPassword from '../../operations/resetPassword';
+
+function resetPasswordResolver(collection: Collection) {
   async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
@@ -12,13 +15,12 @@ function resetPassword(collection) {
       api: 'GraphQL',
     };
 
-    const result = await this.operations.collections.auth.resetPassword(options);
+    const result = await resetPassword(options);
 
     return result;
   }
 
-  const resetPasswordResolver = resolver.bind(this);
-  return resetPasswordResolver;
+  return resolver;
 }
 
-export default resetPassword;
+export default resetPasswordResolver;

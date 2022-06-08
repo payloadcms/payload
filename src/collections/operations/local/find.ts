@@ -1,6 +1,9 @@
 import { TypeWithID } from '../../config/types';
 import { PaginatedDocs } from '../../../mongoose/types';
 import { Document, Where } from '../../../types';
+import { Payload } from '../../..';
+import { PayloadRequest } from '../../../express/types';
+import find from '../find';
 
 export type Options = {
   collection: string
@@ -18,14 +21,15 @@ export type Options = {
   draft?: boolean
 }
 
-export default async function find<T extends TypeWithID = any>(options: Options): Promise<PaginatedDocs<T>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function findLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<PaginatedDocs<T>> {
   const {
     collection: collectionSlug,
     depth,
     page,
     limit,
     where,
-    locale = this?.config?.localization?.defaultLocale,
+    locale = payload?.config?.localization?.defaultLocale,
     fallbackLocale = null,
     user,
     overrideAccess = true,
@@ -35,9 +39,9 @@ export default async function find<T extends TypeWithID = any>(options: Options)
     pagination = true,
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
-  return this.operations.collections.find({
+  return find({
     depth,
     sort,
     page,
@@ -53,7 +57,7 @@ export default async function find<T extends TypeWithID = any>(options: Options)
       payloadAPI: 'local',
       locale,
       fallbackLocale,
-      payload: this,
-    },
+      payload,
+    } as PayloadRequest,
   });
 }

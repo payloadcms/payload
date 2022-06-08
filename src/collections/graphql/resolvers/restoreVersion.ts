@@ -2,16 +2,20 @@
 import { Response } from 'express';
 import { Collection } from '../../config/types';
 import { PayloadRequest } from '../../../express/types';
+import restoreVersion from '../../operations/restoreVersion';
 
 export type Resolver = (
   _: unknown,
+  args: {
+    id: string | number
+  },
   context: {
     req: PayloadRequest,
     res: Response
   }
 ) => Promise<Document>
 
-export default function restoreVersion(collection: Collection): Resolver {
+export default function restoreVersionResolver(collection: Collection): Resolver {
   async function resolver(_, args, context) {
     const options = {
       collection,
@@ -19,10 +23,9 @@ export default function restoreVersion(collection: Collection): Resolver {
       req: context.req,
     };
 
-    const result = await this.operations.collections.restoreVersion(options);
+    const result = await restoreVersion(options);
     return result;
   }
 
-  const restoreVersionResolver = resolver.bind(this);
-  return restoreVersionResolver;
+  return resolver;
 }

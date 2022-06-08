@@ -1,4 +1,7 @@
-function unlock(collection) {
+import unlock from '../../operations/unlock';
+import { Collection } from '../../../collections/config/types';
+
+function unlockResolver(collection: Collection) {
   async function resolver(_, args, context) {
     const options = {
       collection,
@@ -6,13 +9,10 @@ function unlock(collection) {
       req: context.req,
     };
 
-    await this.operations.collections.auth.unlock(options);
-    return true;
+    const result = await unlock(options);
+    return result;
   }
-
-  const unlockResolver = resolver.bind(this);
-
-  return unlockResolver;
+  return resolver;
 }
 
-export default unlock;
+export default unlockResolver;

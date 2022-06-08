@@ -4,7 +4,6 @@ import { PayloadRequest } from '../../express/types';
 import { Collection, TypeWithID } from '../config/types';
 import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import { Payload } from '../../index';
 import { hasWhereAccessResult } from '../../auth/types';
 import { Where } from '../../types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -13,7 +12,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
-  id: string
+  id: string | number
   req: PayloadRequest
   disableErrors?: boolean
   currentDepth?: number
@@ -22,7 +21,7 @@ export type Arguments = {
   depth?: number
 }
 
-async function restoreVersion<T extends TypeWithID = any>(this: Payload, args: Arguments): Promise<T> {
+async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
   const {
     collection: {
       Model,
@@ -34,6 +33,7 @@ async function restoreVersion<T extends TypeWithID = any>(this: Payload, args: A
     depth,
     req: {
       locale,
+      payload,
     },
     req,
   } = args;
@@ -46,7 +46,7 @@ async function restoreVersion<T extends TypeWithID = any>(this: Payload, args: A
   // Retrieve original raw version
   // /////////////////////////////////////
 
-  const VersionModel = this.versions[collectionConfig.slug];
+  const VersionModel = payload.versions[collectionConfig.slug];
 
   let rawVersion = await VersionModel.findOne({
     _id: id,

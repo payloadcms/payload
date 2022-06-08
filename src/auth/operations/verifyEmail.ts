@@ -1,7 +1,13 @@
 import httpStatus from 'http-status';
 import { APIError } from '../../errors';
+import { Collection } from '../../collections/config/types';
 
-async function verifyEmail(args) {
+export type Args = {
+  token: string
+  collection: Collection
+}
+
+async function verifyEmail(args: Args): Promise<boolean> {
   if (!Object.prototype.hasOwnProperty.call(args, 'token')) {
     throw new APIError('Missing required data.', httpStatus.BAD_REQUEST);
   }

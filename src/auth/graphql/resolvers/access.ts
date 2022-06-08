@@ -1,4 +1,6 @@
 import formatName from '../../../graphql/utilities/formatName';
+import access from '../../operations/access';
+import { Payload } from '../../..';
 
 const formatConfigNames = (results, configs) => {
   const formattedResults = { ...results };
@@ -12,17 +14,21 @@ const formatConfigNames = (results, configs) => {
   return formattedResults;
 };
 
-async function access(_, __, context) {
-  const options = {
-    req: context.req,
-  };
+function accessResolver(payload: Payload) {
+  async function resolver(_, args, context) {
+    const options = {
+      req: context.req,
+    };
 
-  let accessResults = await this.operations.collections.auth.access(options);
+    let accessResults = await access(options);
 
-  accessResults = formatConfigNames(accessResults, this.config.collections);
-  accessResults = formatConfigNames(accessResults, this.config.globals);
+    accessResults = formatConfigNames(accessResults, payload.config.collections);
+    accessResults = formatConfigNames(accessResults, payload.config.globals);
 
-  return accessResults;
+    return accessResults;
+  }
+
+  return resolver;
 }
 
-export default access;
+export default accessResolver;

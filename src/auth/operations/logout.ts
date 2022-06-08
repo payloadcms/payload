@@ -11,10 +11,13 @@ export type Arguments = {
 }
 
 async function logout(args: Arguments): Promise<string> {
-  const { config } = this;
-
   const {
     res,
+    req: {
+      payload: {
+        config,
+      },
+    },
     collection: {
       config: collectionConfig,
     },

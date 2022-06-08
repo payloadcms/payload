@@ -4,9 +4,11 @@ import { PayloadRequest } from '../../express/types';
 import { TypeWithID } from '../../collections/config/types';
 import { PaginatedDocs } from '../../mongoose/types';
 import { SanitizedGlobalConfig } from '../config/types';
+import findVersions from '../operations/findVersions';
+import { Where } from '../../types';
 
-export default function findVersions(global: SanitizedGlobalConfig) {
-  async function handler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
+export default function findVersionsHandler(global: SanitizedGlobalConfig) {
+  return async function handler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
     try {
       let page;
 
@@ -21,22 +23,18 @@ export default function findVersions(global: SanitizedGlobalConfig) {
       const options = {
         req,
         globalConfig: global,
-        where: req.query.where,
+        where: req.query.where as Where,
         page,
-        limit: req.query.limit,
-        sort: req.query.sort,
-        depth: req.query.depth,
+        limit: Number(req.query.limit),
+        sort: req.query.sort as string,
+        depth: Number(req.query.depth),
       };
 
-      const result = await this.operations.globals.findVersions(options);
+      const result = await findVersions(options);
 
       return res.status(httpStatus.OK).json(result);
     } catch (error) {
       return next(error);
     }
-  }
-
-  const findVersionsandler = handler.bind(this);
-
-  return findVersionsandler;
+  };
 }

@@ -1,5 +1,8 @@
+import { Payload } from '../../..';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
+import update from '../update';
+import { PayloadRequest } from '../../../express/types';
 
 export type Options<T> = {
   collection: string
@@ -17,11 +20,11 @@ export type Options<T> = {
   autosave?: boolean
 }
 
-export default async function update<T = any>(options: Options<T>): Promise<T> {
+export default async function updateLocal<T = any>(payload: Payload, options: Options<T>): Promise<T> {
   const {
     collection: collectionSlug,
     depth,
-    locale = this?.config?.localization?.defaultLocale,
+    locale = payload.config?.localization?.defaultLocale,
     fallbackLocale = null,
     data,
     id,
@@ -34,7 +37,7 @@ export default async function update<T = any>(options: Options<T>): Promise<T> {
     autosave,
   } = options;
 
-  const collection = this.collections[collectionSlug];
+  const collection = payload.collections[collectionSlug];
 
   const args = {
     depth,
@@ -46,17 +49,18 @@ export default async function update<T = any>(options: Options<T>): Promise<T> {
     overwriteExistingFiles,
     draft,
     autosave,
+    payload,
     req: {
       user,
       payloadAPI: 'local',
       locale,
       fallbackLocale,
-      payload: this,
+      payload,
       files: {
         file: getFileByPath(filePath),
       },
-    },
+    } as PayloadRequest,
   };
 
-  return this.operations.collections.update(args);
+  return update(args);
 }

@@ -1,4 +1,7 @@
-function login(collection) {
+import { Collection } from '../../../collections/config/types';
+import login from '../../operations/login';
+
+function loginResolver(collection: Collection) {
   async function resolver(_, args, context) {
     const options = {
       collection,
@@ -10,12 +13,11 @@ function login(collection) {
       res: context.res,
     };
 
-    const result = await this.operations.collections.auth.login(options);
+    const result = login(options);
     return result;
   }
 
-  const loginResolver = resolver.bind(this);
-  return loginResolver;
+  return resolver;
 }
 
-export default login;
+export default loginResolver;

@@ -3,11 +3,14 @@ import { Response } from 'express';
 import { SanitizedGlobalConfig } from '../../config/types';
 import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
+import findVersionByID from '../../operations/findVersionByID';
 
 export type Resolver = (
   _: unknown,
   args: {
+    id: string | number
     locale?: string
+    draft?: boolean
     fallbackLocale?: string
   },
   context: {
@@ -16,8 +19,8 @@ export type Resolver = (
   }
 ) => Promise<Document>
 
-function findVersionByID(globalConfig: SanitizedGlobalConfig): Resolver {
-  async function resolver(_, args, context) {
+export default function findVersionByIDResolver(globalConfig: SanitizedGlobalConfig): Resolver {
+  return async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
@@ -29,12 +32,7 @@ function findVersionByID(globalConfig: SanitizedGlobalConfig): Resolver {
       depth: 0,
     };
 
-    const result = await this.operations.globals.findVersionByID(options);
+    const result = await findVersionByID(options);
     return result;
-  }
-
-  const findOneResolver = resolver.bind(this);
-  return findOneResolver;
+  };
 }
-
-export default findVersionByID;

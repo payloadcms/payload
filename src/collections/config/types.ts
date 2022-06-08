@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
 import { PaginateModel } from 'mongoose';
-import { GraphQLType } from 'graphql';
+import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Access, GeneratePreviewURL, EntityDescription, Endpoint } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
@@ -234,7 +234,12 @@ export type Collection = {
   Model: CollectionModel;
   config: SanitizedCollectionConfig;
   graphQL?: {
-    [key: string]: GraphQLType
+    type: GraphQLObjectType
+    JWT: GraphQLObjectType
+    versionType: GraphQLObjectType
+    whereInputType: GraphQLInputObjectType
+    mutationInputType: GraphQLNonNull<any>
+    updateMutationInputType: GraphQLNonNull<any>
   }
 };
 

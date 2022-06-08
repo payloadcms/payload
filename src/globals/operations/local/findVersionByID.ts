@@ -1,5 +1,8 @@
+import { Payload } from '../../..';
+import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import { TypeWithVersion } from '../../../versions/types';
+import findVersionByID from '../findVersionByID';
 
 export type Options = {
   slug: string
@@ -13,12 +16,12 @@ export type Options = {
   disableErrors?: boolean
 }
 
-async function findVersionByID<T extends TypeWithVersion<T> = any>(options: Options): Promise<Document> {
+export default async function findVersionByIDLocal<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<T> {
   const {
     slug: globalSlug,
     depth,
     id,
-    locale = this?.config?.localization?.defaultLocale,
+    locale = payload.config?.localization?.defaultLocale,
     fallbackLocale = null,
     user,
     overrideAccess = true,
@@ -26,10 +29,9 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(options: Opti
     showHiddenFields,
   } = options;
 
-  const globalConfig = this.globals.config.find((config) => config.slug === globalSlug);
+  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
 
-  return this.operations.globals.findVersionByID({
-    slug: globalSlug,
+  return findVersionByID({
     depth,
     id,
     globalConfig,
@@ -41,9 +43,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(options: Opti
       payloadAPI: 'local',
       locale,
       fallbackLocale,
-      payload: this,
-    },
+      payload,
+    } as PayloadRequest,
   });
 }
-
-export default findVersionByID;

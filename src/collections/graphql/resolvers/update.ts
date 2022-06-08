@@ -1,6 +1,23 @@
 /* eslint-disable no-param-reassign */
+import { Response } from 'express';
+import { Collection } from '../../config/types';
+import update from '../../operations/update';
+import { PayloadRequest } from '../../../express/types';
 
-export default function update(collection) {
+export type Resolver = (_: unknown, args: {
+    id: string | number
+    data: Record<string, unknown>,
+    locale?: string
+    draft: boolean
+    autosave: boolean
+  },
+  context: {
+    req: PayloadRequest,
+    res: Response
+  }
+) => Promise<Document>
+
+export default function updateResolver(collection: Collection): Resolver {
   async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
@@ -15,11 +32,10 @@ export default function update(collection) {
       autosave: args.autosave,
     };
 
-    const result = await this.operations.collections.update(options);
+    const result = await update(options);
 
     return result;
   }
 
-  const updateResolver = resolver.bind(this);
-  return updateResolver;
+  return resolver;
 }

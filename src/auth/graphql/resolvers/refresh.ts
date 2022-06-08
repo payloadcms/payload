@@ -1,10 +1,12 @@
+import { Collection } from '../../../collections/config/types';
+import refresh from '../../operations/refresh';
 import getExtractJWT from '../../getExtractJWT';
 
-function refresh(collection) {
+function refreshResolver(collection: Collection) {
   async function resolver(_, args, context) {
     let token;
 
-    const extractJWT = getExtractJWT(this.config);
+    const extractJWT = getExtractJWT(context.req.config);
     token = extractJWT(context.req);
 
     if (args.token) {
@@ -18,13 +20,12 @@ function refresh(collection) {
       res: context.res,
     };
 
-    const result = await this.operations.collections.auth.refresh(options);
+    const result = await refresh(options);
 
     return result;
   }
 
-  const refreshResolver = resolver.bind(this);
-  return refreshResolver;
+  return resolver;
 }
 
-export default refresh;
+export default refreshResolver;

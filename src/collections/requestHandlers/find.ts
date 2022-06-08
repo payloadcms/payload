@@ -3,10 +3,13 @@ import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
+import find from '../operations/find';
+import { Where } from '../../types';
 
-export default async function find<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function findHandler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
   try {
-    let page;
+    let page: number | undefined;
 
     if (typeof req.query.page === 'string') {
       const parsedPage = parseInt(req.query.page, 10);
@@ -16,18 +19,16 @@ export default async function find<T extends TypeWithID = any>(req: PayloadReque
       }
     }
 
-    const options = {
+    const result = await find({
       req,
       collection: req.collection,
-      where: req.query.where,
+      where: req.query.where as Where, // This is a little shady
       page,
-      limit: req.query.limit,
-      sort: req.query.sort,
-      depth: req.query.depth,
+      limit: Number(req.query.limit),
+      sort: req.query.sort as string,
+      depth: Number(req.query.depth),
       draft: req.query.draft === 'true',
-    };
-
-    const result = await this.operations.collections.find(options);
+    });
 
     return res.status(httpStatus.OK).json(result);
   } catch (error) {

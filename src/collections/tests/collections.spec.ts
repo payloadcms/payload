@@ -617,8 +617,8 @@ describe('Collections - REST', () => {
         headers,
         method: 'delete',
       });
-      expect(deleteResponse.status).toBe(200);
       const deleteData = await deleteResponse.json();
+      expect(deleteResponse.status).toBe(200);
       expect(deleteData.id).toBe(docId);
     });
   });

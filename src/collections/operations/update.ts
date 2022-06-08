@@ -1,5 +1,4 @@
 import httpStatus from 'http-status';
-import { Payload } from '../..';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -31,9 +30,7 @@ export type Arguments = {
   autosave?: boolean
 }
 
-async function update(this: Payload, incomingArgs: Arguments): Promise<Document> {
-  const { config } = this;
-
+async function update(incomingArgs: Arguments): Promise<Document> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -60,6 +57,10 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
     req,
     req: {
       locale,
+      payload,
+      payload: {
+        config,
+      },
     },
     overrideAccess,
     showHiddenFields,
@@ -216,7 +217,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
 
   if (collectionConfig.versions && !shouldSaveDraft) {
     createdVersion = await saveCollectionVersion({
-      payload: this,
+      payload,
       config: collectionConfig,
       req,
       docWithLocales,
@@ -230,7 +231,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
 
   if (shouldSaveDraft) {
     await ensurePublishedCollectionVersion({
-      payload: this,
+      payload,
       config: collectionConfig,
       req,
       docWithLocales,
@@ -238,7 +239,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
     });
 
     result = await saveCollectionDraft({
-      payload: this,
+      payload,
       config: collectionConfig,
       req,
       data: result,
@@ -254,7 +255,7 @@ async function update(this: Payload, incomingArgs: Arguments): Promise<Document>
       );
     } catch (error) {
       cleanUpFailedVersion({
-        payload: this,
+        payload,
         entityConfig: collectionConfig,
         version: createdVersion,
       });

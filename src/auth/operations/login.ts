@@ -8,8 +8,8 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Field, fieldHasSubFields, fieldAffectsData } from '../../fields/config/types';
 import { User } from '../types';
 import { Collection } from '../../collections/config/types';
-import { Payload } from '../..';
 import { afterRead } from '../../fields/hooks/afterRead';
+import unlock from './unlock';
 
 export type Result = {
   user?: User,
@@ -30,9 +30,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function login(this: Payload, incomingArgs: Arguments): Promise<Result> {
-  const { config, operations, secret } = this;
-
+async function login<T>(incomingArgs: Arguments): Promise<Result & { user: T}> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -54,6 +52,12 @@ async function login(this: Payload, incomingArgs: Arguments): Promise<Result> {
       config: collectionConfig,
     },
     data,
+    req: {
+      payload: {
+        secret,
+        config,
+      },
+    },
     req,
     depth,
     overrideAccess,
@@ -90,7 +94,7 @@ async function login(this: Payload, incomingArgs: Arguments): Promise<Result> {
   }
 
   if (maxLoginAttemptsEnabled) {
-    await operations.collections.auth.unlock({
+    await unlock({
       collection: {
         Model,
         config: collectionConfig,

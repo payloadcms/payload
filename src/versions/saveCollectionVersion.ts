@@ -84,7 +84,7 @@ export const saveCollectionVersion = async ({
   if (config.versions.maxPerDoc) {
     enforceMaxVersions({
       id,
-      payload: this,
+      payload,
       Model: VersionModel,
       entityLabel: config.labels.plural,
       entityType: 'collection',

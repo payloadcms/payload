@@ -5,20 +5,36 @@ import { AccessResult } from '../../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { SanitizedGlobalConfig, TypeWithID } from '../config/types';
+import { PayloadRequest } from '../../express/types';
 
-async function findOne(args) {
-  const { globals: { Model } } = this;
+type Args = {
+  globalConfig: SanitizedGlobalConfig
+  locale?: string
+  req: PayloadRequest
+  slug: string
+  depth?: number
+  showHiddenFields?: boolean
+  draft?: boolean
+  overrideAccess?: boolean
+}
 
+async function findOne<T extends TypeWithID = any>(args: Args): Promise<T> {
   const {
     globalConfig,
     locale,
     req,
+    req: {
+      payload,
+    },
     slug,
     depth,
     showHiddenFields,
     draft: draftEnabled = false,
     overrideAccess = false,
   } = args;
+
+  const { globals: { Model } } = payload;
 
   // /////////////////////////////////////
   // Retrieve and execute access
@@ -52,7 +68,7 @@ async function findOne(args) {
   // Perform database operation
   // /////////////////////////////////////
 
-  let doc = await Model.findOne(query).lean();
+  let doc = await Model.findOne(query).lean() as any;
 
   if (!doc) {
     doc = {};
@@ -71,7 +87,7 @@ async function findOne(args) {
 
   if (globalConfig.versions?.drafts && draftEnabled) {
     doc = await replaceWithDraftIfAvailable({
-      payload: this,
+      payload,
       entity: globalConfig,
       doc,
       locale,

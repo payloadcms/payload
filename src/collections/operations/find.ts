@@ -25,6 +25,7 @@ export type Arguments = {
   draft?: boolean
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<PaginatedDocs<T>> {
   let args = incomingArgs;
 
@@ -54,6 +55,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     req,
     req: {
       locale,
+      payload,
     },
     overrideAccess,
     showHiddenFields,
@@ -136,7 +138,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
       ...result,
       docs: await Promise.all(result.docs.map(async (doc) => replaceWithDraftIfAvailable({
         accessResult,
-        payload: this,
+        payload,
         entity: collectionConfig,
         doc,
         locale,

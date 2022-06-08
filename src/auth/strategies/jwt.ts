@@ -1,10 +1,12 @@
 import passportJwt, { StrategyOptions } from 'passport-jwt';
 import { Strategy as PassportStrategy } from 'passport-strategy';
+import { Payload } from '../..';
+import find from '../../collections/operations/find';
 import getExtractJWT from '../getExtractJWT';
 
 const JwtStrategy = passportJwt.Strategy;
 
-export default ({ secret, config, collections, operations }): PassportStrategy => {
+export default ({ secret, config, collections }: Payload): PassportStrategy => {
   const opts: StrategyOptions = {
     passReqToCallback: true,
     jwtFromRequest: getExtractJWT(config),
@@ -35,7 +37,7 @@ export default ({ secret, config, collections, operations }): PassportStrategy =
         };
       }
 
-      const userQuery = await operations.collections.find({
+      const userQuery = await find({
         where,
         collection,
         req,
