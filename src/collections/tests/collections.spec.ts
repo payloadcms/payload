@@ -10,6 +10,7 @@ let token = null;
 let headers = null;
 
 let localizedPostID;
+let relationshipBID;
 const localizedPostTitle = 'title';
 const englishPostDesc = 'english description';
 const spanishPostDesc = 'spanish description';
@@ -503,12 +504,22 @@ describe('Collections - REST', () => {
       }).then((res) => res.json());
 
       expect(relationshipB.doc.id).toBeDefined();
+      relationshipBID = relationshipB.doc.id;
 
       const queryRes = await fetch(
         `${url}/api/relationship-b?where[nonLocalizedRelationToMany.value][equals]=${localizedPostID}`,
       );
       const data = await queryRes.json();
       expect(data.docs).toHaveLength(1);
+    });
+
+    it('should propagate locale through populated documents', async () => {
+      const relationshipB = await fetch(`${url}/api/relationship-b/${relationshipBID}?locale=es`, {
+        headers,
+      });
+
+      const data = await relationshipB.json();
+      expect(data.nonLocalizedRelationToMany.value.description).toBe(spanishPostDesc);
     });
 
     it('should allow querying by a numeric custom ID', async () => {
