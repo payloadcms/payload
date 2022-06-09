@@ -58,18 +58,6 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
           };
         }
 
-        if (field.type === 'relationship') {
-          const relatedCollections = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo];
-
-          relatedCollections.forEach((slug) => {
-            const collection = config.collections.find((coll) => coll.slug === slug);
-
-            if (collection && collection.access && collection.access[operation]) {
-              promises.push(createAccessPromise(updatedObj[field.name], collection.access[operation], operation, true));
-            }
-          });
-        }
-
         if (field.fields) {
           if (!updatedObj[field.name].fields) updatedObj[field.name].fields = {};
           executeFieldPolicies(updatedObj[field.name].fields, field.fields, operation);

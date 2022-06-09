@@ -58,7 +58,7 @@ const Relationship: React.FC<Props> = (props) => {
   } = useConfig();
 
   const { id } = useDocumentInfo();
-  const { user } = useAuth();
+  const { user, permissions } = useAuth();
   const { getData, getSiblingData } = useWatchForm();
   const formProcessing = useFormProcessing();
   const hasMultipleRelations = Array.isArray(relationTo);
@@ -93,6 +93,9 @@ const Relationship: React.FC<Props> = (props) => {
     value: valueArg,
     sort,
   }) => {
+    if (!permissions) {
+      return;
+    }
     let lastLoadedPageToUse = typeof lastLoadedPageArg !== 'undefined' ? lastLoadedPageArg : 1;
     const lastFullyLoadedRelationToUse = typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1;
 
@@ -141,6 +144,10 @@ const Relationship: React.FC<Props> = (props) => {
             query.where.and.push(optionFilters[relation]);
           }
 
+          if (!permissions.collections[relation].read.permission) {
+            setLastFullyLoadedRelation(relations.indexOf(relation));
+            return;
+          }
           const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
 
           if (response.ok) {
@@ -166,7 +173,17 @@ const Relationship: React.FC<Props> = (props) => {
         }
       }, Promise.resolve());
     }
-  }, [relationTo, hasMany, errorLoading, collections, optionFilters, serverURL, api, hasMultipleRelations]);
+  }, [
+    permissions,
+    relationTo,
+    hasMany,
+    errorLoading,
+    collections,
+    optionFilters,
+    serverURL,
+    api,
+    hasMultipleRelations,
+  ]);
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
