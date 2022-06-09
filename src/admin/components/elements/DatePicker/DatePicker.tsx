@@ -1,6 +1,7 @@
 import React from 'react';
 import DatePicker from 'react-datepicker';
 import CalendarIcon from '../../icons/Calendar';
+import XIcon from '../../icons/X';
 import { Props } from './types';
 
 import 'react-datepicker/dist/react-datepicker.css';
@@ -59,6 +60,15 @@ const DateTime: React.FC<Props> = (props) => {
   return (
     <div className={classes}>
       <div className={`${baseClass}__icon-wrap`}>
+        {dateTimePickerProps.selected && (
+          <button
+            type="button"
+            className={`${baseClass}__clear-button`}
+            onClick={() => onChange(null)}
+          >
+            <XIcon />
+          </button>
+        )}
         <CalendarIcon />
       </div>
       <div className={`${baseClass}__input-wrapper`}>
