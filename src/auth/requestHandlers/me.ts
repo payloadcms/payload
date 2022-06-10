@@ -4,12 +4,9 @@ import me from '../operations/me';
 
 export default async function meHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {
-    const collectionSlugMatch = req.originalUrl.match(/\/([^/]+)\/me\/?$/);
-    const [, collectionSlug] = collectionSlugMatch;
-
     const response = await me({
       req,
-      collectionSlug,
+      collection: req.collection,
     });
     return res.status(200).json(response);
   } catch (err) {

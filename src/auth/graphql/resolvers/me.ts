@@ -1,10 +1,11 @@
 import me from '../../operations/me';
+import { Collection } from '../../../collections/config/types';
 
-function meResolver(collectionSlug: string): any {
+function meResolver(collection: Collection): any {
   async function resolver(_, args, context) {
     const options = {
+      collection,
       req: context.req,
-      collectionSlug,
     };
     return me(options);
   }
