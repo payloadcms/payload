@@ -144,11 +144,18 @@ const Relationship: React.FC<Props> = (props) => {
             query.where.and.push(optionFilters[relation]);
           }
 
-          if (!permissions.collections[relation].read.permission) {
-            setLastFullyLoadedRelation(relations.indexOf(relation));
+          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
+
+          if (response.status === 403) {
+            const restrictedRelationships = {
+              docs: relationMap[relation].map((related) => ({
+                relationTo: relation,
+                id: related,
+              })),
+            } as PaginatedDocs<unknown>;
+            dispatchOptions({ type: 'ADD', data: restrictedRelationships, relation, hasMultipleRelations, collection, sort, ids: relationMap[relation] });
             return;
           }
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
 
           if (response.ok) {
             const data: PaginatedDocs<unknown> = await response.json();
@@ -284,7 +291,7 @@ const Relationship: React.FC<Props> = (props) => {
             if (response.ok) {
               const data = await response.json();
               const collection = collections.find((coll) => coll.slug === relation);
-              dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort: true });
+              dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort: true, ids });
             } else {
               console.error(`There was a problem loading relationships to related collection ${relation}.`);
             }

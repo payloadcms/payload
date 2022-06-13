@@ -86,7 +86,8 @@ The `filterOptions` property can either be a `Where` query directly, or a functi
 You can learn more about writing queries [here](/docs/queries/overview).
 
 <Banner type="warning">
-  When a relationship field has both <strong>filterOptions</strong> and a custom <strong>validate</strong> function, the server-side validation will not enforce <strong>filterOptions</strong>unless you call the default relationship field validation function imported from <strong>payload/fields/validations</strong> within your custom function.
+  <strong>Note:</strong><br/>
+  When a relationship field has both <strong>filterOptions</strong> and a custom <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong> unless you call the default relationship field validation function imported from <strong>payload/fields/validations</strong> in your validate function.
 </Banner>
 
 ### How the data is saved

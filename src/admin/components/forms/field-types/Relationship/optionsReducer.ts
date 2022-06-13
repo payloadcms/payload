@@ -29,7 +29,7 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
     }
 
     case 'ADD': {
-      const { hasMultipleRelations, collection, relation, data, sort } = action;
+      const { hasMultipleRelations, collection, relation, data, sort, ids = [] } = action;
 
       const labelKey = collection.admin.useAsTitle || 'id';
 
@@ -50,7 +50,13 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
               ];
             }
             return docs;
-          }, []),
+          },
+          [
+            ...ids.map((id) => ({
+              label: labelKey === 'id' ? id : `Untitled - ID: ${id}`,
+              value: id,
+            })),
+          ]),
         ];
 
         return sort ? sortOptions(options) : options;
@@ -74,7 +80,14 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
         }
 
         return docs;
-      }, []);
+      },
+      [
+        ...ids.map((id) => ({
+          label: labelKey === 'id' ? id : `Untitled - ID: ${id}`,
+          value: id,
+          relationTo: relation,
+        })),
+      ]);
 
       if (optionsToAddTo) {
         const subOptions = [

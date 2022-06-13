@@ -25,6 +25,7 @@ type ADD = {
   hasMultipleRelations: boolean
   collection: SanitizedCollectionConfig
   sort?: boolean
+  ids?: unknown[]
 }
 
 export type Action = CLEAR | ADD

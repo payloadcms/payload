@@ -24,11 +24,6 @@ const populate = async ({
   index,
   showHiddenFields,
 }: PopulateArgs) => {
-  if (currentDepth > depth + 1) {
-    // prevent circular relations
-    return;
-  }
-
   const dataToUpdate = dataReference;
   const relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo;
   const relatedCollection = req.payload.collections[relation];
@@ -42,8 +37,7 @@ const populate = async ({
       idString = idString.toString();
     }
 
-    // skip querying when using overrideAccess and not needing to populate further
-    if (!(overrideAccess && !shouldPopulate)) {
+    if (shouldPopulate) {
       relationshipValue = await req.payload.findByID({
         req,
         collection: relatedCollection.config.slug,
@@ -56,8 +50,8 @@ const populate = async ({
       });
     }
 
-    if (relationshipValue && !shouldPopulate) {
-      // depopulate based on depth
+    if (!relationshipValue) {
+      // ids are visible regardless of access controls
       relationshipValue = idString;
     }
 

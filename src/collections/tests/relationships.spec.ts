@@ -93,7 +93,7 @@ describe('Collections - REST', () => {
       const response = await fetch(`${url}/api/relationship-b/${documentB.id}`);
       const data = await response.json();
 
-      expect(data.strictAccess).toBeNull();
+      expect(typeof data.strictAccess).not.toBe('object');
     });
 
     it('should populate strict access when authorized', async () => {
