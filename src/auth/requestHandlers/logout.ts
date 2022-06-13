@@ -5,7 +5,6 @@ import logout from '../operations/logout';
 
 export default async function logoutHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<{ message: string}> | void> {
   try {
-    debugger;
     const message = await logout({
       collection: req.collection,
       res,
