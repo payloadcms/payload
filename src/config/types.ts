@@ -172,7 +172,7 @@ export type Config = {
     locales: string[]
     defaultLocale: string
     fallback?: boolean
-  };
+  } | false;
   graphQL?: {
     mutations?: ((graphQL: typeof GraphQL, payload: Payload) => Record<string, unknown>),
     queries?: ((graphQL: typeof GraphQL, payload: Payload) => Record<string, unknown>),
@@ -185,6 +185,7 @@ export type Config = {
     afterError?: AfterErrorHook;
   };
   plugins?: Plugin[];
+  telemetry?: boolean;
 };
 
 export type SanitizedConfig = Omit<DeepRequired<Config>, 'collections' | 'globals'> & {
