@@ -229,7 +229,11 @@ const fieldToSchemaMap = {
     };
   },
   date: (field: DateField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
-    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Date };
+    const baseSchema = { 
+      ...formatBaseSchema(field, buildSchemaOptions), 
+      type: Date, 
+      expires: field.expires,
+    };
 
     return {
       ...fields,

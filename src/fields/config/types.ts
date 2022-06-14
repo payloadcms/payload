@@ -151,6 +151,7 @@ export type CheckboxField = FieldBase & {
 
 export type DateField = FieldBase & {
   type: 'date';
+  expires?: number;
   admin?: Admin & {
     placeholder?: string
     date?: ConditionalDateProps
