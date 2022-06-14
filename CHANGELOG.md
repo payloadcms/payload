@@ -1,3 +1,17 @@
+# [0.18.0](https://github.com/payloadcms/payload/compare/v0.17.3...v0.18.0) (2022-06-14)
+
+
+### Bug Fixes
+
+* custom fields values resetting in ui ([#626](https://github.com/payloadcms/payload/issues/626)) ([f2bf239](https://github.com/payloadcms/payload/commit/f2bf2399fa34c49b3b68be55257908b0f8733962))
+* me auth route breaks with query params ([#648](https://github.com/payloadcms/payload/issues/648)) ([a1fe17d](https://github.com/payloadcms/payload/commit/a1fe17d05da57a6fc3ab933d064289fdcd7bf280))
+
+
+### Features
+
+* adds timestamps to generated collection types if enabled ([#604](https://github.com/payloadcms/payload/issues/604)) ([af6479b](https://github.com/payloadcms/payload/commit/af6479bf34128ee1c64f534778d6151fdc15f4f6))
+* enable webpack filesystem cache in dev ([#621](https://github.com/payloadcms/payload/issues/621)) ([44c1232](https://github.com/payloadcms/payload/commit/44c12325b4e47eed26c70047c4e594650bcf2648))
+
 ## [0.17.3](https://github.com/payloadcms/payload/compare/v0.17.2...v0.17.3) (2022-06-08)
 
 
