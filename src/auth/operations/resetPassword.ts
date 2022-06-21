@@ -6,7 +6,6 @@ import getCookieExpiration from '../../utilities/getCookieExpiration';
 import { UserDocument } from '../types';
 import { fieldAffectsData } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
-import executeAccess from '../executeAccess';
 
 export type Result = {
   token: string
@@ -42,18 +41,9 @@ async function resetPassword(args: Arguments): Promise<Result> {
       },
       payload,
     },
-    req,
     overrideAccess,
     data,
   } = args;
-
-  // /////////////////////////////////////
-  // Access
-  // /////////////////////////////////////
-
-  if (!overrideAccess) {
-    await executeAccess({ req }, collectionConfig.access.unlock);
-  }
 
   // /////////////////////////////////////
   // Reset Password

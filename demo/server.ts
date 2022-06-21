@@ -12,6 +12,7 @@ payload.init({
   mongoURL: process.env.MONGO_URL || 'mongodb://localhost/payload',
   express: expressApp,
   email: {
+    logMockCredentials: true,
     fromName: 'Payload',
     fromAddress: 'hello@payloadcms.com',
   },
