@@ -129,6 +129,7 @@ export default joi.object({
   hooks: joi.object().keys({
     afterError: joi.func(),
   }),
+  telemetry: joi.boolean(),
   plugins: joi.array().items(
     joi.func(),
   ),

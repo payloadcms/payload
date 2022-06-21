@@ -66,7 +66,7 @@ module.exports = {
     'no-underscore-dangle': 'off',
     'no-use-before-define': 'off',
     'arrow-body-style': 0,
-    '@typescript-eslint/no-use-before-define': ['error'],
+    '@typescript-eslint/no-use-before-define': 'off',
     'import/extensions': [
       'error',
       'ignorePackages',
