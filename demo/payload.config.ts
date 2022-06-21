@@ -178,5 +178,4 @@ export default buildConfig({
       fileSize: 10000000, // 10MB
     },
   },
-  telemetry: false,
 });
