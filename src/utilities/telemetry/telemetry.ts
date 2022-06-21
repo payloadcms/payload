@@ -32,16 +32,13 @@ export const sendEvent = async ({ payload, event } : Args): Promise<void> => {
         nodeEnv: process.env.NODE_ENV || 'development',
         payloadVersion: await getPayloadVersionFromPackageJson(),
       };
-      const logEvent = { ...baseEvent, ...event };
-
-      console.log(logEvent);
 
       await fetch('https://telemetry.payloadcms.com/event', {
         method: 'post',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(logEvent),
+        body: JSON.stringify({ ...baseEvent, ...event }),
       });
     } catch (_) {
     // Eat any errors in sending telemetry event
