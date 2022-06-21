@@ -124,28 +124,30 @@ export const promise = async ({
     }
 
     // Push merge locale action if applicable
-    if (field.localized && req.payload.config.localization) {
+    if (field.localized) {
       mergeLocaleActions.push(() => {
-        const localeData = req.payload.config.localization.locales.reduce((locales, localeID) => {
-          let valueToSet = siblingData[field.name];
+        if (req.payload.config.localization) {
+          const localeData = req.payload.config.localization.locales.reduce((locales, localeID) => {
+            let valueToSet = siblingData[field.name];
 
-          if (localeID !== req.locale) {
-            valueToSet = siblingDocWithLocales?.[field.name]?.[localeID];
+            if (localeID !== req.locale) {
+              valueToSet = siblingDocWithLocales?.[field.name]?.[localeID];
+            }
+
+            if (typeof valueToSet !== 'undefined') {
+              return {
+                ...locales,
+                [localeID]: valueToSet,
+              };
+            }
+
+            return locales;
+          }, {});
+
+          // If there are locales with data, set the data
+          if (Object.keys(localeData).length > 0) {
+            siblingData[field.name] = localeData;
           }
-
-          if (typeof valueToSet !== 'undefined') {
-            return {
-              ...locales,
-              [localeID]: valueToSet,
-            };
-          }
-
-          return locales;
-        }, {});
-
-        // If there are locales with data, set the data
-        if (Object.keys(localeData).length > 0) {
-          siblingData[field.name] = localeData;
         }
       });
     }

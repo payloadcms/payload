@@ -95,6 +95,12 @@ export type AdminRoute = {
   sensitive?: boolean
 }
 
+export type LocalizationConfig = {
+  locales: string[]
+  defaultLocale: string
+  fallback?: boolean
+}
+
 export type Config = {
   admin?: {
     user?: string;
@@ -168,11 +174,7 @@ export type Config = {
     skip?: (req: PayloadRequest) => boolean;
   };
   upload?: Options;
-  localization?: {
-    locales: string[]
-    defaultLocale: string
-    fallback?: boolean
-  } | false;
+  localization?: LocalizationConfig | false;
   graphQL?: {
     mutations?: ((graphQL: typeof GraphQL, payload: Payload) => Record<string, unknown>),
     queries?: ((graphQL: typeof GraphQL, payload: Payload) => Record<string, unknown>),

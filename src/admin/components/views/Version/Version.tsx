@@ -30,7 +30,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const { setStepNav } = useStepNav();
   const { params: { id, versionID } } = useRouteMatch<{ id?: string, versionID: string }>();
   const [compareValue, setCompareValue] = useState<CompareOption>(mostRecentVersionOption);
-  const [localeOptions] = useState<LocaleOption[]>(() => (localization?.locales ? localization.locales.map((locale) => ({ label: locale, value: locale })) : []));
+  const [localeOptions] = useState<LocaleOption[]>(() => (localization ? localization.locales.map((locale) => ({ label: locale, value: locale })) : []));
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
   const { permissions } = useAuth();
   const locale = useLocale();

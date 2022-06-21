@@ -20,7 +20,7 @@ export default async function updateLocal<T extends TypeWithID = any>(payload: P
   const {
     slug: globalSlug,
     depth,
-    locale = payload.config.localization?.defaultLocale,
+    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     fallbackLocale = null,
     data,
     user,
