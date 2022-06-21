@@ -1,3 +1,10 @@
+## [0.18.1](https://github.com/payloadcms/payload/compare/v0.18.0...v0.18.1) (2022-06-21)
+
+
+### Bug Fixes
+
+* [#671](https://github.com/payloadcms/payload/issues/671), password reset broken ([3d5ed93](https://github.com/payloadcms/payload/commit/3d5ed93fcea8a44d70aa6d46184fa7a50372cf88))
+
 # [0.18.0](https://github.com/payloadcms/payload/compare/v0.17.3...v0.18.0) (2022-06-14)
 
 
