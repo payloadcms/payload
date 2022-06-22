@@ -6,8 +6,8 @@ export type AdminInitEvent = {
   domainID: string
 }
 
-export const adminInit = (req: PayloadRequest) => {
-  const { host } = req.headers;
+export const adminInit = (req: PayloadRequest): void => {
+  const { host, origin } = req.headers;
   if (!origin || origin.includes('localhost')) {
     return;
   }

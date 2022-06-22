@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import { execSync } from 'child_process';
 import Conf from 'conf';
 import { BinaryLike, createHash, randomBytes } from 'crypto';
@@ -27,7 +26,7 @@ export const sendEvent = async ({ payload, event } : Args): Promise<void> => {
     try {
       const baseEvent: BaseEvent = {
         envID: getEnvID(),
-        projectID: oneWayHash(getRawProjectId(), payload.secret),
+        projectID: oneWayHash(getRawProjectID(), payload.secret),
         nodeVersion: process.version,
         nodeEnv: process.env.NODE_ENV || 'development',
         payloadVersion: await getPayloadVersionFromPackageJson(),
@@ -64,7 +63,7 @@ const getEnvID = (): string => {
   return generated;
 };
 
-const getRawProjectId = (): string => {
+const getRawProjectID = (): string => {
   return getProjectIDByGit() || process.env.REPOSITORY_URL || process.cwd();
 };
 

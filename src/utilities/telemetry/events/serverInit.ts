@@ -5,7 +5,7 @@ export type ServerInitEvent = {
   type: 'server-init'
 };
 
-export const serverInit = (payload: Payload) => {
+export const serverInit = (payload: Payload): void => {
   sendEvent({
     payload,
     event: {
