@@ -29,7 +29,7 @@ const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
       },
     },
     ignore: [
-      /node_modules[\\/](?!payload[\\/]dist[\\/]admin|payload[\\/]components).*/,
+      /node_modules[\\/](?!.pnpm[\\/].*[\\/]node_modules[\\/])(?!payload[\\/]dist[\\/]admin|payload[\\/]components).*/,
     ],
   });
 
