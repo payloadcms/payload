@@ -1,4 +1,4 @@
-import { sendEvent } from '../telemetry';
+import { sendEvent } from '..';
 import { Payload } from '../../..';
 
 export type ServerInitEvent = {

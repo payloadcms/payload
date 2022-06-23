@@ -1,11 +1,12 @@
 import { execSync } from 'child_process';
 import Conf from 'conf';
-import { BinaryLike, createHash, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 import findUp from 'find-up';
 import fs from 'fs';
 import { Payload } from '../../index';
 import { ServerInitEvent } from './events/serverInit';
 import { AdminInitEvent } from './events/adminInit';
+import { oneWayHash } from './oneWayHash';
 
 export type BaseEvent = {
   envID: string
@@ -32,7 +33,7 @@ export const sendEvent = async ({ payload, event } : Args): Promise<void> => {
         payloadVersion: await getPayloadVersionFromPackageJson(),
       };
 
-      await fetch('https://telemetry.payloadcms.com/event', {
+      await fetch('https://telemetry.payloadcms.com/events', {
         method: 'post',
         headers: {
           'Content-Type': 'application/json',
@@ -86,16 +87,4 @@ export const getPayloadVersionFromPackageJson = async (): Promise<string> => {
   const packageJsonPath = await findUp('package.json', { cwd: __dirname });
   const jsonContent: PackageJSON = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
   return jsonContent?.dependencies?.payload ?? '';
-};
-
-const oneWayHash = (data: BinaryLike, secret: string): string => {
-  const hash = createHash('sha256');
-
-  // prepend value with payload secret. This ensure one-way.
-  hash.update(secret);
-
-  // Update is an append operation, not a replacement. The secret from the prior
-  // update is still present!
-  hash.update(data);
-  return hash.digest('hex');
 };

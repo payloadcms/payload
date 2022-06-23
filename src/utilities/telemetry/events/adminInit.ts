@@ -1,24 +1,34 @@
 import { PayloadRequest } from '../../../express/types';
-import { sendEvent } from '../telemetry';
+import { sendEvent } from '..';
+import { oneWayHash } from '../oneWayHash';
 
 export type AdminInitEvent = {
   type: 'admin-init'
-  domainID: string
+  domainID?: string
+  userID?: string
 }
 
 export const adminInit = (req: PayloadRequest): void => {
-  const { host, origin } = req.headers;
-  if (!origin || origin.includes('localhost')) {
-    return;
+  const { user, payload } = req;
+  const { host } = req.headers;
+
+  let domainID: string;
+  let userID: string;
+
+  if (host && !host.includes('localhost')) {
+    domainID = oneWayHash(host, payload.secret);
   }
 
-  const domainID = req.payload.encrypt(host);
+  if (user && typeof user?.id === 'string') {
+    userID = oneWayHash(user.id, payload.secret);
+  }
 
   sendEvent({
-    payload: req.payload,
+    payload,
     event: {
       type: 'admin-init',
       domainID,
+      userID,
     },
   });
 };
