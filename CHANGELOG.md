@@ -1,3 +1,10 @@
+## [0.18.3](https://github.com/payloadcms/payload/compare/v0.18.2...v0.18.3) (2022-06-24)
+
+
+### Bug Fixes
+
+* [#670](https://github.com/payloadcms/payload/issues/670), max tokenExpiration ([918062d](https://github.com/payloadcms/payload/commit/918062de2fba371068efc62a989a93ee07fd4c17))
+
 ## [0.18.2](https://github.com/payloadcms/payload/compare/v0.18.1...v0.18.2) (2022-06-24)
 
 
