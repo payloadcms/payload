@@ -16,21 +16,29 @@ export type BaseEvent = {
   payloadVersion: string
 };
 
+type PackageJSON = {
+  name: string
+  dependencies: Record<string, string | undefined>
+}
+
 type TelemetryEvent = ServerInitEvent | AdminInitEvent
 
 type Args = {
   payload: Payload
   event: TelemetryEvent
 }
+
 export const sendEvent = async ({ payload, event } : Args): Promise<void> => {
   if (payload.config.telemetry !== false) {
     try {
+      const packageJSON = await getPackageJSON();
+
       const baseEvent: BaseEvent = {
         envID: getEnvID(),
-        projectID: oneWayHash(getRawProjectID(), payload.secret),
+        projectID: getProjectID(payload, packageJSON),
         nodeVersion: process.version,
         nodeEnv: process.env.NODE_ENV || 'development',
-        payloadVersion: await getPayloadVersionFromPackageJson(),
+        payloadVersion: getPayloadVersion(packageJSON),
       };
 
       await fetch('https://telemetry.payloadcms.com/events', {
@@ -64,27 +72,34 @@ const getEnvID = (): string => {
   return generated;
 };
 
-const getRawProjectID = (): string => {
-  return getProjectIDByGit() || process.env.REPOSITORY_URL || process.cwd();
+const getProjectID = (payload: Payload, packageJSON: PackageJSON): string => {
+  const projectID = getGitID(payload) || getPackageJSONID(payload, packageJSON) || payload.config.serverURL || process.cwd();
+  return oneWayHash(projectID, payload.secret);
 };
 
-
-const getProjectIDByGit = () => {
+const getGitID = (payload: Payload) => {
   try {
     const originBuffer = execSync('git config --local --get remote.origin.url', {
       timeout: 1000,
       stdio: 'pipe',
     });
 
-    return String(originBuffer).trim();
+    return oneWayHash(String(originBuffer).trim(), payload.secret);
   } catch (_) {
     return null;
   }
 };
 
-type PackageJSON = { dependencies: Record<string, string | undefined> }
-export const getPayloadVersionFromPackageJson = async (): Promise<string> => {
+const getPackageJSON = async (): Promise<PackageJSON> => {
   const packageJsonPath = await findUp('package.json', { cwd: __dirname });
   const jsonContent: PackageJSON = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-  return jsonContent?.dependencies?.payload ?? '';
+  return jsonContent;
+};
+
+const getPackageJSONID = (payload: Payload, packageJSON: PackageJSON): string => {
+  return oneWayHash(packageJSON.name, payload.secret);
+};
+
+export const getPayloadVersion = (packageJSON: PackageJSON): string => {
+  return packageJSON?.dependencies?.payload ?? '';
 };
