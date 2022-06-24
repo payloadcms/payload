@@ -1,3 +1,10 @@
+## [0.18.2](https://github.com/payloadcms/payload/compare/v0.18.1...v0.18.2) (2022-06-24)
+
+
+### Features
+
+* telemetry ([1c37ec3](https://github.com/payloadcms/payload/commit/1c37ec39027c73e57ff53db58eca94d485d1fa14))
+
 ## [0.18.1](https://github.com/payloadcms/payload/compare/v0.18.0...v0.18.1) (2022-06-21)
 
 
