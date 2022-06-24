@@ -15,7 +15,7 @@ export const adminInit = (req: PayloadRequest): void => {
   let domainID: string;
   let userID: string;
 
-  if (host && !host.includes('localhost')) {
+  if (host) {
     domainID = oneWayHash(host, payload.secret);
   }
 
