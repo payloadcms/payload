@@ -1,5 +1,6 @@
 import { PayloadRequest } from '../../express/types';
 import { Permissions } from '../types';
+import { adminInit as adminInitTelemetry } from '../../utilities/telemetry/events/adminInit';
 
 const allOperations = ['create', 'read', 'update', 'delete'];
 
@@ -17,6 +18,8 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
       },
     },
   } = args;
+
+  adminInitTelemetry(req);
 
   const results = {} as Permissions;
   const promises = [];

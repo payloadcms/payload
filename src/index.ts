@@ -62,6 +62,7 @@ import { Result as ResetPasswordResult } from './auth/operations/resetPassword';
 import { Result as LoginResult } from './auth/operations/login';
 import { Options as FindGlobalOptions } from './globals/operations/local/findOne';
 import { Options as UpdateGlobalOptions } from './globals/operations/local/update';
+import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit';
 
 require('isomorphic-fetch');
 
@@ -219,6 +220,8 @@ export class Payload {
     }
 
     if (typeof options.onInit === 'function') options.onInit(this);
+
+    serverInitTelemetry(this);
   }
 
   getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`;

@@ -20,7 +20,7 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
   const {
     collection: collectionSlug,
     depth,
-    locale = payload?.config?.localization?.defaultLocale,
+    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     fallbackLocale = null,
     data,
     id,
