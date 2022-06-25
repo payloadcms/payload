@@ -10,7 +10,7 @@ $cal-icon-width: 18px;
 
   &__icon-wrap {
     position: relative;
-    z-index: 2;
+    z-index: 1;
 
     .icon {
       pointer-events: none;
