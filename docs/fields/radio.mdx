@@ -15,7 +15,7 @@ keywords: radio, fields, config, configuration, documentation, Content Managemen
 | Option           | Description |
 | ---------------- | ----------- |
 | **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
-| **`options`** *      | Array of options to allow the field to store. Can either be an array of strings, or an array of objects containing an `option` string and a `value` string. |
+| **`options`** *      | Array of options to allow the field to store. Can either be an array of strings, or an array of objects containing an `label` string and a `value` string. |
 | **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type. |
 | **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
 | **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
