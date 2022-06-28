@@ -17,22 +17,34 @@ const connectMongoose = async (
   };
 
   if (process.env.NODE_ENV === 'test' || process.env.MEMORY_SERVER) {
-    if (local) {
-      urlToConnect = `${connection.url}:${connection.port}/${connection.name}`;
-    } else {
-      connectionOptions.dbName = 'payloadmemory';
-      // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
-      const { MongoMemoryServer } = require('mongodb-memory-server');
-      const mongo = await MongoMemoryServer.create({
-        instance: {
-          dbName: connection.name,
-          port: connection.port,
-        },
-      });
+    // if (local) {
+    //   urlToConnect = `${connection.url}:${connection.port}/${connection.name}`;
+    // } else {
+    //   connectionOptions.dbName = 'payloadmemory';
+    //   // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+    //   const { MongoMemoryServer } = require('mongodb-memory-server');
+    //   const mongo = await MongoMemoryServer.create({
+    //     instance: {
+    //       dbName: connection.name,
+    //       port: connection.port,
+    //     },
+    //   });
 
-      urlToConnect = mongo.getUri();
-      successfulConnectionMessage = 'Connected to in-memory Mongo server successfully!';
-    }
+    //   urlToConnect = mongo.getUri();
+    //   successfulConnectionMessage = 'Connected to in-memory Mongo server successfully!';
+    // }
+    connectionOptions.dbName = 'payloadmemory';
+    // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    const mongo = await MongoMemoryServer.create({
+      instance: {
+        dbName: connection.name,
+        port: connection.port,
+      },
+    });
+
+    urlToConnect = mongo.getUri();
+    successfulConnectionMessage = 'Connected to in-memory Mongo server successfully!';
   }
 
 
