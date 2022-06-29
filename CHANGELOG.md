@@ -1,3 +1,11 @@
+## [0.18.5](https://github.com/payloadcms/payload/compare/v0.18.4...v0.18.5) (2022-06-29)
+
+
+### Bug Fixes
+
+* empty cell data renders in list ([#699](https://github.com/payloadcms/payload/issues/699)) ([b6b0ffb](https://github.com/payloadcms/payload/commit/b6b0ffb674ca6d1568981ab110013e66c678270f))
+* icon appears above select field's option list ([#685](https://github.com/payloadcms/payload/issues/685)) ([c78d774](https://github.com/payloadcms/payload/commit/c78d77446a6a8fd1e85f8c094f751dfc1f8b0530))
+
 ## [0.18.4](https://github.com/payloadcms/payload/compare/v0.18.3...v0.18.4) (2022-06-24)
 
 ## [0.18.3](https://github.com/payloadcms/payload/compare/v0.18.2...v0.18.3) (2022-06-24)
