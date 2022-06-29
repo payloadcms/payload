@@ -138,6 +138,10 @@ export interface AllFields {
   selectMany: ('option-1' | 'option-2' | 'option-3' | 'option-4')[];
   dayOnlyDateFieldExample: string;
   timeOnlyDateFieldExample?: string;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
   point?: [number, number];
   radioGroupExample: 'option-1' | 'option-2' | 'option-3';
   email?: string;
@@ -542,9 +546,21 @@ export interface File {
  */
 export interface Geolocation {
   id: string;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
   location?: [number, number];
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
   localizedPoint?: [number, number];
   group?: {
+    /**
+     * @minItems 2
+     * @maxItems 2
+     */
     point?: [number, number];
   };
   createdAt: string;
