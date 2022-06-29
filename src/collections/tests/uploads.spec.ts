@@ -116,6 +116,52 @@ describe('Collections - Uploads', () => {
         });
       });
 
+      it('creates images that do not require all sizes', async () => {
+        const formData = new FormData();
+        formData.append(
+          'file',
+          fs.createReadStream(path.join(__dirname, '../../..', 'tests/api/assets/small.png')),
+        );
+        formData.append('alt', 'test media');
+        formData.append('locale', 'en');
+        const response = await fetch(`${api}/media`, {
+          body: formData as unknown as BodyInit,
+          headers,
+          method: 'post',
+        });
+
+        const data = await response.json();
+
+        expect(response.status).toBe(201);
+
+        expect(await fileExists(path.join(mediaDir, 'small.png'))).toBe(true);
+        expect(await fileExists(path.join(mediaDir, 'small-16x16.png'))).toBe(true);
+        expect(await fileExists(path.join(mediaDir, 'small-320x240.png'))).toBe(true);
+        expect(await fileExists(path.join(mediaDir, 'small-640x480.png'))).toBe(false);
+
+        // Check api response
+        expect(data).toMatchObject({
+          doc: {
+            alt: 'test media',
+            filename: 'small.png',
+            mimeType: 'image/png',
+            sizes: {
+              icon: {
+                filename: 'small-16x16.png',
+                width: 16,
+                height: 16,
+              },
+            },
+
+            // We have a hook to check if upload sizes
+            // are properly bound to the Payload `req`.
+            // This field should be automatically set
+            // if they are found.
+            foundUploadSizes: true,
+          },
+        });
+      });
+
       it('creates media without storing a file', async () => {
         const formData = new FormData();
         formData.append(
