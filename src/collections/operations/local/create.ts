@@ -16,6 +16,7 @@ export type Options<T> = {
   disableVerificationEmail?: boolean
   showHiddenFields?: boolean
   filePath?: string
+  file?: File
   overwriteExistingFiles?: boolean
   req?: PayloadRequest
   draft?: boolean
@@ -33,6 +34,7 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
     disableVerificationEmail,
     showHiddenFields,
     filePath,
+    file,
     overwriteExistingFiles = false,
     req,
     draft,
@@ -57,7 +59,7 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
       fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
       payload,
       files: {
-        file: getFileByPath(filePath) as UploadedFile,
+        file: file ?? getFileByPath(filePath) as UploadedFile,
       },
     } as PayloadRequest,
   });
