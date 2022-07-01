@@ -146,17 +146,6 @@ const Relationship: React.FC<Props> = (props) => {
 
           const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
 
-          if (response.status === 403) {
-            const restrictedRelationships = {
-              docs: relationMap[relation].map((related) => ({
-                relationTo: relation,
-                id: related,
-              })),
-            } as PaginatedDocs<unknown>;
-            dispatchOptions({ type: 'ADD', data: restrictedRelationships, relation, hasMultipleRelations, collection, sort, ids: relationMap[relation] });
-            return;
-          }
-
           if (response.ok) {
             const data: PaginatedDocs<unknown> = await response.json();
             if (data.docs.length > 0) {
@@ -174,6 +163,10 @@ const Relationship: React.FC<Props> = (props) => {
                 }
               }
             }
+          } else if (response.status === 403) {
+            setLastFullyLoadedRelation(relations.indexOf(relation));
+            lastLoadedPageToUse = 1;
+            dispatchOptions({ type: 'ADD', data: { docs: [] } as PaginatedDocs<unknown>, relation, hasMultipleRelations, collection, sort, ids: relationMap[relation] });
           } else {
             setErrorLoading('An error has occurred.');
           }
@@ -288,12 +281,12 @@ const Relationship: React.FC<Props> = (props) => {
 
           if (!errorLoading) {
             const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
+            const collection = collections.find((coll) => coll.slug === relation);
             if (response.ok) {
               const data = await response.json();
-              const collection = collections.find((coll) => coll.slug === relation);
               dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort: true, ids });
-            } else {
-              console.error(`There was a problem loading relationships to related collection ${relation}.`);
+            } else if (response.status === 403) {
+              dispatchOptions({ type: 'ADD', data: { docs: [] } as PaginatedDocs, relation, hasMultipleRelations, collection, sort: true, ids });
             }
           }
         }

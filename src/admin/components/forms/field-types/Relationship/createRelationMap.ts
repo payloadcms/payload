@@ -1,4 +1,3 @@
-import { Value } from '../../../elements/ReactSelect/types';
 import { ValueWithRelation } from './types';
 
 type RelationMap = {
@@ -17,11 +16,17 @@ export const createRelationMap: CreateRelationMap = ({
   value,
 }) => {
   const hasMultipleRelations = Array.isArray(relationTo);
-  const relationMap: RelationMap = {};
+  let relationMap: RelationMap;
+  if (Array.isArray(relationTo)) {
+    relationMap = relationTo.reduce((map, current) => {
+      return { ...map, [current]: [] };
+    }, {});
+  } else {
+    relationMap = { [relationTo]: [] };
+  }
 
   const add = (relation: string, id: unknown) => {
-    if (((typeof id === 'string' && id !== 'null') || typeof id === 'number') && typeof relation === 'string') {
-      if (typeof relationMap[relation] === 'undefined') relationMap[relation] = [];
+    if (((typeof id === 'string') || typeof id === 'number') && typeof relation === 'string') {
       relationMap[relation].push(id);
     }
   };
