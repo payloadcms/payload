@@ -335,9 +335,14 @@ describe('Field Validations', () => {
       const result = number(val, { ...options });
       expect(result).toBe(validNumberMessage);
     });
-    it('should handle undefined', () => {
-      const val = undefined;
+    it('should handle empty value', () => {
+      const val = "";
       const result = number(val, { ...options });
+      expect(result).toBe(true);
+    });
+    it('should handle required value', () => {
+      const val = "";
+      const result = number(val, { ...options, required: true });
       expect(result).toBe(validNumberMessage);
     });
     it('should validate minValue', () => {
