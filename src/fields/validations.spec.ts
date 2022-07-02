@@ -341,12 +341,12 @@ describe('Field Validations', () => {
       expect(result).toBe(validNumberMessage);
     });
     it('should validate minValue', () => {
-      const val = 1;
-      const result = number(val, { ...options, min: 2});
-      expect(result).toBe(minValueMessage(val, 2));
+      const val = 2.4;
+      const result = number(val, { ...options, min: 2.5});
+      expect(result).toBe(minValueMessage(val, 2.5));
     });
     it('should validate maxValue', () => {
-      const val = 2;
+      const val = 1.25;
       const result = number(val, { ...options, max: 1});
       expect(result).toBe(maxValueMessage(val, 1));
     });
