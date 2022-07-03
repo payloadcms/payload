@@ -25,21 +25,20 @@ const populate = async ({
   showHiddenFields,
 }: PopulateArgs) => {
   const dataToUpdate = dataReference;
-
   const relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo;
   const relatedCollection = req.payload.collections[relation];
 
   if (relatedCollection) {
     let idString = Array.isArray(field.relationTo) ? data.value : data;
+    let relationshipValue;
+    const shouldPopulate = depth && currentDepth <= depth;
 
     if (typeof idString !== 'string' && typeof idString?.toString === 'function') {
       idString = idString.toString();
     }
 
-    let populatedRelationship;
-
-    if (depth && currentDepth <= depth) {
-      populatedRelationship = await req.payload.findByID({
+    if (shouldPopulate) {
+      relationshipValue = await req.payload.findByID({
         req,
         collection: relatedCollection.config.slug,
         id: idString as string,
@@ -51,19 +50,21 @@ const populate = async ({
       });
     }
 
-    // If populatedRelationship comes back, update value
-    if (populatedRelationship || populatedRelationship === null) {
-      if (typeof index === 'number') {
-        if (Array.isArray(field.relationTo)) {
-          dataToUpdate[field.name][index].value = populatedRelationship;
-        } else {
-          dataToUpdate[field.name][index] = populatedRelationship;
-        }
-      } else if (Array.isArray(field.relationTo)) {
-        dataToUpdate[field.name].value = populatedRelationship;
+    if (!relationshipValue) {
+      // ids are visible regardless of access controls
+      relationshipValue = idString;
+    }
+
+    if (typeof index === 'number') {
+      if (Array.isArray(field.relationTo)) {
+        dataToUpdate[field.name][index].value = relationshipValue;
       } else {
-        dataToUpdate[field.name] = populatedRelationship;
+        dataToUpdate[field.name][index] = relationshipValue;
       }
+    } else if (Array.isArray(field.relationTo)) {
+      dataToUpdate[field.name].value = relationshipValue;
+    } else {
+      dataToUpdate[field.name] = relationshipValue;
     }
   }
 };

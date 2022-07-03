@@ -58,7 +58,7 @@ const Relationship: React.FC<Props> = (props) => {
   } = useConfig();
 
   const { id } = useDocumentInfo();
-  const { user } = useAuth();
+  const { user, permissions } = useAuth();
   const { getData, getSiblingData } = useWatchForm();
   const formProcessing = useFormProcessing();
   const hasMultipleRelations = Array.isArray(relationTo);
@@ -93,6 +93,9 @@ const Relationship: React.FC<Props> = (props) => {
     value: valueArg,
     sort,
   }) => {
+    if (!permissions) {
+      return;
+    }
     let lastLoadedPageToUse = typeof lastLoadedPageArg !== 'undefined' ? lastLoadedPageArg : 1;
     const lastFullyLoadedRelationToUse = typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1;
 
@@ -160,13 +163,27 @@ const Relationship: React.FC<Props> = (props) => {
                 }
               }
             }
+          } else if (response.status === 403) {
+            setLastFullyLoadedRelation(relations.indexOf(relation));
+            lastLoadedPageToUse = 1;
+            dispatchOptions({ type: 'ADD', data: { docs: [] } as PaginatedDocs<unknown>, relation, hasMultipleRelations, collection, sort, ids: relationMap[relation] });
           } else {
             setErrorLoading('An error has occurred.');
           }
         }
       }, Promise.resolve());
     }
-  }, [relationTo, hasMany, errorLoading, collections, optionFilters, serverURL, api, hasMultipleRelations]);
+  }, [
+    permissions,
+    relationTo,
+    hasMany,
+    errorLoading,
+    collections,
+    optionFilters,
+    serverURL,
+    api,
+    hasMultipleRelations,
+  ]);
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
@@ -264,12 +281,12 @@ const Relationship: React.FC<Props> = (props) => {
 
           if (!errorLoading) {
             const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
+            const collection = collections.find((coll) => coll.slug === relation);
             if (response.ok) {
               const data = await response.json();
-              const collection = collections.find((coll) => coll.slug === relation);
-              dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort: true });
-            } else {
-              console.error(`There was a problem loading relationships to related collection ${relation}.`);
+              dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort: true, ids });
+            } else if (response.status === 403) {
+              dispatchOptions({ type: 'ADD', data: { docs: [] } as PaginatedDocs, relation, hasMultipleRelations, collection, sort: true, ids });
             }
           }
         }

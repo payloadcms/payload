@@ -1,5 +1,6 @@
 import getConfig from '../../config/load';
 import { email, password } from '../../mongoose/testCredentials';
+import { PaginatedDocs } from '../../mongoose/types';
 
 require('isomorphic-fetch');
 
@@ -7,6 +8,15 @@ const { serverURL: url } = getConfig();
 
 let token = null;
 let headers = null;
+
+type RelationshipA = {
+  id: string
+  post?: string | RelationshipB
+}
+type RelationshipB = {
+  id: string
+  post?: (string | RelationshipA)[]
+}
 
 describe('Collections - REST', () => {
   beforeAll(async (done) => {
@@ -93,7 +103,7 @@ describe('Collections - REST', () => {
       const response = await fetch(`${url}/api/relationship-b/${documentB.id}`);
       const data = await response.json();
 
-      expect(data.strictAccess).toBeNull();
+      expect(typeof data.strictAccess).not.toBe('object');
     });
 
     it('should populate strict access when authorized', async () => {
@@ -110,18 +120,18 @@ describe('Collections - REST', () => {
         headers,
         method: 'get',
       });
-      const data = await response.json();
-      const [doc] = data.docs;
-      expect(doc.id).toBe(documentA.id);
-      let nested = doc.post;
-      expect(nested.id).toBe(documentB.id);
-      [nested] = nested.post;
-      expect(nested.id).toBe(documentA.id);
-      nested = nested.post;
-      expect(nested.id).toBe(documentB.id);
-      [nested] = nested.post;
-      expect(nested).not.toHaveProperty('post');
-      expect(nested).toBe(documentA.id);
+      const data: PaginatedDocs<RelationshipA> = await response.json();
+      const [depth0] = data.docs;
+      expect(depth0.id).toBe(documentA.id);
+      const depth1 = depth0.post as RelationshipB;
+      expect(depth1.id).toBe(documentB.id);
+      const [depth2] = depth1.post as RelationshipA[];
+      expect(depth2.id).toBe(documentA.id);
+      const depth3 = depth2.post as RelationshipB;
+      expect(depth3.id).toBe(documentB.id);
+      const [depth4] = depth3.post as RelationshipA[];
+      expect(depth4).not.toHaveProperty('post');
+      expect(depth4).toBe(documentA.id);
     });
 
     it('should respect max depth at the field level', async () => {
