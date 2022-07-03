@@ -24,9 +24,9 @@ import canUseDOM from '../utilities/canUseDOM';
 const defaultMessage = 'This field is required.';
 
 export const number: Validate<unknown, unknown, NumberField> = (value: string, { required, min, max }) => {
-  const parsedValue = parseInt(value, 10);
+  const parsedValue = parseFloat(value);
 
-  if ((value && typeof parsedValue !== 'number') || (required && Number.isNaN(parsedValue))) {
+  if ((value && typeof parsedValue !== 'number') || (required && Number.isNaN(parsedValue)) || (value && Number.isNaN(parsedValue))) {
     return 'Please enter a valid number.';
   }
 
