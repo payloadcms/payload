@@ -72,6 +72,9 @@ Check out the [Payload website](https://payloadcms.com/docs/getting-started/what
 
 There are lots of good conversations and resources in our [GitHub Discussions board](https://github.com/payloadcms/payload/discussions). If you're struggling with something, chances are, someone's already solved what you're up against. Searching Discussions will often provide very helpful tips and tricks.
 
+##### Improvements
+Payload is still a work in progress. Updates and bug fixes are a part of the software.
+
 ##### Discord
 
 Join [Payload's Discord channel](https://discord.com/invite/r6sCXqVk3v) to interact with Payload developers in realtime.
