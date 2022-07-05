@@ -157,7 +157,7 @@ const Text: Block = {
 };
 
 const TextArea: Block = {
-  slug: 'textArea',
+  slug: 'textarea',
   labels: {
     singular: 'Text Area',
     plural: 'Text Area Fields',
@@ -568,7 +568,7 @@ export default {
   select: Select,
   checkbox: Checkbox,
   text: Text,
-  textArea: TextArea,
+  textarea: TextArea,
   email: Email,
   message: Message,
   number: Number,
