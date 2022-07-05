@@ -1,7 +1,7 @@
 import { buildConfig } from 'payload/config';
 import path from 'path';
-import seo from '../../dist';
-// import seo from '../../src';
+// import seo from '../../dist';
+import seo from '../../src';
 import Users from './collections/Users';
 import Pages from './collections/Pages';
 import Media from './collections/Media';
@@ -47,9 +47,9 @@ export default buildConfig({
         'pages',
       ],
       uploadsCollection: 'media',
-      generateTitle: ({ doc }) => `Website.com — ${doc?.title?.value}`,
-      generateDescription: ({ doc }) => doc?.excerpt?.value,
-      generateURL: ({ doc }) => `https://yoursite.com/${doc?.slug?.value || ''}`
+      generateTitle: ({ doc }: any) => `Website.com — ${doc?.title?.value}`,
+      generateDescription: ({ doc }: any) => doc?.excerpt?.value,
+      generateURL: ({ doc }: any) => `https://yoursite.com/${doc?.slug?.value || ''}`
     }),
   ],
   typescript: {
