@@ -1,6 +1,6 @@
 # Payload Nested Docs Plugin
 
-[![NPM](https://img.shields.io/npm/v/payload-plugin-nested-pages)](https://www.npmjs.com/package/payload-plugin-nested-pages)
+[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-nested-docs)](https://www.npmjs.com/package/@payloadcms/plugin-nested-docs)
 
 A plugin for [Payload CMS](https://github.com/payloadcms/payload) to easily allow for documents to be nested inside one another.
 
@@ -11,9 +11,9 @@ Core features:
 ## Installation
 
 ```bash
-  yarn add payload-plugin-nested-pages
+  yarn add @payloadcms/plugin-nested-docs
   # OR
-  npm i payload-plugin-nested-pages
+  npm i @payloadcms/plugin-nested-docs
 ```
 
 ## Basic Usage
@@ -135,8 +135,8 @@ You can also extend the built-in `parent` and `breadcrumbs` fields on a page-by-
 
 ```js
 import { CollectionConfig } from 'payload/types';
-import createParentField from 'payload-plugin-nested-pages/fields/parent';
-import createBreadcrumbsField from 'payload-plugin-nested-pages/fields/breadcrumbs';
+import createParentField from '@payloadcms/plugin-nested-docs/fields/parent';
+import createBreadcrumbsField from '@payloadcms/plugin-nested-docs/fields/breadcrumbs';
 
 const examplePageConfig: CollectionConfig = {
   slug: 'pages',
@@ -177,9 +177,9 @@ import {
   NestedPagesConfig,
   GenerateURL,
   GenerateLabel
-} from 'payload-plugin-nested-pages/dist/types';
+} from '@payloadcms/plugin-nested-docs/dist/types';
 ```
 
 ## Screenshots
 
-<!-- ![screenshot 1](https://github.com/trouble/payload-plugin-nested-pages/blob/main/images/screenshot-1.jpg?raw=true) -->
+<!-- ![screenshot 1](https://github.com/@payloadcms/plugin-nested-docs/blob/main/images/screenshot-1.jpg?raw=true) -->
