@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@types/escape-html": "^1.0.1",
-    "payload": "^0.15.6",
+    "payload": "^0.18.5",
     "react": "^17.0.2",
     "typescript": "^4.5.5"
   },

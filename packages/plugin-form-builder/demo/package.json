@@ -13,9 +13,11 @@
     "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types"
   },
   "dependencies": {
+    "@payloadcms/plugin-form-builder": "^1.0.6",
+    "deepmerge": "^4.2.2",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "^0.15.6"
+    "payload": "^0.18.5"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",
