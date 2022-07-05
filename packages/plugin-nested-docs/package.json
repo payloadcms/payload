@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-nested-docs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Nested pages plugin for Payload CMS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
