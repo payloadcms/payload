@@ -24,6 +24,7 @@ export type FieldConfig = Partial<Field> | PaymentFieldConfig;
 export type FieldsConfig = {
   select?: boolean | FieldConfig
   text?: boolean | FieldConfig
+  textarea?: boolean | FieldConfig
   email?: boolean | FieldConfig
   state?: boolean | FieldConfig
   country?: boolean | FieldConfig
@@ -47,6 +48,16 @@ export type FormConfig = {
 
 export type TextField = {
   blockType: 'text'
+  blockName?: string
+  width?: string
+  name: string
+  label?: string
+  defaultValue?: string
+  required?: boolean
+}
+
+export type TextAreaField = {
+  blockType: 'textarea'
   blockName?: string
   width?: string
   name: string
@@ -139,7 +150,7 @@ export type MessageField = {
   message: unknown
 }
 
-export type FormFieldBlock = TextField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField | PaymentField
+export type FormFieldBlock = TextField | TextAreaField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField | PaymentField
 
 export type Email = {
   emailTo: string

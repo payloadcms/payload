@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "Form builder plugin for Payload CMS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,12 +22,12 @@
   "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^0.15.6",
+    "payload": "^0.18.5",
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
     "@types/escape-html": "^1.0.1",
-    "payload": "^0.15.6",
+    "payload": "^0.18.5",
     "react": "^17.0.2",
     "typescript": "^4.5.5"
   },

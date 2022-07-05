@@ -14,7 +14,6 @@ const label: Field = {
   name: 'label',
   label: 'Label',
   type: 'text',
-  required: true,
 };
 
 const required: Field = {
@@ -115,6 +114,53 @@ const Text: Block = {
   labels: {
     singular: 'Text',
     plural: 'Text Fields',
+  },
+  fields: [
+    {
+      type: 'row',
+      fields: [
+        {
+          ...name,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...label,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          ...width,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'defaultValue',
+          label: 'Default Value',
+          type: 'text',
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    required,
+  ],
+};
+
+const TextArea: Block = {
+  slug: 'textarea',
+  labels: {
+    singular: 'Text Area',
+    plural: 'Text Area Fields',
   },
   fields: [
     {
@@ -522,6 +568,7 @@ export default {
   select: Select,
   checkbox: Checkbox,
   text: Text,
+  textarea: TextArea,
   email: Email,
   message: Message,
   number: Number,

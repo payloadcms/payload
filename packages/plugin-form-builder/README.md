@@ -53,6 +53,7 @@ export default config;
     ```
     fields: {
       text: true,
+      textarea: true,
       select: true,
       email: true,
       state: true,
@@ -134,6 +135,12 @@ export default config;
 Each form field is defined as a [Payload Block](https://payloadcms.com/docs/fields/blocks) with the following subfields:
 
   - Text
+    - `name`: string
+    - `label`: string
+    - `defaultValue`: string
+    - `width`: string
+    - `required`: checkbox
+  - Textarea
     - `name`: string
     - `label`: string
     - `defaultValue`: string
