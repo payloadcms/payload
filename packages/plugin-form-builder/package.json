@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Form builder plugin for Payload CMS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
