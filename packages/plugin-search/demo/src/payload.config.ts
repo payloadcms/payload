@@ -19,8 +19,7 @@ export default buildConfig({
             ...config.resolve.alias,
             react: path.join(__dirname, "../node_modules/react"),
             "react-dom": path.join(__dirname, "../node_modules/react-dom"),
-            "payload": path.join(__dirname, "../node_modules/payload"),
-            "@payloadcms/config-provider": path.join(__dirname, "../node_modules/@payloadcms/config-provider"),
+            "payload": path.join(__dirname, "../node_modules/payload")
           },
         },
       };

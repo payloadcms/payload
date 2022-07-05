@@ -1,6 +1,6 @@
 # Payload Search Plugin
 
-[![NPM](https://img.shields.io/npm/v/payload-plugin-search)](https://www.npmjs.com/package/payload-plugin-search)
+[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-search)](https://www.npmjs.com/package/@payloadcms/plugin-search)
 
 A plugin for [Payload CMS](https://github.com/payloadcms/payload) to create extremely fast search results from your existing documents.
 
@@ -13,9 +13,9 @@ Core features:
 ## Installation
 
 ```bash
-  yarn add payload-plugin-search
+  yarn add @payloadcms/plugin-search
   # OR
-  npm i payload-plugin-search
+  npm i @payloadcms/plugin-search
 ```
 
 ## Basic Usage
@@ -121,9 +121,9 @@ All types can be directly imported:
 import {
   SearchConfig,
   BeforeSync
-} from 'payload-plugin-search/dist/types';
+} from '@payloadcms/plugin-search/dist/types';
 ```
 
 ## Screenshots
 
-<!-- ![screenshot 1](https://github.com/trouble/payload-plugin-search/blob/main/images/screenshot-1.jpg?raw=true) -->
+<!-- ![screenshot 1](https://github.com/@payloadcms/plugin-search/blob/main/images/screenshot-1.jpg?raw=true) -->

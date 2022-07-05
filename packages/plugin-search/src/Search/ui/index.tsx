@@ -3,7 +3,7 @@ import { useWatchForm } from 'payload/components/forms';
 import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard';
 import { UIField } from 'payload/dist/fields/config/types';
 import { Fields } from 'payload/dist/admin/components/forms/Form/types';
-import { useConfig } from '@payloadcms/config-provider';
+import { useConfig } from 'payload/components/utilities';
 
 type FieldsWithDoc = Fields & {
   doc: {
