@@ -11,6 +11,7 @@ const FormBuilder = (incomingFormConfig: FormConfig) => (config: Config): Config
     ...incomingFormConfig,
     fields: {
       text: true,
+      textArea: true,
       select: true,
       email: true,
       state: true,

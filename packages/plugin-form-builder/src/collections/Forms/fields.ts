@@ -157,6 +157,53 @@ const Text: Block = {
   ],
 };
 
+const TextArea: Block = {
+  slug: 'textArea',
+  labels: {
+    singular: 'Text Area',
+    plural: 'Text Area Fields',
+  },
+  fields: [
+    {
+      type: 'row',
+      fields: [
+        {
+          ...name,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...label,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          ...width,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'defaultValue',
+          label: 'Default Value',
+          type: 'text',
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    required,
+  ],
+};
+
 const Number: Block = {
   slug: 'number',
   labels: {
@@ -522,6 +569,7 @@ export default {
   select: Select,
   checkbox: Checkbox,
   text: Text,
+  textArea: TextArea,
   email: Email,
   message: Message,
   number: Number,
