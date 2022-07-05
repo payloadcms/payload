@@ -88,6 +88,15 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
+# Yarn Berry
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
 # dotenv environment variables file
 .env
 
