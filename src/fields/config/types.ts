@@ -305,6 +305,9 @@ export type BlockField = FieldBase & {
   blocks?: Block[];
   defaultValue?: unknown
   labels?: Labels
+  admin?: Admin & {
+    titlePath?: string;
+  }
 }
 
 export type PointField = FieldBase & {

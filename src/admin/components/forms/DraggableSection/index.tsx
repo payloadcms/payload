@@ -35,6 +35,8 @@ const DraggableSection: React.FC<Props> = (props) => {
     permissions,
     readOnly,
     hasMaxRows,
+    titlePath,
+    titleReadOnly,
   } = props;
 
   const [isHovered, setIsHovered] = useState(false);
@@ -84,8 +86,8 @@ const DraggableSection: React.FC<Props> = (props) => {
                   />
                   <SectionTitle
                     label={label}
-                    path={`${parentPath}.${rowIndex}.blockName`}
-                    readOnly={readOnly}
+                    path={`${parentPath}.${rowIndex}.${titlePath || 'blockName'}`}
+                    readOnly={readOnly || !!titleReadOnly}
                   />
 
                   <Button

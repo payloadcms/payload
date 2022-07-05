@@ -44,12 +44,7 @@ const Blocks: React.FC<Props> = (props) => {
     required,
     validate = blocksValidator,
     permissions,
-    admin: {
-      readOnly,
-      description,
-      condition,
-      className,
-    },
+    admin: { readOnly, description, condition, className, titlePath },
   } = props;
 
   const path = pathFromProps || name;
@@ -65,80 +60,109 @@ const Blocks: React.FC<Props> = (props) => {
   const operation = useOperation();
   const { dispatchFields } = formContext;
 
-  const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, minRows, maxRows, required });
-  }, [maxRows, minRows, required, validate]);
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, minRows, maxRows, required });
+    },
+    [maxRows, minRows, required, validate],
+  );
 
   const [disableFormData, setDisableFormData] = useState(false);
 
-  const {
-    showError,
-    errorMessage,
-    value,
-    setValue,
-  } = useField<number>({
+  const { showError, errorMessage, value, setValue } = useField<number>({
     path,
     validate: memoizedValidate,
     disableFormData,
     condition,
   });
 
-  const addRow = useCallback(async (rowIndex, blockType) => {
-    const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
+  const addRow = useCallback(
+    async (rowIndex, blockType) => {
+      const block = blocks.find(
+        (potentialBlock) => potentialBlock.slug === blockType,
+      );
 
-    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, operation, id, user, locale });
-
-    dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
-    dispatchRows({ type: 'ADD', rowIndex, blockType });
-    setValue(value as number + 1);
-  }, [path, setValue, value, blocks, dispatchFields, operation, id, user, locale]);
-
-  const removeRow = useCallback((rowIndex) => {
-    dispatchRows({ type: 'REMOVE', rowIndex });
-    dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
-    setValue(value as number - 1);
-  }, [path, setValue, value, dispatchFields]);
-
-  const moveRow = useCallback((moveFromIndex, moveToIndex) => {
-    dispatchRows({ type: 'MOVE', moveFromIndex, moveToIndex });
-    dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
-  }, [dispatchRows, dispatchFields, path]);
-
-  const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
-    dispatchRows({ type: 'SET_COLLAPSE', id: rowID, collapsed });
-
-    if (preferencesKey) {
-      const preferences: DocumentPreferences = await getPreference(preferencesKey);
-      const preferencesToSet = preferences || { fields: {} };
-      let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed
-        .filter((filterID) => (rows.find((row) => row.id === filterID)))
-        || [];
-
-      if (!collapsed) {
-        newCollapsedState = newCollapsedState.filter((existingID) => existingID !== rowID);
-      } else {
-        newCollapsedState.push(rowID);
-      }
-
-      setPreference(preferencesKey, {
-        ...preferencesToSet,
-        fields: {
-          ...preferencesToSet?.fields || {},
-          [path]: {
-            ...preferencesToSet?.fields?.[path],
-            collapsed: newCollapsedState,
-          },
-        },
+      const subFieldState = await buildStateFromSchema({
+        fieldSchema: block.fields,
+        operation,
+        id,
+        user,
+        locale,
       });
-    }
-  }, [preferencesKey, getPreference, path, setPreference, rows]);
 
-  const onDragEnd = useCallback((result) => {
-    if (!result.destination) return;
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-    moveRow(sourceIndex, destinationIndex);
-  }, [moveRow]);
+      dispatchFields({
+        type: 'ADD_ROW',
+        rowIndex,
+        subFieldState,
+        path,
+        blockType,
+      });
+      dispatchRows({ type: 'ADD', rowIndex, blockType });
+      setValue((value as number) + 1);
+    },
+    [path, setValue, value, blocks, dispatchFields, operation, id, user, locale],
+  );
+
+  const removeRow = useCallback(
+    (rowIndex) => {
+      dispatchRows({ type: 'REMOVE', rowIndex });
+      dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
+      setValue((value as number) - 1);
+    },
+    [path, setValue, value, dispatchFields],
+  );
+
+  const moveRow = useCallback(
+    (moveFromIndex, moveToIndex) => {
+      dispatchRows({ type: 'MOVE', moveFromIndex, moveToIndex });
+      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
+    },
+    [dispatchRows, dispatchFields, path],
+  );
+
+  const setCollapse = useCallback(
+    async (rowID: string, collapsed: boolean) => {
+      dispatchRows({ type: 'SET_COLLAPSE', id: rowID, collapsed });
+
+      if (preferencesKey) {
+        const preferences: DocumentPreferences = await getPreference(
+          preferencesKey,
+        );
+        const preferencesToSet = preferences || { fields: {} };
+        let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed.filter((filterID) => rows.find((row) => row.id === filterID)) || [];
+
+        if (!collapsed) {
+          newCollapsedState = newCollapsedState.filter(
+            (existingID) => existingID !== rowID,
+          );
+        } else {
+          newCollapsedState.push(rowID);
+        }
+
+        setPreference(preferencesKey, {
+          ...preferencesToSet,
+          fields: {
+            ...(preferencesToSet?.fields || {}),
+            [path]: {
+              ...preferencesToSet?.fields?.[path],
+              collapsed: newCollapsedState,
+            },
+          },
+        });
+      }
+    },
+    [preferencesKey, getPreference, path, setPreference, rows],
+  );
+
+  const onDragEnd = useCallback(
+    (result) => {
+      if (!result.destination) return;
+      const sourceIndex = result.source.index;
+      const destinationIndex = result.destination.index;
+      moveRow(sourceIndex, destinationIndex);
+    },
+    [moveRow],
+  );
 
   // Get preferences, and once retrieved,
   // Reset rows with preferences included
@@ -147,8 +171,14 @@ const Blocks: React.FC<Props> = (props) => {
 
     if (Array.isArray(data)) {
       const fetchPreferences = async () => {
-        const preferences = preferencesKey ? await getPreference<DocumentPreferences>(preferencesKey) : undefined;
-        dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
+        const preferences = preferencesKey
+          ? await getPreference<DocumentPreferences>(preferencesKey)
+          : undefined;
+        dispatchRows({
+          type: 'SET_ALL',
+          data: data || [],
+          collapsedState: preferences?.fields?.[path]?.collapsed,
+        });
       };
 
       fetchPreferences();
@@ -173,16 +203,11 @@ const Blocks: React.FC<Props> = (props) => {
 
   const hasMaxRows = maxRows && rows.length >= maxRows;
 
-  const classes = [
-    baseClass,
-    className,
-  ].filter(Boolean).join(' ');
+  const classes = [baseClass, className].filter(Boolean).join(' ');
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div
-        className={classes}
-      >
+      <div className={classes}>
         <div className={`${baseClass}__error-wrap`}>
           <Error
             showError={showError}
@@ -206,50 +231,54 @@ const Blocks: React.FC<Props> = (props) => {
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
-              {rows.length > 0 && rows.map((row, i) => {
-                const { blockType } = row;
-                const blockToRender = blocks.find((block) => block.slug === blockType);
-
-                if (blockToRender) {
-                  return (
-                    <DraggableSection
-                      readOnly={readOnly}
-                      key={row.id}
-                      id={row.id}
-                      blockType="blocks"
-                      blocks={blocks}
-                      label={blockToRender?.labels?.singular}
-                      isCollapsed={row.collapsed}
-                      rowCount={rows.length}
-                      rowIndex={i}
-                      addRow={addRow}
-                      removeRow={removeRow}
-                      moveRow={moveRow}
-                      setRowCollapse={setCollapse}
-                      parentPath={path}
-                      fieldTypes={fieldTypes}
-                      permissions={permissions}
-                      hasMaxRows={hasMaxRows}
-                      fieldSchema={[
-                        ...blockToRender.fields,
-                      ]}
-                    />
+              {rows.length > 0
+                && rows.map((row, i) => {
+                  const { blockType } = row;
+                  const blockToRender = blocks.find(
+                    (block) => block.slug === blockType,
                   );
-                }
+                  if (blockToRender) {
+                    return (
+                      <DraggableSection
+                        readOnly={readOnly}
+                        key={row.id}
+                        id={row.id}
+                        blockType="blocks"
+                        blocks={blocks}
+                        label={blockToRender?.labels?.singular}
+                        isCollapsed={row.collapsed}
+                        rowCount={rows.length}
+                        rowIndex={i}
+                        addRow={addRow}
+                        removeRow={removeRow}
+                        moveRow={moveRow}
+                        setRowCollapse={setCollapse}
+                        parentPath={path}
+                        fieldTypes={fieldTypes}
+                        permissions={permissions}
+                        hasMaxRows={hasMaxRows}
+                        fieldSchema={[...blockToRender.fields]}
+                        titlePath={titlePath}
+                      />
+                    );
+                  }
 
-                return null;
-              })}
+                  return null;
+                })}
               {(rows.length < minRows || (required && rows.length === 0)) && (
                 <Banner type="error">
                   This field requires at least
                   {' '}
-                  {`${minRows || 1} ${minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural}`}
+                  {`${minRows || 1} ${
+                    minRows === 1 || typeof minRows === 'undefined'
+                      ? labels.singular
+                      : labels.plural
+                  }`}
                 </Banner>
               )}
-              {(rows.length === 0 && readOnly) && (
+              {rows.length === 0 && readOnly && (
                 <Banner>
                   This field has no
-                  {' '}
                   {labels.plural}
                   .
                 </Banner>
@@ -259,7 +288,7 @@ const Blocks: React.FC<Props> = (props) => {
           )}
         </Droppable>
 
-        {(!readOnly && (rows.length < maxRows || maxRows === undefined)) && (
+        {!readOnly && (rows.length < maxRows || maxRows === undefined) && (
           <div className={`${baseClass}__add-button-wrap`}>
             <Popup
               buttonType="custom"
