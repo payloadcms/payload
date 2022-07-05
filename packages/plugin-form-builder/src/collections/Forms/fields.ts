@@ -14,7 +14,6 @@ const label: Field = {
   name: 'label',
   label: 'Label',
   type: 'text',
-  required: true,
 };
 
 const required: Field = {
