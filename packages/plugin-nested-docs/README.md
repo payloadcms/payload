@@ -1,4 +1,4 @@
-# Payload Nested Pages Plugin
+# Payload Nested Docs Plugin
 
 [![NPM](https://img.shields.io/npm/v/payload-plugin-nested-pages)](https://www.npmjs.com/package/payload-plugin-nested-pages)
 
@@ -22,7 +22,7 @@ In the `plugins` array of your [Payload config](https://payloadcms.com/docs/conf
 
 ```js
 import { buildConfig } from 'payload/config';
-import nestedPages from 'payload-plugin-nestedPages';
+import nestedDocs from '@payloadcms/plugin-nested-docs';
 
 const config = buildConfig({
   collections: [
@@ -41,7 +41,7 @@ const config = buildConfig({
     }
   ],
   plugins: [
-    nestedPages({
+    nestedDocs({
       collections: ['pages'],
       generateLabel: (_, doc) => doc.title,
       generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
