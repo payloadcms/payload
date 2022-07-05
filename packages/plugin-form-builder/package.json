@@ -1,6 +1,8 @@
 {
   "name": "@payloadcms/plugin-form-builder",
   "version": "1.0.7",
+  "homepage:": "https://payloadcms.com",
+  "repository": "git@github.com:payloadcms/plugin-form-builder.git",
   "description": "Form builder plugin for Payload CMS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
