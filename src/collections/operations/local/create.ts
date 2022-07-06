@@ -53,7 +53,7 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
       ...req || {},
       user,
       payloadAPI: 'local',
-      locale: locale || req?.locale || payload?.config?.localization?.defaultLocale,
+      locale: locale || req?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
       fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
       payload,
       files: {

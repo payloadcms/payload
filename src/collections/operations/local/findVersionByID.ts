@@ -22,7 +22,7 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
     collection: collectionSlug,
     depth,
     id,
-    locale = payload.config?.localization?.defaultLocale,
+    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     fallbackLocale = null,
     overrideAccess = true,
     disableErrors = false,

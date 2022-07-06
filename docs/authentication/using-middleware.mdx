@@ -6,7 +6,7 @@ desc: Make full use of Payload's built-in authentication with your own custom Ex
 keywords: authentication, middleware, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Because Payload uses your existing Express server, you are free to add whatever logic you need to your app through endpoints of your own. However, Payload does not add its middleware to your Express app itself—instead, ist scopes all of its middleware to Payload-specific routers.
+Because Payload uses your existing Express server, you are free to add whatever logic you need to your app through endpoints of your own. However, Payload does not add its middleware to your Express app itself—instead, it scopes all of its middleware to Payload-specific routers.
 
 This approach has a ton of benefits - it's great for isolation of concerns and limiting scope, but it also means that your additional routes won't have access to Payload's user authentication.
 

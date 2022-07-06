@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { PayloadRequest } from '../../express/types';
 import getExtractJWT from '../getExtractJWT';
 import { User } from '../types';
+import { Collection } from '../../collections/config/types';
 
 export type Result = {
   user?: User,
@@ -11,20 +12,20 @@ export type Result = {
 }
 
 export type Arguments = {
-  req: PayloadRequest,
-  collectionSlug: string
+  req: PayloadRequest
+  collection: Collection
 }
 
 async function me({
   req,
-  collectionSlug,
+  collection,
 }: Arguments): Promise<Result> {
   const extractJWT = getExtractJWT(req.payload.config);
 
   if (req.user) {
     const user = { ...req.user };
 
-    if (user.collection !== collectionSlug) {
+    if (user.collection !== collection.config.slug) {
       return {
         user: null,
       };

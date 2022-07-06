@@ -1,6 +1,7 @@
 import path from 'path';
+import { Config } from './types';
 
-export const defaults = {
+export const defaults: Config = {
   serverURL: '',
   defaultDepth: 2,
   maxDepth: 10,
@@ -45,4 +46,5 @@ export const defaults = {
   },
   hooks: {},
   localization: false,
+  telemetry: true,
 };

@@ -42,7 +42,7 @@ export default async function findByIDLocal<T extends TypeWithID = any>(payload:
     user: undefined,
     ...req || {},
     payloadAPI: 'local',
-    locale: locale || req?.locale || payload?.config?.localization?.defaultLocale,
+    locale: locale || req?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
     fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
     payload,
   };

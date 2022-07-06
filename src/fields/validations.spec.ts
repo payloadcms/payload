@@ -1,9 +1,12 @@
-import { text, textarea, password, select, point } from './validations';
+import { text, textarea, password, select, point, number } from './validations';
 import { ValidateOptions } from './config/types';
 
 const minLengthMessage = (length: number) => `This value must be longer than the minimum length of ${length} characters.`;
 const maxLengthMessage = (length: number) => `This value must be shorter than the max length of ${length} characters.`;
+const minValueMessage = (value: number, min: number) => `"${value}" is less than the min allowed value of ${min}.`;
+const maxValueMessage = (value: number, max: number) => `"${value}" is greater than the max allowed value of ${max}.`;
 const requiredMessage = 'This field is required.';
+const validNumberMessage = 'Please enter a valid number.';
 let options: ValidateOptions<any, any, any> = {
   operation: 'create',
   data: undefined,
@@ -312,6 +315,45 @@ describe('Field Validations', () => {
       optionsRequired.hasMany = true;
       const result = select(val, optionsRequired);
       expect(result).not.toStrictEqual(true);
+    });
+  });
+  describe('number', () => {
+    options.type = 'number';
+    options.name = 'test';
+    it('should validate', () => {
+      const val = 1;
+      const result = number(val, options);
+      expect(result).toBe(true);
+    });
+    it('should validate', () => {
+      const val = 1.5;
+      const result = number(val, options);
+      expect(result).toBe(true);
+    });
+    it('should show invalid number message', () => {
+      const val = 'test';
+      const result = number(val, { ...options });
+      expect(result).toBe(validNumberMessage);
+    });
+    it('should handle empty value', () => {
+      const val = "";
+      const result = number(val, { ...options });
+      expect(result).toBe(true);
+    });
+    it('should handle required value', () => {
+      const val = "";
+      const result = number(val, { ...options, required: true });
+      expect(result).toBe(validNumberMessage);
+    });
+    it('should validate minValue', () => {
+      const val = 2.4;
+      const result = number(val, { ...options, min: 2.5});
+      expect(result).toBe(minValueMessage(val, 2.5));
+    });
+    it('should validate maxValue', () => {
+      const val = 1.25;
+      const result = number(val, { ...options, max: 1});
+      expect(result).toBe(maxValueMessage(val, 1));
     });
   });
 });

@@ -1,5 +1,6 @@
 import { PayloadRequest } from '../../express/types';
 import { Permissions } from '../types';
+import { adminInit as adminInitTelemetry } from '../../utilities/telemetry/events/adminInit';
 
 const allOperations = ['create', 'read', 'update', 'delete'];
 
@@ -17,6 +18,8 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
       },
     },
   } = args;
+
+  adminInitTelemetry(req);
 
   const results = {} as Permissions;
   const promises = [];
@@ -53,18 +56,6 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
           updatedObj[field.name][operation] = {
             permission: isLoggedIn,
           };
-        }
-
-        if (field.type === 'relationship') {
-          const relatedCollections = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo];
-
-          relatedCollections.forEach((slug) => {
-            const collection = config.collections.find((coll) => coll.slug === slug);
-
-            if (collection && collection.access && collection.access[operation]) {
-              promises.push(createAccessPromise(updatedObj[field.name], collection.access[operation], operation, true));
-            }
-          });
         }
 
         if (field.fields) {

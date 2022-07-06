@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { FieldBase } from '../../../../fields/config/types';
 import { useWatchForm } from '../Form/context';
 
-const withCondition = <P extends unknown>(Field: React.ComponentType<P>): React.FC<P> => {
+const withCondition = <P extends Record<string, unknown>>(Field: React.ComponentType<P>): React.FC<P> => {
   const CheckForCondition: React.FC<P> = (props) => {
     const {
       admin: {

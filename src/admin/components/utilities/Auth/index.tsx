@@ -12,6 +12,8 @@ import { AuthContext } from './types';
 
 const Context = createContext({} as AuthContext);
 
+const maxTimeoutTime = 2147483647;
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>();
   const [tokenInMemory, setTokenInMemory] = useState<string>();
@@ -127,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (remainingTime > 0) {
       reminder = setTimeout(() => {
         openModal('stay-logged-in');
-      }, ((remainingTime - 60) * 1000));
+      }, (Math.min((remainingTime - 60) * 1000), maxTimeoutTime));
     }
 
     return () => {
@@ -145,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         push(`${admin}/logout-inactivity`);
         closeAllModals();
-      }, remainingTime * 1000);
+      }, Math.min(remainingTime * 1000, maxTimeoutTime));
     }
 
     return () => {

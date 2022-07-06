@@ -26,7 +26,7 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
     page,
     limit,
     where,
-    locale = payload.config?.localization?.defaultLocale,
+    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     fallbackLocale = null,
     user,
     overrideAccess = true,

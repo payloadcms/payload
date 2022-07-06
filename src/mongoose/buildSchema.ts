@@ -32,7 +32,7 @@ const setBlockDiscriminators = (fields: Field[], schema: Schema, config: Sanitiz
 
         const blockSchema = new Schema(blockSchemaFields, { _id: false, id: false });
 
-        if (blockFieldType.localized) {
+        if (blockFieldType.localized && config.localization) {
           config.localization.locales.forEach((locale) => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore Possible incorrect typing in mongoose types, this works
@@ -57,10 +57,10 @@ const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: Bui
   index: field.index || field.unique || false,
 });
 
-const localizeSchema = (field: NonPresentationalField, schema, locales) => {
-  if (field.localized && Array.isArray(locales)) {
+const localizeSchema = (field: NonPresentationalField, schema, localization) => {
+  if (field.localized && localization && Array.isArray(localization.locales)) {
     return {
-      type: locales.reduce((localeSchema, locale) => ({
+      type: localization.locales.reduce((localeSchema, locale) => ({
         ...localeSchema,
         [locale]: schema,
       }), {
@@ -129,7 +129,7 @@ const fieldIndexMap = {
     if (field.index === true || field.index === undefined) {
       index = '2dsphere';
     }
-    if (field.localized) {
+    if (field.localized && config.localization) {
       return config.localization.locales.map((locale) => ({ [`${field.name}.${locale}`]: index }));
     }
     return [{ [field.name]: index }];
@@ -142,7 +142,7 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   text: (field: TextField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
@@ -150,7 +150,7 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   email: (field: EmailField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
@@ -158,7 +158,7 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   textarea: (field: TextareaField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
@@ -166,7 +166,7 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   richText: (field: RichTextField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
@@ -174,7 +174,7 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   code: (field: CodeField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
@@ -182,7 +182,7 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   point: (field: PointField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
@@ -202,7 +202,7 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   radio: (field: RadioField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
@@ -217,7 +217,7 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   checkbox: (field: CheckboxField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
@@ -225,7 +225,7 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   date: (field: DateField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
@@ -233,7 +233,7 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   upload: (field: UploadField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
@@ -245,14 +245,14 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   relationship: (field: RelationshipField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
     const hasManyRelations = Array.isArray(field.relationTo);
     let schemaToReturn: { [key: string]: any } = {};
 
-    if (field.localized) {
+    if (field.localized && config.localization) {
       schemaToReturn = {
         type: config.localization.locales.reduce((locales, locale) => {
           let localeSchema: { [key: string]: any } = {};
@@ -329,7 +329,7 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   group: (field: GroupField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
@@ -352,7 +352,7 @@ const fieldToSchemaMap = {
 
     return {
       ...fields,
-      [field.name]: localizeSchema(field, baseSchema, config.localization.locales),
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
     };
   },
   select: (field: SelectField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
@@ -364,7 +364,7 @@ const fieldToSchemaMap = {
         return option;
       }),
     };
-    const schemaToReturn = localizeSchema(field, baseSchema, config.localization.locales);
+    const schemaToReturn = localizeSchema(field, baseSchema, config.localization);
 
     return {
       ...fields,
@@ -375,7 +375,7 @@ const fieldToSchemaMap = {
     const baseSchema = [new Schema({ }, { _id: false, discriminatorKey: 'blockType' })];
     let schemaToReturn;
 
-    if (field.localized) {
+    if (field.localized && config.localization) {
       schemaToReturn = config.localization.locales.reduce((localeSchema, locale) => ({
         ...localeSchema,
         [locale]: baseSchema,

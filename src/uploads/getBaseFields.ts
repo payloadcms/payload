@@ -137,7 +137,10 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
             height,
             mimeType,
             filesize,
-            filename,
+            {
+              ...filename,
+              unique: false,
+            },
           ],
         })),
       },

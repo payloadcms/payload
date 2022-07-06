@@ -19,7 +19,7 @@ export default async function findOneLocal<T extends TypeWithID = any>(payload: 
   const {
     slug: globalSlug,
     depth,
-    locale = payload.config.localization?.defaultLocale,
+    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     fallbackLocale = null,
     user,
     overrideAccess = true,

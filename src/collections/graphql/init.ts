@@ -299,7 +299,7 @@ function initCollectionsGraphQL(payload: Payload): void {
             },
           },
         }),
-        resolve: me(slug),
+        resolve: me(collection),
       };
 
       if (collection.config.auth.maxLoginAttempts > 0) {

@@ -31,7 +31,7 @@ const DefaultCell: React.FC<Props> = (props) => {
     wrapElementProps.to = `${admin}/collections/${slug}/${id}`;
   }
 
-  const CellComponent = cellComponents[field.type];
+  const CellComponent = cellData && cellComponents[field.type];
 
   if (!CellComponent) {
     return (
