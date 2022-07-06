@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
+import { UploadedFile } from 'express-fileupload';
 import payload from '../../..';
+import getFileByPath from '../../../uploads/getFileByPath';
 
 let createdMediaID;
 
@@ -31,6 +33,32 @@ describe('Collections - Local', () => {
       expect(result.id).toBeDefined();
       expect(result.alt).toStrictEqual(alt);
       expect(result.filename).toStrictEqual('generic-block-image.svg');
+      expect(result.filesize).toStrictEqual(size);
+      createdMediaID = result.id;
+    });
+
+    it('should allow an upload-enabled file to be created from file instead of filepath', async () => {
+      const name = 'upload-local.svg';
+      const alt = 'Alt Text Here';
+      const filePath = path.resolve(
+        __dirname,
+        '../../../admin/assets/images/generic-block-image.svg',
+      );
+      const { size } = fs.statSync(filePath);
+      const file = getFileByPath(filePath);
+      file.name = name;
+
+      const result: Media = await payload.create({
+        collection: 'media',
+        data: {
+          alt,
+        },
+        file,
+      });
+
+      expect(result.id).toBeDefined();
+      expect(result.alt).toStrictEqual(alt);
+      expect(result.filename).toStrictEqual(name);
       expect(result.filesize).toStrictEqual(size);
       createdMediaID = result.id;
     });

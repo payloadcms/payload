@@ -4,6 +4,8 @@ import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import create from '../create';
+import { File } from '../../../uploads/types';
+
 
 export type Options<T> = {
   collection: string
@@ -59,7 +61,7 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
       fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
       payload,
       files: {
-        file: file ?? getFileByPath(filePath) as UploadedFile,
+        file: file ?? getFileByPath(filePath),
       },
     } as PayloadRequest,
   });
