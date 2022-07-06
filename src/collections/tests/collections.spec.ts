@@ -7,9 +7,9 @@ require('isomorphic-fetch');
 const { serverURL: url } = getConfig();
 
 let token = null;
-let headers = null;
+let headers = {};
 
-let localizedPostID;
+let localizedPost;
 let relationshipBID;
 const localizedPostTitle = 'title';
 const englishPostDesc = 'english description';
@@ -91,7 +91,7 @@ describe('Collections - REST', () => {
       expect(data.doc.createdAt).toStrictEqual(expect.stringMatching(timestampRegex));
       expect(data.doc.updatedAt).toStrictEqual(expect.stringMatching(timestampRegex));
 
-      localizedPostID = data.doc.id;
+      localizedPost = data.doc;
     });
 
     it('should add id to array items', async () => {
@@ -170,7 +170,7 @@ describe('Collections - REST', () => {
     });
 
     it('should allow a Spanish locale to be added to an existing post', async () => {
-      const response = await fetch(`${url}/api/localized-posts/${localizedPostID}?locale=es`, {
+      const response = await fetch(`${url}/api/localized-posts/${localizedPost.id}?locale=es`, {
         body: JSON.stringify({
           title: 'title in spanish',
           description: spanishPostDesc,
@@ -183,11 +183,13 @@ describe('Collections - REST', () => {
           },
           nonLocalizedArray: [
             {
+              id: localizedPost.nonLocalizedArray[0].id,
               localizedEmbeddedText: 'spanish',
             },
           ],
           richTextBlocks: [
             {
+              id: localizedPost.richTextBlocks[0].id,
               blockType: 'richTextBlock',
               blockName: 'Test Block Name',
               content: [
@@ -211,12 +213,102 @@ describe('Collections - REST', () => {
       expect(data.doc.nonLocalizedArray[0].localizedEmbeddedText).toStrictEqual('spanish');
       expect(data.doc.richTextBlocks[0].content[0].children[0].text).toStrictEqual('spanish');
     });
+
+    it('should persist existing array-based data while updating and passing row ID', async () => {
+      const originalText = 'some optional text';
+
+      const { doc } = await fetch(`${url}/api/arrays`, {
+        headers,
+        method: 'post',
+        body: JSON.stringify({
+          array: [
+            {
+              required: 'a required field here',
+              optional: originalText,
+            },
+            {
+              required: 'another required field here',
+              optional: 'this is cool',
+            },
+          ],
+        }),
+      }).then((res) => res.json());
+
+      const arrayWithExistingValues = [
+        ...doc.array,
+      ];
+
+      const updatedText = 'this is some new text for the first item in array';
+
+      arrayWithExistingValues[0] = {
+        id: arrayWithExistingValues[0].id,
+        required: updatedText,
+      };
+
+      const { doc: updatedDoc } = await fetch(`${url}/api/arrays/${doc.id}`, {
+        headers,
+        method: 'put',
+        body: JSON.stringify({
+          array: arrayWithExistingValues,
+        }),
+      }).then((res) => res.json());
+
+      expect(updatedDoc.array[0].required).toStrictEqual(updatedText);
+      expect(updatedDoc.array[0].optional).toStrictEqual(originalText);
+    });
+
+    it('should disregard existing array-based data while updating and NOT passing row ID', async () => {
+      const updatedText = 'here is some new text';
+
+      const secondArrayItem = {
+        required: 'test',
+        optional: 'optional test',
+      };
+
+      const { doc } = await fetch(`${url}/api/arrays`, {
+        headers,
+        method: 'post',
+        body: JSON.stringify({
+          array: [
+            {
+              required: 'a required field here',
+              optional: 'some optional text',
+            },
+            secondArrayItem,
+          ],
+        }),
+      }).then((res) => res.json());
+
+      const { doc: updatedDoc } = await fetch(`${url}/api/arrays/${doc.id}`, {
+        headers,
+        method: 'put',
+        body: JSON.stringify({
+          array: [
+            {
+              required: updatedText,
+            },
+            {
+              id: doc.array[1].id,
+              required: doc.array[1].required,
+              // NOTE - not passing optional field. It should persist
+              // because we're passing ID
+            },
+          ],
+        }),
+      }).then((res) => res.json());
+
+      expect(updatedDoc.array[0].required).toStrictEqual(updatedText);
+      expect(updatedDoc.array[0].optional).toBeUndefined();
+
+      expect(updatedDoc.array[1].required).toStrictEqual(secondArrayItem.required);
+      expect(updatedDoc.array[1].optional).toStrictEqual(secondArrayItem.optional);
+    });
   });
 
   describe('Read', () => {
     describe('Localized', () => {
       it('should allow a localized post to be retrieved in unspecified locale, defaulting to English', async () => {
-        const response = await fetch(`${url}/api/localized-posts/${localizedPostID}`);
+        const response = await fetch(`${url}/api/localized-posts/${localizedPost.id}`);
         const data = await response.json();
 
         expect(response.status).toBe(200);
@@ -228,7 +320,7 @@ describe('Collections - REST', () => {
       });
 
       it('should allow a localized post to be retrieved in specified English locale', async () => {
-        const response = await fetch(`${url}/api/localized-posts/${localizedPostID}?locale=en`);
+        const response = await fetch(`${url}/api/localized-posts/${localizedPost.id}?locale=en`);
         const data = await response.json();
 
         expect(response.status).toBe(200);
@@ -240,7 +332,7 @@ describe('Collections - REST', () => {
       });
 
       it('should allow a localized post to be retrieved in Spanish', async () => {
-        const response = await fetch(`${url}/api/localized-posts/${localizedPostID}?locale=es`);
+        const response = await fetch(`${url}/api/localized-posts/${localizedPost.id}?locale=es`);
         const data = await response.json();
 
         expect(response.status).toBe(200);
@@ -252,7 +344,7 @@ describe('Collections - REST', () => {
       });
 
       it('should allow a localized post to be retrieved in all locales', async () => {
-        const response = await fetch(`${url}/api/localized-posts/${localizedPostID}?locale=all`);
+        const response = await fetch(`${url}/api/localized-posts/${localizedPost.id}?locale=all`);
         const data = await response.json();
 
         expect(response.status).toBe(200);
@@ -417,7 +509,7 @@ describe('Collections - REST', () => {
           postLocalizedMultiple: [
             {
               relationTo: 'localized-posts',
-              value: localizedPostID,
+              value: localizedPost.id,
             },
           ],
         }),
@@ -442,7 +534,7 @@ describe('Collections - REST', () => {
     it('should allow querying by a localized nested relationship property', async () => {
       const res = await fetch(`${url}/api/relationship-a`, {
         body: JSON.stringify({
-          LocalizedPost: [localizedPostID],
+          LocalizedPost: [localizedPost.id],
         }),
         headers,
         method: 'post',
@@ -496,7 +588,7 @@ describe('Collections - REST', () => {
           title: 'awefjlaiwejfalweiijfaew',
           nonLocalizedRelationToMany: {
             relationTo: 'localized-posts',
-            value: localizedPostID,
+            value: localizedPost.id,
           },
         }),
         headers,
@@ -507,7 +599,7 @@ describe('Collections - REST', () => {
       relationshipBID = relationshipB.doc.id;
 
       const queryRes = await fetch(
-        `${url}/api/relationship-b?where[nonLocalizedRelationToMany.value][equals]=${localizedPostID}`,
+        `${url}/api/relationship-b?where[nonLocalizedRelationToMany.value][equals]=${localizedPost.id}`,
       );
       const data = await queryRes.json();
       expect(data.docs).toHaveLength(1);

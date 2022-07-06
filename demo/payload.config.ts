@@ -5,6 +5,7 @@ import Admin from './collections/Admin';
 import AllFields from './collections/AllFields';
 import AutoLabel from './collections/AutoLabel';
 import Autosave from './collections/Autosave';
+import Arrays from './collections/Arrays';
 import Code from './collections/Code';
 import Conditions from './collections/Conditions';
 // import CustomComponents from './collections/CustomComponents';
@@ -93,6 +94,7 @@ export default buildConfig({
   collections: [
     Admin,
     AllFields,
+    Arrays,
     AutoLabel,
     Autosave,
     Blocks,
