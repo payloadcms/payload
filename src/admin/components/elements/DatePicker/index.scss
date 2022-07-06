@@ -3,24 +3,36 @@
 $cal-icon-width: 18px;
 
 .date-time-picker {
+  position: relative;
+
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box,
   .react-datepicker__time-container {
     width: 120px;
   }
 
   &__icon-wrap {
-    position: relative;
-    z-index: 1;
+    display: flex;
+    column-gap: 10px;
+    position: absolute;
+    right: base(.75);
+    top: base(.625);
+    z-index: 2;
 
     .icon {
       pointer-events: none;
-      position: absolute;
-      right: base(.75);
-      top: base(.625);
       width: $cal-icon-width;
       height: auto;
       @include color-svg($color-dark-gray);
     }
+  }
+
+  &__clear-button {
+    appearance: none;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    cursor: pointer;
   }
 
   &__appearance--timeOnly {
