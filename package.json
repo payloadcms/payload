@@ -50,7 +50,8 @@
     "release:minor": "release-it minor",
     "release:major": "release-it major",
     "release:beta": "release-it prepatch --config .release-it.beta.json",
-    "lint": "eslint \"src/**/*.ts\""
+    "lint": "eslint \"src/**/*.ts\"",
+    "dev:collections": "TS_NODE_FILES=true ts-node src/scripts/devtest.ts collections/tests"
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"
@@ -245,6 +246,7 @@
     "@types/react-select": "^3.0.26",
     "@types/sass": "^1.16.0",
     "@types/sharp": "^0.26.1",
+    "@types/shelljs": "^0.8.11",
     "@types/testing-library__jest-dom": "^5.9.5",
     "@types/uuid": "^8.3.0",
     "@types/webpack": "4.41.26",
@@ -256,6 +258,7 @@
     "@typescript-eslint/parser": "4.0.1",
     "babel-eslint": "^10.0.1",
     "babel-plugin-ignore-html-and-css-imports": "^0.1.0",
+    "commander": "9.1.0",
     "copyfiles": "^2.4.0",
     "cross-env": "^7.0.2",
     "cypress": "9.2.0",
@@ -270,13 +273,16 @@
     "graphql-request": "^3.4.0",
     "mongodb": "^3.6.2",
     "mongodb-memory-server": "^7.2.0",
+    "node-loader": "^2.0.0",
     "nodemon": "^2.0.6",
     "passport-strategy": "^1.0.0",
     "release-it": "^14.2.2",
     "rimraf": "^3.0.2",
     "serve-static": "^1.14.2",
+    "shelljs": "^0.8.5",
     "start-server-and-test": "^1.14.0",
-    "typescript": "^4.1.2"
+    "typescript": "^4.1.2",
+    "webpack-sharp-loader": "^1.0.4"
   },
   "files": [
     "bin.js",
