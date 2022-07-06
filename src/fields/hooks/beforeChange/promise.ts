@@ -5,6 +5,7 @@ import { Operation } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import getValueWithDefault from '../../getDefaultValue';
 import { traverseFields } from './traverseFields';
+import { getExistingRowDoc } from './getExistingRowDoc';
 
 type Args = {
   data: Record<string, unknown>
@@ -217,8 +218,8 @@ export const promise = async ({
             promises,
             req,
             siblingData: row,
-            siblingDoc: siblingDoc[field.name]?.[i] || {},
-            siblingDocWithLocales: siblingDocWithLocales[field.name]?.[i] || {},
+            siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]?.[i]),
+            siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]?.[i]),
             skipValidation: skipValidationFromHere,
           });
         });
@@ -247,8 +248,8 @@ export const promise = async ({
               promises,
               req,
               siblingData: row,
-              siblingDoc: siblingDoc[field.name]?.[i] || {},
-              siblingDocWithLocales: siblingDocWithLocales[field.name]?.[i] || {},
+              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]?.[i]),
+              siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]?.[i]),
               skipValidation: skipValidationFromHere,
             });
           }
