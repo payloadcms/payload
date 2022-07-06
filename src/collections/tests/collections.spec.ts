@@ -7,7 +7,7 @@ require('isomorphic-fetch');
 const { serverURL: url } = getConfig();
 
 let token = null;
-let headers = null;
+let headers = {};
 
 let localizedPost;
 let relationshipBID;
@@ -212,6 +212,96 @@ describe('Collections - REST', () => {
       expect(data.doc.localizedGroup.text).toStrictEqual('spanish');
       expect(data.doc.nonLocalizedArray[0].localizedEmbeddedText).toStrictEqual('spanish');
       expect(data.doc.richTextBlocks[0].content[0].children[0].text).toStrictEqual('spanish');
+    });
+
+    it('should persist existing array-based data while updating and passing row ID', async () => {
+      const originalText = 'some optional text';
+
+      const { doc } = await fetch(`${url}/api/arrays`, {
+        headers,
+        method: 'post',
+        body: JSON.stringify({
+          array: [
+            {
+              required: 'a required field here',
+              optional: originalText,
+            },
+            {
+              required: 'another required field here',
+              optional: 'this is cool',
+            },
+          ],
+        }),
+      }).then((res) => res.json());
+
+      const arrayWithExistingValues = [
+        ...doc.array,
+      ];
+
+      const updatedText = 'this is some new text for the first item in array';
+
+      arrayWithExistingValues[0] = {
+        id: arrayWithExistingValues[0].id,
+        required: updatedText,
+      };
+
+      const { doc: updatedDoc } = await fetch(`${url}/api/arrays/${doc.id}`, {
+        headers,
+        method: 'put',
+        body: JSON.stringify({
+          array: arrayWithExistingValues,
+        }),
+      }).then((res) => res.json());
+
+      expect(updatedDoc.array[0].required).toStrictEqual(updatedText);
+      expect(updatedDoc.array[0].optional).toStrictEqual(originalText);
+    });
+
+    it('should disregard existing array-based data while updating and NOT passing row ID', async () => {
+      const updatedText = 'here is some new text';
+
+      const secondArrayItem = {
+        required: 'test',
+        optional: 'optional test',
+      };
+
+      const { doc } = await fetch(`${url}/api/arrays`, {
+        headers,
+        method: 'post',
+        body: JSON.stringify({
+          array: [
+            {
+              required: 'a required field here',
+              optional: 'some optional text',
+            },
+            secondArrayItem,
+          ],
+        }),
+      }).then((res) => res.json());
+
+      const { doc: updatedDoc } = await fetch(`${url}/api/arrays/${doc.id}`, {
+        headers,
+        method: 'put',
+        body: JSON.stringify({
+          array: [
+            {
+              required: updatedText,
+            },
+            {
+              id: doc.array[1].id,
+              required: doc.array[1].required,
+              // NOTE - not passing optional field. It should persist
+              // because we're passing ID
+            },
+          ],
+        }),
+      }).then((res) => res.json());
+
+      expect(updatedDoc.array[0].required).toStrictEqual(updatedText);
+      expect(updatedDoc.array[0].optional).toBeUndefined();
+
+      expect(updatedDoc.array[1].required).toStrictEqual(secondArrayItem.required);
+      expect(updatedDoc.array[1].optional).toStrictEqual(secondArrayItem.optional);
     });
   });
 
