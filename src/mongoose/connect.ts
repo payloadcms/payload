@@ -11,9 +11,9 @@ const connectMongoose = async (
   let urlToConnect = url;
   let successfulConnectionMessage = 'Connected to Mongo server successfully!';
   const connectionOptions = {
+    autoIndex: true,
     ...options,
     useNewUrlParser: true,
-    autoIndex: true,
   };
 
   if (process.env.NODE_ENV === 'test' || process.env.MEMORY_SERVER) {
