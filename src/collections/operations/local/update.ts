@@ -15,6 +15,7 @@ export type Options<T> = {
   overrideAccess?: boolean
   showHiddenFields?: boolean
   filePath?: string
+  file?: File
   overwriteExistingFiles?: boolean
   draft?: boolean
   autosave?: boolean
@@ -32,6 +33,7 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
     overrideAccess = true,
     showHiddenFields,
     filePath,
+    file,
     overwriteExistingFiles = false,
     draft,
     autosave,
@@ -57,7 +59,7 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
       fallbackLocale,
       payload,
       files: {
-        file: getFileByPath(filePath),
+        file: file ?? getFileByPath(filePath),
       },
     } as PayloadRequest,
   };

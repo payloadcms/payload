@@ -102,6 +102,10 @@ const post = await payload.create({
   // a file directly through the Local API by providing
   // its full, absolute file path.
   filePath: path.resolve(__dirname, './path-to-image.jpg'),
+
+  // Alternatively, you can directly pass a File,
+  // if file is provided, filePath will be omitted
+  file: uploadedFile,
 })
 ```
 
