@@ -1,5 +1,6 @@
 import mongoose, { ConnectOptions } from 'mongoose';
 import pino from 'pino';
+import getPort from 'get-port';
 import { connection } from './testCredentials';
 
 const connectMongoose = async (
@@ -21,10 +22,11 @@ const connectMongoose = async (
     connectionOptions.dbName = 'payloadmemory';
     // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
     const { MongoMemoryServer } = require('mongodb-memory-server');
+    const port = await getPort();
     mongoMemoryServer = await MongoMemoryServer.create({
       instance: {
         dbName: connection.name,
-        port: connection.port,
+        port,
       },
     });
 

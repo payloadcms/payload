@@ -26,6 +26,7 @@ export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
   await page.fill('#confirm-password', credentials.password);
   await wait(500);
   await page.click('[type=submit]');
+  await page.waitForURL(`${serverURL}/admin`);
 }
 
 export async function login(args: LoginArgs): Promise<void> {
@@ -36,4 +37,5 @@ export async function login(args: LoginArgs): Promise<void> {
   await page.fill('#password', credentials.password);
   await wait(500);
   await page.click('[type=submit]');
+  await page.waitForURL(`${serverURL}/admin`);
 }
