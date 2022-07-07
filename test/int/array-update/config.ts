@@ -1,6 +1,6 @@
-import { generateTestConfig } from '../../helpers/configHelpers';
+import { buildConfig } from '../../../src/config/build';
 
-export default generateTestConfig({
+export default buildConfig({
   // admin: {
   //   disable: true,
   // },

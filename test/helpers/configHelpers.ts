@@ -1,13 +1,8 @@
 import path from 'path';
 import { v4 as uuid } from 'uuid';
 import { CollectionConfig } from '../../src/collections/config/types';
-import { Config, SanitizedConfig, InitOptions } from '../../src/config/types';
-import { buildConfig } from '../../src/config/build';
+import { InitOptions } from '../../src/config/types';
 import payload from '../../src';
-
-export function generateTestConfig(overrides?: Partial<Config>): SanitizedConfig {
-  return buildConfig(overrides ?? {});
-}
 
 type InitPayloadTestOptions = { initOptions?: Partial<InitOptions> }
 export function initPayloadTest(dirName: string, initOptions?: InitPayloadTestOptions): void {
