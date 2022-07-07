@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import express from 'express';
-import payload from '../src';
+import payload from '../../src';
 
 const expressApp = express();
 

@@ -36,7 +36,7 @@
     "demo:build": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/bin/build",
     "demo:generate:types": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts node dist/bin/generateTypes",
     "demo:serve": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=production nodemon",
-    "dev": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts nodemon",
+    "dev": "nodemon",
     "test": "yarn test:int && yarn test:client",
     "pretest": "yarn build",
     "test:int": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test DISABLE_LOGGING=true jest --forceExit --runInBand",
@@ -50,8 +50,7 @@
     "release:minor": "release-it minor",
     "release:major": "release-it major",
     "release:beta": "release-it prepatch --config .release-it.beta.json",
-    "lint": "eslint \"src/**/*.ts\"",
-    "dev:collections": "TS_NODE_FILES=true ts-node src/scripts/devtest.ts collections/tests"
+    "lint": "eslint \"src/**/*.ts\""
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"

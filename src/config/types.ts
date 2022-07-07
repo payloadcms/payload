@@ -188,6 +188,7 @@ export type Config = {
   };
   plugins?: Plugin[];
   telemetry?: boolean;
+  onInit?: (payload: Payload) => Promise<void>
 };
 
 export type SanitizedConfig = Omit<DeepRequired<Config>, 'collections' | 'globals'> & {
