@@ -5,7 +5,7 @@ import { initPayloadTest } from '../../helpers/configHelpers';
 let serverURL: string;
 
 test.describe('it should load the admin ui', () => {
-  test.beforeAll(async ({ page }) => {
+  test.beforeAll(async () => {
     // Go to the starting url before each test.
     ({ serverURL } = await initPayloadTest({
       __dirname,

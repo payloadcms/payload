@@ -26,6 +26,7 @@ module.exports = {
       rules: {
         'jest/consistent-test-it': 'off',
         'jest/require-top-level-describe': 'off',
+        'jest/no-test-callback': 'off',
       }
     },
     {
