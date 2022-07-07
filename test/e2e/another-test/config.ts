@@ -1,4 +1,5 @@
 import { buildConfig } from '../buildConfig';
+import { credentials } from '../helpers';
 
 export default buildConfig({
   collections: [
@@ -23,4 +24,13 @@ export default buildConfig({
       ],
     },
   ],
+  onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: credentials.email,
+        password: credentials.password,
+      },
+    });
+  },
 });
