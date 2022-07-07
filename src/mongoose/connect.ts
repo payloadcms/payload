@@ -33,7 +33,6 @@ const connectMongoose = async (
     successfulConnectionMessage = 'Connected to in-memory Mongo server successfully!';
   }
 
-
   try {
     await mongoose.connect(urlToConnect, connectionOptions);
     logger.info(successfulConnectionMessage);

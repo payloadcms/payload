@@ -8,7 +8,7 @@ import { Payload } from '../index';
 const router = express.Router();
 
 function initAdmin(ctx: Payload): void {
-  if (!ctx.config.admin.disable && process.env.NODE_ENV !== 'test') {
+  if (!ctx.config.admin.disable) {
     router.use(history());
 
     if (process.env.NODE_ENV === 'production') {

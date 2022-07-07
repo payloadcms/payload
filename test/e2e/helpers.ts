@@ -7,7 +7,6 @@ const credentials = {
   roles: ['admin'],
 };
 
-
 type FirstRegisterArgs = {
   page: Page,
   serverURL: string,

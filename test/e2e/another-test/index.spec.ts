@@ -24,6 +24,6 @@ test.describe('it should load the admin ui', () => {
 
   test('should not get redirected', async () => {
     await expect(page).toHaveURL(`${serverURL}/admin`);
-    await expect(page.locator('.dashboard__card-list')).toBeVisible();
+    await expect(page.locator('.dashboard__wrap')).toBeVisible();
   });
 });
