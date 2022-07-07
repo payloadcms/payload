@@ -5,7 +5,6 @@ import { connection } from './testCredentials';
 const connectMongoose = async (
   url: string,
   options: ConnectOptions,
-  local: boolean,
   logger: pino.Logger,
 ): Promise<void | any> => {
   let urlToConnect = url;
@@ -34,7 +33,15 @@ const connectMongoose = async (
   }
 
   try {
+    if (process.env.PAYLOAD_DROP_DATABASE) {
+      mongoose.connection.once('connected', () => {
+        mongoose.connection.dropDatabase();
+      });
+    }
+
     await mongoose.connect(urlToConnect, connectionOptions);
+
+
     logger.info(successfulConnectionMessage);
   } catch (err) {
     logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err);

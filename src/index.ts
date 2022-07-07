@@ -219,7 +219,7 @@ export class Payload {
     }
 
     // Connect to database
-    this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, options.local, this.logger);
+    this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, this.logger);
 
     if (typeof options.onInit === 'function') await options.onInit(this);
     if (typeof this.config.onInit === 'function') await this.config.onInit(this);

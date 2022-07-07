@@ -16,7 +16,6 @@ const init = async () => {
       fromAddress: 'hello@payloadcms.com',
     },
     onInit: async (app) => {
-      await mongoose.connection.dropDatabase();
       app.logger.info('Payload Dev Server Initialized');
     },
   });
