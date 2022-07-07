@@ -1,6 +1,6 @@
-import { buildConfig } from '../../../src/config/build';
+import { buildTestConfig } from '../../helpers/buildTestConfig';
 
-export default buildConfig({
+export default buildTestConfig({
   collections: [{
     slug: 'arrays',
     fields: [

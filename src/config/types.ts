@@ -67,7 +67,7 @@ export type InitOptions = {
   secret: string;
   email?: EmailOptions;
   local?: boolean;
-  onInit?: (payload: Payload) => void;
+  onInit?: (payload: Payload) => Promise<void>;
   /** Pino LoggerOptions */
   loggerOptions?: LoggerOptions;
 };

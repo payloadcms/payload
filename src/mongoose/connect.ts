@@ -7,7 +7,7 @@ const connectMongoose = async (
   options: ConnectOptions,
   local: boolean,
   logger: pino.Logger,
-): Promise<void> => {
+): Promise<void | any> => {
   let urlToConnect = url;
   let successfulConnectionMessage = 'Connected to Mongo server successfully!';
   const connectionOptions = {
@@ -16,18 +16,20 @@ const connectMongoose = async (
     useNewUrlParser: true,
   };
 
-  if (process.env.NODE_ENV === 'test' || process.env.MEMORY_SERVER) {
+  let mongoMemoryServer;
+
+  if (process.env.NODE_ENV === 'test') {
     connectionOptions.dbName = 'payloadmemory';
     // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
     const { MongoMemoryServer } = require('mongodb-memory-server');
-    const mongo = await MongoMemoryServer.create({
+    mongoMemoryServer = await MongoMemoryServer.create({
       instance: {
         dbName: connection.name,
         port: connection.port,
       },
     });
 
-    urlToConnect = mongo.getUri();
+    urlToConnect = mongoMemoryServer.getUri();
     successfulConnectionMessage = 'Connected to in-memory Mongo server successfully!';
   }
 
@@ -39,6 +41,8 @@ const connectMongoose = async (
     logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err);
     process.exit(1);
   }
+
+  return mongoMemoryServer;
 };
 
 export default connectMongoose;

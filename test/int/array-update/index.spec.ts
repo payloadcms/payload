@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { initPayloadTest } from '../../helpers/configHelpers';
 import payload from '../../../src';
 import config from './config';
@@ -5,8 +6,14 @@ import config from './config';
 const collection = config.collections[0]?.slug;
 
 describe('array-update', () => {
-  beforeAll(() => {
-    initPayloadTest(__dirname);
+  beforeAll(async () => {
+    await initPayloadTest({ __dirname });
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.connection.close();
+    await payload.mongoMemoryServer.stop();
   });
 
   it('should persist existing array-based data while updating and passing row ID', async () => {

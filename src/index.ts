@@ -100,6 +100,8 @@ export class Payload {
 
   mongoURL: string;
 
+  mongoMemoryServer: any
+
   local: boolean;
 
   encrypt = encrypt;
@@ -177,9 +179,6 @@ export class Payload {
     initCollections(this);
     initGlobals(this);
 
-    // Connect to database
-    connectMongoose(this.mongoURL, options.mongoOptions, options.local, this.logger);
-
     // If not initializing locally, set up HTTP routing
     if (!this.local) {
       options.express.use((req: PayloadRequest, res, next) => {
@@ -218,6 +217,9 @@ export class Payload {
 
       this.authenticate = authenticate(this.config);
     }
+
+    // Connect to database
+    this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, options.local, this.logger);
 
     if (typeof options.onInit === 'function') await options.onInit(this);
     if (typeof this.config.onInit === 'function') await this.config.onInit(this);
