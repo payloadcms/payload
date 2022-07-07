@@ -1,9 +1,6 @@
 import { buildConfig } from '../../../src/config/build';
 
 export default buildConfig({
-  // admin: {
-  //   disable: true,
-  // },
   collections: [{
     slug: 'arrays',
     fields: [

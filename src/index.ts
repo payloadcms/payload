@@ -137,7 +137,7 @@ export class Payload {
    * @description Initializes Payload
    * @param options
    */
-  init(options: InitOptions): void {
+  async init(options: InitOptions): Promise<void> {
     this.logger = Logger('payload', options.loggerOptions);
     this.logger.info('Starting Payload...');
     if (!options.secret) {
@@ -219,7 +219,8 @@ export class Payload {
       this.authenticate = authenticate(this.config);
     }
 
-    if (typeof options.onInit === 'function') options.onInit(this);
+    if (typeof options.onInit === 'function') await options.onInit(this);
+    if (typeof this.config.onInit === 'function') await this.config.onInit(this);
 
     serverInitTelemetry(this);
   }
