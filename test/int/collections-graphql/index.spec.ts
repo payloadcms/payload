@@ -9,15 +9,8 @@ const collection = config.collections[0]?.slug;
 let client: RESTClient;
 
 describe('collections-graphql', () => {
-  beforeAll(async (done) => {
-    const { serverURL } = await initPayloadTest({
-      __dirname,
-      done,
-      init: {
-        local: false,
-      },
-    });
-
+  beforeAll(async () => {
+    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     client = new RESTClient(config, { serverURL });
   });
 

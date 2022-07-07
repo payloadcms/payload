@@ -22,6 +22,13 @@ module.exports = {
   },
   overrides: [
     {
+      files: ['test/e2e/**'],
+      rules: {
+        'jest/consistent-test-it': 'off',
+        'jest/require-top-level-describe': 'off',
+      }
+    },
+    {
       files: ['*.ts', '*.tsx'],
       parser: '@typescript-eslint/parser',
       extends: [
