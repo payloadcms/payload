@@ -1,10 +1,8 @@
 module.exports = {
   verbose: true,
   testEnvironment: 'node',
-  testPathIgnorePatterns: [
-    'node_modules',
-    'src/*',
-    'dist',
+  testMatch: [
+    '**/test/int/**/*spec.ts',
   ],
   testTimeout: 15000,
   moduleNameMapper: {

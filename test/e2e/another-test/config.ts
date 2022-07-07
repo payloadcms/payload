@@ -1,15 +1,18 @@
-import { buildTestConfig } from '../../helpers/buildTestConfig';
+import { buildConfig } from '../buildConfig';
+import { credentials } from '../helpers';
 
-export default buildTestConfig({
-  collections: [{
-    slug: 'posts',
-    fields: [
-      {
-        name: 'title',
-        type: 'text',
-      },
-    ],
-  }],
+export default buildConfig({
+  collections: [
+    {
+      slug: 'posts',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+  ],
   globals: [
     {
       slug: 'nav',
@@ -21,4 +24,13 @@ export default buildTestConfig({
       ],
     },
   ],
+  onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: credentials.email,
+        password: credentials.password,
+      },
+    });
+  },
 });

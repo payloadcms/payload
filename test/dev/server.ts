@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import express from 'express';
+import mongoose from 'mongoose';
 import payload from '../../src';
 
 const expressApp = express();
@@ -14,7 +15,7 @@ const init = async () => {
       fromName: 'Payload',
       fromAddress: 'hello@payloadcms.com',
     },
-    onInit: (app) => {
+    onInit: async (app) => {
       app.logger.info('Payload Dev Server Initialized');
     },
   });

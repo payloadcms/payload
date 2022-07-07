@@ -9,7 +9,6 @@ import payload from '../../src';
 type Options = {
   __dirname: string
   init?: Partial<InitOptions>
-  done?: () => void
 }
 
 export async function initPayloadTest(options: Options): Promise<{ serverURL: string }> {
@@ -28,10 +27,10 @@ export async function initPayloadTest(options: Options): Promise<{ serverURL: st
     initOptions.express = express();
   }
 
-  payload.init(initOptions);
+  await payload.init(initOptions);
 
   if (initOptions.express) {
-    initOptions.express.listen(port, options.done);
+    initOptions.express.listen(port);
   }
 
   return { serverURL: `http://localhost:${port}` };

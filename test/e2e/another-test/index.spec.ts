@@ -1,7 +1,7 @@
 // example.spec.ts
 import { test, expect, Page } from '@playwright/test';
 import { initPayloadTest } from '../../helpers/configHelpers';
-import { firstRegister } from '../helpers';
+import { login } from '../helpers';
 
 let serverURL: string;
 
@@ -19,11 +19,11 @@ test.describe('it should load the admin ui', () => {
     const context = await browser.newContext();
     page = await context.newPage();
 
-    await firstRegister({ page, serverURL });
+    await login({ page, serverURL });
   });
 
-  test('should not get redirected', async () => {
+  test('should be redirected to dashboard', async () => {
     await expect(page).toHaveURL(`${serverURL}/admin`);
-    await expect(page.locator('.dashboard__card-list')).toBeVisible();
+    await expect(page.locator('.dashboard__wrap')).toBeVisible();
   });
 });
