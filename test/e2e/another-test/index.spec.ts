@@ -1,11 +1,13 @@
 // example.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { initPayloadTest } from '../../helpers/configHelpers';
+import { firstRegister } from '../helpers';
 
 let serverURL: string;
 
 test.describe('it should load the admin ui', () => {
-  test.beforeAll(async () => {
+  let page: Page;
+  test.beforeAll(async ({ browser }) => {
     // Go to the starting url before each test.
     ({ serverURL } = await initPayloadTest({
       __dirname,
@@ -13,13 +15,15 @@ test.describe('it should load the admin ui', () => {
         local: false,
       },
     }));
+
+    const context = await browser.newContext();
+    page = await context.newPage();
+
+    await firstRegister({ page, serverURL });
   });
 
-  test.beforeEach(async ({ page }) => {
-    await page.goto(`${serverURL}/admin`);
-  });
-
-  test('my test', async ({ page }) => {
-    await expect(page).toHaveURL(`${serverURL}/admin/create-first-user`);
+  test('should not get redirected', async () => {
+    await expect(page).toHaveURL(`${serverURL}/admin`);
+    await expect(page.locator('.dashboard__card-list')).toBeVisible();
   });
 });

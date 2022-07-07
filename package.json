@@ -40,6 +40,7 @@
     "pretest": "yarn build",
     "test": "NODE_ENV=test DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
     "test:e2e": "cross-env DISABLE_LOGGING=true playwright test",
+    "test:e2e:headed": "cross-env DISABLE_LOGGING=true playwright test --headed",
     "clean": "rimraf dist",
     "release": "release-it",
     "release:patch": "release-it patch",
