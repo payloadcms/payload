@@ -31,7 +31,10 @@ const Login: React.FC = () => {
       admin,
       api,
     },
+    collections,
   } = useConfig();
+
+  const collection = collections.find(({ slug }) => slug === userSlug);
 
   const onSuccess = (data) => {
     if (data.token) {
@@ -81,30 +84,32 @@ const Login: React.FC = () => {
         <Logo />
       </div>
       {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
-      <Form
-        disableSuccessStatus
-        waitForAutocomplete
-        onSuccess={onSuccess}
-        method="post"
-        action={`${serverURL}${api}/${userSlug}/login`}
-      >
-        <Email
-          label="Email Address"
-          name="email"
-          admin={{ autoComplete: 'email' }}
-          required
-        />
-        <Password
-          label="Password"
-          name="password"
-          autoComplete="off"
-          required
-        />
-        <Link to={`${admin}/forgot`}>
-          Forgot password?
-        </Link>
-        <FormSubmit>Login</FormSubmit>
-      </Form>
+      {!collection.auth.disableLocalStrategy && (
+        <Form
+          disableSuccessStatus
+          waitForAutocomplete
+          onSuccess={onSuccess}
+          method="post"
+          action={`${serverURL}${api}/${userSlug}/login`}
+        >
+          <Email
+            label="Email Address"
+            name="email"
+            admin={{ autoComplete: 'email' }}
+            required
+          />
+          <Password
+            label="Password"
+            name="password"
+            autoComplete="off"
+            required
+          />
+          <Link to={`${admin}/forgot`}>
+            Forgot password?
+          </Link>
+          <FormSubmit>Login</FormSubmit>
+        </Form>
+      )}
       {Array.isArray(afterLogin) && afterLogin.map((Component, i) => <Component key={i} />)}
     </MinimalTemplate>
   );

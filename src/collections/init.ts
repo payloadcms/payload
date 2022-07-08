@@ -106,10 +106,19 @@ export default function registerCollections(ctx: Payload): void {
 
       if (collection.auth) {
         const AuthCollection = ctx.collections[formattedCollection.slug];
-        passport.use(new LocalStrategy(AuthCollection.Model.authenticate()));
+
+        if (!collection.auth.disableLocalStrategy) {
+          passport.use(new LocalStrategy(AuthCollection.Model.authenticate()));
+        }
 
         if (collection.auth.useAPIKey) {
           passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(ctx, AuthCollection));
+        }
+
+        if (Array.isArray(collection.auth.strategies)) {
+          collection.auth.strategies.forEach((strategy) => {
+            passport.use(strategy);
+          });
         }
       }
 

@@ -1,3 +1,4 @@
+import { Strategy } from 'passport';
 import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../express/types';
 import { Where, PayloadMongooseDocument } from '../types';
@@ -87,6 +88,8 @@ export interface IncomingAuthType {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML,
     generateEmailSubject?: GenerateForgotPasswordEmailSubject,
   }
+  disableLocalStrategy?: true
+  strategies: Strategy[]
 }
 
 export type VerifyConfig = {

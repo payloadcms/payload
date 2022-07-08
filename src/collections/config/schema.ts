@@ -84,6 +84,8 @@ const collectionSchema = joi.object().keys({
         generateEmailSubject: joi.func(),
       }),
       maxLoginAttempts: joi.number(),
+      disableLocalStrategy: joi.boolean().valid(true),
+      strategies: joi.array().items(joi.object()),
     }),
     joi.boolean(),
   ),

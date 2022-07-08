@@ -81,13 +81,15 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
       authFields = authFields.concat(baseAPIKeyFields);
     }
 
-    if (sanitized.auth.verify) {
-      if (sanitized.auth.verify === true) sanitized.auth.verify = {};
-      authFields = authFields.concat(baseVerificationFields);
-    }
+    if (!sanitized.auth.disableLocalStrategy) {
+      if (sanitized.auth.verify) {
+        if (sanitized.auth.verify === true) sanitized.auth.verify = {};
+        authFields = authFields.concat(baseVerificationFields);
+      }
 
-    if (sanitized.auth.maxLoginAttempts > 0) {
-      authFields = authFields.concat(baseAccountLockFields);
+      if (sanitized.auth.maxLoginAttempts > 0) {
+        authFields = authFields.concat(baseAccountLockFields);
+      }
     }
 
     authFields = mergeBaseFields(sanitized.fields, authFields);
