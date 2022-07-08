@@ -6,7 +6,7 @@ desc: Output your own GraphQL schema based on your collections and globals to a 
 keywords: headless cms, typescript, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-When working with GraphQL it is useful to have the schema for development. In Payload the schema is controlled by your collections and globals and is made available to the developer or third parties, it is not necessary for developers using Payload to write schema types manually. The schema definitions are made accessible to in two possible ways.
+When working with GraphQL it is useful to have the schema for development of other projects that need to call on your GraphQL endpoint. In Payload the schema is controlled by your collections and globals and is made available to the developer or third parties, it is not necessary for developers using Payload to write schema types manually.
 
 ### GraphQL Schema generate script
 
@@ -16,11 +16,7 @@ Run the following command in a Payload project to generate your project's GraphQ
 payload generate:graphQLSchema
 ```
 
-You can run this command whenever you need to regenerate your graphQL schema and output it to a file, and then you can use the schema for writing your own graphQL.
-
-### Query GraphQL schema
-
-While your project is running you can query for any schema definitions from the GraphQL endpoint using an `IntrospectionQuery` query.
+You can run this command whenever you need to regenerate your graphQL schema and output it to a file, and then you can use the schema for writing your own graphQL elsewhere in other projects.
 
 ### GraphQL schema output file
 
