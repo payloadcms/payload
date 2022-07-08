@@ -1,3 +1,21 @@
+# [0.19.0](https://github.com/payloadcms/payload/compare/v0.18.5...v0.19.0) (2022-07-08)
+
+
+### Bug Fixes
+
+* allow passing of autoIndex mongoose connectionOptions ([#722](https://github.com/payloadcms/payload/issues/722)) ([567d8c1](https://github.com/payloadcms/payload/commit/567d8c19bff05c4d5edfcff1f04ff5e7804412ce))
+* copyfiles cross platform ([#712](https://github.com/payloadcms/payload/issues/712)) ([67331eb](https://github.com/payloadcms/payload/commit/67331eb975c57897236466bef109a9559ff0d1a0))
+* ensures auth/me relations in gql can be queried ([01bc1fe](https://github.com/payloadcms/payload/commit/01bc1fef1e498038457b9454fc0969c2a1fe4601))
+* ensures old data from arrays is not persisted ([d9ef803](https://github.com/payloadcms/payload/commit/d9ef803d203c03a161dedff7076381ed944cf8d6))
+* relationship field disabled from access control in related collections ([#644](https://github.com/payloadcms/payload/issues/644)) ([91e33d1](https://github.com/payloadcms/payload/commit/91e33d1c1cf97d3f8512caea72dc1012969b84bb))
+
+
+### Features
+
+* allow clearing DatePicker value ([#641](https://github.com/payloadcms/payload/issues/641)) ([9fd171b](https://github.com/payloadcms/payload/commit/9fd171b26db5e3aaa6ade706f02c9697e1d785f3))
+* File argument in create/update operation ([#708](https://github.com/payloadcms/payload/issues/708)) ([f3b7dcf](https://github.com/payloadcms/payload/commit/f3b7dcff57961e0c6a5b1536de23b7fe6fa035cf))
+* graphql schema output ([#730](https://github.com/payloadcms/payload/issues/730)) ([ad43cbc](https://github.com/payloadcms/payload/commit/ad43cbc808572f15157e4e52d211253c63012d7f))
+
 ## [0.18.5](https://github.com/payloadcms/payload/compare/v0.18.4...v0.18.5) (2022-06-29)
 
 
