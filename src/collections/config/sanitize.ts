@@ -75,13 +75,15 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
   if (sanitized.auth) {
     sanitized.auth = merge(authDefaults, typeof sanitized.auth === 'object' ? sanitized.auth : {});
 
-    let authFields = baseAuthFields;
+    let authFields = [];
 
     if (sanitized.auth.useAPIKey) {
       authFields = authFields.concat(baseAPIKeyFields);
     }
 
     if (!sanitized.auth.disableLocalStrategy) {
+      authFields = authFields.concat(baseAuthFields);
+
       if (sanitized.auth.verify) {
         if (sanitized.auth.verify === true) sanitized.auth.verify = {};
         authFields = authFields.concat(baseVerificationFields);
