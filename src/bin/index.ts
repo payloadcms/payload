@@ -19,7 +19,7 @@ const scriptIndex = args._.findIndex(
 
 const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex];
 
-switch (script) {
+switch (script.toLowerCase()) {
   case 'build': {
     build();
     break;
@@ -30,7 +30,7 @@ switch (script) {
     break;
   }
 
-  case 'generate:graphQLSchema': {
+  case 'generate:graphqlschema': {
     generateGraphQLSchema();
     break;
   }
