@@ -37,12 +37,14 @@ export default ({ secret, config, collections }: Payload): PassportStrategy => {
         };
       }
 
+      const isGraphQL = req.url === config.routes.graphQL;
+
       const userQuery = await find({
         where,
         collection,
         req,
         overrideAccess: true,
-        depth: collection.config.auth.depth,
+        depth: isGraphQL ? 0 : collection.config.auth.depth,
       });
 
       if (userQuery.docs && userQuery.docs.length > 0) {
