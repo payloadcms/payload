@@ -89,7 +89,12 @@ export interface IncomingAuthType {
     generateEmailSubject?: GenerateForgotPasswordEmailSubject,
   }
   disableLocalStrategy?: true
-  strategies?: Strategy[]
+  strategies?: {
+    name: string
+    strategy: Strategy
+    refresh?: boolean
+    logout?: boolean
+  }[]
 }
 
 export type VerifyConfig = {

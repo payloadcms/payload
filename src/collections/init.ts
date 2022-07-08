@@ -116,7 +116,7 @@ export default function registerCollections(ctx: Payload): void {
         }
 
         if (Array.isArray(collection.auth.strategies)) {
-          collection.auth.strategies.forEach((strategy) => {
+          collection.auth.strategies.forEach(({ strategy }) => {
             passport.use(strategy);
           });
         }

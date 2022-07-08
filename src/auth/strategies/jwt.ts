@@ -50,6 +50,7 @@ export default ({ secret, config, collections }: Payload): PassportStrategy => {
       if (userQuery.docs && userQuery.docs.length > 0) {
         const user = userQuery.docs[0];
         user.collection = collection.config.slug;
+        user._strategy = 'local-jwt';
 
         done(null, user);
       } else {
