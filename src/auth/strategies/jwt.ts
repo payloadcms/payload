@@ -37,7 +37,7 @@ export default ({ secret, config, collections }: Payload): PassportStrategy => {
         };
       }
 
-      const isGraphQL = req.url === config.routes.graphQL;
+      const isGraphQL = (req.url || '').replace(/\/$/, '') === config.routes.graphQL.replace(/\/$/, '');
 
       const userQuery = await find({
         where,
