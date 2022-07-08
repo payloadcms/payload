@@ -1,3 +1,4 @@
+import { mapAsync } from '../../../src/utilities/mapAsync';
 import { buildConfig } from '../buildConfig';
 
 export const slug = 'posts';
@@ -25,12 +26,14 @@ export default buildConfig({
     ],
   }],
   onInit: async (payload) => {
-    await payload.create({
-      collection: slug,
-      data: {
-        title: 'title',
-        description: 'description',
-      },
+    await mapAsync([...Array(11)], async () => {
+      await payload.create({
+        collection: slug,
+        data: {
+          title: 'title',
+          description: 'description',
+        },
+      });
     });
   },
 });

@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { Payload } from '../../src';
 import wait from '../../src/utilities/wait';
 
 export const credentials = {
