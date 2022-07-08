@@ -116,6 +116,7 @@ export default joi.object({
       maxComplexity: joi.number(),
       disablePlaygroundInProduction: joi.boolean(),
       disable: joi.boolean(),
+      schemaOutputFile: joi.string(),
     }),
   localization: joi.alternatives()
     .try(

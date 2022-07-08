@@ -1,4 +1,4 @@
-import express, { Express, Router } from 'express';
+import express, { Express, Response, Router } from 'express';
 import pino from 'pino';
 import crypto from 'crypto';
 import { GraphQLError, GraphQLFormattedError, GraphQLSchema } from 'graphql';
@@ -29,7 +29,8 @@ import initGlobals from './globals/init';
 import { Globals, TypeWithID as GlobalTypeWithID } from './globals/config/types';
 import initGraphQLPlayground from './graphql/initPlayground';
 import initStatic from './express/static';
-import initializeGraphQL from './graphql';
+import registerSchema from './graphql/registerSchema';
+import graphQLHandler from './graphql/graphQLHandler';
 import buildEmail from './email/build';
 import identifyAPI from './express/middleware/identifyAPI';
 import errorHandler, { ErrorHandler } from './express/middleware/errorHandler';
@@ -98,7 +99,7 @@ export class Payload {
 
   secret: string;
 
-  mongoURL: string;
+  mongoURL: string | false;
 
   local: boolean;
 
@@ -113,8 +114,8 @@ export class Payload {
   types: {
     blockTypes: any;
     blockInputTypes: any;
-    localeInputType: any;
-    fallbackLocaleInputType: any;
+    localeInputType?: any;
+    fallbackLocaleInputType?: any;
   };
 
   Query: { name: string; fields: { [key: string]: any } } = { name: 'Query', fields: {} };
@@ -146,7 +147,7 @@ export class Payload {
       );
     }
 
-    if (!options.mongoURL) {
+    if (options.mongoURL !== false && typeof options.mongoURL !== 'string') {
       throw new Error('Error: missing MongoDB connection URL.');
     }
 
@@ -178,8 +179,13 @@ export class Payload {
     initGlobals(this);
 
     // Connect to database
-    connectMongoose(this.mongoURL, options.mongoOptions, options.local, this.logger);
+    if (this.mongoURL) {
+      connectMongoose(this.mongoURL, options.mongoOptions, options.local, this.logger);
+    }
 
+    if (!this.config.graphQL.disable) {
+      registerSchema(this);
+    }
     // If not initializing locally, set up HTTP routing
     if (!this.local) {
       options.express.use((req: PayloadRequest, res, next) => {
@@ -202,7 +208,7 @@ export class Payload {
         this.router.use(
           this.config.routes.graphQL,
           identifyAPI('GraphQL'),
-          (req, res) => initializeGraphQL(req, res)(req, res),
+          (req: PayloadRequest, res: Response) => graphQLHandler(req, res)(req, res),
         );
         initGraphQLPlayground(this);
       }

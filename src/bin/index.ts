@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import minimist from 'minimist';
 import { generateTypes } from './generateTypes';
+import { generateGraphQLSchema } from './generateGraphQLSchema';
 import babelConfig from '../babel.config';
 
 require('@babel/register')({
@@ -18,7 +19,7 @@ const scriptIndex = args._.findIndex(
 
 const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex];
 
-switch (script) {
+switch (script.toLowerCase()) {
   case 'build': {
     build();
     break;
@@ -29,6 +30,10 @@ switch (script) {
     break;
   }
 
+  case 'generate:graphqlschema': {
+    generateGraphQLSchema();
+    break;
+  }
 
   default:
     console.log(`Unknown script "${script}".`);

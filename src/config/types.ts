@@ -62,7 +62,7 @@ export function hasTransportOptions(emailConfig: EmailOptions): emailConfig is E
 
 export type InitOptions = {
   express?: Express;
-  mongoURL: string;
+  mongoURL: string | false;
   mongoOptions?: ConnectOptions;
   secret: string;
   email?: EmailOptions;
@@ -181,6 +181,7 @@ export type Config = {
     maxComplexity?: number;
     disablePlaygroundInProduction?: boolean;
     disable?: boolean;
+    schemaOutputFile?: string;
   };
   components?: { [key: string]: JSX.Element | (() => JSX.Element) };
   hooks?: {
