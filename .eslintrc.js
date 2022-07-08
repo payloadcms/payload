@@ -27,6 +27,7 @@ module.exports = {
         'jest/consistent-test-it': 'off',
         'jest/require-top-level-describe': 'off',
         'jest/no-test-callback': 'off',
+        'jest/prefer-strict-equal': 'off',
       }
     },
     {

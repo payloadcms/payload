@@ -110,6 +110,44 @@ describe('collections', () => {
         await expect(tableItems).toHaveCount(10);
       });
     });
+
+    describe('sorting', () => {
+      beforeAll(async () => {
+        [1, 2].map(async () => {
+          await createPost();
+        });
+      });
+
+      test('should sort', async () => {
+        const getTableItems = () => page.locator('table >> tbody >> tr');
+
+        await expect(getTableItems()).toHaveCount(2);
+
+        const chevrons = page.locator('table >> thead >> th >> button');
+        const upChevron = chevrons.first();
+        const downChevron = chevrons.nth(1);
+
+        const getFirstId = async () => getTableItems().first().locator('td').first()
+          .innerText();
+        const getSecondId = async () => getTableItems().nth(1).locator('td').first()
+          .innerText();
+
+        const firstId = await getFirstId();
+        const secondId = await getSecondId();
+
+        await upChevron.click({ delay: 100 });
+
+        // Order should have swapped
+        expect(await getFirstId()).toEqual(secondId);
+        expect(await getSecondId()).toEqual(firstId);
+
+        await downChevron.click({ delay: 100 });
+
+        // Swap back
+        expect(await getFirstId()).toEqual(firstId);
+        expect(await getSecondId()).toEqual(secondId);
+      });
+    });
   });
 });
 
@@ -123,8 +161,9 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
     },
   });
 }
+
 async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find<Post>({ collection: slug });
+  const allDocs = await payload.find<Post>({ collection: slug, limit: 100 });
   const ids = allDocs.docs.map((doc) => doc.id);
   await mapAsync(ids, async (id) => {
     await payload.delete({ collection: slug, id });
