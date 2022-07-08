@@ -1,8 +1,18 @@
 import { buildConfig } from '../buildConfig';
 
+export const slug = 'posts';
+
+export interface Post {
+  id: string,
+  title: string,
+  description: string,
+  createdAt: Date,
+  updatedAt: Date,
+}
+
 export default buildConfig({
   collections: [{
-    slug: 'posts',
+    slug,
     fields: [
       {
         name: 'title',
@@ -14,4 +24,13 @@ export default buildConfig({
       },
     ],
   }],
+  onInit: async (payload) => {
+    await payload.create({
+      collection: slug,
+      data: {
+        title: 'title',
+        description: 'description',
+      },
+    });
+  },
 });
