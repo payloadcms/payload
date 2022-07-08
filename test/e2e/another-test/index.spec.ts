@@ -1,20 +1,22 @@
-// example.spec.ts
-import { test, expect, Page } from '@playwright/test';
+import { expect, Page, test } from '@playwright/test';
+import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
 import { initPayloadTest } from '../../helpers/configHelpers';
+import { slug } from '../collections/config';
 import { login } from '../helpers';
 
-let serverURL: string;
+const { beforeAll, describe } = test;
+let url: AdminUrlUtil;
 
-test.describe('it should load the admin ui', () => {
+describe('it should load the admin ui', () => {
   let page: Page;
-  test.beforeAll(async ({ browser }) => {
-    // Go to the starting url before each test.
-    ({ serverURL } = await initPayloadTest({
+  beforeAll(async ({ browser }) => {
+    const { serverURL } = await initPayloadTest({
       __dirname,
       init: {
         local: false,
       },
-    }));
+    });
+    url = new AdminUrlUtil(serverURL, slug);
 
     const context = await browser.newContext();
     page = await context.newPage();
@@ -23,7 +25,7 @@ test.describe('it should load the admin ui', () => {
   });
 
   test('should be redirected to dashboard', async () => {
-    await expect(page).toHaveURL(`${serverURL}/admin`);
+    await expect(page).toHaveURL(url.admin);
     await expect(page.locator('.dashboard__wrap')).toBeVisible();
   });
 });
