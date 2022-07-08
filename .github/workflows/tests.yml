@@ -41,16 +41,16 @@ jobs:
       env:
         CI: true
 
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: E2E Tests
-      run: yarn test:e2e
-    - uses: actions/upload-artifact@v2
-      if: always()
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+    # - name: Install Playwright Browsers
+    #   run: npx playwright install --with-deps
+    # - name: E2E Tests
+    #   run: yarn test:e2e
+    # - uses: actions/upload-artifact@v2
+    #   if: always()
+    #   with:
+    #     name: playwright-report
+    #     path: playwright-report/
+    #     retention-days: 30
   install_npm:
     runs-on: ubuntu-latest
     strategy:
