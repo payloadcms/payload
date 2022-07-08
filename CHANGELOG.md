@@ -1,5 +1,9 @@
 # [0.19.0](https://github.com/payloadcms/payload/compare/v0.18.5...v0.19.0) (2022-07-08)
 
+### BREAKING CHANGES
+
+* relationship fields with access control preventing read of relation will return id instead of null ([#644](https://github.com/payloadcms/payload/pull/644))
+
 
 ### Bug Fixes
 
