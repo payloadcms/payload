@@ -31,7 +31,7 @@ jobs:
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     - run: yarn build
-    - run: yarn test:client
+    - run: yarn test:components
     - run: yarn test:int # In-memory db + api tests
     - run: yarn test:e2e
     - run: yarn demo:generate:types
