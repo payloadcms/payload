@@ -151,6 +151,7 @@ export default buildConfig({
     maxComplexity: 1000,
     disablePlaygroundInProduction: false,
     disable: false,
+    schemaOutputFile: path.resolve(__dirname, './generated-schema.graphql'),
   },
   // rateLimit: {
   //   window: 15 * 60 * 100,

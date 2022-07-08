@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import minimist from 'minimist';
 import { generateTypes } from './generateTypes';
+import { generateGraphQLSchema } from './generateGraphQLSchema';
 import babelConfig from '../babel.config';
 
 require('@babel/register')({
@@ -29,6 +30,10 @@ switch (script) {
     break;
   }
 
+  case 'generate:graphQLSchema': {
+    generateGraphQLSchema();
+    break;
+  }
 
   default:
     console.log(`Unknown script "${script}".`);

@@ -99,7 +99,7 @@ export class Payload {
 
   secret: string;
 
-  mongoURL: string;
+  mongoURL: string | false;
 
   local: boolean;
 
@@ -147,7 +147,7 @@ export class Payload {
       );
     }
 
-    if (!options.mongoURL) {
+    if (options.mongoURL !== false && typeof options.mongoURL !== 'string') {
       throw new Error('Error: missing MongoDB connection URL.');
     }
 
@@ -179,8 +179,13 @@ export class Payload {
     initGlobals(this);
 
     // Connect to database
-    connectMongoose(this.mongoURL, options.mongoOptions, options.local, this.logger);
+    if (this.mongoURL) {
+      connectMongoose(this.mongoURL, options.mongoOptions, options.local, this.logger);
+    }
 
+    if (!this.config.graphQL.disable) {
+      registerSchema(this);
+    }
     // If not initializing locally, set up HTTP routing
     if (!this.local) {
       options.express.use((req: PayloadRequest, res, next) => {
@@ -200,7 +205,6 @@ export class Payload {
       this.router.get('/access', access);
 
       if (!this.config.graphQL.disable) {
-        registerSchema(this);
         this.router.use(
           this.config.routes.graphQL,
           identifyAPI('GraphQL'),
