@@ -5,6 +5,7 @@ import { initPayloadTest } from '../../helpers/configHelpers';
 import { firstRegister, saveDocAndAssert } from '../helpers';
 import { Post, slug } from './config';
 import { mapAsync } from '../../../src/utilities/mapAsync';
+import wait from '../../../src/utilities/wait';
 
 const { afterEach, beforeAll, beforeEach, describe } = test;
 
@@ -51,7 +52,7 @@ describe('collections', () => {
       await page.locator('#description').fill(description);
       await page.click('text=Save', { delay: 100 });
 
-      saveDocAndAssert(page);
+      await saveDocAndAssert(page);
 
       await expect(page.locator('#title')).toHaveValue(title);
       await expect(page.locator('#description')).toHaveValue(description);
@@ -81,6 +82,33 @@ describe('collections', () => {
   describe('list view', () => {
     beforeEach(async () => {
       await page.goto(url.collection);
+    });
+
+    describe('filtering', () => {
+      test('toggle columns', async () => {
+        const columnCountLocator = 'table >> thead >> tr >> th';
+        await createPost();
+        page.locator('.list-controls__toggle-columns').click({ delay: 100 });
+        await wait(1000); // Wait for column toggle UI, should probably use waitForSelector
+
+        const numberOfColumns = await page.locator(columnCountLocator).count();
+        const idButton = page.locator('.column-selector >> text=ID');
+
+        // Remove ID column
+        await idButton.click({ delay: 100 });
+        await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1);
+
+        // Add back ID column
+        await idButton.click({ delay: 100 });
+        await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns);
+      });
+
+      test('search by id', async () => {
+        const { id } = await createPost();
+        await page.locator('.search-filter__input').fill(id);
+        const tableItems = page.locator('table >> tbody >> tr');
+        await expect(tableItems).toHaveCount(1);
+      });
     });
 
     describe('pagination', () => {
