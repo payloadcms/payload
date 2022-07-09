@@ -4,7 +4,16 @@ import { mapAsync } from '../../../src/utilities/mapAsync';
 import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
 import { initPayloadTest } from '../../helpers/configHelpers';
 import { firstRegister, saveDocAndAssert } from '../helpers';
-import { FieldsRelationship, RelationOne, relationOneSlug, RelationTwo, relationTwoSlug, slug } from './config';
+import {
+  FieldsRelationship as CollectionWithRelationships,
+  RelationOne,
+  relationOneSlug,
+  RelationRestricted,
+  relationRestrictedSlug,
+  RelationTwo,
+  relationTwoSlug,
+  slug,
+} from './config';
 
 const { beforeAll, describe } = test;
 
@@ -16,6 +25,9 @@ describe('fields - relationship', () => {
   let anotherRelationOneDoc: RelationOne;
   let relationTwoDoc: RelationTwo;
 
+  let docWithRestrictedRelation: CollectionWithRelationships;
+  let restrictedRelation: RelationRestricted;
+
   beforeAll(async ({ browser }) => {
     const { serverURL } = await initPayloadTest({
       __dirname,
@@ -23,7 +35,7 @@ describe('fields - relationship', () => {
         local: false,
       },
     });
-    await clearDocs();
+    await clearAllDocs();
 
     url = new AdminUrlUtil(serverURL, slug);
 
@@ -52,6 +64,23 @@ describe('fields - relationship', () => {
       },
     });
 
+    // Create restricted doc
+    restrictedRelation = await payload.create<RelationRestricted>({
+      collection: relationRestrictedSlug,
+      data: {
+        name: 'restricted',
+      },
+    });
+
+    // Add restricted doc as relation
+    docWithRestrictedRelation = await payload.create<CollectionWithRelationships>({
+      collection: slug,
+      data: {
+        name: 'with-relation-to-restricted',
+        relationshipRestricted: restrictedRelation.id,
+      },
+    });
+
     await firstRegister({ page, serverURL });
   });
 
@@ -63,7 +92,7 @@ describe('fields - relationship', () => {
 
     await relationshipField.click({ delay: 100 });
 
-    const options = page.locator('.render-fields >> .react-select >> .rs__option');
+    const options = page.locator('.rs__option');
 
     await expect(options).toHaveCount(3); // None + two docs
 
@@ -82,7 +111,7 @@ describe('fields - relationship', () => {
 
     await relationshipHasManyField.click({ delay: 100 });
 
-    const options = page.locator('.render-fields >> .react-select >> .rs__option');
+    const options = page.locator('.rs__option');
 
     await expect(options).toHaveCount(2); // Two relationship options
 
@@ -111,7 +140,7 @@ describe('fields - relationship', () => {
 
     await relationshipMultipleField.click({ delay: 100 });
 
-    const options = page.locator('.rs__group >> .rs__option');
+    const options = page.locator('.rs__option');
 
     await expect(options).toHaveCount(4); // None + 3 docs
 
@@ -126,17 +155,34 @@ describe('fields - relationship', () => {
 
     await saveDocAndAssert(page);
   });
+
+  test('should only show ID on restricted relation', async () => {
+    await page.goto(url.doc(docWithRestrictedRelation.id));
+
+    const fields = page.locator('.render-fields >> .react-select');
+    const restrictedRelationField = fields.nth(3);
+
+    // Check existing relationship has untitled ID
+    await expect(restrictedRelationField).toContainText(`Untitled - ID: ${restrictedRelation.id}`);
+
+    // Check dropdown options
+    await restrictedRelationField.click({ delay: 100 });
+    const options = page.locator('.rs__option');
+
+    await expect(options).toHaveCount(2); // None + 1 Unitled ID
+  });
 });
 
-async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find<FieldsRelationship>({ collection: slug, limit: 100 });
-  const ids = allDocs.docs.map((doc) => doc.id);
+async function clearAllDocs(): Promise<void> {
+  await clearCollectionDocs(slug);
+  await clearCollectionDocs(relationOneSlug);
+  await clearCollectionDocs(relationTwoSlug);
+  await clearCollectionDocs(relationRestrictedSlug);
+}
+
+async function clearCollectionDocs(collectionSlug: string): Promise<void> {
+  const ids = (await payload.find({ collection: collectionSlug, limit: 100 })).docs.map((doc) => doc.id);
   await mapAsync(ids, async (id) => {
-    await payload.delete({ collection: slug, id });
-  });
-  const relationOneDocs = await payload.find<FieldsRelationship>({ collection: relationOneSlug, limit: 100 });
-  const relationOneIds = relationOneDocs.docs.map((doc) => doc.id);
-  await mapAsync(relationOneIds, async (id) => {
-    await payload.delete({ collection: relationOneSlug, id });
+    await payload.delete({ collection: collectionSlug, id });
   });
 }
