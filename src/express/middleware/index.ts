@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import compression from 'compression';
 import bodyParser from 'body-parser';
@@ -27,6 +28,7 @@ const middleware = (payload: Payload): any => {
   if (typeof payload.config.rateLimit.skip === 'function') rateLimitOptions.skip = payload.config.rateLimit.skip;
 
   return [
+    cookieParser(),
     rateLimit(rateLimitOptions),
     passport.initialize(),
     identifyAPI('REST'),
