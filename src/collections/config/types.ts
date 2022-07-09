@@ -34,8 +34,6 @@ export type HookOperationType =
 | 'delete'
 | 'refresh'
 | 'login'
-| 'logout'
-| 'me'
 | 'forgotPassword';
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>;
