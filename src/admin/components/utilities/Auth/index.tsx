@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [lastLocationChange, setLastLocationChange] = useState(0);
   const debouncedLocationChange = useDebounce(lastLocationChange, 10000);
 
-  const email = user?.email;
+  const id = user?.id;
 
   const refreshCookie = useCallback(() => {
     const now = Math.round((new Date()).getTime() / 1000);
@@ -96,10 +96,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // When location changes, refresh cookie
   useEffect(() => {
-    if (email) {
+    if (id) {
       refreshCookie();
     }
-  }, [debouncedLocationChange, refreshCookie, email]);
+  }, [debouncedLocationChange, refreshCookie, id]);
 
   useEffect(() => {
     setLastLocationChange(Date.now());
@@ -116,10 +116,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    if (email) {
+    if (id) {
       getPermissions();
     }
-  }, [email, api, serverURL]);
+  }, [id, api, serverURL]);
 
   useEffect(() => {
     let reminder: ReturnType<typeof setTimeout>;

@@ -16,7 +16,7 @@ import './index.scss';
 const baseClass = 'auth-fields';
 
 const Auth: React.FC<Props> = (props) => {
-  const { useAPIKey, requirePassword, verify, collection: { slug }, email, operation } = props;
+  const { useAPIKey, requirePassword, verify, collection: { slug }, collection, email, operation } = props;
   const [changingPassword, setChangingPassword] = useState(requirePassword);
   const { getField } = useWatchForm();
   const modified = useFormModified();
@@ -54,6 +54,10 @@ const Auth: React.FC<Props> = (props) => {
       toast.error('Successfully unlocked');
     }
   }, [serverURL, api, slug, email]);
+
+  if (!collection.auth.disableLocalStrategy) {
+    return null;
+  }
 
   return (
     <div className={baseClass}>

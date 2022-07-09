@@ -14,6 +14,10 @@ export default ({ secret, config, collections }: Payload): PassportStrategy => {
   };
 
   return new JwtStrategy(opts, async (req, token, done) => {
+    if (req.user) {
+      done(null, req.user);
+    }
+
     try {
       const collection = collections[token.collection];
 
