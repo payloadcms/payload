@@ -19,7 +19,9 @@ Collections feature the ability to define the following hooks:
 
 Additionally, `auth`-enabled collections feature the following hooks:
 
+- [beforeLogin](#beforelogin)
 - [afterLogin](#afterlogin)
+- [afterLogout](#afterlogout)
 - [afterForgotPassword](#afterforgotpassword)
 
 ## Config
@@ -45,7 +47,9 @@ module.exports = {
     afterDelete: [(args) => {...}],
 
     // Auth-enabled hooks
+    beforeLogin: [(args) => {...}],
     afterLogin: [(args) => {...}],
+    afterLogout: [(args) => {...}],
     afterForgotPassword: [(args) => {...}],
   }
 }
@@ -162,6 +166,20 @@ const afterDeleteHook = async ({
 }) => {...}
 ```
 
+### beforeLogin
+
+For auth-enabled Collections, this hook runs after successful `login` operations. You can optionally modify the user that is returned.
+
+```js
+const beforeLoginHook = async ({
+  req, // full express request
+  user, // user being logged in
+  token, // user token
+}) => {
+  return user;
+}
+```
+
 ### afterLogin
 
 For auth-enabled Collections, this hook runs after successful `login` operations. You can optionally modify the user that is returned.
@@ -169,11 +187,17 @@ For auth-enabled Collections, this hook runs after successful `login` operations
 ```js
 const afterLoginHook = async ({
   req, // full express request
-  user, // user being logged in
-  token, // user token
-}) => {
-  return user;
-}
+}) => {...}
+```
+
+### afterLogout
+
+For auth-enabled Collections, this hook runs after before `logout` operations.
+
+```js
+const afterLoginHook = async ({
+  req, // full express request
+}) => {...}
 ```
 
 ### afterForgotPassword
@@ -206,6 +230,7 @@ import type {
   CollectionAfterDeleteHook,
   CollectionBeforeLoginHook,
   CollectionAfterLoginHook,
+  CollectionAfterLogoutHook,
   CollectionAfterForgotPasswordHook,
 } from 'payload/types';
 

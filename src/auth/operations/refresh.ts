@@ -61,6 +61,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
   delete payload.iat;
   delete payload.exp;
   const refreshedToken = jwt.sign(payload, secret, opts);
+  const exp = (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number;
 
   if (args.res) {
     const cookieOptions = {
@@ -78,12 +79,26 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
   }
 
   // /////////////////////////////////////
+  // After Refresh - Collection
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.afterRefresh.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    args = (await hook({
+      req: args.req,
+      exp,
+      token: refreshedToken,
+    })) || args;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
 
   return {
     refreshedToken,
-    exp: (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number,
+    exp,
     user: payload,
   };
 }

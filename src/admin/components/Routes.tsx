@@ -103,11 +103,11 @@ const Routes = () => {
                 <Route path={`${match.url}/login`}>
                   <Login />
                 </Route>
+                <Route path={`${match.url}/logout`}>
+                  <Logout />
+                </Route>
                 {!userCollection.auth.disableLocalStrategy && (
                   <React.Fragment>
-                    <Route path={`${match.url}/logout`}>
-                      <Logout />
-                    </Route>
                     <Route path={`${match.url}/logout-inactivity`}>
                       <Logout inactivity />
                     </Route>

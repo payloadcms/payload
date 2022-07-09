@@ -33,6 +33,8 @@ export type HookOperationType =
 | 'delete'
 | 'refresh'
 | 'login'
+| 'logout'
+| 'me'
 | 'forgotPassword';
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>;
@@ -120,6 +122,21 @@ export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   token: string;
 }) => any;
 
+export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
+  req: PayloadRequest;
+}) => any;
+
+export type AfterMeHook<T extends TypeWithID = any> = (args: {
+  req: PayloadRequest;
+  response: unknown;
+}) => any;
+
+export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
+  req: PayloadRequest;
+  token: string;
+  exp: number;
+}) => any;
+
 export type AfterForgotPasswordHook = (args: {
   args?: any;
 }) => any;
@@ -191,6 +208,9 @@ export type CollectionConfig = {
     afterError?: AfterErrorHook;
     beforeLogin?: BeforeLoginHook[];
     afterLogin?: AfterLoginHook[];
+    afterLogout?: AfterLogoutHook[];
+    afterMe?: AfterMeHook[];
+    afterRefresh?: AfterRefreshHook[];
     afterForgotPassword?: AfterForgotPasswordHook[];
   };
   /**

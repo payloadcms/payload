@@ -47,16 +47,6 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
           handler: loginHandler,
         },
         {
-          path: '/logout',
-          method: 'post',
-          handler: logoutHandler,
-        },
-        {
-          path: '/refresh-token',
-          method: 'post',
-          handler: refreshHandler,
-        },
-        {
           path: '/first-register',
           method: 'post',
           handler: registerFirstUserHandler,
@@ -84,6 +74,16 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         path: '/me',
         method: 'get',
         handler: meHandler,
+      },
+      {
+        path: '/logout',
+        method: 'post',
+        handler: logoutHandler,
+      },
+      {
+        path: '/refresh-token',
+        method: 'post',
+        handler: refreshHandler,
       },
     ]);
   }

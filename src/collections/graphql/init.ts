@@ -307,6 +307,32 @@ function initCollectionsGraphQL(payload: Payload): void {
         resolve: init(collection),
       };
 
+      payload.Mutation.fields[`refreshToken${singularLabel}`] = {
+        type: new GraphQLObjectType({
+          name: formatName(`${slug}Refreshed${singularLabel}`),
+          fields: {
+            user: {
+              type: collection.graphQL.JWT,
+            },
+            refreshedToken: {
+              type: GraphQLString,
+            },
+            exp: {
+              type: GraphQLInt,
+            },
+          },
+        }),
+        args: {
+          token: { type: GraphQLString },
+        },
+        resolve: refresh(collection),
+      };
+
+      payload.Mutation.fields[`logout${singularLabel}`] = {
+        type: GraphQLString,
+        resolve: logout(collection),
+      };
+
       if (!collection.config.auth.disableLocalStrategy) {
         if (collection.config.auth.maxLoginAttempts > 0) {
           payload.Mutation.fields[`unlock${singularLabel}`] = {
@@ -340,11 +366,6 @@ function initCollectionsGraphQL(payload: Payload): void {
           resolve: login(collection),
         };
 
-        payload.Mutation.fields[`logout${singularLabel}`] = {
-          type: GraphQLString,
-          resolve: logout(collection),
-        };
-
         payload.Mutation.fields[`forgotPassword${singularLabel}`] = {
           type: new GraphQLNonNull(GraphQLBoolean),
           args: {
@@ -376,27 +397,6 @@ function initCollectionsGraphQL(payload: Payload): void {
             token: { type: GraphQLString },
           },
           resolve: verifyEmail(collection),
-        };
-
-        payload.Mutation.fields[`refreshToken${singularLabel}`] = {
-          type: new GraphQLObjectType({
-            name: formatName(`${slug}Refreshed${singularLabel}`),
-            fields: {
-              user: {
-                type: collection.graphQL.JWT,
-              },
-              refreshedToken: {
-                type: GraphQLString,
-              },
-              exp: {
-                type: GraphQLInt,
-              },
-            },
-          }),
-          args: {
-            token: { type: GraphQLString },
-          },
-          resolve: refresh(collection),
         };
       }
     }

@@ -51,6 +51,9 @@ const collectionSchema = joi.object().keys({
     afterDelete: joi.array().items(joi.func()),
     beforeLogin: joi.array().items(joi.func()),
     afterLogin: joi.array().items(joi.func()),
+    afterLogout: joi.array().items(joi.func()),
+    afterMe: joi.array().items(joi.func()),
+    afterRefresh: joi.array().items(joi.func()),
     afterForgotPassword: joi.array().items(joi.func()),
   }),
   endpoints: joi.array().items(joi.object({
