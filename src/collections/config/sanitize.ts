@@ -1,4 +1,5 @@
 import merge from 'deepmerge';
+import { isPlainObject } from 'is-plain-object';
 import { SanitizedCollectionConfig, CollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import toKebabCase from '../../utilities/toKebabCase';
@@ -20,7 +21,9 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized: CollectionConfig = merge(defaults, collection);
+  const sanitized: CollectionConfig = merge(defaults, collection, {
+    isMergeableObject: isPlainObject,
+  });
 
   sanitized.slug = toKebabCase(sanitized.slug);
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
@@ -73,7 +76,13 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
   }
 
   if (sanitized.auth) {
-    sanitized.auth = merge(authDefaults, typeof sanitized.auth === 'object' ? sanitized.auth : {});
+    sanitized.auth = merge(
+      authDefaults,
+      typeof sanitized.auth === 'object' ? sanitized.auth : {},
+      {
+        isMergeableObject: isPlainObject,
+      },
+    );
 
     let authFields = [];
 
