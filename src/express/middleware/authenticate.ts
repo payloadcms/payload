@@ -5,7 +5,7 @@ import { SanitizedConfig } from '../../config/types';
 export type PayloadAuthenticate = (req: Request, res: Response, next: NextFunction) => NextFunction;
 
 export default (config: SanitizedConfig): PayloadAuthenticate => {
-  const defaultMethods = ['anonymous'];
+  const defaultMethods = ['jwt', 'anonymous'];
 
   const methods = config.collections.reduce((enabledMethods, collection) => {
     if (typeof collection.auth === 'object') {
@@ -13,16 +13,12 @@ export default (config: SanitizedConfig): PayloadAuthenticate => {
 
       if (Array.isArray(collection.auth.strategies)) {
         collection.auth.strategies.forEach(({ name }) => {
-          collectionMethods.push(name);
+          collectionMethods.unshift(name);
         });
       }
 
       if (collection.auth.useAPIKey) {
-        collectionMethods.push(`${collection.slug}-api-key`);
-      }
-
-      if (!collection.auth.disableLocalStrategy) {
-        defaultMethods.push('jwt');
+        collectionMethods.unshift(`${collection.slug}-api-key`);
       }
 
       return collectionMethods;
