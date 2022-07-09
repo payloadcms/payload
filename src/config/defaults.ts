@@ -44,6 +44,8 @@ export const defaults: Config = {
     json: {},
     compression: {},
     middleware: [],
+    preMiddleware: [],
+    postMiddleware: [],
   },
   hooks: {},
   localization: false,
