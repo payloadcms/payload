@@ -1,3 +1,10 @@
+## [0.19.1](https://github.com/payloadcms/payload/compare/v0.19.0...v0.19.1) (2022-07-09)
+
+
+### Bug Fixes
+
+* ensures duplicative relationship options are not present ([#732](https://github.com/payloadcms/payload/issues/732)) ([ce1c99b](https://github.com/payloadcms/payload/commit/ce1c99b01c0b615401d618bd1894450114cc1f4c))
+
 # [0.19.0](https://github.com/payloadcms/payload/compare/v0.18.5...v0.19.0) (2022-07-08)
 
 ### BREAKING CHANGES
