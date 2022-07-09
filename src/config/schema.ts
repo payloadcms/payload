@@ -98,6 +98,8 @@ export default joi.object({
       json: joi.object(),
       compression: joi.object(),
       middleware: joi.array().items(joi.func()),
+      preMiddleware: joi.array().items(joi.func()),
+      postMiddleware: joi.array().items(joi.func()),
     }),
   local: joi.boolean(),
   upload: joi.object(),
