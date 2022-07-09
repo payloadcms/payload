@@ -5379,6 +5379,11 @@ eslint-plugin-jsx-a11y@^6.2.1:
     minimatch "^3.1.2"
     semver "^6.3.0"
 
+eslint-plugin-playwright@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.npmjs.org/eslint-plugin-playwright/-/eslint-plugin-playwright-0.9.0.tgz#e14ac6c834f2704b293fc3f45cd40d771ec2e840"
+  integrity sha512-5bxAhiKjRASSgtQ4IipwtdesgQ8GT9m0PK61Uqxclu/TpiZS4eaAksydVeiiSPIOQph5GvuuLA7+oBS0WkWO6w==
+
 eslint-plugin-react-hooks@^2.3.0:
   version "2.5.1"
   resolved "https://registry.npmjs.org/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-2.5.1.tgz#4ef5930592588ce171abeb26f400c7fbcbc23cd0"

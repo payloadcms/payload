@@ -23,6 +23,9 @@ module.exports = {
   overrides: [
     {
       files: ['test/e2e/**'],
+      extends: [
+        'plugin:playwright/playwright-test'
+      ],
       rules: {
         'jest/consistent-test-it': 'off',
         'jest/require-top-level-describe': 'off',
