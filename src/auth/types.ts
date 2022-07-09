@@ -90,7 +90,6 @@ export interface IncomingAuthType {
   }
   disableLocalStrategy?: true
   strategies?: {
-    name: string
     strategy: Strategy
     refresh?: boolean
     logout?: boolean

@@ -3,7 +3,6 @@ import paginate from 'mongoose-paginate-v2';
 import express from 'express';
 import passport from 'passport';
 import passportLocalMongoose from 'passport-local-mongoose';
-import Passport from 'passport-local';
 import { UpdateQuery } from 'mongodb';
 import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
 import buildQueryPlugin from '../mongoose/buildQuery';
@@ -16,8 +15,6 @@ import { Payload } from '../index';
 import { getVersionsModelName } from '../versions/getVersionsModelName';
 import mountEndpoints from '../express/mountEndpoints';
 import buildEndpoints from './buildEndpoints';
-
-const LocalStrategy = Passport.Strategy;
 
 export default function registerCollections(ctx: Payload): void {
   ctx.config.collections = ctx.config.collections.map((collection: SanitizedCollectionConfig) => {
@@ -101,15 +98,8 @@ export default function registerCollections(ctx: Payload): void {
 
       router.all('*', bindCollectionMiddleware(ctx.collections[formattedCollection.slug]));
 
-      const endpoints = buildEndpoints(collection);
-      mountEndpoints(router, endpoints);
-
       if (collection.auth) {
         const AuthCollection = ctx.collections[formattedCollection.slug];
-
-        if (!collection.auth.disableLocalStrategy) {
-          passport.use(new LocalStrategy(AuthCollection.Model.authenticate()));
-        }
 
         if (collection.auth.useAPIKey) {
           passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(ctx, AuthCollection));
@@ -121,6 +111,9 @@ export default function registerCollections(ctx: Payload): void {
           });
         }
       }
+
+      const endpoints = buildEndpoints(collection);
+      mountEndpoints(router, endpoints);
 
       ctx.router.use(`/${slug}`, router);
     }

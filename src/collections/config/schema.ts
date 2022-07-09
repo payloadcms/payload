@@ -86,7 +86,6 @@ const collectionSchema = joi.object().keys({
       maxLoginAttempts: joi.number(),
       disableLocalStrategy: joi.boolean().valid(true),
       strategies: joi.array().items(joi.object().keys({
-        name: joi.string().required(),
         strategy: joi.object().required(),
         refresh: joi.boolean(),
         logout: joi.boolean(),

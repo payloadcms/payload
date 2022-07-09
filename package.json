@@ -142,7 +142,7 @@
     "mongoose-paginate-v2": "^1.6.1",
     "nodemailer": "^6.4.2",
     "object-to-formdata": "^4.1.0",
-    "passport": "^0.4.1",
+    "passport": "^0.6.0",
     "passport-anonymous": "^1.0.1",
     "passport-headerapikey": "^1.2.1",
     "passport-jwt": "^4.0.0",
