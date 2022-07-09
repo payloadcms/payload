@@ -22,7 +22,7 @@ export default function registerCollections(ctx: Payload): void {
 
     const schema = buildCollectionSchema(formattedCollection, ctx.config);
 
-    if (collection.auth) {
+    if (collection.auth && !collection.auth.disableLocalStrategy) {
       schema.plugin(passportLocalMongoose, {
         usernameField: 'email',
       });

@@ -164,7 +164,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
 
   let doc;
 
-  if (collectionConfig.auth) {
+  if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
     if (data.email) {
       resultWithLocales.email = (data.email as string).toLowerCase();
     }
