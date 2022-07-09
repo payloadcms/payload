@@ -87,6 +87,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
 
     args = (await hook({
       req: args.req,
+      res: args.res,
       exp,
       token: refreshedToken,
     })) || args;
