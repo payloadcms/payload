@@ -22,7 +22,14 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['test/e2e/**'],
+      files: ['test/**/**.ts'],
+      rules: {
+        '@typescript-eslint/no-use-before-define': 'off',
+        '@typescript-eslint/consistent-type-imports': 'warn',
+      }
+    },
+    {
+      files: ['test/e2e/**/**.ts'],
       extends: [
         'plugin:playwright/playwright-test'
       ],

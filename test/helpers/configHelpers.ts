@@ -2,8 +2,8 @@ import getPort from 'get-port';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
 import express from 'express';
-import { CollectionConfig } from '../../src/collections/config/types';
-import { InitOptions } from '../../src/config/types';
+import type { CollectionConfig } from '../../src/collections/config/types';
+import type { InitOptions } from '../../src/config/types';
 import payload from '../../src';
 
 type Options = {

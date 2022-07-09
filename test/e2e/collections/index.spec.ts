@@ -1,9 +1,11 @@
-import { expect, Page, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import payload from '../../../src';
 import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
 import { initPayloadTest } from '../../helpers/configHelpers';
 import { firstRegister, saveDocAndAssert } from '../helpers';
-import { Post, slug } from './config';
+import type { Post } from './config';
+import { slug } from './config';
 import { mapAsync } from '../../../src/utilities/mapAsync';
 import wait from '../../../src/utilities/wait';
 

@@ -1,8 +1,7 @@
 import qs from 'qs';
-import { Config } from '../../src/config/types';
-import { PaginatedDocs } from '../../src/mongoose/types';
+import type { Config } from '../../src/config/types';
+import type { PaginatedDocs } from '../../src/mongoose/types';
 
-/* eslint-disable @typescript-eslint/no-use-before-define */
 require('isomorphic-fetch');
 
 type Args = {
@@ -113,11 +112,11 @@ export class RESTClient {
   }
 
   async update(args: UpdateArgs): Promise<{ status: number; doc: any }> {
-    const { slug, id, body, query } = args;
+    const { slug, id, data, query } = args;
     const formattedQs = qs.stringify(query);
     const response = await fetch(`${this.serverURL}/api/${slug}/${id}${formattedQs}`, {
-      body: JSON.stringify(body),
-      headers: this.headers,
+      body: JSON.stringify(data),
+      headers,
       method: 'put',
     });
     const { status } = response;
@@ -127,7 +126,7 @@ export class RESTClient {
 
   async findByID(collectionSlug: string, id: string): Promise<{ status: number; doc: any }> {
     const response = await fetch(`${this.serverURL}/api/${collectionSlug}/${id}`, {
-      headers: this.headers,
+      headers,
       method: 'get',
     });
     const { status } = response;

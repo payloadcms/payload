@@ -1,4 +1,5 @@
-import { expect, Page, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import wait from '../../../src/utilities/wait';
 import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
 import { initPayloadTest } from '../../helpers/configHelpers';

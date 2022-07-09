@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import express from 'express';
-import mongoose from 'mongoose';
 import payload from '../../src';
 
 const expressApp = express();

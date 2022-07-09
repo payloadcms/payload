@@ -1,18 +1,21 @@
-import { expect, Page, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import payload from '../../../src';
 import { mapAsync } from '../../../src/utilities/mapAsync';
 import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
 import { initPayloadTest } from '../../helpers/configHelpers';
 import { firstRegister, saveDocAndAssert } from '../helpers';
-import {
+import type {
   FieldsRelationship as CollectionWithRelationships,
   RelationOne,
-  relationOneSlug,
   RelationRestricted,
-  relationRestrictedSlug,
   RelationTwo,
-  relationTwoSlug,
   RelationWithTitle,
+} from './config';
+import {
+  relationOneSlug,
+  relationRestrictedSlug,
+  relationTwoSlug,
   relationWithTitleSlug,
   slug,
 } from './config';
