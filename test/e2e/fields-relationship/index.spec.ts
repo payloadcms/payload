@@ -12,6 +12,8 @@ import {
   relationRestrictedSlug,
   RelationTwo,
   relationTwoSlug,
+  RelationWithTitle,
+  relationWithTitleSlug,
   slug,
 } from './config';
 
@@ -25,8 +27,9 @@ describe('fields - relationship', () => {
   let anotherRelationOneDoc: RelationOne;
   let relationTwoDoc: RelationTwo;
 
-  let docWithRestrictedRelation: CollectionWithRelationships;
+  let docWithExistingRelations: CollectionWithRelationships;
   let restrictedRelation: RelationRestricted;
+  let relationWithTitle: RelationWithTitle;
 
   beforeAll(async ({ browser }) => {
     const { serverURL } = await initPayloadTest({
@@ -72,12 +75,22 @@ describe('fields - relationship', () => {
       },
     });
 
+    // Doc with useAsTitle
+    relationWithTitle = await payload.create<RelationWithTitle>({
+      collection: relationWithTitleSlug,
+      data: {
+        name: 'relation-title',
+      },
+    });
+
     // Add restricted doc as relation
-    docWithRestrictedRelation = await payload.create<CollectionWithRelationships>({
+    docWithExistingRelations = await payload.create<CollectionWithRelationships>({
       collection: slug,
       data: {
-        name: 'with-relation-to-restricted',
+        name: 'with-existing-relations',
+        relationship: relationOneDoc.id,
         relationshipRestricted: restrictedRelation.id,
+        relationshipWithTitle: relationWithTitle.id,
       },
     });
 
@@ -156,20 +169,50 @@ describe('fields - relationship', () => {
     await saveDocAndAssert(page);
   });
 
-  test('should only show ID on restricted relation', async () => {
-    await page.goto(url.doc(docWithRestrictedRelation.id));
+  describe('existing relationships', () => {
+    test('should highlight existing relationship', async () => {
+      await page.goto(url.doc(docWithExistingRelations.id));
 
-    const fields = page.locator('.render-fields >> .react-select');
-    const restrictedRelationField = fields.nth(3);
+      const fields = page.locator('.render-fields >> .react-select');
+      const relationOneField = fields.nth(0);
 
-    // Check existing relationship has untitled ID
-    await expect(restrictedRelationField).toContainText(`Untitled - ID: ${restrictedRelation.id}`);
+      // Check dropdown options
+      await relationOneField.click({ delay: 100 });
 
-    // Check dropdown options
-    await restrictedRelationField.click({ delay: 100 });
-    const options = page.locator('.rs__option');
+      await expect(page.locator('.rs__option--is-selected')).toHaveCount(1);
+      await expect(page.locator('.rs__option--is-selected')).toHaveText(relationOneDoc.id);
+    });
 
-    await expect(options).toHaveCount(2); // None + 1 Unitled ID
+    test('should show untitled ID on restricted relation', async () => {
+      await page.goto(url.doc(docWithExistingRelations.id));
+
+      const fields = page.locator('.render-fields >> .react-select');
+      const restrictedRelationField = fields.nth(3);
+
+      // Check existing relationship has untitled ID
+      await expect(restrictedRelationField).toContainText(`Untitled - ID: ${restrictedRelation.id}`);
+
+      // Check dropdown options
+      await restrictedRelationField.click({ delay: 100 });
+      const options = page.locator('.rs__option');
+
+      await expect(options).toHaveCount(2); // None + 1 Unitled ID
+    });
+
+    test('should show useAsTitle on relation', async () => {
+      await page.goto(url.doc(docWithExistingRelations.id));
+
+      const fields = page.locator('.render-fields >> .react-select');
+      const relationWithTitleField = fields.nth(4);
+
+      // Check existing relationship for correct title
+      await expect(relationWithTitleField).toHaveText(relationWithTitle.name);
+
+      await relationWithTitleField.click({ delay: 100 });
+      const options = page.locator('.rs__option');
+
+      await expect(options).toHaveCount(2); // None + 1 Doc
+    });
   });
 });
 
@@ -178,6 +221,7 @@ async function clearAllDocs(): Promise<void> {
   await clearCollectionDocs(relationOneSlug);
   await clearCollectionDocs(relationTwoSlug);
   await clearCollectionDocs(relationRestrictedSlug);
+  await clearCollectionDocs(relationWithTitleSlug);
 }
 
 async function clearCollectionDocs(collectionSlug: string): Promise<void> {
