@@ -1,6 +1,6 @@
-import { Page } from '@playwright/test';
-import { Payload } from '../../src';
+import { expect, Page } from '@playwright/test';
 import wait from '../../src/utilities/wait';
+
 
 export const credentials = {
   email: 'dev@payloadcms.com',
@@ -39,4 +39,10 @@ export async function login(args: LoginArgs): Promise<void> {
   await wait(500);
   await page.click('[type=submit]');
   await page.waitForURL(`${serverURL}/admin`);
+}
+
+export async function saveDocAndAssert(page: Page): Promise<void> {
+  await page.click('text=Save', { delay: 100 });
+  await expect(page.locator('.Toastify')).toContainText('successfully');
+  expect(page.url()).not.toContain('create');
 }

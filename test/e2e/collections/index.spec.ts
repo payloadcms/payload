@@ -2,7 +2,7 @@ import { expect, Page, test } from '@playwright/test';
 import payload from '../../../src';
 import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
 import { initPayloadTest } from '../../helpers/configHelpers';
-import { firstRegister } from '../helpers';
+import { firstRegister, saveDocAndAssert } from '../helpers';
 import { Post, slug } from './config';
 import { mapAsync } from '../../../src/utilities/mapAsync';
 
@@ -51,8 +51,7 @@ describe('collections', () => {
       await page.locator('#description').fill(description);
       await page.click('text=Save', { delay: 100 });
 
-      await expect(page.locator('text=Post successfully created')).toBeVisible();
-      expect(page.url()).not.toContain('create');
+      saveDocAndAssert(page);
 
       await expect(page.locator('#title')).toHaveValue(title);
       await expect(page.locator('#description')).toHaveValue(description);

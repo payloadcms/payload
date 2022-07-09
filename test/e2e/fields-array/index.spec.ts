@@ -9,7 +9,7 @@ const { beforeAll, describe } = test;
 
 let url: AdminUrlUtil;
 
-describe('it should create array', () => {
+describe('fields - array', () => {
   let page: Page;
   beforeAll(async ({ browser }) => {
     const { serverURL } = await initPayloadTest({
