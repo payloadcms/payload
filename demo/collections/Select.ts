@@ -22,6 +22,7 @@ const Select: CollectionConfig = {
       }],
       label: 'Select From',
       required: true,
+      isClearable: true,
     },
     {
       name: 'selectHasMany',
