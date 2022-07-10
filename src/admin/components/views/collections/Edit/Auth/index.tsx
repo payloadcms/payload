@@ -55,7 +55,7 @@ const Auth: React.FC<Props> = (props) => {
     }
   }, [serverURL, api, slug, email]);
 
-  if (!collection.auth.disableLocalStrategy) {
+  if (collection.auth.disableLocalStrategy) {
     return null;
   }
 
