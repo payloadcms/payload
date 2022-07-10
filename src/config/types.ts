@@ -116,7 +116,7 @@ export type Config = {
     dateFormat?: string
     components?: {
       routes?: AdminRoute[]
-      providers?: React.ComponentType[]
+      providers?: React.ComponentType<{ children: React.ReactNode }>[]
       beforeDashboard?: React.ComponentType[]
       afterDashboard?: React.ComponentType[]
       beforeLogin?: React.ComponentType[]

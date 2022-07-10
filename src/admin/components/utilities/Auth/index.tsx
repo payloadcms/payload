@@ -170,4 +170,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export const useAuth = (): AuthContext => useContext(Context);
+type UseAuth<T = User> = () => AuthContext<T>;
+
+export const useAuth: UseAuth = () => useContext(Context);
