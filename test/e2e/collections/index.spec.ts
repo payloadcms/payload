@@ -82,11 +82,20 @@ describe('collections', () => {
   });
 
   describe('list view', () => {
+    const tableRowLocator = 'table >> tbody >> tr';
+
     beforeEach(async () => {
       await page.goto(url.collection);
     });
 
     describe('filtering', () => {
+      test('search by id', async () => {
+        const { id } = await createPost();
+        await page.locator('.search-filter__input').fill(id);
+        const tableItems = page.locator(tableRowLocator);
+        await expect(tableItems).toHaveCount(1);
+      });
+
       test('toggle columns', async () => {
         const columnCountLocator = 'table >> thead >> tr >> th';
         await createPost();
@@ -105,11 +114,38 @@ describe('collections', () => {
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns);
       });
 
-      test('search by id', async () => {
-        const { id } = await createPost();
-        await page.locator('.search-filter__input').fill(id);
-        const tableItems = page.locator('table >> tbody >> tr');
-        await expect(tableItems).toHaveCount(1);
+      test('filter rows', async () => {
+        const post1 = await createPost({ title: 'post1' });
+        await createPost({ title: 'post2 ' });
+
+        await expect(page.locator(tableRowLocator)).toHaveCount(2);
+
+        page.locator('.list-controls__toggle-where').click({ delay: 100 });
+        await wait(1000); // Wait for column toggle UI, should probably use waitForSelector
+
+        await page.locator('text=Add filter').click();
+
+        // const filterField = dropDowns.nth(0);
+        const operatorField = page.locator('.condition >> .condition__operator');
+        const valueField = page.locator('.condition >> .condition__value >> input');
+
+        await operatorField.click();
+
+        const dropdownOptions = operatorField.locator('.rs__option');
+        await dropdownOptions.locator('text=equals').click();
+
+        await valueField.fill(post1.id);
+        await wait(1000);
+
+        await expect(page.locator(tableRowLocator)).toHaveCount(1);
+        const firstId = await page.locator(tableRowLocator).first().locator('td').first()
+          .innerText();
+        expect(firstId).toEqual(post1.id);
+
+        // Remove filter
+        await page.locator('.condition >> .icon--x').click();
+        await wait(1000);
+        await expect(page.locator(tableRowLocator)).toHaveCount(2);
       });
     });
 
@@ -124,7 +160,7 @@ describe('collections', () => {
         const pageInfo = page.locator('.collection-list__page-info');
         const perPage = page.locator('.per-page');
         const paginator = page.locator('.paginator');
-        const tableItems = page.locator('table >> tbody >> tr');
+        const tableItems = page.locator(tableRowLocator);
 
         await expect(tableItems).toHaveCount(10);
         await expect(pageInfo).toHaveText('1-10 of 11');
@@ -148,7 +184,7 @@ describe('collections', () => {
       });
 
       test('should sort', async () => {
-        const getTableItems = () => page.locator('table >> tbody >> tr');
+        const getTableItems = () => page.locator(tableRowLocator);
 
         await expect(getTableItems()).toHaveCount(2);
 

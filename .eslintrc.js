@@ -38,6 +38,7 @@ module.exports = {
         'jest/require-top-level-describe': 'off',
         'jest/no-test-callback': 'off',
         'jest/prefer-strict-equal': 'off',
+        'jest/expect-expect': 'off',
       }
     },
     {
