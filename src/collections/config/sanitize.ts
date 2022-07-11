@@ -1,4 +1,5 @@
 import merge from 'deepmerge';
+import { isPlainObject } from 'is-plain-object';
 import { SanitizedCollectionConfig, CollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import toKebabCase from '../../utilities/toKebabCase';
@@ -20,7 +21,9 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized: CollectionConfig = merge(defaults, collection);
+  const sanitized: CollectionConfig = merge(defaults, collection, {
+    isMergeableObject: isPlainObject,
+  });
 
   sanitized.slug = toKebabCase(sanitized.slug);
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
@@ -73,21 +76,31 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
   }
 
   if (sanitized.auth) {
-    sanitized.auth = merge(authDefaults, typeof sanitized.auth === 'object' ? sanitized.auth : {});
+    sanitized.auth = merge(
+      authDefaults,
+      typeof sanitized.auth === 'object' ? sanitized.auth : {},
+      {
+        isMergeableObject: isPlainObject,
+      },
+    );
 
-    let authFields = baseAuthFields;
+    let authFields = [];
 
     if (sanitized.auth.useAPIKey) {
       authFields = authFields.concat(baseAPIKeyFields);
     }
 
-    if (sanitized.auth.verify) {
-      if (sanitized.auth.verify === true) sanitized.auth.verify = {};
-      authFields = authFields.concat(baseVerificationFields);
-    }
+    if (!sanitized.auth.disableLocalStrategy) {
+      authFields = authFields.concat(baseAuthFields);
 
-    if (sanitized.auth.maxLoginAttempts > 0) {
-      authFields = authFields.concat(baseAccountLockFields);
+      if (sanitized.auth.verify) {
+        if (sanitized.auth.verify === true) sanitized.auth.verify = {};
+        authFields = authFields.concat(baseVerificationFields);
+      }
+
+      if (sanitized.auth.maxLoginAttempts > 0) {
+        authFields = authFields.concat(baseAccountLockFields);
+      }
     }
 
     authFields = mergeBaseFields(sanitized.fields, authFields);

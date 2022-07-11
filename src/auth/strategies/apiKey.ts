@@ -51,6 +51,7 @@ export default (payload: Payload, { Model, config }): PassportAPIKey => {
       if (userQuery.docs && userQuery.docs.length > 0) {
         const user = userQuery.docs[0];
         user.collection = config.slug;
+        user._strategy = 'api-key';
         done(null, user);
       } else {
         done(null, false);

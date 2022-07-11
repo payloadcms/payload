@@ -28,6 +28,7 @@ export const defaults: Config = {
   graphQL: {
     maxComplexity: 1000,
     disablePlaygroundInProduction: true,
+    schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
   },
   routes: {
     admin: '/admin',
@@ -43,6 +44,8 @@ export const defaults: Config = {
     json: {},
     compression: {},
     middleware: [],
+    preMiddleware: [],
+    postMiddleware: [],
   },
   hooks: {},
   localization: false,

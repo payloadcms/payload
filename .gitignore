@@ -86,6 +86,15 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
+# Yarn Berry
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
 # dotenv environment variables file
 .env
 
@@ -231,3 +240,4 @@ components/styles.css
 
 # Ignore generated
 demo/generated-types.ts
+demo/generated-schema.graphql

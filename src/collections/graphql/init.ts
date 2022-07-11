@@ -302,79 +302,9 @@ function initCollectionsGraphQL(payload: Payload): void {
         resolve: me(collection),
       };
 
-      if (collection.config.auth.maxLoginAttempts > 0) {
-        payload.Mutation.fields[`unlock${singularLabel}`] = {
-          type: new GraphQLNonNull(GraphQLBoolean),
-          args: {
-            email: { type: new GraphQLNonNull(GraphQLString) },
-          },
-          resolve: unlock(collection),
-        };
-      }
-
       payload.Query.fields[`initialized${singularLabel}`] = {
         type: GraphQLBoolean,
         resolve: init(collection),
-      };
-
-      payload.Mutation.fields[`login${singularLabel}`] = {
-        type: new GraphQLObjectType({
-          name: formatName(`${slug}LoginResult`),
-          fields: {
-            token: {
-              type: GraphQLString,
-            },
-            user: {
-              type: collection.graphQL.type,
-            },
-            exp: {
-              type: GraphQLInt,
-            },
-          },
-        }),
-        args: {
-          email: { type: GraphQLString },
-          password: { type: GraphQLString },
-        },
-        resolve: login(collection),
-      };
-
-      payload.Mutation.fields[`logout${singularLabel}`] = {
-        type: GraphQLString,
-        resolve: logout(collection),
-      };
-
-      payload.Mutation.fields[`forgotPassword${singularLabel}`] = {
-        type: new GraphQLNonNull(GraphQLBoolean),
-        args: {
-          email: { type: new GraphQLNonNull(GraphQLString) },
-          disableEmail: { type: GraphQLBoolean },
-          expiration: { type: GraphQLInt },
-        },
-        resolve: forgotPassword(collection),
-      };
-
-      payload.Mutation.fields[`resetPassword${singularLabel}`] = {
-        type: new GraphQLObjectType({
-          name: formatName(`${slug}ResetPassword`),
-          fields: {
-            token: { type: GraphQLString },
-            user: { type: collection.graphQL.type },
-          },
-        }),
-        args: {
-          token: { type: GraphQLString },
-          password: { type: GraphQLString },
-        },
-        resolve: resetPassword(collection),
-      };
-
-      payload.Mutation.fields[`verifyEmail${singularLabel}`] = {
-        type: GraphQLBoolean,
-        args: {
-          token: { type: GraphQLString },
-        },
-        resolve: verifyEmail(collection),
       };
 
       payload.Mutation.fields[`refreshToken${singularLabel}`] = {
@@ -397,6 +327,78 @@ function initCollectionsGraphQL(payload: Payload): void {
         },
         resolve: refresh(collection),
       };
+
+      payload.Mutation.fields[`logout${singularLabel}`] = {
+        type: GraphQLString,
+        resolve: logout(collection),
+      };
+
+      if (!collection.config.auth.disableLocalStrategy) {
+        if (collection.config.auth.maxLoginAttempts > 0) {
+          payload.Mutation.fields[`unlock${singularLabel}`] = {
+            type: new GraphQLNonNull(GraphQLBoolean),
+            args: {
+              email: { type: new GraphQLNonNull(GraphQLString) },
+            },
+            resolve: unlock(collection),
+          };
+        }
+
+        payload.Mutation.fields[`login${singularLabel}`] = {
+          type: new GraphQLObjectType({
+            name: formatName(`${slug}LoginResult`),
+            fields: {
+              token: {
+                type: GraphQLString,
+              },
+              user: {
+                type: collection.graphQL.type,
+              },
+              exp: {
+                type: GraphQLInt,
+              },
+            },
+          }),
+          args: {
+            email: { type: GraphQLString },
+            password: { type: GraphQLString },
+          },
+          resolve: login(collection),
+        };
+
+        payload.Mutation.fields[`forgotPassword${singularLabel}`] = {
+          type: new GraphQLNonNull(GraphQLBoolean),
+          args: {
+            email: { type: new GraphQLNonNull(GraphQLString) },
+            disableEmail: { type: GraphQLBoolean },
+            expiration: { type: GraphQLInt },
+          },
+          resolve: forgotPassword(collection),
+        };
+
+        payload.Mutation.fields[`resetPassword${singularLabel}`] = {
+          type: new GraphQLObjectType({
+            name: formatName(`${slug}ResetPassword`),
+            fields: {
+              token: { type: GraphQLString },
+              user: { type: collection.graphQL.type },
+            },
+          }),
+          args: {
+            token: { type: GraphQLString },
+            password: { type: GraphQLString },
+          },
+          resolve: resetPassword(collection),
+        };
+
+        payload.Mutation.fields[`verifyEmail${singularLabel}`] = {
+          type: GraphQLBoolean,
+          args: {
+            token: { type: GraphQLString },
+          },
+          resolve: verifyEmail(collection),
+        };
+      }
     }
   });
 }

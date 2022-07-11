@@ -10,21 +10,25 @@ export type Arguments = {
   collection: Collection
 }
 
-async function logout(args: Arguments): Promise<string> {
+async function logout(incomingArgs: Arguments): Promise<string> {
+  let args = incomingArgs;
   const {
     res,
     req: {
       payload: {
         config,
       },
+      user,
     },
+    req,
     collection: {
       config: collectionConfig,
     },
-  } = args;
+    collection,
+  } = incomingArgs;
 
-  if (!args.req.user) throw new APIError('No User', httpStatus.BAD_REQUEST);
-  if (args.req.user.collection !== collectionConfig.slug) throw new APIError('Incorrect collection', httpStatus.FORBIDDEN);
+  if (!user) throw new APIError('No User', httpStatus.BAD_REQUEST);
+  if (user.collection !== collectionConfig.slug) throw new APIError('Incorrect collection', httpStatus.FORBIDDEN);
 
   const cookieOptions = {
     path: '/',
@@ -35,6 +39,15 @@ async function logout(args: Arguments): Promise<string> {
   };
 
   if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
+
+  await collection.config.hooks.afterLogout.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    args = (await hook({
+      req,
+      res,
+    })) || args;
+  }, Promise.resolve());
 
   res.clearCookie(`${config.cookiePrefix}-token`, cookieOptions);
 

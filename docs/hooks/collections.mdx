@@ -19,7 +19,11 @@ Collections feature the ability to define the following hooks:
 
 Additionally, `auth`-enabled collections feature the following hooks:
 
+- [beforeLogin](#beforelogin)
 - [afterLogin](#afterlogin)
+- [afterLogout](#afterlogout)
+- [afterRefresh](#afterrefresh)
+- [afterMe](#afterme)
 - [afterForgotPassword](#afterforgotpassword)
 
 ## Config
@@ -45,7 +49,11 @@ module.exports = {
     afterDelete: [(args) => {...}],
 
     // Auth-enabled hooks
+    beforeLogin: [(args) => {...}],
     afterLogin: [(args) => {...}],
+    afterLogout: [(args) => {...}],
+    afterRefresh: [(args) => {...}],
+    afterMe: [(args) => {...}],
     afterForgotPassword: [(args) => {...}],
   }
 }
@@ -55,7 +63,7 @@ module.exports = {
 
 The `beforeOperation` Hook type can be used to modify the arguments that operations accept or execute side-effects that run before an operation begins.
 
-Available Collection operations include `create`, `read`, `update`, `delete`, `refresh`, and `forgotPassword`.
+Available Collection operations include `create`, `read`, `update`, `delete`, `login`, `refresh` and `forgotPassword`.
 
 ```js
 const beforeOperationHook = async ({
@@ -162,6 +170,20 @@ const afterDeleteHook = async ({
 }) => {...}
 ```
 
+### beforeLogin
+
+For auth-enabled Collections, this hook runs after successful `login` operations. You can optionally modify the user that is returned.
+
+```js
+const beforeLoginHook = async ({
+  req, // full express request
+  user, // user being logged in
+  token, // user token
+}) => {
+  return user;
+}
+```
+
 ### afterLogin
 
 For auth-enabled Collections, this hook runs after successful `login` operations. You can optionally modify the user that is returned.
@@ -169,11 +191,40 @@ For auth-enabled Collections, this hook runs after successful `login` operations
 ```js
 const afterLoginHook = async ({
   req, // full express request
-  user, // user being logged in
-  token, // user token
-}) => {
-  return user;
-}
+}) => {...}
+```
+
+### afterLogout
+
+For auth-enabled Collections, this hook runs after `logout` operations.
+
+```js
+const afterLogoutHook = async ({
+  req, // full express request
+}) => {...}
+```
+
+### afterRefresh
+
+For auth-enabled Collections, this hook runs after `refresh` operations.
+
+```js
+const afterRefreshHook = async ({
+  req, // full express request
+  res, // full express response
+  token, // newly refreshed user token
+}) => {...}
+```
+
+### afterMe
+
+For auth-enabled Collections, this hook runs after `me` operations.
+
+```js
+const afterMeHook = async ({
+  req, // full express request
+  response, // response to return
+}) => {...}
 ```
 
 ### afterForgotPassword
@@ -206,6 +257,9 @@ import type {
   CollectionAfterDeleteHook,
   CollectionBeforeLoginHook,
   CollectionAfterLoginHook,
+  CollectionAfterLogoutHook,
+  CollectionAfterRefreshHook,
+  CollectionAfterMeHook,
   CollectionAfterForgotPasswordHook,
 } from 'payload/types';
 

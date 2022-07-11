@@ -1,19 +1,18 @@
+/* eslint-disable no-param-reassign */
 import * as GraphQL from 'graphql';
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
-import { graphqlHTTP } from 'express-graphql';
 import queryComplexity, { fieldExtensionsEstimator, simpleEstimator } from 'graphql-query-complexity';
-import errorHandler from './errorHandler';
-import buildPoliciesType from './schema/buildPoliciesType';
+import { Payload } from '..';
 import buildLocaleInputType from './schema/buildLocaleInputType';
 import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType';
 import initCollections from '../collections/graphql/init';
 import initGlobals from '../globals/graphql/init';
 import initPreferences from '../preferences/graphql/init';
+import buildPoliciesType from './schema/buildPoliciesType';
 import accessResolver from '../auth/graphql/resolvers/access';
+import errorHandler from './errorHandler';
 
-const initializeGraphQL = (req, res) => {
-  const { payload } = req;
-
+export default function registerSchema(payload: Payload): void {
   payload.types = {
     blockTypes: {},
     blockInputTypes: {},
@@ -106,18 +105,4 @@ const initializeGraphQL = (req, res) => {
       // onComplete: (complexity) => { console.log('Query Complexity:', complexity); },
     }),
   ]);
-
-  payload.errorResponses = null;
-
-  return graphqlHTTP(
-    async (request, response, { variables }) => ({
-      schema: payload.schema,
-      customFormatErrorFn: payload.customFormatErrorFn,
-      extensions: payload.extensions,
-      context: { req, res },
-      validationRules: payload.validationRules(variables),
-    }),
-  );
-};
-
-export default initializeGraphQL;
+}
