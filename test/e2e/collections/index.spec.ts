@@ -39,13 +39,36 @@ describe('collections', () => {
     await clearDocs();
   });
 
-  test('should nav to list', async () => {
-    await page.goto(url.admin);
-    const collectionLink = page.locator(`nav >> text=${slug}`);
-    await collectionLink.click();
+  describe('Nav', () => {
+    test('should nav to collection - sidebar', async () => {
+      await page.goto(url.admin);
+      const collectionLink = page.locator(`nav >> text=${slug}`);
+      await collectionLink.click();
 
-    expect(page.url()).toContain(url.collection);
+      expect(page.url()).toContain(url.collection);
+    });
+
+    test('should navigate to collection - card', async () => {
+      await page.goto(url.admin);
+      await page.locator('a:has-text("Posts")').click();
+      expect(page.url()).toContain(url.collection);
+    });
+
+    test('breadcrumbs - from card to dashboard', async () => {
+      await page.goto(url.collection);
+      await page.locator('a:has-text("Dashboard")').click();
+      expect(page.url()).toContain(url.admin);
+    });
+
+    test('breadcrumbs - from document to collection', async () => {
+      const { id } = await createPost();
+
+      await page.goto(url.doc(id));
+      await page.locator('nav >> text=Posts').click();
+      expect(page.url()).toContain(url.collection);
+    });
   });
+
 
   describe('CRUD', () => {
     test('should create', async () => {
@@ -68,16 +91,26 @@ describe('collections', () => {
       await expect(page.locator('#title')).toHaveValue(title);
       await expect(page.locator('#description')).toHaveValue(description);
     });
-
     test('should delete existing', async () => {
       const { id } = await createPost();
 
       await page.goto(url.doc(id));
-      await page.locator('.delete-document__toggle').click();
-      await page.locator('button >> text=Confirm').click();
+      await page.locator('button:has-text("Delete")').click();
+      await page.locator('button:has-text("Confirm")').click();
 
       await expect(page.locator(`text=Post "${id}" successfully deleted.`)).toBeVisible();
       expect(page.url()).toContain(url.collection);
+    });
+
+    test('should duplicate existing', async () => {
+      const { id } = await createPost();
+
+      await page.goto(url.doc(id));
+      await page.locator('button:has-text("Duplicate")').click();
+
+      expect(page.url()).toContain(url.create);
+      await page.locator('button:has-text("Save")').click();
+      expect(page.url()).not.toContain(id); // new id
     });
   });
 
@@ -99,7 +132,7 @@ describe('collections', () => {
       test('toggle columns', async () => {
         const columnCountLocator = 'table >> thead >> tr >> th';
         await createPost();
-        page.locator('.list-controls__toggle-columns').click({ delay: 100 });
+        await page.locator('button:has-text("Columns")').click();
         await wait(1000); // Wait for column toggle UI, should probably use waitForSelector
 
         const numberOfColumns = await page.locator(columnCountLocator).count();
@@ -116,11 +149,11 @@ describe('collections', () => {
 
       test('filter rows', async () => {
         const post1 = await createPost({ title: 'post1' });
-        await createPost({ title: 'post2 ' });
+        await createPost({ title: 'post2' });
 
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
 
-        page.locator('.list-controls__toggle-where').click({ delay: 100 });
+        await page.locator('button:has-text("Filters")').click();
         await wait(1000); // Wait for column toggle UI, should probably use waitForSelector
 
         await page.locator('text=Add filter').click();
