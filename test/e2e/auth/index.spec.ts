@@ -17,7 +17,7 @@ import { slug } from './config';
 const { beforeAll, describe } = test;
 let url: AdminUrlUtil;
 
-describe('suite name', () => {
+describe('authentication', () => {
   let page: Page;
 
   beforeAll(async ({ browser }) => {
@@ -37,11 +37,32 @@ describe('suite name', () => {
     await firstRegister({ page, serverURL });
   });
 
-  // afterEach(async () => {
-  // });
-
-  describe('feature', () => {
-    test('testname', () => {
+  describe('Authentication', () => {
+    test('should login and logout', () => {
+      expect(1).toEqual(1);
+    });
+    test('should logout', () => {
+      expect(1).toEqual(1);
+    });
+    test('should allow change password', () => {
+      expect(1).toEqual(1);
+    });
+    test('should reset password', () => {
+      expect(1).toEqual(1);
+    });
+    test('should lockout after reaching max login attempts', () => {
+      expect(1).toEqual(1);
+    });
+    test('should prevent login for locked user', () => {
+      expect(1).toEqual(1);
+    });
+    test('should unlock user', () => {
+      expect(1).toEqual(1);
+    });
+    test('should not login without verify', () => {
+      expect(1).toEqual(1);
+    });
+    test('should allow generate api keys', () => {
       expect(1).toEqual(1);
     });
   });
