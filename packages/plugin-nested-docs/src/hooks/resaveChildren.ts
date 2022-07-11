@@ -16,9 +16,12 @@ const resaveChildren = (options: Options, collection: CollectionConfig): Collect
 
     try {
       children.docs.forEach((child: any) => {
+        const updateAsDraft = typeof collection.versions === 'object' && collection.versions.drafts && child._status !== 'published';
+
         payload.update({
           id: child.id,
           collection: collection.slug,
+          draft: updateAsDraft,
           data: {
             ...child,
             breadcrumbs: populateBreadcrumbs(req, options, collection, child),
@@ -27,7 +30,8 @@ const resaveChildren = (options: Options, collection: CollectionConfig): Collect
         });
       });
     } catch (err) {
-      console.error(err);
+      payload.logger.error(`Nested Docs plugin has had an error while resaving a child document.`)
+      payload.logger.error(err);
     }
   };
 
