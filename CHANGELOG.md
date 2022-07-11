@@ -1,25 +1,15 @@
 ## [0.19.2](https://github.com/payloadcms/payload/compare/v0.19.1...v0.19.2) (2022-07-11)
 
-
 ### Bug Fixes
 
-* ensures anonymous passport strategy is loaded last ([df76f60](https://github.com/payloadcms/payload/commit/df76f60e7f864f0c018a7204e980e0951713226e))
-* ensures router switch only contains top-level route components ([91c4ef2](https://github.com/payloadcms/payload/commit/91c4ef226bef83e21fcf2ef110faa4366e3cca5a))
-* removes reliance on auth email ([d68bb8c](https://github.com/payloadcms/payload/commit/d68bb8c292bec79588dc0161f97fc26f2d03c9aa))
-
+* ensures only plain objects are merged within incoming configs ([2c66ad8](https://github.com/payloadcms/payload/commit/2c66ad86898c28da32b1714821c2ea8fe8e17868))
 
 ### Features
 
+* :tada: [Extensible Authentication Strategies](https://github.com/payloadcms/payload/discussions/290)!
 * add afterMe afterLogout and afterRefresh ([4055908](https://github.com/payloadcms/payload/commit/4055908bc885ec1b2d69817a9937e4591d099fa1))
 * add preMiddleware and postMiddleware, deprecate middleware ([e806437](https://github.com/payloadcms/payload/commit/e8064371b01b4e66d3b1af980e71364714bf3d5b))
-* add res to token hooks ([166bd31](https://github.com/payloadcms/payload/commit/166bd31506e8698d31c53c2b67ec32fde80a84d3))
-* adds cookie-parser ([5858752](https://github.com/payloadcms/payload/commit/58587525e52252f37a9608a4ef9c7fccf248f5ed))
-* begins extensible auth strategies ([6d02f7d](https://github.com/payloadcms/payload/commit/6d02f7d3ac065b1a2927a01a0ff10a1fca538108))
 * better types useAuth and custom provider components ([38b52bf](https://github.com/payloadcms/payload/commit/38b52bf67b0d1545bb8ee627f3b6140e27887099))
-* ensures auth component doesn't render if disabled ([03f28a4](https://github.com/payloadcms/payload/commit/03f28a480423ef0d7d78b2ee1ea2e97a07e4d334))
-* ensures only plain objects are merged within incoming configs ([2c66ad8](https://github.com/payloadcms/payload/commit/2c66ad86898c28da32b1714821c2ea8fe8e17868))
-* extends strategies with more properties ([6016e23](https://github.com/payloadcms/payload/commit/6016e2346c22712a62589484b4baa403a22caa03))
-* only adds email if local strategy enabled ([56cdd94](https://github.com/payloadcms/payload/commit/56cdd943fd1374a2c66bc857b0cd587f768631bb))
 
 ## [0.19.1](https://github.com/payloadcms/payload/compare/v0.19.0...v0.19.1) (2022-07-09)
 
