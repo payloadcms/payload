@@ -1,5 +1,4 @@
 import express from 'express';
-import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import compression from 'compression';
 import bodyParser from 'body-parser';
@@ -33,7 +32,6 @@ const middleware = (payload: Payload): any => {
 
   return [
     ...(payload.config.express.preMiddleware || []),
-    cookieParser(),
     rateLimit(rateLimitOptions),
     passport.initialize(),
     identifyAPI('REST'),

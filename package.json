@@ -101,7 +101,6 @@
     "compression": "^1.7.4",
     "conf": "^10.1.2",
     "connect-history-api-fallback": "^1.6.0",
-    "cookie-parser": "^1.4.6",
     "css-loader": "^5.0.1",
     "css-minimizer-webpack-plugin": "^3.4.1",
     "date-fns": "^2.14.0",
