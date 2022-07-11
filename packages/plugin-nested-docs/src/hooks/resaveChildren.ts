@@ -15,7 +15,7 @@ const resaveChildren = (options: Options, collection: CollectionConfig): Collect
     });
 
     try {
-      children.docs.forEach((child) => {
+      children.docs.forEach((child: any) => {
         payload.update({
           id: child.id,
           collection: collection.slug,

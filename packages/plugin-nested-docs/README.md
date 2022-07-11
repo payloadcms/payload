@@ -182,4 +182,4 @@ import {
 
 ## Screenshots
 
-<!-- ![screenshot 1](https://github.com/trouble/@payloadcms/plugin-nested-docs/blob/main/images/screenshot-1.jpg?raw=true) -->
+<!-- ![screenshot 1](https://github.com/@payloadcms/plugin-nested-docs/blob/main/images/screenshot-1.jpg?raw=true) -->
