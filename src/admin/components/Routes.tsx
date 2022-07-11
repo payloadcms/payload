@@ -106,18 +106,20 @@ const Routes = () => {
                 <Route path={`${match.url}/logout`}>
                   <Logout />
                 </Route>
+                <Route path={`${match.url}/logout-inactivity`}>
+                  <Logout inactivity />
+                </Route>
+
                 {!userCollection.auth.disableLocalStrategy && (
-                  <React.Fragment>
-                    <Route path={`${match.url}/logout-inactivity`}>
-                      <Logout inactivity />
-                    </Route>
-                    <Route path={`${match.url}/forgot`}>
-                      <ForgotPassword />
-                    </Route>
-                    <Route path={`${match.url}/reset/:token`}>
-                      <ResetPassword />
-                    </Route>
-                  </React.Fragment>
+                  <Route path={`${match.url}/forgot`}>
+                    <ForgotPassword />
+                  </Route>
+                )}
+
+                {!userCollection.auth.disableLocalStrategy && (
+                  <Route path={`${match.url}/reset/:token`}>
+                    <ResetPassword />
+                  </Route>
                 )}
 
                 {collections.map((collection) => {
