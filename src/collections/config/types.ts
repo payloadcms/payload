@@ -2,6 +2,7 @@
 import { DeepRequired } from 'ts-essentials';
 import { PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
+import { Response } from 'express';
 import { Access, GeneratePreviewURL, EntityDescription, Endpoint } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
@@ -120,6 +121,23 @@ export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   token: string;
 }) => any;
 
+export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
+  req: PayloadRequest;
+  res: Response;
+}) => any;
+
+export type AfterMeHook<T extends TypeWithID = any> = (args: {
+  req: PayloadRequest;
+  response: unknown;
+}) => any;
+
+export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
+  req: PayloadRequest;
+  res: Response;
+  token: string;
+  exp: number;
+}) => any;
+
 export type AfterForgotPasswordHook = (args: {
   args?: any;
 }) => any;
@@ -191,6 +209,9 @@ export type CollectionConfig = {
     afterError?: AfterErrorHook;
     beforeLogin?: BeforeLoginHook[];
     afterLogin?: AfterLoginHook[];
+    afterLogout?: AfterLogoutHook[];
+    afterMe?: AfterMeHook[];
+    afterRefresh?: AfterRefreshHook[];
     afterForgotPassword?: AfterForgotPasswordHook[];
   };
   /**

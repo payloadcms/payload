@@ -23,20 +23,45 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
   let { endpoints } = collection;
 
   if (collection.auth) {
-    if (collection.auth.verify) {
-      endpoints.push({
-        path: '/verify/:token',
-        method: 'post',
-        handler: verifyEmail,
-      });
-    }
+    if (!collection.auth.disableLocalStrategy) {
+      if (collection.auth.verify) {
+        endpoints.push({
+          path: '/verify/:token',
+          method: 'post',
+          handler: verifyEmail,
+        });
+      }
 
-    if (collection.auth.maxLoginAttempts > 0) {
-      endpoints.push({
-        path: '/unlock',
-        method: 'post',
-        handler: unlock,
-      });
+      if (collection.auth.maxLoginAttempts > 0) {
+        endpoints.push({
+          path: '/unlock',
+          method: 'post',
+          handler: unlock,
+        });
+      }
+
+      endpoints = endpoints.concat([
+        {
+          path: '/login',
+          method: 'post',
+          handler: loginHandler,
+        },
+        {
+          path: '/first-register',
+          method: 'post',
+          handler: registerFirstUserHandler,
+        },
+        {
+          path: '/forgot-password',
+          method: 'post',
+          handler: forgotPasswordHandler,
+        },
+        {
+          path: '/reset-password',
+          method: 'post',
+          handler: resetPassword,
+        },
+      ]);
     }
 
     endpoints = endpoints.concat([
@@ -46,9 +71,9 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         handler: initHandler,
       },
       {
-        path: '/login',
-        method: 'post',
-        handler: loginHandler,
+        path: '/me',
+        method: 'get',
+        handler: meHandler,
       },
       {
         path: '/logout',
@@ -59,26 +84,6 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         path: '/refresh-token',
         method: 'post',
         handler: refreshHandler,
-      },
-      {
-        path: '/me',
-        method: 'get',
-        handler: meHandler,
-      },
-      {
-        path: '/first-register',
-        method: 'post',
-        handler: registerFirstUserHandler,
-      },
-      {
-        path: '/forgot-password',
-        method: 'post',
-        handler: forgotPasswordHandler,
-      },
-      {
-        path: '/reset-password',
-        method: 'post',
-        handler: resetPassword,
       },
     ]);
   }

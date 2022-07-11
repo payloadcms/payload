@@ -14,6 +14,10 @@ export default ({ secret, config, collections }: Payload): PassportStrategy => {
   };
 
   return new JwtStrategy(opts, async (req, token, done) => {
+    if (req.user) {
+      done(null, req.user);
+    }
+
     try {
       const collection = collections[token.collection];
 
@@ -50,6 +54,7 @@ export default ({ secret, config, collections }: Payload): PassportStrategy => {
       if (userQuery.docs && userQuery.docs.length > 0) {
         const user = userQuery.docs[0];
         user.collection = collection.config.slug;
+        user._strategy = 'local-jwt';
 
         done(null, user);
       } else {

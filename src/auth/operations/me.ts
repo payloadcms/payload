@@ -21,6 +21,9 @@ async function me({
   collection,
 }: Arguments): Promise<Result> {
   const extractJWT = getExtractJWT(req.payload.config);
+  let response: Result = {
+    user: null,
+  };
 
   if (req.user) {
     const user = { ...req.user };
@@ -33,7 +36,7 @@ async function me({
 
     delete user.collection;
 
-    const response: Result = {
+    response = {
       user,
       collection: req.user.collection,
     };
@@ -45,13 +48,22 @@ async function me({
       const decoded = jwt.decode(token) as jwt.JwtPayload;
       if (decoded) response.exp = decoded.exp;
     }
-
-    return response;
   }
 
-  return {
-    user: null,
-  };
+  // /////////////////////////////////////
+  // After Me - Collection
+  // /////////////////////////////////////
+
+  await collection.config.hooks.afterMe.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    response = await hook({
+      req,
+      response,
+    }) || response;
+  }, Promise.resolve());
+
+  return response;
 }
 
 export default me;

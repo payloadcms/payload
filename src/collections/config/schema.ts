@@ -51,6 +51,9 @@ const collectionSchema = joi.object().keys({
     afterDelete: joi.array().items(joi.func()),
     beforeLogin: joi.array().items(joi.func()),
     afterLogin: joi.array().items(joi.func()),
+    afterLogout: joi.array().items(joi.func()),
+    afterMe: joi.array().items(joi.func()),
+    afterRefresh: joi.array().items(joi.func()),
     afterForgotPassword: joi.array().items(joi.func()),
   }),
   endpoints: joi.array().items(joi.object({
@@ -84,6 +87,12 @@ const collectionSchema = joi.object().keys({
         generateEmailSubject: joi.func(),
       }),
       maxLoginAttempts: joi.number(),
+      disableLocalStrategy: joi.boolean().valid(true),
+      strategies: joi.array().items(joi.object().keys({
+        strategy: joi.object().required(),
+        refresh: joi.boolean(),
+        logout: joi.boolean(),
+      })),
     }),
     joi.boolean(),
   ),

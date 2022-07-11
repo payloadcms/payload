@@ -44,13 +44,21 @@ const Routes = () => {
     globals,
   } = useConfig();
 
+  const userCollection = collections.find(({ slug }) => slug === userSlug);
+
   useEffect(() => {
-    requests.get(`${routes.api}/${userSlug}/init`).then((res) => res.json().then((data) => {
-      if (data && 'initialized' in data) {
-        setInitialized(data.initialized);
-      }
-    }));
-  }, [routes, userSlug]);
+    const { slug } = userCollection;
+
+    if (!userCollection.auth.disableLocalStrategy) {
+      requests.get(`${routes.api}/${slug}/init`).then((res) => res.json().then((data) => {
+        if (data && 'initialized' in data) {
+          setInitialized(data.initialized);
+        }
+      }));
+    } else {
+      setInitialized(true);
+    }
+  }, [routes, userCollection]);
 
   return (
     <Suspense fallback={<Loading />}>
@@ -101,15 +109,21 @@ const Routes = () => {
                 <Route path={`${match.url}/logout-inactivity`}>
                   <Logout inactivity />
                 </Route>
-                <Route path={`${match.url}/forgot`}>
-                  <ForgotPassword />
-                </Route>
-                <Route path={`${match.url}/reset/:token`}>
-                  <ResetPassword />
-                </Route>
+
+                {!userCollection.auth.disableLocalStrategy && (
+                  <Route path={`${match.url}/forgot`}>
+                    <ForgotPassword />
+                  </Route>
+                )}
+
+                {!userCollection.auth.disableLocalStrategy && (
+                  <Route path={`${match.url}/reset/:token`}>
+                    <ResetPassword />
+                  </Route>
+                )}
 
                 {collections.map((collection) => {
-                  if (collection?.auth?.verify) {
+                  if (collection?.auth?.verify && !collection.auth.disableLocalStrategy) {
                     return (
                       <Route
                         key={`${collection.slug}-verify`}

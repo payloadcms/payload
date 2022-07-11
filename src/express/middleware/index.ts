@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import compression from 'compression';
 import bodyParser from 'body-parser';
@@ -26,7 +27,13 @@ const middleware = (payload: Payload): any => {
 
   if (typeof payload.config.rateLimit.skip === 'function') rateLimitOptions.skip = payload.config.rateLimit.skip;
 
+  if (payload.config.express.middleware?.length) {
+    payload.logger.warn('express.middleware is deprecated. Please migrate to express.postMiddleware.');
+  }
+
   return [
+    ...(payload.config.express.preMiddleware || []),
+    cookieParser(),
     rateLimit(rateLimitOptions),
     passport.initialize(),
     identifyAPI('REST'),
@@ -44,6 +51,7 @@ const middleware = (payload: Payload): any => {
     corsHeaders(payload.config),
     authenticate(payload.config),
     ...(payload.config.express.middleware || []),
+    ...(payload.config.express.postMiddleware || []),
   ];
 };
 

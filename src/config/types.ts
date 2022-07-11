@@ -116,7 +116,7 @@ export type Config = {
     dateFormat?: string
     components?: {
       routes?: AdminRoute[]
-      providers?: React.ComponentType[]
+      providers?: React.ComponentType<{ children: React.ReactNode }>[]
       beforeDashboard?: React.ComponentType[]
       afterDashboard?: React.ComponentType[]
       beforeLogin?: React.ComponentType[]
@@ -162,7 +162,12 @@ export type Config = {
     compression?: {
       [key: string]: unknown
     },
+    /**
+     * @deprecated express.middleware will be removed in a future version. Please migrate to express.postMiddleware.
+     */
     middleware?: any[]
+    preMiddleware?: any[]
+    postMiddleware?: any[]
   },
   defaultDepth?: number;
   maxDepth?: number;

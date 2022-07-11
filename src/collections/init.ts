@@ -3,7 +3,6 @@ import paginate from 'mongoose-paginate-v2';
 import express from 'express';
 import passport from 'passport';
 import passportLocalMongoose from 'passport-local-mongoose';
-import Passport from 'passport-local';
 import { UpdateQuery } from 'mongodb';
 import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
 import buildQueryPlugin from '../mongoose/buildQuery';
@@ -17,15 +16,13 @@ import { getVersionsModelName } from '../versions/getVersionsModelName';
 import mountEndpoints from '../express/mountEndpoints';
 import buildEndpoints from './buildEndpoints';
 
-const LocalStrategy = Passport.Strategy;
-
 export default function registerCollections(ctx: Payload): void {
   ctx.config.collections = ctx.config.collections.map((collection: SanitizedCollectionConfig) => {
     const formattedCollection = collection;
 
     const schema = buildCollectionSchema(formattedCollection, ctx.config);
 
-    if (collection.auth) {
+    if (collection.auth && !collection.auth.disableLocalStrategy) {
       schema.plugin(passportLocalMongoose, {
         usernameField: 'email',
       });
@@ -101,17 +98,22 @@ export default function registerCollections(ctx: Payload): void {
 
       router.all('*', bindCollectionMiddleware(ctx.collections[formattedCollection.slug]));
 
-      const endpoints = buildEndpoints(collection);
-      mountEndpoints(router, endpoints);
-
       if (collection.auth) {
         const AuthCollection = ctx.collections[formattedCollection.slug];
-        passport.use(new LocalStrategy(AuthCollection.Model.authenticate()));
 
         if (collection.auth.useAPIKey) {
           passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(ctx, AuthCollection));
         }
+
+        if (Array.isArray(collection.auth.strategies)) {
+          collection.auth.strategies.forEach(({ strategy }) => {
+            passport.use(strategy);
+          });
+        }
       }
+
+      const endpoints = buildEndpoints(collection);
+      mountEndpoints(router, endpoints);
 
       ctx.router.use(`/${slug}`, router);
     }
