@@ -91,6 +91,23 @@ describe('collections', () => {
       await expect(page.locator('#title')).toHaveValue(title);
       await expect(page.locator('#description')).toHaveValue(description);
     });
+
+    test('should update existing', async () => {
+      const { id } = await createPost();
+
+      await page.goto(url.doc(id));
+
+      const newTitle = 'new title';
+      const newDesc = 'new description';
+      await page.locator('#title').fill(newTitle);
+      await page.locator('#description').fill(newDesc);
+
+      await saveDocAndAssert(page);
+
+      await expect(page.locator('#title')).toHaveValue(newTitle);
+      await expect(page.locator('#description')).toHaveValue(newDesc);
+    });
+
     test('should delete existing', async () => {
       const { id } = await createPost();
 
@@ -148,7 +165,7 @@ describe('collections', () => {
       });
 
       test('filter rows', async () => {
-        const post1 = await createPost({ title: 'post1' });
+        const { id } = await createPost({ title: 'post1' });
         await createPost({ title: 'post2' });
 
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
@@ -158,7 +175,6 @@ describe('collections', () => {
 
         await page.locator('text=Add filter').click();
 
-        // const filterField = dropDowns.nth(0);
         const operatorField = page.locator('.condition >> .condition__operator');
         const valueField = page.locator('.condition >> .condition__value >> input');
 
@@ -167,13 +183,13 @@ describe('collections', () => {
         const dropdownOptions = operatorField.locator('.rs__option');
         await dropdownOptions.locator('text=equals').click();
 
-        await valueField.fill(post1.id);
+        await valueField.fill(id);
         await wait(1000);
 
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
         const firstId = await page.locator(tableRowLocator).first().locator('td').first()
           .innerText();
-        expect(firstId).toEqual(post1.id);
+        expect(firstId).toEqual(id);
 
         // Remove filter
         await page.locator('.condition >> .icon--x').click();
