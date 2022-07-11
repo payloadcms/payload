@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-nested-docs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "homepage:": "https://payloadcms.com",
   "repository": "git@github.com:payloadcms/plugin-nested-docs.git",
   "description": "Nested documents plugin for Payload CMS",
