@@ -75,6 +75,11 @@
     top: 0;
     z-index: 2;
     padding-right: $baseline;
+
+    >* {
+      position: relative;
+      z-index: 1;
+    }
   }
 
   &__document-actions--with-preview {

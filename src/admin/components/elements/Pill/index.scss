@@ -46,7 +46,7 @@
       }
 
       &:active {
-        background: var(--color-base-50);
+        background: var(--color-base-100);
       }
     }
   }
@@ -58,13 +58,13 @@
       }
 
       &:active {
-        background: var(--color-base-50);
+        background: var(--color-base-100);
       }
     }
   }
 
   &--style-light-gray {
-    background: var(--color-base-50);
+    background: var(--color-base-100);
     color: var(--color-base-800);
   }
 

@@ -8,7 +8,7 @@
     cursor: pointer;
 
     &--is-current {
-      background: var(--color-base-50);
+      background: var(--color-base-100);
       color: var(--color-base-400);
       cursor: default;
     }
@@ -32,7 +32,7 @@
     line-height: base(1);
 
     &:hover:not(.clickable-arrow--is-disabled) {
-      background: var(--color-base-50);
+      background: var(--color-base-100);
     }
   }
 

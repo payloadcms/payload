@@ -8,6 +8,8 @@
   .template-minimal {
     padding-top: base(6);
     align-items: flex-start;
+    position: relative;
+    z-index: 1;
   }
 
   &__header {

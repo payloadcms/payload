@@ -116,9 +116,26 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--color-success-500);
 // STYLE MIXINS
 //////////////////////////////
 
-@mixin blur-bg($color: var(--color-base-50)) {
-  background: rgba($color, .7);
-  backdrop-filter: saturate(180%) blur(5px);
+@mixin blur-bg($color: var(--color-base-100)) {
+
+  &:before,
+  &:after {
+    content: ' ';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  &:before {
+    background: $color;
+    opacity: .7;
+  }
+
+  &:after {
+    backdrop-filter: blur(5px);
+  }
 }
 
 @mixin formInput () {

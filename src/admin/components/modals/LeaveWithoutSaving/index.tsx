@@ -17,7 +17,7 @@ const LeaveWithoutSaving: React.FC = () => {
     <NavigationPrompt when={Boolean(modified && user)}>
       {({ onConfirm, onCancel }) => (
         <div className={modalSlug}>
-          <MinimalTemplate>
+          <MinimalTemplate className={`${modalSlug}__template`}>
             <h1>Leave without saving</h1>
             <p>Your changes have not been saved. If you leave now, you will lose your changes.</p>
             <Button

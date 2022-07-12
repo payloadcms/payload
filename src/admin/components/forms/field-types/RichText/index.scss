@@ -6,14 +6,19 @@
 
   &__toolbar {
     @include blur-bg(var(--color-base-0));
-    display: flex;
-    flex-wrap: wrap;
-    align-items: stretch;
     margin-bottom: $baseline;
     border: $style-stroke-width-s solid var(--color-base-150);
     padding: base(.25);
     position: sticky;
     top: base(5);
+  }
+
+  &__toolbar-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    position: relative;
+    z-index: 1;
   }
 
   &__editor {
@@ -61,7 +66,7 @@
     }
 
     &:hover {
-      background-color: var(--color-base-50);
+      background-color: var(--color-base-100);
     }
 
     &__button--active,

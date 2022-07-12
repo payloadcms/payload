@@ -90,9 +90,8 @@ const DeleteDocument: React.FC<Props> = (props) => {
         <Modal
           slug={modalSlug}
           className={baseClass}
-          lockBodyScroll
         >
-          <MinimalTemplate>
+          <MinimalTemplate className={`${baseClass}__template`}>
             <h1>Confirm deletion</h1>
             <p>
               You are about to delete the

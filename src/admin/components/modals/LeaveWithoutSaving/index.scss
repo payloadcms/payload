@@ -9,6 +9,11 @@
   bottom: 0;
   left: 0;
 
+  &__template {
+    position: relative;
+    z-index: 1;
+  }
+
   .btn {
     margin-right: $baseline;
   }

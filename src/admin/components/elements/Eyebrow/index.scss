@@ -10,10 +10,15 @@
   align-items: center;
   justify-content: space-between;
 
+  &__wrap {
+    position: relative;
+    z-index: 1;
+  }
+
   @include mid-break {
     padding: 0 0 $baseline;
     margin: 0;
-    position: static;
+    position: relative;
     display: block;
   }
 }

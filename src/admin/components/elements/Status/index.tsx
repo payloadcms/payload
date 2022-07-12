@@ -114,7 +114,7 @@ const Status: React.FC<Props> = () => {
                 slug={unPublishModalSlug}
                 className={`${baseClass}__modal`}
               >
-                <MinimalTemplate>
+                <MinimalTemplate className={`${baseClass}__modal-template`}>
                   <h1>Confirm unpublish</h1>
                   <p>You are about to unpublish this document. Are you sure?</p>
                   <Button
@@ -147,7 +147,7 @@ const Status: React.FC<Props> = () => {
                 slug={revertModalSlug}
                 className={`${baseClass}__modal`}
               >
-                <MinimalTemplate>
+                <MinimalTemplate className={`${baseClass}__modal-template`}>
                   <h1>Confirm revert to saved</h1>
                   <p>You are about to revert this document&apos;s changes to its published state. Are you sure?</p>
                   <Button

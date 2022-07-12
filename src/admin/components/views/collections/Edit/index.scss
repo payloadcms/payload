@@ -76,6 +76,11 @@
     position: sticky;
     top: 0;
     z-index: $z-nav;
+
+    >* {
+      position: relative;
+      z-index: 1;
+    }
   }
 
   &__document-actions--has-2 {

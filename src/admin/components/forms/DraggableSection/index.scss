@@ -18,7 +18,6 @@
   }
 
   &__section-header {
-    @include blur-bg(var(--color-base-0));
     display: flex;
     position: sticky;
     top: $top-header-offset;

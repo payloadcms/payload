@@ -3,7 +3,7 @@
 .file-field {
   position: relative;
   margin: base(1.5) 0 base(2);
-  background: var(--color-base-50);
+  background: var(--color-base-100);
 
   .tooltip.error-message {
     z-index: 3;
@@ -22,7 +22,7 @@
 
   &__file-selected,
   &__drop-zone {
-    background: var(--color-base-50);
+    background: var(--color-base-100);
     position: relative;
     z-index: 2;
     padding: base(2);
