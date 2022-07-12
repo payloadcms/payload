@@ -113,9 +113,9 @@
 
 %code {
   font-size: base(.4);
-  color: var(--color-base-400);
+  color: var(--theme-elevation-400);
 
   span {
-    color: var(--color-base-800);
+    color: var(--theme-elevation-800);
   }
 }

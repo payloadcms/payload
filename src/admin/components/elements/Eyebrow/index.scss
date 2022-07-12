@@ -6,18 +6,17 @@
   top: 0;
   z-index: $z-nav;
   padding: base(1.5) 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 
   &__wrap {
     position: relative;
     z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   @include mid-break {
-    padding: 0 0 $baseline;
-    margin: 0;
+    padding: base(1) 0;
     position: relative;
     display: block;
   }

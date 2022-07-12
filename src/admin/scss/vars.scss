@@ -142,9 +142,9 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--color-success-500);
   @include inputShadow;
   font-family: $font-body;
   width: 100%;
-  border: 1px solid var(--color-base-150);
+  border: 1px solid var(--theme-elevation-150);
   background: var(--theme-input-bg);
-  color: var(--color-base-800);
+  color: var(--theme-elevation-800);
   border-radius: 0;
   font-size: 1rem;
   height: base(2);
@@ -153,33 +153,33 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--color-success-500);
   -webkit-appearance: none;
 
   &::-webkit-input-placeholder {
-    color: var(--color-base-400);
+    color: var(--theme-elevation-400);
     font-weight: normal;
     font-size: 1rem;
   }
 
   &::-moz-placeholder {
-    color: var(--color-base-400);
+    color: var(--theme-elevation-400);
     font-weight: normal;
     font-size: 1rem;
   }
 
   &:hover {
-    border-color: var(--color-base-250);
+    border-color: var(--theme-elevation-250);
   }
 
   &:focus,
   &:active {
-    border-color: var(--color-base-400);
+    border-color: var(--theme-elevation-400);
     outline: 0;
   }
 
   &:disabled {
-    background: var(--color-base-200);
-    color: var(--color-base-450);
+    background: var(--theme-elevation-200);
+    color: var(--theme-elevation-450);
 
     &:hover {
-      border-color: var(--color-base-150);
+      border-color: var(--theme-elevation-150);
     }
   }
 

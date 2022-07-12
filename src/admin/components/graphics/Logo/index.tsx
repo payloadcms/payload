@@ -3,12 +3,8 @@ import { useConfig } from '../../utilities/Config';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 const css = `
-  path {
-    fill: #333333;
-  }
-
-  html[data-theme=dark] path {
-    fill: white;
+  .graphic-logo path {
+    fill: var(--theme-elevation-1000);
   }
 `;
 
@@ -19,7 +15,7 @@ const PayloadLogo: React.FC = () => (
     viewBox="0 0 180 50"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    className="logo"
+    className="graphic-logo"
   >
     <style>
       {css}

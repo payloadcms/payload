@@ -5,8 +5,8 @@
   line-height: base(1);
   border: 0;
   vertical-align: middle;
-  background: var(--color-base-900);
-  color: var(--color-base-800);
+  background: var(--theme-elevation-900);
+  color: var(--theme-elevation-800);
   border-radius: $style-radius-s;
   padding: base(.5);
   margin-bottom: $baseline;
@@ -27,11 +27,11 @@
   &--type-default {
     &.button--has-action {
       &:hover {
-        background: var(--color-base-900);
+        background: var(--theme-elevation-900);
       }
 
       &:active {
-        background: var(--color-base-950);
+        background: var(--theme-elevation-950);
       }
     }
   }

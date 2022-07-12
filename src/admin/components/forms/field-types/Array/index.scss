@@ -20,11 +20,11 @@
     margin-left: base(0);
 
     .btn {
-      color: var(--color-base-400);
+      color: var(--theme-elevation-400);
       margin: 0;
 
       &:hover {
-        color: var(--color-base-800);
+        color: var(--theme-elevation-800);
       }
     }
   }

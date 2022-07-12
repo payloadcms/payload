@@ -2,7 +2,7 @@
 
 .upload-card {
   @include shadow;
-  background: var(--color-base-0);
+  background: var(--theme-elevation-0);
   max-width: base(9);
   margin-bottom: base(.5);
 

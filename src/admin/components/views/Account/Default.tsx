@@ -16,9 +16,10 @@ import Auth from '../collections/Edit/Auth';
 import Loading from '../../elements/Loading';
 import { Props } from './types';
 import { OperationContext } from '../../utilities/OperationProvider';
+import { ToggleTheme } from './ToggleTheme';
 
 import './index.scss';
-import { ToggleTheme } from './ToggleTheme';
+import { Gutter } from '../../elements/Gutter';
 
 const baseClass = 'account';
 
@@ -76,28 +77,30 @@ const DefaultAccount: React.FC<Props> = (props) => {
               <LeaveWithoutSaving />
               )}
               <div className={`${baseClass}__edit`}>
-                <header className={`${baseClass}__header`}>
+                <Gutter className={`${baseClass}__header`}>
                   <h1>
                     <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
                   </h1>
-                </header>
-                <Auth
-                  useAPIKey={auth.useAPIKey}
-                  collection={collection}
-                  email={data?.email}
-                  operation="update"
-                />
-                <RenderFields
-                  permissions={permissions.fields}
-                  readOnly={!hasSavePermission}
-                  filter={(field) => field?.admin?.position !== 'sidebar'}
-                  fieldTypes={fieldTypes}
-                  fieldSchema={fields}
-                />
-                <div className={`${baseClass}__payload-settings`}>
+                  <Auth
+                    useAPIKey={auth.useAPIKey}
+                    collection={collection}
+                    email={data?.email}
+                    operation="update"
+                  />
+                  <RenderFields
+                    permissions={permissions.fields}
+                    readOnly={!hasSavePermission}
+                    filter={(field) => field?.admin?.position !== 'sidebar'}
+                    fieldTypes={fieldTypes}
+                    fieldSchema={fields}
+                  />
+                </Gutter>
+                <Gutter
+                  className={`${baseClass}__payload-settings`}
+                >
                   <h3>Payload Settings</h3>
                   <ToggleTheme />
-                </div>
+                </Gutter>
               </div>
             </div>
             <div className={`${baseClass}__sidebar-wrap`}>

@@ -8,6 +8,7 @@
   height: 100vh;
   width: base(9);
   overflow: hidden;
+  border-right: 1px solid var(--theme-elevation-100);
 
   header {
     width: 100%;
@@ -60,7 +61,7 @@
   }
 
   &__label {
-    color: var(--color-base-400);
+    color: var(--theme-elevation-400);
   }
 
   &__controls {
@@ -128,29 +129,11 @@
   }
 
   @include mid-break {
+    @include blur-bg;
+    position: fixed;
     width: 100%;
     height: base(3);
     z-index: $z-modal;
-
-    &:before,
-    &:after {
-      content: ' ';
-      position: absolute;
-      z-index: -1;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-    }
-
-    &:before {
-      opacity: .8;
-      background: var(--color-base-100);
-    }
-
-    &:after {
-      backdrop-filter: blur(5px);
-    }
 
     &__scroll {
       padding: 0;
@@ -161,7 +144,9 @@
 
     header,
     &__wrap {
-      padding: $baseline;
+      position: relative;
+      z-index: 1;
+      padding: $baseline var(--gutter-h);
     }
 
     header {

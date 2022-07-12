@@ -89,7 +89,7 @@ const Code: React.FC<Props> = (props) => {
         padding={25}
         style={{
           backgroundColor: '#333333',
-          color: 'var(--color-base-0)',
+          color: 'var(--theme-elevation-0)',
           fontFamily: '"Consolas", "Monaco", monospace',
           fontSize: 12,
           pointerEvents: readOnly ? 'none' : 'auto',

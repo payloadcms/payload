@@ -51,7 +51,7 @@
   transform: translateY(-50%);
 
   svg {
-    @include color-svg(var(--color-base-0));
+    @include color-svg(var(--theme-elevation-0));
     transform: rotate(-90deg);
   }
 }
@@ -61,15 +61,15 @@
   padding-right: base(1.75);
   min-width: base(12);
   width: 100%;
-  background: var(--color-base-750);
+  background: var(--theme-elevation-750);
   border: 0;
-  color: var(--color-base-0);
+  color: var(--theme-elevation-0);
 }
 
 .rich-text-link__new-tab {
   svg {
-    @include color-svg(var(--color-base-0));
-    background: var(--color-base-750);
+    @include color-svg(var(--theme-elevation-0));
+    background: var(--theme-elevation-750);
     margin-right: base(.5);
   }
 

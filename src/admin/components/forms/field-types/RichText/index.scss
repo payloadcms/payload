@@ -5,9 +5,9 @@
   display: flex;
 
   &__toolbar {
-    @include blur-bg(var(--color-base-0));
+    @include blur-bg(var(--theme-elevation-0));
     margin-bottom: $baseline;
-    border: $style-stroke-width-s solid var(--color-base-150);
+    border: $style-stroke-width-s solid var(--theme-elevation-150);
     padding: base(.25);
     position: sticky;
     top: base(5);
@@ -50,7 +50,7 @@
 
   &--read-only {
     .rich-text__editor {
-      background-color: var(--color-base-150);
+      background-color: var(--theme-elevation-150);
       padding: base(.5);
     }
   }
@@ -60,18 +60,18 @@
     padding: base(0.25);
 
     svg {
-      @include color-svg(var(--color-base-800));
+      @include color-svg(var(--theme-elevation-800));
       width: base(0.75);
       height: base(0.75);
     }
 
     &:hover {
-      background-color: var(--color-base-100);
+      background-color: var(--theme-elevation-100);
     }
 
     &__button--active,
     &__button--active:hover {
-      background-color: var(--color-base-150);
+      background-color: var(--theme-elevation-150);
     }
   }
 }

@@ -30,7 +30,7 @@
       object-fit: cover;
       width: 100%;
       height: 100%;
-      background-color: var(--color-base-800);
+      background-color: var(--theme-elevation-800);
     }
   }
 
@@ -67,7 +67,7 @@
 
   &__bottomRow {
     padding: base(.5);
-    border-top: 1px solid var(--color-base-100);
+    border-top: 1px solid var(--theme-elevation-100);
   }
 
   h5 {

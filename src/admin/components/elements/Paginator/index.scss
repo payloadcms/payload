@@ -8,8 +8,8 @@
     cursor: pointer;
 
     &--is-current {
-      background: var(--color-base-100);
-      color: var(--color-base-400);
+      background: var(--theme-elevation-100);
+      color: var(--theme-elevation-400);
       cursor: default;
     }
 
@@ -28,11 +28,11 @@
     align-content: center;
     outline: 0;
     padding: base(.5);
-    color: var(--color-base-800);
+    color: var(--theme-elevation-800);
     line-height: base(1);
 
     &:hover:not(.clickable-arrow--is-disabled) {
-      background: var(--color-base-100);
+      background: var(--theme-elevation-100);
     }
   }
 
@@ -43,6 +43,6 @@
 
   &__separator {
     align-self: center;
-    color: var(--color-base-400);
+    color: var(--theme-elevation-400);
   }
 }

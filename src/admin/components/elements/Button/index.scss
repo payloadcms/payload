@@ -70,20 +70,20 @@
   }
 
   &--style-primary {
-    background-color: var(--color-base-800);
-    color: var(--color-base-0);
+    background-color: var(--theme-elevation-800);
+    color: var(--theme-elevation-0);
 
     &.btn--disabled {
-      background-color: var(--color-base-400);
+      background-color: var(--theme-elevation-400);
     }
 
     &:not(.btn--disabled) {
       &:hover {
-        background: var(--color-base-750);
+        background: var(--theme-elevation-750);
       }
 
       &:active {
-        background: var(--color-base-700);
+        background: var(--theme-elevation-700);
       }
     }
 
@@ -95,26 +95,26 @@
   }
 
   &--style-secondary {
-    $base-box-shadow: inset 0 0 0 $style-stroke-width var(--color-base-800);
-    $hover-box-shadow: inset 0 0 0 $style-stroke-width var(--color-base-700);
+    $base-box-shadow: inset 0 0 0 $style-stroke-width var(--theme-elevation-800);
+    $hover-box-shadow: inset 0 0 0 $style-stroke-width var(--theme-elevation-700);
 
     box-shadow: $base-box-shadow;
-    color: var(--color-base-800);
+    color: var(--theme-elevation-800);
     background: none;
 
     &:hover {
-      background: var(--color-base-100);
+      background: var(--theme-elevation-100);
       box-shadow: $hover-box-shadow;
     }
 
     &:active {
-      background: var(--color-base-200);
+      background: var(--theme-elevation-200);
     }
 
     &.btn--disabled {
-      color: var(--color-base-400);
+      color: var(--theme-elevation-400);
       background: none;
-      box-shadow: inset 0 0 0 $style-stroke-width var(--color-base-400);
+      box-shadow: inset 0 0 0 $style-stroke-width var(--theme-elevation-400);
     }
 
     &:focus {
@@ -149,7 +149,7 @@
 
     &.btn--style-primary {
       .icon {
-        @include color-svg(var(--color-base-0));
+        @include color-svg(var(--theme-elevation-0));
       }
     }
   }
@@ -160,7 +160,7 @@
   }
 
   &--style-light-gray {
-    box-shadow: inset 0 0 0 $style-stroke-width var(--color-base-800);
+    box-shadow: inset 0 0 0 $style-stroke-width var(--theme-elevation-800);
   }
 
   &--icon-position-left {
@@ -192,15 +192,15 @@
 
   &:hover {
     .btn__icon {
-      @include color-svg(var(--color-base-0));
-      background: var(--color-base-800);
+      @include color-svg(var(--theme-elevation-0));
+      background: var(--theme-elevation-800);
     }
   }
 
   &:focus {
     .btn__icon {
-      @include color-svg(var(--color-base-800));
-      background: var(--color-base-150);
+      @include color-svg(var(--theme-elevation-800));
+      background: var(--theme-elevation-150);
     }
 
     outline: none;
@@ -208,8 +208,8 @@
 
   &:active {
     .btn__icon {
-      @include color-svg(var(--color-base-0));
-      background: var(--color-base-700);
+      @include color-svg(var(--theme-elevation-0));
+      background: var(--theme-elevation-700);
     }
   }
 }

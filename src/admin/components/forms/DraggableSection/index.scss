@@ -32,7 +32,7 @@
       transform: rotate(.5turn);
 
       .btn__icon {
-        background-color: var(--color-base-0);
+        background-color: var(--theme-elevation-0);
       }
 
       &--is-collapsed {
@@ -61,7 +61,7 @@
       }
 
       .field-type-gutter__content-container {
-        box-shadow: #{$style-stroke-width-m} 0px 0px 0px var(--color-base-800);
+        box-shadow: #{$style-stroke-width-m} 0px 0px 0px var(--theme-elevation-800);
       }
 
       .position-panel__move-forward,
@@ -76,18 +76,18 @@
       }
 
       .position-panel__current-position {
-        color: var(--color-base-800);
+        color: var(--theme-elevation-800);
       }
     }
 
     .toggle-collapse {
-      @include color-svg(var(--color-base-0));
+      @include color-svg(var(--theme-elevation-0));
 
       .btn__icon {
-        background-color: var(--color-base-400);
+        background-color: var(--theme-elevation-400);
 
         &:hover {
-          background-color: var(--color-base-800);
+          background-color: var(--theme-elevation-800);
         }
       }
     }

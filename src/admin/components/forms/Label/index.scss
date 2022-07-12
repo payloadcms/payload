@@ -3,7 +3,7 @@
 label.field-label {
   display: flex;
   padding-bottom: base(.25);
-  color: var(--color-base-800);
+  color: var(--theme-elevation-800);
 
   .required {
     color: var(--color-error-500);

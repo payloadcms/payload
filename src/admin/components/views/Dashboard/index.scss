@@ -10,7 +10,7 @@
 
   &__label {
     @extend %body;
-    color: var(--color-base-400);
+    color: var(--theme-elevation-400);
   }
 
   &__card-list {

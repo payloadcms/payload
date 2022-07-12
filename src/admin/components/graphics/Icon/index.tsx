@@ -3,12 +3,8 @@ import { useConfig } from '../../utilities/Config';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 const css = `
-  path {
-    fill: #333333;
-  }
-
-  html[data-theme=dark] path {
-    fill: white;
+  .graphic-icon path {
+    fill: var(--theme-elevation-1000);
   }
 `;
 
@@ -18,6 +14,7 @@ const PayloadIcon: React.FC = () => (
     height="25"
     viewBox="0 0 25 25"
     xmlns="http://www.w3.org/2000/svg"
+    className="graphic-icon"
   >
     <style>
       {css}

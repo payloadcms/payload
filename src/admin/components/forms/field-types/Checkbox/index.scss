@@ -67,11 +67,11 @@
   &--read-only {
 
     .checkbox__label {
-      color: var(--color-base-400);
+      color: var(--theme-elevation-400);
     }
 
     .checkbox__input {
-      background-color: var(--color-base-100);
+      background-color: var(--theme-elevation-100);
     }
   }
 }

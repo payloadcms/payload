@@ -6,8 +6,8 @@
   border: 0;
   display: inline-flex;
   vertical-align: middle;
-  background: var(--color-base-150);
-  color: var(--color-base-800);
+  background: var(--theme-elevation-150);
+  color: var(--theme-elevation-800);
   border-radius: $style-radius-s;
   padding: 0 base(.25);
   padding-left: base(.0875 + .25);
@@ -38,15 +38,15 @@
   }
 
   &--style-white {
-    background: var(--color-base-0);
+    background: var(--theme-elevation-0);
 
     &.pill--has-action {
       &:hover {
-        background: var(--color-base-100);
+        background: var(--theme-elevation-100);
       }
 
       &:active {
-        background: var(--color-base-100);
+        background: var(--theme-elevation-100);
       }
     }
   }
@@ -54,18 +54,18 @@
   &--style-light {
     &.pill--has-action {
       &:hover {
-        background: var(--color-base-100);
+        background: var(--theme-elevation-100);
       }
 
       &:active {
-        background: var(--color-base-100);
+        background: var(--theme-elevation-100);
       }
     }
   }
 
   &--style-light-gray {
-    background: var(--color-base-100);
-    color: var(--color-base-800);
+    background: var(--theme-elevation-100);
+    color: var(--theme-elevation-800);
   }
 
   &--style-warning {
@@ -77,20 +77,20 @@
   }
 
   &--style-dark {
-    background: var(--color-base-800);
-    color: var(--color-base-0);
+    background: var(--theme-elevation-800);
+    color: var(--theme-elevation-0);
 
     svg {
-      @include color-svg(var(--color-base-0));
+      @include color-svg(var(--theme-elevation-0));
     }
 
     &.pill--has-action {
       &:hover {
-        background: var(--color-base-750);
+        background: var(--theme-elevation-750);
       }
 
       &:active {
-        background: var(--color-base-700);
+        background: var(--theme-elevation-700);
       }
     }
   }

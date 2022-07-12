@@ -41,8 +41,7 @@
   }
 
   &__edit {
-    background: var(--color-base-0);
-    padding: base(5) base(6) base(6);
+    padding: base(5) 0 base(6);
     margin-bottom: base(1.5);
     flex-grow: 1;
     overflow-x: scroll;
@@ -135,7 +134,7 @@
   }
 
   &__label {
-    color: var(--color-base-400);
+    color: var(--theme-elevation-400);
   }
 
   &__collection-actions,
@@ -161,7 +160,7 @@
 
   @include large-break {
     &__edit {
-      padding: base(3.5);
+      padding: base(3.5) 0;
     }
   }
 

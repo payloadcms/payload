@@ -1,7 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .where-builder {
-  background: var(--color-base-100);
+  background: var(--theme-elevation-100);
   padding: base(.5) $baseline $baseline;
 
   &__label {

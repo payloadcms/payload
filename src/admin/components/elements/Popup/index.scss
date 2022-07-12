@@ -5,7 +5,7 @@
 
   &__content {
     position: absolute;
-    background: var(--color-base-0);
+    background: var(--theme-elevation-0);
     opacity: 0;
     visibility: hidden;
     z-index: $z-modal;
@@ -16,7 +16,7 @@
       position: absolute;
       top: calc(100% - 1px);
       border: 12px solid transparent;
-      border-top-color: var(--color-base-0);
+      border-top-color: var(--theme-elevation-0);
     }
   }
 
@@ -73,7 +73,7 @@
 
       &:after {
         border: 12px solid transparent;
-        border-top-color: var(--color-base-0);
+        border-top-color: var(--theme-elevation-0);
       }
     }
 
@@ -147,14 +147,14 @@
         top: unset;
         bottom: calc(100% - 1px);
         border-top-color: transparent !important;
-        border-bottom-color: var(--color-base-0);
+        border-bottom-color: var(--theme-elevation-0);
       }
     }
 
     &.popup--color-dark {
       .popup__content {
         &:after {
-          border-bottom-color: var(--color-base-800);
+          border-bottom-color: var(--theme-elevation-800);
         }
       }
     }
@@ -166,11 +166,11 @@
 
   &--color-dark {
     .popup__content {
-      background: var(--color-base-800);
-      color: var(--color-base-0);
+      background: var(--theme-elevation-800);
+      color: var(--theme-elevation-0);
 
       &:after {
-        border-top-color: var(--color-base-800);
+        border-top-color: var(--theme-elevation-800);
       }
     }
   }

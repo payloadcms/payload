@@ -6,7 +6,7 @@
   max-width: 100%;
 
   thead {
-    color: var(--color-base-400);
+    color: var(--theme-elevation-400);
 
     th {
       font-weight: normal;
@@ -23,7 +23,7 @@
   tbody {
     tr {
       &:nth-child(odd) {
-        background: var(--color-base-100);
+        background: var(--theme-elevation-100);
       }
     }
   }
