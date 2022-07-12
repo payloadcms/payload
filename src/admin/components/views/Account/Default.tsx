@@ -17,9 +17,9 @@ import Loading from '../../elements/Loading';
 import { Props } from './types';
 import { OperationContext } from '../../utilities/OperationProvider';
 import { ToggleTheme } from './ToggleTheme';
+import { Gutter } from '../../elements/Gutter';
 
 import './index.scss';
-import { Gutter } from '../../elements/Gutter';
 
 const baseClass = 'account';
 

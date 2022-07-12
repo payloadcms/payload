@@ -2,11 +2,14 @@ import React from 'react';
 
 import './index.scss';
 
-const X: React.FC = () => (
+const X: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     width="25"
     height="25"
-    className="icon icon--x"
+    className={[
+      className,
+      'icon icon--x',
+    ].filter(Boolean).join(' ')}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 25 25"
   >

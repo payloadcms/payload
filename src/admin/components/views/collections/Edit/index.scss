@@ -35,9 +35,8 @@
   }
 
   &__edit {
-    padding: base(3) 0 base(6);
-    margin-bottom: base(1.5);
-    overflow-x: auto;
+    padding-top: base(2);
+    padding-bottom: base(2);
     flex-grow: 1;
   }
 
@@ -48,6 +47,7 @@
     top: 0;
     right: 0;
     overflow: visible;
+    border-left: 1px solid var(--theme-elevation-100);
   }
 
   &__sidebar {
@@ -162,12 +162,6 @@
     }
   }
 
-  @include large-break {
-    &__edit {
-      padding: base(3.5) 0;
-    }
-  }
-
   @include mid-break {
     &__main {
       width: 100%;
@@ -185,8 +179,8 @@
     }
 
     &__edit {
-      padding: $baseline;
-      margin-bottom: $baseline;
+      padding-top: 0;
+      padding-bottom: 0;
     }
 
     &__document-actions {
@@ -201,7 +195,7 @@
     &__document-actions,
     &__meta,
     &__sidebar-fields {
-      padding-left: $baseline;
+      padding-left: var(--gutter-h);
     }
 
     &__sidebar-fields {
@@ -211,9 +205,8 @@
     }
 
     &__collection-actions {
-      margin-top: base(.5);
-      padding-left: $baseline;
-      padding-bottom: 0;
+      border-top: 1px solid var(--theme-elevation-100);
+      padding: base(1) 0 0 base(1);
       order: 1;
 
       li {
