@@ -14,7 +14,6 @@ import toggleLeaf from './leaves/toggle';
 import hotkeys from './hotkeys';
 import enablePlugins from './enablePlugins';
 import defaultValue from '../../../../../fields/richText/defaultValue';
-import FieldTypeGutter from '../../FieldTypeGutter';
 import FieldDescription from '../../FieldDescription';
 import withHTML from './plugins/withHTML';
 import { Props, BlurSelectionEditor } from './types';
@@ -56,7 +55,6 @@ const RichText: React.FC<Props> = (props) => {
       width,
       placeholder,
       description,
-      hideGutter,
       condition,
     } = {},
   } = props;
@@ -206,7 +204,6 @@ const RichText: React.FC<Props> = (props) => {
       }}
     >
       <div className={`${baseClass}__wrap`}>
-        {!hideGutter && (<FieldTypeGutter />)}
         <Error
           showError={showError}
           message={errorMessage}
