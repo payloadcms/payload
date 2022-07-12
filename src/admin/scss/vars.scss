@@ -34,7 +34,7 @@ $font-body : 'Suisse Intl' !default;
 $font-mono : monospace !default;
 
 //////////////////////////////
-// COLORS
+// COLORS (LEGACY - DO NOT USE. PREFER CSS VARIABLES)
 //////////////////////////////
 
 $color-dark-gray : #333333 !default;
@@ -116,7 +116,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--color-success-500);
 // STYLE MIXINS
 //////////////////////////////
 
-@mixin blur-bg($color: var(--color-base-100)) {
+@mixin blur-bg($color: var(--theme-bg)) {
 
   &:before,
   &:after {
@@ -143,7 +143,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--color-success-500);
   font-family: $font-body;
   width: 100%;
   border: 1px solid var(--color-base-150);
-  background: var(--color-base-0);
+  background: var(--theme-input-bg);
   color: var(--color-base-800);
   border-radius: 0;
   font-size: 1rem;

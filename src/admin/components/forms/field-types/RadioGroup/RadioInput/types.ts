@@ -1,9 +1,11 @@
+import { OnChange } from '../types';
+
 export type Props = {
   isSelected: boolean
   option: {
     label: string
     value: string
   }
-  onChange: (val: string) => void
+  onChange: OnChange
   path: string
 }

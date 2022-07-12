@@ -18,6 +18,7 @@ import { Props } from './types';
 import { OperationContext } from '../../utilities/OperationProvider';
 
 import './index.scss';
+import { ToggleTheme } from './ToggleTheme';
 
 const baseClass = 'account';
 
@@ -93,6 +94,10 @@ const DefaultAccount: React.FC<Props> = (props) => {
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
                 />
+                <div className={`${baseClass}__payload-settings`}>
+                  <h3>Payload Settings</h3>
+                  <ToggleTheme />
+                </div>
               </div>
             </div>
             <div className={`${baseClass}__sidebar-wrap`}>
