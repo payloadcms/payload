@@ -26,6 +26,7 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/consistent-type-imports': 'warn',
+        'jest/prefer-strict-equal': 'off',
       }
     },
     {
