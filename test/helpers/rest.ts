@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import qs from 'qs';
 import type { Config } from '../../src/config/types';
 import type { PaginatedDocs } from '../../src/mongoose/types';
@@ -57,7 +58,7 @@ export class RESTClient {
 
   private serverURL: string;
 
-  private defaultSlug: string
+  private defaultSlug: string;
 
   constructor(config: Config, args: Args) {
     this.config = config;
@@ -109,7 +110,7 @@ export class RESTClient {
     return { status, doc };
   }
 
-  async find<T = any>(args: FindArgs): Promise<QueryResponse<T>> {
+  async find<T = any>(args?: FindArgs): Promise<QueryResponse<T>> {
     const options = {
       headers: {
         ...headers,
@@ -117,25 +118,33 @@ export class RESTClient {
       },
     };
 
-    if (args.auth) {
+    if (args?.auth) {
       options.headers.Authorization = `JWT ${this.token}`;
     }
 
-    const slug = args.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}${qs.stringify(args.query || {})}`, options);
+    const slug = args?.slug || this.defaultSlug;
+    const whereQuery = qs.stringify(args?.query ? { where: args.query } : {}, {
+      addQueryPrefix: true,
+    });
+    const fetchURL = `${this.serverURL}/api/${slug}${whereQuery}`;
+    const response = await fetch(fetchURL, options);
     const { status } = response;
     const result = await response.json();
+    if (result.errors) throw new Error(result.errors[0].message);
     return { status, result };
   }
 
   async update<T = any>(args: UpdateArgs<T>): Promise<DocResponse<T>> {
     const { slug, id, data, query } = args;
     const formattedQs = qs.stringify(query);
-    const response = await fetch(`${this.serverURL}/api/${slug}/${id}${formattedQs}`, {
-      body: JSON.stringify(data),
-      headers,
-      method: 'put',
-    });
+    const response = await fetch(
+      `${this.serverURL}/api/${slug || this.defaultSlug}/${id}${formattedQs}`,
+      {
+        body: JSON.stringify(data),
+        headers,
+        method: 'put',
+      },
+    );
     const { status } = response;
     const json = await response.json();
     return { status, doc: json.doc };
