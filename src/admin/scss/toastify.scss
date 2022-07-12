@@ -25,16 +25,17 @@
   }
 
   .Toastify__toast--success {
-    color: var(--theme-elevation-800);
+    color: var(--theme-elevation-0);
     background: var(--color-success-500);
   }
 
   .Toastify__close-button--success {
-    color: var(--theme-elevation-800);
+    color: var(--theme-elevation-0);
   }
 
   .Toastify__progress-bar {
-    background-color: rgba(255, 255, 255, 0.7);
+    opacity: .7;
+    background-color: var(--theme-elevation-100);
   }
 
   .Toastify__toast--error {

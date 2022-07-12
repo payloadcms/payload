@@ -18,8 +18,8 @@
 
   &__no-rows {
     font-family: monospace;
-    background-color: #fafbfc;
-    padding: base(.125) 0;
+    background-color: var(--theme-elevation-50);
+    padding: base(.125) base(.5);
     margin: base(.125) 0;
   }
 }

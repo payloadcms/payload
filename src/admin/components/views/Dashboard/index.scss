@@ -4,13 +4,7 @@
   width: 100%;
 
   &__wrap {
-    padding-top: base(2);
     padding-bottom: base(2);
-  }
-
-  &__label {
-    @extend %body;
-    color: var(--theme-elevation-400);
   }
 
   &__card-list {

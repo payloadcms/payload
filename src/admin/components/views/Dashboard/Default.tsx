@@ -38,7 +38,7 @@ const Dashboard: React.FC<Props> = (props) => {
       <Eyebrow />
       <Gutter className={`${baseClass}__wrap`}>
         {Array.isArray(beforeDashboard) && beforeDashboard.map((Component, i) => <Component key={i} />)}
-        <h3 className={`${baseClass}__label`}>Collections</h3>
+        <h2 className={`${baseClass}__label`}>Collections</h2>
         <ul className={`${baseClass}__card-list`}>
           {collections.map((collection) => {
             const hasCreatePermission = permissions?.collections?.[collection.slug]?.create?.permission;
@@ -65,7 +65,7 @@ const Dashboard: React.FC<Props> = (props) => {
         </ul>
         {(globals.length > 0) && (
           <React.Fragment>
-            <h3 className={`${baseClass}__label`}>Globals</h3>
+            <h2 className={`${baseClass}__label`}>Globals</h2>
             <ul className={`${baseClass}__card-list`}>
               {globals.map((global) => (
                 <li key={global.slug}>

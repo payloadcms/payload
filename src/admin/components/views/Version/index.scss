@@ -5,9 +5,7 @@
   margin-bottom: base(2);
 
   &__wrap {
-    padding: base(3);
-    margin-right: base(2);
-    background: var(--theme-elevation-0);
+    padding-top: base(2);
   }
 
   &__header {
@@ -40,8 +38,7 @@
 
   @include mid-break {
     &__wrap {
-      padding: $baseline;
-      margin-right: 0;
+      padding-top: 0;
     }
 
     &__intro,

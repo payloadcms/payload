@@ -19,6 +19,7 @@ import { Banner, Pill } from '../..';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 import { shouldIncrementVersionCount } from '../../../../versions/shouldIncrementVersionCount';
+import { Gutter } from '../../elements/Gutter';
 
 import './index.scss';
 
@@ -171,7 +172,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
         description={metaDesc}
       />
       <Eyebrow />
-      <div className={`${baseClass}__wrap`}>
+      <Gutter className={`${baseClass}__wrap`}>
         <header className={`${baseClass}__header`}>
           <div className={`${baseClass}__intro`}>Showing versions for:</div>
           {useIDLabel && (
@@ -251,7 +252,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
             No further versions found
           </div>
         )}
-      </div>
+      </Gutter>
     </div>
   );
 };
