@@ -6,12 +6,12 @@
 
   &__wrap {
     padding: base(2);
-    background: white;
+    background: var(--color-base-0);
   }
 
   &__label {
     @extend %body;
-    color: $color-gray;
+    color: var(--color-base-400);
   }
 
   &__card-list {

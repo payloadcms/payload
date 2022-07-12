@@ -5,6 +5,6 @@
   width: $baseline;
 
   .fill {
-    fill: $color-dark-gray;
+    fill: var(--color-base-800);
   }
 }

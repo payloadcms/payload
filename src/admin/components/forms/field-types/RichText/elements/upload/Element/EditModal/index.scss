@@ -28,12 +28,14 @@
       display: none;
     }
   }
+
   .rich-text__toolbar {
     margin-bottom: 0;
   }
+
   .rich-text__editor {
-    background-color: white;
-    border: 1px solid $color-light-gray;
+    background-color: var(--color-base-0);
+    border: 1px solid var(--color-base-150);
     border-top: none;
     min-height: base(5);
     padding: base(.35) base(.5);

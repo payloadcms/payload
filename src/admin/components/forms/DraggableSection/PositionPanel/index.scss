@@ -14,7 +14,7 @@
 
   &__current-position {
     text-align: center;
-    color: $color-gray;
+    color: var(--color-base-400);
   }
 
   padding-right: base(.5);

@@ -2,7 +2,7 @@
 
 .icon--x {
   line {
-    stroke: $color-dark-gray;
+    stroke: var(--color-base-800);
     stroke-width: $style-stroke-width;
   }
 }

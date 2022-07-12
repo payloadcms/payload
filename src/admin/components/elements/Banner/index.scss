@@ -6,7 +6,7 @@
   border: 0;
   vertical-align: middle;
   background: var(--color-base-900);
-  color: $color-dark-gray;
+  color: var(--color-base-800);
   border-radius: $style-radius-s;
   padding: base(.5);
   margin-bottom: $baseline;
@@ -38,10 +38,10 @@
 
   &--type-error {
     background: var(--color-error-100);
-    color: $color-red;
+    color: var(--color-error-500);
 
     svg {
-      @include color-svg($color-red);
+      @include color-svg(var(--color-error-500));
     }
 
     &.button--has-action {
@@ -56,7 +56,7 @@
   }
 
   &--type-success {
-    background: $color-green;
+    background: var(--color-success-500);
 
     &.button--has-action {
       &:hover {

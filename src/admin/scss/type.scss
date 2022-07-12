@@ -5,10 +5,15 @@
 // HEADINGS
 /////////////////////////////
 
-%h1, %h2, %h3, %h4, %h5, %h6 {
+%h1,
+%h2,
+%h3,
+%h4,
+%h5,
+%h6 {
   font-family: $font-body;
   font-weight: 600;
-  color: $color-dark-gray;
+  color: var(--color-base-800);
 }
 
 %jumbo {
@@ -109,9 +114,9 @@
 
 %code {
   font-size: base(.4);
-  color: $color-gray;
+  color: var(--color-base-400);
 
   span {
-    color: $color-dark-gray;
+    color: var(--color-base-800);
   }
 }

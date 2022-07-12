@@ -18,9 +18,9 @@ import { useSearchParams } from '../../utilities/SearchParams';
 import { Banner, Pill } from '../..';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../../globals/config/types';
+import { shouldIncrementVersionCount } from '../../../../versions/shouldIncrementVersionCount';
 
 import './index.scss';
-import { shouldIncrementVersionCount } from '../../../../versions/shouldIncrementVersionCount';
 
 const baseClass = 'versions';
 

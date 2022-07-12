@@ -70,8 +70,8 @@
   }
 
   &--style-primary {
-    background-color: $color-dark-gray;
-    color: white;
+    background-color: var(--color-base-800);
+    color: var(--color-base-0);
 
     &.btn--disabled {
       background-color: var(--color-base-400);
@@ -95,11 +95,11 @@
   }
 
   &--style-secondary {
-    $base-box-shadow: inset 0 0 0 $style-stroke-width $color-dark-gray;
+    $base-box-shadow: inset 0 0 0 $style-stroke-width var(--color-base-800);
     $hover-box-shadow: inset 0 0 0 $style-stroke-width var(--color-base-700);
 
     box-shadow: $base-box-shadow;
-    color: $color-dark-gray;
+    color: var(--color-base-800);
     background: none;
 
     &:hover {
@@ -149,7 +149,7 @@
 
     &.btn--style-primary {
       .icon {
-        @include color-svg(white);
+        @include color-svg(var(--color-base-0));
       }
     }
   }
@@ -160,7 +160,7 @@
   }
 
   &--style-light-gray {
-    box-shadow: inset 0 0 0 $style-stroke-width $color-dark-gray;
+    box-shadow: inset 0 0 0 $style-stroke-width var(--color-base-800);
   }
 
   &--icon-position-left {
@@ -192,15 +192,15 @@
 
   &:hover {
     .btn__icon {
-      @include color-svg(white);
-      background: $color-dark-gray;
+      @include color-svg(var(--color-base-0));
+      background: var(--color-base-800);
     }
   }
 
   &:focus {
     .btn__icon {
-      @include color-svg($color-dark-gray);
-      background: $color-light-gray;
+      @include color-svg(var(--color-base-800));
+      background: var(--color-base-150);
     }
 
     outline: none;
@@ -208,8 +208,8 @@
 
   &:active {
     .btn__icon {
-      @include color-svg(white);
-      background: lighten($color-dark-gray, 10%);
+      @include color-svg(var(--color-base-0));
+      background: var(--color-base-700);
     }
   }
 }

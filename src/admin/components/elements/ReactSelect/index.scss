@@ -56,7 +56,7 @@ div.react-select {
   }
 
   .rs__group-heading {
-    color: $color-dark-gray;
+    color: var(--color-base-800);
     padding-left: base(.5);
     margin-bottom: base(.25);
   }
@@ -65,7 +65,7 @@ div.react-select {
     font-family: $font-body;
     font-size: $baseline-body-size;
     padding: base(.375) base(.75);
-    color: $color-dark-gray;
+    color: var(--color-base-800);
 
     &--is-focused {
       background-color: var(--color-base-100);
@@ -79,7 +79,7 @@ div.react-select {
   .rs__multi-value {
     padding: 0;
     background: transparent;
-    border: $style-stroke-width-s solid $color-dark-gray;
+    border: $style-stroke-width-s solid var(--color-base-800);
     line-height: calc(#{$baseline} - #{$style-stroke-width-s * 2});
     margin: base(.25) base(.5) base(.25) 0;
   }
@@ -94,7 +94,7 @@ div.react-select {
     cursor: pointer;
 
     &:hover {
-      color: $color-dark-gray;
+      color: var(--color-base-800);
       background: var(--color-error-150);
     }
   }

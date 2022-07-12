@@ -96,11 +96,11 @@
   --font-mono: monospace;
 }
 
-@if variable-exists(color-dark-gray) {
-  :root {
-    --color-base-800: $color-dark-gray;
-  }
-}
+// @if variable-exists(color-dark-gray) {
+//   :root {
+//     --color-base-800: var(--color-base-800);
+//   }
+// }
 
 /////////////////////////////
 // GLOBAL STYLES
@@ -219,12 +219,12 @@ body {
 
 
 ::selection {
-  background: var(--color-success);
+  background: var(--color-success-500);
   color: var(--color-base-800);
 }
 
 ::-moz-selection {
-  background: var(--color-success);
+  background: var(--color-success-500);
   color: var(--color-base-800);
 }
 

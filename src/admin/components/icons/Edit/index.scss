@@ -6,7 +6,7 @@
   shape-rendering: auto;
 
   .fill {
-    fill: $color-dark-gray;
+    fill: var(--color-base-800);
     stroke: none;
   }
 }

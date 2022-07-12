@@ -51,7 +51,7 @@
   transform: translateY(-50%);
 
   svg {
-    @include color-svg(white);
+    @include color-svg(var(--color-base-0));
     transform: rotate(-90deg);
   }
 }

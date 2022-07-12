@@ -5,12 +5,12 @@
   display: flex;
 
   &__toolbar {
-    @include blur-bg(white);
+    @include blur-bg(var(--color-base-0));
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
     margin-bottom: $baseline;
-    border: $style-stroke-width-s solid $color-light-gray;
+    border: $style-stroke-width-s solid var(--color-base-150);
     padding: base(.25);
     position: sticky;
     top: base(5);
@@ -45,7 +45,7 @@
 
   &--read-only {
     .rich-text__editor {
-      background-color: $color-light-gray;
+      background-color: var(--color-base-150);
       padding: base(.5);
     }
   }
@@ -55,18 +55,18 @@
     padding: base(0.25);
 
     svg {
-      @include color-svg($color-dark-gray);
+      @include color-svg(var(--color-base-800));
       width: base(0.75);
       height: base(0.75);
     }
 
     &:hover {
-      background-color: $color-background-gray;
+      background-color: var(--color-base-50);
     }
 
     &__button--active,
     &__button--active:hover {
-      background-color: $color-light-gray;
+      background-color: var(--color-base-150);
     }
   }
 }

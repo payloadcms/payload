@@ -21,6 +21,7 @@
       text-overflow: ellipsis;
       margin: 0;
     }
+
     margin-bottom: base(1);
   }
 
@@ -40,7 +41,7 @@
   }
 
   &__edit {
-    background: white;
+    background: var(--color-base-0);
     padding: base(5) base(6) base(6);
     margin-bottom: base(1.5);
     flex-grow: 1;
@@ -86,15 +87,15 @@
   &__document-actions--with-preview {
     display: flex;
 
-    > * {
+    >* {
       width: calc(50% - #{base(.5)});
     }
 
-    > *:first-child {
+    >*:first-child {
       margin-right: base(.5);
     }
 
-    > *:last-child {
+    >*:last-child {
       margin-left: base(.5);
     }
 
@@ -129,12 +130,14 @@
   }
 
   &__label {
-    color: $color-gray;
+    color: var(--color-base-400);
   }
 
   &__collection-actions,
   &__api-url {
-    a, button {
+
+    a,
+    button {
       cursor: pointer;
       font-weight: 600;
       text-decoration: none;

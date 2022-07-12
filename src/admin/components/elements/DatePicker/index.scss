@@ -22,7 +22,7 @@ $cal-icon-width: 18px;
       pointer-events: none;
       width: $cal-icon-width;
       height: auto;
-      @include color-svg($color-dark-gray);
+      @include color-svg(var(--color-base-800));
     }
   }
 
@@ -78,15 +78,15 @@ $cal-icon-width: 18px;
 
   &--has-error {
     .react-datepicker__input-container input {
-      background-color: lighten($color-red, 20%);
+      background-color: var(--color-error-400);
     }
   }
 
   .react-datepicker {
     @include shadow-sm;
-    background: white;
+    background: var(--color-base-0);
     display: inline-flex;
-    border: 1px solid $color-light-gray;
+    border: 1px solid var(--color-base-150);
     font-family: $font-body;
     font-weight: 100;
     border-radius: 0;
@@ -98,11 +98,11 @@ $cal-icon-width: 18px;
       text-align: center;
       border-radius: 0;
       border: none;
-      background-color: white;
+      background-color: var(--color-base-0);
 
       &--time {
         padding: 10px 0;
-        border-bottom: 1px solid $color-light-gray;
+        border-bottom: 1px solid var(--color-base-150);
         font-weight: 600;
       }
     }
@@ -125,20 +125,20 @@ $cal-icon-width: 18px;
       top: 15px;
 
       &--next {
-        border-left-color: $color-gray;
+        border-left-color: var(--color-base-400);
 
         &:focus {
-          border-left-color: darken($color-gray, 30%);
-          outline:none;
+          border-left-color: var(--color-base-500);
+          outline: none;
         }
       }
 
       &--previous {
-        border-right-color: $color-gray;
+        border-right-color: var(--color-base-400);
 
         &:focus {
-          border-right-color: darken($color-gray, 30%);
-          outline:none;
+          border-right-color: var(--color-base-500);
+          outline: none;
         }
       }
     }
@@ -149,7 +149,7 @@ $cal-icon-width: 18px;
     }
 
     &__month-container {
-      border-right: 1px solid $color-light-gray;
+      border-right: 1px solid var(--color-base-150);
     }
 
     &__time-container {
@@ -157,33 +157,33 @@ $cal-icon-width: 18px;
     }
 
     &__day-names {
-      background-color: $color-light-gray;
+      background-color: var(--color-base-150);
     }
 
     &__day {
-      box-shadow: inset 0px 0px 0px 1px $color-light-gray, 0px 0px 0px 1px $color-light-gray;
+      box-shadow: inset 0px 0px 0px 1px var(--color-base-150), 0px 0px 0px 1px var(--color-base-150);
       font-size: base(.55);
 
       &:focus {
         outline: 0;
-        background: $color-gray;
+        background: var(--color-base-400);
       }
 
       &--selected {
         font-weight: 600;
 
         &:focus {
-          background-color: $color-light-gray;
+          background-color: var(--color-base-150);
         }
       }
 
       &--keyboard-selected {
-        color: white;
+        color: var(--color-base-0);
         font-weight: 600;
 
         &:focus {
-          background-color: $color-light-gray;
-          box-shadow: inset 0px 0px 0px 1px $color-dark-gray, 0px 0px 0px 1px $color-dark-gray;
+          background-color: var(--color-base-150);
+          box-shadow: inset 0px 0px 0px 1px var(--color-base-800), 0px 0px 0px 1px var(--color-base-800);
         }
       }
 
@@ -202,27 +202,33 @@ $cal-icon-width: 18px;
 
   .react-datepicker-popper {
     z-index: 10;
-    border: 1px solid $color-light-gray;
+    border: 1px solid var(--color-base-150);
   }
 
   .react-datepicker__day--keyboard-selected,
   .react-datepicker__month-text--keyboard-selected,
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
-    box-shadow: inset 0px 0px 0px 1px $color-dark-gray, 0px 0px 0px 1px $color-dark-gray;
-    background-color: $color-light-gray;
-    color: $color-dark-gray;
+    box-shadow: inset 0px 0px 0px 1px var(--color-base-800), 0px 0px 0px 1px var(--color-base-800);
+    background-color: var(--color-base-150);
+    color: var(--color-base-800);
     border-radius: 0;
   }
 
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected,
-  .react-datepicker__day--selected, .react-datepicker__day--in-selecting-range, .react-datepicker__day--in-range, .react-datepicker__month-text--selected, .react-datepicker__month-text--in-selecting-range, .react-datepicker__month-text--in-range {
-    box-shadow: inset 0px 0px 0px 1px $color-dark-gray, 0px 0px 0px 1px $color-dark-gray;
-    background-color: $color-light-gray;
-    color: $color-dark-gray;
+  .react-datepicker__day--selected,
+  .react-datepicker__day--in-selecting-range,
+  .react-datepicker__day--in-range,
+  .react-datepicker__month-text--selected,
+  .react-datepicker__month-text--in-selecting-range,
+  .react-datepicker__month-text--in-range {
+    box-shadow: inset 0px 0px 0px 1px var(--color-base-800), 0px 0px 0px 1px var(--color-base-800);
+    background-color: var(--color-base-150);
+    color: var(--color-base-800);
     border-radius: 0;
   }
 
-  .react-datepicker__day:hover, .react-datepicker__month-text:hover {
+  .react-datepicker__day:hover,
+  .react-datepicker__month-text:hover {
     border-radius: 0;
   }
 

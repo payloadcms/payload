@@ -14,10 +14,11 @@
   border: 0;
 
   &:hover {
-    background-color: $color-background-gray;
+    background-color: var(--color-base-50);
   }
 
   &__image {
+
     svg,
     img {
       max-width: 100%;
