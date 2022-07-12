@@ -1,11 +1,13 @@
 import qs from 'qs';
 import type { Config } from '../../src/config/types';
 import type { PaginatedDocs } from '../../src/mongoose/types';
+import type { Where } from '../../src/types';
 
 require('isomorphic-fetch');
 
 type Args = {
   serverURL: string
+  defaultSlug: string
 }
 
 type LoginArgs = {
@@ -14,28 +16,38 @@ type LoginArgs = {
   collection: string
 }
 
-type CreateArgs = {
-  slug: string
-  data: Record<string, unknown>
+type CreateArgs<T = any> = {
+  slug?: string
+  data: T
   auth?: boolean
 }
 
 type FindArgs = {
-  slug: string
-  query?: any
+  slug?: string
+  query?: Where
   auth?: boolean
 }
 
-type UpdateArgs = {
-  slug: string
+type UpdateArgs<T = any> = {
+  slug?: string
   id: string
-  data: Record<string, unknown>
+  data: Partial<T>
   query?: any
+}
+
+type DocResponse<T> = {
+  status: number
+  doc: T
 }
 
 const headers = {
   'Content-Type': 'application/json',
   Authorization: '',
+};
+
+type QueryResponse<T> = {
+  status: number;
+  result: PaginatedDocs<T>;
 };
 
 export class RESTClient {
@@ -45,9 +57,12 @@ export class RESTClient {
 
   private serverURL: string;
 
+  private defaultSlug: string
+
   constructor(config: Config, args: Args) {
     this.config = config;
     this.serverURL = args.serverURL;
+    this.defaultSlug = args.defaultSlug;
   }
 
   async login(incomingArgs?: LoginArgs): Promise<string> {
@@ -73,7 +88,7 @@ export class RESTClient {
     return token;
   }
 
-  async create(args: CreateArgs): Promise<{ status: number; doc: any }> {
+  async create<T = any>(args: CreateArgs): Promise<DocResponse<T>> {
     const options = {
       body: JSON.stringify(args.data),
       headers: {
@@ -87,13 +102,14 @@ export class RESTClient {
       options.headers.Authorization = `JWT ${this.token}`;
     }
 
-    const response = await fetch(`${this.serverURL}/api/${args.slug}`, options);
+    const slug = args.slug || this.defaultSlug;
+    const response = await fetch(`${this.serverURL}/api/${slug}`, options);
     const { status } = response;
     const { doc } = await response.json();
     return { status, doc };
   }
 
-  async find(args: FindArgs): Promise<{ status: number; result: PaginatedDocs }> {
+  async find<T = any>(args: FindArgs): Promise<QueryResponse<T>> {
     const options = {
       headers: {
         ...headers,
@@ -105,13 +121,14 @@ export class RESTClient {
       options.headers.Authorization = `JWT ${this.token}`;
     }
 
-    const response = await fetch(`${this.serverURL}/api/${args.slug}${qs.stringify(args.query || {})}`, options);
+    const slug = args.slug || this.defaultSlug;
+    const response = await fetch(`${this.serverURL}/api/${slug}${qs.stringify(args.query || {})}`, options);
     const { status } = response;
     const result = await response.json();
     return { status, result };
   }
 
-  async update(args: UpdateArgs): Promise<{ status: number; doc: any }> {
+  async update<T = any>(args: UpdateArgs<T>): Promise<DocResponse<T>> {
     const { slug, id, data, query } = args;
     const formattedQs = qs.stringify(query);
     const response = await fetch(`${this.serverURL}/api/${slug}/${id}${formattedQs}`, {
@@ -124,10 +141,20 @@ export class RESTClient {
     return { status, doc: json.doc };
   }
 
-  async findByID(collectionSlug: string, id: string): Promise<{ status: number; doc: any }> {
-    const response = await fetch(`${this.serverURL}/api/${collectionSlug}/${id}`, {
+  async findByID<T = any>(id: string, args?: { slug?: string }): Promise<DocResponse<T>> {
+    const response = await fetch(`${this.serverURL}/api/${args?.slug || this.defaultSlug}/${id}`, {
       headers,
       method: 'get',
+    });
+    const { status } = response;
+    const doc = await response.json();
+    return { status, doc };
+  }
+
+  async delete<T = any>(id: string, args?: { slug?: string }): Promise<DocResponse<T>> {
+    const response = await fetch(`${this.serverURL}/api/${args?.slug || this.defaultSlug}/${id}`, {
+      headers,
+      method: 'delete',
     });
     const { status } = response;
     const doc = await response.json();
