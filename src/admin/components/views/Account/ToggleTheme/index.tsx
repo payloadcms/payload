@@ -4,7 +4,7 @@ import { OnChange } from '../../../forms/field-types/RadioGroup/types';
 import { Theme, useTheme } from '../../../utilities/Theme';
 
 export const ToggleTheme: React.FC = () => {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, autoMode } = useTheme();
 
   const onChange = useCallback<OnChange<Theme>>((newTheme) => {
     setTheme(newTheme);
@@ -13,16 +13,20 @@ export const ToggleTheme: React.FC = () => {
   return (
     <RadioGroupInput
       name="theme"
-      label="Dark Mode"
-      value={theme}
+      label="Admin Theme"
+      value={autoMode ? 'auto' : theme}
       onChange={onChange}
       options={[
         {
-          label: 'Disable',
+          label: 'Automatic',
+          value: 'auto',
+        },
+        {
+          label: 'Light',
           value: 'light',
         },
         {
-          label: 'Enable',
+          label: 'Dark',
           value: 'dark',
         },
       ]}
