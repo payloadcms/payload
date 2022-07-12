@@ -61,15 +61,15 @@
   padding-right: base(1.75);
   min-width: base(12);
   width: 100%;
-  background: rgba($color-background-gray, .1);
+  background: var(--color-base-750);
   border: 0;
-  color: white;
+  color: var(--color-base-0);
 }
 
 .rich-text-link__new-tab {
   svg {
-    @include color-svg(white);
-    background-color: rgba(white, .1);
+    @include color-svg(var(--color-base-0));
+    background: var(--color-base-750);
     margin-right: base(.5);
   }
 

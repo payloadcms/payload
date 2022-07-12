@@ -14,7 +14,8 @@
     display: flex;
     margin-bottom: base(1.5);
 
-    a, button {
+    a,
+    button {
       display: block;
       padding: 0;
 
@@ -35,7 +36,8 @@
     visibility: hidden;
     cursor: pointer;
 
-    &:active, &:focus {
+    &:active,
+    &:focus {
       outline: none;
     }
   }
@@ -65,7 +67,7 @@
     margin-top: auto;
     margin-bottom: 0;
 
-    > * {
+    >* {
       margin-top: base(1);
     }
   }
@@ -126,11 +128,29 @@
   }
 
   @include mid-break {
-    background: rgba($color-background-gray, .8);
-    backdrop-filter: saturate(180%) blur(5px);
     width: 100%;
     height: base(3);
     z-index: $z-modal;
+
+    &:before,
+    &:after {
+      content: ' ';
+      position: absolute;
+      z-index: -1;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
+
+    &:before {
+      opacity: .8;
+      background: var(--color-base-100);
+    }
+
+    &:after {
+      backdrop-filter: blur(5px);
+    }
 
     &__scroll {
       padding: 0;

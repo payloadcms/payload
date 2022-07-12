@@ -90,6 +90,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
         <Modal
           slug={modalSlug}
           className={baseClass}
+          lockBodyScroll
         >
           <MinimalTemplate>
             <h1>Confirm deletion</h1>

@@ -56,7 +56,8 @@
     line-height: base(1);
   }
 
-  span, svg {
+  span,
+  svg {
     vertical-align: top;
   }
 
@@ -73,16 +74,16 @@
     color: white;
 
     &.btn--disabled {
-      background-color: rgba($color-dark-gray, .6);
+      background-color: var(--color-base-400);
     }
 
     &:not(.btn--disabled) {
       &:hover {
-        background: lighten($color-dark-gray, 5%);
+        background: var(--color-base-750);
       }
 
       &:active {
-        background: lighten($color-dark-gray, 10%);
+        background: var(--color-base-700);
       }
     }
 
@@ -95,25 +96,25 @@
 
   &--style-secondary {
     $base-box-shadow: inset 0 0 0 $style-stroke-width $color-dark-gray;
-    $hover-box-shadow: inset 0 0 0 $style-stroke-width lighten($color-dark-gray, 5%);
+    $hover-box-shadow: inset 0 0 0 $style-stroke-width var(--color-base-700);
 
     box-shadow: $base-box-shadow;
     color: $color-dark-gray;
     background: none;
 
     &:hover {
-      background: rgba($color-dark-gray, .02);
+      background: var(--color-base-100);
       box-shadow: $hover-box-shadow;
     }
 
     &:active {
-      background: lighten($color-light-gray, 7%);
+      background: var(--color-base-200);
     }
 
     &.btn--disabled {
-      color: rgba($color-dark-gray, .6);
+      color: var(--color-base-400);
       background: none;
-      box-shadow: inset 0 0 0 $style-stroke-width rgba($color-dark-gray, .4);
+      box-shadow: inset 0 0 0 $style-stroke-width var(--color-base-400);
     }
 
     &:focus {

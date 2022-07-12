@@ -1,7 +1,7 @@
 @import '../../../scss/styles';
 
 .card {
-  background: $color-background-gray;
+  background: var(--color-base-100);
   padding: base(1.25) $baseline;
   position: relative;
 

@@ -1,7 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .file-details {
-  background-color: $color-background-gray;
+  background-color: var(--color-base-100);
 
   header {
     display: flex;

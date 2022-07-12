@@ -12,7 +12,7 @@ div.react-select {
     padding: base(.25) 0;
     min-height: base(1.5);
 
-    > * {
+    >* {
       margin-top: 0;
       margin-bottom: 0;
       padding-top: 0;
@@ -68,11 +68,11 @@ div.react-select {
     color: $color-dark-gray;
 
     &--is-focused {
-      background-color: rgba($color-dark-gray, .1);
+      background-color: var(--color-base-100);
     }
 
     &--is-selected {
-      background-color: rgba($color-dark-gray, .5);
+      background-color: var(--color-base-400);
     }
   }
 
@@ -95,13 +95,13 @@ div.react-select {
 
     &:hover {
       color: $color-dark-gray;
-      background: rgba($color-red, .25);
+      background: var(--color-error-150);
     }
   }
 
   &--error {
     div.rs__control {
-      background-color: lighten($color-red, 20%);
+      background-color: var(--color-warning-350);
     }
   }
 }

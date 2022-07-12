@@ -53,7 +53,7 @@
   &--dragging {
     .file-field__drop-zone {
       border-color: $color-green;
-      background: rgba($color-green, .15);
+      background: var(--color-success-150);
     }
   }
 
