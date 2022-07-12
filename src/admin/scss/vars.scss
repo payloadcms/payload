@@ -130,7 +130,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--color-success-500);
 
   &:before {
     background: $color;
-    opacity: .7;
+    opacity: .9;
   }
 
   &:after {
@@ -143,7 +143,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--color-success-500);
   font-family: $font-body;
   width: 100%;
   border: 1px solid var(--color-base-150);
-  background: var(--color-base-0);
+  background: var(--color-base-200);
   color: var(--color-base-800);
   border-radius: 0;
   font-size: 1rem;

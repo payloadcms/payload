@@ -116,6 +116,8 @@ html {
   -webkit-font-smoothing: antialiased;
 
   &[data-theme=dark] {
+    background: var(--color-base-100);
+
     --color-base-0: rgb(0, 0, 0);
     --color-base-50: rgb(7, 7, 7);
     --color-base-100: rgb(20, 20, 20);
@@ -217,6 +219,11 @@ body {
   margin: 0;
 }
 
+[data-theme=dark] {
+  body {
+    color: var(--color-base-1000);
+  }
+}
 
 ::selection {
   background: var(--color-success-500);
@@ -269,7 +276,7 @@ ol {
 }
 
 a {
-  color: var(--color-base-800);
+  color: currentColor;
 
   &:focus {
     opacity: .8;
