@@ -1,10 +1,15 @@
 import { buildConfig } from '../buildConfig';
 
-export const slug = 'slugname';
+export const slug = 'access-controls';
 
 export default buildConfig({
-  collections: [{
-    slug,
-    fields: [],
-  }],
+  collections: [
+    {
+      slug: 'restricted',
+      fields: [],
+      access: {
+        read: () => false,
+      },
+    },
+  ],
 });
