@@ -223,6 +223,14 @@ body {
   body {
     color: var(--color-base-1000);
   }
+
+  ::selection {
+    color: var(--color-base-0);
+  }
+
+  ::-moz-selection {
+    color: var(--color-base-0);
+  }
 }
 
 ::selection {
