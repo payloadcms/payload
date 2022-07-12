@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import payload from '../../../src';
 import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../../helpers/configHelpers';
 import { firstRegister } from '../helpers';
@@ -11,7 +12,7 @@ import { slug } from './config';
  *  - no sidebar link
  *  - no route
  *  - no card
- * field without read access should not show
+ * [x] field without read access should not show
  * prevent user from logging in (canAccessAdmin)
  * no create controls if no access
  * no update control if no update
@@ -45,6 +46,14 @@ describe('access control', () => {
   // afterEach(async () => {
   // });
 
+  test('field without read access should not show', async () => {
+    const { id } = await createDoc({ restrictedField: 'restricted' });
+
+    await page.goto(url.doc(id));
+
+    await expect(page.locator('input[name="restrictedField"]')).toHaveCount(0);
+  });
+
   describe('restricted collection', () => {
     test('should not show in card list', async () => {
       await page.goto(url.admin);
@@ -64,3 +73,10 @@ describe('access control', () => {
     });
   });
 });
+
+async function createDoc(data: any): Promise<{ id: string }> {
+  return payload.create({
+    collection: slug,
+    data,
+  });
+}

@@ -5,6 +5,18 @@ export const slug = 'access-controls';
 export default buildConfig({
   collections: [
     {
+      slug,
+      fields: [
+        {
+          name: 'restrictedField',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+      ],
+    },
+    {
       slug: 'restricted',
       fields: [],
       access: {
@@ -12,4 +24,13 @@ export default buildConfig({
       },
     },
   ],
+  onInit: async (payload) => {
+    await payload.create({
+      collection: slug,
+      data: {
+        restrictedField: 'restricted',
+      },
+    });
+  },
+
 });
