@@ -23,6 +23,7 @@
 
 .rich-text-link__button {
   @extend %btn-reset;
+  font-family: inherit;
   font-size: inherit;
   font-weight: inherit;
   color: inherit;
@@ -61,9 +62,9 @@
   padding-right: base(1.75);
   min-width: base(12);
   width: 100%;
-  background: var(--theme-elevation-750);
+  background: var(--theme-elevation-100);
   border: 0;
-  color: var(--theme-elevation-0);
+  color: var(--theme-elevation-1000);
 }
 
 .rich-text-link__new-tab {

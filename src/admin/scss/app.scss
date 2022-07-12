@@ -118,8 +118,9 @@
   --theme-elevation-950: var(--color-base-950);
   --theme-elevation-1000: var(--color-base-1000);
 
-  --font-body: 'Suisse Intl';
+  --font-body: 'Suisse Intl', system-ui;
   --font-mono: monospace;
+  --font-serif: 'Merriweather', serif;
 
   --gutter-h: #{base(5)};
 

@@ -23,6 +23,8 @@
   }
 
   &__editor {
+    font-family: var(--font-serif);
+    font-size: base(.575);
 
     [data-slate-node=element] {
       margin-bottom: base(0.25);
@@ -31,7 +33,16 @@
     h1,
     h2,
     h3,
-    h4 {
+    h4,
+    h5,
+    h6 {
+      font-family: var(--font-body);
+    }
+
+    h1[data-slate-node=element],
+    h2[data-slate-node=element],
+    h3[data-slate-node=element],
+    h4[data-slate-node=element] {
       margin-bottom: base(.5);
     }
   }
