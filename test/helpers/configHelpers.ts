@@ -11,6 +11,16 @@ type Options = {
   init?: Partial<InitOptions>
 }
 
+export async function initPayloadE2E(__dirname: string, initOptions?: Partial<InitOptions>): Promise<{ serverURL: string }> {
+  return initPayloadTest({
+    __dirname,
+    init: {
+      local: false,
+      ...initOptions,
+    },
+  });
+}
+
 export async function initPayloadTest(options: Options): Promise<{ serverURL: string }> {
   const initOptions = {
     local: true,
