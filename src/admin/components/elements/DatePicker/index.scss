@@ -64,7 +64,7 @@ $cal-icon-width: 18px;
       &-popper,
       &__time-container,
       &__time-box {
-        width: 100%;
+        width: base(6);
       }
 
       &__time-container {
@@ -98,14 +98,14 @@ $cal-icon-width: 18px;
   }
 
   .react-datepicker {
-    @include shadow-sm;
-    background: var(--theme-elevation-0);
+    @include shadow-lg;
+    background: var(--theme-input-bg);
     display: inline-flex;
-    border: 1px solid var(--theme-elevation-150);
+    border: none;
     font-family: $font-body;
     font-weight: 100;
     border-radius: 0;
-    border: none;
+    color: var(--theme-elevation-800);
 
     &__header {
       padding-top: 0;
@@ -113,7 +113,7 @@ $cal-icon-width: 18px;
       text-align: center;
       border-radius: 0;
       border: none;
-      background-color: var(--theme-elevation-0);
+      background-color: var(--theme-input-bg);
 
       &--time {
         padding: 10px 0;
@@ -158,6 +158,16 @@ $cal-icon-width: 18px;
       }
     }
 
+    &__current-month,
+    &__header,
+    &-year-header,
+    &__day-name,
+    &__day,
+    &__time-name,
+    &-time__header {
+      color: var(--theme-elevation-1000);
+    }
+
     &__current-month {
       padding: 10px 0;
       font-weight: 600;
@@ -167,17 +177,26 @@ $cal-icon-width: 18px;
       border-right: 1px solid var(--theme-elevation-150);
     }
 
+    &__time {
+      background: none;
+    }
+
     &__time-container {
       border-left: none;
     }
 
+
     &__day-names {
-      background-color: var(--theme-elevation-150);
+      background-color: var(--theme-elevation-100);
     }
 
     &__day {
-      box-shadow: inset 0px 0px 0px 1px var(--theme-elevation-150), 0px 0px 0px 1px var(--theme-elevation-150);
+      box-shadow: inset 0px 0px 0px 1px var(--theme-elevation-150);
       font-size: base(.55);
+
+      &:hover {
+        background: var(--theme-elevation-100);
+      }
 
       &:focus {
         outline: 0;
@@ -185,7 +204,7 @@ $cal-icon-width: 18px;
       }
 
       &--selected {
-        font-weight: 600;
+        font-weight: bold;
 
         &:focus {
           background-color: var(--theme-elevation-150);
@@ -194,7 +213,7 @@ $cal-icon-width: 18px;
 
       &--keyboard-selected {
         color: var(--theme-elevation-0);
-        font-weight: 600;
+        font-weight: bold;
 
         &:focus {
           background-color: var(--theme-elevation-150);
@@ -203,7 +222,7 @@ $cal-icon-width: 18px;
       }
 
       &--today {
-        font-weight: 600;
+        font-weight: bold;
       }
     }
 
@@ -217,14 +236,15 @@ $cal-icon-width: 18px;
 
   .react-datepicker-popper {
     z-index: 10;
-    border: 1px solid var(--theme-elevation-150);
+    border: none;
   }
 
   .react-datepicker__day--keyboard-selected,
   .react-datepicker__month-text--keyboard-selected,
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
-    box-shadow: inset 0px 0px 0px 1px var(--theme-elevation-800), 0px 0px 0px 1px var(--theme-elevation-800);
+    box-shadow: none;
     background-color: var(--theme-elevation-150);
+    font-weight: bold;
     color: var(--theme-elevation-800);
     border-radius: 0;
   }
@@ -236,10 +256,15 @@ $cal-icon-width: 18px;
   .react-datepicker__month-text--selected,
   .react-datepicker__month-text--in-selecting-range,
   .react-datepicker__month-text--in-range {
-    box-shadow: inset 0px 0px 0px 1px var(--theme-elevation-800), 0px 0px 0px 1px var(--theme-elevation-800);
+    box-shadow: none;
     background-color: var(--theme-elevation-150);
     color: var(--theme-elevation-800);
+    font-weight: bold;
     border-radius: 0;
+  }
+
+  .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover {
+    background: var(--theme-elevation-100);
   }
 
   .react-datepicker__day:hover,
@@ -254,7 +279,6 @@ $cal-icon-width: 18px;
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item {
     line-height: 20px;
     font-size: base(.5);
-    font-weight: 500;
   }
 
   @include small-break {

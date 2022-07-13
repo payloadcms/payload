@@ -54,8 +54,8 @@ div.react-select {
   .rs__menu {
     z-index: 2;
     border-radius: 0;
-    @include inputShadowActive;
-    background: var(--theme-elevation-50);
+    @include shadow-lg;
+    background: var(--theme-input-bg);
   }
 
   .rs__group-heading {
