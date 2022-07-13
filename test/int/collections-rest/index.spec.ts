@@ -1,12 +1,10 @@
 import mongoose from 'mongoose';
 import { initPayloadTest } from '../../helpers/configHelpers';
-import type { Category, Post } from './config';
-import config from './config';
+import type { Relation, Post, RelationHasMany } from './config';
+import config, { relationHasManySlug, slug, relationSlug } from './config';
 import payload from '../../../src';
 import { RESTClient } from '../../helpers/rest';
 import { mapAsync } from '../../../src/utilities/mapAsync';
-
-const slug = config.collections[0]?.slug;
 
 let client: RESTClient;
 
@@ -91,23 +89,50 @@ describe('collections-rest', () => {
   describe('Querying', () => {
     describe('Relationships', () => {
       it('should query nested relationship', async () => {
-        const categoryName = 'name';
-        const { doc: category } = await client.create<Category>({
-          slug: 'category',
+        const nameToQuery = 'name';
+        const { doc: relation } = await client.create<Relation>({
+          slug: relationSlug,
           data: {
-            name: categoryName,
+            name: nameToQuery,
           },
         });
 
         const post1 = await createPost({
-          categoryField: category.id,
+          relationField: relation.id,
         });
         await createPost();
 
         const { status, result } = await client.find<Post>({
           query: {
-            'categoryField.name': {
-              equals: categoryName,
+            'relationField.name': {
+              equals: nameToQuery,
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.docs).toEqual([post1]);
+        expect(result.totalDocs).toEqual(1);
+      });
+
+      it('should query nested relationship - hasMany', async () => {
+        const nameToQuery = 'name';
+        const { doc: relation } = await client.create<RelationHasMany>({
+          slug: relationHasManySlug,
+          data: {
+            name: nameToQuery,
+          },
+        });
+
+        const post1 = await createPost({
+          relationHasManyField: [relation.id],
+        });
+        await createPost();
+
+        const { status, result } = await client.find<Post>({
+          query: {
+            'relationHasManyField.name': {
+              equals: nameToQuery,
             },
           },
         });
@@ -117,7 +142,6 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1);
       });
     });
-
 
     describe('Operators', () => {
       it('equals', async () => {
