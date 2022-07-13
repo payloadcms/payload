@@ -14,6 +14,7 @@ import { Props } from './types';
 import './index.scss';
 import ViewDescription from '../../../elements/ViewDescription';
 import PerPage from '../../../elements/PerPage';
+import { RelationshipProvider } from './RelationshipProvider';
 
 const baseClass = 'collection-list';
 
@@ -76,10 +77,12 @@ const DefaultList: React.FC<Props> = (props) => {
             key={`${pathname}${search}`}
           >
             {!upload && (
+            <RelationshipProvider>
               <Table
                 data={data.docs}
                 columns={tableColumns}
               />
+            </RelationshipProvider>
             )}
             {upload && (
               <UploadGallery

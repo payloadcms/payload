@@ -1,90 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import querystring from 'qs';
 import { useConfig } from '../../../../../../utilities/Config';
 import useIntersect from '../../../../../../../hooks/useIntersect';
-import { requests } from '../../../../../../../api';
+import { useListRelationships } from '../../../RelationshipProvider';
+
+type Value = { relationTo: string, value: number | string };
 
 const RelationshipCell = (props) => {
   const { field, data: cellData } = props;
-  const { relationTo } = field;
   const { collections, routes } = useConfig();
-  const [data, setData] = useState<string | undefined>();
   const [intersectionRef, entry] = useIntersect();
+  const [values, setValues] = useState<Value[]>([]);
+  const { getRelationships, documents } = useListRelationships();
+  const [hasRequested, setHasRequested] = useState(false);
+
   const isAboveViewport = entry?.boundingClientRect?.top > 0;
 
   useEffect(() => {
-    const fetchRelations = async () => {
-      const relationships: Record<string, string[]> = {};
-      const values: Record<string, { relationTo: string, value: string }> = {};
-      const ids: string[] = [];
-      const promises: Promise<unknown>[] = [];
-      if (Array.isArray(cellData)) {
-        // hasMany
-        cellData.forEach((value) => {
-          if (value?.relationTo) {
-            // polymorphic
-            ids.push(value.value);
-            relationships[value.relationTo] = [value.value, ...(relationships[value.relationTo] || [])];
-            values[value.value] = { relationTo: value.relationTo, value };
-          } else {
-            ids.push(value);
-            relationships[relationTo] = [value, ...(relationships[relationTo]) || []];
-            values[value] = { relationTo, value };
-          }
-        });
-      } else if (typeof cellData === 'object') {
-        // polymorphic
-        ids.push(cellData.value);
-        relationships[cellData?.relationTo] = [cellData.value];
-        values[cellData.value] = { relationTo: cellData.relationTo, value: cellData.value };
-      } else {
-        ids.push(cellData);
-        relationships[relationTo] = [cellData];
-        values[cellData] = { relationTo, value: cellData };
-      }
-      const allDocs = [];
-      Object.keys(relationships).forEach((key) => {
-        const url = `${routes.api}/${key}`;
-        const params = {
-          depth: 0,
-          'where[id][in]': relationships[key],
-          limit: 10,
-        };
-        const query = querystring.stringify(params, { addQueryPrefix: true });
-        promises.push(requests.get(`${url}${query}`).then(async (res) => {
-          const result = await res.json();
-          if (result.docs) {
-            allDocs.push(...result.docs);
-          }
-        }));
-      });
+    if (isAboveViewport && !hasRequested) {
+      const formattedValues: Value[] = [];
 
-      await Promise.all(promises);
-      const output = ids.map((id) => {
-        const collection = collections.find(({ slug }) => slug === values[id].relationTo);
-        const useAsTitle = collection.admin.useAsTitle ? collection.admin.useAsTitle : 'id';
-        const doc = allDocs.find((_) => id === _.id);
-        if (doc) {
-          return doc[useAsTitle];
+      const arrayCellData = Array.isArray(cellData) ? cellData : [cellData];
+      arrayCellData.slice(0, (arrayCellData.length < 3 ? arrayCellData.length : 3)).forEach((cell) => {
+        if (typeof cell === 'object' && 'relationTo' in cell && 'value' in cell) {
+          formattedValues.push(cell);
         }
-        // probably 403
-        return `Untitled - ${id}`;
+        if ((typeof cell === 'number' || typeof cell === 'string') && field.relationTo === 'string') {
+          formattedValues.push({
+            value: cell,
+            relationTo: field.relationTo,
+          });
+        }
       });
-      let overflow = '';
-      if (allDocs.length < ids.length) {
-        overflow = '...';
-      }
-      setData(`${output.join(', ')}${overflow}`);
-    };
-
-    if (!data && cellData && isAboveViewport) {
-      fetchRelations();
+      getRelationships(formattedValues);
+      setHasRequested(true);
+      setValues(formattedValues);
     }
-  }, [data, cellData, relationTo, field, collections, isAboveViewport, routes.api]);
+  }, [cellData, field, collections, isAboveViewport, routes.api, hasRequested, getRelationships]);
 
   return (
     <div ref={intersectionRef}>
-      {data}
+      { values.map(({ relationTo, value }, i) => {
+        const document = documents[relationTo][value];
+        const relatedCollection = collections.find(({ slug }) => slug === relationTo);
+        if (document && relatedCollection) {
+          return (
+            <React.Fragment key={i}>
+              { document[relatedCollection.admin.useAsTitle] ?? `Untitled: ${value}`}
+            </React.Fragment>
+          );
+        }
+        return '';
+      })}
+      {/* { (Array.isArray(cellData) && cellData.length > values.length) && ( */}
+      {/*  <React.Fragment>...</React.Fragment> */}
+      {/* )} */}
     </div>
   );
 };
