@@ -5,4 +5,5 @@ export type Props = {
   header?: React.ReactNode
   children: React.ReactNode
   onToggle?: (collapsed: boolean) => void
+  initCollapsed?: boolean
 }

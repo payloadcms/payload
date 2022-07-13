@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
-import Button from '../Button';
 import { Props } from './types';
 import { CollapsibleProvider, useCollapsible } from './provider';
+import Chevron from '../../icons/Chevron';
 
 import './index.scss';
 
 const baseClass = 'collapsible';
 
-export const Collapsible: React.FC<Props> = ({ children, onToggle, className, header }) => {
-  const [collapsed, setCollapsed] = useState(false);
+export const Collapsible: React.FC<Props> = ({ children, onToggle, className, header, initCollapsed }) => {
+  const [collapsed, setCollapsed] = useState(Boolean(initCollapsed));
   const isNested = useCollapsible();
 
   return (
@@ -21,23 +21,21 @@ export const Collapsible: React.FC<Props> = ({ children, onToggle, className, he
     ].filter(Boolean).join(' ')}
     >
       <CollapsibleProvider withinCollapsible>
-        <header>
+        <button
+          type="button"
+          className={`${baseClass}__toggle ${baseClass}__toggle--${collapsed ? 'collapsed' : 'open'}`}
+          onClick={() => {
+            if (typeof onToggle === 'function') onToggle(!collapsed);
+            setCollapsed(!collapsed);
+          }}
+        >
           {header && (
             <div className={`${baseClass}__header-wrap`}>
               {header}
             </div>
           )}
-          <Button
-            icon="chevron"
-            onClick={() => {
-              if (typeof onToggle === 'function') onToggle(!collapsed);
-              setCollapsed(!collapsed);
-            }}
-            buttonStyle="icon-label"
-            className={`${baseClass}__toggle ${baseClass}__toggle--${collapsed ? 'collapsed' : 'open'}`}
-            round
-          />
-        </header>
+          <Chevron className={`${baseClass}__indicator`} />
+        </button>
         <AnimateHeight
           height={collapsed ? 0 : 'auto'}
           duration={200}

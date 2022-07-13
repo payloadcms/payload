@@ -5,6 +5,7 @@ import { FieldTypes } from '../field-types';
 export type Props = {
   className?: string
   readOnly?: boolean
+  forceRender?: boolean
   permissions?: {
     [field: string]: FieldPermissions
   }

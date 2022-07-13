@@ -19,7 +19,6 @@ import { blocks as blocksValidator } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
-import { DocumentPreferences } from '../../../../../preferences/types';
 import { useOperation } from '../../../utilities/OperationProvider';
 
 import './index.scss';
@@ -54,7 +53,7 @@ const Blocks: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const { preferencesKey } = useDocumentInfo();
+  const { preferencesKey, preferences } = useDocumentInfo();
 
   const { getPreference, setPreference } = usePreferences();
   const [rows, dispatchRows] = useReducer(reducer, []);
@@ -108,7 +107,6 @@ const Blocks: React.FC<Props> = (props) => {
     dispatchRows({ type: 'SET_COLLAPSE', id: rowID, collapsed });
 
     if (preferencesKey) {
-      const preferences: DocumentPreferences = await getPreference(preferencesKey);
       const preferencesToSet = preferences || { fields: {} };
       let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed
         .filter((filterID) => (rows.find((row) => row.id === filterID)))
@@ -131,7 +129,7 @@ const Blocks: React.FC<Props> = (props) => {
         },
       });
     }
-  }, [preferencesKey, getPreference, path, setPreference, rows]);
+  }, [preferencesKey, preferences, path, setPreference, rows]);
 
   const onDragEnd = useCallback((result) => {
     if (!result.destination) return;
@@ -145,15 +143,10 @@ const Blocks: React.FC<Props> = (props) => {
   useEffect(() => {
     const data = formContext.getDataByPath(path);
 
-    if (Array.isArray(data)) {
-      const fetchPreferences = async () => {
-        const preferences = preferencesKey ? await getPreference<DocumentPreferences>(preferencesKey) : undefined;
-        dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
-      };
-
-      fetchPreferences();
+    if (Array.isArray(data) && preferences) {
+      dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
     }
-  }, [formContext, path, preferencesKey, getPreference]);
+  }, [formContext, path, preferencesKey, preferences]);
 
   // Set row count on mount and when form context is reset
   useEffect(() => {

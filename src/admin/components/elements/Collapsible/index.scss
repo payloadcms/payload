@@ -8,33 +8,36 @@
     border: 1px solid var(--theme-elevation-300);
   }
 
-  header {
-    position: relative;
-    background: var(--theme-elevation-100);
+  &__toggle {
+    @extend %btn-reset;
+    cursor: pointer;
+    background: var(--theme-elevation-50);
     border-top-right-radius: $style-radius-s;
     border-top-left-radius: $style-radius-s;
+    width: 100%;
     display: flex;
+    align-items: center;
     padding: base(.75) base(1);
+
+    &:hover {
+      background: var(--theme-elevation-100);
+    }
   }
 
   &--collapsed {
-    header {
+    .collapsible__toggle {
       border-bottom-right-radius: $style-radius-s;
       border-bottom-left-radius: $style-radius-s;
     }
-  }
 
-  &__toggle {
-    margin: 0 0 0 auto;
-    transform: rotate(.5turn);
-
-    .btn__icon {
-      background-color: var(--theme-elevation-0);
-    }
-
-    &--collapsed {
+    .collapsible__indicator {
       transform: rotate(0turn);
     }
+  }
+
+  &__indicator {
+    margin: 0 0 0 auto;
+    transform: rotate(.5turn);
   }
 
   &__content {
