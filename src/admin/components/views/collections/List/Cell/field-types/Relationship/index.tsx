@@ -16,7 +16,7 @@ const RelationshipCell = (props) => {
   const isAboveViewport = entry?.boundingClientRect?.top > 0;
 
   useEffect(() => {
-    if (isAboveViewport && !hasRequested) {
+    if (cellData && isAboveViewport && !hasRequested) {
       const formattedValues: Value[] = [];
 
       const arrayCellData = Array.isArray(cellData) ? cellData : [cellData];
@@ -24,7 +24,7 @@ const RelationshipCell = (props) => {
         if (typeof cell === 'object' && 'relationTo' in cell && 'value' in cell) {
           formattedValues.push(cell);
         }
-        if ((typeof cell === 'number' || typeof cell === 'string') && field.relationTo === 'string') {
+        if ((typeof cell === 'number' || typeof cell === 'string') && typeof field.relationTo === 'string') {
           formattedValues.push({
             value: cell,
             relationTo: field.relationTo,
@@ -39,21 +39,24 @@ const RelationshipCell = (props) => {
 
   return (
     <div ref={intersectionRef}>
-      { values.map(({ relationTo, value }, i) => {
+      {values.map(({ relationTo, value }, i) => {
         const document = documents[relationTo][value];
         const relatedCollection = collections.find(({ slug }) => slug === relationTo);
         if (document && relatedCollection) {
           return (
             <React.Fragment key={i}>
-              { document[relatedCollection.admin.useAsTitle] ?? `Untitled: ${value}`}
+              {document[relatedCollection.admin.useAsTitle] ?? `Untitled - ${value}`}
+              {i < values.length && ', '}
             </React.Fragment>
           );
         }
-        return '';
+        return null;
       })}
-      {/* { (Array.isArray(cellData) && cellData.length > values.length) && ( */}
-      {/*  <React.Fragment>...</React.Fragment> */}
-      {/* )} */}
+      {!cellData && !values && (
+        <React.Fragment>
+          {`No <${field.label}>`}
+        </React.Fragment>
+      )}
     </div>
   );
 };
