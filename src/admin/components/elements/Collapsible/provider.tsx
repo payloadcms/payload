@@ -4,7 +4,7 @@ import React, {
 
 const Context = createContext(false);
 
-export const CollapsibleProvider: React.FC<{ children?: React.ReactNode, withinCollapsible: boolean }> = ({ children, withinCollapsible }) => {
+export const CollapsibleProvider: React.FC<{ children?: React.ReactNode, withinCollapsible?: boolean }> = ({ children, withinCollapsible = true }) => {
   return (
     <Context.Provider value={withinCollapsible}>
       {children}

@@ -1,0 +1,44 @@
+---
+title: Collapsible Field
+label: Collapsible
+order: 60
+desc: With the Collapsible field, you can place fields within a collapsible layout component that can be collapsed / expanded.
+keywords: row, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+<Banner >
+  The Collapsible field is presentational-only and only affects the Admin panel. By using it, you can place fields within a nice layout component that can be collapsed / expanded.
+</Banner>
+
+### Config
+
+| Option           | Description |
+| ---------------- | ----------- |
+| **`label`** *        | A label to render within the header of the collapsible component. |
+| **`fields`** *       | Array of field types to nest within this Collapsible. |
+| **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
+
+*\* An asterisk denotes that a property is required.*
+
+### Example
+
+`collections/ExampleCollection.js`
+```js
+{
+  slug: 'example-collection',
+  fields: [
+    {
+      label: 'Header of collapsible goes here',
+      type: 'collapsible', // required
+      fields: [ // required
+        {
+          name: 'someTextField',
+          type: 'text',
+          required: true,
+        },
+      ],
+    }
+  ]
+}
+
+```

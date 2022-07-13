@@ -20,7 +20,7 @@ export const Collapsible: React.FC<Props> = ({ children, onToggle, className, he
       isNested && `${baseClass}--nested`,
     ].filter(Boolean).join(' ')}
     >
-      <CollapsibleProvider withinCollapsible>
+      <CollapsibleProvider>
         <button
           type="button"
           className={`${baseClass}__toggle ${baseClass}__toggle--${collapsed ? 'collapsed' : 'open'}`}
