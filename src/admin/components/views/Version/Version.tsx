@@ -20,6 +20,7 @@ import fieldComponents from './RenderFieldsToDiff/fields';
 import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
 import { FieldPermissions } from '../../../../auth';
 import { useLocale } from '../../utilities/Locale';
+import { Gutter } from '../../elements/Gutter';
 
 import './index.scss';
 
@@ -168,7 +169,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
         description={metaDesc}
       />
       <Eyebrow />
-      <div className={`${baseClass}__wrap`}>
+      <Gutter className={`${baseClass}__wrap`}>
         <div className={`${baseClass}__intro`}>
           {doc?.autosave ? 'Autosaved version ' : 'Version'}
           {' '}
@@ -217,7 +218,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
             comparison={comparison}
           />
         )}
-      </div>
+      </Gutter>
     </div>
   );
 };

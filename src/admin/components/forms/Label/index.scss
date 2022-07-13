@@ -3,10 +3,10 @@
 label.field-label {
   display: flex;
   padding-bottom: base(.25);
-  color: $color-dark-gray;
+  color: var(--theme-elevation-800);
 
   .required {
-    color: $color-red;
+    color: var(--color-error-500);
     margin-left: base(.25);
     margin-right: auto;
   }

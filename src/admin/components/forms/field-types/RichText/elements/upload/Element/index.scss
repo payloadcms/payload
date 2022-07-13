@@ -1,11 +1,14 @@
 @import '../../../../../../../scss/styles.scss';
 
 .rich-text-upload {
+  @extend %body;
+  @include inputShadow;
   max-width: base(15);
   display: flex;
   align-items: center;
-  background: white;
+  background: var(--theme-elevation-50);
   position: relative;
+  font-family: var(--font-body);
 
   &__card {
     @include soft-shadow-bottom;
@@ -24,12 +27,13 @@
     position: relative;
     overflow: hidden;
 
-    img, svg {
+    img,
+    svg {
       position: absolute;
       object-fit: cover;
       width: 100%;
       height: 100%;
-      background-color: $color-dark-gray;
+      background-color: var(--theme-elevation-800);
     }
   }
 
@@ -66,7 +70,7 @@
 
   &__bottomRow {
     padding: base(.5);
-    border-top: 1px solid $color-background-gray;
+    border-top: 1px solid var(--theme-elevation-100);
   }
 
   h5 {

@@ -17,4 +17,9 @@
       margin-right: $baseline;
     }
   }
+
+  &__modal-template {
+    position: relative;
+    z-index: 1;
+  }
 }

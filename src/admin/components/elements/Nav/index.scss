@@ -8,13 +8,15 @@
   height: 100vh;
   width: base(9);
   overflow: hidden;
+  border-right: 1px solid var(--theme-elevation-100);
 
   header {
     width: 100%;
     display: flex;
     margin-bottom: base(1.5);
 
-    a, button {
+    a,
+    button {
       display: block;
       padding: 0;
 
@@ -35,7 +37,8 @@
     visibility: hidden;
     cursor: pointer;
 
-    &:active, &:focus {
+    &:active,
+    &:focus {
       outline: none;
     }
   }
@@ -58,14 +61,14 @@
   }
 
   &__label {
-    color: $color-gray;
+    color: var(--theme-elevation-400);
   }
 
   &__controls {
     margin-top: auto;
     margin-bottom: 0;
 
-    > * {
+    >* {
       margin-top: base(1);
     }
   }
@@ -126,8 +129,8 @@
   }
 
   @include mid-break {
-    background: rgba($color-background-gray, .8);
-    backdrop-filter: saturate(180%) blur(5px);
+    @include blur-bg;
+    position: fixed;
     width: 100%;
     height: base(3);
     z-index: $z-modal;
@@ -141,7 +144,9 @@
 
     header,
     &__wrap {
-      padding: $baseline;
+      position: relative;
+      z-index: 1;
+      padding: $baseline var(--gutter-h);
     }
 
     header {

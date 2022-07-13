@@ -5,7 +5,7 @@
   height: $baseline;
 
   .stroke {
-    stroke: $color-dark-gray;
+    stroke: var(--theme-elevation-800);
     stroke-width: $style-stroke-width;
   }
 }

@@ -2,16 +2,9 @@
 
 .dashboard {
   width: 100%;
-  padding-right: base(2);
 
   &__wrap {
-    padding: base(2);
-    background: white;
-  }
-
-  &__label {
-    @extend %body;
-    color: $color-gray;
+    padding-bottom: base(2);
   }
 
   &__card-list {
@@ -40,10 +33,9 @@
   }
 
   @include mid-break {
-    padding-right: 0;
-
     &__wrap {
-      padding: $baseline;
+      padding-top: 0;
+      padding-bottom: 0;
     }
 
     li {

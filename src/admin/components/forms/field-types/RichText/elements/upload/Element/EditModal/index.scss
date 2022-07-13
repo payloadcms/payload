@@ -8,6 +8,8 @@
   .template-minimal {
     padding-top: base(4);
     align-items: flex-start;
+    position: relative;
+    z-index: 1;
   }
 
   &__header {
@@ -28,12 +30,14 @@
       display: none;
     }
   }
+
   .rich-text__toolbar {
     margin-bottom: 0;
   }
+
   .rich-text__editor {
-    background-color: white;
-    border: 1px solid $color-light-gray;
+    background-color: var(--theme-elevation-0);
+    border: 1px solid var(--theme-elevation-150);
     border-top: none;
     min-height: base(5);
     padding: base(.35) base(.5);

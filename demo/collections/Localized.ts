@@ -21,9 +21,6 @@ const RichTextBlock: Block = {
       name: 'content',
       localized: true,
       type: 'richText',
-      admin: {
-        hideGutter: true,
-      },
     },
   ],
 };

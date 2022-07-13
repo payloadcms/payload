@@ -6,6 +6,11 @@
   align-items: center;
   height: 100%;
 
+  &__template {
+    z-index: 1;
+    position: relative;
+  }
+
   &__toggle {
     @extend %btn-reset;
   }

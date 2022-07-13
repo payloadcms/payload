@@ -1,18 +1,9 @@
 import React, { useCallback } from 'react';
-
 import useField from '../../useField';
 import withCondition from '../../withCondition';
-import Error from '../../Error';
-import Label from '../../Label';
-import FieldDescription from '../../FieldDescription';
-import RadioInput from './RadioInput';
 import { radio } from '../../../../../fields/validations';
-import { optionIsObject } from '../../../../../fields/config/types';
 import { Props } from './types';
-
-import './index.scss';
-
-const baseClass = 'radio-group';
+import RadioGroupInput from './Input';
 
 const RadioGroup: React.FC<Props> = (props) => {
   const {
@@ -44,69 +35,29 @@ const RadioGroup: React.FC<Props> = (props) => {
     showError,
     errorMessage,
     setValue,
-  } = useField({
+  } = useField<string>({
     path,
     validate: memoizedValidate,
     condition,
   });
 
-  const classes = [
-    'field-type',
-    baseClass,
-    className,
-    `${baseClass}--layout-${layout}`,
-    showError && 'error',
-    readOnly && `${baseClass}--read-only`,
-  ].filter(Boolean).join(' ');
-
   return (
-    <div
-      className={classes}
-      style={{
-        ...style,
-        width,
-      }}
-    >
-      <div className={`${baseClass}__error-wrap`}>
-        <Error
-          showError={showError}
-          message={errorMessage}
-        />
-      </div>
-      <Label
-        htmlFor={path}
-        label={label}
-        required={required}
-      />
-      <ul className={`${baseClass}--group`}>
-        {options.map((option) => {
-          let optionValue = '';
-
-          if (optionIsObject(option)) {
-            optionValue = option.value;
-          } else {
-            optionValue = option;
-          }
-
-          const isSelected = String(optionValue) === String(value);
-
-          return (
-            <li key={`${path} - ${optionValue}`}>
-              <RadioInput
-                path={path}
-                isSelected={isSelected}
-                option={optionIsObject(option) ? option : { label: option, value: option }}
-                onChange={readOnly ? undefined : setValue}
-              />
-            </li>
-          );
-        })}
-      </ul>
-      <FieldDescription
-        value={value}
-        description={description}
-      />
-    </div>
+    <RadioGroupInput
+      path={path}
+      name={name}
+      onChange={readOnly ? undefined : setValue}
+      value={value}
+      showError={showError}
+      errorMessage={errorMessage}
+      required={required}
+      label={label}
+      layout={layout}
+      style={style}
+      className={className}
+      width={width}
+      description={description}
+      options={options}
+    />
   );
 };
 

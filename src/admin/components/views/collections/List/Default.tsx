@@ -10,11 +10,12 @@ import Button from '../../../elements/Button';
 import Table from '../../../elements/Table';
 import Meta from '../../../utilities/Meta';
 import { Props } from './types';
-
-import './index.scss';
 import ViewDescription from '../../../elements/ViewDescription';
 import PerPage from '../../../elements/PerPage';
+import { Gutter } from '../../../elements/Gutter';
 import { RelationshipProvider } from './RelationshipProvider';
+
+import './index.scss';
 
 const baseClass = 'collection-list';
 
@@ -51,7 +52,7 @@ const DefaultList: React.FC<Props> = (props) => {
         title={collection.labels.plural}
       />
       <Eyebrow />
-      <div className={`${baseClass}__wrap`}>
+      <Gutter className={`${baseClass}__wrap`}>
         <header className={`${baseClass}__header`}>
           <h1>{pluralLabel}</h1>
           {hasCreatePermission && (
@@ -147,7 +148,7 @@ const DefaultList: React.FC<Props> = (props) => {
             </Fragment>
           )}
         </div>
-      </div>
+      </Gutter>
     </div>
   );
 };

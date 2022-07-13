@@ -5,9 +5,7 @@
   margin-bottom: base(2);
 
   &__wrap {
-    padding: base(3);
-    margin-right: base(2);
-    background: white;
+    padding-top: base(1);
   }
 
   &__header {
@@ -52,15 +50,7 @@
 
   @include mid-break {
     &__wrap {
-      padding: $baseline 0;
-      margin-right: 0;
-    }
-
-    &__header,
-    .table,
-    &__page-controls {
-      padding-left: $baseline;
-      padding-right: $baseline;
+      padding-top: 0;
     }
 
     &__page-controls {

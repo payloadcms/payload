@@ -19,11 +19,11 @@
   &__add-button-wrap {
 
     .btn {
-      color: $color-gray;
+      color: var(--theme-elevation-400);
       margin: 0;
 
       &:hover {
-        color: $color-dark-gray;
+        color: var(--theme-elevation-800);
       }
     }
   }
@@ -33,7 +33,7 @@
   }
 
   .section__content {
-    > div > div {
+    >div>div {
       width: 100%;
     }
   }

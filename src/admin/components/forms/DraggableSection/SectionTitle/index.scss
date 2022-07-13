@@ -7,7 +7,7 @@
 
   &__input {
     flex-grow: 1;
-    color: $color-dark-gray;
+    color: var(--theme-elevation-800);
     background-color: transparent;
     font-family: $font-body;
     font-weight: 600;
@@ -18,7 +18,7 @@
     border: none;
 
     &:hover {
-      box-shadow: inset 0px -2px 0px -1px $color-light-gray;
+      box-shadow: inset 0px -2px 0px -1px var(--theme-elevation-150);
     }
 
     &:hover,

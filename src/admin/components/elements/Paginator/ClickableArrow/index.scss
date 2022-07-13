@@ -11,8 +11,8 @@
   &--is-disabled {
     cursor: default;
 
-    .icon .stroke{
-      stroke: $color-gray;
+    .icon .stroke {
+      stroke: var(--theme-elevation-400);
     }
   }
 }

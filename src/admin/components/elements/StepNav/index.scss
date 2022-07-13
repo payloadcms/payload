@@ -35,10 +35,4 @@
     overflow: hidden;
     white-space: nowrap;
   }
-
-  @include mid-break {
-    > *:first-child {
-      padding-left: $baseline;
-    }
-  }
 }

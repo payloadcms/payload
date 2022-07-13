@@ -60,7 +60,7 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
         slug={modalSlug}
         className={`${baseClass}__modal`}
       >
-        <MinimalTemplate>
+        <MinimalTemplate className={`${baseClass}__modal-template`}>
           <h1>Confirm version restoration</h1>
           <p>{restoreMessage}</p>
           <Button

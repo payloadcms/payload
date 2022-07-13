@@ -1,11 +1,8 @@
 module.exports = {
   verbose: true,
   testEnvironment: 'node',
-  globalSetup: '<rootDir>/tests/api/globalSetup.ts',
-  testPathIgnorePatterns: [
-    'node_modules',
-    'src/admin/*',
-    'dist',
+  testMatch: [
+    '**/test/int/**/*spec.ts',
   ],
   testTimeout: 15000,
   moduleNameMapper: {

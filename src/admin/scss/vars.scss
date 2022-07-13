@@ -18,40 +18,40 @@ $breakpoint-l-width: 1440px !default;
 // BASELINE GRID
 //////////////////////////////
 
-$baseline-px         : 25px !default;
-$baseline-body-size  : 13px !default;
-$baseline            : math.div($baseline-px, $baseline-body-size) + rem;
+$baseline-px : 25px !default;
+$baseline-body-size : 13px !default;
+$baseline : math.div($baseline-px, $baseline-body-size)+rem;
 
 @function base($multiplier) {
-	@return math.div($baseline-px, $baseline-body-size) * $multiplier + rem;
+  @return math.div($baseline-px, $baseline-body-size) * $multiplier +rem;
 }
 
 //////////////////////////////
 // FONTS
 //////////////////////////////
 
-$font-body  : 'Suisse Intl' !default;
-$font-mono  : monospace !default;
+$font-body : 'Suisse Intl' !default;
+$font-mono : monospace !default;
 
 //////////////////////////////
-// COLORS
+// COLORS (LEGACY - DO NOT USE. PREFER CSS VARIABLES)
 //////////////////////////////
 
-$color-dark-gray       : #333333 !default;
-$color-gray            : #9A9A9A !default;
-$color-light-gray      : #DADADA !default;
+$color-dark-gray : #333333 !default;
+$color-gray : #9A9A9A !default;
+$color-light-gray : #DADADA !default;
 $color-background-gray : #F3F3F3 !default;
-$color-red             : #ff6f76 !default;
-$color-yellow          : #FDFFA4 !default;
-$color-green           : #B2FFD6 !default;
-$color-purple          : #F3DDF3 !default;
+$color-red : #ff6f76 !default;
+$color-yellow : #FDFFA4 !default;
+$color-green : #B2FFD6 !default;
+$color-purple : #F3DDF3 !default;
 
 //////////////////////////////
 // STYLES
 //////////////////////////////
 
-$style-radius-s     : 3px !default;
-$style-radius-m     : 4px !default;
+$style-radius-s : 3px !default;
+$style-radius-m : 4px !default;
 $style-stroke-width : 1px !default;
 
 $style-stroke-width-s : 1px !default;
@@ -63,7 +63,7 @@ $style-stroke-width-m : 2px !default;
 
 $top-header-offset: calc(#{base(4)} - 1px);
 $top-header-offset-m: base(3);
-$focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
+$focus-box-shadow: 0 0 0 $style-stroke-width-m var(--color-success-500);
 
 //////////////////////////////
 // SHADOWS
@@ -74,7 +74,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
 }
 
 @mixin shadow-lg {
-  box-shadow: 0 2px 20px 7px rgba(0, 2, 4, 0.1), 0 6px 4px -4px rgba(0, 2, 4, 0.02);
+  box-shadow: 0 20px 35px -10px rgba(0, 2, 4, 0.2), 0 6px 4px -4px rgba(0, 2, 4, 0.02);
 }
 
 @mixin shadow-lg-top {
@@ -82,15 +82,15 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
 }
 
 @mixin shadow {
-  box-shadow: 0 12px 45px rgba(0,0,0,.03);
+  box-shadow: 0 12px 45px rgba(0, 0, 0, .03);
 
   &:hover {
-    	box-shadow: 0 12px 45px rgba(0,0,0,.07);
+    box-shadow: 0 12px 45px rgba(0, 0, 0, .07);
   }
 }
 
 @mixin inputShadowActive {
-	box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.16), 0 6px 4px -4px rgba(0, 2, 4, 0.13);
+  box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.16), 0 6px 4px -4px rgba(0, 2, 4, 0.13);
 }
 
 @mixin inputShadow {
@@ -101,7 +101,8 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
       box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.13), 0 6px 4px -4px rgba(0, 2, 4, 0.1);
     }
 
-    &:active, &:focus {
+    &:active,
+    &:focus {
       @include inputShadowActive;
     }
   }
@@ -115,18 +116,35 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
 // STYLE MIXINS
 //////////////////////////////
 
-@mixin blur-bg($color: $color-background-gray) {
-  background: rgba($color, .7);
-  backdrop-filter: saturate(180%) blur(5px);
+@mixin blur-bg($color: var(--theme-bg)) {
+
+  &:before,
+  &:after {
+    content: ' ';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  &:before {
+    background: $color;
+    opacity: .9;
+  }
+
+  &:after {
+    backdrop-filter: blur(5px);
+  }
 }
 
 @mixin formInput () {
   @include inputShadow;
   font-family: $font-body;
   width: 100%;
-  border: 1px solid $color-light-gray;
-  background: white;
-  color: $color-dark-gray;
+  border: 1px solid var(--theme-elevation-150);
+  background: var(--theme-input-bg);
+  color: var(--theme-elevation-800);
   border-radius: 0;
   font-size: 1rem;
   height: base(2);
@@ -135,37 +153,37 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m $color-green;
   -webkit-appearance: none;
 
   &::-webkit-input-placeholder {
-    color: $color-gray;
+    color: var(--theme-elevation-400);
     font-weight: normal;
     font-size: 1rem;
   }
 
   &::-moz-placeholder {
-    color: $color-gray;
+    color: var(--theme-elevation-400);
     font-weight: normal;
     font-size: 1rem;
   }
 
   &:hover {
-    border-color: darken($color-light-gray, 10%);
+    border-color: var(--theme-elevation-250);
   }
 
   &:focus,
   &:active {
-    border-color: $color-gray;
+    border-color: var(--theme-elevation-400);
     outline: 0;
   }
 
   &:disabled {
-    background: lighten($color-light-gray, 5%);
-    color: darken($color-gray, 5%);
+    background: var(--theme-elevation-200);
+    color: var(--theme-elevation-450);
 
     &:hover {
-      border-color: $color-light-gray;
+      border-color: var(--theme-elevation-150);
     }
   }
 
   @include small-break {
-      margin-bottom: base(.5);
+    margin-bottom: base(.5);
   }
 }

@@ -6,6 +6,7 @@ import { SanitizedCollectionConfig } from '../../../../../../../collections/conf
 import { fieldAffectsData, fieldIsPresentationalOnly, RelationshipField } from '../../../../../../../fields/config/types';
 import Label from '../../Label';
 import { Props } from '../types';
+import { diffStyles } from '../styles';
 
 import './index.scss';
 
@@ -85,6 +86,7 @@ const Relationship: React.FC<Props & { field: RelationshipField}> = ({ field, ve
         {field.label}
       </Label>
       <ReactDiffViewer
+        styles={diffStyles}
         oldValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
         newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
         splitView

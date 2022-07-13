@@ -26,6 +26,7 @@ import Publish from '../../../elements/Publish';
 import SaveDraft from '../../../elements/SaveDraft';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { OperationContext } from '../../../utilities/OperationProvider';
+import { Gutter } from '../../../elements/Gutter';
 
 import './index.scss';
 
@@ -96,7 +97,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
               {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && (
               <LeaveWithoutSaving />
               )}
-              <div className={`${baseClass}__edit`}>
+              <Gutter className={`${baseClass}__edit`}>
                 <header className={`${baseClass}__header`}>
                   <h1>
                     <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
@@ -125,7 +126,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
                 />
-              </div>
+              </Gutter>
             </div>
             <div className={`${baseClass}__sidebar-wrap`}>
               <div className={`${baseClass}__sidebar`}>
