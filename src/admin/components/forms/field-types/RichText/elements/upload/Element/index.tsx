@@ -128,7 +128,7 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
         </div>
 
         <div className={`${baseClass}__bottomRow`}>
-          <h5>{upload?.filename}</h5>
+          <strong>{upload?.filename}</strong>
         </div>
       </div>
       {children}

@@ -4,8 +4,10 @@
   max-width: base(15);
   display: flex;
   align-items: center;
-  background: white;
+  background: var(--theme-elevation-50);
   position: relative;
+  @extend %body;
+  font-family: var(--font-body);
 
   &__card {
     @include soft-shadow-bottom;
