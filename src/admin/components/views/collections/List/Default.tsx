@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useConfig } from '../../../utilities/Config';
 import UploadGallery from '../../../elements/UploadGallery';
 import Eyebrow from '../../../elements/Eyebrow';
@@ -44,7 +44,6 @@ const DefaultList: React.FC<Props> = (props) => {
 
   const { routes: { admin } } = useConfig();
   const history = useHistory();
-  const { pathname, search } = useLocation();
 
   return (
     <div className={baseClass}>
@@ -74,9 +73,7 @@ const DefaultList: React.FC<Props> = (props) => {
           enableSort={Boolean(upload)}
         />
         {(data.docs && data.docs.length > 0) && (
-          <React.Fragment
-            key={`${pathname}${search}`}
-          >
+          <React.Fragment>
             {!upload && (
             <RelationshipProvider>
               <Table

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../../../src/collections/config/types';
 import { buildConfig } from '../buildConfig';
+import { devUser } from '../../credentials';
 
 export const slug = 'fields-relationship';
 
@@ -38,6 +39,9 @@ export default buildConfig({
   collections: [
     {
       slug,
+      admin: {
+        defaultColumns: ['relationship', 'relationshipRestricted', 'with-existing-relations'],
+      },
       fields: [
         {
           type: 'relationship',
@@ -94,6 +98,13 @@ export default buildConfig({
     },
   ],
   onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    });
     // Create docs to relate to
     const { id: relationOneDocId } = await payload.create<RelationOne>({
       collection: relationOneSlug,

@@ -3,7 +3,10 @@ import { useConfig } from '../../../../../../utilities/Config';
 import useIntersect from '../../../../../../../hooks/useIntersect';
 import { useListRelationships } from '../../../RelationshipProvider';
 
+import './index.scss';
+
 type Value = { relationTo: string, value: number | string };
+const baseClass = 'relationship-cell';
 
 const RelationshipCell = (props) => {
   const { field, data: cellData } = props;
@@ -38,7 +41,10 @@ const RelationshipCell = (props) => {
   }, [cellData, field, collections, isAboveViewport, routes.api, hasRequested, getRelationships]);
 
   return (
-    <div ref={intersectionRef}>
+    <div
+      className={baseClass}
+      ref={intersectionRef}
+    >
       {values.map(({ relationTo, value }, i) => {
         const document = documents[relationTo][value];
         const relatedCollection = collections.find(({ slug }) => slug === relationTo);
@@ -46,13 +52,13 @@ const RelationshipCell = (props) => {
           return (
             <React.Fragment key={i}>
               {document[relatedCollection.admin.useAsTitle] ?? `Untitled - ${value}`}
-              {i < values.length && ', '}
+              {values.length > i + 1 && ', '}
             </React.Fragment>
           );
         }
         return null;
       })}
-      {!cellData && !values && (
+      {!cellData && !values && hasRequested && (
         <React.Fragment>
           {`No <${field.label}>`}
         </React.Fragment>

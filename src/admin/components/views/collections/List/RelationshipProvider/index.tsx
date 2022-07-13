@@ -23,7 +23,6 @@ type ListRelationshipContext = {
 const Context = createContext({} as ListRelationshipContext);
 
 export const RelationshipProvider: React.FC<{children?: React.ReactNode}> = ({ children }) => {
-  const contextRef = useRef({} as ListRelationshipContext);
   const [documents, dispatchDocuments] = useReducer(reducer, {});
   const debouncedDocuments = useDebounce(documents, 100);
   const config = useConfig();
@@ -65,11 +64,8 @@ export const RelationshipProvider: React.FC<{children?: React.ReactNode}> = ({ c
     dispatchDocuments({ type: 'REQUEST', docs: relationships });
   }, []);
 
-  contextRef.current.getRelationships = getRelationships;
-  contextRef.current.documents = documents;
-
   return (
-    <Context.Provider value={contextRef.current}>
+    <Context.Provider value={{ getRelationships, documents }}>
       {children}
     </Context.Provider>
   );
