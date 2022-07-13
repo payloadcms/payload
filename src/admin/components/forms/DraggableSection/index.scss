@@ -26,19 +26,6 @@
     margin-left: - base(.75);
     margin-right: - base(.75);
     width: calc(100% + #{base(1.5)});
-
-    .toggle-collapse {
-      margin: 0 0 0 auto;
-      transform: rotate(.5turn);
-
-      .btn__icon {
-        background-color: var(--theme-elevation-0);
-      }
-
-      &--is-collapsed {
-        transform: rotate(0turn);
-      }
-    }
   }
 
   &__render-fields-wrapper {

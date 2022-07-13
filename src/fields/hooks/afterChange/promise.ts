@@ -111,7 +111,8 @@ export const promise = async ({
       break;
     }
 
-    case 'row': {
+    case 'row':
+    case 'collapsible': {
       traverseFields({
         data,
         doc,

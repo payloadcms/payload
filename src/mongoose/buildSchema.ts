@@ -4,7 +4,7 @@
 /* eslint-disable no-use-before-define */
 import { Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
-import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, fieldIsPresentationalOnly, NonPresentationalField } from '../fields/config/types';
+import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, fieldIsPresentationalOnly, NonPresentationalField, CollapsibleField } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
 
 export type BuildSchemaOptions = {
@@ -306,12 +306,26 @@ const fieldToSchemaMap = {
   row: (field: RowField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
     const newFields = { ...fields };
 
-    field.fields.forEach((rowField: Field) => {
-      const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[rowField.type];
+    field.fields.forEach((subField: Field) => {
+      const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
 
-      if (fieldSchemaMap && fieldAffectsData(rowField)) {
-        const fieldSchema = fieldSchemaMap(rowField, fields, config, buildSchemaOptions);
-        newFields[rowField.name] = fieldSchema[rowField.name];
+      if (fieldSchemaMap && fieldAffectsData(subField)) {
+        const fieldSchema = fieldSchemaMap(subField, fields, config, buildSchemaOptions);
+        newFields[subField.name] = fieldSchema[subField.name];
+      }
+    });
+
+    return newFields;
+  },
+  collapsible: (field: CollapsibleField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+    const newFields = { ...fields };
+
+    field.fields.forEach((subField: Field) => {
+      const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+
+      if (fieldSchemaMap && fieldAffectsData(subField)) {
+        const fieldSchema = fieldSchemaMap(subField, fields, config, buildSchemaOptions);
+        newFields[subField.name] = fieldSchema[subField.name];
       }
     });
 

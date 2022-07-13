@@ -15,7 +15,7 @@ import { GraphQLJSON } from 'graphql-type-json';
 import withNullableType from './withNullableType';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
-import { ArrayField, CodeField, DateField, EmailField, Field, fieldHasSubFields, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField } from '../../fields/config/types';
+import { ArrayField, CodeField, DateField, EmailField, Field, fieldHasSubFields, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
 import { Payload } from '../../index';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
@@ -128,6 +128,20 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
 
       if (getFieldSchema) {
         const fieldSchema = getFieldSchema(rowField);
+
+        return [
+          ...acc,
+          fieldSchema,
+        ];
+      }
+
+      return acc;
+    }, []),
+    collapsible: (field: CollapsibleField) => field.fields.reduce((acc, collapsibleField: CollapsibleField) => {
+      const getFieldSchema = fieldToSchemaMap[collapsibleField.type];
+
+      if (getFieldSchema) {
+        const fieldSchema = getFieldSchema(collapsibleField);
 
         return [
           ...acc,

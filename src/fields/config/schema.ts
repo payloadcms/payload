@@ -175,6 +175,16 @@ export const row = baseField.keys({
   }),
 });
 
+export const collapsible = baseField.keys({
+  label: joi.string().required(),
+  type: joi.string().valid('collapsible').required(),
+  fields: joi.array().items(joi.link('#field')),
+  admin: baseAdminFields.keys({
+    readOnly: joi.forbidden(),
+    hidden: joi.forbidden(),
+  }),
+});
+
 export const group = baseField.keys({
   type: joi.string().valid('group').required(),
   name: joi.string().required(),
@@ -367,6 +377,7 @@ const fieldSchema = joi.alternatives()
     group,
     array,
     row,
+    collapsible,
     radio,
     relationship,
     checkbox,

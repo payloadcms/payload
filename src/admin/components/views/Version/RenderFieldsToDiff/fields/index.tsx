@@ -12,6 +12,7 @@ export default {
   checkbox: Text,
   radio: Text,
   row: Nested,
+  collapsible: Nested,
   group: Nested,
   array: Iterable,
   blocks: Iterable,

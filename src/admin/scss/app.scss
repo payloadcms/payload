@@ -133,7 +133,7 @@
   }
 
   @include small-break {
-    --gutter-h: #{base(1)};
+    --gutter-h: #{base(.75)};
   }
 }
 

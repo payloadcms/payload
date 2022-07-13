@@ -165,14 +165,17 @@ export type GroupField = FieldBase & {
   }
 }
 
-export type RowAdmin = Omit<Admin, 'description'> & {
-  readOnly?: false;
-  hidden?: false;
-};
+export type RowAdmin = Omit<Admin, 'description'>;
 
 export type RowField = Omit<FieldBase, 'admin' | 'name'> & {
   admin?: RowAdmin;
   type: 'row';
+  fields: Field[];
+}
+
+export type CollapsibleField = Omit<FieldBase, 'name'> & {
+  type: 'collapsible';
+  label: string
   fields: Field[];
 }
 
@@ -328,6 +331,7 @@ export type Field =
   | CodeField
   | PointField
   | RowField
+  | CollapsibleField
   | UIField;
 
 export type FieldAffectingData =
@@ -364,7 +368,8 @@ export type NonPresentationalField = TextField
   | UploadField
   | CodeField
   | PointField
-  | RowField;
+  | RowField
+  | CollapsibleField;
 
 export type FieldWithPath = Field & {
   path?: string
@@ -373,7 +378,8 @@ export type FieldWithPath = Field & {
 export type FieldWithSubFields =
   GroupField
   | ArrayField
-  | RowField;
+  | RowField
+  | CollapsibleField;
 
 export type FieldPresentationalOnly =
   UIField;
@@ -387,7 +393,7 @@ export type FieldWithMaxDepth =
   | RelationshipField
 
 export function fieldHasSubFields(field: Field): field is FieldWithSubFields {
-  return (field.type === 'group' || field.type === 'array' || field.type === 'row');
+  return (field.type === 'group' || field.type === 'array' || field.type === 'row' || field.type === 'collapsible');
 }
 
 export function fieldIsArrayType(field: Field): field is ArrayField {

@@ -1,0 +1,49 @@
+@import '../../../scss/styles.scss';
+
+.collapsible {
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: $style-radius-m;
+
+  &:hover {
+    border: 1px solid var(--theme-elevation-300);
+  }
+
+  header {
+    position: relative;
+    background: var(--theme-elevation-100);
+    border-top-right-radius: $style-radius-s;
+    border-top-left-radius: $style-radius-s;
+    display: flex;
+    padding: base(.75) base(1);
+  }
+
+  &--collapsed {
+    header {
+      border-bottom-right-radius: $style-radius-s;
+      border-bottom-left-radius: $style-radius-s;
+    }
+  }
+
+  &__toggle {
+    margin: 0 0 0 auto;
+    transform: rotate(.5turn);
+
+    .btn__icon {
+      background-color: var(--theme-elevation-0);
+    }
+
+    &--collapsed {
+      transform: rotate(0turn);
+    }
+  }
+
+  &__content {
+    padding: $baseline;
+  }
+
+  @include small-break {
+    header {
+      padding: base(.75) var(--gutter-h);
+    }
+  }
+}
