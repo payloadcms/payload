@@ -45,17 +45,17 @@ describe('collections', () => {
       const collectionLink = page.locator(`nav >> text=${slug}`);
       await collectionLink.click();
 
-      expect(page.url()).toContain(url.collection);
+      expect(page.url()).toContain(url.list);
     });
 
     test('should navigate to collection - card', async () => {
       await page.goto(url.admin);
       await page.locator('a:has-text("Posts")').click();
-      expect(page.url()).toContain(url.collection);
+      expect(page.url()).toContain(url.list);
     });
 
     test('breadcrumbs - from card to dashboard', async () => {
-      await page.goto(url.collection);
+      await page.goto(url.list);
       await page.locator('a:has-text("Dashboard")').click();
       expect(page.url()).toContain(url.admin);
     });
@@ -63,9 +63,9 @@ describe('collections', () => {
     test('breadcrumbs - from document to collection', async () => {
       const { id } = await createPost();
 
-      await page.goto(url.doc(id));
+      await page.goto(url.edit(id));
       await page.locator('nav >> text=Posts').click();
-      expect(page.url()).toContain(url.collection);
+      expect(page.url()).toContain(url.list);
     });
   });
 
@@ -86,7 +86,7 @@ describe('collections', () => {
     test('should read existing', async () => {
       const { id } = await createPost();
 
-      await page.goto(url.doc(id));
+      await page.goto(url.edit(id));
 
       await expect(page.locator('#title')).toHaveValue(title);
       await expect(page.locator('#description')).toHaveValue(description);
@@ -95,7 +95,7 @@ describe('collections', () => {
     test('should update existing', async () => {
       const { id } = await createPost();
 
-      await page.goto(url.doc(id));
+      await page.goto(url.edit(id));
 
       const newTitle = 'new title';
       const newDesc = 'new description';
@@ -111,18 +111,18 @@ describe('collections', () => {
     test('should delete existing', async () => {
       const { id } = await createPost();
 
-      await page.goto(url.doc(id));
+      await page.goto(url.edit(id));
       await page.locator('button:has-text("Delete")').click();
       await page.locator('button:has-text("Confirm")').click();
 
       await expect(page.locator(`text=Post "${id}" successfully deleted.`)).toBeVisible();
-      expect(page.url()).toContain(url.collection);
+      expect(page.url()).toContain(url.list);
     });
 
     test('should duplicate existing', async () => {
       const { id } = await createPost();
 
-      await page.goto(url.doc(id));
+      await page.goto(url.edit(id));
       await page.locator('button:has-text("Duplicate")').click();
 
       expect(page.url()).toContain(url.create);
@@ -135,7 +135,7 @@ describe('collections', () => {
     const tableRowLocator = 'table >> tbody >> tr';
 
     beforeEach(async () => {
-      await page.goto(url.collection);
+      await page.goto(url.list);
     });
 
     describe('filtering', () => {

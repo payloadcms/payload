@@ -1,17 +1,17 @@
 export class AdminUrlUtil {
   admin: string;
 
-  collection: string;
+  list: string;
 
   create: string;
 
   constructor(serverURL: string, slug: string) {
     this.admin = `${serverURL}/admin`;
-    this.collection = `${this.admin}/collections/${slug}`;
-    this.create = `${this.collection}/create`;
+    this.list = `${this.admin}/collections/${slug}`;
+    this.create = `${this.list}/create`;
   }
 
-  doc(id: string): string {
-    return `${this.collection}/${id}`;
+  edit(id: string): string {
+    return `${this.list}/${id}`;
   }
 }

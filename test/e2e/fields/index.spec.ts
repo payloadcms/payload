@@ -3,8 +3,7 @@ import { expect, test } from '@playwright/test';
 import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
 import { initPayloadTest } from '../../helpers/configHelpers';
 import { login } from '../helpers';
-import { slug } from './config';
-import { seededDoc } from './shared';
+import { textDoc } from './shared';
 
 const { beforeAll, describe } = test;
 
@@ -20,7 +19,7 @@ describe('fields', () => {
       },
     });
 
-    url = new AdminUrlUtil(serverURL, slug);
+    url = new AdminUrlUtil(serverURL, 'text-fields');
 
     const context = await browser.newContext();
     page = await context.newPage();
@@ -30,9 +29,9 @@ describe('fields', () => {
 
   describe('text', () => {
     test('should display field in list view', async () => {
-      await page.goto(url.collection);
+      await page.goto(url.list);
       const textCell = await page.locator('table tr:first-child td:first-child a');
-      await expect(textCell).toHaveText(seededDoc.text);
+      await expect(textCell).toHaveText(textDoc.text);
     });
   });
 });

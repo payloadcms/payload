@@ -174,7 +174,7 @@ describe('fields - relationship', () => {
 
   describe('existing relationships', () => {
     test('should highlight existing relationship', async () => {
-      await page.goto(url.doc(docWithExistingRelations.id));
+      await page.goto(url.edit(docWithExistingRelations.id));
 
       const fields = page.locator('.render-fields >> .react-select');
       const relationOneField = fields.nth(0);
@@ -187,7 +187,7 @@ describe('fields - relationship', () => {
     });
 
     test('should show untitled ID on restricted relation', async () => {
-      await page.goto(url.doc(docWithExistingRelations.id));
+      await page.goto(url.edit(docWithExistingRelations.id));
 
       const fields = page.locator('.render-fields >> .react-select');
       const restrictedRelationField = fields.nth(3);
@@ -203,7 +203,7 @@ describe('fields - relationship', () => {
     });
 
     test('should show useAsTitle on relation', async () => {
-      await page.goto(url.doc(docWithExistingRelations.id));
+      await page.goto(url.edit(docWithExistingRelations.id));
 
       const fields = page.locator('.render-fields >> .react-select');
       const relationWithTitleField = fields.nth(4);

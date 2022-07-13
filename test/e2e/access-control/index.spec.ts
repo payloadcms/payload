@@ -49,7 +49,7 @@ describe('access control', () => {
   test('field without read access should not show', async () => {
     const { id } = await createDoc({ restrictedField: 'restricted' });
 
-    await page.goto(url.doc(id));
+    await page.goto(url.edit(id));
 
     await expect(page.locator('input[name="restrictedField"]')).toHaveCount(0);
   });
@@ -66,7 +66,7 @@ describe('access control', () => {
     });
 
     test('should not have collection url', async () => {
-      await page.goto(url.collection);
+      await page.goto(url.list);
       await page.locator('text=Nothing found').click();
       await page.locator('a:has-text("Back to Dashboard")').click();
       await expect(page).toHaveURL(url.admin);

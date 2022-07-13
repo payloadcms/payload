@@ -1,3 +1,3 @@
-export const seededDoc = {
-  text: 'Seeded document',
+export const textDoc = {
+  text: 'Seeded text document',
 };
