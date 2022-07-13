@@ -165,6 +165,11 @@ export class Payload {
 
     this.config = loadConfig(this.logger);
 
+    // Connect to database
+    if (this.mongoURL) {
+      this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, this.logger);
+    }
+
     // If not initializing locally, scaffold router
     if (!this.local) {
       this.router = express.Router();
@@ -222,10 +227,6 @@ export class Payload {
       this.authenticate = authenticate(this.config);
     }
 
-    // Connect to database
-    if (this.mongoURL) {
-      this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, this.logger);
-    }
     if (typeof options.onInit === 'function') await options.onInit(this);
     if (typeof this.config.onInit === 'function') await this.config.onInit(this);
 
