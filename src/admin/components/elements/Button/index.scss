@@ -56,7 +56,8 @@
     line-height: base(1);
   }
 
-  span, svg {
+  span,
+  svg {
     vertical-align: top;
   }
 
@@ -69,20 +70,20 @@
   }
 
   &--style-primary {
-    background-color: $color-dark-gray;
-    color: white;
+    background-color: var(--theme-elevation-800);
+    color: var(--theme-elevation-0);
 
     &.btn--disabled {
-      background-color: rgba($color-dark-gray, .6);
+      background-color: var(--theme-elevation-400);
     }
 
     &:not(.btn--disabled) {
       &:hover {
-        background: lighten($color-dark-gray, 5%);
+        background: var(--theme-elevation-750);
       }
 
       &:active {
-        background: lighten($color-dark-gray, 10%);
+        background: var(--theme-elevation-700);
       }
     }
 
@@ -94,26 +95,26 @@
   }
 
   &--style-secondary {
-    $base-box-shadow: inset 0 0 0 $style-stroke-width $color-dark-gray;
-    $hover-box-shadow: inset 0 0 0 $style-stroke-width lighten($color-dark-gray, 5%);
+    $base-box-shadow: inset 0 0 0 $style-stroke-width var(--theme-elevation-800);
+    $hover-box-shadow: inset 0 0 0 $style-stroke-width var(--theme-elevation-700);
 
     box-shadow: $base-box-shadow;
-    color: $color-dark-gray;
+    color: var(--theme-elevation-800);
     background: none;
 
     &:hover {
-      background: rgba($color-dark-gray, .02);
+      background: var(--theme-elevation-100);
       box-shadow: $hover-box-shadow;
     }
 
     &:active {
-      background: lighten($color-light-gray, 7%);
+      background: var(--theme-elevation-200);
     }
 
     &.btn--disabled {
-      color: rgba($color-dark-gray, .6);
+      color: var(--theme-elevation-400);
       background: none;
-      box-shadow: inset 0 0 0 $style-stroke-width rgba($color-dark-gray, .4);
+      box-shadow: inset 0 0 0 $style-stroke-width var(--theme-elevation-400);
     }
 
     &:focus {
@@ -148,7 +149,7 @@
 
     &.btn--style-primary {
       .icon {
-        @include color-svg(white);
+        @include color-svg(var(--theme-elevation-0));
       }
     }
   }
@@ -159,7 +160,7 @@
   }
 
   &--style-light-gray {
-    box-shadow: inset 0 0 0 $style-stroke-width $color-dark-gray;
+    box-shadow: inset 0 0 0 $style-stroke-width var(--theme-elevation-800);
   }
 
   &--icon-position-left {
@@ -191,15 +192,15 @@
 
   &:hover {
     .btn__icon {
-      @include color-svg(white);
-      background: $color-dark-gray;
+      @include color-svg(var(--theme-elevation-0));
+      background: var(--theme-elevation-800);
     }
   }
 
   &:focus {
     .btn__icon {
-      @include color-svg($color-dark-gray);
-      background: $color-light-gray;
+      @include color-svg(var(--theme-elevation-800));
+      background: var(--theme-elevation-150);
     }
 
     outline: none;
@@ -207,8 +208,8 @@
 
   &:active {
     .btn__icon {
-      @include color-svg(white);
-      background: lighten($color-dark-gray, 10%);
+      @include color-svg(var(--theme-elevation-0));
+      background: var(--theme-elevation-700);
     }
   }
 }

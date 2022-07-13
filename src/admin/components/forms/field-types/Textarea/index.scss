@@ -12,7 +12,7 @@
 
   &.error {
     textarea {
-      background-color: lighten($color-red, 20%);
+      background-color: var(--color-error-200);
     }
   }
 }

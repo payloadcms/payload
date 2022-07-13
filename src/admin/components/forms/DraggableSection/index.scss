@@ -18,7 +18,6 @@
   }
 
   &__section-header {
-    @include blur-bg(white);
     display: flex;
     position: sticky;
     top: $top-header-offset;
@@ -33,7 +32,7 @@
       transform: rotate(.5turn);
 
       .btn__icon {
-        background-color: white;
+        background-color: var(--theme-elevation-0);
       }
 
       &--is-collapsed {
@@ -46,8 +45,8 @@
     flex-grow: 1;
   }
 
-  &.is-hovered > div {
-    > .field-type-gutter {
+  &.is-hovered>div {
+    >.field-type-gutter {
       &.actions {
 
         .field-type-gutter__content {
@@ -60,8 +59,9 @@
           box-shadow: none;
         }
       }
+
       .field-type-gutter__content-container {
-        box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
+        box-shadow: #{$style-stroke-width-m} 0px 0px 0px var(--theme-elevation-800);
       }
 
       .position-panel__move-forward,
@@ -76,18 +76,18 @@
       }
 
       .position-panel__current-position {
-        color: $color-dark-gray;
+        color: var(--theme-elevation-800);
       }
     }
 
     .toggle-collapse {
-      @include color-svg(white);
+      @include color-svg(var(--theme-elevation-0));
 
       .btn__icon {
-        background-color: $color-gray;
+        background-color: var(--theme-elevation-400);
 
         &:hover {
-          background-color: $color-dark-gray;
+          background-color: var(--theme-elevation-800);
         }
       }
     }

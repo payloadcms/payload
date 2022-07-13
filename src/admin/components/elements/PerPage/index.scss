@@ -15,7 +15,6 @@
 
   &__button {
     @extend %btn-reset;
-    color: white;
     cursor: pointer;
     text-align: left;
     width: 100%;
@@ -29,7 +28,7 @@
     font-weight: bold;
 
     svg {
-      @include color-svg(white);
+      @include color-svg(var(--theme-elevation-1000));
       margin-left: base(-.25);
       margin-right: base(-.125);
       transform: rotate(-90deg);

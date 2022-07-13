@@ -10,11 +10,13 @@ import Check from '../../../../../icons/Check';
 import Error from '../../../../Error';
 
 import './index.scss';
+import { useTheme } from '../../../../../utilities/Theme';
 
 const baseClass = 'rich-text-link';
 
 const Link = ({ attributes, children, element, editorRef }) => {
   const editor = useSlate();
+  const { theme } = useTheme();
   const [error, setError] = useState(false);
   const [open, setOpen] = useState(element.url === undefined);
 
@@ -45,7 +47,7 @@ const Link = ({ attributes, children, element, editorRef }) => {
           initActive={element.url === undefined}
           buttonType="none"
           size="small"
-          color="dark"
+          color={theme === 'dark' ? 'light' : 'dark'}
           horizontalAlign="center"
           forceOpen={open}
           onToggleOpen={handleToggleOpen}

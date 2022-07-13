@@ -16,7 +16,7 @@
 
   &:hover {
     .field-type-gutter__content-container {
-      box-shadow: #{$style-stroke-width-m} 0px 0px 0px $color-dark-gray;
+      box-shadow: #{$style-stroke-width-m} 0px 0px 0px var(--theme-elevation-800);
     }
   }
 

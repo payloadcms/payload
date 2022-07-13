@@ -14,7 +14,7 @@
 
   &__current-position {
     text-align: center;
-    color: $color-gray;
+    color: var(--theme-elevation-400);
   }
 
   padding-right: base(.5);

@@ -5,9 +5,8 @@
   margin-bottom: base(2);
 
   &__wrap {
-    padding: base(3);
-    margin-right: base(2);
-    background: white;
+    padding-top: $baseline;
+    padding-bottom: $baseline;
   }
 
   &__header {
@@ -58,18 +57,8 @@
 
   @include mid-break {
     &__wrap {
-      padding: $baseline 0;
-      margin-right: 0;
-    }
-
-    &__header,
-    .list-controls,
-    .table,
-    .upload-gallery,
-    &__no-results,
-    &__page-controls {
-      padding-left: $baseline;
-      padding-right: $baseline;
+      padding-top: 0;
+      padding-bottom: 0;
     }
 
     &__header {

@@ -5,9 +5,7 @@
   margin-bottom: base(2);
 
   &__wrap {
-    padding: base(3);
-    margin-right: base(2);
-    background: white;
+    padding-top: base(1);
   }
 
   &__header {
@@ -27,7 +25,7 @@
     margin-left: base(-.5);
     margin-right: base(-.5);
 
-    > * {
+    >* {
       margin-left: base(.5);
       margin-right: base(.5);
       flex-basis: 100%;
@@ -40,8 +38,7 @@
 
   @include mid-break {
     &__wrap {
-      padding: $baseline;
-      margin-right: 0;
+      padding-top: 0;
     }
 
     &__intro,
@@ -53,7 +50,7 @@
       display: block;
       margin: 0 base(-.5) base(2);
 
-      > * {
+      >* {
         margin-bottom: base(.5);
       }
     }

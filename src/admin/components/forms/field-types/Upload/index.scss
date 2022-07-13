@@ -1,14 +1,14 @@
 @import '../../../../scss/styles';
 
 .upload {
-	position: relative;
+  position: relative;
   margin-bottom: $baseline;
   min-width: base(15);
 
   &__wrap {
     display: flex;
     padding: base(1.5) base(1.5) $baseline;
-    background: $color-background-gray;
+    background: var(--theme-elevation-100);
 
     .btn {
       margin: 0 $baseline base(.5) 0;

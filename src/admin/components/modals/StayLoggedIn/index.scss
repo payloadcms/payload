@@ -6,6 +6,11 @@
   align-items: center;
   height: 100%;
 
+  &__template {
+    position: relative;
+    z-index: 1;
+  }
+
   .btn {
     margin-right: base(1);
   }

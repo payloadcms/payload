@@ -3,7 +3,7 @@
 .auth-fields {
   margin: base(1.5) 0 base(2);
   padding: base(2) base(2) base(1.5);
-  background: $color-background-gray;
+  background: var(--theme-elevation-50);
 
   .btn {
     margin-top: 0;
@@ -25,8 +25,9 @@
 
 @keyframes highlight {
   0% {
-    background: $color-green;
+    background: var(--color-success-500);
   }
+
   100% {
     background: none;
   }

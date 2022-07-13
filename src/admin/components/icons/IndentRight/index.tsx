@@ -10,7 +10,7 @@ const IndentRight: React.FC = () => (
   >
     <path
       d="M10 9.61502L5 6.04361L5 13.1864L10 9.61502Z"
-      fill="#333333"
+      className="fill"
     />
     <rect
       x="11.9375"

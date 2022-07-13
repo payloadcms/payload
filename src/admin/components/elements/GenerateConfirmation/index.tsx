@@ -41,7 +41,7 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
         slug={modalSlug}
         className={baseClass}
       >
-        <MinimalTemplate>
+        <MinimalTemplate className={`${baseClass}__template`}>
           <h1>Confirm Generation</h1>
           <p>
             Generating a new API key will

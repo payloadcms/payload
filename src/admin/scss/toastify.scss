@@ -25,21 +25,25 @@
   }
 
   .Toastify__toast--success {
-    color: $color-dark-gray;
-    background: $color-green;
+    color: var(--color-success-900);
+    background: var(--color-success-500);
+
+    .Toastify__progress-bar {
+      background-color: var(--color-success-900);
+    }
   }
 
   .Toastify__close-button--success {
-    color: $color-dark-gray;
-  }
-
-  .Toastify__progress-bar {
-    background-color: rgba(255,255,255, 0.7);
+    color: var(--color-success-900);
   }
 
   .Toastify__toast--error {
-    background: $color-red;
+    background: var(--color-error-500);
     color: #fff;
+
+    .Toastify__progress-bar {
+      background-color: var(--color-base-0);
+    }
   }
 
   .Toastify__close-button--light {

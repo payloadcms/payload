@@ -6,13 +6,15 @@
   }
 
   &__modal {
+    @include blur-bg;
     display: flex;
     align-items: center;
     height: 100%;
+  }
 
-    &.payload__modal-item--enterDone {
-      @include blur-bg;
-    }
+  &__modal-template {
+    position: relative;
+    z-index: 1;
   }
 
   &__header {

@@ -5,10 +5,14 @@
 // HEADINGS
 /////////////////////////////
 
-%h1, %h2, %h3, %h4, %h5, %h6 {
+%h1,
+%h2,
+%h3,
+%h4,
+%h5,
+%h6 {
   font-family: $font-body;
-  font-weight: 600;
-  color: $color-dark-gray;
+  font-weight: 500;
 }
 
 %jumbo {
@@ -46,7 +50,6 @@
   margin: 0 0 base(1);
   font-size: base(.925);
   line-height: 1.25;
-  font-weight: 600;
   letter-spacing: -.5px;
 
   @include small-break {
@@ -65,14 +68,12 @@
   margin: 0;
   font-size: base(.5625);
   line-height: 1.5;
-  font-weight: 600;
 }
 
 %h6 {
   margin: 0;
   font-size: base(.5);
   line-height: 1.5;
-  font-weight: 600;
 }
 
 %small {
@@ -109,9 +110,9 @@
 
 %code {
   font-size: base(.4);
-  color: $color-gray;
+  color: var(--theme-elevation-400);
 
   span {
-    color: $color-dark-gray;
+    color: var(--theme-elevation-800);
   }
 }

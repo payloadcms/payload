@@ -4,7 +4,7 @@ $controls-top-adjustment: base(.1);
 
 @mixin nestedStickyOffsets ($loopCount, $currentCount: 0) {
   .field-type {
-    @if $loopCount > $currentCount {
+    @if $loopCount >$currentCount {
       .field-type-gutter--v-align-sticky .field-type-gutter__content {
         top: calc(#{$top-header-offset} + (#{base(2.75)} * #{$currentCount}));
       }
@@ -53,7 +53,7 @@ $controls-top-adjustment: base(.1);
     padding-right: $style-stroke-width-s;
     position: relative;
     min-height: 100%;
-    box-shadow: #{$style-stroke-width-s} 0px 0px 0px $color-light-gray;
+    box-shadow: #{$style-stroke-width-s} 0px 0px 0px var(--theme-elevation-150);
   }
 
   &__content {
@@ -66,7 +66,9 @@ $controls-top-adjustment: base(.1);
   &--negative-gutter {
     &.field-type-gutter--left {
       position: absolute;
-      top: 0; right: 100%; bottom: 0;
+      top: 0;
+      right: 100%;
+      bottom: 0;
     }
   }
 

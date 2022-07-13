@@ -91,7 +91,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
           slug={modalSlug}
           className={baseClass}
         >
-          <MinimalTemplate>
+          <MinimalTemplate className={`${baseClass}__template`}>
             <h1>Confirm deletion</h1>
             <p>
               You are about to delete the
