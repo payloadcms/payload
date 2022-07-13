@@ -4,13 +4,12 @@
     "node_modules",
     "node_modules/**/node_modules",
     "src/admin",
-    "src/**/*.spec.ts",
-    "demo/**/*.tsx"
+    "src/**/*.spec.ts"
   ],
   "watch": [
     "src/**/*.ts",
-    "demo/"
+    "test/"
   ],
   "ext": "ts,js,json",
-  "exec": "node ./demo/index.js"
+  "exec": "node ./test/dev/index.js"
 }

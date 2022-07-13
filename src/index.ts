@@ -101,6 +101,8 @@ export class Payload {
 
   mongoURL: string | false;
 
+  mongoMemoryServer: any
+
   local: boolean;
 
   encrypt = encrypt;
@@ -138,7 +140,7 @@ export class Payload {
    * @description Initializes Payload
    * @param options
    */
-  init(options: InitOptions): void {
+  async init(options: InitOptions): Promise<void> {
     this.logger = Logger('payload', options.loggerOptions);
     this.logger.info('Starting Payload...');
     if (!options.secret) {
@@ -177,11 +179,6 @@ export class Payload {
     // Initialize collections & globals
     initCollections(this);
     initGlobals(this);
-
-    // Connect to database
-    if (this.mongoURL) {
-      connectMongoose(this.mongoURL, options.mongoOptions, options.local, this.logger);
-    }
 
     if (!this.config.graphQL.disable) {
       registerSchema(this);
@@ -225,7 +222,12 @@ export class Payload {
       this.authenticate = authenticate(this.config);
     }
 
-    if (typeof options.onInit === 'function') options.onInit(this);
+    // Connect to database
+    if (this.mongoURL) {
+      this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, this.logger);
+    }
+    if (typeof options.onInit === 'function') await options.onInit(this);
+    if (typeof this.config.onInit === 'function') await this.config.onInit(this);
 
     serverInitTelemetry(this);
   }

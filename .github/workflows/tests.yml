@@ -31,11 +31,26 @@ jobs:
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     - run: yarn build
-    - run: yarn test:client
-    - run: yarn test:int # In-memory db + api tests
-    - run: yarn demo:generate:types
+
+    - name: Component Tests
+      run: yarn test:components
+    - name: Integraion Tests
+      run: yarn test:int
+    - name: Generate Payload Types
+      run: yarn demo:generate:types
       env:
         CI: true
+
+    # - name: Install Playwright Browsers
+    #   run: npx playwright install --with-deps
+    # - name: E2E Tests
+    #   run: yarn test:e2e
+    # - uses: actions/upload-artifact@v2
+    #   if: always()
+    #   with:
+    #     name: playwright-report
+    #     path: playwright-report/
+    #     retention-days: 30
   install_npm:
     runs-on: ubuntu-latest
     strategy:
