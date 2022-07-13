@@ -1,12 +1,13 @@
 @import '../../../../../../../scss/styles.scss';
 
 .rich-text-upload {
+  @extend %body;
+  @include inputShadow;
   max-width: base(15);
   display: flex;
   align-items: center;
   background: var(--theme-elevation-50);
   position: relative;
-  @extend %body;
   font-family: var(--font-body);
 
   &__card {

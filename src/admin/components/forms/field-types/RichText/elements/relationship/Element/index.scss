@@ -1,13 +1,14 @@
 @import '../../../../../../../scss/styles.scss';
 
 .rich-text-relationship {
+  @extend %body;
+  @include inputShadow;
   padding: base(.5);
   display: flex;
   align-items: flex-start;
   background: var(--theme-elevation-50);
   max-width: base(15);
   margin-bottom: base(.5);
-  @extend %body;
   font-family: var(--font-body);
 
   svg {
