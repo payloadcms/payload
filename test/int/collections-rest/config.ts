@@ -6,17 +6,16 @@ export interface Post {
   title: string;
   description?: string;
   number?: number;
-  relationField?: Relation | string
-  relationHasManyField?: RelationHasMany[] | string[]
-  relationMultiRelationTo?: { relationTo: string, value: string }
+  relationField?: Relation | string;
+  relationHasManyField?: Relation[] | string[];
+  relationMultiRelationTo?: { relationTo: string; value: string };
+  relationMultiRelationToHasMany?: Array<{ relationTo: string; value: string }>;
 }
 
 export interface Relation {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
-
-export type RelationHasMany = Relation
 
 const openAccess = {
   create: () => true,
@@ -40,7 +39,6 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 
 export const slug = 'posts';
 export const relationSlug = 'relation-normal';
-export const relationHasManySlug = 'relation-has-many';
 export default buildConfig({
   collections: [
     {
@@ -69,7 +67,7 @@ export default buildConfig({
         {
           name: 'relationHasManyField',
           type: 'relationship',
-          relationTo: relationHasManySlug,
+          relationTo: relationSlug,
           hasMany: true,
         },
         // Relation multiple relationTo
@@ -78,21 +76,33 @@ export default buildConfig({
           type: 'relationship',
           relationTo: [relationSlug, 'dummy'],
         },
+        // Relation multiple relationTo hasMany
+        {
+          name: 'relationMultiRelationToHasMany',
+          type: 'relationship',
+          relationTo: [relationSlug, 'dummy'],
+          hasMany: true,
+        },
       ],
     },
     collectionWithName(relationSlug),
-    collectionWithName(relationHasManySlug),
-    // collectionWithName(relationMultiSlug),
     collectionWithName('dummy'),
   ],
   onInit: async (payload) => {
-    // Relation - hasMany
-    const rel1 = await payload.create<RelationHasMany>({
-      collection: relationHasManySlug,
+    const rel1 = await payload.create<Relation>({
+      collection: relationSlug,
       data: {
         name: 'name',
       },
     });
+    const rel2 = await payload.create<Relation>({
+      collection: relationSlug,
+      data: {
+        name: 'name2',
+      },
+    });
+
+    // Relation - hasMany
     await payload.create<Post>({
       collection: slug,
       data: {
@@ -100,14 +110,15 @@ export default buildConfig({
         relationHasManyField: rel1.id,
       },
     });
-
-    // Relation - relationTo multi
-    const rel2 = await payload.create<Relation>({
-      collection: relationSlug,
+    await payload.create<Post>({
+      collection: slug,
       data: {
-        name: 'multi',
+        title: 'rel to hasMany 2',
+        relationHasManyField: rel2.id,
       },
     });
+
+    // Relation - relationTo multi
     await payload.create<Post>({
       collection: slug,
       data: {
@@ -118,6 +129,23 @@ export default buildConfig({
         },
       },
     });
-  },
 
+    // Relation - relationTo multi hasMany
+    await payload.create<Post>({
+      collection: slug,
+      data: {
+        title: 'rel to multi hasMany',
+        relationMultiRelationToHasMany: [
+          {
+            relationTo: relationSlug,
+            value: rel1.id,
+          },
+          {
+            relationTo: relationSlug,
+            value: rel2.id,
+          },
+        ],
+      },
+    });
+  },
 });
