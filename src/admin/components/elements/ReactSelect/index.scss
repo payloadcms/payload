@@ -43,6 +43,8 @@ div.react-select {
   }
 
   .rs__input {
+    color: var(--theme-elevation-1000);
+
     input {
       font-family: $font-body;
       width: 100% !important;
@@ -53,6 +55,7 @@ div.react-select {
     z-index: 2;
     border-radius: 0;
     @include inputShadowActive;
+    background: var(--theme-elevation-50);
   }
 
   .rs__group-heading {
@@ -72,8 +75,12 @@ div.react-select {
     }
 
     &--is-selected {
-      background-color: var(--theme-elevation-400);
+      background-color: var(--theme-elevation-300);
     }
+  }
+
+  .rs__single-value {
+    color: currentColor;
   }
 
   .rs__multi-value {
