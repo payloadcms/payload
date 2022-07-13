@@ -11,9 +11,9 @@ import FieldTypeGutter from '../FieldTypeGutter';
 import RenderFields from '../RenderFields';
 import { Props } from './types';
 import HiddenInput from '../field-types/HiddenInput';
+import { fieldAffectsData } from '../../../../fields/config/types';
 
 import './index.scss';
-import { fieldAffectsData } from '../../../../fields/config/types';
 
 const baseClass = 'draggable-section';
 
