@@ -14,5 +14,6 @@ export function buildConfig(overrides?: Partial<Config>): SanitizedConfig {
       }),
     };
   }
+
   return buildPayloadConfig(merge(baseConfig, overrides || {}));
 }

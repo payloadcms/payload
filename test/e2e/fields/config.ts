@@ -1,13 +1,11 @@
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../../credentials';
-import { seededDoc } from './shared';
-
-export const slug = 'docs';
+import { textDoc } from './shared';
 
 export default buildConfig({
   collections: [
     {
-      slug,
+      slug: 'text-fields',
       admin: {
         useAsTitle: 'text',
       },
@@ -30,8 +28,8 @@ export default buildConfig({
     });
 
     await payload.create({
-      collection: slug,
-      data: seededDoc,
+      collection: 'text-fields',
+      data: textDoc,
     });
   },
 });

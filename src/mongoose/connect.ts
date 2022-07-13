@@ -35,15 +35,13 @@ const connectMongoose = async (
   }
 
   try {
-    if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      mongoose.connection.once('connected', () => {
-        logger.info('---- DROPPING DATABASE ----');
-        mongoose.connection.dropDatabase();
-      });
-    }
-
     await mongoose.connect(urlToConnect, connectionOptions);
 
+    if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
+      logger.info('---- DROPPING DATABASE ----');
+      await mongoose.connection.dropDatabase();
+      logger.info('---- DROPPED DATABASE ----');
+    }
 
     logger.info(successfulConnectionMessage);
   } catch (err) {
