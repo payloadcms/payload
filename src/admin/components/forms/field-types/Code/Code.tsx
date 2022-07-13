@@ -88,8 +88,8 @@ const Code: React.FC<Props> = (props) => {
         highlight={highlighter}
         padding={25}
         style={{
-          backgroundColor: '#333333',
-          color: 'var(--theme-elevation-0)',
+          backgroundColor: 'var(--color-base-850)',
+          color: 'var(--color-base-0)',
           fontFamily: '"Consolas", "Monaco", monospace',
           fontSize: 12,
           pointerEvents: readOnly ? 'none' : 'auto',
