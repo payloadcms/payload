@@ -22,7 +22,6 @@ const Localizer: React.FC<Props> = () => {
     return (
       <div className={baseClass}>
         <Popup
-          color="dark"
           horizontalAlign="left"
           button={locale}
           render={({ close }) => (
