@@ -141,7 +141,35 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual([post1]);
         expect(result.totalDocs).toEqual(1);
       });
+
+      it('should query nested relationship - multi relationTo - by id', async () => {
+        const { doc: relation } = await client.create<Relation>({
+          slug: relationSlug,
+          data: {
+            name: 'name',
+          },
+        });
+
+        const post1 = await createPost({
+          relationMultiRelationTo: { relationTo: relationSlug, value: relation.id },
+        });
+        await createPost();
+
+        const { status, result } = await client.find<Post>({
+          query: {
+            'relationMultiRelationTo.value': {
+              equals: relation.id,
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.docs).toEqual([post1]);
+        expect(result.totalDocs).toEqual(1);
+      });
     });
+
+    it.todo('should query nested relation - multi relationTo - by property value');
 
     describe('Operators', () => {
       it('equals', async () => {

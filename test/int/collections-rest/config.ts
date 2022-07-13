@@ -8,7 +8,7 @@ export interface Post {
   number?: number;
   relationField?: Relation | string
   relationHasManyField?: RelationHasMany[] | string[]
-  relationMultiRelationTo?: Relation[] | string[]
+  relationMultiRelationTo?: { relationTo: string, value: string }
 }
 
 export interface Relation {
@@ -25,9 +25,9 @@ const openAccess = {
   delete: () => true,
 };
 
-const collectionWithName = (slug: string): CollectionConfig => {
+const collectionWithName = (collectionSlug: string): CollectionConfig => {
   return {
-    slug,
+    slug: collectionSlug,
     access: openAccess,
     fields: [
       {
@@ -41,7 +41,6 @@ const collectionWithName = (slug: string): CollectionConfig => {
 export const slug = 'posts';
 export const relationSlug = 'relation-normal';
 export const relationHasManySlug = 'relation-has-many';
-export const relationMultipleRelationToSlug = 'relation-multi-relation-to';
 export default buildConfig({
   collections: [
     {
@@ -83,21 +82,40 @@ export default buildConfig({
     },
     collectionWithName(relationSlug),
     collectionWithName(relationHasManySlug),
+    // collectionWithName(relationMultiSlug),
     collectionWithName('dummy'),
   ],
   onInit: async (payload) => {
+    // Relation - hasMany
     const rel1 = await payload.create<RelationHasMany>({
       collection: relationHasManySlug,
       data: {
         name: 'name',
       },
     });
-
-    await payload.create({
+    await payload.create<Post>({
       collection: slug,
       data: {
-        title: 'title',
+        title: 'rel to hasMany',
         relationHasManyField: rel1.id,
+      },
+    });
+
+    // Relation - relationTo multi
+    const rel2 = await payload.create<Relation>({
+      collection: relationSlug,
+      data: {
+        name: 'multi',
+      },
+    });
+    await payload.create<Post>({
+      collection: slug,
+      data: {
+        title: 'rel to multi',
+        relationMultiRelationTo: {
+          relationTo: relationSlug,
+          value: rel2.id,
+        },
       },
     });
   },
