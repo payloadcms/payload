@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { initPayloadTest } from '../../helpers/configHelpers';
-import type { Post } from './config';
+import type { Category, Post } from './config';
 import config from './config';
 import payload from '../../../src';
 import { RESTClient } from '../../helpers/rest';
@@ -89,6 +89,36 @@ describe('collections-rest', () => {
 
 
   describe('Querying', () => {
+    describe('Relationships', () => {
+      it('should query nested relationship', async () => {
+        const categoryName = 'name';
+        const { doc: category } = await client.create<Category>({
+          slug: 'category',
+          data: {
+            name: categoryName,
+          },
+        });
+
+        const post1 = await createPost({
+          categoryField: category.id,
+        });
+        await createPost();
+
+        const { status, result } = await client.find<Post>({
+          query: {
+            'categoryField.name': {
+              equals: categoryName,
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.docs).toEqual([post1]);
+        expect(result.totalDocs).toEqual(1);
+      });
+    });
+
+
     describe('Operators', () => {
       it('equals', async () => {
         const valueToQuery = 'valueToQuery';
