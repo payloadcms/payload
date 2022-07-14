@@ -7,7 +7,6 @@ import relationship from './Relationship';
 import richText from './Richtext';
 import select from './Select';
 import textarea from './Textarea';
-import upload from './Upload';
 
 
 export default {
@@ -20,5 +19,5 @@ export default {
   richText,
   select,
   textarea,
-  upload,
+  upload: relationship,
 };

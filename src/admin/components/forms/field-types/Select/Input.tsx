@@ -62,6 +62,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
 
   return (
     <div
+      id={`field-${path}`}
       className={classes}
       style={{
         ...style,

@@ -7,6 +7,7 @@ import './index.scss';
 
 type Value = { relationTo: string, value: number | string };
 const baseClass = 'relationship-cell';
+const totalToShow = 3;
 
 const RelationshipCell = (props) => {
   const { field, data: cellData } = props;
@@ -23,7 +24,7 @@ const RelationshipCell = (props) => {
       const formattedValues: Value[] = [];
 
       const arrayCellData = Array.isArray(cellData) ? cellData : [cellData];
-      arrayCellData.slice(0, (arrayCellData.length < 3 ? arrayCellData.length : 3)).forEach((cell) => {
+      arrayCellData.slice(0, (arrayCellData.length < totalToShow ? arrayCellData.length : totalToShow)).forEach((cell) => {
         if (typeof cell === 'object' && 'relationTo' in cell && 'value' in cell) {
           formattedValues.push(cell);
         }
@@ -50,16 +51,17 @@ const RelationshipCell = (props) => {
         const relatedCollection = collections.find(({ slug }) => slug === relationTo);
         return (
           <React.Fragment key={i}>
-            {document && document[relatedCollection.admin.useAsTitle] ? document[relatedCollection.admin.useAsTitle] : `Untitled - ID: ${value}`}
+            { document === false && `Untitled - ID: ${value}`}
+            { document === null && 'Loading...'}
+            { document && (
+              document[relatedCollection.admin.useAsTitle] ? document[relatedCollection.admin.useAsTitle] : `Untitled - ID: ${value}`
+            )}
             {values.length > i + 1 && ', '}
           </React.Fragment>
         );
       })}
-      {!cellData && !values && hasRequested && (
-        <React.Fragment>
-          {`No <${field.label}>`}
-        </React.Fragment>
-      )}
+      { Array.isArray(cellData) && cellData.length > totalToShow && ` and ${cellData.length - totalToShow} more` }
+      { values.length === 0 && `No <${field.label}>`}
     </div>
   );
 };

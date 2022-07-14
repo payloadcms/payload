@@ -60,17 +60,17 @@ const Password: React.FC<Props> = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={path}
+        htmlFor={`field-${path}`}
         label={label}
         required={required}
       />
       <input
+        id={`field-${path}`}
         value={value as string || ''}
         onChange={setValue}
         disabled={formProcessing}
         type="password"
         autoComplete={autoComplete}
-        id={path}
         name={path}
       />
     </div>

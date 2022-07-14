@@ -1,14 +1,16 @@
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react';
 import querystring from 'qs';
 import { useConfig } from '../../../../utilities/Config';
-import { requests } from '../../../../../api';
 import { TypeWithID } from '../../../../../../collections/config/types';
 import { reducer } from './reducer';
 import useDebounce from '../../../../../hooks/useDebounce';
 
+// documents are first set to null when requested
+// set to false when no doc is returned
+// or set to the document returned
 export type Documents = {
  [slug: string]: {
-   [id: string | number]: TypeWithID | null | 'loading'
+   [id: string | number]: TypeWithID | null | false
  }
 }
 
@@ -32,7 +34,7 @@ export const RelationshipProvider: React.FC<{children?: React.ReactNode}> = ({ c
   } = config;
 
   useEffect(() => {
-    Object.entries(debouncedDocuments).forEach(([slug, docs]) => {
+    Object.entries(debouncedDocuments).forEach(async ([slug, docs]) => {
       const idsToLoad: (string | number)[] = [];
 
       Object.entries(docs).forEach(([id, value]) => {
@@ -50,12 +52,15 @@ export const RelationshipProvider: React.FC<{children?: React.ReactNode}> = ({ c
         };
 
         const query = querystring.stringify(params, { addQueryPrefix: true });
-        requests.get(`${url}${query}`).then(async (res) => {
-          const result = await res.json();
-          if (result.docs) {
-            dispatchDocuments({ type: 'ADD_LOADED', docs: result.docs, relationTo: slug });
+        const result = await fetch(`${url}${query}`);
+        if (result.ok) {
+          const json = await result.json();
+          if (json.docs) {
+            dispatchDocuments({ type: 'ADD_LOADED', docs: json.docs, relationTo: slug, idsToLoad });
           }
-        });
+        } else {
+          dispatchDocuments({ type: 'ADD_LOADED', docs: [], relationTo: slug, idsToLoad });
+        }
       }
     });
   }, [serverURL, api, debouncedDocuments]);

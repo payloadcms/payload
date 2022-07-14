@@ -70,16 +70,16 @@ const Email: React.FC<Props> = (props) => {
       />
       <Label
         htmlFor={path}
-        label={label}
+        label={`field-${path}`}
         required={required}
       />
       <input
+        id={`field-${path}`}
         value={value as string || ''}
         onChange={setValue}
         disabled={Boolean(readOnly)}
         placeholder={placeholder}
         type="email"
-        id={path}
         name={path}
         autoComplete={autoComplete}
       />

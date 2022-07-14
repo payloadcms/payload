@@ -1,4 +1,3 @@
-import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../../..';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';

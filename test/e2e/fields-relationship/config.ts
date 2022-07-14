@@ -1,6 +1,7 @@
 import type { CollectionConfig } from '../../../src/collections/config/types';
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../../credentials';
+import { mapAsync } from '../../../src/utilities/mapAsync';
 
 export const slug = 'fields-relationship';
 
@@ -13,6 +14,7 @@ export interface FieldsRelationship {
   id: string;
   relationship: RelationOne;
   relationshipHasMany: RelationOne[];
+  relationshipHasManyMultiple: Array<RelationOne | RelationTwo | { relationTo: string, value: string}>;
   relationshipMultiple: Array<RelationOne | RelationTwo>;
   relationshipRestricted: RelationRestricted;
   relationshipWithTitle: RelationWithTitle;
@@ -40,7 +42,7 @@ export default buildConfig({
     {
       slug,
       admin: {
-        defaultColumns: ['relationship', 'relationshipRestricted', 'with-existing-relations'],
+        defaultColumns: ['id', 'relationship', 'relationshipRestricted', 'relationshipHasManyMultiple', 'relationshipWithTitle'],
       },
       fields: [
         {
@@ -57,6 +59,12 @@ export default buildConfig({
         {
           type: 'relationship',
           name: 'relationshipMultiple',
+          relationTo: [relationOneSlug, relationTwoSlug],
+        },
+        {
+          type: 'relationship',
+          name: 'relationshipHasManyMultiple',
+          hasMany: true,
           relationTo: [relationOneSlug, relationTwoSlug],
         },
         {
@@ -113,18 +121,26 @@ export default buildConfig({
       },
     });
 
-    await payload.create<RelationOne>({
-      collection: relationOneSlug,
-      data: {
-        name: relationOneSlug,
-      },
+    const relationOneIDs = [];
+    await mapAsync([...Array(5)], async () => {
+      const doc = await payload.create<RelationOne>({
+        collection: relationOneSlug,
+        data: {
+          name: relationOneSlug,
+        },
+      });
+      relationOneIDs.push(doc.id);
     });
 
-    await payload.create<RelationTwo>({
-      collection: relationTwoSlug,
-      data: {
-        name: relationTwoSlug,
-      },
+    const relationTwoIDs = [];
+    await mapAsync([...Array(11)], async () => {
+      const doc = await payload.create<RelationTwo>({
+        collection: relationTwoSlug,
+        data: {
+          name: relationTwoSlug,
+        },
+      });
+      relationTwoIDs.push(doc.id);
     });
 
     // Existing relationships
@@ -147,6 +163,29 @@ export default buildConfig({
         relationshipRestricted: restrictedDocId,
         relationshipWithTitle: relationWithTitleDocId,
       },
+    });
+    await mapAsync([...Array(11)], async () => {
+      await payload.create<FieldsRelationship>({
+        collection: slug,
+        data: {
+          relationship: relationOneDocId,
+          relationshipRestricted: restrictedDocId,
+          relationshipHasManyMultiple: relationOneIDs.map((id) => ({ relationTo: relationOneSlug, value: id })),
+        },
+      });
+    });
+    await mapAsync([...Array(15)], async () => {
+      const relationOneID = relationOneIDs[Math.floor(Math.random() * 10)];
+      const relationTwoID = relationTwoIDs[Math.floor(Math.random() * 10)];
+      await payload.create<FieldsRelationship>({
+        collection: slug,
+        data: {
+          relationship: relationOneDocId,
+          relationshipRestricted: restrictedDocId,
+          relationshipHasMany: [relationOneID],
+          relationshipHasManyMultiple: [{ relationTo: relationTwoSlug, value: relationTwoID }],
+        },
+      });
     });
   },
 });

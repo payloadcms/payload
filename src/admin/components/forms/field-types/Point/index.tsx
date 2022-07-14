@@ -81,34 +81,34 @@ const PointField: React.FC<Props> = (props) => {
       <ul className={`${baseClass}__wrap`}>
         <li>
           <Label
-            htmlFor={`${path}.longitude`}
+            htmlFor={`field-longitude-${path}`}
             label={`${label} - Longitude`}
             required={required}
           />
           <input
+            id={`field-longitude-${path}`}
             value={(value && typeof value[0] === 'number') ? value[0] : ''}
             onChange={(e) => handleChange(e, 0)}
             disabled={readOnly}
             placeholder={placeholder}
             type="number"
-            id={`${path}.longitude`}
             name={`${path}.longitude`}
             step={step}
           />
         </li>
         <li>
           <Label
-            htmlFor={`${path}.latitude`}
+            htmlFor={`field-latitude-${path}`}
             label={`${label} - Latitude`}
             required={required}
           />
           <input
+            id={`field-latitude-${path}`}
             value={(value && typeof value[1] === 'number') ? value[1] : ''}
             onChange={(e) => handleChange(e, 1)}
             disabled={readOnly}
             placeholder={placeholder}
             type="number"
-            id={`${path}.latitude`}
             name={`${path}.latitude`}
             step={step}
           />
