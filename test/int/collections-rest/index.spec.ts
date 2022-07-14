@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
 import { initPayloadTest } from '../../helpers/configHelpers';
-import type { Relation, Post } from './config';
+import type { Relation } from './config';
 import config, { slug, relationSlug } from './config';
 import payload from '../../../src';
 import { RESTClient } from '../../helpers/rest';
 import { mapAsync } from '../../../src/utilities/mapAsync';
+import type { Post } from './payload-types';
 
 let client: RESTClient;
 
@@ -311,7 +312,7 @@ describe('collections-rest', () => {
         const { status, result } = await client.find<Post>({
           query: {
             title: {
-              like: post1.title.substring(0, 6),
+              like: post1.title?.substring(0, 6),
             },
           },
         });

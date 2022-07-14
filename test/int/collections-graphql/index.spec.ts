@@ -3,6 +3,7 @@ import { initPayloadTest } from '../../helpers/configHelpers';
 import config from './config';
 import payload from '../../../src';
 import { RESTClient } from '../../helpers/rest';
+import type { Post } from './payload-types';
 
 const collection = config.collections[0]?.slug;
 
@@ -11,7 +12,7 @@ let client: RESTClient;
 describe('collections-graphql', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
-    client = new RESTClient(config, { serverURL });
+    client = new RESTClient(config, { serverURL, defaultSlug: collection });
   });
 
   afterAll(async () => {
@@ -23,7 +24,7 @@ describe('collections-graphql', () => {
   it('should create', async () => {
     const title = 'hello';
 
-    const { doc } = await client.create({
+    const { doc } = await client.create<Post>({
       slug: collection,
       data: {
         title,

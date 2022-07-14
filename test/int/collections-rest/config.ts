@@ -1,16 +1,6 @@
 import type { CollectionConfig } from '../../../src/collections/config/types';
 import { buildConfig } from '../buildConfig';
-
-export interface Post {
-  id: string;
-  title: string;
-  description?: string;
-  number?: number;
-  relationField?: Relation | string;
-  relationHasManyField?: Relation[] | string[];
-  relationMultiRelationTo?: { relationTo: string; value: string };
-  relationMultiRelationToHasMany?: Array<{ relationTo: string; value: string }>;
-}
+import type { Post } from './payload-types';
 
 export interface Relation {
   id: string;
@@ -38,7 +28,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 };
 
 export const slug = 'posts';
-export const relationSlug = 'relation-normal';
+export const relationSlug = 'relation';
 export default buildConfig({
   collections: [
     {
