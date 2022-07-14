@@ -54,15 +54,25 @@ export const Collapsible: React.FC<Props> = ({
             className={[
               `${baseClass}__toggle`,
               `${baseClass}__toggle--${collapsed ? 'collapsed' : 'open'}`,
-              dragHandleProps && `${baseClass}__toggle--has-drag-handle`,
             ].filter(Boolean).join(' ')}
             onClick={() => {
               if (typeof onToggle === 'function') onToggle(!collapsed);
               setCollapsedLocal(!collapsed);
             }}
           >
-            {header && header}
+            <span>
+              Toggle block
+            </span>
           </button>
+          {header && (
+            <div className={[
+              `${baseClass}__header-wrap`,
+              dragHandleProps && `${baseClass}__header-wrap--has-drag-handle`,
+            ].filter(Boolean).join(' ')}
+            >
+              {header && header}
+            </div>
+          )}
           <div className={`${baseClass}__actions-wrap`}>
             {actions && (
               <div className={`${baseClass}__actions`}>

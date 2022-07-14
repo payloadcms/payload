@@ -42,11 +42,33 @@
     border-top-right-radius: $style-radius-s;
     border-top-left-radius: $style-radius-s;
     width: 100%;
+    color: transparent;
+
+    span {
+      user-select: none;
+    }
+  }
+
+  &__toggle,
+  &__header-wrap {
     padding: var(--toggle-pad-v) var(--toggle-pad-h);
   }
 
-  &__toggle--has-drag-handle {
-    padding-left: base(1.5);
+  &__header-wrap {
+    position: absolute;
+    top: 0;
+    right: base(3);
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+
+    >* {
+      pointer-events: all;
+    }
+  }
+
+  &__header-wrap--has-drag-handle {
+    left: base(.875);
   }
 
   &--collapsed {

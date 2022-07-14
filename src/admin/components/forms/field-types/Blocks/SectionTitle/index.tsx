@@ -1,6 +1,5 @@
 import React from 'react';
-import useField from '../../useField';
-import Pill from '../../../elements/Pill';
+import useField from '../../../useField';
 import { Props } from './types';
 
 import './index.scss';
@@ -8,7 +7,7 @@ import './index.scss';
 const baseClass = 'section-title';
 
 const SectionTitle: React.FC<Props> = (props) => {
-  const { label, path, readOnly } = props;
+  const { path, readOnly } = props;
 
   const { value, setValue } = useField({ path });
 
@@ -17,14 +16,10 @@ const SectionTitle: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={classes}>
-      <Pill
-        pillStyle="light-gray"
-        className={`${baseClass}__pill`}
-      >
-        {label}
-      </Pill>
-
+    <div
+      className={classes}
+      data-value={value}
+    >
       <input
         className={`${baseClass}__input`}
         id={path}
@@ -32,7 +27,11 @@ const SectionTitle: React.FC<Props> = (props) => {
         placeholder="Untitled"
         type="text"
         name={path}
-        onChange={setValue}
+        onChange={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setValue(e.target.value);
+        }}
         readOnly={readOnly}
       />
     </div>

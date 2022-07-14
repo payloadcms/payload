@@ -23,9 +23,11 @@ import { Collapsible } from '../../../elements/Collapsible';
 import { ArrayAction } from '../../../elements/ArrayAction';
 import RenderFields from '../../RenderFields';
 import { fieldAffectsData } from '../../../../../fields/config/types';
+import SectionTitle from './SectionTitle';
+
+import Pill from '../../../elements/Pill';
 
 import './index.scss';
-import Pill from '../../../elements/Pill';
 
 const baseClass = 'blocks-field';
 
@@ -186,8 +188,8 @@ const Blocks: React.FC<Props> = (props) => {
   // Set row count on mount and when form context is reset
   useEffect(() => {
     const data = formContext.getDataByPath<Row[]>(path);
-    dispatchRows({ type: 'SET_ALL', data: data || [] });
-  }, [formContext, path]);
+    dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
+  }, [formContext, path, preferences]);
 
   useEffect(() => {
     setValue(rows?.length || 0, true);
@@ -291,6 +293,10 @@ const Blocks: React.FC<Props> = (props) => {
                                 <Pill className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}>
                                   {blockToRender.labels.singular}
                                 </Pill>
+                                <SectionTitle
+                                  path={`${path}.${i}.blockName`}
+                                  readOnly={readOnly}
+                                />
                               </div>
                             )}
                             actions={!readOnly ? (
