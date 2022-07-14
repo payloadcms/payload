@@ -16,11 +16,11 @@
   }
 
   &--hovered {
-    .collapsible__drag {
+    >.collapsible__toggle-wrap>.collapsible__drag {
       opacity: 1;
     }
 
-    .collapsible__toggle {
+    >.collapsible__toggle-wrap>.collapsible__toggle {
       background: var(--theme-elevation-100);
     }
   }
@@ -106,10 +106,6 @@
   }
 
   @include small-break {
-    header {
-      padding: base(.75) var(--gutter-h);
-    }
-
     &__content {
       padding: var(--gutter-h);
     }

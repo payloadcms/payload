@@ -1,7 +1,7 @@
 @import '../../../../scss/styles.scss';
 
 .array-field {
-  margin: base(2) 0;
+  margin: 0 0 base(2);
 
   &__header {
     h3 {
@@ -28,7 +28,6 @@
     @extend %btn-reset;
     cursor: pointer;
     margin-left: base(.5);
-    font-weight: 600;
 
     &:hover {
       text-decoration: underline;

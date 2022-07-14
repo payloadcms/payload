@@ -42,7 +42,7 @@
 
   &--size-small {
     .popup__scroll {
-      padding: base(.75);
+      padding: base(.75) calc(var(--scrollbar-width) + #{base(.75)}) base(.75) base(.75);
     }
 
     .popup__content {

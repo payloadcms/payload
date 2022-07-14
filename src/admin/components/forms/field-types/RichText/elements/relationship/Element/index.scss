@@ -2,14 +2,22 @@
 
 .rich-text-relationship {
   @extend %body;
-  @include inputShadow;
+  @include shadow-sm;
   padding: base(.5);
   display: flex;
   align-items: flex-start;
-  background: var(--theme-elevation-50);
+  background: var(--theme-input-bg);
+  border: 1px solid var(--theme-elevation-100);
   max-width: base(15);
-  margin-bottom: base(.5);
   font-family: var(--font-body);
+
+  &:hover {
+    border: 1px solid var(--theme-elevation-150);
+  }
+
+  &[data-slate-node=element] {
+    margin: base(.625) 0;
+  }
 
   svg {
     width: base(1.25);

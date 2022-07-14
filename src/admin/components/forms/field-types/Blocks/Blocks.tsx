@@ -290,7 +290,10 @@ const Blocks: React.FC<Props> = (props) => {
                                 <span className={`${baseClass}__block-number`}>
                                   {rowNumber >= 10 ? rowNumber : `0${rowNumber}`}
                                 </span>
-                                <Pill className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}>
+                                <Pill
+                                  pillStyle="white"
+                                  className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
+                                >
                                   {blockToRender.labels.singular}
                                 </Pill>
                                 <SectionTitle
@@ -332,7 +335,7 @@ const Blocks: React.FC<Props> = (props) => {
                               forceRender
                               readOnly={readOnly}
                               fieldTypes={fieldTypes}
-                              permissions={permissions.fields}
+                              permissions={permissions?.fields}
                               fieldSchema={blockToRender.fields.map((field) => ({
                                 ...field,
                                 path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,

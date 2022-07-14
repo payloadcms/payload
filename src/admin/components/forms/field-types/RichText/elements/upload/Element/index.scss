@@ -2,13 +2,22 @@
 
 .rich-text-upload {
   @extend %body;
-  @include inputShadow;
+  @include shadow-sm;
   max-width: base(15);
   display: flex;
   align-items: center;
-  background: var(--theme-elevation-50);
+  background: var(--theme-input-bg);
+  border: 1px solid var(--theme-elevation-100);
   position: relative;
   font-family: var(--font-body);
+
+  &:hover {
+    border: 1px solid var(--theme-elevation-150);
+  }
+
+  &[data-slate-node=element] {
+    margin: base(.625) 0;
+  }
 
   &__card {
     @include soft-shadow-bottom;

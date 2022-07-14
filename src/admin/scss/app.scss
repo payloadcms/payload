@@ -14,7 +14,6 @@
   --theme-bg: var(--theme-elevation-0);
   --theme-input-bg: var(--theme-elevation-0);
   --theme-text: var(--theme-elevation-800);
-
   --font-body: 'Suisse Intl', system-ui;
   --font-mono: monospace;
   --font-serif: 'Merriweather', serif;
@@ -53,11 +52,11 @@ html {
     --theme-input-bg: var(--theme-elevation-50);
 
     ::selection {
-      color: var(--theme-base-1000);
+      color: var(--color-base-1000);
     }
 
     ::-moz-selection {
-      color: var(--theme-base-1000);
+      color: var(--color-base-1000);
     }
   }
 

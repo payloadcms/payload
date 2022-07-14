@@ -62,15 +62,14 @@
   padding-right: base(1.75);
   min-width: base(12);
   width: 100%;
-  background: var(--theme-elevation-100);
-  border: 0;
+  background: var(--theme-input-bg);
   color: var(--theme-elevation-1000);
 }
 
 .rich-text-link__new-tab {
   svg {
-    @include color-svg(var(--theme-elevation-0));
-    background: var(--theme-elevation-750);
+    @include color-svg(var(--theme-elevation-900));
+    background: var(--theme-elevation-100);
     margin-right: base(.5);
   }
 

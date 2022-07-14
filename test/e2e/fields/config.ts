@@ -1,100 +1,20 @@
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../../credentials';
-import { arrayDoc, blocksDoc, collapsibleDoc, richTextDoc, textDoc } from './shared';
+import ArrayFields, { arrayDoc } from './collections/Array';
+import BlockFields, { blocksDoc } from './collections/Blocks';
+import CollapsibleFields, { collapsibleDoc } from './collections/Collapsible';
+import RichTextFields, { richTextDoc } from './collections/RichText';
+import SelectFields, { selectsDoc } from './collections/Select';
+import TextFields, { textDoc } from './collections/Text';
 
 export default buildConfig({
   collections: [
-    {
-      slug: 'array-fields',
-      fields: [
-        {
-          name: 'items',
-          type: 'array',
-          required: true,
-          fields: [
-            {
-              name: 'text',
-              type: 'text',
-              required: true,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      slug: 'block-fields',
-      fields: [
-        {
-          name: 'blocks',
-          type: 'blocks',
-          required: true,
-          blocks: [
-            {
-              slug: 'text',
-              fields: [
-                {
-                  name: 'text',
-                  type: 'text',
-                  required: true,
-                },
-              ],
-            },
-            {
-              slug: 'number',
-              fields: [
-                {
-                  name: 'number',
-                  type: 'number',
-                  required: true,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      slug: 'collapsible-fields',
-      fields: [
-        {
-          label: 'Collapsible Field',
-          type: 'collapsible',
-          admin: {
-            description: 'This is a collapsible field.',
-          },
-          fields: [
-            {
-              name: 'text',
-              type: 'text',
-              required: true,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      slug: 'rich-text-fields',
-      fields: [
-        {
-          name: 'richText',
-          type: 'richText',
-          required: true,
-        },
-      ],
-    },
-    {
-      slug: 'text-fields',
-      admin: {
-        useAsTitle: 'text',
-      },
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-          required: true,
-        },
-      ],
-    },
+    ArrayFields,
+    BlockFields,
+    CollapsibleFields,
+    RichTextFields,
+    SelectFields,
+    TextFields,
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -118,6 +38,11 @@ export default buildConfig({
     await payload.create({
       collection: 'collapsible-fields',
       data: collapsibleDoc,
+    });
+
+    await payload.create({
+      collection: 'select-fields',
+      data: selectsDoc,
     });
 
     const createdTextDoc = await payload.create({

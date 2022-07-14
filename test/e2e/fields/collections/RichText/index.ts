@@ -1,43 +1,14 @@
-export const arrayDoc = {
-  items: [
+import type { CollectionConfig } from '../../../../../src/collections/config/types';
+
+const RichTextFields: CollectionConfig = {
+  slug: 'rich-text-fields',
+  fields: [
     {
-      text: 'first row',
-    },
-    {
-      text: 'second row',
-    },
-    {
-      text: 'third row',
-    },
-    {
-      text: 'fourth row',
-    },
-    {
-      text: 'fifth row',
-    },
-    {
-      text: 'sixth row',
+      name: 'richText',
+      type: 'richText',
+      required: true,
     },
   ],
-};
-
-export const blocksDoc = {
-  blocks: [
-    {
-      blockName: 'First block',
-      blockType: 'text',
-      text: 'first block',
-    },
-    {
-      blockName: 'Second block',
-      blockType: 'number',
-      number: 342,
-    },
-  ],
-};
-
-export const collapsibleDoc = {
-  text: 'Seeded collapsible doc',
 };
 
 export const richTextDoc = {
@@ -53,7 +24,20 @@ export const richTextDoc = {
     {
       children: [
         {
-          text: 'I can do all kinds of fun stuff like render links and store nested relationship fields:',
+          text: 'I can do all kinds of fun stuff like ',
+        },
+        {
+          type: 'link',
+          url: 'test.com',
+          newTab: true,
+          children: [
+            {
+              text: 'render links',
+            },
+          ],
+        },
+        {
+          text: ' and store nested relationship fields:',
         },
       ],
     },
@@ -64,7 +48,9 @@ export const richTextDoc = {
         },
       ],
       type: 'relationship',
-      value: { id: '' },
+      value: {
+        id: '',
+      },
       relationTo: 'text-fields',
     },
     {
@@ -113,6 +99,5 @@ export const richTextDoc = {
   ],
 };
 
-export const textDoc = {
-  text: 'Seeded text document',
-};
+
+export default RichTextFields;

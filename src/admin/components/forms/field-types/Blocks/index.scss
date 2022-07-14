@@ -1,7 +1,7 @@
 @import '../../../../scss/styles.scss';
 
 .blocks-field {
-  margin: base(2) 0;
+  margin: 0 0 base(2);
 
   &__header {
     h3 {
@@ -28,7 +28,6 @@
     @extend %btn-reset;
     cursor: pointer;
     margin-left: base(.5);
-    font-weight: 600;
 
     &:hover {
       text-decoration: underline;
@@ -37,10 +36,22 @@
 
   &__block-header {
     display: inline-flex;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   &__block-number {
-    margin-right: base(.375)
+    margin-right: base(.375);
+    flex-shrink: 0;
+  }
+
+  &__block-pill {
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .section-title {
+    min-width: 0;
   }
 
   &__row {
