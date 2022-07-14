@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { initPayloadTest } from '../../helpers/configHelpers';
 import payload from '../../../src';
 import config from './config';
+import type { Array as ArrayCollection } from './payload-types';
 
 const collection = config.collections[0]?.slug;
 
@@ -47,7 +48,7 @@ describe('array-update', () => {
     };
 
 
-    const updatedDoc = await payload.update({
+    const updatedDoc = await payload.update<ArrayCollection>({
       id: doc.id,
       collection,
       data: {
@@ -55,7 +56,7 @@ describe('array-update', () => {
       },
     });
 
-    expect(updatedDoc.array[0]).toMatchObject({
+    expect(updatedDoc.array?.[0]).toMatchObject({
       required: updatedText,
       optional: originalText,
     });
@@ -69,7 +70,7 @@ describe('array-update', () => {
       optional: 'optional test',
     };
 
-    const doc = await payload.create({
+    const doc = await payload.create<ArrayCollection>({
       collection,
       data: {
         array: [
@@ -82,7 +83,7 @@ describe('array-update', () => {
       },
     });
 
-    const updatedDoc = await payload.update<any>({
+    const updatedDoc = await payload.update<ArrayCollection>({
       id: doc.id,
       collection,
       data: {
@@ -91,8 +92,8 @@ describe('array-update', () => {
             required: updatedText,
           },
           {
-            id: doc.array[1].id,
-            required: doc.array[1].required,
+            id: doc.array?.[1].id,
+            required: doc.array?.[1].required as string,
             // NOTE - not passing optional field. It should persist
             // because we're passing ID
           },
@@ -100,9 +101,9 @@ describe('array-update', () => {
       },
     });
 
-    expect(updatedDoc.array[0].required).toStrictEqual(updatedText);
-    expect(updatedDoc.array[0].optional).toBeUndefined();
+    expect(updatedDoc.array?.[0].required).toStrictEqual(updatedText);
+    expect(updatedDoc.array?.[0].optional).toBeUndefined();
 
-    expect(updatedDoc.array[1]).toMatchObject(secondArrayItem);
+    expect(updatedDoc.array?.[1]).toMatchObject(secondArrayItem);
   });
 });

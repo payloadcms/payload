@@ -1,7 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react';
 import querystring from 'qs';
 import { useConfig } from '../../../../utilities/Config';
-import { requests } from '../../../../../api';
 import { TypeWithID } from '../../../../../../collections/config/types';
 import { reducer } from './reducer';
 import useDebounce from '../../../../../hooks/useDebounce';
@@ -69,6 +68,7 @@ export const RelationshipProvider: React.FC<{children?: React.ReactNode}> = ({ c
   const getRelationships = useCallback(async (relationships: { relationTo: string, value: number | string }[]) => {
     dispatchDocuments({ type: 'REQUEST', docs: relationships });
   }, []);
+
   return (
     <Context.Provider value={{ getRelationships, documents }}>
       {children}

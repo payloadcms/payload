@@ -25,7 +25,7 @@ const { beforeAll, describe } = test;
 
 let url: AdminUrlUtil;
 
-describe.only('fields - relationship', () => {
+describe('fields - relationship', () => {
   let page: Page;
   let relationOneDoc: RelationOne;
   let anotherRelationOneDoc: RelationOne;

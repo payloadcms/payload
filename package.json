@@ -44,6 +44,7 @@
     "test:e2e:headed": "cross-env NODE_ENV=test DISABLE_LOGGING=true playwright test --headed",
     "test:e2e:debug": "cross-env PWDEBUG=1 NODE_ENV=test DISABLE_LOGGING=true playwright test",
     "test:components": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=test jest --config=jest.components.config.js",
+    "generatetypes": "node ./test/dev/generateTypes.js",
     "clean": "rimraf dist",
     "release": "release-it",
     "release:patch": "release-it patch",

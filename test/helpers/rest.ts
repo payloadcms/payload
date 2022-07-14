@@ -3,6 +3,7 @@ import qs from 'qs';
 import type { Config } from '../../src/config/types';
 import type { PaginatedDocs } from '../../src/mongoose/types';
 import type { Where } from '../../src/types';
+import { devUser } from '../credentials';
 
 require('isomorphic-fetch');
 
@@ -68,8 +69,8 @@ export class RESTClient {
 
   async login(incomingArgs?: LoginArgs): Promise<string> {
     const args = incomingArgs ?? {
-      email: 'dev@payloadcms.com',
-      password: 'test',
+      email: devUser.email,
+      password: devUser.password,
       collection: 'users',
     };
 

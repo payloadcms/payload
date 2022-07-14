@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
 import { initPayloadTest } from '../../helpers/configHelpers';
-import type { Relation, Post, RelationHasMany } from './config';
-import config, { relationHasManySlug, slug, relationSlug } from './config';
+import type { Relation } from './config';
+import config, { slug, relationSlug } from './config';
 import payload from '../../../src';
 import { RESTClient } from '../../helpers/rest';
 import { mapAsync } from '../../../src/utilities/mapAsync';
+import type { Post } from './payload-types';
 
 let client: RESTClient;
 
@@ -85,54 +86,75 @@ describe('collections-rest', () => {
     });
   });
 
-
   describe('Querying', () => {
     describe('Relationships', () => {
-      it('should query nested relationship', async () => {
-        const nameToQuery = 'name';
-        const { doc: relation } = await client.create<Relation>({
+      let post: Post;
+      let relation: Relation;
+      let relation2: Relation;
+      const nameToQuery = 'name';
+      const nameToQuery2 = 'name';
+
+      beforeEach(async () => {
+        ({ doc: relation } = await client.create<Relation>({
           slug: relationSlug,
           data: {
             name: nameToQuery,
           },
-        });
+        }));
 
-        const post1 = await createPost({
+        ({ doc: relation2 } = await client.create<Relation>({
+          slug: relationSlug,
+          data: {
+            name: nameToQuery2,
+          },
+        }));
+
+        post = await createPost({
           relationField: relation.id,
         });
-        await createPost();
 
-        const { status, result } = await client.find<Post>({
-          query: {
-            'relationField.name': {
-              equals: nameToQuery,
+        await createPost(); // Extra post to allow asserting totalDoc count
+      });
+
+      describe('regular relationship', () => {
+        it('query by property value', async () => {
+          const { status, result } = await client.find<Post>({
+            query: {
+              'relationField.name': {
+                equals: relation.name,
+              },
             },
-          },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toEqual([post]);
+          expect(result.totalDocs).toEqual(1);
         });
 
-        expect(status).toEqual(200);
-        expect(result.docs).toEqual([post1]);
-        expect(result.totalDocs).toEqual(1);
+        it('query by id', async () => {
+          const { status, result } = await client.find<Post>({
+            query: {
+              relationField: {
+                equals: relation.id,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toEqual([post]);
+          expect(result.totalDocs).toEqual(1);
+        });
       });
 
       it('should query nested relationship - hasMany', async () => {
-        const nameToQuery = 'name';
-        const { doc: relation } = await client.create<RelationHasMany>({
-          slug: relationHasManySlug,
-          data: {
-            name: nameToQuery,
-          },
-        });
-
         const post1 = await createPost({
-          relationHasManyField: [relation.id],
+          relationHasManyField: [relation.id, relation2.id],
         });
-        await createPost();
 
         const { status, result } = await client.find<Post>({
           query: {
             'relationHasManyField.name': {
-              equals: nameToQuery,
+              equals: relation.name,
             },
           },
         });
@@ -140,6 +162,81 @@ describe('collections-rest', () => {
         expect(status).toEqual(200);
         expect(result.docs).toEqual([post1]);
         expect(result.totalDocs).toEqual(1);
+
+        // Query second relationship
+        const { status: status2, result: result2 } = await client.find<Post>({
+          query: {
+            'relationHasManyField.name': {
+              equals: relation2.name,
+            },
+          },
+        });
+
+        expect(status2).toEqual(200);
+        expect(result2.docs).toEqual([post1]);
+        expect(result2.totalDocs).toEqual(1);
+      });
+
+      describe('relationTo multi', () => {
+        it('nested by id', async () => {
+          const post1 = await createPost({
+            relationMultiRelationTo: { relationTo: relationSlug, value: relation.id },
+          });
+          await createPost();
+
+          const { status, result } = await client.find<Post>({
+            query: {
+              'relationMultiRelationTo.value': {
+                equals: relation.id,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toEqual([post1]);
+          expect(result.totalDocs).toEqual(1);
+        });
+
+        it.todo('nested by property value');
+      });
+
+      describe('relationTo multi hasMany', () => {
+        it('nested by id', async () => {
+          const post1 = await createPost({
+            relationMultiRelationToHasMany: [
+              { relationTo: relationSlug, value: relation.id },
+              { relationTo: relationSlug, value: relation2.id },
+            ],
+          });
+          await createPost();
+
+          const { status, result } = await client.find<Post>({
+            query: {
+              'relationMultiRelationToHasMany.value': {
+                equals: relation.id,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toEqual([post1]);
+          expect(result.totalDocs).toEqual(1);
+
+          // Query second relation
+          const { status: status2, result: result2 } = await client.find<Post>({
+            query: {
+              'relationMultiRelationToHasMany.value': {
+                equals: relation.id,
+              },
+            },
+          });
+
+          expect(status2).toEqual(200);
+          expect(result2.docs).toEqual([post1]);
+          expect(result2.totalDocs).toEqual(1);
+        });
+
+        it.todo('nested by property value');
       });
     });
 
@@ -215,7 +312,7 @@ describe('collections-rest', () => {
         const { status, result } = await client.find<Post>({
           query: {
             title: {
-              like: post1.title.substring(0, 6),
+              like: post1.title?.substring(0, 6),
             },
           },
         });
@@ -411,7 +508,6 @@ describe('collections-rest', () => {
     });
   });
 });
-
 
 async function createPost(overrides?: Partial<Post>) {
   const { doc } = await client.create<Post>({ data: { title: 'title', ...overrides } });
