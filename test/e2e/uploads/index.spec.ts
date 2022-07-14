@@ -4,7 +4,7 @@ import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
 import { relationSlug, mediaSlug } from './config';
-import type { Media, Relation } from './payload-types';
+import type { Media } from './payload-types';
 import wait from '../../../src/utilities/wait';
 import payload from '../../../src';
 

@@ -27,6 +27,16 @@ export interface Restricted {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "read-only-collection".
+ */
+export interface ReadOnlyCollection {
+  id: string;
+  name?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
