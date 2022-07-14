@@ -43,7 +43,7 @@ const ConfirmPassword: React.FC = () => {
         message={errorMessage}
       />
       <Label
-        htmlFor="confirm-password"
+        htmlFor="field-confirm-password"
         label="Confirm Password"
         required
       />
@@ -52,7 +52,7 @@ const ConfirmPassword: React.FC = () => {
         onChange={setValue}
         type="password"
         autoComplete="off"
-        id="confirm-password"
+        id="field-confirm-password"
         name="confirm-password"
       />
     </div>

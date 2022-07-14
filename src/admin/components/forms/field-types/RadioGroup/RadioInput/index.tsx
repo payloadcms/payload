@@ -13,7 +13,7 @@ const RadioInput: React.FC<Props> = (props) => {
     isSelected && `${baseClass}--is-selected`,
   ].filter(Boolean).join(' ');
 
-  const id = `${path}-${option.value}`;
+  const id = `field-${path}-${option.value}`;
 
   return (
     <label

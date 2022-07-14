@@ -79,17 +79,17 @@ const NumberField: React.FC<Props> = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={path}
+        htmlFor={`field-${path}`}
         label={label}
         required={required}
       />
       <input
+        id={`field-${path}`}
         value={typeof value === 'number' ? value : ''}
         onChange={handleChange}
         disabled={readOnly}
         placeholder={placeholder}
         type="number"
-        id={path}
         name={path}
         step={step}
       />

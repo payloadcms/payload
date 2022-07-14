@@ -24,11 +24,14 @@ const Table: React.FC<Props> = ({ columns, data }) => {
           </thead>
           <tbody>
             {data && data.map((row, rowIndex) => (
-              <tr key={rowIndex}>
+              <tr
+                key={rowIndex}
+                className={`row-${rowIndex + 1}`}
+              >
                 {columns.map((col, colIndex) => (
                   <td
                     key={colIndex}
-                    className={col.accessor}
+                    className={`cell-${col.accessor}`}
                   >
                     {col.components.renderCell(row, row[col.accessor])}
                   </td>

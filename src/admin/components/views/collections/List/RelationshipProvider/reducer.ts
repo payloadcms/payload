@@ -10,6 +10,7 @@ type AddLoadedDocuments = {
   type: 'ADD_LOADED',
   relationTo: string,
   docs: TypeWithID[],
+  idsToLoad: (string | number)[]
 }
 
 type Action = RequestDocuments | AddLoadedDocuments;
@@ -34,12 +35,18 @@ export function reducer(state: Documents, action: Action): Documents {
       if (typeof newState[action.relationTo] !== 'object') {
         newState[action.relationTo] = {};
       }
+      const unreturnedIDs = [...action.idsToLoad];
 
       if (Array.isArray(action.docs)) {
         action.docs.forEach((doc) => {
+          unreturnedIDs.splice(unreturnedIDs.indexOf(doc.id), 1);
           newState[action.relationTo][doc.id] = doc;
         });
       }
+
+      unreturnedIDs.forEach((id) => {
+        newState[action.relationTo][id] = false;
+      });
 
       return newState;
     }

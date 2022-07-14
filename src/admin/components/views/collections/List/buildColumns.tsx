@@ -58,6 +58,7 @@ const buildColumns = (collection: SanitizedCollectionConfig, columns: string[]):
           ),
           renderCell: (rowData, cellData) => (
             <Cell
+              key={JSON.stringify(cellData)}
               field={field}
               colIndex={colIndex}
               collection={collection}

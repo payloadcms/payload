@@ -335,6 +335,7 @@ const Relationship: React.FC<Props> = (props) => {
 
   return (
     <div
+      id={`field-${path}`}
       className={classes}
       style={{
         ...style,
