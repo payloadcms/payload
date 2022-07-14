@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
 import express from 'express';
+import { v4 as uuid } from 'uuid';
 import payload from '../../src';
 
 const expressApp = express();
 
 const init = async () => {
   await payload.init({
-    secret: 'SECRET_KEY',
+    secret: uuid(),
     mongoURL: process.env.MONGO_URL || 'mongodb://localhost/payload',
     express: expressApp,
     email: {

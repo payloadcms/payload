@@ -33,6 +33,7 @@ const Group: React.FC<Props> = (props) => {
 
   return (
     <div
+      id={`field-${path}`}
       className={[
         'field-type',
         baseClass,

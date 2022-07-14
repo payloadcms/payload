@@ -202,6 +202,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div
+        id={`field-${path}`}
         className={classes}
       >
         <div className={`${baseClass}__error-wrap`}>

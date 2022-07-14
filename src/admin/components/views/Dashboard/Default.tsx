@@ -47,6 +47,7 @@ const Dashboard: React.FC<Props> = (props) => {
               <li key={collection.slug}>
                 <Card
                   title={collection.labels.plural}
+                  id={`card-${collection.slug}`}
                   onClick={() => push({ pathname: `${admin}/collections/${collection.slug}` })}
                   actions={hasCreatePermission ? (
                     <Button

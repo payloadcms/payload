@@ -105,6 +105,7 @@ const Condition: React.FC<Props> = (props) => {
         <div className={`${baseClass}__actions`}>
           <Button
             icon="x"
+            className={`${baseClass}__actions-remove`}
             round
             buttonStyle="icon-label"
             iconStyle="with-border"
@@ -116,6 +117,7 @@ const Condition: React.FC<Props> = (props) => {
           />
           <Button
             icon="plus"
+            className={`${baseClass}__actions-add`}
             round
             buttonStyle="icon-label"
             iconStyle="with-border"

@@ -73,11 +73,14 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
         />
       </div>
       <Label
-        htmlFor={path}
+        htmlFor={`field-${path}`}
         label={label}
         required={required}
       />
-      <ul className={`${baseClass}--group`}>
+      <ul
+        id={`field-${path}`}
+        className={`${baseClass}--group`}
+      >
         {options.map((option) => {
           let optionValue = '';
 

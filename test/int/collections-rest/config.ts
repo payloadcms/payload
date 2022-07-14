@@ -1,22 +1,12 @@
 import type { CollectionConfig } from '../../../src/collections/config/types';
+import { devUser } from '../../credentials';
 import { buildConfig } from '../buildConfig';
-
-export interface Post {
-  id: string;
-  title: string;
-  description?: string;
-  number?: number;
-  relationField?: Relation | string
-  relationHasManyField?: RelationHasMany[] | string[]
-  relationMultiRelationTo?: Relation[] | string[]
-}
+import type { Post } from './payload-types';
 
 export interface Relation {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
-
-export type RelationHasMany = Relation
 
 const openAccess = {
   create: () => true,
@@ -25,9 +15,9 @@ const openAccess = {
   delete: () => true,
 };
 
-const collectionWithName = (slug: string): CollectionConfig => {
+const collectionWithName = (collectionSlug: string): CollectionConfig => {
   return {
-    slug,
+    slug: collectionSlug,
     access: openAccess,
     fields: [
       {
@@ -39,9 +29,7 @@ const collectionWithName = (slug: string): CollectionConfig => {
 };
 
 export const slug = 'posts';
-export const relationSlug = 'relation-normal';
-export const relationHasManySlug = 'relation-has-many';
-export const relationMultipleRelationToSlug = 'relation-multi-relation-to';
+export const relationSlug = 'relation';
 export default buildConfig({
   collections: [
     {
@@ -70,7 +58,7 @@ export default buildConfig({
         {
           name: 'relationHasManyField',
           type: 'relationship',
-          relationTo: relationHasManySlug,
+          relationTo: relationSlug,
           hasMany: true,
         },
         // Relation multiple relationTo
@@ -79,27 +67,84 @@ export default buildConfig({
           type: 'relationship',
           relationTo: [relationSlug, 'dummy'],
         },
+        // Relation multiple relationTo hasMany
+        {
+          name: 'relationMultiRelationToHasMany',
+          type: 'relationship',
+          relationTo: [relationSlug, 'dummy'],
+          hasMany: true,
+        },
       ],
     },
     collectionWithName(relationSlug),
-    collectionWithName(relationHasManySlug),
     collectionWithName('dummy'),
   ],
   onInit: async (payload) => {
-    const rel1 = await payload.create<RelationHasMany>({
-      collection: relationHasManySlug,
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    });
+
+    const rel1 = await payload.create<Relation>({
+      collection: relationSlug,
       data: {
         name: 'name',
       },
     });
+    const rel2 = await payload.create<Relation>({
+      collection: relationSlug,
+      data: {
+        name: 'name2',
+      },
+    });
 
-    await payload.create({
+    // Relation - hasMany
+    await payload.create<Post>({
       collection: slug,
       data: {
-        title: 'title',
+        title: 'rel to hasMany',
         relationHasManyField: rel1.id,
       },
     });
-  },
+    await payload.create<Post>({
+      collection: slug,
+      data: {
+        title: 'rel to hasMany 2',
+        relationHasManyField: rel2.id,
+      },
+    });
 
+    // Relation - relationTo multi
+    await payload.create<Post>({
+      collection: slug,
+      data: {
+        title: 'rel to multi',
+        relationMultiRelationTo: {
+          relationTo: relationSlug,
+          value: rel2.id,
+        },
+      },
+    });
+
+    // Relation - relationTo multi hasMany
+    await payload.create<Post>({
+      collection: slug,
+      data: {
+        title: 'rel to multi hasMany',
+        relationMultiRelationToHasMany: [
+          {
+            relationTo: relationSlug,
+            value: rel1.id,
+          },
+          {
+            relationTo: relationSlug,
+            value: rel2.id,
+          },
+        ],
+      },
+    });
+  },
 });

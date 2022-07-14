@@ -78,11 +78,12 @@ const Code: React.FC<Props> = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={path}
+        htmlFor={`field-${path}`}
         label={label}
         required={required}
       />
       <Editor
+        id={`field-${path}`}
         value={value as string || ''}
         onValueChange={readOnly ? () => null : setValue}
         highlight={highlighter}

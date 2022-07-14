@@ -2,6 +2,7 @@ import React, { MouseEvent } from 'react';
 
 export type Props = {
   className?: string,
+  id?: string,
   type?: 'submit' | 'button',
   el?: 'link' | 'anchor' | undefined,
   to?: string,
@@ -12,6 +13,7 @@ export type Props = {
   icon?: React.ReactNode | ['chevron' | 'x' | 'plus' | 'edit'],
   iconStyle?: 'with-border' | 'without-border' | 'none',
   buttonStyle?: 'primary' | 'secondary' | 'transparent' | 'error' | 'none' | 'icon-label',
+  buttonId?: string,
   round?: boolean,
   size?: 'small' | 'medium',
   iconPosition?: 'left' | 'right',

@@ -209,7 +209,7 @@ const RichText: React.FC<Props> = (props) => {
           message={errorMessage}
         />
         <Label
-          htmlFor={path}
+          htmlFor={`field-${path}`}
           label={label}
           required={required}
         />
@@ -270,6 +270,7 @@ const RichText: React.FC<Props> = (props) => {
               ref={editorRef}
             >
               <Editable
+                id={`field-${path}`}
                 className={`${baseClass}__input`}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}

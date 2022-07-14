@@ -70,9 +70,9 @@ const Checkbox: React.FC<Props> = (props) => {
         />
       </div>
       <input
+        id={`field-${path}`}
         type="checkbox"
         name={path}
-        id={path}
         checked={Boolean(value)}
         readOnly
       />

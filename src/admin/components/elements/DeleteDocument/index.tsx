@@ -18,6 +18,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const {
     title: titleFromProps,
     id,
+    buttonId,
     collection: {
       admin: {
         useAsTitle,
@@ -78,6 +79,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
       <React.Fragment>
         <button
           type="button"
+          id={buttonId}
           className={`${baseClass}__toggle`}
           onClick={(e) => {
             e.preventDefault();
@@ -105,6 +107,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
               &quot;. Are you sure?
             </p>
             <Button
+              id="confirm-cancel"
               buttonStyle="secondary"
               type="button"
               onClick={deleting ? undefined : () => toggle(modalSlug)}
@@ -113,6 +116,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
             </Button>
             <Button
               onClick={deleting ? undefined : handleDelete}
+              id="confirm-delete"
             >
               {deleting ? 'Deleting...' : 'Confirm'}
             </Button>

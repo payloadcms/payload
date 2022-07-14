@@ -61,17 +61,17 @@ const TextInput: React.FC<TextInputProps> = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={path}
+        htmlFor={`field-${path}`}
         label={label}
         required={required}
       />
       <input
+        id={`field-${path}`}
         value={value || ''}
         onChange={onChange}
         disabled={readOnly}
         placeholder={placeholder}
         type="text"
-        id={path}
         name={path}
       />
       <FieldDescription

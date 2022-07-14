@@ -62,16 +62,16 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={path}
+        htmlFor={`field-${path}`}
         label={label}
         required={required}
       />
       <textarea
+        id={`field-${path}`}
         value={value || ''}
         onChange={onChange}
         disabled={readOnly}
         placeholder={placeholder}
-        id={path}
         name={path}
         rows={rows}
       />

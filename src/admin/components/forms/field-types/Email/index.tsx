@@ -74,12 +74,12 @@ const Email: React.FC<Props> = (props) => {
         required={required}
       />
       <input
+        id={`field-${path}`}
         value={value as string || ''}
         onChange={setValue}
         disabled={Boolean(readOnly)}
         placeholder={placeholder}
         type="email"
-        id={path}
         name={path}
         autoComplete={autoComplete}
       />
