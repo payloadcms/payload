@@ -43,7 +43,7 @@
 
   &--size-small {
     .popup__content {
-      @include shadow-sm;
+      @include shadow-m;
     }
 
     &.popup--h-align-left {
@@ -69,7 +69,7 @@
 
   &--size-wide {
     .popup__content {
-      @include shadow-sm;
+      @include shadow-m;
 
       &:after {
         border: 12px solid transparent;
@@ -109,11 +109,11 @@
   &--h-align-center {
     .popup__content {
       left: 50%;
-      transform: translateX(-0%);
+      transform: translateX(-50%);
 
       &:after {
         left: 50%;
-        transform: translateX(-0%);
+        transform: translateX(-50%);
       }
     }
   }

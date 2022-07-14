@@ -1,5 +1,5 @@
 export const arrayDoc = {
-  array: [
+  items: [
     {
       text: 'first row',
     },

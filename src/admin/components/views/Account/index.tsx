@@ -18,7 +18,7 @@ const AccountView: React.FC = () => {
   const { setStepNav } = useStepNav();
   const { user, permissions } = useAuth();
   const [initialState, setInitialState] = useState({});
-  const { id } = useDocumentInfo();
+  const { id, preferences } = useDocumentInfo();
 
   const {
     serverURL,
@@ -44,7 +44,7 @@ const AccountView: React.FC = () => {
 
   const collectionPermissions = permissions?.collections?.[adminUser];
 
-  const [{ data, isLoading }] = usePayloadAPI(
+  const [{ data, isLoading: isLoadingDocument }] = usePayloadAPI(
     `${serverURL}${api}/${collection?.slug}/${user?.id}?depth=0`,
     { initialParams: { 'fallback-locale': 'null' } },
   );
@@ -85,7 +85,7 @@ const AccountView: React.FC = () => {
           hasSavePermission,
           initialState,
           apiURL,
-          isLoading,
+          isLoading: isLoadingDocument || !preferences,
         }}
       />
     </NegativeFieldGutterProvider>

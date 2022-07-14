@@ -20,7 +20,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { setStepNav } = useStepNav();
   const { permissions, user } = useAuth();
   const [initialState, setInitialState] = useState({});
-  const { getVersions } = useDocumentInfo();
+  const { getVersions, preferences } = useDocumentInfo();
 
   const {
     serverURL,
@@ -50,7 +50,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     setInitialState(state);
   }, [getVersions, fields, user, locale]);
 
-  const [{ data, isLoading }] = usePayloadAPI(
+  const [{ data, isLoading: isLoadingDocument }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
   );
@@ -82,7 +82,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
         DefaultComponent={DefaultGlobal}
         CustomComponent={CustomEdit}
         componentProps={{
-          isLoading,
+          isLoading: isLoadingDocument || !preferences,
           data: dataToRender,
           permissions: globalPermissions,
           initialState,

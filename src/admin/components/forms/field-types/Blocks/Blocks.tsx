@@ -54,8 +54,7 @@ const Blocks: React.FC<Props> = (props) => {
   const path = pathFromProps || name;
 
   const { preferencesKey, preferences } = useDocumentInfo();
-
-  const { getPreference, setPreference } = usePreferences();
+  const { setPreference } = usePreferences();
   const [rows, dispatchRows] = useReducer(reducer, []);
   const formContext = useForm();
   const { user } = useAuth();

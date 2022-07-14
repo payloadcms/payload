@@ -1265,14 +1265,6 @@
   resolved "https://registry.npmjs.org/@emotion/weak-memoize/-/weak-memoize-0.2.5.tgz#8eed982e2ee6f7f4e44c253e12962980791efd46"
   integrity sha512-6U71C2Wp7r5XtFtQzYrW5iKFT67OixrSxjI4MptCHzdSVlgabczzqLe0ZSgnub/5Kp4hSbpDB1tMytZY9pwxxA==
 
-"@faceless-ui/collapsibles@^1.0.0":
-  version "1.1.1"
-  resolved "https://registry.npmjs.org/@faceless-ui/collapsibles/-/collapsibles-1.1.1.tgz#89b86e11eceae55ed87caa4de9d395f7b082a938"
-  integrity sha512-7tU5CjXUnW7bKthpMgNKs5TirTb+DQVFASnstqlpe+gXl8W76Rq4Z9m6nS3PnnG2B5h9aqtUVaNgroLc1J+i/w==
-  dependencies:
-    react-animate-height "^2.0.16"
-    react-transition-group "^4.4.2"
-
 "@faceless-ui/modal@^1.1.7":
   version "1.2.0"
   resolved "https://registry.npmjs.org/@faceless-ui/modal/-/modal-1.2.0.tgz#0ca43e480f83d307dcd84c033fbc82c0619f5d8c"
@@ -10322,7 +10314,7 @@ rc@1.2.8, rc@^1.2.7, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-animate-height@^2.0.16, react-animate-height@^2.0.20:
+react-animate-height@^2.0.20:
   version "2.1.2"
   resolved "https://registry.npmjs.org/react-animate-height/-/react-animate-height-2.1.2.tgz#9b450fc64d46f10f5e07da8d0d5e2c47b9f15030"
   integrity sha512-A9jfz/4CTdsIsE7WCQtO9UkOpMBcBRh8LxyHl2eoZz1ki02jpyUL5xt58gabd0CyeLQ8fRyQ+s2lyV2Ufu8Owg==

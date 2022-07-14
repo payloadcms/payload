@@ -13,6 +13,7 @@ const baseClass = 'popup';
 const Popup: React.FC<Props> = (props) => {
   const {
     className,
+    buttonClassName,
     render,
     size = 'small',
     color = 'light',
@@ -129,21 +130,11 @@ const Popup: React.FC<Props> = (props) => {
               onMouseEnter={() => setActive(true)}
               onMouseLeave={() => setActive(false)}
             >
-              <PopupButton
-                buttonType={buttonType}
-                button={button}
-                setActive={setActive}
-                active={active}
-              />
+              <PopupButton {...{ className: buttonClassName, buttonType, button, setActive, active }} />
             </div>
           )
           : (
-            <PopupButton
-              buttonType={buttonType}
-              button={button}
-              setActive={setActive}
-              active={active}
-            />
+            <PopupButton {...{ className: buttonClassName, buttonType, button, setActive, active }} />
           )}
       </div>
 

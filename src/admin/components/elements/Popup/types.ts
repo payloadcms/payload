@@ -2,6 +2,7 @@ import { CSSProperties } from 'react';
 
 export type Props = {
     className?: string
+    buttonClassName?: string
     render?: (any) => React.ReactNode,
     children?: React.ReactNode,
     verticalAlign?: 'top' | 'bottom'

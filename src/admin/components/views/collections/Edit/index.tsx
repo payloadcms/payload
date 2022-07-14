@@ -44,7 +44,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { setStepNav } = useStepNav();
   const [initialState, setInitialState] = useState({});
   const { permissions, user } = useAuth();
-  const { getVersions } = useDocumentInfo();
+  const { getVersions, preferences } = useDocumentInfo();
 
   const onSave = useCallback(async (json: any) => {
     getVersions();
@@ -56,7 +56,7 @@ const EditView: React.FC<IndexProps> = (props) => {
     }
   }, [admin, collection, history, isEditing, getVersions, user, id, locale]);
 
-  const [{ data, isLoading, isError }] = usePayloadAPI(
+  const [{ data, isLoading: isLoadingDocument, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
   );
@@ -97,7 +97,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   }, [setStepNav, isEditing, pluralLabel, dataToRender, slug, useAsTitle, admin]);
 
   useEffect(() => {
-    if (isLoading) {
+    if (isLoadingDocument) {
       return;
     }
     const awaitInitialState = async () => {
@@ -106,7 +106,7 @@ const EditView: React.FC<IndexProps> = (props) => {
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, isEditing, id, user, locale, isLoading]);
+  }, [dataToRender, fields, isEditing, id, user, locale, isLoadingDocument]);
 
   if (isError) {
     return (
@@ -125,7 +125,7 @@ const EditView: React.FC<IndexProps> = (props) => {
         DefaultComponent={DefaultEdit}
         CustomComponent={CustomEdit}
         componentProps={{
-          isLoading,
+          isLoading: isLoadingDocument || !preferences,
           data: dataToRender,
           collection,
           permissions: collectionPermissions,

@@ -8,7 +8,7 @@ export default buildConfig({
       slug: 'array-fields',
       fields: [
         {
-          name: 'array',
+          name: 'items',
           type: 'array',
           required: true,
           fields: [
@@ -59,6 +59,9 @@ export default buildConfig({
         {
           label: 'Collapsible Field',
           type: 'collapsible',
+          admin: {
+            description: 'This is a collapsible field.',
+          },
           fields: [
             {
               name: 'text',

@@ -1,6 +1,9 @@
 @import '../../../scss/styles.scss';
 
 .collapsible {
+  --toggle-pad-h: #{base(.75)};
+  --toggle-pad-v: #{base(.5)};
+
   border: 1px solid var(--theme-elevation-200);
   border-radius: $style-radius-m;
 
@@ -8,20 +11,42 @@
     border: 1px solid var(--theme-elevation-300);
   }
 
+  &__toggle-wrap {
+    position: relative;
+  }
+
+  &--hovered {
+    .collapsible__drag {
+      opacity: 1;
+    }
+
+    .collapsible__toggle {
+      background: var(--theme-elevation-100);
+    }
+  }
+
+  &__drag {
+    opacity: .5;
+    position: absolute;
+    z-index: 1;
+    top: var(--toggle-pad-v);
+    left: base(.5);
+  }
+
   &__toggle {
     @extend %btn-reset;
+    @extend %body;
+    text-align: left;
     cursor: pointer;
     background: var(--theme-elevation-50);
     border-top-right-radius: $style-radius-s;
     border-top-left-radius: $style-radius-s;
     width: 100%;
-    display: flex;
-    align-items: center;
-    padding: base(.5) base(1);
+    padding: var(--toggle-pad-v) var(--toggle-pad-h);
+  }
 
-    &:hover {
-      background: var(--theme-elevation-100);
-    }
+  &__toggle--has-drag-handle {
+    padding-left: base(1.5);
   }
 
   &--collapsed {
@@ -35,12 +60,26 @@
     }
   }
 
+  &__actions-wrap {
+    position: absolute;
+    right: var(--toggle-pad-h);
+    top: var(--toggle-pad-v);
+    pointer-events: none;
+    display: flex;
+  }
+
+  &__actions {
+    pointer-events: all;
+  }
+
   &__indicator {
-    margin: 0 0 0 auto;
     transform: rotate(.5turn);
   }
 
   &__content {
+    background-color: var(--theme-elevation-0);
+    border-bottom-left-radius: $style-radius-s;
+    border-bottom-right-radius: $style-radius-s;
     padding: $baseline;
   }
 

@@ -88,7 +88,6 @@
     "@babel/preset-typescript": "^7.12.1",
     "@babel/register": "^7.11.5",
     "@date-io/date-fns": "^2.10.6",
-    "@faceless-ui/collapsibles": "^1.0.0",
     "@faceless-ui/modal": "^1.1.7",
     "@faceless-ui/scroll-info": "^1.2.3",
     "@faceless-ui/window-info": "^2.0.2",

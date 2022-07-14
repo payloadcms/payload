@@ -76,28 +76,6 @@ const DraggableSection: React.FC<Props> = (props) => {
 
             <div className={`${baseClass}__render-fields-wrapper`}>
 
-              {blockType === 'blocks' && (
-                <div className={`${baseClass}__section-header`}>
-                  <HiddenInput
-                    name={`${parentPath}.${rowIndex}.id`}
-                    value={id}
-                  />
-                  <SectionTitle
-                    label={label}
-                    path={`${parentPath}.${rowIndex}.blockName`}
-                    readOnly={readOnly}
-                  />
-
-                  <Button
-                    icon="chevron"
-                    onClick={() => setRowCollapse(id, !isCollapsed)}
-                    buttonStyle="icon-label"
-                    className={`toggle-collapse toggle-collapse--is-${isCollapsed ? 'collapsed' : 'open'}`}
-                    round
-                  />
-                </div>
-              )}
-
               <AnimateHeight
                 height={isCollapsed ? 0 : 'auto'}
                 duration={200}

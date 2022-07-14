@@ -1,4 +1,5 @@
 import equal from 'deep-equal';
+import ObjectID from 'bson-objectid';
 import { unflatten, flatten } from 'flatley';
 import flattenFilters from './flattenFilters';
 import getSiblingData from './getSiblingData';
@@ -99,6 +100,32 @@ function fieldReducer(state: Fields, action): Fields {
       if (Object.keys(subFieldState).length > 0) {
         // Add new object containing subfield names to unflattenedRows array
         unflattenedRows.splice(rowIndex + 1, 0, subFieldState);
+      }
+
+      const newState = {
+        ...remainingFlattenedState,
+        ...(flatten({ [path]: unflattenedRows }, { filters: flattenFilters })),
+      };
+
+      return newState;
+    }
+
+    case 'DUPLICATE_ROW': {
+      const {
+        rowIndex, path,
+      } = action;
+
+      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, path);
+
+      const duplicate = {
+        ...unflattenedRows[rowIndex],
+        id: new ObjectID().toHexString(),
+      };
+
+      // If there are subfields
+      if (Object.keys(duplicate).length > 0) {
+        // Add new object containing subfield names to unflattenedRows array
+        unflattenedRows.splice(rowIndex + 1, 0, duplicate);
       }
 
       const newState = {

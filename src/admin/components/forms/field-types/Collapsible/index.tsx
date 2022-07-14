@@ -8,6 +8,7 @@ import toKebabCase from '../../../../../utilities/toKebabCase';
 import { usePreferences } from '../../../utilities/Preferences';
 import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
+import FieldDescription from '../../FieldDescription';
 
 import './index.scss';
 
@@ -23,6 +24,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       className,
+      description,
     },
   } = props;
 
@@ -45,32 +47,33 @@ const CollapsibleField: React.FC<Props> = (props) => {
     });
   }, [preferencesKey, fieldPreferencesKey, getPreference, setPreference]);
 
-  // Do not render until preferences are retrieved
-  // So we can properly render the field as open or closed by default
-  if (!preferences) return null;
-
   return (
-    <Collapsible
-      initCollapsed={Boolean(preferences.fields[fieldPreferencesKey]?.collapsed)}
-      className={[
-        'field-type',
-        baseClass,
-        className,
-      ].filter(Boolean).join(' ')}
-      header={<div className={`${baseClass}__label`}>{label}</div>}
-      onToggle={onToggle}
-    >
-      <RenderFields
-        forceRender
-        readOnly={readOnly}
-        permissions={permissions?.fields}
-        fieldTypes={fieldTypes}
-        fieldSchema={fields.map((field) => ({
-          ...field,
-          path: `${path ? `${path}.` : ''}${fieldAffectsData(field) ? field.name : ''}`,
-        }))}
+    <React.Fragment>
+      <Collapsible
+        initCollapsed={Boolean(preferences.fields[fieldPreferencesKey]?.collapsed)}
+        className={[
+          'field-type',
+          baseClass,
+          className,
+        ].filter(Boolean).join(' ')}
+        header={<div className={`${baseClass}__label`}>{label}</div>}
+        onToggle={onToggle}
+      >
+        <RenderFields
+          forceRender
+          readOnly={readOnly}
+          permissions={permissions?.fields}
+          fieldTypes={fieldTypes}
+          fieldSchema={fields.map((field) => ({
+            ...field,
+            path: `${path ? `${path}.` : ''}${fieldAffectsData(field) ? field.name : ''}`,
+          }))}
+        />
+      </Collapsible>
+      <FieldDescription
+        description={description}
       />
-    </Collapsible>
+    </React.Fragment>
   );
 };
 
