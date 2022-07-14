@@ -3,7 +3,11 @@ import { buildConfig as buildPayloadConfig } from '../../src/config/build';
 import type { Config, SanitizedConfig } from '../../src/config/types';
 
 export function buildConfig(overrides?: Partial<Config>): SanitizedConfig {
-  const baseConfig: Config = {};
+  const baseConfig: Config = {
+    typescript: {
+      outputFile: process.env.PAYLOAD_TS_OUTPUT_PATH,
+    },
+  };
   if (process.env.NODE_ENV === 'test') {
     baseConfig.admin = {
       webpack: (config) => ({
