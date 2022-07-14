@@ -140,10 +140,9 @@ export default buildConfig({
         name: 'relation-title',
       },
     });
-    await payload.create<RelationOne>({
+    await payload.create<FieldsRelationship>({
       collection: slug,
       data: {
-        name: 'with-existing-relations',
         relationship: relationOneDocId,
         relationshipRestricted: restrictedDocId,
         relationshipWithTitle: relationWithTitleDocId,

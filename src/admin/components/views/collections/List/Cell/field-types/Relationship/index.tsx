@@ -48,15 +48,12 @@ const RelationshipCell = (props) => {
       {values.map(({ relationTo, value }, i) => {
         const document = documents[relationTo][value];
         const relatedCollection = collections.find(({ slug }) => slug === relationTo);
-        if (document && relatedCollection) {
-          return (
-            <React.Fragment key={i}>
-              {document[relatedCollection.admin.useAsTitle] ?? `Untitled - ${value}`}
-              {values.length > i + 1 && ', '}
-            </React.Fragment>
-          );
-        }
-        return null;
+        return (
+          <React.Fragment key={i}>
+            {document && document[relatedCollection.admin.useAsTitle] ? document[relatedCollection.admin.useAsTitle] : `Untitled - ID: ${value}`}
+            {values.length > i + 1 && ', '}
+          </React.Fragment>
+        );
       })}
       {!cellData && !values && hasRequested && (
         <React.Fragment>

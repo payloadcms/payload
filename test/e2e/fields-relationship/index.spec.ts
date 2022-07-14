@@ -4,7 +4,7 @@ import payload from '../../../src';
 import { mapAsync } from '../../../src/utilities/mapAsync';
 import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
 import { initPayloadTest } from '../../helpers/configHelpers';
-import { firstRegister, saveDocAndAssert } from '../helpers';
+import { login, saveDocAndAssert } from '../helpers';
 import type {
   FieldsRelationship as CollectionWithRelationships,
   RelationOne,
@@ -19,6 +19,7 @@ import {
   relationWithTitleSlug,
   slug,
 } from './config';
+import wait from '../../../src/utilities/wait';
 
 const { beforeAll, describe } = test;
 
@@ -97,7 +98,7 @@ describe('fields - relationship', () => {
       },
     });
 
-    await firstRegister({ page, serverURL });
+    await login({ page, serverURL });
   });
 
   test('should create relationship', async () => {
@@ -215,6 +216,30 @@ describe('fields - relationship', () => {
       const options = page.locator('.rs__option');
 
       await expect(options).toHaveCount(2); // None + 1 Doc
+    });
+
+    test('should show id on relation in list view', async () => {
+      await page.goto(url.list);
+      await wait(1000);
+      const cells = page.locator('.relationship');
+      const relationship = cells.nth(0);
+      await expect(relationship).toHaveText(relationOneDoc.id);
+    });
+
+    test('should show useAsTitle on relation in list view', async () => {
+      await page.goto(url.list);
+      wait(110);
+      const cells = page.locator('.relationshipWithTitle');
+      const relationship = cells.nth(0);
+      await expect(relationship).toHaveText(relationWithTitle.id);
+    });
+
+    test('should show untitled ID on restricted relation in list view', async () => {
+      await page.goto(url.list);
+      wait(110);
+      const cells = page.locator('.relationship');
+      const relationship = cells.nth(0);
+      await expect(relationship).toHaveText(relationOneDoc.id);
     });
   });
 });
