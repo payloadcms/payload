@@ -3,21 +3,13 @@ import { expect, test } from '@playwright/test';
 import payload from '../../../src';
 import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../../helpers/configHelpers';
-import { firstRegister } from '../helpers';
-import { slug } from './config';
+import { login } from '../helpers';
+import { readOnlySlug, restrictedSlug, slug } from './config';
+import type { ReadOnlyCollection } from './payload-types';
 
 /**
  * TODO: Access Control
- * - [x] restricted collections not shown
- *  - no sidebar link
- *  - no route
- *  - no card
- * [x] field without read access should not show
  * prevent user from logging in (canAccessAdmin)
- * no create controls if no access
- * no update control if no update
- *  - check fields are rendered as readonly
- * no delete control if no access
  * no version controls is no access
  *
  * FSK: 'should properly prevent / allow public users from reading a restricted field'
@@ -26,25 +18,25 @@ import { slug } from './config';
  */
 
 const { beforeAll, describe } = test;
-let url: AdminUrlUtil;
 
 describe('access control', () => {
   let page: Page;
+  let url: AdminUrlUtil;
+  let restrictedUrl: AdminUrlUtil;
+  let readoOnlyUrl: AdminUrlUtil;
 
   beforeAll(async ({ browser }) => {
     const { serverURL } = await initPayloadE2E(__dirname);
-    // await clearDocs(); // Clear any seeded data from onInit
 
     url = new AdminUrlUtil(serverURL, slug);
+    restrictedUrl = new AdminUrlUtil(serverURL, restrictedSlug);
+    readoOnlyUrl = new AdminUrlUtil(serverURL, readOnlySlug);
 
     const context = await browser.newContext();
     page = await context.newPage();
 
-    await firstRegister({ page, serverURL });
+    await login({ page, serverURL });
   });
-
-  // afterEach(async () => {
-  // });
 
   test('field without read access should not show', async () => {
     const { id } = await createDoc({ restrictedField: 'restricted' });
@@ -55,9 +47,20 @@ describe('access control', () => {
   });
 
   describe('restricted collection', () => {
+    let existingDoc: ReadOnlyCollection;
+
+    beforeAll(async () => {
+      existingDoc = await payload.create<ReadOnlyCollection>({
+        collection: readOnlySlug,
+        data: {
+          name: 'name',
+        },
+      });
+    });
+
     test('should not show in card list', async () => {
       await page.goto(url.admin);
-      await expect(page.locator('.dashboard__card-list >> text=Restricteds')).toHaveCount(0);
+      await expect(page.locator(`#card-${restrictedSlug}`)).toHaveCount(0);
     });
 
     test('should not show in nav', async () => {
@@ -65,11 +68,67 @@ describe('access control', () => {
       await expect(page.locator('.nav >> a:has-text("Restricteds")')).toHaveCount(0);
     });
 
-    test('should not have collection url', async () => {
-      await page.goto(url.list);
-      await page.locator('text=Nothing found').click();
-      await page.locator('a:has-text("Back to Dashboard")').click();
-      await expect(page).toHaveURL(url.admin);
+    test('should not have list url', async () => {
+      await page.goto(restrictedUrl.list);
+      await expect(page.locator('.unauthorized')).toBeVisible();
+    });
+
+    test('should not have create url', async () => {
+      await page.goto(restrictedUrl.create);
+      await expect(page.locator('.unauthorized')).toBeVisible();
+    });
+
+    test('should not have access to existing doc', async () => {
+      await page.goto(restrictedUrl.edit(existingDoc.id));
+      await expect(page.locator('.unauthorized')).toBeVisible();
+    });
+  });
+
+  describe('read-only collection', () => {
+    let existingDoc: ReadOnlyCollection;
+
+    beforeAll(async () => {
+      existingDoc = await payload.create<ReadOnlyCollection>({
+        collection: readOnlySlug,
+        data: {
+          name: 'name',
+        },
+      });
+    });
+
+    test('should show in card list', async () => {
+      await page.goto(url.admin);
+      await expect(page.locator(`#card-${readOnlySlug}`)).toHaveCount(1);
+    });
+
+    test('should show in nav', async () => {
+      await page.goto(url.admin);
+      await expect(page.locator(`.nav a[href="/admin/collections/${readOnlySlug}"]`)).toHaveCount(1);
+    });
+
+    test('should have collection url', async () => {
+      await page.goto(readoOnlyUrl.list);
+      await expect(page).toHaveURL(readoOnlyUrl.list); // no redirect
+    });
+
+    test('should not have "Create New" button', async () => {
+      await page.goto(readoOnlyUrl.create);
+      await expect(page.locator('.collection-list__header a')).toHaveCount(0);
+    });
+
+    test('should not have quick create button', async () => {
+      await page.goto(url.admin);
+      await expect(page.locator(`#card-${readOnlySlug}`)).not.toHaveClass('card__actions');
+    });
+
+    test('edit view should not have buttons', async () => {
+      await page.goto(readoOnlyUrl.edit(existingDoc.id));
+      await expect(page.locator('.collection-edit__collection-actions li')).toHaveCount(0);
+    });
+
+    test('fields should be read-only', async () => {
+      await page.goto(readoOnlyUrl.edit(existingDoc.id));
+      await expect(page.locator('#field-name')).toBeDisabled();
     });
   });
 });
