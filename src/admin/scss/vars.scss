@@ -38,7 +38,7 @@ $style-stroke-width-m : 2px !default;
 
 $top-header-offset: calc(#{base(4)} - 1px);
 $top-header-offset-m: base(3);
-$focus-box-shadow: 0 0 0 $style-stroke-width-m var(--color-success-500);
+$focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 
 //////////////////////////////
 // SHADOWS

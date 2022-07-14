@@ -6,9 +6,9 @@
   left: auto;
   right: base(.5);
   transform: none;
-  background-color: var(--color-error-500);
+  background-color: var(--theme-error-500);
 
   span {
-    border-top-color: var(--color-error-500);
+    border-top-color: var(--theme-error-500);
   }
 }

@@ -52,8 +52,8 @@
 
   &--dragging {
     .file-field__drop-zone {
-      border-color: var(--color-success-500);
-      background: var(--color-success-150);
+      border-color: var(--theme-success-500);
+      background: var(--theme-success-150);
     }
   }
 

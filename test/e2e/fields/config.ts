@@ -1,6 +1,6 @@
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../../credentials';
-import { arrayDoc, blocksDoc, collapsibleDoc, textDoc } from './shared';
+import { arrayDoc, blocksDoc, collapsibleDoc, richTextDoc, textDoc } from './shared';
 
 export default buildConfig({
   collections: [
@@ -73,6 +73,16 @@ export default buildConfig({
       ],
     },
     {
+      slug: 'rich-text-fields',
+      fields: [
+        {
+          name: 'richText',
+          type: 'richText',
+          required: true,
+        },
+      ],
+    },
+    {
       slug: 'text-fields',
       admin: {
         useAsTitle: 'text',
@@ -110,9 +120,17 @@ export default buildConfig({
       data: collapsibleDoc,
     });
 
-    await payload.create({
+    const createdTextDoc = await payload.create({
       collection: 'text-fields',
       data: textDoc,
+    });
+
+    const richTextDocWithRelationship = { ...richTextDoc };
+    richTextDocWithRelationship.richText[2].value = { id: createdTextDoc.id };
+
+    await payload.create({
+      collection: 'rich-text-fields',
+      data: richTextDocWithRelationship,
     });
   },
 });

@@ -9,7 +9,7 @@
 
   &--has-error {
     .react-datepicker__input-container input {
-      background-color: var(--color-error-200);
+      background-color: var(--theme-error-200);
     }
   }
 }

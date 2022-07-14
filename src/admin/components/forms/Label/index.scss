@@ -6,7 +6,7 @@ label.field-label {
   color: var(--theme-elevation-800);
 
   .required {
-    color: var(--color-error-500);
+    color: var(--theme-error-500);
     margin-left: base(.25);
     margin-right: auto;
   }

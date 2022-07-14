@@ -6,7 +6,7 @@
 
   &.error {
     textarea {
-      border: 1px solid var(--color-error-500) !important;
+      border: 1px solid var(--theme-error-500) !important;
     }
   }
 }
@@ -49,7 +49,7 @@ pre[class*="language-"] {
 
 :not(pre)>code[class*="language-"],
 pre[class*="language-"] {
-  background: var(--color-base-100);
+  background: var(--theme-base-100);
 }
 
 /* Inline code */
