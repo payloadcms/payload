@@ -25,7 +25,9 @@ const ButtonContents = ({ children, icon, tooltip }) => {
   const BuiltInIcon = icons[icon];
 
   return (
-    <span className={`${baseClass}__content`}>
+    <span
+      className={`${baseClass}__content`}
+    >
       {tooltip && (
         <Tooltip className={`${baseClass}__tooltip`}>
           {tooltip}
@@ -49,6 +51,7 @@ const ButtonContents = ({ children, icon, tooltip }) => {
 const Button: React.FC<Props> = (props) => {
   const {
     className,
+    id,
     type = 'button',
     el,
     to,
@@ -86,6 +89,7 @@ const Button: React.FC<Props> = (props) => {
   }
 
   const buttonProps = {
+    id,
     type,
     className: classes,
     disabled,

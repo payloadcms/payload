@@ -2,8 +2,8 @@ import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import payload from '../../../src';
 import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
-import { initPayloadTest } from '../../helpers/configHelpers';
-import { firstRegister, saveDocAndAssert } from '../helpers';
+import { initPayloadE2E } from '../../helpers/configHelpers';
+import { login, saveDocAndAssert } from '../helpers';
 import type { Post } from './config';
 import { slug } from './config';
 import { mapAsync } from '../../../src/utilities/mapAsync';
@@ -20,19 +20,14 @@ describe('collections', () => {
   let page: Page;
 
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadTest({
-      __dirname,
-      init: {
-        local: false,
-      },
-    });
+    const { serverURL } = await initPayloadE2E(__dirname);
     await clearDocs(); // Clear any seeded data from onInit
     url = new AdminUrlUtil(serverURL, slug);
 
     const context = await browser.newContext();
     page = await context.newPage();
 
-    await firstRegister({ page, serverURL });
+    await login({ page, serverURL });
   });
 
   afterEach(async () => {
@@ -50,13 +45,13 @@ describe('collections', () => {
 
     test('should navigate to collection - card', async () => {
       await page.goto(url.admin);
-      await page.locator('a:has-text("Posts")').click();
+      await page.locator(`#card-${slug}`).click();
       expect(page.url()).toContain(url.list);
     });
 
-    test('breadcrumbs - from card to dashboard', async () => {
+    test('breadcrumbs - from list to dashboard', async () => {
       await page.goto(url.list);
-      await page.locator('a:has-text("Dashboard")').click();
+      await page.locator('.step-nav a[href="/admin"]').click();
       expect(page.url()).toContain(url.admin);
     });
 
@@ -64,7 +59,7 @@ describe('collections', () => {
       const { id } = await createPost();
 
       await page.goto(url.edit(id));
-      await page.locator('nav >> text=Posts').click();
+      await page.locator(`.step-nav >> text=${slug}`).click();
       expect(page.url()).toContain(url.list);
     });
   });
@@ -73,14 +68,14 @@ describe('collections', () => {
   describe('CRUD', () => {
     test('should create', async () => {
       await page.goto(url.create);
-      await page.locator('#title').fill(title);
-      await page.locator('#description').fill(description);
-      await page.click('text=Save', { delay: 100 });
+      await page.locator('#field-title').fill(title);
+      await page.locator('#field-description').fill(description);
+      await page.click('#action-save', { delay: 100 });
 
       await saveDocAndAssert(page);
 
-      await expect(page.locator('#title')).toHaveValue(title);
-      await expect(page.locator('#description')).toHaveValue(description);
+      await expect(page.locator('#field-title')).toHaveValue(title);
+      await expect(page.locator('#field-description')).toHaveValue(description);
     });
 
     test('should read existing', async () => {
@@ -88,8 +83,8 @@ describe('collections', () => {
 
       await page.goto(url.edit(id));
 
-      await expect(page.locator('#title')).toHaveValue(title);
-      await expect(page.locator('#description')).toHaveValue(description);
+      await expect(page.locator('#field-title')).toHaveValue(title);
+      await expect(page.locator('#field-description')).toHaveValue(description);
     });
 
     test('should update existing', async () => {
@@ -99,21 +94,21 @@ describe('collections', () => {
 
       const newTitle = 'new title';
       const newDesc = 'new description';
-      await page.locator('#title').fill(newTitle);
-      await page.locator('#description').fill(newDesc);
+      await page.locator('#field-title').fill(newTitle);
+      await page.locator('#field-description').fill(newDesc);
 
       await saveDocAndAssert(page);
 
-      await expect(page.locator('#title')).toHaveValue(newTitle);
-      await expect(page.locator('#description')).toHaveValue(newDesc);
+      await expect(page.locator('#field-title')).toHaveValue(newTitle);
+      await expect(page.locator('#field-description')).toHaveValue(newDesc);
     });
 
     test('should delete existing', async () => {
       const { id } = await createPost();
 
       await page.goto(url.edit(id));
-      await page.locator('button:has-text("Delete")').click();
-      await page.locator('button:has-text("Confirm")').click();
+      await page.locator('#action-delete').click();
+      await page.locator('#confirm-delete').click();
 
       await expect(page.locator(`text=Post "${id}" successfully deleted.`)).toBeVisible();
       expect(page.url()).toContain(url.list);
@@ -123,10 +118,10 @@ describe('collections', () => {
       const { id } = await createPost();
 
       await page.goto(url.edit(id));
-      await page.locator('button:has-text("Duplicate")').click();
+      await page.locator('#action-duplicate').click();
 
       expect(page.url()).toContain(url.create);
-      await page.locator('button:has-text("Save")').click();
+      await page.locator('#action-save').click();
       expect(page.url()).not.toContain(id); // new id
     });
   });
@@ -149,7 +144,7 @@ describe('collections', () => {
       test('toggle columns', async () => {
         const columnCountLocator = 'table >> thead >> tr >> th';
         await createPost();
-        await page.locator('button:has-text("Columns")').click();
+        await page.locator('.list-controls__toggle-columns').click();
         await wait(1000); // Wait for column toggle UI, should probably use waitForSelector
 
         const numberOfColumns = await page.locator(columnCountLocator).count();
@@ -170,13 +165,13 @@ describe('collections', () => {
 
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
 
-        await page.locator('button:has-text("Filters")').click();
+        await page.locator('.list-controls__toggle-where').click();
         await wait(1000); // Wait for column toggle UI, should probably use waitForSelector
 
-        await page.locator('text=Add filter').click();
+        await page.locator('.where-builder__add-first-filter').click();
 
-        const operatorField = page.locator('.condition >> .condition__operator');
-        const valueField = page.locator('.condition >> .condition__value >> input');
+        const operatorField = page.locator('.condition__operator');
+        const valueField = page.locator('.condition__value >> input');
 
         await operatorField.click();
 
@@ -192,7 +187,7 @@ describe('collections', () => {
         expect(firstId).toEqual(id);
 
         // Remove filter
-        await page.locator('.condition >> .icon--x').click();
+        await page.locator('.condition__actions-remove').click();
         await wait(1000);
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
       });
@@ -237,14 +232,11 @@ describe('collections', () => {
 
         await expect(getTableItems()).toHaveCount(2);
 
-        const chevrons = page.locator('table >> thead >> th >> button');
-        const upChevron = chevrons.first();
-        const downChevron = chevrons.nth(1);
+        const upChevron = page.locator('#heading-id .sort-column__asc');
+        const downChevron = page.locator('#heading-id .sort-column__desc');
 
-        const getFirstId = async () => getTableItems().first().locator('td').first()
-          .innerText();
-        const getSecondId = async () => getTableItems().nth(1).locator('td').first()
-          .innerText();
+        const getFirstId = async () => page.locator('.row-1 .cell-id').innerText();
+        const getSecondId = async () => page.locator('.row-2 .cell-id').innerText();
 
         const firstId = await getFirstId();
         const secondId = await getSecondId();

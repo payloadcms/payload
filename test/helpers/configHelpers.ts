@@ -5,7 +5,6 @@ import express from 'express';
 import type { CollectionConfig } from '../../src/collections/config/types';
 import type { InitOptions } from '../../src/config/types';
 import payload from '../../src';
-import { devUser } from '../credentials';
 
 type Options = {
   __dirname: string

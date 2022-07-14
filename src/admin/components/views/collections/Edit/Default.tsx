@@ -134,7 +134,14 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   <ul className={`${baseClass}__collection-actions`}>
                     {(permissions?.create?.permission) && (
                     <React.Fragment>
-                      <li><Link to={`${admin}/collections/${slug}/create`}>Create New</Link></li>
+                      <li>
+                        <Link
+                          id="action-create"
+                          to={`${admin}/collections/${slug}/create`}
+                        >
+                          Create New
+                        </Link>
+                      </li>
                       {!disableDuplicate && (
                       <li><DuplicateDocument slug={slug} /></li>
                       )}
@@ -145,6 +152,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       <DeleteDocument
                         collection={collection}
                         id={id}
+                        buttonId="action-delete"
                       />
                     </li>
                   )}
@@ -167,7 +175,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         </React.Fragment>
                       )}
                       {!collection.versions?.drafts && (
-                        <FormSubmit>Save</FormSubmit>
+                        <FormSubmit buttonId="action-save">Save</FormSubmit>
                       )}
                     </React.Fragment>
                     )}

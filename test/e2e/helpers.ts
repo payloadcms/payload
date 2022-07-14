@@ -37,7 +37,7 @@ export async function login(args: LoginArgs): Promise<void> {
 }
 
 export async function saveDocAndAssert(page: Page): Promise<void> {
-  await page.click('text=Save', { delay: 100 });
+  await page.click('#action-save', { delay: 100 });
   await expect(page.locator('.Toastify')).toContainText('successfully');
   expect(page.url()).not.toContain('create');
 }

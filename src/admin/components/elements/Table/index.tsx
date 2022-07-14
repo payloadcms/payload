@@ -16,7 +16,10 @@ const Table: React.FC<Props> = ({ columns, data }) => {
           <thead>
             <tr>
               {columns.map((col, i) => (
-                <th key={i}>
+                <th
+                  key={i}
+                  id={`heading-${col.accessor}`}
+                >
                   {col.components.Heading}
                 </th>
               ))}
