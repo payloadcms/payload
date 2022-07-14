@@ -76,7 +76,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
 
   useEffect(() => {
     const params = {
-      depth: 1,
+      depth: 0,
       draft: 'true',
       page: undefined,
       sort: undefined,
@@ -107,7 +107,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         setTableColumns(buildColumns(collection, currentPreferences?.columns));
       }
 
-      const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 10 });
+      const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 0 });
 
       const search = {
         ...params,

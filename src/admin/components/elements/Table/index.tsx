@@ -26,7 +26,10 @@ const Table: React.FC<Props> = ({ columns, data }) => {
             {data && data.map((row, rowIndex) => (
               <tr key={rowIndex}>
                 {columns.map((col, colIndex) => (
-                  <td key={colIndex}>
+                  <td
+                    key={colIndex}
+                    className={col.accessor}
+                  >
                     {col.components.renderCell(row, row[col.accessor])}
                   </td>
                 ))}

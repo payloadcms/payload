@@ -1,55 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import { useConfig } from '../../../../../../utilities/Config';
+import useIntersect from '../../../../../../../hooks/useIntersect';
+import { useListRelationships } from '../../../RelationshipProvider';
+
+import './index.scss';
+
+type Value = { relationTo: string, value: number | string };
+const baseClass = 'relationship-cell';
 
 const RelationshipCell = (props) => {
   const { field, data: cellData } = props;
-  const { relationTo } = field;
-  const { collections } = useConfig();
-  const [data, setData] = useState();
+  const { collections, routes } = useConfig();
+  const [intersectionRef, entry] = useIntersect();
+  const [values, setValues] = useState<Value[]>([]);
+  const { getRelationships, documents } = useListRelationships();
+  const [hasRequested, setHasRequested] = useState(false);
+
+  const isAboveViewport = entry?.boundingClientRect?.top > 0;
 
   useEffect(() => {
-    const hasManyRelations = Array.isArray(relationTo);
+    if (cellData && isAboveViewport && !hasRequested) {
+      const formattedValues: Value[] = [];
 
-    if (cellData) {
-      if (Array.isArray(cellData)) {
-        setData(cellData.reduce((newData, value) => {
-          const relation = hasManyRelations ? value?.relationTo : relationTo;
-          const doc = hasManyRelations ? value.value : value;
-
-          const collection = collections.find((coll) => coll.slug === relation);
-
-          if (collection) {
-            const useAsTitle = collection.admin.useAsTitle ? collection.admin.useAsTitle : 'id';
-            let title: string;
-            if (typeof doc === 'string') {
-              title = doc;
-            } else {
-              title = doc?.[useAsTitle] ? doc[useAsTitle] : doc;
-            }
-
-            return newData ? `${newData}, ${title}` : title;
-          }
-
-          return newData;
-        }, ''));
-      } else {
-        const relation = hasManyRelations ? cellData?.relationTo : relationTo;
-        const doc = hasManyRelations ? cellData.value : cellData;
-        const collection = collections.find((coll) => coll.slug === relation);
-
-        if (collection && doc) {
-          const useAsTitle = collection.admin.useAsTitle ? collection.admin.useAsTitle : 'id';
-
-          setData(doc[useAsTitle] ? doc[useAsTitle] : doc);
+      const arrayCellData = Array.isArray(cellData) ? cellData : [cellData];
+      arrayCellData.slice(0, (arrayCellData.length < 3 ? arrayCellData.length : 3)).forEach((cell) => {
+        if (typeof cell === 'object' && 'relationTo' in cell && 'value' in cell) {
+          formattedValues.push(cell);
         }
-      }
+        if ((typeof cell === 'number' || typeof cell === 'string') && typeof field.relationTo === 'string') {
+          formattedValues.push({
+            value: cell,
+            relationTo: field.relationTo,
+          });
+        }
+      });
+      getRelationships(formattedValues);
+      setHasRequested(true);
+      setValues(formattedValues);
     }
-  }, [cellData, relationTo, field, collections]);
+  }, [cellData, field, collections, isAboveViewport, routes.api, hasRequested, getRelationships]);
 
   return (
-    <React.Fragment>
-      {data}
-    </React.Fragment>
+    <div
+      className={baseClass}
+      ref={intersectionRef}
+    >
+      {values.map(({ relationTo, value }, i) => {
+        const document = documents[relationTo][value];
+        const relatedCollection = collections.find(({ slug }) => slug === relationTo);
+        return (
+          <React.Fragment key={i}>
+            {document && document[relatedCollection.admin.useAsTitle] ? document[relatedCollection.admin.useAsTitle] : `Untitled - ID: ${value}`}
+            {values.length > i + 1 && ', '}
+          </React.Fragment>
+        );
+      })}
+      {!cellData && !values && hasRequested && (
+        <React.Fragment>
+          {`No <${field.label}>`}
+        </React.Fragment>
+      )}
+    </div>
   );
 };
 
