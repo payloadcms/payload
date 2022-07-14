@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import payload from '../../../src';
 import { mapAsync } from '../../../src/utilities/mapAsync';
 import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
-import { initPayloadTest } from '../../helpers/configHelpers';
+import { initPayloadE2E, initPayloadTest } from '../../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
 import type {
   FieldsRelationship as CollectionWithRelationships,
@@ -36,12 +36,7 @@ describe('fields - relationship', () => {
   let relationWithTitle: RelationWithTitle;
 
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadTest({
-      __dirname,
-      init: {
-        local: false,
-      },
-    });
+    const { serverURL } = await initPayloadE2E(__dirname);
     await clearAllDocs();
 
     url = new AdminUrlUtil(serverURL, slug);

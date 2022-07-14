@@ -70,7 +70,7 @@ const Email: React.FC<Props> = (props) => {
       />
       <Label
         htmlFor={path}
-        label={`field-${path}`}
+        label={label}
         required={required}
       />
       <input
