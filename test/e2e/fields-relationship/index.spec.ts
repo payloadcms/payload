@@ -208,7 +208,6 @@ describe('fields - relationship', () => {
 
       // Check existing relationship for correct title
       await expect(field).toHaveText(relationWithTitle.name);
-      await page.screenshot({ path: './bad.png' });
 
       await field.click({ delay: 100 });
       const options = page.locator('.rs__option');
