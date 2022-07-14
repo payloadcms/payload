@@ -11,9 +11,9 @@
   --z-modal: #{$z-modal};
   --scrollbar-width: 17px;
 
-  --theme-bg: var(--theme-base-0);
-  --theme-input-bg: var(--theme-base-0);
-  --theme-text: var(--theme-base-800);
+  --theme-bg: var(--theme-elevation-0);
+  --theme-input-bg: var(--theme-elevation-0);
+  --theme-text: var(--theme-elevation-800);
 
   --font-body: 'Suisse Intl', system-ui;
   --font-mono: monospace;
@@ -64,6 +64,12 @@ html {
   @include mid-break {
     font-size: 12px;
   }
+}
+
+html,
+body,
+#app {
+  height: 100%;
 }
 
 body {
