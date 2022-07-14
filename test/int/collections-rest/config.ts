@@ -1,4 +1,5 @@
 import type { CollectionConfig } from '../../../src/collections/config/types';
+import { devUser } from '../../credentials';
 import { buildConfig } from '../buildConfig';
 import type { Post } from './payload-types';
 
@@ -79,6 +80,14 @@ export default buildConfig({
     collectionWithName('dummy'),
   ],
   onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    });
+
     const rel1 = await payload.create<Relation>({
       collection: relationSlug,
       data: {
