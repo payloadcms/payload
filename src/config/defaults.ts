@@ -18,7 +18,6 @@ export const defaults: Config = {
     indexHTML: path.resolve(__dirname, '../admin/index.html'),
     components: {},
     css: path.resolve(__dirname, '../admin/scss/custom.css'),
-    scss: path.resolve(__dirname, '../admin/scss/overrides.scss'),
     dateFormat: 'MMMM do yyyy, h:mm a',
   },
   typescript: {

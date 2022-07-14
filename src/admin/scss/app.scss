@@ -133,7 +133,7 @@
   }
 
   @include small-break {
-    --gutter-h: #{base(.75)};
+    --gutter-h: #{base(.5)};
   }
 }
 
@@ -250,14 +250,8 @@ html {
   }
 }
 
-html,
-body,
-#app {
-  height: 100%;
-}
-
 body {
-  font-family: $font-body;
+  font-family: var(--font-body);
   font-weight: 400;
   color: var(--theme-text);
   margin: 0;

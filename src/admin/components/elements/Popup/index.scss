@@ -42,6 +42,10 @@
   ////////////////////////////////
 
   &--size-small {
+    .popup__scroll {
+      padding: base(.75);
+    }
+
     .popup__content {
       @include shadow-m;
     }

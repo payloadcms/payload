@@ -1,8 +1,7 @@
 @import '../../../../scss/styles.scss';
 
-.field-type.blocks {
+.blocks-field {
   margin: base(2) 0;
-  min-width: base(15);
 
   &__header {
     h3 {
@@ -10,6 +9,42 @@
     }
 
     margin-bottom: base(1);
+  }
+
+  &__header-wrap {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+  }
+
+  &__header-actions {
+    list-style: none;
+    margin: 0 0 0 auto;
+    padding: 0;
+    display: flex;
+  }
+
+  &__header-action {
+    @extend %btn-reset;
+    cursor: pointer;
+    margin-left: base(.5);
+    font-weight: 600;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__block-header {
+    display: flex;
+  }
+
+  &__block-number {
+    margin-right: base(.375)
+  }
+
+  &__row {
+    margin-bottom: base(.5);
   }
 
   &__error-wrap {
@@ -28,27 +63,7 @@
     }
   }
 
-  .section .section {
-    margin-top: 0;
-  }
-
-  .section__content {
-    >div>div {
-      width: 100%;
-    }
-  }
-
-  @include mid-break {
-    min-width: calc(100vw - #{base(2)});
-  }
-}
-
-.field-type.group,
-.field-type.array,
-.field-type.blocks {
-  .field-type.blocks {
-    .field-type.blocks__add-button-wrap {
-      margin-left: base(3);
-    }
+  .field-type:last-child {
+    margin-bottom: 0;
   }
 }

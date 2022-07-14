@@ -1,10 +1,5 @@
 @use 'sass:math';
 
-///////////////////////////////////////////////////////////////////////////////////////
-// All variables and mixins within this file are able to be overridden by
-// developers using Payload. No CSS definitions should be placed in this file.
-///////////////////////////////////////////////////////////////////////////////////////
-
 /////////////////////////////
 // BREAKPOINTS
 /////////////////////////////
@@ -25,26 +20,6 @@ $baseline : math.div($baseline-px, $baseline-body-size)+rem;
 @function base($multiplier) {
   @return math.div($baseline-px, $baseline-body-size) * $multiplier +rem;
 }
-
-//////////////////////////////
-// FONTS
-//////////////////////////////
-
-$font-body : 'Suisse Intl' !default;
-$font-mono : monospace !default;
-
-//////////////////////////////
-// COLORS (LEGACY - DO NOT USE. PREFER CSS VARIABLES)
-//////////////////////////////
-
-$color-dark-gray : #333333 !default;
-$color-gray : #9A9A9A !default;
-$color-light-gray : #DADADA !default;
-$color-background-gray : #F3F3F3 !default;
-$color-red : #ff6f76 !default;
-$color-yellow : #FDFFA4 !default;
-$color-green : #B2FFD6 !default;
-$color-purple : #F3DDF3 !default;
 
 //////////////////////////////
 // STYLES
@@ -144,7 +119,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--color-success-500);
 
 @mixin formInput () {
   @include inputShadow;
-  font-family: $font-body;
+  font-family: var(--font-body);
   width: 100%;
   border: 1px solid var(--theme-elevation-150);
   background: var(--theme-input-bg);

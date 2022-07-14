@@ -102,7 +102,7 @@ $cal-icon-width: 18px;
     background: var(--theme-input-bg);
     display: inline-flex;
     border: none;
-    font-family: $font-body;
+    font-family: var(--font-body);
     font-weight: 100;
     border-radius: 0;
     color: var(--theme-elevation-800);

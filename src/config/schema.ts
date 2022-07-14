@@ -45,7 +45,6 @@ export default joi.object({
     disable: joi.bool(),
     indexHTML: joi.string(),
     css: joi.string(),
-    scss: joi.string(),
     dateFormat: joi.string(),
     components: joi.object()
       .keys({

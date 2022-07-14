@@ -1,4 +1,4 @@
-export default (element: HTMLElement): number => {
+export const getOffsetTop = (element: HTMLElement): number => {
   let el = element;
   // Set our distance placeholder
   let distance = 0;

@@ -46,7 +46,7 @@ div.react-select {
     color: var(--theme-elevation-1000);
 
     input {
-      font-family: $font-body;
+      font-family: var(--font-body);
       width: 100% !important;
     }
   }
@@ -65,7 +65,7 @@ div.react-select {
   }
 
   .rs__option {
-    font-family: $font-body;
+    font-family: var(--font-body);
     font-size: $baseline-body-size;
     padding: base(.375) base(.75);
     color: var(--theme-elevation-800);

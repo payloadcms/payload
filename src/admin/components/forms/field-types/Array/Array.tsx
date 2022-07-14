@@ -44,6 +44,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     },
   } = props;
 
+  const path = pathFromProps || name;
+
   // Handle labeling for Arrays, Global Arrays, and Blocks
   const getLabels = (p: Props) => {
     if (p?.labels) return p.labels;
@@ -65,8 +67,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const operation = useOperation();
 
   const { dispatchFields } = formContext;
-
-  const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value, options) => {
     return validate(value, { ...options, minRows, maxRows, required });
@@ -91,6 +91,18 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     dispatchRows({ type: 'ADD', rowIndex });
     setValue(value as number + 1);
+
+    setTimeout(() => {
+      const newRow = document.getElementById(`${path}-row-${rowIndex + 1}`);
+
+      if (newRow) {
+        const bounds = newRow.getBoundingClientRect();
+        window.scrollBy({
+          top: bounds.top - 100,
+          behavior: 'smooth',
+        });
+      }
+    }, 0);
   }, [dispatchRows, dispatchFields, fields, path, setValue, value, operation, id, user, locale]);
 
   const duplicateRow = useCallback(async (rowIndex: number) => {
@@ -233,52 +245,57 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
-              {rows.length > 0 && rows.map((row, i) => (
-                <Draggable
-                  key={row.id}
-                  draggableId={row.id}
-                  index={i}
-                  isDragDisabled={readOnly}
-                >
-                  {(providedDrag) => (
-                    <div
-                      ref={providedDrag.innerRef}
-                      {...providedDrag.draggableProps}
-                    >
-                      <Collapsible
-                        collapsed={row.collapsed}
-                        onToggle={(collapsed) => setCollapse(row.id, collapsed)}
-                        className={`${baseClass}__row`}
-                        key={row.id}
-                        dragHandleProps={providedDrag.dragHandleProps}
-                        header={`${labels.singular} ${i + 1}`}
-                        actions={!readOnly ? (
-                          <ArrayAction
-                            rowCount={rows.length}
-                            duplicateRow={duplicateRow}
-                            addRow={addRow}
-                            moveRow={moveRow}
-                            removeRow={removeRow}
-                            index={i}
-                          />
-                        ) : undefined}
-                      >
-                        <RenderFields
-                          forceRender
-                          readOnly={readOnly}
-                          fieldTypes={fieldTypes}
-                          permissions={permissions.fields}
-                          fieldSchema={fields.map((field) => ({
-                            ...field,
-                            path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,
-                          }))}
-                        />
+              {rows.length > 0 && rows.map((row, i) => {
+                const rowNumber = i + 1;
 
-                      </Collapsible>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
+                return (
+                  <Draggable
+                    key={row.id}
+                    draggableId={row.id}
+                    index={i}
+                    isDragDisabled={readOnly}
+                  >
+                    {(providedDrag) => (
+                      <div
+                        id={`${path}-row-${i}`}
+                        ref={providedDrag.innerRef}
+                        {...providedDrag.draggableProps}
+                      >
+                        <Collapsible
+                          collapsed={row.collapsed}
+                          onToggle={(collapsed) => setCollapse(row.id, collapsed)}
+                          className={`${baseClass}__row`}
+                          key={row.id}
+                          dragHandleProps={providedDrag.dragHandleProps}
+                          header={`${labels.singular} ${rowNumber >= 10 ? rowNumber : `0${rowNumber}`}`}
+                          actions={!readOnly ? (
+                            <ArrayAction
+                              rowCount={rows.length}
+                              duplicateRow={duplicateRow}
+                              addRow={addRow}
+                              moveRow={moveRow}
+                              removeRow={removeRow}
+                              index={i}
+                            />
+                          ) : undefined}
+                        >
+                          <RenderFields
+                            forceRender
+                            readOnly={readOnly}
+                            fieldTypes={fieldTypes}
+                            permissions={permissions.fields}
+                            fieldSchema={fields.map((field) => ({
+                              ...field,
+                              path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,
+                            }))}
+                          />
+
+                        </Collapsible>
+                      </div>
+                    )}
+                  </Draggable>
+                );
+              })}
               {(rows.length < minRows || (required && rows.length === 0)) && (
                 <Banner type="error">
                   This field requires at least
@@ -300,7 +317,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
             </div>
           )}
         </Droppable>
-        {(!readOnly && (!hasMaxRows)) && (
+        {(!readOnly && !hasMaxRows) && (
           <div className={`${baseClass}__add-button-wrap`}>
             <Button
               onClick={() => addRow(value as number)}

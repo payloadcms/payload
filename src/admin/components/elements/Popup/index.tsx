@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useWindowInfo } from '@faceless-ui/window-info';
 import { useScrollInfo } from '@faceless-ui/scroll-info';
 import { Props } from './types';
@@ -40,13 +40,13 @@ const Popup: React.FC<Props> = (props) => {
   const { y: scrollY } = useScrollInfo();
   const { height: windowHeight, width: windowWidth } = useWindowInfo();
 
-  const handleClickOutside = (e) => {
+  const handleClickOutside = useCallback((e) => {
     if (contentRef.current.contains(e.target)) {
       return;
     }
 
     setActive(false);
-  };
+  }, []);
 
   useThrottledEffect(() => {
     if (contentRef.current && buttonRef.current) {
@@ -99,7 +99,7 @@ const Popup: React.FC<Props> = (props) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [active, onToggleOpen]);
+  }, [active, handleClickOutside, onToggleOpen]);
 
   useEffect(() => {
     setActive(forceOpen);

@@ -112,7 +112,6 @@ export type Config = {
     disable?: boolean;
     indexHTML?: string;
     css?: string
-    scss?: string
     dateFormat?: string
     components?: {
       routes?: AdminRoute[]

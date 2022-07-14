@@ -9,7 +9,7 @@
     flex-grow: 1;
     color: var(--theme-elevation-800);
     background-color: transparent;
-    font-family: $font-body;
+    font-family: var(--font-body);
     font-weight: 600;
     font-size: base(.75);
     padding: base(.1) base(.2);

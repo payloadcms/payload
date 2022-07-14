@@ -87,5 +87,9 @@
     header {
       padding: base(.75) var(--gutter-h);
     }
+
+    &__content {
+      padding: var(--gutter-h);
+    }
   }
 }
