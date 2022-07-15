@@ -25,9 +25,7 @@ export function buildConfig(overrides?: Partial<Config>): SanitizedConfig {
     };
   }
 
-  console.log(process.env.PAYLOAD_DISABLE_ADMIN);
   if (process.env.PAYLOAD_DISABLE_ADMIN === 'true') {
-    console.log('disabling admin');
     if (typeof baseConfig.admin !== 'object') baseConfig.admin = {};
     baseConfig.admin.disable = true;
   }
