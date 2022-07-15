@@ -1,4 +1,4 @@
-import { openAccess } from '../../helpers/configHelpers';
+import { openAccess } from '../helpers/configHelpers';
 import { buildConfig } from '../buildConfig';
 
 export default buildConfig({

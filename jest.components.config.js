@@ -2,7 +2,7 @@ module.exports = {
   verbose: true,
   testTimeout: 15000,
   testRegex: '(/src/admin/.*\\.(test|spec))\\.[jt]sx?$',
-  setupFilesAfterEnv: ['<rootDir>/test/components/globalSetup.js'],
+  setupFilesAfterEnv: ['<rootDir>/test/componentsSetup.js'],
   testPathIgnorePatterns: [
     'node_modules',
     'dist',

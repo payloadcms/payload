@@ -1,5 +1,5 @@
 const path = require('path');
-const babelConfig = require('../../babel.config');
+const babelConfig = require('../babel.config');
 
 require('@babel/register')({
   ...babelConfig,
@@ -14,8 +14,8 @@ require('@babel/register')({
 
 const [testSuiteDir] = process.argv.slice(2);
 
-const configPath = path.resolve(__dirname, '../', testSuiteDir, 'config.ts');
+const configPath = path.resolve(__dirname, testSuiteDir, 'config.ts');
 process.env.PAYLOAD_CONFIG_PATH = configPath;
 process.env.PAYLOAD_DROP_DATABASE = 'true';
 
-require('./server');
+require('./devServer');
