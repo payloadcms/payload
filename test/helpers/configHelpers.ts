@@ -28,6 +28,7 @@ export async function initPayloadTest(options: Options): Promise<{ serverURL: st
     ...options.init || {},
   };
 
+  process.env.PAYLOAD_DISABLE_ADMIN = 'true';
   process.env.PAYLOAD_CONFIG_PATH = path.resolve(options.__dirname, './config.ts');
 
   const port = await getPort();
