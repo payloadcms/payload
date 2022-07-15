@@ -37,8 +37,10 @@ const ColumnSelector: React.FC<Props> = (props) => {
             alignIcon="left"
             key={field.name || i}
             icon={isEnabled ? <X /> : <Plus />}
-            pillStyle={isEnabled ? 'dark' : undefined}
-            className={`${baseClass}__active-column`}
+            className={[
+              `${baseClass}__column`,
+              isEnabled && `${baseClass}__column--active`,
+            ].filter(Boolean).join(' ')}
           >
             {field.label || field.name}
           </Pill>

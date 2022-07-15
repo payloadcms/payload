@@ -179,6 +179,18 @@ export type CollapsibleField = Omit<FieldBase, 'name'> & {
   fields: Field[];
 }
 
+export type TabsAdmin = Omit<Admin, 'description'>;
+
+export type TabsField = Omit<FieldBase, 'admin' | 'name'> & {
+  type: 'tabs';
+  tabs: {
+    label: string
+    fields: Field[];
+    description?: Description
+  }[]
+  admin?: TabsAdmin
+}
+
 export type UIField = {
   name: string
   label?: string
@@ -332,6 +344,7 @@ export type Field =
   | PointField
   | RowField
   | CollapsibleField
+  | TabsField
   | UIField;
 
 export type FieldAffectingData =
@@ -369,6 +382,7 @@ export type NonPresentationalField = TextField
   | CodeField
   | PointField
   | RowField
+  | TabsField
   | CollapsibleField;
 
 export type FieldWithPath = Field & {

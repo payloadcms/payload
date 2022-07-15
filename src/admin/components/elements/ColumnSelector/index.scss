@@ -8,4 +8,13 @@
     margin-right: base(.5);
     margin-bottom: base(.5);
   }
+
+  &__column {
+    background-color: transparent;
+    box-shadow: 0 0 0 1px var(--theme-elevation-200);
+  }
+
+  &__column--active {
+    background-color: var(--theme-elevation-150);
+  }
 }

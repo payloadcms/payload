@@ -86,6 +86,22 @@ const RenderFieldsToDiff: React.FC<Props> = ({
           );
         }
 
+        if (field.type === 'tabs') {
+          return field.tabs.map((tab, tabIndex) => {
+            return (
+              <RenderFieldsToDiff
+                key={tabIndex}
+                fields={tab.fields}
+                fieldComponents={fieldComponents}
+                fieldPermissions={fieldPermissions}
+                version={version}
+                comparison={comparison}
+                locales={locales}
+              />
+            );
+          });
+        }
+
         // At this point, we are dealing with a `row` or similar
         if (fieldHasSubFields(field)) {
           return (

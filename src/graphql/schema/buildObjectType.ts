@@ -443,6 +443,23 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
 
       return subFieldSchema;
     }, {}),
+    tabs: (field) => field.tabs.reduce((tabSchema, tab) => {
+      return {
+        ...tabSchema,
+        ...tab.fields.reduce((subFieldSchema, subField) => {
+          const buildSchemaType = fieldToSchemaMap[subField.type];
+
+          if (!fieldIsPresentationalOnly(subField) && buildSchemaType) {
+            return {
+              ...subFieldSchema,
+              [formatName(subField.name)]: buildSchemaType(subField),
+            };
+          }
+
+          return subFieldSchema;
+        }, {}),
+      };
+    }, {}),
   };
 
   const objectSchema = {

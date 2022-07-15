@@ -168,20 +168,29 @@ export const radio = baseField.keys({
 export const row = baseField.keys({
   type: joi.string().valid('row').required(),
   fields: joi.array().items(joi.link('#field')),
-  admin: baseAdminFields.keys({
-    description: joi.forbidden(),
-    readOnly: joi.forbidden(),
-    hidden: joi.forbidden(),
-  }),
+  admin: baseAdminFields.default(),
 });
 
 export const collapsible = baseField.keys({
   label: joi.string().required(),
   type: joi.string().valid('collapsible').required(),
   fields: joi.array().items(joi.link('#field')),
+  admin: baseAdminFields.default(),
+});
+
+export const tabs = baseField.keys({
+  type: joi.string().valid('tabs').required(),
+  fields: joi.forbidden(),
+  tabs: joi.array().items(joi.object({
+    label: joi.string().required(),
+    fields: joi.array().items(joi.link('#field')).required(),
+    description: joi.alternatives().try(
+      joi.string(),
+      componentSchema,
+    ),
+  })).required(),
   admin: baseAdminFields.keys({
-    readOnly: joi.forbidden(),
-    hidden: joi.forbidden(),
+    description: joi.forbidden(),
   }),
 });
 
@@ -378,6 +387,7 @@ const fieldSchema = joi.alternatives()
     array,
     row,
     collapsible,
+    tabs,
     radio,
     relationship,
     checkbox,

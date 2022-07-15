@@ -269,10 +269,20 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
             break;
           }
 
-          case 'row': {
+          case 'row':
+          case 'collapsible': {
             const topLevelFields = generateFieldTypes(config, field.fields);
             requiredTopLevelProps = requiredTopLevelProps.concat(topLevelFields.required);
             topLevelProps = topLevelProps.concat(Object.entries(topLevelFields.properties).map((prop) => prop));
+            break;
+          }
+
+          case 'tabs': {
+            field.tabs.forEach((tab) => {
+              const topLevelFields = generateFieldTypes(config, tab.fields);
+              requiredTopLevelProps = requiredTopLevelProps.concat(topLevelFields.required);
+              topLevelProps = topLevelProps.concat(Object.entries(topLevelFields.properties).map((prop) => prop));
+            });
             break;
           }
 

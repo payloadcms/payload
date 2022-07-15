@@ -282,6 +282,29 @@ export const promise = async ({
       break;
     }
 
+    case 'tabs': {
+      field.tabs.forEach((tab) => {
+        traverseFields({
+          data,
+          doc,
+          docWithLocales,
+          errors,
+          fields: tab.fields,
+          id,
+          mergeLocaleActions,
+          operation,
+          path,
+          promises,
+          req,
+          siblingData,
+          siblingDoc,
+          siblingDocWithLocales,
+          skipValidation: skipValidationFromHere,
+        });
+      });
+      break;
+    }
+
     default: {
       break;
     }

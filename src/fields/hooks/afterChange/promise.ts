@@ -127,6 +127,22 @@ export const promise = async ({
       break;
     }
 
+    case 'tabs': {
+      field.tabs.forEach((tab) => {
+        traverseFields({
+          data,
+          doc,
+          fields: tab.fields,
+          operation,
+          promises,
+          req,
+          siblingData: siblingData || {},
+          siblingDoc: { ...siblingDoc },
+        });
+      });
+      break;
+    }
+
     default: {
       break;
     }

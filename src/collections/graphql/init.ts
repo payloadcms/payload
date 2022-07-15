@@ -135,7 +135,7 @@ function initCollectionsGraphQL(payload: Payload): void {
     collection.graphQL.updateMutationInputType = new GraphQLNonNull(buildMutationInputType(
       payload,
       `${singularLabel}Update`,
-      fields.filter((field) => fieldAffectsData(field) && field.name !== 'id'),
+      fields.filter((field) => !(fieldAffectsData(field) && field.name === 'id')),
       `${singularLabel}Update`,
       true,
     ));

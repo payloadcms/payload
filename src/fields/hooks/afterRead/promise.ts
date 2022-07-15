@@ -266,6 +266,26 @@ export const promise = async ({
       break;
     }
 
+    case 'tabs': {
+      field.tabs.forEach((tab) => {
+        traverseFields({
+          currentDepth,
+          depth,
+          doc,
+          fieldPromises,
+          fields: tab.fields,
+          findMany,
+          flattenLocales,
+          overrideAccess,
+          populationPromises,
+          req,
+          siblingDoc,
+          showHiddenFields,
+        });
+      });
+      break;
+    }
+
     default: {
       break;
     }

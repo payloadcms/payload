@@ -5,6 +5,7 @@ import BlockFields, { blocksDoc } from './collections/Blocks';
 import CollapsibleFields, { collapsibleDoc } from './collections/Collapsible';
 import RichTextFields, { richTextDoc } from './collections/RichText';
 import SelectFields, { selectsDoc } from './collections/Select';
+import TabsFields, { tabsDoc } from './collections/Tabs';
 import TextFields, { textDoc } from './collections/Text';
 
 export default buildConfig({
@@ -14,6 +15,7 @@ export default buildConfig({
     CollapsibleFields,
     RichTextFields,
     SelectFields,
+    TabsFields,
     TextFields,
   ],
   onInit: async (payload) => {
@@ -43,6 +45,11 @@ export default buildConfig({
     await payload.create({
       collection: 'select-fields',
       data: selectsDoc,
+    });
+
+    await payload.create({
+      collection: 'tabs-fields',
+      data: tabsDoc,
     });
 
     const createdTextDoc = await payload.create({

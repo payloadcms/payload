@@ -16,6 +16,7 @@ import {
   NumberField, optionIsObject, PointField,
   RadioField, RelationshipField,
   RichTextField, RowField, SelectField,
+  TabsField,
   TextareaField,
   TextField, UploadField,
 } from '../../fields/config/types';
@@ -273,6 +274,38 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
 
 
     return rowSchema;
+  }, []),
+  tabs: (field: TabsField) => field.tabs.reduce((tabSchema, tab) => {
+    return [
+      ...tabSchema,
+      ...tab.fields.reduce((rowSchema, subField) => {
+        const getFieldSchema = fieldToSchemaMap(parentName)[subField.type];
+
+        if (getFieldSchema) {
+          const rowFieldSchema = getFieldSchema(subField);
+
+          if (fieldHasSubFields(subField)) {
+            return [
+              ...rowSchema,
+              ...rowFieldSchema,
+            ];
+          }
+
+          if (fieldAffectsData(subField)) {
+            return [
+              ...rowSchema,
+              {
+                key: subField.name,
+                type: rowFieldSchema,
+              },
+            ];
+          }
+        }
+
+
+        return rowSchema;
+      }, []),
+    ];
   }, []),
 });
 

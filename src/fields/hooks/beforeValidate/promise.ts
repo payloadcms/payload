@@ -267,6 +267,25 @@ export const promise = async ({
       break;
     }
 
+    case 'tabs': {
+      field.tabs.forEach((tab) => {
+        traverseFields({
+          data,
+          doc,
+          fields: tab.fields,
+          id,
+          operation,
+          overrideAccess,
+          promises,
+          req,
+          siblingData,
+          siblingDoc,
+        });
+      });
+
+      break;
+    }
+
     default: {
       break;
     }

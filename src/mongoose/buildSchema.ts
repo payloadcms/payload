@@ -4,7 +4,7 @@
 /* eslint-disable no-use-before-define */
 import { Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
-import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, fieldIsPresentationalOnly, NonPresentationalField, CollapsibleField } from '../fields/config/types';
+import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, fieldIsPresentationalOnly, NonPresentationalField, CollapsibleField, TabsField } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
 
 export type BuildSchemaOptions = {
@@ -328,6 +328,23 @@ const fieldToSchemaMap = {
         newFields[subField.name] = fieldSchema[subField.name];
       }
     });
+
+    return newFields;
+  },
+  tabs: (field: TabsField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+    const newFields = { ...fields };
+
+    field.tabs.forEach((tab) => {
+      tab.fields.forEach((subField: Field) => {
+        const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+
+        if (fieldSchemaMap && fieldAffectsData(subField)) {
+          const fieldSchema = fieldSchemaMap(subField, fields, config, buildSchemaOptions);
+          newFields[subField.name] = fieldSchema[subField.name];
+        }
+      });
+    });
+
 
     return newFields;
   },

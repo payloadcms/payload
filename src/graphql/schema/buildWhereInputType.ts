@@ -35,7 +35,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
       if (getFieldSchema) {
         const fieldSchema = getFieldSchema(field);
 
-        if (fieldHasSubFields(field)) {
+        if (fieldHasSubFields(field) || field.type === 'tabs') {
           return {
             ...schema,
             ...(fieldSchema.reduce((subFields, subField) => ({

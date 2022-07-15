@@ -20,6 +20,7 @@ import group from './Group';
 import array from './Array';
 import row from './Row';
 import collapsible from './Collapsible';
+import tabs from './Tabs';
 import upload from './Upload';
 import ui from './UI';
 
@@ -44,6 +45,7 @@ export type FieldTypes = {
   array: React.ComponentType
   row: React.ComponentType
   collapsible: React.ComponentType
+  tabs: React.ComponentType
   upload: React.ComponentType
   ui: React.ComponentType
 }
@@ -69,6 +71,7 @@ const fieldTypes: FieldTypes = {
   array,
   row,
   collapsible,
+  tabs,
   upload,
   ui,
 };

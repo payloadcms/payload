@@ -15,7 +15,7 @@ import { GraphQLJSON } from 'graphql-type-json';
 import withNullableType from './withNullableType';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
-import { ArrayField, CodeField, DateField, EmailField, Field, fieldHasSubFields, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField } from '../../fields/config/types';
+import { ArrayField, CodeField, DateField, EmailField, Field, fieldHasSubFields, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField, TabsField } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
 import { Payload } from '../../index';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
@@ -151,6 +151,27 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
 
       return acc;
     }, []),
+    tabs: (field: TabsField) => field.tabs.reduce((acc, tab) => {
+      const test = [
+        ...acc,
+        ...tab.fields.reduce((subAcc, rowField: TabsField) => {
+          const getFieldSchema = fieldToSchemaMap[rowField.type];
+
+          if (getFieldSchema) {
+            const fieldSchema = getFieldSchema(rowField);
+
+            return [
+              ...subAcc,
+              fieldSchema,
+            ];
+          }
+
+          return subAcc;
+        }, []),
+      ];
+
+      return test;
+    }, []),
   };
 
   const fieldTypes = fields.reduce((schema, field: Field) => {
@@ -160,21 +181,38 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
       if (getFieldSchema) {
         const fieldSchema = getFieldSchema(field);
 
-        if (fieldHasSubFields(field) && Array.isArray(fieldSchema)) {
-          return fieldSchema.reduce((acc, subField, i) => {
-            const currentSubField = field.fields[i];
-            if (fieldAffectsData(currentSubField)) {
+        if (Array.isArray(fieldSchema)) {
+          let subFields: Field[] = [];
+
+          if (fieldHasSubFields(field)) {
+            subFields = field.fields;
+          }
+
+          if (field.type === 'tabs') {
+            subFields = field.tabs.reduce((flattenedFields, tab) => {
+              return [
+                ...flattenedFields,
+                ...tab.fields,
+              ];
+            }, []);
+          }
+
+          if (subFields.length > 0) {
+            return fieldSchema.reduce((acc, subField, i) => {
+              const currentSubField = subFields[i];
+              if (fieldAffectsData(currentSubField)) {
+                return {
+                  ...acc,
+                  [currentSubField.name]: subField,
+                };
+              }
+
               return {
                 ...acc,
-                [currentSubField.name]: subField,
+                ...fieldSchema,
               };
-            }
-
-            return {
-              ...acc,
-              ...fieldSchema,
-            };
-          }, schema);
+            }, schema);
+          }
         }
 
         if (fieldAffectsData(field)) {
