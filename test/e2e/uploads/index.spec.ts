@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import path from 'path';
 import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
@@ -57,13 +58,11 @@ describe('uploads', () => {
   test('should create file upload', async () => {
     await page.goto(mediaURL.create);
 
-    await page.setInputFiles('input[type="file"]', './image.png');
+    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './image.png'));
 
     const filename = page.locator('.file-field__filename');
 
     await expect(filename).toContainText('.png');
-
-    await page.locator('.form-submit button').click();
 
     await saveDocAndAssert(page);
   });
