@@ -1,8 +1,8 @@
 import path from 'path';
 import fs from 'fs';
-import { buildConfig } from '../buildConfig';
-import { devUser } from '../../credentials';
-import getFileByPath from '../../../src/uploads/getFileByPath';
+import { buildConfig } from '../e2e/buildConfig';
+import { devUser } from '../credentials';
+import getFileByPath from '../../src/uploads/getFileByPath';
 
 export const mediaSlug = 'media';
 

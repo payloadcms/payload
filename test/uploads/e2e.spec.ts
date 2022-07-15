@@ -1,13 +1,13 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import path from 'path';
-import { AdminUrlUtil } from '../../helpers/adminUrlUtil';
-import { initPayloadE2E } from '../../helpers/configHelpers';
-import { login, saveDocAndAssert } from '../helpers';
 import { relationSlug, mediaSlug } from './config';
 import type { Media } from './payload-types';
-import wait from '../../../src/utilities/wait';
-import payload from '../../../src';
+import payload from '../../src';
+import { AdminUrlUtil } from '../helpers/adminUrlUtil';
+import { initPayloadE2E } from '../helpers/configHelpers';
+import { login, saveDocAndAssert } from '../e2e/helpers';
+import wait from '../../src/utilities/wait';
 
 const { beforeAll, describe } = test;
 

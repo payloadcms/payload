@@ -12,9 +12,9 @@ require('@babel/register')({
   },
 });
 
-const [testConfigDir] = process.argv.slice(2);
+const [testSuiteDir] = process.argv.slice(2);
 
-const configPath = path.resolve(__dirname, '../', testConfigDir, 'config.ts');
+const configPath = path.resolve(__dirname, '../', testSuiteDir, 'config.ts');
 process.env.PAYLOAD_CONFIG_PATH = configPath;
 process.env.PAYLOAD_DROP_DATABASE = 'true';
 
