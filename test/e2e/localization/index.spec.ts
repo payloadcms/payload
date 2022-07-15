@@ -66,16 +66,16 @@ describe('Localization', () => {
       await changeLocale('es');
 
       // Localized field should not be populated
-      await expect(page.locator('#title')).toBeEmpty();
-      await expect(page.locator('#description')).toHaveValue(description);
+      await expect(page.locator('#field-title')).toBeEmpty();
+      await expect(page.locator('#field-description')).toHaveValue(description);
 
       await fillValues({ title: spanishTitle, description });
       await saveDocAndAssert(page);
       await changeLocale(defaultLocale);
 
       // Expect english title
-      await expect(page.locator('#title')).toHaveValue(title);
-      await expect(page.locator('#description')).toHaveValue(description);
+      await expect(page.locator('#field-title')).toHaveValue(title);
+      await expect(page.locator('#field-description')).toHaveValue(description);
     });
 
     test('create spanish post, add english', async () => {
@@ -93,8 +93,8 @@ describe('Localization', () => {
       await changeLocale(defaultLocale);
 
       // Localized field should not be populated
-      await expect(page.locator('#title')).toBeEmpty();
-      await expect(page.locator('#description')).toHaveValue(description);
+      await expect(page.locator('#field-title')).toBeEmpty();
+      await expect(page.locator('#field-description')).toHaveValue(description);
 
       // Add English
 
@@ -102,8 +102,8 @@ describe('Localization', () => {
       await saveDocAndAssert(page);
       await saveDocAndAssert(page);
 
-      await expect(page.locator('#title')).toHaveValue(title);
-      await expect(page.locator('#description')).toHaveValue(description);
+      await expect(page.locator('#field-title')).toHaveValue(title);
+      await expect(page.locator('#field-description')).toHaveValue(description);
     });
   });
 });
@@ -119,8 +119,8 @@ async function clearDocs(): Promise<void> {
 async function fillValues(data: Partial<Omit<LocalizedPost, keyof TypeWithTimestamps>>) {
   const { title: titleVal, description: descVal } = data;
 
-  if (titleVal) await page.locator('#title').fill(titleVal);
-  if (descVal) await page.locator('#description').fill(descVal);
+  if (titleVal) await page.locator('#field-title').fill(titleVal);
+  if (descVal) await page.locator('#field-description').fill(descVal);
 }
 
 async function changeLocale(newLocale: string) {
