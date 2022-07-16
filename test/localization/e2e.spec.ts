@@ -1,21 +1,14 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import payload from '../../src';
 import type { TypeWithTimestamps } from '../../src/collections/config/types';
-import { mapAsync } from '../../src/utilities/mapAsync';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { firstRegister, saveDocAndAssert } from '../helpers';
-import type { LocalizedPost } from './config';
+import type { LocalizedPost } from './payload-types';
 import { slug } from './config';
 
 /**
  * TODO: Localization
- * - [x] create doc in spanish locale
- * - [x] retrieve doc in spanish locale
- * - [x] retrieve doc in default locale, check for null fields
- * - add translations in english to spanish doc
- * - [x] check locale toggle button
  *
  * Fieldtypes to test: (collections for each field type)
  *  - localized and non-localized: array, block, group, relationship, text
@@ -23,7 +16,7 @@ import { slug } from './config';
  * Repeat above for Globals
  */
 
-const { beforeAll, describe, afterEach } = test;
+const { beforeAll, describe } = test;
 let url: AdminUrlUtil;
 
 const defaultLocale = 'en';
@@ -41,18 +34,12 @@ describe('Localization', () => {
       },
     });
 
-    await clearDocs(); // Clear any seeded data from onInit
-
     url = new AdminUrlUtil(serverURL, slug);
 
     const context = await browser.newContext();
     page = await context.newPage();
 
     await firstRegister({ page, serverURL });
-  });
-
-  afterEach(async () => {
-    await clearDocs();
   });
 
   describe('localized text', () => {
@@ -107,14 +94,6 @@ describe('Localization', () => {
     });
   });
 });
-
-async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find<LocalizedPost>({ collection: slug, limit: 100 });
-  const ids = allDocs.docs.map((doc) => doc.id);
-  await mapAsync(ids, async (id) => {
-    await payload.delete({ collection: slug, id });
-  });
-}
 
 async function fillValues(data: Partial<Omit<LocalizedPost, keyof TypeWithTimestamps>>) {
   const { title: titleVal, description: descVal } = data;
