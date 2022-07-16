@@ -29,6 +29,18 @@
     border-bottom: 0;
   }
 
+  &--within-tab:first-child {
+    margin-top: 0;
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  &--within-tab:last-child {
+    margin-bottom: 0;
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
   &--gutter {
     border-left: 1px solid var(--theme-elevation-100);
     padding: 0 0 0 $baseline;

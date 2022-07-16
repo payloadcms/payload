@@ -8,6 +8,7 @@ import { useCollapsible } from '../../../elements/Collapsible/provider';
 
 import './index.scss';
 import { GroupProvider, useGroup } from './provider';
+import { useTabs } from '../Tabs/provider';
 
 const baseClass = 'group-field';
 
@@ -31,6 +32,7 @@ const Group: React.FC<Props> = (props) => {
 
   const isWithinCollapsible = useCollapsible();
   const isWithinGroup = useGroup();
+  const isWithinTab = useTabs();
 
   const path = pathFromProps || name;
 
@@ -42,6 +44,7 @@ const Group: React.FC<Props> = (props) => {
         baseClass,
         isWithinCollapsible && `${baseClass}--within-collapsible`,
         isWithinGroup && `${baseClass}--within-group`,
+        isWithinTab && `${baseClass}--within-tab`,
         (!hideGutter && isWithinGroup) && `${baseClass}--gutter`,
         className,
       ].filter(Boolean).join(' ')}
