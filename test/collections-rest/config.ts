@@ -30,6 +30,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 
 export const slug = 'posts';
 export const relationSlug = 'relation';
+export const pointSlug = 'point';
 export default buildConfig({
   collections: [
     {
@@ -76,6 +77,16 @@ export default buildConfig({
         },
       ],
     },
+    {
+      slug: pointSlug,
+      access: openAccess,
+      fields: [
+        {
+          type: 'point',
+          name: 'point',
+        },
+      ],
+    },
     collectionWithName(relationSlug),
     collectionWithName('dummy'),
   ],
@@ -98,6 +109,13 @@ export default buildConfig({
       collection: relationSlug,
       data: {
         name: 'name2',
+      },
+    });
+
+    await payload.create({
+      collection: pointSlug,
+      data: {
+        point: [10, 20],
       },
     });
 

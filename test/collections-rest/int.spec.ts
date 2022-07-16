@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import type { Relation } from './config';
-import config, { slug, relationSlug } from './config';
+import config, { slug, relationSlug, pointSlug } from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
 import type { Post } from './payload-types';
@@ -420,6 +420,40 @@ describe('collections-rest', () => {
           const expectedDocs = [post1, post2];
           expect(result.docs).toHaveLength(expectedDocs.length);
           expect(result.docs).toEqual(expect.arrayContaining(expectedDocs));
+        });
+      });
+
+      describe('near', () => {
+        const point = [10, 20];
+        const [lat, lng] = point;
+        it('should return a document near a point', async () => {
+          const near = `${lat + 0.01}, ${lng + 0.01}, 10000`;
+          const { status, result } = await client.find({
+            slug: pointSlug,
+            query: {
+              point: {
+                near,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toHaveLength(1);
+        });
+
+        it('should not return a point far away', async () => {
+          const near = `${lng + 1}, ${lat - 1}, 5000`;
+          const { status, result } = await client.find({
+            slug: pointSlug,
+            query: {
+              point: {
+                near,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toHaveLength(0);
         });
       });
 
