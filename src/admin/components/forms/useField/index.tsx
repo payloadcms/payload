@@ -33,16 +33,16 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     setModified,
   } = formContext || {};
 
-  const [internalValue, setInternalValue] = useState(undefined);
-  const [internallyValid, setInternallyValid] = useState<boolean>(undefined);
-
-  // Debounce internal values to update form state only every 60ms
-  const debouncedValue = useDebounce(internalValue, 120);
-
   // Get field by path
   const field = getField(path);
 
   const initialValue = field?.initialValue as T;
+
+  const [internalValue, setInternalValue] = useState(field?.value as T);
+  const [internallyValid, setInternallyValid] = useState<boolean>(undefined);
+
+  // Debounce internal values to update form state only every 60ms
+  const debouncedValue = useDebounce(internalValue, 120);
 
   // Validation is defined by two ways -
   // 1. by field state
@@ -128,7 +128,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   ]);
 
   useEffect(() => {
-    setInternalValue(initialValue);
     setInternallyValid(undefined);
   }, [initialValue]);
 
