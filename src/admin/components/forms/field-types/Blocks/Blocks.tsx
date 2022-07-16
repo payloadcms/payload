@@ -24,8 +24,9 @@ import { ArrayAction } from '../../../elements/ArrayAction';
 import RenderFields from '../../RenderFields';
 import { fieldAffectsData } from '../../../../../fields/config/types';
 import SectionTitle from './SectionTitle';
-
 import Pill from '../../../elements/Pill';
+import { scrollToID } from '../../../../utilities/scrollToID';
+import HiddenInput from '../HiddenInput';
 
 import './index.scss';
 
@@ -102,15 +103,7 @@ const Blocks: React.FC<Props> = (props) => {
     setValue(value as number + 1);
 
     setTimeout(() => {
-      const newRow = document.getElementById(`${path}-row-${rowIndex + 1}`);
-
-      if (newRow) {
-        const bounds = newRow.getBoundingClientRect();
-        window.scrollBy({
-          top: bounds.top - 100,
-          behavior: 'smooth',
-        });
-      }
+      scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
   }, [path, setValue, value, blocks, dispatchFields, operation, id, user, locale]);
 
@@ -118,6 +111,10 @@ const Blocks: React.FC<Props> = (props) => {
     dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });
     dispatchRows({ type: 'ADD', rowIndex, blockType });
     setValue(value as number + 1);
+
+    setTimeout(() => {
+      scrollToID(`${path}-row-${rowIndex + 1}`);
+    }, 0);
   }, [dispatchRows, dispatchFields, path, setValue, value]);
 
   const removeRow = useCallback((rowIndex: number) => {
@@ -334,6 +331,10 @@ const Blocks: React.FC<Props> = (props) => {
                               </React.Fragment>
                             ) : undefined}
                           >
+                            <HiddenInput
+                              name={`${path}.${i}.id`}
+                              value={row.id}
+                            />
                             <RenderFields
                               forceRender
                               readOnly={readOnly}

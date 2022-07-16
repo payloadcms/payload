@@ -20,6 +20,8 @@ import { fieldAffectsData } from '../../../../../fields/config/types';
 import { Props } from './types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { ArrayAction } from '../../../elements/ArrayAction';
+import { scrollToID } from '../../../../utilities/scrollToID';
+import HiddenInput from '../HiddenInput';
 
 import './index.scss';
 
@@ -88,20 +90,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const addRow = useCallback(async (rowIndex: number) => {
     const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user, locale });
+    console.log(subFieldState);
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     dispatchRows({ type: 'ADD', rowIndex });
     setValue(value as number + 1);
 
     setTimeout(() => {
-      const newRow = document.getElementById(`${path}-row-${rowIndex + 1}`);
-
-      if (newRow) {
-        const bounds = newRow.getBoundingClientRect();
-        window.scrollBy({
-          top: bounds.top - 100,
-          behavior: 'smooth',
-        });
-      }
+      scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
   }, [dispatchRows, dispatchFields, fields, path, setValue, value, operation, id, user, locale]);
 
@@ -109,6 +104,10 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });
     dispatchRows({ type: 'ADD', rowIndex });
     setValue(value as number + 1);
+
+    setTimeout(() => {
+      scrollToID(`${path}-row-${rowIndex + 1}`);
+    }, 0);
   }, [dispatchRows, dispatchFields, path, setValue, value]);
 
   const removeRow = useCallback((rowIndex: number) => {
@@ -282,6 +281,10 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                             />
                           ) : undefined}
                         >
+                          <HiddenInput
+                            name={`${path}.${i}.id`}
+                            value={row.id}
+                          />
                           <RenderFields
                             forceRender
                             readOnly={readOnly}

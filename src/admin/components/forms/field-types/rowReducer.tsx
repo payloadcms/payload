@@ -85,8 +85,6 @@ const reducer = (currentState: Row[], action: Action): Row[] => {
         collapsed: collapse,
       }));
 
-      console.log(newState);
-
       return newState;
     }
 

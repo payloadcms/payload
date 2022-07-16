@@ -10,8 +10,6 @@ import FormSubmit from '../../forms/Submit';
 import { Props } from './types';
 import { Field } from '../../../../fields/config/types';
 
-import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
-
 import './index.scss';
 
 const baseClass = 'create-first-user';
@@ -68,15 +66,13 @@ const CreateFirstUser: React.FC<Props> = (props) => {
         action={`${serverURL}${api}/${userSlug}/first-register`}
         validationOperation="create"
       >
-        <NegativeFieldGutterProvider allow>
-          <RenderFields
-            fieldSchema={[
-              ...fields,
-              ...userConfig.fields,
-            ]}
-            fieldTypes={fieldTypes}
-          />
-        </NegativeFieldGutterProvider>
+        <RenderFields
+          fieldSchema={[
+            ...fields,
+            ...userConfig.fields,
+          ]}
+          fieldTypes={fieldTypes}
+        />
         <FormSubmit>Create</FormSubmit>
       </Form>
     </MinimalTemplate>

@@ -9,7 +9,6 @@ import { useLocale } from '../../utilities/Locale';
 import DefaultAccount from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 
 const AccountView: React.FC = () => {
@@ -73,22 +72,20 @@ const AccountView: React.FC = () => {
   }, [dataToRender, fields, id, user, locale]);
 
   return (
-    <NegativeFieldGutterProvider allow>
-      <RenderCustomComponent
-        DefaultComponent={DefaultAccount}
-        CustomComponent={CustomAccount}
-        componentProps={{
-          action,
-          data,
-          collection,
-          permissions: collectionPermissions,
-          hasSavePermission,
-          initialState,
-          apiURL,
-          isLoading: isLoadingDocument || !preferences,
-        }}
-      />
-    </NegativeFieldGutterProvider>
+    <RenderCustomComponent
+      DefaultComponent={DefaultAccount}
+      CustomComponent={CustomAccount}
+      componentProps={{
+        action,
+        data,
+        collection,
+        permissions: collectionPermissions,
+        hasSavePermission,
+        initialState,
+        apiURL,
+        isLoading: isLoadingDocument || !preferences,
+      }}
+    />
   );
 };
 

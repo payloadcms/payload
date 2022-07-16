@@ -16,6 +16,16 @@ const CollapsibleFields: CollectionConfig = {
           type: 'text',
           required: true,
         },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'textWithinGroup',
+              type: 'text',
+            },
+          ],
+        },
       ],
     },
   ],
@@ -23,6 +33,9 @@ const CollapsibleFields: CollectionConfig = {
 
 export const collapsibleDoc = {
   text: 'Seeded collapsible doc',
+  group: {
+    textWithinGroup: 'some text within a group',
+  },
 };
 
 export default CollapsibleFields;

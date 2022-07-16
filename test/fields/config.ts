@@ -16,11 +16,11 @@ export default buildConfig({
     BlockFields,
     CollapsibleFields,
     ConditionalLogic,
+    PointFields,
     RichTextFields,
     SelectFields,
     TabsFields,
     TextFields,
-    PointFields,
   ],
   localization: {
     defaultLocale: 'en',

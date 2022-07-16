@@ -10,7 +10,6 @@ import { useLocale } from '../../utilities/Locale';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultGlobal from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
-import { NegativeFieldGutterProvider } from '../../forms/FieldTypeGutter/context';
 import { IndexProps } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 
@@ -77,22 +76,20 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const globalPermissions = permissions?.globals?.[slug];
 
   return (
-    <NegativeFieldGutterProvider allow>
-      <RenderCustomComponent
-        DefaultComponent={DefaultGlobal}
-        CustomComponent={CustomEdit}
-        componentProps={{
-          isLoading: isLoadingDocument || !preferences,
-          data: dataToRender,
-          permissions: globalPermissions,
-          initialState,
-          global,
-          onSave,
-          apiURL: `${serverURL}${api}/globals/${slug}${global.versions?.drafts ? '?draft=true' : ''}`,
-          action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
-        }}
-      />
-    </NegativeFieldGutterProvider>
+    <RenderCustomComponent
+      DefaultComponent={DefaultGlobal}
+      CustomComponent={CustomEdit}
+      componentProps={{
+        isLoading: isLoadingDocument || !preferences,
+        data: dataToRender,
+        permissions: globalPermissions,
+        initialState,
+        global,
+        onSave,
+        apiURL: `${serverURL}${api}/globals/${slug}${global.versions?.drafts ? '?draft=true' : ''}`,
+        action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
+      }}
+    />
   );
 };
 export default GlobalView;

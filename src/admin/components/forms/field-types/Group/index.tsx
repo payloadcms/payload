@@ -2,14 +2,13 @@ import React from 'react';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import FieldDescription from '../../FieldDescription';
-import FieldTypeGutter from '../../FieldTypeGutter';
-import { NegativeFieldGutterProvider } from '../../FieldTypeGutter/context';
 import { Props } from './types';
 import { fieldAffectsData } from '../../../../../fields/config/types';
+import { useCollapsible } from '../../../elements/Collapsible/provider';
 
 import './index.scss';
 
-const baseClass = 'group';
+const baseClass = 'group-field';
 
 const Group: React.FC<Props> = (props) => {
   const {
@@ -23,11 +22,12 @@ const Group: React.FC<Props> = (props) => {
       style,
       className,
       width,
-      hideGutter,
       description,
     },
     permissions,
   } = props;
+
+  const isWithinCollapsible = useCollapsible();
 
   const path = pathFromProps || name;
 
@@ -37,17 +37,15 @@ const Group: React.FC<Props> = (props) => {
       className={[
         'field-type',
         baseClass,
+        isWithinCollapsible && `${baseClass}--within-collapsible`,
         className,
-        !label && `${baseClass}--no-label`,
       ].filter(Boolean).join(' ')}
       style={{
         ...style,
         width,
       }}
     >
-      {!hideGutter && (<FieldTypeGutter />)}
-
-      <div className={`${baseClass}__content-wrapper`}>
+      <div className={`${baseClass}__wrap`}>
         {(label || description) && (
           <header className={`${baseClass}__header`}>
             {label && (
@@ -59,19 +57,15 @@ const Group: React.FC<Props> = (props) => {
             />
           </header>
         )}
-        <div className={`${baseClass}__fields-wrapper`}>
-          <NegativeFieldGutterProvider allow={false}>
-            <RenderFields
-              permissions={permissions?.fields}
-              readOnly={readOnly}
-              fieldTypes={fieldTypes}
-              fieldSchema={fields.map((subField) => ({
-                ...subField,
-                path: `${path}${fieldAffectsData(subField) ? `.${subField.name}` : ''}`,
-              }))}
-            />
-          </NegativeFieldGutterProvider>
-        </div>
+        <RenderFields
+          permissions={permissions?.fields}
+          readOnly={readOnly}
+          fieldTypes={fieldTypes}
+          fieldSchema={fields.map((subField) => ({
+            ...subField,
+            path: `${path}${fieldAffectsData(subField) ? `.${subField.name}` : ''}`,
+          }))}
+        />
       </div>
     </div>
   );
