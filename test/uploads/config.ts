@@ -23,7 +23,6 @@ export default buildConfig({
       },
     }),
   },
-  // upload: {},
   collections: [
     {
       slug: relationSlug,
@@ -68,6 +67,14 @@ export default buildConfig({
       },
       fields: [
       ],
+    },
+    {
+      slug: 'unstored-media',
+      upload: {
+        staticURL: '/media',
+        disableLocalStorage: true,
+      },
+      fields: [],
     },
   ],
   onInit: async (payload) => {
