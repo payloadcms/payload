@@ -5,6 +5,7 @@ import flattenFilters from './flattenFilters';
 import getSiblingData from './getSiblingData';
 import reduceFieldsToValues from './reduceFieldsToValues';
 import { Fields } from './types';
+import deepCopyObject from '../../../../utilities/deepCopyObject';
 
 const unflattenRowsFromState = (state: Fields, path) => {
   // Take a copy of state
@@ -117,10 +118,8 @@ function fieldReducer(state: Fields, action): Fields {
 
       const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, path);
 
-      const duplicate = {
-        ...unflattenedRows[rowIndex],
-        id: new ObjectID().toHexString(),
-      };
+      const duplicate = deepCopyObject(unflattenedRows[rowIndex]);
+      if (duplicate.id) delete duplicate.id;
 
       // If there are subfields
       if (Object.keys(duplicate).length > 0) {
