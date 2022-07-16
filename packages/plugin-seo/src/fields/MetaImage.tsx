@@ -90,6 +90,7 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = (props) => {
               backgroundColor: 'transparent',
               cursor: 'pointer',
               textDecoration: 'underline',
+              color: 'currentcolor',
             }}
           >
             Auto-generate

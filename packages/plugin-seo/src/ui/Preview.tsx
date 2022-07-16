@@ -59,14 +59,14 @@ export const Preview: React.FC<PreviewFieldWithProps | {}> = (props) => {
           boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
           pointerEvents: 'none',
           maxWidth: '600px',
-          width: '100%'
+          width: '100%',
+          background: 'var(--theme-elevation-50)',
         }}
       >
         <div>
           <a
             href={href}
             style={{
-              color: '#202124', // #4d5156 light version
               textDecoration: 'none',
             }}
           >
@@ -81,7 +81,6 @@ export const Preview: React.FC<PreviewFieldWithProps | {}> = (props) => {
           <a
             href="/"
             style={{
-              color: '#1a0dab', // dark mode: '#8ab4f8',
               textDecoration: 'none',
             }}
           >
@@ -91,7 +90,6 @@ export const Preview: React.FC<PreviewFieldWithProps | {}> = (props) => {
         <p
           style={{
             margin: 0,
-            color: '#202124',
           }}
         >
           {metaDescription as string}

@@ -88,6 +88,7 @@ export const MetaDescription: React.FC<(TextareaFieldWithProps | {}) & {
               backgroundColor: 'transparent',
               cursor: 'pointer',
               textDecoration: 'underline',
+              color: 'currentcolor',
             }}
           >
             Auto-generate
@@ -103,10 +104,6 @@ export const MetaDescription: React.FC<(TextareaFieldWithProps | {}) & {
             href="https://developers.google.com/search/docs/advanced/appearance/snippet#meta-descriptions"
             rel="noopener noreferrer"
             target="_blank"
-            style={{
-              color: '-webkit-link',
-              textDecoration: 'none',
-            }}
           >
             best practices
           </a>

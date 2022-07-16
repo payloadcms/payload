@@ -86,6 +86,7 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
               backgroundColor: 'transparent',
               cursor: 'pointer',
               textDecoration: 'underline',
+              color: 'currentcolor',
             }}
           >
             Auto-generate
@@ -101,10 +102,6 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
             href="https://developers.google.com/search/docs/advanced/appearance/title-link#page-titles"
             rel="noopener noreferrer"
             target="_blank"
-            style={{
-              color: '-webkit-link',
-              textDecoration: 'none',
-            }}
           >
             best practices
           </a>
