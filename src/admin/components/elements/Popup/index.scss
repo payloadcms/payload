@@ -7,7 +7,7 @@
     position: absolute;
     background: var(--theme-input-bg);
     display: none;
-    z-index: $z-modal;
+    z-index: var(--z-popup);
     max-width: calc(100vw - #{$baseline});
 
     &:after {

@@ -51,17 +51,17 @@
 @font-face {
   font-family: 'Merriweather';
   font-style: normal;
-  font-weight: 700;
+  font-weight: 900;
   src: local(''),
-    url('../assets/fonts/merriweather-v30-latin-700.woff2') format('woff2'),
-    url('../assets/fonts/merriweather-v30-latin-700.woff') format('woff');
+    url('../assets/fonts/merriweather-v30-latin-900.woff2') format('woff2'),
+    url('../assets/fonts/merriweather-v30-latin-900.woff') format('woff');
 }
 
 @font-face {
   font-family: 'Merriweather';
   font-style: italic;
-  font-weight: 700;
+  font-weight: 900;
   src: local(''),
-    url('../assets/fonts/merriweather-v30-latin-700italic.woff2') format('woff2'),
-    url('../assets/fonts/merriweather-v30-latin-700italic.woff') format('woff');
+    url('../assets/fonts/merriweather-v30-latin-900italic.woff2') format('woff2'),
+    url('../assets/fonts/merriweather-v30-latin-900italic.woff') format('woff');
 }

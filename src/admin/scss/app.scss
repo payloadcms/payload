@@ -8,7 +8,6 @@
   --breakpoint-s-width : #{$breakpoint-s-width};
   --breakpoint-m-width : #{$breakpoint-m-width};
   --breakpoint-l-width : #{$breakpoint-l-width};
-  --z-modal: #{$z-modal};
   --scrollbar-width: 17px;
 
   --theme-bg: var(--theme-elevation-0);
@@ -17,6 +16,11 @@
   --font-body: 'Suisse Intl', system-ui;
   --font-mono: monospace;
   --font-serif: 'Merriweather', serif;
+
+  --z-popup: 10;
+  --z-nav: 20;
+  --z-modal: 30;
+  --z-status: 40;
 
   --gutter-h: #{base(5)};
 
@@ -164,7 +168,7 @@ dialog {
 
 .payload__modal-item--enter,
 .payload__modal-item--enterDone {
-  z-index: $z-modal;
+  z-index: var(--z-modal);
 }
 
 @import '~payload-user-css';

@@ -30,12 +30,11 @@
   letter-spacing: inherit;
   line-height: inherit;
   position: relative;
-  z-index: 2;
   text-decoration: underline;
   cursor: text;
 
   &--open {
-    z-index: $z-modal + 1;
+    z-index: var(--z-popup);
   }
 }
 

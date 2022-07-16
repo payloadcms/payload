@@ -74,7 +74,7 @@
     padding-right: $baseline;
     position: sticky;
     top: 0;
-    z-index: $z-nav;
+    z-index: var(--z-nav);
 
     >* {
       position: relative;
@@ -189,7 +189,7 @@
       left: 0;
       right: 0;
       top: auto;
-      z-index: $z-nav;
+      z-index: var(--z-nav);
     }
 
     &__document-actions,

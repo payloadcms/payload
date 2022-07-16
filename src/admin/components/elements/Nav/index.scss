@@ -133,7 +133,7 @@
     position: fixed;
     width: 100%;
     height: base(3);
-    z-index: $z-modal;
+    z-index: var(--z-modal);
 
     &__scroll {
       padding: 0;
