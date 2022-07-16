@@ -160,6 +160,9 @@ export type DateField = FieldBase & {
 export type GroupField = FieldBase & {
   type: 'group';
   fields: Field[];
+  admin?: Admin & {
+    hideGutter?: boolean
+  }
 }
 
 export type RowAdmin = Omit<Admin, 'description'>;
@@ -275,6 +278,7 @@ export type RichTextField = FieldBase & {
     placeholder?: string
     elements?: RichTextElement[];
     leaves?: RichTextLeaf[];
+    hideGutter?: boolean
     upload?: {
       collections: {
         [collection: string]: {

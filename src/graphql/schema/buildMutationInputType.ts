@@ -202,6 +202,10 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
     fields: fields.reduce((inputObjectTypeConfig, field) => {
       const fieldSchema = fieldToSchemaMap[field.type];
 
+      if (typeof fieldSchema !== 'function') {
+        return inputObjectTypeConfig;
+      }
+
       return {
         ...inputObjectTypeConfig,
         ...fieldSchema(inputObjectTypeConfig, field),
