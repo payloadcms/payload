@@ -13,6 +13,10 @@ const TabsFields: CollectionConfig = {
           fields: [
             {
               name: 'array',
+              labels: {
+                singular: 'Item',
+                plural: 'Items',
+              },
               type: 'array',
               required: true,
               fields: [

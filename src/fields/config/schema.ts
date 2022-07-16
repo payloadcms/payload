@@ -203,7 +203,6 @@ export const group = baseField.keys({
     joi.func(),
   ),
   admin: baseAdminFields.keys({
-    hideGutter: joi.boolean().default(false),
     description: joi.string(),
   }),
 });

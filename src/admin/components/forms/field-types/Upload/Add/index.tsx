@@ -8,7 +8,6 @@ import Button from '../../../../elements/Button';
 import RenderFields from '../../../RenderFields';
 import FormSubmit from '../../../Submit';
 import Upload from '../../../../views/collections/Edit/Upload';
-import { NegativeFieldGutterProvider } from '../../../FieldTypeGutter/context';
 import ViewDescription from '../../../../elements/ViewDescription';
 import { Props } from './types';
 
@@ -82,14 +81,12 @@ const AddUploadModal: React.FC<Props> = (props) => {
           <Upload
             collection={collection}
           />
-          <NegativeFieldGutterProvider allow>
-            <RenderFields
-              permissions={collectionPermissions}
-              readOnly={false}
-              fieldTypes={fieldTypes}
-              fieldSchema={collection.fields}
-            />
-          </NegativeFieldGutterProvider>
+          <RenderFields
+            permissions={collectionPermissions}
+            readOnly={false}
+            fieldTypes={fieldTypes}
+            fieldSchema={collection.fields}
+          />
         </Form>
       </MinimalTemplate>
     </Modal>

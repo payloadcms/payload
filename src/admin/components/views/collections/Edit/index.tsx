@@ -9,7 +9,6 @@ import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';
 import formatFields from './formatFields';
 import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema';
-import { NegativeFieldGutterProvider } from '../../../forms/FieldTypeGutter/context';
 import { useLocale } from '../../../utilities/Locale';
 import { IndexProps } from './types';
 import { StepNavItem } from '../../../elements/StepNav/types';
@@ -120,24 +119,22 @@ const EditView: React.FC<IndexProps> = (props) => {
   const hasSavePermission = (isEditing && collectionPermissions?.update?.permission) || (!isEditing && collectionPermissions?.create?.permission);
 
   return (
-    <NegativeFieldGutterProvider allow>
-      <RenderCustomComponent
-        DefaultComponent={DefaultEdit}
-        CustomComponent={CustomEdit}
-        componentProps={{
-          isLoading: isLoadingDocument || !preferences,
-          data: dataToRender,
-          collection,
-          permissions: collectionPermissions,
-          isEditing,
-          onSave,
-          initialState,
-          hasSavePermission,
-          apiURL,
-          action,
-        }}
-      />
-    </NegativeFieldGutterProvider>
+    <RenderCustomComponent
+      DefaultComponent={DefaultEdit}
+      CustomComponent={CustomEdit}
+      componentProps={{
+        isLoading: isLoadingDocument || !preferences,
+        data: dataToRender,
+        collection,
+        permissions: collectionPermissions,
+        isEditing,
+        onSave,
+        initialState,
+        hasSavePermission,
+        apiURL,
+        action,
+      }}
+    />
   );
 };
 export default EditView;

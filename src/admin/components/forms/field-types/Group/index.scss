@@ -1,50 +1,38 @@
 @import '../../../../scss/styles.scss';
 
-.group {
-  margin-top: base(2);
-  margin-bottom: base(2);
-  display: flex;
-  position: relative;
+.group-field {
+  margin: base(2) calc(var(--gutter-h) * -1);
+  padding: base(2) var(--gutter-h);
+  border-top: 1px solid var(--theme-elevation-100);
+  border-bottom: 1px solid var(--theme-elevation-100);
+
+  &--within-collapsible {
+    margin: $baseline calc(#{$baseline} * -1);
+    padding: $baseline;
+
+    &:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+  }
 
   &__header {
-    margin-bottom: base(1);
+    margin-bottom: base(.75);
   }
 
   &__title {
     margin-bottom: 0;
   }
 
-  &:hover {
-    .field-type-gutter__content-container {
-      box-shadow: #{$style-stroke-width-m} 0px 0px 0px var(--theme-elevation-800);
-    }
-  }
-
-  &__content-wrapper {
-    width: 100%;
-  }
-
-  &__fields-wrapper {
-    position: relative;
-  }
-
-  .render-fields {
-    width: 100%;
-
-    .row {
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-  }
-
-  &--no-label {
-    margin-top: 0,
-  }
-
-  @include mid-break {
-    &__fields-wrapper {
-      display: flex;
+  @include small-break {
+    &--within-collapsible {
+      margin-left: calc(var(--gutter-h) * -1);
+      margin-right: calc(var(--gutter-h) * -1);
     }
   }
 }
