@@ -22,6 +22,26 @@ $baseline : math.div($baseline-px, $baseline-body-size)+rem;
 }
 
 //////////////////////////////
+// FONTS (LEGACY - DO NOT USE. PREFER CSS VARIABLES)
+//////////////////////////////
+
+$font-body : 'Suisse Intl' !default;
+$font-mono : monospace !default;
+
+//////////////////////////////
+// COLORS (LEGACY - DO NOT USE. PREFER CSS VARIABLES)
+//////////////////////////////
+
+$color-dark-gray : #333333 !default;
+$color-gray : #9A9A9A !default;
+$color-light-gray : #DADADA !default;
+$color-background-gray : #F3F3F3 !default;
+$color-red : #ff6f76 !default;
+$color-yellow : #FDFFA4 !default;
+$color-green : #B2FFD6 !default;
+$color-purple : #F3DDF3 !default;
+
+//////////////////////////////
 // STYLES
 //////////////////////////////
 

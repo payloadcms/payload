@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "0.19.2",
+  "version": "0.20.4-beta.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "author": {
@@ -39,6 +39,7 @@
     "demo:serve": "cross-env PAYLOAD_CONFIG_PATH=demo/payload.config.ts NODE_ENV=production nodemon",
     "dev": "nodemon",
     "dev:generatetypes": "node ./test/generateTypes.js",
+    "pretest": "yarn build",
     "test": "yarn test:int && yarn test:components",
     "test:int": "cross-env NODE_ENV=test DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
     "test:e2e": "cross-env NODE_ENV=test DISABLE_LOGGING=true playwright test",

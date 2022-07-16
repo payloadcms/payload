@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable global-require */
 import mongoose, { ConnectOptions } from 'mongoose';
 import pino from 'pino';
-import getPort from 'get-port';
 import { connection } from './testCredentials';
 
 const connectMongoose = async (
@@ -20,8 +21,9 @@ const connectMongoose = async (
 
   if (process.env.NODE_ENV === 'test') {
     connectionOptions.dbName = 'payloadmemory';
-    // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
     const { MongoMemoryServer } = require('mongodb-memory-server');
+    const getPort = require('get-port');
+
     const port = await getPort();
     mongoMemoryServer = await MongoMemoryServer.create({
       instance: {

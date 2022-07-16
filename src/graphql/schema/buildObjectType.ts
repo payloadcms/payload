@@ -494,6 +494,11 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
     name,
     fields: () => fields.reduce((objectTypeConfig, field) => {
       const fieldSchema = fieldToSchemaMap[field.type];
+
+      if (typeof fieldSchema !== 'function') {
+        return objectTypeConfig;
+      }
+
       return {
         ...objectTypeConfig,
         ...fieldSchema(objectTypeConfig, field),

@@ -203,6 +203,7 @@ export const group = baseField.keys({
     joi.func(),
   ),
   admin: baseAdminFields.keys({
+    hideGutter: joi.boolean().default(false),
     description: joi.string(),
   }),
 });
@@ -306,6 +307,7 @@ export const richText = baseField.keys({
   ),
   admin: baseAdminFields.keys({
     placeholder: joi.string(),
+    hideGutter: joi.boolean().default(false),
     elements: joi.array().items(
       joi.alternatives().try(
         joi.string(),
