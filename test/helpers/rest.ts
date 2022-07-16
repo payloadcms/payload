@@ -22,6 +22,7 @@ type CreateArgs<T = any> = {
   slug?: string
   data: T
   auth?: boolean
+  file?: boolean
 }
 
 type FindArgs = {
@@ -34,7 +35,13 @@ type UpdateArgs<T = any> = {
   slug?: string
   id: string
   data: Partial<T>
+  auth?: boolean
   query?: any
+}
+type DeleteArgs = {
+  slug?: string
+  id: string
+  auth?: boolean
 }
 
 type DocResponse<T> = {
@@ -57,9 +64,9 @@ export class RESTClient {
 
   private token: string;
 
-  private serverURL: string;
-
   private defaultSlug: string;
+
+  serverURL: string;
 
   constructor(config: Config, args: Args) {
     this.config = config;
@@ -92,9 +99,9 @@ export class RESTClient {
 
   async create<T = any>(args: CreateArgs): Promise<DocResponse<T>> {
     const options = {
-      body: JSON.stringify(args.data),
+      body: args.file ? args.data : JSON.stringify(args.data),
       headers: {
-        ...headers,
+        ...(args.file ? [] : headers),
         Authorization: '',
       },
       method: 'post',
@@ -138,6 +145,9 @@ export class RESTClient {
   async update<T = any>(args: UpdateArgs<T>): Promise<DocResponse<T>> {
     const { slug, id, data, query } = args;
     const formattedQs = qs.stringify(query);
+    if (args?.auth) {
+      headers.Authorization = `JWT ${this.token}`;
+    }
     const response = await fetch(
       `${this.serverURL}/api/${slug || this.defaultSlug}/${id}${formattedQs}`,
       {
@@ -161,11 +171,20 @@ export class RESTClient {
     return { status, doc };
   }
 
-  async delete<T = any>(id: string, args?: { slug?: string }): Promise<DocResponse<T>> {
-    const response = await fetch(`${this.serverURL}/api/${args?.slug || this.defaultSlug}/${id}`, {
-      headers,
+  async delete<T = any>(id: string, args?: DeleteArgs): Promise<DocResponse<T>> {
+    const options = {
+      headers: {
+        ...headers,
+        Authorization: '',
+      },
       method: 'delete',
-    });
+    };
+
+    if (args?.auth) {
+      options.headers.Authorization = `JWT ${this.token}`;
+    }
+
+    const response = await fetch(`${this.serverURL}/api/${args?.slug || this.defaultSlug}/${id}`, options);
     const { status } = response;
     const doc = await response.json();
     return { status, doc };
