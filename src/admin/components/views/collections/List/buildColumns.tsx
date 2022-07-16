@@ -7,7 +7,24 @@ import { fieldIsPresentationalOnly } from '../../../../../fields/config/types';
 import flattenFields from '../../../../utilities/flattenTopLevelFields';
 
 const buildColumns = (collection: SanitizedCollectionConfig, columns: string[]): Column[] => {
-  const flattenedFields = flattenFields(collection.fields, true);
+  const flattenedFields = flattenFields([
+    ...collection.fields,
+    {
+      name: 'id',
+      type: 'text',
+      label: 'ID',
+    },
+    {
+      name: 'updatedAt',
+      type: 'date',
+      label: 'Updated At',
+    },
+    {
+      name: 'createdAt',
+      type: 'date',
+      label: 'Created At',
+    },
+  ], true);
 
   return (columns || []).reduce((cols, col, colIndex) => {
     let field = null;
