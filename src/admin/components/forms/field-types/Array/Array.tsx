@@ -59,7 +59,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const { preferencesKey, preferences } = useDocumentInfo();
   const { setPreference } = usePreferences();
-  const [rows, dispatchRows] = useReducer(reducer, []);
+  const [rows, dispatchRows] = useReducer(reducer, undefined);
   const formContext = useForm();
   const { user } = useAuth();
   const { id } = useDocumentInfo();
@@ -191,13 +191,15 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     }
   }, [rows, setValue]);
 
-  const hasMaxRows = maxRows && rows.length >= maxRows;
+  const hasMaxRows = maxRows && rows?.length >= maxRows;
 
   const classes = [
     'field-type',
     baseClass,
     className,
   ].filter(Boolean).join(' ');
+
+  if (!rows) return null;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>

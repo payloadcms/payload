@@ -9,6 +9,7 @@ const TabsFields: CollectionConfig = {
       tabs: [
         {
           label: 'Tab One',
+          description: 'Here is a description for tab one',
           fields: [
             {
               name: 'array',
@@ -26,6 +27,7 @@ const TabsFields: CollectionConfig = {
         },
         {
           label: 'Tab Two',
+          description: 'Description for tab two',
           fields: [
             {
               name: 'text',
@@ -36,6 +38,7 @@ const TabsFields: CollectionConfig = {
         },
         {
           label: 'Tab Three',
+          description: 'Description for tab three',
           fields: [
             {
               name: 'number',

@@ -44,7 +44,7 @@ type MOVE = {
 type Action = SET_ALL | SET_COLLAPSE | SET_ALL_COLLAPSED | ADD | REMOVE | MOVE;
 
 const reducer = (currentState: Row[], action: Action): Row[] => {
-  const stateCopy = [...currentState];
+  const stateCopy = [...currentState || []];
 
   switch (action.type) {
     case 'SET_ALL': {
