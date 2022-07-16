@@ -49,6 +49,38 @@ const TabsFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'collapsible',
+      label: 'Tabs within Collapsible',
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Nested Tab One',
+              description: 'Here is a description for a nested tab',
+              fields: [
+                {
+                  name: 'textarea',
+                  type: 'textarea',
+                },
+              ],
+            },
+            {
+              label: 'Nested Tab Two',
+              description: 'Description for tab two',
+              fields: [
+                {
+                  name: 'anotherText',
+                  type: 'text',
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 };
 
@@ -66,6 +98,8 @@ export const tabsDoc = {
   ],
   text: 'This text will show up in the second tab input',
   number: 12,
+  textarea: 'Here is some text that goes in a textarea',
+  anotherText: 'Super tired of writing this text',
 };
 
 export default TabsFields;

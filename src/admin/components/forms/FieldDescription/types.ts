@@ -9,6 +9,7 @@ export type Description = string | DescriptionFunction | DescriptionComponent
 export type Props = {
   description?: Description
   value?: unknown;
+  className?: string
 }
 
 export function isComponent(description: Description): description is DescriptionComponent {

@@ -31,7 +31,7 @@
       "env": {
         "BABEL_ENV": "development"
       },
-      "program": "${workspaceFolder}/test/dev/index.js",
+      "program": "${workspaceFolder}/test/dev.js",
       "skipFiles": [
         "<node_internals>/**"
       ],
@@ -39,7 +39,7 @@
         "--nolazy"
       ],
       "args": [
-        "e2e/fields"
+        "fields"
       ]
     },
   ]

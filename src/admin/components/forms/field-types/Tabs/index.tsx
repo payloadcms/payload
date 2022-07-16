@@ -5,6 +5,7 @@ import { Props } from './types';
 import { fieldAffectsData } from '../../../../../fields/config/types';
 import FieldDescription from '../../FieldDescription';
 import toKebabCase from '../../../../../utilities/toKebabCase';
+import { useCollapsible } from '../../../elements/Collapsible/provider';
 
 import './index.scss';
 
@@ -22,6 +23,7 @@ const TabsField: React.FC<Props> = (props) => {
     },
   } = props;
 
+  const isWithinCollapsible = useCollapsible();
   const [active, setActive] = useState(0);
 
   const activeTab = tabs[active];
@@ -30,6 +32,7 @@ const TabsField: React.FC<Props> = (props) => {
     <div className={[
       className,
       baseClass,
+      isWithinCollapsible && `${baseClass}--within-collapsible`,
     ].filter(Boolean).join(' ')}
     >
       <div className={`${baseClass}__tabs`}>
@@ -38,7 +41,10 @@ const TabsField: React.FC<Props> = (props) => {
             <button
               key={i}
               type="button"
-              className={`${baseClass}__tab`}
+              className={[
+                `${baseClass}__tab-button`,
+                active === i && `${baseClass}__tab-button--active`,
+              ].filter(Boolean).join(' ')}
               onClick={() => setActive(i)}
             >
               {tab.label}
@@ -51,9 +57,10 @@ const TabsField: React.FC<Props> = (props) => {
           <div className={[
             `${baseClass}__tab`,
             `${baseClass}__tab-${toKebabCase(activeTab.label)}`,
-          ].join('')}
+          ].join(' ')}
           >
             <FieldDescription
+              className={`${baseClass}__description`}
               description={activeTab.description}
             />
             <RenderFields

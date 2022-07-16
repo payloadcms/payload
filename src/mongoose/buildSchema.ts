@@ -304,47 +304,43 @@ const fieldToSchemaMap = {
     };
   },
   row: (field: RowField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
-    const newFields = { ...fields };
+    let newFields = { ...fields };
 
     field.fields.forEach((subField: Field) => {
-      const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+      const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
 
-      if (fieldSchemaMap && fieldAffectsData(subField)) {
-        const fieldSchema = fieldSchemaMap(subField, fields, config, buildSchemaOptions);
-        newFields[subField.name] = fieldSchema[subField.name];
+      if (fieldSchema) {
+        newFields = fieldSchema(subField, newFields, config, buildSchemaOptions);
       }
     });
 
     return newFields;
   },
   collapsible: (field: CollapsibleField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
-    const newFields = { ...fields };
+    let newFields = { ...fields };
 
     field.fields.forEach((subField: Field) => {
-      const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+      const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
 
-      if (fieldSchemaMap && fieldAffectsData(subField)) {
-        const fieldSchema = fieldSchemaMap(subField, fields, config, buildSchemaOptions);
-        newFields[subField.name] = fieldSchema[subField.name];
+      if (fieldSchema) {
+        newFields = fieldSchema(subField, newFields, config, buildSchemaOptions);
       }
     });
 
     return newFields;
   },
   tabs: (field: TabsField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
-    const newFields = { ...fields };
+    let newFields = { ...fields };
 
     field.tabs.forEach((tab) => {
       tab.fields.forEach((subField: Field) => {
-        const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+        const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
 
-        if (fieldSchemaMap && fieldAffectsData(subField)) {
-          const fieldSchema = fieldSchemaMap(subField, fields, config, buildSchemaOptions);
-          newFields[subField.name] = fieldSchema[subField.name];
+        if (fieldSchema) {
+          newFields = fieldSchema(subField, newFields, config, buildSchemaOptions);
         }
       });
     });
-
 
     return newFields;
   },
