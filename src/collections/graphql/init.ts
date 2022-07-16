@@ -10,7 +10,6 @@ import {
 
 import formatName from '../../graphql/utilities/formatName';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
-import { BaseFields } from './types';
 import buildMutationInputType, { getCollectionIDType } from '../../graphql/schema/buildMutationInputType';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
 import createResolver from './resolvers/create';
@@ -31,7 +30,7 @@ import unlock from '../../auth/graphql/resolvers/unlock';
 import refresh from '../../auth/graphql/resolvers/refresh';
 import { Payload } from '../..';
 import { Field, fieldAffectsData } from '../../fields/config/types';
-import buildObjectType from '../../graphql/schema/buildObjectType';
+import buildObjectType, { ObjectTypeConfig } from '../../graphql/schema/buildObjectType';
 import buildWhereInputType from '../../graphql/schema/buildWhereInputType';
 import getDeleteResolver from './resolvers/delete';
 
@@ -66,7 +65,7 @@ function initCollectionsGraphQL(payload: Payload): void {
     const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id');
     const idType = getCollectionIDType(collection.config);
 
-    const baseFields: BaseFields = {};
+    const baseFields: ObjectTypeConfig = {};
 
     const whereInputFields = [
       ...fields,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
+import flattenTopLevelFields from '../../../utilities/flattenTopLevelFields';
 import Pill from '../Pill';
 import Plus from '../../icons/Plus';
 import X from '../../icons/X';
@@ -16,7 +16,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
     setColumns,
   } = props;
 
-  const [fields] = useState(() => flattenTopLevelFields(collection.fields));
+  const [fields] = useState(() => flattenTopLevelFields(collection.fields, true));
 
   return (
     <div className={baseClass}>

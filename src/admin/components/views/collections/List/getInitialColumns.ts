@@ -1,5 +1,33 @@
 import { Field, fieldHasSubFields, fieldAffectsData } from '../../../../../fields/config/types';
 
+const getRemainingColumns = (fields: Field[], useAsTitle: string): string[] => fields.reduce((remaining, field) => {
+  if (fieldAffectsData(field) && field.name === useAsTitle) {
+    return remaining;
+  }
+
+  if (!fieldAffectsData(field) && fieldHasSubFields(field)) {
+    return [
+      ...remaining,
+      ...getRemainingColumns(field.fields, useAsTitle),
+    ];
+  }
+
+  if (field.type === 'tabs') {
+    return [
+      ...remaining,
+      ...field.tabs.reduce((tabFieldColumns, tab) => [
+        ...tabFieldColumns,
+        ...getRemainingColumns(tab.fields, useAsTitle),
+      ], []),
+    ];
+  }
+
+  return [
+    ...remaining,
+    field.name,
+  ];
+}, []);
+
 const getInitialColumnState = (fields: Field[], useAsTitle: string, defaultColumns: string[]): string[] => {
   let initialColumns = [];
 
@@ -12,32 +40,7 @@ const getInitialColumnState = (fields: Field[], useAsTitle: string, defaultColum
     initialColumns.push(useAsTitle);
   }
 
-  const remainingColumns = fields.reduce((remaining, field) => {
-    if (fieldAffectsData(field) && field.name === useAsTitle) {
-      return remaining;
-    }
-
-    if (!fieldAffectsData(field) && fieldHasSubFields(field)) {
-      return [
-        ...remaining,
-        ...field.fields.reduce((subFields, subField) => {
-          if (fieldAffectsData(subField)) {
-            return [
-              ...subFields,
-              subField.name,
-            ];
-          }
-
-          return subFields;
-        }, []),
-      ];
-    }
-
-    return [
-      ...remaining,
-      field.name,
-    ];
-  }, []);
+  const remainingColumns = getRemainingColumns(fields, useAsTitle);
 
   initialColumns = initialColumns.concat(remainingColumns);
   initialColumns = initialColumns.slice(0, 4);
