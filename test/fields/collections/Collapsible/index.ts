@@ -2,6 +2,7 @@ import type { CollectionConfig } from '../../../../src/collections/config/types'
 
 const CollapsibleFields: CollectionConfig = {
   slug: 'collapsible-fields',
+  versions: true,
   fields: [
     {
       label: 'Collapsible Field',

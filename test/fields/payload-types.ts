@@ -8,6 +8,109 @@
 export interface Config {}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-fields".
+ */
+export interface ArrayField {
+  id: string;
+  items: {
+    text: string;
+    id?: string;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "block-fields".
+ */
+export interface BlockField {
+  id: string;
+  blocks: (
+    | {
+        text: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'text';
+      }
+    | {
+        number: number;
+        id?: string;
+        blockName?: string;
+        blockType: 'number';
+      }
+    | {
+        subBlocks?: (
+          | {
+              text: string;
+              id?: string;
+              blockName?: string;
+              blockType: 'text';
+            }
+          | {
+              number: number;
+              id?: string;
+              blockName?: string;
+              blockType: 'number';
+            }
+        )[];
+        id?: string;
+        blockName?: string;
+        blockType: 'subBlocks';
+      }
+  )[];
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collapsible-fields".
+ */
+export interface CollapsibleField {
+  id: string;
+  text: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rich-text-fields".
+ */
+export interface RichTextField {
+  id: string;
+  richText: {
+    [k: string]: unknown;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-fields".
+ */
+export interface SelectField {
+  id: string;
+  select?: 'one' | 'two' | 'three';
+  selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[];
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabs-fields".
+ */
+export interface TabsField {
+  id: string;
+  array: {
+    text: string;
+    id?: string;
+  }[];
+  text: string;
+  number: number;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "text-fields".
  */
 export interface TextField {

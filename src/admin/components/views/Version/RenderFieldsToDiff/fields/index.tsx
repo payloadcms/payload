@@ -2,6 +2,7 @@ import Text from './Text';
 import Nested from './Nested';
 import Iterable from './Iterable';
 import Relationship from './Relationship';
+import Tabs from './Tabs';
 
 export default {
   text: Text,
@@ -22,4 +23,5 @@ export default {
   relationship: Relationship,
   upload: Relationship,
   point: Text,
+  tabs: Tabs,
 };

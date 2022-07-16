@@ -2,6 +2,7 @@ import type { CollectionConfig } from '../../../../src/collections/config/types'
 
 const TabsFields: CollectionConfig = {
   slug: 'tabs-fields',
+  versions: true,
   fields: [
     {
       type: 'tabs',

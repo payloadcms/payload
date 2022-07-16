@@ -3,9 +3,9 @@ import { DiffMethod } from 'react-diff-viewer';
 import { Props } from './types';
 import { fieldAffectsData, fieldHasSubFields } from '../../../../../fields/config/types';
 import Nested from './fields/Nested';
+import { diffMethods } from './fields/diffMethods';
 
 import './index.scss';
-import { diffMethods } from './fields/diffMethods';
 
 const baseClass = 'render-field-diffs';
 
@@ -87,19 +87,18 @@ const RenderFieldsToDiff: React.FC<Props> = ({
         }
 
         if (field.type === 'tabs') {
-          return field.tabs.map((tab, tabIndex) => {
-            return (
-              <RenderFieldsToDiff
-                key={tabIndex}
-                fields={tab.fields}
-                fieldComponents={fieldComponents}
-                fieldPermissions={fieldPermissions}
-                version={version}
-                comparison={comparison}
-                locales={locales}
-              />
-            );
-          });
+          const Tabs = fieldComponents.tabs;
+
+          return (
+            <Tabs
+              key={i}
+              version={version}
+              comparison={comparison}
+              field={field}
+              locales={locales}
+              fieldComponents={fieldComponents}
+            />
+          );
         }
 
         // At this point, we are dealing with a `row` or similar

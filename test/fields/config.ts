@@ -3,6 +3,7 @@ import { devUser } from '../credentials';
 import ArrayFields, { arrayDoc } from './collections/Array';
 import BlockFields, { blocksDoc } from './collections/Blocks';
 import CollapsibleFields, { collapsibleDoc } from './collections/Collapsible';
+import ConditionalLogic, { conditionalLogicDoc } from './collections/ConditionalLogic';
 import RichTextFields, { richTextDoc } from './collections/RichText';
 import SelectFields, { selectsDoc } from './collections/Select';
 import TabsFields, { tabsDoc } from './collections/Tabs';
@@ -13,6 +14,7 @@ export default buildConfig({
     ArrayFields,
     BlockFields,
     CollapsibleFields,
+    ConditionalLogic,
     RichTextFields,
     SelectFields,
     TabsFields,
@@ -40,6 +42,11 @@ export default buildConfig({
     await payload.create({
       collection: 'collapsible-fields',
       data: collapsibleDoc,
+    });
+
+    await payload.create({
+      collection: 'conditional-logic',
+      data: conditionalLogicDoc,
     });
 
     await payload.create({
