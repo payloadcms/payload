@@ -20,4 +20,8 @@
     position: relative;
     display: block;
   }
+
+  @include small-break {
+    padding: 0 0 base(1);
+  }
 }
