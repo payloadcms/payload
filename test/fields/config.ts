@@ -8,6 +8,7 @@ import RichTextFields, { richTextDoc } from './collections/RichText';
 import SelectFields, { selectsDoc } from './collections/Select';
 import TabsFields, { tabsDoc } from './collections/Tabs';
 import TextFields, { textDoc } from './collections/Text';
+import PointFields, { pointDoc } from './collections/Point';
 
 export default buildConfig({
   collections: [
@@ -19,7 +20,12 @@ export default buildConfig({
     SelectFields,
     TabsFields,
     TextFields,
+    PointFields,
   ],
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -57,6 +63,11 @@ export default buildConfig({
     await payload.create({
       collection: 'tabs-fields',
       data: tabsDoc,
+    });
+
+    await payload.create({
+      collection: 'point-fields',
+      data: pointDoc,
     });
 
     const createdTextDoc = await payload.create({
