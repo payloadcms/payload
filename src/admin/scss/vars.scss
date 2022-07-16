@@ -181,8 +181,4 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
       border-color: var(--theme-elevation-150);
     }
   }
-
-  @include small-break {
-    margin-bottom: base(.5);
-  }
 }

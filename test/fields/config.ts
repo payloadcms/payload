@@ -9,6 +9,7 @@ import SelectFields, { selectsDoc } from './collections/Select';
 import TabsFields, { tabsDoc } from './collections/Tabs';
 import TextFields, { textDoc } from './collections/Text';
 import PointFields, { pointDoc } from './collections/Point';
+import GroupFields, { groupDoc } from './collections/Group';
 
 export default buildConfig({
   collections: [
@@ -16,6 +17,7 @@ export default buildConfig({
     BlockFields,
     CollapsibleFields,
     ConditionalLogic,
+    GroupFields,
     PointFields,
     RichTextFields,
     SelectFields,
@@ -53,6 +55,11 @@ export default buildConfig({
     await payload.create({
       collection: 'conditional-logic',
       data: conditionalLogicDoc,
+    });
+
+    await payload.create({
+      collection: 'group-fields',
+      data: groupDoc,
     });
 
     await payload.create({

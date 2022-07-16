@@ -56,6 +56,7 @@ const RichText: React.FC<Props> = (props) => {
       placeholder,
       description,
       condition,
+      hideGutter,
     } = {},
   } = props;
 
@@ -139,6 +140,7 @@ const RichText: React.FC<Props> = (props) => {
     className,
     showError && 'error',
     readOnly && `${baseClass}--read-only`,
+    !hideGutter && `${baseClass}--gutter`,
   ].filter(Boolean).join(' ');
 
   const editor = useMemo(() => {

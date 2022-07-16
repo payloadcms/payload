@@ -78,6 +78,13 @@
     }
   }
 
+  &--gutter {
+    .rich-text__editor {
+      padding-left: $baseline;
+      border-left: 1px solid var(--theme-elevation-100);
+    }
+  }
+
   &__input {
     min-height: base(10);
   }
