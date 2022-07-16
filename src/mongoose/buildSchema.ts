@@ -6,6 +6,7 @@ import { Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
 import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, fieldIsPresentationalOnly, NonPresentationalField, CollapsibleField, TabsField } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
+import flattenTopLevelFields from '../utilities/flattenTopLevelFields';
 
 export type BuildSchemaOptions = {
   options?: SchemaOptions
@@ -118,7 +119,7 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
     schema.index(index);
   });
 
-  setBlockDiscriminators(configFields, schema, config, buildSchemaOptions);
+  setBlockDiscriminators(flattenTopLevelFields(configFields), schema, config, buildSchemaOptions);
 
   return schema;
 };
