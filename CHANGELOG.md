@@ -1,3 +1,5 @@
+## [0.20.1](https://github.com/payloadcms/payload/compare/v0.19.2...v0.20.1) (2022-07-16)
+
 ## [0.19.2](https://github.com/payloadcms/payload/compare/v0.19.1...v0.19.2) (2022-07-11)
 
 ### Bug Fixes
