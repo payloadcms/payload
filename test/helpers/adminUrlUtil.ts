@@ -14,4 +14,8 @@ export class AdminUrlUtil {
   edit(id: string): string {
     return `${this.list}/${id}`;
   }
+
+  global(slug: string): string {
+    return `${this.admin}/globals/${slug}`;
+  }
 }

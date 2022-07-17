@@ -75,6 +75,7 @@ const DefaultNav = () => {
               if (permissions?.collections?.[collection.slug]?.read.permission) {
                 return (
                   <NavLink
+                    id={`nav-${collection.slug}`}
                     activeClassName="active"
                     key={i}
                     to={href}
@@ -98,6 +99,7 @@ const DefaultNav = () => {
                   if (permissions?.globals?.[global.slug].read.permission) {
                     return (
                       <NavLink
+                        id={`nav-global-${global.slug}`}
                         activeClassName="active"
                         key={i}
                         to={href}
