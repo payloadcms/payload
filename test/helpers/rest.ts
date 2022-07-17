@@ -44,6 +44,17 @@ type DeleteArgs = {
   auth?: boolean;
 };
 
+type FindGlobalArgs<T = any> = {
+  slug?: string;
+  auth?: boolean;
+}
+
+type UpdateGlobalArgs<T = any> = {
+  slug?: string;
+  auth?: boolean;
+  data: Partial<T>;
+}
+
 type DocResponse<T> = {
   status: number;
   doc: T;
@@ -185,5 +196,54 @@ export class RESTClient {
     const { status } = response;
     const doc = await response.json();
     return { status, doc };
+  }
+
+  async findGlobal<T = any>(args?: FindGlobalArgs): Promise<DocResponse<T>> {
+    const options = {
+      headers: {
+        ...headers,
+      },
+      Authorization: '',
+      method: 'get',
+    };
+    if (args?.auth) {
+      options.headers.Authorization = `JWT ${this.token}`;
+    }
+    const response = await fetch(`${this.serverURL}/api/globals/${args?.slug || this.defaultSlug}`, options);
+    const { status } = response;
+    const doc = await response.json();
+    return { status, doc };
+  }
+
+  async updateGlobal<T = any>(args: UpdateGlobalArgs): Promise<DocResponse<T>> {
+    const { slug, data: body, auth } = args;
+    const options = {
+      body: JSON.stringify(body),
+      method: 'post',
+      headers: {
+        ...headers,
+        Authorization: '',
+      },
+    };
+    if (auth) {
+      options.headers.Authorization = `JWT ${this.token}`;
+    }
+    const response = await fetch(`${this.serverURL}/api/globals/${slug || this.defaultSlug}`, options);
+    const { status } = response;
+    const { result } = await response.json();
+    return { status, doc: result };
+  }
+
+  async endpoint<T = any>(path: string, method = 'get', params = undefined): Promise<{status: number, data: T}> {
+    const response = await fetch(`${this.serverURL}/api${path}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+      method,
+    });
+    const { status } = response;
+    const data = await response.json();
+    return { status, data };
   }
 }
