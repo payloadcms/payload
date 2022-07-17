@@ -7,9 +7,7 @@ const button: RichTextCustomElement = {
   name: 'button',
   Button,
   Element,
-  plugins: [
-    plugin,
-  ],
+  plugins: [plugin],
 };
 
 export default button;

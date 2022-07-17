@@ -49,9 +49,12 @@ const Conditions: CollectionConfig = {
     {
       name: 'nestedConditions',
       type: 'text',
-      label: 'Number is either greater than 20 AND enableTest is checked, OR number is less than 20 and enableTest is NOT checked',
+      label:
+        'Number is either greater than 20 AND enableTest is checked, OR number is less than 20 and enableTest is NOT checked',
       admin: {
-        condition: (_, siblings) => (siblings.number > 20 && siblings.enableTest === true) || (siblings.number < 20 && siblings.enableTest === false),
+        condition: (_, siblings) =>
+          (siblings.number > 20 && siblings.enableTest === true) ||
+          (siblings.number < 20 && siblings.enableTest === false),
       },
     },
     {

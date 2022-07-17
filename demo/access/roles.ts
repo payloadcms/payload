@@ -1,7 +1,1 @@
-export default [
-  'admin',
-  'editor',
-  'moderator',
-  'user',
-  'viewer',
-];
+export default ['admin', 'editor', 'moderator', 'user', 'viewer'];

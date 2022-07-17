@@ -5,7 +5,6 @@ import { initPayloadTest } from '../helpers/configHelpers';
 import { firstRegister } from '../helpers';
 import { slug } from './config';
 
-
 /**
  * TODO: Auth
  * change password

@@ -65,8 +65,7 @@ export default buildConfig({
           },
         ],
       },
-      fields: [
-      ],
+      fields: [],
     },
     {
       slug: 'unstored-media',

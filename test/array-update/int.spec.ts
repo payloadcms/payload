@@ -36,9 +36,7 @@ describe('array-update', () => {
       },
     });
 
-    const arrayWithExistingValues = [
-      ...doc.array,
-    ];
+    const arrayWithExistingValues = [...doc.array];
 
     const updatedText = 'this is some new text for the first item in array';
 
@@ -46,7 +44,6 @@ describe('array-update', () => {
       id: arrayWithExistingValues[0].id,
       required: updatedText,
     };
-
 
     const updatedDoc = await payload.update<ArrayCollection>({
       id: doc.id,

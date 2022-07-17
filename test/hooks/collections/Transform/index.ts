@@ -37,9 +37,7 @@ const TransformHooks: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeRead: [
-      (operation) => operation.doc,
-    ],
+    beforeRead: [(operation) => operation.doc],
     beforeChange: [
       (operation) => {
         operation.data.beforeChange = !operation.data.location?.coordinates;

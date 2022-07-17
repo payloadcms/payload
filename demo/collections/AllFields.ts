@@ -82,19 +82,24 @@ const AllFields: CollectionConfig = {
       name: 'select',
       label: 'Select',
       type: 'select',
-      options: [{
-        value: 'option-1',
-        label: 'Option 1 Label',
-      }, {
-        value: 'option-2',
-        label: 'Option 2 Label',
-      }, {
-        value: 'option-3',
-        label: 'Option 3 Label',
-      }, {
-        value: 'option-4',
-        label: 'Option 4 Label',
-      }],
+      options: [
+        {
+          value: 'option-1',
+          label: 'Option 1 Label',
+        },
+        {
+          value: 'option-2',
+          label: 'Option 2 Label',
+        },
+        {
+          value: 'option-3',
+          label: 'Option 3 Label',
+        },
+        {
+          value: 'option-4',
+          label: 'Option 4 Label',
+        },
+      ],
       defaultValue: 'option-1',
       required: true,
     },
@@ -102,19 +107,24 @@ const AllFields: CollectionConfig = {
       name: 'selectMany',
       label: 'Select w/ hasMany',
       type: 'select',
-      options: [{
-        value: 'option-1',
-        label: 'Option 1 Label',
-      }, {
-        value: 'option-2',
-        label: 'Option 2 Label',
-      }, {
-        value: 'option-3',
-        label: 'Option 3 Label',
-      }, {
-        value: 'option-4',
-        label: 'Option 4 Label',
-      }],
+      options: [
+        {
+          value: 'option-1',
+          label: 'Option 1 Label',
+        },
+        {
+          value: 'option-2',
+          label: 'Option 2 Label',
+        },
+        {
+          value: 'option-3',
+          label: 'Option 3 Label',
+        },
+        {
+          value: 'option-4',
+          label: 'Option 4 Label',
+        },
+      ],
       defaultValue: 'option-1',
       required: true,
       hasMany: true,
@@ -150,16 +160,20 @@ const AllFields: CollectionConfig = {
       name: 'radioGroupExample',
       label: 'Radio Group Example',
       type: 'radio',
-      options: [{
-        value: 'option-1',
-        label: 'Options 1 Label',
-      }, {
-        value: 'option-2',
-        label: 'Option 2 Label',
-      }, {
-        value: 'option-3',
-        label: 'Option 3 Label',
-      }],
+      options: [
+        {
+          value: 'option-1',
+          label: 'Options 1 Label',
+        },
+        {
+          value: 'option-2',
+          label: 'Option 2 Label',
+        },
+        {
+          value: 'option-3',
+          label: 'Option 3 Label',
+        },
+      ],
       defaultValue: 'option-2',
       required: true,
       admin: {
@@ -173,7 +187,8 @@ const AllFields: CollectionConfig = {
           name: 'email',
           label: 'Email',
           type: 'email',
-        }, {
+        },
+        {
           name: 'number',
           label: 'Number',
           type: 'number',
@@ -192,7 +207,8 @@ const AllFields: CollectionConfig = {
               name: 'nestedText1',
               label: 'Nested Text 1',
               type: 'text',
-            }, {
+            },
+            {
               name: 'nestedText2',
               label: 'Nested Text 2',
               type: 'text',
@@ -257,12 +273,14 @@ const AllFields: CollectionConfig = {
       admin: {
         readOnly: true,
       },
-      defaultValue: [{
-        text: 'text in readOnly array one',
-      },
-      {
-        text: 'text in readOnly array two',
-      }],
+      defaultValue: [
+        {
+          text: 'text in readOnly array one',
+        },
+        {
+          text: 'text in readOnly array two',
+        },
+      ],
       fields: [
         {
           type: 'text',

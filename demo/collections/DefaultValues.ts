@@ -40,38 +40,48 @@ const DefaultValues: CollectionConfig = {
       name: 'select',
       label: 'Select',
       type: 'select',
-      options: [{
-        value: 'option-1',
-        label: 'Option 1 Label',
-      }, {
-        value: 'option-2',
-        label: 'Option 2 Label',
-      }, {
-        value: 'option-3',
-        label: 'Option 3 Label',
-      }, {
-        value: 'option-4',
-        label: 'Option 4 Label',
-      }],
+      options: [
+        {
+          value: 'option-1',
+          label: 'Option 1 Label',
+        },
+        {
+          value: 'option-2',
+          label: 'Option 2 Label',
+        },
+        {
+          value: 'option-3',
+          label: 'Option 3 Label',
+        },
+        {
+          value: 'option-4',
+          label: 'Option 4 Label',
+        },
+      ],
       defaultValue: 'option-1',
     },
     {
       name: 'selectMany',
       label: 'Select w/ hasMany',
       type: 'select',
-      options: [{
-        value: 'option-1',
-        label: 'Option 1 Label',
-      }, {
-        value: 'option-2',
-        label: 'Option 2 Label',
-      }, {
-        value: 'option-3',
-        label: 'Option 3 Label',
-      }, {
-        value: 'option-4',
-        label: 'Option 4 Label',
-      }],
+      options: [
+        {
+          value: 'option-1',
+          label: 'Option 1 Label',
+        },
+        {
+          value: 'option-2',
+          label: 'Option 2 Label',
+        },
+        {
+          value: 'option-3',
+          label: 'Option 3 Label',
+        },
+        {
+          value: 'option-4',
+          label: 'Option 4 Label',
+        },
+      ],
       defaultValue: ['option-1', 'option-4'],
       hasMany: true,
     },
@@ -79,16 +89,20 @@ const DefaultValues: CollectionConfig = {
       name: 'radioGroupExample',
       label: 'Radio Group Example',
       type: 'radio',
-      options: [{
-        value: 'option-1',
-        label: 'Options 1 Label',
-      }, {
-        value: 'option-2',
-        label: 'Option 2 Label',
-      }, {
-        value: 'option-3',
-        label: 'Option 3 Label',
-      }],
+      options: [
+        {
+          value: 'option-1',
+          label: 'Options 1 Label',
+        },
+        {
+          value: 'option-2',
+          label: 'Option 2 Label',
+        },
+        {
+          value: 'option-3',
+          label: 'Option 3 Label',
+        },
+      ],
       defaultValue: 'option-2',
     },
     {
@@ -99,7 +113,8 @@ const DefaultValues: CollectionConfig = {
           label: 'Email',
           type: 'email',
           defaultValue: 'some@email.com',
-        }, {
+        },
+        {
           name: 'number',
           label: 'Number',
           type: 'number',
@@ -264,28 +279,14 @@ const DefaultValues: CollectionConfig = {
       type: 'richText',
       label: 'Rich Text',
       admin: {
-        elements: [
-          'h1',
-          'h2',
-          'h3',
-          'h4',
-          'h5',
-          'h6',
-          'blockquote',
-          'ul',
-          'ol',
-          'link',
-        ],
-        leaves: [
-          'bold',
-          'italic',
-          'underline',
-          'strikethrough',
-        ],
+        elements: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'ul', 'ol', 'link'],
+        leaves: ['bold', 'italic', 'underline', 'strikethrough'],
       },
-      defaultValue: [{
-        children: [{ text: 'Cookin now' }],
-      }],
+      defaultValue: [
+        {
+          children: [{ text: 'Cookin now' }],
+        },
+      ],
     },
     {
       type: 'array',
@@ -307,9 +308,11 @@ const DefaultValues: CollectionConfig = {
       name: 'asyncText',
       type: 'text',
       defaultValue: async (): Promise<string> => {
-        return new Promise((resolve) => setTimeout(() => {
-          resolve('asyncFunction');
-        }, 50));
+        return new Promise((resolve) =>
+          setTimeout(() => {
+            resolve('asyncFunction');
+          }, 50),
+        );
       },
     },
     {

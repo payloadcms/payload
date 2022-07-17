@@ -32,5 +32,4 @@ export const conditionalLogicDoc = {
   fieldToToggle: 'spiderman',
 };
 
-
 export default ConditionalLogic;

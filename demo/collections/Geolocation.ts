@@ -19,9 +19,7 @@ const Geolocation: CollectionConfig = {
     read: () => true,
   },
   hooks: {
-    beforeRead: [
-      (operation) => operation.doc,
-    ],
+    beforeRead: [(operation) => operation.doc],
     beforeChange: [
       (operation) => {
         operation.data.beforeChange = !operation.data.location?.coordinates;

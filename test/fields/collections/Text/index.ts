@@ -18,5 +18,4 @@ export const textDoc = {
   text: 'Seeded text document',
 };
 
-
 export default TextFields;

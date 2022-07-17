@@ -4,14 +4,14 @@ import wait from '../src/utilities/wait';
 import { devUser } from './credentials';
 
 type FirstRegisterArgs = {
-  page: Page,
-  serverURL: string,
-}
+  page: Page;
+  serverURL: string;
+};
 
 type LoginArgs = {
-  page: Page,
-  serverURL: string,
-}
+  page: Page;
+  serverURL: string;
+};
 
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
   const { page, serverURL } = args;

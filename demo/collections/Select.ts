@@ -10,32 +10,40 @@ const Select: CollectionConfig = {
     {
       name: 'select',
       type: 'select',
-      options: [{
-        value: 'one',
-        label: 'One',
-      }, {
-        value: 'two',
-        label: 'Two',
-      }, {
-        value: 'three',
-        label: 'Three',
-      }],
+      options: [
+        {
+          value: 'one',
+          label: 'One',
+        },
+        {
+          value: 'two',
+          label: 'Two',
+        },
+        {
+          value: 'three',
+          label: 'Three',
+        },
+      ],
       label: 'Select From',
       required: true,
     },
     {
       name: 'selectHasMany',
       type: 'select',
-      options: [{
-        value: 'one',
-        label: 'One',
-      }, {
-        value: 'two',
-        label: 'Two',
-      }, {
-        value: 'three',
-        label: 'Three',
-      }],
+      options: [
+        {
+          value: 'one',
+          label: 'One',
+        },
+        {
+          value: 'two',
+          label: 'Two',
+        },
+        {
+          value: 'three',
+          label: 'Three',
+        },
+      ],
       label: 'Select HasMany',
       required: true,
       hasMany: true,
@@ -52,28 +60,35 @@ const Select: CollectionConfig = {
       name: 'selectWithEmptyString',
       type: 'select',
       defaultValue: '',
-      options: [{
-        value: '',
-        label: 'None',
-      }, {
-        value: 'option',
-        label: 'Option',
-      }],
+      options: [
+        {
+          value: '',
+          label: 'None',
+        },
+        {
+          value: 'option',
+          label: 'Option',
+        },
+      ],
       required: true,
     },
     {
       name: 'radio',
       type: 'radio',
-      options: [{
-        value: 'one',
-        label: 'One',
-      }, {
-        value: 'two',
-        label: 'Two',
-      }, {
-        value: 'three',
-        label: 'Three',
-      }],
+      options: [
+        {
+          value: 'one',
+          label: 'One',
+        },
+        {
+          value: 'two',
+          label: 'Two',
+        },
+        {
+          value: 'three',
+          label: 'Three',
+        },
+      ],
       label: 'Choose From',
       required: true,
     },
@@ -81,16 +96,20 @@ const Select: CollectionConfig = {
       name: 'radioWithEmptyString',
       type: 'radio',
       defaultValue: '',
-      options: [{
-        value: '',
-        label: 'None',
-      }, {
-        value: 'one',
-        label: 'One',
-      }, {
-        value: 'two',
-        label: 'Two',
-      }],
+      options: [
+        {
+          value: '',
+          label: 'None',
+        },
+        {
+          value: 'one',
+          label: 'One',
+        },
+        {
+          value: 'two',
+          label: 'Two',
+        },
+      ],
       required: true,
     },
   ],

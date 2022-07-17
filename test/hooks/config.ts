@@ -4,10 +4,7 @@ import TransformHooks from './collections/Transform';
 import Hooks, { hooksSlug } from './collections/Hook';
 
 export default buildConfig({
-  collections: [
-    TransformHooks,
-    Hooks,
-  ],
+  collections: [TransformHooks, Hooks],
   onInit: async (payload) => {
     await payload.create({
       collection: hooksSlug,

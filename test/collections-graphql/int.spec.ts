@@ -191,9 +191,7 @@ describe('collections-graphql', () => {
         const response = await client.request(query);
         const { docs } = response.Posts;
 
-        expect(docs).toContainEqual(
-          expect.objectContaining({ id: withDescription.id, title: withDescription.title }),
-        );
+        expect(docs).toContainEqual(expect.objectContaining({ id: withDescription.id, title: withDescription.title }));
       });
 
       it('exists - false', async () => {

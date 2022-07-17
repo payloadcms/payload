@@ -33,11 +33,7 @@ const LocalizedPosts: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: [
-      'title',
-      'priority',
-      'createdAt',
-    ],
+    defaultColumns: ['title', 'priority', 'createdAt'],
     enableRichTextRelationship: true,
   },
   access: {
@@ -132,9 +128,7 @@ const LocalizedPosts: CollectionConfig = {
       label: 'Blocks',
       name: 'richTextBlocks',
       type: 'blocks',
-      blocks: [
-        RichTextBlock,
-      ],
+      blocks: [RichTextBlock],
     },
   ],
   timestamps: true,
