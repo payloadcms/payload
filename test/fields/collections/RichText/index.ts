@@ -1,4 +1,5 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
+import { loremIpsum } from './loremIpsum';
 
 const RichTextFields: CollectionConfig = {
   slug: 'rich-text-fields',
@@ -38,6 +39,20 @@ const RichTextFields: CollectionConfig = {
       name: 'richText',
       type: 'richText',
       required: true,
+      admin: {
+        upload: {
+          collections: {
+            uploads: {
+              fields: [
+                {
+                  name: 'caption',
+                  type: 'richText',
+                },
+              ],
+            },
+          },
+        },
+      },
     },
   ],
 };
@@ -131,38 +146,44 @@ export const richTextDoc = {
     {
       children: [
         {
-          text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam hendrerit nisi sed sollicitudin pellentesque. Nunc posuere purus rhoncus pulvinar aliquam. Ut aliquet tristique nisl vitae volutpat. Nulla aliquet porttitor venenatis. Donec a dui et dui fringilla consectetur id nec massa. Aliquam erat volutpat. Sed ut dui ut lacus dictum fermentum vel tincidunt neque. Sed sed lacinia lectus. Duis sit amet sodales felis. Duis nunc eros, mattis at dui ac, convallis semper risus. In adipiscing ultrices tellus, in suscipit massa vehicula eu.',
+          text: '',
         },
       ],
+      type: 'upload',
+      value: {
+        id: '',
+      },
+      relationTo: 'uploads',
+      fields: {
+        caption: [
+          ...[...Array(4)].map(() => {
+            return {
+              children: [
+                {
+                  text: loremIpsum,
+                },
+              ],
+            };
+          }),
+        ],
+      },
     },
     {
       children: [
         {
-          text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam hendrerit nisi sed sollicitudin pellentesque. Nunc posuere purus rhoncus pulvinar aliquam. Ut aliquet tristique nisl vitae volutpat. Nulla aliquet porttitor venenatis. Donec a dui et dui fringilla consectetur id nec massa. Aliquam erat volutpat. Sed ut dui ut lacus dictum fermentum vel tincidunt neque. Sed sed lacinia lectus. Duis sit amet sodales felis. Duis nunc eros, mattis at dui ac, convallis semper risus. In adipiscing ultrices tellus, in suscipit massa vehicula eu.',
+          text: '',
         },
       ],
     },
-    {
-      children: [
-        {
-          text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam hendrerit nisi sed sollicitudin pellentesque. Nunc posuere purus rhoncus pulvinar aliquam. Ut aliquet tristique nisl vitae volutpat. Nulla aliquet porttitor venenatis. Donec a dui et dui fringilla consectetur id nec massa. Aliquam erat volutpat. Sed ut dui ut lacus dictum fermentum vel tincidunt neque. Sed sed lacinia lectus. Duis sit amet sodales felis. Duis nunc eros, mattis at dui ac, convallis semper risus. In adipiscing ultrices tellus, in suscipit massa vehicula eu.',
-        },
-      ],
-    },
-    {
-      children: [
-        {
-          text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam hendrerit nisi sed sollicitudin pellentesque. Nunc posuere purus rhoncus pulvinar aliquam. Ut aliquet tristique nisl vitae volutpat. Nulla aliquet porttitor venenatis. Donec a dui et dui fringilla consectetur id nec massa. Aliquam erat volutpat. Sed ut dui ut lacus dictum fermentum vel tincidunt neque. Sed sed lacinia lectus. Duis sit amet sodales felis. Duis nunc eros, mattis at dui ac, convallis semper risus. In adipiscing ultrices tellus, in suscipit massa vehicula eu.',
-        },
-      ],
-    },
-    {
-      children: [
-        {
-          text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam hendrerit nisi sed sollicitudin pellentesque. Nunc posuere purus rhoncus pulvinar aliquam. Ut aliquet tristique nisl vitae volutpat. Nulla aliquet porttitor venenatis. Donec a dui et dui fringilla consectetur id nec massa. Aliquam erat volutpat. Sed ut dui ut lacus dictum fermentum vel tincidunt neque. Sed sed lacinia lectus. Duis sit amet sodales felis. Duis nunc eros, mattis at dui ac, convallis semper risus. In adipiscing ultrices tellus, in suscipit massa vehicula eu.',
-        },
-      ],
-    },
+    ...[...Array(4)].map(() => {
+      return {
+        children: [
+          {
+            text: loremIpsum,
+          },
+        ],
+      };
+    }),
   ],
 };
 

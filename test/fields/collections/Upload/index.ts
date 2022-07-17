@@ -1,8 +1,11 @@
 import { CollectionConfig } from '../../../../src/collections/config/types';
+import path from 'path';
 
 const Uploads: CollectionConfig = {
   slug: 'uploads',
-  upload: true,
+  upload: {
+    staticDir: path.resolve(__dirname, './uploads'),
+  },
   fields: [
     {
       type: 'text',

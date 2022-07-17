@@ -13,9 +13,9 @@ import Form from '../../../../../../Form';
 import reduceFieldsToValues from '../../../../../../Form/reduceFieldsToValues';
 import Submit from '../../../../../../Submit';
 import { Field } from '../../../../../../../../../fields/config/types';
+import { useLocale } from '../../../../../../../utilities/Locale';
 
 import './index.scss';
-import { useLocale } from '../../../../../../../utilities/Locale';
 
 const baseClass = 'edit-upload-modal';
 
@@ -51,7 +51,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema, data: element?.fields, user, operation: 'update', locale });
+      const state = await buildStateFromSchema({ fieldSchema, data: { ...element?.fields || {} }, user, operation: 'update', locale });
       setInitialState(state);
     };
 
@@ -63,7 +63,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
       slug={slug}
       className={baseClass}
     >
-      <MinimalTemplate width="normal">
+      <MinimalTemplate width="wide">
         <header className={`${baseClass}__header`}>
           <h1>
             Edit

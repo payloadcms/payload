@@ -69,13 +69,19 @@ export default buildConfig({
 
     if (fs.existsSync(uploadsDir)) fs.readdirSync(uploadsDir).forEach((f) => fs.rmSync(`${uploadsDir}/${f}`));
 
-    const filePath = path.resolve(__dirname, './collections/Upload/payload.png');
+    const filePath = path.resolve(__dirname, './collections/Upload/payload.jpg');
     const file = getFileByPath(filePath);
 
     const createdUploadDoc = await payload.create({ collection: 'uploads', data: uploadsDoc, file });
 
     const richTextDocWithRelationship = { ...richTextDoc };
-    richTextDocWithRelationship.richText[2].value = { id: createdTextDoc.id };
+
+    const richTextRelationshipIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'relationship');
+    richTextDocWithRelationship.richText[richTextRelationshipIndex].value = { id: createdTextDoc.id };
+
+    const richTextUploadIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'upload');
+    richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdUploadDoc.id };
+
     await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship });
   },
 });
