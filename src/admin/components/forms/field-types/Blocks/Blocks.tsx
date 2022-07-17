@@ -336,6 +336,7 @@ const Blocks: React.FC<Props> = (props) => {
                               value={row.id}
                             />
                             <RenderFields
+                              className={`${baseClass}__fields`}
                               forceRender
                               readOnly={readOnly}
                               fieldTypes={fieldTypes}

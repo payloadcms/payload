@@ -1,4 +1,5 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
+import { blocksField, blocksFieldSeedData } from '../Blocks';
 
 const TabsFields: CollectionConfig = {
   slug: 'tabs-fields',
@@ -8,8 +9,8 @@ const TabsFields: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Tab One',
-          description: 'Here is a description for tab one',
+          label: 'Tab with Array',
+          description: 'This tab has an array.',
           fields: [
             {
               name: 'array',
@@ -30,24 +31,27 @@ const TabsFields: CollectionConfig = {
           ],
         },
         {
-          label: 'Tab Two',
-          description: 'Description for tab two',
+          label: 'Tab with Blocks',
+          description: 'Blocks are rendered here to ensure they populate and render correctly.',
           fields: [
-            {
-              name: 'text',
-              type: 'text',
-              required: true,
-            },
+            blocksField,
           ],
         },
         {
-          label: 'Tab Three',
-          description: 'Description for tab three',
+          label: 'Tab with Group',
+          description: 'This tab has a group, which should not render its top border or margin.',
           fields: [
             {
-              name: 'number',
-              type: 'number',
-              required: true,
+              name: 'group',
+              type: 'group',
+              label: 'Group',
+              fields: [
+                {
+                  name: 'number',
+                  type: 'number',
+                  required: true,
+                },
+              ],
             },
           ],
         },
@@ -100,8 +104,10 @@ export const tabsDoc = {
       text: 'Here is some data for the third row',
     },
   ],
-  text: 'This text will show up in the second tab input',
-  number: 12,
+  blocks: blocksFieldSeedData,
+  group: {
+    number: 12,
+  },
   textarea: 'Here is some text that goes in a textarea',
   anotherText: 'Super tired of writing this text',
 };

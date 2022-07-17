@@ -4,7 +4,7 @@ import SortColumn from '../../../elements/SortColumn';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { Column } from '../../../elements/Table/types';
 import { fieldIsPresentationalOnly } from '../../../../../fields/config/types';
-import flattenFields from '../../../../utilities/flattenTopLevelFields';
+import flattenFields from '../../../../../utilities/flattenTopLevelFields';
 
 const buildColumns = (collection: SanitizedCollectionConfig, columns: string[]): Column[] => {
   const flattenedFields = flattenFields([

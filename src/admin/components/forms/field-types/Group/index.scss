@@ -21,6 +21,31 @@
     }
   }
 
+  &--within-group {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+    border-top: 0;
+    border-bottom: 0;
+  }
+
+  &--within-tab:first-child {
+    margin-top: 0;
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  &--within-tab:last-child {
+    margin-bottom: 0;
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  &--gutter {
+    border-left: 1px solid var(--theme-elevation-100);
+    padding: 0 0 0 $baseline;
+  }
+
   &__header {
     margin-bottom: base(.75);
   }
@@ -30,9 +55,20 @@
   }
 
   @include small-break {
+    padding-top: $baseline;
+    padding-bottom: $baseline;
+
     &--within-collapsible {
       margin-left: calc(var(--gutter-h) * -1);
       margin-right: calc(var(--gutter-h) * -1);
+    }
+
+    &--within-group {
+      padding: 0;
+    }
+
+    &--gutter {
+      padding-left: var(--gutter-h);
     }
   }
 }

@@ -7,7 +7,7 @@ import Button from '../Button';
 import reducer from './reducer';
 import Condition from './Condition';
 import fieldTypes from './field-types';
-import flattenTopLevelFields from '../../../utilities/flattenTopLevelFields';
+import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 import { useSearchParams } from '../../utilities/SearchParams';
 import validateWhereQuery from './validateWhereQuery';
 import { Where } from '../../../../types';

@@ -74,7 +74,7 @@
     }
   }
 
-  .field-type:last-child {
+  &__fields>.field-type:last-child {
     margin-bottom: 0;
   }
 }

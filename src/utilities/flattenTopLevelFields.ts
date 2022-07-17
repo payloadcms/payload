@@ -1,4 +1,4 @@
-import { Field, FieldAffectingData, fieldAffectsData, fieldHasSubFields, fieldIsPresentationalOnly, FieldPresentationalOnly } from '../../fields/config/types';
+import { Field, FieldAffectingData, fieldAffectsData, fieldHasSubFields, fieldIsPresentationalOnly, FieldPresentationalOnly } from '../fields/config/types';
 
 const flattenFields = (fields: Field[], keepPresentationalFields?: boolean): (FieldAffectingData | FieldPresentationalOnly)[] => {
   return fields.reduce((fieldsToUse, field) => {

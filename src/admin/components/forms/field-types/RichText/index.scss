@@ -9,7 +9,7 @@
     margin-bottom: $baseline;
     border: $style-stroke-width-s solid var(--theme-elevation-150);
     position: sticky;
-    z-index: 2;
+    z-index: 1;
     top: base(4);
   }
 
@@ -75,6 +75,13 @@
     h6[data-slate-node=element] {
       font-size: base(.75);
       margin: base(.25) 0 base(.25);
+    }
+  }
+
+  &--gutter {
+    .rich-text__editor {
+      padding-left: $baseline;
+      border-left: 1px solid var(--theme-elevation-100);
     }
   }
 

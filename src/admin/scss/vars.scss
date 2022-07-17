@@ -22,14 +22,14 @@ $baseline : math.div($baseline-px, $baseline-body-size)+rem;
 }
 
 //////////////////////////////
-// FONTS (LEGACY - DO NOT USE. PREFER CSS VARIABLES)
+// FONTS (DEPRECATED. DO NOT USE. PREFER CSS VARIABLES)
 //////////////////////////////
 
 $font-body : 'Suisse Intl' !default;
 $font-mono : monospace !default;
 
 //////////////////////////////
-// COLORS (LEGACY - DO NOT USE. PREFER CSS VARIABLES)
+// COLORS (DEPRECATED. DO NOT USE. PREFER CSS VARIABLES)
 //////////////////////////////
 
 $color-dark-gray : #333333 !default;
@@ -180,9 +180,5 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
     &:hover {
       border-color: var(--theme-elevation-150);
     }
-  }
-
-  @include small-break {
-    margin-bottom: base(.5);
   }
 }

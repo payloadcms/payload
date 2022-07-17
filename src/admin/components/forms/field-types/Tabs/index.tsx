@@ -6,6 +6,7 @@ import { fieldAffectsData } from '../../../../../fields/config/types';
 import FieldDescription from '../../FieldDescription';
 import toKebabCase from '../../../../../utilities/toKebabCase';
 import { useCollapsible } from '../../../elements/Collapsible/provider';
+import { TabsProvider } from './provider';
 
 import './index.scss';
 
@@ -35,25 +36,26 @@ const TabsField: React.FC<Props> = (props) => {
       isWithinCollapsible && `${baseClass}--within-collapsible`,
     ].filter(Boolean).join(' ')}
     >
-      <div className={`${baseClass}__tabs`}>
-        {tabs.map((tab, i) => {
-          return (
-            <button
-              key={i}
-              type="button"
-              className={[
-                `${baseClass}__tab-button`,
-                active === i && `${baseClass}__tab-button--active`,
-              ].filter(Boolean).join(' ')}
-              onClick={() => setActive(i)}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-      <div className={`${baseClass}__content-wrap`}>
-        {activeTab && (
+      <TabsProvider>
+        <div className={`${baseClass}__tabs`}>
+          {tabs.map((tab, i) => {
+            return (
+              <button
+                key={i}
+                type="button"
+                className={[
+                  `${baseClass}__tab-button`,
+                  active === i && `${baseClass}__tab-button--active`,
+                ].filter(Boolean).join(' ')}
+                onClick={() => setActive(i)}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+        <div className={`${baseClass}__content-wrap`}>
+          {activeTab && (
           <div className={[
             `${baseClass}__tab`,
             `${baseClass}__tab-${toKebabCase(activeTab.label)}`,
@@ -74,8 +76,9 @@ const TabsField: React.FC<Props> = (props) => {
               }))}
             />
           </div>
-        )}
-      </div>
+          )}
+        </div>
+      </TabsProvider>
     </div>
   );
 };

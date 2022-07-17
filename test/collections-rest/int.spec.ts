@@ -92,7 +92,7 @@ describe('collections-rest', () => {
       let relation: Relation;
       let relation2: Relation;
       const nameToQuery = 'name';
-      const nameToQuery2 = 'name';
+      const nameToQuery2 = 'name2';
 
       beforeEach(async () => {
         ({ doc: relation } = await client.create<Relation>({

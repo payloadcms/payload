@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import flattenTopLevelFields from '../../../utilities/flattenTopLevelFields';
+import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 import Pill from '../Pill';
 import Plus from '../../icons/Plus';
 import X from '../../icons/X';
