@@ -210,7 +210,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
         )}
         {doc?.version && (
           <RenderFieldsToDiff
-            locales={locales.map(({ value }) => value)}
+            locales={locales ? locales.map(({ value }) => value) : []}
             fields={fields}
             fieldComponents={fieldComponents}
             fieldPermissions={fieldPermissions}
