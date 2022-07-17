@@ -10,11 +10,31 @@ export default buildConfig({
     {
       slug,
       auth: {
-        verify: true,
-        useAPIKey: true,
+        tokenExpiration: 7200, // 2 hours
+        verify: false,
         maxLoginAttempts: 2,
+        lockTime: 600 * 1000, // lock time in ms
+        useAPIKey: true,
+        depth: 0,
+        cookies: {
+          secure: false,
+          sameSite: 'lax',
+          domain: undefined,
+        },
       },
-      fields: [],
+      fields: [
+        {
+          name: 'roles',
+          label: 'Role',
+          type: 'select',
+          options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
+          defaultValue: 'user',
+          required: true,
+          saveToJWT: true,
+          hasMany: true,
+        },
+
+      ],
     },
   ],
 });
