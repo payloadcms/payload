@@ -8,6 +8,9 @@ const RichTextFields: CollectionConfig = {
       name: 'selectHasMany',
       hasMany: true,
       type: 'select',
+      admin: {
+        description: 'This select field is rendered here to ensure its options dropdown renders above the rich text toolbar.',
+      },
       options: [
         {
           label: 'Value One',
@@ -58,7 +61,7 @@ const RichTextFields: CollectionConfig = {
 };
 
 export const richTextDoc = {
-  select: ['one', 'five'],
+  selectHasMany: ['one', 'five'],
   richText: [
     {
       children: [
