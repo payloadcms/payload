@@ -5,7 +5,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
 import type { Post } from './config';
-import { slug } from './config';
+import { globalSlug, slug } from './config';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import wait from '../../src/utilities/wait';
 
@@ -16,7 +16,7 @@ const description = 'description';
 
 let url: AdminUrlUtil;
 
-describe('collections', () => {
+describe('admin', () => {
   let page: Page;
 
   beforeAll(async ({ browser }) => {
@@ -37,10 +37,17 @@ describe('collections', () => {
   describe('Nav', () => {
     test('should nav to collection - sidebar', async () => {
       await page.goto(url.admin);
-      const collectionLink = page.locator(`nav >> text=${slug}`);
+      const collectionLink = page.locator(`#nav-${slug}`);
       await collectionLink.click();
 
       expect(page.url()).toContain(url.list);
+    });
+
+    test('should nav to a global - sidebar', async () => {
+      await page.goto(url.admin);
+      await page.locator(`#nav-global-${globalSlug}`).click();
+
+      expect(page.url()).toContain(url.global(globalSlug));
     });
 
     test('should navigate to collection - card', async () => {
@@ -123,6 +130,16 @@ describe('collections', () => {
       await page.locator('#action-save').click();
       expect(page.url()).not.toContain(id); // new id
     });
+
+    test('should save globals', async () => {
+      await page.goto(url.global(globalSlug));
+
+      await page.locator('#field-title').fill(title);
+      await page.click('#action-save', { delay: 100 });
+
+      await expect(page.locator('.Toastify__toast--success')).toHaveCount(1);
+      await expect(page.locator('#field-title')).toHaveValue(title);
+    });
   });
 
   describe('list view', () => {
@@ -181,7 +198,8 @@ describe('collections', () => {
         await wait(1000);
 
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
-        const firstId = await page.locator(tableRowLocator).first().locator('td').first().innerText();
+        const firstId = await page.locator(tableRowLocator).first().locator('td').first()
+          .innerText();
         expect(firstId).toEqual(id);
 
         // Remove filter

@@ -115,7 +115,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                           </React.Fragment>
                         )}
                         {!global.versions?.drafts && (
-                          <FormSubmit>Save</FormSubmit>
+                          <FormSubmit buttonId="action-save">Save</FormSubmit>
                         )}
                       </React.Fragment>
                     )}

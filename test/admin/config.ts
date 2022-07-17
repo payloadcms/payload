@@ -3,6 +3,7 @@ import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
 
 export const slug = 'posts';
+export const globalSlug = 'global';
 
 export interface Post {
   id: string;
@@ -23,6 +24,17 @@ export default buildConfig({
         },
         {
           name: 'description',
+          type: 'text',
+        },
+      ],
+    },
+  ],
+  globals: [
+    {
+      slug: globalSlug,
+      fields: [
+        {
+          name: 'title',
           type: 'text',
         },
       ],
