@@ -7,8 +7,12 @@ module.exports = {
       jsx: true,
     },
   },
-  plugins: ['@typescript-eslint', 'prettier'],
-  extends: ['@trbl', 'plugin:prettier/recommended'],
+  plugins: [
+    '@typescript-eslint',
+  ],
+  extends: [
+    '@trbl',
+  ],
   settings: {
     'import/resolver': {
       node: {
@@ -18,41 +22,41 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['test/**/*'],
-      rules: {
-        'prettier/prettier': 'error',
-      },
-    },
-    {
       files: ['test/**/int.spec.ts'],
       rules: {
         '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/consistent-type-imports': 'warn',
         'jest/prefer-strict-equal': 'off',
-      },
+      }
     },
     {
       files: ['test/**/e2e.spec.ts'],
-      extends: ['plugin:playwright/playwright-test'],
+      extends: [
+        'plugin:playwright/playwright-test'
+      ],
       rules: {
         'jest/consistent-test-it': 'off',
         'jest/require-top-level-describe': 'off',
         'jest/no-test-callback': 'off',
         'jest/prefer-strict-equal': 'off',
         'jest/expect-expect': 'off',
-      },
+      }
     },
     {
       files: ['*.ts', '*.tsx'],
       parser: '@typescript-eslint/parser',
-      extends: ['plugin:@typescript-eslint/recommended'],
+      extends: [
+        'plugin:@typescript-eslint/recommended',
+      ],
       rules: {
         'no-shadow': 'off',
         '@typescript-eslint/no-shadow': ['error'],
         'import/no-unresolved': [
           2,
           {
-            ignore: ['payload-config'],
+            ignore: [
+              'payload-config',
+            ],
           },
         ],
       },

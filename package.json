@@ -52,8 +52,7 @@
     "release:minor": "release-it minor",
     "release:major": "release-it major",
     "release:beta": "release-it prepatch --config .release-it.beta.json",
-    "lint": "eslint \"src/**/*.ts\"",
-    "lint:fix": "eslint --fix --ext .ts,.tsx test"
+    "lint": "eslint \"src/**/*.ts\""
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"
@@ -257,20 +256,18 @@
     "@types/webpack-dev-middleware": "4.0.0",
     "@types/webpack-env": "^1.15.3",
     "@types/webpack-hot-middleware": "2.25.3",
-    "@typescript-eslint/eslint-plugin": "^5.30.6",
-    "@typescript-eslint/parser": "^5.30.6",
+    "@typescript-eslint/eslint-plugin": "^4.8.1",
+    "@typescript-eslint/parser": "4.0.1",
     "babel-eslint": "^10.0.1",
     "babel-plugin-ignore-html-and-css-imports": "^0.1.0",
     "copyfiles": "^2.4.0",
     "cross-env": "^7.0.2",
-    "eslint": "^8.20.0",
-    "eslint-config-prettier": "^8.5.0",
+    "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-jest": "^23.16.0",
     "eslint-plugin-jest-dom": "^4.0.1",
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-playwright": "^0.9.0",
-    "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.18.0",
     "eslint-plugin-react-hooks": "^2.3.0",
     "form-data": "^3.0.0",
