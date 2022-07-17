@@ -2,6 +2,7 @@ import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
 import type { Post } from './payload-types';
+import Endpoints from './Endpoints';
 
 export interface Relation {
   id: string;
@@ -89,6 +90,7 @@ export default buildConfig({
     },
     collectionWithName(relationSlug),
     collectionWithName('dummy'),
+    Endpoints,
   ],
   onInit: async (payload) => {
     await payload.create({
