@@ -1,3 +1,5 @@
+import path from 'path';
+import fs from 'fs';
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
 import ArrayFields, { arrayDoc } from './collections/Array';
@@ -10,8 +12,22 @@ import TabsFields, { tabsDoc } from './collections/Tabs';
 import TextFields, { textDoc } from './collections/Text';
 import PointFields, { pointDoc } from './collections/Point';
 import GroupFields, { groupDoc } from './collections/Group';
+import getFileByPath from '../../src/uploads/getFileByPath';
+import Uploads, { uploadsDoc } from './collections/Upload';
 
 export default buildConfig({
+  admin: {
+    webpack: (config) => ({
+      ...config,
+      resolve: {
+        ...config.resolve,
+        alias: {
+          ...config?.resolve?.alias,
+          fs: path.resolve(__dirname, './mocks/emptyModule.js'),
+        },
+      },
+    }),
+  },
   collections: [
     ArrayFields,
     BlockFields,
@@ -23,6 +39,7 @@ export default buildConfig({
     SelectFields,
     TabsFields,
     TextFields,
+    Uploads,
   ],
   localization: {
     defaultLocale: 'en',
@@ -37,57 +54,28 @@ export default buildConfig({
       },
     });
 
-    await payload.create({
-      collection: 'array-fields',
-      data: arrayDoc,
-    });
+    await payload.create({ collection: 'array-fields', data: arrayDoc });
+    await payload.create({ collection: 'block-fields', data: blocksDoc });
+    await payload.create({ collection: 'collapsible-fields', data: collapsibleDoc });
+    await payload.create({ collection: 'conditional-logic', data: conditionalLogicDoc });
+    await payload.create({ collection: 'group-fields', data: groupDoc });
+    await payload.create({ collection: 'select-fields', data: selectsDoc });
+    await payload.create({ collection: 'tabs-fields', data: tabsDoc });
+    await payload.create({ collection: 'point-fields', data: pointDoc });
 
-    await payload.create({
-      collection: 'block-fields',
-      data: blocksDoc,
-    });
+    const createdTextDoc = await payload.create({ collection: 'text-fields', data: textDoc });
 
-    await payload.create({
-      collection: 'collapsible-fields',
-      data: collapsibleDoc,
-    });
+    const uploadsDir = path.resolve(__dirname, './collections/Upload/uploads');
 
-    await payload.create({
-      collection: 'conditional-logic',
-      data: conditionalLogicDoc,
-    });
+    if (fs.existsSync(uploadsDir)) fs.readdirSync(uploadsDir).forEach((f) => fs.rmSync(`${uploadsDir}/${f}`));
 
-    await payload.create({
-      collection: 'group-fields',
-      data: groupDoc,
-    });
+    const filePath = path.resolve(__dirname, './collections/Upload/payload.png');
+    const file = getFileByPath(filePath);
 
-    await payload.create({
-      collection: 'select-fields',
-      data: selectsDoc,
-    });
-
-    await payload.create({
-      collection: 'tabs-fields',
-      data: tabsDoc,
-    });
-
-    await payload.create({
-      collection: 'point-fields',
-      data: pointDoc,
-    });
-
-    const createdTextDoc = await payload.create({
-      collection: 'text-fields',
-      data: textDoc,
-    });
+    const createdUploadDoc = await payload.create({ collection: 'uploads', data: uploadsDoc, file });
 
     const richTextDocWithRelationship = { ...richTextDoc };
     richTextDocWithRelationship.richText[2].value = { id: createdTextDoc.id };
-
-    await payload.create({
-      collection: 'rich-text-fields',
-      data: richTextDocWithRelationship,
-    });
+    await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship });
   },
 });
