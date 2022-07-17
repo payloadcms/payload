@@ -24,6 +24,7 @@ export type SelectInputProps = Omit<SelectField, 'type' | 'value' | 'options'> &
   width?: string
   hasMany?: boolean
   options?: OptionObject[]
+  isClearable?: boolean
 }
 
 const SelectInput: React.FC<SelectInputProps> = (props) => {

@@ -229,7 +229,9 @@ export type SelectField = FieldBase & {
   type: 'select'
   options: Option[]
   hasMany?: boolean
-  isClearable?: boolean;
+  admin?: Admin & {
+    isClearable?: boolean;
+  }
 }
 
 export type RelationshipField = FieldBase & {

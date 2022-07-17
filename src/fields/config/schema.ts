@@ -144,7 +144,9 @@ export const select = baseField.keys({
     joi.array().items(joi.string().allow('')),
     joi.func(),
   ),
-  isClearable: joi.boolean().default(false),
+  admin: baseAdminFields.keys({
+    isClearable: joi.boolean().default(false),
+  }),
 });
 
 export const radio = baseField.keys({

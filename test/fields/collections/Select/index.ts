@@ -6,6 +6,9 @@ const SelectFields: CollectionConfig = {
     {
       name: 'select',
       type: 'select',
+      admin: {
+        isClearable: true,
+      },
       options: [
         {
           label: 'Value One',
@@ -25,6 +28,9 @@ const SelectFields: CollectionConfig = {
       name: 'selectHasMany',
       hasMany: true,
       type: 'select',
+      admin: {
+        isClearable: true,
+      },
       options: [
         {
           label: 'Value One',
