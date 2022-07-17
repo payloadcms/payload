@@ -34,7 +34,7 @@ jobs:
 
     - name: Component Tests
       run: yarn test:components
-    - name: Integraion Tests
+    - name: Integration Tests
       run: yarn test:int
 
     - name: Generate Payload Types
