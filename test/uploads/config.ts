@@ -1,8 +1,8 @@
 import path from 'path';
-import fs from 'fs';
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
 import getFileByPath from '../../src/uploads/getFileByPath';
+import removeFiles from '../helpers/removeFiles';
 
 export const mediaSlug = 'media';
 
@@ -77,9 +77,8 @@ export default buildConfig({
     },
   ],
   onInit: async (payload) => {
-    // delete files in /media
-    const mediaDir = path.resolve(__dirname, './media');
-    fs.readdirSync(mediaDir).forEach((f) => fs.rmSync(`${mediaDir}/${f}`));
+    const uploadsDir = path.resolve(__dirname, './media');
+    removeFiles(uploadsDir);
 
     await payload.create({
       collection: 'users',
