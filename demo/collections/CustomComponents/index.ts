@@ -202,7 +202,8 @@ const CustomComponents: CollectionConfig = {
               Field: NestedText1Field,
             },
           },
-        }, {
+        },
+        {
           name: 'nestedText2',
           label: 'Nested Text 2',
           type: 'text',

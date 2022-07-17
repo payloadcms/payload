@@ -25,9 +25,7 @@ const Media: CollectionConfig = {
     description: 'No selfies please',
   },
   hooks: {
-    beforeChange: [
-      checkForUploadSizesHook,
-    ],
+    beforeChange: [checkForUploadSizesHook],
   },
   upload: {
     staticURL: '/media',

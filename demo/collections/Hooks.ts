@@ -1,6 +1,14 @@
 /* eslint-disable no-param-reassign, no-console */
 // If importing outside of demo project, should import CollectionAfterReadHook, CollectionBeforeChangeHook, etc
-import { AfterChangeHook, AfterDeleteHook, AfterReadHook, BeforeChangeHook, BeforeDeleteHook, BeforeReadHook, CollectionConfig } from '../../src/collections/config/types';
+import {
+  AfterChangeHook,
+  AfterDeleteHook,
+  AfterReadHook,
+  BeforeChangeHook,
+  BeforeDeleteHook,
+  BeforeReadHook,
+  CollectionConfig,
+} from '../../src/collections/config/types';
 import { FieldHook } from '../../src/fields/config/types';
 import { Hook } from '../payload-types';
 
@@ -50,7 +58,7 @@ const Hooks: CollectionConfig = {
         doc.findMany = findMany;
 
         return doc;
-      }) as AfterReadHook<Hook & { afterReadHook: boolean, findMany: boolean }>,
+      }) as AfterReadHook<Hook & { afterReadHook: boolean; findMany: boolean }>,
     ],
     afterChange: [
       ((operation) => {
@@ -79,9 +87,7 @@ const Hooks: CollectionConfig = {
       unique: true,
       localized: true,
       hooks: {
-        afterRead: [
-          ({ value }) => (value ? value.toUpperCase() : null) as FieldHook<Hook, 'title'>,
-        ],
+        afterRead: [({ value }) => (value ? value.toUpperCase() : null) as FieldHook<Hook, 'title'>],
       },
     },
     {

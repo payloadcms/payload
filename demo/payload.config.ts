@@ -72,15 +72,9 @@ export default buildConfig({
           Component: CustomRouteWithDefaultTemplate,
         },
       ],
-      afterDashboard: [
-        AfterDashboard,
-      ],
-      beforeLogin: [
-        BeforeLogin,
-      ],
-      afterNavLinks: [
-        AfterNavLinks,
-      ],
+      afterDashboard: [AfterDashboard],
+      beforeLogin: [BeforeLogin],
+      afterNavLinks: [AfterNavLinks],
       // Nav: () => (
       //   <div>Hello</div>
       // ),
@@ -125,11 +119,7 @@ export default buildConfig({
     Uniques,
     UnstoredMedia,
   ],
-  globals: [
-    BlocksGlobal,
-    NavigationArray,
-    GlobalWithStrictAccess,
-  ],
+  globals: [BlocksGlobal, NavigationArray, GlobalWithStrictAccess],
   // cors: [
   //   'http://localhost',
   //   'http://localhost:3000',
@@ -161,10 +151,7 @@ export default buildConfig({
   // },
   maxDepth: 10,
   localization: {
-    locales: [
-      'en',
-      'es',
-    ],
+    locales: ['en', 'es'],
     defaultLocale: 'en',
     fallback: true,
   },

@@ -70,7 +70,8 @@ const Validations: CollectionConfig = {
 
             return true;
           },
-        }, {
+        },
+        {
           name: 'greaterThan10LessThan50',
           label: 'Greater than 10, Less than 50',
           type: 'number',

@@ -95,15 +95,8 @@ const RichText: CollectionConfig = {
       label: 'Customized Rich Text',
       required: true,
       admin: {
-        elements: [
-          'h2',
-          'h3',
-          Button,
-        ],
-        leaves: [
-          'bold',
-          PurpleBackground,
-        ],
+        elements: ['h2', 'h3', Button],
+        leaves: ['bold', PurpleBackground],
       },
     },
   ],

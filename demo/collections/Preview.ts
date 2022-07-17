@@ -11,7 +11,7 @@ const Preview: CollectionConfig = {
     preview: async (doc, { token }) => {
       const { title } = doc;
       if (title) {
-        const mockAsyncReq = await fetch(`http://localhost:3000/api/previewable-post?depth=0`)
+        const mockAsyncReq = await fetch(`http://localhost:3000/api/previewable-post?depth=0`);
         const mockJSON = await mockAsyncReq.json();
         const mockParam = mockJSON?.docs?.[0]?.title || '';
         return `http://localhost:3000/previewable-posts/${title}?preview=true&token=${token}&mockParam=${mockParam}`;

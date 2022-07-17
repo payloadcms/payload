@@ -32,15 +32,18 @@ const NavigationArray: GlobalConfig = {
       label: 'Array',
       type: 'array',
       localized: true,
-      fields: [{
-        name: 'text',
-        label: 'Text',
-        type: 'text',
-      }, {
-        name: 'textarea',
-        label: 'Textarea',
-        type: 'textarea',
-      }],
+      fields: [
+        {
+          name: 'text',
+          label: 'Text',
+          type: 'text',
+        },
+        {
+          name: 'textarea',
+          label: 'Textarea',
+          type: 'textarea',
+        },
+      ],
     },
   ],
 };
