@@ -18,10 +18,9 @@ export interface User {
   email?: string;
   resetPasswordToken?: string;
   resetPasswordExpiration?: string;
-  _verified?: boolean;
-  _verificationToken?: string;
   loginAttempts?: number;
   lockUntil?: string;
+  roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   createdAt: string;
   updatedAt: string;
 }

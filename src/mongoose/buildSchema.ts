@@ -196,7 +196,7 @@ const fieldToSchemaMap = {
         type: [Number],
         sparse: field.unique && field.localized,
         unique: field.unique || false,
-        required: (field.required && !field.localized && !field?.admin?.condition && !field?.access?.create) || false,
+        required: false,
         default: field.defaultValue || undefined,
       },
     };

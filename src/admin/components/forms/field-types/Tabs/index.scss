@@ -13,9 +13,7 @@
   }
 
   &--within-collapsible {
-    margin-left: calc(#{$baseline} * -1);
-    margin-right: calc(#{$baseline} * -1);
-    margin-bottom: 0;
+    margin: 0 calc(#{$baseline} * -1);
 
     .tabs-field__tabs,
     .tabs-field__content-wrap {
