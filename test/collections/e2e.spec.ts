@@ -64,7 +64,6 @@ describe('collections', () => {
     });
   });
 
-
   describe('CRUD', () => {
     test('should create', async () => {
       await page.goto(url.create);
@@ -182,8 +181,7 @@ describe('collections', () => {
         await wait(1000);
 
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
-        const firstId = await page.locator(tableRowLocator).first().locator('td').first()
-          .innerText();
+        const firstId = await page.locator(tableRowLocator).first().locator('td').first().innerText();
         expect(firstId).toEqual(id);
 
         // Remove filter

@@ -12,13 +12,7 @@ import type {
   RelationTwo,
   RelationWithTitle,
 } from './config';
-import {
-  relationOneSlug,
-  relationRestrictedSlug,
-  relationTwoSlug,
-  relationWithTitleSlug,
-  slug,
-} from './config';
+import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationWithTitleSlug, slug } from './config';
 import wait from '../../src/utilities/wait';
 
 const { beforeAll, describe } = test;

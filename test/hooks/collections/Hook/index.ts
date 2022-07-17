@@ -7,55 +7,63 @@ const Hooks: CollectionConfig = {
   slug: hooksSlug,
   access: openAccess,
   hooks: {
-    beforeValidate: [({ data }) => (validateHookOrder('collectionBeforeValidate', data))],
-    beforeChange: [({ data }) => (validateHookOrder('collectionBeforeChange', data))],
-    afterChange: [({ doc }) => (validateHookOrder('collectionAfterChange', doc))],
-    beforeRead: [({ doc }) => (validateHookOrder('collectionBeforeRead', doc))],
-    afterRead: [({ doc }) => (validateHookOrder('collectionAfterRead', doc))],
+    beforeValidate: [({ data }) => validateHookOrder('collectionBeforeValidate', data)],
+    beforeChange: [({ data }) => validateHookOrder('collectionBeforeChange', data)],
+    afterChange: [({ doc }) => validateHookOrder('collectionAfterChange', doc)],
+    beforeRead: [({ doc }) => validateHookOrder('collectionBeforeRead', doc)],
+    afterRead: [({ doc }) => validateHookOrder('collectionAfterRead', doc)],
   },
   fields: [
     {
       name: 'fieldBeforeValidate',
       type: 'checkbox',
       hooks: {
-        beforeValidate: [({ data }) => {
-          data.fieldBeforeValidate = true;
-          validateHookOrder('fieldBeforeValidate', data);
-          return true;
-        }],
+        beforeValidate: [
+          ({ data }) => {
+            data.fieldBeforeValidate = true;
+            validateHookOrder('fieldBeforeValidate', data);
+            return true;
+          },
+        ],
       },
     },
     {
       name: 'fieldBeforeChange',
       type: 'checkbox',
       hooks: {
-        beforeChange: [({ data }) => {
-          data.fieldBeforeChange = true;
-          validateHookOrder('fieldBeforeChange', data);
-          return true;
-        }],
+        beforeChange: [
+          ({ data }) => {
+            data.fieldBeforeChange = true;
+            validateHookOrder('fieldBeforeChange', data);
+            return true;
+          },
+        ],
       },
     },
     {
       name: 'fieldAfterChange',
       type: 'checkbox',
       hooks: {
-        afterChange: [({ data }) => {
-          data.fieldAfterChange = true;
-          validateHookOrder('fieldAfterChange', data);
-          return true;
-        }],
+        afterChange: [
+          ({ data }) => {
+            data.fieldAfterChange = true;
+            validateHookOrder('fieldAfterChange', data);
+            return true;
+          },
+        ],
       },
     },
     {
       name: 'fieldAfterRead',
       type: 'checkbox',
       hooks: {
-        afterRead: [({ data }) => {
-          data.fieldAfterRead = true;
-          validateHookOrder('fieldAfterRead', data);
-          return true;
-        }],
+        afterRead: [
+          ({ data }) => {
+            data.fieldAfterRead = true;
+            validateHookOrder('fieldAfterRead', data);
+            return true;
+          },
+        ],
       },
     },
     {

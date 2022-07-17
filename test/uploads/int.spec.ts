@@ -27,10 +27,7 @@ describe('Collections - Uploads', () => {
     describe('create', () => {
       it('creates from form data', async () => {
         const formData = new FormData();
-        formData.append(
-          'file',
-          fs.createReadStream(path.join(__dirname, './image.png')),
-        );
+        formData.append('file', fs.createReadStream(path.join(__dirname, './image.png')));
 
         const { status, doc } = await client.create({
           file: true,
@@ -62,10 +59,7 @@ describe('Collections - Uploads', () => {
 
     it('creates images that do not require all sizes', async () => {
       const formData = new FormData();
-      formData.append(
-        'file',
-        fs.createReadStream(path.join(__dirname, './small.png')),
-      );
+      formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')));
 
       const { status, doc } = await client.create({
         file: true,
@@ -88,10 +82,7 @@ describe('Collections - Uploads', () => {
 
     it('creates media without storing a file', async () => {
       const formData = new FormData();
-      formData.append(
-        'file',
-        fs.createReadStream(path.join(__dirname, './small.png')),
-      );
+      formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')));
 
       // unstored media
       const { status, doc } = await client.create({
@@ -125,10 +116,7 @@ describe('Collections - Uploads', () => {
     });
 
     const formData = new FormData();
-    formData.append(
-      'file',
-      fs.createReadStream(path.join(__dirname, './small.png')),
-    );
+    formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')));
 
     const { status, doc } = await client.update({
       id: mediaDoc.id,
@@ -147,10 +135,7 @@ describe('Collections - Uploads', () => {
 
   it('delete', async () => {
     const formData = new FormData();
-    formData.append(
-      'file',
-      fs.createReadStream(path.join(__dirname, './image.png')),
-    );
+    formData.append('file', fs.createReadStream(path.join(__dirname, './image.png')));
 
     const { doc } = await client.create({
       file: true,

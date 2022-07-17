@@ -62,9 +62,7 @@ export const blocksField: Field = {
 
 const BlockFields: CollectionConfig = {
   slug: 'block-fields',
-  fields: [
-    blocksField,
-  ],
+  fields: [blocksField],
 };
 
 export const blocksFieldSeedData = [

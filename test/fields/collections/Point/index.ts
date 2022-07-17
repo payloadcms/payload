@@ -37,5 +37,4 @@ export const pointDoc = {
   group: { point: [1, 9] },
 };
 
-
 export default PointFields;

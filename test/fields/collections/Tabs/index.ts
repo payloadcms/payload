@@ -33,9 +33,7 @@ const TabsFields: CollectionConfig = {
         {
           label: 'Tab with Blocks',
           description: 'Blocks are rendered here to ensure they populate and render correctly.',
-          fields: [
-            blocksField,
-          ],
+          fields: [blocksField],
         },
         {
           label: 'Tab with Group',
@@ -95,7 +93,7 @@ const TabsFields: CollectionConfig = {
 export const tabsDoc = {
   array: [
     {
-      text: 'Hello, I\'m the first row',
+      text: "Hello, I'm the first row",
     },
     {
       text: 'Second row here',

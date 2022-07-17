@@ -6,14 +6,15 @@ export default buildConfig({
   admin: {
     user: 'users',
   },
-  collections: [{
-    slug,
-    auth: {
-      verify: true,
-      useAPIKey: true,
-      maxLoginAttempts: 2,
+  collections: [
+    {
+      slug,
+      auth: {
+        verify: true,
+        useAPIKey: true,
+        maxLoginAttempts: 2,
+      },
+      fields: [],
     },
-    fields: [],
-  },
   ],
 });

@@ -166,5 +166,4 @@ export const richTextDoc = {
   ],
 };
 
-
 export default RichTextFields;

@@ -7,9 +7,9 @@ import type { InitOptions } from '../../src/config/types';
 import payload from '../../src';
 
 type Options = {
-  __dirname: string
-  init?: Partial<InitOptions>
-}
+  __dirname: string;
+  init?: Partial<InitOptions>;
+};
 
 export async function initPayloadE2E(__dirname: string): Promise<{ serverURL: string }> {
   return initPayloadTest({
@@ -25,7 +25,7 @@ export async function initPayloadTest(options: Options): Promise<{ serverURL: st
     local: true,
     secret: uuid(),
     mongoURL: `mongodb://localhost/${uuid()}`,
-    ...options.init || {},
+    ...(options.init || {}),
   };
 
   process.env.PAYLOAD_DISABLE_ADMIN = 'true';

@@ -8,46 +8,46 @@ import { devUser } from '../credentials';
 require('isomorphic-fetch');
 
 type Args = {
-  serverURL: string
-  defaultSlug: string
-}
+  serverURL: string;
+  defaultSlug: string;
+};
 
 type LoginArgs = {
-  email: string
-  password: string
-  collection: string
-}
+  email: string;
+  password: string;
+  collection: string;
+};
 
 type CreateArgs<T = any> = {
-  slug?: string
-  data: T
-  auth?: boolean
-  file?: boolean
-}
+  slug?: string;
+  data: T;
+  auth?: boolean;
+  file?: boolean;
+};
 
 type FindArgs = {
-  slug?: string
-  query?: Where
-  auth?: boolean
-}
+  slug?: string;
+  query?: Where;
+  auth?: boolean;
+};
 
 type UpdateArgs<T = any> = {
-  slug?: string
-  id: string
-  data: Partial<T>
-  auth?: boolean
-  query?: any
-}
+  slug?: string;
+  id: string;
+  data: Partial<T>;
+  auth?: boolean;
+  query?: any;
+};
 type DeleteArgs = {
-  slug?: string
-  id: string
-  auth?: boolean
-}
+  slug?: string;
+  id: string;
+  auth?: boolean;
+};
 
 type DocResponse<T> = {
-  status: number
-  doc: T
-}
+  status: number;
+  doc: T;
+};
 
 const headers = {
   'Content-Type': 'application/json',
@@ -148,14 +148,11 @@ export class RESTClient {
     if (args?.auth) {
       headers.Authorization = `JWT ${this.token}`;
     }
-    const response = await fetch(
-      `${this.serverURL}/api/${slug || this.defaultSlug}/${id}${formattedQs}`,
-      {
-        body: JSON.stringify(data),
-        headers,
-        method: 'put',
-      },
-    );
+    const response = await fetch(`${this.serverURL}/api/${slug || this.defaultSlug}/${id}${formattedQs}`, {
+      body: JSON.stringify(data),
+      headers,
+      method: 'put',
+    });
     const { status } = response;
     const json = await response.json();
     return { status, doc: json.doc };

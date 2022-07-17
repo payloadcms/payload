@@ -14,7 +14,7 @@ export interface FieldsRelationship {
   id: string;
   relationship: RelationOne;
   relationshipHasMany: RelationOne[];
-  relationshipHasManyMultiple: Array<RelationOne | RelationTwo | { relationTo: string, value: string }>;
+  relationshipHasManyMultiple: Array<RelationOne | RelationTwo | { relationTo: string; value: string }>;
   relationshipMultiple: Array<RelationOne | RelationTwo>;
   relationshipRestricted: RelationRestricted;
   relationshipWithTitle: RelationWithTitle;
@@ -42,7 +42,13 @@ export default buildConfig({
     {
       slug,
       admin: {
-        defaultColumns: ['id', 'relationship', 'relationshipRestricted', 'relationshipHasManyMultiple', 'relationshipWithTitle'],
+        defaultColumns: [
+          'id',
+          'relationship',
+          'relationshipRestricted',
+          'relationshipHasManyMultiple',
+          'relationshipWithTitle',
+        ],
       },
       fields: [
         {
@@ -170,7 +176,10 @@ export default buildConfig({
         data: {
           relationship: relationOneDocId,
           relationshipRestricted: restrictedDocId,
-          relationshipHasManyMultiple: relationOneIDs.map((id) => ({ relationTo: relationOneSlug, value: id })),
+          relationshipHasManyMultiple: relationOneIDs.map((id) => ({
+            relationTo: relationOneSlug,
+            value: id,
+          })),
         },
       });
     });
