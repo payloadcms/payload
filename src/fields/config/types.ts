@@ -229,6 +229,7 @@ export type SelectField = FieldBase & {
   type: 'select'
   options: Option[]
   hasMany?: boolean
+  isClearable?: boolean;
 }
 
 export type RelationshipField = FieldBase & {

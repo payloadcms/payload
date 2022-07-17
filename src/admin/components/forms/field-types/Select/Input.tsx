@@ -42,6 +42,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
     width,
     options,
     hasMany,
+    isClearable,
   } = props;
 
   const classes = [
@@ -85,6 +86,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
         isDisabled={readOnly}
         options={options}
         isMulti={hasMany}
+        isClearable={isClearable}
       />
       <FieldDescription
         value={value}
