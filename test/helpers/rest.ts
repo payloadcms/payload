@@ -29,6 +29,21 @@ type FindArgs = {
   slug?: string;
   query?: Where;
   auth?: boolean;
+  depth?: number
+  page?: number
+  limit?: number
+};
+
+type FindByIDArgs = {
+  id: string;
+  slug?: string;
+  query?: Where;
+  auth?: boolean;
+  options?: {
+    depth?: number
+    page?: number
+    limit?: number
+  },
 };
 
 type UpdateArgs<T = any> = {
@@ -133,13 +148,9 @@ export class RESTClient {
     const options = {
       headers: {
         ...headers,
-        Authorization: '',
+        Authorization: args?.auth !== false && this.token ? `JWT ${this.token}` : '',
       },
     };
-
-    if (args?.auth) {
-      options.headers.Authorization = `JWT ${this.token}`;
-    }
 
     const slug = args?.slug || this.defaultSlug;
     const whereQuery = qs.stringify(args?.query ? { where: args.query } : {}, {
@@ -169,9 +180,18 @@ export class RESTClient {
     return { status, doc: json.doc };
   }
 
-  async findByID<T = any>(id: string, args?: { slug?: string }): Promise<DocResponse<T>> {
-    const response = await fetch(`${this.serverURL}/api/${args?.slug || this.defaultSlug}/${id}`, {
-      headers,
+  async findByID<T = any>(args: FindByIDArgs): Promise<DocResponse<T>> {
+    const options = {
+      headers: {
+        ...headers,
+        Authorization: args?.auth !== false && this.token ? `JWT ${this.token}` : '',
+      },
+    };
+
+    const formattedOpts = qs.stringify(args?.options || {}, { addQueryPrefix: true });
+    const fetchURL = `${this.serverURL}/api/${args?.slug || this.defaultSlug}/${args.id}${formattedOpts}`;
+    const response = await fetch(fetchURL, {
+      headers: options.headers,
       method: 'get',
     });
     const { status } = response;

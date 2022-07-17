@@ -2,6 +2,7 @@ module.exports = {
   verbose: true,
   testEnvironment: 'node',
   testMatch: [
+    '**/src/**/*.spec.ts',
     '**/test/**/*int.spec.ts',
   ],
   globalSetup: './test/jest.setup.ts',

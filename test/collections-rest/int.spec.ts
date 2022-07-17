@@ -87,6 +87,7 @@ describe('collections-rest', () => {
   });
 
   describe('Querying', () => {
+    it.todo('should allow querying by a field within a group');
     describe('Relationships', () => {
       let post: Post;
       let relation: Relation;
