@@ -178,7 +178,7 @@ export const richTextDoc = {
         },
       ],
     },
-    ...[...Array(4)].map(() => {
+    ...[...Array(2)].map(() => {
       return {
         children: [
           {
