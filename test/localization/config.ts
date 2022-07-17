@@ -22,6 +22,8 @@ export type LocalizedPostAllLocale = LocalizedPost & {
 export const slug = 'localized-posts';
 export const withLocalizedRelSlug = 'with-localized-relationship';
 
+export const withRequiredLocalizedFields = 'localized-required';
+
 const openAccess = {
   read: () => true,
   create: () => true,
@@ -47,6 +49,43 @@ export default buildConfig({
         {
           name: 'description',
           type: 'text',
+        },
+      ],
+    },
+    {
+      slug: withRequiredLocalizedFields,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+          localized: true,
+        },
+        {
+          name: 'layout',
+          type: 'blocks',
+          required: true,
+          localized: true,
+          blocks: [
+            {
+              slug: 'text',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+            {
+              slug: 'number',
+              fields: [
+                {
+                  name: 'number',
+                  type: 'number',
+                },
+              ],
+            },
+          ],
         },
       ],
     },
