@@ -34,6 +34,7 @@ const Select: React.FC<Props> = (props) => {
       description,
       condition,
     } = {},
+    isClearable,
   } = props;
 
   const path = pathFromProps || name;
@@ -62,7 +63,9 @@ const Select: React.FC<Props> = (props) => {
   const onChange = useCallback((selectedOption) => {
     if (!readOnly) {
       let newValue;
-      if (hasMany) {
+      if (!selectedOption) {
+        newValue = undefined;
+      } else if (hasMany) {
         if (Array.isArray(selectedOption)) {
           newValue = selectedOption.map((option) => option.value);
         } else {
@@ -96,6 +99,7 @@ const Select: React.FC<Props> = (props) => {
       className={className}
       width={width}
       hasMany={hasMany}
+      isClearable={isClearable}
     />
   );
 };

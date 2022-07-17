@@ -19,6 +19,7 @@ keywords: select, multi-select, fields, config, configuration, documentation, Co
 | **`hasMany`**        | Boolean when, if set to `true`, allows this field to have many selections instead of only one. |
 | **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type. |
 | **`unique`**         | Enforce that each entry in the Collection has a unique value for this field. |
+| **`isClearable`**    | Whether select can be cleared. |
 | **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
 | **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |

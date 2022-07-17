@@ -15,6 +15,7 @@ const ReactSelect: React.FC<Props> = (props) => {
     disabled = false,
     placeholder,
     isSearchable = true,
+    isClearable,
   } = props;
 
   const classes = [
@@ -35,6 +36,7 @@ const ReactSelect: React.FC<Props> = (props) => {
       classNamePrefix="rs"
       options={options}
       isSearchable={isSearchable}
+      isClearable={isClearable}
     />
   );
 };
