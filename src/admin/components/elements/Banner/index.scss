@@ -57,6 +57,7 @@
 
   &--type-success {
     background: var(--theme-success-500);
+    color: var(--color-base-800);
 
     &.button--has-action {
       &:hover {
