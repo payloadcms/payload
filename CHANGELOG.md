@@ -1,4 +1,4 @@
-gi## [0.19.2](https://github.com/payloadcms/payload/compare/v0.19.1...v0.19.2) (2022-07-11)
+## [0.19.2](https://github.com/payloadcms/payload/compare/v0.19.1...v0.19.2) (2022-07-11)
 
 ### Bug Fixes
 
