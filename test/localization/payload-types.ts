@@ -19,6 +19,30 @@ export interface LocalizedPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-required".
+ */
+export interface LocalizedRequired {
+  id: string;
+  title: string;
+  layout: (
+    | {
+        text?: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'text';
+      }
+    | {
+        number?: number;
+        id?: string;
+        blockName?: string;
+        blockType: 'number';
+      }
+  )[];
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "with-localized-relationship".
  */
 export interface WithLocalizedRelationship {

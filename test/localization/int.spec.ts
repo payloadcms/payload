@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import payload from '../../src';
-import type { LocalizedPost, WithLocalizedRelationship } from './payload-types';
+import type { LocalizedPost, WithLocalizedRelationship, LocalizedRequired } from './payload-types';
 import type { LocalizedPostAllLocale } from './config';
-import config, { slug, withLocalizedRelSlug } from './config';
+import config, { slug, withLocalizedRelSlug, withRequiredLocalizedFields } from './config';
 import {
   defaultLocale,
   englishTitle,
@@ -444,6 +444,56 @@ describe('Localization', () => {
           });
         });
       });
+    });
+  });
+
+  describe('Localized - required', () => {
+    it('should update without passing all required fields', async () => {
+      const newDoc = await payload.create({
+        collection: withRequiredLocalizedFields,
+        data: {
+          title: 'hello',
+          layout: [
+            {
+              blockType: 'text',
+              text: 'laiwejfilwaje',
+            },
+          ],
+        },
+      });
+
+      await payload.update({
+        collection: withRequiredLocalizedFields,
+        id: newDoc.id,
+        locale: spanishLocale,
+        data: {
+          title: 'en espanol, big bird',
+          layout: [
+            {
+              blockType: 'number',
+              number: 12,
+            },
+          ],
+        },
+      });
+
+      const updatedDoc = await payload.update<LocalizedRequired>({
+        collection: withRequiredLocalizedFields,
+        id: newDoc.id,
+        data: {
+          title: 'hello x2',
+        },
+      });
+
+      expect(updatedDoc.layout[0].blockType).toStrictEqual('text');
+
+      const spanishDoc = await payload.findByID({
+        collection: withRequiredLocalizedFields,
+        id: newDoc.id,
+        locale: spanishLocale,
+      });
+
+      expect(spanishDoc.layout[0].blockType).toStrictEqual('number');
     });
   });
 });
