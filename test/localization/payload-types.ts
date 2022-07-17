@@ -19,6 +19,46 @@ export interface LocalizedPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with-localized-relationship".
+ */
+export interface WithLocalizedRelationship {
+  id: string;
+  localizedRelationship?: string | LocalizedPost;
+  localizedRelationHasManyField?: (string | LocalizedPost)[];
+  localizedRelationMultiRelationTo?:
+    | {
+        value: string | LocalizedPost;
+        relationTo: 'localized-posts';
+      }
+    | {
+        value: string | Dummy;
+        relationTo: 'dummy';
+      };
+  localizedRelationMultiRelationToHasMany?: (
+    | {
+        value: string | LocalizedPost;
+        relationTo: 'localized-posts';
+      }
+    | {
+        value: string | Dummy;
+        relationTo: 'dummy';
+      }
+  )[];
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dummy".
+ */
+export interface Dummy {
+  id: string;
+  name?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
