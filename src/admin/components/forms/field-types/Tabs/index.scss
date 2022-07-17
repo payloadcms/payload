@@ -1,6 +1,7 @@
 @import '../../../../scss/styles.scss';
 
 .tabs-field {
+  margin-top: base(2);
   margin-left: calc(var(--gutter-h) * -1);
   margin-right: calc(var(--gutter-h) * -1);
   margin-bottom: base(2);
@@ -31,7 +32,7 @@
   &__tab-button {
     @extend %btn-reset;
     @extend %h4;
-    padding-bottom: base(.5);
+    padding-bottom: base(.75);
     margin: 0 $baseline 0 0;
     cursor: pointer;
     opacity: .5;
