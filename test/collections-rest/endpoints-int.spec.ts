@@ -9,7 +9,7 @@ describe('Collections - Endpoints', () => {
   beforeAll(async () => {
     const config = await initPayloadTest({ __dirname, init: { local: false } });
     serverURL = config.serverURL;
-    endpoint = async (path: string, method = 'get', params = {}): Promise<unknown> => {
+    endpoint = async (path: string, method = 'get', params = undefined): Promise<unknown> => {
       const response = await fetch(`${serverURL}/api${path}`, {
         headers: {
           'Content-Type': 'application/json',
