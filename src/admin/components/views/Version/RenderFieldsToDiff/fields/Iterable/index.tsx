@@ -91,7 +91,7 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
         <div className={`${baseClass}__no-rows`}>
           No
           {' '}
-          {field.labels.plural}
+          {field.labels?.plural ?? 'rows'}
           {' '}
           found
         </div>
