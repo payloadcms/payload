@@ -37,6 +37,9 @@ jobs:
     - name: Integraion Tests
       run: yarn test:int
 
+    - name: Generate Payload Types
+      run: yarn dev:generate-types fields
+
     # - name: Install Playwright Browsers
     #   run: npx playwright install --with-deps
     # - name: E2E Tests

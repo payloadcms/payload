@@ -33,7 +33,7 @@
     "build": "yarn copyfiles && yarn build:tsc && yarn build:components",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec 'yarn build:tsc'",
     "dev": "nodemon",
-    "dev:generatetypes": "node ./test/generateTypes.js",
+    "dev:generate-types": "node ./test/generateTypes.js",
     "pretest": "yarn build",
     "test": "yarn test:int && yarn test:components",
     "test:int": "cross-env NODE_ENV=test DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
