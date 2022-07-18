@@ -16,26 +16,12 @@ export interface Post {
   description?: string;
   number?: number;
   relationField?: string | Relation;
-  relationHasManyField?: (string | Relation)[];
-  relationMultiRelationTo?:
-    | {
-        value: string | Relation;
-        relationTo: 'relation';
-      }
-    | {
-        value: string | Dummy;
-        relationTo: 'dummy';
-      };
-  relationMultiRelationToHasMany?: (
-    | {
-        value: string | Relation;
-        relationTo: 'relation';
-      }
-    | {
-        value: string | Dummy;
-        relationTo: 'dummy';
-      }
-  )[];
+  defaultAccessRelation?: string | StrictAccess;
+  chainedRelation?: string | ChainedRelation;
+  maxDepthRelation?: string | Relation;
+  customIdRelation?: string | CustomIdRelation;
+  customIdNumberRelation?: number | CustomIdNumberRelation;
+  filteredRelation?: string | Relation;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,14 +32,37 @@ export interface Post {
 export interface Relation {
   id: string;
   name?: string;
+  disableRelation: boolean;
   createdAt: string;
   updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "dummy".
+ * via the `definition` "strict-access".
  */
-export interface Dummy {
+export interface StrictAccess {
+  id: string;
+  name?: string;
+  disableRelation: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chained-relation".
+ */
+export interface ChainedRelation {
+  id: string;
+  name?: string;
+  relation?: string | ChainedRelation;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-relation".
+ */
+export interface CustomIdRelation {
   id: string;
   name?: string;
   createdAt: string;
@@ -61,45 +70,11 @@ export interface Dummy {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "point".
+ * via the `definition` "custom-id-number-relation".
  */
-export interface Point {
-  id: string;
-  /**
-   * @minItems 2
-   * @maxItems 2
-   */
-  point?: [number, number];
-  createdAt: string;
-  updatedAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-id".
- */
-export interface CustomId {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-id-number".
- */
-export interface CustomIdNumber {
+export interface CustomIdNumberRelation {
   id: number;
   name?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "endpoints".
- */
-export interface Endpoint {
-  id: string;
-  title?: string;
   createdAt: string;
   updatedAt: string;
 }

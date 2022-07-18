@@ -35,7 +35,7 @@ type FindArgs = {
 };
 
 type FindByIDArgs = {
-  id: string;
+  id: string | number;
   slug?: string;
   query?: Where;
   auth?: boolean;
@@ -73,6 +73,7 @@ type UpdateGlobalArgs<T = any> = {
 type DocResponse<T> = {
   status: number;
   doc: T;
+  errors?: { name: string, message: string, data: any }[]
 };
 
 const headers = {
@@ -177,7 +178,7 @@ export class RESTClient {
     });
     const { status } = response;
     const json = await response.json();
-    return { status, doc: json.doc };
+    return { status, doc: json.doc, errors: json.errors };
   }
 
   async findByID<T = any>(args: FindByIDArgs): Promise<DocResponse<T>> {
