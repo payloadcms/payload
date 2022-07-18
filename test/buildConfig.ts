@@ -6,6 +6,7 @@ const baseConfig: Config = {
   typescript: {
     outputFile: process.env.PAYLOAD_TS_OUTPUT_PATH,
   },
+  telemetry: false,
 };
 
 export function buildConfig(overrides?: Partial<Config>): SanitizedConfig {
@@ -13,8 +14,9 @@ export function buildConfig(overrides?: Partial<Config>): SanitizedConfig {
     baseConfig.admin = {
       ...(baseConfig.admin || {}),
       webpack: (config) => {
-        const existingConfig =
-          typeof overrides?.admin?.webpack === 'function' ? overrides.admin.webpack(config) : config;
+        const existingConfig = typeof overrides?.admin?.webpack === 'function'
+          ? overrides.admin.webpack(config)
+          : config;
         return {
           ...existingConfig,
           cache: {
