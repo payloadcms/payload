@@ -35,6 +35,7 @@
     height: auto;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
 
     img,
     svg {
@@ -52,11 +53,13 @@
     align-items: center;
     padding: base(.75) base(1);
     justify-content: space-between;
+    overflow: hidden;
   }
 
   &__actions {
     display: flex;
     align-items: center;
+    flex-shrink: 0;
   }
 
   &__actionButton {
@@ -74,7 +77,9 @@
   }
 
   &__collectionLabel {
-    margin-right: base(3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__bottomRow {
@@ -98,5 +103,11 @@
   &--selected {
     box-shadow: $focus-box-shadow;
     outline: none;
+  }
+
+  @include small-break {
+    &__topRowRightPanel {
+      padding: base(.75) base(.5);
+    }
   }
 }

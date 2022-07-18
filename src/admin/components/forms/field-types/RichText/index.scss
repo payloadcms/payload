@@ -45,6 +45,7 @@
     h5,
     h6 {
       font-family: var(--font-body);
+      line-height: 1.125;
     }
 
     h1[data-slate-node=element] {
@@ -122,6 +123,12 @@
     &__button--active,
     &__button--active:hover {
       background-color: var(--theme-elevation-150);
+    }
+  }
+
+  @include mid-break {
+    &__toolbar {
+      top: base(3);
     }
   }
 }

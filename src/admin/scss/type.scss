@@ -28,7 +28,7 @@
   letter-spacing: -1px;
 
   @include small-break {
-    letter-spacing: base(0);
+    letter-spacing: -.5px;
     font-size: base(1.25);
     line-height: base(1.25);
   }
