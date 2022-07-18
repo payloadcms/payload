@@ -20,6 +20,7 @@ export interface Post {
   chainedRelation?: string | ChainedRelation;
   maxDepthRelation?: string | Relation;
   customIdRelation?: string | CustomIdRelation;
+  customIdNumberRelation?: number | CustomIdNumberRelation;
   filteredRelation?: string | Relation;
   createdAt: string;
   updatedAt: string;
@@ -63,6 +64,16 @@ export interface ChainedRelation {
  */
 export interface CustomIdRelation {
   id: string;
+  name?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-number-relation".
+ */
+export interface CustomIdNumberRelation {
+  id: number;
   name?: string;
   createdAt: string;
   updatedAt: string;

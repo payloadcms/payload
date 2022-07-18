@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
 import { initPayloadTest } from '../helpers/configHelpers';
-import config, { customIdSlug, chainedRelSlug, defaultAccessRelSlug, slug, relationSlug } from './config';
+import config, { customIdSlug, chainedRelSlug, defaultAccessRelSlug, slug, relationSlug, customIdNumberSlug } from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
-import type { ChainedRelation, CustomIdRelation, Post, Relation } from './payload-types';
+import type { ChainedRelation, CustomIdNumberRelation, CustomIdRelation, Post, Relation } from './payload-types';
 import { mapAsync } from '../../src/utilities/mapAsync';
 
 let client: RESTClient;
@@ -38,7 +38,9 @@ describe('Relationships', () => {
       let chained2: ChainedRelation;
       let chained3: ChainedRelation;
       let customIdRelation: CustomIdRelation;
+      let customIdNumberRelation: CustomIdNumberRelation;
       let generatedCustomId: string;
+      let generatedCustomIdNumber: number;
       const nameToQuery = 'name';
 
       beforeEach(async () => {
@@ -96,12 +98,22 @@ describe('Relationships', () => {
           },
         });
 
+        generatedCustomIdNumber = Math.floor(Math.random() * (1000)) + 1;
+        customIdNumberRelation = await payload.create<CustomIdNumberRelation>({
+          collection: customIdNumberSlug,
+          data: {
+            id: generatedCustomIdNumber,
+            name: 'custom-id-number',
+          },
+        });
+
         post = await createPost({
           relationField: relation.id,
           defaultAccessRelation: defaultAccessRelation.id,
           chainedRelation: chained.id,
           maxDepthRelation: relation.id,
           customIdRelation: customIdRelation.id,
+          customIdNumberRelation: customIdNumberRelation.id,
           filteredRelation: filteredRelation.id,
         });
 
@@ -163,6 +175,11 @@ describe('Relationships', () => {
         it('should query a custom id relation', async () => {
           const { doc } = await client.findByID<Post>({ id: post.id });
           expect(doc?.customIdRelation).toMatchObject({ id: generatedCustomId });
+        });
+
+        it('should query a custom id number relation', async () => {
+          const { doc } = await client.findByID<Post>({ id: post.id });
+          expect(doc?.customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber });
         });
       });
     });

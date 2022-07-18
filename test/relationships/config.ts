@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
-import type { CustomIdRelation, Post, Relation } from './payload-types';
+import type { CustomIdNumberRelation, CustomIdRelation, Post, Relation } from './payload-types';
 
 const openAccess = {
   create: () => true,
@@ -38,6 +38,7 @@ export const relationSlug = 'relation';
 export const defaultAccessRelSlug = 'strict-access';
 export const chainedRelSlug = 'chained-relation';
 export const customIdSlug = 'custom-id-relation';
+export const customIdNumberSlug = 'custom-id-number-relation';
 export default buildConfig({
   collections: [
     {
@@ -85,6 +86,11 @@ export default buildConfig({
           relationTo: customIdSlug,
         },
         {
+          name: 'customIdNumberRelation',
+          type: 'relationship',
+          relationTo: customIdNumberSlug,
+        },
+        {
           name: 'filteredRelation',
           type: 'relationship',
           relationTo: relationSlug,
@@ -127,6 +133,19 @@ export default buildConfig({
         {
           name: 'id',
           type: 'text',
+        },
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: customIdNumberSlug,
+      fields: [
+        {
+          name: 'id',
+          type: 'number',
         },
         {
           name: 'name',
@@ -196,6 +215,14 @@ export default buildConfig({
       },
     });
 
+    const customIdNumberRelation = await payload.create<CustomIdNumberRelation>({
+      collection: customIdNumberSlug,
+      data: {
+        id: 908234892340,
+        name: 'custom-id',
+      },
+    });
+
 
     // Relationship
     await payload.create<Post>({
@@ -207,6 +234,7 @@ export default buildConfig({
         chainedRelation: chained.id,
         maxDepthRelation: rel1.id,
         customIdRelation: customIdRelation.id,
+        customIdNumberRelation: customIdNumberRelation.id,
         filteredRelation: filteredRelation.id,
       },
     });
