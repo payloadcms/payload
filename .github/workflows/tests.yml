@@ -34,12 +34,11 @@ jobs:
 
     - name: Component Tests
       run: yarn test:components
-    - name: Integraion Tests
+    - name: Integration Tests
       run: yarn test:int
+
     - name: Generate Payload Types
-      run: yarn demo:generate:types
-      env:
-        CI: true
+      run: yarn dev:generate-types fields
 
     # - name: Install Playwright Browsers
     #   run: npx playwright install --with-deps

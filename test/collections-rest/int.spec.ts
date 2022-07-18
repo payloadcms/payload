@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
+import { randomBytes } from 'crypto';
 import { initPayloadTest } from '../helpers/configHelpers';
 import type { Relation } from './config';
-import config, { slug, relationSlug, pointSlug } from './config';
+import config, { customIdNumberSlug, customIdSlug, slug, relationSlug, pointSlug } from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
 import type { Post } from './payload-types';
@@ -61,6 +62,53 @@ describe('collections-rest', () => {
       expect(updated.description).toEqual(description); // Check was not modified
     });
 
+    describe('Custom ID', () => {
+      describe('string', () => {
+        it('should create', async () => {
+          const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
+          const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, data: { name: 'custom-id-name' } } });
+          expect(doc.id).toEqual(customId);
+        });
+
+        it('should find', async () => {
+          const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
+          const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, data: { name: 'custom-id-name' } } });
+          const { doc: foundDoc } = await client.findByID({ slug: customIdSlug, id: customId });
+
+          expect(foundDoc.id).toEqual(doc.id);
+        });
+
+        it('should update', async () => {
+          const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
+          const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, data: { name: 'custom-id-name' } } });
+          const { doc: updatedDoc } = await client.update({ slug: customIdSlug, id: doc.id, data: { name: 'updated' } });
+          expect(updatedDoc.name).toEqual('updated');
+        });
+      });
+
+      describe('number', () => {
+        it('should create', async () => {
+          const customId = Math.floor(Math.random() * (1000)) + 1;
+          const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, data: { name: 'custom-id-number-name' } } });
+          expect(doc.id).toEqual(customId);
+        });
+
+        it('should find', async () => {
+          const customId = Math.floor(Math.random() * (1000)) + 1;
+          const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, data: { name: 'custom-id-number-name' } } });
+          const { doc: foundDoc } = await client.findByID({ slug: customIdNumberSlug, id: customId });
+          expect(foundDoc.id).toEqual(doc.id);
+        });
+
+        it('should update', async () => {
+          const customId = Math.floor(Math.random() * (1000)) + 1;
+          const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, data: { name: 'custom-id-number-name' } } });
+          const { doc: updatedDoc } = await client.update({ slug: customIdNumberSlug, id: doc.id, data: { name: 'updated' } });
+          expect(updatedDoc.name).toEqual('updated');
+        });
+      });
+    });
+
     it('should delete', async () => {
       const { id } = await createPost();
 
@@ -87,6 +135,7 @@ describe('collections-rest', () => {
   });
 
   describe('Querying', () => {
+    it.todo('should allow querying by a field within a group');
     describe('Relationships', () => {
       let post: Post;
       let relation: Relation;

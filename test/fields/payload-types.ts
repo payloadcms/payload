@@ -16,6 +16,10 @@ export interface ArrayField {
     text: string;
     id?: string;
   }[];
+  localized: {
+    text: string;
+    id?: string;
+  }[];
   createdAt: string;
   updatedAt: string;
 }
@@ -68,6 +72,67 @@ export interface BlockField {
 export interface CollapsibleField {
   id: string;
   text: string;
+  group?: {
+    textWithinGroup?: string;
+    subGroup?: {
+      textWithinSubGroup?: string;
+    };
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditional-logic".
+ */
+export interface ConditionalLogic {
+  id: string;
+  text: string;
+  toggleField?: boolean;
+  fieldToToggle: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-fields".
+ */
+export interface GroupField {
+  id: string;
+  group?: {
+    text: string;
+    defaultParent?: string;
+    defaultChild?: string;
+    subGroup?: {
+      textWithinGroup?: string;
+    };
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "point-fields".
+ */
+export interface PointField {
+  id: string;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point: [number, number];
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  localized?: [number, number];
+  group?: {
+    /**
+     * @minItems 2
+     * @maxItems 2
+     */
+    point?: [number, number];
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -77,6 +142,7 @@ export interface CollapsibleField {
  */
 export interface RichTextField {
   id: string;
+  selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[];
   richText: {
     [k: string]: unknown;
   }[];
@@ -104,8 +170,44 @@ export interface TabsField {
     text: string;
     id?: string;
   }[];
-  text: string;
-  number: number;
+  blocks: (
+    | {
+        text: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'text';
+      }
+    | {
+        number: number;
+        id?: string;
+        blockName?: string;
+        blockType: 'number';
+      }
+    | {
+        subBlocks?: (
+          | {
+              text: string;
+              id?: string;
+              blockName?: string;
+              blockType: 'text';
+            }
+          | {
+              number: number;
+              id?: string;
+              blockName?: string;
+              blockType: 'number';
+            }
+        )[];
+        id?: string;
+        blockName?: string;
+        blockType: 'subBlocks';
+      }
+  )[];
+  group?: {
+    number: number;
+  };
+  textarea?: string;
+  anotherText: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -116,6 +218,22 @@ export interface TabsField {
 export interface TextField {
   id: string;
   text: string;
+  defaultFunction?: string;
+  defaultAsync?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads".
+ */
+export interface Upload {
+  id: string;
+  url?: string;
+  filename?: string;
+  mimeType?: string;
+  filesize?: number;
+  text?: string;
   createdAt: string;
   updatedAt: string;
 }

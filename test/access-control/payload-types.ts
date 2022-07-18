@@ -8,10 +8,40 @@
 export interface Config {}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "slugname".
+ * via the `definition` "access-controls".
  */
-export interface Slugname {
+export interface AccessControl {
   id: string;
+  restrictedField?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted".
+ */
+export interface Restricted {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "read-only-collection".
+ */
+export interface ReadOnlyCollection {
+  id: string;
+  name?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-versions".
+ */
+export interface RestrictedVersion {
+  id: string;
+  name?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -318,6 +318,16 @@ describe('Localization', () => {
             expect(result2.docs[0].id).toEqual(withRelationship.id);
           });
 
+          it('relationship population uses locale', async () => {
+            const result = await payload.findByID<WithLocalizedRelationship>({
+              collection: withLocalizedRelSlug,
+              depth: 1,
+              id: withRelationship.id,
+              locale: spanishLocale,
+            });
+            expect((result.localizedRelationship as LocalizedPost).title).toEqual(relationSpanishTitle);
+          });
+
           it('all locales', async () => {
             const queryRelation = (where: Where) => {
               return payload.find<WithLocalizedRelationship>({
