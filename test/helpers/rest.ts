@@ -35,7 +35,7 @@ type FindArgs = {
 };
 
 type FindByIDArgs = {
-  id: string;
+  id: string | number;
   slug?: string;
   query?: Where;
   auth?: boolean;

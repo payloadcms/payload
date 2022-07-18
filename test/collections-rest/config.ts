@@ -32,6 +32,9 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 export const slug = 'posts';
 export const relationSlug = 'relation';
 export const pointSlug = 'point';
+export const customIdSlug = 'custom-id';
+export const customIdNumberSlug = 'custom-id-number';
+
 export default buildConfig({
   collections: [
     {
@@ -90,6 +93,34 @@ export default buildConfig({
     },
     collectionWithName(relationSlug),
     collectionWithName('dummy'),
+    {
+      slug: customIdSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+        },
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: customIdNumberSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'id',
+          type: 'number',
+        },
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
     Endpoints,
   ],
   onInit: async (payload) => {

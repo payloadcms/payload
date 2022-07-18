@@ -61,6 +61,50 @@ export interface Dummy {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "point".
+ */
+export interface Point {
+  id: string;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number];
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id".
+ */
+export interface CustomId {
+  id: string;
+  name?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-number".
+ */
+export interface CustomIdNumber {
+  id: number;
+  name?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "endpoints".
+ */
+export interface Endpoint {
+  id: string;
+  title?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
