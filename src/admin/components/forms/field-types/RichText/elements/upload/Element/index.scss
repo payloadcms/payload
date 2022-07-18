@@ -53,7 +53,7 @@
     align-items: center;
     padding: base(.75) base(1);
     justify-content: space-between;
-    overflow: hidden;
+    max-width: calc(100% - #{base(3.25)});
   }
 
   &__actions {
