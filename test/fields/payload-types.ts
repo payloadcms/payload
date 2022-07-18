@@ -16,6 +16,10 @@ export interface ArrayField {
     text: string;
     id?: string;
   }[];
+  localized: {
+    text: string;
+    id?: string;
+  }[];
   createdAt: string;
   updatedAt: string;
 }
@@ -97,6 +101,8 @@ export interface GroupField {
   id: string;
   group?: {
     text: string;
+    defaultParent?: string;
+    defaultChild?: string;
     subGroup?: {
       textWithinGroup?: string;
     };
@@ -212,6 +218,8 @@ export interface TabsField {
 export interface TextField {
   id: string;
   text: string;
+  defaultFunction?: string;
+  defaultAsync?: string;
   createdAt: string;
   updatedAt: string;
 }

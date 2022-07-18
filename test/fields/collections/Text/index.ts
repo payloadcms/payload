@@ -1,5 +1,7 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 
+export const defaultText = 'default-text';
+
 const TextFields: CollectionConfig = {
   slug: 'text-fields',
   admin: {
@@ -10,6 +12,20 @@ const TextFields: CollectionConfig = {
       name: 'text',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'defaultFunction',
+      type: 'text',
+      defaultValue: () => (defaultText),
+    },
+    {
+      name: 'defaultAsync',
+      type: 'text',
+      defaultValue: async (): Promise<string> => {
+        return new Promise((resolve) => setTimeout(() => {
+          resolve(defaultText);
+        }, 1));
+      },
     },
   ],
 };

@@ -1,13 +1,20 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 
+export const groupDefaultValue = 'set from parent';
+export const groupDefaultChild = 'child takes priority';
+export const groupFieldsSlug = 'group-fields';
+
 const GroupFields: CollectionConfig = {
-  slug: 'group-fields',
+  slug: groupFieldsSlug,
   versions: true,
   fields: [
     {
       label: 'Group Field',
       name: 'group',
       type: 'group',
+      defaultValue: {
+        defaultParent: groupDefaultValue,
+      },
       admin: {
         description: 'This is a group.',
       },
@@ -16,6 +23,17 @@ const GroupFields: CollectionConfig = {
           name: 'text',
           type: 'text',
           required: true,
+          defaultValue: groupDefaultValue,
+        },
+        {
+          name: 'defaultParent',
+          type: 'text',
+          defaultValue: groupDefaultChild,
+        },
+        {
+          name: 'defaultChild',
+          type: 'text',
+          defaultValue: groupDefaultChild,
         },
         {
           name: 'subGroup',

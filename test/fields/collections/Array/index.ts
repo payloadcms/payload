@@ -1,12 +1,34 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 
+export const arrayDefaultValue = [
+  { text: 'row one' },
+  { text: 'row two' },
+];
+
+export const arrayFieldsSlug = 'array-fields';
+
 const ArrayFields: CollectionConfig = {
-  slug: 'array-fields',
+  slug: arrayFieldsSlug,
   fields: [
     {
       name: 'items',
       type: 'array',
       required: true,
+      defaultValue: arrayDefaultValue,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+    {
+      name: 'localized',
+      type: 'array',
+      required: true,
+      localized: true,
+      defaultValue: arrayDefaultValue,
       fields: [
         {
           name: 'text',
