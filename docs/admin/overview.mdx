@@ -66,6 +66,10 @@ For example, you may wish to have two Collections that both support `Authenticat
 
 This is totally possible. For the above scenario, by specifying `admin: { user: 'admins' }`, your Payload Admin panel will use `admins`. Any users logged in as `customers` will not be able to log in via the Admin panel.
 
+### Light and dark modes
+
+Users in the admin panel have access to choosing between light mode and dark mode for their editing experience. The setting is managed while logged into the admin UI within the user account page and will be stored with the browser. By default, the operating system preference is detected and used.
+
 ### Restricting user access
 
 If you would like to restrict which users from a single Collection can access the Admin panel, you can use the `admin` access control function. [Click here](/docs/access-control/overview#admin) to learn more.
