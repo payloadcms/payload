@@ -38,7 +38,7 @@ const Group: React.FC<Props> = (props) => {
 
   return (
     <div
-      id={`field-${path}`}
+      id={`field-${path.replace(/\./gi, '__')}`}
       className={[
         'field-type',
         baseClass,

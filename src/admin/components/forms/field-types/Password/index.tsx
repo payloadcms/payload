@@ -60,12 +60,12 @@ const Password: React.FC<Props> = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={`field-${path}`}
+        htmlFor={`field-${path.replace(/\./gi, '__')}`}
         label={label}
         required={required}
       />
       <input
-        id={`field-${path}`}
+        id={`field-${path.replace(/\./gi, '__')}`}
         value={value as string || ''}
         onChange={setValue}
         disabled={formProcessing}

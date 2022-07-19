@@ -83,7 +83,7 @@ const Code: React.FC<Props> = (props) => {
         required={required}
       />
       <Editor
-        id={`field-${path}`}
+        id={`field-${path.replace(/\./gi, '__')}`}
         value={value as string || ''}
         onValueChange={readOnly ? () => null : setValue}
         highlight={highlighter}

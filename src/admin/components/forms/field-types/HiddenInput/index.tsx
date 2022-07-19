@@ -25,7 +25,7 @@ const HiddenInput: React.FC<Props> = (props) => {
 
   return (
     <input
-      id={`field-${path}`}
+      id={`field-${path.replace(/\./gi, '__')}`}
       type="hidden"
       value={value as string || ''}
       onChange={setValue}

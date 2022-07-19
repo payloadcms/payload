@@ -37,6 +37,27 @@ const ArrayFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'array',
+      name: 'readOnly',
+      admin: {
+        readOnly: true,
+      },
+      defaultValue: [
+        {
+          text: 'defaultValue',
+        },
+        {
+          text: 'defaultValue2',
+        },
+      ],
+      fields: [
+        {
+          type: 'text',
+          name: 'text',
+        },
+      ],
+    },
   ],
 };
 

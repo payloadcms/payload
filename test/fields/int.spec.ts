@@ -5,7 +5,7 @@ import payload from '../../src';
 import { pointDoc } from './collections/Point';
 import type { ArrayField, GroupField } from './payload-types';
 import { arrayFieldsSlug, arrayDefaultValue } from './collections/Array';
-import { groupFieldsSlug, groupDefaultChild, groupDefaultValue } from './collections/Group';
+import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
 import { defaultText } from './collections/Text';
 
 let client;
@@ -80,6 +80,7 @@ describe('Fields', () => {
   });
   describe('array', () => {
     let doc;
+    let arrayInGroupDoc;
     const collection = arrayFieldsSlug;
 
     beforeAll(async () => {
@@ -87,6 +88,14 @@ describe('Fields', () => {
         collection,
         data: {},
       });
+    });
+
+    it('should create with ids and nested ids', async () => {
+      const docWithIDs = await payload.create<GroupField>({
+        collection: groupFieldsSlug,
+        data: groupDoc,
+      });
+      expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined();
     });
 
     it('should create with defaultValue', async () => {
@@ -137,18 +146,18 @@ describe('Fields', () => {
   });
 
   describe('group', () => {
-    let groupDoc;
+    let document;
 
     beforeAll(async () => {
-      groupDoc = await payload.create<GroupField>({
+      document = await payload.create<GroupField>({
         collection: groupFieldsSlug,
         data: {},
       });
     });
 
     it('should create with defaultValue', async () => {
-      expect(groupDoc.group.defaultParent).toStrictEqual(groupDefaultValue);
-      expect(groupDoc.group.defaultChild).toStrictEqual(groupDefaultChild);
+      expect(document.group.defaultParent).toStrictEqual(groupDefaultValue);
+      expect(document.group.defaultChild).toStrictEqual(groupDefaultChild);
     });
   });
 });

@@ -4,16 +4,18 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
 import { textDoc } from './collections/Text';
+import { arrayFieldsSlug } from './collections/Array';
+import { pointFieldsSlug } from './collections/Point';
 
 const { beforeAll, describe } = test;
 
 let page: Page;
-let url: AdminUrlUtil;
+let serverURL;
 
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(__dirname);
-    url = new AdminUrlUtil(serverURL, 'text-fields');
+    const config = await initPayloadE2E(__dirname);
+    serverURL = config.serverURL;
 
     const context = await browser.newContext();
     page = await context.newPage();
@@ -23,15 +25,22 @@ describe('fields', () => {
 
   describe('text', () => {
     test('should display field in list view', async () => {
+      const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'text-fields');
       await page.goto(url.list);
       const textCell = page.locator('table tr:first-child td:first-child a');
-      await expect(textCell).toHaveText(textDoc.text);
+      await expect(textCell)
+        .toHaveText(textDoc.text);
     });
   });
 
   describe('point', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, pointFieldsSlug);
+    });
+
     test('should save point', async () => {
-      await page.goto(url.create, 'point-fields');
+      await page.goto(url.create);
       const longField = page.locator('#field-longitude-point');
       await longField.fill('9');
 
@@ -44,13 +53,34 @@ describe('fields', () => {
       const localizedLatField = page.locator('#field-latitude-localized');
       await localizedLatField.fill('-1');
 
-      const groupLongitude = page.locator('#field-longitude-group.point');
+      const groupLongitude = page.locator('#field-longitude-group__point');
       await groupLongitude.fill('3');
 
-      const groupLatField = page.locator('#field-latitude-group.point');
+      const groupLatField = page.locator('#field-latitude-group__point');
       await groupLatField.fill('-8');
 
       await saveDocAndAssert(page);
+    });
+  });
+
+  describe('fields - array', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, arrayFieldsSlug);
+    });
+
+    test('should be readOnly', async () => {
+      await page.goto(url.create);
+      const field = page.locator('#field-readOnly__0__text');
+      await expect(field)
+        .toBeDisabled();
+    });
+
+    test('should have defaultValue', async () => {
+      await page.goto(url.create);
+      const field = page.locator('#field-readOnly__0__text');
+      await expect(field)
+        .toHaveValue('defaultValue');
     });
   });
 });

@@ -81,12 +81,12 @@ const PointField: React.FC<Props> = (props) => {
       <ul className={`${baseClass}__wrap`}>
         <li>
           <Label
-            htmlFor={`field-longitude-${path}`}
+            htmlFor={`field-longitude-${path.replace(/\./gi, '__')}`}
             label={`${label} - Longitude`}
             required={required}
           />
           <input
-            id={`field-longitude-${path}`}
+            id={`field-longitude-${path.replace(/\./gi, '__')}`}
             value={(value && typeof value[0] === 'number') ? value[0] : ''}
             onChange={(e) => handleChange(e, 0)}
             disabled={readOnly}
@@ -98,12 +98,12 @@ const PointField: React.FC<Props> = (props) => {
         </li>
         <li>
           <Label
-            htmlFor={`field-latitude-${path}`}
+            htmlFor={`field-latitude-${path.replace(/\./gi, '__')}`}
             label={`${label} - Latitude`}
             required={required}
           />
           <input
-            id={`field-latitude-${path}`}
+            id={`field-latitude-${path.replace(/\./gi, '__')}`}
             value={(value && typeof value[1] === 'number') ? value[1] : ''}
             onChange={(e) => handleChange(e, 1)}
             disabled={readOnly}

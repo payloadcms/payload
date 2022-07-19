@@ -1,7 +1,9 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 
+export const pointFieldsSlug = 'point-fields';
+
 const PointFields: CollectionConfig = {
-  slug: 'point-fields',
+  slug: pointFieldsSlug,
   admin: {
     useAsTitle: 'point',
   },

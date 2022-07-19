@@ -20,6 +20,10 @@ export interface ArrayField {
     text: string;
     id?: string;
   }[];
+  readOnly?: {
+    text?: string;
+    id?: string;
+  }[];
   createdAt: string;
   updatedAt: string;
 }
@@ -105,6 +109,10 @@ export interface GroupField {
     defaultChild?: string;
     subGroup?: {
       textWithinGroup?: string;
+      arrayWithinGroup?: {
+        textWithinArray?: string;
+        id?: string;
+      }[];
     };
   };
   createdAt: string;

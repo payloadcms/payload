@@ -211,7 +211,7 @@ const RichText: React.FC<Props> = (props) => {
           message={errorMessage}
         />
         <Label
-          htmlFor={`field-${path}`}
+          htmlFor={`field-${path.replace(/\./gi, '__')}`}
           label={label}
           required={required}
         />
@@ -272,7 +272,7 @@ const RichText: React.FC<Props> = (props) => {
               ref={editorRef}
             >
               <Editable
-                id={`field-${path}`}
+                id={`field-${path.replace(/\./gi, '__')}`}
                 className={`${baseClass}__input`}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}

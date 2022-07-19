@@ -70,7 +70,7 @@ const Checkbox: React.FC<Props> = (props) => {
         />
       </div>
       <input
-        id={`field-${path}`}
+        id={`field-${path.replace(/\./gi, '__')}`}
         type="checkbox"
         name={path}
         checked={Boolean(value)}

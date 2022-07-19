@@ -78,7 +78,7 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
         required={required}
       />
       <ul
-        id={`field-${path}`}
+        id={`field-${path.replace(/\./gi, '__')}`}
         className={`${baseClass}--group`}
       >
         {options.map((option) => {

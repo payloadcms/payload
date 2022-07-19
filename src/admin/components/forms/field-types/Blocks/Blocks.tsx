@@ -211,7 +211,7 @@ const Blocks: React.FC<Props> = (props) => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div
-        id={`field-${path}`}
+        id={`field-${path.replace(/\./gi, '__')}`}
         className={classes}
       >
         <div className={`${baseClass}__error-wrap`}>

@@ -335,7 +335,7 @@ const Relationship: React.FC<Props> = (props) => {
 
   return (
     <div
-      id={`field-${path}`}
+      id={`field-${path.replace(/\./gi, '__')}`}
       className={classes}
       style={{
         ...style,
