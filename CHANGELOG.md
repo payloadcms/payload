@@ -1,3 +1,9 @@
+### BREAKING CHANGES
+
+We have removed our reliance on SCSS variables like color and font, replacing them instead with CSS variables wherever possible.
+
+Due to this change, the `admin.scss` functionality has become obsolete, and overriding SCSS variables is not longer needed or supported. If you want to customize CSS, you can still do so, but via the `admin.css` property instead.
+
 ## [0.19.2](https://github.com/payloadcms/payload/compare/v0.19.1...v0.19.2) (2022-07-11)
 
 ### Bug Fixes
@@ -244,13 +250,13 @@ Here is a previous example:
 
 ```js
 {
-	"message": "The following fields are invalid: location,",
-	"data": [
-		{
-			"message": "This field requires two numbers",
-			"field": "location"
-		},
-	]
+ "message": "The following fields are invalid: location,",
+ "data": [
+  {
+   "message": "This field requires two numbers",
+   "field": "location"
+  },
+ ]
 },
 ```
 
@@ -258,13 +264,13 @@ The new shape of GraphQL errors is as follows:
 
 ```js
 "extensions": {
-	"name": "ValidationError",
-	"data": [
-		{
-			"message": "This field requires two numbers",
-			"field": "location"
-		},
-	]
+ "name": "ValidationError",
+ "data": [
+  {
+   "message": "This field requires two numbers",
+   "field": "location"
+  },
+ ]
 }
 ```
 
@@ -772,9 +778,9 @@ const plugin = (config: Config): Config => {
 
 - There have been a few very minor, yet breaking TypeScript changes in this release. If you are accessing Payload config types from directly within the `dist` folder, like any of the following:
 
-* `import { PayloadCollectionConfig, CollectionConfig } from 'payload/dist/collections/config/types';`
-* `import { PayloadGlobalConfig, GlobalConfig } from 'payload/dist/globals/config/types';`
-* `import { Config, PayloadConfig } from 'payload/config';`
+- `import { PayloadCollectionConfig, CollectionConfig } from 'payload/dist/collections/config/types';`
+- `import { PayloadGlobalConfig, GlobalConfig } from 'payload/dist/globals/config/types';`
+- `import { Config, PayloadConfig } from 'payload/config';`
 
 You may need to modify your code to work with this release. The TL;DR of the change is that we have improved our naming conventions of internally used types, which will become more important over time. Now, we have landed on a naming convention as follows:
 
@@ -983,7 +989,7 @@ They can be imported safely outside of the `dist` folder now as well. For more i
 
 - By default, all Collection and Global access control functions are now set to require a user to be logged in to interact through GraphQL or REST APIs. This default access control is set to ensure that your API data is secure out of the box. From there, you can opt to publicly expose API actions as you need.
 
-#### Migration Instructions to `0.6.x`:
+#### Migration Instructions to `0.6.x`
 
 If you have any Collections or Globals that should be publicly available without being logged in, you need to define an access control function for each operation that needs to be publicly available.
 
@@ -1213,7 +1219,7 @@ If none of your collections or globals should be publicly exposed, you don't nee
 ### Features
 
 - add support for setting mongoose connection options ([82c4898](https://github.com/payloadcms/payload/commit/82c489841c418b953c7f08d30c8b19751ff050f4))
-- admin ui create first user add confirm password field (https://github.com/payloadcms/payload/commit/60453fec9ee17e8f83f7e98c5e2b2e39bc6d0365)
+- admin ui create first user add confirm password field (<https://github.com/payloadcms/payload/commit/60453fec9ee17e8f83f7e98c5e2b2e39bc6d0365>)
 
 ### Bug Fixes
 
