@@ -1,12 +1,12 @@
 @import '../../../scss/styles.scss';
 
 .file-details {
-  background-color: $color-background-gray;
+  background-color: var(--theme-elevation-100);
 
   header {
     display: flex;
     align-items: flex-start;
-    border-bottom: $style-stroke-width-m solid white;
+    border-bottom: 1px solid var(--theme-elevation-0);
   }
 
   &__remove {
@@ -53,7 +53,7 @@
   }
 
   &__size-label {
-    color: $color-gray;
+    color: var(--theme-elevation-400);
   }
 
   @include large-break {
@@ -89,7 +89,7 @@
     }
 
     &__main-detail {
-      border-top: $style-stroke-width-m solid white;
+      border-top: $style-stroke-width-m solid var(--theme-elevation-0);
       order: 3;
       width: 100%;
     }

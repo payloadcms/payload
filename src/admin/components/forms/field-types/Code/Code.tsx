@@ -78,18 +78,19 @@ const Code: React.FC<Props> = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={path}
+        htmlFor={`field-${path}`}
         label={label}
         required={required}
       />
       <Editor
+        id={`field-${path.replace(/\./gi, '__')}`}
         value={value as string || ''}
         onValueChange={readOnly ? () => null : setValue}
         highlight={highlighter}
         padding={25}
         style={{
-          backgroundColor: '#333333',
-          color: 'white',
+          backgroundColor: 'var(--theme-base-850)',
+          color: 'var(--theme-base-0)',
           fontFamily: '"Consolas", "Monaco", monospace',
           fontSize: 12,
           pointerEvents: readOnly ? 'none' : 'auto',

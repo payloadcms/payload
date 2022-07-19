@@ -27,6 +27,7 @@ const Duplicate: React.FC<Props> = ({ slug }) => {
 
   return (
     <Button
+      id="action-duplicate"
       buttonStyle="none"
       className={baseClass}
       onClick={handleClick}

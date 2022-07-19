@@ -6,6 +6,7 @@ import Eyebrow from '../../elements/Eyebrow';
 import Card from '../../elements/Card';
 import Button from '../../elements/Button';
 import { Props } from './types';
+import { Gutter } from '../../elements/Gutter';
 
 import './index.scss';
 
@@ -35,9 +36,9 @@ const Dashboard: React.FC<Props> = (props) => {
   return (
     <div className={baseClass}>
       <Eyebrow />
-      <div className={`${baseClass}__wrap`}>
+      <Gutter className={`${baseClass}__wrap`}>
         {Array.isArray(beforeDashboard) && beforeDashboard.map((Component, i) => <Component key={i} />)}
-        <h3 className={`${baseClass}__label`}>Collections</h3>
+        <h2 className={`${baseClass}__label`}>Collections</h2>
         <ul className={`${baseClass}__card-list`}>
           {collections.map((collection) => {
             const hasCreatePermission = permissions?.collections?.[collection.slug]?.create?.permission;
@@ -46,6 +47,7 @@ const Dashboard: React.FC<Props> = (props) => {
               <li key={collection.slug}>
                 <Card
                   title={collection.labels.plural}
+                  id={`card-${collection.slug}`}
                   onClick={() => push({ pathname: `${admin}/collections/${collection.slug}` })}
                   actions={hasCreatePermission ? (
                     <Button
@@ -64,7 +66,7 @@ const Dashboard: React.FC<Props> = (props) => {
         </ul>
         {(globals.length > 0) && (
           <React.Fragment>
-            <h3 className={`${baseClass}__label`}>Globals</h3>
+            <h2 className={`${baseClass}__label`}>Globals</h2>
             <ul className={`${baseClass}__card-list`}>
               {globals.map((global) => (
                 <li key={global.slug}>
@@ -78,7 +80,7 @@ const Dashboard: React.FC<Props> = (props) => {
           </React.Fragment>
         )}
         {Array.isArray(afterDashboard) && afterDashboard.map((Component, i) => <Component key={i} />)}
-      </div>
+      </Gutter>
     </div>
   );
 };

@@ -144,7 +144,9 @@ export const select = baseField.keys({
     joi.array().items(joi.string().allow('')),
     joi.func(),
   ),
-  isClearable: joi.boolean().default(false),
+  admin: baseAdminFields.keys({
+    isClearable: joi.boolean().default(false),
+  }),
 });
 
 export const radio = baseField.keys({
@@ -169,10 +171,29 @@ export const radio = baseField.keys({
 export const row = baseField.keys({
   type: joi.string().valid('row').required(),
   fields: joi.array().items(joi.link('#field')),
+  admin: baseAdminFields.default(),
+});
+
+export const collapsible = baseField.keys({
+  label: joi.string().required(),
+  type: joi.string().valid('collapsible').required(),
+  fields: joi.array().items(joi.link('#field')),
+  admin: baseAdminFields.default(),
+});
+
+export const tabs = baseField.keys({
+  type: joi.string().valid('tabs').required(),
+  fields: joi.forbidden(),
+  tabs: joi.array().items(joi.object({
+    label: joi.string().required(),
+    fields: joi.array().items(joi.link('#field')).required(),
+    description: joi.alternatives().try(
+      joi.string(),
+      componentSchema,
+    ),
+  })).required(),
   admin: baseAdminFields.keys({
     description: joi.forbidden(),
-    readOnly: joi.forbidden(),
-    hidden: joi.forbidden(),
   }),
 });
 
@@ -185,7 +206,7 @@ export const group = baseField.keys({
     joi.func(),
   ),
   admin: baseAdminFields.keys({
-    hideGutter: joi.boolean().default(false),
+    hideGutter: joi.boolean().default(true),
     description: joi.string(),
   }),
 });
@@ -289,6 +310,7 @@ export const richText = baseField.keys({
   ),
   admin: baseAdminFields.keys({
     placeholder: joi.string(),
+    hideGutter: joi.boolean().default(true),
     elements: joi.array().items(
       joi.alternatives().try(
         joi.string(),
@@ -311,7 +333,6 @@ export const richText = baseField.keys({
         }),
       ),
     ),
-    hideGutter: joi.boolean().default(false),
     upload: joi.object({
       collections: joi.object().pattern(joi.string(), joi.object().keys({
         fields: joi.array().items(joi.link('#field')),
@@ -369,6 +390,8 @@ const fieldSchema = joi.alternatives()
     group,
     array,
     row,
+    collapsible,
+    tabs,
     radio,
     relationship,
     checkbox,

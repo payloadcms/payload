@@ -24,38 +24,26 @@ const config = buildConfig({
 })
 ```
 
-### Overriding SCSS variables
+### Overriding built-in styles
 
-You can specify your own SCSS variable stylesheet that will allow for the override of Payload's base theme. This unlocks a ton of powerful theming and design options such as:
+To make it as easy as possible for you to override our styles, Payload uses [BEM naming conventions](http://getbem.com/) for all CSS within the Admin UI. If you provide your own CSS, you can override any built-in styles easily.
 
-- Changing dashboard font families
-- Modifying color palette
-- Creating a dark theme
-- Etc.
+In addition to adding your own style definitions, you can also override Payload's built-in CSS variables. We use as much as possible behind the scenes, and you can override any of them that you'd like to.
 
-To do so, provide your base Payload config with a path to your own SCSS variable sheet.
+You can find the built-in Payload CSS variables within [`./src/admin/scss/app.scss`](https://github.com/payloadcms/payload/blob/master/src/admin/scss/app.scss) and [`./src/admin/scss/colors.scss`](https://github.com/payloadcms/payload/blob/master/src/admin/scss/colors.scss). The following variables are defined and can be overridden:
 
-**Example in payload.config.js:**
-```js
-import { buildConfig } from 'payload/config';
-import path from 'path';
+- Breakpoints
+- Base color shades (white to black by default)
+- Success / warning / error color shades
+- Theme-specific colors (background, input background, text color, etc.)
+- Elevation colors (used to determine how "bright" something should be when compared to the background)
+- Fonts
+- Horizontal gutter
 
-const config = buildConfig({
-	admin: {
-		scss: path.resolve(__dirname, 'relative/path/to/vars.scss'),
-	},
-})
-```
+#### Dark mode
 
-**Example stylesheet override:**
-```scss
-$font-body: 'Papyrus';
-$style-radius-m: 10px;
-```
-
-To reference all Sass variables that you can override, look at the default [SCSS variable stylesheet](https://github.com/payloadcms/payload/blob/master/src/admin/scss/vars.scss) within the Payload source code.
-
-<Banner type="error">
-	<strong>Warning:</strong><br />
-	Only SCSS variables, mixins, functions, and extends are allowed in <strong>your SCSS overrides</strong>. Do not attempt to add any CSS declarations to this file, as this variable stylesheet is imported by many components throughout the Payload Admin panel and will result in your CSS definition(s) being duplicated many times. If you need to add real CSS definitions, see "Adding your own CSS / SCSS" the top of this page.
+<Banner type="warning">
+  If you're overriding colors or theme elevations, make sure to consider how your changes will affect dark mode.
 </Banner>
+
+By default, Payload automatically overrides all `--theme-elevation`s and inverts all success / warning / error shades to suit dark mode. We also update some base theme variables like `--theme-bg`, `--theme-text`, etc.

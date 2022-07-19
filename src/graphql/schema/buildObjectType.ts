@@ -5,6 +5,7 @@
 import { GraphQLJSON } from 'graphql-type-json';
 import {
   GraphQLBoolean, GraphQLEnumType,
+  GraphQLFieldConfig,
   GraphQLFloat,
   GraphQLInt,
   GraphQLList,
@@ -14,11 +15,10 @@ import {
   GraphQLUnionType,
 } from 'graphql';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { Field, RadioField, RelationshipField, SelectField, UploadField, ArrayField, GroupField, RichTextField, fieldAffectsData, NumberField, TextField, EmailField, TextareaField, CodeField, DateField, PointField, CheckboxField, BlockField, RowField, fieldIsPresentationalOnly } from '../../fields/config/types';
+import { Field, RadioField, RelationshipField, SelectField, UploadField, ArrayField, GroupField, RichTextField, fieldAffectsData, NumberField, TextField, EmailField, TextareaField, CodeField, DateField, PointField, CheckboxField, BlockField, RowField, fieldIsPresentationalOnly, CollapsibleField, TabsField } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
-import { BaseFields } from '../../collections/graphql/types';
 import { toWords } from '../../utilities/formatLabels';
 import createRichTextRelationshipPromise from '../../fields/richText/relationshipPromise';
 import formatOptions from '../utilities/formatOptions';
@@ -39,37 +39,65 @@ type LocaleInputType = {
   }
 }
 
-function buildObjectType(payload: Payload, name: string, fields: Field[], parentName: string, baseFields: BaseFields = {}): GraphQLObjectType {
-  const fieldToSchemaMap = {
-    number: (field: NumberField) => ({ type: withNullableType(field, GraphQLFloat) }),
-    text: (field: TextField) => ({ type: withNullableType(field, GraphQLString) }),
-    email: (field: EmailField) => ({ type: withNullableType(field, EmailAddressResolver) }),
-    textarea: (field: TextareaField) => ({ type: withNullableType(field, GraphQLString) }),
-    code: (field: CodeField) => ({ type: withNullableType(field, GraphQLString) }),
-    date: (field: DateField) => ({ type: withNullableType(field, DateTimeResolver) }),
-    point: (field: PointField) => ({ type: withNullableType(field, new GraphQLList(GraphQLFloat)) }),
-    richText: (field: RichTextField) => ({
-      type: withNullableType(field, GraphQLJSON),
-      async resolve(parent, args, context) {
-        if (args.depth > 0) {
-          await createRichTextRelationshipPromise({
-            req: context.req,
-            siblingDoc: parent,
-            depth: args.depth,
-            field,
-            showHiddenFields: false,
-          });
-        }
+export type ObjectTypeConfig = {
+  [path: string]: GraphQLFieldConfig<any, any>
+}
 
-        return parent[field.name];
-      },
-      args: {
-        depth: {
-          type: GraphQLInt,
+function buildObjectType(payload: Payload, name: string, fields: Field[], parentName: string, baseFields: ObjectTypeConfig = {}): GraphQLObjectType {
+  const fieldToSchemaMap = {
+    number: (objectTypeConfig: ObjectTypeConfig, field: NumberField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, GraphQLFloat) },
+    }),
+    text: (objectTypeConfig: ObjectTypeConfig, field: TextField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, GraphQLString) },
+    }),
+    email: (objectTypeConfig: ObjectTypeConfig, field: EmailField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, EmailAddressResolver) },
+    }),
+    textarea: (objectTypeConfig: ObjectTypeConfig, field: TextareaField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, GraphQLString) },
+    }),
+    code: (objectTypeConfig: ObjectTypeConfig, field: CodeField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, GraphQLString) },
+    }),
+    date: (objectTypeConfig: ObjectTypeConfig, field: DateField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, DateTimeResolver) },
+    }),
+    point: (objectTypeConfig: ObjectTypeConfig, field: PointField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, new GraphQLList(GraphQLFloat)) },
+    }),
+    richText: (objectTypeConfig: ObjectTypeConfig, field: RichTextField) => ({
+      ...objectTypeConfig,
+      [field.name]: {
+        type: withNullableType(field, GraphQLJSON),
+        async resolve(parent, args, context) {
+          if (args.depth > 0) {
+            await createRichTextRelationshipPromise({
+              req: context.req,
+              siblingDoc: parent,
+              depth: args.depth,
+              field,
+              showHiddenFields: false,
+            });
+          }
+
+          return parent[field.name];
+        },
+        args: {
+          depth: {
+            type: GraphQLInt,
+          },
         },
       },
     }),
-    upload: (field: UploadField) => {
+    upload: (objectTypeConfig: ObjectTypeConfig, field: UploadField) => {
       const { relationTo, label } = field;
 
       const uploadName = combineParentName(parentName, label === false ? toWords(field.name, true) : label);
@@ -149,19 +177,28 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
         ),
       };
 
-      return upload;
+      return {
+        ...objectTypeConfig,
+        [field.name]: upload,
+      };
     },
-    radio: (field: RadioField) => ({
-      type: withNullableType(
-        field,
-        new GraphQLEnumType({
-          name: combineParentName(parentName, field.name),
-          values: formatOptions(field),
-        }),
-      ),
+    radio: (objectTypeConfig: ObjectTypeConfig, field: RadioField) => ({
+      ...objectTypeConfig,
+      [field.name]: {
+        type: withNullableType(
+          field,
+          new GraphQLEnumType({
+            name: combineParentName(parentName, field.name),
+            values: formatOptions(field),
+          }),
+        ),
+      },
     }),
-    checkbox: (field: CheckboxField) => ({ type: withNullableType(field, GraphQLBoolean) }),
-    select: (field: SelectField) => {
+    checkbox: (objectTypeConfig: ObjectTypeConfig, field: CheckboxField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, GraphQLBoolean) },
+    }),
+    select: (objectTypeConfig: ObjectTypeConfig, field: SelectField) => {
       const fullName = combineParentName(parentName, field.name);
 
       let type: GraphQLType = new GraphQLEnumType({
@@ -172,9 +209,12 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
       type = field.hasMany ? new GraphQLList(type) : type;
       type = withNullableType(field, type);
 
-      return { type };
+      return {
+        ...objectTypeConfig,
+        [field.name]: { type },
+      };
     },
-    relationship: (field: RelationshipField) => {
+    relationship: (objectTypeConfig: ObjectTypeConfig, field: RelationshipField) => {
       const { relationTo, label } = field;
       const isRelatedToManyCollections = Array.isArray(relationTo);
       const hasManyValues = field.hasMany;
@@ -388,22 +428,31 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
         };
       }
 
-      return relationship;
+      return {
+        ...objectTypeConfig,
+        [field.name]: relationship,
+      };
     },
-    array: (field: ArrayField) => {
+    array: (objectTypeConfig: ObjectTypeConfig, field: ArrayField) => {
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
       const type = buildObjectType(payload, fullName, field.fields, fullName);
       const arrayType = new GraphQLList(withNullableType(field, type));
 
-      return { type: arrayType };
+      return {
+        ...objectTypeConfig,
+        [field.name]: { type: arrayType },
+      };
     },
-    group: (field: GroupField) => {
+    group: (objectTypeConfig: ObjectTypeConfig, field: GroupField) => {
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
       const type = buildObjectType(payload, fullName, field.fields, fullName);
 
-      return { type };
+      return {
+        ...objectTypeConfig,
+        [field.name]: { type },
+      };
     },
-    blocks: (field: BlockField) => {
+    blocks: (objectTypeConfig: ObjectTypeConfig, field: BlockField) => {
       const blockTypes = field.blocks.map((block) => {
         buildBlockType(payload, block);
         return payload.types.blockTypes[block.slug];
@@ -417,43 +466,43 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
         resolveType: (data) => payload.types.blockTypes[data.blockType].name,
       }));
 
-      return { type };
+      return {
+        ...objectTypeConfig,
+        [field.name]: { type },
+      };
     },
-    row: (field) => field.fields.reduce((subFieldSchema, subField) => {
-      const buildSchemaType = fieldToSchemaMap[subField.type];
-
-      if (!fieldIsPresentationalOnly(subField) && buildSchemaType) {
-        return {
-          ...subFieldSchema,
-          [formatName(subField.name)]: buildSchemaType(subField),
-        };
-      }
-
-      return subFieldSchema;
-    }, {}),
+    row: (objectTypeConfig: ObjectTypeConfig, field: RowField) => field.fields.reduce((objectTypeConfigWithRowFields, subField) => {
+      const addSubField = fieldToSchemaMap[subField.type];
+      return addSubField(objectTypeConfigWithRowFields, subField);
+    }, objectTypeConfig),
+    collapsible: (objectTypeConfig: ObjectTypeConfig, field: CollapsibleField) => field.fields.reduce((objectTypeConfigWithCollapsibleFields, subField) => {
+      const addSubField = fieldToSchemaMap[subField.type];
+      return addSubField(objectTypeConfigWithCollapsibleFields, subField);
+    }, objectTypeConfig),
+    tabs: (objectTypeConfig: ObjectTypeConfig, field: TabsField) => field.tabs.reduce((tabSchema, tab) => {
+      return {
+        ...tabSchema,
+        ...tab.fields.reduce((subFieldSchema, subField) => {
+          const addSubField = fieldToSchemaMap[subField.type];
+          return addSubField(subFieldSchema, subField);
+        }, tabSchema),
+      };
+    }, objectTypeConfig),
   };
 
   const objectSchema = {
     name,
-    fields: () => fields.reduce((schema, field) => {
-      if (!fieldIsPresentationalOnly(field) && !field.hidden) {
-        const fieldSchema = fieldToSchemaMap[field.type];
-        if (fieldSchema) {
-          if (fieldAffectsData(field)) {
-            return {
-              ...schema,
-              [formatName(field.name)]: fieldSchema(field),
-            };
-          }
+    fields: () => fields.reduce((objectTypeConfig, field) => {
+      const fieldSchema = fieldToSchemaMap[field.type];
 
-          return {
-            ...schema,
-            ...fieldSchema(field),
-          };
-        }
+      if (typeof fieldSchema !== 'function') {
+        return objectTypeConfig;
       }
 
-      return schema;
+      return {
+        ...objectTypeConfig,
+        ...fieldSchema(objectTypeConfig, field),
+      };
     }, baseFields),
   };
 

@@ -8,6 +8,8 @@ export type Options = {
   slug: string
   id: string
   depth?: number
+  locale?: string
+  fallbackLocale?: string
   user?: Document
   overrideAccess?: boolean
   showHiddenFields?: boolean
@@ -19,11 +21,13 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
     depth,
     id,
     user,
+    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
+    fallbackLocale = null,
     overrideAccess = true,
     showHiddenFields,
   } = options;
 
-  const globalConfig = payload.globals[globalSlug];
+  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
 
   return restoreVersion({
     depth,
@@ -35,6 +39,8 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
       user,
       payloadAPI: 'local',
       payload,
+      locale,
+      fallbackLocale,
     } as PayloadRequest,
   });
 }

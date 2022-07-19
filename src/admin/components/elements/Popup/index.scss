@@ -5,10 +5,9 @@
 
   &__content {
     position: absolute;
-    background: white;
-    opacity: 0;
-    visibility: hidden;
-    z-index: $z-modal;
+    background: var(--theme-input-bg);
+    display: none;
+    z-index: var(--z-popup);
     max-width: calc(100vw - #{$baseline});
 
     &:after {
@@ -16,7 +15,7 @@
       position: absolute;
       top: calc(100% - 1px);
       border: 12px solid transparent;
-      border-top-color: white;
+      border-top-color: var(--theme-input-bg);
     }
   }
 
@@ -42,8 +41,12 @@
   ////////////////////////////////
 
   &--size-small {
+    .popup__scroll {
+      padding: base(.75) calc(var(--scrollbar-width) + #{base(.75)}) base(.75) base(.75);
+    }
+
     .popup__content {
-      @include shadow-sm;
+      @include shadow-m;
     }
 
     &.popup--h-align-left {
@@ -69,11 +72,11 @@
 
   &--size-wide {
     .popup__content {
-      @include shadow-sm;
+      @include shadow-m;
 
       &:after {
         border: 12px solid transparent;
-        border-top-color: white;
+        border-top-color: var(--theme-input-bg);
       }
     }
 
@@ -147,14 +150,14 @@
         top: unset;
         bottom: calc(100% - 1px);
         border-top-color: transparent !important;
-        border-bottom-color: white;
+        border-bottom-color: var(--theme-input-bg);
       }
     }
 
     &.popup--color-dark {
       .popup__content {
         &:after {
-          border-bottom-color: $color-dark-gray;
+          border-bottom-color: var(--theme-elevation-800);
         }
       }
     }
@@ -166,11 +169,11 @@
 
   &--color-dark {
     .popup__content {
-      background: $color-dark-gray;
-      color: white;
+      background: var(--theme-elevation-800);
+      color: var(--theme-input-bg);
 
       &:after {
-        border-top-color: $color-dark-gray;
+        border-top-color: var(--theme-elevation-800);
       }
     }
   }
@@ -181,14 +184,14 @@
 
   &--active {
     .popup__content {
-      opacity: 1;
-      visibility: visible;
+      display: block;
     }
   }
 
   @include mid-break {
+
     &__scroll,
-    &--size-large .popup__scroll{
+    &--size-large .popup__scroll {
       padding: base(.75);
       padding-right: calc(var(--scrollbar-width) + #{base(.75)});
     }
@@ -206,11 +209,11 @@
     &--h-align-center {
       .popup__content {
         left: 50%;
-        transform: translateX(-50%);
+        transform: translateX(-0%);
 
         &:after {
           left: 50%;
-          transform: translateX(-50%);
+          transform: translateX(-0%);
         }
       }
     }

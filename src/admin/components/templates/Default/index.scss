@@ -5,22 +5,16 @@
   display: flex;
 
   &__wrap {
-    padding-left: base(2);
     min-width: 0;
     width: 100%;
     flex-grow: 1;
-  }
-
-  @include large-break {
-    &__wrap {
-      padding-left: base(1);
-    }
   }
 
   @include mid-break {
     display: block;
     width: 100%;
     margin-left: 0;
+    padding-top: base(3);
 
     &__wrap {
       padding: 0 0 $baseline;

@@ -67,7 +67,7 @@ export type InitOptions = {
   secret: string;
   email?: EmailOptions;
   local?: boolean;
-  onInit?: (payload: Payload) => void;
+  onInit?: (payload: Payload) => Promise<void>;
   /** Pino LoggerOptions */
   loggerOptions?: LoggerOptions;
 };
@@ -112,7 +112,6 @@ export type Config = {
     disable?: boolean;
     indexHTML?: string;
     css?: string
-    scss?: string
     dateFormat?: string
     components?: {
       routes?: AdminRoute[]
@@ -194,6 +193,7 @@ export type Config = {
   };
   plugins?: Plugin[];
   telemetry?: boolean;
+  onInit?: (payload: Payload) => Promise<void>
 };
 
 export type SanitizedConfig = Omit<DeepRequired<Config>, 'collections' | 'globals'> & {

@@ -21,6 +21,7 @@
       text-overflow: ellipsis;
       margin: 0;
     }
+
     margin-bottom: base(1);
   }
 
@@ -40,11 +41,9 @@
   }
 
   &__edit {
-    background: white;
-    padding: base(5) base(6) base(6);
-    margin-bottom: base(1.5);
+    padding-top: base(1);
+    padding-bottom: base(2);
     flex-grow: 1;
-    overflow-x: scroll;
   }
 
   &__sidebar-wrap {
@@ -54,6 +53,7 @@
     top: 0;
     right: 0;
     overflow: visible;
+    border-left: 1px solid var(--theme-elevation-100);
   }
 
   &__sidebar {
@@ -81,20 +81,25 @@
     top: 0;
     z-index: 2;
     padding-right: $baseline;
+
+    >* {
+      position: relative;
+      z-index: 1;
+    }
   }
 
   &__document-actions--with-preview {
     display: flex;
 
-    > * {
+    >* {
       width: calc(50% - #{base(.5)});
     }
 
-    > *:first-child {
+    >*:first-child {
       margin-right: base(.5);
     }
 
-    > *:last-child {
+    >*:last-child {
       margin-left: base(.5);
     }
 
@@ -129,14 +134,16 @@
   }
 
   &__label {
-    color: $color-gray;
+    color: var(--theme-elevation-400);
   }
 
   &__collection-actions,
   &__api-url {
-    a, button {
+
+    a,
+    button {
       cursor: pointer;
-      font-weight: 600;
+      font-weight: bold;
       text-decoration: none;
 
       &:hover {
@@ -148,12 +155,6 @@
   &--is-editing {
     .collection-edit__sidebar {
       padding-top: 0;
-    }
-  }
-
-  @include large-break {
-    &__edit {
-      padding: base(3.5);
     }
   }
 
@@ -174,8 +175,8 @@
     }
 
     &__edit {
-      padding: $baseline;
-      margin-bottom: $baseline;
+      padding-top: 0;
+      padding-bottom: 0;
     }
 
     &__document-actions {
@@ -189,7 +190,7 @@
     &__document-actions,
     &__meta,
     &__sidebar-fields {
-      padding-left: $baseline;
+      padding-left: var(--gutter-h);
     }
 
     &__api-url {
@@ -197,9 +198,8 @@
     }
 
     &__collection-actions {
-      margin-top: base(.5);
-      padding-left: $baseline;
-      padding-bottom: 0;
+      border-top: 1px solid var(--theme-elevation-100);
+      padding: base(1) 0 0 base(1);
       order: 1;
 
       li {

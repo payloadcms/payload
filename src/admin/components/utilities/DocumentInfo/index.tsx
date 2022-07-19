@@ -8,6 +8,8 @@ import { ContextType, Props, Version } from './types';
 import { TypeWithID } from '../../../../globals/config/types';
 import { TypeWithTimestamps } from '../../../../collections/config/types';
 import { Where } from '../../../../types';
+import { DocumentPreferences } from '../../../../preferences/types';
+import { usePreferences } from '../Preferences';
 
 const Context = createContext({} as ContextType);
 
@@ -18,6 +20,8 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   id,
 }) => {
   const { serverURL, routes: { api } } = useConfig();
+  const { getPreference } = usePreferences();
+  const [preferences, setPreferences] = useState<DocumentPreferences>();
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null);
   const [versions, setVersions] = useState<PaginatedDocs<Version>>(null);
   const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null);
@@ -153,6 +157,15 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     getVersions();
   }, [getVersions]);
 
+  useEffect(() => {
+    const getDocPreferences = async () => {
+      const existingPreferences = await getPreference<DocumentPreferences>(preferencesKey);
+      setPreferences(existingPreferences || { fields: {} });
+    };
+
+    getDocPreferences();
+  }, [getPreference, preferencesKey]);
+
   const value = {
     slug,
     type,
@@ -164,6 +177,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     getVersions,
     publishedDoc,
     id,
+    preferences,
   };
 
   return (

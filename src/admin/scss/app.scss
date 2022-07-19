@@ -1,14 +1,40 @@
 @import 'fonts';
 @import 'styles';
 @import './toastify.scss';
+@import './colors.scss';
 
 :root {
   --breakpoint-xs-width : #{$breakpoint-xs-width};
-  --breakpoint-s-width  : #{$breakpoint-s-width};
-  --breakpoint-m-width  : #{$breakpoint-m-width};
-  --breakpoint-l-width  : #{$breakpoint-l-width};
-  --z-modal: #{$z-modal};
+  --breakpoint-s-width : #{$breakpoint-s-width};
+  --breakpoint-m-width : #{$breakpoint-m-width};
+  --breakpoint-l-width : #{$breakpoint-l-width};
   --scrollbar-width: 17px;
+
+  --theme-bg: var(--theme-elevation-0);
+  --theme-input-bg: var(--theme-elevation-0);
+  --theme-text: var(--theme-elevation-800);
+  --font-body: 'Suisse Intl', system-ui;
+  --font-mono: monospace;
+  --font-serif: 'Merriweather', serif;
+
+  --z-popup: 10;
+  --z-nav: 20;
+  --z-modal: 30;
+  --z-status: 40;
+
+  --gutter-h: #{base(5)};
+
+  @include large-break {
+    --gutter-h: #{base(3)};
+  }
+
+  @include mid-break {
+    --gutter-h: #{base(2)};
+  }
+
+  @include small-break {
+    --gutter-h: #{base(.5)};
+  }
 }
 
 /////////////////////////////
@@ -21,8 +47,22 @@
 
 html {
   @extend %body;
-  background: $color-background-gray;
+  background: var(--theme-bg);
   -webkit-font-smoothing: antialiased;
+
+  &[data-theme=dark] {
+    --theme-bg: var(--theme-elevation-0);
+    --theme-text: var(--theme-elevation-1000);
+    --theme-input-bg: var(--theme-elevation-50);
+
+    ::selection {
+      color: var(--color-base-1000);
+    }
+
+    ::-moz-selection {
+      color: var(--color-base-1000);
+    }
+  }
 
   @include mid-break {
     font-size: 12px;
@@ -36,21 +76,20 @@ body,
 }
 
 body {
-  font-family: $font-body;
+  font-family: var(--font-body);
   font-weight: 400;
-  color: $color-dark-gray;
+  color: var(--theme-text);
   margin: 0;
 }
 
-
 ::selection {
-  background: $color-green;
-  color: $color-dark-gray;
+  background: var(--theme-success-500);
+  color: var(--theme-base-800);
 }
 
 ::-moz-selection {
-  background: $color-green;
-  color: $color-dark-gray;
+  background: var(--theme-success-500);
+  color: var(--theme-base-800);
 }
 
 img {
@@ -84,16 +123,17 @@ h6 {
 }
 
 p {
-    margin: 0 0 $baseline;
+  margin: 0 0 $baseline;
 }
 
-ul, ol {
+ul,
+ol {
   padding-left: $baseline;
   margin: 0 0 $baseline;
 }
 
 a {
-  color: $color-dark-gray;
+  color: currentColor;
 
   &:focus {
     opacity: .8;
@@ -114,10 +154,12 @@ dialog {
   width: 100%;
   border: 0;
   padding: 0;
+  color: currentColor;
 }
 
 .payload__modal-item {
   min-height: 100%;
+  background: transparent;
 }
 
 .payload__modal-container--enterDone {
@@ -126,7 +168,7 @@ dialog {
 
 .payload__modal-item--enter,
 .payload__modal-item--enterDone {
-  z-index: $z-modal;
+  z-index: var(--z-modal);
 }
 
 @import '~payload-user-css';

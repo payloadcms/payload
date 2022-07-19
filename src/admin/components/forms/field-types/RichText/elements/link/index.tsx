@@ -45,7 +45,6 @@ const Link = ({ attributes, children, element, editorRef }) => {
           initActive={element.url === undefined}
           buttonType="none"
           size="small"
-          color="dark"
           horizontalAlign="center"
           forceOpen={open}
           onToggleOpen={handleToggleOpen}

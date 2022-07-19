@@ -68,6 +68,14 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
 
     if ('fields' in field && field.fields) field.fields = sanitizeFields(field.fields, validRelationships);
 
+    if (field.type === 'tabs') {
+      field.tabs = field.tabs.map((tab) => {
+        const unsanitizedTab = { ...tab };
+        unsanitizedTab.fields = sanitizeFields(tab.fields, validRelationships);
+        return unsanitizedTab;
+      });
+    }
+
     if ('blocks' in field && field.blocks) {
       field.blocks = field.blocks.map((block) => {
         const unsanitizedBlock = { ...block };

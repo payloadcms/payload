@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useConfig } from '../../../utilities/Config';
 import UploadGallery from '../../../elements/UploadGallery';
 import Eyebrow from '../../../elements/Eyebrow';
@@ -10,10 +10,12 @@ import Button from '../../../elements/Button';
 import Table from '../../../elements/Table';
 import Meta from '../../../utilities/Meta';
 import { Props } from './types';
-
-import './index.scss';
 import ViewDescription from '../../../elements/ViewDescription';
 import PerPage from '../../../elements/PerPage';
+import { Gutter } from '../../../elements/Gutter';
+import { RelationshipProvider } from './RelationshipProvider';
+
+import './index.scss';
 
 const baseClass = 'collection-list';
 
@@ -42,7 +44,6 @@ const DefaultList: React.FC<Props> = (props) => {
 
   const { routes: { admin } } = useConfig();
   const history = useHistory();
-  const { pathname, search } = useLocation();
 
   return (
     <div className={baseClass}>
@@ -50,7 +51,7 @@ const DefaultList: React.FC<Props> = (props) => {
         title={collection.labels.plural}
       />
       <Eyebrow />
-      <div className={`${baseClass}__wrap`}>
+      <Gutter className={`${baseClass}__wrap`}>
         <header className={`${baseClass}__header`}>
           <h1>{pluralLabel}</h1>
           {hasCreatePermission && (
@@ -72,14 +73,14 @@ const DefaultList: React.FC<Props> = (props) => {
           enableSort={Boolean(upload)}
         />
         {(data.docs && data.docs.length > 0) && (
-          <React.Fragment
-            key={`${pathname}${search}`}
-          >
+          <React.Fragment>
             {!upload && (
+            <RelationshipProvider>
               <Table
                 data={data.docs}
                 columns={tableColumns}
               />
+            </RelationshipProvider>
             )}
             {upload && (
               <UploadGallery
@@ -144,7 +145,7 @@ const DefaultList: React.FC<Props> = (props) => {
             </Fragment>
           )}
         </div>
-      </div>
+      </Gutter>
     </div>
   );
 };

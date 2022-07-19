@@ -6,11 +6,11 @@
 
   .stroke {
     fill: none;
-    stroke: $color-dark-gray;
+    stroke: var(--theme-elevation-800);
     stroke-width: $style-stroke-width-m;
   }
 
   .fill {
-    fill: $color-dark-gray;
+    fill: var(--theme-elevation-800);
   }
 }

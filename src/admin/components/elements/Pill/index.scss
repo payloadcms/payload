@@ -6,12 +6,15 @@
   border: 0;
   display: inline-flex;
   vertical-align: middle;
-  background: $color-light-gray;
-  color: $color-dark-gray;
+  background: var(--theme-elevation-150);
+  color: var(--theme-elevation-800);
   border-radius: $style-radius-s;
   padding: 0 base(.25);
   padding-left: base(.0875 + .25);
   cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:active,
   &:focus {
@@ -38,14 +41,15 @@
   }
 
   &--style-white {
-    background: white;
+    background: var(--theme-elevation-0);
+
     &.pill--has-action {
       &:hover {
-        background: lighten($color-light-gray, 3%);
+        background: var(--theme-elevation-100);
       }
 
       &:active {
-        background: lighten($color-light-gray, 5%);
+        background: var(--theme-elevation-100);
       }
     }
   }
@@ -53,43 +57,44 @@
   &--style-light {
     &.pill--has-action {
       &:hover {
-        background: lighten($color-light-gray, 3%);
+        background: var(--theme-elevation-100);
       }
 
       &:active {
-        background: lighten($color-light-gray, 5%);
+        background: var(--theme-elevation-100);
       }
     }
   }
 
   &--style-light-gray {
-    background: $color-background-gray;
-    color: $color-dark-gray;
+    background: var(--theme-elevation-100);
+    color: var(--theme-elevation-800);
   }
 
   &--style-warning {
-    background: $color-yellow;
+    background: var(--theme-warning-500);
   }
 
   &--style-success {
-    background: $color-green;
+    background: var(--theme-success-500);
+    color: var(--color-base-800);
   }
 
   &--style-dark {
-    background: $color-dark-gray;
-    color: white;
+    background: var(--theme-elevation-800);
+    color: var(--theme-elevation-0);
 
     svg {
-      @include color-svg(white);
+      @include color-svg(var(--theme-elevation-0));
     }
 
     &.pill--has-action {
       &:hover {
-        background: lighten($color-dark-gray, 3%);
+        background: var(--theme-elevation-750);
       }
 
       &:active {
-        background: lighten($color-dark-gray, 5%);
+        background: var(--theme-elevation-700);
       }
     }
   }

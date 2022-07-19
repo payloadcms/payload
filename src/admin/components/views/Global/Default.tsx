@@ -19,9 +19,10 @@ import SaveDraft from '../../elements/SaveDraft';
 import Publish from '../../elements/Publish';
 import Status from '../../elements/Status';
 import Autosave from '../../elements/Autosave';
+import { OperationContext } from '../../utilities/OperationProvider';
+import { Gutter } from '../../elements/Gutter';
 
 import './index.scss';
-import { OperationContext } from '../../utilities/OperationProvider';
 
 const baseClass = 'global-edit';
 
@@ -71,7 +72,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
               {!(global.versions?.drafts && global.versions?.drafts?.autosave) && (
                 <LeaveWithoutSaving />
               )}
-              <div className={`${baseClass}__edit`}>
+              <Gutter className={`${baseClass}__edit`}>
                 <header className={`${baseClass}__header`}>
                   <h1>
                     Edit
@@ -91,7 +92,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                   fieldTypes={fieldTypes}
                   fieldSchema={fields}
                 />
-              </div>
+              </Gutter>
             </div>
             <div className={`${baseClass}__sidebar-wrap`}>
               <div className={`${baseClass}__sidebar`}>
@@ -114,7 +115,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                           </React.Fragment>
                         )}
                         {!global.versions?.drafts && (
-                          <FormSubmit>Save</FormSubmit>
+                          <FormSubmit buttonId="action-save">Save</FormSubmit>
                         )}
                       </React.Fragment>
                     )}

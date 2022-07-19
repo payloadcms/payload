@@ -1,11 +1,23 @@
 @import '../../../../../../../scss/styles.scss';
 
 .rich-text-upload {
+  @extend %body;
+  @include shadow-sm;
   max-width: base(15);
   display: flex;
   align-items: center;
-  background: white;
+  background: var(--theme-input-bg);
+  border: 1px solid var(--theme-elevation-100);
   position: relative;
+  font-family: var(--font-body);
+
+  &:hover {
+    border: 1px solid var(--theme-elevation-150);
+  }
+
+  &[data-slate-node=element] {
+    margin: base(.625) 0;
+  }
 
   &__card {
     @include soft-shadow-bottom;
@@ -23,13 +35,15 @@
     height: auto;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
 
-    img, svg {
+    img,
+    svg {
       position: absolute;
       object-fit: cover;
       width: 100%;
       height: 100%;
-      background-color: $color-dark-gray;
+      background-color: var(--theme-elevation-800);
     }
   }
 
@@ -39,11 +53,13 @@
     align-items: center;
     padding: base(.75) base(1);
     justify-content: space-between;
+    max-width: calc(100% - #{base(3.25)});
   }
 
   &__actions {
     display: flex;
     align-items: center;
+    flex-shrink: 0;
   }
 
   &__actionButton {
@@ -61,12 +77,14 @@
   }
 
   &__collectionLabel {
-    margin-right: base(3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__bottomRow {
     padding: base(.5);
-    border-top: 1px solid $color-background-gray;
+    border-top: 1px solid var(--theme-elevation-100);
   }
 
   h5 {
@@ -85,5 +103,11 @@
   &--selected {
     box-shadow: $focus-box-shadow;
     outline: none;
+  }
+
+  @include small-break {
+    &__topRowRightPanel {
+      padding: base(.75) base(.5);
+    }
   }
 }

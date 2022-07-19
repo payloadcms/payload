@@ -111,7 +111,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={path}
+        htmlFor={`field-${path.replace(/\./gi, '__')}`}
         label={label}
         required={required}
       />

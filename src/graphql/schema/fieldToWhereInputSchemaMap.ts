@@ -11,11 +11,12 @@ import { GraphQLJSON } from 'graphql-type-json';
 import {
   ArrayField,
   CheckboxField,
-  CodeField, DateField,
+  CodeField, CollapsibleField, DateField,
   EmailField, fieldAffectsData, fieldHasSubFields, GroupField,
   NumberField, optionIsObject, PointField,
   RadioField, RelationshipField,
   RichTextField, RowField, SelectField,
+  TabsField,
   TextareaField,
   TextField, UploadField,
 } from '../../fields/config/types';
@@ -220,24 +221,24 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
   }),
   array: (field: ArrayField) => recursivelyBuildNestedPaths(parentName, field),
   group: (field: GroupField) => recursivelyBuildNestedPaths(parentName, field),
-  row: (field: RowField) => field.fields.reduce((rowSchema, rowField) => {
-    const getFieldSchema = fieldToSchemaMap(parentName)[rowField.type];
+  row: (field: RowField) => field.fields.reduce((rowSchema, subField) => {
+    const getFieldSchema = fieldToSchemaMap(parentName)[subField.type];
 
     if (getFieldSchema) {
-      const rowFieldSchema = getFieldSchema(rowField);
+      const rowFieldSchema = getFieldSchema(subField);
 
-      if (fieldHasSubFields(rowField)) {
+      if (fieldHasSubFields(subField)) {
         return [
           ...rowSchema,
           ...rowFieldSchema,
         ];
       }
 
-      if (fieldAffectsData(rowField)) {
+      if (fieldAffectsData(subField)) {
         return [
           ...rowSchema,
           {
-            key: rowField.name,
+            key: subField.name,
             type: rowFieldSchema,
           },
         ];
@@ -246,6 +247,65 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
 
 
     return rowSchema;
+  }, []),
+  collapsible: (field: CollapsibleField) => field.fields.reduce((rowSchema, subField) => {
+    const getFieldSchema = fieldToSchemaMap(parentName)[subField.type];
+
+    if (getFieldSchema) {
+      const rowFieldSchema = getFieldSchema(subField);
+
+      if (fieldHasSubFields(subField)) {
+        return [
+          ...rowSchema,
+          ...rowFieldSchema,
+        ];
+      }
+
+      if (fieldAffectsData(subField)) {
+        return [
+          ...rowSchema,
+          {
+            key: subField.name,
+            type: rowFieldSchema,
+          },
+        ];
+      }
+    }
+
+
+    return rowSchema;
+  }, []),
+  tabs: (field: TabsField) => field.tabs.reduce((tabSchema, tab) => {
+    return [
+      ...tabSchema,
+      ...tab.fields.reduce((rowSchema, subField) => {
+        const getFieldSchema = fieldToSchemaMap(parentName)[subField.type];
+
+        if (getFieldSchema) {
+          const rowFieldSchema = getFieldSchema(subField);
+
+          if (fieldHasSubFields(subField)) {
+            return [
+              ...rowSchema,
+              ...rowFieldSchema,
+            ];
+          }
+
+          if (fieldAffectsData(subField)) {
+            return [
+              ...rowSchema,
+              {
+                key: subField.name,
+                type: rowFieldSchema,
+              },
+            ];
+          }
+        }
+
+
+        return rowSchema;
+      }, []),
+    ];
   }, []),
 });
 

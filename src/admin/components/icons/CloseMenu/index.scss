@@ -5,6 +5,6 @@
   width: $baseline;
 
   .fill {
-    fill: $color-dark-gray;
+    fill: var(--theme-elevation-800);
   }
 }

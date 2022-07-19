@@ -6,10 +6,9 @@
   left: auto;
   right: base(.5);
   transform: none;
-  background-color: $color-red;
+  background-color: var(--theme-error-500);
 
   span {
-    border-top-color: $color-red;
+    border-top-color: var(--theme-error-500);
   }
 }
-

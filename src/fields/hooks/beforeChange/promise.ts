@@ -58,8 +58,8 @@ export const promise = async ({
     if (typeof siblingData[field.name] === 'undefined') {
       // If no incoming data, but existing document data is found, merge it in
       if (typeof siblingDoc[field.name] !== 'undefined') {
-        if (field.localized && typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null) {
-          siblingData[field.name] = siblingDoc[field.name][req.locale];
+        if (field.localized && typeof siblingDocWithLocales[field.name] === 'object' && siblingDocWithLocales[field.name] !== null) {
+          siblingData[field.name] = siblingDocWithLocales[field.name][req.locale];
         } else {
           siblingData[field.name] = siblingDoc[field.name];
         }
@@ -259,7 +259,8 @@ export const promise = async ({
       break;
     }
 
-    case 'row': {
+    case 'row':
+    case 'collapsible': {
       traverseFields({
         data,
         doc,
@@ -278,6 +279,29 @@ export const promise = async ({
         skipValidation: skipValidationFromHere,
       });
 
+      break;
+    }
+
+    case 'tabs': {
+      field.tabs.forEach((tab) => {
+        traverseFields({
+          data,
+          doc,
+          docWithLocales,
+          errors,
+          fields: tab.fields,
+          id,
+          mergeLocaleActions,
+          operation,
+          path,
+          promises,
+          req,
+          siblingData,
+          siblingDoc,
+          siblingDocWithLocales,
+          skipValidation: skipValidationFromHere,
+        });
+      });
       break;
     }
 

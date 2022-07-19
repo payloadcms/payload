@@ -21,7 +21,7 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
       className={baseClass}
       slug="stay-logged-in"
     >
-      <MinimalTemplate>
+      <MinimalTemplate className={`${baseClass}__template`}>
         <h1>Stay logged in</h1>
         <p>You haven&apos;t been active in a little while and will shortly be automatically logged out for your own security. Would you like to stay logged in?</p>
         <div className={`${baseClass}__actions`}>

@@ -249,7 +249,8 @@ export const promise = async ({
       break;
     }
 
-    case 'row': {
+    case 'row':
+    case 'collapsible': {
       traverseFields({
         data,
         doc,
@@ -261,6 +262,25 @@ export const promise = async ({
         req,
         siblingData,
         siblingDoc,
+      });
+
+      break;
+    }
+
+    case 'tabs': {
+      field.tabs.forEach((tab) => {
+        traverseFields({
+          data,
+          doc,
+          fields: tab.fields,
+          id,
+          operation,
+          overrideAccess,
+          promises,
+          req,
+          siblingData,
+          siblingDoc,
+        });
       });
 
       break;

@@ -8,7 +8,7 @@
 .select--read-only {
   div.react-select {
     div.rs__control {
-      background: lighten($color-light-gray, 5%);
+      background: var(--theme-elevation-100);
     }
   }
 }

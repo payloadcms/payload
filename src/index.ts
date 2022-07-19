@@ -75,11 +75,11 @@ export class Payload {
 
   collections: {
     [slug: string]: Collection;
-  } = {}
+  } = {};
 
   versions: {
     [slug: string]: CollectionModel;
-  } = {}
+  } = {};
 
   preferences: Preferences;
 
@@ -87,7 +87,7 @@ export class Payload {
 
   logger: pino.Logger;
 
-  express: Express
+  express: Express;
 
   router: Router;
 
@@ -100,6 +100,8 @@ export class Payload {
   secret: string;
 
   mongoURL: string | false;
+
+  mongoMemoryServer: any;
 
   local: boolean;
 
@@ -138,7 +140,7 @@ export class Payload {
    * @description Initializes Payload
    * @param options
    */
-  init(options: InitOptions): void {
+  async init(options: InitOptions): Promise<void> {
     this.logger = Logger('payload', options.loggerOptions);
     this.logger.info('Starting Payload...');
     if (!options.secret) {
@@ -163,6 +165,11 @@ export class Payload {
 
     this.config = loadConfig(this.logger);
 
+    // Connect to database
+    if (this.mongoURL) {
+      this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, this.logger);
+    }
+
     // If not initializing locally, scaffold router
     if (!this.local) {
       this.router = express.Router();
@@ -177,11 +184,6 @@ export class Payload {
     // Initialize collections & globals
     initCollections(this);
     initGlobals(this);
-
-    // Connect to database
-    if (this.mongoURL) {
-      connectMongoose(this.mongoURL, options.mongoOptions, options.local, this.logger);
-    }
 
     if (!this.config.graphQL.disable) {
       registerSchema(this);
@@ -225,7 +227,8 @@ export class Payload {
       this.authenticate = authenticate(this.config);
     }
 
-    if (typeof options.onInit === 'function') options.onInit(this);
+    if (typeof options.onInit === 'function') await options.onInit(this);
+    if (typeof this.config.onInit === 'function') await this.config.onInit(this);
 
     serverInitTelemetry(this);
   }
@@ -242,7 +245,7 @@ export class Payload {
   create = async <T = any>(options: CreateOptions<T>): Promise<T> => {
     const { create } = localOperations;
     return create(this, options);
-  }
+  };
 
   /**
    * @description Find documents with criteria
@@ -252,17 +255,17 @@ export class Payload {
   find = async <T extends TypeWithID = any>(options: FindOptions): Promise<PaginatedDocs<T>> => {
     const { find } = localOperations;
     return find(this, options);
-  }
+  };
 
   findGlobal = async <T extends GlobalTypeWithID = any>(options: FindGlobalOptions): Promise<T> => {
     const { findOne } = localGlobalOperations;
     return findOne(this, options);
-  }
+  };
 
   updateGlobal = async <T extends GlobalTypeWithID = any>(options: UpdateGlobalOptions): Promise<T> => {
     const { update } = localGlobalOperations;
     return update(this, options);
-  }
+  };
 
   /**
    * @description Find global versions with criteria
@@ -272,7 +275,7 @@ export class Payload {
   findGlobalVersions = async <T extends TypeWithVersion<T> = any>(options: FindGlobalVersionsOptions): Promise<PaginatedDocs<T>> => {
     const { findVersions } = localGlobalOperations;
     return findVersions<T>(this, options);
-  }
+  };
 
   /**
    * @description Find global version by ID
@@ -282,7 +285,7 @@ export class Payload {
   findGlobalVersionByID = async <T extends TypeWithVersion<T> = any>(options: FindGlobalVersionByIDOptions): Promise<T> => {
     const { findVersionByID } = localGlobalOperations;
     return findVersionByID(this, options);
-  }
+  };
 
   /**
    * @description Restore global version by ID
@@ -292,7 +295,7 @@ export class Payload {
   restoreGlobalVersion = async <T extends TypeWithVersion<T> = any>(options: RestoreGlobalVersionOptions): Promise<T> => {
     const { restoreVersion } = localGlobalOperations;
     return restoreVersion(this, options);
-  }
+  };
 
   /**
    * @description Find document by ID
@@ -302,7 +305,7 @@ export class Payload {
   findByID = async <T extends TypeWithID = any>(options: FindByIDOptions): Promise<T> => {
     const { findByID } = localOperations;
     return findByID<T>(this, options);
-  }
+  };
 
   /**
    * @description Update document
@@ -312,12 +315,12 @@ export class Payload {
   update = async <T = any>(options: UpdateOptions<T>): Promise<T> => {
     const { update } = localOperations;
     return update<T>(this, options);
-  }
+  };
 
   delete = async <T extends TypeWithID = any>(options: DeleteOptions): Promise<T> => {
     const { localDelete } = localOperations;
     return localDelete<T>(this, options);
-  }
+  };
 
   /**
    * @description Find versions with criteria
@@ -327,7 +330,7 @@ export class Payload {
   findVersions = async <T extends TypeWithVersion<T> = any>(options: FindVersionsOptions): Promise<PaginatedDocs<T>> => {
     const { findVersions } = localOperations;
     return findVersions<T>(this, options);
-  }
+  };
 
   /**
    * @description Find version by ID
@@ -337,7 +340,7 @@ export class Payload {
   findVersionByID = async <T extends TypeWithVersion<T> = any>(options: FindVersionByIDOptions): Promise<T> => {
     const { findVersionByID } = localOperations;
     return findVersionByID(this, options);
-  }
+  };
 
   /**
    * @description Restore version by ID
@@ -347,32 +350,32 @@ export class Payload {
   restoreVersion = async <T extends TypeWithVersion<T> = any>(options: RestoreVersionOptions): Promise<T> => {
     const { restoreVersion } = localOperations;
     return restoreVersion(this, options);
-  }
+  };
 
   login = async <T extends TypeWithID = any>(options: LoginOptions): Promise<LoginResult & { user: T}> => {
     const { login } = localOperations.auth;
     return login(this, options);
-  }
+  };
 
   forgotPassword = async (options: ForgotPasswordOptions): Promise<ForgotPasswordResult> => {
     const { forgotPassword } = localOperations.auth;
     return forgotPassword(this, options);
-  }
+  };
 
   resetPassword = async (options: ResetPasswordOptions): Promise<ResetPasswordResult> => {
     const { resetPassword } = localOperations.auth;
     return resetPassword(this, options);
-  }
+  };
 
   unlock = async (options: UnlockOptions): Promise<boolean> => {
     const { unlock } = localOperations.auth;
     return unlock(this, options);
-  }
+  };
 
   verifyEmail = async (options: VerifyEmailOptions): Promise<boolean> => {
     const { verifyEmail } = localOperations.auth;
     return verifyEmail(this, options);
-  }
+  };
 }
 
 const payload = new Payload();

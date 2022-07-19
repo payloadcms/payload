@@ -6,7 +6,7 @@
 
   &.error {
     textarea {
-      border: 1px solid $color-red !important;
+      border: 1px solid var(--theme-error-500) !important;
     }
   }
 }
@@ -47,13 +47,13 @@ pre[class*="language-"] {
   border-radius: 0.3em;
 }
 
-:not(pre) > code[class*="language-"],
+:not(pre)>code[class*="language-"],
 pre[class*="language-"] {
-  background: #1d1f21;
+  background: var(--theme-base-100);
 }
 
 /* Inline code */
-:not(pre) > code[class*="language-"] {
+:not(pre)>code[class*="language-"] {
   padding: 0.1em;
   border-radius: 0.3em;
 }

@@ -12,7 +12,7 @@ div.react-select {
     padding: base(.25) 0;
     min-height: base(1.5);
 
-    > * {
+    >* {
       margin-top: 0;
       margin-bottom: 0;
       padding-top: 0;
@@ -43,8 +43,10 @@ div.react-select {
   }
 
   .rs__input {
+    color: var(--theme-elevation-1000);
+
     input {
-      font-family: $font-body;
+      font-family: var(--font-body);
       width: 100% !important;
     }
   }
@@ -52,34 +54,39 @@ div.react-select {
   .rs__menu {
     z-index: 2;
     border-radius: 0;
-    @include inputShadowActive;
+    @include shadow-lg;
+    background: var(--theme-input-bg);
   }
 
   .rs__group-heading {
-    color: $color-dark-gray;
+    color: var(--theme-elevation-800);
     padding-left: base(.5);
     margin-bottom: base(.25);
   }
 
   .rs__option {
-    font-family: $font-body;
+    font-family: var(--font-body);
     font-size: $baseline-body-size;
     padding: base(.375) base(.75);
-    color: $color-dark-gray;
+    color: var(--theme-elevation-800);
 
     &--is-focused {
-      background-color: rgba($color-dark-gray, .1);
+      background-color: var(--theme-elevation-100);
     }
 
     &--is-selected {
-      background-color: rgba($color-dark-gray, .5);
+      background-color: var(--theme-elevation-300);
     }
+  }
+
+  .rs__single-value {
+    color: currentColor;
   }
 
   .rs__multi-value {
     padding: 0;
     background: transparent;
-    border: $style-stroke-width-s solid $color-dark-gray;
+    border: $style-stroke-width-s solid var(--theme-elevation-800);
     line-height: calc(#{$baseline} - #{$style-stroke-width-s * 2});
     margin: base(.25) base(.5) base(.25) 0;
   }
@@ -87,6 +94,7 @@ div.react-select {
   .rs__multi-value__label {
     padding: 0 base(.125) 0 base(.25);
     max-width: 150px;
+    color: currentColor;
   }
 
   .rs__multi-value__remove {
@@ -94,14 +102,14 @@ div.react-select {
     cursor: pointer;
 
     &:hover {
-      color: $color-dark-gray;
-      background: rgba($color-red, .25);
+      color: var(--theme-elevation-800);
+      background: var(--theme-error-150);
     }
   }
 
   &--error {
     div.rs__control {
-      background-color: lighten($color-red, 20%);
+      background-color: var(--theme-error-200);
     }
   }
 }

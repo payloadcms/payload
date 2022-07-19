@@ -76,7 +76,10 @@ const DateTime: React.FC<Props> = (props) => {
         label={label}
         required={required}
       />
-      <div className={`${baseClass}__input-wrapper`}>
+      <div
+        id={`field-${path.replace(/\./gi, '__')}`}
+        className={`${baseClass}__input-wrapper`}
+      >
         <DatePicker
           {...date}
           placeholder={placeholder}

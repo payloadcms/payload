@@ -31,12 +31,8 @@ export default (config: SanitizedConfig): Configuration => ({
       {
         oneOf: [
           {
-            test: /\.(?:ico|gif|png|jpg|jpeg)$/i,
+            test: /\.(?:ico|gif|png|jpg|jpeg|woff(2)?|eot|ttf|otf|svg)$/i,
             type: 'asset/resource',
-          },
-          {
-            test: /\.(woff(2)?|eot|ttf|otf|svg|)$/,
-            type: 'asset/inline',
           },
         ],
       },
@@ -54,7 +50,6 @@ export default (config: SanitizedConfig): Configuration => ({
       'payload-config': config.paths.config,
       payload$: mockModulePath,
       'payload-user-css': config.admin.css,
-      'payload-scss-overrides': config.admin.scss,
       dotenv: mockDotENVPath,
     },
     extensions: ['.ts', '.tsx', '.js', '.json'],

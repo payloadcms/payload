@@ -61,17 +61,17 @@ const TextInput: React.FC<TextInputProps> = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={path}
+        htmlFor={`field-${path.replace(/\./gi, '__')}`}
         label={label}
         required={required}
       />
       <input
+        id={`field-${path.replace(/\./gi, '__')}`}
         value={value || ''}
         onChange={onChange}
         disabled={readOnly}
         placeholder={placeholder}
         type="text"
-        id={path}
         name={path}
       />
       <FieldDescription

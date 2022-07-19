@@ -7,6 +7,7 @@ const baseClass = 'popup-button';
 
 const PopupButton: React.FC<Props> = (props) => {
   const {
+    className,
     buttonType,
     button,
     setActive,
@@ -15,6 +16,7 @@ const PopupButton: React.FC<Props> = (props) => {
 
   const classes = [
     baseClass,
+    className,
     `${baseClass}--${buttonType}`,
   ].filter(Boolean).join(' ');
 

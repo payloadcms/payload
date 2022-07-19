@@ -4,8 +4,9 @@
 /* eslint-disable no-use-before-define */
 import { Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
-import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, fieldIsPresentationalOnly, NonPresentationalField } from '../fields/config/types';
+import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, fieldIsPresentationalOnly, NonPresentationalField, CollapsibleField, TabsField } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
+import flattenTopLevelFields from '../utilities/flattenTopLevelFields';
 
 export type BuildSchemaOptions = {
   options?: SchemaOptions
@@ -118,7 +119,7 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
     schema.index(index);
   });
 
-  setBlockDiscriminators(configFields, schema, config, buildSchemaOptions);
+  setBlockDiscriminators(flattenTopLevelFields(configFields), schema, config, buildSchemaOptions);
 
   return schema;
 };
@@ -195,7 +196,7 @@ const fieldToSchemaMap = {
         type: [Number],
         sparse: field.unique && field.localized,
         unique: field.unique || false,
-        required: (field.required && !field.localized && !field?.admin?.condition && !field?.access?.create) || false,
+        required: false,
         default: field.defaultValue || undefined,
       },
     };
@@ -304,15 +305,42 @@ const fieldToSchemaMap = {
     };
   },
   row: (field: RowField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
-    const newFields = { ...fields };
+    let newFields = { ...fields };
 
-    field.fields.forEach((rowField: Field) => {
-      const fieldSchemaMap: FieldSchemaGenerator = fieldToSchemaMap[rowField.type];
+    field.fields.forEach((subField: Field) => {
+      const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
 
-      if (fieldSchemaMap && fieldAffectsData(rowField)) {
-        const fieldSchema = fieldSchemaMap(rowField, fields, config, buildSchemaOptions);
-        newFields[rowField.name] = fieldSchema[rowField.name];
+      if (fieldSchema) {
+        newFields = fieldSchema(subField, newFields, config, buildSchemaOptions);
       }
+    });
+
+    return newFields;
+  },
+  collapsible: (field: CollapsibleField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+    let newFields = { ...fields };
+
+    field.fields.forEach((subField: Field) => {
+      const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+
+      if (fieldSchema) {
+        newFields = fieldSchema(subField, newFields, config, buildSchemaOptions);
+      }
+    });
+
+    return newFields;
+  },
+  tabs: (field: TabsField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+    let newFields = { ...fields };
+
+    field.tabs.forEach((tab) => {
+      tab.fields.forEach((subField: Field) => {
+        const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+
+        if (fieldSchema) {
+          newFields = fieldSchema(subField, newFields, config, buildSchemaOptions);
+        }
+      });
     });
 
     return newFields;

@@ -5,8 +5,8 @@
   line-height: base(1);
   border: 0;
   vertical-align: middle;
-  background: rgba($color-dark-gray, .1);
-  color: $color-dark-gray;
+  background: var(--theme-elevation-900);
+  color: var(--theme-elevation-800);
   border-radius: $style-radius-s;
   padding: base(.5);
   margin-bottom: $baseline;
@@ -18,6 +18,7 @@
 
   &--has-icon {
     display: flex;
+
     svg {
       display: block;
     }
@@ -26,44 +27,45 @@
   &--type-default {
     &.button--has-action {
       &:hover {
-        background: darken($color-dark-gray, .15);
+        background: var(--theme-elevation-900);
       }
 
       &:active {
-        background: darken($color-dark-gray, .2);
+        background: var(--theme-elevation-950);
       }
     }
   }
 
   &--type-error {
-    background: rgba($color-red, .1);
-    color: $color-red;
+    background: var(--theme-error-100);
+    color: var(--theme-error-500);
 
     svg {
-      @include color-svg($color-red);
+      @include color-svg(var(--theme-error-500));
     }
 
     &.button--has-action {
       &:hover {
-        background: rgba($color-red, .15);
+        background: var(--theme-error-200);
       }
 
       &:active {
-        background: rgba($color-red, .2);
+        background: var(--theme-error-300);
       }
     }
   }
 
   &--type-success {
-    background: $color-green;
+    background: var(--theme-success-500);
+    color: var(--color-base-800);
 
     &.button--has-action {
       &:hover {
-        background: rgba($color-green, .15);
+        background: var(--theme-success-200);
       }
 
       &:active {
-        background: rgba($color-green, .2);
+        background: var(--theme-success-200);
       }
     }
   }

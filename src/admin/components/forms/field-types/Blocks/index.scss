@@ -1,8 +1,7 @@
 @import '../../../../scss/styles.scss';
 
-.field-type.blocks {
-  margin: base(2) 0;
-  min-width: base(15);
+.blocks-field {
+  margin: 0 0 base(2);
 
   &__header {
     h3 {
@@ -12,6 +11,53 @@
     margin-bottom: base(1);
   }
 
+  &__header-wrap {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+  }
+
+  &__header-actions {
+    list-style: none;
+    margin: 0 0 0 auto;
+    padding: 0;
+    display: flex;
+  }
+
+  &__header-action {
+    @extend %btn-reset;
+    cursor: pointer;
+    margin-left: base(.5);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__block-header {
+    display: inline-flex;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  &__block-number {
+    margin-right: base(.375);
+    flex-shrink: 0;
+  }
+
+  &__block-pill {
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .section-title {
+    min-width: 0;
+  }
+
+  &__row {
+    margin-bottom: base(.5);
+  }
+
   &__error-wrap {
     position: relative;
   }
@@ -19,36 +65,16 @@
   &__add-button-wrap {
 
     .btn {
-      color: $color-gray;
+      color: var(--theme-elevation-400);
       margin: 0;
 
       &:hover {
-        color: $color-dark-gray;
+        color: var(--theme-elevation-800);
       }
     }
   }
 
-  .section .section {
-    margin-top: 0;
-  }
-
-  .section__content {
-    > div > div {
-      width: 100%;
-    }
-  }
-
-  @include mid-break {
-    min-width: calc(100vw - #{base(2)});
-  }
-}
-
-.field-type.group,
-.field-type.array,
-.field-type.blocks {
-  .field-type.blocks {
-    .field-type.blocks__add-button-wrap {
-      margin-left: base(3);
-    }
+  &__fields>.field-type:last-child {
+    margin-bottom: 0;
   }
 }

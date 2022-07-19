@@ -1,16 +1,15 @@
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
-import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
 import { useAuth } from '../../../utilities/Auth';
 import { usePreferences } from '../../../utilities/Preferences';
 import { useLocale } from '../../../utilities/Locale';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
-import reducer from '../rowReducer';
+import reducer, { Row } from '../rowReducer';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { useForm } from '../../Form/context';
 import buildStateFromSchema from '../../Form/buildStateFromSchema';
-import DraggableSection from '../../DraggableSection';
 import Error from '../../Error';
 import useField from '../../useField';
 import Popup from '../../../elements/Popup';
@@ -19,12 +18,19 @@ import { blocks as blocksValidator } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
-import { DocumentPreferences } from '../../../../../preferences/types';
 import { useOperation } from '../../../utilities/OperationProvider';
+import { Collapsible } from '../../../elements/Collapsible';
+import { ArrayAction } from '../../../elements/ArrayAction';
+import RenderFields from '../../RenderFields';
+import { fieldAffectsData } from '../../../../../fields/config/types';
+import SectionTitle from './SectionTitle';
+import Pill from '../../../elements/Pill';
+import { scrollToID } from '../../../../utilities/scrollToID';
+import HiddenInput from '../HiddenInput';
 
 import './index.scss';
 
-const baseClass = 'field-type blocks';
+const baseClass = 'blocks-field';
 
 const labelDefaults = {
   singular: 'Block',
@@ -54,10 +60,9 @@ const Blocks: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const { preferencesKey } = useDocumentInfo();
-
-  const { getPreference, setPreference } = usePreferences();
-  const [rows, dispatchRows] = useReducer(reducer, []);
+  const { preferencesKey, preferences } = useDocumentInfo();
+  const { setPreference } = usePreferences();
+  const [rows, dispatchRows] = useReducer(reducer, undefined);
   const formContext = useForm();
   const { user } = useAuth();
   const { id } = useDocumentInfo();
@@ -70,6 +75,7 @@ const Blocks: React.FC<Props> = (props) => {
   }, [maxRows, minRows, required, validate]);
 
   const [disableFormData, setDisableFormData] = useState(false);
+  const [selectorIndexOpen, setSelectorIndexOpen] = useState<number>();
 
   const {
     showError,
@@ -83,32 +89,56 @@ const Blocks: React.FC<Props> = (props) => {
     condition,
   });
 
-  const addRow = useCallback(async (rowIndex, blockType) => {
+  const onAddPopupToggle = useCallback((open) => {
+    if (!open) {
+      setSelectorIndexOpen(undefined);
+    }
+  }, []);
+
+  const addRow = useCallback(async (rowIndex: number, blockType: string) => {
     const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
-
     const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, operation, id, user, locale });
-
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
     dispatchRows({ type: 'ADD', rowIndex, blockType });
     setValue(value as number + 1);
+
+    setTimeout(() => {
+      scrollToID(`${path}-row-${rowIndex + 1}`);
+    }, 0);
   }, [path, setValue, value, blocks, dispatchFields, operation, id, user, locale]);
 
-  const removeRow = useCallback((rowIndex) => {
+  const duplicateRow = useCallback(async (rowIndex: number, blockType: string) => {
+    dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });
+    dispatchRows({ type: 'ADD', rowIndex, blockType });
+    setValue(value as number + 1);
+
+    setTimeout(() => {
+      scrollToID(`${path}-row-${rowIndex + 1}`);
+    }, 0);
+  }, [dispatchRows, dispatchFields, path, setValue, value]);
+
+  const removeRow = useCallback((rowIndex: number) => {
     dispatchRows({ type: 'REMOVE', rowIndex });
     dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
     setValue(value as number - 1);
   }, [path, setValue, value, dispatchFields]);
 
-  const moveRow = useCallback((moveFromIndex, moveToIndex) => {
+  const moveRow = useCallback((moveFromIndex: number, moveToIndex: number) => {
     dispatchRows({ type: 'MOVE', moveFromIndex, moveToIndex });
     dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
   }, [dispatchRows, dispatchFields, path]);
+
+  const onDragEnd = useCallback((result) => {
+    if (!result.destination) return;
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+    moveRow(sourceIndex, destinationIndex);
+  }, [moveRow]);
 
   const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
     dispatchRows({ type: 'SET_COLLAPSE', id: rowID, collapsed });
 
     if (preferencesKey) {
-      const preferences: DocumentPreferences = await getPreference(preferencesKey);
       const preferencesToSet = preferences || { fields: {} };
       let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed
         .filter((filterID) => (rows.find((row) => row.id === filterID)))
@@ -131,35 +161,32 @@ const Blocks: React.FC<Props> = (props) => {
         },
       });
     }
-  }, [preferencesKey, getPreference, path, setPreference, rows]);
+  }, [preferencesKey, preferences, path, setPreference, rows]);
 
-  const onDragEnd = useCallback((result) => {
-    if (!result.destination) return;
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-    moveRow(sourceIndex, destinationIndex);
-  }, [moveRow]);
+  const toggleCollapseAll = useCallback(async (collapse: boolean) => {
+    dispatchRows({ type: 'SET_ALL_COLLAPSED', collapse });
 
-  // Get preferences, and once retrieved,
-  // Reset rows with preferences included
-  useEffect(() => {
-    const data = formContext.getDataByPath(path);
+    if (preferencesKey) {
+      const preferencesToSet = preferences || { fields: {} };
 
-    if (Array.isArray(data)) {
-      const fetchPreferences = async () => {
-        const preferences = preferencesKey ? await getPreference<DocumentPreferences>(preferencesKey) : undefined;
-        dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
-      };
-
-      fetchPreferences();
+      setPreference(preferencesKey, {
+        ...preferencesToSet,
+        fields: {
+          ...preferencesToSet?.fields || {},
+          [path]: {
+            ...preferencesToSet?.fields?.[path],
+            collapsed: collapse ? rows.map(({ id: rowID }) => rowID) : [],
+          },
+        },
+      });
     }
-  }, [formContext, path, preferencesKey, getPreference]);
+  }, [path, preferences, preferencesKey, rows, setPreference]);
 
   // Set row count on mount and when form context is reset
   useEffect(() => {
-    const data = formContext.getDataByPath(path);
-    dispatchRows({ type: 'SET_ALL', data: data || [] });
-  }, [formContext, path]);
+    const data = formContext.getDataByPath<Row[]>(path);
+    dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
+  }, [formContext, path, preferences]);
 
   useEffect(() => {
     setValue(rows?.length || 0, true);
@@ -171,16 +198,20 @@ const Blocks: React.FC<Props> = (props) => {
     }
   }, [rows, setValue]);
 
-  const hasMaxRows = maxRows && rows.length >= maxRows;
+  const hasMaxRows = maxRows && rows?.length >= maxRows;
 
   const classes = [
+    'field-type',
     baseClass,
     className,
   ].filter(Boolean).join(' ');
 
+  if (!rows) return null;
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div
+        id={`field-${path.replace(/\./gi, '__')}`}
         className={classes}
       >
         <div className={`${baseClass}__error-wrap`}>
@@ -190,7 +221,29 @@ const Blocks: React.FC<Props> = (props) => {
           />
         </div>
         <header className={`${baseClass}__header`}>
-          <h3>{label}</h3>
+          <div className={`${baseClass}__header-wrap`}>
+            <h3>{label}</h3>
+            <ul className={`${baseClass}__header-actions`}>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => toggleCollapseAll(true)}
+                  className={`${baseClass}__header-action`}
+                >
+                  Collapse All
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => toggleCollapseAll(false)}
+                  className={`${baseClass}__header-action`}
+                >
+                  Show All
+                </button>
+              </li>
+            </ul>
+          </div>
           <FieldDescription
             value={value}
             description={description}
@@ -210,30 +263,94 @@ const Blocks: React.FC<Props> = (props) => {
                 const { blockType } = row;
                 const blockToRender = blocks.find((block) => block.slug === blockType);
 
+                const rowNumber = i + 1;
+
                 if (blockToRender) {
                   return (
-                    <DraggableSection
-                      readOnly={readOnly}
+                    <Draggable
                       key={row.id}
-                      id={row.id}
-                      blockType="blocks"
-                      blocks={blocks}
-                      label={blockToRender?.labels?.singular}
-                      isCollapsed={row.collapsed}
-                      rowCount={rows.length}
-                      rowIndex={i}
-                      addRow={addRow}
-                      removeRow={removeRow}
-                      moveRow={moveRow}
-                      setRowCollapse={setCollapse}
-                      parentPath={path}
-                      fieldTypes={fieldTypes}
-                      permissions={permissions}
-                      hasMaxRows={hasMaxRows}
-                      fieldSchema={[
-                        ...blockToRender.fields,
-                      ]}
-                    />
+                      draggableId={row.id}
+                      index={i}
+                      isDragDisabled={readOnly}
+                    >
+                      {(providedDrag) => (
+                        <div
+                          id={`${path}-row-${i}`}
+                          ref={providedDrag.innerRef}
+                          {...providedDrag.draggableProps}
+                        >
+                          <Collapsible
+                            collapsed={row.collapsed}
+                            onToggle={(collapsed) => setCollapse(row.id, collapsed)}
+                            className={`${baseClass}__row`}
+                            key={row.id}
+                            dragHandleProps={providedDrag.dragHandleProps}
+                            header={(
+                              <div className={`${baseClass}__block-header`}>
+                                <span className={`${baseClass}__block-number`}>
+                                  {rowNumber >= 10 ? rowNumber : `0${rowNumber}`}
+                                </span>
+                                <Pill
+                                  pillStyle="white"
+                                  className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
+                                >
+                                  {blockToRender.labels.singular}
+                                </Pill>
+                                <SectionTitle
+                                  path={`${path}.${i}.blockName`}
+                                  readOnly={readOnly}
+                                />
+                              </div>
+                            )}
+                            actions={!readOnly ? (
+                              <React.Fragment>
+                                <Popup
+                                  key={`${blockType}-${i}`}
+                                  forceOpen={selectorIndexOpen === i}
+                                  onToggleOpen={onAddPopupToggle}
+                                  buttonType="none"
+                                  size="large"
+                                  horizontalAlign="right"
+                                  render={({ close }) => (
+                                    <BlockSelector
+                                      blocks={blocks}
+                                      addRow={addRow}
+                                      addRowIndex={i}
+                                      close={close}
+                                    />
+                                  )}
+                                />
+                                <ArrayAction
+                                  rowCount={rows.length}
+                                  duplicateRow={() => duplicateRow(i, blockType)}
+                                  addRow={() => setSelectorIndexOpen(i)}
+                                  moveRow={moveRow}
+                                  removeRow={removeRow}
+                                  index={i}
+                                />
+                              </React.Fragment>
+                            ) : undefined}
+                          >
+                            <HiddenInput
+                              name={`${path}.${i}.id`}
+                              value={row.id}
+                            />
+                            <RenderFields
+                              className={`${baseClass}__fields`}
+                              forceRender
+                              readOnly={readOnly}
+                              fieldTypes={fieldTypes}
+                              permissions={permissions?.fields}
+                              fieldSchema={blockToRender.fields.map((field) => ({
+                                ...field,
+                                path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,
+                              }))}
+                            />
+
+                          </Collapsible>
+                        </div>
+                      )}
+                    </Draggable>
                   );
                 }
 
@@ -259,7 +376,7 @@ const Blocks: React.FC<Props> = (props) => {
           )}
         </Droppable>
 
-        {(!readOnly && (rows.length < maxRows || maxRows === undefined)) && (
+        {(!readOnly && !hasMaxRows) && (
           <div className={`${baseClass}__add-button-wrap`}>
             <Popup
               buttonType="custom"

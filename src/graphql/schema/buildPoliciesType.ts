@@ -64,6 +64,15 @@ const buildFields = (label, fieldsToBuild) => fieldsToBuild.reduce((builtFields,
         ...subFields,
       };
     }
+
+    if (field.type === 'tabs') {
+      return field.tabs.reduce((fieldsWithTabFields, tab) => {
+        return {
+          ...fieldsWithTabFields,
+          ...buildFields(label, tab.fields),
+        };
+      }, { ...builtFields });
+    }
   }
   return builtFields;
 }, {});

@@ -208,5 +208,21 @@ export const addFieldStatePromise = async ({
       locale,
       operation,
     });
+  } else if (field.type === 'tabs') {
+    field.tabs.forEach((tab) => {
+      iterateFields({
+        state,
+        fields: tab.fields,
+        data,
+        parentPassesCondition: passesCondition,
+        path,
+        user,
+        fieldPromises,
+        fullData,
+        id,
+        locale,
+        operation,
+      });
+    });
   }
 };

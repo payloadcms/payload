@@ -121,6 +121,19 @@ export const recurseNestedFields = ({
           showHiddenFields,
         });
       }
+    } else if (field.type === 'tabs') {
+      field.tabs.forEach((tab) => {
+        recurseNestedFields({
+          promises,
+          data,
+          fields: tab.fields,
+          req,
+          overrideAccess,
+          depth,
+          currentDepth,
+          showHiddenFields,
+        });
+      });
     } else if (Array.isArray(data[field.name])) {
       if (field.type === 'blocks') {
         data[field.name].forEach((row, i) => {

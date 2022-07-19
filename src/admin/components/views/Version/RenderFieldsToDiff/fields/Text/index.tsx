@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer';
 import Label from '../../Label';
+import { diffStyles } from '../styles';
 import { Props } from '../types';
 
 import './index.scss';
@@ -29,6 +30,7 @@ const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText 
         {field.label}
       </Label>
       <ReactDiffViewer
+        styles={diffStyles}
         compareMethod={DiffMethod[diffMethod]}
         oldValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
         newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}

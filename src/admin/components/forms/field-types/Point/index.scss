@@ -1,7 +1,7 @@
 @import '../../../../scss/styles.scss';
 
 .point {
-	position: relative;
+  position: relative;
   margin-bottom: $baseline;
 
   &__wrap {
@@ -18,13 +18,13 @@
     }
   }
 
-	input {
-		@include formInput;
-	}
+  input {
+    @include formInput;
+  }
 
-	&.error {
-		input {
-      background-color: lighten($color-red, 20%);
-		}
-	}
+  &.error {
+    input {
+      background-color: var(--theme-error-200);
+    }
+  }
 }

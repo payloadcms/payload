@@ -23,18 +23,18 @@
 
 .rich-text-link__button {
   @extend %btn-reset;
+  font-family: inherit;
   font-size: inherit;
   font-weight: inherit;
   color: inherit;
   letter-spacing: inherit;
   line-height: inherit;
   position: relative;
-  z-index: 2;
   text-decoration: underline;
   cursor: text;
 
   &--open {
-    z-index: $z-modal + 1;
+    z-index: var(--z-popup);
   }
 }
 
@@ -51,7 +51,7 @@
   transform: translateY(-50%);
 
   svg {
-    @include color-svg(white);
+    @include color-svg(var(--theme-elevation-0));
     transform: rotate(-90deg);
   }
 }
@@ -61,15 +61,14 @@
   padding-right: base(1.75);
   min-width: base(12);
   width: 100%;
-  background: rgba($color-background-gray, .1);
-  border: 0;
-  color: white;
+  background: var(--theme-input-bg);
+  color: var(--theme-elevation-1000);
 }
 
 .rich-text-link__new-tab {
   svg {
-    @include color-svg(white);
-    background-color: rgba(white, .1);
+    @include color-svg(var(--theme-elevation-900));
+    background: var(--theme-elevation-100);
     margin-right: base(.5);
   }
 

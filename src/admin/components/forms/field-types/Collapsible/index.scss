@@ -1,0 +1,11 @@
+@import '../../../../scss/styles.scss';
+
+.collapsible-field {
+  &__label {
+    pointer-events: none;
+  }
+
+  .field-type:last-child {
+    margin-bottom: 0;
+  }
+}

@@ -24,6 +24,7 @@ export type SelectInputProps = Omit<SelectField, 'type' | 'value' | 'options'> &
   width?: string
   hasMany?: boolean
   options?: OptionObject[]
+  isClearable?: boolean
 }
 
 const SelectInput: React.FC<SelectInputProps> = (props) => {
@@ -63,6 +64,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
 
   return (
     <div
+      id={`field-${path.replace(/\./gi, '__')}`}
       className={classes}
       style={{
         ...style,
@@ -74,7 +76,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={path}
+        htmlFor={`field-${path.replace(/\./gi, '__')}`}
         label={label}
         required={required}
       />

@@ -4,6 +4,7 @@
   position: relative;
 
   button {
+    color: currentColor;
     padding: base(.25) 0;
     font-size: 1rem;
     line-height: base(1);
@@ -23,7 +24,7 @@
   }
 
   span {
-    color: $color-gray;
+    color: var(--theme-elevation-400);
   }
 
   ul {

@@ -26,7 +26,6 @@ const PerPage: React.FC<Props> = ({ limits = defaultLimits, limit, handleChange,
   return (
     <div className={baseClass}>
       <Popup
-        color="dark"
         horizontalAlign="right"
         button={(
           <strong>

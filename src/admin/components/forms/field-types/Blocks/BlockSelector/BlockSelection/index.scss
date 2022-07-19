@@ -12,12 +12,14 @@
   border-radius: 0;
   box-shadow: 0;
   border: 0;
+  color: currentColor;
 
   &:hover {
-    background-color: $color-background-gray;
+    background-color: var(--theme-elevation-100);
   }
 
   &__image {
+
     svg,
     img {
       max-width: 100%;

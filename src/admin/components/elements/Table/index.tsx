@@ -16,7 +16,10 @@ const Table: React.FC<Props> = ({ columns, data }) => {
           <thead>
             <tr>
               {columns.map((col, i) => (
-                <th key={i}>
+                <th
+                  key={i}
+                  id={`heading-${col.accessor}`}
+                >
                   {col.components.Heading}
                 </th>
               ))}
@@ -24,9 +27,15 @@ const Table: React.FC<Props> = ({ columns, data }) => {
           </thead>
           <tbody>
             {data && data.map((row, rowIndex) => (
-              <tr key={rowIndex}>
+              <tr
+                key={rowIndex}
+                className={`row-${rowIndex + 1}`}
+              >
                 {columns.map((col, colIndex) => (
-                  <td key={colIndex}>
+                  <td
+                    key={colIndex}
+                    className={`cell-${col.accessor}`}
+                  >
                     {col.components.renderCell(row, row[col.accessor])}
                   </td>
                 ))}

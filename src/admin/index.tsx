@@ -16,6 +16,7 @@ import { SearchParamsProvider } from './components/utilities/SearchParams';
 import { LocaleProvider } from './components/utilities/Locale';
 import Routes from './components/Routes';
 import { StepNavProvider } from './components/elements/StepNav';
+import { ThemeProvider } from './components/utilities/Theme';
 
 import './scss/app.scss';
 
@@ -37,15 +38,17 @@ const Index = () => (
             >
               <AuthProvider>
                 <PreferencesProvider>
-                  <SearchParamsProvider>
-                    <LocaleProvider>
-                      <StepNavProvider>
-                        <CustomProvider>
-                          <Routes />
-                        </CustomProvider>
-                      </StepNavProvider>
-                    </LocaleProvider>
-                  </SearchParamsProvider>
+                  <ThemeProvider>
+                    <SearchParamsProvider>
+                      <LocaleProvider>
+                        <StepNavProvider>
+                          <CustomProvider>
+                            <Routes />
+                          </CustomProvider>
+                        </StepNavProvider>
+                      </LocaleProvider>
+                    </SearchParamsProvider>
+                  </ThemeProvider>
                   <ModalContainer />
                 </PreferencesProvider>
               </AuthProvider>

@@ -14,7 +14,6 @@ import toggleLeaf from './leaves/toggle';
 import hotkeys from './hotkeys';
 import enablePlugins from './enablePlugins';
 import defaultValue from '../../../../../fields/richText/defaultValue';
-import FieldTypeGutter from '../../FieldTypeGutter';
 import FieldDescription from '../../FieldDescription';
 import withHTML from './plugins/withHTML';
 import { Props, BlurSelectionEditor } from './types';
@@ -56,8 +55,8 @@ const RichText: React.FC<Props> = (props) => {
       width,
       placeholder,
       description,
-      hideGutter,
       condition,
+      hideGutter,
     } = {},
   } = props;
 
@@ -141,6 +140,7 @@ const RichText: React.FC<Props> = (props) => {
     className,
     showError && 'error',
     readOnly && `${baseClass}--read-only`,
+    !hideGutter && `${baseClass}--gutter`,
   ].filter(Boolean).join(' ');
 
   const editor = useMemo(() => {
@@ -206,13 +206,12 @@ const RichText: React.FC<Props> = (props) => {
       }}
     >
       <div className={`${baseClass}__wrap`}>
-        {!hideGutter && (<FieldTypeGutter />)}
         <Error
           showError={showError}
           message={errorMessage}
         />
         <Label
-          htmlFor={path}
+          htmlFor={`field-${path.replace(/\./gi, '__')}`}
           label={label}
           required={required}
         />
@@ -227,50 +226,53 @@ const RichText: React.FC<Props> = (props) => {
         >
           <div className={`${baseClass}__wrapper`}>
             <div className={`${baseClass}__toolbar`}>
-              {elements.map((element, i) => {
-                let elementName: string;
-                if (typeof element === 'object' && element?.name) elementName = element.name;
-                if (typeof element === 'string') elementName = element;
+              <div className={`${baseClass}__toolbar-wrap`}>
+                {elements.map((element, i) => {
+                  let elementName: string;
+                  if (typeof element === 'object' && element?.name) elementName = element.name;
+                  if (typeof element === 'string') elementName = element;
 
-                const elementType = enabledElements[elementName];
-                const Button = elementType?.Button;
+                  const elementType = enabledElements[elementName];
+                  const Button = elementType?.Button;
 
-                if (Button) {
-                  return (
-                    <Button
-                      key={i}
-                      path={path}
-                    />
-                  );
-                }
+                  if (Button) {
+                    return (
+                      <Button
+                        key={i}
+                        path={path}
+                      />
+                    );
+                  }
 
-                return null;
-              })}
-              {leaves.map((leaf, i) => {
-                let leafName: string;
-                if (typeof leaf === 'object' && leaf?.name) leafName = leaf.name;
-                if (typeof leaf === 'string') leafName = leaf;
+                  return null;
+                })}
+                {leaves.map((leaf, i) => {
+                  let leafName: string;
+                  if (typeof leaf === 'object' && leaf?.name) leafName = leaf.name;
+                  if (typeof leaf === 'string') leafName = leaf;
 
-                const leafType = enabledLeaves[leafName];
-                const Button = leafType?.Button;
+                  const leafType = enabledLeaves[leafName];
+                  const Button = leafType?.Button;
 
-                if (Button) {
-                  return (
-                    <Button
-                      key={i}
-                      path={path}
-                    />
-                  );
-                }
+                  if (Button) {
+                    return (
+                      <Button
+                        key={i}
+                        path={path}
+                      />
+                    );
+                  }
 
-                return null;
-              })}
+                  return null;
+                })}
+              </div>
             </div>
             <div
               className={`${baseClass}__editor`}
               ref={editorRef}
             >
               <Editable
+                id={`field-${path.replace(/\./gi, '__')}`}
                 className={`${baseClass}__input`}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}

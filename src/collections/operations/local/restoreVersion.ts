@@ -7,7 +7,6 @@ import restoreVersion from '../restoreVersion';
 export type Options = {
   collection: string
   id: string
-  data: Record<string, unknown>
   depth?: number
   locale?: string
   fallbackLocale?: string
@@ -22,7 +21,6 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
     depth,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     fallbackLocale = null,
-    data,
     id,
     user,
     overrideAccess = true,
@@ -34,7 +32,6 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
   const args = {
     payload,
     depth,
-    data,
     collection,
     overrideAccess,
     id,

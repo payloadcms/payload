@@ -64,6 +64,10 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
         }
       } else if (field.fields) {
         executeFieldPolicies(updatedObj, field.fields, operation);
+      } else if (field.type === 'tabs') {
+        field.tabs.forEach((tab) => {
+          executeFieldPolicies(updatedObj, tab.fields, operation);
+        });
       }
     });
   };

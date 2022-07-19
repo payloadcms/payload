@@ -4,8 +4,7 @@ import Eyebrow from '../../elements/Eyebrow';
 import { useStepNav } from '../../elements/StepNav';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-
-import './index.scss';
+import { Gutter } from '../../elements/Gutter';
 
 const baseClass = 'not-found';
 
@@ -27,7 +26,7 @@ const NotFound: React.FC = () => {
         keywords="404, Not found, Payload, CMS"
       />
       <Eyebrow />
-      <div className={`${baseClass}__wrap`}>
+      <Gutter className={`${baseClass}__wrap`}>
         <h1>Nothing found</h1>
         <p>Sorry&mdash;there is nothing to correspond with your request.</p>
         <Button
@@ -36,7 +35,7 @@ const NotFound: React.FC = () => {
         >
           Back to Dashboard
         </Button>
-      </div>
+      </Gutter>
     </div>
   );
 };

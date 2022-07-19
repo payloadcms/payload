@@ -1,0 +1,113 @@
+@import '../../../scss/styles.scss';
+
+.collapsible {
+  --toggle-pad-h: #{base(.75)};
+  --toggle-pad-v: #{base(.5)};
+
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: $style-radius-m;
+
+  &:hover {
+    border: 1px solid var(--theme-elevation-300);
+  }
+
+  &__toggle-wrap {
+    position: relative;
+  }
+
+  &--hovered {
+    >.collapsible__toggle-wrap>.collapsible__drag {
+      opacity: 1;
+    }
+
+    >.collapsible__toggle-wrap>.collapsible__toggle {
+      background: var(--theme-elevation-100);
+    }
+  }
+
+  &__drag {
+    opacity: .5;
+    position: absolute;
+    z-index: 1;
+    top: var(--toggle-pad-v);
+    left: base(.5);
+  }
+
+  &__toggle {
+    @extend %btn-reset;
+    @extend %body;
+    text-align: left;
+    cursor: pointer;
+    background: var(--theme-elevation-50);
+    border-top-right-radius: $style-radius-s;
+    border-top-left-radius: $style-radius-s;
+    width: 100%;
+    color: transparent;
+
+    span {
+      user-select: none;
+    }
+  }
+
+  &__toggle,
+  &__header-wrap {
+    padding: var(--toggle-pad-v) var(--toggle-pad-h);
+  }
+
+  &__header-wrap {
+    position: absolute;
+    top: 0;
+    right: base(3);
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+
+    >* {
+      pointer-events: all;
+    }
+  }
+
+  &__header-wrap--has-drag-handle {
+    left: base(.875);
+  }
+
+  &--collapsed {
+    .collapsible__toggle {
+      border-bottom-right-radius: $style-radius-s;
+      border-bottom-left-radius: $style-radius-s;
+    }
+
+    .collapsible__indicator {
+      transform: rotate(0turn);
+    }
+  }
+
+  &__actions-wrap {
+    position: absolute;
+    right: var(--toggle-pad-h);
+    top: var(--toggle-pad-v);
+    pointer-events: none;
+    display: flex;
+  }
+
+  &__actions {
+    pointer-events: all;
+  }
+
+  &__indicator {
+    transform: rotate(.5turn);
+  }
+
+  &__content {
+    background-color: var(--theme-elevation-0);
+    border-bottom-left-radius: $style-radius-s;
+    border-bottom-right-radius: $style-radius-s;
+    padding: $baseline;
+  }
+
+  @include small-break {
+    &__content {
+      padding: var(--gutter-h);
+    }
+  }
+}

@@ -1,18 +1,18 @@
 @import '../../../scss/styles.scss';
 
 .tooltip {
-	background-color: $color-dark-gray;
-  position: absolute;
-  z-index: 2;
+	background-color: var(--theme-elevation-800);
+	position: absolute;
+	z-index: 2;
 	bottom: 100%;
 	left: 50%;
 	transform: translate3d(-50%, -20%, 0);
 	padding: base(.2) base(.4);
-	color: white;
-  line-height: base(.75);
-  font-weight: normal;
-  white-space: nowrap;
-  border-radius: 2px;
+	color: var(--theme-elevation-0);
+	line-height: base(.75);
+	font-weight: normal;
+	white-space: nowrap;
+	border-radius: 2px;
 
 	span {
 		position: absolute;
@@ -22,6 +22,6 @@
 		height: 0;
 		width: 0;
 		border: 10px solid transparent;
-		border-top-color: $color-dark-gray;
+		border-top-color: var(--theme-elevation-800);
 	}
 }

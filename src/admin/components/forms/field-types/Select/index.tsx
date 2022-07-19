@@ -32,9 +32,9 @@ const Select: React.FC<Props> = (props) => {
       className,
       width,
       description,
+      isClearable,
       condition,
     } = {},
-    isClearable,
   } = props;
 
   const path = pathFromProps || name;
@@ -64,7 +64,7 @@ const Select: React.FC<Props> = (props) => {
     if (!readOnly) {
       let newValue;
       if (!selectedOption) {
-        newValue = undefined;
+        newValue = null;
       } else if (hasMany) {
         if (Array.isArray(selectedOption)) {
           newValue = selectedOption.map((option) => option.value);

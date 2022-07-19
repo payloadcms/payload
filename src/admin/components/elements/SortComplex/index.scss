@@ -1,7 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .sort-complex {
-  background: $color-background-gray;
+  background: var(--theme-elevation-100);
   padding: base(0.5);
   display: flex;
 
@@ -17,8 +17,9 @@
     padding: 0 base(0.5);
     flex-grow: 1;
   }
+
   &__label {
-    color: $color-gray;
+    color: var(--theme-elevation-400);
     margin: base(0.5) 0;
   }
 

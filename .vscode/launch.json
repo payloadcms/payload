@@ -29,55 +29,17 @@
       "request": "launch",
       "name": "Launch Program",
       "env": {
-        "PAYLOAD_CONFIG_PATH": "demo/payload.config.ts",
         "BABEL_ENV": "development"
       },
-      "program": "${workspaceFolder}/demo/index.js",
+      "program": "${workspaceFolder}/test/dev.js",
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/babel-node",
       "runtimeArgs": [
         "--nolazy"
       ],
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch Program - Production",
-      "env": {
-        "PAYLOAD_CONFIG_PATH": "demo/payload.config.ts",
-        "NODE_ENV": "production",
-        "BABEL_ENV": "development"
-      },
-      "program": "${workspaceFolder}/demo/index.js",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/babel-node",
-      "outputCapture": "std",
-      "runtimeArgs": [
-        "--nolazy"
-      ],
-    },
-    {
-      "type": "chrome",
-      "request": "launch",
-      "name": "Launch Chrome against Localhost",
-      "url": "http://localhost:3000/admin",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Debug Payload Generate Types",
-      "program": "${workspaceFolder}/src/bin/generateTypes.ts",
-      "env": {
-        "PAYLOAD_CONFIG_PATH": "demo/payload.config.ts",
-      },
-      "outFiles": [
-        "${workspaceFolder}/dist/**/*.js",
-        "!**/node_modules/**"
+      "args": [
+        "fields"
       ]
     },
   ]

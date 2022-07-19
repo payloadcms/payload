@@ -16,7 +16,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
     setColumns,
   } = props;
 
-  const [fields] = useState(() => flattenTopLevelFields(collection.fields));
+  const [fields] = useState(() => flattenTopLevelFields(collection.fields, true));
 
   return (
     <div className={baseClass}>
@@ -37,8 +37,10 @@ const ColumnSelector: React.FC<Props> = (props) => {
             alignIcon="left"
             key={field.name || i}
             icon={isEnabled ? <X /> : <Plus />}
-            pillStyle={isEnabled ? 'dark' : undefined}
-            className={`${baseClass}__active-column`}
+            className={[
+              `${baseClass}__column`,
+              isEnabled && `${baseClass}__column--active`,
+            ].filter(Boolean).join(' ')}
           >
             {field.label || field.name}
           </Pill>

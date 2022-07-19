@@ -1,16 +1,16 @@
 @import '../../../../scss/styles.scss';
 
 .field-type.password {
-	position: relative;
+  position: relative;
   margin-bottom: $baseline;
 
-	input {
-		@include formInput;
-	}
+  input {
+    @include formInput;
+  }
 
-	&.error {
-		input {
-      background-color: lighten($color-red, 20%);
-		}
-	}
+  &.error {
+    input {
+      background-color: var(--theme-error-200);
+    }
+  }
 }
