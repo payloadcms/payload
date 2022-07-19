@@ -23,23 +23,19 @@ export const beforeValidate = async ({
   overrideAccess,
   req,
 }: Args): Promise<Record<string, unknown>> => {
-  const promises = [];
   const data = deepCopyObject(incomingData);
 
-  traverseFields({
+  await traverseFields({
     data,
     doc,
     fields: entityConfig.fields,
     id,
     operation,
     overrideAccess,
-    promises,
     req,
     siblingData: data,
     siblingDoc: doc,
   });
-
-  await Promise.all(promises);
 
   return data;
 };

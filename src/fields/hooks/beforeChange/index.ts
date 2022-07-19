@@ -28,7 +28,6 @@ export const beforeChange = async ({
   skipValidation,
 }: Args): Promise<Record<string, unknown>> => {
   const data = deepCopyObject(incomingData);
-  const promises = [];
   const mergeLocaleActions = [];
   const errors: { message: string, field: string }[] = [];
 
@@ -48,8 +47,6 @@ export const beforeChange = async ({
     fields: entityConfig.fields,
     skipValidation,
   });
-
-  await Promise.all(promises);
 
   if (errors.length > 0) {
     throw new ValidationError(errors);

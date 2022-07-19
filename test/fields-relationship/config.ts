@@ -9,6 +9,8 @@ export const relationOneSlug = 'relation-one';
 export const relationTwoSlug = 'relation-two';
 export const relationRestrictedSlug = 'relation-restricted';
 export const relationWithTitleSlug = 'relation-with-title';
+export const groupWithNestedRelationship = 'group-nested-relation-with-title';
+export const nestedRelationship = 'nested-relation-with-title';
 
 export interface FieldsRelationship {
   id: string;
@@ -36,6 +38,20 @@ const baseRelationshipFields: CollectionConfig['fields'] = [
     type: 'text',
   },
 ];
+
+const groupWithNestedRelationshipFields = (relationTo: string): CollectionConfig['fields'] => ([
+  {
+    type: 'group',
+    name: 'group',
+    fields: [
+      {
+        name: 'relation',
+        type: 'relationship',
+        relationTo,
+      },
+    ],
+  },
+]);
 
 export default buildConfig({
   collections: [
@@ -109,6 +125,14 @@ export default buildConfig({
         useAsTitle: 'name',
       },
       fields: baseRelationshipFields,
+    },
+    {
+      slug: groupWithNestedRelationship,
+      fields: groupWithNestedRelationshipFields(nestedRelationship),
+    },
+    {
+      slug: nestedRelationship,
+      fields: groupWithNestedRelationshipFields(relationWithTitleSlug),
     },
   ],
   onInit: async (payload) => {

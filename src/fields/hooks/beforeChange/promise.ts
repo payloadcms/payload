@@ -196,9 +196,8 @@ export const promise = async ({
     case 'array': {
       const rows = siblingData[field.name];
 
-      const promises = [];
-
       if (Array.isArray(rows)) {
+        const promises = [];
         rows.forEach((row, i) => {
           promises.push(traverseFields({
             data,
@@ -217,9 +216,10 @@ export const promise = async ({
             skipValidation: skipValidationFromHere,
           }));
         });
+
+        await Promise.all(promises);
       }
 
-      await Promise.all(promises);
 
       break;
     }
@@ -227,9 +227,8 @@ export const promise = async ({
     case 'blocks': {
       const rows = siblingData[field.name];
 
-      const promises = [];
-
       if (Array.isArray(rows)) {
+        const promises = [];
         rows.forEach((row, i) => {
           const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
 
@@ -252,17 +251,17 @@ export const promise = async ({
             }));
           }
         });
+
+        await Promise.all(promises);
       }
 
-      await Promise.all(promises);
 
       break;
     }
 
     case 'row':
     case 'collapsible': {
-      const promises = [];
-      promises.push(traverseFields({
+      await traverseFields({
         data,
         doc,
         docWithLocales,
@@ -277,9 +276,7 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales,
         skipValidation: skipValidationFromHere,
-      }));
-
-      await Promise.all(promises);
+      });
 
       break;
     }

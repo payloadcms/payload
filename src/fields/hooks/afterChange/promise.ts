@@ -8,7 +8,6 @@ type Args = {
   doc: Record<string, unknown>
   field: Field
   operation: 'create' | 'update'
-  promises: Promise<void>[]
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
@@ -22,7 +21,6 @@ export const promise = async ({
   doc,
   field,
   operation,
-  promises,
   req,
   siblingData,
   siblingDoc,
@@ -52,12 +50,11 @@ export const promise = async ({
   // Traverse subfields
   switch (field.type) {
     case 'group': {
-      traverseFields({
+      await traverseFields({
         data,
         doc,
         fields: field.fields,
         operation,
-        promises,
         req,
         siblingData: siblingData[field.name] as Record<string, unknown> || {},
         siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
@@ -70,18 +67,19 @@ export const promise = async ({
       const rows = siblingDoc[field.name];
 
       if (Array.isArray(rows)) {
+        const promises = [];
         rows.forEach((row, i) => {
-          traverseFields({
+          promises.push(traverseFields({
             data,
             doc,
             fields: field.fields,
             operation,
-            promises,
             req,
             siblingData: siblingData[field.name]?.[i] || {},
             siblingDoc: { ...row } || {},
-          });
+          }));
         });
+        await Promise.all(promises);
       }
       break;
     }
@@ -90,22 +88,23 @@ export const promise = async ({
       const rows = siblingDoc[field.name];
 
       if (Array.isArray(rows)) {
+        const promises = [];
         rows.forEach((row, i) => {
           const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
 
           if (block) {
-            traverseFields({
+            promises.push(traverseFields({
               data,
               doc,
               fields: block.fields,
               operation,
-              promises,
               req,
               siblingData: siblingData[field.name]?.[i] || {},
               siblingDoc: { ...row } || {},
-            });
+            }));
           }
         });
+        await Promise.all(promises);
       }
 
       break;
@@ -113,12 +112,11 @@ export const promise = async ({
 
     case 'row':
     case 'collapsible': {
-      traverseFields({
+      await traverseFields({
         data,
         doc,
         fields: field.fields,
         operation,
-        promises,
         req,
         siblingData: siblingData || {},
         siblingDoc: { ...siblingDoc },
@@ -128,18 +126,19 @@ export const promise = async ({
     }
 
     case 'tabs': {
+      const promises = [];
       field.tabs.forEach((tab) => {
-        traverseFields({
+        promises.push(traverseFields({
           data,
           doc,
           fields: tab.fields,
           operation,
-          promises,
           req,
           siblingData: siblingData || {},
           siblingDoc: { ...siblingDoc },
-        });
+        }));
       });
+      await Promise.all(promises);
       break;
     }
 
