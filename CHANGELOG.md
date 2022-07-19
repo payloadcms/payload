@@ -1,3 +1,59 @@
+## [1.0.4](https://github.com/payloadcms/payload/compare/v0.20.1...v1.0.4) (2022-07-19)
+
+
+### Bug Fixes
+
+* bug with base colors ([4bb0d39](https://github.com/payloadcms/payload/commit/4bb0d3994f630a6111f18ab6a1a2e9a9a83d2a98))
+* bug with version diff screen when arrays have no labels ([6060e4c](https://github.com/payloadcms/payload/commit/6060e4cb274f68e56cfbc9ed434e8bdb8817c20b))
+* ensures blocks can be nested within tabs / rows / collapsibles ([2707af1](https://github.com/payloadcms/payload/commit/2707af1d45d3234ba6e495bf9e0eb0d0f43f866a))
+* ensures column selector renders active columns properly ([6347a2f](https://github.com/payloadcms/payload/commit/6347a2febfef5023004e39d799898748844b74e7))
+* ensures duplicated rows have properly created ids ([3ae1c26](https://github.com/payloadcms/payload/commit/3ae1c26a074c74585162a9938e67e3c7bcc087fa))
+* ensures passing partial data to update works when fields are localized ([39d075b](https://github.com/payloadcms/payload/commit/39d075b9998e51d462b2207a1bbfc0326a7eb46a))
+* ensures point field doesn't interrupt version creation ([2ef8a1e](https://github.com/payloadcms/payload/commit/2ef8a1e35a9ecd67d7d809fb446f3549a347a930))
+* ensures success pills are properly colored ([7376246](https://github.com/payloadcms/payload/commit/73762465925ab27c8e0282d41760bfac6e52ce8e))
+* responsive improvements to rich text upload ([079623f](https://github.com/payloadcms/payload/commit/079623f40a1f5b7bd559f9c6ab2bfedea30fe987))
+* styles empty version diff row for dark mode ([e7d2bdb](https://github.com/payloadcms/payload/commit/e7d2bdb45a042d69ef3adc40c1b10e065a0620ec))
+* success banner color rendering incorrectly ([76b6c73](https://github.com/payloadcms/payload/commit/76b6c736e1f9e47e1beacc99c1ba566c62f4a760))
+* tabs top margin ([dd810a3](https://github.com/payloadcms/payload/commit/dd810a35933925f789712be2a805c90ae30f4cc0))
+* upload e2e file path ([a664b62](https://github.com/payloadcms/payload/commit/a664b627f67207f520b16b705017c72838039f64))
+
+
+### Features
+
+* add card ids ([baf4664](https://github.com/payloadcms/payload/commit/baf46640737d8aca6fead1568ba15f11769a76f2))
+* adds collapsible field type ([98676be](https://github.com/payloadcms/payload/commit/98676bea69a37c6521dea1dfafa4c4a9967efc1e))
+* adds uploads collection for testing to /fields tests ([1812be2](https://github.com/payloadcms/payload/commit/1812be2e161b31fd6021fdfc8343c78001b4de28))
+* allow clear select value ([#735](https://github.com/payloadcms/payload/issues/735)) ([3132d35](https://github.com/payloadcms/payload/commit/3132d35e27f3c1037aeb3d1801e13df2e992e98b))
+* avoids forcing fonts to be inline within webpack builds ([eac9823](https://github.com/payloadcms/payload/commit/eac982398e8f51d1e5aa9ba1eca0094450ac4210))
+* e2e test upload ([#755](https://github.com/payloadcms/payload/issues/755)) ([1160093](https://github.com/payloadcms/payload/commit/11600930b78dbae50fd093529b727101d83561fa))
+* ensures groups within blocks render properly ([3a98c6a](https://github.com/payloadcms/payload/commit/3a98c6ad531c86ec7a3a4163650068a157d56746))
+* ensures nested fields not affecting data can be traversed properly ([3b9fdf3](https://github.com/payloadcms/payload/commit/3b9fdf3ffdc49ff9a2c0e56f5438810c5f397f86))
+* ensures tabs and collapsibles render in version diff ([54162b5](https://github.com/payloadcms/payload/commit/54162b52cc8211e100d4ad901339b7982666389c))
+* expands rich text field config for better coverage ([d8a28ac](https://github.com/payloadcms/payload/commit/d8a28acfa8ee975f9ea662ed9ad4fe2bc22b423f))
+* finishes block field ([41a0ba5](https://github.com/payloadcms/payload/commit/41a0ba57805b4b06e5310659263ee59ae0828f34))
+* finishes collapsible field ([60bfb1c](https://github.com/payloadcms/payload/commit/60bfb1c3b801c89de055d11cee50a1b51e864b7b))
+* finishes tabs field ([68e7c41](https://github.com/payloadcms/payload/commit/68e7c41fdc07df04dcc3caaf486d2d596354039d))
+* initializes useField internalValue with incoming field value ([c995f79](https://github.com/payloadcms/payload/commit/c995f797fec76e78eafb323cdf4219caebdfa6c7))
+* merges select isClearable ([a6a9ab1](https://github.com/payloadcms/payload/commit/a6a9ab15b72ca5f3ed107cfbc81638b5e35ea932))
+* more maintainable colors ([5fc4f3a](https://github.com/payloadcms/payload/commit/5fc4f3adadc8f7ec3eaf99021dccf7060926c7f1))
+* only renders arrays and blocks once they are initialized ([735e385](https://github.com/payloadcms/payload/commit/735e385537a505db00b21b2567f829bcb1718c3c))
+* point field int test ([c75c67e](https://github.com/payloadcms/payload/commit/c75c67ec86bc5ff42d4965631d7f7e80fb01cb1f))
+* refactors z index methodology ([2fa680c](https://github.com/payloadcms/payload/commit/2fa680cdf8daeff42ac0724d895e8c4130ade725))
+* remove duplication of config in tests ([40b6aff](https://github.com/payloadcms/payload/commit/40b6afff2d1a5f263eae4da5fe477a0fd738b701))
+* remove files test helper ([bb9f28f](https://github.com/payloadcms/payload/commit/bb9f28fb0871a525e4b8cc24b14a71ac02d8996d))
+* reorganizes mongo connection ([8589fde](https://github.com/payloadcms/payload/commit/8589fdefdad4856f4d642c2d9ed8d6ca815c81f6))
+* restores built-in fields into table column builder ([7a6f239](https://github.com/payloadcms/payload/commit/7a6f2392fa63532a8556ec0dc0e1186057291fea))
+* retrofits array to new collapsible component ([aa89251](https://github.com/payloadcms/payload/commit/aa89251a3b6990460ac03e0a33d9aab3ceeadd9d))
+* revises e2e field testing ([31ca363](https://github.com/payloadcms/payload/commit/31ca3639828ddf572033023bd6a350f5b4a2eb9a))
+* scaffolds tabs field ([85b7a49](https://github.com/payloadcms/payload/commit/85b7a490eb6fa53424986d78b893284096c040d4))
+* styles nested groups and adds gutter back to richText ([3a17a8a](https://github.com/payloadcms/payload/commit/3a17a8a001a1aaaa52b119faf4740c50367b4049))
+* test admin globals ([b00d858](https://github.com/payloadcms/payload/commit/b00d8584f37eff50a0257fde2543ae516b375146))
+* test collections rest endpoints ([cf38e8d](https://github.com/payloadcms/payload/commit/cf38e8d520226e6370b3f55e26141408375b0610))
+* testing refactor (e2e/int) ([#748](https://github.com/payloadcms/payload/issues/748)) ([90ba15f](https://github.com/payloadcms/payload/commit/90ba15f9bdf834a55861551e43c4dc55ca81565b))
+* updates block field to use new collapsible ([49d09a3](https://github.com/payloadcms/payload/commit/49d09a349fe6cdc45c429b77e9d60943b7db851f))
+* updates styling of group field ([8c4e0fa](https://github.com/payloadcms/payload/commit/8c4e0fa7b28fd68be1b20374d5d8cfaff923db11))
+* upload integration tests ([#759](https://github.com/payloadcms/payload/issues/759)) ([e75cca4](https://github.com/payloadcms/payload/commit/e75cca4512e16647b6e0371706b33ad4f486c26d))
+
 ### BREAKING CHANGES
 
 We have removed our reliance on SCSS variables like color and font, replacing them instead with CSS variables wherever possible.
