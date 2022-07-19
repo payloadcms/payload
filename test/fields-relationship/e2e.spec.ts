@@ -111,7 +111,7 @@ describe('fields - relationship', () => {
   test('should create hasMany relationship', async () => {
     await page.goto(url.create);
 
-    const field = page.locator('.field-relationshipHasMany');
+    const field = page.locator('#field-relationshipHasMany');
 
     await field.click({ delay: 100 });
 
@@ -139,7 +139,7 @@ describe('fields - relationship', () => {
   test('should create relations to multiple collections', async () => {
     await page.goto(url.create);
 
-    const field = page.locator('.field-relationshipMultiple');
+    const field = page.locator('#field-relationshipMultiple');
 
     await field.click({ delay: 100 });
 
