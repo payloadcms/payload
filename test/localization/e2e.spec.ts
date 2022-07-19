@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import type { TypeWithTimestamps } from '../../src/collections/config/types';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { firstRegister, saveDocAndAssert } from '../helpers';
+import { login, saveDocAndAssert } from '../helpers';
 import type { LocalizedPost } from './payload-types';
 import { slug } from './config';
 
@@ -39,7 +39,7 @@ describe('Localization', () => {
     const context = await browser.newContext();
     page = await context.newPage();
 
-    await firstRegister({ page, serverURL });
+    await login({ page, serverURL });
   });
 
   describe('localized text', () => {
