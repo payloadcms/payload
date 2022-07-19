@@ -1,6 +1,5 @@
-import express, { Express, Response, Router } from 'express';
+import { Express, Router } from 'express';
 import pino from 'pino';
-import crypto from 'crypto';
 import { GraphQLError, GraphQLFormattedError, GraphQLSchema } from 'graphql';
 import {
   TypeWithID,
@@ -15,31 +14,13 @@ import {
 import { TypeWithVersion } from './versions/types';
 import { PaginatedDocs } from './mongoose/types';
 
-import Logger from './utilities/logger';
-import loadConfig from './config/load';
-import authenticate, { PayloadAuthenticate } from './express/middleware/authenticate';
-import connectMongoose from './mongoose/connect';
-import expressMiddleware from './express/middleware';
-import initAdmin from './express/admin';
-import initAuth from './auth/init';
-import access from './auth/requestHandlers/access';
-import initCollections from './collections/init';
-import initPreferences from './preferences/init';
-import initGlobals from './globals/init';
+import { PayloadAuthenticate } from './express/middleware/authenticate';
 import { Globals, TypeWithID as GlobalTypeWithID } from './globals/config/types';
-import initGraphQLPlayground from './graphql/initPlayground';
-import initStatic from './express/static';
-import registerSchema from './graphql/registerSchema';
-import graphQLHandler from './graphql/graphQLHandler';
-import buildEmail from './email/build';
-import identifyAPI from './express/middleware/identifyAPI';
-import errorHandler, { ErrorHandler } from './express/middleware/errorHandler';
+import { ErrorHandler } from './express/middleware/errorHandler';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { encrypt, decrypt } from './auth/crypto';
 import { BuildEmailResult, Message } from './email/types';
-import { PayloadRequest } from './express/types';
-import sendEmail from './email/sendEmail';
 import { Preferences } from './preferences/types';
 
 import { Options as CreateOptions } from './collections/operations/local/create';
@@ -63,7 +44,7 @@ import { Result as ResetPasswordResult } from './auth/operations/resetPassword';
 import { Result as LoginResult } from './auth/operations/login';
 import { Options as FindGlobalOptions } from './globals/operations/local/findOne';
 import { Options as UpdateGlobalOptions } from './globals/operations/local/update';
-import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit';
+import { init } from './init';
 
 require('isomorphic-fetch');
 
@@ -75,11 +56,11 @@ export class Payload {
 
   collections: {
     [slug: string]: Collection;
-  } = {};
+  } = {}
 
   versions: {
     [slug: string]: CollectionModel;
-  } = {};
+  } = {}
 
   preferences: Preferences;
 
@@ -87,7 +68,7 @@ export class Payload {
 
   logger: pino.Logger;
 
-  express: Express;
+  express: Express
 
   router: Router;
 
@@ -101,7 +82,7 @@ export class Payload {
 
   mongoURL: string | false;
 
-  mongoMemoryServer: any;
+  mongoMemoryServer: any
 
   local: boolean;
 
@@ -140,97 +121,12 @@ export class Payload {
    * @description Initializes Payload
    * @param options
    */
-  async init(options: InitOptions): Promise<void> {
-    this.logger = Logger('payload', options.loggerOptions);
-    this.logger.info('Starting Payload...');
-    if (!options.secret) {
-      throw new Error(
-        'Error: missing secret key. A secret key is needed to secure Payload.',
-      );
-    }
+  init(options: InitOptions): void {
+    init(this, options);
+  }
 
-    if (options.mongoURL !== false && typeof options.mongoURL !== 'string') {
-      throw new Error('Error: missing MongoDB connection URL.');
-    }
-
-    this.emailOptions = { ...(options.email) };
-    this.secret = crypto
-      .createHash('sha256')
-      .update(options.secret)
-      .digest('hex')
-      .slice(0, 32);
-
-    this.mongoURL = options.mongoURL;
-    this.local = options.local;
-
-    this.config = loadConfig(this.logger);
-
-    // Connect to database
-    if (this.mongoURL) {
-      this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, this.logger);
-    }
-
-    // If not initializing locally, scaffold router
-    if (!this.local) {
-      this.router = express.Router();
-      this.router.use(...expressMiddleware(this));
-      initAuth(this);
-    }
-
-    // Configure email service
-    this.email = buildEmail(this.emailOptions, this.logger);
-    this.sendEmail = sendEmail.bind(this);
-
-    // Initialize collections & globals
-    initCollections(this);
-    initGlobals(this);
-
-    if (!this.config.graphQL.disable) {
-      registerSchema(this);
-    }
-    // If not initializing locally, set up HTTP routing
-    if (!this.local) {
-      options.express.use((req: PayloadRequest, res, next) => {
-        req.payload = this;
-        next();
-      });
-
-      this.express = options.express;
-
-      if (this.config.rateLimit.trustProxy) {
-        this.express.set('trust proxy', 1);
-      }
-
-      initAdmin(this);
-      initPreferences(this);
-
-      this.router.get('/access', access);
-
-      if (!this.config.graphQL.disable) {
-        this.router.use(
-          this.config.routes.graphQL,
-          identifyAPI('GraphQL'),
-          (req: PayloadRequest, res: Response) => graphQLHandler(req, res)(req, res),
-        );
-        initGraphQLPlayground(this);
-      }
-
-      // Bind router to API
-      this.express.use(this.config.routes.api, this.router);
-
-      // Enable static routes for all collections permitting upload
-      initStatic(this);
-
-      this.errorHandler = errorHandler(this.config, this.logger);
-      this.router.use(this.errorHandler);
-
-      this.authenticate = authenticate(this.config);
-    }
-
-    if (typeof options.onInit === 'function') await options.onInit(this);
-    if (typeof this.config.onInit === 'function') await this.config.onInit(this);
-
-    serverInitTelemetry(this);
+  async initAsync(options: InitOptions): Promise<void> {
+    await init(this, options);
   }
 
   getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`;
@@ -245,7 +141,7 @@ export class Payload {
   create = async <T = any>(options: CreateOptions<T>): Promise<T> => {
     const { create } = localOperations;
     return create(this, options);
-  };
+  }
 
   /**
    * @description Find documents with criteria
@@ -255,17 +151,17 @@ export class Payload {
   find = async <T extends TypeWithID = any>(options: FindOptions): Promise<PaginatedDocs<T>> => {
     const { find } = localOperations;
     return find(this, options);
-  };
+  }
 
   findGlobal = async <T extends GlobalTypeWithID = any>(options: FindGlobalOptions): Promise<T> => {
     const { findOne } = localGlobalOperations;
     return findOne(this, options);
-  };
+  }
 
   updateGlobal = async <T extends GlobalTypeWithID = any>(options: UpdateGlobalOptions): Promise<T> => {
     const { update } = localGlobalOperations;
     return update(this, options);
-  };
+  }
 
   /**
    * @description Find global versions with criteria
@@ -275,7 +171,7 @@ export class Payload {
   findGlobalVersions = async <T extends TypeWithVersion<T> = any>(options: FindGlobalVersionsOptions): Promise<PaginatedDocs<T>> => {
     const { findVersions } = localGlobalOperations;
     return findVersions<T>(this, options);
-  };
+  }
 
   /**
    * @description Find global version by ID
@@ -285,7 +181,7 @@ export class Payload {
   findGlobalVersionByID = async <T extends TypeWithVersion<T> = any>(options: FindGlobalVersionByIDOptions): Promise<T> => {
     const { findVersionByID } = localGlobalOperations;
     return findVersionByID(this, options);
-  };
+  }
 
   /**
    * @description Restore global version by ID
@@ -295,7 +191,7 @@ export class Payload {
   restoreGlobalVersion = async <T extends TypeWithVersion<T> = any>(options: RestoreGlobalVersionOptions): Promise<T> => {
     const { restoreVersion } = localGlobalOperations;
     return restoreVersion(this, options);
-  };
+  }
 
   /**
    * @description Find document by ID
@@ -305,7 +201,7 @@ export class Payload {
   findByID = async <T extends TypeWithID = any>(options: FindByIDOptions): Promise<T> => {
     const { findByID } = localOperations;
     return findByID<T>(this, options);
-  };
+  }
 
   /**
    * @description Update document
@@ -315,12 +211,12 @@ export class Payload {
   update = async <T = any>(options: UpdateOptions<T>): Promise<T> => {
     const { update } = localOperations;
     return update<T>(this, options);
-  };
+  }
 
   delete = async <T extends TypeWithID = any>(options: DeleteOptions): Promise<T> => {
     const { localDelete } = localOperations;
     return localDelete<T>(this, options);
-  };
+  }
 
   /**
    * @description Find versions with criteria
@@ -330,7 +226,7 @@ export class Payload {
   findVersions = async <T extends TypeWithVersion<T> = any>(options: FindVersionsOptions): Promise<PaginatedDocs<T>> => {
     const { findVersions } = localOperations;
     return findVersions<T>(this, options);
-  };
+  }
 
   /**
    * @description Find version by ID
@@ -340,7 +236,7 @@ export class Payload {
   findVersionByID = async <T extends TypeWithVersion<T> = any>(options: FindVersionByIDOptions): Promise<T> => {
     const { findVersionByID } = localOperations;
     return findVersionByID(this, options);
-  };
+  }
 
   /**
    * @description Restore version by ID
@@ -350,32 +246,32 @@ export class Payload {
   restoreVersion = async <T extends TypeWithVersion<T> = any>(options: RestoreVersionOptions): Promise<T> => {
     const { restoreVersion } = localOperations;
     return restoreVersion(this, options);
-  };
+  }
 
   login = async <T extends TypeWithID = any>(options: LoginOptions): Promise<LoginResult & { user: T}> => {
     const { login } = localOperations.auth;
     return login(this, options);
-  };
+  }
 
   forgotPassword = async (options: ForgotPasswordOptions): Promise<ForgotPasswordResult> => {
     const { forgotPassword } = localOperations.auth;
     return forgotPassword(this, options);
-  };
+  }
 
   resetPassword = async (options: ResetPasswordOptions): Promise<ResetPasswordResult> => {
     const { resetPassword } = localOperations.auth;
     return resetPassword(this, options);
-  };
+  }
 
   unlock = async (options: UnlockOptions): Promise<boolean> => {
     const { unlock } = localOperations.auth;
     return unlock(this, options);
-  };
+  }
 
   verifyEmail = async (options: VerifyEmailOptions): Promise<boolean> => {
     const { verifyEmail } = localOperations.auth;
     return verifyEmail(this, options);
-  };
+  }
 }
 
 const payload = new Payload();
