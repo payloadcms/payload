@@ -80,7 +80,6 @@ describe('Fields', () => {
   });
   describe('array', () => {
     let doc;
-    let arrayInGroupDoc;
     const collection = arrayFieldsSlug;
 
     beforeAll(async () => {
@@ -90,7 +89,7 @@ describe('Fields', () => {
       });
     });
 
-    it('should create with ids and nested ids', async () => {
+    it.skip('should create with ids and nested ids', async () => {
       const docWithIDs = await payload.create<GroupField>({
         collection: groupFieldsSlug,
         data: groupDoc,
