@@ -22,7 +22,7 @@ describe('access control', () => {
   let page: Page;
   let url: AdminUrlUtil;
   let restrictedUrl: AdminUrlUtil;
-  let readoOnlyUrl: AdminUrlUtil;
+  let readOnlyUrl: AdminUrlUtil;
   let restrictedVersionsUrl: AdminUrlUtil;
 
   beforeAll(async ({ browser }) => {
@@ -30,7 +30,7 @@ describe('access control', () => {
 
     url = new AdminUrlUtil(serverURL, slug);
     restrictedUrl = new AdminUrlUtil(serverURL, restrictedSlug);
-    readoOnlyUrl = new AdminUrlUtil(serverURL, readOnlySlug);
+    readOnlyUrl = new AdminUrlUtil(serverURL, readOnlySlug);
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug);
 
     const context = await browser.newContext();
@@ -108,12 +108,12 @@ describe('access control', () => {
     });
 
     test('should have collection url', async () => {
-      await page.goto(readoOnlyUrl.list);
-      await expect(page).toHaveURL(readoOnlyUrl.list); // no redirect
+      await page.goto(readOnlyUrl.list);
+      await expect(page).toHaveURL(readOnlyUrl.list); // no redirect
     });
 
     test('should not have "Create New" button', async () => {
-      await page.goto(readoOnlyUrl.create);
+      await page.goto(readOnlyUrl.create);
       await expect(page.locator('.collection-list__header a')).toHaveCount(0);
     });
 
@@ -123,12 +123,12 @@ describe('access control', () => {
     });
 
     test('edit view should not have actions buttons', async () => {
-      await page.goto(readoOnlyUrl.edit(existingDoc.id));
+      await page.goto(readOnlyUrl.edit(existingDoc.id));
       await expect(page.locator('.collection-edit__collection-actions li')).toHaveCount(0);
     });
 
     test('fields should be read-only', async () => {
-      await page.goto(readoOnlyUrl.edit(existingDoc.id));
+      await page.goto(readOnlyUrl.edit(existingDoc.id));
       await expect(page.locator('#field-name')).toBeDisabled();
     });
   });
