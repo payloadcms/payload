@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/payloadcms/payload/compare/v1.0.5...v1.0.6) (2022-07-19)
+
+
+### Features
+
+* improves initAsync pattern ([428edb0](https://github.com/payloadcms/payload/commit/428edb05c4d8805bb2c4fb98f51e57eed2926374))
+
 ## [1.0.5](https://github.com/payloadcms/payload/compare/v1.0.4...v1.0.5) (2022-07-19)
 
 
