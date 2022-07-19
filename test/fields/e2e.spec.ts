@@ -27,7 +27,7 @@ describe('fields', () => {
     test('should display field in list view', async () => {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'text-fields');
       await page.goto(url.list);
-      const textCell = page.locator('table tr:first-child td:first-child a');
+      const textCell = page.locator('.row-1 .cell-text');
       await expect(textCell)
         .toHaveText(textDoc.text);
     });
