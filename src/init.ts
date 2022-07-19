@@ -30,8 +30,7 @@ import { Payload } from '.';
 import loadConfig from './config/load';
 import Logger from './utilities/logger';
 
-export const init = async (payload: Payload, options: InitOptions): Promise<void> => {
-  payload.logger = Logger('payload', options.loggerOptions);
+export const init = (payload: Payload, options: InitOptions): void => {
   payload.logger.info('Starting Payload...');
   if (!options.secret) {
     throw new Error(
@@ -50,15 +49,9 @@ export const init = async (payload: Payload, options: InitOptions): Promise<void
     .digest('hex')
     .slice(0, 32);
 
-  payload.mongoURL = options.mongoURL;
   payload.local = options.local;
 
   payload.config = loadConfig(payload.logger);
-
-  // Connect to database
-  if (payload.mongoURL) {
-    payload.mongoMemoryServer = await connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
-  }
 
   // If not initializing locally, scaffold router
   if (!payload.local) {
@@ -117,8 +110,33 @@ export const init = async (payload: Payload, options: InitOptions): Promise<void
     payload.authenticate = authenticate(payload.config);
   }
 
+  serverInitTelemetry(payload);
+};
+
+export const initAsync = async (payload: Payload, options: InitOptions): Promise<void> => {
+  payload.logger = Logger('payload', options.loggerOptions);
+  payload.mongoURL = options.mongoURL;
+
+  if (payload.mongoURL) {
+    payload.mongoMemoryServer = await connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
+  }
+
+  init(payload, options);
+
   if (typeof options.onInit === 'function') await options.onInit(payload);
   if (typeof payload.config.onInit === 'function') await payload.config.onInit(payload);
+};
 
-  serverInitTelemetry(payload);
+export const initSync = (payload: Payload, options: InitOptions): void => {
+  payload.logger = Logger('payload', options.loggerOptions);
+  payload.mongoURL = options.mongoURL;
+
+  if (payload.mongoURL) {
+    connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
+  }
+
+  init(payload, options);
+
+  if (typeof options.onInit === 'function') options.onInit(payload);
+  if (typeof payload.config.onInit === 'function') payload.config.onInit(payload);
 };
