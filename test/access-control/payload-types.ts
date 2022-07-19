@@ -48,6 +48,20 @@ export interface RestrictedVersion {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sibling-data".
+ */
+export interface SiblingDatum {
+  id: string;
+  array?: {
+    allowPublicReadability?: boolean;
+    text?: string;
+    id?: string;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {

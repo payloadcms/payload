@@ -1,16 +1,27 @@
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
+import { FieldAccess } from '../../src/fields/config/types';
+import { SiblingDatum } from './payload-types';
+import { firstArrayText, secondArrayText } from './shared';
 
 export const slug = 'posts';
 export const readOnlySlug = 'read-only-collection';
 export const restrictedSlug = 'restricted';
 export const restrictedVersionsSlug = 'restricted-versions';
+export const siblingDataSlug = 'sibling-data';
 
 const openAccess = {
   create: () => true,
   read: () => true,
   update: () => true,
   delete: () => true,
+};
+
+const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) => {
+  if (user) return true;
+  if (siblingData?.allowPublicReadability) return true;
+
+  return false;
 };
 
 export default buildConfig({
@@ -75,6 +86,35 @@ export default buildConfig({
         readVersions: () => false,
       },
     },
+    {
+      slug: siblingDataSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'allowPublicReadability',
+                  label: 'Allow Public Readability',
+                  type: 'checkbox',
+                },
+                {
+                  name: 'text',
+                  type: 'text',
+                  access: {
+                    read: PublicReadabilityAccess,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -103,6 +143,22 @@ export default buildConfig({
       collection: restrictedVersionsSlug,
       data: {
         name: 'versioned',
+      },
+    });
+
+    await payload.create<SiblingDatum>({
+      collection: siblingDataSlug,
+      data: {
+        array: [
+          {
+            text: firstArrayText,
+            allowPublicReadability: true,
+          },
+          {
+            text: secondArrayText,
+            allowPublicReadability: false,
+          },
+        ],
       },
     });
   },

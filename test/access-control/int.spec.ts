@@ -2,8 +2,9 @@ import mongoose from 'mongoose';
 import payload from '../../src';
 import { Forbidden } from '../../src/errors';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { restrictedSlug, slug } from './config';
-import type { Restricted, Post } from './payload-types';
+import { restrictedSlug, siblingDataSlug, slug } from './config';
+import type { Restricted, Post, SiblingDatum } from './payload-types';
+import { firstArrayText, secondArrayText } from './shared';
 
 describe('Access Control', () => {
   let post1: Post;
@@ -32,6 +33,43 @@ describe('Access Control', () => {
   });
 
   it.todo('should properly prevent / allow public users from reading a restricted field');
+
+  it('should be able to restrict access based upon siblingData', async () => {
+    const { id } = await payload.create<SiblingDatum>({
+      collection: siblingDataSlug,
+      data: {
+        array: [
+          {
+            text: firstArrayText,
+            allowPublicReadability: true,
+          },
+          {
+            text: secondArrayText,
+            allowPublicReadability: false,
+          },
+        ],
+      },
+    });
+
+    const doc = await payload.findByID<SiblingDatum>({
+      id,
+      collection: siblingDataSlug,
+      overrideAccess: false,
+    });
+
+    expect(doc.array?.[0].text).toBe(firstArrayText);
+    // Should respect PublicReadabilityAccess function and not be sent
+    expect(doc.array?.[1].text).toBeUndefined();
+
+    // Retrieve with default of overriding access
+    const docOverride = await payload.findByID<SiblingDatum>({
+      id,
+      collection: siblingDataSlug,
+    });
+
+    expect(docOverride.array?.[0].text).toBe(firstArrayText);
+    expect(docOverride.array?.[1].text).toBe(secondArrayText);
+  });
 
   describe('Collections', () => {
     describe('restricted collection', () => {
