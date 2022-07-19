@@ -8,9 +8,9 @@
 export interface Config {}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "access-controls".
+ * via the `definition` "posts".
  */
-export interface AccessControl {
+export interface Post {
   id: string;
   restrictedField?: string;
   createdAt: string;
@@ -22,6 +22,7 @@ export interface AccessControl {
  */
 export interface Restricted {
   id: string;
+  name?: string;
   createdAt: string;
   updatedAt: string;
 }

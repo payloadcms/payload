@@ -1,28 +1,45 @@
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
 
-export const slug = 'access-controls';
+export const slug = 'posts';
 export const readOnlySlug = 'read-only-collection';
 export const restrictedSlug = 'restricted';
 export const restrictedVersionsSlug = 'restricted-versions';
+
+const openAccess = {
+  create: () => true,
+  read: () => true,
+  update: () => true,
+  delete: () => true,
+};
 
 export default buildConfig({
   collections: [
     {
       slug,
+      access: {
+        ...openAccess,
+        update: () => false,
+      },
       fields: [
         {
           name: 'restrictedField',
           type: 'text',
           access: {
             read: () => false,
+            update: () => false,
           },
         },
       ],
     },
     {
       slug: restrictedSlug,
-      fields: [],
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
       access: {
         create: () => false,
         read: () => false,
