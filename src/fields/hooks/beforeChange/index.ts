@@ -32,7 +32,7 @@ export const beforeChange = async ({
   const mergeLocaleActions = [];
   const errors: { message: string, field: string }[] = [];
 
-  traverseFields({
+  await traverseFields({
     data,
     doc,
     docWithLocales,
@@ -41,7 +41,6 @@ export const beforeChange = async ({
     operation,
     path: '',
     mergeLocaleActions,
-    promises,
     req,
     siblingData: data,
     siblingDoc: doc,

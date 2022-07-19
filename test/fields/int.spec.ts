@@ -89,7 +89,7 @@ describe('Fields', () => {
       });
     });
 
-    it.skip('should create with ids and nested ids', async () => {
+    it('should create with ids and nested ids', async () => {
       const docWithIDs = await payload.create<GroupField>({
         collection: groupFieldsSlug,
         data: groupDoc,
