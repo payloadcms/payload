@@ -1,13 +1,15 @@
 import { buildConfig } from '../buildConfig';
 import TransformHooks from './collections/Transform';
 import Hooks, { hooksSlug } from './collections/Hook';
-import NestedGroupRelationship from './collections/NestedGroupRelationship';
+import NestedAfterReadHooks from './collections/NestedAfterReadHooks';
+import Relations from './collections/Relations';
 
 export default buildConfig({
   collections: [
     TransformHooks,
     Hooks,
-    NestedGroupRelationship,
+    NestedAfterReadHooks,
+    Relations,
   ],
   onInit: async (payload) => {
     await payload.create({

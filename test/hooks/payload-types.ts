@@ -45,21 +45,33 @@ export interface Hook {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "nested-after-read-hook".
+ * via the `definition` "nested-after-read-hooks".
  */
 export interface NestedAfterReadHook {
   id: string;
   text?: string;
-  group?: {
-    array?: {
+  group: {
+    array: {
       input?: string;
       afterRead?: string;
+      shouldPopulate?: string | Relation;
       id?: string;
     }[];
-    subGroup?: {
+    subGroup: {
       afterRead?: string;
+      shouldPopulate?: string | Relation;
     };
   };
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relations".
+ */
+export interface Relation {
+  id: string;
+  title: string;
   createdAt: string;
   updatedAt: string;
 }

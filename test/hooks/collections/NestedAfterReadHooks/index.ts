@@ -1,9 +1,12 @@
 import { CollectionConfig } from '../../../../src/collections/config/types';
+import { relationsSlug } from '../Relations';
 
-export const nestedAfterReadHook = 'nested-after-read-hook';
+export const nestedAfterReadHooksSlug = 'nested-after-read-hooks';
 
-const NestedGroupRelationship: CollectionConfig = {
-  slug: nestedAfterReadHook,
+export const generatedAfterReadText = 'hello';
+
+const NestedAfterReadHooks: CollectionConfig = {
+  slug: nestedAfterReadHooksSlug,
   fields: [
     {
       type: 'text',
@@ -26,9 +29,14 @@ const NestedGroupRelationship: CollectionConfig = {
               name: 'afterRead',
               hooks: {
                 afterRead: [(): string => {
-                  return 'hello';
+                  return generatedAfterReadText;
                 }],
               },
+            },
+            {
+              name: 'shouldPopulate',
+              type: 'relationship',
+              relationTo: relationsSlug,
             },
           ],
         },
@@ -41,9 +49,14 @@ const NestedGroupRelationship: CollectionConfig = {
               type: 'text',
               hooks: {
                 afterRead: [(): string => {
-                  return 'hello';
+                  return generatedAfterReadText;
                 }],
               },
+            },
+            {
+              name: 'shouldPopulate',
+              type: 'relationship',
+              relationTo: relationsSlug,
             },
           ],
         },
@@ -52,4 +65,4 @@ const NestedGroupRelationship: CollectionConfig = {
   ],
 };
 
-export default NestedGroupRelationship;
+export default NestedAfterReadHooks;
