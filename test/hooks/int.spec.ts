@@ -3,10 +3,11 @@ import { initPayloadTest } from '../helpers/configHelpers';
 import config from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
-import type { Post } from './payload-types';
-import { mapAsync } from '../../src/utilities/mapAsync';
 import { transformSlug } from './collections/Transform';
 import { hooksSlug } from './collections/Hook';
+import { generatedAfterReadText, nestedAfterReadHooksSlug } from './collections/NestedAfterReadHooks';
+import { relationsSlug } from './collections/Relations';
+import type { NestedAfterReadHook } from './payload-types';
 
 let client: RESTClient;
 
@@ -20,10 +21,6 @@ describe('Hooks', () => {
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
     await payload.mongoMemoryServer.stop();
-  });
-
-  beforeEach(async () => {
-    await clearDocs();
   });
 
   describe('transform actions', () => {
@@ -68,13 +65,56 @@ describe('Hooks', () => {
       expect(doc.collectionAfterChange).toEqual(true);
       expect(doc.fieldAfterRead).toEqual(true);
     });
+
+    it('should save data generated with afterRead hooks in nested field structures', async () => {
+      const document = await payload.create<NestedAfterReadHook>({
+        collection: nestedAfterReadHooksSlug,
+        data: {
+          text: 'ok',
+          group: {
+            array: [
+              { input: 'input' },
+            ],
+          },
+        },
+      });
+
+      expect(document.group.subGroup.afterRead).toEqual(generatedAfterReadText);
+      expect(document.group.array[0].afterRead).toEqual(generatedAfterReadText);
+    });
+
+    it('should populate related docs within nested field structures', async () => {
+      const relation = await payload.create({
+        collection: relationsSlug,
+        data: {
+          title: 'Hello',
+        },
+      });
+
+      const document = await payload.create({
+        collection: nestedAfterReadHooksSlug,
+        data: {
+          text: 'ok',
+          group: {
+            array: [
+              {
+                shouldPopulate: relation.id,
+              },
+            ],
+            subGroup: {
+              shouldPopulate: relation.id,
+            },
+          },
+        },
+      });
+
+      const retrievedDoc = await payload.findByID({
+        collection: nestedAfterReadHooksSlug,
+        id: document.id,
+      });
+
+      expect(retrievedDoc.group.array[0].shouldPopulate.title).toEqual(relation.title);
+      expect(retrievedDoc.group.subGroup.shouldPopulate.title).toEqual(relation.title);
+    });
   });
 });
-
-async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find<Post>({ collection: transformSlug, limit: 100 });
-  const ids = allDocs.docs.map((doc) => doc.id);
-  await mapAsync(ids, async (id) => {
-    await payload.delete({ collection: transformSlug, id });
-  });
-}

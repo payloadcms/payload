@@ -28,11 +28,10 @@ export const beforeChange = async ({
   skipValidation,
 }: Args): Promise<Record<string, unknown>> => {
   const data = deepCopyObject(incomingData);
-  const promises = [];
   const mergeLocaleActions = [];
   const errors: { message: string, field: string }[] = [];
 
-  traverseFields({
+  await traverseFields({
     data,
     doc,
     docWithLocales,
@@ -41,7 +40,6 @@ export const beforeChange = async ({
     operation,
     path: '',
     mergeLocaleActions,
-    promises,
     req,
     siblingData: data,
     siblingDoc: doc,
@@ -49,8 +47,6 @@ export const beforeChange = async ({
     fields: entityConfig.fields,
     skipValidation,
   });
-
-  await Promise.all(promises);
 
   if (errors.length > 0) {
     throw new ValidationError(errors);

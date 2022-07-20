@@ -10,7 +10,6 @@ type Args = {
   id?: string | number
   operation: 'create' | 'update'
   overrideAccess: boolean
-  promises: Promise<void>[]
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
@@ -28,7 +27,6 @@ export const promise = async ({
   id,
   operation,
   overrideAccess,
-  promises,
   req,
   siblingData,
   siblingDoc,
@@ -184,14 +182,13 @@ export const promise = async ({
       if (typeof siblingData[field.name] !== 'object') groupData = {};
       if (typeof siblingDoc[field.name] !== 'object') groupDoc = {};
 
-      traverseFields({
+      await traverseFields({
         data,
         doc,
         fields: field.fields,
         id,
         operation,
         overrideAccess,
-        promises,
         req,
         siblingData: groupData,
         siblingDoc: groupDoc,
@@ -204,20 +201,21 @@ export const promise = async ({
       const rows = siblingData[field.name];
 
       if (Array.isArray(rows)) {
+        const promises = [];
         rows.forEach((row, i) => {
-          traverseFields({
+          promises.push(traverseFields({
             data,
             doc,
             fields: field.fields,
             id,
             operation,
             overrideAccess,
-            promises,
             req,
             siblingData: row,
             siblingDoc: siblingDoc[field.name]?.[i] || {},
-          });
+          }));
         });
+        await Promise.all(promises);
       }
       break;
     }
@@ -226,24 +224,25 @@ export const promise = async ({
       const rows = siblingData[field.name];
 
       if (Array.isArray(rows)) {
+        const promises = [];
         rows.forEach((row, i) => {
           const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
 
           if (block) {
-            traverseFields({
+            promises.push(traverseFields({
               data,
               doc,
               fields: block.fields,
               id,
               operation,
               overrideAccess,
-              promises,
               req,
               siblingData: row,
               siblingDoc: siblingDoc[field.name]?.[i] || {},
-            });
+            }));
           }
         });
+        await Promise.all(promises);
       }
 
       break;
@@ -251,14 +250,13 @@ export const promise = async ({
 
     case 'row':
     case 'collapsible': {
-      traverseFields({
+      await traverseFields({
         data,
         doc,
         fields: field.fields,
         id,
         operation,
         overrideAccess,
-        promises,
         req,
         siblingData,
         siblingDoc,
@@ -268,20 +266,21 @@ export const promise = async ({
     }
 
     case 'tabs': {
+      const promises = [];
       field.tabs.forEach((tab) => {
-        traverseFields({
+        promises.push(traverseFields({
           data,
           doc,
           fields: tab.fields,
           id,
           operation,
           overrideAccess,
-          promises,
           req,
           siblingData,
           siblingDoc,
-        });
+        }));
       });
+      await Promise.all(promises);
 
       break;
     }

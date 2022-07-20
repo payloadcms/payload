@@ -19,22 +19,17 @@ export const afterChange = async ({
   operation,
   req,
 }: Args): Promise<Record<string, unknown>> => {
-  const promises = [];
-
   const doc = deepCopyObject(incomingDoc);
 
-  traverseFields({
+  await traverseFields({
     data,
     doc,
     fields: entityConfig.fields,
     operation,
-    promises,
     req,
     siblingDoc: doc,
     siblingData: data,
   });
-
-  await Promise.all(promises);
 
   return doc;
 };

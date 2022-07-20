@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../src/collections/config/types';
+import type { CollectionConfig } from '../../src/collections/config/types';
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
 import { mapAsync } from '../../src/utilities/mapAsync';

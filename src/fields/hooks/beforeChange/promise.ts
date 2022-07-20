@@ -17,7 +17,6 @@ type Args = {
   mergeLocaleActions: (() => void)[]
   operation: Operation
   path: string
-  promises: Promise<void>[]
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
@@ -44,7 +43,6 @@ export const promise = async ({
   mergeLocaleActions,
   operation,
   path,
-  promises,
   req,
   siblingData,
   siblingDoc,
@@ -171,15 +169,11 @@ export const promise = async ({
     }
 
     case 'group': {
-      let groupData = siblingData[field.name] as Record<string, unknown>;
-      let groupDoc = siblingDoc[field.name] as Record<string, unknown>;
-      let groupDocWithLocales = siblingDocWithLocales[field.name] as Record<string, unknown>;
+      if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {};
+      if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {};
+      if (typeof siblingDocWithLocales[field.name] !== 'object') siblingDocWithLocales[field.name] = {};
 
-      if (typeof siblingData[field.name] !== 'object') groupData = {};
-      if (typeof siblingDoc[field.name] !== 'object') groupDoc = {};
-      if (typeof siblingDocWithLocales[field.name] !== 'object') groupDocWithLocales = {};
-
-      traverseFields({
+      await traverseFields({
         data,
         doc,
         docWithLocales,
@@ -189,11 +183,10 @@ export const promise = async ({
         mergeLocaleActions,
         operation,
         path: `${path}${field.name}.`,
-        promises,
         req,
-        siblingData: groupData,
-        siblingDoc: groupDoc,
-        siblingDocWithLocales: groupDocWithLocales,
+        siblingData: siblingData[field.name] as Record<string, unknown>,
+        siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
+        siblingDocWithLocales: siblingDocWithLocales[field.name] as Record<string, unknown>,
         skipValidation: skipValidationFromHere,
       });
 
@@ -204,8 +197,9 @@ export const promise = async ({
       const rows = siblingData[field.name];
 
       if (Array.isArray(rows)) {
+        const promises = [];
         rows.forEach((row, i) => {
-          traverseFields({
+          promises.push(traverseFields({
             data,
             doc,
             docWithLocales,
@@ -215,15 +209,18 @@ export const promise = async ({
             mergeLocaleActions,
             operation,
             path: `${path}${field.name}.${i}.`,
-            promises,
             req,
             siblingData: row,
             siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]?.[i]),
             siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]?.[i]),
             skipValidation: skipValidationFromHere,
-          });
+          }));
         });
+
+        await Promise.all(promises);
       }
+
+
       break;
     }
 
@@ -231,11 +228,12 @@ export const promise = async ({
       const rows = siblingData[field.name];
 
       if (Array.isArray(rows)) {
+        const promises = [];
         rows.forEach((row, i) => {
           const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
 
           if (block) {
-            traverseFields({
+            promises.push(traverseFields({
               data,
               doc,
               docWithLocales,
@@ -245,23 +243,25 @@ export const promise = async ({
               mergeLocaleActions,
               operation,
               path: `${path}${field.name}.${i}.`,
-              promises,
               req,
               siblingData: row,
               siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]?.[i]),
               siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]?.[i]),
               skipValidation: skipValidationFromHere,
-            });
+            }));
           }
         });
+
+        await Promise.all(promises);
       }
+
 
       break;
     }
 
     case 'row':
     case 'collapsible': {
-      traverseFields({
+      await traverseFields({
         data,
         doc,
         docWithLocales,
@@ -271,7 +271,6 @@ export const promise = async ({
         mergeLocaleActions,
         operation,
         path,
-        promises,
         req,
         siblingData,
         siblingDoc,
@@ -283,8 +282,9 @@ export const promise = async ({
     }
 
     case 'tabs': {
+      const promises = [];
       field.tabs.forEach((tab) => {
-        traverseFields({
+        promises.push(traverseFields({
           data,
           doc,
           docWithLocales,
@@ -294,14 +294,16 @@ export const promise = async ({
           mergeLocaleActions,
           operation,
           path,
-          promises,
           req,
           siblingData,
           siblingDoc,
           siblingDocWithLocales,
           skipValidation: skipValidationFromHere,
-        });
+        }));
       });
+
+      await Promise.all(promises);
+
       break;
     }
 

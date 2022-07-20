@@ -13,7 +13,6 @@ type Args = {
   mergeLocaleActions: (() => void)[]
   operation: Operation
   path: string
-  promises: Promise<void>[]
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
@@ -21,7 +20,7 @@ type Args = {
   skipValidation?: boolean
 }
 
-export const traverseFields = ({
+export const traverseFields = async ({
   data,
   doc,
   docWithLocales,
@@ -31,13 +30,14 @@ export const traverseFields = ({
   mergeLocaleActions,
   operation,
   path,
-  promises,
   req,
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
   skipValidation,
-}: Args): void => {
+}: Args): Promise<void> => {
+  const promises = [];
+
   fields.forEach((field) => {
     promises.push(promise({
       data,
@@ -49,7 +49,6 @@ export const traverseFields = ({
       mergeLocaleActions,
       operation,
       path,
-      promises,
       req,
       siblingData,
       siblingDoc,
@@ -57,4 +56,6 @@ export const traverseFields = ({
       skipValidation,
     }));
   });
+
+  await Promise.all(promises);
 };

@@ -58,6 +58,16 @@ const ArrayFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'array',
+      name: 'potentiallyEmptyArray',
+      fields: [
+        {
+          type: 'text',
+          name: 'text',
+        },
+      ],
+    },
   ],
 };
 

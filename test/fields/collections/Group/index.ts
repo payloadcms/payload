@@ -57,6 +57,16 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'potentiallyEmptyGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
 };
 

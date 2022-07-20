@@ -80,6 +80,32 @@ export interface RelationWithTitle {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-nested-relation-with-title".
+ */
+export interface GroupNestedRelationWithTitle {
+  id: string;
+  group?: {
+    relation?: string | NestedRelationWithTitle;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-relation-with-title".
+ */
+export interface NestedRelationWithTitle {
+  id: string;
+  group?: {
+    subGroup?: {
+      relation?: string | RelationOne;
+    };
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {

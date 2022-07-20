@@ -9,24 +9,23 @@ type Args = {
   id?: string | number
   operation: 'create' | 'update'
   overrideAccess: boolean
-  promises: Promise<void>[]
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
 }
 
-export const traverseFields = ({
+export const traverseFields = async ({
   data,
   doc,
   fields,
   id,
   operation,
   overrideAccess,
-  promises,
   req,
   siblingData,
   siblingDoc,
-}: Args): void => {
+}: Args): Promise<void> => {
+  const promises = [];
   fields.forEach((field) => {
     promises.push(promise({
       data,
@@ -35,10 +34,10 @@ export const traverseFields = ({
       id,
       operation,
       overrideAccess,
-      promises,
       req,
       siblingData,
       siblingDoc,
     }));
   });
+  await Promise.all(promises);
 };
