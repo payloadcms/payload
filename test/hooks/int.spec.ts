@@ -7,6 +7,7 @@ import type { Post } from './payload-types';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import { transformSlug } from './collections/Transform';
 import { hooksSlug } from './collections/Hook';
+import { nestedAfterReadHook } from './collections/NestedGroupRelationship';
 
 let client: RESTClient;
 
@@ -67,6 +68,23 @@ describe('Hooks', () => {
       expect(doc.fieldAfterChange).toEqual(true);
       expect(doc.collectionAfterChange).toEqual(true);
       expect(doc.fieldAfterRead).toEqual(true);
+    });
+
+    it('should populate after read in two nested groups', async () => {
+      const document = await payload.create({
+        collection: nestedAfterReadHook,
+        data: {
+          text: 'ok',
+          group: {
+            array: [
+              { input: 'input' },
+            ],
+          },
+        },
+      });
+
+      expect(typeof document.group.subGroup.text).toEqual('string');
+      expect(typeof document.group.array[0].afterRead).toEqual('string');
     });
   });
 });
