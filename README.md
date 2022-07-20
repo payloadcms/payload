@@ -1,6 +1,9 @@
 <h1 align="center">Payload</h1>
 <p align="center">A free and open-source TypeScript headless CMS & application framework built with Express, MongoDB and React.</p>
 <p align="center">
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" />
+  </a>
   <a href="https://github.com/payloadcms/payload/actions">
     <img src="https://github.com/payloadcms/payload/workflows/build/badge.svg" />
   </a>
