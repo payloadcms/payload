@@ -1,3 +1,17 @@
+## [1.0.8](https://github.com/payloadcms/payload/compare/v1.0.7...v1.0.8) (2022-07-20)
+
+
+### Bug Fixes
+
+* await field hooks recursively ([893772e](https://github.com/payloadcms/payload/commit/893772ebd8b3d565f9c62d83ca0fa131b9d59970))
+* potential solution for [#756](https://github.com/payloadcms/payload/issues/756) ([b987cb8](https://github.com/payloadcms/payload/commit/b987cb8dc4774fbcc11b71661f2c4d25208f7de2))
+
+
+### Features
+
+* export PayloadRequest ([66c820c](https://github.com/payloadcms/payload/commit/66c820c863e7aeaa9050c0a0964256d6878af9d9))
+* improves generated types by removing unnecessary optional properties ([#784](https://github.com/payloadcms/payload/issues/784)) ([6f748f1](https://github.com/payloadcms/payload/commit/6f748f1adb78a70c9e5dba6cedcf1e2cdd55498a))
+
 ## [1.0.7](https://github.com/payloadcms/payload/compare/v1.0.6...v1.0.7) (2022-07-19)
 
 ## [1.0.6](https://github.com/payloadcms/payload/compare/v1.0.5...v1.0.6) (2022-07-19)
