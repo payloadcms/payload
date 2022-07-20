@@ -10,6 +10,12 @@ import loadConfig from '../config/load';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 import deepCopyObject from '../utilities/deepCopyObject';
 
+const nonOptionalFieldTypes = ['group', 'array', 'blocks'];
+
+const propertyIsOptional = (field: Field) => {
+  return fieldAffectsData(field) && (field.required === true || nonOptionalFieldTypes.includes(field.type));
+};
+
 function getCollectionIDType(collections: SanitizedCollectionConfig[], slug: string): 'string' | 'number' {
   const matchedCollection = collections.find((collection) => collection.slug === slug);
   const customIdField = matchedCollection.fields.find((field) => 'name' in field && field.name === 'id');
@@ -320,7 +326,7 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
     ),
     required: [
       ...fields
-        .filter((field) => fieldAffectsData(field) && field.required === true)
+        .filter(propertyIsOptional)
         .map((field) => (fieldAffectsData(field) ? field.name : '')),
       ...requiredTopLevelProps,
     ],
