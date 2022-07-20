@@ -149,6 +149,18 @@ describe('Relationships', () => {
         expect(status).toEqual(400);
       });
 
+      describe('Custom ID', () => {
+        it('should query a custom id relation', async () => {
+          const { doc } = await client.findByID<Post>({ id: post.id });
+          expect(doc?.customIdRelation).toMatchObject({ id: generatedCustomId });
+        });
+
+        it('should query a custom id number relation', async () => {
+          const { doc } = await client.findByID<Post>({ id: post.id });
+          expect(doc?.customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber });
+        });
+      });
+
       describe('depth', () => {
         it('should populate to depth', async () => {
           const { doc } = await client.findByID<Post>({ id: post.id, options: { depth: 2 } });
@@ -170,16 +182,6 @@ describe('Relationships', () => {
           expect(doc?.maxDepthRelation).not.toHaveProperty('name');
           // should not affect other fields
           expect(doc?.relationField).toMatchObject({ id: relation.id, name: relation.name });
-        });
-
-        it('should query a custom id relation', async () => {
-          const { doc } = await client.findByID<Post>({ id: post.id });
-          expect(doc?.customIdRelation).toMatchObject({ id: generatedCustomId });
-        });
-
-        it('should query a custom id number relation', async () => {
-          const { doc } = await client.findByID<Post>({ id: post.id });
-          expect(doc?.customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber });
         });
       });
     });
