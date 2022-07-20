@@ -132,7 +132,25 @@ export default buildConfig({
     },
     {
       slug: nestedRelationship,
-      fields: groupWithNestedRelationshipFields(relationWithTitleSlug),
+      fields: [
+        {
+          type: 'group',
+          name: 'group',
+          fields: [
+            {
+              type: 'group',
+              name: 'subGroup',
+              fields: [
+                {
+                  name: 'relation',
+                  type: 'relationship',
+                  relationTo: relationOneSlug,
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
   ],
   onInit: async (payload) => {
