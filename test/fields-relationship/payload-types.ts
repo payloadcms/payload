@@ -97,7 +97,9 @@ export interface GroupNestedRelationWithTitle {
 export interface NestedRelationWithTitle {
   id: string;
   group?: {
-    relation?: string | RelationWithTitle;
+    subGroup?: {
+      relation?: string | RelationOne;
+    };
   };
   createdAt: string;
   updatedAt: string;

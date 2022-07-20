@@ -4,7 +4,7 @@ import config from '../uploads/config';
 import payload from '../../src';
 import { pointDoc } from './collections/Point';
 import type { ArrayField, GroupField } from './payload-types';
-import { arrayFieldsSlug, arrayDefaultValue } from './collections/Array';
+import { arrayFieldsSlug, arrayDefaultValue, arrayDoc } from './collections/Array';
 import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
 import { defaultText } from './collections/Text';
 
@@ -89,6 +89,15 @@ describe('Fields', () => {
       });
     });
 
+    it('should return empty array for arrays when no data present', async () => {
+      const document = await payload.create<ArrayField>({
+        collection: arrayFieldsSlug,
+        data: arrayDoc,
+      });
+
+      expect(document.potentiallyEmptyArray).toEqual([]);
+    });
+
     it('should create with ids and nested ids', async () => {
       const docWithIDs = await payload.create<GroupField>({
         collection: groupFieldsSlug,
@@ -157,6 +166,15 @@ describe('Fields', () => {
     it('should create with defaultValue', async () => {
       expect(document.group.defaultParent).toStrictEqual(groupDefaultValue);
       expect(document.group.defaultChild).toStrictEqual(groupDefaultChild);
+    });
+
+    it('should return empty object for groups when no data present', async () => {
+      const doc = await payload.create<GroupField>({
+        collection: groupFieldsSlug,
+        data: groupDoc,
+      });
+
+      expect(doc.potentiallyEmptyGroup).toEqual({});
     });
   });
 });

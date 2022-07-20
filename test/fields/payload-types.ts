@@ -20,7 +20,11 @@ export interface ArrayField {
     text: string;
     id?: string;
   }[];
-  readOnly?: {
+  readOnly: {
+    text?: string;
+    id?: string;
+  }[];
+  potentiallyEmptyArray: {
     text?: string;
     id?: string;
   }[];
@@ -47,7 +51,7 @@ export interface BlockField {
         blockType: 'number';
       }
     | {
-        subBlocks?: (
+        subBlocks: (
           | {
               text: string;
               id?: string;
@@ -76,9 +80,9 @@ export interface BlockField {
 export interface CollapsibleField {
   id: string;
   text: string;
-  group?: {
+  group: {
     textWithinGroup?: string;
-    subGroup?: {
+    subGroup: {
       textWithinSubGroup?: string;
     };
   };
@@ -103,17 +107,20 @@ export interface ConditionalLogic {
  */
 export interface GroupField {
   id: string;
-  group?: {
+  group: {
     text: string;
     defaultParent?: string;
     defaultChild?: string;
-    subGroup?: {
+    subGroup: {
       textWithinGroup?: string;
-      arrayWithinGroup?: {
+      arrayWithinGroup: {
         textWithinArray?: string;
         id?: string;
       }[];
     };
+  };
+  potentiallyEmptyGroup: {
+    text?: string;
   };
   createdAt: string;
   updatedAt: string;
@@ -134,7 +141,7 @@ export interface PointField {
    * @maxItems 2
    */
   localized?: [number, number];
-  group?: {
+  group: {
     /**
      * @minItems 2
      * @maxItems 2
@@ -192,7 +199,7 @@ export interface TabsField {
         blockType: 'number';
       }
     | {
-        subBlocks?: (
+        subBlocks: (
           | {
               text: string;
               id?: string;
@@ -211,7 +218,7 @@ export interface TabsField {
         blockType: 'subBlocks';
       }
   )[];
-  group?: {
+  group: {
     number: number;
   };
   textarea?: string;

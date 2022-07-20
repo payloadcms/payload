@@ -95,6 +95,7 @@ const createHookOrder = [
   'collectionBeforeChange',
   'fieldBeforeChange',
   'fieldAfterRead',
+  'collectionAfterRead',
   'fieldAfterChange',
   'collectionAfterChange',
 ];
