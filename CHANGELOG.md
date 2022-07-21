@@ -4,7 +4,6 @@
 ### Bug Fixes
 
 * avoid assuming Email will be present on JWT token. Using ID instead as email might not be in if using disableLocalStrategy ([#789](https://github.com/payloadcms/payload/issues/789)) ([3b4d5af](https://github.com/payloadcms/payload/commit/3b4d5afd41f898c06c5d0f2b96ce0478c27d0976))
-* **doc:** corrects  doc to match underlying Access type ([#792](https://github.com/payloadcms/payload/issues/792)) ([6f8b8d0](https://github.com/payloadcms/payload/commit/6f8b8d0fb838e42be0fb2e34b4d2d7eea1b2bae4))
 * enable index creation from schema ([#791](https://github.com/payloadcms/payload/issues/791)) ([2a1f387](https://github.com/payloadcms/payload/commit/2a1f387bcc071730692b5eadadf01a91d7a1f5d4))
 * graphql gen logging output ([#795](https://github.com/payloadcms/payload/issues/795)) ([8a81d0b](https://github.com/payloadcms/payload/commit/8a81d0b2746b727784280704aab26b0aed3a757d))
 * sharpens radio input edges by replacing box-shadow trick with border property ([#768](https://github.com/payloadcms/payload/issues/768)) ([e2c366f](https://github.com/payloadcms/payload/commit/e2c366f5363aa88b29a1b90688f75a1da0c2cca8))
