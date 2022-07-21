@@ -17,7 +17,7 @@ export function generateGraphQLSchema(): void {
 
   logger.info('Compiling GraphQL schema...');
   fs.writeFileSync(config.graphQL.schemaOutputFile, printSchema(payload.schema));
-  logger.info(`GraphQL written to ${config.typescript.outputFile}`);
+  logger.info(`GraphQL written to ${config.graphQL.schemaOutputFile}`);
 }
 
 // when generateGraphQLSchema.js is launched directly
