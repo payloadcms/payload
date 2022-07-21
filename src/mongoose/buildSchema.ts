@@ -4,7 +4,7 @@
 /* eslint-disable no-use-before-define */
 import { Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
-import { ArrayField, Block, BlockField, CheckboxField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, fieldIsPresentationalOnly, NonPresentationalField, CollapsibleField, TabsField } from '../fields/config/types';
+import { ArrayField, Block, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NonPresentationalField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextareaField, TextField, UploadField } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
 import flattenTopLevelFields from '../utilities/flattenTopLevelFields';
 
@@ -104,6 +104,8 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
       }
 
       if (config.indexSortableFields && !buildSchemaOptions.global && !field.index && !field.hidden && sortableFieldTypes.indexOf(field.type) > -1 && fieldAffectsData(field)) {
+        indexFields.push({ [field.name]: 1 });
+      } else if ((field.index || field.unique) && fieldAffectsData(field)) {
         indexFields.push({ [field.name]: 1 });
       }
     }
@@ -400,7 +402,7 @@ const fieldToSchemaMap = {
     };
   },
   blocks: (field: BlockField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
-    const baseSchema = [new Schema({ }, { _id: false, discriminatorKey: 'blockType' })];
+    const baseSchema = [new Schema({}, { _id: false, discriminatorKey: 'blockType' })];
     let schemaToReturn;
 
     if (field.localized && config.localization) {
