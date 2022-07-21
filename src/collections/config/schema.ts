@@ -1,6 +1,11 @@
 import joi from 'joi';
 import { componentSchema } from '../../utilities/componentSchema';
 
+const strategyBaseSchema = joi.object().keys({
+  refresh: joi.boolean(),
+  logout: joi.boolean(),
+});
+
 const collectionSchema = joi.object().keys({
   slug: joi.string().required(),
   labels: joi.object({
@@ -88,15 +93,18 @@ const collectionSchema = joi.object().keys({
       }),
       maxLoginAttempts: joi.number(),
       disableLocalStrategy: joi.boolean().valid(true),
-      strategies: joi.array().items(joi.object().keys({
-        name: joi.string(),
-        strategy: joi.alternatives().try(
-          joi.func().maxArity(1).required(),
-          joi.object()
-        ),
-        refresh: joi.boolean(),
-        logout: joi.boolean(),
-      })),
+      strategies: joi.array().items(joi.alternatives().try(
+        strategyBaseSchema.keys({
+          name: joi.string().required(),
+          strategy: joi.func()
+            .maxArity(1)
+            .required(),
+        }),
+        strategyBaseSchema.keys({
+          name: joi.string(),
+          strategy: joi.object().required(),
+        }),
+      )),
     }),
     joi.boolean(),
   ),
