@@ -1,3 +1,20 @@
+## [1.0.9](https://github.com/payloadcms/payload/compare/v1.0.8...v1.0.9) (2022-07-21)
+
+
+### Bug Fixes
+
+* avoid assuming Email will be present on JWT token. Using ID instead as email might not be in if using disableLocalStrategy ([#789](https://github.com/payloadcms/payload/issues/789)) ([3b4d5af](https://github.com/payloadcms/payload/commit/3b4d5afd41f898c06c5d0f2b96ce0478c27d0976))
+* **doc:** corrects  doc to match underlying Access type ([#792](https://github.com/payloadcms/payload/issues/792)) ([6f8b8d0](https://github.com/payloadcms/payload/commit/6f8b8d0fb838e42be0fb2e34b4d2d7eea1b2bae4))
+* enable index creation from schema ([#791](https://github.com/payloadcms/payload/issues/791)) ([2a1f387](https://github.com/payloadcms/payload/commit/2a1f387bcc071730692b5eadadf01a91d7a1f5d4))
+* graphql gen logging output ([#795](https://github.com/payloadcms/payload/issues/795)) ([8a81d0b](https://github.com/payloadcms/payload/commit/8a81d0b2746b727784280704aab26b0aed3a757d))
+* sharpens radio input edges by replacing box-shadow trick with border property ([#768](https://github.com/payloadcms/payload/issues/768)) ([e2c366f](https://github.com/payloadcms/payload/commit/e2c366f5363aa88b29a1b90688f75a1da0c2cca8))
+
+
+### Features
+
+* pass payload and names to custom auth strategies ([#781](https://github.com/payloadcms/payload/issues/781)) ([3a3026c](https://github.com/payloadcms/payload/commit/3a3026cd637c1274fdf6e4c4cba4f30a202e1ff7))
+* use provided auth strategy name or strategy.name ([#797](https://github.com/payloadcms/payload/issues/797)) ([f22f56e](https://github.com/payloadcms/payload/commit/f22f56e73c979ee3e1b165b327b1bcf6e1de6eda))
+
 ## [1.0.8](https://github.com/payloadcms/payload/compare/v1.0.7...v1.0.8) (2022-07-20)
 
 
