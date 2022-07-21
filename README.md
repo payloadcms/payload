@@ -48,10 +48,10 @@
 
 Payload is a CMS that has been designed for developers from the ground up to deliver them what they need to build great digital products. If you know JavaScript, you know Payload. It's a _code-first_ CMS, which allows us to do a lot of things right:
 
-- Payload gives you everything you need, but then steps back and lets you build what you want in JavaScript or TypeScript - with no unnecessary complexity brought by GUIs. You'll understand how your CMS works, because you will have written it exactly how you want it.
+- Payload gives you everything you need, but then steps back and lets you build what you want in JavaScript or TypeScript - with no unnecessary complexity brought by GUIs. You'll understand how your CMS works because you will have written it exactly how you want it.
 - Bring your own Express server and do whatever you need on top of Payload. Payload doesn't impose anything on you or your app.
 - Completely control the Admin panel by using your own React components. Swap out fields or even entire views with ease.
-- Use your data however and wherever you need thanks to auto-generated, yet fully extensible REST, GraphQL and Local Node APIs.
+- Use your data however and wherever you need thanks to auto-generated, yet fully extensible REST, GraphQL, and Local Node APIs.
 
 ### Quick Start
 
