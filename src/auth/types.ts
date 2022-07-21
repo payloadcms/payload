@@ -95,8 +95,6 @@ export interface IncomingAuthType {
   strategies?: {
     name?: string
     strategy: AuthStrategy
-    refresh?: boolean
-    logout?: boolean
   }[]
 }
 

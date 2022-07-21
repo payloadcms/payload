@@ -208,3 +208,17 @@ Behind the scenes, Payload uses PassportJS to power its local authentication str
   developer. Otherwise, just let Payload's built-in authentication handle user
   auth for you.
 </Banner>
+
+The `strategies` property is an array that takes objects with the following properties:
+
+**`strategy`**
+
+This property can accept a Passport strategy directly, or you can pass a function that takes a `payload` argument, and returns a Passport strategy.
+
+**`name`**
+
+If you pass a strategy to the `strategy` property directly, the `name` property is optional and allows you to override the strategy's built-in name.
+
+However, if you pass a function to `strategy`, `name` is a required property.
+
+In either case, Payload will prefix the strategy name with the collection `slug` that the strategy is passed to.
