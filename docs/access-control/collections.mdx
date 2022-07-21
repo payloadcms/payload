@@ -90,11 +90,9 @@ const canReadPage = ({ req: { user } }) => {
   }
   // using a query constraint, guest users can access when a field named 'isPublic' is set to true
   return {
-    where: {
-      // assumes we have a checkbox field named 'isPublic'
-      isPublic: {
-        equals: true
-      }
+    // assumes we have a checkbox field named 'isPublic'
+    isPublic: {
+      equals: true
     }
   }
 };
