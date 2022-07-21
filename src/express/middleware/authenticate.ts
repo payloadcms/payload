@@ -12,8 +12,8 @@ export default (config: SanitizedConfig): PayloadAuthenticate => {
       const collectionMethods = [...enabledMethods];
 
       if (Array.isArray(collection.auth.strategies)) {
-        collection.auth.strategies.forEach(({ name }, index) => {
-          collectionMethods.unshift(`${collection.slug}-${name ?? index}`);
+        collection.auth.strategies.forEach(({ name, strategy }) => {
+          collectionMethods.unshift(`${collection.slug}-${name ?? strategy.name}`);
         });
       }
 
