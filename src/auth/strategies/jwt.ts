@@ -1,7 +1,7 @@
 import passportJwt, { StrategyOptions } from 'passport-jwt';
 import { Strategy as PassportStrategy } from 'passport-strategy';
 import { Payload } from '../..';
-import find from '../../collections/operations/find';
+import findByID from '../../collections/operations/findByID';
 import getExtractJWT from '../getExtractJWT';
 
 const JwtStrategy = passportJwt.Strategy;
@@ -21,41 +21,19 @@ export default ({ secret, config, collections }: Payload): PassportStrategy => {
     try {
       const collection = collections[token.collection];
 
-      const where: { [key: string]: any } = {};
-      if (collection.config.auth.verify) {
-        where.and = [
-          {
-            email: {
-              equals: token.email,
-            },
-          },
-          {
-            _verified: {
-              not_equals: false,
-            },
-          },
-        ];
-      } else {
-        where.email = {
-          equals: token.email,
-        };
-      }
-
       const isGraphQL = (req.url || '').replace(/\/$/, '') === config.routes.graphQL.replace(/\/$/, '');
 
-      const userQuery = await find({
-        where,
+      const user = await findByID({
+        id: token.id,
         collection,
         req,
         overrideAccess: true,
         depth: isGraphQL ? 0 : collection.config.auth.depth,
       });
 
-      if (userQuery.docs && userQuery.docs.length > 0) {
-        const user = userQuery.docs[0];
+      if(user && (!collection.config.auth.verify || user._verified)) {
         user.collection = collection.config.slug;
         user._strategy = 'local-jwt';
-
         done(null, user);
       } else {
         done(null, false);
