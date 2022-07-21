@@ -2,6 +2,7 @@ import { Strategy } from 'passport';
 import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../express/types';
 import { Where, PayloadMongooseDocument } from '../types';
+import { Payload } from '..';
 
 export type Permission = {
   permission: boolean
@@ -67,6 +68,8 @@ type GenerateVerifyEmailSubject = (args: { req: PayloadRequest, token: string, u
 type GenerateForgotPasswordEmailHTML = (args?: { req?: PayloadRequest, token?: string, user?: unknown}) => Promise<string> | string
 type GenerateForgotPasswordEmailSubject = (args?: { req?: PayloadRequest, token?: string, user?: any }) => Promise<string> | string
 
+type AuthStrategy = (ctx: Payload) => Strategy | Strategy;
+
 export interface IncomingAuthType {
   tokenExpiration?: number;
   verify?:
@@ -90,7 +93,8 @@ export interface IncomingAuthType {
   }
   disableLocalStrategy?: true
   strategies?: {
-    strategy: Strategy
+    name?: string
+    strategy: AuthStrategy
     refresh?: boolean
     logout?: boolean
   }[]

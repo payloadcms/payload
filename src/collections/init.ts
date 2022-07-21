@@ -106,8 +106,9 @@ export default function registerCollections(ctx: Payload): void {
         }
 
         if (Array.isArray(collection.auth.strategies)) {
-          collection.auth.strategies.forEach(({ strategy }) => {
-            passport.use(strategy);
+          collection.auth.strategies.forEach(({ name, strategy }, index) => {
+            const passportStrategy = typeof strategy === 'object' ? strategy : strategy(ctx);
+            passport.use(`${AuthCollection.config.slug}-${name ?? index}`, passportStrategy);
           });
         }
       }
