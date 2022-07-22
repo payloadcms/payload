@@ -297,13 +297,30 @@ const fieldToSchemaMap = {
   },
   tabs: (field: TabsField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     field.tabs.forEach((tab) => {
-      tab.fields.forEach((subField: Field) => {
-        const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+      if (tab.name) {
+        const formattedBaseSchema = formatBaseSchema(field, buildSchemaOptions);
 
-        if (addFieldSchema) {
-          addFieldSchema(subField, schema, config, buildSchemaOptions);
-        }
-      });
+        const baseSchema = {
+          ...formattedBaseSchema,
+          type: buildSchema(config, tab.fields, {
+            options: {
+              _id: false,
+              id: false,
+            },
+            disableUnique: buildSchemaOptions.disableUnique,
+          }),
+        };
+
+        newFields[tab.name] = localizeSchema(field, baseSchema, config.localization);
+      } else {
+        tab.fields.forEach((subField: Field) => {
+          const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+
+          if (addFieldSchema) {
+            addFieldSchema(subField, schema, config, buildSchemaOptions);
+          }
+        });
+      }
     });
   },
   array: (field: ArrayField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
