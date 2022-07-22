@@ -468,7 +468,7 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
 
       return {
         ...objectTypeConfig,
-        [field.name]: { type },
+        [field.name]: { type: withNullableType(field, type) },
       };
     },
     row: (objectTypeConfig: ObjectTypeConfig, field: RowField) => field.fields.reduce((objectTypeConfigWithRowFields, subField) => {
