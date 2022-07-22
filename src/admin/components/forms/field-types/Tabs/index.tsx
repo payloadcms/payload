@@ -74,7 +74,7 @@ const TabsField: React.FC<Props> = (props) => {
               fieldTypes={fieldTypes}
               fieldSchema={activeTab.fields.map((field) => ({
                 ...field,
-                path: `${path ? `${path}.` : ''}${fieldAffectsData(field) ? field.name : ''}`,
+                path: `${path ? `${path}.` : ''}${activeTab.name ? `${activeTab.name}.` : ''}${fieldAffectsData(field) ? field.name : ''}`,
               }))}
             />
           </div>
