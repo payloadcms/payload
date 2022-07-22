@@ -94,7 +94,7 @@ const TabsFields: CollectionConfig = {
         {
           name: 'tab',
           label: 'Tab with Name',
-          description: 'This tab has a name, which should namespace the contained field.',
+          description: 'This tab has a name, which should namespace the contained fields.',
           fields: [
             {
               name: 'array',
@@ -151,7 +151,7 @@ const TabsFields: CollectionConfig = {
             {
               name: 'nestedTab',
               label: 'Nested Tab with Name',
-              description: 'This tab has a name, which should namespace the contained field.',
+              description: 'This tab has a name, which should namespace the contained fields.',
               fields: [
                 {
                   name: 'text',
@@ -183,21 +183,21 @@ export const tabsDoc = {
     number: 12,
   },
   nestedTab: {
-    text: 'Some nested, namespaced text in a tab',
+    text: 'Some text in a nested, named tab',
   },
   tab: {
     array: [
       {
-        text: "Hello, I'm the first row",
+        text: "Hello, I'm the first row, in a named tab",
       },
       {
-        text: 'Second row here',
+        text: 'Second row here, in a named tab',
       },
       {
-        text: 'Here is some data for the third row',
+        text: 'Here is some data for the third row, in a named tab',
       },
     ],
-    text: 'Some namespaced text in a tab',
+    text: 'Some text in a named tab',
   },
   textarea: 'Here is some text that goes in a textarea',
   anotherText: 'Super tired of writing this text',
