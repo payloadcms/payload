@@ -213,9 +213,9 @@ export const addFieldStatePromise = async ({
       iterateFields({
         state,
         fields: tab.fields,
-        data,
+        data: tab.name ? data?.[tab.name] : data,
         parentPassesCondition: passesCondition,
-        path,
+        path: tab.name ? `${path}${tab.name}.` : path,
         user,
         fieldPromises,
         fullData,
