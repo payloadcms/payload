@@ -91,6 +91,17 @@ const TabsFields: CollectionConfig = {
             },
           ],
         },
+        {
+          name: 'tab',
+          label: 'Tab with Name',
+          description: 'This tab has a name, which should namespace the contained field.',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
       ],
     },
     {
@@ -143,6 +154,9 @@ export const tabsDoc = {
   blocks: blocksFieldSeedData,
   group: {
     number: 12,
+  },
+  tab: {
+    text: 'Some brand new text',
   },
   textarea: 'Here is some text that goes in a textarea',
   anotherText: 'Super tired of writing this text',
