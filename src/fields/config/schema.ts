@@ -185,6 +185,7 @@ export const tabs = baseField.keys({
   type: joi.string().valid('tabs').required(),
   fields: joi.forbidden(),
   tabs: joi.array().items(joi.object({
+    name: joi.string(),
     label: joi.string().required(),
     fields: joi.array().items(joi.link('#field')).required(),
     description: joi.alternatives().try(

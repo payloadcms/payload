@@ -184,6 +184,7 @@ export type TabsAdmin = Omit<Admin, 'description'>;
 export type TabsField = Omit<FieldBase, 'admin' | 'name'> & {
   type: 'tabs';
   tabs: {
+    name?: string
     label: string
     fields: Field[];
     description?: Description
