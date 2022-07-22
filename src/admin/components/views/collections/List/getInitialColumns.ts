@@ -17,7 +17,7 @@ const getRemainingColumns = (fields: Field[], useAsTitle: string): string[] => f
       ...remaining,
       ...field.tabs.reduce((tabFieldColumns, tab) => [
         ...tabFieldColumns,
-        ...getRemainingColumns(tab.fields, useAsTitle),
+        ...(tab.name ? [tab.name] : getRemainingColumns(tab.fields, useAsTitle)),
       ], []),
     ];
   }
