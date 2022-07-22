@@ -453,6 +453,16 @@ function buildObjectType({
       return objectTypeConfigWithCollapsibleFields;
     }, objectTypeConfig),
     tabs: (objectTypeConfig: ObjectTypeConfig, field: TabsField) => field.tabs.reduce((tabSchema, tab) => {
+      if (tab.name) {
+        const fullName = combineParentName(parentName, toWords(tab.name, true));
+        const type = buildObjectType(payload, fullName, tab.fields, fullName);
+
+        return {
+          ...tabSchema,
+          [tab.name]: { type },
+        };
+      }
+
       return {
         ...tabSchema,
         ...tab.fields.reduce((subFieldSchema, subField) => {
