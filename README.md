@@ -75,6 +75,10 @@ Check out the [Payload website](https://payloadcms.com/docs/getting-started/what
 
 There are lots of good conversations and resources in our [GitHub Discussions board](https://github.com/payloadcms/payload/discussions). If you're struggling with something, chances are, someone's already solved what you're up against. Searching Discussions will often provide very helpful tips and tricks.
 
+##### Contributions
+
+If you want to add contributions to this repository, please follow the instructions in contributing.md.
+
 ##### Discord
 
 Join [Payload's Discord channel](https://discord.com/invite/r6sCXqVk3v) to interact with Payload developers in realtime.
