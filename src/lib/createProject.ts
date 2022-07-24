@@ -97,6 +97,12 @@ export async function createProject(
   } else {
     try {
       await fse.copy(templateDir, projectDir, { recursive: true })
+      if (packageManager === 'npm') {
+        const src = path.resolve(templateDir, '..', 'npmrc.template')
+        const dest = path.resolve(projectDir, '.npmrc')
+        await fse.copy(src, dest)
+      }
+
       success('Project directory created')
     } catch (err) {
       const msg =
