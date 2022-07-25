@@ -70,6 +70,7 @@ const batchAndLoadDocs = (req: PayloadRequest): BatchLoadFn<string, TypeWithID> 
       fallbackLocale,
       depth,
       currentDepth,
+      pagination: false,
       where: {
         id: {
           in: ids,
