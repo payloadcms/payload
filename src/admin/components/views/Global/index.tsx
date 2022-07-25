@@ -12,13 +12,14 @@ import DefaultGlobal from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import { IndexProps } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import { Fields } from '../../forms/Form/types';
 
 const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{data?: Record<string, unknown>}>();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
   const { permissions, user } = useAuth();
-  const [initialState, setInitialState] = useState({});
+  const [initialState, setInitialState] = useState<Fields>();
   const { getVersions, preferences } = useDocumentInfo();
 
   const {
@@ -80,7 +81,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
       DefaultComponent={DefaultGlobal}
       CustomComponent={CustomEdit}
       componentProps={{
-        isLoading: isLoadingDocument || !preferences,
+        isLoading: !initialState || !preferences,
         data: dataToRender,
         permissions: globalPermissions,
         initialState,
