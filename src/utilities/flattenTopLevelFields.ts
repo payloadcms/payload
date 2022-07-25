@@ -22,7 +22,7 @@ const flattenFields = (fields: Field[], keepPresentationalFields?: boolean): (Fi
         ...field.tabs.reduce((tabFields, tab) => {
           return [
             ...tabFields,
-            ...flattenFields(tab.fields, keepPresentationalFields),
+            ...(tab.name ? [tab] : flattenFields(tab.fields, keepPresentationalFields)),
           ];
         }, []),
       ];
