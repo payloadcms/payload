@@ -357,7 +357,7 @@ describe('collections-rest', () => {
 
       it('like', async () => {
         const post1 = await createPost({ title: 'prefix-value' });
-        await createPost();
+
         const { status, result } = await client.find<Post>({
           query: {
             title: {
@@ -368,6 +368,22 @@ describe('collections-rest', () => {
 
         expect(status).toEqual(200);
         expect(result.docs).toEqual([post1]);
+        expect(result.totalDocs).toEqual(1);
+      });
+
+      it('like - partial word match', async () => {
+        const post = await createPost({ title: 'separate words should partially match' });
+
+        const { status, result } = await client.find<Post>({
+          query: {
+            title: {
+              like: 'words partial',
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.docs).toEqual([post]);
         expect(result.totalDocs).toEqual(1);
       });
 
