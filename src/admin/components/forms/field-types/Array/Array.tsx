@@ -178,7 +178,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   useEffect(() => {
     const data = formContext.getDataByPath<Row[]>(path);
     dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
-  }, [/* formContext, */ path, preferences]);
+  }, [path, preferences]);
 
   useEffect(() => {
     setValue(rows?.length || 0, true);
