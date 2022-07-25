@@ -21,7 +21,6 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 }) => {
   const { serverURL, routes: { api } } = useConfig();
   const { getPreference } = usePreferences();
-  const [preferences, setPreferences] = useState<DocumentPreferences>();
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null);
   const [versions, setVersions] = useState<PaginatedDocs<Version>>(null);
   const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null);
@@ -159,8 +158,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
   useEffect(() => {
     const getDocPreferences = async () => {
-      const existingPreferences = await getPreference<DocumentPreferences>(preferencesKey);
-      setPreferences(existingPreferences || { fields: {} });
+      await getPreference<DocumentPreferences>(preferencesKey);
     };
 
     getDocPreferences();
@@ -177,7 +175,6 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     getVersions,
     publishedDoc,
     id,
-    preferences,
   };
 
   return (

@@ -59,7 +59,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   // eslint-disable-next-line react/destructuring-assignment
   const label = props?.label ?? props?.labels?.singular;
 
-  const { preferencesKey, preferences } = useDocumentInfo();
+  const { preferencesKey } = useDocumentInfo();
+  const { getPreference } = usePreferences();
   const { setPreference } = usePreferences();
   const [rows, dispatchRows] = useReducer(reducer, undefined);
   const formContext = useForm();
@@ -90,7 +91,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const addRow = useCallback(async (rowIndex: number) => {
     const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user, locale });
-    console.log(subFieldState);
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     dispatchRows({ type: 'ADD', rowIndex });
     setValue(value as number + 1);
@@ -132,7 +132,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     dispatchRows({ type: 'SET_COLLAPSE', id: rowID, collapsed });
 
     if (preferencesKey) {
-      const preferencesToSet = preferences || { fields: {} };
+      const preferencesToSet = await getPreference(preferencesKey) || { fields: {} };
       let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed
         .filter((filterID) => (rows.find((row) => row.id === filterID)))
         || [];
@@ -154,13 +154,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         },
       });
     }
-  }, [preferencesKey, preferences, path, setPreference, rows]);
+  }, [preferencesKey, path, setPreference, rows, getPreference]);
 
   const toggleCollapseAll = useCallback(async (collapse: boolean) => {
     dispatchRows({ type: 'SET_ALL_COLLAPSED', collapse });
 
     if (preferencesKey) {
-      const preferencesToSet = preferences || { fields: {} };
+      const preferencesToSet = await getPreference(preferencesKey) || { fields: {} };
 
       setPreference(preferencesKey, {
         ...preferencesToSet,
@@ -173,12 +173,17 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         },
       });
     }
-  }, [path, preferences, preferencesKey, rows, setPreference]);
+  }, [path, getPreference, preferencesKey, rows, setPreference]);
 
   useEffect(() => {
-    const data = formContext.getDataByPath<Row[]>(path);
-    dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
-  }, [formContext, path, preferences]);
+    const initializeRowState = async () => {
+      const data = formContext.getDataByPath<Row[]>(path);
+      const preferences = await getPreference(preferencesKey) || { fields: {} };
+      dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
+    };
+
+    initializeRowState();
+  }, [formContext, path, getPreference, preferencesKey]);
 
   useEffect(() => {
     setValue(rows?.length || 0, true);

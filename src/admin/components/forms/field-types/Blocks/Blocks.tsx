@@ -60,7 +60,8 @@ const Blocks: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const { preferencesKey, preferences } = useDocumentInfo();
+  const { preferencesKey } = useDocumentInfo();
+  const { getPreference } = usePreferences();
   const { setPreference } = usePreferences();
   const [rows, dispatchRows] = useReducer(reducer, undefined);
   const formContext = useForm();
@@ -139,7 +140,7 @@ const Blocks: React.FC<Props> = (props) => {
     dispatchRows({ type: 'SET_COLLAPSE', id: rowID, collapsed });
 
     if (preferencesKey) {
-      const preferencesToSet = preferences || { fields: {} };
+      const preferencesToSet = await getPreference(preferencesKey) || { fields: {} };
       let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed
         .filter((filterID) => (rows.find((row) => row.id === filterID)))
         || [];
@@ -161,13 +162,13 @@ const Blocks: React.FC<Props> = (props) => {
         },
       });
     }
-  }, [preferencesKey, preferences, path, setPreference, rows]);
+  }, [preferencesKey, getPreference, path, setPreference, rows]);
 
   const toggleCollapseAll = useCallback(async (collapse: boolean) => {
     dispatchRows({ type: 'SET_ALL_COLLAPSED', collapse });
 
     if (preferencesKey) {
-      const preferencesToSet = preferences || { fields: {} };
+      const preferencesToSet = await getPreference(preferencesKey) || { fields: {} };
 
       setPreference(preferencesKey, {
         ...preferencesToSet,
@@ -180,13 +181,18 @@ const Blocks: React.FC<Props> = (props) => {
         },
       });
     }
-  }, [path, preferences, preferencesKey, rows, setPreference]);
+  }, [getPreference, path, preferencesKey, rows, setPreference]);
 
   // Set row count on mount and when form context is reset
   useEffect(() => {
-    const data = formContext.getDataByPath<Row[]>(path);
-    dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
-  }, [formContext, path, preferences]);
+    const initializeRowState = async () => {
+      const data = formContext.getDataByPath<Row[]>(path);
+      const preferences = await getPreference(preferencesKey) || { fields: {} };
+      dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
+    };
+
+    initializeRowState();
+  }, [formContext, path, getPreference, preferencesKey]);
 
   useEffect(() => {
     setValue(rows?.length || 0, true);

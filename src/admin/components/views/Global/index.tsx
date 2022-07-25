@@ -13,6 +13,7 @@ import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import { IndexProps } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { Fields } from '../../forms/Form/types';
+import { usePreferences } from '../../utilities/Preferences';
 
 const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{data?: Record<string, unknown>}>();
@@ -20,7 +21,8 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { setStepNav } = useStepNav();
   const { permissions, user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
-  const { getVersions, preferences } = useDocumentInfo();
+  const { getVersions, preferencesKey } = useDocumentInfo();
+  const { getPreference } = usePreferences();
 
   const {
     serverURL,
@@ -50,7 +52,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     setInitialState(state);
   }, [getVersions, fields, user, locale]);
 
-  const [{ data, isLoading: isLoadingDocument }] = usePayloadAPI(
+  const [{ data }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
   );
@@ -68,11 +70,12 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   useEffect(() => {
     const awaitInitialState = async () => {
       const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: 'update', locale });
+      await getPreference(preferencesKey);
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, user, locale]);
+  }, [dataToRender, fields, user, locale, getPreference, preferencesKey]);
 
   const globalPermissions = permissions?.globals?.[slug];
 
@@ -81,7 +84,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
       DefaultComponent={DefaultGlobal}
       CustomComponent={CustomEdit}
       componentProps={{
-        isLoading: !initialState || !preferences,
+        isLoading: !initialState,
         data: dataToRender,
         permissions: globalPermissions,
         initialState,

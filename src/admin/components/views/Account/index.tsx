@@ -11,6 +11,7 @@ import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { Fields } from '../../forms/Form/types';
+import { usePreferences } from '../../utilities/Preferences';
 
 const AccountView: React.FC = () => {
   const { state: locationState } = useLocation<{ data: unknown }>();
@@ -18,7 +19,8 @@ const AccountView: React.FC = () => {
   const { setStepNav } = useStepNav();
   const { user, permissions } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
-  const { id, preferences } = useDocumentInfo();
+  const { id, preferencesKey } = useDocumentInfo();
+  const { getPreference } = usePreferences();
 
   const {
     serverURL,
@@ -44,7 +46,7 @@ const AccountView: React.FC = () => {
 
   const collectionPermissions = permissions?.collections?.[adminUser];
 
-  const [{ data, isLoading: isLoadingDocument }] = usePayloadAPI(
+  const [{ data }] = usePayloadAPI(
     `${serverURL}${api}/${collection?.slug}/${user?.id}?depth=0`,
     { initialParams: { 'fallback-locale': 'null' } },
   );
@@ -66,11 +68,12 @@ const AccountView: React.FC = () => {
   useEffect(() => {
     const awaitInitialState = async () => {
       const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user, locale });
+      await getPreference(preferencesKey);
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, id, user, locale]);
+  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference]);
 
   return (
     <RenderCustomComponent
@@ -84,7 +87,7 @@ const AccountView: React.FC = () => {
         hasSavePermission,
         initialState,
         apiURL,
-        isLoading: !initialState || !preferences,
+        isLoading: !initialState,
       }}
     />
   );

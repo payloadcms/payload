@@ -5,8 +5,8 @@ import { useAuth } from '../Auth';
 import { requests } from '../../../api';
 
 type PreferencesContext = {
-  getPreference: <T>(key: string) => T | Promise<T>;
-  setPreference: <T>(key: string, value: T) => void;
+  getPreference: <T = any>(key: string) => T | Promise<T>;
+  setPreference: <T = any>(key: string, value: T) => void;
 }
 
 const Context = createContext({} as PreferencesContext);
@@ -32,9 +32,9 @@ export const PreferencesProvider: React.FC<{children?: React.ReactNode}> = ({ ch
     }
   }, [user]);
 
-  const getPreference = useCallback(async (key: string) => {
+  const getPreference = useCallback(async <T = any>(key: string): Promise<T> => {
     if (typeof preferencesRef.current[key] !== 'undefined') return preferencesRef.current[key];
-    const promise = new Promise((resolve) => {
+    const promise = new Promise((resolve: (value: T) => void) => {
       (async () => {
         const request = await requests.get(`${serverURL}${api}/_preferences/${key}`);
         let value = null;

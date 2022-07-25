@@ -57,7 +57,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const collectionPermissions = permissions?.collections?.[slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
   const newDocumentURL = `${admin}/collections/${slug}/create`;
-  const [{ data }, { setParams: setFetchParams }] = usePayloadAPI(fetchURL);
+  const [{ data }, { setParams: setFetchParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } });
 
   const activeColumnNames = tableColumns.map(({ accessor }) => accessor);
   const stringifiedActiveColumns = JSON.stringify(activeColumnNames);

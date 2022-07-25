@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
@@ -29,7 +29,8 @@ const CollapsibleField: React.FC<Props> = (props) => {
   } = props;
 
   const { getPreference, setPreference } = usePreferences();
-  const { preferencesKey, preferences } = useDocumentInfo();
+  const { preferencesKey } = useDocumentInfo();
+  const [initCollapsed, setInitCollapsed] = useState<boolean>();
   const [fieldPreferencesKey] = useState(() => `collapsible-${toKebabCase(label)}`);
 
   const onToggle = useCallback(async (newCollapsedState: boolean) => {
@@ -47,10 +48,21 @@ const CollapsibleField: React.FC<Props> = (props) => {
     });
   }, [preferencesKey, fieldPreferencesKey, getPreference, setPreference]);
 
+  useEffect(() => {
+    const fetchInitialState = async () => {
+      const preferences = await getPreference(preferencesKey);
+      setInitCollapsed(Boolean(preferences?.fields?.[fieldPreferencesKey]?.collapsed));
+    };
+
+    fetchInitialState();
+  }, [getPreference, preferencesKey, fieldPreferencesKey]);
+
+  if (typeof initCollapsed !== 'boolean') return null;
+
   return (
     <React.Fragment>
       <Collapsible
-        initCollapsed={Boolean(preferences.fields[fieldPreferencesKey]?.collapsed)}
+        initCollapsed={initCollapsed}
         className={[
           'field-type',
           baseClass,
