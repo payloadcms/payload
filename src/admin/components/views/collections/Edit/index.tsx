@@ -13,6 +13,7 @@ import { useLocale } from '../../../utilities/Locale';
 import { IndexProps } from './types';
 import { StepNavItem } from '../../../elements/StepNav/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
+import { Fields } from '../../../forms/Form/types';
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props;
@@ -41,7 +42,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation();
   const history = useHistory();
   const { setStepNav } = useStepNav();
-  const [initialState, setInitialState] = useState({});
+  const [initialState, setInitialState] = useState<Fields>();
   const { permissions, user } = useAuth();
   const { getVersions, preferences } = useDocumentInfo();
 
@@ -123,7 +124,7 @@ const EditView: React.FC<IndexProps> = (props) => {
       DefaultComponent={DefaultEdit}
       CustomComponent={CustomEdit}
       componentProps={{
-        isLoading: isLoadingDocument || !preferences,
+        isLoading: !initialState || !preferences,
         data: dataToRender,
         collection,
         permissions: collectionPermissions,

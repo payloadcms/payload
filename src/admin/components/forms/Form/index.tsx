@@ -42,7 +42,6 @@ const Form: React.FC<Props> = (props) => {
     initialState, // fully formed initial field state
     initialData, // values only, paths are required as key - form should build initial state as convenience
     waitForAutocomplete,
-    log,
   } = props;
 
   const history = useHistory();
