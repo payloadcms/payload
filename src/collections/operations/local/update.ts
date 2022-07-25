@@ -3,6 +3,7 @@ import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import update from '../update';
 import { PayloadRequest } from '../../../express/types';
+import { getDataLoader } from '../../dataloader';
 
 export type Options<T> = {
   collection: string
@@ -41,6 +42,19 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
 
   const collection = payload.collections[collectionSlug];
 
+  const reqToUse = {
+    user,
+    payloadAPI: 'local',
+    locale,
+    fallbackLocale,
+    payload,
+    files: {
+      file: file ?? getFileByPath(filePath),
+    },
+  } as PayloadRequest;
+
+  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+
   const args = {
     depth,
     data,
@@ -52,16 +66,7 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
     draft,
     autosave,
     payload,
-    req: {
-      user,
-      payloadAPI: 'local',
-      locale,
-      fallbackLocale,
-      payload,
-      files: {
-        file: file ?? getFileByPath(filePath),
-      },
-    } as PayloadRequest,
+    req: reqToUse,
   };
 
   return update(args);

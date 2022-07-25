@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import express, { Response } from 'express';
+import express, { NextFunction, Response } from 'express';
 import crypto from 'crypto';
 import {
 
@@ -29,6 +29,7 @@ import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/
 import { Payload } from '.';
 import loadConfig from './config/load';
 import Logger from './utilities/logger';
+import { getDataLoader } from './collections/dataloader';
 
 export const init = (payload: Payload, options: InitOptions): void => {
   payload.logger.info('Starting Payload...');
@@ -76,6 +77,11 @@ export const init = (payload: Payload, options: InitOptions): void => {
     options.express.use((req: PayloadRequest, res, next) => {
       req.payload = payload;
       next();
+    });
+
+    options.express.use((req: PayloadRequest, res: Response, next: NextFunction): void => {
+      req.payloadDataLoader = getDataLoader(req);
+      return next();
     });
 
     payload.express = options.express;

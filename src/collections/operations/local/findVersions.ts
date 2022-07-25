@@ -4,6 +4,7 @@ import { PaginatedDocs } from '../../../mongoose/types';
 import { TypeWithVersion } from '../../../versions/types';
 import { PayloadRequest } from '../../../express/types';
 import findVersions from '../findVersions';
+import { getDataLoader } from '../../dataloader';
 
 export type Options = {
   collection: string
@@ -36,6 +37,16 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
 
   const collection = payload.collections[collectionSlug];
 
+  const reqToUse = {
+    user,
+    payloadAPI: 'local',
+    locale,
+    fallbackLocale,
+    payload,
+  } as PayloadRequest;
+
+  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+
   return findVersions({
     where,
     page,
@@ -45,12 +56,6 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
     sort,
     overrideAccess,
     showHiddenFields,
-    req: {
-      user,
-      payloadAPI: 'local',
-      locale,
-      fallbackLocale,
-      payload,
-    } as PayloadRequest,
+    req: reqToUse,
   });
 }

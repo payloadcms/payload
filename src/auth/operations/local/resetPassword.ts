@@ -1,6 +1,7 @@
 import { Payload } from '../../..';
 import resetPassword, { Result } from '../resetPassword';
 import { PayloadRequest } from '../../../express/types';
+import { getDataLoader } from '../../../collections/dataloader';
 
 export type Options = {
   collection: string
@@ -22,15 +23,19 @@ async function localResetPassword(payload: Payload, options: Options): Promise<R
 
   const collection = payload.collections[collectionSlug];
 
+  const reqToUse = {
+    ...req,
+    payload,
+    payloadAPI: 'local',
+  } as PayloadRequest;
+
+  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+
   return resetPassword({
     collection,
     data,
     overrideAccess,
-    req: {
-      ...req,
-      payload,
-      payloadAPI: 'local',
-    } as PayloadRequest,
+    req: reqToUse,
   });
 }
 

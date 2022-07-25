@@ -3,6 +3,7 @@ import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import { TypeWithVersion } from '../../../versions/types';
 import findVersionByID from '../findVersionByID';
+import { getDataLoader } from '../../dataloader';
 
 export type Options = {
   collection: string
@@ -32,6 +33,16 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
 
   const collection = payload.collections[collectionSlug];
 
+  const reqToUse = {
+    ...req || {},
+    payloadAPI: 'local',
+    locale: locale || req?.locale || this?.config?.localization?.defaultLocale,
+    fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
+    payload,
+  } as PayloadRequest;
+
+  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+
   return findVersionByID({
     depth,
     id,
@@ -39,12 +50,6 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
     overrideAccess,
     disableErrors,
     showHiddenFields,
-    req: {
-      ...req || {},
-      payloadAPI: 'local',
-      locale: locale || req?.locale || this?.config?.localization?.defaultLocale,
-      fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
-      payload,
-    } as PayloadRequest,
+    req: reqToUse,
   });
 }

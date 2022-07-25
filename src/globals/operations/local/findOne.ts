@@ -1,4 +1,5 @@
 import { Payload } from '../../..';
+import { getDataLoader } from '../../../collections/dataloader';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import { TypeWithID } from '../../config/types';
@@ -29,6 +30,16 @@ export default async function findOneLocal<T extends TypeWithID = any>(payload: 
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
 
+  const reqToUse = {
+    user,
+    payloadAPI: 'local',
+    locale,
+    fallbackLocale,
+    payload,
+  } as PayloadRequest;
+
+  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+
   return findOne({
     slug: globalSlug,
     depth,
@@ -36,12 +47,6 @@ export default async function findOneLocal<T extends TypeWithID = any>(payload: 
     overrideAccess,
     showHiddenFields,
     draft,
-    req: {
-      user,
-      payloadAPI: 'local',
-      locale,
-      fallbackLocale,
-      payload,
-    } as PayloadRequest,
+    req: reqToUse,
   });
 }

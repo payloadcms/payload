@@ -3,6 +3,7 @@ import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import { Payload } from '../../../index';
 import deleteOperation from '../delete';
+import { getDataLoader } from '../../dataloader';
 
 export type Options = {
   collection: string
@@ -29,18 +30,22 @@ export default async function deleteLocal<T extends TypeWithID = any>(payload: P
 
   const collection = payload.collections[collectionSlug];
 
+  const reqToUse = {
+    user,
+    payloadAPI: 'local',
+    locale,
+    fallbackLocale,
+    payload,
+  } as PayloadRequest;
+
+  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+
   return deleteOperation({
     depth,
     id,
     collection,
     overrideAccess,
     showHiddenFields,
-    req: {
-      user,
-      payloadAPI: 'local',
-      locale,
-      fallbackLocale,
-      payload,
-    } as PayloadRequest,
+    req: reqToUse,
   });
 }

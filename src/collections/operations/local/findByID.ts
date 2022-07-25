@@ -3,6 +3,7 @@ import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import findByID from '../findByID';
 import { Payload } from '../../..';
+import { getDataLoader } from '../../dataloader';
 
 export type Options = {
   collection: string
@@ -45,9 +46,11 @@ export default async function findByIDLocal<T extends TypeWithID = any>(payload:
     locale: locale || req?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
     fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
     payload,
-  };
+  } as PayloadRequest;
 
   if (typeof user !== 'undefined') reqToUse.user = user;
+
+  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
 
   return findByID({
     depth,
@@ -57,7 +60,7 @@ export default async function findByIDLocal<T extends TypeWithID = any>(payload:
     overrideAccess,
     disableErrors,
     showHiddenFields,
-    req: reqToUse as PayloadRequest,
+    req: reqToUse,
     draft,
   });
 }

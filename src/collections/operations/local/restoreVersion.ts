@@ -2,6 +2,7 @@ import { Payload } from '../../..';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import { TypeWithVersion } from '../../../versions/types';
+import { getDataLoader } from '../../dataloader';
 import restoreVersion from '../restoreVersion';
 
 export type Options = {
@@ -29,6 +30,16 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
 
   const collection = payload.collections[collectionSlug];
 
+  const reqToUse = {
+    user,
+    payloadAPI: 'local',
+    locale,
+    fallbackLocale,
+    payload,
+  } as PayloadRequest;
+
+  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+
   const args = {
     payload,
     depth,
@@ -36,13 +47,7 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
     overrideAccess,
     id,
     showHiddenFields,
-    req: {
-      user,
-      payloadAPI: 'local',
-      locale,
-      fallbackLocale,
-      payload,
-    } as PayloadRequest,
+    req: reqToUse,
   };
 
   return restoreVersion(args);
