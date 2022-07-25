@@ -38,7 +38,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
   const initialValue = field?.initialValue as T;
 
-  const [internalValue, setInternalValue] = useState(field?.value as T);
+  const [internalValue, setInternalValue] = useState(() => field?.value as T);
   const [internallyValid, setInternallyValid] = useState<boolean>(undefined);
 
   // Debounce internal values to update form state only every 60ms

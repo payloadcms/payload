@@ -10,13 +10,14 @@ import DefaultAccount from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import { Fields } from '../../forms/Form/types';
 
 const AccountView: React.FC = () => {
   const { state: locationState } = useLocation<{ data: unknown }>();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
   const { user, permissions } = useAuth();
-  const [initialState, setInitialState] = useState({});
+  const [initialState, setInitialState] = useState<Fields>();
   const { id, preferences } = useDocumentInfo();
 
   const {
@@ -83,7 +84,7 @@ const AccountView: React.FC = () => {
         hasSavePermission,
         initialState,
         apiURL,
-        isLoading: isLoadingDocument || !preferences,
+        isLoading: !initialState || !preferences,
       }}
     />
   );
