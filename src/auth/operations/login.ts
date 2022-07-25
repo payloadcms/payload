@@ -70,7 +70,7 @@ async function login<T>(incomingArgs: Arguments): Promise<Result & { user: T}> {
 
   const { email: unsanitizedEmail, password } = data;
 
-  const email = unsanitizedEmail ? (unsanitizedEmail as string).toLowerCase() : null;
+  const email = unsanitizedEmail ? (unsanitizedEmail as string).toLowerCase().trim() : null;
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore Improper typing in library, additional args should be optional
