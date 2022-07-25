@@ -1239,14 +1239,6 @@
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.5.tgz#8eed982e2ee6f7f4e44c253e12962980791efd46"
   integrity sha512-6U71C2Wp7r5XtFtQzYrW5iKFT67OixrSxjI4MptCHzdSVlgabczzqLe0ZSgnub/5Kp4hSbpDB1tMytZY9pwxxA==
 
-"@faceless-ui/collapsibles@^1.0.0":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@faceless-ui/collapsibles/-/collapsibles-1.1.1.tgz#89b86e11eceae55ed87caa4de9d395f7b082a938"
-  integrity sha512-7tU5CjXUnW7bKthpMgNKs5TirTb+DQVFASnstqlpe+gXl8W76Rq4Z9m6nS3PnnG2B5h9aqtUVaNgroLc1J+i/w==
-  dependencies:
-    react-animate-height "^2.0.16"
-    react-transition-group "^4.4.2"
-
 "@faceless-ui/modal@^1.1.7":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@faceless-ui/modal/-/modal-1.2.0.tgz#0ca43e480f83d307dcd84c033fbc82c0619f5d8c"
@@ -1706,6 +1698,13 @@
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/@types/is-hotkey/-/is-hotkey-0.1.7.tgz#30ec6d4234895230b576728ef77e70a52962f3b3"
   integrity sha512-yB5C7zcOM7idwYZZ1wKQ3pTfjA9BbvFqRWvKB46GFddxnJtHwi/b9y84ykQtxQPg5qhdpg4Q/kWU3EGoCTmLzQ==
+
+"@types/is-plain-object@^2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@types/is-plain-object/-/is-plain-object-2.0.4.tgz#20fbadb3bec1eb1bccb7adc2001fff29b37a0168"
+  integrity sha512-najbe//S/ThT7nEh+iLmXNUFMWQHf7x2QUrsMgtF/apA8dJl8rCsfWr9f8XG9nBo+NyT5TbT92IFIJji9ZmsRQ==
+  dependencies:
+    is-plain-object "*"
 
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0", "@types/istanbul-lib-coverage@^2.0.1":
   version "2.0.4"
@@ -5061,17 +5060,17 @@ is-path-inside@^3.0.2:
   resolved "https://registry.yarnpkg.com/is-path-inside/-/is-path-inside-3.0.3.tgz#d231362e53a07ff2b0e0ea7fed049161ffd16283"
   integrity sha512-Fd4gABb+ycGAmKou8eMftCupSir5lRxqf4aD/vd0cD2qc4HL07OjCeuHMr8Ro4CoMaeCKDB0/ECBOVWjTwUvPQ==
 
+is-plain-object@*, is-plain-object@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/is-plain-object/-/is-plain-object-5.0.0.tgz#4427f50ab3429e9025ea7d52e9043a9ef4159344"
+  integrity sha512-VRSzKkbMm5jMDoKLbltAkFQ5Qr7VDiTFGXxYFXXowVj387GeGNOCsOH6Msy00SGZ3Fp84b1Naa1psqgcCIEP5Q==
+
 is-plain-object@^2.0.3, is-plain-object@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/is-plain-object/-/is-plain-object-2.0.4.tgz#2c163b3fafb1b606d9d17928f05c2a1c38e07677"
   integrity sha512-h5PpgXkWitc38BBMYawTYMWJHFZJVnBquFE57xFpjB8pJFiF6gZ+bU+WyI/yqXiFR5mdLsgYNaPe8uao6Uv9Og==
   dependencies:
     isobject "^3.0.1"
-
-is-plain-object@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/is-plain-object/-/is-plain-object-5.0.0.tgz#4427f50ab3429e9025ea7d52e9043a9ef4159344"
-  integrity sha512-VRSzKkbMm5jMDoKLbltAkFQ5Qr7VDiTFGXxYFXXowVj387GeGNOCsOH6Msy00SGZ3Fp84b1Naa1psqgcCIEP5Q==
 
 is-potential-custom-element-name@^1.0.1:
   version "1.0.1"
@@ -6864,13 +6863,14 @@ passport-strategy@1.x.x, passport-strategy@^1.0.0:
   resolved "https://registry.yarnpkg.com/passport-strategy/-/passport-strategy-1.0.0.tgz#b5539aa8fc225a3d1ad179476ddf236b440f52e4"
   integrity sha1-tVOaqPwiWj0a0XlHbd8ja0QPUuQ=
 
-passport@^0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/passport/-/passport-0.4.1.tgz#941446a21cb92fc688d97a0861c38ce9f738f270"
-  integrity sha512-IxXgZZs8d7uFSt3eqNjM9NQ3g3uQCW5avD8mRNoXV99Yig50vjuaez6dQK2qC0kVWPRTujxY0dWgGfT09adjYg==
+passport@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/passport/-/passport-0.6.0.tgz#e869579fab465b5c0b291e841e6cc95c005fac9d"
+  integrity sha512-0fe+p3ZnrWRW74fe8+SvCyf4a3Pb2/h7gFkQ8yTJpAO50gDzlfjZUZTO1k5Eg9kUct22OxHLqDZoKUWRHOh9ug==
   dependencies:
     passport-strategy "1.x.x"
     pause "0.0.1"
+    utils-merge "^1.0.1"
 
 path-browserify@^1.0.1:
   version "1.0.1"
@@ -6929,10 +6929,10 @@ pause@0.0.1:
   resolved "https://registry.yarnpkg.com/pause/-/pause-0.0.1.tgz#1d408b3fdb76923b9543d96fb4c9dfd535d9cb5d"
   integrity sha1-HUCLP9t2kjuVQ9lvtMnf1TXZy10=
 
-payload@^0.18.5:
-  version "0.18.5"
-  resolved "https://registry.yarnpkg.com/payload/-/payload-0.18.5.tgz#d391707c0d32aa362486bf83c193f13239f97963"
-  integrity sha512-lHr51ue4G/lLpphfvqqT9ItVMlNgQsjwQiCBm+d/Z9QnRvM4T5ar/bFkhMd4j3HuRq5yEl8+R4Tqwq2i5uf1lA==
+payload@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/payload/-/payload-1.0.9.tgz#0f57b2ba1b1f7551768319bd5459a1685cb660bd"
+  integrity sha512-8+5ukcHAR4zfnwa4M2oh2NMQCO2PDoDf3Ck91IIh9QdRAIZJUapy7PyN+rzXnUhLH6mnFh5TqPUusITOH+dlhA==
   dependencies:
     "@babel/cli" "^7.12.8"
     "@babel/core" "^7.11.6"
@@ -6945,10 +6945,10 @@ payload@^0.18.5:
     "@babel/preset-typescript" "^7.12.1"
     "@babel/register" "^7.11.5"
     "@date-io/date-fns" "^2.10.6"
-    "@faceless-ui/collapsibles" "^1.0.0"
     "@faceless-ui/modal" "^1.1.7"
     "@faceless-ui/scroll-info" "^1.2.3"
     "@faceless-ui/window-info" "^2.0.2"
+    "@types/is-plain-object" "^2.0.4"
     babel-jest "^26.3.0"
     babel-loader "^8.1.0"
     body-parser "^1.19.0"
@@ -6979,6 +6979,7 @@ payload@^0.18.5:
     html-webpack-plugin "^5.0.0-alpha.14"
     http-status "^1.4.2"
     is-hotkey "^0.2.0"
+    is-plain-object "^5.0.0"
     isomorphic-fetch "^3.0.0"
     jest "^26.6.3"
     joi "^17.3.0"
@@ -6995,7 +6996,7 @@ payload@^0.18.5:
     mongoose-paginate-v2 "^1.6.1"
     nodemailer "^6.4.2"
     object-to-formdata "^4.1.0"
-    passport "^0.4.1"
+    passport "^0.6.0"
     passport-anonymous "^1.0.1"
     passport-headerapikey "^1.2.1"
     passport-jwt "^4.0.0"
@@ -7825,7 +7826,7 @@ rc@^1.2.7, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-animate-height@^2.0.16, react-animate-height@^2.0.20:
+react-animate-height@^2.0.20:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/react-animate-height/-/react-animate-height-2.1.2.tgz#9b450fc64d46f10f5e07da8d0d5e2c47b9f15030"
   integrity sha512-A9jfz/4CTdsIsE7WCQtO9UkOpMBcBRh8LxyHl2eoZz1ki02jpyUL5xt58gabd0CyeLQ8fRyQ+s2lyV2Ufu8Owg==
@@ -9471,7 +9472,7 @@ utila@~0.4:
   resolved "https://registry.yarnpkg.com/utila/-/utila-0.4.0.tgz#8a16a05d445657a3aea5eecc5b12a4fa5379772c"
   integrity sha1-ihagXURWV6Oupe7MWxKk+lN5dyw=
 
-utils-merge@1.0.1:
+utils-merge@1.0.1, utils-merge@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
