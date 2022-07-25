@@ -14,6 +14,7 @@ import { IndexProps } from './types';
 import { StepNavItem } from '../../../elements/StepNav/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { Fields } from '../../../forms/Form/types';
+import { usePreferences } from '../../../utilities/Preferences';
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props;
@@ -44,7 +45,8 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { setStepNav } = useStepNav();
   const [initialState, setInitialState] = useState<Fields>();
   const { permissions, user } = useAuth();
-  const { getVersions, preferences } = useDocumentInfo();
+  const { getVersions, preferencesKey } = useDocumentInfo();
+  const { getPreference } = usePreferences();
 
   const onSave = useCallback(async (json: any) => {
     getVersions();
@@ -102,11 +104,12 @@ const EditView: React.FC<IndexProps> = (props) => {
     }
     const awaitInitialState = async () => {
       const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: isEditing ? 'update' : 'create', id, locale });
+      await getPreference(preferencesKey);
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, isEditing, id, user, locale, isLoadingDocument]);
+  }, [dataToRender, fields, isEditing, id, user, locale, isLoadingDocument, preferencesKey, getPreference]);
 
   if (isError) {
     return (
@@ -124,7 +127,7 @@ const EditView: React.FC<IndexProps> = (props) => {
       DefaultComponent={DefaultEdit}
       CustomComponent={CustomEdit}
       componentProps={{
-        isLoading: !initialState || !preferences,
+        isLoading: !initialState,
         data: dataToRender,
         collection,
         permissions: collectionPermissions,
