@@ -32,7 +32,7 @@ export default async function updateLocal<T extends TypeWithID = any>(payload: P
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
 
-  const reqToUse = {
+  const req = {
     user,
     payloadAPI: 'local',
     locale,
@@ -40,7 +40,7 @@ export default async function updateLocal<T extends TypeWithID = any>(payload: P
     payload,
   } as PayloadRequest;
 
-  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return update({
     slug: globalSlug,
@@ -50,6 +50,6 @@ export default async function updateLocal<T extends TypeWithID = any>(payload: P
     overrideAccess,
     showHiddenFields,
     draft,
-    req: reqToUse,
+    req,
   });
 }

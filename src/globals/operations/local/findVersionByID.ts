@@ -32,7 +32,7 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
 
-  const reqToUse = {
+  const req = {
     user,
     payloadAPI: 'local',
     locale,
@@ -40,7 +40,7 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
     payload,
   } as PayloadRequest;
 
-  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findVersionByID({
     depth,
@@ -49,6 +49,6 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
     overrideAccess,
     disableErrors,
     showHiddenFields,
-    req: reqToUse,
+    req,
   });
 }

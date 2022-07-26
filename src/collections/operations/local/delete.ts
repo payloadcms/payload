@@ -30,7 +30,7 @@ export default async function deleteLocal<T extends TypeWithID = any>(payload: P
 
   const collection = payload.collections[collectionSlug];
 
-  const reqToUse = {
+  const req = {
     user,
     payloadAPI: 'local',
     locale,
@@ -38,7 +38,7 @@ export default async function deleteLocal<T extends TypeWithID = any>(payload: P
     payload,
   } as PayloadRequest;
 
-  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return deleteOperation({
     depth,
@@ -46,6 +46,6 @@ export default async function deleteLocal<T extends TypeWithID = any>(payload: P
     collection,
     overrideAccess,
     showHiddenFields,
-    req: reqToUse,
+    req,
   });
 }

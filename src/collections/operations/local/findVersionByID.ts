@@ -28,20 +28,20 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
     overrideAccess = true,
     disableErrors = false,
     showHiddenFields,
-    req,
+    req: incomingReq,
   } = options;
 
   const collection = payload.collections[collectionSlug];
 
-  const reqToUse = {
-    ...req || {},
+  const req = {
+    ...incomingReq || {},
     payloadAPI: 'local',
-    locale: locale || req?.locale || this?.config?.localization?.defaultLocale,
-    fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
+    locale: locale || incomingReq?.locale || this?.config?.localization?.defaultLocale,
+    fallbackLocale: fallbackLocale || incomingReq?.fallbackLocale || null,
     payload,
   } as PayloadRequest;
 
-  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findVersionByID({
     depth,
@@ -50,6 +50,6 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
     overrideAccess,
     disableErrors,
     showHiddenFields,
-    req: reqToUse,
+    req,
   });
 }

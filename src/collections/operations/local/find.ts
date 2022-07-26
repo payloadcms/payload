@@ -43,23 +43,23 @@ export default async function findLocal<T extends TypeWithID = any>(payload: Pay
     sort,
     draft = false,
     pagination = true,
-    req,
+    req: incomingReq,
   } = options;
 
   const collection = payload.collections[collectionSlug];
 
-  const reqToUse = {
+  const req = {
     user: undefined,
-    ...req || {},
+    ...incomingReq || {},
     payloadAPI: 'local',
-    locale: locale || req?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
-    fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
+    locale: locale || incomingReq?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
+    fallbackLocale: fallbackLocale || incomingReq?.fallbackLocale || null,
     payload,
   } as PayloadRequest;
 
-  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
-  if (typeof user !== 'undefined') reqToUse.user = user;
+  if (typeof user !== 'undefined') req.user = user;
 
   return find({
     depth,
@@ -74,6 +74,6 @@ export default async function findLocal<T extends TypeWithID = any>(payload: Pay
     showHiddenFields,
     draft,
     pagination,
-    req: reqToUse,
+    req,
   });
 }

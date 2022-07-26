@@ -42,7 +42,7 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
 
   const collection = payload.collections[collectionSlug];
 
-  const reqToUse = {
+  const req = {
     user,
     payloadAPI: 'local',
     locale,
@@ -53,7 +53,7 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
     },
   } as PayloadRequest;
 
-  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   const args = {
     depth,
@@ -66,7 +66,7 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
     draft,
     autosave,
     payload,
-    req: reqToUse,
+    req,
   };
 
   return update(args);

@@ -38,25 +38,25 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
     filePath,
     file,
     overwriteExistingFiles = false,
-    req,
+    req: incomingReq,
     draft,
   } = options;
 
   const collection = payload.collections[collectionSlug];
 
-  const reqToUse = {
-    ...req || {},
+  const req = {
+    ...incomingReq || {},
     user,
     payloadAPI: 'local',
-    locale: locale || req?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
-    fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
+    locale: locale || incomingReq?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
+    fallbackLocale: fallbackLocale || incomingReq?.fallbackLocale || null,
     payload,
     files: {
       file: file ?? getFileByPath(filePath),
     },
   } as PayloadRequest;
 
-  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return create({
     depth,
@@ -67,6 +67,6 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
     showHiddenFields,
     overwriteExistingFiles,
     draft,
-    req: reqToUse,
+    req,
   });
 }

@@ -37,7 +37,7 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
 
   const collection = payload.collections[collectionSlug];
 
-  const reqToUse = {
+  const req = {
     user,
     payloadAPI: 'local',
     locale,
@@ -45,7 +45,7 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
     payload,
   } as PayloadRequest;
 
-  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findVersions({
     where,
@@ -56,6 +56,6 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
     sort,
     overrideAccess,
     showHiddenFields,
-    req: reqToUse,
+    req,
   });
 }

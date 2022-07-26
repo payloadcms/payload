@@ -19,24 +19,24 @@ async function localForgotPassword(payload: Payload, options: Options): Promise<
     data,
     expiration,
     disableEmail,
-    req = {},
+    req: incomingReq = {},
   } = options;
 
   const collection = payload.collections[collectionSlug];
 
-  const reqToUse = {
-    ...req,
+  const req = {
+    ...incomingReq,
     payloadAPI: 'local',
   } as PayloadRequest;
 
-  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return forgotPassword({
     data,
     collection,
     disableEmail,
     expiration,
-    req: reqToUse,
+    req,
   });
 }
 

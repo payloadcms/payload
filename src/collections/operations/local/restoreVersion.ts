@@ -30,7 +30,7 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
 
   const collection = payload.collections[collectionSlug];
 
-  const reqToUse = {
+  const req = {
     user,
     payloadAPI: 'local',
     locale,
@@ -38,7 +38,7 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
     payload,
   } as PayloadRequest;
 
-  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   const args = {
     payload,
@@ -47,7 +47,7 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
     overrideAccess,
     id,
     showHiddenFields,
-    req: reqToUse,
+    req,
   };
 
   return restoreVersion(args);

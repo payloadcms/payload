@@ -30,7 +30,7 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
 
-  const reqToUse = {
+  const req = {
     user,
     payloadAPI: 'local',
     payload,
@@ -38,7 +38,7 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
     fallbackLocale,
   } as PayloadRequest;
 
-  reqToUse.payloadDataLoader = getDataLoader(reqToUse);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return restoreVersion({
     depth,
@@ -46,6 +46,6 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
     overrideAccess,
     id,
     showHiddenFields,
-    req: reqToUse,
+    req,
   });
 }
