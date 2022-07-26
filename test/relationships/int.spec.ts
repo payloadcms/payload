@@ -98,7 +98,7 @@ describe('Relationships', () => {
           },
         });
 
-        generatedCustomIdNumber = Math.floor(Math.random() * (1000)) + 1;
+        generatedCustomIdNumber = Math.floor(Math.random() * (1_000_000)) + 1;
         customIdNumberRelation = await payload.create<CustomIdNumberRelation>({
           collection: customIdNumberSlug,
           data: {

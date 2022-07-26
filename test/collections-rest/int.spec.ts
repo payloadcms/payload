@@ -88,20 +88,20 @@ describe('collections-rest', () => {
 
       describe('number', () => {
         it('should create', async () => {
-          const customId = Math.floor(Math.random() * (1000)) + 1;
+          const customId = Math.floor(Math.random() * (1_000_000)) + 1;
           const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, data: { name: 'custom-id-number-name' } } });
           expect(doc.id).toEqual(customId);
         });
 
         it('should find', async () => {
-          const customId = Math.floor(Math.random() * (1000)) + 1;
+          const customId = Math.floor(Math.random() * (1_000_000)) + 1;
           const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, data: { name: 'custom-id-number-name' } } });
           const { doc: foundDoc } = await client.findByID({ slug: customIdNumberSlug, id: customId });
           expect(foundDoc.id).toEqual(doc.id);
         });
 
         it('should update', async () => {
-          const customId = Math.floor(Math.random() * (1000)) + 1;
+          const customId = Math.floor(Math.random() * (1_000_000)) + 1;
           const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, data: { name: 'custom-id-number-name' } } });
           const { doc: updatedDoc } = await client.update({ slug: customIdNumberSlug, id: doc.id, data: { name: 'updated' } });
           expect(updatedDoc.name).toEqual('updated');
