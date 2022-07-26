@@ -20,9 +20,37 @@ Payload documentation can be found directly within its codebase and you can feel
 
 If you're an incredibly awesome person and want to help us make Payload even better through new features or additions, we would be thrilled to work with you.
 
-To help us work on new features, you can reach out to our Development team at [`dev@payloadcms.com`](mailto:dev@payloadcms.com). Be as complete and descriptive as possible regarding your vision and we'll go from there!
+### Before Starting
+
+To help us work on new features, you can create a new feature request post in [GitHub Discussion](https://github.com/payloadcms/payload/discussions) or discuss it in our [Discord](https://discord.com/invite/r6sCXqVk3v). New functionality often has large implications across the entire Payload repo, so it is best to discuss the architecture and approach before starting work on a pull request.
+
+### Code
+
+Most new functionality should keep testing in mind. With 1.0, testability of new features has been vastly improved. All top-level directories within the `test/` directory are for testing a specific category: `fields`, `collections`, etc.
+
+If it makes sense to add your feature to an existing test directory, please do so.
+
+A typical directory with `test/` will be structured like this:
+
+```text
+.
+├── config.ts
+├── int.spec.ts
+├── e2e.spec.ts
+└── payload-types.ts
+```
+
+- `config.ts` - This is the _granular_ Payload config for testing. It should be as lightweight as possible. Reference existing configs for an example
+- `int.spec.ts` - This is the test file run by jest. Any test file must have a `*int.spec.ts` suffix.
+- `e2e.spec.ts` - This is the end-to-end test file that will load up the admin UI using the above config and run Playwright tests. These tests are typically only needed if a large change is being made to the Admin UI.
+- `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `yarn dev:generate-types my-test-dir`.
+
+The directory split up in this way specifically to reduce friction when creating tests and to add the ability to boot up Payload with that specific config.
+
+The following command will start Payload with your config: `yarn dev my-test-dir`. This command will start up Payload using your config and refresh a test database on every restart.
+
+NOTE: It is recommended to add the test credentials to your autofill for `localhost:3000/admin` as this will be required on every nodemon restart.
 
 ## Pull Requests
 
 For all Pull Requests, you should be extremely descriptive about both your problem and proposed solution. If there are any affected open or closed issues, please leave the issue number in your PR message.
-
