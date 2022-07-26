@@ -68,16 +68,15 @@ Alternatively, it only takes about five minutes to [create an app from scratch](
 ### Documentation
 
 Check out the [Payload website](https://payloadcms.com/docs/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
+### Contributing
+
+If you want to add contributions to this repository, please follow the instructions in [contributing.md](./contributing.md).
 
 ### Other Resources
 
 ##### Discussions
 
 There are lots of good conversations and resources in our [GitHub Discussions board](https://github.com/payloadcms/payload/discussions). If you're struggling with something, chances are, someone's already solved what you're up against. Searching Discussions will often provide very helpful tips and tricks.
-
-##### Contributions
-
-If you want to add contributions to this repository, please follow the instructions in contributing.md.
 
 ##### Discord
 
