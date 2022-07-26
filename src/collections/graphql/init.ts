@@ -142,7 +142,7 @@ function initCollectionsGraphQL(payload: Payload): void {
     payload.Query.fields[singularLabel] = {
       type: collection.graphQL.type,
       args: {
-        id: { type: idType },
+        id: { type: new GraphQLNonNull(idType) },
         draft: { type: GraphQLBoolean },
         ...(payload.config.localization ? {
           locale: { type: payload.types.localeInputType },
