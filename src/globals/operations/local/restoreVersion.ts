@@ -1,4 +1,5 @@
 import { Payload } from '../../..';
+import { getDataLoader } from '../../../collections/dataloader';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import { TypeWithVersion } from '../../../versions/types';
@@ -29,18 +30,22 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
 
+  const req = {
+    user,
+    payloadAPI: 'local',
+    payload,
+    locale,
+    fallbackLocale,
+  } as PayloadRequest;
+
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
+
   return restoreVersion({
     depth,
     globalConfig,
     overrideAccess,
     id,
     showHiddenFields,
-    req: {
-      user,
-      payloadAPI: 'local',
-      payload,
-      locale,
-      fallbackLocale,
-    } as PayloadRequest,
+    req,
   });
 }

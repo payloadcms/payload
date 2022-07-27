@@ -1,6 +1,7 @@
 import { PayloadRequest } from '../../../express/types';
 import { Payload } from '../../..';
 import unlock from '../unlock';
+import { getDataLoader } from '../../../collections/dataloader';
 
 export type Options = {
   collection: string
@@ -16,20 +17,24 @@ async function localUnlock(payload: Payload, options: Options): Promise<boolean>
     collection: collectionSlug,
     data,
     overrideAccess = true,
-    req,
+    req: incomingReq = {},
   } = options;
 
   const collection = payload.collections[collectionSlug];
+
+  const req = {
+    ...incomingReq,
+    payload,
+    payloadAPI: 'local',
+  } as PayloadRequest;
+
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return unlock({
     data,
     collection,
     overrideAccess,
-    req: {
-      ...req,
-      payload,
-      payloadAPI: 'local',
-    } as PayloadRequest,
+    req,
   });
 }
 

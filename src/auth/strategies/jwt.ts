@@ -31,7 +31,7 @@ export default ({ secret, config, collections }: Payload): PassportStrategy => {
         depth: isGraphQL ? 0 : collection.config.auth.depth,
       });
 
-      if(user && (!collection.config.auth.verify || user._verified)) {
+      if (user && (!collection.config.auth.verify || user._verified)) {
         user.collection = collection.config.slug;
         user._strategy = 'local-jwt';
         done(null, user);

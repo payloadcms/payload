@@ -3,6 +3,7 @@ import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import { TypeWithID } from '../../config/types';
 import update from '../update';
+import { getDataLoader } from '../../../collections/dataloader';
 
 export type Options = {
   slug: string
@@ -31,6 +32,16 @@ export default async function updateLocal<T extends TypeWithID = any>(payload: P
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
 
+  const req = {
+    user,
+    payloadAPI: 'local',
+    locale,
+    fallbackLocale,
+    payload,
+  } as PayloadRequest;
+
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
+
   return update({
     slug: globalSlug,
     data,
@@ -39,12 +50,6 @@ export default async function updateLocal<T extends TypeWithID = any>(payload: P
     overrideAccess,
     showHiddenFields,
     draft,
-    req: {
-      user,
-      payloadAPI: 'local',
-      locale,
-      fallbackLocale,
-      payload,
-    } as PayloadRequest,
+    req,
   });
 }

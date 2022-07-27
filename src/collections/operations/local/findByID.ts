@@ -3,6 +3,7 @@ import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import findByID from '../findByID';
 import { Payload } from '../../..';
+import { getDataLoader } from '../../dataloader';
 
 export type Options = {
   collection: string
@@ -32,22 +33,24 @@ export default async function findByIDLocal<T extends TypeWithID = any>(payload:
     overrideAccess = true,
     disableErrors = false,
     showHiddenFields,
-    req,
+    req: incomingReq,
     draft = false,
   } = options;
 
   const collection = payload.collections[collectionSlug];
 
-  const reqToUse = {
+  const req = {
     user: undefined,
-    ...req || {},
+    ...incomingReq || {},
     payloadAPI: 'local',
-    locale: locale || req?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
-    fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
+    locale: locale || incomingReq?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
+    fallbackLocale: fallbackLocale || incomingReq?.fallbackLocale || null,
     payload,
-  };
+  } as PayloadRequest;
 
-  if (typeof user !== 'undefined') reqToUse.user = user;
+  if (typeof user !== 'undefined') req.user = user;
+
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findByID({
     depth,
@@ -57,7 +60,7 @@ export default async function findByIDLocal<T extends TypeWithID = any>(payload:
     overrideAccess,
     disableErrors,
     showHiddenFields,
-    req: reqToUse as PayloadRequest,
+    req,
     draft,
   });
 }

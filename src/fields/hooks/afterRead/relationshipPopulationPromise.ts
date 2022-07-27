@@ -29,30 +29,30 @@ const populate = async ({
   const relatedCollection = req.payload.collections[relation];
 
   if (relatedCollection) {
-    let idString = Array.isArray(field.relationTo) ? data.value : data;
+    let id = Array.isArray(field.relationTo) ? data.value : data;
     let relationshipValue;
     const shouldPopulate = depth && currentDepth <= depth;
 
-    if (typeof idString !== 'string' && typeof idString?.toString === 'function') {
-      idString = idString.toString();
+    if (typeof id !== 'string' && typeof id !== 'number' && typeof id?.toString === 'function') {
+      id = id.toString();
     }
 
     if (shouldPopulate) {
-      relationshipValue = await req.payload.findByID({
-        req,
-        collection: relatedCollection.config.slug,
-        id: idString as string,
-        currentDepth: currentDepth + 1,
-        overrideAccess: typeof overrideAccess === 'undefined' ? false : overrideAccess,
-        disableErrors: true,
+      relationshipValue = await req.payloadDataLoader.load(JSON.stringify([
+        relatedCollection.config.slug,
+        id,
         depth,
+        currentDepth + 1,
+        req.locale,
+        req.fallbackLocale,
+        overrideAccess,
         showHiddenFields,
-      });
+      ]));
     }
 
     if (!relationshipValue) {
       // ids are visible regardless of access controls
-      relationshipValue = idString;
+      relationshipValue = id;
     }
 
     if (typeof index === 'number') {

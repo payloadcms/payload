@@ -18,8 +18,10 @@ export type Arguments = {
   limit?: number
   sort?: string
   depth?: number
+  currentDepth?: number
   req?: PayloadRequest
   overrideAccess?: boolean
+  disableErrors?: boolean
   pagination?: boolean
   showHiddenFields?: boolean
   draft?: boolean
@@ -47,6 +49,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     page,
     limit,
     depth,
+    currentDepth,
     draft: draftsEnabled,
     collection: {
       Model,
@@ -58,6 +61,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
       payload,
     },
     overrideAccess,
+    disableErrors,
     showHiddenFields,
     pagination = true,
   } = args;
@@ -95,7 +99,23 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   let accessResult: AccessResult;
 
   if (!overrideAccess) {
-    accessResult = await executeAccess({ req }, collectionConfig.access.read);
+    accessResult = await executeAccess({ req, disableErrors }, collectionConfig.access.read);
+
+    // If errors are disabled, and access returns false, return empty results
+    if (accessResult === false) {
+      return {
+        docs: [],
+        totalDocs: 0,
+        totalPages: 1,
+        page: 1,
+        pagingCounter: 1,
+        hasPrevPage: false,
+        hasNextPage: false,
+        prevPage: null,
+        nextPage: null,
+        limit,
+      };
+    }
 
     if (hasWhereAccessResult(accessResult)) {
       queryToBuild.where.and.push(accessResult);
@@ -127,6 +147,11 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
 
   let result = {
     ...paginatedDocs,
+    docs: paginatedDocs.docs.map((doc) => {
+      const sanitizedDoc = JSON.parse(JSON.stringify(doc));
+      sanitizedDoc.id = sanitizedDoc._id;
+      return sanitizeInternalFields(sanitizedDoc);
+    }),
   } as PaginatedDocs<T>;
 
   // /////////////////////////////////////
@@ -153,8 +178,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   result = {
     ...result,
     docs: await Promise.all(result.docs.map(async (doc) => {
-      const docString = JSON.stringify(doc);
-      let docRef = JSON.parse(docString);
+      let docRef = doc;
 
       await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
         await priorHook;
@@ -174,6 +198,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     ...result,
     docs: await Promise.all(result.docs.map(async (doc) => afterRead<T>({
       depth,
+      currentDepth,
       doc,
       entityConfig: collectionConfig,
       overrideAccess,
@@ -205,11 +230,6 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
-
-  result = {
-    ...result,
-    docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
-  };
 
   return result;
 }
