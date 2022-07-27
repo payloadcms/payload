@@ -1,6 +1,7 @@
 import getPort from 'get-port';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
+import shelljs from 'shelljs';
 import express from 'express';
 import type { CollectionConfig } from '../../src/collections/config/types';
 import type { InitOptions } from '../../src/config/types';
@@ -12,6 +13,8 @@ type Options = {
 };
 
 export async function initPayloadE2E(__dirname: string): Promise<{ serverURL: string }> {
+  const webpackCachePath = path.resolve(__dirname, '../../node_modules/.cache/webpack');
+  shelljs.rm('-rf', webpackCachePath);
   return initPayloadTest({
     __dirname,
     init: {
