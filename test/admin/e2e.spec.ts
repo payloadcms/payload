@@ -5,7 +5,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
 import type { Post } from './config';
-import { globalSlug, slug } from './config';
+import { globalSlug, slug } from './shared';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import wait from '../../src/utilities/wait';
 
