@@ -4,6 +4,7 @@ import { TypeWithVersion } from '../../../versions/types';
 import { Payload } from '../../..';
 import { PayloadRequest } from '../../../express/types';
 import findVersions from '../findVersions';
+import { getDataLoader } from '../../../collections/dataloader';
 
 export type Options = {
   slug: string
@@ -36,6 +37,16 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
 
+  const req = {
+    user,
+    payloadAPI: 'local',
+    locale,
+    fallbackLocale,
+    payload,
+  } as PayloadRequest;
+
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
+
   return findVersions({
     where,
     page,
@@ -45,12 +56,6 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
     sort,
     overrideAccess,
     showHiddenFields,
-    req: {
-      user,
-      payloadAPI: 'local',
-      locale,
-      fallbackLocale,
-      payload,
-    } as PayloadRequest,
+    req,
   });
 }

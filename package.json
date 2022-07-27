@@ -98,6 +98,7 @@
     "connect-history-api-fallback": "^1.6.0",
     "css-loader": "^5.0.1",
     "css-minimizer-webpack-plugin": "^3.4.1",
+    "dataloader": "^2.1.0",
     "date-fns": "^2.14.0",
     "deep-equal": "^2.0.5",
     "deepmerge": "^4.2.2",

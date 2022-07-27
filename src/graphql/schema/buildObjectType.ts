@@ -122,7 +122,6 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
       }
 
       const relatedCollectionSlug = field.relationTo;
-      const relatedCollection = payload.collections[relatedCollectionSlug];
 
       const upload = {
         args: uploadArgs,
@@ -132,35 +131,21 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
           const value = parent[field.name];
           const locale = args.locale || context.req.locale;
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale;
-
-          let id = value;
+          const id = value;
 
           if (id) {
-            id = id.toString();
+            const relatedDocument = await context.req.payloadDataLoader.load(JSON.stringify([
+              relatedCollectionSlug,
+              id,
+              0,
+              0,
+              locale,
+              fallbackLocale,
+              false,
+              false,
+            ]));
 
-            const relatedDocumentQuery = {
-              collection: relatedCollection,
-              where: {
-                ...(args.where || {}),
-                _id: {
-                  equals: id,
-                },
-              },
-              res: context.res,
-              req: {
-                ...context.req,
-                locale,
-                fallbackLocale,
-              },
-              depth: 0,
-              pagination: false,
-            };
-
-            const relatedDocument = await find(relatedDocumentQuery);
-
-            if (relatedDocument.docs[0]) return relatedDocument.docs[0];
-
-            return null;
+            return relatedDocument || null;
           }
 
           return null;
@@ -282,10 +267,6 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
         };
       }
 
-      const {
-        collections,
-      } = payload;
-
       const relationship = {
         args: relationshipArgs,
         type: hasManyValues ? new GraphQLList(type) : type,
@@ -309,34 +290,28 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
                 id = relatedDoc.value;
               }
 
-              const result = await find({
-                collection: collections[collectionSlug as string],
-                where: {
-                  ...(args.where || {}),
-                  _id: {
-                    equals: id,
-                  },
-                },
-                req: {
-                  ...context.req,
-                  locale,
-                  fallbackLocale,
-                },
-                depth: 0,
-                pagination: false,
-              });
+              const result = await context.req.payloadDataLoader.load(JSON.stringify([
+                collectionSlug,
+                id,
+                0,
+                0,
+                locale,
+                fallbackLocale,
+                false,
+                false,
+              ]));
 
-              if (result.docs.length === 1) {
+              if (result) {
                 if (isRelatedToManyCollections) {
                   results[i] = {
                     relationTo: collectionSlug,
                     value: {
-                      ...result.docs[0],
+                      ...result,
                       collection: collectionSlug,
                     },
                   };
                 } else {
-                  [results[i]] = result.docs;
+                  results[i] = result;
                 }
               }
             };
@@ -360,35 +335,29 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
           if (id) {
             id = id.toString();
 
-            const relatedDocumentQuery = {
-              collection: collections[relatedCollectionSlug as string],
-              where: {
-                ...(args.where || {}),
-                id: {
-                  equals: id,
-                },
-              },
-              ...context,
-              depth: 0,
-            };
+            const relatedDocument = await context.req.payloadDataLoader.load(JSON.stringify([
+              relatedCollectionSlug,
+              id,
+              0,
+              0,
+              locale,
+              fallbackLocale,
+              false,
+              false,
+            ]));
 
-            if (args.page) relatedDocumentQuery.paginate.page = args.page;
-            if (args.limit) relatedDocumentQuery.paginate.limit = args.limit;
-
-            const relatedDocument = await find(relatedDocumentQuery);
-
-            if (relatedDocument.docs[0]) {
+            if (relatedDocument) {
               if (isRelatedToManyCollections) {
                 return {
                   relationTo: relatedCollectionSlug,
                   value: {
-                    ...relatedDocument.docs[0],
+                    ...relatedDocument,
                     collection: relatedCollectionSlug,
                   },
                 };
               }
 
-              return relatedDocument.docs[0];
+              return relatedDocument;
             }
 
             return null;
@@ -397,36 +366,6 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
           return null;
         },
       };
-
-      if (hasManyValues) {
-        relationship.args.page = { type: GraphQLInt };
-        relationship.args.limit = { type: GraphQLInt };
-      }
-
-      if (Array.isArray(relationTo)) {
-        const relatedCollectionFields = relationTo.reduce((allFields, relation) => [
-          ...allFields,
-          ...collections[relation].config.fields,
-        ], []);
-
-        relationship.args.where = {
-          type: buildWhereInputType(
-            relationshipName,
-            relatedCollectionFields,
-            relationshipName,
-          ),
-        };
-      } else {
-        const whereFields = payload.collections[relationTo].config.fields;
-
-        relationship.args.where = {
-          type: buildWhereInputType(
-            relationshipName,
-            whereFields,
-            relationshipName,
-          ),
-        };
-      }
 
       return {
         ...objectTypeConfig,

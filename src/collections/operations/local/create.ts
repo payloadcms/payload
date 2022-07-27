@@ -4,6 +4,7 @@ import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import create from '../create';
 import { File } from '../../../uploads/types';
+import { getDataLoader } from '../../dataloader';
 
 
 export type Options<T> = {
@@ -37,11 +38,25 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
     filePath,
     file,
     overwriteExistingFiles = false,
-    req,
+    req: incomingReq,
     draft,
   } = options;
 
   const collection = payload.collections[collectionSlug];
+
+  const req = {
+    ...incomingReq || {},
+    user,
+    payloadAPI: 'local',
+    locale: locale || incomingReq?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
+    fallbackLocale: fallbackLocale || incomingReq?.fallbackLocale || null,
+    payload,
+    files: {
+      file: file ?? getFileByPath(filePath),
+    },
+  } as PayloadRequest;
+
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return create({
     depth,
@@ -52,16 +67,6 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
     showHiddenFields,
     overwriteExistingFiles,
     draft,
-    req: {
-      ...req || {},
-      user,
-      payloadAPI: 'local',
-      locale: locale || req?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
-      fallbackLocale: fallbackLocale || req?.fallbackLocale || null,
-      payload,
-      files: {
-        file: file ?? getFileByPath(filePath),
-      },
-    } as PayloadRequest,
+    req,
   });
 }
