@@ -89,6 +89,15 @@ describe('Relationships', () => {
           },
         });
 
+        chained3 = await payload.update<ChainedRelation>({
+          collection: chainedRelSlug,
+          id: chained3.id,
+          data: {
+            name: 'chain3',
+            relation: chained.id,
+          },
+        });
+
         generatedCustomId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
         customIdRelation = await payload.create<CustomIdRelation>({
           collection: customIdSlug,
