@@ -6,9 +6,7 @@ import CustomMinimalRoute from './components/views/CustomMinimal';
 import CustomDefaultRoute from './components/views/CustomDefault';
 import BeforeLogin from './components/BeforeLogin';
 import AfterNavLinks from './components/AfterNavLinks';
-
-export const slug = 'posts';
-export const globalSlug = 'global';
+import { slug, globalSlug } from './shared';
 
 export interface Post {
   id: string;
