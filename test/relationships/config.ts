@@ -2,6 +2,7 @@ import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
 import type { CustomIdNumberRelation, CustomIdRelation, Post, Relation } from './payload-types';
+import { ChainedRelation } from './payload-types';
 
 const openAccess = {
   create: () => true,
@@ -184,14 +185,14 @@ export default buildConfig({
       },
     });
 
-    const chained3 = await payload.create<Relation>({
+    const chained3 = await payload.create<ChainedRelation>({
       collection: chainedRelSlug,
       data: {
         name: 'chain3',
       },
     });
 
-    const chained2 = await payload.create<Relation>({
+    const chained2 = await payload.create<ChainedRelation>({
       collection: chainedRelSlug,
       data: {
         name: 'chain2',
@@ -199,11 +200,20 @@ export default buildConfig({
       },
     });
 
-    const chained = await payload.create<Relation>({
+    const chained = await payload.create<ChainedRelation>({
       collection: chainedRelSlug,
       data: {
         name: 'chain1',
         relation: chained2.id,
+      },
+    });
+
+    await payload.update<ChainedRelation>({
+      collection: chainedRelSlug,
+      id: chained3.id,
+      data: {
+        name: 'chain3',
+        relation: chained.id,
       },
     });
 
