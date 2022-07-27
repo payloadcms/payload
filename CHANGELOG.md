@@ -1,3 +1,23 @@
+## [1.0.10](https://github.com/payloadcms/payload/compare/v1.0.9...v1.0.10) (2022-07-27)
+
+
+### Bug Fixes
+
+* [#806](https://github.com/payloadcms/payload/issues/806), allow partial word matches using 'like' operator ([c96985b](https://github.com/payloadcms/payload/commit/c96985be0c14fcff768e036de96ebef3caa24d1c))
+* [#836](https://github.com/payloadcms/payload/issues/836) ([84611af](https://github.com/payloadcms/payload/commit/84611aff2c9e0b1a1e721a72e9d3fc0740f10aff))
+* accesses payload config correctly in gql refresh resolver ([d5e88cc](https://github.com/payloadcms/payload/commit/d5e88cc1a93ee8f93ee2eb75ab1690281f266f6a))
+* email not always loading while viewing auth collections ([36e9acc](https://github.com/payloadcms/payload/commit/36e9acc637c4a706f0d3d07fbfb88e9afdccc2da))
+* ensures collapsible preferences are retained through doc save ([61f0e8e](https://github.com/payloadcms/payload/commit/61f0e8ea9fd574fc40186f63c0016da150610d70))
+* id now properly required in graphql findByID operation ([5dc7caf](https://github.com/payloadcms/payload/commit/5dc7caf35689d3f5cd71b9b2759edcb9b7eaadc5))
+* set overflow payload modal container to auto ([cfb5540](https://github.com/payloadcms/payload/commit/cfb5540e64ccc016a4ef408a71b9aaf3d219b0fc))
+* trim trailing whitespaces of email in login ([8feed39](https://github.com/payloadcms/payload/commit/8feed39fb92f2e194ae628b090cbb84d802586b6))
+
+
+### Features
+
+* greatly enhances performance by using dataloader pattern to batch populations ([c5bcd1e](https://github.com/payloadcms/payload/commit/c5bcd1e3412087249a2a3d98830a1b69e33736a0))
+* significantly improves complex GraphQL query performance ([5d57bfa](https://github.com/payloadcms/payload/commit/5d57bfa4382470d2a171dcac3743523c930e3a3f))
+
 ## [1.0.9](https://github.com/payloadcms/payload/compare/v1.0.8...v1.0.9) (2022-07-21)
 
 
