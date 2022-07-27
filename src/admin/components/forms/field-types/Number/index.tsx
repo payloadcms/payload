@@ -92,6 +92,11 @@ const NumberField: React.FC<Props> = (props) => {
         type="number"
         name={path}
         step={step}
+        onWheel={(e) => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          e.target.blur();
+        }}
       />
       <FieldDescription
         value={value}
