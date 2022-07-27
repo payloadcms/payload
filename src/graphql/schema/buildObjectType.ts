@@ -9,6 +9,7 @@ import {
   GraphQLFloat,
   GraphQLInt,
   GraphQLList,
+  GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
   GraphQLType,
@@ -71,7 +72,7 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
     }),
     point: (objectTypeConfig: ObjectTypeConfig, field: PointField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, new GraphQLList(GraphQLFloat)) },
+      [field.name]: { type: withNullableType(field, new GraphQLList(new GraphQLNonNull(GraphQLFloat))) },
     }),
     richText: (objectTypeConfig: ObjectTypeConfig, field: RichTextField) => ({
       ...objectTypeConfig,
@@ -206,7 +207,7 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
         values: formatOptions(field),
       });
 
-      type = field.hasMany ? new GraphQLList(type) : type;
+      type = field.hasMany ? new GraphQLList(new GraphQLNonNull(type)) : type;
       type = withNullableType(field, type);
 
       return {
@@ -288,7 +289,7 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
 
       const relationship = {
         args: relationshipArgs,
-        type: hasManyValues ? new GraphQLList(type) : type,
+        type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         extensions: { complexity: 10 },
         async resolve(parent, args, context) {
           const value = parent[field.name];
@@ -436,11 +437,11 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
     array: (objectTypeConfig: ObjectTypeConfig, field: ArrayField) => {
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
       const type = buildObjectType(payload, fullName, field.fields, fullName);
-      const arrayType = new GraphQLList(withNullableType(field, type));
+      const arrayType = new GraphQLList(new GraphQLNonNull(type));
 
       return {
         ...objectTypeConfig,
-        [field.name]: { type: arrayType },
+        [field.name]: { type: withNullableType(field, arrayType) },
       };
     },
     group: (objectTypeConfig: ObjectTypeConfig, field: GroupField) => {
@@ -460,11 +461,11 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
 
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
 
-      const type = new GraphQLList(new GraphQLUnionType({
+      const type = new GraphQLList(new GraphQLNonNull(new GraphQLUnionType({
         name: fullName,
         types: blockTypes,
         resolveType: (data) => payload.types.blockTypes[data.blockType].name,
-      }));
+      })));
 
       return {
         ...objectTypeConfig,
