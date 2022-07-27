@@ -14,7 +14,7 @@ const clearWebpackCache = () => {
 
 const testRunCodes: { suiteName: string; code: number }[] = [];
 
-const executePlaywright = (suiteName: string, suitePath: string, bail = false) => {
+const executePlaywright = (suitePath: string, bail = false) => {
   console.log(`Executing ${suitePath}...`);
   const playwrightCfg = path.resolve(
     __dirname,
@@ -22,7 +22,7 @@ const executePlaywright = (suiteName: string, suitePath: string, bail = false) =
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   );
 
-  const cmd = `DISABLE_LOGGING=true PLAYWRIGHT_JSON_OUTPUT_NAME=results-${suiteName}.json ${playwrightBin} test ${suitePath} -c ${playwrightCfg} --reporter=json`;
+  const cmd = `DISABLE_LOGGING=true ${playwrightBin} test ${suitePath} -c ${playwrightCfg}`;
   console.log('command: ', cmd);
   const { stdout, code } = shelljs.exec(cmd);
   if (code) {
@@ -46,14 +46,14 @@ if (!suiteName || args[0].startsWith('-')) {
   glob(`${path.resolve(__dirname)}/**/*e2e.spec.ts`, (err, files) => {
     files.forEach((file) => {
       clearWebpackCache();
-      executePlaywright('all', file, bail);
+      executePlaywright(file, bail);
     });
   });
 } else {
   // Run specific suite
   clearWebpackCache();
   const suitePath = path.resolve(__dirname, suiteName, 'e2e.spec.ts');
-  executePlaywright(suiteName, suitePath);
+  executePlaywright(suitePath);
 }
 
 testRunCodes.forEach((tr) => {
