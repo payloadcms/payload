@@ -6,7 +6,7 @@ function refreshResolver(collection: Collection) {
   async function resolver(_, args, context) {
     let token;
 
-    const extractJWT = getExtractJWT(context.req.config);
+    const extractJWT = getExtractJWT(context.req.payload.config);
     token = extractJWT(context.req);
 
     if (args.token) {
