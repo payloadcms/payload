@@ -1,40 +1,63 @@
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable import/no-extraneous-dependencies, no-console */
 import path from 'path';
 import shelljs from 'shelljs';
 
 import glob from 'glob';
 
 const playwrightBin = path.resolve(__dirname, '../node_modules/.bin/playwright');
-const playwrightCfg = path.resolve(__dirname, '../playwright.config.ts');
-const webpackCachePath = path.resolve(__dirname, '../node_modules/.cache/webpack');
 
-const getPlaywrightCommand = (suiteName: string, suitePath: string) => {
-  return `DISABLE_LOGGING=true PLAYWRIGHT_JSON_OUTPUT_NAME=results-${suiteName}.json ${playwrightBin} test ${suitePath} -c ${playwrightCfg} --reporter=json`;
+const clearWebpackCache = () => {
+  const webpackCachePath = path.resolve(__dirname, '../node_modules/.cache/webpack');
+  console.log('Clearing webpack cache.');
+  shelljs.rm('-rf', webpackCachePath);
 };
 
-const [suiteName] = process.argv.slice(2);
-console.log('Clearing webpack cache.');
-shelljs.rm('-rf', webpackCachePath);
+const testRunCodes: { suiteName: string; code: number }[] = [];
 
-// Run specific suite
-if (suiteName) {
-  const suitePath = path.resolve(__dirname, suiteName, 'e2e.spec.ts');
+const executePlaywright = (suiteName: string, suitePath: string, bail = false) => {
   console.log(`Executing ${suitePath}...`);
-  const { stderr } = shelljs.exec(getPlaywrightCommand(suiteName, suitePath));
-  if (stderr && !stderr.includes('webpack')) {
-    throw new Error(`ERROR: ${stderr}`);
+  const playwrightCfg = path.resolve(
+    __dirname,
+    '..',
+    `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
+  );
+
+  const cmd = `DISABLE_LOGGING=true PLAYWRIGHT_JSON_OUTPUT_NAME=results-${suiteName}.json ${playwrightBin} test ${suitePath} -c ${playwrightCfg} --reporter=json`;
+  console.log('command: ', cmd);
+  const { stdout, code } = shelljs.exec(cmd);
+  if (code) {
+    if (bail) {
+      console.error(`TEST FAILURE DURING ${suiteName} suite.`);
+      process.exit(1);
+    } else {
+      testRunCodes.push({ suiteName, code });
+    }
   }
+  return stdout;
+};
+
+const args = process.argv.slice(2);
+const suiteName = args[0];
+
+if (!suiteName || args[0].startsWith('-')) {
+  // Run all
+  console.log('Executing all E2E tests...');
+  const bail = args.includes('--bail');
+  glob(`${path.resolve(__dirname)}/**/*e2e.spec.ts`, (err, files) => {
+    files.forEach((file) => {
+      clearWebpackCache();
+      executePlaywright('all', file, bail);
+    });
+  });
+} else {
+  // Run specific suite
+  clearWebpackCache();
+  const suitePath = path.resolve(__dirname, suiteName, 'e2e.spec.ts');
+  executePlaywright(suiteName, suitePath);
 }
 
-// Run all
-console.log('Executing all E2E tests...');
-glob(`${path.resolve(__dirname)}/**/*e2e.spec.ts`, (err, files) => {
-  files.forEach((file, i) => {
-    shelljs.rm('-rf', webpackCachePath);
-    console.log(`Executing ${file}`);
-    const { stderr } = shelljs.exec(getPlaywrightCommand(suiteName, file));
-    if (stderr && !stderr.includes('webpack')) {
-      throw new Error(`ERROR: ${stderr}`);
-    }
-  });
+testRunCodes.forEach((tr) => {
+  console.log(`Suite: ${tr.suiteName}, Success: ${tr.code === 0}`);
 });
+
+if (testRunCodes.some((tr) => tr.code > 0)) process.exit(1);
