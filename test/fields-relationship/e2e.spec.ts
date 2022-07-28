@@ -15,7 +15,7 @@ import type {
 import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationWithTitleSlug, slug } from './config';
 import wait from '../../src/utilities/wait';
 
-const { beforeAll, describe } = test;
+const { beforeAll, beforeEach, describe } = test;
 
 let url: AdminUrlUtil;
 
@@ -31,12 +31,17 @@ describe('fields - relationship', () => {
 
   beforeAll(async ({ browser }) => {
     const { serverURL } = await initPayloadE2E(__dirname);
-    await clearAllDocs();
 
     url = new AdminUrlUtil(serverURL, slug);
 
     const context = await browser.newContext();
     page = await context.newPage();
+
+    await login({ page, serverURL });
+  });
+
+  beforeEach(async () => {
+    await clearAllDocs();
 
     // Create docs to relate to
     relationOneDoc = await payload.create<RelationOne>({
@@ -86,8 +91,6 @@ describe('fields - relationship', () => {
         relationshipWithTitle: relationWithTitle.id,
       },
     });
-
-    await login({ page, serverURL });
   });
 
   test('should create relationship', async () => {
@@ -112,7 +115,6 @@ describe('fields - relationship', () => {
     await page.goto(url.create);
 
     const field = page.locator('#field-relationshipHasMany');
-
     await field.click({ delay: 100 });
 
     const options = page.locator('.rs__option');
@@ -207,24 +209,21 @@ describe('fields - relationship', () => {
     test('should show id on relation in list view', async () => {
       await page.goto(url.list);
       await wait(110);
-      const cells = page.locator('.cell-relationship');
-      const relationship = cells.nth(0);
+      const relationship = page.locator('.row-1 .cell-relationship');
       await expect(relationship).toHaveText(relationOneDoc.id);
     });
 
     test('should show Untitled ID on restricted relation in list view', async () => {
       await page.goto(url.list);
       await wait(110);
-      const cells = page.locator('.cell-relationshipRestricted');
-      const relationship = cells.nth(0);
+      const relationship = page.locator('.row-1 .cell-relationshipRestricted');
       await expect(relationship).toContainText('Untitled - ID: ');
     });
 
     test('should show useAsTitle on relation in list view', async () => {
       await page.goto(url.list);
       await wait(110);
-      const cells = page.locator('.cell-relationshipWithTitle');
-      const relationship = cells.nth(0);
+      const relationship = page.locator('.row-1 .cell-relationshipWithTitle');
       await expect(relationship).toHaveText(relationWithTitle.name);
     });
   });
