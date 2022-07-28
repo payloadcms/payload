@@ -40,10 +40,11 @@ jobs:
     - name: Generate Payload Types
       run: yarn dev:generate-types fields
 
-    # - name: Install Playwright Browsers
-    #   run: npx playwright install --with-deps
-    # - name: E2E Tests
-    #   run: yarn test:e2e:all --bail
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    - name: E2E Tests
+      run: yarn test:e2e:all --bail
+
     # - uses: actions/upload-artifact@v2
     #   if: always()
     #   with:
