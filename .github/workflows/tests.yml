@@ -43,7 +43,7 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: E2E Tests
-      run: yarn test:e2e:all --bail
+      run: yarn test:e2e --bail
 
     # - uses: actions/upload-artifact@v2
     #   if: always()
