@@ -102,6 +102,9 @@ export async function createProject(
         const dest = path.resolve(projectDir, '.npmrc')
         await fse.copy(src, dest)
       }
+      const gi = path.resolve(templateDir, '..', 'gitignore.template')
+      const giDest = path.resolve(projectDir, '.gitignore')
+      await fse.copy(gi, giDest)
 
       success('Project directory created')
     } catch (err) {
