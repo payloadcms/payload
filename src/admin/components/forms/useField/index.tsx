@@ -128,6 +128,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   ]);
 
   useEffect(() => {
+    setInternalValue(initialValue);
     setInternallyValid(undefined);
   }, [initialValue]);
 
