@@ -14,17 +14,17 @@ export default async function resizeHandler(
 ): Promise<Response<{}> | void> {
   try {
     const payload = req.payload;
-    const collection = req.collection!.config;
+    const collectionConfig = req.collection!.config;
 
     const image: TypeWithID & FileData & { url?: string } =
       await payload.findByID({
-        collection: collection.slug,
+        collection: collectionConfig.slug,
         id: req.params.id,
       });
 
     let imageBuffer: Buffer;
 
-    if (collection.upload.disableLocalStorage) {
+    if (collectionConfig.upload.disableLocalStorage) {
       if (!image.url) {
         const errorMessage = 'No url property found';
         payload.logger.error(errorMessage);
@@ -37,7 +37,7 @@ export default async function resizeHandler(
     } else {
       let imagePath = path.resolve(
         payload.config.paths.configDir,
-        collection.upload.staticDir,
+        collectionConfig.upload.staticDir,
         image.filename
       );
       imageBuffer = fs.readFileSync(imagePath);
