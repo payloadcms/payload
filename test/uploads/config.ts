@@ -36,6 +36,9 @@ export default buildConfig({
     },
     {
       slug: mediaSlug,
+      access: {
+        read: () => true,
+      },
       upload: {
         staticURL: '/media',
         staticDir: './media',
