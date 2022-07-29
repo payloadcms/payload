@@ -1,11 +1,10 @@
 import { Response, NextFunction } from 'express';
-import payload from '../..';
 import { PayloadRequest } from '../../express/types';
 import { FileData } from '../../uploads/types';
 import { SanitizedCollectionConfig } from '../config/types';
 import fetch from 'node-fetch';
 import { TypeWithID } from '../../globals/config/types';
-import sharp, { ResizeOptions } from 'sharp';
+import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 
@@ -16,6 +15,7 @@ export default (collection: SanitizedCollectionConfig) =>
     next: NextFunction
   ): Promise<Response<{}> | void> {
     try {
+      const payload = req.payload;
       const image: TypeWithID & FileData & { url?: string } =
         await payload.findByID({
           collection: collection.slug,
@@ -45,10 +45,14 @@ export default (collection: SanitizedCollectionConfig) =>
 
       const width = parseInt(req.query.width as string);
       const height = parseInt(req.query.height as string);
+      const fit = req.query.fit as keyof sharp.FitEnum;
+      const background = req.query.background as string;
       const position = (req.query.position as string) || 'centre';
 
-      const options: ResizeOptions = {
+      const options: sharp.ResizeOptions = {
+        background,
         position,
+        fit,
       };
 
       payload.logger.info(
