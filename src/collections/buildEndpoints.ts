@@ -18,7 +18,7 @@ import deleteHandler from './requestHandlers/delete';
 import findByID from './requestHandlers/findByID';
 import update from './requestHandlers/update';
 import logoutHandler from '../auth/requestHandlers/logout';
-import createResizeHandler from './requestHandlers/resize';
+import resizeHandler from './requestHandlers/resize';
 
 const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
   let { endpoints } = collection;
@@ -93,7 +93,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
     endpoints.push({
       path: '/resize/:id',
       method: 'get',
-      handler: createResizeHandler(collection),
+      handler: resizeHandler,
     });
   }
 
