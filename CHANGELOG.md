@@ -1,3 +1,10 @@
+## [1.0.11](https://github.com/payloadcms/payload/compare/v1.0.10...v1.0.11) (2022-07-28)
+
+
+### Bug Fixes
+
+* ensures when initial values changes, field value is updated ([858b1af](https://github.com/payloadcms/payload/commit/858b1afa546db68416d625a7ab970c9693d0595e))
+
 ## [1.0.10](https://github.com/payloadcms/payload/compare/v1.0.9...v1.0.10) (2022-07-27)
 
 
