@@ -53,6 +53,33 @@ const TabsFields: CollectionConfig = {
             },
           ],
         },
+        {
+          label: 'Tab with Row',
+          description: 'This tab has a row field.',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'textInRow',
+                  type: 'text',
+                  required: true,
+                  admin: {
+                    width: '50%',
+                  },
+                },
+                {
+                  name: 'numberInRow',
+                  type: 'number',
+                  required: true,
+                  admin: {
+                    width: '50%',
+                  },
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -108,6 +135,8 @@ export const tabsDoc = {
   },
   textarea: 'Here is some text that goes in a textarea',
   anotherText: 'Super tired of writing this text',
+  textInRow: 'hello',
+  numberInRow: 235,
 };
 
 export default TabsFields;

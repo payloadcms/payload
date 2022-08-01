@@ -38,6 +38,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
   const initialValue = field?.initialValue as T;
 
+  const [internalInitialValue, setInternalInitialValue] = useState(() => field?.initialValue as T);
   const [internalValue, setInternalValue] = useState(() => field?.value as T);
   const [internallyValid, setInternallyValid] = useState<boolean>(undefined);
 
@@ -128,9 +129,13 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   ]);
 
   useEffect(() => {
-    setInternalValue(initialValue);
+    if (internalInitialValue !== initialValue) {
+      setInternalValue(initialValue);
+      setInternalInitialValue(initialValue);
+    }
+
     setInternallyValid(undefined);
-  }, [initialValue]);
+  }, [initialValue, internalInitialValue]);
 
   // The only time that the FORM value should be updated
   // is when the debounced value updates. So, when the debounced value updates,
