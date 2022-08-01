@@ -6,6 +6,7 @@ import { login, saveDocAndAssert } from '../helpers';
 import { textDoc } from './collections/Text';
 import { arrayFieldsSlug } from './collections/Array';
 import { pointFieldsSlug } from './collections/Point';
+import wait from '../../src/utilities/wait';
 
 const { beforeAll, describe } = test;
 
@@ -81,6 +82,60 @@ describe('fields', () => {
       const field = page.locator('#field-readOnly__0__text');
       await expect(field)
         .toHaveValue('defaultValue');
+    });
+  });
+
+  describe('fields - tabs', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'tabs-fields');
+    });
+
+    test('should fill and retain a new value within a tab while switching tabs', async () => {
+      const textInRowValue = 'hello';
+      const numberInRowValue = '23';
+
+      await page.goto(url.create);
+
+      await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();
+      await page.locator('#field-textInRow').fill(textInRowValue);
+      await page.locator('#field-numberInRow').fill(numberInRowValue);
+
+      await wait(500);
+
+      await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click();
+      await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();
+
+      await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue);
+      await expect(page.locator('#field-numberInRow')).toHaveValue(numberInRowValue);
+    });
+
+    test('should retain updated values within tabs while switching between tabs', async () => {
+      const textInRowValue = 'new value';
+      await page.goto(url.list);
+      await page.locator('.cell-id a').click();
+
+      // Go to Row tab, update the value
+      await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();
+      await page.locator('#field-textInRow').fill(textInRowValue);
+
+      await wait(500);
+
+      // Go to Array tab, then back to Row. Make sure new value is still there
+      await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click();
+      await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();
+
+      await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue);
+
+      // Go to array tab, save the doc
+      await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click();
+      await page.click('#action-save', { delay: 100 });
+
+      await wait(500);
+
+      // Go back to row tab, make sure the new value is still present
+      await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();
+      await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue);
     });
   });
 });
