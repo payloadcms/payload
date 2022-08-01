@@ -37,22 +37,24 @@ const TabsField: React.FC<Props> = (props) => {
     ].filter(Boolean).join(' ')}
     >
       <TabsProvider>
-        <div className={`${baseClass}__tabs`}>
-          {tabs.map((tab, i) => {
-            return (
-              <button
-                key={i}
-                type="button"
-                className={[
-                  `${baseClass}__tab-button`,
-                  active === i && `${baseClass}__tab-button--active`,
-                ].filter(Boolean).join(' ')}
-                onClick={() => setActive(i)}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+        <div className={`${baseClass}__tabs-wrap`}>
+          <div className={`${baseClass}__tabs`}>
+            {tabs.map((tab, i) => {
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  className={[
+                    `${baseClass}__tab-button`,
+                    active === i && `${baseClass}__tab-button--active`,
+                  ].filter(Boolean).join(' ')}
+                  onClick={() => setActive(i)}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
         <div className={`${baseClass}__content-wrap`}>
           {activeTab && (
