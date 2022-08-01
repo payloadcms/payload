@@ -279,6 +279,7 @@
     "rimraf": "^3.0.2",
     "serve-static": "^1.14.2",
     "shelljs": "^0.8.5",
+    "slash": "^3.0.0",
     "start-server-and-test": "^1.14.0",
     "ts-node": "^10.9.1",
     "typescript": "^4.1.2"
