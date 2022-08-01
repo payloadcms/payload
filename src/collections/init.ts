@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { UpdateAggregationStage } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 import express from 'express';
 import passport from 'passport';
@@ -52,7 +52,7 @@ export default function registerCollections(ctx: Payload): void {
           if (this.loginAttempts + 1 >= maxLoginAttempts && !this.isLocked) {
             updates.$set = { lockUntil: Date.now() + lockTime };
           }
-          return this.updateOne(updates as mongoose.Document, cb);
+          return this.updateOne(updates as UpdateAggregationStage, cb);
         };
 
         // eslint-disable-next-line func-names
