@@ -1,8 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies, no-console */
 import path from 'path';
 import shelljs from 'shelljs';
-
 import glob from 'glob';
+import slash from 'slash';
+
+shelljs.env.DISABLE_LOGGING = 'true';
 
 const playwrightBin = path.resolve(__dirname, '../node_modules/.bin/playwright');
 
@@ -42,7 +44,7 @@ function executePlaywright(suitePath: string, bail = false) {
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   );
 
-  const cmd = `DISABLE_LOGGING=true ${playwrightBin} test ${suitePath} -c ${playwrightCfg}`;
+  const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`);
   console.log('\n', cmd);
   const { stdout, code } = shelljs.exec(cmd);
   const suite = path.basename(path.dirname(suitePath));
