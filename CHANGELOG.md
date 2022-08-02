@@ -1,3 +1,11 @@
+## [1.0.12](https://github.com/payloadcms/payload/compare/v1.0.11...v1.0.12) (2022-08-02)
+
+
+### Bug Fixes
+
+* ensures tabs can overflow on mobile when there are many ([663cae4](https://github.com/payloadcms/payload/commit/663cae4788f2726f3fa2430228706be63b7e642b))
+* unique index creation ([#867](https://github.com/payloadcms/payload/issues/867)) ([c175476](https://github.com/payloadcms/payload/commit/c175476e74b31ea1fbc4a250fa8d23953d13e541))
+
 ## [1.0.11](https://github.com/payloadcms/payload/compare/v1.0.10...v1.0.11) (2022-07-28)
 
 
