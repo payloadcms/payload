@@ -14,6 +14,7 @@ import PointFields, { pointDoc } from './collections/Point';
 import GroupFields, { groupDoc } from './collections/Group';
 import getFileByPath from '../../src/uploads/getFileByPath';
 import Uploads, { uploadsDoc } from './collections/Upload';
+import IndexedFields from './collections/Indexed';
 
 export default buildConfig({
   admin: {
@@ -40,6 +41,7 @@ export default buildConfig({
     TabsFields,
     TextFields,
     Uploads,
+    IndexedFields,
   ],
   localization: {
     defaultLocale: 'en',

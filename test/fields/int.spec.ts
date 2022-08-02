@@ -1,3 +1,4 @@
+import type { IndexDirection, IndexOptions } from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
 import config from '../uploads/config';
@@ -33,6 +34,43 @@ describe('Fields', () => {
       expect(doc.text).toEqual(text);
       expect(doc.defaultFunction).toEqual(defaultText);
       expect(doc.defaultAsync).toEqual(defaultText);
+    });
+  });
+
+  describe('indexes', () => {
+    let indexes;
+    const definitions: Record<string, IndexDirection> = {};
+    const options: Record<string, IndexOptions> = {};
+
+    beforeAll(() => {
+      indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+
+      indexes.forEach((index) => {
+        const field = Object.keys(index[0])[0];
+        definitions[field] = index[0][field];
+        // eslint-disable-next-line prefer-destructuring
+        options[field] = index[1];
+      });
+    });
+
+    it('should have indexes', () => {
+      expect(definitions.text).toEqual(1);
+    });
+    it('should have unique indexes', () => {
+      expect(definitions.uniqueText).toEqual(1);
+      expect(options.uniqueText).toMatchObject({ unique: true });
+    });
+    it('should have 2dsphere indexes on point fields', () => {
+      expect(definitions.point).toEqual('2dsphere');
+    });
+    it('should have 2dsphere indexes on point fields in groups', () => {
+      expect(definitions['group.point']).toEqual('2dsphere');
+    });
+    it('should have a sparse index on a unique localized field in a group', () => {
+      expect(definitions['group.localizedUnique.en']).toEqual(1);
+      expect(options['group.localizedUnique.en']).toMatchObject({ unique: true, sparse: true });
+      expect(definitions['group.localizedUnique.es']).toEqual(1);
+      expect(options['group.localizedUnique.es']).toMatchObject({ unique: true, sparse: true });
     });
   });
 
