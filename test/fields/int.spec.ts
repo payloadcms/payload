@@ -1,3 +1,4 @@
+import type { IndexDirection, IndexOptions } from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
 import config from '../uploads/config';
@@ -33,6 +34,43 @@ describe('Fields', () => {
       expect(doc.text).toEqual(text);
       expect(doc.defaultFunction).toEqual(defaultText);
       expect(doc.defaultAsync).toEqual(defaultText);
+    });
+  });
+
+  describe('indexes', () => {
+    let indexes;
+    let textIndexDefinition;
+    let uniqueIndexDefinition;
+    let uniqueIndexOptions;
+    let pointIndexDefinition;
+
+    beforeAll(() => {
+      indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+
+      indexes.forEach((index) => {
+        if (index[0].text) {
+          textIndexDefinition = index[0].text;
+        }
+        if (index[0].uniqueText) {
+          uniqueIndexDefinition = index[0].uniqueText;
+          // eslint-disable-next-line prefer-destructuring
+          uniqueIndexOptions = index[1];
+        }
+        if (index[0].point) {
+          pointIndexDefinition = index[0].point;
+        }
+      });
+    });
+
+    it('should have indexes', () => {
+      expect(textIndexDefinition).toEqual(1);
+    });
+    it('should have unique indexes', () => {
+      expect(uniqueIndexDefinition).toEqual(1);
+      expect(uniqueIndexOptions).toMatchObject({ unique: true });
+    });
+    it('should point field geospatial indexes', () => {
+      expect(pointIndexDefinition).toEqual('2dsphere');
     });
   });
 

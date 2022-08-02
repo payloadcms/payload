@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
-import { Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
+import { IndexDefinition, IndexOptions, Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
 import { ArrayField, Block, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NonPresentationalField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextareaField, TextField, UploadField } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
@@ -16,6 +16,11 @@ export type BuildSchemaOptions = {
 }
 
 type FieldSchemaGenerator = (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => SchemaDefinition;
+
+type Index = {
+  index: IndexDefinition
+  options?: IndexOptions
+}
 
 const setBlockDiscriminators = (fields: Field[], schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
   fields.forEach((field) => {
@@ -78,7 +83,7 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
   const { allowIDField, options } = buildSchemaOptions;
   let fields = {};
   let schemaFields = configFields;
-  const indexFields = [];
+  const indexFields: Index[] = [];
 
   if (!allowIDField) {
     const idField = schemaFields.find((field) => fieldAffectsData(field) && field.name === 'id');
@@ -104,21 +109,23 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
       }
 
       if (config.indexSortableFields && !buildSchemaOptions.global && !field.index && !field.hidden && sortableFieldTypes.indexOf(field.type) > -1 && fieldAffectsData(field)) {
-        indexFields.push({ [field.name]: 1 });
-      } else if ((field.index || field.unique) && fieldAffectsData(field)) {
-        indexFields.push({ [field.name]: 1 });
+        indexFields.push({ index: { [field.name]: 1 } });
+      } else if (field.unique && fieldAffectsData(field)) {
+        indexFields.push({ index: { [field.name]: 1 }, options: { unique: true, sparse: field.localized || false } });
+      } else if (field.index && fieldAffectsData(field)) {
+        indexFields.push({ index: { [field.name]: 1 } });
       }
     }
   });
 
   if (buildSchemaOptions?.options?.timestamps) {
-    indexFields.push({ createdAt: 1 });
-    indexFields.push({ updatedAt: 1 });
+    indexFields.push({ index: { createdAt: 1 } });
+    indexFields.push({ index: { updatedAt: 1 } });
   }
 
   const schema = new Schema(fields, options);
-  indexFields.forEach((index) => {
-    schema.index(index);
+  indexFields.forEach((indexField) => {
+    schema.index(indexField.index, indexField.options);
   });
 
   setBlockDiscriminators(flattenTopLevelFields(configFields), schema, config, buildSchemaOptions);
@@ -128,14 +135,24 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
 
 const fieldIndexMap = {
   point: (field: PointField, config: SanitizedConfig) => {
-    let index: boolean | '2dsphere';
+    let direction: boolean | '2dsphere';
+    const options: IndexOptions = {
+      unique: field.unique || false,
+      sparse: (field.localized && field.unique) || false,
+    };
     if (field.index === true || field.index === undefined) {
-      index = '2dsphere';
+      direction = '2dsphere';
     }
     if (field.localized && config.localization) {
-      return config.localization.locales.map((locale) => ({ [`${field.name}.${locale}`]: index }));
+      return config.localization.locales.map((locale) => ({
+        index: { [`${field.name}.${locale}`]: direction },
+        options,
+      }));
     }
-    return [{ [field.name]: index }];
+    if (field.unique) {
+      options.unique = true;
+    }
+    return [{ index: { [field.name]: direction }, options }];
   },
 };
 
