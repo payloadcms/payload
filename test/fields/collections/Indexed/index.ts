@@ -18,6 +18,22 @@ const IndexedFields: CollectionConfig = {
       name: 'point',
       type: 'point',
     },
+    {
+      type: 'group',
+      name: 'group',
+      fields: [
+        {
+          name: 'localizedUnique',
+          type: 'text',
+          unique: true,
+          localized: true,
+        },
+        {
+          name: 'point',
+          type: 'point',
+        },
+      ],
+    },
   ],
 };
 

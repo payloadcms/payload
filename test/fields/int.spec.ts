@@ -39,38 +39,38 @@ describe('Fields', () => {
 
   describe('indexes', () => {
     let indexes;
-    let textIndexDefinition;
-    let uniqueIndexDefinition;
-    let uniqueIndexOptions;
-    let pointIndexDefinition;
+    const definitions: Record<string, IndexDirection> = {};
+    const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
       indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
 
       indexes.forEach((index) => {
-        if (index[0].text) {
-          textIndexDefinition = index[0].text;
-        }
-        if (index[0].uniqueText) {
-          uniqueIndexDefinition = index[0].uniqueText;
-          // eslint-disable-next-line prefer-destructuring
-          uniqueIndexOptions = index[1];
-        }
-        if (index[0].point) {
-          pointIndexDefinition = index[0].point;
-        }
+        const field = Object.keys(index[0])[0];
+        definitions[field] = index[0][field];
+        // eslint-disable-next-line prefer-destructuring
+        options[field] = index[1];
       });
     });
 
     it('should have indexes', () => {
-      expect(textIndexDefinition).toEqual(1);
+      expect(definitions.text).toEqual(1);
     });
     it('should have unique indexes', () => {
-      expect(uniqueIndexDefinition).toEqual(1);
-      expect(uniqueIndexOptions).toMatchObject({ unique: true });
+      expect(definitions.uniqueText).toEqual(1);
+      expect(options.uniqueText).toMatchObject({ unique: true });
     });
-    it('should point field geospatial indexes', () => {
-      expect(pointIndexDefinition).toEqual('2dsphere');
+    it('should have 2dsphere indexes on point fields', () => {
+      expect(definitions.point).toEqual('2dsphere');
+    });
+    it('should have 2dsphere indexes on point fields in groups', () => {
+      expect(definitions['group.point']).toEqual('2dsphere');
+    });
+    it('should have a sparse index on a unique localized field in a group', () => {
+      expect(definitions['group.localizedUnique.en']).toEqual(1);
+      expect(options['group.localizedUnique.en']).toMatchObject({ unique: true, sparse: true });
+      expect(definitions['group.localizedUnique.es']).toEqual(1);
+      expect(options['group.localizedUnique.es']).toMatchObject({ unique: true, sparse: true });
     });
   });
 
