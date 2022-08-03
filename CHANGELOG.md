@@ -1,3 +1,16 @@
+## [1.0.13](https://github.com/payloadcms/payload/compare/v1.0.12...v1.0.13) (2022-08-03)
+
+
+### Bug Fixes
+
+* [#878](https://github.com/payloadcms/payload/issues/878) ([b8504ff](https://github.com/payloadcms/payload/commit/b8504ffb25310095097f35107e2b33dc648580cc))
+* [#880](https://github.com/payloadcms/payload/issues/880) ([9c0c606](https://github.com/payloadcms/payload/commit/9c0c606b20e963a12d23b428c54c63d6a73be472))
+
+
+### Features
+
+* improves adjacent group styling ([0294c02](https://github.com/payloadcms/payload/commit/0294c02aedaa11a72240ab1dc7d6ccd2318de51f))
+
 ## [1.0.12](https://github.com/payloadcms/payload/compare/v1.0.11...v1.0.12) (2022-08-02)
 
 
