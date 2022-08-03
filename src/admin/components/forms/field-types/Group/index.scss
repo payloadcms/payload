@@ -72,3 +72,8 @@
     }
   }
 }
+
+.group-field + .group-field {
+  margin-top: base(-2);
+  border-top: 0;
+}
