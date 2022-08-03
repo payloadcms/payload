@@ -30,26 +30,32 @@ export const blocksField: Field = {
       slug: 'subBlocks',
       fields: [
         {
-          name: 'subBlocks',
-          type: 'blocks',
-          blocks: [
+          type: 'collapsible',
+          label: 'Collapsible within Block',
+          fields: [
             {
-              slug: 'text',
-              fields: [
+              name: 'subBlocks',
+              type: 'blocks',
+              blocks: [
                 {
-                  name: 'text',
-                  type: 'text',
-                  required: true,
+                  slug: 'text',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                      required: true,
+                    },
+                  ],
                 },
-              ],
-            },
-            {
-              slug: 'number',
-              fields: [
                 {
-                  name: 'number',
-                  type: 'number',
-                  required: true,
+                  slug: 'number',
+                  fields: [
+                    {
+                      name: 'number',
+                      type: 'number',
+                      required: true,
+                    },
+                  ],
                 },
               ],
             },
