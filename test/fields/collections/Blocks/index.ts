@@ -98,7 +98,7 @@ export const blocksFieldSeedData = [
       },
     ],
   },
-];
+] as const;
 
 export const blocksDoc = {
   blocks: blocksFieldSeedData,
