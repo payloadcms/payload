@@ -4,10 +4,11 @@ import { RESTClient } from '../helpers/rest';
 import config from '../uploads/config';
 import payload from '../../src';
 import { pointDoc } from './collections/Point';
-import type { ArrayField, GroupField } from './payload-types';
+import type { ArrayField, BlockField, GroupField } from './payload-types';
 import { arrayFieldsSlug, arrayDefaultValue, arrayDoc } from './collections/Array';
 import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
 import { defaultText } from './collections/Text';
+import { blocksFieldSeedData } from './collections/Blocks';
 
 let client;
 
@@ -213,6 +214,22 @@ describe('Fields', () => {
       });
 
       expect(doc.potentiallyEmptyGroup).toEqual({});
+    });
+  });
+
+  describe('blocks', () => {
+    it('should retrieve doc with blocks', async () => {
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+      });
+
+      expect(blockFields.docs[0].blocks[0].blockType).toEqual(blocksFieldSeedData[0].blockType);
+      expect(blockFields.docs[0].blocks[0].text).toEqual(blocksFieldSeedData[0].text);
+
+      expect(blockFields.docs[0].blocks[2].blockType).toEqual(blocksFieldSeedData[2].blockType);
+      expect(blockFields.docs[0].blocks[2].blockName).toEqual(blocksFieldSeedData[2].blockName);
+      expect(blockFields.docs[0].blocks[2].subBlocks[0].number).toEqual(blocksFieldSeedData[2].subBlocks[0].number);
+      expect(blockFields.docs[0].blocks[2].subBlocks[1].text).toEqual(blocksFieldSeedData[2].subBlocks[1].text);
     });
   });
 });

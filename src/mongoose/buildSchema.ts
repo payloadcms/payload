@@ -2,11 +2,10 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
-import { IndexDefinition, IndexOptions, Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
+import { IndexDefinition, IndexOptions, Schema, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
 import { ArrayField, Block, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NonPresentationalField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextareaField, TextField, UploadField } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
-import flattenTopLevelFields from '../utilities/flattenTopLevelFields';
 
 export type BuildSchemaOptions = {
   options?: SchemaOptions
@@ -15,46 +14,12 @@ export type BuildSchemaOptions = {
   global?: boolean
 }
 
-type FieldSchemaGenerator = (field: Field, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => SchemaDefinition;
+type FieldSchemaGenerator = (field: Field, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => void;
 
 type Index = {
   index: IndexDefinition
   options?: IndexOptions
 }
-
-const setBlockDiscriminators = (fields: Field[], schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
-  fields.forEach((field) => {
-    const blockFieldType = field as BlockField;
-    if (blockFieldType.type === 'blocks' && blockFieldType.blocks && blockFieldType.blocks.length > 0) {
-      blockFieldType.blocks.forEach((blockItem: Block) => {
-        let blockSchemaFields = {};
-
-        blockItem.fields.forEach((blockField) => {
-          const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[blockField.type];
-          if (fieldSchema) {
-            blockSchemaFields = fieldSchema(blockField, blockSchemaFields, config, buildSchemaOptions);
-          }
-        });
-
-        const blockSchema = new Schema(blockSchemaFields, { _id: false, id: false });
-
-        if (blockFieldType.localized && config.localization) {
-          config.localization.locales.forEach((locale) => {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore Possible incorrect typing in mongoose types, this works
-            schema.path(`${field.name}.${locale}`).discriminator(blockItem.slug, blockSchema);
-            setBlockDiscriminators(blockItem.fields, blockSchema, config, buildSchemaOptions);
-          });
-        } else {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore Possible incorrect typing in mongoose types, this works
-          schema.path(field.name).discriminator(blockItem.slug, blockSchema);
-          setBlockDiscriminators(blockItem.fields, blockSchema, config, buildSchemaOptions);
-        }
-      });
-    }
-  });
-};
 
 const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: BuildSchemaOptions) => ({
   sparse: field.unique && field.localized,
@@ -82,6 +47,8 @@ const localizeSchema = (field: NonPresentationalField, schema, localization) => 
 const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchemaOptions: BuildSchemaOptions = {}): Schema => {
   const { allowIDField, options } = buildSchemaOptions;
   let fields = {};
+
+
   let schemaFields = configFields;
   const indexFields: Index[] = [];
 
@@ -95,12 +62,14 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
     }
   }
 
+  const schema = new Schema(fields, options);
+
   schemaFields.forEach((field) => {
     if (!fieldIsPresentationalOnly(field)) {
-      const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[field.type];
+      const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[field.type];
 
-      if (fieldSchema) {
-        fields = fieldSchema(field, fields, config, buildSchemaOptions);
+      if (addFieldSchema) {
+        addFieldSchema(field, schema, config, buildSchemaOptions);
       }
 
       // geospatial field index must be created after the schema is created
@@ -123,12 +92,9 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
     indexFields.push({ index: { updatedAt: 1 } });
   }
 
-  const schema = new Schema(fields, options);
   indexFields.forEach((indexField) => {
     schema.index(indexField.index, indexField.options);
   });
-
-  setBlockDiscriminators(flattenTopLevelFields(configFields), schema, config, buildSchemaOptions);
 
   return schema;
 };
@@ -157,55 +123,49 @@ const fieldIndexMap = {
 };
 
 const fieldToSchemaMap = {
-  number: (field: NumberField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  number: (field: NumberField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Number };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  text: (field: TextField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  text: (field: TextField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  email: (field: EmailField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  email: (field: EmailField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  textarea: (field: TextareaField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  textarea: (field: TextareaField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  richText: (field: RichTextField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  richText: (field: RichTextField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Schema.Types.Mixed };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  code: (field: CodeField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  code: (field: CodeField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  point: (field: PointField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
+  point: (field: PointField, schema: Schema, config: SanitizedConfig): void => {
     const baseSchema = {
       type: {
         type: String,
@@ -220,12 +180,11 @@ const fieldToSchemaMap = {
       },
     };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  radio: (field: RadioField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  radio: (field: RadioField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
@@ -235,40 +194,36 @@ const fieldToSchemaMap = {
       }),
     };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  checkbox: (field: CheckboxField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  checkbox: (field: CheckboxField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Boolean };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  date: (field: DateField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  date: (field: DateField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Date };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  upload: (field: UploadField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  upload: (field: UploadField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: Schema.Types.Mixed,
       ref: field.relationTo,
     };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  relationship: (field: RelationshipField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
+  relationship: (field: RelationshipField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
     const hasManyRelations = Array.isArray(field.relationTo);
     let schemaToReturn: { [key: string]: any } = {};
 
@@ -318,53 +273,40 @@ const fieldToSchemaMap = {
       if (field.hasMany) schemaToReturn = [schemaToReturn];
     }
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: schemaToReturn,
-    };
+    });
   },
-  row: (field: RowField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
-    let newFields = { ...fields };
-
+  row: (field: RowField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     field.fields.forEach((subField: Field) => {
-      const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+      const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
 
-      if (fieldSchema) {
-        newFields = fieldSchema(subField, newFields, config, buildSchemaOptions);
+      if (addFieldSchema) {
+        addFieldSchema(subField, schema, config, buildSchemaOptions);
       }
     });
-
-    return newFields;
   },
-  collapsible: (field: CollapsibleField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
-    let newFields = { ...fields };
-
+  collapsible: (field: CollapsibleField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     field.fields.forEach((subField: Field) => {
-      const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+      const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
 
-      if (fieldSchema) {
-        newFields = fieldSchema(subField, newFields, config, buildSchemaOptions);
+      if (addFieldSchema) {
+        addFieldSchema(subField, schema, config, buildSchemaOptions);
       }
     });
-
-    return newFields;
   },
-  tabs: (field: TabsField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
-    let newFields = { ...fields };
-
+  tabs: (field: TabsField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     field.tabs.forEach((tab) => {
       tab.fields.forEach((subField: Field) => {
-        const fieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+        const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
 
-        if (fieldSchema) {
-          newFields = fieldSchema(subField, newFields, config, buildSchemaOptions);
+        if (addFieldSchema) {
+          addFieldSchema(subField, schema, config, buildSchemaOptions);
         }
       });
     });
-
-    return newFields;
   },
-  array: (field: ArrayField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
+  array: (field: ArrayField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: [buildSchema(config, field.fields, {
@@ -374,12 +316,11 @@ const fieldToSchemaMap = {
       })],
     };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  group: (field: GroupField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  group: (field: GroupField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     let { required } = field;
     if (field?.admin?.condition || field?.localized || field?.access?.create) required = false;
 
@@ -397,12 +338,11 @@ const fieldToSchemaMap = {
       }),
     };
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
-    };
+    });
   },
-  select: (field: SelectField, fields: SchemaDefinition, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): SchemaDefinition => {
+  select: (field: SelectField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
@@ -413,28 +353,49 @@ const fieldToSchemaMap = {
     };
     const schemaToReturn = localizeSchema(field, baseSchema, config.localization);
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: field.hasMany ? [schemaToReturn] : schemaToReturn,
-    };
+    });
   },
-  blocks: (field: BlockField, fields: SchemaDefinition, config: SanitizedConfig): SchemaDefinition => {
-    const baseSchema = [new Schema({}, { _id: false, discriminatorKey: 'blockType' })];
+  blocks: (field: BlockField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
+    const fieldSchema = [new Schema({}, { _id: false, discriminatorKey: 'blockType' })];
     let schemaToReturn;
 
     if (field.localized && config.localization) {
       schemaToReturn = config.localization.locales.reduce((localeSchema, locale) => ({
         ...localeSchema,
-        [locale]: baseSchema,
+        [locale]: fieldSchema,
       }), {});
     } else {
-      schemaToReturn = baseSchema;
+      schemaToReturn = fieldSchema;
     }
 
-    return {
-      ...fields,
+    schema.add({
       [field.name]: schemaToReturn,
-    };
+    });
+
+    field.blocks.forEach((blockItem: Block) => {
+      const blockSchema = new Schema({}, { _id: false, id: false });
+
+      blockItem.fields.forEach((blockField) => {
+        const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[blockField.type];
+        if (addFieldSchema) {
+          addFieldSchema(blockField, blockSchema, config, buildSchemaOptions);
+        }
+      });
+
+      if (field.localized && config.localization) {
+        config.localization.locales.forEach((locale) => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore Possible incorrect typing in mongoose types, this works
+          schema.path(`${field.name}.${locale}`).discriminator(blockItem.slug, blockSchema);
+        });
+      } else {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore Possible incorrect typing in mongoose types, this works
+        schema.path(field.name).discriminator(blockItem.slug, blockSchema);
+      }
+    });
   },
 };
 
