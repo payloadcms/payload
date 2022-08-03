@@ -57,7 +57,7 @@ const Popup: React.FC<Props> = (props) => {
         bottom: contentBottomPos,
       } = contentRef.current.getBoundingClientRect();
 
-      let boundingTopPos = 0;
+      let boundingTopPos = 100;
       let boundingRightPos = windowWidth;
       let boundingBottomPos = windowHeight;
       let boundingLeftPos = 0;

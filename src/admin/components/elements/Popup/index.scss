@@ -6,7 +6,8 @@
   &__content {
     position: absolute;
     background: var(--theme-input-bg);
-    display: none;
+    opacity: 0;
+    visibility: hidden;
     z-index: var(--z-popup);
     max-width: calc(100vw - #{$baseline});
 
@@ -184,7 +185,8 @@
 
   &--active {
     .popup__content {
-      display: block;
+      opacity: 1;
+      visibility: visible;
     }
   }
 
