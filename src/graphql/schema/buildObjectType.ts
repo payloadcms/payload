@@ -15,7 +15,7 @@ import {
   GraphQLUnionType,
 } from 'graphql';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { Field, RadioField, RelationshipField, SelectField, UploadField, ArrayField, GroupField, RichTextField, fieldAffectsData, NumberField, TextField, EmailField, TextareaField, CodeField, DateField, PointField, CheckboxField, BlockField, RowField, fieldIsPresentationalOnly, CollapsibleField, TabsField } from '../../fields/config/types';
+import { Field, RadioField, RelationshipField, SelectField, UploadField, ArrayField, GroupField, RichTextField, NumberField, TextField, EmailField, TextareaField, CodeField, DateField, PointField, CheckboxField, BlockField, RowField, CollapsibleField, TabsField } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
@@ -23,7 +23,6 @@ import { toWords } from '../../utilities/formatLabels';
 import createRichTextRelationshipPromise from '../../fields/richText/relationshipPromise';
 import formatOptions from '../utilities/formatOptions';
 import { Payload } from '../..';
-import find from '../../collections/operations/find';
 import buildWhereInputType from './buildWhereInputType';
 import buildBlockType from './buildBlockType';
 
@@ -43,7 +42,23 @@ export type ObjectTypeConfig = {
   [path: string]: GraphQLFieldConfig<any, any>
 }
 
-function buildObjectType(payload: Payload, name: string, fields: Field[], parentName: string, baseFields: ObjectTypeConfig = {}): GraphQLObjectType {
+type Args = {
+  payload: Payload
+  name: string
+  parentName: string
+  fields: Field[]
+  baseFields?: ObjectTypeConfig
+  forceNullable?: boolean
+}
+
+function buildObjectType({
+  payload,
+  name,
+  fields,
+  parentName,
+  baseFields = {},
+  forceNullable,
+}: Args): GraphQLObjectType {
   const fieldToSchemaMap = {
     number: (objectTypeConfig: ObjectTypeConfig, field: NumberField) => ({
       ...objectTypeConfig,
@@ -374,7 +389,13 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
     },
     array: (objectTypeConfig: ObjectTypeConfig, field: ArrayField) => {
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
-      const type = buildObjectType(payload, fullName, field.fields, fullName);
+      const type = buildObjectType({
+        payload,
+        name: fullName,
+        fields: field.fields,
+        parentName: fullName,
+        forceNullable,
+      });
       const arrayType = new GraphQLList(withNullableType(field, type));
 
       return {
@@ -384,7 +405,13 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
     },
     group: (objectTypeConfig: ObjectTypeConfig, field: GroupField) => {
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
-      const type = buildObjectType(payload, fullName, field.fields, fullName);
+      const type = buildObjectType({
+        payload,
+        name: fullName,
+        parentName: fullName,
+        fields: field.fields,
+        forceNullable,
+      });
 
       return {
         ...objectTypeConfig,
@@ -393,7 +420,11 @@ function buildObjectType(payload: Payload, name: string, fields: Field[], parent
     },
     blocks: (objectTypeConfig: ObjectTypeConfig, field: BlockField) => {
       const blockTypes = field.blocks.map((block) => {
-        buildBlockType(payload, block);
+        buildBlockType({
+          payload,
+          block,
+          forceNullable,
+        });
         return payload.types.blockTypes[block.slug];
       });
 

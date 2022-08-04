@@ -45,6 +45,7 @@ function initCollectionsGraphQL(payload: Payload): void {
         },
         fields,
         timestamps,
+        versions,
       },
     } = collection;
 
@@ -101,13 +102,16 @@ function initCollectionsGraphQL(payload: Payload): void {
       });
     }
 
-    collection.graphQL.type = buildObjectType(
+    const forceNullableObjectType = Boolean(versions?.drafts);
+
+    collection.graphQL.type = buildObjectType({
       payload,
-      singularLabel,
+      name: singularLabel,
+      parentName: singularLabel,
       fields,
-      singularLabel,
       baseFields,
-    );
+      forceNullable: forceNullableObjectType,
+    });
 
     collection.graphQL.whereInputType = buildWhereInputType(
       singularLabel,
@@ -214,13 +218,15 @@ function initCollectionsGraphQL(payload: Payload): void {
           type: 'date',
         },
       ];
-      collection.graphQL.versionType = buildObjectType(
+
+      collection.graphQL.versionType = buildObjectType({
         payload,
-        `${singularLabel}Version`,
-        versionCollectionFields,
-        `${singularLabel}Version`,
-        {},
-      );
+        name: `${singularLabel}Version`,
+        fields: versionCollectionFields,
+        parentName: `${singularLabel}Version`,
+        forceNullable: forceNullableObjectType,
+      });
+
       payload.Query.fields[`version${formatName(singularLabel)}`] = {
         type: collection.graphQL.versionType,
         args: {
@@ -262,10 +268,10 @@ function initCollectionsGraphQL(payload: Payload): void {
     }
 
     if (collection.config.auth) {
-      collection.graphQL.JWT = buildObjectType(
+      collection.graphQL.JWT = buildObjectType({
         payload,
-        formatName(`${slug}JWT`),
-        collection.config.fields.filter((field) => fieldAffectsData(field) && field.saveToJWT).concat([
+        name: formatName(`${slug}JWT`),
+        fields: collection.config.fields.filter((field) => fieldAffectsData(field) && field.saveToJWT).concat([
           {
             name: 'email',
             type: 'email',
@@ -277,8 +283,8 @@ function initCollectionsGraphQL(payload: Payload): void {
             required: true,
           },
         ]),
-        formatName(`${slug}JWT`),
-      );
+        parentName: formatName(`${slug}JWT`),
+      });
 
       payload.Query.fields[`me${singularLabel}`] = {
         type: new GraphQLObjectType({

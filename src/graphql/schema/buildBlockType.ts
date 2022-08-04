@@ -4,7 +4,17 @@ import { Block } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import buildObjectType from './buildObjectType';
 
-function buildBlockType(payload: Payload, block: Block): void {
+type Args = {
+  payload: Payload
+  block: Block
+  forceNullable?: boolean
+}
+
+function buildBlockType({
+  payload,
+  block,
+  forceNullable,
+}: Args): void {
   const {
     slug,
     labels: {
@@ -14,18 +24,19 @@ function buildBlockType(payload: Payload, block: Block): void {
 
   if (!payload.types.blockTypes[slug]) {
     const formattedBlockName = formatName(singular);
-    payload.types.blockTypes[slug] = buildObjectType(
+    payload.types.blockTypes[slug] = buildObjectType({
       payload,
-      formattedBlockName,
-      [
+      name: formattedBlockName,
+      parentName: formattedBlockName,
+      fields: [
         ...block.fields,
         {
           name: 'blockType',
           type: 'text',
         },
       ],
-      formattedBlockName,
-    );
+      forceNullable,
+    });
   }
 }
 

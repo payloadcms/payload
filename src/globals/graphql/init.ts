@@ -21,18 +21,22 @@ function initGlobalsGraphQL(payload: Payload): void {
       const {
         label,
         fields,
+        versions,
       } = global;
 
       const formattedLabel = formatName(label);
 
       global.graphQL = {};
 
-      global.graphQL.type = buildObjectType(
+      const forceNullableObjectType = Boolean(versions?.drafts);
+
+      global.graphQL.type = buildObjectType({
         payload,
-        formattedLabel,
+        name: formattedLabel,
+        parentName: formattedLabel,
         fields,
-        formattedLabel,
-      );
+        forceNullable: forceNullableObjectType,
+      });
 
       global.graphQL.mutationInputType = new GraphQLNonNull(buildMutationInputType(
         payload,
@@ -80,13 +84,15 @@ function initGlobalsGraphQL(payload: Payload): void {
             type: 'date',
           },
         ];
-        global.graphQL.versionType = buildObjectType(
+
+        global.graphQL.versionType = buildObjectType({
           payload,
-          `${formattedLabel}Version`,
-          versionGlobalFields,
-          `${formattedLabel}Version`,
-          {},
-        );
+          name: `${formattedLabel}Version`,
+          parentName: `${formattedLabel}Version`,
+          fields: versionGlobalFields,
+          forceNullable: forceNullableObjectType,
+        });
+
         payload.Query.fields[`version${formatName(formattedLabel)}`] = {
           type: global.graphQL.versionType,
           args: {
