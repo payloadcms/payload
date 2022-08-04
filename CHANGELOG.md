@@ -1,3 +1,16 @@
+## [1.0.14](https://github.com/payloadcms/payload/compare/v1.0.13...v1.0.14) (2022-08-04)
+
+
+### Bug Fixes
+
+* [#884](https://github.com/payloadcms/payload/issues/884) ([e9b3f3f](https://github.com/payloadcms/payload/commit/e9b3f3f060d134f3ed4b410adddb9d2593f6ee95))
+* allows querying incomplete drafts in graphql ([8d968b7](https://github.com/payloadcms/payload/commit/8d968b7690c147685d569c334c108d8830ee7581))
+
+
+### Features
+
+* allows querying on rich text content ([3343adb](https://github.com/payloadcms/payload/commit/3343adb95257daae0be49daf6c768788292ef267))
+
 ## [1.0.13](https://github.com/payloadcms/payload/compare/v1.0.12...v1.0.13) (2022-08-03)
 
 
