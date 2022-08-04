@@ -38,6 +38,17 @@ export default buildConfig({
   },
   collections: [
     {
+      slug: 'users',
+      auth: true,
+      fields: [
+        {
+          name: 'relation',
+          type: 'relationship',
+          relationTo: slug,
+        },
+      ],
+    },
+    {
       slug,
       access: openAccess,
       fields: [
@@ -133,14 +144,6 @@ export default buildConfig({
     },
   ],
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    });
-
     const collection = slug;
 
     await payload.create({
@@ -156,6 +159,16 @@ export default buildConfig({
         title: englishTitle,
       },
     });
+
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+        relation: localizedPost.id,
+      },
+    });
+
     await payload.update<LocalizedPost>({
       collection,
       id: localizedPost.id,
@@ -171,6 +184,7 @@ export default buildConfig({
         title: relationEnglishTitle,
       },
     });
+
     await payload.update<LocalizedPost>({
       collection,
       id: localizedPost.id,
