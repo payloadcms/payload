@@ -259,15 +259,17 @@ describe('admin', () => {
 
         await upChevron.click({ delay: 100 });
 
-        // Order should have swapped
-        expect(await getFirstId()).toEqual(secondId);
-        expect(await getSecondId()).toEqual(firstId);
+        const sorted = [firstId, secondId].sort((a, b) => (a.localeCompare(b)));
+
+        // order should be ascending
+        expect(await getFirstId()).toEqual(sorted[0]);
+        expect(await getSecondId()).toEqual(sorted[1]);
 
         await downChevron.click({ delay: 100 });
 
         // Swap back
-        expect(await getFirstId()).toEqual(firstId);
-        expect(await getSecondId()).toEqual(secondId);
+        expect(await getFirstId()).toEqual(sorted[1]);
+        expect(await getSecondId()).toEqual(sorted[0]);
       });
     });
   });
