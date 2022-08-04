@@ -14,7 +14,7 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
     },
   );
 
-  schema.plugin(paginate, { useEstimatedCount: true })
+  schema.plugin(paginate)
     .plugin(buildQueryPlugin);
 
   return schema;

@@ -34,10 +34,10 @@ export default function initGlobals(ctx: Payload): void {
           },
         );
 
-        versionSchema.plugin(paginate, { useEstimatedCount: true })
+        versionSchema.plugin(paginate)
           .plugin(buildQueryPlugin);
 
-        ctx.versions[global.slug] = mongoose.model(versionModelName, versionSchema) as CollectionModel;
+        ctx.versions[global.slug] = mongoose.model(versionModelName, versionSchema) as unknown as CollectionModel;
       }
     });
 
