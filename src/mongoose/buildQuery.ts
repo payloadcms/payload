@@ -199,6 +199,10 @@ class ParamParser {
           ];
           return;
         }
+
+        if (priorSchemaType.instance === 'Mixed') {
+          lastIncompletePath.path = currentPath;
+        }
       }
 
       if (operator === 'near') {

@@ -232,4 +232,30 @@ describe('Fields', () => {
       expect(blockFields.docs[0].blocks[2].subBlocks[1].text).toEqual(blocksFieldSeedData[2].subBlocks[1].text);
     });
   });
+
+  describe('richText', () => {
+    it('should allow querying on rich text content', async () => {
+      const emptyRichTextQuery = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.text': {
+            like: 'doesnt exist',
+          },
+        },
+      });
+
+      expect(emptyRichTextQuery.docs).toHaveLength(0);
+
+      const workingRichTextQuery = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.text': {
+            like: 'hello',
+          },
+        },
+      });
+
+      expect(workingRichTextQuery.docs).toHaveLength(1);
+    });
+  });
 });
