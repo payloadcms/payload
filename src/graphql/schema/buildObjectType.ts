@@ -62,36 +62,36 @@ function buildObjectType({
   const fieldToSchemaMap = {
     number: (objectTypeConfig: ObjectTypeConfig, field: NumberField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLFloat) },
+      [field.name]: { type: withNullableType(field, GraphQLFloat, forceNullable) },
     }),
     text: (objectTypeConfig: ObjectTypeConfig, field: TextField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLString) },
+      [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
     }),
     email: (objectTypeConfig: ObjectTypeConfig, field: EmailField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, EmailAddressResolver) },
+      [field.name]: { type: withNullableType(field, EmailAddressResolver, forceNullable) },
     }),
     textarea: (objectTypeConfig: ObjectTypeConfig, field: TextareaField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLString) },
+      [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
     }),
     code: (objectTypeConfig: ObjectTypeConfig, field: CodeField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLString) },
+      [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
     }),
     date: (objectTypeConfig: ObjectTypeConfig, field: DateField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, DateTimeResolver) },
+      [field.name]: { type: withNullableType(field, DateTimeResolver, forceNullable) },
     }),
     point: (objectTypeConfig: ObjectTypeConfig, field: PointField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, new GraphQLList(GraphQLFloat)) },
+      [field.name]: { type: withNullableType(field, new GraphQLList(GraphQLFloat), forceNullable) },
     }),
     richText: (objectTypeConfig: ObjectTypeConfig, field: RichTextField) => ({
       ...objectTypeConfig,
       [field.name]: {
-        type: withNullableType(field, GraphQLJSON),
+        type: withNullableType(field, GraphQLJSON, forceNullable),
         async resolve(parent, args, context) {
           if (args.depth > 0) {
             await createRichTextRelationshipPromise({
@@ -191,12 +191,13 @@ function buildObjectType({
             name: combineParentName(parentName, field.name),
             values: formatOptions(field),
           }),
+          forceNullable,
         ),
       },
     }),
     checkbox: (objectTypeConfig: ObjectTypeConfig, field: CheckboxField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLBoolean) },
+      [field.name]: { type: withNullableType(field, GraphQLBoolean, forceNullable) },
     }),
     select: (objectTypeConfig: ObjectTypeConfig, field: SelectField) => {
       const fullName = combineParentName(parentName, field.name);
@@ -207,7 +208,7 @@ function buildObjectType({
       });
 
       type = field.hasMany ? new GraphQLList(type) : type;
-      type = withNullableType(field, type);
+      type = withNullableType(field, type, forceNullable);
 
       return {
         ...objectTypeConfig,
@@ -396,7 +397,7 @@ function buildObjectType({
         parentName: fullName,
         forceNullable,
       });
-      const arrayType = new GraphQLList(withNullableType(field, type));
+      const arrayType = new GraphQLList(withNullableType(field, type, forceNullable));
 
       return {
         ...objectTypeConfig,
