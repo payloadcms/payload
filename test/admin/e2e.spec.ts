@@ -246,6 +246,7 @@ describe('admin', () => {
         [1, 2].map(async () => {
           sorted.push(await createPost());
         });
+        sorted.sort((a, b) => a.localeCompare(b));
       });
 
       test('should sort ascending', async () => {
