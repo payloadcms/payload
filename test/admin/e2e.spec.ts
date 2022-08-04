@@ -237,39 +237,35 @@ describe('admin', () => {
     });
 
     describe('sorting', () => {
-      beforeAll(async () => {
+      let sorted;
+      const getFirstId = async () => page.locator('.row-1 .cell-id').innerText();
+      const getSecondId = async () => page.locator('.row-2 .cell-id').innerText();
+
+      beforeEach(async () => {
+        sorted = [];
         [1, 2].map(async () => {
-          await createPost();
+          sorted.push(await createPost());
         });
       });
 
-      test('should sort', async () => {
+      test('should sort ascending', async () => {
         const getTableItems = () => page.locator(tableRowLocator);
 
-        await expect(getTableItems()).toHaveCount(2);
+        await expect(await getTableItems()).toHaveCount(2);
 
         const upChevron = page.locator('#heading-id .sort-column__asc');
+        await upChevron.click();
+
+        expect(await getFirstId()).toEqual(sorted[0].id);
+        expect(await getSecondId()).toEqual(sorted[1].id);
+      });
+
+      test('should sort descending', async () => {
         const downChevron = page.locator('#heading-id .sort-column__desc');
+        await downChevron.click();
 
-        const getFirstId = async () => page.locator('.row-1 .cell-id').innerText();
-        const getSecondId = async () => page.locator('.row-2 .cell-id').innerText();
-
-        const firstId = await getFirstId();
-        const secondId = await getSecondId();
-
-        await upChevron.click({ delay: 100 });
-
-        const sorted = [firstId, secondId].sort((a, b) => (a.localeCompare(b)));
-
-        // order should be ascending
-        expect(await getFirstId()).toEqual(sorted[0]);
-        expect(await getSecondId()).toEqual(sorted[1]);
-
-        await downChevron.click({ delay: 100 });
-
-        // Swap back
-        expect(await getFirstId()).toEqual(sorted[1]);
-        expect(await getSecondId()).toEqual(sorted[0]);
+        expect(await getFirstId()).toEqual(sorted[1].id);
+        expect(await getSecondId()).toEqual(sorted[0].id);
       });
     });
   });
