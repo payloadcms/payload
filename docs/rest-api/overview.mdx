@@ -103,9 +103,9 @@ const Orders = {
       handler: async (req, res, next) => {
         const tracking = await getTrackingInfo(req.params.id);
         if (tracking) {
-          res.status('200').send({ tracking });
+          res.status(200).send({ tracking });
         } else {
-          res.status('404').send({ error: 'not found' });
+          res.status(404).send({ error: 'not found' });
         }
       }
     }
