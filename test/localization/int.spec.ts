@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
 import payload from '../../src';
 import type { LocalizedPost, WithLocalizedRelationship, LocalizedRequired } from './payload-types';
@@ -18,12 +19,14 @@ import type { Where } from '../../src/types';
 
 const collection = config.collections[1]?.slug;
 
+let serverURL;
+
 describe('Localization', () => {
   let post1: LocalizedPost;
   let postWithLocalizedData: LocalizedPost;
 
   beforeAll(async () => {
-    await initPayloadTest({ __dirname });
+    ({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }));
 
     post1 = await payload.create({
       collection,
@@ -504,6 +507,59 @@ describe('Localization', () => {
       });
 
       expect(spanishDoc.layout[0].blockType).toStrictEqual('number');
+    });
+  });
+
+  describe('Localized - GraphQL', () => {
+    let token;
+
+    it('should allow user to login and retrieve populated localized field', async () => {
+      const url = `${serverURL}${config.routes.api}${config.routes.graphQL}?locale=en`;
+      const client = new GraphQLClient(url);
+
+      const query = `mutation {
+        loginUser(email: "dev@payloadcms.com", password: "test") {
+          token
+          user {
+            relation {
+              title
+            }
+          }
+        }
+      }`;
+
+      const response = await client.request(query);
+      const result = response.loginUser;
+
+      expect(typeof result.token).toStrictEqual('string');
+      expect(typeof result.user.relation.title).toStrictEqual('string');
+
+      token = result.token;
+    });
+
+    it('should allow retrieval of populated localized fields within meUser', async () => {
+      // Defining locale=en in graphQL string should not break JWT strategy
+      const url = `${serverURL}${config.routes.api}${config.routes.graphQL}?locale=en`;
+      const client = new GraphQLClient(url);
+
+      const query = `query {
+        meUser {
+          user {
+            id
+            relation {
+              title
+            }
+          }
+        }
+      }`;
+
+      const response = await client.request(query, null, {
+        Authorization: `JWT ${token}`,
+      });
+
+      const result = response.meUser;
+
+      expect(typeof result.user.relation.title).toStrictEqual('string');
     });
   });
 });

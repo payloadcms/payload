@@ -1,3 +1,4 @@
+import url from 'url';
 import passportJwt, { StrategyOptions } from 'passport-jwt';
 import { Strategy as PassportStrategy } from 'passport-strategy';
 import { Payload } from '../..';
@@ -21,7 +22,8 @@ export default ({ secret, config, collections }: Payload): PassportStrategy => {
     try {
       const collection = collections[token.collection];
 
-      const isGraphQL = (req.url || '').replace(/\/$/, '') === config.routes.graphQL.replace(/\/$/, '');
+      const parsedURL = url.parse(req.url);
+      const isGraphQL = parsedURL.pathname === config.routes.graphQL;
 
       const user = await findByID({
         id: token.id,
