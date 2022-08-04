@@ -16,7 +16,7 @@ import {
 } from './shared';
 import type { Where } from '../../src/types';
 
-const collection = config.collections[0]?.slug;
+const collection = config.collections[1]?.slug;
 
 describe('Localization', () => {
   let post1: LocalizedPost;
