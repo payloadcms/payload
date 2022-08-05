@@ -181,14 +181,27 @@ export type CollapsibleField = Omit<FieldBase, 'name'> & {
 
 export type TabsAdmin = Omit<Admin, 'description'>;
 
-export type TabsField = Omit<FieldBase, 'admin' | 'name'> & {
+type BaseTab = {
+  fields: Field[]
+  description?: Description
+}
+
+type NamedTab = BaseTab & {
+  name: string
+  localized?: boolean
+  label?: string
+}
+
+type UnnamedTab = BaseTab & {
+  label: string
+  localized?: never
+}
+
+export type Tab = NamedTab | UnnamedTab
+
+export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized'> & {
   type: 'tabs';
-  tabs: {
-    name?: string
-    label: string
-    fields: Field[];
-    description?: Description
-  }[]
+  tabs: Tab[]
   admin?: TabsAdmin
 }
 
@@ -449,6 +462,14 @@ export function fieldIsPresentationalOnly(field: Field): field is UIField {
 
 export function fieldAffectsData(field: Field): field is FieldAffectingData {
   return 'name' in field && !fieldIsPresentationalOnly(field);
+}
+
+export function tabHasName(tab: Tab): tab is NamedTab {
+  return 'name' in tab;
+}
+
+export function fieldIsLocalized(field: Field): boolean {
+  return 'localized' in field && field.localized;
 }
 
 export type HookName = 'beforeRead' | 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';

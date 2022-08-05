@@ -8,55 +8,34 @@
 export interface Config {}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "autosave-global".
  */
-export interface Post {
+export interface AutosaveGlobal {
   id: string;
-  restrictedField?: string;
+  _status?: 'draft' | 'published';
+  title: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-posts".
+ */
+export interface AutosavePost {
+  id: string;
+  _status?: 'draft' | 'published';
+  title: string;
+  description: string;
   createdAt: string;
   updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "restricted".
+ * via the `definition` "draft-posts".
  */
-export interface Restricted {
+export interface DraftPost {
   id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "read-only-collection".
- */
-export interface ReadOnlyCollection {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "restricted-versions".
- */
-export interface RestrictedVersion {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "sibling-data".
- */
-export interface SiblingDatum {
-  id: string;
-  array?: {
-    allowPublicReadability?: boolean;
-    text?: string;
-    id?: string;
-  }[];
+  _status?: 'draft' | 'published';
+  title: string;
+  description: string;
   createdAt: string;
   updatedAt: string;
 }

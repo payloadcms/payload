@@ -4,11 +4,13 @@ import { RESTClient } from '../helpers/rest';
 import config from '../uploads/config';
 import payload from '../../src';
 import { pointDoc } from './collections/Point';
+import type { ArrayField, BlockField, GroupField, TabsField } from './payload-types';
 import type { ArrayField, GroupField } from './payload-types';
 import { arrayFieldsSlug, arrayDefaultValue, arrayDoc } from './collections/Array';
 import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
 import { defaultText } from './collections/Text';
 import { blocksFieldSeedData } from './collections/Blocks';
+import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
 import { defaultNumber, numberDoc } from './collections/Number';
 
 let client;
@@ -279,6 +281,29 @@ describe('Fields', () => {
     it('should create with defaultValue', async () => {
       expect(document.group.defaultParent).toStrictEqual(groupDefaultValue);
       expect(document.group.defaultChild).toStrictEqual(groupDefaultChild);
+    });
+  });
+
+  describe('tabs', () => {
+    let document;
+
+    beforeAll(async () => {
+      document = await payload.create<TabsField>({
+        collection: tabsSlug,
+        data: tabsDoc,
+      });
+    });
+
+    it('should create with fields inside a named tab', async () => {
+      expect(document.tab.text).toStrictEqual(namedTabText);
+    });
+
+    it('should create with defaultValue inside a named tab', async () => {
+      expect(document.tab.defaultValue).toStrictEqual(namedTabDefaultValue);
+    });
+
+    it('should create with localized text inside a named tab', async () => {
+      expect(document.localizedTab.text).toStrictEqual(localizedTextValue);
     });
 
     it('should return empty object for groups when no data present', async () => {

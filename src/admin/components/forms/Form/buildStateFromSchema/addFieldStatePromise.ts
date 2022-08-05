@@ -1,7 +1,12 @@
 /* eslint-disable no-param-reassign */
 import ObjectID from 'bson-objectid';
 import { User } from '../../../../../auth';
-import { NonPresentationalField, fieldAffectsData, fieldHasSubFields } from '../../../../../fields/config/types';
+import {
+  NonPresentationalField,
+  fieldAffectsData,
+  fieldHasSubFields,
+  tabHasName,
+} from '../../../../../fields/config/types';
 import getValueWithDefault from '../../../../../fields/getDefaultValue';
 import { Fields, Field, Data } from '../types';
 import { iterateFields } from './iterateFields';
@@ -213,9 +218,9 @@ export const addFieldStatePromise = async ({
       iterateFields({
         state,
         fields: tab.fields,
-        data: tab.name ? data?.[tab.name] : data,
+        data: tabHasName(tab) ? data?.[tab.name] : data,
         parentPassesCondition: passesCondition,
-        path: tab.name ? `${path}${tab.name}.` : path,
+        path: tabHasName(tab) ? `${path}${tab.name}.` : path,
         user,
         fieldPromises,
         fullData,

@@ -6,6 +6,7 @@ import { login, saveDocAndAssert } from '../helpers';
 import { textDoc } from './collections/Text';
 import { arrayFieldsSlug } from './collections/Array';
 import { pointFieldsSlug } from './collections/Point';
+import { tabsSlug } from './collections/Tabs';
 import wait from '../../src/utilities/wait';
 
 const { beforeAll, describe } = test;
@@ -88,7 +89,7 @@ describe('fields', () => {
   describe('fields - tabs', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, 'tabs-fields');
+      url = new AdminUrlUtil(serverURL, tabsSlug);
     });
 
     test('should fill and retain a new value within a tab while switching tabs', async () => {
@@ -101,7 +102,7 @@ describe('fields', () => {
       await page.locator('#field-textInRow').fill(textInRowValue);
       await page.locator('#field-numberInRow').fill(numberInRowValue);
 
-      await wait(500);
+      await wait(100);
 
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click();
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();
@@ -119,7 +120,7 @@ describe('fields', () => {
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();
       await page.locator('#field-textInRow').fill(textInRowValue);
 
-      await wait(500);
+      await wait(100);
 
       // Go to Array tab, then back to Row. Make sure new value is still there
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click();
@@ -131,7 +132,7 @@ describe('fields', () => {
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click();
       await page.click('#action-save', { delay: 100 });
 
-      await wait(500);
+      await wait(100);
 
       // Go back to row tab, make sure the new value is still present
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();

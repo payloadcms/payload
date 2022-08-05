@@ -4,7 +4,33 @@
 /* eslint-disable no-use-before-define */
 import { IndexDefinition, IndexOptions, Schema, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
-import { ArrayField, Block, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NonPresentationalField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextareaField, TextField, UploadField } from '../fields/config/types';
+import {
+  ArrayField,
+  Block,
+  BlockField,
+  CheckboxField,
+  CodeField,
+  CollapsibleField,
+  DateField,
+  EmailField,
+  Field,
+  fieldAffectsData, fieldIsLocalized,
+  fieldIsPresentationalOnly,
+  GroupField,
+  NonPresentationalField,
+  NumberField,
+  PointField,
+  RadioField,
+  RelationshipField,
+  RichTextField,
+  RowField,
+  SelectField,
+  tabHasName,
+  TabsField,
+  TextareaField,
+  TextField,
+  UploadField,
+} from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
 
 export type BuildSchemaOptions = {
@@ -22,14 +48,14 @@ type Index = {
 }
 
 const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: BuildSchemaOptions) => ({
-  sparse: field.unique && field.localized,
+  sparse: field.unique && fieldIsLocalized(field),
   unique: (!buildSchemaOptions.disableUnique && field.unique) || false,
   required: false,
   index: field.index || field.unique || false,
 });
 
 const localizeSchema = (field: NonPresentationalField, schema, localization) => {
-  if (field.localized && localization && Array.isArray(localization.locales)) {
+  if (fieldIsLocalized(field) && localization && Array.isArray(localization.locales)) {
     return {
       type: localization.locales.reduce((localeSchema, locale) => ({
         ...localeSchema,
@@ -297,7 +323,7 @@ const fieldToSchemaMap = {
   },
   tabs: (field: TabsField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     field.tabs.forEach((tab) => {
-      if (tab.name) {
+      if (tabHasName(tab)) {
         const formattedBaseSchema = formatBaseSchema(field, buildSchemaOptions);
 
         const baseSchema = {
@@ -311,7 +337,9 @@ const fieldToSchemaMap = {
           }),
         };
 
-        newFields[tab.name] = localizeSchema(field, baseSchema, config.localization);
+        schema.add({
+          [tab.name]: localizeSchema(field, baseSchema, config.localization),
+        });
       } else {
         tab.fields.forEach((subField: Field) => {
           const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
@@ -345,7 +373,7 @@ const fieldToSchemaMap = {
 
     const baseSchema = {
       ...formattedBaseSchema,
-      required: required && field.fields.some((subField) => (!fieldIsPresentationalOnly(subField) && subField.required && !subField.localized && !subField?.admin?.condition && !subField?.access?.create)),
+      required: required && field.fields.some((subField) => (!fieldIsPresentationalOnly(subField) && subField.required && !fieldIsLocalized(subField) && !subField?.admin?.condition && !subField?.access?.create)),
       type: buildSchema(config, field.fields, {
         options: {
           _id: false,

@@ -1,4 +1,4 @@
-import { Field, fieldHasSubFields, fieldAffectsData } from '../../../../../fields/config/types';
+import { Field, fieldHasSubFields, fieldAffectsData, tabHasName } from '../../../../../fields/config/types';
 
 const getRemainingColumns = (fields: Field[], useAsTitle: string): string[] => fields.reduce((remaining, field) => {
   if (fieldAffectsData(field) && field.name === useAsTitle) {
@@ -17,7 +17,7 @@ const getRemainingColumns = (fields: Field[], useAsTitle: string): string[] => f
       ...remaining,
       ...field.tabs.reduce((tabFieldColumns, tab) => [
         ...tabFieldColumns,
-        ...(tab.name ? [tab.name] : getRemainingColumns(tab.fields, useAsTitle)),
+        ...(tabHasName(tab) ? [tab.name] : getRemainingColumns(tab.fields, useAsTitle)),
       ], []),
     ];
   }

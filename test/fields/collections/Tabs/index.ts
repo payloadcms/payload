@@ -2,8 +2,14 @@ import type { CollectionConfig } from '../../../../src/collections/config/types'
 import { blocksField, blocksFieldSeedData } from '../Blocks';
 import { UIField } from './UIField';
 
+export const tabsSlug = 'tabs-fields';
+
+export const namedTabText = 'Some text in a named tab';
+export const namedTabDefaultValue = 'default text inside of a named tab';
+export const localizedTextValue = 'localized text';
+
 const TabsFields: CollectionConfig = {
-  slug: 'tabs-fields',
+  slug: tabsSlug,
   versions: true,
   fields: [
     {
@@ -116,6 +122,39 @@ const TabsFields: CollectionConfig = {
               name: 'text',
               type: 'text',
             },
+            {
+              name: 'defaultValue',
+              type: 'text',
+              defaultValue: namedTabDefaultValue,
+            },
+          ],
+        },
+        {
+          name: 'localizedTab',
+          label: 'Localized Tab',
+          localized: true,
+          description: 'This tab is localized and requires a name',
+          fields: [
+            {
+              name: 'array',
+              labels: {
+                singular: 'Item',
+                plural: 'Items',
+              },
+              type: 'array',
+              required: true,
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                  required: true,
+                },
+              ],
+            },
+            {
+              name: 'text',
+              type: 'text',
+            },
           ],
         },
       ],
@@ -197,7 +236,21 @@ export const tabsDoc = {
         text: 'Here is some data for the third row, in a named tab',
       },
     ],
-    text: 'Some text in a named tab',
+    text: namedTabText,
+  },
+  localizedTab: {
+    array: [
+      {
+        text: "Hello, I'm the first row, in a named tab",
+      },
+      {
+        text: 'Second row here, in a named tab',
+      },
+      {
+        text: 'Here is some data for the third row, in a named tab',
+      },
+    ],
+    text: localizedTextValue,
   },
   textarea: 'Here is some text that goes in a textarea',
   anotherText: 'Super tired of writing this text',

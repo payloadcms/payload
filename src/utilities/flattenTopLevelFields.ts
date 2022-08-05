@@ -1,4 +1,12 @@
-import { Field, FieldAffectingData, fieldAffectsData, fieldHasSubFields, fieldIsPresentationalOnly, FieldPresentationalOnly } from '../fields/config/types';
+import {
+  Field,
+  FieldAffectingData,
+  fieldAffectsData,
+  fieldHasSubFields,
+  fieldIsPresentationalOnly,
+  FieldPresentationalOnly,
+  tabHasName,
+} from '../fields/config/types';
 
 const flattenFields = (fields: Field[], keepPresentationalFields?: boolean): (FieldAffectingData | FieldPresentationalOnly)[] => {
   return fields.reduce((fieldsToUse, field) => {
@@ -22,7 +30,7 @@ const flattenFields = (fields: Field[], keepPresentationalFields?: boolean): (Fi
         ...field.tabs.reduce((tabFields, tab) => {
           return [
             ...tabFields,
-            ...(tab.name ? [tab] : flattenFields(tab.fields, keepPresentationalFields)),
+            ...(tabHasName(tab) ? [tab] : flattenFields(tab.fields, keepPresentationalFields)),
           ];
         }, []),
       ];

@@ -15,7 +15,29 @@ import {
   GraphQLUnionType,
 } from 'graphql';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { Field, RadioField, RelationshipField, SelectField, UploadField, ArrayField, GroupField, RichTextField, NumberField, TextField, EmailField, TextareaField, CodeField, DateField, PointField, CheckboxField, BlockField, RowField, CollapsibleField, TabsField } from '../../fields/config/types';
+import {
+  Field,
+  RadioField,
+  RelationshipField,
+  SelectField,
+  UploadField,
+  ArrayField,
+  GroupField,
+  RichTextField,
+  NumberField,
+  TextField,
+  EmailField,
+  TextareaField,
+  CodeField,
+  DateField,
+  PointField,
+  CheckboxField,
+  BlockField,
+  RowField,
+  CollapsibleField,
+  TabsField,
+  tabHasName,
+} from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
@@ -453,9 +475,15 @@ function buildObjectType({
       return objectTypeConfigWithCollapsibleFields;
     }, objectTypeConfig),
     tabs: (objectTypeConfig: ObjectTypeConfig, field: TabsField) => field.tabs.reduce((tabSchema, tab) => {
-      if (tab.name) {
+      if (tabHasName(tab)) {
         const fullName = combineParentName(parentName, toWords(tab.name, true));
-        const type = buildObjectType(payload, fullName, tab.fields, fullName);
+        const type = buildObjectType({
+          payload,
+          name: fullName,
+          parentName: fullName,
+          fields: tab.fields,
+          forceNullable,
+        });
 
         return {
           ...tabSchema,
