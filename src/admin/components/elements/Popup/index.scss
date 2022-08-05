@@ -8,6 +8,7 @@
     background: var(--theme-input-bg);
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
     z-index: var(--z-popup);
     max-width: calc(100vw - #{$baseline});
 
@@ -187,6 +188,7 @@
     .popup__content {
       opacity: 1;
       visibility: visible;
+      pointer-events: all;
     }
   }
 
