@@ -16,7 +16,7 @@ export const getHandleDelete = ({ connectionString, containerName }: Args): Hand
   return async ({ doc }) => {
     const filesToDelete: string[] = [
       doc.filename,
-      ...Object.values(doc.sizes).map(resizedFileData => resizedFileData.filename),
+      ...Object.values(doc?.sizes || []).map(resizedFileData => resizedFileData?.filename),
     ]
 
     for (const fileName of filesToDelete) {
