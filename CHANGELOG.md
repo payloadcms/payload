@@ -1,3 +1,10 @@
+## [1.0.17](https://github.com/payloadcms/payload/compare/v1.0.16...v1.0.17) (2022-08-06)
+
+
+### Bug Fixes
+
+* [#898](https://github.com/payloadcms/payload/issues/898) ([209b02b](https://github.com/payloadcms/payload/commit/209b02b0699b17d060dab3cc09cdd06ad813c053))
+
 ## [1.0.16](https://github.com/payloadcms/payload/compare/v1.0.15...v1.0.16) (2022-08-05)
 
 
