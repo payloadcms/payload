@@ -2,6 +2,7 @@ import type { Adapter, GeneratedAdapter } from '../../types'
 import { getGenerateURL } from './generateURL'
 import { getHandleDelete } from './handleDelete'
 import { getHandleUpload } from './handleUpload'
+import { extendWebpackConfig } from './webpack'
 
 export interface Args {
   connectionString: string
@@ -23,5 +24,6 @@ export const azureBlobStorageAdapter =
       }),
       handleDelete: getHandleDelete({ collection, connectionString, containerName, baseURL }),
       generateURL: getGenerateURL({ containerName, baseURL }),
+      webpack: extendWebpackConfig,
     }
   }

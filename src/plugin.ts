@@ -19,10 +19,12 @@ export const cloudStorage =
   (config: Config): Config => {
     const { collections: allCollectionOptions } = pluginOptions
 
+    const webpack = extendWebpackConfig({ options: pluginOptions, config })
+
     return {
       ...config,
       admin: {
-        webpack: extendWebpackConfig({ options: pluginOptions, config }),
+        webpack,
       },
       collections: (config.collections || []).map(existingCollection => {
         const options = allCollectionOptions.find(({ slug }) => slug === existingCollection.slug)

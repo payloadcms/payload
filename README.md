@@ -17,7 +17,7 @@ import { cloudStorage } from '@payloadcms/plugin-cloud-storage';
 
 export default buildConfig({
   plugins: [
-  	cloudStorage({
+    cloudStorage({
       collections: [{
         slug: 'my-collection-slug',
         adapter: theAdapterToUse, // see docs for the adapter you want to use

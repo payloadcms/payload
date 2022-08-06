@@ -10,7 +10,7 @@ services:
       - "10001:10001"
       - "10002:10002"
     volumes:
-      - azurestoragedata:/data"
+      - ./azurestoragedata:/data"
 
 volumes:
   azurestoragedata:

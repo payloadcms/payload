@@ -8,7 +8,7 @@ export const extendWebpackConfig = (existingWebpackConfig: WebpackConfig): Webpa
       ...(existingWebpackConfig.resolve || {}),
       alias: {
         ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
-        '@azure/storage-blob': path.resolve(__dirname, './mock'),
+        '@azure/storage-blob': path.resolve(__dirname, './mock.js'),
       },
     },
   }
