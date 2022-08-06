@@ -34,7 +34,7 @@
     "eslint-plugin-import": "2.25.4",
     "eslint-plugin-prettier": "^4.0.0",
     "nodemon": "^2.0.6",
-    "payload": "^1.0.16",
+    "payload": "^1.0.18",
     "prettier": "^2.7.1",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
