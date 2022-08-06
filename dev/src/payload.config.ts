@@ -1,7 +1,7 @@
 import { buildConfig } from 'payload/config'
 import path from 'path'
 import Users from './collections/Users'
-import { cloudStorage } from '../../src/plugin'
+import { cloudStorage, azureBlobStorageAdapter } from '../../src'
 import { Media } from './collections/Media'
 
 export default buildConfig({
@@ -32,7 +32,13 @@ export default buildConfig({
     cloudStorage({
       collections: [
         {
-          slug: 'users',
+          slug: 'media',
+          adapter: azureBlobStorageAdapter({
+            connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
+            containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
+            allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
+            baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL,
+          }),
         },
       ],
     }),

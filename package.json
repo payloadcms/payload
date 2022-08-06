@@ -13,9 +13,16 @@
     "lint": "eslint src",
     "lint:fix": "eslint --fix --ext .ts,.tsx src"
   },
-  "dependencies": {
+  "peerDependencies": {
+    "@azure/storage-blob": "^12.11.0"
+  },
+  "peerDependenciesMeta": {
+    "@azure/storage-blob": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@azure/storage-blob": "^12.11.0",
     "@types/express": "^4.17.9",
     "@typescript-eslint/eslint-plugin": "5.12.1",
     "@typescript-eslint/parser": "5.12.1",

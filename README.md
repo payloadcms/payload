@@ -13,14 +13,14 @@ Install this plugin within your Payload as follows:
 ```ts
 import { buildConfig } from 'payload/config';
 import path from 'path';
-import Users from './collections/Users';
-import { cloudStorage } from '../../src/plugin';
+import { cloudStorage } from '@payloadcms/plugin-cloud-storage';
 
 export default buildConfig({
   plugins: [
   	cloudStorage({
       collections: [{
-        // options here
+        slug: 'my-collection-slug',
+        adapter: theAdapterToUse, // see docs for the adapter you want to use
       }]
     }),
   ],
@@ -33,7 +33,9 @@ export default buildConfig({
 **Adapter-based Implementation**
 This plugin supports the following adapters:
 
-- Azure Blob Storage
+- [Azure Blob Storage](#azure-blob-storage-adapter)
+
+However, you can create your own adapter for any third-party service you would like to use.
 
 ## Plugin options
 
@@ -45,9 +47,32 @@ This plugin is configurable to work across many different Payload collections. A
 
 #### Collection-specific options
 
-| Option                       | Description                                                                                                                                                                                                      |
-|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **[`slug`]** *               | The collection slug to extend.                                                                                                                                                                 |
+| Option                       | Description                     |
+|------------------------------|---------------------------------|
+| **[`slug`]** *               | The collection slug to extend.  |
+| **[`disableLocalStorage`]**  | Choose to disable local storage on this collection. Defaults to `true`. |
+| **[`adapter`]**              | Pass in the adapter that you'd like to use for this collection. |
+
+#### Azure Blob Storage Adapter
+
+To use the Azure Blob Storage adapter, you need to have `@azure/storage-blob` installed in your project dependencies. To do so, run `yarn add @azure/storage-blob`.
+
+From there, create the adapter, passing in all of its required properties:
+
+```js
+import { azureBlobStorageAdapter } from '@payloadcms/plugin-cloud-storage';
+
+const adapter = azureBlobStorageAdapter({
+  connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
+  containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
+  allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
+  baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL,
+})
+
+// Now you can pass this adapter to the plugin
+```
+
+**Important:** make sure you have all of the above environment variables filled out and that they reflect your Azure blob storage configuration.
 
 #### Local sandbox & plugin development
 

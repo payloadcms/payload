@@ -1,10 +1,8 @@
-import { CollectionConfig } from 'payload/types';
+import type { CollectionConfig } from 'payload/types'
 
 const Users: CollectionConfig = {
   slug: 'users',
-  auth: {
-    disableLocalStrategy: true,
-  },
+  auth: true,
   admin: {
     useAsTitle: 'upn',
   },
@@ -14,6 +12,6 @@ const Users: CollectionConfig = {
   fields: [
     // no fields in this demo necessary
   ],
-};
+}
 
-export default Users;
+export default Users

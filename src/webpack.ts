@@ -1,27 +1,45 @@
 import type { Config } from 'payload/config'
-import path from 'path'
 import type { Configuration as WebpackConfig } from 'webpack'
+import type { GeneratedAdapter, PluginOptions } from './types'
+
+interface Args {
+  config: Config
+  options: PluginOptions
+}
 
 export const extendWebpackConfig =
-  (config: Config): ((webpackConfig: WebpackConfig) => WebpackConfig) =>
+  ({ config, options }: Args): ((webpackConfig: WebpackConfig) => WebpackConfig) =>
   webpackConfig => {
     const existingWebpackConfig =
       typeof config.admin?.webpack === 'function'
         ? config.admin.webpack(webpackConfig)
         : webpackConfig
 
-    return {
+    const newConfig: WebpackConfig = {
       ...existingWebpackConfig,
       resolve: {
         ...(existingWebpackConfig.resolve || {}),
         alias: {
           ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
-          'passport-azure-ad': path.resolve(__dirname, './mocks/passportAzureADMock.js'),
-          [path.resolve(__dirname, './endpoints/refresh/index')]: path.resolve(
-            __dirname,
-            './mocks/getRefreshEndpoint.js',
-          ),
         },
       },
     }
+
+    return options.collections.reduce((resultingWebpackConfig, collectionOptions) => {
+      const matchedCollection = config.collections?.find(
+        ({ slug }) => slug === collectionOptions.slug,
+      )
+
+      if (matchedCollection) {
+        const adapter: GeneratedAdapter = collectionOptions.adapter({
+          collection: matchedCollection,
+        })
+
+        if (adapter.webpack) {
+          return adapter.webpack(resultingWebpackConfig)
+        }
+      }
+
+      return resultingWebpackConfig
+    }, newConfig)
   }

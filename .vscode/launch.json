@@ -1,9 +1,15 @@
 {
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll": true,
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/dev",
+      "name": "Debug Cloud Storage",
+      "program": "${workspaceFolder}/dev/src/server.ts"
     },
-    "editor.formatOnSave": true,
-  },
+  ]
 }
