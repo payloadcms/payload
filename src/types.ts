@@ -20,6 +20,7 @@ export type HandleDelete = (args: {
   collection: CollectionConfig
   req: PayloadRequest
   doc: TypeWithID & FileData
+  filename: string
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {

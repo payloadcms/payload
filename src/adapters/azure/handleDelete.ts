@@ -13,16 +13,8 @@ export const getHandleDelete = ({ connectionString, containerName }: Args): Hand
   const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
   const containerClient = blobServiceClient.getContainerClient(containerName)
 
-  return async ({ doc }) => {
-    const filesToDelete: string[] = [
-      doc.filename,
-      ...Object.values(doc?.sizes || []).map(resizedFileData => resizedFileData?.filename),
-    ]
-
-    for (const fileName of filesToDelete) {
-      const blobName = fileName
-      const blockBlobClient = containerClient.getBlockBlobClient(blobName)
-      await blockBlobClient.deleteIfExists()
-    }
+  return async ({ filename }) => {
+    const blockBlobClient = containerClient.getBlockBlobClient(filename)
+    await blockBlobClient.deleteIfExists()
   }
 }
