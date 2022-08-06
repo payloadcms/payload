@@ -178,18 +178,21 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
     }),
     row: (inputObjectTypeConfig: InputObjectTypeConfig, field: RowField) => field.fields.reduce((acc, subField: Field) => {
       const addSubField = fieldToSchemaMap[subField.type];
-      return addSubField(acc, subField);
+      if (addSubField) return addSubField(acc, subField);
+      return acc;
     }, inputObjectTypeConfig),
     collapsible: (inputObjectTypeConfig: InputObjectTypeConfig, field: CollapsibleField) => field.fields.reduce((acc, subField: CollapsibleField) => {
       const addSubField = fieldToSchemaMap[subField.type];
-      return addSubField(acc, subField);
+      if (addSubField) return addSubField(acc, subField);
+      return acc;
     }, inputObjectTypeConfig),
     tabs: (inputObjectTypeConfig: InputObjectTypeConfig, field: TabsField) => field.tabs.reduce((acc, tab) => {
       return {
         ...acc,
         ...tab.fields.reduce((subFieldSchema, subField) => {
           const addSubField = fieldToSchemaMap[subField.type];
-          return addSubField(subFieldSchema, subField);
+          if (addSubField) return addSubField(subFieldSchema, subField);
+          return subFieldSchema;
         }, acc),
       };
     }, inputObjectTypeConfig),

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 import { blocksField, blocksFieldSeedData } from '../Blocks';
+import { UIField } from './UIField';
 
 const TabsFields: CollectionConfig = {
   slug: 'tabs-fields',
@@ -12,6 +13,16 @@ const TabsFields: CollectionConfig = {
           label: 'Tab with Array',
           description: 'This tab has an array.',
           fields: [
+            {
+              type: 'ui',
+              name: 'demoUIField',
+              label: 'Demo UI Field',
+              admin: {
+                components: {
+                  Field: UIField,
+                },
+              },
+            },
             {
               name: 'array',
               labels: {

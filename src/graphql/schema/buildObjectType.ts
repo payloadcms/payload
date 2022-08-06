@@ -444,18 +444,21 @@ function buildObjectType({
     },
     row: (objectTypeConfig: ObjectTypeConfig, field: RowField) => field.fields.reduce((objectTypeConfigWithRowFields, subField) => {
       const addSubField = fieldToSchemaMap[subField.type];
-      return addSubField(objectTypeConfigWithRowFields, subField);
+      if (addSubField) return addSubField(objectTypeConfigWithRowFields, subField);
+      return objectTypeConfigWithRowFields;
     }, objectTypeConfig),
     collapsible: (objectTypeConfig: ObjectTypeConfig, field: CollapsibleField) => field.fields.reduce((objectTypeConfigWithCollapsibleFields, subField) => {
       const addSubField = fieldToSchemaMap[subField.type];
-      return addSubField(objectTypeConfigWithCollapsibleFields, subField);
+      if (addSubField) return addSubField(objectTypeConfigWithCollapsibleFields, subField);
+      return objectTypeConfigWithCollapsibleFields;
     }, objectTypeConfig),
     tabs: (objectTypeConfig: ObjectTypeConfig, field: TabsField) => field.tabs.reduce((tabSchema, tab) => {
       return {
         ...tabSchema,
         ...tab.fields.reduce((subFieldSchema, subField) => {
           const addSubField = fieldToSchemaMap[subField.type];
-          return addSubField(subFieldSchema, subField);
+          if (addSubField) return addSubField(subFieldSchema, subField);
+          return subFieldSchema;
         }, tabSchema),
       };
     }, objectTypeConfig),
