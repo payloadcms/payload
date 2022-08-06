@@ -44,12 +44,7 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
 
       if (sanitized.versions.drafts.autosave === true) sanitized.versions.drafts.autosave = {};
 
-      const versionFields = mergeBaseFields(sanitized.fields, baseVersionFields);
-
-      sanitized.fields = [
-        ...versionFields,
-        ...sanitized.fields,
-      ];
+      sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields);
     }
 
     sanitized.versions = merge(versionCollectionDefaults, sanitized.versions);
@@ -62,17 +57,12 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
     sanitized.upload.staticURL = sanitized.upload.staticURL || `/${sanitized.slug}`;
     sanitized.admin.useAsTitle = (sanitized.admin.useAsTitle && sanitized.admin.useAsTitle !== 'id') ? sanitized.admin.useAsTitle : 'filename';
 
-    let uploadFields = getBaseUploadFields({
+    const uploadFields = getBaseUploadFields({
       config,
       collection: sanitized,
     });
 
-    uploadFields = mergeBaseFields(sanitized.fields, uploadFields);
-
-    sanitized.fields = [
-      ...uploadFields,
-      ...sanitized.fields,
-    ];
+    sanitized.fields = mergeBaseFields(sanitized.fields, uploadFields);
   }
 
   if (sanitized.auth) {
@@ -103,12 +93,7 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
       }
     }
 
-    authFields = mergeBaseFields(sanitized.fields, authFields);
-
-    sanitized.fields = [
-      ...authFields,
-      ...sanitized.fields,
-    ];
+    sanitized.fields = mergeBaseFields(sanitized.fields, authFields);
   }
 
   // /////////////////////////////////

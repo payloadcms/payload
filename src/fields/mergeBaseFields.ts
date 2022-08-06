@@ -1,14 +1,15 @@
 import merge from 'deepmerge';
+import { Field, fieldAffectsData, fieldHasSubFields, FieldWithSubFields } from './config/types';
 
-const mergeBaseFields = (fields, baseFields) => {
-  const mergedFields = [];
+const mergeBaseFields = (fields: Field[], baseFields: Field[]): Field[] => {
+  const mergedFields = [...fields || []];
 
-  if (fields) {
-    baseFields.forEach((baseField) => {
-      let matchedIndex = null;
+  baseFields.forEach((baseField) => {
+    let matchedIndex = null;
 
-      const match = fields.find((field, i) => {
-        if (field.name === baseField.name) {
+    if (fieldAffectsData(baseField)) {
+      const match = mergedFields.find((field, i) => {
+        if (fieldAffectsData(field) && field.name === baseField.name) {
           matchedIndex = i;
           return true;
         }
@@ -17,30 +18,23 @@ const mergeBaseFields = (fields, baseFields) => {
       });
 
       if (match) {
-        const matchCopy = { ...match };
-        fields.splice(matchedIndex, 1);
+        const matchCopy: Field = { ...match };
+        mergedFields.splice(matchedIndex, 1);
 
-        let mergedField = {
-          ...baseField,
-          ...matchCopy,
-        };
+        const mergedField = merge<Field>(baseField, matchCopy);
 
-        if (baseField.fields && matchCopy.fields) {
-          mergedField.fields = mergeBaseFields(matchCopy.fields, baseField.fields);
-          return mergedFields.push(mergedField);
+        if (fieldHasSubFields(baseField) && fieldHasSubFields(matchCopy)) {
+          (mergedField as FieldWithSubFields).fields = mergeBaseFields(matchCopy.fields, baseField.fields);
         }
 
-        mergedField = merge(mergedField, matchCopy, { arrayMerge: (_, source) => source });
-        return mergedFields.push(mergedField);
+        mergedFields.push(mergedField);
+      } else {
+        mergedFields.push(baseField);
       }
+    }
+  });
 
-      return mergedFields.push(baseField);
-    });
-
-    return mergedFields;
-  }
-
-  return baseFields;
+  return mergedFields;
 };
 
 export default mergeBaseFields;
