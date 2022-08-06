@@ -16,11 +16,16 @@ const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string,
     mimeType,
     sizes,
     filename,
+    url,
   } = doc;
 
   const { serverURL } = useConfig();
 
   if (isImage(mimeType as string)) {
+    if (typeof adminThumbnail === 'undefined' && url) {
+      return url as string;
+    }
+
     if (typeof adminThumbnail === 'function') {
       const thumbnailURL = adminThumbnail({ doc });
 
