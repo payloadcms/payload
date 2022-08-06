@@ -89,3 +89,7 @@ This repository includes a local development environment for local testing and d
 ## Questions
 
 Please contact [Payload](dev@payloadcms.com) with any questions about using this plugin.
+
+## Credit
+
+This plugin was created with significant help, and code, from [Alex Bechmann](https://github.com/alexbechmann) and [Richard VanBergen](https://github.com/richardvanbergen). Thank you!!
