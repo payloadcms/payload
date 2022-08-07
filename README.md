@@ -76,7 +76,7 @@ const adapter = azureBlobStorageAdapter({
 
 ### S3 Adapter
 
-To use the S3 adapter, you need to have `@aws-sdk/client-s3` isntalled in your project dependencies. To do so, run `yarn add @aws-sdk/client-s3`.
+To use the S3 adapter, you need to have `@aws-sdk/client-s3` installed in your project dependencies. To do so, run `yarn add @aws-sdk/client-s3`.
 
 From there, create the adapter, passing in all of its required properties:
 
