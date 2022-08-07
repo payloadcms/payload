@@ -1,6 +1,7 @@
 import * as AWS from '@aws-sdk/client-s3'
 import type { Adapter, GeneratedAdapter } from '../../types'
 import { getGenerateURL } from './generateURL'
+import { getHandler } from './staticHandler'
 import { getHandleDelete } from './handleDelete'
 import { getHandleUpload } from './handleUpload'
 import { extendWebpackConfig } from './webpack'
@@ -23,8 +24,9 @@ export const s3Adapter =
         bucket,
         acl,
       }),
-      handleDelete: getHandleDelete({ collection, s3, bucket }),
+      handleDelete: getHandleDelete({ s3, bucket }),
       generateURL: getGenerateURL({ bucket, config }),
+      staticHandler: getHandler({ bucket, s3 }),
       webpack: extendWebpackConfig,
     }
   }

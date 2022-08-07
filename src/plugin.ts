@@ -34,13 +34,26 @@ export const cloudStorage =
 
           const fields = getFields({
             collection: existingCollection,
+            disablePayloadAccessControl: options.disablePayloadAccessControl,
             adapter,
           })
+
+          const handlers = [
+            ...(typeof existingCollection.upload === 'object' &&
+            Array.isArray(existingCollection.upload.handlers)
+              ? existingCollection.upload.handlers
+              : []),
+          ]
+
+          if (!options.disablePayloadAccessControl) {
+            handlers.push(adapter.staticHandler)
+          }
 
           return {
             ...existingCollection,
             upload: {
               ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
+              handlers,
               disableLocalStorage:
                 typeof options.disableLocalStorage === 'boolean'
                   ? options.disableLocalStorage

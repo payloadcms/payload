@@ -54,6 +54,7 @@ This plugin is configurable to work across many different Payload collections. A
 | `slug` *               | The collection slug to extend.  |
 | `adapter` *            | Pass in the adapter that you'd like to use for this collection. |
 | `disableLocalStorage`  | Choose to disable local storage on this collection. Defaults to `true`. |
+| `disablePayloadAccessControl` | Set to `true` to disable Payload's access control. [More](#payload-access-control) |
 
 ### Azure Blob Storage Adapter
 
@@ -62,7 +63,7 @@ To use the Azure Blob Storage adapter, you need to have `@azure/storage-blob` in
 From there, create the adapter, passing in all of its required properties:
 
 ```js
-import { azureBlobStorageAdapter } from '@payloadcms/plugin-cloud-storage';
+import { azureBlobStorageAdapter } from '@payloadcms/plugin-cloud-storage/azure';
 
 const adapter = azureBlobStorageAdapter({
   connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
@@ -81,7 +82,7 @@ To use the S3 adapter, you need to have `@aws-sdk/client-s3` isntalled in your p
 From there, create the adapter, passing in all of its required properties:
 
 ```js
-import { s3Adapter } from '@payloadcms/plugin-cloud-storage';
+import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3';
 
 const adapter = s3Adapter({
   config: {
@@ -96,6 +97,16 @@ const adapter = s3Adapter({
 
 // Now you can pass this adapter to the plugin
 ```
+
+### Payload Access Control
+
+Payload ships with access control that runs _even on statically served files_. The same `read` access control property on your `upload`-enabled collections is used, and it allows you to restrict who can request your uploaded files.
+
+To preserve this feature, by default, this plugin _keeps all file URLs exactly the same_. Your file URLs won't be updated to point directly to your cloud storage source, as in that case, Payload's access control will be completely bypassed and you would need public readability on your cloud-hosted files.
+
+Instead, all uploads will still be reached from the default `/collectionSlug/staticURL/filename` path. This plugin will "pass through" all files that are hosted on your third-party cloud service—with the added benefit of keeping your existing access control in place.
+
+If this does not apply to you (your upload collection has `read: () => true` or similar) you can disable this functionality by setting `disablePayloadAccessControl` to `true`. When this setting is in place, this plugin will update your file URLs to point directly to your cloud host.
 
 ## Local development
 

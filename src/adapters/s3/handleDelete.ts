@@ -1,9 +1,7 @@
-import type { CollectionConfig } from 'payload/types'
 import type * as AWS from '@aws-sdk/client-s3'
 import type { HandleDelete } from '../../types'
 
 interface Args {
-  collection: CollectionConfig
   s3: AWS.S3
   bucket: string
 }
