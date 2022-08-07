@@ -1,3 +1,10 @@
+## [1.0.19](https://github.com/payloadcms/payload/compare/v1.0.18...v1.0.19) (2022-08-07)
+
+
+### Features
+
+* exposes static upload handlers ([a8d2e09](https://github.com/payloadcms/payload/commit/a8d2e099523cc7b99f94ae0cad574b41679c6e25))
+
 ## [1.0.18](https://github.com/payloadcms/payload/compare/v1.0.17...v1.0.18) (2022-08-06)
 
 ## [1.0.17](https://github.com/payloadcms/payload/compare/v1.0.16...v1.0.17) (2022-08-06)
