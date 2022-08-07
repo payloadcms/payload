@@ -1,3 +1,4 @@
+import { BlobServiceClient } from '@azure/storage-blob'
 import type { Adapter, GeneratedAdapter } from '../../types'
 import { getGenerateURL } from './generateURL'
 import { getHandleDelete } from './handleDelete'
@@ -14,15 +15,16 @@ export interface Args {
 export const azureBlobStorageAdapter =
   ({ connectionString, containerName, baseURL, allowContainerCreate }: Args): Adapter =>
   ({ collection }): GeneratedAdapter => {
+    const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
+    const containerClient = blobServiceClient.getContainerClient(containerName)
+
     return {
       handleUpload: getHandleUpload({
         collection,
-        connectionString,
-        containerName,
-        baseURL,
+        containerClient,
         allowContainerCreate,
       }),
-      handleDelete: getHandleDelete({ collection, connectionString, containerName, baseURL }),
+      handleDelete: getHandleDelete({ collection, containerClient }),
       generateURL: getGenerateURL({ containerName, baseURL }),
       webpack: extendWebpackConfig,
     }

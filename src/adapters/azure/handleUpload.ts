@@ -1,23 +1,14 @@
+import type { ContainerClient } from '@azure/storage-blob'
 import type { CollectionConfig } from 'payload/types'
-import { BlobServiceClient } from '@azure/storage-blob'
 import type { HandleUpload } from '../../types'
 
 interface Args {
   collection: CollectionConfig
-  connectionString: string
-  containerName: string
-  baseURL: string
+  containerClient: ContainerClient
   allowContainerCreate: boolean
 }
 
-export const getHandleUpload = ({
-  allowContainerCreate,
-  connectionString,
-  containerName,
-}: Args): HandleUpload => {
-  const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
-  const containerClient = blobServiceClient.getContainerClient(containerName)
-
+export const getHandleUpload = ({ allowContainerCreate, containerClient }: Args): HandleUpload => {
   if (allowContainerCreate) {
     containerClient.createIfNotExists({ access: 'blob' })
   }

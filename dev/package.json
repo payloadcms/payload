@@ -4,7 +4,8 @@
   "main": "dist/server.js",
   "license": "MIT",
   "scripts": {
-    "dev": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
+    "dev:azure": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER=azure nodemon",
+    "dev:s3": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER=s3 nodemon",
     "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload build",
     "build:server": "tsc",
     "build": "yarn build:payload && yarn build:server",
@@ -12,6 +13,7 @@
     "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.142.0",
     "@azure/storage-blob": "^12.11.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",

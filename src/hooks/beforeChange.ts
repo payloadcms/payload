@@ -22,7 +22,7 @@ export const getBeforeChangeHook =
       await Promise.all(promises)
     } catch (err: unknown) {
       req.payload.logger.error(
-        `There was an error while uploading files corresponding to the ${collection.labels?.singular} with filename ${data.filename}:`,
+        `There was an error while uploading files corresponding to the collection ${collection.slug} with filename ${data.filename}:`,
       )
       req.payload.logger.error(err)
     }

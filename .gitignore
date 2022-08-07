@@ -104,3 +104,4 @@ dist
 .tern-port
 
 src/adapters/azure/emulator/azurestoragedata
+src/adapters/s3/emulator/.localstack

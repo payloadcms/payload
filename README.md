@@ -31,9 +31,11 @@ export default buildConfig({
 ## Features
 
 **Adapter-based Implementation**
+
 This plugin supports the following adapters:
 
 - [Azure Blob Storage](#azure-blob-storage-adapter)
+- [AWS S3-style Storage](#s3-adapter)
 
 However, you can create your own adapter for any third-party service you would like to use.
 
@@ -41,19 +43,19 @@ However, you can create your own adapter for any third-party service you would l
 
 This plugin is configurable to work across many different Payload collections. A `*` denotes that the property is required.
 
-| Option                        | Description |
-| ----------------------------- | ----------- |
-| **[`collections`]** *         | Array of collection-specific options to enable the plugin for. |
+| Option                  | Description |
+| ----------------------- | ----------- |
+| `collections` *         | Array of collection-specific options to enable the plugin for. |
 
-#### Collection-specific options
+**Collection-specific options:**
 
 | Option                       | Description                     |
 |------------------------------|---------------------------------|
-| **[`slug`]** *               | The collection slug to extend.  |
-| **[`disableLocalStorage`]**  | Choose to disable local storage on this collection. Defaults to `true`. |
-| **[`adapter`]**              | Pass in the adapter that you'd like to use for this collection. |
+| `slug` *               | The collection slug to extend.  |
+| `adapter` *            | Pass in the adapter that you'd like to use for this collection. |
+| `disableLocalStorage`  | Choose to disable local storage on this collection. Defaults to `true`. |
 
-#### Azure Blob Storage Adapter
+### Azure Blob Storage Adapter
 
 To use the Azure Blob Storage adapter, you need to have `@azure/storage-blob` installed in your project dependencies. To do so, run `yarn add @azure/storage-blob`.
 
@@ -72,19 +74,32 @@ const adapter = azureBlobStorageAdapter({
 // Now you can pass this adapter to the plugin
 ```
 
-**Important:** make sure you have all of the above environment variables filled out and that they reflect your Azure blob storage configuration.
+### S3 Adapter
 
-#### Local sandbox & plugin development
+To use the S3 adapter, you need to have `@aws-sdk/client-s3` isntalled in your project dependencies. To do so, run `yarn add @aws-sdk/client-s3`.
 
-This repository includes a local development environment for local testing and development of this plugin. To run the local sandbox, follow the instructions below.
+From there, create the adapter, passing in all of its required properties:
 
-1. Make sure you have Node and a MongoDB to work with
-1. Clone the repo
-1. `yarn` in both the root folder of the repo, and the `./dev` folder
-1. `cd` into `./dev` and run `cp .env.example .env` to create an `.env` file
-1. Open your newly created `./dev/.env` file and _completely_ fill out each property
-1. Run `yarn dev` within the `/dev` folder
-1. Open `http://localhost:3000/admin` in your browser
+```js
+import { s3Adapter } from '@payloadcms/plugin-cloud-storage';
+
+const adapter = s3Adapter({
+  config: {
+    endpoint: process.env.S3_ENDPOINT,
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+    }
+  },
+  bucket: process.env.S3_BUCKET,
+})
+
+// Now you can pass this adapter to the plugin
+```
+
+## Local development
+
+For instructions regarding how to develop with this plugin locally, [click here](/docs/local-dev.md).
 
 ## Questions
 
