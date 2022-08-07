@@ -77,7 +77,7 @@ const adapter = azureBlobStorageAdapter({
 
 ### S3 Adapter
 
-To use the S3 adapter, you need to have `@aws-sdk/client-s3` isntalled in your project dependencies. To do so, run `yarn add @aws-sdk/client-s3`.
+To use the S3 adapter, you need to have `@aws-sdk/client-s3` installed in your project dependencies. To do so, run `yarn add @aws-sdk/client-s3`.
 
 From there, create the adapter, passing in all of its required properties:
 
@@ -110,7 +110,7 @@ If this does not apply to you (your upload collection has `read: () => true` or 
 
 ## Local development
 
-For instructions regarding how to develop with this plugin locally, [click here](/docs/local-dev.md).
+For instructions regarding how to develop with this plugin locally, [click here](https://github.com/payloadcms/plugin-cloud-storage/blob/master/docs/local-dev.md).
 
 ## Questions
 
