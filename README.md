@@ -99,7 +99,7 @@ const adapter = s3Adapter({
 
 ## Local development
 
-For instructions regarding how to develop with this plugin locally, [click here]([/docs/local-dev.md](https://github.com/payloadcms/plugin-cloud-storage/blob/master/docs/local-dev.md)).
+For instructions regarding how to develop with this plugin locally, [click here](https://github.com/payloadcms/plugin-cloud-storage/blob/master/docs/local-dev.md).
 
 ## Questions
 
