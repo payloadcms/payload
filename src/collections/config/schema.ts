@@ -145,6 +145,7 @@ const collectionSchema = joi.object().keys({
       ),
       mimeTypes: joi.array().items(joi.string()),
       staticOptions: joi.object(),
+      handlers: joi.array().items(joi.func()),
     }),
     joi.boolean(),
   ),

@@ -7,11 +7,13 @@ keywords: uploads, images, media, overview, documentation, Content Management Sy
 ---
 
 <Banner>
-  Payload provides for everything you need to enable file upload, storage, and management directly on your server—including extremely powerful file access control.
+  Payload provides for everything you need to enable file upload, storage, and
+  management directly on your server—including extremely powerful file access
+  control.
 </Banner>
 
 ![Upload admin panel functionality](https://payloadcms.com/images/upload-admin.jpg)
-*Admin panel screenshot depicting a Media Collection with Upload enabled*
+_Admin panel screenshot depicting a Media Collection with Upload enabled_
 
 **Here are some common use cases of Uploads:**
 
@@ -22,7 +24,7 @@ keywords: uploads, images, media, overview, documentation, Content Management Sy
 **By simply enabling Upload functionality on a Collection, Payload will automatically transform your Collection into a robust file management / storage solution. The following modifications will be made:**
 
 1. `filename`, `mimeType`, and `filesize` fields will be automatically added to your Collection. Optionally, if you pass `imageSizes` to your Collection's Upload config, a [`sizes`](#image-sizes) array will also be added containing auto-resized image sizes and filenames.
-1.  The Admin panel will modify its built-in `List` component to show a thumbnail gallery of your Uploads instead of the default Table view
+1. The Admin panel will modify its built-in `List` component to show a thumbnail gallery of your Uploads instead of the default Table view
 1. The Admin panel will modify its `Edit` view(s) to add a new set of corresponding Upload UI which will allow for file upload
 1. The `create`, `update`, and `delete` Collection operations will be modified to support file upload, re-upload, and deletion
 
@@ -31,59 +33,62 @@ keywords: uploads, images, media, overview, documentation, Content Management Sy
 Every Payload Collection can opt-in to supporting Uploads by specifying the `upload` property on the Collection's config to either `true` or to an object containing `upload` options.
 
 <Banner type="success">
-  <strong>Tip:</strong><br/>
-  A common pattern is to create a <strong>Media</strong> collection and enable <strong>upload</strong> on that collection.
+  <strong>Tip:</strong>
+  <br />A common pattern is to create a <strong>Media</strong> collection and enable{" "}
+  <strong>upload</strong> on that collection.
 </Banner>
 
 #### Collection Upload Options
 
-| Option                    | Description  |
-| ------------------------- | -------------|
-| **`staticURL`** *         | The base URL path to use to access your uploads. Example: `/media` |
-| **`staticDir`** *         | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. |
-| **`imageSizes`**          | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes) |
-| **`adminThumbnail`**      | Set the way that the Admin panel will display thumbnails for this Collection. [More](#admin-thumbnails) |
-| **`mimeTypes`**           | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes) |
-| **`disableLocalStorage`** | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage) |
+| Option                    | Description                                                                                                                                     |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`staticURL`** \*        | The base URL path to use to access your uploads. Example: `/media`                                                                              |
+| **`staticDir`** \*        | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config.           |
+| **`imageSizes`**          | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                              |
+| **`adminThumbnail`**      | Set the way that the Admin panel will display thumbnails for this Collection. [More](#admin-thumbnails)                                         |
+| **`mimeTypes`**           | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes)                                        |
+| **`disableLocalStorage`** | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage)                                                     |
 | **`staticOptions`**       | Set options for `express.static` to use while serving your static files. [More](http://expressjs.com/en/resources/middleware/serve-static.html) |
+| **`handlers`**            | Array of Express request handlers to execute before the built-in Payload static middleware executes.                                            |
 
-*An asterisk denotes that a property above is required.*
+_An asterisk denotes that a property above is required._
 
 **Example Upload collection:**
+
 ```js
 const Media = {
-  slug: 'media',
+  slug: "media",
   upload: {
-    staticURL: '/media',
-    staticDir: 'media',
+    staticURL: "/media",
+    staticDir: "media",
     imageSizes: [
       {
-        name: 'thumbnail',
+        name: "thumbnail",
         width: 400,
         height: 300,
-        crop: 'centre',
+        crop: "centre",
       },
       {
-        name: 'card',
+        name: "card",
         width: 768,
         height: 1024,
-        crop: 'centre',
+        crop: "centre",
       },
       {
-        name: 'tablet',
+        name: "tablet",
         width: 1024,
         // By specifying `null` or leaving a height undefined,
         // the image will be sized to a certain width,
         // but it will retain its original aspect ratio
         // and calculate a height automatically.
         height: null,
-        crop: 'centre',
-      }
+        crop: "centre",
+      },
     ],
-    adminThumbnail: 'thumbnail',
-    mimeTypes: ['image/*'],
-  }
-}
+    adminThumbnail: "thumbnail",
+    mimeTypes: ["image/*"],
+  },
+};
 ```
 
 ### Payload-wide Upload Options
@@ -93,16 +98,16 @@ Payload relies on the [`express-fileupload`](https://www.npmjs.com/package/expre
 A common example of what you might want to customize within Payload-wide Upload options would be to increase the allowed `fileSize` of uploads sent to Payload:
 
 ```js
-import { buildConfig } from 'payload/config';
+import { buildConfig } from "payload/config";
 
 export default buildConfig({
   collections: [
     {
-      slug: 'media',
+      slug: "media",
       fields: [
         {
-          name: 'alt',
-          type: 'text',
+          name: "alt",
+          type: "text",
         },
       ],
       upload: true,
@@ -111,8 +116,8 @@ export default buildConfig({
   upload: {
     limits: {
       fileSize: 5000000, // 5MB, written in bytes
-    }
-  }
+    },
+  },
 });
 ```
 
@@ -135,8 +140,13 @@ The object will have keys for each size generated, and each key will be set equa
 If you are using a plugin to send your files off to a third-party file storage host or CDN, like Amazon S3 or similar, you may not want to store your files locally at all. You can prevent Payload from writing files to disk by specifying `disableLocalStorage: true` on your collection's upload config.
 
 <Banner type="warning">
-  <strong>Note:</strong><br/>
-  This is a fairly advanced feature. If you do disable local file storage, by default, your admin panel's thumbnails will be broken as you will not have stored a file. It will be totally up to you to use either a plugin or your own hooks to store your files in a permanent manner, as well as provide your own admin thumbnail using <strong>upload.adminThumbnail</strong>.
+  <strong>Note:</strong>
+  <br />
+  This is a fairly advanced feature. If you do disable local file storage, by
+  default, your admin panel's thumbnails will be broken as you will not have
+  stored a file. It will be totally up to you to use either a plugin or your own
+  hooks to store your files in a permanent manner, as well as provide your own
+  admin thumbnail using <strong>upload.adminThumbnail</strong>.
 </Banner>
 
 ### Admin Thumbnails
@@ -147,12 +157,13 @@ You can specify how Payload retrieves admin thumbnails for your upload-enabled C
 1. A function that takes the document's data and sends back a full URL to load the thumbnail. For example, to dynamically set an admin thumbnail URL, you could write a function that returns a string pointing to a different file source:
 
 **Example custom Admin thumbnail:**
+
 ```js
 const Media = {
-  slug: 'media',
+  slug: "media",
   upload: {
-    staticURL: '/media',
-    staticDir: 'media',
+    staticURL: "/media",
+    staticDir: "media",
     imageSizes: [
       // ... image sizes here
     ],
@@ -160,13 +171,16 @@ const Media = {
     adminThumbnail: ({ doc }) =>
       `https://google.com/custom-path-to-file/${doc.filename}`,
     // highlight-end
-  }
-}
+  },
+};
 ```
 
 <Banner>
-  <strong>Note:</strong><br/>
-  If you specify a function to return an admin thumbnail, but your upload is not an image file type (for example, PDF or TXT) your function will not be used. Instead, Payload will display its generic file upload graphic.
+  <strong>Note:</strong>
+  <br />
+  If you specify a function to return an admin thumbnail, but your upload is not
+  an image file type (for example, PDF or TXT) your function will not be used.
+  Instead, Payload will display its generic file upload graphic.
 </Banner>
 
 ### MimeTypes
@@ -176,22 +190,26 @@ Specifying the `mimeTypes` property can restrict what files are allowed from the
 Some example values are: `image/*`, `audio/*`, `video/*`, `image/png`, `application/pdf`
 
 **Example mimeTypes usage:**
+
 ```js
 const Media = {
-  slug: 'media',
+  slug: "media",
   upload: {
-    staticURL: '/media',
-    staticDir: 'media',
-    mimeTypes: ['image/*', 'application/pdf'], // highlight-line
-  }
-}
+    staticURL: "/media",
+    staticDir: "media",
+    mimeTypes: ["image/*", "application/pdf"], // highlight-line
+  },
+};
 ```
 
 ### Uploading Files
 
 <Banner type="warning">
-  <strong>Important:</strong><br/>
-  Uploading files is currently only possible through the REST and Local APIs due to how GraphQL works. It's difficult and fairly nonsensical to support uploading files through GraphQL.
+  <strong>Important:</strong>
+  <br />
+  Uploading files is currently only possible through the REST and Local APIs due
+  to how GraphQL works. It's difficult and fairly nonsensical to support
+  uploading files through GraphQL.
 </Banner>
 
 To upload a file, use your collection's [`create`](/docs/rest-api/overview#collections) endpoint. Send it all the data that your Collection requires, as well as a `file` key containing the file that you'd like to upload.

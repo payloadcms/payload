@@ -6,7 +6,7 @@ import authenticate from './middleware/authenticate';
 import { Payload } from '../index';
 import corsHeaders from './middleware/corsHeaders';
 
-function initStatic(ctx: Payload) {
+function initStatic(ctx: Payload): void {
   Object.entries(ctx.collections).forEach(([_, collection]) => {
     const { config } = collection;
 
@@ -18,6 +18,10 @@ function initStatic(ctx: Payload) {
       router.use(authenticate(ctx.config));
 
       router.use(getExecuteStaticAccess(collection));
+
+      if (Array.isArray(config.upload?.handlers)) {
+        router.get('/:filename*', config.upload.handlers);
+      }
 
       const staticPath = path.resolve(ctx.config.paths.configDir, config.upload.staticDir);
 

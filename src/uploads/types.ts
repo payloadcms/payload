@@ -42,6 +42,7 @@ export type IncomingUploadType = {
   adminThumbnail?: string | GetAdminThumbnail;
   mimeTypes?: string[];
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
+  handlers?: any[]
 }
 
 
@@ -53,6 +54,7 @@ export type Upload = {
   adminThumbnail?: string | GetAdminThumbnail
   mimeTypes?: string[];
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
+  handlers?: any[]
 }
 
 export type File = {
