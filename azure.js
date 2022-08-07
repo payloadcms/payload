@@ -1,1 +1,1 @@
-exports.azureBlobStorageAdapter = require('./dist/adapters/azure')
+exports.azureBlobStorageAdapter = require('./dist/adapters/azure').azureBlobStorageAdapter

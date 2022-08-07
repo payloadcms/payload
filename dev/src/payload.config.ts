@@ -1,7 +1,9 @@
 import { buildConfig } from 'payload/config'
 import path from 'path'
 import Users from './collections/Users'
-import { cloudStorage, azureBlobStorageAdapter, s3Adapter } from '../../src'
+import { cloudStorage } from '../../src'
+import { s3Adapter } from '../../src/adapters/s3'
+import { azureBlobStorageAdapter } from '../../src/adapters/azure'
 import type { Adapter } from '../../src/types'
 import { Media } from './collections/Media'
 
@@ -58,12 +60,11 @@ export default buildConfig({
   },
   plugins: [
     cloudStorage({
-      collections: [
-        {
-          slug: 'media',
+      collections: {
+        media: {
           adapter,
         },
-      ],
+      },
     }),
   ],
   onInit: async payload => {
