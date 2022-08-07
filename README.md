@@ -4,7 +4,7 @@ This repository contains the officially supported Payload Cloud Storage plugin. 
 
 #### Requirements
 
-- Payload version `1.0.16` or higher is required
+- Payload version `1.0.19` or higher is required
 
 ## Usage
 
