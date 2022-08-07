@@ -46,12 +46,11 @@ export interface GeneratedAdapter {
 export type Adapter = (args: { collection: CollectionConfig }) => GeneratedAdapter
 
 export interface CollectionOptions {
-  slug: string
   disableLocalStorage?: boolean
   disablePayloadAccessControl?: true
   adapter: Adapter
 }
 
 export interface PluginOptions {
-  collections: CollectionOptions[]
+  collections: Record<string, CollectionOptions>
 }

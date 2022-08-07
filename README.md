@@ -18,10 +18,11 @@ import { cloudStorage } from '@payloadcms/plugin-cloud-storage';
 export default buildConfig({
   plugins: [
     cloudStorage({
-      collections: [{
-        slug: 'my-collection-slug',
-        adapter: theAdapterToUse, // see docs for the adapter you want to use
-      }]
+      collections: {
+        'my-collection-slug': {
+          adapter: theAdapterToUse, // see docs for the adapter you want to use
+        },
+      },
     }),
   ],
   // The rest of your config goes here
@@ -45,13 +46,12 @@ This plugin is configurable to work across many different Payload collections. A
 
 | Option                  | Description |
 | ----------------------- | ----------- |
-| `collections` *         | Array of collection-specific options to enable the plugin for. |
+| `collections` *         | Object with keys set to the slug of collections you want to enable the plugin for, and values set to collection-specific options. |
 
 **Collection-specific options:**
 
 | Option                       | Description                     |
 |------------------------------|---------------------------------|
-| `slug` *               | The collection slug to extend.  |
 | `adapter` *            | Pass in the adapter that you'd like to use for this collection. |
 | `disableLocalStorage`  | Choose to disable local storage on this collection. Defaults to `true`. |
 | `disablePayloadAccessControl` | Set to `true` to disable Payload's access control. [More](#payload-access-control) |

@@ -25,21 +25,22 @@ export const extendWebpackConfig =
       },
     }
 
-    return options.collections.reduce((resultingWebpackConfig, collectionOptions) => {
-      const matchedCollection = config.collections?.find(
-        ({ slug }) => slug === collectionOptions.slug,
-      )
+    return Object.entries(options.collections).reduce(
+      (resultingWebpackConfig, [slug, collectionOptions]) => {
+        const matchedCollection = config.collections?.find(coll => coll.slug === slug)
 
-      if (matchedCollection) {
-        const adapter: GeneratedAdapter = collectionOptions.adapter({
-          collection: matchedCollection,
-        })
+        if (matchedCollection) {
+          const adapter: GeneratedAdapter = collectionOptions.adapter({
+            collection: matchedCollection,
+          })
 
-        if (adapter.webpack) {
-          return adapter.webpack(resultingWebpackConfig)
+          if (adapter.webpack) {
+            return adapter.webpack(resultingWebpackConfig)
+          }
         }
-      }
 
-      return resultingWebpackConfig
-    }, newConfig)
+        return resultingWebpackConfig
+      },
+      newConfig,
+    )
   }

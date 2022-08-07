@@ -27,7 +27,7 @@ export const cloudStorage =
         webpack,
       },
       collections: (config.collections || []).map(existingCollection => {
-        const options = allCollectionOptions.find(({ slug }) => slug === existingCollection.slug)
+        const options = allCollectionOptions[existingCollection.slug]
 
         if (options) {
           const adapter = options.adapter({ collection: existingCollection })
