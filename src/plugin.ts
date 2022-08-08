@@ -9,8 +9,8 @@ import { getFields } from './fields/getFields'
 // to cloud storage instead of solely storing files locally.
 
 // It is based on an adapter approach, where adapters can be written for any cloud provider.
-// Adapters are responsible for providing three actions that this plugin will use:
-// 1. handleUpload, 2. handleDelete, 3. generateURL
+// Adapters are responsible for providing four actions that this plugin will use:
+// 1. handleUpload, 2. handleDelete, 3. generateURL, 4. staticHandler
 
 // Optionally, the adapter can specify any Webpack config overrides if they are necessary.
 
