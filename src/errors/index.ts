@@ -8,6 +8,7 @@ export { default as FileUploadError } from './FileUploadError';
 export { default as Forbidden } from './Forbidden';
 export { default as LockedAuth } from './LockedAuth';
 export { default as InvalidConfiguration } from './InvalidConfiguration';
+export { default as InvalidFieldName } from './InvalidFieldName';
 export { default as InvalidFieldRelationship } from './InvalidFieldRelationship';
 export { default as MissingCollectionLabel } from './MissingCollectionLabel';
 export { default as MissingFieldInputOptions } from './MissingFieldInputOptions';
