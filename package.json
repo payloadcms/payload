@@ -12,7 +12,8 @@
   },
   "peerDependencies": {
     "@aws-sdk/client-s3": "^3.142.0",
-    "@azure/storage-blob": "^12.11.0"
+    "@azure/storage-blob": "^12.11.0",
+    "payload": "^1.0.19"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/client-s3": {
