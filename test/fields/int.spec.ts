@@ -4,11 +4,12 @@ import { RESTClient } from '../helpers/rest';
 import config from '../uploads/config';
 import payload from '../../src';
 import { pointDoc } from './collections/Point';
-import type { ArrayField, BlockField, GroupField } from './payload-types';
+import type { ArrayField, GroupField } from './payload-types';
 import { arrayFieldsSlug, arrayDefaultValue, arrayDoc } from './collections/Array';
 import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
 import { defaultText } from './collections/Text';
 import { blocksFieldSeedData } from './collections/Blocks';
+import { defaultNumber, numberDoc } from './collections/Number';
 
 let client;
 
@@ -35,6 +36,79 @@ describe('Fields', () => {
       expect(doc.text).toEqual(text);
       expect(doc.defaultFunction).toEqual(defaultText);
       expect(doc.defaultAsync).toEqual(defaultText);
+    });
+  });
+
+  describe('number', () => {
+    let doc;
+    beforeAll(async () => {
+      doc = await payload.create({
+        collection: 'number-fields',
+        data: numberDoc,
+      });
+    });
+
+    it('creates with default values', async () => {
+      expect(doc.number).toEqual(numberDoc.number);
+      expect(doc.min).toEqual(numberDoc.min);
+      expect(doc.max).toEqual(numberDoc.max);
+      expect(doc.positiveNumber).toEqual(numberDoc.positiveNumber);
+      expect(doc.negativeNumber).toEqual(numberDoc.negativeNumber);
+      expect(doc.decimalMin).toEqual(numberDoc.decimalMin);
+      expect(doc.decimalMax).toEqual(numberDoc.decimalMax);
+      expect(doc.defaultNumber).toEqual(defaultNumber);
+    });
+
+    it('should not create number below minimum', async () => {
+      await expect(async () => payload.create({
+        collection: 'number-fields',
+        data: {
+          min: 5,
+        },
+      })).rejects.toThrow('The following field is invalid: min');
+    });
+    it('should not create number above max', async () => {
+      await expect(async () => payload.create({
+        collection: 'number-fields',
+        data: {
+          max: 15,
+        },
+      })).rejects.toThrow('The following field is invalid: max');
+    });
+
+    it('should not create number below 0', async () => {
+      await expect(async () => payload.create({
+        collection: 'number-fields',
+        data: {
+          positiveNumber: -5,
+        },
+      })).rejects.toThrow('The following field is invalid: positiveNumber');
+    });
+
+    it('should not create number above 0', async () => {
+      await expect(async () => payload.create({
+        collection: 'number-fields',
+        data: {
+          negativeNumber: 5,
+        },
+      })).rejects.toThrow('The following field is invalid: negativeNumber');
+    });
+    it('should not create a decimal number below min', async () => {
+      await expect(async () => payload.create({
+        collection: 'number-fields',
+        data: {
+          decimalMin: -0.25,
+        },
+      })).rejects.toThrow('The following field is invalid: decimalMin');
+    });
+
+    it('should not create a decimal number above max', async () => {
+      await expect(async () => payload.create({
+        collection: 'number-fields',
+        data: {
+          decimalMax: 1.5,
+        },
+      })).rejects.toThrow('The following field is invalid: decimalMax');
     });
   });
 

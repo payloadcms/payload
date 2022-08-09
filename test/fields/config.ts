@@ -15,6 +15,7 @@ import GroupFields, { groupDoc } from './collections/Group';
 import getFileByPath from '../../src/uploads/getFileByPath';
 import Uploads, { uploadsDoc } from './collections/Upload';
 import IndexedFields from './collections/Indexed';
+import NumberFields, { numberDoc } from './collections/Number';
 
 export default buildConfig({
   admin: {
@@ -40,6 +41,7 @@ export default buildConfig({
     SelectFields,
     TabsFields,
     TextFields,
+    NumberFields,
     Uploads,
     IndexedFields,
   ],
@@ -85,5 +87,7 @@ export default buildConfig({
     richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdUploadDoc.id };
 
     await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship });
+
+    await payload.create({ collection: 'number-fields', data: numberDoc });
   },
 });
