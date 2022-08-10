@@ -221,6 +221,8 @@ export interface TabsField {
   group: {
     number: number;
   };
+  textInRow: string;
+  numberInRow: number;
   textarea?: string;
   anotherText: string;
   createdAt: string;
@@ -240,15 +242,56 @@ export interface TextField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "number-fields".
+ */
+export interface NumberField {
+  id: string;
+  number?: number;
+  min?: number;
+  max?: number;
+  positiveNumber?: number;
+  negativeNumber?: number;
+  decimalMin?: number;
+  decimalMax?: number;
+  defaultNumber?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "uploads".
  */
 export interface Upload {
   id: string;
+  text?: string;
   url?: string;
   filename?: string;
   mimeType?: string;
   filesize?: number;
-  text?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "indexed-fields".
+ */
+export interface IndexedField {
+  id: string;
+  text: string;
+  uniqueText?: string;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number];
+  group: {
+    localizedUnique?: string;
+    /**
+     * @minItems 2
+     * @maxItems 2
+     */
+    point?: [number, number];
+  };
   createdAt: string;
   updatedAt: string;
 }

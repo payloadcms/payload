@@ -30,11 +30,11 @@ export const number: Validate<unknown, unknown, NumberField> = (value: string, {
     return 'Please enter a valid number.';
   }
 
-  if (max && parsedValue > max) {
+  if (typeof max === 'number' && parsedValue > max) {
     return `"${value}" is greater than the max allowed value of ${max}.`;
   }
 
-  if (min && parsedValue < min) {
+  if (typeof min === 'number' && parsedValue < min) {
     return `"${value}" is less than the min allowed value of ${min}.`;
   }
 
