@@ -130,6 +130,18 @@ const TabsFields: CollectionConfig = {
           ],
         },
         {
+          name: 'namedTabWithDefaultValue',
+          label: 'Tab with Default Value',
+          description: 'This tab has a name, which should namespace the contained fields.',
+          fields: [
+            {
+              name: 'defaultValue',
+              type: 'text',
+              defaultValue: namedTabDefaultValue,
+            },
+          ],
+        },
+        {
           name: 'localizedTab',
           label: 'Localized Tab',
           localized: true,

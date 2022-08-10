@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import merge from 'deepmerge';
-import { Field, fieldAffectsData } from '../../config/types';
+import { Field, fieldAffectsData, tabHasName } from '../../config/types';
 import { Operation } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import getValueWithDefault from '../../getDefaultValue';
@@ -284,6 +284,16 @@ export const promise = async ({
     case 'tabs': {
       const promises = [];
       field.tabs.forEach((tab) => {
+        let tabPath = path;
+        let tabSiblingData = siblingData;
+        let tabSiblingDoc = siblingDoc;
+        let tabSiblingDocWithLocales = siblingDocWithLocales;
+        if (tabHasName(tab)) {
+          tabPath = `${path}${tab.name}.`;
+          tabSiblingData = typeof siblingData[tab.name] === 'object' ? siblingData[tab.name] as Record<string, unknown> : {};
+          tabSiblingDoc = typeof siblingDoc[tab.name] === 'object' ? siblingDoc[tab.name] as Record<string, unknown> : {};
+          tabSiblingDocWithLocales = typeof siblingDocWithLocales[tab.name] === 'object' ? siblingDocWithLocales[tab.name] as Record<string, unknown> : {};
+        }
         promises.push(traverseFields({
           data,
           doc,
@@ -293,11 +303,11 @@ export const promise = async ({
           id,
           mergeLocaleActions,
           operation,
-          path,
+          path: tabPath,
           req,
-          siblingData,
-          siblingDoc,
-          siblingDocWithLocales,
+          siblingData: tabSiblingData,
+          siblingDoc: tabSiblingDoc,
+          siblingDocWithLocales: tabSiblingDocWithLocales,
           skipValidation: skipValidationFromHere,
         }));
       });

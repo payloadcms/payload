@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { Field, fieldAffectsData } from '../../config/types';
+import { Field, fieldAffectsData, tabHasName } from '../../config/types';
 import { PayloadRequest } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import richTextRelationshipPromise from '../../richText/relationshipPromise';
@@ -72,6 +72,15 @@ export const promise = async ({
 
       break;
     }
+    case 'tabs': {
+      field.tabs.forEach((tab) => {
+        if (tabHasName(tab) && typeof siblingDoc[tab.name] === 'undefined') {
+          siblingDoc[tab.name] = {};
+        }
+      });
+
+      break;
+    }
 
     case 'richText': {
       if (((field.admin?.elements?.includes('relationship') || field.admin?.elements?.includes('upload')) || !field?.admin?.elements)) {
@@ -90,7 +99,7 @@ export const promise = async ({
     }
 
     case 'point': {
-      const pointDoc = siblingDoc[field.name] as any;
+      const pointDoc = siblingDoc[field.name] as Record<string, unknown>;
       if (Array.isArray(pointDoc?.coordinates) && pointDoc.coordinates.length === 2) {
         siblingDoc[field.name] = pointDoc.coordinates;
       }
@@ -197,7 +206,7 @@ export const promise = async ({
       const rows = siblingDoc[field.name];
 
       if (Array.isArray(rows)) {
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           traverseFields({
             currentDepth,
             depth,
@@ -221,7 +230,7 @@ export const promise = async ({
       const rows = siblingDoc[field.name];
 
       if (Array.isArray(rows)) {
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
 
           if (block) {
@@ -268,6 +277,12 @@ export const promise = async ({
 
     case 'tabs': {
       field.tabs.forEach((tab) => {
+        let tabDoc = siblingDoc;
+        if (tabHasName(tab)) {
+          tabDoc = siblingDoc[tab.name] as Record<string, unknown>;
+          if (typeof siblingDoc[tab.name] !== 'object') tabDoc = {};
+        }
+
         traverseFields({
           currentDepth,
           depth,
@@ -279,7 +294,7 @@ export const promise = async ({
           overrideAccess,
           populationPromises,
           req,
-          siblingDoc,
+          siblingDoc: tabDoc,
           showHiddenFields,
         });
       });

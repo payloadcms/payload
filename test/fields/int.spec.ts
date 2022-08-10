@@ -4,7 +4,7 @@ import { RESTClient } from '../helpers/rest';
 import config from '../uploads/config';
 import payload from '../../src';
 import { pointDoc } from './collections/Point';
-import type { ArrayField, BlockField, GroupField, TabsField } from './payload-types';
+import type { ArrayField, GroupField, TabsField } from './payload-types';
 import type { ArrayField, GroupField } from './payload-types';
 import { arrayFieldsSlug, arrayDefaultValue, arrayDoc } from './collections/Array';
 import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
@@ -302,8 +302,17 @@ describe('Fields', () => {
       expect(document.tab.defaultValue).toStrictEqual(namedTabDefaultValue);
     });
 
+    it('should create with defaultValue inside a named tab with no other values', async () => {
+      expect(document.namedTabWithDefaultValue.defaultValue).toStrictEqual(namedTabDefaultValue);
+    });
+
     it('should create with localized text inside a named tab', async () => {
-      expect(document.localizedTab.text).toStrictEqual(localizedTextValue);
+      document = await payload.findByID({
+        collection: tabsSlug,
+        id: document.id,
+        locale: 'all',
+      });
+      expect(document.localizedTab.en.text).toStrictEqual(localizedTextValue);
     });
 
     it('should return empty object for groups when no data present', async () => {
