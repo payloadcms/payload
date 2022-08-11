@@ -1,5 +1,5 @@
 import sanitizeFields from './sanitize';
-import { MissingFieldType, InvalidFieldRelationship } from '../../errors';
+import { MissingFieldType, InvalidFieldRelationship, InvalidFieldName } from '../../errors';
 import { ArrayField, Block, BlockField, CheckboxField, Field, TextField } from './types';
 
 describe('sanitizeFields', () => {
@@ -15,6 +15,18 @@ describe('sanitizeFields', () => {
       // @ts-ignore
       sanitizeFields(fields, []);
     }).toThrow(MissingFieldType);
+  });
+  it("should throw on invalid field name", () => {
+    const fields: Field[] = [
+      {
+        label: "some.collection",
+        name: "some.collection",
+        type: "text",
+      }
+    ];
+    expect(() => {
+      sanitizeFields(fields, []);
+    }).toThrow(InvalidFieldName);
   });
 
   describe('auto-labeling', () => {

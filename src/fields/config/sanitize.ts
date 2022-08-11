@@ -1,5 +1,5 @@
 import { formatLabels, toWords } from '../../utilities/formatLabels';
-import { MissingFieldType, InvalidFieldRelationship } from '../../errors';
+import { MissingFieldType, InvalidFieldRelationship, InvalidFieldName } from '../../errors';
 import { baseBlockFields } from '../baseFields/baseBlockFields';
 import validations from '../validations';
 import { baseIDField } from '../baseFields/baseIDField';
@@ -13,6 +13,11 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
     const field: Field = { ...unsanitizedField };
 
     if (!field.type) throw new MissingFieldType(field);
+
+    // assert that field names do not contain forbidden characters
+    if ('name' in field && field.name && field.name.includes('.')) {
+      throw new InvalidFieldName(field, field.name);
+    }
 
     // Auto-label
     if ('name' in field && field.name && typeof field.label !== 'string' && field.label !== false) {
