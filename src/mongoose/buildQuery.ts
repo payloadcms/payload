@@ -200,7 +200,7 @@ class ParamParser {
           return;
         }
 
-        if (priorSchemaType.instance === 'Mixed') {
+        if (priorSchemaType.instance === 'Mixed' || priorSchemaType.instance === 'Array') {
           lastIncompletePath.path = currentPath;
         }
       }
