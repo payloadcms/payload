@@ -82,6 +82,35 @@ describe('Versions', () => {
         expect(collectionLocalVersionID).toBeDefined();
       });
 
+      it(" should allow saving multiple versions of models with unique fields", async () => {
+        const autosavePost = await payload.create({
+          collection,
+          data: {
+            title: "unique unchanging title",
+            description: "description 1",
+          },
+        });
+
+        const firstUpdate = await payload.update<any>({
+          id: autosavePost.id,
+          collection,
+          data: {
+            description: "description 2",
+          },
+        });
+        const finalDescription = "final description";
+
+        const secondUpdate = await payload.update<any>({
+          id: autosavePost.id,
+          collection,
+          data: {
+            description: finalDescription,
+          },
+        });
+
+        expect(secondUpdate.description).toBe(finalDescription);
+      });
+
       it('should allow a version to be retrieved by ID', async () => {
         const version = await payload.findVersionByID({
           collection,
