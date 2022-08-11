@@ -80,7 +80,7 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
       if (config.indexSortableFields && !buildSchemaOptions.global && !field.index && !field.hidden && sortableFieldTypes.indexOf(field.type) > -1 && fieldAffectsData(field)) {
         indexFields.push({ index: { [field.name]: 1 } });
       } else if (field.unique && fieldAffectsData(field)) {
-        indexFields.push({ index: { [field.name]: 1 }, options: { unique: true, sparse: field.localized || false } });
+        indexFields.push({ index: { [field.name]: 1 }, options: { unique: !buildSchemaOptions.disableUnique, sparse: field.localized || false } });
       } else if (field.index && fieldAffectsData(field)) {
         indexFields.push({ index: { [field.name]: 1 } });
       }

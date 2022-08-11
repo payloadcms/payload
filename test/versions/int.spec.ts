@@ -62,7 +62,7 @@ describe('Versions', () => {
 
         collectionLocalPostID = autosavePost.id;
 
-        const updatedPost = await payload.update<any>({
+        const updatedPost = await payload.update({
           id: collectionLocalPostID,
           collection,
           data: {
@@ -80,6 +80,35 @@ describe('Versions', () => {
         expect(updatedPost._status).toStrictEqual('draft');
 
         expect(collectionLocalVersionID).toBeDefined();
+      });
+
+      it('should allow saving multiple versions of models with unique fields', async () => {
+        const autosavePost = await payload.create({
+          collection,
+          data: {
+            title: 'unique unchanging title',
+            description: 'description 1',
+          },
+        });
+
+        await payload.update({
+          id: autosavePost.id,
+          collection,
+          data: {
+            description: 'description 2',
+          },
+        });
+        const finalDescription = 'final description';
+
+        const secondUpdate = await payload.update({
+          id: autosavePost.id,
+          collection,
+          data: {
+            description: finalDescription,
+          },
+        });
+
+        expect(secondUpdate.description).toBe(finalDescription);
       });
 
       it('should allow a version to be retrieved by ID', async () => {
