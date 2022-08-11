@@ -1,3 +1,16 @@
+## [1.0.20](https://github.com/payloadcms/payload/compare/v1.0.19...v1.0.20) (2022-08-11)
+
+
+### Bug Fixes
+
+* E11000 duplicate key error has no keyValue ([#916](https://github.com/payloadcms/payload/issues/916)) ([50972b9](https://github.com/payloadcms/payload/commit/50972b98a1d30c86d8b429ee5ba1c7dacac59f2c))
+* number validation works with 0 min and max ([#906](https://github.com/payloadcms/payload/issues/906)) ([874c001](https://github.com/payloadcms/payload/commit/874c001d3b9712bce342c206e66f794a7e4938ba))
+
+
+### Features
+
+* field name validation ([#903](https://github.com/payloadcms/payload/issues/903)) ([2f4f075](https://github.com/payloadcms/payload/commit/2f4f075441768475f1202587abf578d5e4ae9f2a))
+
 ## [1.0.19](https://github.com/payloadcms/payload/compare/v1.0.18...v1.0.19) (2022-08-07)
 
 
