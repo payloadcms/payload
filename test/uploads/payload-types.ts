@@ -28,8 +28,8 @@ export interface Media {
   filesize?: number;
   width?: number;
   height?: number;
-  sizes?: {
-    maintainedAspectRatio?: {
+  sizes: {
+    maintainedAspectRatio: {
       url?: string;
       width?: number;
       height?: number;
@@ -37,7 +37,7 @@ export interface Media {
       filesize?: number;
       filename?: string;
     };
-    tablet?: {
+    tablet: {
       url?: string;
       width?: number;
       height?: number;
@@ -45,7 +45,7 @@ export interface Media {
       filesize?: number;
       filename?: string;
     };
-    mobile?: {
+    mobile: {
       url?: string;
       width?: number;
       height?: number;
@@ -53,7 +53,7 @@ export interface Media {
       filesize?: number;
       filename?: string;
     };
-    icon?: {
+    icon: {
       url?: string;
       width?: number;
       height?: number;
@@ -62,6 +62,19 @@ export interface Media {
       filename?: string;
     };
   };
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unstored-media".
+ */
+export interface UnstoredMedia {
+  id: string;
+  url?: string;
+  filename?: string;
+  mimeType?: string;
+  filesize?: number;
   createdAt: string;
   updatedAt: string;
 }
