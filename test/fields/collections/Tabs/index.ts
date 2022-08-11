@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 import { blocksField, blocksFieldSeedData } from '../Blocks';
 import { UIField } from './UIField';
@@ -10,6 +11,9 @@ export const localizedTextValue = 'localized text';
 
 const TabsFields: CollectionConfig = {
   slug: tabsSlug,
+  access: {
+    read: () => true,
+  },
   versions: true,
   fields: [
     {
@@ -148,24 +152,71 @@ const TabsFields: CollectionConfig = {
           description: 'This tab is localized and requires a name',
           fields: [
             {
-              name: 'array',
-              labels: {
-                singular: 'Item',
-                plural: 'Items',
-              },
-              type: 'array',
-              required: true,
-              fields: [
-                {
-                  name: 'text',
-                  type: 'text',
-                  required: true,
-                },
-              ],
+              name: 'text',
+              type: 'text',
             },
+          ],
+        },
+        {
+          name: 'accessControlTab',
+          label: 'Access Control Tab',
+          access: {
+            read: () => false,
+          },
+          description: 'This tab is cannot be read',
+          fields: [
             {
               name: 'text',
               type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'hooksTab',
+          label: 'Hooks Tab',
+          hooks: {
+            beforeValidate: [
+              ({ data }) => {
+                data.hooksTab.beforeValidate = true;
+                return data.hooksTab;
+              },
+            ],
+            beforeChange: [
+              ({ data }) => {
+                data.hooksTab.beforeChange = true;
+                return data.hooksTab;
+              },
+            ],
+            afterChange: [
+              ({ data }) => {
+                data.hooksTab.afterChange = true;
+                return data.hooksTab;
+              },
+            ],
+            afterRead: [
+              ({ data }) => {
+                data.hooksTab.afterRead = true;
+                return data.hooksTab;
+              },
+            ],
+          },
+          description: 'This tab has hooks',
+          fields: [
+            {
+              name: 'beforeValidate',
+              type: 'checkbox',
+            },
+            {
+              name: 'beforeChange',
+              type: 'checkbox',
+            },
+            {
+              name: 'afterChange',
+              type: 'checkbox',
+            },
+            {
+              name: 'afterRead',
+              type: 'checkbox',
             },
           ],
         },
@@ -250,19 +301,18 @@ export const tabsDoc = {
     ],
     text: namedTabText,
   },
+  text: 'localized',
   localizedTab: {
-    array: [
-      {
-        text: "Hello, I'm the first row, in a named tab",
-      },
-      {
-        text: 'Second row here, in a named tab',
-      },
-      {
-        text: 'Here is some data for the third row, in a named tab',
-      },
-    ],
     text: localizedTextValue,
+  },
+  accessControlTab: {
+    text: 'cannot be read',
+  },
+  hooksTab: {
+    beforeValidate: false,
+    beforeChange: false,
+    afterChange: false,
+    afterRead: false,
   },
   textarea: 'Here is some text that goes in a textarea',
   anotherText: 'Super tired of writing this text',

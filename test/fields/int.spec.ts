@@ -315,6 +315,26 @@ describe('Fields', () => {
       expect(document.localizedTab.en.text).toStrictEqual(localizedTextValue);
     });
 
+    it('should allow access control on a named tab', async () => {
+      document = await payload.findByID({
+        collection: tabsSlug,
+        id: document.id,
+        overrideAccess: false,
+      });
+      expect(document.accessControlTab).toBeUndefined();
+    });
+
+    it('should allow hooks on a named tab', async () => {
+      document = await payload.findByID({
+        collection: tabsSlug,
+        id: document.id,
+      });
+      expect(document.hooksTab.beforeValidate).toBe(true);
+      expect(document.hooksTab.beforeChange).toBe(true);
+      expect(document.hooksTab.afterChange).toBe(true);
+      expect(document.hooksTab.afterRead).toBe(true);
+    });
+
     it('should return empty object for groups when no data present', async () => {
       const doc = await payload.create<GroupField>({
         collection: groupFieldsSlug,

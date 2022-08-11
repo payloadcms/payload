@@ -25,10 +25,11 @@ import {
   RichTextField,
   RowField,
   SelectField,
+  Tab,
   tabHasName,
   TabsField,
   TextareaField,
-  TextField,
+  TextField, UnnamedTab,
   UploadField,
 } from '../fields/config/types';
 import sortableFieldTypes from '../fields/sortableFieldTypes';
@@ -54,7 +55,7 @@ const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: Bui
   index: field.index || field.unique || false,
 });
 
-const localizeSchema = (field: NonPresentationalField, schema, localization) => {
+const localizeSchema = (field: NonPresentationalField | Tab, schema, localization) => {
   if (fieldIsLocalized(field) && localization && Array.isArray(localization.locales)) {
     return {
       type: localization.locales.reduce((localeSchema, locale) => ({
@@ -338,10 +339,10 @@ const fieldToSchemaMap = {
         };
 
         schema.add({
-          [tab.name]: localizeSchema(field, baseSchema, config.localization),
+          [tab.name]: localizeSchema(tab, baseSchema, config.localization),
         });
       } else {
-        tab.fields.forEach((subField: Field) => {
+        (tab as UnnamedTab).fields.forEach((subField: Field) => {
           const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
 
           if (addFieldSchema) {

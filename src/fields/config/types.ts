@@ -181,18 +181,14 @@ export type CollapsibleField = Omit<FieldBase, 'name'> & {
 
 export type TabsAdmin = Omit<Admin, 'description'>;
 
-type BaseTab = {
+type TabBase = {
   fields: Field[]
   description?: Description
 }
 
-type NamedTab = BaseTab & {
-  name: string
-  localized?: boolean
-  label?: string
-}
+export type NamedTab = TabBase & FieldBase
 
-type UnnamedTab = BaseTab & {
+export type UnnamedTab = TabBase & Omit<FieldBase, 'name'> & {
   label: string
   localized?: never
 }
@@ -204,6 +200,10 @@ export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized'> & {
   tabs: Tab[]
   admin?: TabsAdmin
 }
+
+type TabAsField = Tab & {
+  type: 'tab'
+};
 
 export type UIField = {
   name: string
@@ -363,6 +363,7 @@ export type Field =
   | RowField
   | CollapsibleField
   | TabsField
+  | TabAsField
   | UIField;
 
 export type FieldAffectingData =
@@ -468,7 +469,7 @@ export function tabHasName(tab: Tab): tab is NamedTab {
   return 'name' in tab;
 }
 
-export function fieldIsLocalized(field: Field): boolean {
+export function fieldIsLocalized(field: Field | Tab): boolean {
   return 'localized' in field && field.localized;
 }
 

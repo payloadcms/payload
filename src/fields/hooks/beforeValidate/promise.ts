@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { PayloadRequest } from '../../../express/types';
-import { Field, fieldAffectsData, valueIsValueWithRelation } from '../../config/types';
+import { Field, fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types';
 import { traverseFields } from './traverseFields';
 
 type Args = {
@@ -265,22 +265,44 @@ export const promise = async ({
       break;
     }
 
-    case 'tabs': {
-      const promises = [];
-      field.tabs.forEach((tab) => {
-        promises.push(traverseFields({
-          data,
-          doc,
-          fields: tab.fields,
-          id,
-          operation,
-          overrideAccess,
-          req,
-          siblingData,
-          siblingDoc,
-        }));
+    case 'tab': {
+      let tabSiblingData;
+      let tabSiblingDoc;
+      if (tabHasName(field)) {
+        tabSiblingData = typeof siblingData[field.name] === 'object' ? siblingData[field.name] : {};
+        tabSiblingDoc = typeof siblingDoc[field.name] === 'object' ? siblingDoc[field.name] : {};
+      } else {
+        tabSiblingData = siblingData;
+        tabSiblingDoc = siblingDoc;
+      }
+
+      await traverseFields({
+        data,
+        doc,
+        fields: field.fields,
+        id,
+        operation,
+        overrideAccess,
+        req,
+        siblingData: tabSiblingData,
+        siblingDoc: tabSiblingDoc,
       });
-      await Promise.all(promises);
+
+      break;
+    }
+
+    case 'tabs': {
+      await traverseFields({
+        data,
+        doc,
+        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        id,
+        operation,
+        overrideAccess,
+        req,
+        siblingData,
+        siblingDoc,
+      });
 
       break;
     }

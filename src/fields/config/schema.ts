@@ -181,7 +181,7 @@ export const collapsible = baseField.keys({
   admin: baseAdminFields.default(),
 });
 
-const tab = joi.object({
+const tab = baseField.keys({
   name: joi.string().when('localized', { is: joi.exist(), then: joi.required() }),
   localized: joi.boolean(),
   label: joi.string().required(),

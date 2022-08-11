@@ -275,28 +275,45 @@ export const promise = async ({
       break;
     }
 
-    case 'tabs': {
-      field.tabs.forEach((tab) => {
-        let tabDoc = siblingDoc;
-        if (tabHasName(tab)) {
-          tabDoc = siblingDoc[tab.name] as Record<string, unknown>;
-          if (typeof siblingDoc[tab.name] !== 'object') tabDoc = {};
-        }
+    case 'tab': {
+      let tabDoc = siblingDoc;
+      if (tabHasName(field)) {
+        tabDoc = siblingDoc[field.name] as Record<string, unknown>;
+        if (typeof siblingDoc[field.name] !== 'object') tabDoc = {};
+      }
 
-        traverseFields({
-          currentDepth,
-          depth,
-          doc,
-          fieldPromises,
-          fields: tab.fields,
-          findMany,
-          flattenLocales,
-          overrideAccess,
-          populationPromises,
-          req,
-          siblingDoc: tabDoc,
-          showHiddenFields,
-        });
+      await traverseFields({
+        currentDepth,
+        depth,
+        doc,
+        fieldPromises,
+        fields: field.fields,
+        findMany,
+        flattenLocales,
+        overrideAccess,
+        populationPromises,
+        req,
+        siblingDoc: tabDoc,
+        showHiddenFields,
+      });
+
+      break;
+    }
+
+    case 'tabs': {
+      traverseFields({
+        currentDepth,
+        depth,
+        doc,
+        fieldPromises,
+        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        findMany,
+        flattenLocales,
+        overrideAccess,
+        populationPromises,
+        req,
+        siblingDoc,
+        showHiddenFields,
       });
       break;
     }
