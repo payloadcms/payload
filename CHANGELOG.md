@@ -1,3 +1,11 @@
+## [1.0.21](https://github.com/payloadcms/payload/compare/v1.0.20...v1.0.21) (2022-08-11)
+
+
+### Bug Fixes
+
+* ensures you can query on nested block fields ([ca852e8](https://github.com/payloadcms/payload/commit/ca852e8cb2d78982abeae0b5db4117f0261d8fed))
+* saving multiple versions ([#918](https://github.com/payloadcms/payload/issues/918)) ([d0da3d7](https://github.com/payloadcms/payload/commit/d0da3d7962bbddfbdc1c553816409823bf6e1335))
+
 ## [1.0.20](https://github.com/payloadcms/payload/compare/v1.0.19...v1.0.20) (2022-08-11)
 
 
