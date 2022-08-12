@@ -68,6 +68,7 @@ const TabsField: React.FC<Props> = (props) => {
               description={activeTab.description}
             />
             <RenderFields
+              key={activeTab.label}
               forceRender
               readOnly={readOnly}
               permissions={permissions?.fields}
