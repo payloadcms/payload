@@ -1,5 +1,4 @@
 import equal from 'deep-equal';
-import ObjectID from 'bson-objectid';
 import { unflatten, flatten } from 'flatley';
 import flattenFilters from './flattenFilters';
 import getSiblingData from './getSiblingData';
