@@ -1,3 +1,11 @@
+## [1.0.22](https://github.com/payloadcms/payload/compare/v1.0.21...v1.0.22) (2022-08-12)
+
+
+### Bug Fixes
+
+* [#905](https://github.com/payloadcms/payload/issues/905) ([b8421dd](https://github.com/payloadcms/payload/commit/b8421ddc0c9357de7a61bdc565fe2f9c4cf62681))
+* ensures you can query on mixed schema type within blocks ([fba0847](https://github.com/payloadcms/payload/commit/fba0847f0fbc4c144ec85bb7a1ed3f2a953f5e05))
+
 ## [1.0.21](https://github.com/payloadcms/payload/compare/v1.0.20...v1.0.21) (2022-08-11)
 
 
