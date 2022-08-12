@@ -271,7 +271,6 @@
     "get-port": "5.1.1",
     "glob": "^8.0.3",
     "graphql-request": "^3.4.0",
-    "mongodb": "^3.6.2",
     "mongodb-memory-server": "^7.2.0",
     "nodemon": "^2.0.6",
     "passport-strategy": "^1.0.0",
