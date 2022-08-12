@@ -369,7 +369,8 @@ export type FieldAffectingData =
   | CodeField
   | PointField
 
-export type NonPresentationalField = TextField
+export type NonPresentationalField =
+  TextField
   | NumberField
   | EmailField
   | TextareaField

@@ -118,6 +118,9 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
+      // mongoose model schema indexes do not always create indexes in the actual database
+      // see: https://github.com/payloadcms/payload/issues/571
+
       indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
 
       indexes.forEach((index) => {
@@ -146,6 +149,12 @@ describe('Fields', () => {
       expect(options['group.localizedUnique.en']).toMatchObject({ unique: true, sparse: true });
       expect(definitions['group.localizedUnique.es']).toEqual(1);
       expect(options['group.localizedUnique.es']).toMatchObject({ unique: true, sparse: true });
+    });
+    it('should have unique indexes in a collapsible', () => {
+      expect(definitions['collapsibleLocalizedUnique.en']).toEqual(1);
+      expect(options['collapsibleLocalizedUnique.en']).toMatchObject({ unique: true, sparse: true });
+      expect(definitions.collapsibleTextUnique).toEqual(1);
+      expect(options.collapsibleTextUnique).toMatchObject({ unique: true });
     });
   });
 
