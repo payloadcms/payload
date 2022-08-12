@@ -6,6 +6,7 @@ import ArrayFields, { arrayDoc } from './collections/Array';
 import BlockFields, { blocksDoc } from './collections/Blocks';
 import CollapsibleFields, { collapsibleDoc } from './collections/Collapsible';
 import ConditionalLogic, { conditionalLogicDoc } from './collections/ConditionalLogic';
+import DateFields, { dateDoc } from './collections/Date';
 import RichTextFields, { richTextDoc } from './collections/RichText';
 import SelectFields, { selectsDoc } from './collections/Select';
 import TabsFields, { tabsDoc } from './collections/Tabs';
@@ -44,6 +45,7 @@ export default buildConfig({
     NumberFields,
     Uploads,
     IndexedFields,
+    DateFields,
   ],
   localization: {
     defaultLocale: 'en',
@@ -66,6 +68,7 @@ export default buildConfig({
     await payload.create({ collection: 'select-fields', data: selectsDoc });
     await payload.create({ collection: 'tabs-fields', data: tabsDoc });
     await payload.create({ collection: 'point-fields', data: pointDoc });
+    await payload.create({ collection: 'date-fields', data: dateDoc });
 
     const createdTextDoc = await payload.create({ collection: 'text-fields', data: textDoc });
 
