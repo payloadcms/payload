@@ -305,6 +305,30 @@ describe('Fields', () => {
       expect(blockFields.docs[0].blocks[2].subBlocks[0].number).toEqual(blocksFieldSeedData[2].subBlocks[0].number);
       expect(blockFields.docs[0].blocks[2].subBlocks[1].text).toEqual(blocksFieldSeedData[2].subBlocks[1].text);
     });
+
+    it('should query based on richtext data within a block', async () => {
+      const blockFieldsSuccess = await payload.find({
+        collection: 'block-fields',
+        where: {
+          'blocks.richText.children.text': {
+            like: 'fun',
+          },
+        },
+      });
+
+      expect(blockFieldsSuccess.docs).toHaveLength(1);
+
+      const blockFieldsFail = await payload.find({
+        collection: 'block-fields',
+        where: {
+          'blocks.richText.children.text': {
+            like: 'funny',
+          },
+        },
+      });
+
+      expect(blockFieldsFail.docs).toHaveLength(0);
+    });
   });
 
   describe('richText', () => {

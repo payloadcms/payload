@@ -230,7 +230,7 @@ describe('Localization', () => {
             const result = await payload.find<WithLocalizedRelationship>({
               collection: withLocalizedRelSlug,
               where: {
-                'localizedRelation.title': {
+                'localizedRelationship.title': {
                   equals: localizedRelation.title,
                 },
               },
@@ -244,7 +244,7 @@ describe('Localization', () => {
               collection: withLocalizedRelSlug,
               locale: spanishLocale,
               where: {
-                'localizedRelation.title': {
+                'localizedRelationship.title': {
                   equals: relationSpanishTitle,
                 },
               },
@@ -258,7 +258,7 @@ describe('Localization', () => {
               collection: withLocalizedRelSlug,
               locale: 'all',
               where: {
-                'localizedRelation.title.es': {
+                'localizedRelationship.title.es': {
                   equals: relationSpanishTitle,
                 },
               },

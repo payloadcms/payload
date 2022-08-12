@@ -14,6 +14,10 @@ export const blocksField: Field = {
           type: 'text',
           required: true,
         },
+        {
+          name: 'richText',
+          type: 'richText',
+        },
       ],
     },
     {
@@ -76,6 +80,7 @@ export const blocksFieldSeedData = [
     blockName: 'First block',
     blockType: 'text',
     text: 'first block',
+    richText: [],
   },
   {
     blockName: 'Second block',

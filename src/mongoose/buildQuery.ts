@@ -203,6 +203,8 @@ class ParamParser {
         if (priorSchemaType.instance === 'Mixed' || priorSchemaType.instance === 'Array') {
           lastIncompletePath.path = currentPath;
         }
+      } else {
+        lastIncompletePath.path = currentPath;
       }
 
       if (operator === 'near') {

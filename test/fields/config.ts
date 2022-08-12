@@ -59,7 +59,6 @@ export default buildConfig({
     });
 
     await payload.create({ collection: 'array-fields', data: arrayDoc });
-    await payload.create({ collection: 'block-fields', data: blocksDoc });
     await payload.create({ collection: 'collapsible-fields', data: collapsibleDoc });
     await payload.create({ collection: 'conditional-logic', data: conditionalLogicDoc });
     await payload.create({ collection: 'group-fields', data: groupDoc });
@@ -89,5 +88,13 @@ export default buildConfig({
     await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship });
 
     await payload.create({ collection: 'number-fields', data: numberDoc });
+
+    const blocksDocWithRichText = { ...blocksDoc };
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText;
+
+    await payload.create({ collection: 'block-fields', data: blocksDocWithRichText });
   },
 });
