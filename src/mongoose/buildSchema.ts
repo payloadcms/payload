@@ -89,7 +89,13 @@ const addFieldIndex = (field: NonPresentationalField, indexFields: Index[], conf
   if (config.indexSortableFields && !buildSchemaOptions.global && !field.index && !field.hidden && sortableFieldTypes.indexOf(field.type) > -1 && fieldAffectsData(field)) {
     indexFields.push({ index: { [field.name]: 1 } });
   } else if (field.unique && fieldAffectsData(field)) {
-    indexFields.push({ index: { [field.name]: 1 }, options: { unique: !buildSchemaOptions.disableUnique, sparse: field.localized || false } });
+    indexFields.push({
+      index: { [field.name]: 1 },
+      options: {
+        unique: !buildSchemaOptions.disableUnique,
+        sparse: field.localized || false,
+      },
+    });
   } else if (field.index && fieldAffectsData(field)) {
     indexFields.push({ index: { [field.name]: 1 } });
   }
@@ -179,11 +185,12 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           options,
         })),
       );
+    } else {
+      if (field.unique) {
+        options.unique = true;
+      }
+      indexes.push({ index: { [field.name]: direction }, options });
     }
-    if (field.unique) {
-      options.unique = true;
-    }
-    indexes.push({ index: { [field.name]: direction }, options });
   },
   radio: (field: RadioField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
     const baseSchema = {
