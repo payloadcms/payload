@@ -561,6 +561,55 @@ describe('Localization', () => {
 
       expect(typeof result.user.relation.title).toStrictEqual('string');
     });
+
+    it('should create and update collections', async () => {
+      const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
+      const client = new GraphQLClient(url);
+
+      const create = `mutation {
+        createLocalizedPost(
+          data: {
+            title: "${englishTitle}"
+          }
+          locale: ${defaultLocale}
+        ) {
+          id
+          title
+        }
+      }`;
+
+      const { createLocalizedPost: createResult } = await client.request(create, null, {
+        Authorization: `JWT ${token}`,
+      });
+
+
+      const update = `mutation {
+        updateLocalizedPost(
+          id: "${createResult.id}",
+          data: {
+            title: "${spanishTitle}"
+          }
+          locale: ${spanishLocale}
+        ) {
+          title
+        }
+      }`;
+
+      const { updateLocalizedPost: updateResult } = await client.request(update, null, {
+        Authorization: `JWT ${token}`,
+      });
+
+      const result = await payload.findByID({
+        collection: slug,
+        id: createResult.id,
+        locale: 'all',
+      });
+
+      expect(createResult.title).toStrictEqual(englishTitle);
+      expect(updateResult.title).toStrictEqual(spanishTitle);
+      expect(result.title[defaultLocale]).toStrictEqual(englishTitle);
+      expect(result.title[spanishLocale]).toStrictEqual(spanishTitle);
+    });
   });
 });
 

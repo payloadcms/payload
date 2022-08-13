@@ -177,6 +177,9 @@ function initCollectionsGraphQL(payload: Payload): void {
       args: {
         data: { type: collection.graphQL.mutationInputType },
         draft: { type: GraphQLBoolean },
+        ...(payload.config.localization ? {
+          locale: { type: payload.types.localeInputType },
+        } : {}),
       },
       resolve: createResolver(collection),
     };
@@ -188,6 +191,9 @@ function initCollectionsGraphQL(payload: Payload): void {
         data: { type: collection.graphQL.updateMutationInputType },
         draft: { type: GraphQLBoolean },
         autosave: { type: GraphQLBoolean },
+        ...(payload.config.localization ? {
+          locale: { type: payload.types.localeInputType },
+        } : {}),
       },
       resolve: updateResolver(collection),
     };

@@ -62,6 +62,9 @@ function initGlobalsGraphQL(payload: Payload): void {
         args: {
           data: { type: global.graphQL.mutationInputType },
           draft: { type: GraphQLBoolean },
+          ...(payload.config.localization ? {
+            locale: { type: payload.types.localeInputType },
+          } : {}),
         },
         resolve: updateResolver(global),
       };
