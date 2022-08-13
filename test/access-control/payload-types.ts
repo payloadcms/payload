@@ -52,7 +52,7 @@ export interface RestrictedVersion {
  */
 export interface SiblingDatum {
   id: string;
-  array?: {
+  array: {
     allowPublicReadability?: boolean;
     text?: string;
     id?: string;

@@ -8,36 +8,22 @@
 export interface Config {}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-global".
+ * via the `definition` "global".
  */
-export interface AutosaveGlobal {
+export interface Global {
   id: string;
-  title: string;
-  _status?: 'draft' | 'published';
+  title?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-posts".
+ * via the `definition` "array".
  */
-export interface AutosavePost {
+export interface Array {
   id: string;
-  title: string;
-  description: string;
-  _status?: 'draft' | 'published';
-  createdAt: string;
-  updatedAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-posts".
- */
-export interface DraftPost {
-  id: string;
-  title: string;
-  description: string;
-  _status?: 'draft' | 'published';
-  createdAt: string;
-  updatedAt: string;
+  array: {
+    text?: string;
+    id?: string;
+  }[];
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
