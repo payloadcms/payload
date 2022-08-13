@@ -239,5 +239,4 @@ components/index.js
 components/styles.css
 
 # Ignore generated
-demo/generated-types.ts
-demo/generated-schema.graphql
+test/**/graphql.schema
