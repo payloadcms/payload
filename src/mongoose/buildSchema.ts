@@ -44,9 +44,10 @@ const localizeSchema = (field: NonPresentationalField, schema, localization) => 
   return schema;
 };
 
-const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchemaOptions: BuildSchemaOptions = {}, indexes: Index[] = []): Schema => {
+const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchemaOptions: BuildSchemaOptions = {}): Schema => {
   const { allowIDField, options } = buildSchemaOptions;
   let fields = {};
+  const indexes: Index[] = [];
 
   let schemaFields = configFields;
 
@@ -319,7 +320,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       });
     });
   },
-  array: (field: ArrayField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]) => {
+  array: (field: ArrayField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: [buildSchema(
@@ -330,7 +331,6 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           allowIDField: true,
           disableUnique: buildSchemaOptions.disableUnique,
         },
-        indexes,
       )],
     };
 
@@ -338,7 +338,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
   },
-  group: (field: GroupField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  group: (field: GroupField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     let { required } = field;
     if (field?.admin?.condition || field?.localized || field?.access?.create) required = false;
 
@@ -357,7 +357,6 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           },
           disableUnique: buildSchemaOptions.disableUnique,
         },
-        indexes,
       ),
     };
 
