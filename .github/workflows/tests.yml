@@ -40,6 +40,9 @@ jobs:
     - name: Generate Payload Types
       run: yarn dev:generate-types fields
 
+    - name: Generate Payload GraphQL Schemas
+      run: yarn dev:generate-graphQLSchema fields
+
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: E2E Tests
