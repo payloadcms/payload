@@ -1,5 +1,8 @@
 import { GraphQLClient } from 'graphql-request';
+import payload from '../../src';
+import { devUser } from '../credentials';
 import { initPayloadTest } from '../helpers/configHelpers';
+import { postDoc } from './config';
 
 describe('dataloader', () => {
   let serverURL;
@@ -10,13 +13,24 @@ describe('dataloader', () => {
 
   describe('graphql', () => {
     let client: GraphQLClient;
+    let token: string;
+
     beforeAll(async () => {
       const url = `${serverURL}/api/graphql`;
       client = new GraphQLClient(url);
+
+      const loginResult = await payload.login({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      });
+
+      if (loginResult.token) token = loginResult.token;
     });
 
     it('should allow querying via graphql', async () => {
-      const title = 'graphql-title';
       const query = `query {
         Posts {
           docs {
@@ -28,10 +42,12 @@ describe('dataloader', () => {
         }
       }`;
 
-      const response = await client.request(query);
-      const posts = response.Posts;
+      const response = await client.request(query, null, {
+        Authorization: `JWT ${token}`,
+      });
 
-      expect(posts).toMatchObject({ title });
+      const { docs } = response.Posts;
+      expect(docs[0].title).toStrictEqual(postDoc.title);
     });
   });
 });
