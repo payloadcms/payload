@@ -5,6 +5,7 @@ import seo from '../../src';
 import Users from './collections/Users';
 import Pages from './collections/Pages';
 import Media from './collections/Media';
+import HomePage from './globals/HomePage';
 
 export default buildConfig({
   serverURL: 'http://localhost:3000',
@@ -32,6 +33,9 @@ export default buildConfig({
     Pages,
     Media
   ],
+  globals: [
+    HomePage
+  ],
   localization: {
     locales: [
       'en',
@@ -45,6 +49,9 @@ export default buildConfig({
     seo({
       collections: [
         'pages',
+      ],
+      globals: [
+        'homePage',
       ],
       uploadsCollection: 'media',
       generateTitle: ({ doc }: any) => `Website.com — ${doc?.title?.value}`,

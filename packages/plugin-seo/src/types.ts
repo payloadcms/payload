@@ -2,6 +2,7 @@ import { Field } from "payload/dist/fields/config/types";
 
 export type SEOConfig = {
   collections?: string[]
+  globals?: string[]
   uploadsCollection?: string
   fields?: Partial<Field>[]
   generateTitle?: <T = any>(args: { doc: T, locale?: string }) => string | Promise<string>

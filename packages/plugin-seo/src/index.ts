@@ -87,6 +87,21 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
         })
       }
       return collection;
+    }) || [],
+    globals: config.globals?.map((global) => {
+      const { slug } = global;
+      const isEnabled = seoConfig?.globals?.includes(slug);
+
+      if (isEnabled) {
+        return ({
+          ...global,
+          fields: [
+            ...global?.fields || [],
+            ...seoFields,
+          ],
+        })
+      }
+      return global;
     }) || []
   })
 };
