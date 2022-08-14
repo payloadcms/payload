@@ -50,7 +50,7 @@ export default config;
 - `fields`
     An object of field types to allow your admin editors to build forms with. Pass either a boolean value or a partial [Payload Block](https://payloadcms.com/docs/fields/blocks#block-configs) to override default settings. See [Fields](#fields) for more details.
 
-    ```
+    ```js
     fields: {
       text: true,
       textarea: true,
@@ -72,7 +72,7 @@ export default config;
 
     An array of collection slugs that, when enabled, are populated as options in form redirect fields.
 
-    ```
+    ```js
     redirectRelationships: ['pages']
     ```
 
@@ -80,7 +80,7 @@ export default config;
 
    A [beforeChange]([beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange)) hook that is called upon form submissions. You can integrate into any third-party payment processing API here. There is a `getPaymentTotal` function that will calculate the total cost after all conditions have been applied.
 
-    ```
+    ```js
     import { getPaymentTotal } from '@payloadcms/plugin-form-builder';
     ...
     handlePayment: async ({ form, submissionData }) => {
@@ -99,7 +99,7 @@ export default config;
 
     A [beforeChange]([beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange)) hook that is called just after emails are prepared, but before they are sent. This is a great place to inject your own HTML template to add custom styles.
 
-    ```
+    ```js
     beforeEmails: (emailsToSend) => {
       // modify the emails in any way before they are sent
       return emails.map((email) => ({
@@ -113,7 +113,7 @@ export default config;
 
     Override anything on the form collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections). Your overrides will be merged into the default `forms` collection.
 
-    ```
+    ```js
     formOverrides: {
       slug: 'contact-forms'
     }
@@ -124,7 +124,7 @@ export default config;
 
     You can override access control and anything else on the form submission collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections). Your overrides will be merged into the default `formSubmissions` collection.
 
-    ```
+    ```js
     formSubmissionOverrides: {
       slug: 'leads'
     }
