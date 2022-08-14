@@ -36,6 +36,7 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const [fields] = useState(() => formatFields(incomingCollection, isEditing));
   const [collection] = useState(() => ({ ...incomingCollection, fields }));
+  const [redirect, setRedirect] = useState<string>();
 
   const locale = useLocale();
   const { serverURL, routes: { admin, api } } = useConfig();
@@ -51,12 +52,12 @@ const EditView: React.FC<IndexProps> = (props) => {
   const onSave = useCallback(async (json: any) => {
     getVersions();
     if (!isEditing) {
-      history.push(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
+      setRedirect(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
       const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc, user, id, operation: 'update', locale });
       setInitialState(state);
     }
-  }, [admin, collection, history, isEditing, getVersions, user, id, locale]);
+  }, [admin, collection, isEditing, getVersions, user, id, locale]);
 
   const [{ data, isLoading: isLoadingDocument, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
@@ -110,6 +111,12 @@ const EditView: React.FC<IndexProps> = (props) => {
 
     awaitInitialState();
   }, [dataToRender, fields, isEditing, id, user, locale, isLoadingDocument, preferencesKey, getPreference]);
+
+  useEffect(() => {
+    if (redirect) {
+      history.push(redirect);
+    }
+  }, [history, redirect]);
 
   if (isError) {
     return (

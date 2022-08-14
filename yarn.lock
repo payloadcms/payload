@@ -10531,7 +10531,7 @@ react-router-dom@^5.1.2:
     tiny-invariant "^1.0.2"
     tiny-warning "^1.0.0"
 
-react-router-navigation-prompt@^1.8.11:
+react-router-navigation-prompt@^1.9.6:
   version "1.9.6"
   resolved "https://registry.npmjs.org/react-router-navigation-prompt/-/react-router-navigation-prompt-1.9.6.tgz#a949252dfbae8c40508671beb6d5995f0b089ac4"
   integrity sha512-l0sAtbroHK8i1/Eyy29XcrMpBEt0R08BaScgMUt8r5vWWbLz7G0ChOikayTCQm7QgDFsHw8gVnxDJb7TBZCAKg==
