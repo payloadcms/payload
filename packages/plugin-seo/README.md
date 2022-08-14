@@ -90,6 +90,17 @@ export default config;
     })
     ```
 
+  - `generateImage`
+
+    A function that allows you to return any meta image, including from document's content.
+
+     ```js
+    seo({
+      ...
+      generateImage: ({ doc, locale }) => doc?.featuredImage?.value
+    })
+    ```
+
   - `generateURL`
 
     A function called by the search preview component to display the actual URL of your page.
