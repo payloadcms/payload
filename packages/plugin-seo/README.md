@@ -5,12 +5,12 @@
 A plugin for [Payload CMS](https://github.com/payloadcms/payload) to auto-generate SEO meta data based on the content of your documents.
 
 Core features:
-  - Adds a `meta` field to every SEO-enabled collection that:
-    - Includes title, description, and image subfields
-    - Auto-generates meta data from your document's content
-    - Displays hints and indicators to help content editors
-    - Renders a snippet of what a search engine might display
-    - Soon: variable injection
+  - Adds a `meta` field to every SEO-enabled collection or global. It:
+    - includes title, description, and image subfields
+    - auto-generates meta data from your document's content
+    - displays hints and indicators to help content editors
+    - renders a snippet of what a search engine might display
+    - soon will support variable injection
 
 ## Installation
 
@@ -42,10 +42,19 @@ const config = buildConfig({
       fields: []
     }
   ],
+  globals: [
+    {
+      slug: 'homePage',
+      fields: []
+    }
+  ],
   plugins: [
     seo({
       collections: [
         'pages',
+      ],
+      globals: [
+        'homePage',
       ],
       uploadsCollection: 'media',
       generateTitle: ({ doc }) => `Website.com — ${doc.title.value}`,
@@ -63,6 +72,9 @@ export default config;
 
     An array of collections slugs to enable SEO. Enabled collections receive a `meta` field which is an object of title, description, and image subfields.
 
+- `globals`
+
+    An array of global slugs to enable SEO. Enabled globals receive a `meta` field which is an object of title, description, and image subfields.
 
 - `uploadsCollection`
 
