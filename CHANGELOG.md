@@ -1,3 +1,11 @@
+## [1.0.23](https://github.com/payloadcms/payload/compare/v1.0.22...v1.0.23) (2022-08-15)
+
+
+### Bug Fixes
+
+* [#930](https://github.com/payloadcms/payload/issues/930) ([cbb1c84](https://github.com/payloadcms/payload/commit/cbb1c84be76146301ce41c4bdace647df83a4aac))
+* dev:generate-types on all test configs ([#919](https://github.com/payloadcms/payload/issues/919)) ([145e1db](https://github.com/payloadcms/payload/commit/145e1db05db0e71149ba74e95764970dfdfd8b6b))
+
 ## [1.0.22](https://github.com/payloadcms/payload/compare/v1.0.21...v1.0.22) (2022-08-12)
 
 
