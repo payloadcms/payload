@@ -34,6 +34,24 @@ const IndexedFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'collapsible',
+      label: 'Collapsible',
+      fields: [
+        {
+          name: 'collapsibleLocalizedUnique',
+          type: 'text',
+          unique: true,
+          localized: true,
+        },
+        {
+          name: 'collapsibleTextUnique',
+          type: 'text',
+          label: 'collapsibleTextUnique',
+          unique: true,
+        },
+      ],
+    },
   ],
 };
 
