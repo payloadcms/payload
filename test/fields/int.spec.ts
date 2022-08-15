@@ -118,6 +118,9 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
+      // mongoose model schema indexes do not always create indexes in the actual database
+      // see: https://github.com/payloadcms/payload/issues/571
+
       indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
 
       indexes.forEach((index) => {
@@ -147,10 +150,19 @@ describe('Fields', () => {
       expect(definitions['group.localizedUnique.es']).toEqual(1);
       expect(options['group.localizedUnique.es']).toMatchObject({ unique: true, sparse: true });
     });
+    it('should have unique indexes in a collapsible', () => {
+      expect(definitions['collapsibleLocalizedUnique.en']).toEqual(1);
+      expect(options['collapsibleLocalizedUnique.en']).toMatchObject({ unique: true, sparse: true });
+      expect(definitions.collapsibleTextUnique).toEqual(1);
+      expect(options.collapsibleTextUnique).toMatchObject({ unique: true });
+    });
   });
 
   describe('point', () => {
     let doc;
+    const point = [7, -7];
+    const localized = [5, -2];
+    const group = { point: [1, 9] };
 
     beforeAll(async () => {
       const findDoc = await payload.find({
@@ -174,9 +186,6 @@ describe('Fields', () => {
     });
 
     it('should create', async () => {
-      const point = [7, -7];
-      const localized = [5, -2];
-      const group = { point: [1, 9] };
       doc = await payload.create({
         collection: 'point-fields',
         data: {
@@ -185,6 +194,30 @@ describe('Fields', () => {
           group,
         },
       });
+
+      expect(doc.point).toEqual(point);
+      expect(doc.localized).toEqual(localized);
+      expect(doc.group).toMatchObject(group);
+    });
+
+    it('should not create duplicate point when unique', async () => {
+      await expect(() => payload.create({
+        collection: 'point-fields',
+        data: {
+          point,
+          localized,
+          group,
+        },
+      }))
+        .rejects
+        .toThrow(Error);
+
+      await expect(async () => payload.create({
+        collection: 'number-fields',
+        data: {
+          min: 5,
+        },
+      })).rejects.toThrow('The following field is invalid: min');
 
       expect(doc.point).toEqual(point);
       expect(doc.localized).toEqual(localized);
