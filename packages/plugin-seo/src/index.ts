@@ -81,8 +81,12 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
         return ({
           ...collection,
           fields: [
-            ...collection?.fields || [],
-            ...seoFields,
+            {
+              type: 'tabs', tabs: [
+                { label: collection?.labels?.singular || 'Content', fields: [...(collection?.fields || [])] },
+                { label: 'SEO', fields: [...seoFields] },
+              ]
+            },
           ],
         })
       }
@@ -96,8 +100,12 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
         return ({
           ...global,
           fields: [
-            ...global?.fields || [],
-            ...seoFields,
+            {
+              type: 'tabs', tabs: [
+                { label: global?.label || 'Content', fields: [...(global?.fields || [])] },
+                { label: 'SEO', fields: [...seoFields] },
+              ]
+            },
           ],
         })
       }
