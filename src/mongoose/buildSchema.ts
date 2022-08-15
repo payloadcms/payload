@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
-import { IndexOptions, Schema, SchemaOptions } from 'mongoose';
+import { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
 import { ArrayField, Block, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NonPresentationalField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextareaField, TextField, UploadField } from '../fields/config/types';
 
@@ -15,12 +15,17 @@ export type BuildSchemaOptions = {
 
 type FieldSchemaGenerator = (field: Field, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => void;
 
-const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: BuildSchemaOptions) => ({
-  sparse: field.unique && field.localized,
-  unique: (!buildSchemaOptions.disableUnique && field.unique) || false,
-  required: false,
-  index: field.index || field.unique || false,
-});
+const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: BuildSchemaOptions) => {
+  const schema: SchemaTypeOptions<unknown> = {
+    unique: (!buildSchemaOptions.disableUnique && field.unique) || false,
+    required: false,
+    index: field.index || field.unique || false,
+  };
+  if (field.unique && field.localized) {
+    schema.sparse = true;
+  }
+  return schema;
+};
 
 const localizeSchema = (field: NonPresentationalField, schema, localization) => {
   if (field.localized && localization && Array.isArray(localization.locales)) {
@@ -112,27 +117,39 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     });
   },
   point: (field: PointField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
-    const baseSchema = {
+    const baseSchema: SchemaTypeOptions<unknown> = {
       type: {
         type: String,
         enum: ['Point'],
       },
       coordinates: {
         type: [Number],
-        sparse: (buildSchemaOptions.disableUnique && field.unique) && field.localized,
-        unique: (buildSchemaOptions.disableUnique && field.unique) || false,
         required: false,
         default: field.defaultValue || undefined,
       },
     };
+    if (buildSchemaOptions.disableUnique && field.unique && field.localized) {
+      baseSchema.coordinates.sparse = true;
+    }
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
 
-    // if (field.index === true || field.index === undefined) {
-    //   baseSchema.index = '2dsphere';
-    // }
+    if (field.index === true || field.index === undefined) {
+      const indexOptions: IndexOptions = {};
+      if (!buildSchemaOptions.disableUnique && field.unique) {
+        indexOptions.sparse = true;
+        indexOptions.unique = true;
+      }
+      if (field.localized && config.localization) {
+        config.localization.locales.forEach((locale) => {
+          schema.index({ [`${field.name}.${locale}`]: '2dsphere' }, indexOptions);
+        });
+      } else {
+        schema.index({ [field.name]: '2dsphere' }, indexOptions);
+      }
+    }
   },
   radio: (field: RadioField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = {

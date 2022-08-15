@@ -160,6 +160,9 @@ describe('Fields', () => {
 
   describe('point', () => {
     let doc;
+    const point = [7, -7];
+    const localized = [5, -2];
+    const group = { point: [1, 9] };
 
     beforeAll(async () => {
       const findDoc = await payload.find({
@@ -183,9 +186,6 @@ describe('Fields', () => {
     });
 
     it('should create', async () => {
-      const point = [7, -7];
-      const localized = [5, -2];
-      const group = { point: [1, 9] };
       doc = await payload.create({
         collection: 'point-fields',
         data: {
@@ -194,6 +194,30 @@ describe('Fields', () => {
           group,
         },
       });
+
+      expect(doc.point).toEqual(point);
+      expect(doc.localized).toEqual(localized);
+      expect(doc.group).toMatchObject(group);
+    });
+
+    it('should not create duplicate point when unique', async () => {
+      await expect(() => payload.create({
+        collection: 'point-fields',
+        data: {
+          point,
+          localized,
+          group,
+        },
+      }))
+        .rejects
+        .toThrow(Error);
+
+      await expect(async () => payload.create({
+        collection: 'number-fields',
+        data: {
+          min: 5,
+        },
+      })).rejects.toThrow('The following field is invalid: min');
 
       expect(doc.point).toEqual(point);
       expect(doc.localized).toEqual(localized);
