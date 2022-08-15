@@ -2,10 +2,9 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
-import { IndexDefinition, IndexOptions, Schema, SchemaOptions } from 'mongoose';
+import { IndexOptions, Schema, SchemaOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
 import { ArrayField, Block, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NonPresentationalField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextareaField, TextField, UploadField } from '../fields/config/types';
-import sortableFieldTypes from '../fields/sortableFieldTypes';
 
 export type BuildSchemaOptions = {
   options?: SchemaOptions
@@ -14,12 +13,7 @@ export type BuildSchemaOptions = {
   global?: boolean
 }
 
-type FieldSchemaGenerator = (field: Field, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]) => void;
-
-type Index = {
-  index: IndexDefinition
-  options?: IndexOptions
-}
+type FieldSchemaGenerator = (field: Field, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => void;
 
 const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: BuildSchemaOptions) => ({
   sparse: field.unique && field.localized,
@@ -38,7 +32,6 @@ const localizeSchema = (field: NonPresentationalField, schema, localization) => 
         _id: false,
       }),
       localized: true,
-      index: schema.index,
     };
   }
   return schema;
@@ -47,7 +40,6 @@ const localizeSchema = (field: NonPresentationalField, schema, localization) => 
 const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchemaOptions: BuildSchemaOptions = {}): Schema => {
   const { allowIDField, options } = buildSchemaOptions;
   let fields = {};
-  const indexes: Index[] = [];
 
   let schemaFields = configFields;
 
@@ -68,90 +60,58 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
       const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[field.type];
 
       if (addFieldSchema) {
-        addFieldSchema(field, schema, config, buildSchemaOptions, indexes);
+        addFieldSchema(field, schema, config, buildSchemaOptions);
       }
     }
-  });
-
-  if (buildSchemaOptions?.options?.timestamps) {
-    indexes.push({ index: { createdAt: 1 } });
-    indexes.push({ index: { updatedAt: 1 } });
-  }
-
-  // mongoose on mongoDB 5 or 6 need to call this to make the index in the database, schema indexes alone are not enough
-  indexes.forEach((indexField) => {
-    schema.index(indexField.index, indexField.options);
   });
 
   return schema;
 };
 
-const addFieldIndex = (field: NonPresentationalField, indexFields: Index[], config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
-  if (config.indexSortableFields && !buildSchemaOptions.global && !field.index && !field.hidden && sortableFieldTypes.indexOf(field.type) > -1 && fieldAffectsData(field)) {
-    indexFields.push({ index: { [field.name]: 1 } });
-  } else if (field.unique && fieldAffectsData(field)) {
-    indexFields.push({
-      index: { [field.name]: 1 },
-      options: {
-        unique: !buildSchemaOptions.disableUnique,
-        sparse: field.localized || false,
-      },
-    });
-  } else if (field.index && fieldAffectsData(field)) {
-    indexFields.push({ index: { [field.name]: 1 } });
-  }
-};
-
 const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
-  number: (field: NumberField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  number: (field: NumberField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Number };
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
-    addFieldIndex(field, indexes, config, buildSchemaOptions);
   },
-  text: (field: TextField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  text: (field: TextField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
-    addFieldIndex(field, indexes, config, buildSchemaOptions);
   },
-  email: (field: EmailField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  email: (field: EmailField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
-    addFieldIndex(field, indexes, config, buildSchemaOptions);
   },
-  textarea: (field: TextareaField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  textarea: (field: TextareaField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
-    addFieldIndex(field, indexes, config, buildSchemaOptions);
   },
-  richText: (field: RichTextField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  richText: (field: RichTextField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Schema.Types.Mixed };
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
-    addFieldIndex(field, indexes, config, buildSchemaOptions);
   },
-  code: (field: CodeField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  code: (field: CodeField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
-    addFieldIndex(field, indexes, config, buildSchemaOptions);
   },
-  point: (field: PointField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  point: (field: PointField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = {
       type: {
         type: String,
@@ -170,30 +130,11 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
 
-    // creates geospatial 2dsphere index by default
-    let direction;
-    const options: IndexOptions = {
-      unique: field.unique || false,
-      sparse: (field.localized && field.unique) || false,
-    };
-    if (field.index === true || field.index === undefined) {
-      direction = '2dsphere';
-    }
-    if (field.localized && config.localization) {
-      indexes.push(
-        ...config.localization.locales.map((locale) => ({
-          index: { [`${field.name}.${locale}`]: direction },
-          options,
-        })),
-      );
-    } else {
-      if (field.unique) {
-        options.unique = true;
-      }
-      indexes.push({ index: { [field.name]: direction }, options });
-    }
+    // if (field.index === true || field.index === undefined) {
+    //   baseSchema.index = '2dsphere';
+    // }
   },
-  radio: (field: RadioField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  radio: (field: RadioField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
@@ -206,25 +147,22 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
-    addFieldIndex(field, indexes, config, buildSchemaOptions);
   },
-  checkbox: (field: CheckboxField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  checkbox: (field: CheckboxField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Boolean };
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
-    addFieldIndex(field, indexes, config, buildSchemaOptions);
   },
-  date: (field: DateField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  date: (field: DateField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Date };
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
-    addFieldIndex(field, indexes, config, buildSchemaOptions);
   },
-  upload: (field: UploadField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  upload: (field: UploadField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: Schema.Types.Mixed,
@@ -234,9 +172,8 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
-    addFieldIndex(field, indexes, config, buildSchemaOptions);
   },
-  relationship: (field: RelationshipField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]) => {
+  relationship: (field: RelationshipField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
     const hasManyRelations = Array.isArray(field.relationTo);
     let schemaToReturn: { [key: string]: any } = {};
 
@@ -289,33 +226,32 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     schema.add({
       [field.name]: schemaToReturn,
     });
-    addFieldIndex(field, indexes, config, buildSchemaOptions);
   },
-  row: (field: RowField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  row: (field: RowField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     field.fields.forEach((subField: Field) => {
       const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
 
       if (addFieldSchema) {
-        addFieldSchema(subField, schema, config, buildSchemaOptions, indexes);
+        addFieldSchema(subField, schema, config, buildSchemaOptions);
       }
     });
   },
-  collapsible: (field: CollapsibleField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  collapsible: (field: CollapsibleField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     field.fields.forEach((subField: Field) => {
       const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
 
       if (addFieldSchema) {
-        addFieldSchema(subField, schema, config, buildSchemaOptions, indexes);
+        addFieldSchema(subField, schema, config, buildSchemaOptions);
       }
     });
   },
-  tabs: (field: TabsField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  tabs: (field: TabsField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     field.tabs.forEach((tab) => {
       tab.fields.forEach((subField: Field) => {
         const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
 
         if (addFieldSchema) {
-          addFieldSchema(subField, schema, config, buildSchemaOptions, indexes);
+          addFieldSchema(subField, schema, config, buildSchemaOptions);
         }
       });
     });
@@ -364,7 +300,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
   },
-  select: (field: SelectField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  select: (field: SelectField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
       type: String,
@@ -378,9 +314,8 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     schema.add({
       [field.name]: field.hasMany ? [schemaToReturn] : schemaToReturn,
     });
-    addFieldIndex(field, indexes, config, buildSchemaOptions);
   },
-  blocks: (field: BlockField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions, indexes: Index[]): void => {
+  blocks: (field: BlockField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const fieldSchema = [new Schema({}, { _id: false, discriminatorKey: 'blockType' })];
     let schemaToReturn;
 
@@ -403,7 +338,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       blockItem.fields.forEach((blockField) => {
         const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[blockField.type];
         if (addFieldSchema) {
-          addFieldSchema(blockField, blockSchema, config, buildSchemaOptions, indexes);
+          addFieldSchema(blockField, blockSchema, config, buildSchemaOptions);
         }
       });
 
