@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import path from 'path';
 import fs from 'fs';
 import { buildConfig } from '../buildConfig';
@@ -91,9 +92,10 @@ export default buildConfig({
 
     const blocksDocWithRichText = { ...blocksDoc };
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText;
+    // @ts-ignore
+    blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText;
 
     await payload.create({ collection: 'block-fields', data: blocksDocWithRichText });
   },

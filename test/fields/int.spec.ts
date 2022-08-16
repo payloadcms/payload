@@ -362,6 +362,54 @@ describe('Fields', () => {
 
       expect(blockFieldsFail.docs).toHaveLength(0);
     });
+
+    it('should query based on richtext data within a localized block, specifying locale', async () => {
+      const blockFieldsSuccess = await payload.find({
+        collection: 'block-fields',
+        where: {
+          'localizedBlocks.en.richText.children.text': {
+            like: 'fun',
+          },
+        },
+      });
+
+      expect(blockFieldsSuccess.docs).toHaveLength(1);
+
+      const blockFieldsFail = await payload.find({
+        collection: 'block-fields',
+        where: {
+          'localizedBlocks.en.richText.children.text': {
+            like: 'funny',
+          },
+        },
+      });
+
+      expect(blockFieldsFail.docs).toHaveLength(0);
+    });
+
+    it('should query based on richtext data within a localized block, without specifying locale', async () => {
+      const blockFieldsSuccess = await payload.find({
+        collection: 'block-fields',
+        where: {
+          'localizedBlocks.richText.children.text': {
+            like: 'fun',
+          },
+        },
+      });
+
+      expect(blockFieldsSuccess.docs).toHaveLength(1);
+
+      const blockFieldsFail = await payload.find({
+        collection: 'block-fields',
+        where: {
+          'localizedBlocks.richText.children.text': {
+            like: 'funny',
+          },
+        },
+      });
+
+      expect(blockFieldsFail.docs).toHaveLength(0);
+    });
   });
 
   describe('richText', () => {

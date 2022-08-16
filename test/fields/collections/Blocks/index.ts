@@ -72,7 +72,14 @@ export const blocksField: Field = {
 
 const BlockFields: CollectionConfig = {
   slug: 'block-fields',
-  fields: [blocksField],
+  fields: [
+    blocksField,
+    {
+      ...blocksField,
+      name: 'localizedBlocks',
+      localized: true,
+    },
+  ],
 };
 
 export const blocksFieldSeedData = [
@@ -107,6 +114,7 @@ export const blocksFieldSeedData = [
 
 export const blocksDoc = {
   blocks: blocksFieldSeedData,
+  localizedBlocks: blocksFieldSeedData,
 };
 
 export default BlockFields;
