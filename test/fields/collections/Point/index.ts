@@ -19,6 +19,7 @@ const PointFields: CollectionConfig = {
       name: 'localized',
       type: 'point',
       label: 'Localized Point',
+      unique: true,
       localized: true,
     },
     {
@@ -36,7 +37,7 @@ const PointFields: CollectionConfig = {
 
 export const pointDoc = {
   point: [7, -7],
-  localized: [5, -2],
+  localized: [15, -12],
   group: { point: [1, 9] },
 };
 
