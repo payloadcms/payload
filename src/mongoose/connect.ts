@@ -39,8 +39,6 @@ const connectMongoose = async (
   try {
     await mongoose.connect(urlToConnect, connectionOptions);
 
-    mongoose.set('strictQuery', false);
-
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
       logger.info('---- DROPPING DATABASE ----');
       await mongoose.connection.dropDatabase();
