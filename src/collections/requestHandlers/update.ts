@@ -10,7 +10,7 @@ export type UpdateResult = {
 };
 
 export async function deprecatedUpdate(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<UpdateResult> | void> {
-  console.warn('The PUT method is deprecated and will no longer be supported in a future release. Please use the PATCH method for update requests.');
+  req.payload.logger.warn('The PUT method is deprecated and will no longer be supported in a future release. Please use the PATCH method for update requests.');
 
   return updateHandler(req, res, next);
 }

@@ -25,7 +25,7 @@ const SaveDraft: React.FC = () => {
 
     if (collection) {
       action = `${serverURL}${api}/${collection.slug}${id ? `/${id}` : ''}${search}`;
-      if (id) method = 'PUT';
+      if (id) method = 'PATCH';
     }
 
     if (global) {

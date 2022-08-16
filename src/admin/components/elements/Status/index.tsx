@@ -55,7 +55,7 @@ const Status: React.FC<Props> = () => {
 
     if (collection) {
       url = `${serverURL}${api}/${collection.slug}/${id}?depth=0&locale=${locale}&fallback-locale=null`;
-      method = 'put';
+      method = 'PATCH';
     }
     if (global) {
       url = `${serverURL}${api}/globals/${global.slug}?depth=0&locale=${locale}&fallback-locale=null`;

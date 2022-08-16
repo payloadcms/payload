@@ -81,7 +81,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
         <OperationContext.Provider value={operation}>
           <Form
             className={`${baseClass}__form`}
-            method={id ? 'put' : 'post'}
+            method={id ? 'patch' : 'post'}
             action={action}
             onSuccess={onSave}
             disabled={!hasSavePermission}

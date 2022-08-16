@@ -174,7 +174,7 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}/api/${slug || this.defaultSlug}/${id}${formattedQs}`, {
       body: JSON.stringify(data),
       headers,
-      method: 'put',
+      method: 'PATCH',
     });
     const { status } = response;
     const json = await response.json();

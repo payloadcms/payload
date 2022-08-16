@@ -34,6 +34,20 @@ export const requests = {
     return fetch(url, formattedOptions);
   },
 
+  patch: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
+    const headers = options && options.headers ? { ...options.headers } : {};
+
+    const formattedOptions = {
+      ...options,
+      method: 'PATCH',
+      headers: {
+        ...headers,
+      },
+    };
+
+    return fetch(url, formattedOptions);
+  },
+
   delete: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
     const headers = options && options.headers ? { ...options.headers } : {};
     return fetch(url, {

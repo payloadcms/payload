@@ -61,7 +61,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
         <OperationContext.Provider value="update">
           <Form
             className={`${baseClass}__form`}
-            method="put"
+            method="patch"
             action={action}
             initialState={initialState}
             disabled={!hasSavePermission}
