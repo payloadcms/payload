@@ -14,6 +14,11 @@ const TextFields: CollectionConfig = {
       required: true,
     },
     {
+      name: 'localizedText',
+      type: 'text',
+      localized: true,
+    },
+    {
       name: 'defaultFunction',
       type: 'text',
       defaultValue: () => (defaultText),
@@ -32,6 +37,7 @@ const TextFields: CollectionConfig = {
 
 export const textDoc = {
   text: 'Seeded text document',
+  localizedText: 'Localized text',
 };
 
 export default TextFields;

@@ -334,19 +334,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   },
   blocks: (field: BlockField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const fieldSchema = [new Schema({}, { _id: false, discriminatorKey: 'blockType' })];
-    let schemaToReturn;
-
-    if (field.localized && config.localization) {
-      schemaToReturn = config.localization.locales.reduce((localeSchema, locale) => ({
-        ...localeSchema,
-        [locale]: fieldSchema,
-      }), {});
-    } else {
-      schemaToReturn = fieldSchema;
-    }
 
     schema.add({
-      [field.name]: schemaToReturn,
+      [field.name]: localizeSchema(field, fieldSchema, config.localization),
     });
 
     field.blocks.forEach((blockItem: Block) => {
