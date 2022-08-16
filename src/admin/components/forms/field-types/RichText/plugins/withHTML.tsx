@@ -10,7 +10,6 @@ const ELEMENT_TAGS = {
   H4: () => ({ type: 'h4' }),
   H5: () => ({ type: 'h5' }),
   H6: () => ({ type: 'h6' }),
-  IMG: (el) => ({ type: 'image', url: el.getAttribute('src') }),
   LI: () => ({ type: 'li' }),
   OL: () => ({ type: 'ol' }),
   P: () => ({ type: 'p' }),
@@ -47,9 +46,14 @@ const deserialize = (el) => {
   ) {
     [parent] = el.childNodes;
   }
-  const children = Array.from(parent.childNodes)
+
+  let children = Array.from(parent.childNodes)
     .map(deserialize)
     .flat();
+
+  if (children.length === 0) {
+    children = [{ text: '' }];
+  }
 
   if (el.nodeName === 'BODY') {
     return jsx('fragment', {}, children);
