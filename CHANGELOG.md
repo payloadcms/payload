@@ -6,8 +6,6 @@
 * [#939](https://github.com/payloadcms/payload/issues/939) ([b1a1575](https://github.com/payloadcms/payload/commit/b1a1575122f602ff6ba77973ab2a67893d352487))
 * create indexes in nested fields ([f615abc](https://github.com/payloadcms/payload/commit/f615abc9b1d9000aff114010ef7f618ec70b6491))
 * format graphql localization input type ([#932](https://github.com/payloadcms/payload/issues/932)) ([1c7445d](https://github.com/payloadcms/payload/commit/1c7445dc7fd883f6d5dcba532e9e048b1cff08f5))
-* nested schema indexes ([d0744f3](https://github.com/payloadcms/payload/commit/d0744f370270f160da29fe9ae9772c8e8c8d6f53))
-* point index ([b860959](https://github.com/payloadcms/payload/commit/b860959feac2e58806d68da642fe3b37bdb003fc))
 
 
 ### Features
