@@ -1,6 +1,6 @@
 type SharedProps = {
-  displayFormat?: string | undefined
-  pickerAppearance?: 'dayAndTime' | 'timeOnly' | 'dayOnly'
+  displayFormat?: string
+  pickerAppearance?: 'dayAndTime' | 'timeOnly' | 'dayOnly' | 'monthOnly'
 }
 
 type TimePickerProps = {
@@ -16,6 +16,11 @@ type DayPickerProps = {
   maxDate?: Date
 }
 
+type MonthPickerProps = {
+  minDate?: Date
+  maxDate?: Date
+}
+
 export type ConditionalDateProps =
   | SharedProps & DayPickerProps & TimePickerProps & {
     pickerAppearance?: 'dayAndTime'
@@ -25,6 +30,9 @@ export type ConditionalDateProps =
   }
   | SharedProps & DayPickerProps & {
     pickerAppearance: 'dayOnly'
+  }
+  | SharedProps & MonthPickerProps & {
+    pickerAppearance: 'monthOnly'
   }
 
 export type Props = SharedProps & DayPickerProps & TimePickerProps & {

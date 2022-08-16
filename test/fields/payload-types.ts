@@ -297,6 +297,20 @@ export interface IndexedField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "date-fields".
+ */
+export interface DateField {
+  id: string;
+  default: string;
+  timeOnly?: string;
+  dayOnly?: string;
+  dayAndTime?: string;
+  monthOnly?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
