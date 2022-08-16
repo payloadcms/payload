@@ -16,7 +16,7 @@ import findVersionByID from './requestHandlers/findVersionByID';
 import restoreVersion from './requestHandlers/restoreVersion';
 import deleteHandler from './requestHandlers/delete';
 import findByID from './requestHandlers/findByID';
-import update from './requestHandlers/update';
+import update, { deprecatedUpdate } from './requestHandlers/update';
 import logoutHandler from '../auth/requestHandlers/logout';
 
 const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
@@ -122,6 +122,11 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
     {
       path: '/:id',
       method: 'put',
+      handler: deprecatedUpdate,
+    },
+    {
+      path: '/:id',
+      method: 'patch',
       handler: update,
     },
     {
