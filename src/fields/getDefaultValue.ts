@@ -15,9 +15,8 @@ const getValueWithDefault = async ({ value, defaultValue, locale, user }: Args):
   if (defaultValue && typeof defaultValue === 'function') {
     return defaultValue({ locale, user });
   }
-  return defaultValue;
 
-  return undefined;
+  return defaultValue;
 };
 
 export default getValueWithDefault;
