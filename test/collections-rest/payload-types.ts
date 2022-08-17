@@ -95,16 +95,6 @@ export interface CustomIdNumber {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "endpoints".
- */
-export interface Endpoint {
-  id: string;
-  title?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {

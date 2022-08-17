@@ -1,5 +1,6 @@
 import joi from 'joi';
 import { componentSchema } from '../../utilities/componentSchema';
+import { endpointsSchema } from '../../config/schema';
 
 const globalSchema = joi.object().keys({
   slug: joi.string().required(),
@@ -18,14 +19,7 @@ const globalSchema = joi.object().keys({
     beforeRead: joi.array().items(joi.func()),
     afterRead: joi.array().items(joi.func()),
   }),
-  endpoints: joi.array().items(joi.object({
-    path: joi.string(),
-    method: joi.string().valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
-    handler: joi.alternatives().try(
-      joi.array().items(joi.func()),
-      joi.func(),
-    ),
-  })),
+  endpoints: endpointsSchema,
   access: joi.object({
     read: joi.func(),
     readVersions: joi.func(),
