@@ -4,6 +4,7 @@ import path from 'path';
 import stripe from '../../src';
 import Users from './collections/Users';
 import Customers from './collections/Customers';
+import { handleUpdatedSubscription } from './webhooks/handleUpdatedSubscription';
 
 export default buildConfig({
   serverURL: 'http://localhost:3000',
@@ -39,7 +40,11 @@ export default buildConfig({
   },
   plugins: [
     stripe({
-
+      stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+      stripeWebhookEndpointSecret: process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET,
+      webhooks: {
+        'customer.subscription.updated': handleUpdatedSubscription
+      },
     }),
   ],
   typescript: {

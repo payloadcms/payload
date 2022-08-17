@@ -26,5 +26,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "stripe": "^10.2.0"
+  }
 }

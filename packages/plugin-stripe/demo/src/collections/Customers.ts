@@ -12,8 +12,12 @@ const Customers: CollectionConfig = {
       required: true
     },
     {
-      name: 'stripeCustomerID',
+      name: 'stripeSubscriptionID',
       type: 'text',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+      }
     },
   ],
 }
