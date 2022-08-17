@@ -1,3 +1,16 @@
+## [1.0.25](https://github.com/payloadcms/payload/compare/v1.0.24...v1.0.25) (2022-08-17)
+
+
+### Bug Fixes
+
+* [#568](https://github.com/payloadcms/payload/issues/568) ([a3edbf4](https://github.com/payloadcms/payload/commit/a3edbf4fef5efd8293cb4d6139b2513441cb741e))
+
+
+### Features
+
+* add new pickerAppearance option 'monthOnly' ([566c6ba](https://github.com/payloadcms/payload/commit/566c6ba3a9beb13ea9437844313ec6701effce27))
+* custom api endpoints ([11d8fc7](https://github.com/payloadcms/payload/commit/11d8fc71e8bdb62c6755789903702b0ee257b448))
+
 ## [1.0.24](https://github.com/payloadcms/payload/compare/v1.0.23...v1.0.24) (2022-08-16)
 
 
