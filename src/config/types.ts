@@ -200,7 +200,6 @@ export type Config = {
 export type SanitizedConfig = Omit<DeepRequired<Config>, 'collections' | 'globals'> & {
   collections: SanitizedCollectionConfig[]
   globals: SanitizedGlobalConfig[]
-  endpoints: SanitizedGlobalConfig[]
   paths: { [key: string]: string };
 }
 
