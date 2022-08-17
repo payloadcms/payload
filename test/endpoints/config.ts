@@ -8,6 +8,7 @@ export const collectionSlug = 'endpoints';
 export const globalSlug = 'global-endpoints';
 
 export const globalEndpoint = 'global';
+export const applicationEndpoint = 'path';
 
 export default buildConfig({
   collections: [
@@ -66,6 +67,15 @@ export default buildConfig({
         },
       }],
       fields: [],
+    },
+  ],
+  endpoints: [
+    {
+      path: applicationEndpoint,
+      method: 'post',
+      handler: (req: PayloadRequest, res: Response): void => {
+        res.json(req.body);
+      },
     },
   ],
   onInit: async (payload) => {

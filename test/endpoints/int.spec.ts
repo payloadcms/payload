@@ -1,6 +1,6 @@
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
-import { collectionSlug, globalEndpoint, globalSlug } from './config';
+import { applicationEndpoint, collectionSlug, globalEndpoint, globalSlug } from './config';
 
 require('isomorphic-fetch');
 
@@ -40,6 +40,16 @@ describe('Endpoints', () => {
     it('should call custom endpoint', async () => {
       const params = { globals: 'response' };
       const { status, data } = await client.endpoint(`/globals/${globalSlug}/${globalEndpoint}`, 'post', params);
+
+      expect(status).toBe(200);
+      expect(params).toMatchObject(data);
+    });
+  });
+
+  describe('Application', () => {
+    it('should call custom endpoint', async () => {
+      const params = { app: 'response' };
+      const { status, data } = await client.endpoint(`/${applicationEndpoint}`, 'post', params);
 
       expect(status).toBe(200);
       expect(params).toMatchObject(data);

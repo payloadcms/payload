@@ -5,6 +5,15 @@ const component = joi.alternatives().try(
   joi.func(),
 );
 
+export const endpointsSchema = joi.array().items(joi.object({
+  path: joi.string(),
+  method: joi.string().valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
+  handler: joi.alternatives().try(
+    joi.array().items(joi.func()),
+    joi.func(),
+  ),
+}));
+
 export default joi.object({
   serverURL: joi.string()
     .uri()
@@ -33,6 +42,7 @@ export default joi.object({
     outputFile: joi.string(),
   }),
   collections: joi.array(),
+  endpoints: endpointsSchema,
   globals: joi.array(),
   admin: joi.object({
     user: joi.string(),
