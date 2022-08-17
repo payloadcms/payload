@@ -31,6 +31,7 @@ import { Payload } from '.';
 import loadConfig from './config/load';
 import Logger from './utilities/logger';
 import { getDataLoader } from './collections/dataloader';
+import mountEndpoints from './express/mountEndpoints';
 
 export const init = (payload: Payload, options: InitOptions): void => {
   payload.logger.info('Starting Payload...');
@@ -104,6 +105,8 @@ export const init = (payload: Payload, options: InitOptions): void => {
       );
       initGraphQLPlayground(payload);
     }
+
+    mountEndpoints(payload.router, payload.config.endpoints);
 
     // Bind router to API
     payload.express.use(payload.config.routes.api, payload.router);

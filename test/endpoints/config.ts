@@ -71,7 +71,7 @@ export default buildConfig({
   ],
   endpoints: [
     {
-      path: applicationEndpoint,
+      path: `/${applicationEndpoint}`,
       method: 'post',
       handler: (req: PayloadRequest, res: Response): void => {
         res.json(req.body);

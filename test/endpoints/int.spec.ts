@@ -46,7 +46,7 @@ describe('Endpoints', () => {
     });
   });
 
-  describe('Application', () => {
+  describe('API', () => {
     it('should call custom endpoint', async () => {
       const params = { app: 'response' };
       const { status, data } = await client.endpoint(`/${applicationEndpoint}`, 'post', params);
