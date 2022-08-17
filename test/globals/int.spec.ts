@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
-import config, { arraySlug, englishLocale, globalsEndpoint, slug, spanishLocale } from './config';
+import config, { arraySlug, englishLocale, slug, spanishLocale } from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
 
@@ -55,16 +55,6 @@ describe('globals', () => {
       expect(doc.array).toHaveLength(1);
       expect(doc.array).toMatchObject(array);
       expect(doc.id).toBeDefined();
-    });
-
-    describe('Endpoints', () => {
-      it('should call custom endpoint', async () => {
-        const params = { globals: 'response' };
-        const { status, data } = await client.endpoint(`/globals/${slug}/${globalsEndpoint}`, 'post', params);
-
-        expect(status).toBe(200);
-        expect(params).toMatchObject(data);
-      });
     });
   });
 

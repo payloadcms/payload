@@ -139,6 +139,7 @@ export type Config = {
     webpack?: (config: Configuration) => Configuration;
   };
   collections?: CollectionConfig[];
+  endpoints?: Endpoint[];
   globals?: GlobalConfig[];
   serverURL?: string;
   cookiePrefix?: string;
