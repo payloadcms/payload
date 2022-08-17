@@ -5,6 +5,7 @@ export type SEOConfig = {
   globals?: string[]
   uploadsCollection?: string
   fields?: Partial<Field>[]
+  tabbedUi?: boolean
   generateTitle?: <T = any>(args: { doc: T, locale?: string }) => string | Promise<string>
   generateDescription?: <T = any>(args: { doc: T, locale?: string }) => string | Promise<string>
   generateImage?: <T = any>(args: { doc: T, locale?: string }) => string | Promise<string>
