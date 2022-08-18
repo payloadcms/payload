@@ -61,7 +61,9 @@ export default buildConfig({
           name: 'relationshipHasMany',
           relationTo: relationOneSlug,
           hasMany: true,
-          sortable: true,
+          admin: {
+            isSortable: true,
+          },
         },
         {
           type: 'relationship',
@@ -84,7 +86,9 @@ export default buildConfig({
           name: 'relationshipWithTitle',
           relationTo: relationWithTitleSlug,
           hasMany: true,
-          sortable: true,
+          admin: {
+            isSortable: true,
+          },
         },
       ],
     },
@@ -185,7 +189,7 @@ export default buildConfig({
         relationshipWithTitle: [relationWithTitleDocId],
       },
     });
-    await mapAsync([...Array(5)], async () => {
+    await mapAsync([...Array(11)], async () => {
       await payload.create<FieldsRelationship>({
         collection: slug,
         data: {

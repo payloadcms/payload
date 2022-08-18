@@ -139,7 +139,6 @@ export const select = baseField.keys({
     }),
   )).required(),
   hasMany: joi.boolean().default(false),
-  sortable: joi.boolean().default(false),
   defaultValue: joi.alternatives().try(
     joi.string().allow(''),
     joi.array().items(joi.string().allow('')),
@@ -147,6 +146,7 @@ export const select = baseField.keys({
   ),
   admin: baseAdminFields.keys({
     isClearable: joi.boolean().default(false),
+    isSortable: joi.boolean().default(false),
   }),
 });
 
@@ -260,7 +260,6 @@ export const point = baseField.keys({
 export const relationship = baseField.keys({
   type: joi.string().valid('relationship').required(),
   hasMany: joi.boolean().default(false),
-  sortable: joi.boolean().default(false),
   relationTo: joi.alternatives().try(
     joi.string().required(),
     joi.array().items(joi.string()),
@@ -274,6 +273,9 @@ export const relationship = baseField.keys({
   defaultValue: joi.alternatives().try(
     joi.func(),
   ),
+  admin: baseAdminFields.keys({
+    isSortable: joi.boolean().default(false),
+  }),
 });
 
 export const blocks = baseField.keys({

@@ -27,10 +27,10 @@ const SelectFields: CollectionConfig = {
     {
       name: 'selectHasMany',
       hasMany: true,
-      sortable: true,
       type: 'select',
       admin: {
         isClearable: true,
+        isSortable: true,
       },
       options: [
         {

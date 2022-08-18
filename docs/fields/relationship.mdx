@@ -24,7 +24,6 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 | **`relationTo`** *   | Provide one or many collection `slug`s to be able to assign relationships to. |
 | **`filterOptions`**  | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options). |
 | **`hasMany`**        | Boolean when, if set to `true`, allows this field to have many relations instead of only one. |
-| **`sortable`**       | Boolean when, if set to `true`, allows this field to be sortable by using drag and drop. (Only works when `hasMany` is set to `true`) |
 | **`maxDepth`**       | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth) |
 | **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type. |
 | **`unique`**         | Enforce that each entry in the Collection has a unique value for this field. |
@@ -45,6 +44,14 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
   <strong>Tip:</strong><br/>
   The <a href="/docs/getting-started/concepts#depth">Depth</a> parameter can be used to automatically populate related documents that are returned by the API.
 </Banner>
+
+### Admin config
+
+In addition to the default [field admin config](/docs/fields/overview#admin-config), the Relationship field type also allows for the following admin-specific properties:
+
+**`isSortable`**
+
+Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop. (Only works when `hasMany` is set to `true`)
 
 ### Filtering relationship options
 

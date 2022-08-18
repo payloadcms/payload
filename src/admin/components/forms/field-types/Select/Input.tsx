@@ -23,7 +23,7 @@ export type SelectInputProps = Omit<SelectField, 'type' | 'value' | 'options'> &
   className?: string
   width?: string
   hasMany?: boolean
-  sortable?: boolean
+  isSortable?: boolean
   options?: OptionObject[]
   isClearable?: boolean
 }
@@ -44,7 +44,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
     width,
     options,
     hasMany,
-    sortable,
+    isSortable,
     isClearable,
   } = props;
 
@@ -89,7 +89,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
         isDisabled={readOnly}
         options={options}
         isMulti={hasMany}
-        isSortable={sortable}
+        isSortable={isSortable}
         isClearable={isClearable}
       />
       <FieldDescription

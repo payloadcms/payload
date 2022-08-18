@@ -229,9 +229,9 @@ export type SelectField = FieldBase & {
   type: 'select'
   options: Option[]
   hasMany?: boolean
-  sortable?: boolean
   admin?: Admin & {
     isClearable?: boolean;
+    isSortable?: boolean;
   }
 }
 
@@ -239,9 +239,11 @@ export type RelationshipField = FieldBase & {
   type: 'relationship';
   relationTo: string | string[];
   hasMany?: boolean;
-  sortable?: boolean;
   maxDepth?: number;
   filterOptions?: FilterOptions;
+  admin?: Admin & {
+    isSortable?: boolean;
+  }
 }
 
 export type ValueWithRelation = {

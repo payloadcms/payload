@@ -1,4 +1,4 @@
-import React, { MouseEventHandler } from 'react';
+import React, { MouseEventHandler, useCallback } from 'react';
 import Select, {
   components,
   MultiValueProps,
@@ -8,6 +8,7 @@ import {
   SortableContainer,
   SortableContainerProps,
   SortableElement,
+  SortStartHandler,
   SortEndHandler,
   SortableHandle,
 } from 'react-sortable-hoc';
@@ -27,11 +28,16 @@ const SortableMultiValue = SortableElement(
       e.preventDefault();
       e.stopPropagation();
     };
-    const innerProps = { ...props.innerProps, onMouseDown };
+    const classes = [
+      props.className,
+      !props.isDisabled && 'draggable',
+    ].filter(Boolean).join(' ');
+
     return (
       <components.MultiValue
         {...props}
-        innerProps={innerProps}
+        className={classes}
+        innerProps={{ ...props.innerProps, onMouseDown }}
       />
     );
   },
@@ -63,9 +69,16 @@ const ReactSelect: React.FC<Props> = (props) => {
     showError && 'react-select--error',
   ].filter(Boolean).join(' ');
 
-  const onSortEnd: SortEndHandler = ({ oldIndex, newIndex }) => {
+  const onSortStart: SortStartHandler = useCallback(({ helper }) => {
+    const portalNode = helper;
+    if (portalNode && portalNode.style) {
+      portalNode.style.cssText += 'pointer-events: auto; cursor: grabbing;';
+    }
+  }, []);
+
+  const onSortEnd: SortEndHandler = useCallback(({ oldIndex, newIndex }) => {
     onChange(arrayMove(value as Value[], oldIndex, newIndex));
-  };
+  }, [onChange, value]);
 
   if (isMulti && isSortable) {
     return (
@@ -73,6 +86,7 @@ const ReactSelect: React.FC<Props> = (props) => {
         useDragHandle
         // react-sortable-hoc props:
         axis="xy"
+        onSortStart={onSortStart}
         onSortEnd={onSortEnd}
         // small fix for https://github.com/clauderic/react-sortable-hoc/pull/352:
         getHelperDimensions={({ node }) => node.getBoundingClientRect()}

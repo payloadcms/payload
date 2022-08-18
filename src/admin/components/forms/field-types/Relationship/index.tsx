@@ -38,7 +38,6 @@ const Relationship: React.FC<Props> = (props) => {
     required,
     label,
     hasMany,
-    sortable,
     filterOptions,
     admin: {
       readOnly,
@@ -47,6 +46,7 @@ const Relationship: React.FC<Props> = (props) => {
       width,
       description,
       condition,
+      isSortable,
     } = {},
   } = props;
 
@@ -391,7 +391,7 @@ const Relationship: React.FC<Props> = (props) => {
           disabled={formProcessing}
           options={options}
           isMulti={hasMany}
-          isSortable={sortable}
+          isSortable={isSortable}
         />
       )}
       {errorLoading && (
