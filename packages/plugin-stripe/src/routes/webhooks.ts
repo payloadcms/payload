@@ -17,21 +17,23 @@ export const stripeWebhooks = (
   if (webhooks && stripeWebhookEndpointSecret) {
     const stripe = new Stripe(stripeSecretKey, { apiVersion: '2022-08-01' });
 
-    const sig = req.headers['stripe-signature'];
+    const stripeSignature = req.headers['stripe-signature'];
 
-    let event: Stripe.Event | undefined;
+    if (stripeSignature) {
+      let event: Stripe.Event | undefined;
 
-    try {
-      event = stripe.webhooks.constructEvent(req.body, sig, stripeWebhookEndpointSecret);
-    } catch (err: any) {
-      res.status(400).send(`Webhook Error: ${err.message}`);
-    }
+      try {
+        event = stripe.webhooks.constructEvent(req.body, stripeSignature, stripeWebhookEndpointSecret);
+      } catch (err: any) {
+        res.status(400).send(`Webhook Error: ${err.message}`);
+      }
 
-    if (event) {
-      const webhookEventHandler = webhooks[event.type];
-      if (typeof webhookEventHandler === 'function') {
-        webhookEventHandler(event, stripe, stripeConfig)
-      };
+      if (event) {
+        const webhookEventHandler = webhooks[event.type];
+        if (typeof webhookEventHandler === 'function') {
+          webhookEventHandler(event, stripe, stripeConfig)
+        };
+      }
     }
   }
 

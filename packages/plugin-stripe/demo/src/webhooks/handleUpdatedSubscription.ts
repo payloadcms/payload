@@ -25,7 +25,7 @@ export const handleUpdatedSubscription: WebhookHandler = async (event) => {
         console.error(error);
       }
     } else {
-      console.error(`Stripe subscription update webhook for ${event.id} could not find an associated license.`);
+      console.error(`Stripe subscription update webhook for ${event.id} could not find an associated customer.`);
     }
   } catch (error) {
     console.log(error);

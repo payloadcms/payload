@@ -1,8 +1,9 @@
-import { PayloadRequest } from 'payload/dist/types';
+import { PayloadRequest } from 'payload/types';
 import { Forbidden } from 'payload/errors';
 import Stripe from 'stripe';
 import { StripeConfig } from '../types';
 import lodashGet from 'lodash.get';
+import { Response } from 'express';
 
 export const stripeREST = async (
   req: PayloadRequest,
@@ -23,18 +24,17 @@ export const stripeREST = async (
       user
     } = req;
 
-    if (!user) {
+    if (!user) { // TODO: make this customizable from the config
       throw new Forbidden();
     }
 
     if (typeof stripeMethod === 'string') {
-      const foundMethod = lodashGet(stripe, stripeMethod); // NOTE: convert dot notation
+      const topLevelMethod = stripeMethod.split('.')[0] as keyof Stripe;
+      const contextToBind = stripe[topLevelMethod];
+      const foundMethod = lodashGet(stripe, stripeMethod).bind(contextToBind); // NOTE: 'lodashGet' uses dot notation and finds the property on the object
 
       if (typeof foundMethod === 'function') {
-
-        const stripeResponse = await foundMethod.apply(stripe, stripeArgs);
-
-        // const stripeResponse = await stripe.subscriptions.list(stripeArgs);
+        const stripeResponse = await foundMethod(stripeArgs);
 
         if (!stripeResponse?.data) {
           return res.status(404);

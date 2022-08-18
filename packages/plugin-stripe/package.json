@@ -22,7 +22,8 @@
   "license": "MIT",
   "peerDependencies": {
     "payload": "^0.18.5 || ^1.0.0",
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
+    "express": "^4.8.0"
   },
   "dependencies": {
     "lodash.get": "^4.4.2",

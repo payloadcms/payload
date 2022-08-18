@@ -63,7 +63,7 @@ The following routes are automatically opened to allow you to interact with the 
   ```
     const res = await fetch(`/api/stripe/rest`, {
       body: JSON.stringify({
-        stripeMethod: "stripe.subscriptions.list',
+        stripeMethod: "stripe.subscriptions.list",
         stripeMethodArgs: {
           customer: "abc"
         }

@@ -5,6 +5,9 @@ const Customers: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
+  // hooks: {
+  //   afterChange: [] // automatically populate 'stripeCustomerID' field on create
+  // },
   fields: [
     {
       name: 'title',
@@ -12,8 +15,11 @@ const Customers: CollectionConfig = {
       required: true
     },
     {
-      name: 'stripeSubscriptionID',
+      name: 'stripeCustomerID',
       type: 'text',
+      // hooks: {
+      //   afterChange: [] // for a two-way sync, send to stripe using the exposed '/stripe/rest' endpoint
+      // },
       admin: {
         position: 'sidebar',
         readOnly: true,
