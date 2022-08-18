@@ -1,6 +1,8 @@
 name: build
 
-on: [push]
+on:
+  workflow_dispatch:
+  push:
 
 jobs:
   build_yarn:
