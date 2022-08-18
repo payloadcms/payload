@@ -114,6 +114,20 @@ export interface BlockField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "code-fields".
+ */
+export interface CodeField {
+  id: string;
+  javascript?: string;
+  typescript?: string;
+  json?: string;
+  html?: string;
+  css?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collapsible-fields".
  */
 export interface CollapsibleField {

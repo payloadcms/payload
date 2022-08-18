@@ -18,6 +18,7 @@ import getFileByPath from '../../src/uploads/getFileByPath';
 import Uploads, { uploadsDoc } from './collections/Upload';
 import IndexedFields from './collections/Indexed';
 import NumberFields, { numberDoc } from './collections/Number';
+import CodeFields, { codeDoc } from './collections/Code';
 
 export default buildConfig({
   admin: {
@@ -35,6 +36,7 @@ export default buildConfig({
   collections: [
     ArrayFields,
     BlockFields,
+    CodeFields,
     CollapsibleFields,
     ConditionalLogic,
     GroupFields,
@@ -69,6 +71,7 @@ export default buildConfig({
     await payload.create({ collection: 'tabs-fields', data: tabsDoc });
     await payload.create({ collection: 'point-fields', data: pointDoc });
     await payload.create({ collection: 'date-fields', data: dateDoc });
+    await payload.create({ collection: 'code-fields', data: codeDoc });
 
     const createdTextDoc = await payload.create({ collection: 'text-fields', data: textDoc });
 
