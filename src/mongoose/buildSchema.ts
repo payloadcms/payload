@@ -54,7 +54,7 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
       fields = {
         _id: idField.type === 'number' ? Number : String,
       };
-      schemaFields = schemaFields.filter((field) => fieldAffectsData(field) && field.name !== 'id');
+      schemaFields = schemaFields.filter((field) => !(fieldAffectsData(field) && field.name === 'id'));
     }
   }
 

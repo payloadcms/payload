@@ -101,8 +101,13 @@ export default buildConfig({
           type: 'text',
         },
         {
-          name: 'name',
-          type: 'text',
+          type: 'row',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+            },
+          ],
         },
       ],
     },
@@ -193,6 +198,22 @@ export default buildConfig({
             value: rel2.id,
           },
         ],
+      },
+    });
+
+    await payload.create({
+      collection: customIdSlug,
+      data: {
+        id: 'test',
+        name: 'inside row',
+      },
+    });
+
+    await payload.create({
+      collection: customIdNumberSlug,
+      data: {
+        id: 123,
+        name: 'name',
       },
     });
   },
