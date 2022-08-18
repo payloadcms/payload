@@ -39,7 +39,19 @@ This field uses `prismjs` for syntax highlighting and `react-simple-code-editor`
 
 In addition to the default [field admin config](/docs/fields/overview#admin-config), the Code field type also allows for the customization of a `language` property.
 
-Currently, the `language` property only supports JavaScript syntax but more support will be added as requested.
+The following `prismjs` plugins are imported, enabling the `language` property to accept the following values:
+
+| Plugin                       | Language |
+| ---------------------------- | ----------- |
+| **`prism-css`**              | `css` |
+| **`prism-clike`**            | `clike` |
+| **`prism-markup`**           | `markup`, `html`, `xml`, `svg`, `mathml`, `ssml`, `atom`, `rss` |
+| **`prism-javascript`**       | `javascript`, `js` |
+| **`prism-json`**             | `json` |
+| **`prism-jsx`**              | `jsx` |
+| **`prism-typescript`**       | `typescript`, `ts` |
+| **`prism-tsx`**              | `tsx` |
+| **`prism-yaml`**             | `yaml`, `yml` |
 
 ### Example
 
