@@ -1,8 +1,10 @@
 name: build
 
 on:
-  workflow_dispatch:
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
   push:
+    branches: ['master']
 
 jobs:
   build_yarn:
