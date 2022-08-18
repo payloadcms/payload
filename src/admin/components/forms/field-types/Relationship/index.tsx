@@ -46,6 +46,7 @@ const Relationship: React.FC<Props> = (props) => {
       width,
       description,
       condition,
+      isSortable,
     } = {},
   } = props;
 
@@ -390,6 +391,7 @@ const Relationship: React.FC<Props> = (props) => {
           disabled={formProcessing}
           options={options}
           isMulti={hasMany}
+          isSortable={isSortable}
         />
       )}
       {errorLoading && (

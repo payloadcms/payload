@@ -231,6 +231,7 @@ export type SelectField = FieldBase & {
   hasMany?: boolean
   admin?: Admin & {
     isClearable?: boolean;
+    isSortable?: boolean;
   }
 }
 
@@ -240,6 +241,9 @@ export type RelationshipField = FieldBase & {
   hasMany?: boolean;
   maxDepth?: number;
   filterOptions?: FilterOptions;
+  admin?: Admin & {
+    isSortable?: boolean;
+  }
 }
 
 export type ValueWithRelation = {

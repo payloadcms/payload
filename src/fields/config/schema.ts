@@ -146,6 +146,7 @@ export const select = baseField.keys({
   ),
   admin: baseAdminFields.keys({
     isClearable: joi.boolean().default(false),
+    isSortable: joi.boolean().default(false),
   }),
 });
 
@@ -272,6 +273,9 @@ export const relationship = baseField.keys({
   defaultValue: joi.alternatives().try(
     joi.func(),
   ),
+  admin: baseAdminFields.keys({
+    isSortable: joi.boolean().default(false),
+  }),
 });
 
 export const blocks = baseField.keys({

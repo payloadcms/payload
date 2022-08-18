@@ -14,7 +14,7 @@ const baseClass = 'condition-value-relationship';
 const maxResultsPerRequest = 10;
 
 const RelationshipField: React.FC<Props> = (props) => {
-  const { onChange, value, relationTo, hasMany } = props;
+  const { onChange, value, relationTo, hasMany, admin: { isSortable } = {} } = props;
 
   const {
     serverURL,
@@ -253,6 +253,7 @@ const RelationshipField: React.FC<Props> = (props) => {
           value={valueToRender}
           options={options}
           isMulti={hasMany}
+          isSortable={isSortable}
         />
       )}
       {errorLoading && (

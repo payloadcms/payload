@@ -51,6 +51,10 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 
 Set to `true` if you'd like this field to be clearable within the Admin UI.
 
+**`isSortable`**
+
+Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop. (Only works when `hasMany` is set to `true`)
+
 ### Example
 
 `collections/ExampleCollection.js`
@@ -65,6 +69,7 @@ Set to `true` if you'd like this field to be clearable within the Admin UI.
       hasMany: true,
       admin: {
         isClearable: true,
+        isSortable: true, // use mouse to drag and drop different values, and sort them according to your choice
       },
       options: [
         {
