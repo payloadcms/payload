@@ -66,13 +66,15 @@ describe('collections-rest', () => {
       describe('string', () => {
         it('should create', async () => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
-          const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, data: { name: 'custom-id-name' } } });
+          const customIdName = 'custom-id-name';
+          const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, name: customIdName } });
           expect(doc.id).toEqual(customId);
+          expect(doc.name).toEqual(customIdName);
         });
 
         it('should find', async () => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
-          const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, data: { name: 'custom-id-name' } } });
+          const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, name: 'custom-id-name' } });
           const { doc: foundDoc } = await client.findByID({ slug: customIdSlug, id: customId });
 
           expect(foundDoc.id).toEqual(doc.id);
@@ -89,20 +91,20 @@ describe('collections-rest', () => {
       describe('number', () => {
         it('should create', async () => {
           const customId = Math.floor(Math.random() * (1_000_000)) + 1;
-          const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, data: { name: 'custom-id-number-name' } } });
+          const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, name: 'custom-id-number-name' } });
           expect(doc.id).toEqual(customId);
         });
 
         it('should find', async () => {
           const customId = Math.floor(Math.random() * (1_000_000)) + 1;
-          const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, data: { name: 'custom-id-number-name' } } });
+          const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, name: 'custom-id-number-name' } });
           const { doc: foundDoc } = await client.findByID({ slug: customIdNumberSlug, id: customId });
           expect(foundDoc.id).toEqual(doc.id);
         });
 
         it('should update', async () => {
           const customId = Math.floor(Math.random() * (1_000_000)) + 1;
-          const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, data: { name: 'custom-id-number-name' } } });
+          const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, name: 'custom-id-number-name' } });
           const { doc: updatedDoc } = await client.update({ slug: customIdNumberSlug, id: doc.id, data: { name: 'updated' } });
           expect(updatedDoc.name).toEqual('updated');
         });
