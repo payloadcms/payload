@@ -1,3 +1,10 @@
+## [1.0.27](https://github.com/payloadcms/payload/compare/v1.0.26...v1.0.27) (2022-08-18)
+
+
+### Bug Fixes
+
+* react-sortable-hoc dependency instead of dev dependency ([4ef6801](https://github.com/payloadcms/payload/commit/4ef6801230cb0309a9d20dd092f8a3372f75f9ca))
+
 ## [1.0.26](https://github.com/payloadcms/payload/compare/v1.0.25...v1.0.26) (2022-08-18)
 
 
