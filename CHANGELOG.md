@@ -1,3 +1,16 @@
+## [1.0.26](https://github.com/payloadcms/payload/compare/v1.0.25...v1.0.26) (2022-08-18)
+
+
+### Bug Fixes
+
+* missing fields in rows on custom id collections ([#954](https://github.com/payloadcms/payload/issues/954)) ([39586d3](https://github.com/payloadcms/payload/commit/39586d3cdb01131b29f1f8f7346086d2bc9903c1))
+
+
+### Features
+
+* adds more prismjs syntax highlighting options for code blocks ([#961](https://github.com/payloadcms/payload/issues/961)) ([f45d5a0](https://github.com/payloadcms/payload/commit/f45d5a0421117180f85f8e3cd86f835c13ac6d16))
+* enable reordering of hasMany relationship and select fields ([#952](https://github.com/payloadcms/payload/issues/952)) ([38a1a38](https://github.com/payloadcms/payload/commit/38a1a38c0c52403083458619b2f9b58044c5c0ea))
+
 ## [1.0.25](https://github.com/payloadcms/payload/compare/v1.0.24...v1.0.25) (2022-08-17)
 
 
