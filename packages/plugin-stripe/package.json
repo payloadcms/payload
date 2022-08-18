@@ -20,14 +20,23 @@
   ],
   "author": "dev@payloadcms.com",
   "license": "MIT",
+  "peerDependencies": {
+    "payload": "^0.18.5 || ^1.0.0",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+  },
+  "dependencies": {
+    "lodash.get": "^4.4.2",
+    "stripe": "^10.2.0"
+  },
   "devDependencies": {
+    "@types/lodash.get": "^4.4.7",
+    "@types/react": "^18.0.8",
+    "@types/react-dom": "^18.0.3",
     "payload": "^1.0.9",
+    "react": "^18.0.0",
     "typescript": "^4.5.5"
   },
   "files": [
     "dist"
-  ],
-  "dependencies": {
-    "stripe": "^10.2.0"
-  }
+  ]
 }

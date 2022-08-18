@@ -2534,9 +2534,9 @@ bson-objectid@^2.0.1:
   integrity sha512-WYwVtY9yqk179EPMNuF3vcxufdrGLEo2XwqdRVbfLVe9X6jLt7WKZQgP+ObOcprakBGbHxzl76tgTaieqsH29g==
 
 bson@^4.6.5:
-  version "4.6.5"
-  resolved "https://registry.yarnpkg.com/bson/-/bson-4.6.5.tgz#1a410148c20eef4e40d484878a037a7036e840fb"
-  integrity sha512-uqrgcjyOaZsHfz7ea8zLRCLe1u+QGUSzMZmvXqO24CDW7DWoW1qiN9folSwa7hSneTSgM2ykDIzF5kcQQ8cwNw==
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/bson/-/bson-4.7.0.tgz#7874a60091ffc7a45c5dd2973b5cad7cded9718a"
+  integrity sha512-VrlEE4vuiO1WTpfof4VmaVolCVYkYTgB9iWgYNOrVlnifpME/06fhFRmONgBhClD5pFC1t9ZWqFUQEQAzY43bA==
   dependencies:
     buffer "^5.6.0"
 
@@ -3242,9 +3242,9 @@ dataloader@^2.1.0:
   integrity sha512-qTcEYLen3r7ojZNgVUaRggOI+KM7jrKxXeSHhogh/TWxYMeONEMqY+hmkobiYQozsGIyg9OYVzO4ZIfoB4I0pQ==
 
 date-fns@^2.0.1, date-fns@^2.14.0:
-  version "2.29.1"
-  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.29.1.tgz#9667c2615525e552b5135a3116b95b1961456e60"
-  integrity sha512-dlLD5rKaKxpFdnjrs+5azHDFOPEu4ANy/LTh04A1DTzMM7qoajmKCBc8pkKRFT41CNzw+4gQh79X5C+Jq27HAw==
+  version "2.29.2"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.29.2.tgz#0d4b3d0f3dff0f920820a070920f0d9662c51931"
+  integrity sha512-0VNbwmWJDS/G3ySwFSJA3ayhbURMTJLtwM2DTxf9CWondCnh6DTNlO9JgRSq6ibf4eD0lfMJNBxUdEAHHix+bA==
 
 dateformat@^4.5.1:
   version "4.6.3"
@@ -3531,9 +3531,9 @@ ee-first@1.1.1:
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
 electron-to-chromium@^1.4.202:
-  version "1.4.222"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.222.tgz#2ba24bef613fc1985dbffea85df8f62f2dec6448"
-  integrity sha512-gEM2awN5HZknWdLbngk4uQCVfhucFAfFzuchP3wM3NN6eow1eDU0dFy2kts43FB20ZfhVFF0jmFSTb1h5OhyIg==
+  version "1.4.224"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.224.tgz#ecf2eed395cfedcbbe634658ccc4b457f7b254c3"
+  integrity sha512-dOujC5Yzj0nOVE23iD5HKqrRSDj2SD7RazpZS/b/WX85MtO6/LzKDF4TlYZTBteB+7fvSg5JpWh0sN7fImNF8w==
 
 emittery@^0.7.1:
   version "0.7.2"
@@ -6628,10 +6628,10 @@ pause@0.0.1:
   resolved "https://registry.yarnpkg.com/pause/-/pause-0.0.1.tgz#1d408b3fdb76923b9543d96fb4c9dfd535d9cb5d"
   integrity sha512-KG8UEiEVkR3wGEb4m5yZkVCzigAD+cVEJck2CzYZO37ZGJfctvVptVO192MwrtPhzONn6go8ylnOdMhKqi4nfg==
 
-payload@^1.0.9:
-  version "1.0.24"
-  resolved "https://registry.yarnpkg.com/payload/-/payload-1.0.24.tgz#1a5bc168ca34d2d387f7e3a288da465aff7c62ae"
-  integrity sha512-SGRg45ixrfOh8UF9pqnUvMf/uUOGpeahJx4mcpQ5uq4CE5OzIAgq5tRiJeR9DwydlDyE63oI7ohqJV16wzTeQw==
+payload@^1.0.25:
+  version "1.0.25"
+  resolved "https://registry.yarnpkg.com/payload/-/payload-1.0.25.tgz#6fc6f8234deecca66040f517a46cd1635731f83f"
+  integrity sha512-QlYnKCpeUBjIaWjbxyYov5s10003qaJzI49UxDF67EgPK7AfSLWPfmGbvbOMbxTgu0CuF1yCYc+dObpnzVri8g==
   dependencies:
     "@babel/cli" "^7.12.8"
     "@babel/core" "^7.11.6"

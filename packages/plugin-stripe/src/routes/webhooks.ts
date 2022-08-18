@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import { PayloadRequest } from 'payload/dist/types';
 import { StripeConfig } from '../types';
 
-const webhooks = (
+export const stripeWebhooks = (
   req: PayloadRequest,
   res: any,
   next: any,
@@ -37,5 +37,3 @@ const webhooks = (
 
   res.json({ received: true });
 };
-
-export default webhooks;

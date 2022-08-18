@@ -5,9 +5,9 @@
 A plugin for [Payload CMS](https://github.com/payloadcms/payload) to manage a [Stripe](https://stripe.com/) account through Payload.
 
 Core features:
-  - Provides a layer of Payload access control over your Stripe account
-  - Opens custom routes to interface with the Stripe API
-  - Allows two-way data sync from Stripe to Payload
+  - Layers your Stripe account with Payload access control
+  - Opens custom routes to interface with the Stripe REST API
+  - Handles Stripe webhooks to allow for a two-way data sync
 
 ## Installation
 
@@ -56,17 +56,20 @@ The following routes are automatically opened to allow you to interact with the 
 
 >NOTE: the `/api` part of these routes may be different based on the settings defined in your Payload config.
 
-- `GET /api/stripe/products`
+- `POST /api/stripe/rest`
 
-  Returns every product available in your account by calling [`stripe.products.list`](https://stripe.com/docs/api/products/list).
+  Calls the given [Stripe REST API](https://stripe.com/docs/api) method and returns the result.
 
-- `GET /api/stripe/subscriptions/:id`
-
-  Returns a customer's subscriptions by calling [`stripe.subscriptions.retrieve(id)`](https://stripe.com/docs/api/subscriptions/list).
-
-- `POST /api/stripe/subscriptions/update-payment`
-
-  Returns an http status code. Updates a subscription's payment method by calling [`stripe.subscriptions.update(id)`](https://stripe.com/docs/api/subscriptions/update). Send the subscription ID through the body of your request.
+  ```
+    const res = await fetch(`/api/stripe/rest`, {
+      body: JSON.stringify({
+        stripeMethod: "stripe.subscriptions.list',
+        stripeMethodArgs: {
+          customer: "abc"
+        }
+      })
+    })
+  ```
 
 - `POST /api/stripe/webhooks`
 
@@ -112,6 +115,21 @@ import {
   WebhookHandler
 } from '@payloadcms/plugin-stripe/dist/types';
 ```
+
+### Development
+
+This plugin can be developed locally using any Stripe account that you have access to. Then:
+
+```bash
+git clone git@github.com:payloadcms/plugin-stripe.git \
+  cd plugin-stripe && yarn \
+  cd demo && yarn \
+  cp .env.example .env \
+  vim .env \ # add your Stripe creds to this file
+  yarn dev
+```
+
+Now you have a running Payload server with this plugin installed, so you can authenticate and begin hitting the routes. To do this, open [Postman](https://www.postman.com/) and import [our config](https://github.com/payloadcms/plugin-stripe/blob/main/src/payload-stripe-plugin.postman_collection.json). First, login to retrieve your Payload access token. This token is automatically attached to the header of all other requests.
 
 ## Screenshots
 

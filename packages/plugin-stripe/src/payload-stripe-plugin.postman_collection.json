@@ -1,0 +1,119 @@
+{
+	"info": {
+		"_postman_id": "130686e1-ddd9-40f1-b031-68ec1a6413ee",
+		"name": "Payload Stripe Plugin",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4309346"
+	},
+	"item": [
+		{
+			"name": "Get All Products",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImphY29ic2ZsZXRjaEBnbWFpbC5jb20iLCJpZCI6IjYyMGYyMGUxM2Y2NmNkNmYyYWI1MDVjOCIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImlhdCI6MTY2MDgzNTE3MCwiZXhwIjoxNjYwODQyMzcwfQ.46HcrF-SSlOsEbYtdzzUTWZm2J5_30y6LC1FiMoVCPg",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"stripeMethod\": \"subscriptions.list\",\n    \"stripeArgs\": {\n        \"customer\": \"cus_MGgt3Tuj3D66f2\"\n    }\n}"
+				},
+				"url": {
+					"raw": "localhost:3000/api/stripe/rest",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"stripe",
+						"rest"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();",
+							"pm.environment.set(\"PAYLOAD_API_TOKEN\", jsonData.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"jacobsfletch@gmail.com\",\n\t\"password\": \"test\"\n}"
+				},
+				"url": {
+					"raw": "localhost:3000/api/users/login",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"users",
+						"login"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh Token",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImphY29ic2ZsZXRjaEBnbWFpbC5jb20iLCJpZCI6IjYwODJlZjUxMzg5ZmM2MmYzNWI2MmM2ZiIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImZpcnN0TmFtZSI6IkphY29iIiwibGFzdE5hbWUiOiJGbGV0Y2hlciIsIm9yZ2FuaXphdGlvbiI6IjYwN2RiNGNmYjYzMGIyNWI5YzkzNmMzNSIsImlhdCI6MTYzMTExMDk3NSwiZXhwIjoxNjMyOTI1Mzc1fQ.OL9l8jFNaCZCU-ZDQpH-EJauaRM-5JT4_Y3J_-aC-aY\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/users/refresh-token",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"users",
+						"refresh-token"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
