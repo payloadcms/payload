@@ -18,6 +18,7 @@ keywords: select, multi-select, fields, config, configuration, documentation, Co
 | **`name`** \*      | To be used as the property name when stored and retrieved from the database.                                                                                                                        |
 | **`options`** \*   | Array of options to allow the field to store. Can either be an array of strings, or an array of objects containing a `label` string and a `value` string.                                           |
 | **`hasMany`**      | Boolean when, if set to `true`, allows this field to have many selections instead of only one.                                                                                                      |
+| **`sortable`**     | Boolean when, if set to `true`, allows this field to be sortable using drag and drop.                                                                                                      |
 | **`label`**        | Used as a field label in the Admin panel and to name the generated GraphQL type.                                                                                                                    |
 | **`unique`**       | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                        |
 | **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
@@ -63,6 +64,7 @@ Set to `true` if you'd like this field to be clearable within the Admin UI.
       name: 'selectedFeatures', // required
       type: 'select', // required
       hasMany: true,
+      sortable: true, // use mouse to drag and drop different values, and sort them according to your choice
       admin: {
         isClearable: true,
       },

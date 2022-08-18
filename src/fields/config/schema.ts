@@ -139,6 +139,7 @@ export const select = baseField.keys({
     }),
   )).required(),
   hasMany: joi.boolean().default(false),
+  sortable: joi.boolean().default(false),
   defaultValue: joi.alternatives().try(
     joi.string().allow(''),
     joi.array().items(joi.string().allow('')),
@@ -259,6 +260,7 @@ export const point = baseField.keys({
 export const relationship = baseField.keys({
   type: joi.string().valid('relationship').required(),
   hasMany: joi.boolean().default(false),
+  sortable: joi.boolean().default(false),
   relationTo: joi.alternatives().try(
     joi.string().required(),
     joi.array().items(joi.string()),

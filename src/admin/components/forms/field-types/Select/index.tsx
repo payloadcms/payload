@@ -25,6 +25,7 @@ const Select: React.FC<Props> = (props) => {
     label,
     options: optionsFromProps,
     hasMany,
+    sortable,
     required,
     admin: {
       readOnly,
@@ -99,6 +100,7 @@ const Select: React.FC<Props> = (props) => {
       className={className}
       width={width}
       hasMany={hasMany}
+      sortable={sortable}
       isClearable={isClearable}
     />
   );

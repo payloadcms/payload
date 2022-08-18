@@ -61,6 +61,7 @@ export default buildConfig({
           name: 'relationshipHasMany',
           relationTo: relationOneSlug,
           hasMany: true,
+          sortable: true,
         },
         {
           type: 'relationship',
@@ -82,6 +83,8 @@ export default buildConfig({
           type: 'relationship',
           name: 'relationshipWithTitle',
           relationTo: relationWithTitleSlug,
+          hasMany: true,
+          sortable: true,
         },
       ],
     },
@@ -162,15 +165,27 @@ export default buildConfig({
         name: 'relation-title',
       },
     });
+
+    const relationTitleIDs = [];
+    await mapAsync([...Array(11)], async (item, idx) => {
+      const doc = await payload.create<RelationTwo>({
+        collection: relationWithTitleSlug,
+        data: {
+          name: `relation-title-${idx}`,
+        },
+      });
+      relationTitleIDs.push(doc.id);
+    });
+
     await payload.create<FieldsRelationship>({
       collection: slug,
       data: {
         relationship: relationOneDocId,
         relationshipRestricted: restrictedDocId,
-        relationshipWithTitle: relationWithTitleDocId,
+        relationshipWithTitle: [relationWithTitleDocId],
       },
     });
-    await mapAsync([...Array(11)], async () => {
+    await mapAsync([...Array(5)], async () => {
       await payload.create<FieldsRelationship>({
         collection: slug,
         data: {
@@ -186,6 +201,7 @@ export default buildConfig({
     await mapAsync([...Array(15)], async () => {
       const relationOneID = relationOneIDs[Math.floor(Math.random() * 10)];
       const relationTwoID = relationTwoIDs[Math.floor(Math.random() * 10)];
+      const relationTitleID = relationTitleIDs[Math.floor(Math.random() * 10)];
       await payload.create<FieldsRelationship>({
         collection: slug,
         data: {
@@ -193,6 +209,7 @@ export default buildConfig({
           relationshipRestricted: restrictedDocId,
           relationshipHasMany: [relationOneID],
           relationshipHasManyMultiple: [{ relationTo: relationTwoSlug, value: relationTwoID }],
+          relationshipWithTitle: [relationTitleID],
         },
       });
     });

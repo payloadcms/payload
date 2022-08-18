@@ -16,6 +16,7 @@ export type Props = {
   showError?: boolean,
   options: Options
   isMulti?: boolean,
+  isSortable?: boolean,
   isDisabled?: boolean
   onInputChange?: (val: string) => void
   onMenuScrollToBottom?: () => void
