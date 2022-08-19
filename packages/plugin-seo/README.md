@@ -80,7 +80,7 @@ export default config;
 
     An upload-enabled collection slug, for the meta image to access.
 
-- `tabbedUi`
+- `tabbedUI`
 
     Display SEO meta fields in a separate tab using Payload's [tabs UI component](https://payloadcms.com/docs/fields/tabs) (Default: `false`)
 
