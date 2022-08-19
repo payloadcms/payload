@@ -42,19 +42,10 @@ const config = buildConfig({
       fields: []
     }
   ],
-  globals: [
-    {
-      slug: 'homePage',
-      fields: []
-    }
-  ],
   plugins: [
     seo({
       collections: [
         'pages',
-      ],
-      globals: [
-        'homePage',
       ],
       uploadsCollection: 'media',
       generateTitle: ({ doc }) => `Website.com — ${doc.title.value}`,
@@ -68,23 +59,23 @@ export default config;
 
 ### Options
 
-- `collections`
+- `collections` : string[] | optional
 
     An array of collections slugs to enable SEO. Enabled collections receive a `meta` field which is an object of title, description, and image subfields.
 
-- `globals`
+- `globals` : string[] | optional
 
     An array of global slugs to enable SEO. Enabled globals receive a `meta` field which is an object of title, description, and image subfields.
 
-- `uploadsCollection`
+- `uploadsCollection` : string | optional
 
     An upload-enabled collection slug, for the meta image to access.
 
-- `tabbedUI`
+- `tabbedUI` : boolean | optional
 
-    Display SEO meta fields in a separate tab using Payload's [tabs UI component](https://payloadcms.com/docs/fields/tabs) (Default: `false`)
+    Displays meta fields as tabs using Payload's [Tabs Field](https://payloadcms.com/docs/fields/tabs). Defaults to `false`.
 
-- `generateTitle`
+- `generateTitle` : method | optional
 
     A function that allows you to return any meta title, including from document's content.
 
@@ -95,7 +86,7 @@ export default config;
     })
     ```
 
-- `generateDescription`
+- `generateDescription` : method | optional
 
     A function that allows you to return any meta description, including from document's content.
 
@@ -106,7 +97,7 @@ export default config;
     })
     ```
 
-- `generateImage`
+- `generateImage` : method | optional
 
     A function that allows you to return any meta image, including from document's content.
 
@@ -117,7 +108,7 @@ export default config;
     })
     ```
 
-- `generateURL`
+- `generateURL` : method | optional
 
     A function called by the search preview component to display the actual URL of your page.
 
