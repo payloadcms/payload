@@ -80,6 +80,10 @@ export default config;
 
     An upload-enabled collection slug, for the meta image to access.
 
+- `tabbedUI`
+
+    Display SEO meta fields in a separate tab using Payload's [tabs UI component](https://payloadcms.com/docs/fields/tabs) (Default: `false`)
+
 - `generateTitle`
 
     A function that allows you to return any meta title, including from document's content.
@@ -91,7 +95,7 @@ export default config;
     })
     ```
 
-  - `generateDescription`
+- `generateDescription`
 
     A function that allows you to return any meta description, including from document's content.
 
@@ -102,7 +106,7 @@ export default config;
     })
     ```
 
-  - `generateImage`
+- `generateImage`
 
     A function that allows you to return any meta image, including from document's content.
 
@@ -113,7 +117,7 @@ export default config;
     })
     ```
 
-  - `generateURL`
+- `generateURL`
 
     A function called by the search preview component to display the actual URL of your page.
 

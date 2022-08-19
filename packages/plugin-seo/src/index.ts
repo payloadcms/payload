@@ -80,10 +80,17 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
       if (isEnabled) {
         return ({
           ...collection,
-          fields: [
+          fields: (seoConfig?.tabbedUI ? [
+            {
+              type: 'tabs', tabs: [
+                { label: collection?.labels?.singular || 'Content', fields: [...(collection?.fields || [])] },
+                { label: 'SEO', fields: [...seoFields] },
+              ]
+            },
+          ] : [
             ...collection?.fields || [],
             ...seoFields,
-          ],
+          ]),
         })
       }
       return collection;
@@ -95,10 +102,17 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
       if (isEnabled) {
         return ({
           ...global,
-          fields: [
+          fields: (seoConfig?.tabbedUI ? [
+            {
+              type: 'tabs', tabs: [
+                { label: global?.label || 'Content', fields: [...(global?.fields || [])] },
+                { label: 'SEO', fields: [...seoFields] },
+              ]
+            },
+          ] : [
             ...global?.fields || [],
             ...seoFields,
-          ],
+          ]),
         })
       }
       return global;
