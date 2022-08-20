@@ -7,7 +7,7 @@
     "dev:azure": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER=azure nodemon",
     "dev:s3": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER=s3 nodemon",
     "dev:gcs": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER=gcs nodemon",
-    "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER=gcs payload build",
+    "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload build",
     "build:server": "tsc",
     "build": "yarn build:payload && yarn build:server",
     "serve": "cross-env PAYLOAD_CONFIG_PATH=dist/payload.config.js NODE_ENV=production node dist/server.js",
