@@ -37,6 +37,7 @@ This plugin supports the following adapters:
 
 - [Azure Blob Storage](#azure-blob-storage-adapter)
 - [AWS S3-style Storage](#s3-adapter)
+- [Google Cloud Storage](#gcs-adapter)
 
 However, you can create your own adapter for any third-party service you would like to use.
 
@@ -98,7 +99,7 @@ const adapter = s3Adapter({
 // Now you can pass this adapter to the plugin
 ```
 
-### Google Cloud Storage(GCS) Adapter
+### GCS Adapter
 
 To use the GCS adapter, you need to have `@google-cloud/storage` installed in your project dependencies. To do so, run `yarn add @google-storage/cloud`.
 
