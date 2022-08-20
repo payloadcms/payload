@@ -13,13 +13,17 @@
   "peerDependencies": {
     "@aws-sdk/client-s3": "^3.142.0",
     "@azure/storage-blob": "^12.11.0",
-    "payload": "^1.0.19"
+    "@google-cloud/storage": "^6.4.1",
+    "payload": "^1.0.27"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/client-s3": {
       "optional": true
     },
     "@azure/storage-blob": {
+      "optional": true
+    },
+    "@google-cloud/storage": {
       "optional": true
     }
   },
@@ -32,6 +36,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.142.0",
     "@azure/storage-blob": "^12.11.0",
+    "@google-cloud/storage": "^6.4.1",
     "@types/express": "^4.17.9",
     "@typescript-eslint/eslint-plugin": "5.12.1",
     "@typescript-eslint/parser": "5.12.1",

@@ -98,6 +98,28 @@ const adapter = s3Adapter({
 // Now you can pass this adapter to the plugin
 ```
 
+### Google Cloud Storage(GCS) Adapter
+
+To use the GCS adapter, you need to have `@google-cloud/storage` installed in your project dependencies. To do so, run `yarn add @google-storage/cloud`.
+
+From there, create the adapter, passing in all of its required properties:
+
+```js
+import { gcsAdapter } from '@payloadcms/plugin-cloud-storage/gcs';
+
+const adapter = gcsAdapter({
+  options: {
+    // you can choose any method for authentication, and authorization which is being provided by `@google-cloud/storage`
+    keyFilename: './gcs-credentials.json',
+    //OR
+    credentials: JSON.parse(process.env.GCS_CREDENTIALS) // this env variable will have stringify version of your credentials.json file
+  },
+  bucket: process.env.GCS_BUCKET,
+})
+
+// Now you can pass this adapter to the plugin
+```
+
 ### Payload Access Control
 
 Payload ships with access control that runs _even on statically served files_. The same `read` access control property on your `upload`-enabled collections is used, and it allows you to restrict who can request your uploaded files.
