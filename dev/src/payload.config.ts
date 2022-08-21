@@ -3,6 +3,7 @@ import path from 'path'
 import Users from './collections/Users'
 import { cloudStorage } from '../../src'
 import { s3Adapter } from '../../src/adapters/s3'
+import { gcsAdapter } from '../../src/adapters/gcs'
 import { azureBlobStorageAdapter } from '../../src/adapters/azure'
 import type { Adapter } from '../../src/types'
 import { Media } from './collections/Media'
@@ -32,6 +33,16 @@ if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 's3') {
   })
 }
 
+if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'gcs') {
+  adapter = gcsAdapter({
+    options: {
+      apiEndpoint: process.env.GCS_ENDPOINT,
+      projectId: process.env.GCS_PROJECT_ID,
+    },
+    bucket: process.env.GCS_BUCKET,
+  })
+}
+
 export default buildConfig({
   serverURL: 'http://localhost:3000',
   collections: [Media, Users],
@@ -49,6 +60,7 @@ export default buildConfig({
             react: path.resolve(__dirname, '../node_modules/react'),
             '@azure/storage-blob': path.resolve(__dirname, '../../src/adapters/azure/mock.js'),
             '@aws-sdk/client-s3': path.resolve(__dirname, '../../src/adapters/s3/mock.js'),
+            '@google-cloud/storage': path.resolve(__dirname, '../../src/adapters/gcs/mock.js'),
           },
         },
       }

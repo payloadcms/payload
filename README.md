@@ -37,6 +37,7 @@ This plugin supports the following adapters:
 
 - [Azure Blob Storage](#azure-blob-storage-adapter)
 - [AWS S3-style Storage](#s3-adapter)
+- [Google Cloud Storage](#gcs-adapter)
 
 However, you can create your own adapter for any third-party service you would like to use.
 
@@ -93,6 +94,28 @@ const adapter = s3Adapter({
     }
   },
   bucket: process.env.S3_BUCKET,
+})
+
+// Now you can pass this adapter to the plugin
+```
+
+### GCS Adapter
+
+To use the GCS adapter, you need to have `@google-cloud/storage` installed in your project dependencies. To do so, run `yarn add @google-storage/cloud`.
+
+From there, create the adapter, passing in all of its required properties:
+
+```js
+import { gcsAdapter } from '@payloadcms/plugin-cloud-storage/gcs';
+
+const adapter = gcsAdapter({
+  options: {
+    // you can choose any method for authentication, and authorization which is being provided by `@google-cloud/storage`
+    keyFilename: './gcs-credentials.json',
+    //OR
+    credentials: JSON.parse(process.env.GCS_CREDENTIALS) // this env variable will have stringify version of your credentials.json file
+  },
+  bucket: process.env.GCS_BUCKET,
 })
 
 // Now you can pass this adapter to the plugin

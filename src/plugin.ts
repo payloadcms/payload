@@ -24,6 +24,7 @@ export const cloudStorage =
     return {
       ...config,
       admin: {
+        ...(config.admin || {}),
         webpack,
       },
       collections: (config.collections || []).map(existingCollection => {
