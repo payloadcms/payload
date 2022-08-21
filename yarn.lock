@@ -2271,7 +2271,7 @@
 
 "@google-cloud/storage@^6.4.1":
   version "6.4.1"
-  resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.4.1.tgz#83334150d4e224cb48691de4d7f9c38e143a0970"
+  resolved "https://registry.npmjs.org/@google-cloud/storage/-/storage-6.4.1.tgz#83334150d4e224cb48691de4d7f9c38e143a0970"
   integrity sha512-lAddmRJ8tvxPykUqJfONBQA5XGwGk0vut1POXublc64+nCdB5aQMxwuBMf7J1zubx19QGpYPQwW6wR7YTWrvLw==
   dependencies:
     "@google-cloud/paginator" "^3.0.7"
