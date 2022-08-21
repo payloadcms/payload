@@ -34,3 +34,14 @@ To use the S3 emulator, use the following steps:
 
 Finally, you can run `yarn dev:s3` and then open `http://localhost:3000/admin` in your browser.
 
+### Google Cloud Storage(GCS) Adapter Development
+
+This repository comes with a Docker emulator for Google Cloud Storage.
+
+If you would like to test locally with an emulated GCS container, you can `cd` into `./src/adapters/gcs/emulator` and then run `docker-compose up -d`.
+
+The default `./dev/.env.example` file comes pre-loaded with correct `env` variables that correspond to the GCS Docker emulator.
+
+Otherwise, if you are not using the emulator, make sure your environment variables within `./dev/.env` are configured for your Google connection.
+
+Finally, to start the Payload dev server with the GCS adapter, run `yarn dev:gcs` and then open `http://localhost:3000/admin` in your browser.
