@@ -97,11 +97,11 @@ export async function createProject(
   } else {
     try {
       await fse.copy(templateDir, projectDir, { recursive: true })
-      if (packageManager === 'npm') {
-        const src = path.resolve(templateDir, '..', 'npmrc.template')
-        const dest = path.resolve(projectDir, '.npmrc')
-        await fse.copy(src, dest)
-      }
+
+      const src = path.resolve(templateDir, '..', 'npmrc.template')
+      const dest = path.resolve(projectDir, '.npmrc')
+      await fse.copy(src, dest)
+
       const gi = path.resolve(templateDir, '..', 'gitignore.template')
       const giDest = path.resolve(projectDir, '.gitignore')
       await fse.copy(gi, giDest)
