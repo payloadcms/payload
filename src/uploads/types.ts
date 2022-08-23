@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import express from 'express';
 import serveStatic from 'serve-static';
+import { Sharp, ResizeOptions } from 'sharp';
 
 export type FileSize = {
   filename: string;
@@ -54,7 +55,9 @@ export type Upload = {
   adminThumbnail?: string | GetAdminThumbnail
   mimeTypes?: string[];
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
-  handlers?: any[]
+  handlers?: any[];
+  resizeOption?: ResizeOptions;
+  formatOption?: Parameters<Sharp['toFormat']>;
 }
 
 export type File = {
