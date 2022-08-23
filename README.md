@@ -101,7 +101,7 @@ const adapter = s3Adapter({
 
 ### GCS Adapter
 
-To use the GCS adapter, you need to have `@google-cloud/storage` installed in your project dependencies. To do so, run `yarn add @google-storage/cloud`.
+To use the GCS adapter, you need to have `@google-cloud/storage` installed in your project dependencies. To do so, run `yarn add @google-cloud/storage`.
 
 From there, create the adapter, passing in all of its required properties:
 
