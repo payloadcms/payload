@@ -85,7 +85,7 @@ export default async function resizeAndSave({
         height: bufferObject.info.height,
         filename: imageNameWithDimensions,
         filesize: bufferObject.info.size,
-        mimeType,
+        mimeType: formatOption ? `image/${formatOption?.[0]}` : mimeType,
       };
     });
 
