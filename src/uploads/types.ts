@@ -44,6 +44,8 @@ export type IncomingUploadType = {
   mimeTypes?: string[];
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
   handlers?: any[]
+  resizeOption?: ResizeOptions;
+  formatOption?: Parameters<Sharp['toFormat']>;
 }
 
 
