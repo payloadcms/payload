@@ -16,8 +16,10 @@ Fields are defined as an array on Collections and Globals via the `fields` key. 
 The required `type` property on a field determines what values it can accept, how it is presented in the API, and how the field will be rendered in the admin interface.
 
 **Simple collection with two fields:**
-```js
-const Pages = {
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Page: CollectionConfig = {
 	slug: 'pages',
 	fields: [
 		{
@@ -29,7 +31,7 @@ const Pages = {
 			type: 'checkbox', // highlight-line
 		},
 	],
-}
+};
 ```
 
 ### Field types
@@ -80,8 +82,10 @@ There are two arguments available to custom validation functions.
 | `payload`          | If the `validate` function is being executed on the server, Payload will be exposed for easily running local operations. |
 
 Example:
-```js
-{
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Orders: CollectionConfig = {
   slug: 'orders',
   fields: [
     {
@@ -101,27 +105,27 @@ Example:
       },
     },
   ],
-}
+};
 ```
 
 When supplying a field `validate` function, Payload will use yours in place of the default. To make use of the default field validation in your custom logic you can import, call and return the result as needed.
 
 For example:
-```js
+```ts
 import { text } from 'payload/fields/validations';
-const field =
-  {
-    name: 'notBad',
-    type: 'text',
-    validate: (val, args) => {
-      if (value === 'bad') {
-        return 'This cannot be "bad"';
-      }
-      // highlight-start
-      return text(val, args);
-      // highlight-end
-    },
-}
+
+const field: Field = {
+  name: 'notBad',
+  type: 'text',
+  validate: (val, args) => {
+    if (val === 'bad') {
+      return 'This cannot be "bad"';
+    }
+    // highlight-start
+    return text(val, args);
+    // highlight-end
+  },
+};
 ```
 
 ### Customizable ID
@@ -131,7 +135,7 @@ Users are then required to provide a custom ID value when creating a record thro
 Valid ID types are `number` and `text`.
 
 Example:
-```js
+```ts
 {
   fields: [
     {
@@ -174,7 +178,7 @@ The `condition` function should return a boolean that will control if the field 
 
 **Example:**
 
-```js
+```ts
 {
   fields: [
     {
@@ -212,21 +216,21 @@ Functions are called with an optional argument object containing:
 
 Here is an example of a defaultValue function that uses both:
 
-```js
+```ts
 const translation: {
-    en: 'Written by',
-    es: 'Escrito por',
+  en: 'Written by',
+  es: 'Escrito por',
 };
 
 const field = {
-    name: 'attribution',
-    type: 'text',
-    admin: {
-      // highlight-start
-      defaultValue: ({ user, locale }) => (`${translation[locale]} ${user.name}`)
-      // highlight-end
-    }
-  };
+  name: 'attribution',
+  type: 'text',
+  admin: {
+    // highlight-start
+    defaultValue: ({ user, locale }) => (`${translation[locale]} ${user.name}`)
+    // highlight-end
+  }
+};
 ```
 
 <Banner type="success">
@@ -244,7 +248,7 @@ As shown above, you can simply provide a string that will show by the field, but
 
 **Function Example:**
 
-```js
+```ts
 {
   fields: [
     {
@@ -262,7 +266,7 @@ As shown above, you can simply provide a string that will show by the field, but
 This example will display the number of characters allowed as the user types.
 
 **Component Example:**
-```js
+```ts
 {
   fields: [
     {
@@ -289,10 +293,8 @@ This component will count the number of characters entered.
 
 You can import the internal Payload `Field` type as well as other common field types as follows:
 
-```js
+```ts
 import type {
   Field,
-  Validate,
-  Condition,
 } from 'payload/types';
 ```

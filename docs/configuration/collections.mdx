@@ -31,8 +31,10 @@ It's often best practice to write your Collections in separate files and then im
 
 #### Simple collection example
 
-```js
-const Orders = {
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Orders: CollectionConfig = {
 	slug: 'orders',
 	fields: [
 		{
@@ -47,7 +49,7 @@ const Orders = {
 			required: true,
 		}
 	]
-}
+};
 ```
 
 #### More collection config examples
@@ -80,8 +82,10 @@ If the function is specified, a Preview button will automatically appear in the 
 
 **Example collection with preview function:**
 
-```js
-const Posts = {
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Posts: CollectionConfig = {
 	slug: 'posts',
 	fields: [
 		{
@@ -118,14 +122,14 @@ Collections support all field types that Payload has to offer—including simple
 
 You can import collection types as follows:
 
-```js
+```ts
 import { CollectionConfig } from 'payload/types';
 
 // This is the type used for incoming collection configs.
 // Only the bare minimum properties are marked as required.
 ```
 
-```js
+```ts
 import { SanitizedCollectionConfig } from 'payload/types';
 
 // This is the type used after an incoming collection config is fully sanitized.

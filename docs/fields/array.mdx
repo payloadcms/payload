@@ -41,9 +41,11 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
 
 ### Example
 
-`collections/ExampleCollection.js`
-```js
-{
+`collections/ExampleCollection.ts`
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
@@ -70,6 +72,5 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
       ]
     }
   ]
-}
-
+};
 ```

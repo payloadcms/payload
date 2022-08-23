@@ -83,11 +83,10 @@ After all plugins are executed, the full config with all plugins will be sanitiz
 
 Here is an example for how to automatically add a `lastModifiedBy` field to all Payload collections using a Plugin written in TypeScript.
 
-```js
-import { Config } from 'payload/config';
-import { CollectionConfig } from 'payload/dist/collections/config/types';
+```ts
+import { Config, Plugin } from 'payload/config';
 
-const addLastModified = (incomingConfig: Config): Config => {
+const addLastModified: Plugin = (incomingConfig: Config): Config => {
   // Find all incoming auth-enabled collections
   // so we can create a lastModifiedBy relationship field
   // to all auth collections

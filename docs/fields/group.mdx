@@ -39,9 +39,11 @@ Set this property to `true` to hide this field's gutter within the admin panel. 
 
 ### Example
 
-`collections/ExampleCollection.js`
-```js
-{
+`collections/ExampleCollection.ts`
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
@@ -65,6 +67,5 @@ Set this property to `true` to hide this field's gutter within the admin panel. 
       ],
     }
   ]
-}
-
+};
 ```

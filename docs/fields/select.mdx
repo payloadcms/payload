@@ -57,10 +57,11 @@ Set to `true` if you'd like this field to be sortable within the Admin UI using 
 
 ### Example
 
-`collections/ExampleCollection.js`
+`collections/ExampleCollection.ts`
+```ts
+import { CollectionConfig } from 'payload/types';
 
-```js
-{
+const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
