@@ -33,20 +33,16 @@ export default async function findByIDLocal<T extends TypeWithID = any>(payload:
     overrideAccess = true,
     disableErrors = false,
     showHiddenFields,
-    req: incomingReq,
+    req = {} as PayloadRequest,
     draft = false,
   } = options;
 
   const collection = payload.collections[collectionSlug];
 
-  const req = {
-    user: undefined,
-    ...incomingReq || {},
-    payloadAPI: 'local',
-    locale: locale || incomingReq?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
-    fallbackLocale: fallbackLocale || incomingReq?.fallbackLocale || null,
-    payload,
-  } as PayloadRequest;
+  req.payloadAPI = 'local';
+  req.locale = locale || req?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null);
+  req.fallbackLocale = fallbackLocale || req?.fallbackLocale || null;
+  req.payload = payload;
 
   if (typeof user !== 'undefined') req.user = user;
 

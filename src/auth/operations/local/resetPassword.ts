@@ -18,16 +18,13 @@ async function localResetPassword(payload: Payload, options: Options): Promise<R
     collection: collectionSlug,
     data,
     overrideAccess,
-    req: incomingReq = {},
+    req = {} as PayloadRequest,
   } = options;
 
   const collection = payload.collections[collectionSlug];
 
-  const req = {
-    ...incomingReq,
-    payload,
-    payloadAPI: 'local',
-  } as PayloadRequest;
+  req.payload = payload;
+  req.payloadAPI = 'local';
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 

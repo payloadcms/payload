@@ -1,9 +1,9 @@
+import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../../..';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import create from '../create';
-import { File } from '../../../uploads/types';
 import { getDataLoader } from '../../dataloader';
 
 
@@ -18,7 +18,7 @@ export type Options<T> = {
   disableVerificationEmail?: boolean
   showHiddenFields?: boolean
   filePath?: string
-  file?: File
+  file?: UploadedFile
   overwriteExistingFiles?: boolean
   req?: PayloadRequest
   draft?: boolean
@@ -38,23 +38,21 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
     filePath,
     file,
     overwriteExistingFiles = false,
-    req: incomingReq,
+    req = {} as PayloadRequest,
     draft,
   } = options;
 
   const collection = payload.collections[collectionSlug];
 
-  const req = {
-    ...incomingReq || {},
-    user,
-    payloadAPI: 'local',
-    locale: locale || incomingReq?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null),
-    fallbackLocale: fallbackLocale || incomingReq?.fallbackLocale || null,
-    payload,
-    files: {
-      file: file ?? getFileByPath(filePath),
-    },
-  } as PayloadRequest;
+  req.payloadAPI = 'local';
+  req.locale = locale || req?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null);
+  req.fallbackLocale = fallbackLocale || req?.fallbackLocale || null;
+  req.payload = payload;
+  req.files = {
+    file: (file as UploadedFile) ?? (getFileByPath(filePath) as UploadedFile),
+  };
+
+  if (typeof user !== 'undefined') req.user = user;
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 

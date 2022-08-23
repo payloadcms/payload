@@ -17,16 +17,13 @@ async function localUnlock(payload: Payload, options: Options): Promise<boolean>
     collection: collectionSlug,
     data,
     overrideAccess = true,
-    req: incomingReq = {},
+    req = {} as PayloadRequest,
   } = options;
 
   const collection = payload.collections[collectionSlug];
 
-  const req = {
-    ...incomingReq,
-    payload,
-    payloadAPI: 'local',
-  } as PayloadRequest;
+  req.payload = payload;
+  req.payloadAPI = 'local';
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 

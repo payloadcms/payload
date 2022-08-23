@@ -1,9 +1,11 @@
 import mongoose from 'mongoose';
 import payload from '../../src';
+import type { Options as CreateOptions } from '../../src/collections/operations/local/create';
 import { Forbidden } from '../../src/errors';
+import type { PayloadRequest } from '../../src/types';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { restrictedSlug, siblingDataSlug, slug } from './config';
-import type { Restricted, Post, SiblingDatum } from './payload-types';
+import { relyOnRequestHeadersSlug, requestHeaders, restrictedSlug, siblingDataSlug, slug } from './config';
+import type { Restricted, Post, SiblingDatum, RelyOnRequestHeader } from './payload-types';
 import { firstArrayText, secondArrayText } from './shared';
 
 describe('Access Control', () => {
@@ -74,7 +76,7 @@ describe('Access Control', () => {
   describe('Collections', () => {
     describe('restricted collection', () => {
       it('field without read access should not show', async () => {
-        const { id } = await createDoc({ restrictedField: 'restricted' });
+        const { id } = await createDoc<Post>({ restrictedField: 'restricted' });
 
         const retrievedDoc = await payload.findByID({ collection: slug, id, overrideAccess: false });
 
@@ -82,7 +84,7 @@ describe('Access Control', () => {
       });
 
       it('field without read access should not show when overrideAccess: true', async () => {
-        const { id, restrictedField } = await createDoc({ restrictedField: 'restricted' });
+        const { id, restrictedField } = await createDoc<Post>({ restrictedField: 'restricted' });
 
         const retrievedDoc = await payload.findByID({ collection: slug, id, overrideAccess: true });
 
@@ -90,11 +92,57 @@ describe('Access Control', () => {
       });
 
       it('field without read access should not show when overrideAccess default', async () => {
-        const { id, restrictedField } = await createDoc({ restrictedField: 'restricted' });
+        const { id, restrictedField } = await createDoc<Post>({ restrictedField: 'restricted' });
 
         const retrievedDoc = await payload.findByID({ collection: slug, id });
 
         expect(retrievedDoc.restrictedField).toEqual(restrictedField);
+      });
+    });
+    describe('non-enumerated request properties passed to access control', () => {
+      it('access control ok when passing request headers', async () => {
+        const req = Object.defineProperty({}, 'headers', {
+          value: requestHeaders,
+          enumerable: false,
+        }) as PayloadRequest;
+        const name = 'name';
+        const overrideAccess = false;
+
+        const { id } = await createDoc<RelyOnRequestHeader>({ name }, relyOnRequestHeadersSlug, { req, overrideAccess });
+        const docById = await payload.findByID({ collection: relyOnRequestHeadersSlug, id, req, overrideAccess });
+        const { docs: docsByName } = await payload.find({
+          collection: relyOnRequestHeadersSlug,
+          where: {
+            name: {
+              equals: name,
+            },
+          },
+          req,
+          overrideAccess,
+        });
+
+        expect(docById).not.toBeUndefined();
+        expect(docsByName.length).toBeGreaterThan(0);
+      });
+
+      it('access control fails when omitting request headers', async () => {
+        const name = 'name';
+        const overrideAccess = false;
+
+        await expect(() => createDoc<RelyOnRequestHeader>({ name }, relyOnRequestHeadersSlug, { overrideAccess })).rejects.toThrow(Forbidden);
+        const { id } = await createDoc<RelyOnRequestHeader>({ name }, relyOnRequestHeadersSlug);
+
+        await expect(() => payload.findByID({ collection: relyOnRequestHeadersSlug, id, overrideAccess })).rejects.toThrow(Forbidden);
+
+        await expect(() => payload.find({
+          collection: relyOnRequestHeadersSlug,
+          where: {
+            name: {
+              equals: name,
+            },
+          },
+          overrideAccess,
+        })).rejects.toThrow(Forbidden);
       });
     });
   });
@@ -172,9 +220,10 @@ describe('Access Control', () => {
   });
 });
 
-async function createDoc(data: Partial<Post>): Promise<Post> {
-  return payload.create({
-    collection: slug,
+async function createDoc<Collection>(data: Partial<Collection>, overrideSlug = slug, options?: Partial<CreateOptions<Collection>>): Promise<Collection> {
+  return payload.create<Collection>({
+    ...options,
+    collection: overrideSlug,
     data: data ?? {},
   });
 }
