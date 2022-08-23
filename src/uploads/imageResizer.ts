@@ -46,15 +46,19 @@ export default async function resizeAndSave({
   savedFilename,
   mimeType,
 }: Args): Promise<FileSizes> {
-  const { imageSizes, disableLocalStorage } = config.upload;
+  const { imageSizes, disableLocalStorage, resizeOption, formatOption } = config.upload;
 
   const sizes = imageSizes
-    .filter((desiredSize) => desiredSize.width <= dimensions.width || desiredSize.height <= dimensions.height)
+    .filter((desiredSize) => (typeof desiredSize.width === 'number' && desiredSize.width <= dimensions.width) || (typeof desiredSize.height === 'number' && desiredSize.height <= dimensions.height))
     .map(async (desiredSize) => {
-      const resized = await sharp(file)
-        .resize(desiredSize.width, desiredSize.height, {
+      let resized = await sharp(file)
+        .resize(desiredSize.width, desiredSize.height, resizeOption ?? {
           position: desiredSize.crop || 'centre',
         });
+
+      if (formatOption) {
+        resized = await resized.toFormat(...formatOption);
+      }
 
       const bufferObject = await resized.toBuffer({
         resolveWithObject: true,
