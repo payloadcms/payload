@@ -67,7 +67,7 @@ export default async function resizeAndSave({
       req.payloadUploadSizes[desiredSize.name] = bufferObject.data;
 
       const outputImage = getOutputImage(savedFilename, desiredSize);
-      const imageNameWithDimensions = `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${outputImage.extension}`;
+      const imageNameWithDimensions = `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${formatOption?.[0] ?? outputImage.extension}`;
       const imagePath = `${staticPath}/${imageNameWithDimensions}`;
       const fileAlreadyExists = await fileExists(imagePath);
 
