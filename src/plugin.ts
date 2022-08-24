@@ -31,11 +31,15 @@ export const cloudStorage =
         const options = allCollectionOptions[existingCollection.slug]
 
         if (options?.adapter) {
-          const adapter = options.adapter({ collection: existingCollection })
+          const adapter = options.adapter({
+            collection: existingCollection,
+            prefix: options.prefix,
+          })
 
           const fields = getFields({
             collection: existingCollection,
             disablePayloadAccessControl: options.disablePayloadAccessControl,
+            prefix: options.prefix,
             adapter,
           })
 

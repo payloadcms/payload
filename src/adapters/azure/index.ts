@@ -15,7 +15,7 @@ export interface Args {
 
 export const azureBlobStorageAdapter =
   ({ connectionString, containerName, baseURL, allowContainerCreate }: Args): Adapter =>
-  ({ collection }): GeneratedAdapter => {
+  ({ collection, prefix }): GeneratedAdapter => {
     const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
     const containerClient = blobServiceClient.getContainerClient(containerName)
 
@@ -24,10 +24,11 @@ export const azureBlobStorageAdapter =
         collection,
         containerClient,
         allowContainerCreate,
+        prefix,
       }),
       handleDelete: getHandleDelete({ collection, containerClient }),
       generateURL: getGenerateURL({ containerName, baseURL }),
-      staticHandler: getHandler({ containerClient }),
+      staticHandler: getHandler({ containerClient, collection }),
       webpack: extendWebpackConfig,
     }
   }

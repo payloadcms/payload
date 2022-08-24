@@ -12,10 +12,12 @@ export const getAfterReadHook =
   ({ collection, adapter, size }: Args): FieldHook =>
   async ({ data, value }) => {
     const filename = size ? data?.sizes?.[size.name]?.filename : data?.filename
+    const prefix = data?.prefix
 
     const url = await adapter.generateURL({
       collection,
       filename,
+      prefix,
     })
 
     return url || value

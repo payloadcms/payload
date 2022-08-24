@@ -1,3 +1,4 @@
+import path from 'path'
 import type { GroupField, TextField } from 'payload/dist/fields/config/types'
 import type { CollectionConfig, Field } from 'payload/types'
 import { getAfterReadHook } from '../hooks/afterRead'
@@ -6,10 +7,16 @@ import type { GeneratedAdapter } from '../types'
 interface Args {
   collection: CollectionConfig
   disablePayloadAccessControl?: true
+  prefix?: string
   adapter: GeneratedAdapter
 }
 
-export const getFields = ({ adapter, collection, disablePayloadAccessControl }: Args): Field[] => {
+export const getFields = ({
+  adapter,
+  collection,
+  disablePayloadAccessControl,
+  prefix,
+}: Args): Field[] => {
   const baseURLField: Field = {
     name: 'url',
     label: 'URL',
@@ -104,6 +111,19 @@ export const getFields = ({ adapter, collection, disablePayloadAccessControl }: 
 
       fields.push(sizesField)
     }
+  }
+
+  // If prefix is enabled, save it to db
+  if (prefix) {
+    fields.push({
+      name: 'prefix',
+      type: 'text',
+      defaultValue: path.posix.join(prefix),
+      admin: {
+        readOnly: true,
+        disabled: true,
+      },
+    })
   }
 
   return fields

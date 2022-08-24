@@ -1,3 +1,4 @@
+import path from 'path'
 import { Storage } from '@google-cloud/storage'
 import type { HandleDelete } from '../../types'
 
@@ -7,8 +8,8 @@ interface Args {
 }
 
 export const getHandleDelete = ({ gcs, bucket }: Args): HandleDelete => {
-  return async ({ filename }) => {
-    await gcs.bucket(bucket).file(filename).delete({
+  return async ({ filename, prefix = '' }) => {
+    await gcs.bucket(bucket).file(path.posix.join(prefix, filename)).delete({
       ignoreNotFound: true,
     })
   }
