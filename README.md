@@ -53,7 +53,7 @@ This plugin is configurable to work across many different Payload collections. A
 
 | Option                       | Description                     |
 |------------------------------|---------------------------------|
-| `adapter` *            | Pass in the adapter that you'd like to use for this collection. |
+| `adapter` *            | Pass in the adapter that you'd like to use for this collection. You can also set this field to `null` for local development if you'd like to bypass cloud storage in certain scenarios and use local storage. |
 | `disableLocalStorage`  | Choose to disable local storage on this collection. Defaults to `true`. |
 | `disablePayloadAccessControl` | Set to `true` to disable Payload's access control. [More](#payload-access-control) |
 
