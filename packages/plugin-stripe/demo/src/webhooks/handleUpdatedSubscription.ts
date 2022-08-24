@@ -1,7 +1,7 @@
 import payload from 'payload';
-import { WebhookHandler } from '../../../src/types';
+import { StripeWebhookHandler } from '../../../src/types';
 
-export const handleUpdatedSubscription: WebhookHandler = async (event) => {
+export const handleUpdatedSubscription: StripeWebhookHandler = async (event) => {
   try {
     const customerQuery = await payload.find({
       collection: 'customers',
