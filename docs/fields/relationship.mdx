@@ -69,26 +69,26 @@ The `filterOptions` property can either be a `Where` query directly, or a functi
 
 **Example:**
 
-```js
-  const relationshipField = {
-    name: 'purchase',
-    type: 'relationship',
-    relationTo: ['products', 'services'],
-    filterOptions: ({ relationTo, siblingData }) => {
-      // returns a Where query dynamically by the type of relationship
-      if (relationTo === 'products') {
-        return {
-          'stock': { is_greater_than: siblingData.quantity }
-        }
+```ts
+const relationshipField = {
+  name: 'purchase',
+  type: 'relationship',
+  relationTo: ['products', 'services'],
+  filterOptions: ({ relationTo, siblingData }) => {
+    // returns a Where query dynamically by the type of relationship
+    if (relationTo === 'products') {
+      return {
+        'stock': { is_greater_than: siblingData.quantity }
       }
+    }
 
-      if (relationTo === 'services') {
-        return {
-          'isAvailable': { equals: true }
-        }
+    if (relationTo === 'services') {
+      return {
+        'isAvailable': { equals: true }
       }
-    },
-  };
+    }
+  },
+};
 ```
 
 You can learn more about writing queries [here](/docs/queries/overview).
@@ -106,7 +106,7 @@ Given the variety of options possible within the `relationship` field type, the 
 
 The most simple pattern of a relationship is to use `hasMany: false` with a `relationTo` that allows for only one type of collection.
 
-```js
+```ts
 {
   slug: 'example-collection',
   fields: [
@@ -137,7 +137,7 @@ When querying documents in this collection via REST API, you could query as foll
 
 Also known as **dynamic references**, in this configuration, the `relationTo` field is an array of Collection slugs that tells Payload which Collections are valid to reference.
 
-```js
+```ts
 {
   slug: 'example-collection',
   fields: [
@@ -176,7 +176,7 @@ This query would return only documents that have an owner relationship to organi
 
 The `hasMany` tells Payload that there may be more than one collection saved to the field.
 
-```js
+```ts
 {
   slug: 'example-collection',
   fields: [
@@ -204,7 +204,7 @@ When querying documents, the format does not change for arrays:
 
 #### Has Many - Polymorphic
 
-```js
+```ts
 {
   slug: 'example-collection',
   fields: [

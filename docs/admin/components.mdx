@@ -38,9 +38,16 @@ You can override a set of admin panel-wide components by providing a component t
 #### Full example:
 
 `payload.config.js`
-```js
-import { buildConfig } from 'payload/config';
-import { MyCustomNav, MyCustomLogo, MyCustomIcon, MyCustomAccount, MyCustomDashboard, MyProvider } from './customComponents.js';
+```ts
+import { buildConfig } from 'payload/config'
+import {
+  MyCustomNav,
+  MyCustomLogo,
+  MyCustomIcon,
+  MyCustomAccount,
+  MyCustomDashboard,
+  MyProvider,
+} from './customComponents';
 
 export default buildConfig({
   admin: {
@@ -55,9 +62,9 @@ export default buildConfig({
         Dashboard: MyCustomDashboard,
       },
       providers: [MyProvider],
-    }
-  }
-})
+    },
+  },
+});
 ```
 
 *For more examples regarding how to customize components, look at the following [examples](https://github.com/payloadcms/payload/tree/master/test/admin/components).*
@@ -100,20 +107,17 @@ All Payload fields support the ability to swap in your own React components. So,
 
 When swapping out the `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useField` hook as follows:
 
-```js
-import { useField } from 'payload/components/forms';
+```tsx
+import { useField } from 'payload/components/forms'
 
-const CustomTextField = ({ path }) => {
+type Props = { path: string }
+
+const CustomTextField: React.FC<Props> = ({ path }) => {
   // highlight-start
-  const { value, setValue } = useField({ path });
+  const { value, setValue } = useField<Props>({ path })
   // highlight-end
 
-  return (
-    <input
-      onChange={(e) => setValue(e.target.value)}
-      value={value}
-    />
-  )
+  return <input onChange={e => setValue(e.target.value)} value={value.path} />
 }
 ```
 
@@ -121,10 +125,10 @@ const CustomTextField = ({ path }) => {
 
 There are times when a custom field component needs to have access to data from other fields. This can be done using `getDataByPath` from `useWatchForm` as follows:
 
-```js
+```tsx
 import { useWatchForm } from 'payload/components/forms';
 
-const DisplayFee = () => {
+const DisplayFee: React.FC = () => {
   const { getDataByPath } = useWatchForm();
 
   const amount = getDataByPath('amount');
@@ -132,7 +136,7 @@ const DisplayFee = () => {
 
   if (amount && feePercentage) {
     return (
-      <span>The fee is ${ amount * feePercentage / 100 }</span>
+      <span>The fee is ${(amount * feePercentage) / 100}</span>
     );
   }
 };
@@ -142,10 +146,10 @@ const DisplayFee = () => {
 
 The document ID can be very useful for certain custom components. You can get the `id` from the `useDocumentInfo` hook. Here is an example of a `UI` field using `id` to link to related collections:
 
-```js
+```tsx
 import { useDocumentInfo } from 'payload/components/utilities';
 
-const LinkFromCategoryToPosts = () => {
+const LinkFromCategoryToPosts: React.FC = () => {
   // highlight-start
   const { id } = useDocumentInfo();
   // highlight-end
@@ -222,10 +226,10 @@ To make use of Payload SCSS variables / mixins to use directly in your own compo
 
 In any custom component you can get the selected locale with the `useLocale` hook. Here is a simple example:
 
-```js
+```tsx
 import { useLocale } from 'payload/components/utilities';
 
-const Greeting = () => {
+const Greeting: React.FC = () => {
   // highlight-start
   const locale = useLocale();
   // highlight-end
@@ -237,6 +241,6 @@ const Greeting = () => {
 
   return (
     <span> { trans[locale] } </span>
-  )
-}
+  );
+};
 ```

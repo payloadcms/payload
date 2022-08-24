@@ -29,8 +29,10 @@ At the top of your Payload config you can define all the options to manage Graph
 
 Everything that can be done to a Collection via the REST or Local API can be done with GraphQL (outside of uploading files, which is REST-only). If you have a collection as follows:
 
-```js
-const PublicUser = {
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const PublicUser: CollectionConfig = {
   slug: 'public-users',
   auth: true, // Auth is enabled
   labels: {
@@ -70,8 +72,10 @@ const PublicUser = {
 
 Globals are also fully supported. For example:
 
-```js
-const Header = {
+```ts
+import { GlobalConfig } from 'payload/types';
+
+const Header: GlobalConfig = {
   slug: 'header',
   fields: [
     ...

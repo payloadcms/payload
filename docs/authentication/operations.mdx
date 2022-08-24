@@ -17,7 +17,7 @@ The Access operation returns what a logged in user can and can't do with the col
 `GET http://localhost:3000/api/access`
 
 Example response:
-```js
+```ts
 {
   canAccessAdmin: true,
   collections: {
@@ -54,7 +54,7 @@ Example response:
 
 **Example GraphQL Query**:
 
-```
+```graphql
 query {
   Access {
     pages {
@@ -75,7 +75,7 @@ Returns either a logged in user with token or null when there is no logged in us
 `GET http://localhost:3000/api/[collection-slug]/me`
 
 Example response:
-```js
+```ts
 {
   user: { // The JWT "payload" ;) from the logged in user
     email: 'dev@payloadcms.com',
@@ -90,7 +90,7 @@ Example response:
 
 **Example GraphQL Query**:
 
-```
+```graphql
 query {
   Me[collection-singular-label] {
     user {
@@ -106,7 +106,7 @@ query {
 Accepts an `email` and `password`. On success, it will return the logged in user as well as a token that can be used to authenticate. In the GraphQL and REST APIs, this operation also automatically sets an HTTP-only cookie including the user's token. If you pass an Express `res` to the Local API operation, Payload will set a cookie there as well.
 
 **Example REST API login**:
-```js
+```ts
 const res = await fetch('http://localhost:3000/api/[collection-slug]/login', {
   method: 'POST',
   headers: {
@@ -137,7 +137,7 @@ const json = await res.json();
 
 **Example GraphQL Mutation**:
 
-```
+```graphql
 mutation {
   login[collection-singular-label](email: "dev@payloadcms.com", password: "yikes") {
     user {
@@ -151,7 +151,7 @@ mutation {
 
 **Example Local API login**:
 
-```js
+```ts
 const result = await payload.login({
   collection: '[collection-slug]',
   data: {
@@ -166,7 +166,7 @@ const result = await payload.login({
 As Payload sets HTTP-only cookies, logging out cannot be done by just removing a cookie in JavaScript, as HTTP-only cookies are inaccessible by JS within the browser. So, Payload exposes a `logout` operation to delete the token in a safe way.
 
 **Example REST API logout**:
-```js
+```ts
 const res = await fetch('http://localhost:3000/api/[collection-slug]/logout', {
   method: 'POST',
   headers: {
@@ -192,7 +192,7 @@ This operation requires a non-expired token to send back a new one. If the user'
 If successful, this operation will automatically renew the user's HTTP-only cookie and will send back the updated token in JSON.
 
 **Example REST API token refresh**:
-```js
+```ts
 const res = await fetch('http://localhost:3000/api/[collection-slug]/refresh-token', {
   method: 'POST',
   headers: {
@@ -239,18 +239,18 @@ mutation {
 If your collection supports email verification, the Verify operation will be exposed which accepts a verification token and sets the user's `_verified` property to `true`, thereby allowing the user to authenticate with the Payload API.
 
 **Example REST API user verification**:
-```js
+```ts
 const res = await fetch(`http://localhost:3000/api/[collection-slug]/verify/${TOKEN_HERE}`, {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
   },
-})
+});
 ```
 
 **Example GraphQL Mutation**:
 
-```
+```graphql
 mutation {
   verifyEmail[collection-singular-label](token: "TOKEN_HERE")
 }
@@ -258,7 +258,7 @@ mutation {
 
 **Example Local API verification**:
 
-```js
+```ts
 const result = await payload.verifyEmail({
   collection: '[collection-slug]',
   token: 'TOKEN_HERE',
@@ -272,7 +272,7 @@ If a user locks themselves out and you wish to deliberately unlock them, you can
 To restrict who is allowed to unlock users, you can utilize the [`unlock`](/docs/access-control/overview#unlock) access control function.
 
 **Example REST API unlock**:
-```js
+```ts
 const res = await fetch(`http://localhost:3000/api/[collection-slug]/unlock`, {
   method: 'POST',
   headers: {
@@ -291,7 +291,7 @@ mutation {
 
 **Example Local API unlock**:
 
-```js
+```ts
 const result = await payload.unlock({
   collection: '[collection-slug]',
 })
@@ -306,7 +306,7 @@ The link to reset the user's password contains a token which is what allows the 
 By default, the Forgot Password operations send users to the Payload Admin panel to reset their password, but you can customize the generated email to send users to the frontend of your app instead by [overriding the email HTML](/docs/authentication/config#forgot-password).
 
 **Example REST API Forgot Password**:
-```js
+```ts
 const res = await fetch(`http://localhost:3000/api/[collection-slug]/forgot-password`, {
   method: 'POST',
   headers: {
@@ -315,7 +315,7 @@ const res = await fetch(`http://localhost:3000/api/[collection-slug]/forgot-pass
   body: JSON.stringify({
     email: 'dev@payloadcms.com',
   }),
-})
+});
 ```
 
 **Example GraphQL Mutation**:
@@ -328,14 +328,14 @@ mutation {
 
 **Example Local API forgot password**:
 
-```js
+```ts
 const token = await payload.forgotPassword({
   collection: '[collection-slug]',
   data: {
     email: 'dev@payloadcms.com',
   },
   disableEmail: false // you can disable the auto-generation of email via local API
-})
+});
 ```
 
 <Banner type="success">
@@ -348,7 +348,7 @@ const token = await payload.forgotPassword({
 After a user has "forgotten" their password and a token is generated, that token can be used to send to the reset password operation along with a new password which will allow the user to reset their password securely.
 
 **Example REST API Reset Password**:
-```js
+```ts
 const res = await fetch(`http://localhost:3000/api/[collection-slug]/reset-password`, {
   method: 'POST',
   headers: {
@@ -358,7 +358,7 @@ const res = await fetch(`http://localhost:3000/api/[collection-slug]/reset-passw
     token: 'TOKEN_GOES_HERE'
     password: 'not-today',
   }),
-})
+});
 
 const json = await res.json();
 
@@ -379,7 +379,7 @@ const json = await res.json();
 
 **Example GraphQL Mutation**:
 
-```
+```graphql
 mutation {
   resetPassword[collection-singular-label](token: "TOKEN_GOES_HERE", password: "not-today")
 }

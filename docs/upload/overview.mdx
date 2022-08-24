@@ -55,38 +55,40 @@ _An asterisk denotes that a property above is required._
 
 **Example Upload collection:**
 
-```js
-const Media = {
-  slug: "media",
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Media: CollectionConfig = {
+  slug: 'media',
   upload: {
-    staticURL: "/media",
-    staticDir: "media",
+    staticURL: '/media',
+    staticDir: 'media',
     imageSizes: [
       {
-        name: "thumbnail",
+        name: 'thumbnail',
         width: 400,
         height: 300,
-        crop: "centre",
+        crop: 'centre',
       },
       {
-        name: "card",
+        name: 'card',
         width: 768,
         height: 1024,
-        crop: "centre",
+        crop: 'centre',
       },
       {
-        name: "tablet",
+        name: 'tablet',
         width: 1024,
         // By specifying `null` or leaving a height undefined,
         // the image will be sized to a certain width,
         // but it will retain its original aspect ratio
         // and calculate a height automatically.
         height: null,
-        crop: "centre",
+        crop: 'centre',
       },
     ],
-    adminThumbnail: "thumbnail",
-    mimeTypes: ["image/*"],
+    adminThumbnail: 'thumbnail',
+    mimeTypes: ['image/*'],
   },
 };
 ```
@@ -97,17 +99,17 @@ Payload relies on the [`express-fileupload`](https://www.npmjs.com/package/expre
 
 A common example of what you might want to customize within Payload-wide Upload options would be to increase the allowed `fileSize` of uploads sent to Payload:
 
-```js
-import { buildConfig } from "payload/config";
+```ts
+import { buildConfig } from 'payload/config';
 
 export default buildConfig({
   collections: [
     {
-      slug: "media",
+      slug: 'media',
       fields: [
         {
-          name: "alt",
-          type: "text",
+          name: 'alt',
+          type: 'text',
         },
       ],
       upload: true,
@@ -158,12 +160,14 @@ You can specify how Payload retrieves admin thumbnails for your upload-enabled C
 
 **Example custom Admin thumbnail:**
 
-```js
-const Media = {
-  slug: "media",
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Media: CollectionConfig = {
+  slug: 'media',
   upload: {
-    staticURL: "/media",
-    staticDir: "media",
+    staticURL: '/media',
+    staticDir: 'media',
     imageSizes: [
       // ... image sizes here
     ],
@@ -191,13 +195,15 @@ Some example values are: `image/*`, `audio/*`, `video/*`, `image/png`, `applicat
 
 **Example mimeTypes usage:**
 
-```js
-const Media = {
-  slug: "media",
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Media: CollectionConfig = {
+  slug: 'media',
   upload: {
-    staticURL: "/media",
-    staticDir: "media",
-    mimeTypes: ["image/*", "application/pdf"], // highlight-line
+    staticURL: '/media',
+    staticDir: 'media',
+    mimeTypes: ['image/*', 'application/pdf'], // highlight-line
   },
 };
 ```
