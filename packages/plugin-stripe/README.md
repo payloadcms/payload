@@ -2,12 +2,13 @@
 
 [![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-stripe)](https://www.npmjs.com/package/@payloadcms/plugin-stripe)
 
-A plugin for [Payload CMS](https://github.com/payloadcms/payload) to manage a [Stripe](https://stripe.com/) account through Payload.
+A plugin for [Payload CMS](https://github.com/payloadcms/payload) to manage [Stripe](https://stripe.com) through Payload.
 
 Core features:
-  - Layers your Stripe account with Payload access control
-  - Opens custom routes to interface with the Stripe REST API
-  - Handles Stripe webhooks to allow for a two-way data sync
+  - Layers your Stripe account behind [Payload access control](https://payloadcms.com/docs/access-control/overview)
+  - Enables a two-way communication channel between Stripe and Payload
+    - Proxies the [Stripe REST API](https://stripe.com/docs/api)
+    - Proxies [Stripe webhooks](https://stripe.com/docs/webhooks)
 
 ## Installation
 
@@ -50,21 +51,27 @@ export default config;
 
   Optional. An object of Stripe webhook handlers, keyed to the name of the event. See [webhooks](#webhooks) for more details or for a list of all available webhooks, see [here](https://stripe.com/docs/cli/trigger#trigger-event).
 
-### Routes
+### Endpoints
 
-The following routes are automatically opened to allow you to interact with the Stripe API behind Payload access control. This allows you to read and make updates to your account.
+One core functionality of this plugin is to enable a two-way communication channel between Stripe and Payload. To do this, the following custom endpoints are automatically opened for you:
 
 >NOTE: the `/api` part of these routes may be different based on the settings defined in your Payload config.
 
 - `POST /api/stripe/rest`
 
-  Calls the given [Stripe REST API](https://stripe.com/docs/api) method and returns the result.
+  Proxies the [Stripe REST API](https://stripe.com/docs/api) behind [Payload access control](https://payloadcms.com/docs/access-control/overview) and returns the result. If you need to proxy the API server-side, use the [stripeProxy](#node) function.
 
-  ```
+  ```js
     const res = await fetch(`/api/stripe/rest`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        ContentType: 'application/json',
+        // Authorization: `JWT ${token}` // NOTE: do this if not in a browser (i.e. curl or Postman)
+      },
       body: JSON.stringify({
         stripeMethod: "stripe.subscriptions.list",
-        stripeMethodArgs: {
+        stripeArgs: {
           customer: "abc"
         }
       })
@@ -105,6 +112,36 @@ export default config;
 
 For a full list of available webhooks, see [here](https://stripe.com/docs/cli/trigger#trigger-event).
 
+### Node
+
+You can also proxy the Stripe API server-side using the `stripeProxy` function exported by the plugin. This is exactly what the `/api/stripe/rest` endpoint does behind-the-scenes. Here's an example:
+
+```js
+import { stripeProxy } from '@payloadcms/plugin-stripe';
+
+export const MyFunction = async () => {
+  try {
+    const customer = await stripeProxy({
+      stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+      stripeMethod: 'customers.create',
+      stripeArgs: {
+        email: data.email,
+      }
+    });
+
+    if (customer.status === 200) {
+      // DO SOMETHING
+    }
+
+    if (customer.status >= 400) {
+      throw new Error(customer.message);
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+```
+
 ## TypeScript
 
 All types can be directly imported:
@@ -112,7 +149,8 @@ All types can be directly imported:
 ```js
 import {
   StripeConfig,
-  WebhookHandler
+  StripeWebhookHandler.
+  StripeProxy
 } from '@payloadcms/plugin-stripe/dist/types';
 ```
 
