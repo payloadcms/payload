@@ -11,6 +11,7 @@ export const stripeREST = async (
   next: any,
   stripeConfig: StripeConfig
 ) => {
+  const { payload } = req;
   const { stripeSecretKey } = stripeConfig;
 
   const stripe = new Stripe(stripeSecretKey, { apiVersion: '2022-08-01' });
@@ -18,8 +19,8 @@ export const stripeREST = async (
   try {
     const {
       body: {
-        stripeMethod, // 'subscriptions.list',
-        stripeArgs // 'cus_MGgt3Tuj3D66f2'
+        stripeMethod, // example: 'subscriptions.list',
+        stripeArgs // example: 'cus_MGgt3Tuj3D66f2'
       },
       user
     } = req;
@@ -34,19 +35,18 @@ export const stripeREST = async (
       const foundMethod = lodashGet(stripe, stripeMethod).bind(contextToBind); // NOTE: 'lodashGet' uses dot notation and finds the property on the object
 
       if (typeof foundMethod === 'function') {
-        const stripeResponse = await foundMethod(stripeArgs);
-
-        if (!stripeResponse?.data) {
-          return res.status(404);
+        try {
+          const stripeResponse = await foundMethod(stripeArgs);
+          return res.json(stripeResponse);
+        } catch (error) {
+          return res.status(404).send(`A Stripe API error has occurred: ${error}`);
         }
-
-        return res.json(stripeResponse);
       } else {
-        console.warn(`The provide Stripe method of '${stripeMethod}' is not a part of the Stripe API.`);
+        payload.logger.error(`The provided Stripe method of '${stripeMethod}' is not a part of the Stripe API.`)
         return next();
       }
     } else {
-      console.warn('You must provide a Stripe method to call.');
+      payload.logger.error('You must provide a Stripe method to call.')
       return next();
     }
 
