@@ -79,7 +79,7 @@ export type AccessResult = boolean | Where;
  */
 export type Access = (args?: any) => AccessResult | Promise<AccessResult>;
 
-interface PayloadHandler {(
+export interface PayloadHandler {(
     req: PayloadRequest,
     res: Response,
     next: NextFunction,
