@@ -7,7 +7,7 @@ import Customers from './collections/Customers';
 import { handleUpdatedSubscription } from './webhooks/handleUpdatedSubscription';
 
 export default buildConfig({
-  serverURL: 'http://localhost:3000',
+  serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
   admin: {
     user: Users.slug,
     webpack: (config) => {
