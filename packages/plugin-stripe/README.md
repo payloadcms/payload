@@ -53,7 +53,7 @@ export default config;
 
 ### Endpoints
 
-One core functionality of this plugin is to enable a two-way communication channel between Stripe and Payload. To do this, the following custom endpoints are automatically opened for you:
+One core functionality of this plugin is to enable a two-way communication channel between Stripe and Payload. To do this, the following custom endpoints are automatically opened for you.
 
 >NOTE: the `/api` part of these routes may be different based on the settings defined in your Payload config.
 
@@ -84,7 +84,7 @@ One core functionality of this plugin is to enable a two-way communication chann
 
 ### Webhooks
 
-This plugin also allows for a two-way data sync from Stripe to Payload using [Stripe webhooks](https://stripe.com/docs/webhooks). Webhooks listen for events on your Stripe account so you can trigger reactions to them. To enable webhooks:
+[Stripe webhooks](https://stripe.com/docs/webhooks) are used to sync from Stripe to Payload. Webhooks listen for events on your Stripe account so you can trigger reactions to them. To enable webhooks:
 
 1. Login and [create a new webhook](https://dashboard.stripe.com/test/webhooks/create) from the Stripe dashboard
 1. Paste `/api/stripe/webhooks` as the "Webhook Endpoint URL"
@@ -156,7 +156,7 @@ import {
 
 ### Development
 
-This plugin can be developed locally using any Stripe account that you have access to. Then:
+For development purposes, there is a full working example of how this plugin might be used in the [demo](./demo) of this repo. This demo can be developed locally using any Stripe account, you just need a working API key. Then:
 
 ```bash
 git clone git@github.com:payloadcms/plugin-stripe.git \

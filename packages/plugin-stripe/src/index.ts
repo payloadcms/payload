@@ -3,6 +3,8 @@ import { stripeREST } from './routes/rest';
 import { stripeWebhooks } from './routes/webhooks';
 import { StripeConfig } from './types';
 
+export { stripeProxy } from './utilities/stripeProxy';
+
 const stripe = (stripeConfig: StripeConfig) => (config: Config): Config => {
   return ({
     ...config,

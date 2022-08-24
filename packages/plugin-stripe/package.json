@@ -16,7 +16,10 @@
     "cms",
     "plugin",
     "typescript",
-    "payments"
+    "payments",
+    "saas",
+    "subscriptions",
+    "licensing"
   ],
   "author": "dev@payloadcms.com",
   "license": "MIT",
