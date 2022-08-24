@@ -27,6 +27,15 @@ export const getFields = ({
     },
   }
 
+  const basePrefixField: Field = {
+    name: 'prefix',
+    type: 'text',
+    admin: {
+      readOnly: true,
+      disabled: true,
+    },
+  }
+
   const fields = [...collection.fields]
 
   // If Payload access control is disabled,
@@ -115,14 +124,24 @@ export const getFields = ({
 
   // If prefix is enabled, save it to db
   if (prefix) {
+    let existingPrefixFieldIndex = -1
+
+    const existingPrefixField = fields.find((existingField, i) => {
+      if ('name' in existingField && existingField.name === 'prefix') {
+        existingPrefixFieldIndex = i
+        return true
+      }
+      return false
+    }) as TextField
+
+    if (existingPrefixFieldIndex > -1) {
+      fields.splice(existingPrefixFieldIndex, 1)
+    }
+
     fields.push({
-      name: 'prefix',
-      type: 'text',
+      ...basePrefixField,
+      ...(existingPrefixField || {}),
       defaultValue: path.posix.join(prefix),
-      admin: {
-        readOnly: true,
-        disabled: true,
-      },
     })
   }
 
