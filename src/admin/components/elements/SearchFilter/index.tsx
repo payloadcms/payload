@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { Props } from './types';
@@ -16,6 +16,7 @@ const SearchFilter: React.FC<Props> = (props) => {
     fieldName = 'id',
     fieldLabel = 'ID',
     modifySearchQuery = true,
+    searchableTextFields,
     handleChange,
   } = props;
 
@@ -24,11 +25,36 @@ const SearchFilter: React.FC<Props> = (props) => {
 
   const [search, setSearch] = useState(() => params?.where?.[fieldName]?.like || '');
 
+  const placeholder = useRef(`Search by ${fieldLabel}`);
+
   const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
-    if (debouncedSearch !== params?.where?.[fieldName]?.like) {
-      const newWhere = {
+    if (debouncedSearch || params?.where) {
+      let newWhere = searchableTextFields?.length > 0 ? {
+        ...(typeof params?.where === 'object' ? params.where : {}),
+        or: [
+          {
+            [fieldName]: {
+              like: debouncedSearch,
+            },
+          },
+          ...searchableTextFields.reduce<Array<{
+          [key: string]: {
+            like: string,
+          }
+        }>>((prev, curr) => {
+          return [
+            ...prev,
+            {
+              [curr.name]: {
+                like: debouncedSearch,
+              },
+            },
+          ];
+        }, []),
+        ],
+      } : {
         ...(typeof params?.where === 'object' ? params.where : {}),
         [fieldName]: {
           like: debouncedSearch,
@@ -36,12 +62,12 @@ const SearchFilter: React.FC<Props> = (props) => {
       };
 
       if (!debouncedSearch) {
-        delete newWhere[fieldName];
+        newWhere = undefined;
       }
 
       if (handleChange) handleChange(newWhere as Where);
 
-      if (modifySearchQuery && params?.where?.[fieldName]?.like !== newWhere?.[fieldName]?.like) {
+      if (modifySearchQuery && queryString.stringify(params?.where) !== queryString.stringify(newWhere)) {
         history.replace({
           search: queryString.stringify({
             ...params,
@@ -51,13 +77,24 @@ const SearchFilter: React.FC<Props> = (props) => {
         });
       }
     }
-  }, [debouncedSearch, history, fieldName, params, handleChange, modifySearchQuery]);
+  }, [debouncedSearch, history, fieldName, params, handleChange, modifySearchQuery, searchableTextFields]);
+
+  useEffect(() => {
+    if (searchableTextFields?.length > 0) {
+      placeholder.current = searchableTextFields.reduce<string>((previousValue, currentValue, currentIndex) => {
+        if (currentIndex === searchableTextFields.length - 1) {
+          return `${previousValue} or ${currentValue.label || currentValue.name}`;
+        }
+        return `${previousValue}, ${currentValue.label || currentValue.name}`;
+      }, placeholder.current);
+    }
+  }, [searchableTextFields]);
 
   return (
     <div className={baseClass}>
       <input
         className={`${baseClass}__input`}
-        placeholder={`Search by ${fieldLabel}`}
+        placeholder={placeholder.current}
         type="text"
         value={search || ''}
         onChange={(e) => setSearch(e.target.value)}
