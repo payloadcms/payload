@@ -81,11 +81,11 @@ const SearchFilter: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (searchableTextFields?.length > 0) {
-      placeholder.current = searchableTextFields.reduce<string>((previousValue, currentValue, currentIndex) => {
-        if (currentIndex === searchableTextFields.length - 1) {
-          return `${previousValue} or ${currentValue.label || currentValue.name}`;
+      placeholder.current = searchableTextFields.reduce<string>((prev, curr, i) => {
+        if (i === searchableTextFields.length - 1) {
+          return `${prev} or ${curr.label || curr.name}`;
         }
-        return `${previousValue}, ${currentValue.label || currentValue.name}`;
+        return `${prev}, ${curr.label || curr.name}`;
       }, placeholder.current);
     }
   }, [searchableTextFields]);
