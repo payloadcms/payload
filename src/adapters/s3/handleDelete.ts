@@ -8,7 +8,7 @@ interface Args {
 }
 
 export const getHandleDelete = ({ s3, bucket }: Args): HandleDelete => {
-  return async ({ filename, prefix = '' }) => {
+  return async ({ filename, doc: { prefix = '' } }) => {
     await s3.deleteObject({
       Bucket: bucket,
       Key: path.posix.join(prefix, filename),

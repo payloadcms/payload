@@ -26,7 +26,6 @@ export type HandleDelete = (args: {
   req: PayloadRequest
   doc: TypeWithID & FileData & TypeWithPrefix
   filename: string
-  prefix?: string
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {

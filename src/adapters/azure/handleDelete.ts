@@ -9,7 +9,7 @@ interface Args {
 }
 
 export const getHandleDelete = ({ containerClient }: Args): HandleDelete => {
-  return async ({ filename, prefix = '' }) => {
+  return async ({ filename, doc: { prefix = '' } }) => {
     const blockBlobClient = containerClient.getBlockBlobClient(path.posix.join(prefix, filename))
     await blockBlobClient.deleteIfExists()
   }

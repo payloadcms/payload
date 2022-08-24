@@ -8,7 +8,7 @@ interface Args {
 }
 
 export const getHandleDelete = ({ gcs, bucket }: Args): HandleDelete => {
-  return async ({ filename, prefix = '' }) => {
+  return async ({ filename, doc: { prefix = '' } }) => {
     await gcs.bucket(bucket).file(path.posix.join(prefix, filename)).delete({
       ignoreNotFound: true,
     })
