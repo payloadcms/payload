@@ -1,10 +1,11 @@
 import Stripe from 'stripe';
 import { PayloadRequest } from 'payload/dist/types';
 import { StripeConfig } from '../types';
+import { Response } from 'express';
 
 export const stripeWebhooks = (
   req: PayloadRequest,
-  res: any,
+  res: Response,
   next: any,
   stripeConfig: StripeConfig
 ) => {
