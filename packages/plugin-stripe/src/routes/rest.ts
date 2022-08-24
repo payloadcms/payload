@@ -1,9 +1,8 @@
 import { PayloadRequest } from 'payload/types';
 import { Forbidden } from 'payload/errors';
-import Stripe from 'stripe';
 import { StripeConfig } from '../types';
-import lodashGet from 'lodash.get';
 import { Response } from 'express';
+import { stripeProxy } from '../utilities/stripeProxy';
 
 export const stripeREST = async (
   req: PayloadRequest,
@@ -11,46 +10,39 @@ export const stripeREST = async (
   next: any,
   stripeConfig: StripeConfig
 ) => {
-  const { payload } = req;
+  const {
+    payload,
+    user,
+    body: {
+      stripeMethod, // example: 'subscriptions.list',
+      stripeArgs // example: 'cus_MGgt3Tuj3D66f2'
+    },
+  } = req;
+
   const { stripeSecretKey } = stripeConfig;
 
-  const stripe = new Stripe(stripeSecretKey, { apiVersion: '2022-08-01' });
-
   try {
-    const {
-      body: {
-        stripeMethod, // example: 'subscriptions.list',
-        stripeArgs // example: 'cus_MGgt3Tuj3D66f2'
-      },
-      user
-    } = req;
-
     if (!user) { // TODO: make this customizable from the config
       throw new Forbidden();
     }
 
-    if (typeof stripeMethod === 'string') {
-      const topLevelMethod = stripeMethod.split('.')[0] as keyof Stripe;
-      const contextToBind = stripe[topLevelMethod];
-      const foundMethod = lodashGet(stripe, stripeMethod).bind(contextToBind); // NOTE: 'lodashGet' uses dot notation and finds the property on the object
+    const pluginRes = await stripeProxy({
+      stripeSecretKey,
+      stripeMethod, // example: 'subscriptions.list',
+      stripeArgs // example: 'cus_MGgt3Tuj3D66f2'
+    });
 
-      if (typeof foundMethod === 'function') {
-        try {
-          const stripeResponse = await foundMethod(stripeArgs);
-          return res.json(stripeResponse);
-        } catch (error) {
-          return res.status(404).send(`A Stripe API error has occurred: ${error}`);
-        }
-      } else {
-        payload.logger.error(`The provided Stripe method of '${stripeMethod}' is not a part of the Stripe API.`)
-        return next();
-      }
-    } else {
-      payload.logger.error('You must provide a Stripe method to call.')
-      return next();
-    }
+    const {
+      status,
+    } = pluginRes;
 
-  } catch (err) {
-    return next(err);
+    res.status(status).json(pluginRes);
+
+  } catch (error) {
+    const message = `An error has occurred in the Stripe plugin REST handler: '${error}'`;
+    payload.logger.error(message);
+    return res.status(500).json({
+      message
+    });
   }
 };
