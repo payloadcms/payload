@@ -30,7 +30,7 @@ export const cloudStorage =
       collections: (config.collections || []).map(existingCollection => {
         const options = allCollectionOptions[existingCollection.slug]
 
-        if (options) {
+        if (options?.adapter) {
           const adapter = options.adapter({ collection: existingCollection })
 
           const fields = getFields({

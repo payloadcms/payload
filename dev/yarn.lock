@@ -7826,7 +7826,7 @@ pause@0.0.1:
 
 payload@^1.0.27:
   version "1.0.27"
-  resolved "https://registry.yarnpkg.com/payload/-/payload-1.0.27.tgz#6ac1ecf7800ec0c55638942bbbbf5688180fd6c3"
+  resolved "https://registry.npmjs.org/payload/-/payload-1.0.27.tgz#6ac1ecf7800ec0c55638942bbbbf5688180fd6c3"
   integrity sha512-tCiVH9GuhGtgGJ4ICPOKPv7BySVOwyOx6BekClp+WBLxe6Z2Wmd33bTY4X9/ZdllsdxATwmrMItUWpv0VEMEKw==
   dependencies:
     "@babel/cli" "^7.12.8"
