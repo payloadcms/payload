@@ -1,3 +1,4 @@
+import path from 'path'
 import type { GroupField, TextField } from 'payload/dist/fields/config/types'
 import type { CollectionConfig, Field } from 'payload/types'
 import { getAfterReadHook } from '../hooks/afterRead'
@@ -6,13 +7,28 @@ import type { GeneratedAdapter } from '../types'
 interface Args {
   collection: CollectionConfig
   disablePayloadAccessControl?: true
+  prefix?: string
   adapter: GeneratedAdapter
 }
 
-export const getFields = ({ adapter, collection, disablePayloadAccessControl }: Args): Field[] => {
+export const getFields = ({
+  adapter,
+  collection,
+  disablePayloadAccessControl,
+  prefix,
+}: Args): Field[] => {
   const baseURLField: Field = {
     name: 'url',
     label: 'URL',
+    type: 'text',
+    admin: {
+      readOnly: true,
+      disabled: true,
+    },
+  }
+
+  const basePrefixField: Field = {
+    name: 'prefix',
     type: 'text',
     admin: {
       readOnly: true,
@@ -104,6 +120,29 @@ export const getFields = ({ adapter, collection, disablePayloadAccessControl }: 
 
       fields.push(sizesField)
     }
+  }
+
+  // If prefix is enabled, save it to db
+  if (prefix) {
+    let existingPrefixFieldIndex = -1
+
+    const existingPrefixField = fields.find((existingField, i) => {
+      if ('name' in existingField && existingField.name === 'prefix') {
+        existingPrefixFieldIndex = i
+        return true
+      }
+      return false
+    }) as TextField
+
+    if (existingPrefixFieldIndex > -1) {
+      fields.splice(existingPrefixFieldIndex, 1)
+    }
+
+    fields.push({
+      ...basePrefixField,
+      ...(existingPrefixField || {}),
+      defaultValue: path.posix.join(prefix),
+    })
   }
 
   return fields

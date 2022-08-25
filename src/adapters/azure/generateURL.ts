@@ -1,3 +1,4 @@
+import path from 'path'
 import type { GenerateURL } from '../../types'
 
 interface Args {
@@ -7,6 +8,6 @@ interface Args {
 
 export const getGenerateURL =
   ({ containerName, baseURL }: Args): GenerateURL =>
-  ({ filename }) => {
-    return `${baseURL}/${containerName}/${filename}`
+  ({ filename, prefix = '' }) => {
+    return `${baseURL}/${containerName}/${path.posix.join(prefix, filename)}`
   }

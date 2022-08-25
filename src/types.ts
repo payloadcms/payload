@@ -17,16 +17,21 @@ export type HandleUpload = (args: {
   file: File
 }) => Promise<void> | void
 
+export interface TypeWithPrefix {
+  prefix?: string
+}
+
 export type HandleDelete = (args: {
   collection: CollectionConfig
   req: PayloadRequest
-  doc: TypeWithID & FileData
+  doc: TypeWithID & FileData & TypeWithPrefix
   filename: string
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {
   filename: string
   collection: CollectionConfig
+  prefix?: string
 }) => string | Promise<string>
 
 export type StaticHandler = (
@@ -43,11 +48,12 @@ export interface GeneratedAdapter {
   webpack?: (config: WebpackConfig) => WebpackConfig
 }
 
-export type Adapter = (args: { collection: CollectionConfig }) => GeneratedAdapter
+export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) => GeneratedAdapter
 
 export interface CollectionOptions {
   disableLocalStorage?: boolean
   disablePayloadAccessControl?: true
+  prefix?: string
   adapter: Adapter | null
 }
 

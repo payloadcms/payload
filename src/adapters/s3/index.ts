@@ -14,7 +14,7 @@ export interface Args {
 
 export const s3Adapter =
   ({ config, bucket, acl }: Args): Adapter =>
-  ({ collection }): GeneratedAdapter => {
+  ({ collection, prefix }): GeneratedAdapter => {
     const s3 = new AWS.S3(config)
 
     return {
@@ -23,10 +23,11 @@ export const s3Adapter =
         s3,
         bucket,
         acl,
+        prefix,
       }),
       handleDelete: getHandleDelete({ s3, bucket }),
       generateURL: getGenerateURL({ bucket, config }),
-      staticHandler: getHandler({ bucket, s3 }),
+      staticHandler: getHandler({ bucket, s3, collection }),
       webpack: extendWebpackConfig,
     }
   }
