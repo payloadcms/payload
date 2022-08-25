@@ -6,8 +6,8 @@ import deepCopyObject from '../../../utilities/deepCopyObject';
 
 type Args = {
   data: Record<string, unknown>
-  doc: Record<string, unknown>,
-  previousDoc: Record<string, unknown>,
+  doc: Record<string, unknown>
+  previousDoc: Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   operation: 'create' | 'update'
   req: PayloadRequest
