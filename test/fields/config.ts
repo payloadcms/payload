@@ -19,14 +19,10 @@ import Uploads, { uploadsDoc } from './collections/Upload';
 import IndexedFields from './collections/Indexed';
 import NumberFields, { numberDoc } from './collections/Number';
 import CodeFields, { codeDoc } from './collections/Code';
-import BackpopulatedRelationshipsPlugin from './plugins/backpopulated-relationship/backpopulated-relationship-plugin';
 import GearBundle from './collections/GearBundles';
 import GearComponent from './collections/GearComponents';
 
 export default buildConfig({
-  plugins: [
-    BackpopulatedRelationshipsPlugin,
-  ],
   admin: {
     webpack: (config) => ({
       ...config,
@@ -71,26 +67,63 @@ export default buildConfig({
       },
     });
 
-    await payload.create({ collection: 'array-fields', data: arrayDoc });
-    await payload.create({ collection: 'collapsible-fields', data: collapsibleDoc });
-    await payload.create({ collection: 'conditional-logic', data: conditionalLogicDoc });
-    await payload.create({ collection: 'group-fields', data: groupDoc });
-    await payload.create({ collection: 'select-fields', data: selectsDoc });
-    await payload.create({ collection: 'tabs-fields', data: tabsDoc });
-    await payload.create({ collection: 'point-fields', data: pointDoc });
-    await payload.create({ collection: 'date-fields', data: dateDoc });
-    await payload.create({ collection: 'code-fields', data: codeDoc });
+    await payload.create({
+      collection: 'array-fields',
+      data: arrayDoc
+    });
+    await payload.create({
+      collection: 'collapsible-fields',
+      data: collapsibleDoc
+    });
+    await payload.create({
+      collection: 'conditional-logic',
+      data: conditionalLogicDoc
+    });
+    await payload.create({
+      collection: 'group-fields',
+      data: groupDoc
+    });
+    await payload.create({
+      collection: 'select-fields',
+      data: selectsDoc
+    });
+    await payload.create({
+      collection: 'tabs-fields',
+      data: tabsDoc
+    });
+    await payload.create({
+      collection: 'point-fields',
+      data: pointDoc
+    });
+    await payload.create({
+      collection: 'date-fields',
+      data: dateDoc
+    });
+    await payload.create({
+      collection: 'code-fields',
+      data: codeDoc
+    });
 
-    const createdTextDoc = await payload.create({ collection: 'text-fields', data: textDoc });
+    const createdTextDoc = await payload.create({
+      collection: 'text-fields',
+      data: textDoc
+    });
 
     const uploadsDir = path.resolve(__dirname, './collections/Upload/uploads');
 
-    if (fs.existsSync(uploadsDir)) fs.readdirSync(uploadsDir).forEach((f) => fs.rmSync(`${uploadsDir}/${f}`));
+    if (fs.existsSync(uploadsDir)) {
+      fs.readdirSync(uploadsDir)
+        .forEach((f) => fs.rmSync(`${uploadsDir}/${f}`));
+    }
 
     const filePath = path.resolve(__dirname, './collections/Upload/payload.jpg');
     const file = getFileByPath(filePath);
 
-    const createdUploadDoc = await payload.create({ collection: 'uploads', data: uploadsDoc, file });
+    const createdUploadDoc = await payload.create({
+      collection: 'uploads',
+      data: uploadsDoc,
+      file
+    });
 
     const richTextDocWithRelationship = { ...richTextDoc };
 
@@ -100,9 +133,15 @@ export default buildConfig({
     const richTextUploadIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'upload');
     richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdUploadDoc.id };
 
-    await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship });
+    await payload.create({
+      collection: 'rich-text-fields',
+      data: richTextDocWithRelationship
+    });
 
-    await payload.create({ collection: 'number-fields', data: numberDoc });
+    await payload.create({
+      collection: 'number-fields',
+      data: numberDoc
+    });
 
     const blocksDocWithRichText = { ...blocksDoc };
 
@@ -111,6 +150,9 @@ export default buildConfig({
     // @ts-ignore
     blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText;
 
-    await payload.create({ collection: 'block-fields', data: blocksDocWithRichText });
+    await payload.create({
+      collection: 'block-fields',
+      data: blocksDocWithRichText
+    });
   },
 });

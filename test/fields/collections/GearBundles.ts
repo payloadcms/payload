@@ -1,5 +1,4 @@
 import type { CollectionConfig } from '../../../src/collections/config/types';
-import backpopulate from '../plugins/backpopulated-relationship/hooks/backpopulate';
 
 
 const GearBundle: CollectionConfig = {
@@ -20,8 +19,20 @@ const GearBundle: CollectionConfig = {
       relationTo: ['gear-component'],
       hasMany: true,
       hooks: {
-        afterChange: [backpopulate],
-      },
+        afterChange: [
+          ({
+            value,
+            originalDoc,
+            previousDoc,
+          }) => {
+            console.log('ac value', value);
+            console.log('ac originalDoc', originalDoc);
+            console.log('ac previousDoc', previousDoc);
+
+            return;
+          },
+        ],
+      }
     },
   ],
 };

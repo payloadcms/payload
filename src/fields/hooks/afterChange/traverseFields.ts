@@ -5,6 +5,7 @@ import { PayloadRequest } from '../../../express/types';
 type Args = {
   data: Record<string, unknown>
   doc: Record<string, unknown>
+  previousDoc: Record<string, unknown>
   fields: Field[]
   operation: 'create' | 'update'
   req: PayloadRequest
@@ -15,6 +16,7 @@ type Args = {
 export const traverseFields = async ({
   data,
   doc,
+  previousDoc,
   fields,
   operation,
   req,
@@ -27,6 +29,7 @@ export const traverseFields = async ({
     promises.push(promise({
       data,
       doc,
+      previousDoc,
       field,
       operation,
       req,

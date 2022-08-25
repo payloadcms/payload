@@ -78,7 +78,6 @@ export const promise = async ({
       await field.hooks.beforeChange.reduce(async (priorHook, currentHook) => {
         await priorHook;
 
-        data.aaa = doc;
         const hookedValue = await currentHook({
           value: siblingData[field.name],
           originalDoc: doc,
