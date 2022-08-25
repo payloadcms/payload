@@ -18,6 +18,7 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   req: PayloadRequest
   siblingData: Partial<S>
   value?: P,
+  previousValue?: P,
 }
 
 export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;
