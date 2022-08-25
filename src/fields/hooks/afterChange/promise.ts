@@ -43,7 +43,6 @@ export const promise = async ({
           req,
         });
 
-
         if (hookedValue !== undefined) {
           siblingDoc[field.name] = hookedValue;
         }
