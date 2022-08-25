@@ -10,6 +10,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint --fix --ext .ts,.tsx src"
   },
+  "prepublishOnly": "yarn build",
   "peerDependencies": {
     "@aws-sdk/client-s3": "^3.142.0",
     "@azure/storage-blob": "^12.11.0",
