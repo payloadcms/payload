@@ -250,6 +250,7 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   global = await afterChange({
     data,
     doc: global,
+    previousDoc: originalDoc,
     entityConfig: globalConfig,
     operation: 'update',
     req,

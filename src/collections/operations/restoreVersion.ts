@@ -145,6 +145,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   result = await afterChange({
     data: result,
     doc: result,
+    previousDoc: {},
     entityConfig: collectionConfig,
     operation: 'update',
     req,
