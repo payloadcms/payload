@@ -13,7 +13,6 @@ import { Props } from './types';
 import ViewDescription from '../../../elements/ViewDescription';
 import PerPage from '../../../elements/PerPage';
 import { Gutter } from '../../../elements/Gutter';
-import { RelationshipProvider } from './RelationshipProvider';
 
 import './index.scss';
 
@@ -75,12 +74,10 @@ const DefaultList: React.FC<Props> = (props) => {
         {(data.docs && data.docs.length > 0) && (
           <React.Fragment>
             {!upload && (
-            <RelationshipProvider>
               <Table
                 data={data.docs}
                 columns={tableColumns}
               />
-            </RelationshipProvider>
             )}
             {upload && (
               <UploadGallery
