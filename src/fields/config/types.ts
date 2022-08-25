@@ -13,6 +13,7 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   data?: Partial<T>,
   findMany?: boolean
   originalDoc?: T,
+  previousDoc?: T,
   operation?: 'create' | 'read' | 'update' | 'delete',
   req: PayloadRequest
   siblingData: Partial<S>

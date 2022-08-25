@@ -19,8 +19,14 @@ import Uploads, { uploadsDoc } from './collections/Upload';
 import IndexedFields from './collections/Indexed';
 import NumberFields, { numberDoc } from './collections/Number';
 import CodeFields, { codeDoc } from './collections/Code';
+import BackpopulatedRelationshipsPlugin from './plugins/backpopulated-relationship/backpopulated-relationship-plugin';
+import GearBundle from './collections/GearBundles';
+import GearComponent from './collections/GearComponents';
 
 export default buildConfig({
+  plugins: [
+    BackpopulatedRelationshipsPlugin,
+  ],
   admin: {
     webpack: (config) => ({
       ...config,
@@ -49,6 +55,8 @@ export default buildConfig({
     Uploads,
     IndexedFields,
     DateFields,
+    GearBundle,
+    GearComponent,
   ],
   localization: {
     defaultLocale: 'en',
