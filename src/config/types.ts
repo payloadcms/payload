@@ -122,20 +122,20 @@ export type Config = {
     components?: {
       routes?: AdminRoute[]
       providers?: React.ComponentType<{ children: React.ReactNode }>[]
-      beforeDashboard?: React.ComponentType[]
-      afterDashboard?: React.ComponentType[]
-      beforeLogin?: React.ComponentType[]
-      afterLogin?: React.ComponentType[]
-      beforeNavLinks?: React.ComponentType[]
-      afterNavLinks?: React.ComponentType[]
-      Nav?: React.ComponentType
+      beforeDashboard?: React.ComponentType<any>[]
+      afterDashboard?: React.ComponentType<any>[]
+      beforeLogin?: React.ComponentType<any>[]
+      afterLogin?: React.ComponentType<any>[]
+      beforeNavLinks?: React.ComponentType<any>[]
+      afterNavLinks?: React.ComponentType<any>[]
+      Nav?: React.ComponentType<any>
       graphics?: {
-        Icon?: React.ComponentType
-        Logo?: React.ComponentType
+        Icon?: React.ComponentType<any>
+        Logo?: React.ComponentType<any>
       }
       views?: {
-        Account?: React.ComponentType
-        Dashboard?: React.ComponentType
+        Account?: React.ComponentType<any>
+        Dashboard?: React.ComponentType<any>
       }
     }
     pagination?: {
@@ -209,4 +209,4 @@ export type SanitizedConfig = Omit<DeepRequired<Config>, 'collections' | 'global
   paths: { [key: string]: string };
 }
 
-export type EntityDescription = string | (() => string) | React.ComponentType
+export type EntityDescription = string | (() => string) | React.ComponentType<any>

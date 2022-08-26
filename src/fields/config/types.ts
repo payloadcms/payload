@@ -51,9 +51,9 @@ type Admin = {
   condition?: Condition;
   description?: Description;
   components?: {
-    Filter?: React.ComponentType;
-    Cell?: React.ComponentType;
-    Field?: React.ComponentType;
+    Filter?: React.ComponentType<any>;
+    Cell?: React.ComponentType<any>;
+    Field?: React.ComponentType<any>;
   }
   hidden?: boolean
 }
@@ -264,15 +264,15 @@ type RichTextPlugin = (editor: Editor) => Editor;
 
 export type RichTextCustomElement = {
   name: string
-  Button: React.ComponentType
-  Element: React.ComponentType
+  Button: React.ComponentType<any>
+  Element: React.ComponentType<any>
   plugins?: RichTextPlugin[]
 }
 
 export type RichTextCustomLeaf = {
   name: string
-  Button: React.ComponentType
-  Leaf: React.ComponentType
+  Button: React.ComponentType<any>
+  Leaf: React.ComponentType<any>
   plugins?: RichTextPlugin[]
 }
 
