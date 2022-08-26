@@ -1,11 +1,15 @@
 /* eslint-disable no-param-reassign */
 import { CollectionConfig } from '../../../../src/collections/config/types';
-import { openAccess } from '../../../helpers/configHelpers';
 
 export const hooksSlug = 'hooks';
 const Hooks: CollectionConfig = {
   slug: hooksSlug,
-  access: openAccess,
+  access: {
+    read: () => true,
+    create: () => true,
+    delete: () => true,
+    update: () => true,
+  },
   hooks: {
     beforeValidate: [({ data }) => validateHookOrder('collectionBeforeValidate', data)],
     beforeChange: [({ data }) => validateHookOrder('collectionBeforeChange', data)],
