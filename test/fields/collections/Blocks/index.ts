@@ -67,6 +67,42 @@ export const blocksField: Field = {
         },
       ],
     },
+    {
+      slug: 'tabs',
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab with Collapsible',
+              fields: [
+                {
+                  type: 'collapsible',
+                  label: 'Collapsible within Block',
+                  fields: [
+                    {
+                      // collapsible
+                      name: 'textInCollapsible',
+                      type: 'text',
+                    },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      // collapsible
+                      name: 'textInRow',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 };
 
