@@ -2,13 +2,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
-import { fieldAffectsData } from '../../../../../fields/config/types';
 import { Collapsible } from '../../../elements/Collapsible';
 import toKebabCase from '../../../../../utilities/toKebabCase';
 import { usePreferences } from '../../../utilities/Preferences';
 import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import FieldDescription from '../../FieldDescription';
+import { getFieldPath } from '../getFieldPath';
 
 import './index.scss';
 
@@ -78,7 +78,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
           fieldTypes={fieldTypes}
           fieldSchema={fields.map((field) => ({
             ...field,
-            path: `${path ? `${path}.` : ''}${fieldAffectsData(field) ? field.name : ''}`,
+            path: getFieldPath(path, field),
           }))}
         />
       </Collapsible>

@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
-import { fieldAffectsData } from '../../../../../fields/config/types';
 import FieldDescription from '../../FieldDescription';
 import toKebabCase from '../../../../../utilities/toKebabCase';
 import { useCollapsible } from '../../../elements/Collapsible/provider';
 import { TabsProvider } from './provider';
+import { getFieldPath } from '../getFieldPath';
 
 import './index.scss';
 
@@ -75,7 +75,7 @@ const TabsField: React.FC<Props> = (props) => {
               fieldTypes={fieldTypes}
               fieldSchema={activeTab.fields.map((field) => ({
                 ...field,
-                path: `${path ? `${path}.` : ''}${fieldAffectsData(field) ? field.name : ''}`,
+                path: getFieldPath(path, field),
               }))}
             />
           </div>
