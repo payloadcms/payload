@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 import { CollectionConfig } from '../../../../src/collections/config/types';
-import { openAccess } from '../../../helpers/configHelpers';
 
 const validateFieldTransformAction = (hook: string, value) => {
   if (value !== undefined && value !== null && !Array.isArray(value)) {
@@ -12,7 +11,12 @@ const validateFieldTransformAction = (hook: string, value) => {
 export const transformSlug = 'transforms';
 const TransformHooks: CollectionConfig = {
   slug: transformSlug,
-  access: openAccess,
+  access: {
+    read: () => true,
+    create: () => true,
+    delete: () => true,
+    update: () => true,
+  },
   fields: [
     {
       name: 'transform',
