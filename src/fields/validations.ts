@@ -235,11 +235,13 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
     return defaultMessage;
   }
 
-  const idField = options.payload.collections[options.relationTo].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
-  const type = getIDType(idField);
+  if (!canUseDOM) {
+    const idField = options.payload.collections[options.relationTo].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+    const type = getIDType(idField);
 
-  if (!isValidID(value, type)) {
-    return 'This field is not a valid upload ID';
+    if (!isValidID(value, type)) {
+      return 'This field is not a valid upload ID';
+    }
   }
 
   return validateFilterOptions(value, options);
@@ -250,7 +252,7 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
     return defaultMessage;
   }
 
-  if (typeof value !== 'undefined') {
+  if (!canUseDOM && typeof value !== 'undefined') {
     const values = Array.isArray(value) ? value : [value];
 
     const invalidRelationships = values.filter((val) => {
