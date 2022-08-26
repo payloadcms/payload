@@ -30,7 +30,7 @@ const RelationshipCell = (props) => {
             if (collection) {
               const useAsTitle = collection.admin.useAsTitle ? collection.admin.useAsTitle : 'id';
               if (typeof doc === 'string') {
-                return doc;
+                return `Untitled - ID: ${doc}`;
               }
               return doc?.[useAsTitle] ? doc[useAsTitle] : doc;
             }
@@ -47,7 +47,7 @@ const RelationshipCell = (props) => {
         if (collection && doc) {
           const useAsTitle = collection.admin.useAsTitle ? collection.admin.useAsTitle : 'id';
 
-          setData(doc[useAsTitle] ? doc[useAsTitle] : doc);
+          setData(doc[useAsTitle] ? doc[useAsTitle] : `Untitled - ID: ${doc}`);
         }
       }
     }
@@ -55,7 +55,7 @@ const RelationshipCell = (props) => {
 
   return (
     <div className={baseClass}>
-      {data}
+      {cellData ? data : `No <${field.label}>` }
     </div>
   );
 };
