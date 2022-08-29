@@ -1,3 +1,21 @@
+## [1.0.28](https://github.com/payloadcms/payload/compare/v1.0.27...v1.0.28) (2022-08-29)
+
+
+### Bug Fixes
+
+* incorrect field paths when nesting unnamed fields ([#1011](https://github.com/payloadcms/payload/issues/1011)) ([50b0303](https://github.com/payloadcms/payload/commit/50b0303ab39f0d0500c5e4116df95f02d1d7fff3)), closes [#976](https://github.com/payloadcms/payload/issues/976)
+* relationship cell loading ([#1021](https://github.com/payloadcms/payload/issues/1021)) ([6a3cfce](https://github.com/payloadcms/payload/commit/6a3cfced9a6e0ef75b398ec663f908c725b10d1a))
+* remove lazy loading of array and blocks ([4900fa7](https://github.com/payloadcms/payload/commit/4900fa799ffbeb70e689622b269dc04a67978552))
+* require properties in blocks and arrays fields ([#1020](https://github.com/payloadcms/payload/issues/1020)) ([6bc6e7b](https://github.com/payloadcms/payload/commit/6bc6e7bb616bd9f28f2464d3e55e7a1d19a8e7f8))
+* unpublish item will not crash the UI anymore ([#1016](https://github.com/payloadcms/payload/issues/1016)) ([0586d7a](https://github.com/payloadcms/payload/commit/0586d7aa7d0938df25492487aa073c2aa366e1e4))
+
+
+### Features
+
+* export more fields config types and validation type ([#989](https://github.com/payloadcms/payload/issues/989)) ([25f5d68](https://github.com/payloadcms/payload/commit/25f5d68b74b081c060ddf6f0405c9211f5da6b54))
+* types custom components to allow any props ([#1013](https://github.com/payloadcms/payload/issues/1013)) ([3736755](https://github.com/payloadcms/payload/commit/3736755a12cf5bbaaa916a5c0363026318a60823))
+* validate relationship and upload ids ([#1004](https://github.com/payloadcms/payload/issues/1004)) ([d727fc8](https://github.com/payloadcms/payload/commit/d727fc8e2467e3f438ea6b1d2031e0657bffd183))
+
 ## [1.0.27](https://github.com/payloadcms/payload/compare/v1.0.26...v1.0.27) (2022-08-18)
 
 
