@@ -128,7 +128,7 @@ export default buildConfig({
     });
 
     const relationOneIDs = [];
-    await mapAsync([...Array(5)], async () => {
+    await mapAsync([...Array(11)], async () => {
       const doc = await payload.create<RelationOne>({
         collection: relationOneSlug,
         data: {
