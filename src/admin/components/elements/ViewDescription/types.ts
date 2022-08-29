@@ -2,7 +2,7 @@ import React from 'react';
 
 export type DescriptionFunction = () => string
 
-export type DescriptionComponent = React.ComponentType
+export type DescriptionComponent = React.ComponentType<any>
 
 type Description = string | DescriptionFunction | DescriptionComponent
 

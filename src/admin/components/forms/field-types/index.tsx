@@ -25,29 +25,29 @@ import upload from './Upload';
 import ui from './UI';
 
 export type FieldTypes = {
-  code: React.ComponentType
-  email: React.ComponentType
-  hidden: React.ComponentType
-  text: React.ComponentType
-  date: React.ComponentType
-  password: React.ComponentType
-  confirmPassword: React.ComponentType
-  relationship: React.ComponentType
-  textarea: React.ComponentType
-  select: React.ComponentType
-  number: React.ComponentType
-  point: React.ComponentType
-  checkbox: React.ComponentType
-  richText: React.ComponentType
-  radio: React.ComponentType
-  blocks: React.ComponentType
-  group: React.ComponentType
-  array: React.ComponentType
-  row: React.ComponentType
-  collapsible: React.ComponentType
-  tabs: React.ComponentType
-  upload: React.ComponentType
-  ui: React.ComponentType
+  code: React.ComponentType<any>
+  email: React.ComponentType<any>
+  hidden: React.ComponentType<any>
+  text: React.ComponentType<any>
+  date: React.ComponentType<any>
+  password: React.ComponentType<any>
+  confirmPassword: React.ComponentType<any>
+  relationship: React.ComponentType<any>
+  textarea: React.ComponentType<any>
+  select: React.ComponentType<any>
+  number: React.ComponentType<any>
+  point: React.ComponentType<any>
+  checkbox: React.ComponentType<any>
+  richText: React.ComponentType<any>
+  radio: React.ComponentType<any>
+  blocks: React.ComponentType<any>
+  group: React.ComponentType<any>
+  array: React.ComponentType<any>
+  row: React.ComponentType<any>
+  collapsible: React.ComponentType<any>
+  tabs: React.ComponentType<any>
+  upload: React.ComponentType<any>
+  ui: React.ComponentType<any>
 }
 
 const fieldTypes: FieldTypes = {

@@ -68,7 +68,7 @@ export type GlobalConfig = {
     hideAPIURL?: boolean;
     components?: {
       views?: {
-        Edit?: React.ComponentType
+        Edit?: React.ComponentType<any>
       }
     }
   }
