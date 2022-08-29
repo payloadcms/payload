@@ -37,8 +37,8 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
       });
     }
 
-    if (field.type === 'blocks') {
-      field.blocks = field.blocks?.map((block) => ({ ...block, fields: block.fields.concat(baseBlockFields) }));
+    if (field.type === 'blocks' && field.blocks) {
+      field.blocks = field.blocks.map((block) => ({ ...block, fields: block.fields.concat(baseBlockFields) }));
     }
 
     if (field.type === 'array' && field.fields) {
