@@ -17,7 +17,7 @@ const RelationshipCell = (props) => {
   const { getRelationships, documents } = useListRelationships();
   const [hasRequested, setHasRequested] = useState(false);
 
-  const isAboveViewport = entry?.boundingClientRect?.top > 0;
+  const isAboveViewport = entry?.boundingClientRect?.top < window.innerHeight;
 
   useEffect(() => {
     if (cellData && isAboveViewport && !hasRequested) {
