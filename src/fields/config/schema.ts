@@ -217,7 +217,7 @@ export const array = baseField.keys({
   name: joi.string().required(),
   minRows: joi.number(),
   maxRows: joi.number(),
-  fields: joi.array().items(joi.link('#field')),
+  fields: joi.array().items(joi.link('#field')).required(),
   labels: joi.object({
     singular: joi.string(),
     plural: joi.string(),

@@ -41,7 +41,7 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
       field.blocks = field.blocks?.map((block) => ({ ...block, fields: block.fields.concat(baseBlockFields) }));
     }
 
-    if (field.type === 'array') {
+    if (field.type === 'array' && field.fields) {
       field.fields.push(baseIDField);
     }
 
