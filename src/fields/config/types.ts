@@ -301,7 +301,7 @@ export type ArrayField = FieldBase & {
   minRows?: number;
   maxRows?: number;
   labels?: Labels;
-  fields?: Field[];
+  fields: Field[];
 }
 
 export type RadioField = FieldBase & {
@@ -324,7 +324,7 @@ export type BlockField = FieldBase & {
   type: 'blocks';
   minRows?: number;
   maxRows?: number;
-  blocks?: Block[];
+  blocks: Block[];
   defaultValue?: unknown
   labels?: Labels
 }
