@@ -10,6 +10,7 @@ export type BuildSchemaOptions = {
   options?: SchemaOptions
   allowIDField?: boolean
   disableUnique?: boolean
+  draftsEnabled?: boolean
   global?: boolean
 }
 
@@ -19,11 +20,13 @@ const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: Bui
   const schema: SchemaTypeOptions<unknown> = {
     unique: (!buildSchemaOptions.disableUnique && field.unique) || false,
     required: false,
-    index: field.index || field.unique || false,
+    index: field.index || (!buildSchemaOptions.disableUnique && field.unique) || false,
   };
-  if (field.unique && field.localized) {
+
+  if ((schema.unique && (field.localized || buildSchemaOptions.draftsEnabled))) {
     schema.sparse = true;
   }
+
   return schema;
 };
 
