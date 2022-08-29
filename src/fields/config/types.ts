@@ -324,7 +324,7 @@ export type BlockField = FieldBase & {
   type: 'blocks';
   minRows?: number;
   maxRows?: number;
-  blocks?: Block[];
+  blocks: Block[];
   defaultValue?: unknown
   labels?: Labels
 }

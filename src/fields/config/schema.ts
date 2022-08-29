@@ -298,7 +298,7 @@ export const blocks = baseField.keys({
       }),
       fields: joi.array().items(joi.link('#field')),
     }),
-  ),
+  ).required(),
   defaultValue: joi.alternatives().try(
     joi.array().items(joi.object()),
     joi.func(),
