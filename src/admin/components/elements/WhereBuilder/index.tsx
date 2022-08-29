@@ -71,19 +71,17 @@ const WhereBuilder: React.FC<Props> = (props) => {
 
     if (handleChange) handleChange(newWhereQuery as Where);
 
-    if (modifySearchQuery) {
-      const newParams = {
-        ...currentParams,
-        page: currentParams.page,
-        where: newWhereQuery,
-      };
-      if (newParams.page) delete newParams.page;
-      const newSearchQuery = queryString.stringify(newParams);
-      if (newSearchQuery) {
-        history.replace({
-          search: `?${newSearchQuery}&page=1`,
-        });
-      }
+    const hasExistingConditions = typeof currentParams?.where === 'object' && 'or' in currentParams.where;
+    const hasNewWhereConditions = conditions.length > 0;
+
+    if (modifySearchQuery && ((hasExistingConditions && !hasNewWhereConditions) || hasNewWhereConditions)) {
+      history.replace({
+        search: queryString.stringify({
+          ...currentParams,
+          page: 1,
+          where: newWhereQuery,
+        }, { addQueryPrefix: true }),
+      });
     }
   }, 500, [conditions, modifySearchQuery, handleChange]);
 
