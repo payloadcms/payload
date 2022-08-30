@@ -1,3 +1,16 @@
+## [1.0.31](https://github.com/payloadcms/payload/compare/v1.0.30...v1.0.31) (2022-08-30)
+
+
+### Bug Fixes
+
+* [#948](https://github.com/payloadcms/payload/issues/948) ([8df9ee7](https://github.com/payloadcms/payload/commit/8df9ee7b2dfcb2f77f049d02788a5c60c45f8c12))
+* [#981](https://github.com/payloadcms/payload/issues/981) ([d588843](https://github.com/payloadcms/payload/commit/d58884312132e109ae3f6619be2e0d7bab3f3111))
+
+
+### Features
+
+* duplicate copies all locales ([51c7770](https://github.com/payloadcms/payload/commit/51c7770b10c34a3e40520ca8d64beedc67693c5c))
+
 ## [1.0.30](https://github.com/payloadcms/payload/compare/v1.0.29...v1.0.30) (2022-08-30)
 
 
