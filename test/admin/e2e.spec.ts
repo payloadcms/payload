@@ -120,17 +120,6 @@ describe('admin', () => {
       expect(page.url()).toContain(url.list);
     });
 
-    test('should duplicate existing', async () => {
-      const { id } = await createPost();
-
-      await page.goto(url.edit(id));
-      await page.locator('#action-duplicate').click();
-
-      expect(page.url()).toContain(url.create);
-      await page.locator('#action-save').click();
-      expect(page.url()).not.toContain(id); // new id
-    });
-
     test('should save globals', async () => {
       await page.goto(url.global(globalSlug));
 
