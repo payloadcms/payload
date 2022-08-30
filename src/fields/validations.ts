@@ -285,10 +285,9 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
     });
 
     if (invalidRelationships.length > 0) {
-      return `This field has the following invalid selections: ${
-        invalidRelationships.map((err, invalid) => {
-          return `${err} ${JSON.stringify(invalid)}`;
-        }).join(', ')}` as string;
+      return `This field has the following invalid selections: ${invalidRelationships.map((err, invalid) => {
+        return `${err} ${JSON.stringify(invalid)}`;
+      }).join(', ')}` as string;
     }
   }
 
