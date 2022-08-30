@@ -85,13 +85,12 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
     toast.success(`${collection.labels.singular} successfully duplicated.`,
       { autoClose: 3000 });
 
-    const previousModifiedState = modified;
     setModified(false);
+
     setTimeout(() => {
       push({
         pathname: `${admin}/collections/${slug}/${duplicateID}`,
       });
-      setModified(previousModifiedState);
     }, 10);
   }, [modified, localization, collection.labels.singular, setModified, toggle, modalSlug, serverURL, api, slug, id, push, admin]);
 
@@ -110,7 +109,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
       >
         Duplicate
       </Button>
-      { modified && hasClicked && (
+      {modified && hasClicked && (
         <Modal
           slug={modalSlug}
           className={`${baseClass}__modal`}
@@ -136,7 +135,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
             </Button>
           </MinimalTemplate>
         </Modal>
-      ) }
+      )}
     </React.Fragment>
   );
 };
