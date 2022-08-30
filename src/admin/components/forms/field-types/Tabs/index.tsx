@@ -58,27 +58,27 @@ const TabsField: React.FC<Props> = (props) => {
         </div>
         <div className={`${baseClass}__content-wrap`}>
           {activeTab && (
-          <div className={[
-            `${baseClass}__tab`,
-            `${baseClass}__tab-${toKebabCase(activeTab.label)}`,
-          ].join(' ')}
-          >
-            <FieldDescription
-              className={`${baseClass}__description`}
-              description={activeTab.description}
-            />
-            <RenderFields
-              key={activeTab.label}
-              forceRender
-              readOnly={readOnly}
-              permissions={permissions?.fields}
-              fieldTypes={fieldTypes}
-              fieldSchema={activeTab.fields.map((field) => ({
-                ...field,
-                path: getFieldPath(path, field),
-              }))}
-            />
-          </div>
+            <div className={[
+              `${baseClass}__tab`,
+              `${baseClass}__tab-${toKebabCase(activeTab.label)}`,
+            ].join(' ')}
+            >
+              <FieldDescription
+                className={`${baseClass}__description`}
+                description={activeTab.description}
+              />
+              <RenderFields
+                key={activeTab.label}
+                forceRender
+                readOnly={readOnly}
+                permissions={permissions?.fields}
+                fieldTypes={fieldTypes}
+                fieldSchema={activeTab.fields.map((field) => ({
+                  ...field,
+                  path: getFieldPath(path, field),
+                }))}
+              />
+            </div>
           )}
         </div>
       </TabsProvider>
