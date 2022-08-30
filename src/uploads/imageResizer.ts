@@ -57,7 +57,7 @@ export default async function resizeAndSave({
         });
 
       if (formatOption) {
-        resized = await resized.toFormat(...formatOption);
+        resized = resized.toFormat(...formatOption);
       }
 
       const bufferObject = await resized.toBuffer({

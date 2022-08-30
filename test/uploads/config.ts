@@ -75,6 +75,15 @@ export default buildConfig({
       },
       fields: [],
     },
+    {
+      slug: 'resizeOptions',
+      upload: {
+        staticURL: '/media',
+        disableLocalStorage: true,
+        formatOption: ['webp'],
+      },
+      fields: [],
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(__dirname, './media');
