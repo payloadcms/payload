@@ -1,3 +1,10 @@
+## [1.0.30](https://github.com/payloadcms/payload/compare/v1.0.29...v1.0.30) (2022-08-30)
+
+
+### Bug Fixes
+
+* upload field validation not required ([#1025](https://github.com/payloadcms/payload/issues/1025)) ([689fa00](https://github.com/payloadcms/payload/commit/689fa008fb0b28fb92be4ca785a77f4c35ae16b2))
+
 ## [1.0.29](https://github.com/payloadcms/payload/compare/v1.0.28...v1.0.29) (2022-08-29)
 
 
