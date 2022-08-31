@@ -18,16 +18,10 @@ const baseClass = 'auth-fields';
 const Auth: React.FC<Props> = (props) => {
   const { useAPIKey, requirePassword, verify, collection: { slug }, collection, email, operation } = props;
   const [changingPassword, setChangingPassword] = useState(requirePassword);
-  const { getField } = useWatchForm();
+  const { getField, dispatchFields } = useWatchForm();
   const modified = useFormModified();
 
   const enableAPIKey = getField('enableAPIKey');
-
-  useEffect(() => {
-    if (!modified) {
-      setChangingPassword(false);
-    }
-  }, [modified]);
 
   const {
     serverURL,
@@ -35,6 +29,15 @@ const Auth: React.FC<Props> = (props) => {
       api,
     },
   } = useConfig();
+
+  const handleChangePassword = useCallback(async (state: boolean) => {
+    if (!state) {
+      dispatchFields({ type: 'REMOVE', path: 'password' });
+      dispatchFields({ type: 'REMOVE', path: 'confirm-password' });
+    }
+
+    setChangingPassword(state);
+  }, [dispatchFields]);
 
   const unlock = useCallback(async () => {
     const url = `${serverURL}${api}/${slug}/unlock`;
@@ -54,6 +57,12 @@ const Auth: React.FC<Props> = (props) => {
       toast.error('Successfully unlocked');
     }
   }, [serverURL, api, slug, email]);
+
+  useEffect(() => {
+    if (!modified) {
+      setChangingPassword(false);
+    }
+  }, [modified]);
 
   if (collection.auth.disableLocalStrategy) {
     return null;
@@ -80,7 +89,7 @@ const Auth: React.FC<Props> = (props) => {
             <Button
               size="small"
               buttonStyle="secondary"
-              onClick={() => setChangingPassword(false)}
+              onClick={() => handleChangePassword(false)}
             >
               Cancel
             </Button>
@@ -91,7 +100,7 @@ const Auth: React.FC<Props> = (props) => {
         <Button
           size="small"
           buttonStyle="secondary"
-          onClick={() => setChangingPassword(true)}
+          onClick={() => handleChangePassword(true)}
         >
           Change Password
         </Button>
