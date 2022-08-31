@@ -392,6 +392,14 @@ const Relationship: React.FC<Props> = (props) => {
           options={options}
           isMulti={hasMany}
           isSortable={isSortable}
+          filterOption={(item, search) => {
+            const words = search.split(' ');
+            const regex = words.reduce((pattern, word, i) => {
+              return `${pattern}(?=.*\\b${word}.*\\b)${i + 1 === words.length ? '.+' : ''}`;
+            }, '');
+            const r = new RegExp(regex, 'i')
+            return r.test(item.label)
+          }}
         />
       )}
       {errorLoading && (
