@@ -177,6 +177,9 @@ export type CollapsibleField = Omit<FieldBase, 'name'> & {
   type: 'collapsible';
   label: string
   fields: Field[];
+  admin?: Admin & {
+    initCollapsed?: boolean | false;
+  }
 }
 
 export type TabsAdmin = Omit<Admin, 'description'>;
@@ -302,6 +305,9 @@ export type ArrayField = FieldBase & {
   maxRows?: number;
   labels?: Labels;
   fields: Field[];
+  admin?: Admin & {
+    initCollapsed?: boolean | false;
+  }
 }
 
 export type RadioField = FieldBase & {
@@ -327,6 +333,10 @@ export type BlockField = FieldBase & {
   blocks: Block[];
   defaultValue?: unknown
   labels?: Labels
+  admin?: Admin & {
+    initCollapsed?: boolean | false;
+  }
+
 }
 
 export type PointField = FieldBase & {

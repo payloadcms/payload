@@ -11,6 +11,7 @@ export const baseAdminFields = joi.object().keys({
   style: joi.object().unknown(),
   className: joi.string(),
   readOnly: joi.boolean().default(false),
+  initCollapsed: joi.boolean().default(false),
   hidden: joi.boolean().default(false),
   disabled: joi.boolean().default(false),
   condition: joi.func(),

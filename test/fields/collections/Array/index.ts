@@ -24,6 +24,26 @@ const ArrayFields: CollectionConfig = {
       ],
     },
     {
+      name: 'items-collapsed-by-default',
+      labels: {
+        singular: 'Item',
+        plural: 'Items',
+      },
+      type: 'array',
+      required: true,
+      defaultValue: arrayDefaultValue,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          required: true,
+        },
+      ],
+      admin: {
+        initCollapsed: true,
+      },
+    },
+    {
       name: 'localized',
       type: 'array',
       required: true,

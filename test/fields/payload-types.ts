@@ -72,6 +72,13 @@ export interface BlockField {
         blockName?: string;
         blockType: 'subBlocks';
       }
+    | {
+        textInCollapsible?: string;
+        textInRow?: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'tabs';
+      }
   )[];
   localizedBlocks: (
     | {
@@ -107,6 +114,13 @@ export interface BlockField {
         id?: string;
         blockName?: string;
         blockType: 'subBlocks';
+      }
+    | {
+        textInCollapsible?: string;
+        textInRow?: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'tabs';
       }
   )[];
   createdAt: string;
@@ -272,6 +286,13 @@ export interface TabsField {
         id?: string;
         blockName?: string;
         blockType: 'subBlocks';
+      }
+    | {
+        textInCollapsible?: string;
+        textInRow?: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'tabs';
       }
   )[];
   group: {
