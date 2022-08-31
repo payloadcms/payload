@@ -42,6 +42,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       readOnly,
       description,
       condition,
+      initCollapsed,
       className,
     },
   } = props;
@@ -178,12 +179,23 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   useEffect(() => {
     const initializeRowState = async () => {
       const data = formContext.getDataByPath<Row[]>(path);
-      const preferences = await getPreference(preferencesKey) || { fields: {} };
+      const collapseDefaultState = initCollapsed
+        ? {
+          fields: {
+            [path]: {
+              collapsed: data.map((item) => item.id),
+            },
+          },
+        }
+        : {
+          fields: {},
+        };
+      const preferences = await getPreference(preferencesKey) || collapseDefaultState;
       dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
     };
 
     initializeRowState();
-  }, [formContext, path, getPreference, preferencesKey]);
+  }, [formContext, path, getPreference, preferencesKey, initCollapsed]);
 
   useEffect(() => {
     setValue(rows?.length || 0, true);
