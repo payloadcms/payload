@@ -22,6 +22,7 @@ import { createRelationMap } from './createRelationMap';
 import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { getFilterOptionsQuery } from '../getFilterOptionsQuery';
+import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
 
 import './index.scss';
 
@@ -393,11 +394,7 @@ const Relationship: React.FC<Props> = (props) => {
           isMulti={hasMany}
           isSortable={isSortable}
           filterOption={(item, search) => {
-            const words = search.split(' ');
-            const regex = words.reduce((pattern, word, i) => {
-              return `${pattern}(?=.*\\b${word}.*\\b)${i + 1 === words.length ? '.+' : ''}`;
-            }, '');
-            const r = new RegExp(regex, 'i')
+            const r = wordBoundariesRegex(search)
             return r.test(item.label)
           }}
         />
