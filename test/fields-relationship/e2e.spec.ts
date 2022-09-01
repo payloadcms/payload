@@ -199,22 +199,22 @@ describe('fields - relationship', () => {
 
     // test.todo('should paginate within the dropdown');
 
-    test("should search within the relationship field", async () => {
+    test('should search within the relationship field', async () => {
       await page.goto(url.edit(docWithExistingRelations.id));
-      const input = page.locator("#field-relationshipWithTitle input");
-      input.fill("title");
-      const options = page.locator("#field-relationshipWithTitle .rs__menu .rs__option");
+      const input = page.locator('#field-relationshipWithTitle input');
+      await input.fill('title');
+      const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option');
       await expect(options).toHaveCount(1);
 
-      input.fill("non-occuring-string");
+      await input.fill('non-occuring-string');
       await expect(options).toHaveCount(0);
     });
 
     test('should search using word boundaries within the relationship field', async () => {
       await page.goto(url.edit(docWithExistingRelations.id));
-      const input = page.locator("#field-relationshipWithTitle input");
-      input.fill("word search");
-      const options = page.locator("#field-relationshipWithTitle .rs__menu .rs__option");
+      const input = page.locator('#field-relationshipWithTitle input');
+      await input.fill('word search');
+      const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option');
       await expect(options).toHaveCount(1);
     });
 

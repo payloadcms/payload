@@ -331,8 +331,8 @@ const Relationship: React.FC<Props> = (props) => {
       const collection = collections.find((coll) => coll.slug === relation);
       const fieldToSearch = collection?.admin?.useAsTitle || 'id';
       return fieldToSearch === 'id' && idOnly;
-    }, true)
-    setEnableWordBoundarySearch(!isIdOnly)
+    }, true);
+    setEnableWordBoundarySearch(!isIdOnly);
   }, [relationTo, collections]);
 
   const classes = [
@@ -405,9 +405,9 @@ const Relationship: React.FC<Props> = (props) => {
           options={options}
           isMulti={hasMany}
           isSortable={isSortable}
-          filterOption={enableWordBoundarySearch ? (item, search) => {
-            const r = wordBoundariesRegex(search || '')
-            return r.test(item.label)
+          filterOption={enableWordBoundarySearch ? (item, searchFilter) => {
+            const r = wordBoundariesRegex(searchFilter || '');
+            return r.test(item.label);
           } : undefined}
         />
       )}
