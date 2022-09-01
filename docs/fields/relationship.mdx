@@ -78,7 +78,7 @@ const relationshipField = {
     // returns a Where query dynamically by the type of relationship
     if (relationTo === 'products') {
       return {
-        'stock': { is_greater_than: siblingData.quantity }
+        'stock': { greater_than: siblingData.quantity }
       }
     }
 
