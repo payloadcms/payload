@@ -61,7 +61,7 @@ const ReactSelect: React.FC<Props> = (props) => {
     isClearable,
     isMulti,
     isSortable,
-    filterOption = null,
+    filterOption = undefined,
   } = props;
 
   const classes = [
@@ -109,6 +109,7 @@ const ReactSelect: React.FC<Props> = (props) => {
           MultiValueLabel: SortableMultiValueLabel,
           DropdownIndicator: Chevron,
         }}
+        filterOption={filterOption}
       />
     );
   }

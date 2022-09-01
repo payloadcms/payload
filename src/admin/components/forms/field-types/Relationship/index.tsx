@@ -71,6 +71,7 @@ const Relationship: React.FC<Props> = (props) => {
   const [optionFilters, setOptionFilters] = useState<{[relation: string]: Where}>();
   const [hasLoadedValueOptions, setHasLoadedValueOptions] = useState(false);
   const [search, setSearch] = useState('');
+  const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false);
 
   const memoizedValidate = useCallback((value, validationOptions) => {
     return validate(value, { ...validationOptions, required });
@@ -323,6 +324,17 @@ const Relationship: React.FC<Props> = (props) => {
     }
   }, [initialValue, getResults, optionFilters, filterOptions]);
 
+  // Determine if we should switch to word boundary search
+  useEffect(() => {
+    const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
+    const isIdOnly = relations.reduce((idOnly, relation) => {
+      const collection = collections.find((coll) => coll.slug === relation);
+      const fieldToSearch = collection?.admin?.useAsTitle || 'id';
+      return fieldToSearch === 'id' && idOnly;
+    }, true)
+    setEnableWordBoundarySearch(!isIdOnly)
+  }, [relationTo, collections]);
+
   const classes = [
     'field-type',
     baseClass,
@@ -393,10 +405,10 @@ const Relationship: React.FC<Props> = (props) => {
           options={options}
           isMulti={hasMany}
           isSortable={isSortable}
-          filterOption={(item, search) => {
-            const r = wordBoundariesRegex(search)
+          filterOption={enableWordBoundarySearch ? (item, search) => {
+            const r = wordBoundariesRegex(search || '')
             return r.test(item.label)
-          }}
+          } : undefined}
         />
       )}
       {errorLoading && (

@@ -30,5 +30,5 @@ export type Props = {
   isClearable?: boolean
   filterOption?:
   | (({ label, value, data }: { label: string, value: string, data: OptionType }, search: string) => boolean)
-  | null,
+  | undefined,
 }
