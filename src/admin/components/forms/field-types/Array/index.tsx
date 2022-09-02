@@ -183,7 +183,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         ? {
           fields: {
             [path]: {
-              collapsed: data.map((item) => item.id),
+              collapsed: data ? data.map((item) => item.id) : false,
             },
           },
         }

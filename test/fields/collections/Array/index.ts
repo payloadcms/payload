@@ -24,14 +24,8 @@ const ArrayFields: CollectionConfig = {
       ],
     },
     {
-      name: 'items-collapsed-by-default',
-      labels: {
-        singular: 'Item',
-        plural: 'Items',
-      },
+      name: 'collapsedArray',
       type: 'array',
-      required: true,
-      defaultValue: arrayDefaultValue,
       fields: [
         {
           name: 'text',
