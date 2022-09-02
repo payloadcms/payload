@@ -153,7 +153,10 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
               collection,
               slug: addModalSlug,
               fieldTypes,
-              setValue: onChange,
+              setValue: (e) => {
+                setMissingFile(false);
+                onChange(e);
+              },
             }}
           />
           <SelectExistingModal
