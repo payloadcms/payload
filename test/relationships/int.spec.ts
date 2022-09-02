@@ -184,6 +184,18 @@ describe('Relationships', () => {
             customIdNumberRelation: 'bad-input',
           })).rejects.toThrow('The following field is invalid: customIdNumberRelation');
         });
+
+        it('should allow update removing a relationship', async () => {
+          const result = await client.update<Post>({
+            slug,
+            id: post.id,
+            data: {
+              relationField: null,
+            },
+          });
+
+          expect(result.status).toEqual(200);
+        });
       });
 
       describe('depth', () => {

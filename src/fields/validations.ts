@@ -252,7 +252,7 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
     return defaultMessage;
   }
 
-  if (!canUseDOM && typeof value !== 'undefined') {
+  if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
     const values = Array.isArray(value) ? value : [value];
 
     const invalidRelationships = values.filter((val) => {
