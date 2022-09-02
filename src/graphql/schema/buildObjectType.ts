@@ -16,7 +16,28 @@ import {
   GraphQLUnionType,
 } from 'graphql';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { Field, RadioField, RelationshipField, SelectField, UploadField, ArrayField, GroupField, RichTextField, NumberField, TextField, EmailField, TextareaField, CodeField, DateField, PointField, CheckboxField, BlockField, RowField, CollapsibleField, TabsField } from '../../fields/config/types';
+import {
+  Field,
+  RadioField,
+  RelationshipField,
+  SelectField,
+  UploadField,
+  ArrayField,
+  GroupField,
+  RichTextField,
+  NumberField,
+  TextField,
+  EmailField,
+  TextareaField,
+  CodeField,
+  DateField,
+  PointField,
+  CheckboxField,
+  BlockField,
+  RowField,
+  CollapsibleField,
+  TabsField,
+} from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
@@ -26,6 +47,7 @@ import formatOptions from '../utilities/formatOptions';
 import { Payload } from '../..';
 import buildWhereInputType from './buildWhereInputType';
 import buildBlockType from './buildBlockType';
+import isFieldNullable from './isFieldNullable';
 
 type LocaleInputType = {
   locale: {
@@ -397,7 +419,7 @@ function buildObjectType({
         name: fullName,
         fields: field.fields,
         parentName: fullName,
-        forceNullable,
+        forceNullable: isFieldNullable(field, forceNullable),
       });
 
       const arrayType = new GraphQLList(new GraphQLNonNull(type));
@@ -414,7 +436,7 @@ function buildObjectType({
         name: fullName,
         parentName: fullName,
         fields: field.fields,
-        forceNullable,
+        forceNullable: isFieldNullable(field, forceNullable),
       });
 
       return {
@@ -427,7 +449,7 @@ function buildObjectType({
         buildBlockType({
           payload,
           block,
-          forceNullable,
+          forceNullable: isFieldNullable(field, forceNullable),
         });
         return payload.types.blockTypes[block.slug];
       });
