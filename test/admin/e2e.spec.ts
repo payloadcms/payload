@@ -225,6 +225,14 @@ describe('admin', () => {
       });
     });
 
+    describe('custom css', () => {
+      test('should see custom css in admin UI', async () => {
+        await page.goto(url.admin);
+        const navControls = await page.locator('.nav__controls');
+        await expect(navControls).toHaveCSS('font-family', 'monospace');
+      });
+    });
+
     // TODO: Troubleshoot flaky suite
     describe.skip('sorting', () => {
       beforeAll(async () => {
