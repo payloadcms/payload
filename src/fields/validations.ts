@@ -1,3 +1,5 @@
+import Graphemer from 'graphemer';
+
 import defaultRichTextValue from './richText/defaultValue';
 import {
   ArrayField,
@@ -26,9 +28,10 @@ import { getIDType } from '../utilities/getIDType';
 
 const defaultMessage = 'This field is required.';
 
-const length: number = (str: string) => {
+const length = (str: string) => {
   if(!str) return 0;
-  return Array.from(new Intl.Segmenter().segment(str)).length;
+  const splitter = new Graphemer();
+  return splitter.countGraphemes(str);
 }
 
 export const number: Validate<unknown, unknown, NumberField> = (value: string, { required, min, max }) => {
