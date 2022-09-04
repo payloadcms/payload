@@ -14,6 +14,16 @@ const TextFields: CollectionConfig = {
       required: true,
     },
     {
+      name: 'maxLengthOne',
+      type: 'text',
+      maxLength: 1,
+    },
+    {
+      name: 'minLengthFive',
+      type: 'text',
+      minLength: 5,
+    },
+    {
       name: 'localizedText',
       type: 'text',
       localized: true,

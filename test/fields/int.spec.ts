@@ -22,13 +22,15 @@ describe('Fields', () => {
     done();
   });
 
-  describe('text', () => {
+  describe('text - field', () => {
     let doc;
     const text = 'text field';
+    const maxLengthOne = 'A';
+    const minLengthFive = 'Hello world';
     beforeAll(async () => {
       doc = await payload.create({
         collection: 'text-fields',
-        data: { text },
+        data: { text, maxLengthOne, minLengthFive },
       });
     });
 
@@ -36,7 +38,43 @@ describe('Fields', () => {
       expect(doc.text).toEqual(text);
       expect(doc.defaultFunction).toEqual(defaultText);
       expect(doc.defaultAsync).toEqual(defaultText);
+      expect(doc.maxLengthOne).toEqual(maxLengthOne);
+      expect(doc.minLengthFive).toEqual(minLengthFive);
     });
+
+    it('should not create text above maximum length', async () => {
+      await expect(async () => payload.create({
+        collection: 'text-fields',
+        data: {
+          text,
+          maxLengthOne: 'Long string',
+          minLengthFive,
+        },
+      })).rejects.toThrow('The following field is invalid: maxLengthOne');
+    });
+
+    it('should not create text below minimum length', async () => {
+      await expect(async () => payload.create({
+        collection: 'text-fields',
+        data: {
+          text,
+          maxLengthOne,
+          minLengthFive: '🇳🇱🎉😊🇳🇱'
+        },
+      })).rejects.toThrow('The following field is invalid: minLengthFive');
+    });
+
+    it('should measure length of emoji correctly', async () => {
+      const emojiDoc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text,
+          maxLengthOne: '🇳🇱',
+        },
+      });
+      expect(emojiDoc.maxLengthOne).toEqual('🇳🇱');
+    });
+
   });
 
   describe('number', () => {

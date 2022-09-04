@@ -26,6 +26,11 @@ import { getIDType } from '../utilities/getIDType';
 
 const defaultMessage = 'This field is required.';
 
+const length: number = (str: string) => {
+  if(!str) return 0;
+  return Array.from(new Intl.Segmenter().segment(str)).length;
+}
+
 export const number: Validate<unknown, unknown, NumberField> = (value: string, { required, min, max }) => {
   const parsedValue = parseFloat(value);
 
@@ -48,17 +53,17 @@ export const number: Validate<unknown, unknown, NumberField> = (value: string, {
   return true;
 };
 
-export const text: Validate<unknown, unknown, TextField> = (value: string, { minLength, maxLength, required }) => {
-  if (value && maxLength && value.length > maxLength) {
+export const text: Validate<unknown, unknown, TextField> = (value: string, { minLength, maxLength, required }) => {  
+  if (value && maxLength && length(value) > maxLength) {
     return `This value must be shorter than the max length of ${maxLength} characters.`;
   }
 
-  if (value && minLength && value?.length < minLength) {
+  if (value && minLength && length(value) < minLength) {
     return `This value must be longer than the minimum length of ${minLength} characters.`;
   }
 
   if (required) {
-    if (typeof value !== 'string' || value?.length === 0) {
+    if (typeof value !== 'string' || length(value) === 0) {
       return defaultMessage;
     }
   }
@@ -67,11 +72,11 @@ export const text: Validate<unknown, unknown, TextField> = (value: string, { min
 };
 
 export const password: Validate<unknown, unknown, TextField> = (value: string, { required, maxLength, minLength }) => {
-  if (value && maxLength && value.length > maxLength) {
+  if (value && maxLength && length(value) > maxLength) {
     return `This value must be shorter than the max length of ${maxLength} characters.`;
   }
 
-  if (value && minLength && value.length < minLength) {
+  if (value && minLength && length(value) < minLength) {
     return `This value must be longer than the minimum length of ${minLength} characters.`;
   }
 
@@ -96,11 +101,11 @@ export const textarea: Validate<unknown, unknown, TextareaField> = (value: strin
   maxLength,
   minLength,
 }) => {
-  if (value && maxLength && value.length > maxLength) {
+  if (value && maxLength && length(value) > maxLength) {
     return `This value must be shorter than the max length of ${maxLength} characters.`;
   }
 
-  if (value && minLength && value.length < minLength) {
+  if (value && minLength && length(value) < minLength) {
     return `This value must be longer than the minimum length of ${minLength} characters.`;
   }
 
