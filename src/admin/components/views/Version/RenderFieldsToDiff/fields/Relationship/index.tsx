@@ -50,9 +50,9 @@ const generateLabelFromValue = (
       valueToReturn = relatedDoc.id;
     }
 
-    if (valueToReturn && typeof valueToReturn === 'object' && titleFieldIsLocalized) {
-      valueToReturn = valueToReturn ? valueToReturn[locale] : '';
-    } 
+    if (typeof valueToReturn === 'object' && titleFieldIsLocalized) {
+      valueToReturn = valueToReturn[locale];
+    }
   }
 
   return valueToReturn;
