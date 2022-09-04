@@ -26,7 +26,7 @@ import { getIDType } from '../utilities/getIDType';
 
 const defaultMessage = 'This field is required.';
 
-const length: number = (str: string) => {
+const length = (str: string) => {
   if(!str) return 0;
   return Array.from(new Intl.Segmenter().segment(str)).length;
 }
