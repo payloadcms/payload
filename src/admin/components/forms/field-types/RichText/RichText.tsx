@@ -152,10 +152,10 @@ const RichText: React.FC<Props> = (props) => {
       ),
     );
 
+    CreatedEditor = withHTML(CreatedEditor);
+
     CreatedEditor = enablePlugins(CreatedEditor, elements);
     CreatedEditor = enablePlugins(CreatedEditor, leaves);
-
-    CreatedEditor = withHTML(CreatedEditor);
 
     return CreatedEditor;
   }, [elements, leaves]);
