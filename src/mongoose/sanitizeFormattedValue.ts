@@ -97,7 +97,7 @@ export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operato
     }
 
     if (operator === 'like' && typeof formattedValue === 'string') {
-      const $regex = wordBoundariesRegex(formattedValue)
+      const $regex = wordBoundariesRegex(formattedValue);
       formattedValue = { $regex };
     }
   }
