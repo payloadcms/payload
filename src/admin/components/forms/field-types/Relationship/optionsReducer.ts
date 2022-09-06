@@ -25,7 +25,7 @@ const sortOptions = (options: Option[]): Option[] => options.sort((a: Option, b:
 const optionsReducer = (state: Option[], action: Action): Option[] => {
   switch (action.type) {
     case 'CLEAR': {
-      return action.required ? [] : [{ value: 'null', label: 'None' }];
+      return [];
     }
 
     case 'ADD': {
@@ -51,7 +51,7 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
             }
             return docs;
           },
-          []),
+            []),
         ];
 
         ids.forEach((id) => {
