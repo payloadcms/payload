@@ -1,5 +1,5 @@
 import React, {
-  useCallback, useEffect, useState, useReducer,
+  useCallback, useEffect, useState, useReducer, useRef,
 } from 'react';
 import equal from 'deep-equal';
 import qs from 'qs';
@@ -68,10 +68,11 @@ const Relationship: React.FC<Props> = (props) => {
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [errorLoading, setErrorLoading] = useState('');
-  const [optionFilters, setOptionFilters] = useState<{[relation: string]: Where}>();
+  const [optionFilters, setOptionFilters] = useState<{ [relation: string]: Where }>();
   const [hasLoadedValueOptions, setHasLoadedValueOptions] = useState(false);
   const [search, setSearch] = useState('');
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false);
+  const firstRun = useRef(true);
 
   const memoizedValidate = useCallback((value, validationOptions) => {
     return validate(value, { ...validationOptions, required });
@@ -334,6 +335,19 @@ const Relationship: React.FC<Props> = (props) => {
     }, true);
     setEnableWordBoundarySearch(!isIdOnly);
   }, [relationTo, collections]);
+
+
+  // When relationTo changes, reset relationship options
+  // Note - effect should not run on first run
+  useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false;
+      return;
+    }
+
+    dispatchOptions({ type: 'CLEAR' });
+    setHasLoadedValueOptions(false);
+  }, [relationTo]);
 
   const classes = [
     'field-type',
