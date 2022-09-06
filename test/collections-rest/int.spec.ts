@@ -373,6 +373,22 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1);
       });
 
+      it('like - cyrillic characters', async () => {
+        const post1 = await createPost({ title: 'Тест' });
+
+        const { status, result } = await client.find<Post>({
+          query: {
+            title: {
+              like: 'Тест',
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.docs).toEqual([post1]);
+        expect(result.totalDocs).toEqual(1);
+      });
+
       it('like - partial word match', async () => {
         const post = await createPost({ title: 'separate words should partially match' });
 
