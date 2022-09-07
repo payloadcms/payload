@@ -11,13 +11,28 @@
     bottom: 0;
     left: 0;
   }
-}
 
-.rich-text-link__popup-wrap {
-  cursor: pointer;
+  &__popup {
+    @extend %body;
+    font-family: var(--font-body);
 
-  .tooltip {
-    bottom: 80%;
+    button {
+      @extend %btn-reset;
+      margin-left: base(.5);
+      font-weight: 600;
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &__goto-link {
+    max-width: base(6);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: base(.5);
   }
 }
 
@@ -35,62 +50,5 @@
 
   &--open {
     z-index: var(--z-popup);
-  }
-}
-
-.rich-text-link__url-wrap {
-  position: relative;
-  width: 100%;
-  margin-bottom: base(.5);
-}
-
-.rich-text-link__confirm {
-  position: absolute;
-  right: base(.5);
-  top: 50%;
-  transform: translateY(-50%);
-
-  svg {
-    @include color-svg(var(--theme-elevation-0));
-    transform: rotate(-90deg);
-  }
-}
-
-.rich-text-link__url {
-  @include formInput;
-  padding-right: base(1.75);
-  min-width: base(12);
-  width: 100%;
-  background: var(--theme-input-bg);
-  color: var(--theme-elevation-1000);
-}
-
-.rich-text-link__new-tab {
-  svg {
-    @include color-svg(var(--theme-elevation-900));
-    background: var(--theme-elevation-100);
-    margin-right: base(.5);
-  }
-
-  path {
-    opacity: 0;
-  }
-
-  &:hover {
-    path {
-      opacity: .2;
-    }
-  }
-
-  &--checked {
-    path {
-      opacity: 1;
-    }
-
-    &:hover {
-      path {
-        opacity: .8;
-      }
-    }
   }
 }

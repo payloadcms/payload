@@ -36,22 +36,18 @@ const insertUpload = (editor, { value, relationTo }) => {
     ],
   };
 
-  if (editor.blurSelection) {
-    Transforms.select(editor, editor.blurSelection);
-  }
-
   injectVoidElement(editor, upload);
 
   ReactEditor.focus(editor);
 };
 
-const UploadButton: React.FC<{path: string}> = ({ path }) => {
+const UploadButton: React.FC<{ path: string }> = ({ path }) => {
   const { open, closeAll, currentModal } = useModal();
   const editor = useSlate();
   const { serverURL, routes: { api }, collections } = useConfig();
   const [availableCollections] = useState(() => collections.filter(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
   const [renderModal, setRenderModal] = useState(false);
-  const [modalCollectionOption, setModalCollectionOption] = useState<{ label: string, value: string}>(() => {
+  const [modalCollectionOption, setModalCollectionOption] = useState<{ label: string, value: string }>(() => {
     const firstAvailableCollection = collections.find(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship));
     if (firstAvailableCollection) {
       return { label: firstAvailableCollection.labels.singular, value: firstAvailableCollection.slug };

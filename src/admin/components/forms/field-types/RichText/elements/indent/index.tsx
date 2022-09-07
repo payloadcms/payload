@@ -24,10 +24,6 @@ const indent = {
     const handleIndent = useCallback((e, dir) => {
       e.preventDefault();
 
-      if (editor.blurSelection) {
-        Transforms.select(editor, editor.blurSelection);
-      }
-
       if (dir === 'left') {
         Transforms.unwrapNodes(editor, {
           match: (n) => Element.isElement(n) && [indentType, ...listTypes].includes(n.type),

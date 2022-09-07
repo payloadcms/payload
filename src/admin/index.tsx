@@ -35,6 +35,7 @@ const Index = () => (
             <ModalProvider
               classPrefix="payload"
               zIndex={50}
+              transTime={0}
             >
               <AuthProvider>
                 <PreferencesProvider>

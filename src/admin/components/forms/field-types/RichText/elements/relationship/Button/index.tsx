@@ -1,6 +1,5 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { Transforms } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
 import { useConfig } from '../../../../../../utilities/Config';
 import ElementButton from '../../Button';
@@ -32,16 +31,12 @@ const insertRelationship = (editor, { value, relationTo }) => {
     ],
   };
 
-  if (editor.blurSelection) {
-    Transforms.select(editor, editor.blurSelection);
-  }
-
   injectVoidElement(editor, relationship);
 
   ReactEditor.focus(editor);
 };
 
-const RelationshipButton: React.FC<{path: string}> = ({ path }) => {
+const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
   const { open, closeAll } = useModal();
   const editor = useSlate();
   const { serverURL, routes: { api }, collections } = useConfig();

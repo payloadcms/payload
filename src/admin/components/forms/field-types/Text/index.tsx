@@ -23,6 +23,7 @@ const Text: React.FC<Props> = (props) => {
       description,
       condition,
     } = {},
+    inputRef,
   } = props;
 
   const path = pathFromProps || name;
@@ -63,6 +64,7 @@ const Text: React.FC<Props> = (props) => {
       className={className}
       width={width}
       description={description}
+      inputRef={inputRef}
     />
   );
 };

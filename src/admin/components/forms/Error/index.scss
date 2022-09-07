@@ -1,6 +1,7 @@
 @import '../../../scss/styles';
 
 .field-error.tooltip {
+  font-family: var(--font-body);
   top: 0;
   bottom: auto;
   left: auto;
