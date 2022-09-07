@@ -144,7 +144,6 @@ const Popup: React.FC<Props> = (props) => {
       >
         <div
           className={`${baseClass}__wrap`}
-        // TODO: color ::after with bg color
         >
           <div
             className={`${baseClass}__scroll`}
