@@ -2,7 +2,7 @@
 import { Field, fieldAffectsData } from '../../config/types';
 import { PayloadRequest } from '../../../express/types';
 import { traverseFields } from './traverseFields';
-import richTextRelationshipPromise from '../../richText/relationshipPromise';
+import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise';
 import relationshipPopulationPromise from './relationshipPopulationPromise';
 
 type Args = {
@@ -47,11 +47,11 @@ export const promise = async ({
   }
 
   const hasLocalizedValue = flattenLocales
-  && fieldAffectsData(field)
-  && (typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null)
-  && field.name
-  && field.localized
-  && req.locale !== 'all';
+    && fieldAffectsData(field)
+    && (typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null)
+    && field.name
+    && field.localized
+    && req.locale !== 'all';
 
   if (hasLocalizedValue) {
     let localizedValue = siblingDoc[field.name][req.locale];
@@ -110,8 +110,8 @@ export const promise = async ({
         await priorHook;
 
         const shouldRunHookOnAllLocales = field.localized
-        && (req.locale === 'all' || !flattenLocales)
-        && typeof siblingDoc[field.name] === 'object';
+          && (req.locale === 'all' || !flattenLocales)
+          && typeof siblingDoc[field.name] === 'object';
 
         if (shouldRunHookOnAllLocales) {
           const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) => (async () => {

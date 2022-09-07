@@ -36,12 +36,26 @@ export const recurseRichText = ({
 }: RecurseRichTextArgs): void => {
   if (Array.isArray(children)) {
     (children as any[]).forEach((element) => {
-      const collection = req.payload.collections[element?.relationTo];
-
       if ((element.type === 'relationship' || element.type === 'upload')
         && element?.value?.id
-        && collection
         && (depth && currentDepth <= depth)) {
+        const collection = req.payload.collections[element?.relationTo];
+
+        if (collection) {
+          promises.push(populate({
+            req,
+            id: element.value.id,
+            data: element,
+            key: 'value',
+            overrideAccess,
+            depth,
+            currentDepth,
+            field,
+            collection,
+            showHiddenFields,
+          }));
+        }
+
         if (element.type === 'upload' && Array.isArray(field.admin?.upload?.collections?.[element?.relationTo]?.fields)) {
           recurseNestedFields({
             promises,
@@ -54,18 +68,40 @@ export const recurseRichText = ({
             showHiddenFields,
           });
         }
-        promises.push(populate({
-          req,
-          id: element.value.id,
-          data: element,
-          key: 'value',
-          overrideAccess,
-          depth,
-          currentDepth,
-          field,
-          collection,
-          showHiddenFields,
-        }));
+      }
+
+      if (element.type === 'link') {
+        if (element?.doc?.value && element?.doc?.relationTo) {
+          const collection = req.payload.collections[element?.doc?.relationTo];
+
+          if (collection) {
+            promises.push(populate({
+              req,
+              id: element.doc.value,
+              data: element.doc,
+              key: 'value',
+              overrideAccess,
+              depth,
+              currentDepth,
+              field,
+              collection,
+              showHiddenFields,
+            }));
+          }
+        }
+
+        if (Array.isArray(field.admin?.link?.fields)) {
+          recurseNestedFields({
+            promises,
+            data: element.fields || {},
+            fields: field.admin?.link?.fields,
+            req,
+            overrideAccess,
+            depth,
+            currentDepth,
+            showHiddenFields,
+          });
+        }
       }
 
       if (element?.children) {

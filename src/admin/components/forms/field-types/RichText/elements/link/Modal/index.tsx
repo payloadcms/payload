@@ -1,28 +1,25 @@
 import { Modal } from '@faceless-ui/modal';
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { MinimalTemplate } from '../../../../../..';
 import Button from '../../../../../../elements/Button';
 import X from '../../../../../../icons/X';
 import Form from '../../../../../Form';
 import FormSubmit from '../../../../../Submit';
-import Checkbox from '../../../../Checkbox';
-import Text from '../../../../Text';
 import { Props } from './types';
 import { modalSlug } from '../shared';
+import fieldTypes from '../../../..';
+import RenderFields from '../../../../../RenderFields';
 
 import './index.scss';
 
 const baseClass = modalSlug;
 
-export const EditModal: React.FC<Props> = ({ close, handleModalSubmit, initialData }) => {
-  const inputRef = useRef<HTMLInputElement>();
-
-  useEffect(() => {
-    if (inputRef?.current) {
-      inputRef.current.focus();
-    }
-  }, []);
-
+export const EditModal: React.FC<Props> = ({
+  close,
+  handleModalSubmit,
+  initialState,
+  fieldSchema,
+}) => {
   return (
     <Modal
       slug={modalSlug}
@@ -40,28 +37,12 @@ export const EditModal: React.FC<Props> = ({ close, handleModalSubmit, initialDa
         </header>
         <Form
           onSubmit={handleModalSubmit}
-          initialData={initialData}
+          initialState={initialState}
         >
-          <Text
-            inputRef={inputRef}
-            required
-            name="text"
-            label="Text to display"
-            admin={{
-              className: `${baseClass}__input`,
-            }}
-          />
-          <Text
-            required
-            name="url"
-            label="Enter a URL"
-            admin={{
-              className: `${baseClass}__input`,
-            }}
-          />
-          <Checkbox
-            label="Open in new tab"
-            name="newTab"
+          <RenderFields
+            fieldTypes={fieldTypes}
+            readOnly={false}
+            fieldSchema={fieldSchema}
           />
           <FormSubmit>
             Confirm

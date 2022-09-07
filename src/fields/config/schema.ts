@@ -346,6 +346,9 @@ export const richText = baseField.keys({
         fields: joi.array().items(joi.link('#field')),
       })),
     }),
+    link: joi.object({
+      fields: joi.array().items(joi.link('#field')),
+    }),
   }),
 });
 

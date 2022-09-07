@@ -234,6 +234,7 @@ const RichText: React.FC<Props> = (props) => {
                   if (Button) {
                     return (
                       <Button
+                        fieldProps={props}
                         key={i}
                         path={path}
                       />
@@ -253,6 +254,7 @@ const RichText: React.FC<Props> = (props) => {
                   if (Button) {
                     return (
                       <Button
+                        fieldProps={props}
                         key={i}
                         path={path}
                       />
