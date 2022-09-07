@@ -129,33 +129,40 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     moveRow(sourceIndex, destinationIndex);
   }, [moveRow]);
 
-  const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
-    dispatchRows({ type: 'SET_COLLAPSE', id: rowID, collapsed });
+  const setCollapse = useCallback(
+    async (rowID: string, collapsed: boolean) => {
+      dispatchRows({ type: 'SET_COLLAPSE', id: rowID, collapsed });
 
-    if (preferencesKey) {
-      const preferencesToSet = await getPreference(preferencesKey) || { fields: {} };
-      let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed
-        .filter((filterID) => (rows.find((row) => row.id === filterID)))
-        || [];
+      if (preferencesKey) {
+        const preferencesToSet = (await getPreference(preferencesKey)) || { fields: {} };
+        let newCollapsedState: string[] = preferencesToSet?.fields?.[path]?.collapsed;
 
-      if (!collapsed) {
-        newCollapsedState = newCollapsedState.filter((existingID) => existingID !== rowID);
-      } else {
-        newCollapsedState.push(rowID);
-      }
+        if (initCollapsed && typeof newCollapsedState === 'undefined') {
+          newCollapsedState = rows.map((row) => row.id);
+        } else if (typeof newCollapsedState === 'undefined') {
+          newCollapsedState = [];
+        }
 
-      setPreference(preferencesKey, {
-        ...preferencesToSet,
-        fields: {
-          ...preferencesToSet?.fields || {},
-          [path]: {
-            ...preferencesToSet?.fields?.[path],
-            collapsed: newCollapsedState,
+        if (!collapsed) {
+          newCollapsedState = newCollapsedState.filter((existingID) => existingID !== rowID);
+        } else {
+          newCollapsedState.push(rowID);
+        }
+
+        setPreference(preferencesKey, {
+          ...preferencesToSet,
+          fields: {
+            ...(preferencesToSet?.fields || {}),
+            [path]: {
+              ...preferencesToSet?.fields?.[path],
+              collapsed: newCollapsedState,
+            },
           },
-        },
-      });
-    }
-  }, [preferencesKey, path, setPreference, rows, getPreference]);
+        });
+      }
+    },
+    [preferencesKey, getPreference, path, setPreference, initCollapsed, rows],
+  );
 
   const toggleCollapseAll = useCallback(async (collapse: boolean) => {
     dispatchRows({ type: 'SET_ALL_COLLAPSED', collapse });
@@ -179,19 +186,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   useEffect(() => {
     const initializeRowState = async () => {
       const data = formContext.getDataByPath<Row[]>(path);
-      const collapseDefaultState = initCollapsed
-        ? {
-          fields: {
-            [path]: {
-              collapsed: data ? data.map((item) => item.id) : false,
-            },
-          },
-        }
-        : {
-          fields: {},
-        };
-      const preferences = await getPreference(preferencesKey) || collapseDefaultState;
-      dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
+      const preferences = (await getPreference(preferencesKey)) || { fields: {} };
+      dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed, initCollapsed });
     };
 
     initializeRowState();

@@ -106,6 +106,11 @@ export const arrayDoc = {
       text: 'sixth row',
     },
   ],
+  collapsedArray: [
+    {
+      text: 'initialize collapsed',
+    },
+  ],
 };
 
 export default ArrayFields;
