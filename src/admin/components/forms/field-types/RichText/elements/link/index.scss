@@ -15,6 +15,7 @@
   &__popup {
     @extend %body;
     font-family: var(--font-body);
+    display: flex;
 
     button {
       @extend %btn-reset;
@@ -29,7 +30,7 @@
   }
 
   &__goto-link {
-    max-width: base(6);
+    max-width: base(8);
     overflow: hidden;
     text-overflow: ellipsis;
     margin-right: base(.5);

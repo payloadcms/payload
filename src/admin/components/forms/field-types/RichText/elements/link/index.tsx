@@ -56,21 +56,21 @@ const Link = ({ attributes, children, element, editorRef }) => {
               closeAll();
               setRenderModal(false);
 
-              // TODO: Inserts duplicate link node
-              Transforms.removeNodes(editor, { at: editor.selection.focus.path });
-              Transforms.insertNodes(
+              const [, parentPath] = Editor.above(editor);
+
+              Transforms.setNodes(
                 editor,
                 {
-                  type: 'link',
                   newTab: data.newTab,
                   url: data.url,
-                  children: [
-                    {
-                      text: String(data.text),
-                    },
-                  ],
                 },
+                { at: parentPath },
               );
+
+              Transforms.delete(editor, { at: editor.selection.focus.path, unit: 'block' });
+              Transforms.move(editor, { distance: 1, unit: 'offset' });
+              Transforms.insertText(editor, String(data.text), { at: editor.selection.focus.path });
+
               ReactEditor.focus(editor);
             }}
             initialData={initialData}
@@ -86,8 +86,7 @@ const Link = ({ attributes, children, element, editorRef }) => {
           boundingRef={editorRef}
           render={() => (
             <div className={`${baseClass}__popup`}>
-              Go to link:
-              {' '}
+              Go to link:&nbsp;
               <a
                 className={`${baseClass}__goto-link`}
                 href={element.url}
@@ -177,17 +176,25 @@ const LinkButton = () => {
               type: 'link',
               url: data.url,
               newTab: data.newTab,
-              children: [{ text: String(data.text) }],
+              children: [],
             };
 
             if (isCollapsed) {
-              Transforms.insertNodes(editor, newLink);
+              // If selection anchor and focus are the same,
+              // Just inject a new node with children already set
+              Transforms.insertNodes(editor, {
+                ...newLink,
+                children: [{ text: String(data.text) }],
+              });
             } else {
-              // TODO: Inserts duplicate link node
+              // Otherwise we need to wrap the selected node in a link,
+              // Delete its old text,
+              // Move the selection one position forward into the link,
+              // And insert the text back into the new link
               Transforms.wrapNodes(editor, newLink, { split: true });
-              Transforms.collapse(editor, { edge: 'end' });
-              Transforms.removeNodes(editor, { at: editor.selection.focus.path });
-              Transforms.insertNodes(editor, newLink);
+              Transforms.delete(editor, { at: editor.selection.focus.path, unit: 'word' });
+              Transforms.move(editor, { distance: 1, unit: 'offset' });
+              Transforms.insertText(editor, String(data.text), { at: editor.selection.focus.path });
             }
 
             closeAll();
