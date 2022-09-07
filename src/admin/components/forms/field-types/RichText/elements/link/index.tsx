@@ -14,6 +14,8 @@ import './index.scss';
 
 const baseClass = 'rich-text-link';
 
+// TODO: Multiple modal windows stacked go boom (rip). Edit Upload in fields -> rich text
+
 const Link = ({ attributes, children, element, editorRef }) => {
   const editor = useSlate();
   const { open, closeAll } = useModal();
@@ -53,6 +55,8 @@ const Link = ({ attributes, children, element, editorRef }) => {
             handleModalSubmit={(_, data) => {
               closeAll();
               setRenderModal(false);
+
+              // TODO: Inserts duplicate link node
               Transforms.removeNodes(editor, { at: editor.selection.focus.path });
               Transforms.insertNodes(
                 editor,
@@ -179,6 +183,7 @@ const LinkButton = () => {
             if (isCollapsed) {
               Transforms.insertNodes(editor, newLink);
             } else {
+              // TODO: Inserts duplicate link node
               Transforms.wrapNodes(editor, newLink, { split: true });
               Transforms.collapse(editor, { edge: 'end' });
               Transforms.removeNodes(editor, { at: editor.selection.focus.path });
