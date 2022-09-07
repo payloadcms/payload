@@ -141,16 +141,19 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
           boundingRef={editorRef}
           render={() => (
             <div className={`${baseClass}__popup`}>
-              {element.linkType === 'internal' && (
+              {element.linkType === 'internal' && element.doc?.relationTo && element.doc?.value && (
                 <Fragment>
-                  Linked to doc&nbsp;
+                  Linked to&nbsp;
+                  <span className={`${baseClass}__link-label`}>
+                    {config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels?.singular}
+                  </span>
                 </Fragment>
               )}
               {(element.linkType === 'custom' || !element.linkType) && (
                 <Fragment>
                   Go to link:&nbsp;
                   <a
-                    className={`${baseClass}__goto-link`}
+                    className={`${baseClass}__link-label`}
                     href={element.url}
                     target="_blank"
                     rel="noreferrer"
