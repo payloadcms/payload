@@ -1,3 +1,10 @@
+## [1.0.34](https://github.com/payloadcms/payload/compare/v1.0.33...v1.0.34) (2022-09-07)
+
+
+### Bug Fixes
+
+* pins faceless ui modal ([b38b642](https://github.com/payloadcms/payload/commit/b38b6427b8b813487922db0bb7d3762cc41d3447))
+
 ## [1.0.33](https://github.com/payloadcms/payload/compare/v1.0.30...v1.0.33) (2022-09-07)
 
 
