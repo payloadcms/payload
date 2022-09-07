@@ -1,3 +1,34 @@
+## [1.0.34](https://github.com/payloadcms/payload/compare/v1.0.33...v1.0.34) (2022-09-07)
+
+
+### Bug Fixes
+
+* pins faceless ui modal ([b38b642](https://github.com/payloadcms/payload/commit/b38b6427b8b813487922db0bb7d3762cc41d3447))
+
+## [1.0.33](https://github.com/payloadcms/payload/compare/v1.0.30...v1.0.33) (2022-09-07)
+
+
+### Bug Fixes
+
+* [#1062](https://github.com/payloadcms/payload/issues/1062) ([05d1b14](https://github.com/payloadcms/payload/commit/05d1b141b22f66cb9007f20f2ae9d8e31db4f32f))
+* [#948](https://github.com/payloadcms/payload/issues/948) ([8df9ee7](https://github.com/payloadcms/payload/commit/8df9ee7b2dfcb2f77f049d02788a5c60c45f8c12))
+* [#981](https://github.com/payloadcms/payload/issues/981) ([d588843](https://github.com/payloadcms/payload/commit/d58884312132e109ae3f6619be2e0d7bab3f3111))
+* accented label char sanitization for GraphQL ([#1080](https://github.com/payloadcms/payload/issues/1080)) ([888734d](https://github.com/payloadcms/payload/commit/888734dcdf775f416395f8830561c47235bb9019))
+* children of conditional fields required in graphql schema ([#1055](https://github.com/payloadcms/payload/issues/1055)) ([29e82ec](https://github.com/payloadcms/payload/commit/29e82ec845f69bf5a09b682739e88529ebc53c16))
+* ensures adding new media to upload works when existing doc does not exist ([5ae666b](https://github.com/payloadcms/payload/commit/5ae666b0e08b128bdf2d576428e8638c2b8c2ed8))
+* implement the same word boundary search as the like query ([#1038](https://github.com/payloadcms/payload/issues/1038)) ([c3a0bd8](https://github.com/payloadcms/payload/commit/c3a0bd86254dfc3f49e46d4e41bdf717424ea342))
+* reorder plugin wrapping ([#1051](https://github.com/payloadcms/payload/issues/1051)) ([cd8edba](https://github.com/payloadcms/payload/commit/cd8edbaa1faa5a94166396918089a01058a4e75e))
+* require min 1 option in field schema validation ([#1082](https://github.com/payloadcms/payload/issues/1082)) ([d56882c](https://github.com/payloadcms/payload/commit/d56882cc20764b793049f20a91864c943e711375))
+* update removing a relationship with null ([#1056](https://github.com/payloadcms/payload/issues/1056)) ([44b0073](https://github.com/payloadcms/payload/commit/44b0073834830a9d645a11bcafab3869b4eb1899))
+* update removing an upload with null ([#1076](https://github.com/payloadcms/payload/issues/1076)) ([2ee4c7a](https://github.com/payloadcms/payload/commit/2ee4c7ad727b9311578d3049660de81c27dace55))
+
+
+### Features
+
+* cyrillic like query support ([#1078](https://github.com/payloadcms/payload/issues/1078)) ([b7e5828](https://github.com/payloadcms/payload/commit/b7e5828adc7bc6602da7992b073b005b30aa896f))
+* duplicate copies all locales ([51c7770](https://github.com/payloadcms/payload/commit/51c7770b10c34a3e40520ca8d64beedc67693c5c))
+* update operator type with contains ([#1045](https://github.com/payloadcms/payload/issues/1045)) ([482cbe7](https://github.com/payloadcms/payload/commit/482cbe71c7b1d39b665fb0b29a7a0b69f454180a))
+
 ## [1.0.30](https://github.com/payloadcms/payload/compare/v1.0.29...v1.0.30) (2022-08-30)
 
 
