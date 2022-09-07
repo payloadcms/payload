@@ -131,13 +131,15 @@ export const code = baseField.keys({
 export const select = baseField.keys({
   type: joi.string().valid('select').required(),
   name: joi.string().required(),
-  options: joi.array().items(joi.alternatives().try(
-    joi.string(),
-    joi.object({
-      value: joi.string().required().allow(''),
-      label: joi.string().required(),
-    }),
-  )).required(),
+  options: joi.array().min(1).items(
+    joi.alternatives().try(
+      joi.string(),
+      joi.object({
+        value: joi.string().required().allow(''),
+        label: joi.string().required(),
+      }),
+    ),
+  ).required(),
   hasMany: joi.boolean().default(false),
   defaultValue: joi.alternatives().try(
     joi.string().allow(''),
@@ -153,13 +155,15 @@ export const select = baseField.keys({
 export const radio = baseField.keys({
   type: joi.string().valid('radio').required(),
   name: joi.string().required(),
-  options: joi.array().items(joi.alternatives().try(
-    joi.string(),
-    joi.object({
-      value: joi.string().required().allow(''),
-      label: joi.string().required(),
-    }),
-  )).required(),
+  options: joi.array().min(1).items(
+    joi.alternatives().try(
+      joi.string(),
+      joi.object({
+        value: joi.string().required().allow(''),
+        label: joi.string().required(),
+      }),
+    ),
+  ).required(),
   defaultValue: joi.alternatives().try(
     joi.string().allow(''),
     joi.func(),
