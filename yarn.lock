@@ -1271,7 +1271,7 @@
   resolved "https://registry.npmjs.org/@emotion/weak-memoize/-/weak-memoize-0.2.5.tgz#8eed982e2ee6f7f4e44c253e12962980791efd46"
   integrity sha512-6U71C2Wp7r5XtFtQzYrW5iKFT67OixrSxjI4MptCHzdSVlgabczzqLe0ZSgnub/5Kp4hSbpDB1tMytZY9pwxxA==
 
-"@faceless-ui/modal@^1.1.7":
+"@faceless-ui/modal@1.2.0":
   version "1.2.0"
   resolved "https://registry.npmjs.org/@faceless-ui/modal/-/modal-1.2.0.tgz#0ca43e480f83d307dcd84c033fbc82c0619f5d8c"
   integrity sha512-92LQw1ZIaphzCVaHyhxrzbRtn9LXnm5GOJVXJ4tDUpuz7j1B05QTSOuYWjBd8AZKsBR0MQhgr11BVVgJ70DEhw==
