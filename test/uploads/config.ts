@@ -76,11 +76,20 @@ export default buildConfig({
       fields: [],
     },
     {
+      slug: 'formatOptions',
+      upload: {
+        staticURL: '/media-format-options',
+        formatOptions: ['webp'],
+      },
+      fields: [],
+    },
+    {
       slug: 'resizeOptions',
       upload: {
-        staticURL: '/media',
-        disableLocalStorage: true,
-        formatOption: ['webp'],
+        staticURL: '/media-resize-options',
+        resizeOptions: {
+          width: 2,
+        },
       },
       fields: [],
     },

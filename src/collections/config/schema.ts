@@ -140,7 +140,7 @@ const collectionSchema = joi.object().keys({
       mimeTypes: joi.array().items(joi.string()),
       staticOptions: joi.object(),
       handlers: joi.array().items(joi.func()),
-      resizeOption: joi.object().keys({
+      resizeOptions: joi.object().keys({
         width: joi.number().allow(null),
         height: joi.number().allow(null),
         fit: joi.string(),
@@ -153,7 +153,7 @@ const collectionSchema = joi.object().keys({
         withoutEnlargement: joi.bool(),
         fastShrinkOnLoad: joi.bool(),
       }).allow(null),
-      formatOption: joi.array().items(joi.string(), joi.object()),
+      formatOptions: joi.array().items(joi.string(), joi.object()),
     }),
     joi.boolean(),
   ),

@@ -1,5 +1,5 @@
 import fs from 'fs';
-import sharp from 'sharp';
+import sharp, { Sharp } from 'sharp';
 import sanitize from 'sanitize-filename';
 import { ProbedImageSize } from './getImageSize';
 import fileExists from './fileExists';
@@ -8,18 +8,25 @@ import { FileSizes, ImageSize } from './types';
 import { PayloadRequest } from '../express/types';
 
 type Args = {
-  req: PayloadRequest,
-  file: Buffer,
-  dimensions: ProbedImageSize,
-  staticPath: string,
-  config: SanitizedCollectionConfig,
-  savedFilename: string,
-  mimeType: string,
+  req: PayloadRequest
+  file: Buffer
+  dimensions: ProbedImageSize
+  staticPath: string
+  config: SanitizedCollectionConfig
+  savedFilename: string
+  mimeType: string
 }
 
-function getOutputImage(sourceImage: string, size: ImageSize) {
+type OutputImage = {
+  name: string,
+  extension: string,
+  width: number,
+  height: number
+}
+
+function getOutputImage(sourceImage: string, size: ImageSize): OutputImage {
   const extension = sourceImage.split('.').pop();
-  const name = sanitize(sourceImage.substr(0, sourceImage.lastIndexOf('.')) || sourceImage);
+  const name = sanitize(sourceImage.substring(0, sourceImage.lastIndexOf('.')) || sourceImage);
 
   return {
     name,
@@ -46,18 +53,20 @@ export default async function resizeAndSave({
   savedFilename,
   mimeType,
 }: Args): Promise<FileSizes> {
-  const { imageSizes, disableLocalStorage, resizeOption, formatOption } = config.upload;
+  const { imageSizes, disableLocalStorage, resizeOptions, formatOptions } = config.upload;
 
   const sizes = imageSizes
-    .filter((desiredSize) => (typeof desiredSize.width === 'number' && desiredSize.width <= dimensions.width) || (typeof desiredSize.height === 'number' && desiredSize.height <= dimensions.height))
+    .filter((desiredSize) => needsResize(desiredSize, dimensions))
     .map(async (desiredSize) => {
-      let resized = await sharp(file)
-        .resize(desiredSize.width, desiredSize.height, resizeOption ?? {
-          position: desiredSize.crop || 'centre',
-        });
+      const defaultResizeOptions = { position: desiredSize.crop || 'centre' };
+      let resized = await sharp(file).resize(
+        desiredSize.width,
+        desiredSize.height,
+        resizeOptions ?? defaultResizeOptions,
+      );
 
-      if (formatOption) {
-        resized = resized.toFormat(...formatOption);
+      if (formatOptions) {
+        resized = resized.toFormat(...formatOptions);
       }
 
       const bufferObject = await resized.toBuffer({
@@ -67,7 +76,7 @@ export default async function resizeAndSave({
       req.payloadUploadSizes[desiredSize.name] = bufferObject.data;
 
       const outputImage = getOutputImage(savedFilename, desiredSize);
-      const imageNameWithDimensions = `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${formatOption?.[0] ?? outputImage.extension}`;
+      const imageNameWithDimensions = createImageName(outputImage, bufferObject, formatOptions);
       const imagePath = `${staticPath}/${imageNameWithDimensions}`;
       const fileAlreadyExists = await fileExists(imagePath);
 
@@ -85,20 +94,36 @@ export default async function resizeAndSave({
         height: bufferObject.info.height,
         filename: imageNameWithDimensions,
         filesize: bufferObject.info.size,
-        mimeType: formatOption ? `image/${formatOption?.[0]}` : mimeType,
+        mimeType: formatOptions ? `image/${formatOptions?.[0]}` : mimeType,
       };
     });
 
   const savedSizes = await Promise.all(sizes);
 
-  return savedSizes.reduce((results, size) => ({
-    ...results,
-    [size.name]: {
-      width: size.width,
-      height: size.height,
-      filename: size.filename,
-      mimeType: size.mimeType,
-      filesize: size.filesize,
-    },
-  }), {});
+  return savedSizes.reduce(
+    (results, size) => ({
+      ...results,
+      [size.name]: {
+        width: size.width,
+        height: size.height,
+        filename: size.filename,
+        mimeType: size.mimeType,
+        filesize: size.filesize,
+      },
+    }),
+    {},
+  );
+}
+function createImageName(
+  outputImage: OutputImage,
+  bufferObject: { data: Buffer; info: sharp.OutputInfo },
+  formatOptions: Parameters<Sharp['toFormat']>,
+): string {
+  const extension = formatOptions?.[0] ?? outputImage.extension;
+  return `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${extension}`;
+}
+
+function needsResize(desiredSize: ImageSize, dimensions: ProbedImageSize): boolean {
+  return (typeof desiredSize.width === 'number' && desiredSize.width <= dimensions.width)
+    || (typeof desiredSize.height === 'number' && desiredSize.height <= dimensions.height);
 }
