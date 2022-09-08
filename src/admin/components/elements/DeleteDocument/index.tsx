@@ -33,7 +33,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const { serverURL, routes: { api, admin } } = useConfig();
   const { setModified } = useForm();
   const [deleting, setDeleting] = useState(false);
-  const { closeAll, toggle } = useModal();
+  const { toggle } = useModal();
   const history = useHistory();
   const title = useTitle(useAsTitle) || id;
   const titleToRender = titleFromProps || title;
@@ -55,12 +55,12 @@ const DeleteDocument: React.FC<Props> = (props) => {
       try {
         const json = await res.json();
         if (res.status < 400) {
-          closeAll();
+          toggle(modalSlug);
           toast.success(`${singular} "${title}" successfully deleted.`);
           return history.push(`${admin}/collections/${slug}`);
         }
 
-        closeAll();
+        toggle(modalSlug);
 
         if (json.errors) {
           json.errors.forEach((error) => toast.error(error.message));
@@ -72,7 +72,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
         return addDefaultError();
       }
     });
-  }, [addDefaultError, closeAll, history, id, singular, slug, title, admin, api, serverURL, setModified]);
+  }, [addDefaultError, toggle, modalSlug, history, id, singular, slug, title, admin, api, serverURL, setModified]);
 
   if (id) {
     return (

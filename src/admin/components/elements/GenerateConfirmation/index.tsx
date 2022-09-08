@@ -4,6 +4,7 @@ import { Modal, useModal } from '@faceless-ui/modal';
 import Button from '../Button';
 import MinimalTemplate from '../../templates/Minimal';
 import { Props } from './types';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
 
 import './index.scss';
 
@@ -15,9 +16,10 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
     highlightField,
   } = props;
 
+  const { id } = useDocumentInfo();
   const { toggle } = useModal();
 
-  const modalSlug = 'generate-confirmation';
+  const modalSlug = `generate-confirmation-${id}`;
 
   const handleGenerate = () => {
     setKey();

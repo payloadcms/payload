@@ -6,7 +6,7 @@ import ElementButton from '../Button';
 import { unwrapLink } from './utilities';
 import LinkIcon from '../../../../../icons/Link';
 import { EditModal } from './Modal';
-import { modalSlug } from './shared';
+import { modalSlug as baseModalSlug } from './shared';
 import isElementActive from '../isActive';
 import { Fields } from '../../../../Form/types';
 import buildStateFromSchema from '../../../../Form/buildStateFromSchema';
@@ -20,11 +20,13 @@ import reduceFieldsToValues from '../../../../Form/reduceFieldsToValues';
 export const LinkButton = ({ fieldProps }) => {
   const customFieldSchema = fieldProps?.admin?.link?.fields;
 
+  const modalSlug = `${baseModalSlug}-${fieldProps.path}`;
+
   const config = useConfig();
   const editor = useSlate();
   const { user } = useAuth();
   const locale = useLocale();
-  const { open, closeAll } = useModal();
+  const { toggle } = useModal();
   const [renderModal, setRenderModal] = useState(false);
   const [initialState, setInitialState] = useState<Fields>({});
   const [fieldSchema] = useState(() => {
@@ -59,7 +61,7 @@ export const LinkButton = ({ fieldProps }) => {
           if (isElementActive(editor, 'link')) {
             unwrapLink(editor);
           } else {
-            open(modalSlug);
+            toggle(modalSlug);
             setRenderModal(true);
 
             const isCollapsed = editor.selection && Range.isCollapsed(editor.selection);
@@ -79,10 +81,11 @@ export const LinkButton = ({ fieldProps }) => {
       </ElementButton>
       {renderModal && (
         <EditModal
+          modalSlug={modalSlug}
           fieldSchema={fieldSchema}
           initialState={initialState}
           close={() => {
-            closeAll();
+            toggle(modalSlug);
             setRenderModal(false);
           }}
           handleModalSubmit={(fields) => {
@@ -117,7 +120,7 @@ export const LinkButton = ({ fieldProps }) => {
               Transforms.insertText(editor, String(data.text), { at: editor.selection.focus.path });
             }
 
-            closeAll();
+            toggle(modalSlug);
             setRenderModal(false);
 
             ReactEditor.focus(editor);

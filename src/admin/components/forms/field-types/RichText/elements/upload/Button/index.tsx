@@ -42,7 +42,7 @@ const insertUpload = (editor, { value, relationTo }) => {
 };
 
 const UploadButton: React.FC<{ path: string }> = ({ path }) => {
-  const { open, closeAll, currentModal } = useModal();
+  const { toggle, modalState } = useModal();
   const editor = useSlate();
   const { serverURL, routes: { api }, collections } = useConfig();
   const [availableCollections] = useState(() => collections.filter(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
@@ -65,7 +65,7 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
 
   const modalSlug = `${path}-add-upload`;
   const moreThanOneAvailableCollection = availableCollections.length > 1;
-  const isOpen = currentModal === modalSlug;
+  const isOpen = modalState[modalSlug]?.isOpen;
 
   // If modal is open, get active page of upload gallery
   const apiURL = isOpen ? `${serverURL}${api}/${modalCollection.slug}` : null;
@@ -79,9 +79,9 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
 
   useEffect(() => {
     if (renderModal) {
-      open(modalSlug);
+      toggle(modalSlug);
     }
-  }, [renderModal, open, modalSlug]);
+  }, [renderModal, toggle, modalSlug]);
 
   useEffect(() => {
     const params: {
@@ -137,7 +137,7 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
                   buttonStyle="icon-label"
                   iconStyle="with-border"
                   onClick={() => {
-                    closeAll();
+                    toggle(modalSlug);
                     setRenderModal(false);
                   }}
                 />
@@ -175,7 +175,7 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
                     relationTo: modalCollection.slug,
                   });
                   setRenderModal(false);
-                  closeAll();
+                  toggle(modalSlug);
                 }}
               />
               <div className={`${baseModalClass}__page-controls`}>

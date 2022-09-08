@@ -15,16 +15,16 @@ import './index.scss';
 
 const baseClass = 'status';
 
-const unPublishModalSlug = 'confirm-un-publish';
-const revertModalSlug = 'confirm-revert';
-
 const Status: React.FC<Props> = () => {
   const { publishedDoc, unpublishedVersions, collection, global, id, getVersions } = useDocumentInfo();
-  const { toggle, closeAll: closeAllModals } = useModal();
+  const { toggle } = useModal();
   const { serverURL, routes: { api } } = useConfig();
   const [processing, setProcessing] = useState(false);
   const { reset: resetForm } = useForm();
   const locale = useLocale();
+
+  const unPublishModalSlug = `confirm-un-publish-${id}`;
+  const revertModalSlug = `confirm-revert-${id}`;
 
   let statusToRender;
 
@@ -92,8 +92,14 @@ const Status: React.FC<Props> = () => {
     }
 
     setProcessing(false);
-    closeAllModals();
-  }, [closeAllModals, collection, global, serverURL, api, resetForm, id, locale, getVersions, publishedDoc]);
+    if (action === 'revert') {
+      toggle(revertModalSlug);
+    }
+
+    if (action === 'unpublish') {
+      toggle(unPublishModalSlug);
+    }
+  }, [collection, global, publishedDoc, serverURL, api, id, locale, resetForm, getVersions, toggle, revertModalSlug, unPublishModalSlug]);
 
   if (statusToRender) {
     return (

@@ -6,19 +6,19 @@ import X from '../../../../../../icons/X';
 import Form from '../../../../../Form';
 import FormSubmit from '../../../../../Submit';
 import { Props } from './types';
-import { modalSlug } from '../shared';
 import fieldTypes from '../../../..';
 import RenderFields from '../../../../../RenderFields';
 
 import './index.scss';
 
-const baseClass = modalSlug;
+const baseClass = 'rich-text-link-edit-modal';
 
 export const EditModal: React.FC<Props> = ({
   close,
   handleModalSubmit,
   initialState,
   fieldSchema,
+  modalSlug,
 }) => {
   return (
     <Modal

@@ -5,7 +5,7 @@ import { useModal } from '@faceless-ui/modal';
 import { unwrapLink } from './utilities';
 import Popup from '../../../../../elements/Popup';
 import { EditModal } from './Modal';
-import { modalSlug } from './shared';
+import { modalSlug as baseModalSlug } from './shared';
 import { Fields } from '../../../../Form/types';
 import buildStateFromSchema from '../../../../Form/buildStateFromSchema';
 import { useAuth } from '../../../../../utilities/Auth';
@@ -15,11 +15,9 @@ import { getBaseFields } from './Modal/baseFields';
 import { Field } from '../../../../../../../fields/config/types';
 import reduceFieldsToValues from '../../../../Form/reduceFieldsToValues';
 import deepCopyObject from '../../../../../../../utilities/deepCopyObject';
-import Edit from '../../../../../icons/Edit';
-import X from '../../../../../icons/X';
+import Button from '../../../../../elements/Button';
 
 import './index.scss';
-import Button from '../../../../../elements/Button';
 
 const baseClass = 'rich-text-link';
 
@@ -60,6 +58,8 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
     return fields;
   });
 
+  const modalSlug = `${baseModalSlug}-${fieldProps.path}`;
+
   const handleTogglePopup = useCallback((render) => {
     if (!render) {
       setRenderPopup(render);
@@ -95,6 +95,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
       >
         {renderModal && (
           <EditModal
+            modalSlug={modalSlug}
             fieldSchema={fieldSchema}
             close={() => {
               closeAll();

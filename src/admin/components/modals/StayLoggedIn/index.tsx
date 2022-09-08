@@ -10,11 +10,13 @@ import './index.scss';
 
 const baseClass = 'stay-logged-in';
 
+const modalSlug = 'stay-logged-in';
+
 const StayLoggedInModal: React.FC<Props> = (props) => {
   const { refreshCookie } = props;
   const history = useHistory();
   const { routes: { admin } } = useConfig();
-  const { closeAll: closeAllModals } = useModal();
+  const { toggle } = useModal();
 
   return (
     <Modal
@@ -28,7 +30,7 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
           <Button
             buttonStyle="secondary"
             onClick={() => {
-              closeAllModals();
+              toggle(modalSlug);
               history.push(`${admin}/logout`);
             }}
           >
@@ -36,7 +38,7 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
           </Button>
           <Button onClick={() => {
             refreshCookie();
-            closeAllModals();
+            toggle(modalSlug);
           }}
           >
             Stay logged in

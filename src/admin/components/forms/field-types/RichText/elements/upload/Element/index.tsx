@@ -21,7 +21,7 @@ const initialParams = {
 
 const Element = ({ attributes, children, element, path, fieldProps }) => {
   const { relationTo, value } = element;
-  const { closeAll, open } = useModal();
+  const { toggle } = useModal();
   const { collections, serverURL, routes: { api } } = useConfig();
   const [modalToRender, setModalToRender] = useState(undefined);
   const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
@@ -50,15 +50,15 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
   }, [editor, element]);
 
   const closeModal = useCallback(() => {
-    closeAll();
+    toggle(modalSlug);
     setModalToRender(null);
-  }, [closeAll]);
+  }, [toggle, modalSlug]);
 
   useEffect(() => {
-    if (modalToRender && modalSlug) {
-      open(`${modalSlug}`);
+    if (modalToRender) {
+      toggle(modalSlug);
     }
-  }, [modalToRender, open, modalSlug]);
+  }, [modalToRender, toggle, modalSlug]);
 
   const fieldSchema = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields;
 

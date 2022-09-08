@@ -37,7 +37,7 @@ const insertRelationship = (editor, { value, relationTo }) => {
 };
 
 const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
-  const { open, closeAll } = useModal();
+  const { toggle } = useModal();
   const editor = useSlate();
   const { serverURL, routes: { api }, collections } = useConfig();
   const [renderModal, setRenderModal] = useState(false);
@@ -52,16 +52,16 @@ const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
     const json = await res.json();
 
     insertRelationship(editor, { value: { id: json.id }, relationTo });
-    closeAll();
+    toggle(modalSlug);
     setRenderModal(false);
     setLoading(false);
-  }, [editor, closeAll, api, serverURL]);
+  }, [editor, toggle, modalSlug, api, serverURL]);
 
   useEffect(() => {
     if (renderModal) {
-      open(modalSlug);
+      toggle(modalSlug);
     }
-  }, [renderModal, open, modalSlug]);
+  }, [renderModal, toggle, modalSlug]);
 
   if (!hasEnabledCollections) return null;
 
@@ -85,7 +85,7 @@ const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
               <Button
                 buttonStyle="none"
                 onClick={() => {
-                  closeAll();
+                  toggle(modalSlug);
                   setRenderModal(false);
                 }}
               >
