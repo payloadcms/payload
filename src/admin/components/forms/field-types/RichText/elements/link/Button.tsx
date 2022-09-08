@@ -15,6 +15,7 @@ import { useLocale } from '../../../../../utilities/Locale';
 import { useConfig } from '../../../../../utilities/Config';
 import { getBaseFields } from './Modal/baseFields';
 import { Field } from '../../../../../../../fields/config/types';
+import reduceFieldsToValues from '../../../../Form/reduceFieldsToValues';
 
 export const LinkButton = ({ fieldProps }) => {
   const customFieldSchema = fieldProps?.admin?.link?.fields;
@@ -84,8 +85,9 @@ export const LinkButton = ({ fieldProps }) => {
             closeAll();
             setRenderModal(false);
           }}
-          handleModalSubmit={(_, data) => {
+          handleModalSubmit={(fields) => {
             const isCollapsed = editor.selection && Range.isCollapsed(editor.selection);
+            const data = reduceFieldsToValues(fields, true);
 
             const newLink = {
               type: 'link',

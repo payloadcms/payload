@@ -10,6 +10,20 @@
     right: 0;
     bottom: 0;
     left: 0;
+
+
+    .popup__scroll,
+    .popup__wrap {
+      overflow: visible;
+    }
+
+    .popup__scroll {
+      padding-right: base(.5);
+    }
+  }
+
+  .icon--x line {
+    stroke-width: 2px;
   }
 
   &__popup {
@@ -19,9 +33,9 @@
 
     button {
       @extend %btn-reset;
-      margin-left: base(.5);
       font-weight: 600;
       cursor: pointer;
+      margin: 0 0 0 base(.25);
 
       &:hover {
         text-decoration: underline;
@@ -33,7 +47,7 @@
     max-width: base(8);
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-right: base(.5);
+    margin-right: base(.25);
   }
 }
 

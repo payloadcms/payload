@@ -15,8 +15,11 @@ import { getBaseFields } from './Modal/baseFields';
 import { Field } from '../../../../../../../fields/config/types';
 import reduceFieldsToValues from '../../../../Form/reduceFieldsToValues';
 import deepCopyObject from '../../../../../../../utilities/deepCopyObject';
+import Edit from '../../../../../icons/Edit';
+import X from '../../../../../icons/X';
 
 import './index.scss';
+import Button from '../../../../../elements/Button';
 
 const baseClass = 'rich-text-link';
 
@@ -144,43 +147,48 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
               {element.linkType === 'internal' && element.doc?.relationTo && element.doc?.value && (
                 <Fragment>
                   Linked to&nbsp;
-                  <span className={`${baseClass}__link-label`}>
-                    {config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels?.singular}
-                  </span>
-                </Fragment>
-              )}
-              {(element.linkType === 'custom' || !element.linkType) && (
-                <Fragment>
-                  Go to link:&nbsp;
                   <a
                     className={`${baseClass}__link-label`}
-                    href={element.url}
+                    href={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {element.url}
+                    {config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels?.singular}
                   </a>
                 </Fragment>
               )}
-              &mdash;
-              <button
-                type="button"
-                onClick={() => {
+              {(element.linkType === 'custom' || !element.linkType) && (
+                <a
+                  className={`${baseClass}__link-label`}
+                  href={element.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {element.url}
+                </a>
+              )}
+              <Button
+                icon="edit"
+                round
+                buttonStyle="icon-label"
+                onClick={(e) => {
+                  e.preventDefault();
                   setRenderPopup(false);
                   open(modalSlug);
                   setRenderModal(true);
                 }}
-              >
-                Change
-              </button>
-              <button
-                type="button"
-                onClick={() => {
+                tooltip="Edit"
+              />
+              <Button
+                icon="x"
+                round
+                buttonStyle="icon-label"
+                onClick={(e) => {
+                  e.preventDefault();
                   unwrapLink(editor);
                 }}
-              >
-                Remove
-              </button>
+                tooltip="Remove"
+              />
             </div>
           )}
         />
