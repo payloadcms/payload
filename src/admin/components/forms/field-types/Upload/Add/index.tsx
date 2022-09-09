@@ -30,12 +30,12 @@ const AddUploadModal: React.FC<Props> = (props) => {
 
   const { permissions } = useAuth();
   const { serverURL, routes: { api } } = useConfig();
-  const { toggle } = useModal();
+  const { toggleModal } = useModal();
 
   const onSuccess = useCallback((json) => {
-    toggle(slug);
+    toggleModal(slug);
     setValue(json.doc);
-  }, [toggle, slug, setValue]);
+  }, [toggleModal, slug, setValue]);
 
   const classes = [
     baseClass,
@@ -69,7 +69,7 @@ const AddUploadModal: React.FC<Props> = (props) => {
                 round
                 buttonStyle="icon-label"
                 iconStyle="with-border"
-                onClick={() => toggle(slug)}
+                onClick={() => toggleModal(slug)}
               />
             </div>
             {description && (

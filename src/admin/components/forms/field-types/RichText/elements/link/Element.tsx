@@ -30,7 +30,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
   const config = useConfig();
   const { user } = useAuth();
   const locale = useLocale();
-  const { open, closeAll } = useModal();
+  const { openModal, toggleModal } = useModal();
   const [renderModal, setRenderModal] = useState(false);
   const [renderPopup, setRenderPopup] = useState(false);
   const [initialState, setInitialState] = useState<Fields>({});
@@ -98,11 +98,11 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
             modalSlug={modalSlug}
             fieldSchema={fieldSchema}
             close={() => {
-              closeAll();
+              toggleModal(modalSlug);
               setRenderModal(false);
             }}
             handleModalSubmit={(fields) => {
-              closeAll();
+              toggleModal(modalSlug);
               setRenderModal(false);
 
               const data = reduceFieldsToValues(fields, true);
@@ -175,7 +175,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
                 onClick={(e) => {
                   e.preventDefault();
                   setRenderPopup(false);
-                  open(modalSlug);
+                  openModal(modalSlug);
                   setRenderModal(true);
                 }}
                 tooltip="Edit"

@@ -58,7 +58,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     filterOptions,
   } = props;
 
-  const { toggle } = useModal();
+  const { toggleModal } = useModal();
 
   const addModalSlug = `${path}-add`;
   const selectExistingModalSlug = `${path}-select-existing`;
@@ -131,7 +131,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
               <Button
                 buttonStyle="secondary"
                 onClick={() => {
-                  toggle(addModalSlug);
+                  toggleModal(addModalSlug);
                 }}
               >
                 Upload new
@@ -141,7 +141,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
               <Button
                 buttonStyle="secondary"
                 onClick={() => {
-                  toggle(selectExistingModalSlug);
+                  toggleModal(selectExistingModalSlug);
                 }}
               >
                 Choose from existing

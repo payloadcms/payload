@@ -44,7 +44,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
   const { id } = useDocumentInfo();
   const { user } = useAuth();
   const { getData, getSiblingData } = useWatchForm();
-  const { toggle, modalState } = useModal();
+  const { toggleModal, modalState } = useModal();
   const [fields] = useState(() => formatFields(collection));
   const [limit, setLimit] = useState(defaultLimit);
   const [sort, setSort] = useState(null);
@@ -115,7 +115,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
                 round
                 buttonStyle="icon-label"
                 iconStyle="with-border"
-                onClick={() => toggle(modalSlug)}
+                onClick={() => toggleModal(modalSlug)}
               />
             </div>
             {description && (
@@ -140,7 +140,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
             collection={collection}
             onCardClick={(doc) => {
               setValue(doc);
-              toggle(modalSlug);
+              toggleModal(modalSlug);
             }}
           />
           <div className={`${baseClass}__page-controls`}>

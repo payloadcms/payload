@@ -33,7 +33,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const { serverURL, routes: { api, admin } } = useConfig();
   const { setModified } = useForm();
   const [deleting, setDeleting] = useState(false);
-  const { toggle } = useModal();
+  const { toggleModal } = useModal();
   const history = useHistory();
   const title = useTitle(useAsTitle) || id;
   const titleToRender = titleFromProps || title;
@@ -55,12 +55,12 @@ const DeleteDocument: React.FC<Props> = (props) => {
       try {
         const json = await res.json();
         if (res.status < 400) {
-          toggle(modalSlug);
+          toggleModal(modalSlug);
           toast.success(`${singular} "${title}" successfully deleted.`);
           return history.push(`${admin}/collections/${slug}`);
         }
 
-        toggle(modalSlug);
+        toggleModal(modalSlug);
 
         if (json.errors) {
           json.errors.forEach((error) => toast.error(error.message));
@@ -72,7 +72,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
         return addDefaultError();
       }
     });
-  }, [addDefaultError, toggle, modalSlug, history, id, singular, slug, title, admin, api, serverURL, setModified]);
+  }, [addDefaultError, toggleModal, modalSlug, history, id, singular, slug, title, admin, api, serverURL, setModified]);
 
   if (id) {
     return (
@@ -84,7 +84,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
           onClick={(e) => {
             e.preventDefault();
             setDeleting(false);
-            toggle(modalSlug);
+            toggleModal(modalSlug);
           }}
         >
           Delete
@@ -110,7 +110,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
               id="confirm-cancel"
               buttonStyle="secondary"
               type="button"
-              onClick={deleting ? undefined : () => toggle(modalSlug)}
+              onClick={deleting ? undefined : () => toggleModal(modalSlug)}
             >
               Cancel
             </Button>

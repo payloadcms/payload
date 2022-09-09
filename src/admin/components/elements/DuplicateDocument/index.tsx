@@ -16,7 +16,7 @@ const baseClass = 'duplicate';
 const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
   const { push } = useHistory();
   const modified = useFormModified();
-  const { toggle } = useModal();
+  const { toggleModal } = useModal();
   const { setModified } = useForm();
   const { serverURL, routes: { api }, localization } = useConfig();
   const { routes: { admin } } = useConfig();
@@ -28,7 +28,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
     setHasClicked(true);
 
     if (modified && !override) {
-      toggle(modalSlug);
+      toggleModal(modalSlug);
       return;
     }
 
@@ -92,7 +92,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         pathname: `${admin}/collections/${slug}/${duplicateID}`,
       });
     }, 10);
-  }, [modified, localization, collection.labels.singular, setModified, toggle, modalSlug, serverURL, api, slug, id, push, admin]);
+  }, [modified, localization, collection.labels.singular, setModified, toggleModal, modalSlug, serverURL, api, slug, id, push, admin]);
 
   const confirm = useCallback(async () => {
     setHasClicked(false);
@@ -123,7 +123,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
               id="confirm-cancel"
               buttonStyle="secondary"
               type="button"
-              onClick={() => toggle(modalSlug)}
+              onClick={() => toggleModal(modalSlug)}
             >
               Cancel
             </Button>

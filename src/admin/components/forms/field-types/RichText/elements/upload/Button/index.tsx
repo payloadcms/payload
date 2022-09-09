@@ -42,7 +42,7 @@ const insertUpload = (editor, { value, relationTo }) => {
 };
 
 const UploadButton: React.FC<{ path: string }> = ({ path }) => {
-  const { toggle, modalState } = useModal();
+  const { toggleModal, modalState } = useModal();
   const editor = useSlate();
   const { serverURL, routes: { api }, collections } = useConfig();
   const [availableCollections] = useState(() => collections.filter(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
@@ -79,9 +79,9 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
 
   useEffect(() => {
     if (renderModal) {
-      toggle(modalSlug);
+      toggleModal(modalSlug);
     }
-  }, [renderModal, toggle, modalSlug]);
+  }, [renderModal, toggleModal, modalSlug]);
 
   useEffect(() => {
     const params: {
@@ -137,7 +137,7 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
                   buttonStyle="icon-label"
                   iconStyle="with-border"
                   onClick={() => {
-                    toggle(modalSlug);
+                    toggleModal(modalSlug);
                     setRenderModal(false);
                   }}
                 />
@@ -175,7 +175,7 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
                     relationTo: modalCollection.slug,
                   });
                   setRenderModal(false);
-                  toggle(modalSlug);
+                  toggleModal(modalSlug);
                 }}
               />
               <div className={`${baseModalClass}__page-controls`}>

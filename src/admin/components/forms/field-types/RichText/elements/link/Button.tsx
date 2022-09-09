@@ -26,7 +26,7 @@ export const LinkButton = ({ fieldProps }) => {
   const editor = useSlate();
   const { user } = useAuth();
   const locale = useLocale();
-  const { toggle } = useModal();
+  const { toggleModal } = useModal();
   const [renderModal, setRenderModal] = useState(false);
   const [initialState, setInitialState] = useState<Fields>({});
   const [fieldSchema] = useState(() => {
@@ -61,7 +61,7 @@ export const LinkButton = ({ fieldProps }) => {
           if (isElementActive(editor, 'link')) {
             unwrapLink(editor);
           } else {
-            toggle(modalSlug);
+            toggleModal(modalSlug);
             setRenderModal(true);
 
             const isCollapsed = editor.selection && Range.isCollapsed(editor.selection);
@@ -85,7 +85,7 @@ export const LinkButton = ({ fieldProps }) => {
           fieldSchema={fieldSchema}
           initialState={initialState}
           close={() => {
-            toggle(modalSlug);
+            toggleModal(modalSlug);
             setRenderModal(false);
           }}
           handleModalSubmit={(fields) => {
@@ -120,7 +120,7 @@ export const LinkButton = ({ fieldProps }) => {
               Transforms.insertText(editor, String(data.text), { at: editor.selection.focus.path });
             }
 
-            toggle(modalSlug);
+            toggleModal(modalSlug);
             setRenderModal(false);
 
             ReactEditor.focus(editor);

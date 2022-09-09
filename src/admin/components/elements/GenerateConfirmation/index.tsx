@@ -17,13 +17,13 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
   } = props;
 
   const { id } = useDocumentInfo();
-  const { toggle } = useModal();
+  const { toggleModal } = useModal();
 
   const modalSlug = `generate-confirmation-${id}`;
 
   const handleGenerate = () => {
     setKey();
-    toggle(modalSlug);
+    toggleModal(modalSlug);
     toast.success('New API Key Generated.', { autoClose: 3000 });
     highlightField(true);
   };
@@ -34,7 +34,7 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
         size="small"
         buttonStyle="secondary"
         onClick={() => {
-          toggle(modalSlug);
+          toggleModal(modalSlug);
         }}
       >
         Generate new API key
@@ -59,7 +59,7 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
             buttonStyle="secondary"
             type="button"
             onClick={() => {
-              toggle(modalSlug);
+              toggleModal(modalSlug);
             }}
           >
             Cancel

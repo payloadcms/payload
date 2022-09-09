@@ -17,7 +17,7 @@ const baseClass = 'status';
 
 const Status: React.FC<Props> = () => {
   const { publishedDoc, unpublishedVersions, collection, global, id, getVersions } = useDocumentInfo();
-  const { toggle } = useModal();
+  const { toggleModal } = useModal();
   const { serverURL, routes: { api } } = useConfig();
   const [processing, setProcessing] = useState(false);
   const { reset: resetForm } = useForm();
@@ -93,13 +93,13 @@ const Status: React.FC<Props> = () => {
 
     setProcessing(false);
     if (action === 'revert') {
-      toggle(revertModalSlug);
+      toggleModal(revertModalSlug);
     }
 
     if (action === 'unpublish') {
-      toggle(unPublishModalSlug);
+      toggleModal(unPublishModalSlug);
     }
-  }, [collection, global, publishedDoc, serverURL, api, id, locale, resetForm, getVersions, toggle, revertModalSlug, unPublishModalSlug]);
+  }, [collection, global, publishedDoc, serverURL, api, id, locale, resetForm, getVersions, toggleModal, revertModalSlug, unPublishModalSlug]);
 
   if (statusToRender) {
     return (
@@ -110,7 +110,7 @@ const Status: React.FC<Props> = () => {
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
-                onClick={() => toggle(unPublishModalSlug)}
+                onClick={() => toggleModal(unPublishModalSlug)}
                 className={`${baseClass}__action`}
                 buttonStyle="none"
               >
@@ -126,7 +126,7 @@ const Status: React.FC<Props> = () => {
                   <Button
                     buttonStyle="secondary"
                     type="button"
-                    onClick={processing ? undefined : () => toggle(unPublishModalSlug)}
+                    onClick={processing ? undefined : () => toggleModal(unPublishModalSlug)}
                   >
                     Cancel
                   </Button>
@@ -143,7 +143,7 @@ const Status: React.FC<Props> = () => {
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
-                onClick={() => toggle(revertModalSlug)}
+                onClick={() => toggleModal(revertModalSlug)}
                 className={`${baseClass}__action`}
                 buttonStyle="none"
               >
@@ -159,7 +159,7 @@ const Status: React.FC<Props> = () => {
                   <Button
                     buttonStyle="secondary"
                     type="button"
-                    onClick={processing ? undefined : () => toggle(revertModalSlug)}
+                    onClick={processing ? undefined : () => toggleModal(revertModalSlug)}
                   >
                     Cancel
                   </Button>
