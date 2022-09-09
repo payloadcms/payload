@@ -169,6 +169,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
                 </a>
               )}
               <Button
+                className={`${baseClass}__link-edit`}
                 icon="edit"
                 round
                 buttonStyle="icon-label"
@@ -181,6 +182,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
                 tooltip="Edit"
               />
               <Button
+                className={`${baseClass}__link-close`}
                 icon="x"
                 round
                 buttonStyle="icon-label"

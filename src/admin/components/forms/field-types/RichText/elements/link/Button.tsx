@@ -68,7 +68,7 @@ export const LinkButton = ({ fieldProps }) => {
 
             if (!isCollapsed) {
               const data = {
-                text: Editor.string(editor, editor.selection),
+                text: editor.selection ? Editor.string(editor, editor.selection) : '',
               };
 
               const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'create', locale });
@@ -102,14 +102,14 @@ export const LinkButton = ({ fieldProps }) => {
               children: [],
             };
 
-            if (isCollapsed) {
+            if (isCollapsed || !editor.selection) {
               // If selection anchor and focus are the same,
               // Just inject a new node with children already set
               Transforms.insertNodes(editor, {
                 ...newLink,
                 children: [{ text: String(data.text) }],
               });
-            } else {
+            } else if (editor.selection) {
               // Otherwise we need to wrap the selected node in a link,
               // Delete its old text,
               // Move the selection one position forward into the link,
