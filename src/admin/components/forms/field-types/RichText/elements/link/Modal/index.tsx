@@ -43,6 +43,7 @@ export const EditModal: React.FC<Props> = ({
             fieldTypes={fieldTypes}
             readOnly={false}
             fieldSchema={fieldSchema}
+            forceRender
           />
           <FormSubmit>
             Confirm

@@ -63,7 +63,7 @@ export default buildConfig({
       },
     });
 
-    await payload.create({ collection: 'array-fields', data: arrayDoc });
+    const createdArrayDoc = await payload.create({ collection: 'array-fields', data: arrayDoc });
     await payload.create({ collection: 'collapsible-fields', data: collapsibleDoc });
     await payload.create({ collection: 'conditional-logic', data: conditionalLogicDoc });
     await payload.create({ collection: 'group-fields', data: groupDoc });
@@ -84,7 +84,8 @@ export default buildConfig({
 
     const createdUploadDoc = await payload.create({ collection: 'uploads', data: uploadsDoc, file });
 
-    const richTextDocWithRelationship = { ...richTextDoc };
+    const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace('{{ARRAY_DOC_ID}}', createdArrayDoc.id));
+    const richTextDocWithRelationship = { ...richTextDocWithRelId };
 
     const richTextRelationshipIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'relationship');
     richTextDocWithRelationship.richText[richTextRelationshipIndex].value = { id: createdTextDoc.id };

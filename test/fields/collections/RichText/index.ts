@@ -94,7 +94,7 @@ export const richTextDoc = {
         },
         {
           type: 'link',
-          url: 'test.com',
+          url: 'https://payloadcms.com',
           newTab: true,
           children: [
             {
@@ -103,7 +103,24 @@ export const richTextDoc = {
           ],
         },
         {
-          text: ' and store nested relationship fields:',
+          text: ', ',
+        },
+        {
+          type: 'link',
+          linkType: 'internal',
+          doc: {
+            value: '{{ARRAY_DOC_ID}}',
+            relationTo: 'array-fields',
+          },
+          fields: {},
+          children: [
+            {
+              text: 'link to relationships',
+            },
+          ],
+        },
+        {
+          text: ', and store nested relationship fields:',
         },
       ],
     },
