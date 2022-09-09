@@ -1,7 +1,7 @@
 ---
 name: Bug Report
 about: Create a bug report for Payload
-labels: 'bug'
+labels: 'possible-bug'
 ---
 
 # Bug Report
