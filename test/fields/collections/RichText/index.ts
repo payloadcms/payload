@@ -43,6 +43,22 @@ const RichTextFields: CollectionConfig = {
       type: 'richText',
       required: true,
       admin: {
+        link: {
+          fields: [
+            {
+              name: 'rel',
+              label: 'Rel Attribute',
+              type: 'select',
+              hasMany: true,
+              options: [
+                'noopener', 'noreferrer', 'nofollow',
+              ],
+              admin: {
+                description: 'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+              },
+            },
+          ],
+        },
         upload: {
           collections: {
             uploads: {
@@ -78,7 +94,7 @@ export const richTextDoc = {
         },
         {
           type: 'link',
-          url: 'test.com',
+          url: 'https://payloadcms.com',
           newTab: true,
           children: [
             {
@@ -87,7 +103,24 @@ export const richTextDoc = {
           ],
         },
         {
-          text: ' and store nested relationship fields:',
+          text: ', ',
+        },
+        {
+          type: 'link',
+          linkType: 'internal',
+          doc: {
+            value: '{{ARRAY_DOC_ID}}',
+            relationTo: 'array-fields',
+          },
+          fields: {},
+          children: [
+            {
+              text: 'link to relationships',
+            },
+          ],
+        },
+        {
+          text: ', and store nested relationship fields:',
         },
       ],
     },

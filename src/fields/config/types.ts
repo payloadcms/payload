@@ -293,6 +293,9 @@ export type RichTextField = FieldBase & {
         }
       }
     }
+    link?: {
+      fields?: Field[];
+    }
   }
 }
 

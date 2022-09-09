@@ -436,5 +436,28 @@ describe('Fields', () => {
 
       expect(workingRichTextQuery.docs).toHaveLength(1);
     });
+
+    it('should populate link relationship', async () => {
+      const query = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.linkType': {
+            equals: 'internal',
+          },
+        },
+      });
+
+      const nodes = query.docs[0].richText;
+      expect(nodes).toBeDefined();
+      const child = nodes.flatMap((n) => n.children)
+        .find((c) => c.doc);
+      expect(child).toMatchObject({
+        type: 'link',
+        linkType: 'internal',
+      });
+      expect(child.doc.relationTo).toEqual('array-fields');
+      expect(typeof child.doc.value.id).toBe('string');
+      expect(child.doc.value.items).toHaveLength(6);
+    });
   });
 });

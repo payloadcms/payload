@@ -2,7 +2,7 @@
 import { Field, fieldHasSubFields, fieldIsArrayType, fieldAffectsData } from '../config/types';
 import { PayloadRequest } from '../../express/types';
 import { populate } from './populate';
-import { recurseRichText } from './relationshipPromise';
+import { recurseRichText } from './richTextRelationshipPromise';
 
 type NestedRichTextFieldsArgs = {
   promises: Promise<void>[]

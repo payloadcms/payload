@@ -42,7 +42,7 @@ import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import withNullableType from './withNullableType';
 import { toWords } from '../../utilities/formatLabels';
-import createRichTextRelationshipPromise from '../../fields/richText/relationshipPromise';
+import createRichTextRelationshipPromise from '../../fields/richText/richTextRelationshipPromise';
 import formatOptions from '../utilities/formatOptions';
 import { Payload } from '../..';
 import buildWhereInputType from './buildWhereInputType';
