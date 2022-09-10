@@ -1,3 +1,10 @@
+## [1.0.36](https://github.com/payloadcms/payload/compare/v1.0.35...v1.0.36) (2022-09-10)
+
+
+### Bug Fixes
+
+* bug with account view ([ada1871](https://github.com/payloadcms/payload/commit/ada1871993bae92bc7a30f48029b437d63eb3871))
+
 ## [1.0.35](https://github.com/payloadcms/payload/compare/v1.0.34...v1.0.35) (2022-09-10)
 
 
