@@ -12,6 +12,7 @@ import Account from '../../graphics/Account';
 import Localizer from '../Localizer';
 import NavGroup from '../NavGroup';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 
 import './index.scss';
 
@@ -41,18 +42,23 @@ const DefaultNav = () => {
   ].filter(Boolean)
     .join(' ');
 
-  const groupedCollections: Record<string, SanitizedCollectionConfig[]> = collections.reduce((acc, currentValue) => {
-    if (currentValue.admin.group) {
-      if (acc[currentValue.admin.group]) {
-        acc[currentValue.admin.group].push(currentValue);
+  const groupNavItems = (items) => {
+    return items.reduce((acc, currentValue) => {
+      if (currentValue.admin.group) {
+        if (acc[currentValue.admin.group]) {
+          acc[currentValue.admin.group].push(currentValue);
+        } else {
+          acc[currentValue.admin.group] = [currentValue];
+        }
       } else {
-        acc[currentValue.admin.group] = [currentValue];
+        acc[''].push(currentValue);
       }
-    } else {
-      acc[''].push(currentValue);
-    }
-    return acc;
-  }, { '': [] });
+      return acc;
+    }, { '': [] });
+  };
+
+  const groupedCollections: Record<string, SanitizedCollectionConfig[]> = groupNavItems(collections);
+  const groupedGlobals: Record<string, SanitizedGlobalConfig[]> = groupNavItems(globals);
 
   useEffect(() => history.listen(() => {
     setMenuActive(false);
@@ -90,6 +96,7 @@ const DefaultNav = () => {
                 <NavGroup
                   key={group}
                   label={group}
+                  type="collections"
                 >
                   {groupCollections.map((collection, i) => {
                     const href = `${admin}/collections/${collection.slug}`;
@@ -117,25 +124,34 @@ const DefaultNav = () => {
             <React.Fragment>
               <span className={`${baseClass}__label`}>Globals</span>
               <nav className={`${baseClass}__globals`}>
-                {globals.map((global, i) => {
-                  const href = `${admin}/globals/${global.slug}`;
+                {Object.entries(groupedGlobals)
+                  .map(([group, globalsGroup]) => (
+                    <NavGroup
+                      key={group}
+                      label={group}
+                      type="globals"
+                    >
+                      {globalsGroup.map((global, i) => {
+                        const href = `${admin}/globals/${global.slug}`;
 
-                  if (permissions?.globals?.[global.slug].read.permission) {
-                    return (
-                      <NavLink
-                        id={`nav-global-${global.slug}`}
-                        activeClassName="active"
-                        key={i}
-                        to={href}
-                      >
-                        <Chevron />
-                        {global.label}
-                      </NavLink>
-                    );
-                  }
-
-                  return null;
-                })}
+                        if (permissions?.globals?.[global.slug]?.read.permission) {
+                          return (
+                            <NavLink
+                              id={`nav-global-${global.slug}`}
+                              className={`${baseClass}__link`}
+                              activeClassName="active"
+                              key={i}
+                              to={href}
+                            >
+                              <Chevron />
+                              {global.label}
+                            </NavLink>
+                          );
+                        }
+                        return null;
+                      })}
+                    </NavGroup>
+                  ))}
               </nav>
             </React.Fragment>
           )}

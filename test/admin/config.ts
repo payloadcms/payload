@@ -120,6 +120,30 @@ export default buildConfig({
         },
       ],
     },
+    {
+      slug: 'group-globals-one',
+      admin: {
+        group: 'Group',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'group-globals-two',
+      admin: {
+        group: 'Group',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({

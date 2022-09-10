@@ -71,6 +71,21 @@ describe('admin', () => {
       await expect(link).toBeVisible();
     });
 
+    test('should collapse and expand globals groups', async () => {
+      await page.goto(url.admin);
+      const navGroup = page.locator('#nav-group-Group .nav-group__toggle');
+      const link = await page.locator('#nav-global-group-globals-one');
+
+      await expect(navGroup).toContainText('Group');
+      await expect(link).toBeVisible();
+
+      await navGroup.click();
+      await expect(link).not.toBeVisible();
+
+      await navGroup.click();
+      await expect(link).toBeVisible();
+    });
+
     test('should save nav group collapse preferences', async () => {
       await page.goto(url.admin);
 

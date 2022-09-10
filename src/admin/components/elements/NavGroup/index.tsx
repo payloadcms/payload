@@ -6,15 +6,17 @@ import { usePreferences } from '../../utilities/Preferences';
 import './index.scss';
 
 const baseClass = 'nav-group';
-const preferencesKey = 'collapsed-nav-groups';
 
-const NavGroup: React.FC<{ children: React.ReactNode, label: string}> = ({
+const NavGroup: React.FC<{ children: React.ReactNode, label: string, type: string}> = ({
   children,
   label,
+  type,
 }) => {
   const [collapsed, setCollapsed] = useState(true);
   const [animate, setAnimate] = useState(false);
   const { getPreference, setPreference } = usePreferences();
+
+  const preferencesKey = `collapsed-${type}-groups`;
 
   useEffect(() => {
     if (label) {
@@ -24,7 +26,7 @@ const NavGroup: React.FC<{ children: React.ReactNode, label: string}> = ({
       };
       setCollapsedFromPreferences();
     }
-  }, [getPreference, label]);
+  }, [getPreference, label, preferencesKey]);
 
   if (label) {
     const toggleCollapsed = async () => {
