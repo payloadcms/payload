@@ -10,6 +10,8 @@ import CloseMenu from '../../icons/CloseMenu';
 import Icon from '../../graphics/Icon';
 import Account from '../../graphics/Account';
 import Localizer from '../Localizer';
+import NavGroup from '../NavGroup';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 
 import './index.scss';
 
@@ -36,7 +38,21 @@ const DefaultNav = () => {
   const classes = [
     baseClass,
     menuActive && `${baseClass}--menu-active`,
-  ].filter(Boolean).join(' ');
+  ].filter(Boolean)
+    .join(' ');
+
+  const groupedCollections: Record<string, SanitizedCollectionConfig[]> = collections.reduce((acc, currentValue) => {
+    if (currentValue.admin.group) {
+      if (acc[currentValue.admin.group]) {
+        acc[currentValue.admin.group].push(currentValue);
+      } else {
+        acc[currentValue.admin.group] = [currentValue];
+      }
+    } else {
+      acc[''].push(currentValue);
+    }
+    return acc;
+  }, { '': [] });
 
   useEffect(() => history.listen(() => {
     setMenuActive(false);
@@ -68,31 +84,39 @@ const DefaultNav = () => {
         <div className={`${baseClass}__wrap`}>
           {Array.isArray(beforeNavLinks) && beforeNavLinks.map((Component, i) => <Component key={i} />)}
           <span className={`${baseClass}__label`}>Collections</span>
-          <nav>
-            {collections && collections.map((collection, i) => {
-              const href = `${admin}/collections/${collection.slug}`;
+          <nav className={`${baseClass}__collections`}>
+            {Object.entries(groupedCollections)
+              .map(([group, groupCollections]) => (
+                <NavGroup
+                  key={group}
+                  label={group}
+                >
+                  {groupCollections.map((collection, i) => {
+                    const href = `${admin}/collections/${collection.slug}`;
 
-              if (permissions?.collections?.[collection.slug]?.read.permission) {
-                return (
-                  <NavLink
-                    id={`nav-${collection.slug}`}
-                    activeClassName="active"
-                    key={i}
-                    to={href}
-                  >
-                    <Chevron />
-                    {collection.labels.plural}
-                  </NavLink>
-                );
-              }
-
-              return null;
-            })}
+                    if (permissions?.collections?.[collection.slug]?.read.permission) {
+                      return (
+                        <NavLink
+                          id={`nav-${collection.slug}`}
+                          className={`${baseClass}__link`}
+                          activeClassName="active"
+                          key={i}
+                          to={href}
+                        >
+                          <Chevron />
+                          {collection.labels.plural}
+                        </NavLink>
+                      );
+                    }
+                    return null;
+                  })}
+                </NavGroup>
+              ))}
           </nav>
           {(globals && globals.length > 0) && (
             <React.Fragment>
               <span className={`${baseClass}__label`}>Globals</span>
-              <nav>
+              <nav className={`${baseClass}__globals`}>
                 {globals.map((global, i) => {
                   const href = `${admin}/globals/${global.slug}`;
 

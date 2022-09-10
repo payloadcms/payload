@@ -1,0 +1,32 @@
+@import '../../../scss/styles.scss';
+
+.nav-group {
+  &__toggle {
+    cursor: pointer;
+    color: var(--theme-elevation-600);
+    background: transparent;
+    padding-left: 0;
+    border: 0;
+    margin-top: base(.25);
+  }
+
+  &__indicator {
+    transform: rotate(.5turn);
+
+    .stroke {
+      stroke: var(--theme-elevation-600);
+    }
+  }
+
+  &--collapsed {
+    .collapsible__toggle {
+      border-bottom-right-radius: $style-radius-s;
+      border-bottom-left-radius: $style-radius-s;
+    }
+
+    .nav-group__indicator {
+      transform: rotate(0turn);
+    }
+  }
+
+}

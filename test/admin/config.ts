@@ -61,6 +61,54 @@ export default buildConfig({
         },
       ],
     },
+    {
+      slug: 'group-one-collection-ones',
+      admin: {
+        group: 'One',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'group-one-collection-twos',
+      admin: {
+        group: 'One',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'group-two-collection-ones',
+      admin: {
+        group: 'Two',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'group-two-collection-twos',
+      admin: {
+        group: 'Two',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
   ],
   globals: [
     {

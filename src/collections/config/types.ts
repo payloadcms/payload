@@ -152,6 +152,10 @@ export type CollectionAdminOptions = {
    */
   defaultColumns?: string[];
   /**
+   * Place collections into a navigational group
+   */
+  group?: string;
+  /**
    * Custom description for collection
    */
   description?: EntityDescription;

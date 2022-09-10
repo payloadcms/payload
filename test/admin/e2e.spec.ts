@@ -56,6 +56,33 @@ describe('admin', () => {
       expect(page.url()).toContain(url.list);
     });
 
+    test('should collapse and expand collection groups', async () => {
+      await page.goto(url.admin);
+      const navGroup = page.locator('#nav-group-One .nav-group__toggle');
+      const link = await page.locator('#nav-group-one-collection-ones');
+
+      await expect(navGroup).toContainText('One');
+      await expect(link).toBeVisible();
+
+      await navGroup.click();
+      await expect(link).not.toBeVisible();
+
+      await navGroup.click();
+      await expect(link).toBeVisible();
+    });
+
+    test('should save nav group collapse preferences', async () => {
+      await page.goto(url.admin);
+
+      const navGroup = page.locator('#nav-group-One .nav-group__toggle');
+      await navGroup.click();
+
+      await page.goto(url.admin);
+
+      const link = await page.locator('#nav-group-one-collection-ones');
+      await expect(link).not.toBeVisible();
+    });
+
     test('breadcrumbs - from list to dashboard', async () => {
       await page.goto(url.list);
       await page.locator('.step-nav a[href="/admin"]').click();

@@ -61,6 +61,7 @@ You can customize the way that the Admin panel behaves on a collection-by-collec
 
 | Option                       | Description  |
 | ---------------------------- | -------------|
+| `group`                      | Text used as a label for grouping collection links together in the navigation. |
 | `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title. |
 | `description`                | Text or React component to display below the Collection label in the List view to give editors more information. |
 | `defaultColumns`             | Array of field names that correspond to which columns to show by default in this collection's List view. |
@@ -78,7 +79,7 @@ If the function is specified, a Preview button will automatically appear in the 
 **The preview function accepts two arguments:**
 
 1. The document being edited
-1. An `options` object, containing `locale` and `token` properties. The `token` is the currently logged in user's JWT.
+1. An `options` object, containing `locale` and `token` properties. The `token` is the currently logged-in user's JWT.
 
 **Example collection with preview function:**
 
