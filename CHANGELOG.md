@@ -1,3 +1,19 @@
+## [1.0.35](https://github.com/payloadcms/payload/compare/v1.0.34...v1.0.35) (2022-09-10)
+
+
+### Bug Fixes
+
+* [#1059](https://github.com/payloadcms/payload/issues/1059) ([13dc39d](https://github.com/payloadcms/payload/commit/13dc39dc6da4cb7c450477f539b09a3cb54ed5af))
+* add height/width if imageSizes not specified ([8bd2a0e](https://github.com/payloadcms/payload/commit/8bd2a0e6c9a9cd05c7b162ade47f3bb111236ba3))
+* incorrect auth strategy type ([c8b37f4](https://github.com/payloadcms/payload/commit/c8b37f40cbdc766a45dbe21573b1848bfc091901))
+* rich text link with no selection ([5a19f69](https://github.com/payloadcms/payload/commit/5a19f6915a17dbb072b89f63f32705d5f0fc75ce))
+
+
+### Features
+
+* allows rich text links to link to other docs ([a99d9c9](https://github.com/payloadcms/payload/commit/a99d9c98c3f92d6fbeb65c384ca4d43b82184bfd))
+* improves rich text link ux ([91000d7](https://github.com/payloadcms/payload/commit/91000d7fdaa9628650c737fc3f7f6a900b7447d4))
+
 ## [1.0.34](https://github.com/payloadcms/payload/compare/v1.0.33...v1.0.34) (2022-09-07)
 
 
