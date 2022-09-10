@@ -40,7 +40,7 @@ const AccountView: React.FC = () => {
     },
   } = useConfig();
 
-  const collection = collections.find((coll) => coll.slug === user.collection);
+  const collection = collections.find((coll) => coll.slug === adminUser);
 
   const { fields } = collection;
 
