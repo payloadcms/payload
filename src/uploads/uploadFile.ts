@@ -56,6 +56,7 @@ const uploadFile = async ({
     if (!disableLocalStorage) {
       mkdirp.sync(staticPath);
     }
+
     if (file) {
       try {
         let fsSafeName: string;
@@ -66,18 +67,17 @@ const uploadFile = async ({
         if (!disableLocalStorage) {
           let resized: Sharp | undefined;
           if (resizeOptions) {
-            resized = await sharp(file.data).resize(resizeOptions);
+            resized = sharp(file.data).resize(resizeOptions);
           }
           if (formatOptions) {
-            resized = (resized ?? await sharp(file.data)).toFormat(formatOptions.format, formatOptions.options);
+            resized = (resized ?? sharp(file.data)).toFormat(formatOptions.format, formatOptions.options);
           }
           fileBuffer = resized ? (await resized.toBuffer()) : file.data;
-          const bufferInfo = await fromBuffer(fileBuffer);
-          mimeType = bufferInfo.mime;
+          const { mime, ext } = await fromBuffer(fileBuffer);
+          mimeType = mime;
           fileSize = fileBuffer.length;
           const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
-          const fileExtension = bufferInfo.ext;
-          fsSafeName = `${baseFilename}.${fileExtension}`;
+          fsSafeName = `${baseFilename}.${ext}`;
 
           if (!overwriteExistingFiles) {
             fsSafeName = await getSafeFileName(Model, staticPath, fsSafeName);
@@ -86,12 +86,12 @@ const uploadFile = async ({
           await saveBufferToFile(fileBuffer, `${staticPath}/${fsSafeName}`);
         }
 
-        fileData.filename = fsSafeName;
-        fileData.filesize = fileSize;
-        fileData.mimeType = mimeType;
+        fileData.filename = fsSafeName || (!overwriteExistingFiles ? await getSafeFileName(Model, staticPath, file.name) : file.name);
+        fileData.filesize = fileSize || file.size;
+        fileData.mimeType = mimeType || (await fromBuffer(file.data)).mime;
 
         if (isImage(file.mimetype)) {
-          const dimensions = await getImageSize(fileBuffer);
+          const dimensions = await getImageSize(file);
           fileData.width = dimensions.width;
           fileData.height = dimensions.height;
 

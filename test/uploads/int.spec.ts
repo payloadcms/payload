@@ -106,7 +106,7 @@ describe('Collections - Uploads', () => {
   it('update', async () => {
     // Create image
     const filePath = path.resolve(__dirname, './image.png');
-    const file = getFileByPath(filePath);
+    const file = await getFileByPath(filePath);
     file.name = 'renamed.png';
 
     const mediaDoc = await payload.create({

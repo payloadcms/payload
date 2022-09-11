@@ -80,7 +80,7 @@ export default buildConfig({
     if (fs.existsSync(uploadsDir)) fs.readdirSync(uploadsDir).forEach((f) => fs.rmSync(`${uploadsDir}/${f}`));
 
     const filePath = path.resolve(__dirname, './collections/Upload/payload.jpg');
-    const file = getFileByPath(filePath);
+    const file = await getFileByPath(filePath);
 
     const createdUploadDoc = await payload.create({ collection: 'uploads', data: uploadsDoc, file });
 
