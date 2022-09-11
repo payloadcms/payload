@@ -1,4 +1,3 @@
-import { UploadedFile } from 'express-fileupload';
 import probeImageSize from 'probe-image-size';
 
 export type ProbedImageSize = {
@@ -8,6 +7,6 @@ export type ProbedImageSize = {
   mime: string,
 }
 
-export default async function (image: UploadedFile): Promise<ProbedImageSize> {
-  return probeImageSize.sync(image.data);
+export default async function (buffer: Buffer): Promise<ProbedImageSize> {
+  return probeImageSize.sync(buffer);
 }

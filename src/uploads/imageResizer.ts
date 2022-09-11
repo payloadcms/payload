@@ -1,6 +1,7 @@
 import fs from 'fs';
-import sharp, { Sharp } from 'sharp';
+import sharp from 'sharp';
 import sanitize from 'sanitize-filename';
+import { fromBuffer } from 'file-type';
 import { ProbedImageSize } from './getImageSize';
 import fileExists from './fileExists';
 import { SanitizedCollectionConfig } from '../collections/config/types';
@@ -36,14 +37,6 @@ function getOutputImage(sourceImage: string, size: ImageSize): OutputImage {
   };
 }
 
-/**
- * @description
- * @param staticPath Path to save images
- * @param config Payload config
- * @param savedFilename
- * @param mimeType
- * @returns image sizes keyed to strings
- */
 export default async function resizeAndSave({
   req,
   file,
@@ -51,22 +44,16 @@ export default async function resizeAndSave({
   staticPath,
   config,
   savedFilename,
-  mimeType,
 }: Args): Promise<FileSizes> {
-  const { imageSizes, disableLocalStorage, resizeOptions, formatOptions } = config.upload;
+  const { imageSizes, disableLocalStorage } = config.upload;
 
   const sizes = imageSizes
     .filter((desiredSize) => needsResize(desiredSize, dimensions))
     .map(async (desiredSize) => {
-      const defaultResizeOptions = { position: desiredSize.crop || 'centre' };
-      let resized = await sharp(file).resize(
-        desiredSize.width,
-        desiredSize.height,
-        resizeOptions ?? defaultResizeOptions,
-      );
+      let resized = await sharp(file).resize(desiredSize);
 
-      if (formatOptions) {
-        resized = resized.toFormat(...formatOptions);
+      if (desiredSize.formatOptions) {
+        resized = resized.toFormat(desiredSize.formatOptions.format, desiredSize.formatOptions.options);
       }
 
       const bufferObject = await resized.toBuffer({
@@ -76,7 +63,7 @@ export default async function resizeAndSave({
       req.payloadUploadSizes[desiredSize.name] = bufferObject.data;
 
       const outputImage = getOutputImage(savedFilename, desiredSize);
-      const imageNameWithDimensions = createImageName(outputImage, bufferObject, formatOptions);
+      const imageNameWithDimensions = createImageName(outputImage, bufferObject);
       const imagePath = `${staticPath}/${imageNameWithDimensions}`;
       const fileAlreadyExists = await fileExists(imagePath);
 
@@ -94,7 +81,7 @@ export default async function resizeAndSave({
         height: bufferObject.info.height,
         filename: imageNameWithDimensions,
         filesize: bufferObject.info.size,
-        mimeType: formatOptions ? `image/${formatOptions?.[0]}` : mimeType,
+        mimeType: (await fromBuffer(bufferObject.data)).mime,
       };
     });
 
@@ -117,10 +104,8 @@ export default async function resizeAndSave({
 function createImageName(
   outputImage: OutputImage,
   bufferObject: { data: Buffer; info: sharp.OutputInfo },
-  formatOptions: Parameters<Sharp['toFormat']>,
 ): string {
-  const extension = formatOptions?.[0] ?? outputImage.extension;
-  return `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${extension}`;
+  return `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${outputImage.extension}`;
 }
 
 function needsResize(desiredSize: ImageSize, dimensions: ProbedImageSize): boolean {

@@ -39,12 +39,23 @@ export default buildConfig({
       upload: {
         staticURL: '/media',
         staticDir: './media',
+        resizeOptions: {
+          width: 1280,
+          height: 720,
+          position: 'center',
+        },
+        formatOptions: {
+          format: 'png',
+          options: { quality: 90 },
+        },
         imageSizes: [
           {
             name: 'maintainedAspectRatio',
             width: 1024,
             height: null,
             crop: 'center',
+            position: 'center',
+            formatOptions: { format: 'png', options: { quality: 90 } },
           },
           {
             name: 'tablet',
@@ -72,24 +83,6 @@ export default buildConfig({
       upload: {
         staticURL: '/media',
         disableLocalStorage: true,
-      },
-      fields: [],
-    },
-    {
-      slug: 'formatOptions',
-      upload: {
-        staticURL: '/media-format-options',
-        formatOptions: ['webp'],
-      },
-      fields: [],
-    },
-    {
-      slug: 'resizeOptions',
-      upload: {
-        staticURL: '/media-resize-options',
-        resizeOptions: {
-          width: 2,
-        },
       },
       fields: [],
     },
