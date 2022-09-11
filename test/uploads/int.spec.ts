@@ -135,7 +135,7 @@ describe('Collections - Uploads', () => {
 
   it('should allow update removing a relationship', async () => {
     const filePath = path.resolve(__dirname, './image.png');
-    const file = getFileByPath(filePath);
+    const file = await getFileByPath(filePath);
     file.name = 'renamed.png';
 
     const { id } = await payload.create({
