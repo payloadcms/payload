@@ -1,6 +1,5 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { Transforms } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
 import { useConfig } from '../../../../../../utilities/Config';
 import ElementButton from '../../Button';
@@ -32,17 +31,13 @@ const insertRelationship = (editor, { value, relationTo }) => {
     ],
   };
 
-  if (editor.blurSelection) {
-    Transforms.select(editor, editor.blurSelection);
-  }
-
   injectVoidElement(editor, relationship);
 
   ReactEditor.focus(editor);
 };
 
-const RelationshipButton: React.FC<{path: string}> = ({ path }) => {
-  const { open, closeAll } = useModal();
+const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
+  const { toggleModal } = useModal();
   const editor = useSlate();
   const { serverURL, routes: { api }, collections } = useConfig();
   const [renderModal, setRenderModal] = useState(false);
@@ -57,16 +52,16 @@ const RelationshipButton: React.FC<{path: string}> = ({ path }) => {
     const json = await res.json();
 
     insertRelationship(editor, { value: { id: json.id }, relationTo });
-    closeAll();
+    toggleModal(modalSlug);
     setRenderModal(false);
     setLoading(false);
-  }, [editor, closeAll, api, serverURL]);
+  }, [editor, toggleModal, modalSlug, api, serverURL]);
 
   useEffect(() => {
     if (renderModal) {
-      open(modalSlug);
+      toggleModal(modalSlug);
     }
-  }, [renderModal, open, modalSlug]);
+  }, [renderModal, toggleModal, modalSlug]);
 
   if (!hasEnabledCollections) return null;
 
@@ -90,7 +85,7 @@ const RelationshipButton: React.FC<{path: string}> = ({ path }) => {
               <Button
                 buttonStyle="none"
                 onClick={() => {
-                  closeAll();
+                  toggleModal(modalSlug);
                   setRenderModal(false);
                 }}
               >

@@ -4,7 +4,7 @@ import FormData from 'form-data';
 import { promisify } from 'util';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
-import config, { mediaSlug } from './config';
+import config, { mediaSlug, relationSlug } from './config';
 import payload from '../../src';
 import getFileByPath from '../../src/uploads/getFileByPath';
 
@@ -131,6 +131,35 @@ describe('Collections - Uploads', () => {
     // Check that previously existing files weren't affected
     expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(true);
     expect(await fileExists(path.join(__dirname, './media', mediaDoc.sizes.icon.filename))).toBe(true);
+  });
+
+  it('should allow update removing a relationship', async () => {
+    const filePath = path.resolve(__dirname, './image.png');
+    const file = getFileByPath(filePath);
+    file.name = 'renamed.png';
+
+    const { id } = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file,
+    });
+
+    const related = await payload.create({
+      collection: relationSlug,
+      data: {
+        image: id,
+      },
+    });
+
+    const doc = await payload.update({
+      collection: relationSlug,
+      id: related.id,
+      data: {
+        image: null,
+      },
+    });
+
+    expect(doc.image).toBeNull();
   });
 
   it('delete', async () => {

@@ -15,10 +15,6 @@ const toggleElement = (editor, format) => {
     type = 'li';
   }
 
-  if (editor.blurSelection) {
-    Transforms.select(editor, editor.blurSelection);
-  }
-
   Transforms.unwrapNodes(editor, {
     match: (n) => Element.isElement(n) && listTypes.includes(n.type as string),
     split: true,

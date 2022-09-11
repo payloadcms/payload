@@ -142,8 +142,14 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           Create New
                         </Link>
                       </li>
-                      {!disableDuplicate && (
-                      <li><DuplicateDocument slug={slug} /></li>
+                      {!disableDuplicate && isEditing && (
+                      <li>
+                        <DuplicateDocument
+                          collection={collection}
+                          id={id}
+                          slug={slug}
+                        />
+                      </li>
                       )}
                     </React.Fragment>
                     )}

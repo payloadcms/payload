@@ -1,11 +1,13 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import payload from '../../src';
 import type { TypeWithTimestamps } from '../../src/collections/config/types';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
 import type { LocalizedPost } from './payload-types';
 import { slug } from './config';
+import { englishTitle, spanishLocale } from './shared';
 
 /**
  * TODO: Localization
@@ -91,6 +93,40 @@ describe('Localization', () => {
 
       await expect(page.locator('#field-title')).toHaveValue(title);
       await expect(page.locator('#field-description')).toHaveValue(description);
+    });
+  });
+
+  describe('localized duplicate', () => {
+    let id;
+
+    beforeAll(async () => {
+      const localizedPost = await payload.create<LocalizedPost>({
+        collection: slug,
+        data: {
+          title: englishTitle,
+        },
+      });
+      id = localizedPost.id;
+      await payload.update<LocalizedPost>({
+        collection: slug,
+        id,
+        locale: spanishLocale,
+        data: {
+          title: spanishTitle,
+        },
+      });
+    });
+
+    test('should duplicate data for all locales', async () => {
+      await page.goto(url.edit(id));
+
+      await page.locator('.btn.duplicate').first().click();
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      await expect(page.locator('#field-title')).toHaveValue(englishTitle);
+
+      await changeLocale(spanishLocale);
+      await expect(page.locator('#field-title')).toHaveValue(spanishTitle);
     });
   });
 });

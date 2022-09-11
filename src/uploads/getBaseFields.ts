@@ -92,6 +92,8 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     filename,
     mimeType,
     filesize,
+    width,
+    height,
   ];
 
   if (uploadOptions.mimeTypes) {
@@ -100,8 +102,6 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
 
   if (uploadOptions.imageSizes) {
     uploadFields = uploadFields.concat([
-      width,
-      height,
       {
         name: 'sizes',
         label: 'Sizes',

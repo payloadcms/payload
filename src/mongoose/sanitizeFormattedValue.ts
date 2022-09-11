@@ -1,6 +1,7 @@
 import mongoose, { SchemaType } from 'mongoose';
 import { createArrayFromCommaDelineated } from './createArrayFromCommaDelineated';
 import { getSchemaTypeOptions } from './getSchemaTypeOptions';
+import wordBoundariesRegex from '../utilities/wordBoundariesRegex';
 
 export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operator: string, val: any): unknown => {
   let formattedValue = val;
@@ -96,12 +97,8 @@ export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operato
     }
 
     if (operator === 'like' && typeof formattedValue === 'string') {
-      const words = formattedValue.split(' ');
-      const regex = words.reduce((pattern, word, i) => {
-        return `${pattern}(?=.*\\b${word}.*\\b)${i + 1 === words.length ? '.+' : ''}`;
-      }, '');
-
-      formattedValue = { $regex: new RegExp(regex), $options: 'i' };
+      const $regex = wordBoundariesRegex(formattedValue);
+      formattedValue = { $regex };
     }
   }
 

@@ -4,10 +4,10 @@ import { useEffect, useRef } from 'react';
 type useThrottledEffect = (callback: React.EffectCallback, delay: number, deps: React.DependencyList) => void;
 
 const useThrottledEffect: useThrottledEffect = (callback, delay, deps = []) => {
-  const lastRan = useRef(Date.now());
+  const lastRan = useRef<number>(null);
 
-  useEffect(
-    () => {
+  useEffect(() => {
+    if (lastRan) {
       const handler = setTimeout(() => {
         if (Date.now() - lastRan.current >= delay) {
           callback();
@@ -18,9 +18,12 @@ const useThrottledEffect: useThrottledEffect = (callback, delay, deps = []) => {
       return () => {
         clearTimeout(handler);
       };
-    },
-    [delay, ...deps],
-  );
+    }
+
+    callback();
+    lastRan.current = Date.now();
+    return () => null;
+  }, [delay, ...deps]);
 };
 
 export default useThrottledEffect;

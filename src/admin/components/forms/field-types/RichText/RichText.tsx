@@ -16,7 +16,7 @@ import enablePlugins from './enablePlugins';
 import defaultValue from '../../../../../fields/richText/defaultValue';
 import FieldDescription from '../../FieldDescription';
 import withHTML from './plugins/withHTML';
-import { Props, BlurSelectionEditor } from './types';
+import { Props } from './types';
 import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/types';
 import listTypes from './elements/listTypes';
 import mergeCustomFunctions from './mergeCustomFunctions';
@@ -34,7 +34,7 @@ type CustomElement = { type?: string; children: CustomText[] }
 
 declare module 'slate' {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditor & HistoryEditor & BlurSelectionEditor
+    Editor: BaseEditor & ReactEditor & HistoryEditor
     Element: CustomElement
     Text: CustomText
   }
@@ -152,17 +152,13 @@ const RichText: React.FC<Props> = (props) => {
       ),
     );
 
+    CreatedEditor = withHTML(CreatedEditor);
+
     CreatedEditor = enablePlugins(CreatedEditor, elements);
     CreatedEditor = enablePlugins(CreatedEditor, leaves);
 
-    CreatedEditor = withHTML(CreatedEditor);
-
     return CreatedEditor;
   }, [elements, leaves]);
-
-  const onBlur = useCallback(() => {
-    editor.blurSelection = editor.selection;
-  }, [editor]);
 
   useEffect(() => {
     if (!loaded) {
@@ -238,6 +234,7 @@ const RichText: React.FC<Props> = (props) => {
                   if (Button) {
                     return (
                       <Button
+                        fieldProps={props}
                         key={i}
                         path={path}
                       />
@@ -257,6 +254,7 @@ const RichText: React.FC<Props> = (props) => {
                   if (Button) {
                     return (
                       <Button
+                        fieldProps={props}
                         key={i}
                         path={path}
                       />
@@ -279,7 +277,6 @@ const RichText: React.FC<Props> = (props) => {
                 placeholder={placeholder}
                 spellCheck
                 readOnly={readOnly}
-                onBlur={onBlur}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     if (event.shiftKey) {
@@ -289,7 +286,7 @@ const RichText: React.FC<Props> = (props) => {
                       const selectedElement = Node.descendant(editor, editor.selection.anchor.path.slice(0, -1));
 
                       if (SlateElement.isElement(selectedElement)) {
-                      // Allow hard enter to "break out" of certain elements
+                        // Allow hard enter to "break out" of certain elements
                         if (editor.shouldBreakOutOnEnter(selectedElement)) {
                           event.preventDefault();
                           const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);

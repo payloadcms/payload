@@ -4,7 +4,6 @@ import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { TextField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
-// import { FieldType } from '../../useField/types';
 
 import './index.scss';
 
@@ -17,10 +16,12 @@ export type TextInputProps = Omit<TextField, 'type'> & {
   value?: string
   description?: Description
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   placeholder?: string
   style?: React.CSSProperties
   className?: string
   width?: string
+  inputRef?: React.MutableRefObject<HTMLInputElement>
 }
 
 const TextInput: React.FC<TextInputProps> = (props) => {
@@ -34,10 +35,12 @@ const TextInput: React.FC<TextInputProps> = (props) => {
     required,
     value,
     onChange,
+    onKeyDown,
     description,
     style,
     className,
     width,
+    inputRef,
   } = props;
 
   const classes = [
@@ -66,9 +69,11 @@ const TextInput: React.FC<TextInputProps> = (props) => {
         required={required}
       />
       <input
+        ref={inputRef}
         id={`field-${path.replace(/\./gi, '__')}`}
         value={value || ''}
         onChange={onChange}
+        onKeyDown={onKeyDown}
         disabled={readOnly}
         placeholder={placeholder}
         type="text"

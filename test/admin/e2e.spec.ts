@@ -120,17 +120,6 @@ describe('admin', () => {
       expect(page.url()).toContain(url.list);
     });
 
-    test('should duplicate existing', async () => {
-      const { id } = await createPost();
-
-      await page.goto(url.edit(id));
-      await page.locator('#action-duplicate').click();
-
-      expect(page.url()).toContain(url.create);
-      await page.locator('#action-save').click();
-      expect(page.url()).not.toContain(id); // new id
-    });
-
     test('should save globals', async () => {
       await page.goto(url.global(globalSlug));
 
@@ -233,6 +222,14 @@ describe('admin', () => {
         await paginator.locator('button').nth(0).click();
         expect(page.url()).toContain('?page=1');
         await expect(tableItems).toHaveCount(10);
+      });
+    });
+
+    describe('custom css', () => {
+      test('should see custom css in admin UI', async () => {
+        await page.goto(url.admin);
+        const navControls = await page.locator('.nav__controls');
+        await expect(navControls).toHaveCSS('font-family', 'monospace');
       });
     });
 

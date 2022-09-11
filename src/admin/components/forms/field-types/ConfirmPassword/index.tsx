@@ -11,6 +11,10 @@ const ConfirmPassword: React.FC = () => {
   const password = getField('password');
 
   const validate = useCallback((value) => {
+    if (!value) {
+      return 'This field is required';
+    }
+
     if (value === password?.value) {
       return true;
     }

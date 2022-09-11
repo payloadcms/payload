@@ -40,6 +40,7 @@ module.exports = {
         'jest/no-test-callback': 'off',
         'jest/prefer-strict-equal': 'off',
         'jest/expect-expect': 'off',
+        'jest-dom/prefer-to-have-attribute': 'off',
       }
     },
     {

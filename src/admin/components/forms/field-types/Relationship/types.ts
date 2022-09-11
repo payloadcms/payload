@@ -15,7 +15,6 @@ export type Option = {
 
 type CLEAR = {
   type: 'CLEAR'
-  required: boolean
 }
 
 type ADD = {

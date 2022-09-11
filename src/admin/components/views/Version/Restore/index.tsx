@@ -15,7 +15,7 @@ const modalSlug = 'restore-version';
 const Restore: React.FC<Props> = ({ collection, global, className, versionID, originalDocID, versionDate }) => {
   const { serverURL, routes: { api, admin } } = useConfig();
   const history = useHistory();
-  const { toggle } = useModal();
+  const { toggleModal } = useModal();
   const [processing, setProcessing] = useState(false);
 
   let fetchURL = `${serverURL}${api}`;
@@ -51,7 +51,7 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
   return (
     <Fragment>
       <Pill
-        onClick={() => toggle(modalSlug)}
+        onClick={() => toggleModal(modalSlug)}
         className={[baseClass, className].filter(Boolean).join(' ')}
       >
         Restore this version
@@ -66,7 +66,7 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
           <Button
             buttonStyle="secondary"
             type="button"
-            onClick={processing ? undefined : () => toggle(modalSlug)}
+            onClick={processing ? undefined : () => toggleModal(modalSlug)}
           >
             Cancel
           </Button>

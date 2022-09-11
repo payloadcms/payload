@@ -1,12 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useWindowInfo } from '@faceless-ui/window-info';
-import { useScrollInfo } from '@faceless-ui/scroll-info';
 import { Props } from './types';
-
-import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import PopupButton from './PopupButton';
 
 import './index.scss';
+import useIntersect from '../../../hooks/useIntersect';
 
 const baseClass = 'popup';
 
@@ -30,15 +28,18 @@ const Popup: React.FC<Props> = (props) => {
     boundingRef,
   } = props;
 
+  const { width: windowWidth, height: windowHeight } = useWindowInfo();
+  const [intersectionRef, intersectionEntry] = useIntersect({
+    threshold: 1,
+    rootMargin: '-100px 0px 0px 0px',
+    root: boundingRef?.current || null,
+  });
+
   const buttonRef = useRef(null);
   const contentRef = useRef(null);
-  const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(initActive);
   const [verticalAlign, setVerticalAlign] = useState(verticalAlignFromProps);
   const [horizontalAlign, setHorizontalAlign] = useState(horizontalAlignFromProps);
-
-  const { y: scrollY } = useScrollInfo();
-  const { height: windowHeight, width: windowWidth } = useWindowInfo();
 
   const handleClickOutside = useCallback((e) => {
     if (contentRef.current.contains(e.target)) {
@@ -46,10 +47,10 @@ const Popup: React.FC<Props> = (props) => {
     }
 
     setActive(false);
-  }, []);
+  }, [contentRef]);
 
-  useThrottledEffect(() => {
-    if (contentRef.current && buttonRef.current) {
+  useEffect(() => {
+    if (contentRef.current) {
       const {
         left: contentLeftPos,
         right: contentRightPos,
@@ -79,13 +80,11 @@ const Popup: React.FC<Props> = (props) => {
 
       if (contentTopPos < boundingTopPos && contentBottomPos < boundingBottomPos) {
         setVerticalAlign('bottom');
-      } else if (contentBottomPos > boundingBottomPos && contentTopPos < boundingTopPos) {
+      } else if (contentBottomPos > boundingBottomPos && contentTopPos > boundingTopPos) {
         setVerticalAlign('top');
       }
-
-      setMounted(true);
     }
-  }, 500, [scrollY, windowHeight, windowWidth]);
+  }, [boundingRef, intersectionEntry, windowHeight, windowWidth]);
 
   useEffect(() => {
     if (typeof onToggleOpen === 'function') onToggleOpen(active);
@@ -112,7 +111,7 @@ const Popup: React.FC<Props> = (props) => {
     `${baseClass}--color-${color}`,
     `${baseClass}--v-align-${verticalAlign}`,
     `${baseClass}--h-align-${horizontalAlign}`,
-    (active && mounted) && `${baseClass}--active`,
+    (active) && `${baseClass}--active`,
   ].filter(Boolean).join(' ');
 
   return (
@@ -144,7 +143,7 @@ const Popup: React.FC<Props> = (props) => {
       >
         <div
           className={`${baseClass}__wrap`}
-          // TODO: color ::after with bg color
+          ref={intersectionRef}
         >
           <div
             className={`${baseClass}__scroll`}

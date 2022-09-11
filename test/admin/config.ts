@@ -1,3 +1,4 @@
+import path from 'path';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
@@ -18,6 +19,7 @@ export interface Post {
 
 export default buildConfig({
   admin: {
+    css: path.resolve(__dirname, 'styles.scss'),
     components: {
       // providers: [CustomProvider, CustomProvider],
       routes: [

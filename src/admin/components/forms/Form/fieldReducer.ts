@@ -64,7 +64,7 @@ function fieldReducer(state: Fields, action): Fields {
 
     case 'REMOVE': {
       const newState = { ...state };
-      delete newState[action.path];
+      if (newState[action.path]) delete newState[action.path];
       return newState;
     }
 

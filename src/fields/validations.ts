@@ -235,7 +235,7 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
     return defaultMessage;
   }
 
-  if (!canUseDOM && typeof value !== 'undefined') {
+  if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
     const idField = options.payload.collections[options.relationTo].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
     const type = getIDType(idField);
 
@@ -252,7 +252,7 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
     return defaultMessage;
   }
 
-  if (!canUseDOM && typeof value !== 'undefined') {
+  if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
     const values = Array.isArray(value) ? value : [value];
 
     const invalidRelationships = values.filter((val) => {
@@ -285,10 +285,9 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
     });
 
     if (invalidRelationships.length > 0) {
-      return `This field has the following invalid selections: ${
-        invalidRelationships.map((err, invalid) => {
-          return `${err} ${JSON.stringify(invalid)}`;
-        }).join(', ')}` as string;
+      return `This field has the following invalid selections: ${invalidRelationships.map((err, invalid) => {
+        return `${err} ${JSON.stringify(invalid)}`;
+      }).join(', ')}` as string;
     }
   }
 

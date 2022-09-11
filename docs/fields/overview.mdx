@@ -225,11 +225,9 @@ const translation: {
 const field = {
   name: 'attribution',
   type: 'text',
-  admin: {
-    // highlight-start
-    defaultValue: ({ user, locale }) => (`${translation[locale]} ${user.name}`)
-    // highlight-end
-  }
+  // highlight-start
+  defaultValue: ({ user, locale }) => (`${translation[locale]} ${user.name}`)
+  // highlight-end
 };
 ```
 
