@@ -9,9 +9,9 @@ import useDebounce from '../../../../../hooks/useDebounce';
 // set to false when no doc is returned
 // or set to the document returned
 export type Documents = {
- [slug: string]: {
-   [id: string | number]: TypeWithID | null | false
- }
+  [slug: string]: {
+    [id: string | number]: TypeWithID | null | false
+  }
 }
 
 type ListRelationshipContext = {
@@ -24,7 +24,7 @@ type ListRelationshipContext = {
 
 const Context = createContext({} as ListRelationshipContext);
 
-export const RelationshipProvider: React.FC<{children?: React.ReactNode}> = ({ children }) => {
+export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [documents, dispatchDocuments] = useReducer(reducer, {});
   const debouncedDocuments = useDebounce(documents, 100);
   const config = useConfig();
@@ -48,7 +48,7 @@ export const RelationshipProvider: React.FC<{children?: React.ReactNode}> = ({ c
         const params = {
           depth: 0,
           'where[id][in]': idsToLoad,
-          pagination: false,
+          limit: 250,
         };
 
         const query = querystring.stringify(params, { addQueryPrefix: true });
