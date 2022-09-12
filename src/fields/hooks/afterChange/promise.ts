@@ -6,6 +6,7 @@ import { traverseFields } from './traverseFields';
 type Args = {
   data: Record<string, unknown>
   doc: Record<string, unknown>
+  previousDoc: Record<string, unknown>
   field: Field | TabAsField
   operation: 'create' | 'update'
   req: PayloadRequest
@@ -19,6 +20,7 @@ type Args = {
 export const promise = async ({
   data,
   doc,
+  previousDoc,
   field,
   operation,
   req,
@@ -34,6 +36,8 @@ export const promise = async ({
         const hookedValue = await currentHook({
           value: siblingData[field.name],
           originalDoc: doc,
+          previousDoc,
+          previousValue: previousDoc[field.name],
           data,
           siblingData,
           operation,
@@ -53,6 +57,7 @@ export const promise = async ({
       await traverseFields({
         data,
         doc,
+        previousDoc,
         fields: field.fields,
         operation,
         req,
@@ -72,6 +77,7 @@ export const promise = async ({
           promises.push(traverseFields({
             data,
             doc,
+            previousDoc,
             fields: field.fields,
             operation,
             req,
@@ -96,6 +102,7 @@ export const promise = async ({
             promises.push(traverseFields({
               data,
               doc,
+              previousDoc,
               fields: block.fields,
               operation,
               req,
@@ -115,6 +122,7 @@ export const promise = async ({
       await traverseFields({
         data,
         doc,
+        previousDoc,
         fields: field.fields,
         operation,
         req,
@@ -151,7 +159,8 @@ export const promise = async ({
       await traverseFields({
         data,
         doc,
-        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        previousDoc,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         operation,
         req,
         siblingData: siblingData || {},

@@ -118,6 +118,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
   result = await afterChange({
     data: result,
     doc: result,
+    previousDoc: {},
     entityConfig: globalConfig,
     operation: 'update',
     req,

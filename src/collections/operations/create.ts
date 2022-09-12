@@ -252,6 +252,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
   result = await afterChange({
     data,
     doc: result,
+    previousDoc: {},
     entityConfig: collectionConfig,
     operation: 'create',
     req,
