@@ -1,6 +1,8 @@
 import mkdirp from 'mkdirp';
 import path from 'path';
-import mime from 'mime';
+import sharp, { Sharp } from 'sharp';
+import { fromBuffer } from 'file-type';
+import sanitize from 'sanitize-filename';
 import { SanitizedConfig } from '../config/types';
 import { Collection } from '../collections/config/types';
 import { FileUploadError, MissingFile } from '../errors';
@@ -37,7 +39,7 @@ const uploadFile = async ({
   if (collectionConfig.upload) {
     const fileData: Partial<FileData> = {};
 
-    const { staticDir, imageSizes, disableLocalStorage } = collectionConfig.upload;
+    const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions } = collectionConfig.upload;
 
     const { file } = req.files || {};
 
@@ -56,16 +58,37 @@ const uploadFile = async ({
     }
 
     if (file) {
-      const fsSafeName = !overwriteExistingFiles ? await getSafeFileName(Model, staticPath, file.name) : file.name;
-
       try {
+        let fsSafeName: string;
+        let fileBuffer: Buffer;
+        let mimeType: string;
+        let fileSize: number;
+
         if (!disableLocalStorage) {
-          await saveBufferToFile(file.data, `${staticPath}/${fsSafeName}`);
+          let resized: Sharp | undefined;
+          if (resizeOptions) {
+            resized = sharp(file.data).resize(resizeOptions);
+          }
+          if (formatOptions) {
+            resized = (resized ?? sharp(file.data)).toFormat(formatOptions.format, formatOptions.options);
+          }
+          fileBuffer = resized ? (await resized.toBuffer()) : file.data;
+          const { mime, ext } = await fromBuffer(fileBuffer);
+          mimeType = mime;
+          fileSize = fileBuffer.length;
+          const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
+          fsSafeName = `${baseFilename}.${ext}`;
+
+          if (!overwriteExistingFiles) {
+            fsSafeName = await getSafeFileName(Model, staticPath, fsSafeName);
+          }
+
+          await saveBufferToFile(fileBuffer, `${staticPath}/${fsSafeName}`);
         }
 
-        fileData.filename = fsSafeName;
-        fileData.filesize = file.size;
-        fileData.mimeType = file.mimetype || mime.getType(fsSafeName);
+        fileData.filename = fsSafeName || (!overwriteExistingFiles ? await getSafeFileName(Model, staticPath, file.name) : file.name);
+        fileData.filesize = fileSize || file.size;
+        fileData.mimeType = mimeType || (await fromBuffer(file.data)).mime;
 
         if (isImage(file.mimetype)) {
           const dimensions = await getImageSize(file);

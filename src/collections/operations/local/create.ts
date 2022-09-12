@@ -5,6 +5,7 @@ import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import create from '../create';
 import { getDataLoader } from '../../dataloader';
+import { File } from '../../../uploads/types';
 
 
 export type Options<T> = {
@@ -18,7 +19,7 @@ export type Options<T> = {
   disableVerificationEmail?: boolean
   showHiddenFields?: boolean
   filePath?: string
-  file?: UploadedFile
+  file?: File
   overwriteExistingFiles?: boolean
   req?: PayloadRequest
   draft?: boolean
@@ -49,7 +50,7 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
   req.fallbackLocale = fallbackLocale || req?.fallbackLocale || null;
   req.payload = payload;
   req.files = {
-    file: (file as UploadedFile) ?? (getFileByPath(filePath) as UploadedFile),
+    file: (file ?? (await getFileByPath(filePath))) as UploadedFile,
   };
 
   if (typeof user !== 'undefined') req.user = user;
