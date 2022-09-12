@@ -12,13 +12,21 @@ keywords: row, fields, config, configuration, documentation, Content Management 
 
 ### Config
 
-| Option           | Description |
-| ---------------- | ----------- |
-| **`label`** *        | A label to render within the header of the collapsible component. |
-| **`fields`** *       | Array of field types to nest within this Collapsible. |
-| **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
+| Option         | Description                                                               |
+| -------------- | ------------------------------------------------------------------------- |
+| **`label`** *  | A label to render within the header of the collapsible component.         |
+| **`fields`** * | Array of field types to nest within this Collapsible.                     |
+| **`admin`**    | Admin-specific configuration. See below for [more detail](#admin-config). |
 
 *\* An asterisk denotes that a property is required.*
+
+### Admin Config
+
+In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following properties:
+
+| Option                 | Description                     |
+| ---------------------- | ------------------------------- |
+| **`initCollapsed`**    | Set the initial collapsed state |
 
 ### Example
 

@@ -39,12 +39,23 @@ export default buildConfig({
       upload: {
         staticURL: '/media',
         staticDir: './media',
+        resizeOptions: {
+          width: 1280,
+          height: 720,
+          position: 'center',
+        },
+        formatOptions: {
+          format: 'png',
+          options: { quality: 90 },
+        },
         imageSizes: [
           {
             name: 'maintainedAspectRatio',
             width: 1024,
             height: null,
             crop: 'center',
+            position: 'center',
+            formatOptions: { format: 'png', options: { quality: 90 } },
           },
           {
             name: 'tablet',
@@ -89,7 +100,7 @@ export default buildConfig({
     });
     // Create image
     const filePath = path.resolve(__dirname, './image.png');
-    const file = getFileByPath(filePath);
+    const file = await getFileByPath(filePath);
 
     const { id: uploadedImage } = await payload.create({
       collection: mediaSlug,

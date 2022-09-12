@@ -49,7 +49,7 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
     fallbackLocale,
     payload,
     files: {
-      file: file ?? getFileByPath(filePath),
+      file: file ?? await getFileByPath(filePath),
     },
   } as PayloadRequest;
 

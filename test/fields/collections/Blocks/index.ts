@@ -1,6 +1,36 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 import { Field } from '../../../../src/fields/config/types';
 
+export const blocksFieldSeedData = [
+  {
+    blockName: 'First block',
+    blockType: 'text',
+    text: 'first block',
+    richText: [],
+  },
+  {
+    blockName: 'Second block',
+    blockType: 'number',
+    number: 342,
+  },
+  {
+    blockName: 'Sub-block demonstration',
+    blockType: 'subBlocks',
+    subBlocks: [
+      {
+        blockName: 'First sub block',
+        blockType: 'number',
+        number: 123,
+      },
+      {
+        blockName: 'Second sub block',
+        blockType: 'text',
+        text: 'second sub block',
+      },
+    ],
+  },
+] as const;
+
 export const blocksField: Field = {
   name: 'blocks',
   type: 'blocks',
@@ -104,6 +134,7 @@ export const blocksField: Field = {
       ],
     },
   ],
+  defaultValue: blocksFieldSeedData,
 };
 
 const BlockFields: CollectionConfig = {
@@ -112,41 +143,19 @@ const BlockFields: CollectionConfig = {
     blocksField,
     {
       ...blocksField,
+      name: 'collapsedByDefaultBlocks',
+      localized: true,
+      admin: {
+        initCollapsed: true,
+      },
+    },
+    {
+      ...blocksField,
       name: 'localizedBlocks',
       localized: true,
     },
   ],
 };
-
-export const blocksFieldSeedData = [
-  {
-    blockName: 'First block',
-    blockType: 'text',
-    text: 'first block',
-    richText: [],
-  },
-  {
-    blockName: 'Second block',
-    blockType: 'number',
-    number: 342,
-  },
-  {
-    blockName: 'Sub-block demonstration',
-    blockType: 'subBlocks',
-    subBlocks: [
-      {
-        blockName: 'First sub block',
-        blockType: 'number',
-        number: 123,
-      },
-      {
-        blockName: 'Second sub block',
-        blockType: 'text',
-        text: 'second sub block',
-      },
-    ],
-  },
-] as const;
 
 export const blocksDoc = {
   blocks: blocksFieldSeedData,

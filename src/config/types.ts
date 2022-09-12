@@ -119,6 +119,7 @@ export type Config = {
     indexHTML?: string;
     css?: string
     dateFormat?: string
+    avatar?: 'default' | 'gravatar' | React.ComponentType<any>,
     components?: {
       routes?: AdminRoute[]
       providers?: React.ComponentType<{ children: React.ReactNode }>[]

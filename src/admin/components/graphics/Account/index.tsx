@@ -1,4 +1,7 @@
 import React from 'react';
+import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config';
+import Gravatar from './Gravatar';
 
 const css = `
   .graphic-account .circle1 {
@@ -10,7 +13,7 @@ const css = `
   }
 `;
 
-const Account: React.FC = () => (
+const Default: React.FC = () => (
   <svg
     className="graphic-account"
     width="25"
@@ -39,4 +42,28 @@ const Account: React.FC = () => (
   </svg>
 );
 
+const Account = () => {
+  const {
+    admin: { avatar: Avatar },
+  } = useConfig();
+  const { user } = useAuth();
+
+  if (!user.email || Avatar === 'default') return <Default />;
+  if (Avatar === 'gravatar') return <Gravatar />;
+  if (Avatar) return <Avatar />;
+  return <Default />;
+};
+
 export default Account;
+
+function isClassComponent(component) {
+  return typeof component === 'function' && !!component.prototype.isReactComponent;
+}
+
+function isFunctionComponent(component) {
+  return typeof component === 'function' && String(component).includes('return React.createElement');
+}
+
+function isReactComponent(component) {
+  return isClassComponent(component) || isFunctionComponent(component);
+}
