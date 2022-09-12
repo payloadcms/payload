@@ -151,6 +151,10 @@ export type CollectionAdminOptions = {
    * Default columns to show in list view
    */
   defaultColumns?: string[];
+    /**
+   * Additional fields to be searched via the full text search
+   */
+  searchableTextFields?: string[];
   /**
    * Custom description for collection
    */
