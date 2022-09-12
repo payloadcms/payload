@@ -16,7 +16,7 @@ const SearchFilter: React.FC<Props> = (props) => {
     fieldName = 'id',
     fieldLabel = 'ID',
     modifySearchQuery = true,
-    searchableTextFields,
+    listSearchableFields,
     handleChange,
   } = props;
 
@@ -31,7 +31,7 @@ const SearchFilter: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (debouncedSearch || params?.where) {
-      let newWhere = searchableTextFields?.length > 0 ? {
+      let newWhere = listSearchableFields?.length > 0 ? {
         ...(typeof params?.where === 'object' ? params.where : {}),
         or: [
           {
@@ -39,20 +39,16 @@ const SearchFilter: React.FC<Props> = (props) => {
               like: debouncedSearch,
             },
           },
-          ...searchableTextFields.reduce<Array<{
-          [key: string]: {
-            like: string,
-          }
-        }>>((prev, curr) => {
-          return [
-            ...prev,
-            {
-              [curr.name]: {
-                like: debouncedSearch,
+          ...listSearchableFields.reduce<Record<string, unknown>[]>((prev, curr) => {
+            return [
+              ...prev,
+              {
+                [curr.name]: {
+                  like: debouncedSearch,
+                },
               },
-            },
-          ];
-        }, []),
+            ];
+          }, []),
         ],
       } : {
         ...(typeof params?.where === 'object' ? params.where : {}),
@@ -77,18 +73,18 @@ const SearchFilter: React.FC<Props> = (props) => {
         });
       }
     }
-  }, [debouncedSearch, history, fieldName, params, handleChange, modifySearchQuery, searchableTextFields]);
+  }, [debouncedSearch, history, fieldName, params, handleChange, modifySearchQuery, listSearchableFields]);
 
   useEffect(() => {
-    if (searchableTextFields?.length > 0) {
-      placeholder.current = searchableTextFields.reduce<string>((prev, curr, i) => {
-        if (i === searchableTextFields.length - 1) {
+    if (listSearchableFields?.length > 0) {
+      placeholder.current = listSearchableFields.reduce<string>((prev, curr, i) => {
+        if (i === listSearchableFields.length - 1) {
           return `${prev} or ${curr.label || curr.name}`;
         }
         return `${prev}, ${curr.label || curr.name}`;
       }, placeholder.current);
     }
-  }, [searchableTextFields]);
+  }, [listSearchableFields]);
 
   return (
     <div className={baseClass}>

@@ -121,7 +121,9 @@ class ParamParser {
       // If the operation is properly formatted as an object
       if (typeof condition === 'object') {
         const result = await this.parsePathOrRelation(condition);
-        completedConditions.push(result);
+        if (Object.keys(result).length > 0) {
+          completedConditions.push(result);
+        }
       }
     }
     return completedConditions;

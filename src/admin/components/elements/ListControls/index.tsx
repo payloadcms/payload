@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
-import { fieldAffectsData, TextField } from '../../../../fields/config/types';
+import { FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
 import WhereBuilder from '../WhereBuilder';
@@ -29,7 +29,7 @@ const ListControls: React.FC<Props> = (props) => {
       fields,
       admin: {
         useAsTitle,
-        searchableTextFields,
+        listSearchableFields,
       },
     },
   } = props;
@@ -38,7 +38,7 @@ const ListControls: React.FC<Props> = (props) => {
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where);
 
   const [titleField] = useState(() => fields.find((field) => fieldAffectsData(field) && field.name === useAsTitle));
-  const [textFieldsToBeSearched] = useState(searchableTextFields ? () => fields.filter((field) => fieldAffectsData(field) && searchableTextFields.includes(field.name) && field.type === 'text') as TextField[] : null);
+  const [textFieldsToBeSearched] = useState(listSearchableFields ? () => fields.filter((field) => fieldAffectsData(field) && listSearchableFields.includes(field.name)) as FieldAffectingData[] : null);
   const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
 
   return (
@@ -49,7 +49,7 @@ const ListControls: React.FC<Props> = (props) => {
           handleChange={handleWhereChange}
           modifySearchQuery={modifySearchQuery}
           fieldLabel={titleField && titleField.label ? titleField.label : undefined}
-          searchableTextFields={textFieldsToBeSearched}
+          listSearchableFields={textFieldsToBeSearched}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>

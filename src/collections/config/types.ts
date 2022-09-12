@@ -27,14 +27,14 @@ export interface AuthCollectionModel extends CollectionModel {
 }
 
 export type HookOperationType =
-| 'create'
-| 'autosave'
-| 'read'
-| 'update'
-| 'delete'
-| 'refresh'
-| 'login'
-| 'forgotPassword';
+  | 'create'
+  | 'autosave'
+  | 'read'
+  | 'update'
+  | 'delete'
+  | 'refresh'
+  | 'login'
+  | 'forgotPassword';
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>;
 
@@ -151,10 +151,10 @@ export type CollectionAdminOptions = {
    * Default columns to show in list view
    */
   defaultColumns?: string[];
-    /**
-   * Additional fields to be searched via the full text search
-   */
-  searchableTextFields?: string[];
+  /**
+ * Additional fields to be searched via the full text search
+ */
+  listSearchableFields?: string[];
   /**
    * Custom description for collection
    */

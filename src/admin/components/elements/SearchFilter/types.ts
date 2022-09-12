@@ -1,10 +1,10 @@
-import { TextField } from '../../../../fields/config/types';
+import { FieldAffectingData } from '../../../../fields/config/types';
 import { Where } from '../../../../types';
 
 export type Props = {
   fieldName?: string,
   fieldLabel?: string,
   modifySearchQuery?: boolean
-  searchableTextFields?: TextField[]
+  listSearchableFields?: FieldAffectingData[]
   handleChange?: (where: Where) => void
 }
