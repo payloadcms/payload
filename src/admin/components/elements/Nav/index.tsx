@@ -89,7 +89,9 @@ const DefaultNav = () => {
         </header>
         <div className={`${baseClass}__wrap`}>
           {Array.isArray(beforeNavLinks) && beforeNavLinks.map((Component, i) => <Component key={i} />)}
-          <span className={`${baseClass}__label`}>Collections</span>
+          { groupedCollections[''].length > 0 && (
+            <span className={`${baseClass}__label`}>Collections</span>
+          ) }
           <nav className={`${baseClass}__collections`}>
             {Object.entries(groupedCollections)
               .map(([group, groupCollections]) => (
@@ -122,7 +124,9 @@ const DefaultNav = () => {
           </nav>
           {(globals && globals.length > 0) && (
             <React.Fragment>
+              { groupedGlobals[''].length > 0 && (
               <span className={`${baseClass}__label`}>Globals</span>
+              ) }
               <nav className={`${baseClass}__globals`}>
                 {Object.entries(groupedGlobals)
                   .map(([group, globalsGroup]) => (

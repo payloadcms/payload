@@ -49,7 +49,18 @@ export default buildConfig({
   },
   collections: [
     {
+      slug: 'users',
+      admin: {
+        group: 'One',
+      },
+      auth: true,
+      fields: [],
+    },
+    {
       slug,
+      admin: {
+        group: 'One',
+      },
       fields: [
         {
           name: 'title',
@@ -113,6 +124,9 @@ export default buildConfig({
   globals: [
     {
       slug: globalSlug,
+      admin: {
+        group: 'Group',
+      },
       fields: [
         {
           name: 'title',
