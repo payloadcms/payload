@@ -100,8 +100,8 @@ describe('Collections - Uploads', () => {
       // Check api response
       expect(doc.filename).toContain('.png');
       expect(doc.mimeType).toEqual('image/png');
-      expect(doc.sizes.tablet.filename).toContain('.png');
-      expect(doc.sizes.tablet.mimeType).toContain('image/png');
+      expect(doc.sizes.maintainedAspectRatio.filename).toContain('.png');
+      expect(doc.sizes.maintainedAspectRatio.mimeType).toContain('image/png');
     });
 
     it('creates media without storing a file', async () => {
@@ -142,7 +142,7 @@ describe('Collections - Uploads', () => {
     const formData = new FormData();
     formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')));
 
-    const { status, doc } = await client.update({
+    const { status } = await client.update({
       id: mediaDoc.id,
       file: true,
       data: formData,
