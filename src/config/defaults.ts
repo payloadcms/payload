@@ -17,6 +17,7 @@ export const defaults: Config = {
     },
     disable: false,
     indexHTML: path.resolve(__dirname, '../admin/index.html'),
+    avatar: 'default',
     components: {},
     css: path.resolve(__dirname, '../admin/scss/custom.css'),
     dateFormat: 'MMMM do yyyy, h:mm a',

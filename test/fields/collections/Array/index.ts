@@ -24,6 +24,20 @@ const ArrayFields: CollectionConfig = {
       ],
     },
     {
+      name: 'collapsedArray',
+      type: 'array',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          required: true,
+        },
+      ],
+      admin: {
+        initCollapsed: true,
+      },
+    },
+    {
       name: 'localized',
       type: 'array',
       required: true,
@@ -90,6 +104,11 @@ export const arrayDoc = {
     },
     {
       text: 'sixth row',
+    },
+  ],
+  collapsedArray: [
+    {
+      text: 'initialize collapsed',
     },
   ],
 };

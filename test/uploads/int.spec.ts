@@ -80,6 +80,30 @@ describe('Collections - Uploads', () => {
       expect(doc.sizes.icon.filename).toBeDefined();
     });
 
+    it('creates images from a different format', async () => {
+      const formData = new FormData();
+      formData.append('file', fs.createReadStream(path.join(__dirname, './image.jpg')));
+
+      const { status, doc } = await client.create({
+        file: true,
+        data: formData,
+        auth: true,
+        headers: {},
+      });
+
+      expect(status).toBe(201);
+
+      // Check for files
+      expect(await fileExists(path.join(__dirname, './media', doc.filename))).toBe(true);
+      expect(await fileExists(path.join(__dirname, './media', doc.sizes.tablet.filename))).toBe(true);
+
+      // Check api response
+      expect(doc.filename).toContain('.png');
+      expect(doc.mimeType).toEqual('image/png');
+      expect(doc.sizes.maintainedAspectRatio.filename).toContain('.png');
+      expect(doc.sizes.maintainedAspectRatio.mimeType).toContain('image/png');
+    });
+
     it('creates media without storing a file', async () => {
       const formData = new FormData();
       formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')));
@@ -106,7 +130,7 @@ describe('Collections - Uploads', () => {
   it('update', async () => {
     // Create image
     const filePath = path.resolve(__dirname, './image.png');
-    const file = getFileByPath(filePath);
+    const file = await getFileByPath(filePath);
     file.name = 'renamed.png';
 
     const mediaDoc = await payload.create({
@@ -118,7 +142,7 @@ describe('Collections - Uploads', () => {
     const formData = new FormData();
     formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')));
 
-    const { status, doc } = await client.update({
+    const { status } = await client.update({
       id: mediaDoc.id,
       file: true,
       data: formData,
@@ -135,7 +159,7 @@ describe('Collections - Uploads', () => {
 
   it('should allow update removing a relationship', async () => {
     const filePath = path.resolve(__dirname, './image.png');
-    const file = getFileByPath(filePath);
+    const file = await getFileByPath(filePath);
     file.name = 'renamed.png';
 
     const { id } = await payload.create({

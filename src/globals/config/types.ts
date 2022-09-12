@@ -24,6 +24,7 @@ export type BeforeChangeHook = (args: {
 
 export type AfterChangeHook = (args: {
   doc: any;
+  previousDoc: any;
   req: PayloadRequest;
 }) => any;
 
@@ -65,6 +66,7 @@ export type GlobalConfig = {
   fields: Field[];
   admin?: {
     description?: string | (() => string);
+    group?: string;
     hideAPIURL?: boolean;
     components?: {
       views?: {

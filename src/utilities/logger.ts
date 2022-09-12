@@ -1,4 +1,3 @@
-import falsey from 'falsey';
 import pino from 'pino';
 import memoize from 'micro-memoize';
 
@@ -7,7 +6,7 @@ export type PayloadLogger = pino.Logger;
 export default memoize(
   (name = 'payload', options?: pino.LoggerOptions) => pino({
     name,
-    enabled: falsey(process.env.DISABLE_LOGGING),
+    enabled: process.env.DISABLE_LOGGING !== 'true',
     ...(options
       ? { options }
       : {

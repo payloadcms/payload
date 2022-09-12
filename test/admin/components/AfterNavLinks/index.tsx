@@ -19,6 +19,7 @@ const AfterNavLinks: React.FC = () => {
       <span className="nav__label">Custom Routes</span>
       <nav>
         <NavLink
+          className="nav__link"
           activeClassName="active"
           to={`${adminRoute}/custom-default-route`}
         >
@@ -26,6 +27,7 @@ const AfterNavLinks: React.FC = () => {
           Default Template
         </NavLink>
         <NavLink
+          className="nav__link"
           activeClassName="active"
           to={`${adminRoute}/custom-minimal-route`}
         >

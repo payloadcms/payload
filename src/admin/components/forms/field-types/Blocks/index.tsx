@@ -54,6 +54,7 @@ const Index: React.FC<Props> = (props) => {
       readOnly,
       description,
       condition,
+      initCollapsed,
       className,
     },
   } = props;
@@ -141,9 +142,13 @@ const Index: React.FC<Props> = (props) => {
 
     if (preferencesKey) {
       const preferencesToSet = await getPreference(preferencesKey) || { fields: {} };
-      let newCollapsedState = preferencesToSet?.fields?.[path]?.collapsed
-        .filter((filterID) => (rows.find((row) => row.id === filterID)))
-        || [];
+      let newCollapsedState: string[] = preferencesToSet?.fields?.[path]?.collapsed;
+
+      if (initCollapsed && typeof newCollapsedState === 'undefined') {
+        newCollapsedState = rows.map((row) => row.id);
+      } else if (typeof newCollapsedState === 'undefined') {
+        newCollapsedState = [];
+      }
 
       if (!collapsed) {
         newCollapsedState = newCollapsedState.filter((existingID) => existingID !== rowID);
@@ -162,7 +167,7 @@ const Index: React.FC<Props> = (props) => {
         },
       });
     }
-  }, [preferencesKey, getPreference, path, setPreference, rows]);
+  }, [preferencesKey, getPreference, path, setPreference, initCollapsed, rows]);
 
   const toggleCollapseAll = useCallback(async (collapse: boolean) => {
     dispatchRows({ type: 'SET_ALL_COLLAPSED', collapse });
@@ -187,12 +192,12 @@ const Index: React.FC<Props> = (props) => {
   useEffect(() => {
     const initializeRowState = async () => {
       const data = formContext.getDataByPath<Row[]>(path);
-      const preferences = await getPreference(preferencesKey) || { fields: {} };
-      dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed });
+      const preferences = (await getPreference(preferencesKey)) || { fields: {} };
+      dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed, initCollapsed });
     };
 
     initializeRowState();
-  }, [formContext, path, getPreference, preferencesKey]);
+  }, [formContext, path, getPreference, preferencesKey, initCollapsed]);
 
   useEffect(() => {
     setValue(rows?.length || 0, true);

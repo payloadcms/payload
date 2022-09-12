@@ -37,6 +37,7 @@ import {
   RowField,
   CollapsibleField,
   TabsField,
+  tabHasName,
 } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
@@ -478,6 +479,22 @@ function buildObjectType({
       return objectTypeConfigWithCollapsibleFields;
     }, objectTypeConfig),
     tabs: (objectTypeConfig: ObjectTypeConfig, field: TabsField) => field.tabs.reduce((tabSchema, tab) => {
+      if (tabHasName(tab)) {
+        const fullName = combineParentName(parentName, toWords(tab.name, true));
+        const type = buildObjectType({
+          payload,
+          name: fullName,
+          parentName: fullName,
+          fields: tab.fields,
+          forceNullable,
+        });
+
+        return {
+          ...tabSchema,
+          [tab.name]: { type },
+        };
+      }
+
       return {
         ...tabSchema,
         ...tab.fields.reduce((subFieldSchema, subField) => {

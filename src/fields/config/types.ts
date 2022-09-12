@@ -10,13 +10,25 @@ import { User } from '../../auth';
 import { Payload } from '../..';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
+  /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<T>,
+  /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany?: boolean
+  /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: T,
+  /** The document before changes were applied, only in `afterChange` hooks. */
+  previousDoc?: T,
+  /** The sibling data from the previous document in `afterChange` hook. */
+  previousSiblingDoc?: T,
+  /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'read' | 'update' | 'delete',
+  /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
+  /** The sibling data passed to a field that the hook is running against. */
   siblingData: Partial<S>
+  /** The value of the field. */
   value?: P,
+  previousValue?: P,
 }
 
 export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;
@@ -177,19 +189,37 @@ export type CollapsibleField = Omit<FieldBase, 'name'> & {
   type: 'collapsible';
   label: string
   fields: Field[];
+  admin?: Admin & {
+    initCollapsed?: boolean | false;
+  }
 }
 
 export type TabsAdmin = Omit<Admin, 'description'>;
 
-export type TabsField = Omit<FieldBase, 'admin' | 'name'> & {
+type TabBase = {
+  fields: Field[]
+  description?: Description
+}
+
+export type NamedTab = TabBase & FieldBase
+
+export type UnnamedTab = TabBase & Omit<FieldBase, 'name'> & {
+  label: string
+  localized?: never
+}
+
+export type Tab = NamedTab | UnnamedTab
+
+export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized'> & {
   type: 'tabs';
-  tabs: {
-    label: string
-    fields: Field[];
-    description?: Description
-  }[]
+  tabs: Tab[]
   admin?: TabsAdmin
 }
+
+export type TabAsField = Tab & {
+  type: 'tab'
+  name?: string
+};
 
 export type UIField = {
   name: string
@@ -305,6 +335,9 @@ export type ArrayField = FieldBase & {
   maxRows?: number;
   labels?: Labels;
   fields: Field[];
+  admin?: Admin & {
+    initCollapsed?: boolean | false;
+  }
 }
 
 export type RadioField = FieldBase & {
@@ -330,6 +363,10 @@ export type BlockField = FieldBase & {
   blocks: Block[];
   defaultValue?: unknown
   labels?: Labels
+  admin?: Admin & {
+    initCollapsed?: boolean | false;
+  }
+
 }
 
 export type PointField = FieldBase & {
@@ -375,6 +412,7 @@ export type FieldAffectingData =
   | UploadField
   | CodeField
   | PointField
+  | TabAsField
 
 export type NonPresentationalField =
   TextField
@@ -450,12 +488,20 @@ export function fieldHasMaxDepth(field: Field): field is FieldWithMaxDepth {
   return (field.type === 'upload' || field.type === 'relationship') && typeof field.maxDepth === 'number';
 }
 
-export function fieldIsPresentationalOnly(field: Field): field is UIField {
+export function fieldIsPresentationalOnly(field: Field | TabAsField): field is UIField {
   return field.type === 'ui';
 }
 
-export function fieldAffectsData(field: Field): field is FieldAffectingData {
+export function fieldAffectsData(field: Field | TabAsField): field is FieldAffectingData {
   return 'name' in field && !fieldIsPresentationalOnly(field);
+}
+
+export function tabHasName(tab: Tab): tab is NamedTab {
+  return 'name' in tab;
+}
+
+export function fieldIsLocalized(field: Field | Tab): boolean {
+  return 'localized' in field && field.localized;
 }
 
 export type HookName = 'beforeRead' | 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';

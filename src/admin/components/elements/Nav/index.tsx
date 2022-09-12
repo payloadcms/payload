@@ -10,6 +10,8 @@ import CloseMenu from '../../icons/CloseMenu';
 import Icon from '../../graphics/Icon';
 import Account from '../../graphics/Account';
 import Localizer from '../Localizer';
+import NavGroup from '../NavGroup';
+import { groupNavItems, Group, EntityToGroup, EntityType } from '../../../utilities/groupNavItems';
 
 import './index.scss';
 
@@ -18,6 +20,7 @@ const baseClass = 'nav';
 const DefaultNav = () => {
   const { permissions } = useAuth();
   const [menuActive, setMenuActive] = useState(false);
+  const [groups, setGroups] = useState<Group[]>([]);
   const history = useHistory();
   const {
     collections,
@@ -36,7 +39,29 @@ const DefaultNav = () => {
   const classes = [
     baseClass,
     menuActive && `${baseClass}--menu-active`,
-  ].filter(Boolean).join(' ');
+  ].filter(Boolean)
+    .join(' ');
+
+  useEffect(() => {
+    setGroups(groupNavItems([
+      ...collections.map((collection) => {
+        const entityToGroup: EntityToGroup = {
+          type: EntityType.collection,
+          entity: collection,
+        };
+
+        return entityToGroup;
+      }),
+      ...globals.map((global) => {
+        const entityToGroup: EntityToGroup = {
+          type: EntityType.global,
+          entity: global,
+        };
+
+        return entityToGroup;
+      }),
+    ], permissions));
+  }, [collections, globals, permissions]);
 
   useEffect(() => history.listen(() => {
     setMenuActive(false);
@@ -65,56 +90,44 @@ const DefaultNav = () => {
             )}
           </button>
         </header>
-        <div className={`${baseClass}__wrap`}>
+        <nav className={`${baseClass}__wrap`}>
           {Array.isArray(beforeNavLinks) && beforeNavLinks.map((Component, i) => <Component key={i} />)}
-          <span className={`${baseClass}__label`}>Collections</span>
-          <nav>
-            {collections && collections.map((collection, i) => {
-              const href = `${admin}/collections/${collection.slug}`;
+          {groups.map(({ label, entities }, key) => {
+            return (
+              <NavGroup {...{ key, label }}>
+                {entities.map(({ entity, type }, i) => {
+                  let entityLabel: string;
+                  let href: string;
+                  let id: string;
 
-              if (permissions?.collections?.[collection.slug]?.read.permission) {
-                return (
-                  <NavLink
-                    id={`nav-${collection.slug}`}
-                    activeClassName="active"
-                    key={i}
-                    to={href}
-                  >
-                    <Chevron />
-                    {collection.labels.plural}
-                  </NavLink>
-                );
-              }
-
-              return null;
-            })}
-          </nav>
-          {(globals && globals.length > 0) && (
-            <React.Fragment>
-              <span className={`${baseClass}__label`}>Globals</span>
-              <nav>
-                {globals.map((global, i) => {
-                  const href = `${admin}/globals/${global.slug}`;
-
-                  if (permissions?.globals?.[global.slug].read.permission) {
-                    return (
-                      <NavLink
-                        id={`nav-global-${global.slug}`}
-                        activeClassName="active"
-                        key={i}
-                        to={href}
-                      >
-                        <Chevron />
-                        {global.label}
-                      </NavLink>
-                    );
+                  if (type === EntityType.collection) {
+                    href = `${admin}/collections/${entity.slug}`;
+                    entityLabel = entity.labels.plural;
+                    id = `nav-${entity.slug}`;
                   }
 
-                  return null;
+                  if (type === EntityType.global) {
+                    href = `${admin}/globals/${entity.slug}`;
+                    entityLabel = entity.label;
+                    id = `nav-global-${entity.slug}`;
+                  }
+
+                  return (
+                    <NavLink
+                      id={id}
+                      className={`${baseClass}__link`}
+                      activeClassName="active"
+                      key={i}
+                      to={href}
+                    >
+                      <Chevron />
+                      {entityLabel}
+                    </NavLink>
+                  );
                 })}
-              </nav>
-            </React.Fragment>
-          )}
+              </NavGroup>
+            );
+          })}
           {Array.isArray(afterNavLinks) && afterNavLinks.map((Component, i) => <Component key={i} />)}
           <div className={`${baseClass}__controls`}>
             <Localizer />
@@ -131,7 +144,7 @@ const DefaultNav = () => {
               <LogOut />
             </Link>
           </div>
-        </div>
+        </nav>
       </div>
     </aside>
   );

@@ -7,6 +7,7 @@ import deepCopyObject from '../../../utilities/deepCopyObject';
 type Args = {
   data: Record<string, unknown>
   doc: Record<string, unknown>
+  previousDoc: Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   operation: 'create' | 'update'
   req: PayloadRequest
@@ -15,6 +16,7 @@ type Args = {
 export const afterChange = async ({
   data,
   doc: incomingDoc,
+  previousDoc,
   entityConfig,
   operation,
   req,
@@ -24,9 +26,11 @@ export const afterChange = async ({
   await traverseFields({
     data,
     doc,
+    previousDoc,
     fields: entityConfig.fields,
     operation,
     req,
+    previousSiblingDoc: previousDoc,
     siblingDoc: doc,
     siblingData: data,
   });

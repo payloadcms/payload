@@ -1,4 +1,4 @@
-import { Field } from '../../config/types';
+import { Field, TabAsField } from '../../config/types';
 import { promise } from './promise';
 import { PayloadRequest } from '../../../express/types';
 
@@ -7,7 +7,7 @@ type Args = {
   depth: number
   doc: Record<string, unknown>
   fieldPromises: Promise<void>[]
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   findMany: boolean
   flattenLocales: boolean
   populationPromises: Promise<void>[]

@@ -1,11 +1,13 @@
-import { Field } from '../../config/types';
+import { Field, TabAsField } from '../../config/types';
 import { promise } from './promise';
 import { PayloadRequest } from '../../../express/types';
 
 type Args = {
   data: Record<string, unknown>
   doc: Record<string, unknown>
-  fields: Field[]
+  previousDoc: Record<string, unknown>
+  previousSiblingDoc: Record<string, unknown>
+  fields: (Field | TabAsField)[]
   operation: 'create' | 'update'
   req: PayloadRequest
   siblingData: Record<string, unknown>
@@ -15,6 +17,8 @@ type Args = {
 export const traverseFields = async ({
   data,
   doc,
+  previousDoc,
+  previousSiblingDoc,
   fields,
   operation,
   req,
@@ -27,6 +31,8 @@ export const traverseFields = async ({
     promises.push(promise({
       data,
       doc,
+      previousDoc,
+      previousSiblingDoc,
       field,
       operation,
       req,

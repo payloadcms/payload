@@ -308,6 +308,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   result = await afterChange({
     data,
     doc: result,
+    previousDoc: originalDoc,
     entityConfig: collectionConfig,
     operation: 'update',
     req,
@@ -322,6 +323,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
     result = await hook({
       doc: result,
+      previousDoc: originalDoc,
       req,
       operation: 'update',
     }) || result;

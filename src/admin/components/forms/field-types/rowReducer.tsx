@@ -11,6 +11,7 @@ type SET_ALL = {
   data: { id?: string, blockType?: string }[]
   collapsedState?: string[]
   blockType?: string
+  initCollapsed?: boolean
 }
 
 type SET_COLLAPSE = {
@@ -48,13 +49,13 @@ const reducer = (currentState: Row[], action: Action): Row[] => {
 
   switch (action.type) {
     case 'SET_ALL': {
-      const { data, collapsedState } = action;
+      const { data, collapsedState, initCollapsed } = action;
 
       if (Array.isArray(data)) {
         return data.map((dataRow, i) => {
           const row = {
             id: dataRow?.id || new ObjectID().toHexString(),
-            collapsed: (collapsedState || []).includes(dataRow?.id),
+            collapsed: Array.isArray(collapsedState) ? collapsedState.includes(dataRow?.id) : initCollapsed,
             blockType: dataRow?.blockType,
           };
 

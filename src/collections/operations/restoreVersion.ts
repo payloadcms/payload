@@ -95,6 +95,16 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   if (!doc && hasWherePolicy) throw new Forbidden();
 
   // /////////////////////////////////////
+  // fetch previousDoc
+  // /////////////////////////////////////
+
+  const previousDoc = await payload.findByID({
+    collection: collectionConfig.slug,
+    id: parentDocID,
+    depth,
+  });
+
+  // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
@@ -145,6 +155,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   result = await afterChange({
     data: result,
     doc: result,
+    previousDoc,
     entityConfig: collectionConfig,
     operation: 'update',
     req,
@@ -160,6 +171,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     result = await hook({
       doc: result,
       req,
+      previousDoc,
       operation: 'update',
     }) || result;
   }, Promise.resolve());

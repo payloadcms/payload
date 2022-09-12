@@ -75,6 +75,8 @@ export interface UnstoredMedia {
   filename?: string;
   mimeType?: string;
   filesize?: number;
+  width?: number;
+  height?: number;
   createdAt: string;
   updatedAt: string;
 }

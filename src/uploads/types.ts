@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import express from 'express';
 import serveStatic from 'serve-static';
+import { Sharp, ResizeOptions } from 'sharp';
 
 export type FileSize = {
   filename: string;
@@ -25,26 +26,38 @@ export type FileData = {
   sizes: FileSizes;
 };
 
-export type ImageSize = {
-  name: string,
-  width: number | null,
-  height: number | null,
-  crop?: string, // comes from sharp package
+/**
+ * Params sent to the sharp toFormat() function
+ * @link https://sharp.pixelplumbing.com/api-output#toformat
+ */
+export type ImageUploadFormatOptions = {
+  format: Parameters<Sharp['toFormat']>[0]
+  options?: Parameters<Sharp['toFormat']>[1]
+}
+
+export type ImageSize = ResizeOptions & {
+  name: string
+  formatOptions?: ImageUploadFormatOptions
+  /**
+   * @deprecated prefer position
+   */
+  crop?: string // comes from sharp package
 };
 
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => string
 
 export type IncomingUploadType = {
-  imageSizes?: ImageSize[];
-  staticURL?: string;
-  staticDir?: string;
+  imageSizes?: ImageSize[]
+  staticURL?: string
+  staticDir?: string
   disableLocalStorage?: boolean
-  adminThumbnail?: string | GetAdminThumbnail;
-  mimeTypes?: string[];
+  adminThumbnail?: string | GetAdminThumbnail
+  mimeTypes?: string[]
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
   handlers?: any[]
+  resizeOptions?: ResizeOptions
+  formatOptions?: ImageUploadFormatOptions
 }
-
 
 export type Upload = {
   imageSizes?: ImageSize[]
@@ -52,9 +65,11 @@ export type Upload = {
   staticDir: string
   disableLocalStorage: boolean
   adminThumbnail?: string | GetAdminThumbnail
-  mimeTypes?: string[];
+  mimeTypes?: string[]
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
   handlers?: any[]
+  resizeOptions?: ResizeOptions;
+  formatOptions?: ImageUploadFormatOptions
 }
 
 export type File = {

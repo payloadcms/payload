@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { Field, fieldAffectsData } from '../../config/types';
+import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
 import { PayloadRequest } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise';
@@ -9,7 +9,7 @@ type Args = {
   currentDepth: number
   depth: number
   doc: Record<string, unknown>
-  field: Field
+  field: Field | TabAsField
   fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean
@@ -49,14 +49,13 @@ export const promise = async ({
   const hasLocalizedValue = flattenLocales
     && fieldAffectsData(field)
     && (typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null)
-    && field.name
     && field.localized
     && req.locale !== 'all';
 
   if (hasLocalizedValue) {
     let localizedValue = siblingDoc[field.name][req.locale];
     if (typeof localizedValue === 'undefined' && req.fallbackLocale) localizedValue = siblingDoc[field.name][req.fallbackLocale];
-    if (typeof localizedValue === 'undefined' && field.type === 'group') localizedValue = {};
+    if (typeof localizedValue === 'undefined' && (field.type === 'group' || field.type === 'tab')) localizedValue = {};
     if (typeof localizedValue === 'undefined') localizedValue = null;
     siblingDoc[field.name] = localizedValue;
   }
@@ -69,6 +68,15 @@ export const promise = async ({
       if (typeof siblingDoc[field.name] === 'undefined') {
         siblingDoc[field.name] = {};
       }
+
+      break;
+    }
+    case 'tabs': {
+      field.tabs.forEach((tab) => {
+        if (tabHasName(tab) && typeof siblingDoc[tab.name] === 'undefined') {
+          siblingDoc[tab.name] = {};
+        }
+      });
 
       break;
     }
@@ -90,7 +98,7 @@ export const promise = async ({
     }
 
     case 'point': {
-      const pointDoc = siblingDoc[field.name] as any;
+      const pointDoc = siblingDoc[field.name] as Record<string, unknown>;
       if (Array.isArray(pointDoc?.coordinates) && pointDoc.coordinates.length === 2) {
         siblingDoc[field.name] = pointDoc.coordinates;
       }
@@ -197,7 +205,7 @@ export const promise = async ({
       const rows = siblingDoc[field.name];
 
       if (Array.isArray(rows)) {
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           traverseFields({
             currentDepth,
             depth,
@@ -221,7 +229,7 @@ export const promise = async ({
       const rows = siblingDoc[field.name];
 
       if (Array.isArray(rows)) {
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
 
           if (block) {
@@ -266,22 +274,45 @@ export const promise = async ({
       break;
     }
 
+    case 'tab': {
+      let tabDoc = siblingDoc;
+      if (tabHasName(field)) {
+        tabDoc = siblingDoc[field.name] as Record<string, unknown>;
+        if (typeof siblingDoc[field.name] !== 'object') tabDoc = {};
+      }
+
+      await traverseFields({
+        currentDepth,
+        depth,
+        doc,
+        fieldPromises,
+        fields: field.fields,
+        findMany,
+        flattenLocales,
+        overrideAccess,
+        populationPromises,
+        req,
+        siblingDoc: tabDoc,
+        showHiddenFields,
+      });
+
+      break;
+    }
+
     case 'tabs': {
-      field.tabs.forEach((tab) => {
-        traverseFields({
-          currentDepth,
-          depth,
-          doc,
-          fieldPromises,
-          fields: tab.fields,
-          findMany,
-          flattenLocales,
-          overrideAccess,
-          populationPromises,
-          req,
-          siblingDoc,
-          showHiddenFields,
-        });
+      traverseFields({
+        currentDepth,
+        depth,
+        doc,
+        fieldPromises,
+        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        findMany,
+        flattenLocales,
+        overrideAccess,
+        populationPromises,
+        req,
+        siblingDoc,
+        showHiddenFields,
       });
       break;
     }

@@ -59,6 +59,15 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
   rawVersion = rawVersion.toJSON({ virtuals: true });
 
   // /////////////////////////////////////
+  // fetch previousDoc
+  // /////////////////////////////////////
+
+  const previousDoc = await payload.findGlobal({
+    slug: globalConfig.slug,
+    depth,
+  });
+
+  // /////////////////////////////////////
   // Update global
   // /////////////////////////////////////
 
@@ -118,6 +127,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
   result = await afterChange({
     data: result,
     doc: result,
+    previousDoc,
     entityConfig: globalConfig,
     operation: 'update',
     req,
@@ -132,6 +142,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
     result = await hook({
       doc: result,
+      previousDoc,
       req,
     }) || result;
   }, Promise.resolve());

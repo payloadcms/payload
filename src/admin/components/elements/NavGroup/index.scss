@@ -1,0 +1,53 @@
+@import '../../../scss/styles.scss';
+
+.nav-group {
+  width: 100%;
+  margin-bottom: base(.5);
+
+  &__toggle {
+    cursor: pointer;
+    color: var(--theme-elevation-400);
+    background: transparent;
+    padding-left: 0;
+    border: 0;
+    margin-top: base(.25);
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: flex-start;
+    padding-right: base(.5);
+
+    svg {
+      flex-shrink: 0;
+      margin-top: base(-.2);
+    }
+
+    &:hover {
+      color: var(--theme-elevation-1000);
+
+      .stroke {
+        stroke: var(--theme-elevation-1000);
+      }
+    }
+  }
+
+  &__indicator {
+    margin-left: auto;
+
+    .stroke {
+      stroke: var(--theme-elevation-200);
+    }
+  }
+
+  &--collapsed {
+    .collapsible__toggle {
+      border-bottom-right-radius: $style-radius-s;
+      border-bottom-left-radius: $style-radius-s;
+    }
+
+    .nav-group__indicator {
+      transform: rotate(.5turn);
+    }
+  }
+
+}

@@ -79,6 +79,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
+  previousDoc: T,
   /**
    * Hook operation being performed
    */
@@ -152,9 +153,13 @@ export type CollectionAdminOptions = {
    */
   defaultColumns?: string[];
   /**
- * Additional fields to be searched via the full text search
- */
+   * Additional fields to be searched via the full text search
+   */
   listSearchableFields?: string[];
+  /**
+   * Place collections into a navigational group
+   * */
+  group?: string;
   /**
    * Custom description for collection
    */
