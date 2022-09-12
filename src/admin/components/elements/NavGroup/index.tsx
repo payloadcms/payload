@@ -7,16 +7,20 @@ import './index.scss';
 
 const baseClass = 'nav-group';
 
-const NavGroup: React.FC<{ children: React.ReactNode, label: string, type: string}> = ({
+type Props = {
+  children: React.ReactNode,
+  label: string,
+}
+
+const NavGroup: React.FC<Props> = ({
   children,
   label,
-  type,
 }) => {
   const [collapsed, setCollapsed] = useState(true);
   const [animate, setAnimate] = useState(false);
   const { getPreference, setPreference } = usePreferences();
 
-  const preferencesKey = `collapsed-${type}-groups`;
+  const preferencesKey = `collapsed-${label}-groups`;
 
   useEffect(() => {
     if (label) {
@@ -60,7 +64,9 @@ const NavGroup: React.FC<{ children: React.ReactNode, label: string, type: strin
             .join(' ')}
           onClick={toggleCollapsed}
         >
-          {label}
+          <div className={`${baseClass}__label`}>
+            {label}
+          </div>
           <Chevron className={`${baseClass}__indicator`} />
         </button>
         <AnimateHeight

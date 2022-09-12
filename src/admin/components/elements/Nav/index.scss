@@ -81,33 +81,16 @@
     }
   }
 
-  a {
-    padding: base(.125) 0;
-    display: flex;
-    text-decoration: none;
-
-    &:focus {
-      box-shadow: none;
-      font-weight: 600;
-    }
-
-    &:active {
-      font-weight: normal;
-    }
-  }
-
   nav {
-    margin: base(.25) 0 $baseline;
-    width: 100%;
-
     a {
       position: relative;
+      padding: base(.125) base(1.5) base(.125) 0;
+      display: flex;
+      text-decoration: none;
 
-      svg {
-        opacity: 0;
-        position: absolute;
-        left: - base(.5);
-        transform: rotate(-90deg);
+      &:focus {
+        box-shadow: none;
+        font-weight: 600;
       }
 
       &:hover {
@@ -115,12 +98,24 @@
       }
 
       &.active {
+        font-weight: normal;
         padding-left: base(.6);
         font-weight: 600;
+      }
+    }
+  }
 
-        svg {
-          opacity: 1;
-        }
+  &__link {
+    svg {
+      opacity: 0;
+      position: absolute;
+      left: - base(.5);
+      transform: rotate(-90deg);
+    }
+
+    &.active {
+      svg {
+        opacity: 1;
       }
     }
   }

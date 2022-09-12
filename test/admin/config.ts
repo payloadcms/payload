@@ -50,9 +50,6 @@ export default buildConfig({
   collections: [
     {
       slug: 'users',
-      admin: {
-        group: 'One',
-      },
       auth: true,
       fields: [],
     },
