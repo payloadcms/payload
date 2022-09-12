@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import merge from 'deepmerge';
-import { Field, fieldAffectsData, tabHasName } from '../../config/types';
+import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
 import { Operation } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import getValueWithDefault from '../../getDefaultValue';
@@ -12,7 +12,7 @@ type Args = {
   doc: Record<string, unknown>
   docWithLocales: Record<string, unknown>
   errors: { message: string, field: string }[]
-  field: Field
+  field: Field | TabAsField
   id?: string | number
   mergeLocaleActions: (() => void)[]
   operation: Operation
@@ -62,7 +62,7 @@ export const promise = async ({
           siblingData[field.name] = siblingDoc[field.name];
         }
 
-      // Otherwise compute default value
+        // Otherwise compute default value
       } else if (typeof field.defaultValue !== 'undefined') {
         siblingData[field.name] = await getValueWithDefault({
           value: siblingData[field.name],

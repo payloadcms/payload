@@ -176,25 +176,29 @@ const TabsFields: CollectionConfig = {
           label: 'Hooks Tab',
           hooks: {
             beforeValidate: [
-              ({ data }) => {
+              ({ data = {} }) => {
+                if (!data.hooksTab) data.hooksTab = {};
                 data.hooksTab.beforeValidate = true;
                 return data.hooksTab;
               },
             ],
             beforeChange: [
-              ({ data }) => {
+              ({ data = {} }) => {
+                if (!data.hooksTab) data.hooksTab = {};
                 data.hooksTab.beforeChange = true;
                 return data.hooksTab;
               },
             ],
             afterChange: [
-              ({ data }) => {
+              ({ data = {} }) => {
+                if (!data.hooksTab) data.hooksTab = {};
                 data.hooksTab.afterChange = true;
                 return data.hooksTab;
               },
             ],
             afterRead: [
-              ({ data }) => {
+              ({ data = {} }) => {
+                if (!data.hooksTab) data.hooksTab = {};
                 data.hooksTab.afterRead = true;
                 return data.hooksTab;
               },

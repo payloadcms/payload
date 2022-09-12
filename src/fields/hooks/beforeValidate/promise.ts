@@ -1,12 +1,12 @@
 /* eslint-disable no-param-reassign */
 import { PayloadRequest } from '../../../express/types';
-import { Field, fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types';
+import { Field, fieldAffectsData, TabAsField, tabHasName, valueIsValueWithRelation } from '../../config/types';
 import { traverseFields } from './traverseFields';
 
 type Args = {
   data: Record<string, unknown>
   doc: Record<string, unknown>
-  field: Field
+  field: Field | TabAsField
   id?: string | number
   operation: 'create' | 'update'
   overrideAccess: boolean

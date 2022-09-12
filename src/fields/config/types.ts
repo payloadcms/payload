@@ -201,7 +201,7 @@ export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized'> & {
   admin?: TabsAdmin
 }
 
-type TabAsField = Tab & {
+export type TabAsField = Tab & {
   type: 'tab'
 };
 
@@ -370,7 +370,6 @@ export type Field =
   | RowField
   | CollapsibleField
   | TabsField
-  | TabAsField
   | UIField;
 
 export type FieldAffectingData =
@@ -465,11 +464,11 @@ export function fieldHasMaxDepth(field: Field): field is FieldWithMaxDepth {
   return (field.type === 'upload' || field.type === 'relationship') && typeof field.maxDepth === 'number';
 }
 
-export function fieldIsPresentationalOnly(field: Field): field is UIField {
+export function fieldIsPresentationalOnly(field: Field | TabAsField): field is UIField {
   return field.type === 'ui';
 }
 
-export function fieldAffectsData(field: Field): field is FieldAffectingData {
+export function fieldAffectsData(field: Field | TabAsField): field is FieldAffectingData {
   return 'name' in field && !fieldIsPresentationalOnly(field);
 }
 

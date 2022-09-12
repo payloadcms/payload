@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { Field, fieldAffectsData, tabHasName } from '../../config/types';
+import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
 import { PayloadRequest } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise';
@@ -9,7 +9,7 @@ type Args = {
   currentDepth: number
   depth: number
   doc: Record<string, unknown>
-  field: Field
+  field: Field | TabAsField
   fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean

@@ -16,10 +16,11 @@ import { GraphQLJSON } from 'graphql-type-json';
 import withNullableType from './withNullableType';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
-import { ArrayField, CodeField, DateField, EmailField, Field, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField, TabsField, CheckboxField, BlockField } from '../../fields/config/types';
+import { ArrayField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField, TabsField, CheckboxField, BlockField, tabHasName } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
 import { Payload } from '../../index';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
+import { groupOrTabHasRequiredSubfield } from '../../utilities/groupOrTabHasRequiredSubfield';
 
 export const getCollectionIDType = (config: SanitizedCollectionConfig): GraphQLScalarType => {
   const idField = config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
@@ -163,7 +164,7 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
       };
     },
     group: (inputObjectTypeConfig: InputObjectTypeConfig, field: GroupField) => {
-      const requiresAtLeastOneField = field.fields.some((subField) => (!fieldIsPresentationalOnly(subField) && subField.required && !subField.localized));
+      const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field);
       const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
       let type: GraphQLType = buildMutationInputType(payload, fullName, field.fields, fullName);
       if (requiresAtLeastOneField) type = new GraphQLNonNull(type);
@@ -186,16 +187,30 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
       if (addSubField) return addSubField(acc, subField);
       return acc;
     }, inputObjectTypeConfig),
-    tabs: (inputObjectTypeConfig: InputObjectTypeConfig, field: TabsField) => field.tabs.reduce((acc, tab) => {
-      return {
-        ...acc,
-        ...tab.fields.reduce((subFieldSchema, subField) => {
-          const addSubField = fieldToSchemaMap[subField.type];
-          if (addSubField) return addSubField(subFieldSchema, subField);
-          return subFieldSchema;
-        }, acc),
-      };
-    }, inputObjectTypeConfig),
+    tabs: (inputObjectTypeConfig: InputObjectTypeConfig, field: TabsField) => {
+      return field.tabs.reduce((acc, tab) => {
+        if (tabHasName(tab)) {
+          const fullName = combineParentName(parentName, toWords(tab.name, true));
+          const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field);
+          let type: GraphQLType = buildMutationInputType(payload, fullName, tab.fields, fullName);
+          if (requiresAtLeastOneField) type = new GraphQLNonNull(type);
+
+          return {
+            ...inputObjectTypeConfig,
+            [tab.name]: { type },
+          };
+        }
+
+        return {
+          ...acc,
+          ...tab.fields.reduce((subFieldSchema, subField) => {
+            const addSubField = fieldToSchemaMap[subField.type];
+            if (addSubField) return addSubField(subFieldSchema, subField);
+            return subFieldSchema;
+          }, acc),
+        };
+      }, inputObjectTypeConfig);
+    },
   };
 
   const fieldName = formatName(name);

@@ -5,7 +5,6 @@ import config from '../uploads/config';
 import payload from '../../src';
 import { pointDoc } from './collections/Point';
 import type { ArrayField, GroupField, TabsField } from './payload-types';
-import type { ArrayField, GroupField } from './payload-types';
 import { arrayFieldsSlug, arrayDefaultValue, arrayDoc } from './collections/Array';
 import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
 import { defaultText } from './collections/Text';
@@ -292,7 +291,7 @@ describe('Fields', () => {
         collection,
         id,
         locale: 'all',
-      }) as unknown as {localized: {en: unknown, es: unknown}};
+      }) as unknown as { localized: { en: unknown, es: unknown } };
 
       expect(enDoc.localized[0].text).toStrictEqual(enText);
       expect(esDoc.localized[0].text).toStrictEqual(esText);

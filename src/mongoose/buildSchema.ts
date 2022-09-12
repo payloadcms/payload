@@ -14,6 +14,7 @@ import {
   DateField,
   EmailField,
   Field,
+  FieldAffectingData,
   fieldAffectsData, fieldIsLocalized,
   fieldIsPresentationalOnly,
   GroupField,
@@ -43,7 +44,7 @@ export type BuildSchemaOptions = {
 
 type FieldSchemaGenerator = (field: Field, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => void;
 
-const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: BuildSchemaOptions) => {
+const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSchemaOptions) => {
   const schema: SchemaTypeOptions<unknown> = {
     unique: (!buildSchemaOptions.disableUnique && field.unique) || false,
     required: false,
@@ -57,8 +58,8 @@ const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: Bui
   return schema;
 };
 
-const localizeSchema = (field: NonPresentationalField | Tab, schema, localization) => {
-  if (fieldIsLocalized(field) && localization && Array.isArray(localization.locales)) {
+const localizeSchema = (entity: NonPresentationalField | Tab, schema, localization) => {
+  if (fieldIsLocalized(entity) && localization && Array.isArray(localization.locales)) {
     return {
       type: localization.locales.reduce((localeSchema, locale) => ({
         ...localeSchema,
@@ -295,17 +296,18 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   tabs: (field: TabsField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     field.tabs.forEach((tab) => {
       if (tabHasName(tab)) {
-        const formattedBaseSchema = formatBaseSchema(field, buildSchemaOptions);
-
         const baseSchema = {
-          ...formattedBaseSchema,
-          type: buildSchema(config, tab.fields, {
-            options: {
-              _id: false,
-              id: false,
+          type: buildSchema(
+            config,
+            tab.fields,
+            {
+              options: {
+                _id: false,
+                id: false,
+              },
+              disableUnique: buildSchemaOptions.disableUnique,
             },
-            disableUnique: buildSchemaOptions.disableUnique,
-          }),
+          ),
         };
 
         schema.add({
@@ -341,14 +343,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     });
   },
   group: (field: GroupField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
-    let { required } = field;
-    if (field?.admin?.condition || field?.localized || field?.access?.create) required = false;
-
     const formattedBaseSchema = formatBaseSchema(field, buildSchemaOptions);
 
     const baseSchema = {
       ...formattedBaseSchema,
-      required: required && field.fields.some((subField) => (!fieldIsPresentationalOnly(subField) && subField.required && !subField.localized && !subField?.admin?.condition && !subField?.access?.create)),
       type: buildSchema(
         config,
         field.fields,

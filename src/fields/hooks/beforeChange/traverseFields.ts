@@ -1,4 +1,4 @@
-import { Field } from '../../config/types';
+import { Field, TabAsField } from '../../config/types';
 import { promise } from './promise';
 import { Operation } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
@@ -8,7 +8,7 @@ type Args = {
   doc: Record<string, unknown>
   docWithLocales: Record<string, unknown>
   errors: { message: string, field: string }[]
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   id?: string | number
   mergeLocaleActions: (() => void)[]
   operation: Operation
