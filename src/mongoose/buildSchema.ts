@@ -4,7 +4,35 @@
 /* eslint-disable no-use-before-define */
 import { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
-import { ArrayField, Block, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, fieldAffectsData, fieldIsPresentationalOnly, GroupField, NonPresentationalField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextareaField, TextField, UploadField } from '../fields/config/types';
+import {
+  ArrayField,
+  Block,
+  BlockField,
+  CheckboxField,
+  CodeField,
+  CollapsibleField,
+  DateField,
+  EmailField,
+  Field,
+  FieldAffectingData,
+  fieldAffectsData, fieldIsLocalized,
+  fieldIsPresentationalOnly,
+  GroupField,
+  NonPresentationalField,
+  NumberField,
+  PointField,
+  RadioField,
+  RelationshipField,
+  RichTextField,
+  RowField,
+  SelectField,
+  Tab,
+  tabHasName,
+  TabsField,
+  TextareaField,
+  TextField, UnnamedTab,
+  UploadField,
+} from '../fields/config/types';
 
 export type BuildSchemaOptions = {
   options?: SchemaOptions
@@ -16,7 +44,7 @@ export type BuildSchemaOptions = {
 
 type FieldSchemaGenerator = (field: Field, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => void;
 
-const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: BuildSchemaOptions) => {
+const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSchemaOptions) => {
   const schema: SchemaTypeOptions<unknown> = {
     unique: (!buildSchemaOptions.disableUnique && field.unique) || false,
     required: false,
@@ -30,8 +58,8 @@ const formatBaseSchema = (field: NonPresentationalField, buildSchemaOptions: Bui
   return schema;
 };
 
-const localizeSchema = (field: NonPresentationalField, schema, localization) => {
-  if (field.localized && localization && Array.isArray(localization.locales)) {
+const localizeSchema = (entity: NonPresentationalField | Tab, schema, localization) => {
+  if (fieldIsLocalized(entity) && localization && Array.isArray(localization.locales)) {
     return {
       type: localization.locales.reduce((localeSchema, locale) => ({
         ...localeSchema,
@@ -267,13 +295,33 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   },
   tabs: (field: TabsField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     field.tabs.forEach((tab) => {
-      tab.fields.forEach((subField: Field) => {
-        const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+      if (tabHasName(tab)) {
+        const baseSchema = {
+          type: buildSchema(
+            config,
+            tab.fields,
+            {
+              options: {
+                _id: false,
+                id: false,
+              },
+              disableUnique: buildSchemaOptions.disableUnique,
+            },
+          ),
+        };
 
-        if (addFieldSchema) {
-          addFieldSchema(subField, schema, config, buildSchemaOptions);
-        }
-      });
+        schema.add({
+          [tab.name]: localizeSchema(tab, baseSchema, config.localization),
+        });
+      } else {
+        (tab as UnnamedTab).fields.forEach((subField: Field) => {
+          const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type];
+
+          if (addFieldSchema) {
+            addFieldSchema(subField, schema, config, buildSchemaOptions);
+          }
+        });
+      }
     });
   },
   array: (field: ArrayField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
@@ -295,14 +343,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     });
   },
   group: (field: GroupField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
-    let { required } = field;
-    if (field?.admin?.condition || field?.localized || field?.access?.create) required = false;
-
     const formattedBaseSchema = formatBaseSchema(field, buildSchemaOptions);
 
     const baseSchema = {
       ...formattedBaseSchema,
-      required: required && field.fields.some((subField) => (!fieldIsPresentationalOnly(subField) && subField.required && !subField.localized && !subField?.admin?.condition && !subField?.access?.create)),
       type: buildSchema(
         config,
         field.fields,

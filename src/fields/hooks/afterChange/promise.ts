@@ -1,12 +1,12 @@
 /* eslint-disable no-param-reassign */
 import { PayloadRequest } from '../../../express/types';
-import { Field, fieldAffectsData } from '../../config/types';
+import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
 import { traverseFields } from './traverseFields';
 
 type Args = {
   data: Record<string, unknown>
   doc: Record<string, unknown>
-  field: Field
+  field: Field | TabAsField
   operation: 'create' | 'update'
   req: PayloadRequest
   siblingData: Record<string, unknown>
@@ -125,20 +125,38 @@ export const promise = async ({
       break;
     }
 
-    case 'tabs': {
-      const promises = [];
-      field.tabs.forEach((tab) => {
-        promises.push(traverseFields({
-          data,
-          doc,
-          fields: tab.fields,
-          operation,
-          req,
-          siblingData: siblingData || {},
-          siblingDoc: { ...siblingDoc },
-        }));
+    case 'tab': {
+      let tabSiblingData = siblingData;
+      let tabSiblingDoc = siblingDoc;
+
+      if (tabHasName(field)) {
+        tabSiblingData = siblingData[field.name] as Record<string, unknown>;
+        tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>;
+      }
+
+      await traverseFields({
+        data,
+        doc,
+        fields: field.fields,
+        operation,
+        req,
+        siblingData: tabSiblingData,
+        siblingDoc: tabSiblingDoc,
       });
-      await Promise.all(promises);
+
+      break;
+    }
+
+    case 'tabs': {
+      await traverseFields({
+        data,
+        doc,
+        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        operation,
+        req,
+        siblingData: siblingData || {},
+        siblingDoc: { ...siblingDoc },
+      });
       break;
     }
 

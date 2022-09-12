@@ -1,11 +1,11 @@
 import { PayloadRequest } from '../../../express/types';
-import { Field } from '../../config/types';
+import { Field, TabAsField } from '../../config/types';
 import { promise } from './promise';
 
 type Args = {
   data: Record<string, unknown>
   doc: Record<string, unknown>
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   id?: string | number
   operation: 'create' | 'update'
   overrideAccess: boolean

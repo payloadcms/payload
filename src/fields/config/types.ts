@@ -10,12 +10,19 @@ import { User } from '../../auth';
 import { Payload } from '../..';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
+  /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<T>,
+  /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany?: boolean
+  /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: T,
+  /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'read' | 'update' | 'delete',
+  /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
+  /** The sibling data passed to a field that the hook is running against. */
   siblingData: Partial<S>
+  /** The value of the field. */
   value?: P,
 }
 
@@ -181,15 +188,30 @@ export type CollapsibleField = Omit<FieldBase, 'name'> & {
 
 export type TabsAdmin = Omit<Admin, 'description'>;
 
-export type TabsField = Omit<FieldBase, 'admin' | 'name'> & {
+type TabBase = {
+  fields: Field[]
+  description?: Description
+}
+
+export type NamedTab = TabBase & FieldBase
+
+export type UnnamedTab = TabBase & Omit<FieldBase, 'name'> & {
+  label: string
+  localized?: never
+}
+
+export type Tab = NamedTab | UnnamedTab
+
+export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized'> & {
   type: 'tabs';
-  tabs: {
-    label: string
-    fields: Field[];
-    description?: Description
-  }[]
+  tabs: Tab[]
   admin?: TabsAdmin
 }
+
+export type TabAsField = Tab & {
+  type: 'tab'
+  name?: string
+};
 
 export type UIField = {
   name: string
@@ -375,6 +397,7 @@ export type FieldAffectingData =
   | UploadField
   | CodeField
   | PointField
+  | TabAsField
 
 export type NonPresentationalField =
   TextField
@@ -450,12 +473,20 @@ export function fieldHasMaxDepth(field: Field): field is FieldWithMaxDepth {
   return (field.type === 'upload' || field.type === 'relationship') && typeof field.maxDepth === 'number';
 }
 
-export function fieldIsPresentationalOnly(field: Field): field is UIField {
+export function fieldIsPresentationalOnly(field: Field | TabAsField): field is UIField {
   return field.type === 'ui';
 }
 
-export function fieldAffectsData(field: Field): field is FieldAffectingData {
+export function fieldAffectsData(field: Field | TabAsField): field is FieldAffectingData {
   return 'name' in field && !fieldIsPresentationalOnly(field);
+}
+
+export function tabHasName(tab: Tab): tab is NamedTab {
+  return 'name' in tab;
+}
+
+export function fieldIsLocalized(field: Field | Tab): boolean {
+  return 'localized' in field && field.localized;
 }
 
 export type HookName = 'beforeRead' | 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';

@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import merge from 'deepmerge';
-import { Field, fieldAffectsData } from '../../config/types';
+import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
 import { Operation } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import getValueWithDefault from '../../getDefaultValue';
@@ -12,7 +12,7 @@ type Args = {
   doc: Record<string, unknown>
   docWithLocales: Record<string, unknown>
   errors: { message: string, field: string }[]
-  field: Field
+  field: Field | TabAsField
   id?: string | number
   mergeLocaleActions: (() => void)[]
   operation: Operation
@@ -62,7 +62,7 @@ export const promise = async ({
           siblingData[field.name] = siblingDoc[field.name];
         }
 
-      // Otherwise compute default value
+        // Otherwise compute default value
       } else if (typeof field.defaultValue !== 'undefined') {
         siblingData[field.name] = await getValueWithDefault({
           value: siblingData[field.name],
@@ -281,28 +281,60 @@ export const promise = async ({
       break;
     }
 
-    case 'tabs': {
-      const promises = [];
-      field.tabs.forEach((tab) => {
-        promises.push(traverseFields({
-          data,
-          doc,
-          docWithLocales,
-          errors,
-          fields: tab.fields,
-          id,
-          mergeLocaleActions,
-          operation,
-          path,
-          req,
-          siblingData,
-          siblingDoc,
-          siblingDocWithLocales,
-          skipValidation: skipValidationFromHere,
-        }));
+    case 'tab': {
+      let tabPath = path;
+      let tabSiblingData = siblingData;
+      let tabSiblingDoc = siblingDoc;
+      let tabSiblingDocWithLocales = siblingDocWithLocales;
+
+      if (tabHasName(field)) {
+        tabPath = `${path}${field.name}.`;
+        if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {};
+        if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {};
+        if (typeof siblingDocWithLocales[field.name] !== 'object') siblingDocWithLocales[field.name] = {};
+
+        tabSiblingData = siblingData[field.name] as Record<string, unknown>;
+        tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>;
+        tabSiblingDocWithLocales = siblingDocWithLocales[field.name] as Record<string, unknown>;
+      }
+
+      await traverseFields({
+        data,
+        doc,
+        docWithLocales,
+        errors,
+        fields: field.fields,
+        id,
+        mergeLocaleActions,
+        operation,
+        path: tabPath,
+        req,
+        siblingData: tabSiblingData,
+        siblingDoc: tabSiblingDoc,
+        siblingDocWithLocales: tabSiblingDocWithLocales,
+        skipValidation: skipValidationFromHere,
       });
 
-      await Promise.all(promises);
+      break;
+    }
+
+    case 'tabs': {
+      await traverseFields({
+        data,
+        doc,
+        docWithLocales,
+        errors,
+        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        id,
+        mergeLocaleActions,
+        operation,
+        path,
+        req,
+        siblingData,
+        siblingDoc,
+        siblingDocWithLocales,
+        skipValidation: skipValidationFromHere,
+      });
 
       break;
     }

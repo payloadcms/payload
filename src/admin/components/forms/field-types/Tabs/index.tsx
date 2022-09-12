@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
+import { fieldAffectsData, tabHasName } from '../../../../../fields/config/types';
 import FieldDescription from '../../FieldDescription';
 import toKebabCase from '../../../../../utilities/toKebabCase';
 import { useCollapsible } from '../../../elements/Collapsible/provider';
 import { TabsProvider } from './provider';
-import { getFieldPath } from '../getFieldPath';
 
 import './index.scss';
 
@@ -50,7 +50,7 @@ const TabsField: React.FC<Props> = (props) => {
                   ].filter(Boolean).join(' ')}
                   onClick={() => setActive(i)}
                 >
-                  {tab.label}
+                  {tab.label ? tab.label : (tabHasName(tab) && tab.name)}
                 </button>
               );
             })}
@@ -68,14 +68,13 @@ const TabsField: React.FC<Props> = (props) => {
                 description={activeTab.description}
               />
               <RenderFields
-                key={activeTab.label}
                 forceRender
                 readOnly={readOnly}
                 permissions={permissions?.fields}
                 fieldTypes={fieldTypes}
                 fieldSchema={activeTab.fields.map((field) => ({
                   ...field,
-                  path: getFieldPath(path, field),
+                  path: `${path ? `${path}.` : ''}${tabHasName(activeTab) ? `${activeTab.name}.` : ''}${fieldAffectsData(field) ? field.name : ''}`,
                 }))}
               />
             </div>

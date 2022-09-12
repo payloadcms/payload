@@ -7,7 +7,7 @@ keywords: tabs, fields, config, configuration, documentation, Content Management
 ---
 
 <Banner >
-  The Tabs field is presentational-only and only affects the Admin panel. By using it, you can place fields within a nice layout component that separates certain sub-fields by a tabbed interface.
+  The Tabs field is presentational-only and only affects the Admin panel (unless a tab is named). By using it, you can place fields within a nice layout component that separates certain sub-fields by a tabbed interface.
 </Banner>
 
 ![Tabs field type used to separate Hero fields from Page Layout](https://payloadcms.com/images/fields/tabs/tabs.jpg)
@@ -26,6 +26,7 @@ Each tab has its own required `label` and `fields` array. You can also optionall
 
 | Option            | Description |
 | ----------------- | ----------- |
+| **`name`**        | An optional property name to be used when stored and retrieved from the database, similar to a [Group](/docs/fields/group). |
 | **`label`** *     | The label to render on the tab itself. |
 | **`fields`** *    | The fields to render within this tab. |
 | **`description`** | Optionally render a description within this tab to describe the contents of the tab itself. |
@@ -56,10 +57,11 @@ const ExampleCollection: CollectionConfig = {
           ],
         },
         {
+          name: 'tabTwo',
           label: 'Tab Two Label', // required
           fields: [ // required
             {
-              name: 'numberField',
+              name: 'numberField', // accessible via tabTwo.numberField
               type: 'number',
               required: true,
             },

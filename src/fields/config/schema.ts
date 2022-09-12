@@ -186,17 +186,22 @@ export const collapsible = baseField.keys({
   admin: baseAdminFields.default(),
 });
 
+const tab = baseField.keys({
+  name: joi.string().when('localized', { is: joi.exist(), then: joi.required() }),
+  localized: joi.boolean(),
+  label: joi.string().required(),
+  fields: joi.array().items(joi.link('#field')).required(),
+  description: joi.alternatives().try(
+    joi.string(),
+    componentSchema,
+  ),
+});
+
 export const tabs = baseField.keys({
   type: joi.string().valid('tabs').required(),
   fields: joi.forbidden(),
-  tabs: joi.array().items(joi.object({
-    label: joi.string().required(),
-    fields: joi.array().items(joi.link('#field')).required(),
-    description: joi.alternatives().try(
-      joi.string(),
-      componentSchema,
-    ),
-  })).required(),
+  localized: joi.forbidden(),
+  tabs: joi.array().items(tab).required(),
   admin: baseAdminFields.keys({
     description: joi.forbidden(),
   }),
