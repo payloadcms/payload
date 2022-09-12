@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useConfig } from '../../utilities/Config';
 
@@ -7,6 +7,7 @@ import Card from '../../elements/Card';
 import Button from '../../elements/Button';
 import { Props } from './types';
 import { Gutter } from '../../elements/Gutter';
+import { groupNavItems, Group, EntityToGroup, EntityType } from '../../../utilities/groupNavItems';
 
 import './index.scss';
 
@@ -33,52 +34,81 @@ const Dashboard: React.FC<Props> = (props) => {
     },
   } = useConfig();
 
+  const [groups, setGroups] = useState<Group[]>([]);
+
+  useEffect(() => {
+    setGroups(groupNavItems([
+      ...collections.map((collection) => {
+        const entityToGroup: EntityToGroup = {
+          type: EntityType.collection,
+          entity: collection,
+        };
+
+        return entityToGroup;
+      }),
+      ...globals.map((global) => {
+        const entityToGroup: EntityToGroup = {
+          type: EntityType.global,
+          entity: global,
+        };
+
+        return entityToGroup;
+      }),
+    ], permissions));
+  }, [collections, globals, permissions]);
+
   return (
     <div className={baseClass}>
       <Eyebrow />
       <Gutter className={`${baseClass}__wrap`}>
         {Array.isArray(beforeDashboard) && beforeDashboard.map((Component, i) => <Component key={i} />)}
-        <h2 className={`${baseClass}__label`}>Collections</h2>
-        <ul className={`${baseClass}__card-list`}>
-          {collections.map((collection) => {
-            const hasCreatePermission = permissions?.collections?.[collection.slug]?.create?.permission;
+        {groups.map(({ label, entities }, groupIndex) => {
+          return (
+            <React.Fragment key={groupIndex}>
+              <h2 className={`${baseClass}__label`}>{label}</h2>
+              <ul className={`${baseClass}__card-list`}>
+                {entities.map(({ entity, type }, entityIndex) => {
+                  let title: string;
+                  let createHREF: string;
+                  let onClick: () => void;
+                  let hasCreatePermission: boolean;
 
-            return (
-              <li key={collection.slug}>
-                <Card
-                  title={collection.labels.plural}
-                  id={`card-${collection.slug}`}
-                  onClick={() => push({ pathname: `${admin}/collections/${collection.slug}` })}
-                  actions={hasCreatePermission ? (
-                    <Button
-                      el="link"
-                      to={`${admin}/collections/${collection.slug}/create`}
-                      icon="plus"
-                      round
-                      buttonStyle="icon-label"
-                      iconStyle="with-border"
-                    />
-                  ) : undefined}
-                />
-              </li>
-            );
-          })}
-        </ul>
-        {(globals.length > 0) && (
-          <React.Fragment>
-            <h2 className={`${baseClass}__label`}>Globals</h2>
-            <ul className={`${baseClass}__card-list`}>
-              {globals.map((global) => (
-                <li key={global.slug}>
-                  <Card
-                    title={global.label}
-                    onClick={() => push({ pathname: `${admin}/globals/${global.slug}` })}
-                  />
-                </li>
-              ))}
-            </ul>
-          </React.Fragment>
-        )}
+                  if (type === EntityType.collection) {
+                    title = entity.labels.plural;
+                    onClick = () => push({ pathname: `${admin}/collections/${entity.slug}` });
+                    createHREF = `${admin}/collections/${entity.slug}/create`;
+                    hasCreatePermission = permissions?.collections?.[entity.slug]?.create?.permission;
+                  }
+
+                  if (type === EntityType.global) {
+                    title = entity.label;
+                    onClick = () => push({ pathname: `${admin}/globals/${global.slug}` });
+                  }
+
+                  return (
+                    <li key={entityIndex}>
+                      <Card
+                        title={title}
+                        id={`card-${entity.slug}`}
+                        onClick={onClick}
+                        actions={(hasCreatePermission && type === EntityType.collection) ? (
+                          <Button
+                            el="link"
+                            to={createHREF}
+                            icon="plus"
+                            round
+                            buttonStyle="icon-label"
+                            iconStyle="with-border"
+                          />
+                        ) : undefined}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            </React.Fragment>
+          );
+        })}
         {Array.isArray(afterDashboard) && afterDashboard.map((Component, i) => <Component key={i} />)}
       </Gutter>
     </div>
