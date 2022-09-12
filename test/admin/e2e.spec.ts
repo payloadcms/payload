@@ -184,8 +184,24 @@ describe('admin', () => {
       test('search by id', async () => {
         const { id } = await createPost();
         await page.locator('.search-filter__input').fill(id);
+        await wait(250);
         const tableItems = page.locator(tableRowLocator);
         await expect(tableItems).toHaveCount(1);
+      });
+
+      test('search by title or description', async () => {
+        await createPost({
+          title: 'find me',
+          description: 'this is fun',
+        });
+
+        await page.locator('.search-filter__input').fill('find me');
+        await wait(250);
+        await expect(page.locator(tableRowLocator)).toHaveCount(1);
+
+        await page.locator('.search-filter__input').fill('this is fun');
+        await wait(250);
+        await expect(page.locator(tableRowLocator)).toHaveCount(1);
       });
 
       test('toggle columns', async () => {

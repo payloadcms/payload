@@ -56,6 +56,7 @@ export default buildConfig({
     {
       slug,
       admin: {
+        listSearchableFields: ['title', 'description', 'number'],
         group: 'One',
       },
       fields: [
@@ -66,6 +67,10 @@ export default buildConfig({
         {
           name: 'description',
           type: 'text',
+        },
+        {
+          name: 'number',
+          type: 'number',
         },
       ],
     },

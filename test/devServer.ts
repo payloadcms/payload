@@ -19,6 +19,11 @@ const init = async () => {
     },
   });
 
+  // Redirect root to Admin panel
+  expressApp.get('/', (_, res) => {
+    res.redirect('/admin');
+  });
+
   const externalRouter = express.Router();
 
   externalRouter.use(payload.authenticate);
