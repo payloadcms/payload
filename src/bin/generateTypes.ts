@@ -3,12 +3,13 @@ import fs from 'fs';
 import type { JSONSchema4 } from 'json-schema';
 import { compile } from 'json-schema-to-typescript';
 import Logger from '../utilities/logger';
-import { fieldAffectsData, Field, Option, FieldAffectingData } from '../fields/config/types';
+import { fieldAffectsData, Field, Option, FieldAffectingData, tabHasName } from '../fields/config/types';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { SanitizedConfig } from '../config/types';
 import loadConfig from '../config/load';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 import deepCopyObject from '../utilities/deepCopyObject';
+import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield';
 
 const nonOptionalFieldTypes = ['group', 'array', 'blocks'];
 
@@ -285,9 +286,23 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
 
           case 'tabs': {
             field.tabs.forEach((tab) => {
-              const topLevelFields = generateFieldTypes(config, tab.fields);
-              requiredTopLevelProps = requiredTopLevelProps.concat(topLevelFields.required);
-              topLevelProps = topLevelProps.concat(Object.entries(topLevelFields.properties).map((prop) => prop));
+              if (tabHasName(tab)) {
+                const hasRequiredSubfields = groupOrTabHasRequiredSubfield(tab);
+                if (hasRequiredSubfields) requiredTopLevelProps.push(tab.name);
+
+                topLevelProps.push([
+                  tab.name,
+                  {
+                    type: 'object',
+                    additionalProperties: false,
+                    ...generateFieldTypes(config, tab.fields),
+                  },
+                ]);
+              } else {
+                const topLevelFields = generateFieldTypes(config, tab.fields);
+                requiredTopLevelProps = requiredTopLevelProps.concat(topLevelFields.required);
+                topLevelProps = topLevelProps.concat(Object.entries(topLevelFields.properties).map((prop) => prop));
+              }
             });
             break;
           }

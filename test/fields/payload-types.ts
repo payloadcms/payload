@@ -300,14 +300,34 @@ export interface TabsField {
   };
   textInRow: string;
   numberInRow: number;
-  text?: string;
-  defaultValue?: string;
-  beforeValidate?: boolean;
-  beforeChange?: boolean;
-  afterChange?: boolean;
-  afterRead?: boolean;
+  tab?: {
+    array: {
+      text: string;
+      id?: string;
+    }[];
+    text?: string;
+    defaultValue?: string;
+  };
+  namedTabWithDefaultValue?: {
+    defaultValue?: string;
+  };
+  localizedTab?: {
+    text?: string;
+  };
+  accessControlTab?: {
+    text?: string;
+  };
+  hooksTab?: {
+    beforeValidate?: boolean;
+    beforeChange?: boolean;
+    afterChange?: boolean;
+    afterRead?: boolean;
+  };
   textarea?: string;
   anotherText: string;
+  nestedTab?: {
+    text?: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
