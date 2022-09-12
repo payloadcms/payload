@@ -323,6 +323,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
     result = await hook({
       doc: result,
+      previousDoc: originalDoc,
       req,
       operation: 'update',
     }) || result;

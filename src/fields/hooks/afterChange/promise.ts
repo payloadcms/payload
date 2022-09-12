@@ -7,6 +7,7 @@ type Args = {
   data: Record<string, unknown>
   doc: Record<string, unknown>
   previousDoc: Record<string, unknown>
+  previousSiblingDoc: Record<string, unknown>
   field: Field | TabAsField
   operation: 'create' | 'update'
   req: PayloadRequest
@@ -21,6 +22,7 @@ export const promise = async ({
   data,
   doc,
   previousDoc,
+  previousSiblingDoc,
   field,
   operation,
   req,
@@ -37,6 +39,7 @@ export const promise = async ({
           value: siblingData[field.name],
           originalDoc: doc,
           previousDoc,
+          previousSiblingDoc,
           previousValue: previousDoc[field.name],
           data,
           siblingData,
@@ -58,6 +61,7 @@ export const promise = async ({
         data,
         doc,
         previousDoc,
+        previousSiblingDoc: previousDoc[field.name] as Record<string, unknown>,
         fields: field.fields,
         operation,
         req,
@@ -78,6 +82,7 @@ export const promise = async ({
             data,
             doc,
             previousDoc,
+            previousSiblingDoc: previousDoc[field.name]?.[i] || {} as Record<string, unknown>,
             fields: field.fields,
             operation,
             req,
@@ -103,6 +108,7 @@ export const promise = async ({
               data,
               doc,
               previousDoc,
+              previousSiblingDoc: previousDoc[field.name]?.[i] || {} as Record<string, unknown>,
               fields: block.fields,
               operation,
               req,
@@ -123,6 +129,7 @@ export const promise = async ({
         data,
         doc,
         previousDoc,
+        previousSiblingDoc: { ...previousSiblingDoc },
         fields: field.fields,
         operation,
         req,
@@ -136,10 +143,12 @@ export const promise = async ({
     case 'tab': {
       let tabSiblingData = siblingData;
       let tabSiblingDoc = siblingDoc;
+      let tabPreviousSiblingDoc = siblingDoc;
 
       if (tabHasName(field)) {
         tabSiblingData = siblingData[field.name] as Record<string, unknown>;
         tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>;
+        tabPreviousSiblingDoc = previousDoc[field.name] as Record<string, unknown>;
       }
 
       await traverseFields({
@@ -148,6 +157,8 @@ export const promise = async ({
         fields: field.fields,
         operation,
         req,
+        previousSiblingDoc: tabPreviousSiblingDoc,
+        previousDoc,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
       });
@@ -160,7 +171,8 @@ export const promise = async ({
         data,
         doc,
         previousDoc,
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        previousSiblingDoc: { ...previousSiblingDoc },
+        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         operation,
         req,
         siblingData: siblingData || {},

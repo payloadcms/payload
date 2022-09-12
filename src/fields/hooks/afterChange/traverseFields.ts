@@ -6,6 +6,7 @@ type Args = {
   data: Record<string, unknown>
   doc: Record<string, unknown>
   previousDoc: Record<string, unknown>
+  previousSiblingDoc: Record<string, unknown>
   fields: (Field | TabAsField)[]
   operation: 'create' | 'update'
   req: PayloadRequest
@@ -17,6 +18,7 @@ export const traverseFields = async ({
   data,
   doc,
   previousDoc,
+  previousSiblingDoc,
   fields,
   operation,
   req,
@@ -30,6 +32,7 @@ export const traverseFields = async ({
       data,
       doc,
       previousDoc,
+      previousSiblingDoc,
       field,
       operation,
       req,

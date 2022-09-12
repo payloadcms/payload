@@ -239,6 +239,7 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
 
     global = await hook({
       doc: global,
+      previousDoc: originalDoc,
       req,
     }) || global;
   }, Promise.resolve());
@@ -265,6 +266,7 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
 
     global = await hook({
       doc: global,
+      previousDoc: originalDoc,
       req,
     }) || result;
   }, Promise.resolve());

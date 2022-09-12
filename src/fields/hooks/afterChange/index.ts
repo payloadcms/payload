@@ -30,6 +30,7 @@ export const afterChange = async ({
     fields: entityConfig.fields,
     operation,
     req,
+    previousSiblingDoc: previousDoc,
     siblingDoc: doc,
     siblingData: data,
   });

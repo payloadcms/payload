@@ -24,6 +24,7 @@ export type BeforeChangeHook = (args: {
 
 export type AfterChangeHook = (args: {
   doc: any;
+  previousDoc: any;
   req: PayloadRequest;
 }) => any;
 

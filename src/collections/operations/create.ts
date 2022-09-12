@@ -267,6 +267,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
 
     result = await hook({
       doc: result,
+      previousDoc: {},
       req: args.req,
       operation: 'create',
     }) || result;
