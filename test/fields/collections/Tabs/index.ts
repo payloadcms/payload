@@ -190,10 +190,9 @@ const TabsFields: CollectionConfig = {
               },
             ],
             afterChange: [
-              ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {};
-                data.hooksTab.afterChange = true;
-                return data.hooksTab;
+              ({ originalDoc }) => {
+                originalDoc.hooksTab.afterChange = true;
+                return originalDoc.hooksTab;
               },
             ],
             afterRead: [

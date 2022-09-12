@@ -49,14 +49,13 @@ export const promise = async ({
   const hasLocalizedValue = flattenLocales
     && fieldAffectsData(field)
     && (typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null)
-    && field.name
     && field.localized
     && req.locale !== 'all';
 
   if (hasLocalizedValue) {
     let localizedValue = siblingDoc[field.name][req.locale];
     if (typeof localizedValue === 'undefined' && req.fallbackLocale) localizedValue = siblingDoc[field.name][req.fallbackLocale];
-    if (typeof localizedValue === 'undefined' && field.type === 'group') localizedValue = {};
+    if (typeof localizedValue === 'undefined' && (field.type === 'group' || field.type === 'tab')) localizedValue = {};
     if (typeof localizedValue === 'undefined') localizedValue = null;
     siblingDoc[field.name] = localizedValue;
   }

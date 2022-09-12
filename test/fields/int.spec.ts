@@ -357,14 +357,14 @@ describe('Fields', () => {
     });
 
     it('should allow hooks on a named tab', async () => {
-      document = await payload.findByID({
+      const newDocument = await payload.create<TabsField>({
         collection: tabsSlug,
-        id: document.id,
+        data: tabsDoc,
       });
-      expect(document.hooksTab.beforeValidate).toBe(true);
-      expect(document.hooksTab.beforeChange).toBe(true);
-      expect(document.hooksTab.afterChange).toBe(true);
-      expect(document.hooksTab.afterRead).toBe(true);
+      expect(newDocument.hooksTab.beforeValidate).toBe(true);
+      expect(newDocument.hooksTab.beforeChange).toBe(true);
+      expect(newDocument.hooksTab.afterChange).toBe(true);
+      expect(newDocument.hooksTab.afterRead).toBe(true);
     });
 
     it('should return empty object for groups when no data present', async () => {

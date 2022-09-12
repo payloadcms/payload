@@ -5,33 +5,52 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
-export interface Config { }
+export interface Config {}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-global".
+ * via the `definition` "posts".
  */
-export interface AutosaveGlobal {
+export interface Post {
   id: string;
-  _status?: 'draft' | 'published';
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-posts".
- */
-export interface AutosavePost {
-  id: string;
-  _status?: 'draft' | 'published';
-  title: string;
-  description: string;
+  restrictedField?: string;
   createdAt: string;
   updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-posts".
+ * via the `definition` "restricted".
  */
-export interface DraftPost {
+export interface Restricted {
+  id: string;
+  name?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "read-only-collection".
+ */
+export interface ReadOnlyCollection {
+  id: string;
+  name?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-versions".
+ */
+export interface RestrictedVersion {
+  id: string;
+  name?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sibling-data".
+ */
+export interface SiblingDatum {
   id: string;
   array: {
     allowPublicReadability?: boolean;

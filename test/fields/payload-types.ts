@@ -72,6 +72,13 @@ export interface BlockField {
         blockName?: string;
         blockType: 'subBlocks';
       }
+    | {
+        textInCollapsible?: string;
+        textInRow?: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'tabs';
+      }
   )[];
   localizedBlocks: (
     | {
@@ -107,6 +114,13 @@ export interface BlockField {
         id?: string;
         blockName?: string;
         blockType: 'subBlocks';
+      }
+    | {
+        textInCollapsible?: string;
+        textInRow?: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'tabs';
       }
   )[];
   createdAt: string;
@@ -273,12 +287,25 @@ export interface TabsField {
         blockName?: string;
         blockType: 'subBlocks';
       }
+    | {
+        textInCollapsible?: string;
+        textInRow?: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'tabs';
+      }
   )[];
   group: {
     number: number;
   };
   textInRow: string;
   numberInRow: number;
+  text?: string;
+  defaultValue?: string;
+  beforeValidate?: boolean;
+  beforeChange?: boolean;
+  afterChange?: boolean;
+  afterRead?: boolean;
   textarea?: string;
   anotherText: string;
   createdAt: string;
@@ -325,6 +352,8 @@ export interface Upload {
   filename?: string;
   mimeType?: string;
   filesize?: number;
+  width?: number;
+  height?: number;
   createdAt: string;
   updatedAt: string;
 }

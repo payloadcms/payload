@@ -10,12 +10,19 @@ import { User } from '../../auth';
 import { Payload } from '../..';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
+  /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<T>,
+  /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany?: boolean
+  /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: T,
+  /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'read' | 'update' | 'delete',
+  /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
+  /** The sibling data passed to a field that the hook is running against. */
   siblingData: Partial<S>
+  /** The value of the field. */
   value?: P,
 }
 
@@ -203,6 +210,7 @@ export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized'> & {
 
 export type TabAsField = Tab & {
   type: 'tab'
+  name?: string
 };
 
 export type UIField = {
@@ -389,6 +397,7 @@ export type FieldAffectingData =
   | UploadField
   | CodeField
   | PointField
+  | TabAsField
 
 export type NonPresentationalField =
   TextField

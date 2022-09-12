@@ -126,14 +126,12 @@ export const promise = async ({
     }
 
     case 'tab': {
-      let tabSiblingData;
-      let tabSiblingDoc;
+      let tabSiblingData = siblingData;
+      let tabSiblingDoc = siblingDoc;
+
       if (tabHasName(field)) {
-        tabSiblingData = siblingData[field.name] || {};
-        tabSiblingDoc = siblingDoc[field.name];
-      } else {
-        tabSiblingData = siblingData || {};
-        tabSiblingDoc = { ...siblingDoc };
+        tabSiblingData = siblingData[field.name] as Record<string, unknown>;
+        tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>;
       }
 
       await traverseFields({

@@ -286,11 +286,16 @@ export const promise = async ({
       let tabSiblingData = siblingData;
       let tabSiblingDoc = siblingDoc;
       let tabSiblingDocWithLocales = siblingDocWithLocales;
+
       if (tabHasName(field)) {
         tabPath = `${path}${field.name}.`;
-        tabSiblingData = typeof siblingData[field.name] === 'object' ? siblingData[field.name] as Record<string, unknown> : {};
-        tabSiblingDoc = typeof siblingDoc[field.name] === 'object' ? siblingDoc[field.name] as Record<string, unknown> : {};
-        tabSiblingDocWithLocales = typeof siblingDocWithLocales[field.name] === 'object' ? siblingDocWithLocales[field.name] as Record<string, unknown> : {};
+        if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {};
+        if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {};
+        if (typeof siblingDocWithLocales[field.name] !== 'object') siblingDocWithLocales[field.name] = {};
+
+        tabSiblingData = siblingData[field.name] as Record<string, unknown>;
+        tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>;
+        tabSiblingDocWithLocales = siblingDocWithLocales[field.name] as Record<string, unknown>;
       }
 
       await traverseFields({
