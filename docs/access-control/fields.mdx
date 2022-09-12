@@ -17,8 +17,10 @@ Field Access Control is specified with functions inside a field's config. All fi
 | **[`update`](#update)**  | Allows or denies the ability to update a field's value |
 
 **Example Collection config:**
-```js
-export default {
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Posts: CollectionConfig = {
   slug: 'posts',
   fields: [
     {
@@ -33,7 +35,7 @@ export default {
       // highlight-end
     };
   ],
-}
+};
 ```
 
 ### Create

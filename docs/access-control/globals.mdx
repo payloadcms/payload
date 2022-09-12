@@ -18,16 +18,20 @@ You can define Global-level Access Control within each Global's `access` propert
 | **[`update`](#update)**  | Used in the `update` Global operation |
 
 **Example Global config:**
-```js
-export default {
+```ts
+import { GlobalConfig } from 'payload/types';
+
+const Header: GlobalConfig = {
   slug: "header",
   // highlight-start
   access: {
-    read: ({ req: { user } }) => { ... },
-    update: ({ req: { user } }) => { ... },
+    read: ({ req: { user } }) => { /* */ },
+    update: ({ req: { user } }) => { /* */ },
   },
   // highlight-end
 };
+
+export default Header;
 ```
 
 ### Read

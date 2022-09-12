@@ -10,7 +10,6 @@ import Button from '../../../../../../../elements/Button';
 import RenderFields from '../../../../../../RenderFields';
 import fieldTypes from '../../../../..';
 import Form from '../../../../../../Form';
-import reduceFieldsToValues from '../../../../../../Form/reduceFieldsToValues';
 import Submit from '../../../../../../Submit';
 import { Field } from '../../../../../../../../../fields/config/types';
 import { useLocale } from '../../../../../../../utilities/Locale';
@@ -34,9 +33,9 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
   const { user } = useAuth();
   const locale = useLocale();
 
-  const handleUpdateEditData = useCallback((fields) => {
+  const handleUpdateEditData = useCallback((_, data) => {
     const newNode = {
-      fields: reduceFieldsToValues(fields, true),
+      fields: data,
     };
 
     const elementPath = ReactEditor.findPath(editor, element);
@@ -90,7 +89,6 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
               fieldTypes={fieldTypes}
               fieldSchema={fieldSchema}
             />
-
             <Submit>
               Save changes
             </Submit>

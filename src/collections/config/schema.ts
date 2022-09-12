@@ -1,5 +1,6 @@
 import joi from 'joi';
 import { componentSchema } from '../../utilities/componentSchema';
+import { endpointsSchema } from '../../config/schema';
 
 const strategyBaseSchema = joi.object().keys({
   refresh: joi.boolean(),
@@ -61,14 +62,7 @@ const collectionSchema = joi.object().keys({
     afterRefresh: joi.array().items(joi.func()),
     afterForgotPassword: joi.array().items(joi.func()),
   }),
-  endpoints: joi.array().items(joi.object({
-    path: joi.string(),
-    method: joi.string().valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
-    handler: joi.alternatives().try(
-      joi.array().items(joi.func()),
-      joi.func(),
-    ),
-  })),
+  endpoints: endpointsSchema,
   auth: joi.alternatives().try(
     joi.object({
       tokenExpiration: joi.number(),

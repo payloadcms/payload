@@ -7,6 +7,7 @@ export const defaults: Config = {
   maxDepth: 10,
   collections: [],
   globals: [],
+  endpoints: [],
   cookiePrefix: 'payload',
   csrf: [],
   cors: [],

@@ -16,8 +16,10 @@ Payload provides an extremely granular querying language through all APIs. Each 
 
 For example, say you have a collection as follows:
 
-```js
-const Post = {
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Post: CollectionConfig = {
   slug: 'posts',
   fields: [
     {

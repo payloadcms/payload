@@ -32,8 +32,10 @@ Every Payload Collection can opt-in to supporting Authentication by specifying t
 
 Simple example collection:
 
-```js
-const Admins = {
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Admins: CollectionConfig = {
   slug:
   // highlight-start
   auth: {
@@ -60,7 +62,7 @@ const Admins = {
 }
 ```
 
-**By enabling Authetication on a config, the following modifications will automatically be made to your Collection:**
+**By enabling Authentication on a config, the following modifications will automatically be made to your Collection:**
 
 1. `email` as well as password `salt` & `hash` fields will be added to your Collection's schema
 1. The Admin panel will feature a new set of corresponding UI to allow for changing password and editing email
@@ -95,7 +97,7 @@ However, if you use `fetch` or similar APIs to retrieve Payload resources from i
 
 Fetch example, including credentials:
 
-```js
+```ts
 const response = await fetch('http://localhost:3000/api/pages', {
   credentials: 'include',
 });
@@ -124,8 +126,8 @@ So, if a user of coolsite.com is logged in and just browsing around on the inter
 
 To define domains that should allow users to identify themselves via the Payload HTTP-only cookie, use the `csrf` option on the base Payload config to whitelist domains that you trust.
 
-`payload.config.js`:
-```js
+`payload.config.ts`:
+```ts
 import { buildConfig } from 'payload/config';
 
 const config = buildConfig({
@@ -148,7 +150,7 @@ export default config;
 In addition to authenticating via an HTTP-only cookie, you can also identify users via the `Authorization` header on an HTTP request.
 
 Example:
-```js
+```ts
 const request = await fetch('http://localhost:3000', {
   headers: {
     Authorization: `JWT ${token}`

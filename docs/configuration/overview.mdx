@@ -39,13 +39,14 @@ Payload is a *config-based*, code-first CMS and application framework. The Paylo
 | `rateLimit`          | Control IP-based rate limiting for all Payload resources. Used to prevent DDoS attacks and [more](/docs/production/preventing-abuse#rate-limiting-requests). |
 | `hooks`              | Tap into Payload-wide hooks. [More](/docs/hooks/overview) |
 | `plugins`            | An array of Payload plugins. [More](/docs/plugins/overview) |
+| `endpoints`          | An array of custom API endpoints added to the Payload router. [More](/docs/rest-api/overview#custom-endpoints) |
 
 #### Simple example
 
-```js
+```ts
 import { buildConfig } from 'payload/config';
 
-const config = buildConfig({
+export default buildConfig({
 	collections: [
 		{
 			slug: 'pages',
@@ -82,9 +83,6 @@ const config = buildConfig({
 		}
 	]
 });
-
-export default config;
-
 ```
 
 #### Full example config
@@ -173,14 +171,14 @@ Then, you could import this file into both your Payload config and your server, 
 
 You can import config types as follows:
 
-```js
+```ts
 import { Config } from 'payload/config';
 
 // This is the type used for an incoming Payload config.
 // Only the bare minimum properties are marked as required.
 ```
 
-```js
+```ts
 import { SanitizedConfig } from 'payload/config';
 
 // This is the type used after an incoming Payload config is fully sanitized.

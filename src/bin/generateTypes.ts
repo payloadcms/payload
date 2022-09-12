@@ -390,6 +390,7 @@ function configToJsonSchema(config: SanitizedConfig): JSONSchema4 {
 export function generateTypes(): void {
   const logger = Logger();
   const config = loadConfig();
+  const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile;
 
   logger.info('Compiling TS types for Collections and Globals...');
 
@@ -402,8 +403,8 @@ export function generateTypes(): void {
       singleQuote: true,
     },
   }).then((compiled) => {
-    fs.writeFileSync(config.typescript.outputFile, compiled);
-    logger.info(`Types written to ${config.typescript.outputFile}`);
+    fs.writeFileSync(outputFile, compiled);
+    logger.info(`Types written to ${outputFile}`);
   });
 }
 

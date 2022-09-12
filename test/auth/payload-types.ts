@@ -12,6 +12,7 @@ export interface Config {}
  */
 export interface User {
   id: string;
+  roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   enableAPIKey?: boolean;
   apiKey?: string;
   apiKeyIndex?: string;
@@ -20,7 +21,6 @@ export interface User {
   resetPasswordExpiration?: string;
   loginAttempts?: number;
   lockUntil?: string;
-  roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   createdAt: string;
   updatedAt: string;
 }

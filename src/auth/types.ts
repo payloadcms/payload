@@ -62,13 +62,13 @@ export interface UserDocument extends PayloadMongooseDocument {
   email: string
 }
 
-type GenerateVerifyEmailHTML = (args: { req: PayloadRequest, token: string, user: any}) => Promise<string> | string
-type GenerateVerifyEmailSubject = (args: { req: PayloadRequest, token: string, user: any}) => Promise<string> | string
+type GenerateVerifyEmailHTML = (args: { req: PayloadRequest, token: string, user: any }) => Promise<string> | string
+type GenerateVerifyEmailSubject = (args: { req: PayloadRequest, token: string, user: any }) => Promise<string> | string
 
-type GenerateForgotPasswordEmailHTML = (args?: { req?: PayloadRequest, token?: string, user?: unknown}) => Promise<string> | string
+type GenerateForgotPasswordEmailHTML = (args?: { req?: PayloadRequest, token?: string, user?: unknown }) => Promise<string> | string
 type GenerateForgotPasswordEmailSubject = (args?: { req?: PayloadRequest, token?: string, user?: any }) => Promise<string> | string
 
-type AuthStrategy = (ctx: Payload) => Strategy | Strategy;
+type AuthStrategy = ((ctx: Payload) => Strategy) | Strategy;
 
 export interface IncomingAuthType {
   tokenExpiration?: number;

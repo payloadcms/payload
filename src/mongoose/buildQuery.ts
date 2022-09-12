@@ -142,7 +142,7 @@ class ParamParser {
       },
     ];
 
-    pathSegments.forEach((segment, i) => {
+    pathSegments.every((segment, i) => {
       const lastIncompletePath = paths.find(({ complete }) => !complete);
       const { path } = lastIncompletePath;
 
@@ -152,7 +152,7 @@ class ParamParser {
 
       if (currentSchemaPathType === 'nested') {
         lastIncompletePath.path = currentPath;
-        return;
+        return true;
       }
 
       const upcomingSegment = pathSegments[i + 1];
@@ -161,25 +161,25 @@ class ParamParser {
         const currentSchemaTypeOptions = getSchemaTypeOptions(currentSchemaType);
 
         if (currentSchemaTypeOptions.localized) {
+          const upcomingLocalizedPath = `${currentPath}.${upcomingSegment}`;
+          const upcomingSchemaTypeWithLocale = schema.path(upcomingLocalizedPath);
+
+          if (upcomingSchemaTypeWithLocale) {
+            lastIncompletePath.path = currentPath;
+            return true;
+          }
+
           const localePath = `${currentPath}.${this.locale}`;
           const localizedSchemaType = schema.path(localePath);
 
           if (localizedSchemaType || operator === 'near') {
             lastIncompletePath.path = localePath;
-            return;
-          }
-
-          const upcomingPathWithLocale = `${currentPath}.${this.locale}.${upcomingSegment}`;
-          const upcomingSchemaTypeWithLocale = schema.path(upcomingPathWithLocale);
-
-          if (upcomingSchemaTypeWithLocale) {
-            lastIncompletePath.path = upcomingPathWithLocale;
-            return;
+            return true;
           }
         }
 
         lastIncompletePath.path = currentPath;
-        return;
+        return true;
       }
 
       const priorSchemaType = schema.path(path);
@@ -197,17 +197,16 @@ class ParamParser {
             ...paths,
             ...this.getLocalizedPaths(RefModel, remainingPath, operator),
           ];
-          return;
-        }
 
-        if (priorSchemaType.instance === 'Mixed') {
-          lastIncompletePath.path = currentPath;
+          return false;
         }
       }
 
-      if (operator === 'near') {
+      if (operator === 'near' || currentSchemaPathType === 'adhocOrUndefined') {
         lastIncompletePath.path = currentPath;
       }
+
+      return true;
     });
 
     return paths;

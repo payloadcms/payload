@@ -8,10 +8,34 @@
 export interface Config {}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "slugname".
+ * via the `definition` "autosave-global".
  */
-export interface Slugname {
+export interface AutosaveGlobal {
   id: string;
+  title: string;
+  _status?: 'draft' | 'published';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-posts".
+ */
+export interface AutosavePost {
+  id: string;
+  title: string;
+  description: string;
+  _status?: 'draft' | 'published';
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-posts".
+ */
+export interface DraftPost {
+  id: string;
+  title: string;
+  description: string;
+  _status?: 'draft' | 'published';
   createdAt: string;
   updatedAt: string;
 }

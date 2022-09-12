@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import express, { NextFunction, Response } from 'express';
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 import {
 
   InitOptions,
@@ -30,6 +31,7 @@ import { Payload } from '.';
 import loadConfig from './config/load';
 import Logger from './utilities/logger';
 import { getDataLoader } from './collections/dataloader';
+import mountEndpoints from './express/mountEndpoints';
 
 export const init = (payload: Payload, options: InitOptions): void => {
   payload.logger.info('Starting Payload...');
@@ -104,6 +106,8 @@ export const init = (payload: Payload, options: InitOptions): void => {
       initGraphQLPlayground(payload);
     }
 
+    mountEndpoints(payload.router, payload.config.endpoints);
+
     // Bind router to API
     payload.express.use(payload.config.routes.api, payload.router);
 
@@ -124,6 +128,7 @@ export const initAsync = async (payload: Payload, options: InitOptions): Promise
   payload.mongoURL = options.mongoURL;
 
   if (payload.mongoURL) {
+    mongoose.set('strictQuery', false);
     payload.mongoMemoryServer = await connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
   }
 
@@ -138,6 +143,7 @@ export const initSync = (payload: Payload, options: InitOptions): void => {
   payload.mongoURL = options.mongoURL;
 
   if (payload.mongoURL) {
+    mongoose.set('strictQuery', false);
     connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
   }
 

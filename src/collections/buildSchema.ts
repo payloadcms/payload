@@ -10,6 +10,7 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
     config,
     collection.fields,
     {
+      draftsEnabled: Boolean(typeof collection?.versions === 'object' && collection.versions.drafts),
       options: { timestamps: collection.timestamps !== false, ...schemaOptions },
     },
   );

@@ -208,6 +208,7 @@ const Routes = () => {
                                       if (permissions?.collections?.[collection.slug]?.read?.permission) {
                                         return (
                                           <DocumentInfoProvider
+                                            key={`${collection.slug}-edit-${id}`}
                                             collection={collection}
                                             id={id}
                                           >

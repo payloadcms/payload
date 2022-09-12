@@ -35,9 +35,11 @@ The data structure in the database matches the GeoJSON structure to represent po
 
 ### Example
 
-`collections/ExampleCollection.js`
-```js
-{
+`collections/ExampleCollection.ts`
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
@@ -46,7 +48,7 @@ The data structure in the database matches the GeoJSON structure to represent po
       label: 'Location',
     },
   ]
-}
+};
 ```
 
 ### Querying

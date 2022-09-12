@@ -367,6 +367,10 @@ const Form: React.FC<Props> = (props) => {
     refreshCookie();
   }, 15000, [fields]);
 
+  // Re-run form validation every second
+  // as fields change, because field validations can
+  // potentially rely on OTHER field values to determine
+  // if they are valid or not (siblingData, data)
   useThrottledEffect(() => {
     validateForm();
   }, 1000, [validateForm, fields]);

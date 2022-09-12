@@ -1,7 +1,5 @@
-import { Response } from 'express';
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
-import { PayloadRequest } from '../../src/express/types';
 
 export const slug = 'global';
 export const arraySlug = 'array';
@@ -31,13 +29,6 @@ export default buildConfig({
           type: 'text',
         },
       ],
-      endpoints: [{
-        path: `/${globalsEndpoint}`,
-        method: 'post',
-        handler: (req: PayloadRequest, res: Response): void => {
-          res.json(req.body);
-        },
-      }],
     },
     {
       slug: arraySlug,

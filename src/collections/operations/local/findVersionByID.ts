@@ -28,18 +28,15 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
     overrideAccess = true,
     disableErrors = false,
     showHiddenFields,
-    req: incomingReq,
+    req = {} as PayloadRequest,
   } = options;
 
   const collection = payload.collections[collectionSlug];
 
-  const req = {
-    ...incomingReq || {},
-    payloadAPI: 'local',
-    locale: locale || incomingReq?.locale || this?.config?.localization?.defaultLocale,
-    fallbackLocale: fallbackLocale || incomingReq?.fallbackLocale || null,
-    payload,
-  } as PayloadRequest;
+  req.payloadAPI = 'local';
+  req.locale = locale || req?.locale || this?.config?.localization?.defaultLocale;
+  req.fallbackLocale = fallbackLocale || req?.fallbackLocale || null;
+  req.payload = payload;
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 

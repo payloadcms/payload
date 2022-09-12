@@ -5,7 +5,7 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
-export interface Config {}
+export interface Config { }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-global".
@@ -33,9 +33,21 @@ export interface AutosavePost {
  */
 export interface DraftPost {
   id: string;
-  _status?: 'draft' | 'published';
-  title: string;
-  description: string;
+  array: {
+    allowPublicReadability?: boolean;
+    text?: string;
+    id?: string;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rely-on-request-headers".
+ */
+export interface RelyOnRequestHeader {
+  id: string;
+  name?: string;
   createdAt: string;
   updatedAt: string;
 }

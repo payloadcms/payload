@@ -28,8 +28,10 @@ As with Collection configs, it's often best practice to write your Globals in se
 
 #### Simple Global example
 
-```js
-const Nav = {
+```ts
+import { GlobalConfig } from 'payload/types';
+
+const Nav: GlobalConfig = {
 	slug: 'nav',
 	fields: [
 		{
@@ -47,7 +49,9 @@ const Nav = {
 			]
 		},
 	]
-}
+};
+
+export default Nav;
 ```
 
 #### Global config example
@@ -78,14 +82,14 @@ Globals support all field types that Payload has to offer—including simple fie
 
 You can import global types as follows:
 
-```js
+```ts
 import { GlobalConfig } from 'payload/types';
 
 // This is the type used for incoming global configs.
 // Only the bare minimum properties are marked as required.
 ```
 
-```js
+```ts
 import { SanitizedGlobalConfig } from 'payload/types';
 
 // This is the type used after an incoming global config is fully sanitized.

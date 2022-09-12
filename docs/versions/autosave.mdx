@@ -25,8 +25,10 @@ Collections and Globals both support the same options for configuring autosave. 
 
 **Example config with versions, drafts, and autosave enabled:**
 
-```js
-const Pages = {
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Pages: CollectionConfig = {
   slug: 'pages',
   access: {
     read: ({ req }) => {

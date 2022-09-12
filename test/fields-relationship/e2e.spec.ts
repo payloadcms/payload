@@ -81,6 +81,14 @@ describe('fields - relationship', () => {
       },
     });
 
+    // Doc with useAsTitle for word boundary test
+    await payload.create<RelationWithTitle>({
+      collection: relationWithTitleSlug,
+      data: {
+        name: 'word boundary search',
+      },
+    });
+
     // Add restricted doc as relation
     docWithExistingRelations = await payload.create<CollectionWithRelationships>({
       collection: slug,
@@ -190,7 +198,25 @@ describe('fields - relationship', () => {
     });
 
     // test.todo('should paginate within the dropdown');
-    // test.todo('should search within the relationship field');
+
+    test('should search within the relationship field', async () => {
+      await page.goto(url.edit(docWithExistingRelations.id));
+      const input = page.locator('#field-relationshipWithTitle input');
+      await input.fill('title');
+      const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option');
+      await expect(options).toHaveCount(1);
+
+      await input.fill('non-occuring-string');
+      await expect(options).toHaveCount(0);
+    });
+
+    test('should search using word boundaries within the relationship field', async () => {
+      await page.goto(url.edit(docWithExistingRelations.id));
+      const input = page.locator('#field-relationshipWithTitle input');
+      await input.fill('word search');
+      const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option');
+      await expect(options).toHaveCount(1);
+    });
 
     test('should show useAsTitle on relation', async () => {
       await page.goto(url.edit(docWithExistingRelations.id));
@@ -203,7 +229,7 @@ describe('fields - relationship', () => {
       await field.click({ delay: 100 });
       const options = page.locator('.rs__option');
 
-      await expect(options).toHaveCount(2); // None + 1 Doc
+      await expect(options).toHaveCount(3); // None + 2 Doc
     });
 
     test('should show id on relation in list view', async () => {

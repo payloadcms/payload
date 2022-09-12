@@ -40,6 +40,9 @@ export interface BlockField {
   blocks: (
     | {
         text: string;
+        richText?: {
+          [k: string]: unknown;
+        }[];
         id?: string;
         blockName?: string;
         blockType: 'text';
@@ -70,6 +73,56 @@ export interface BlockField {
         blockType: 'subBlocks';
       }
   )[];
+  localizedBlocks: (
+    | {
+        text: string;
+        richText?: {
+          [k: string]: unknown;
+        }[];
+        id?: string;
+        blockName?: string;
+        blockType: 'text';
+      }
+    | {
+        number: number;
+        id?: string;
+        blockName?: string;
+        blockType: 'number';
+      }
+    | {
+        subBlocks: (
+          | {
+              text: string;
+              id?: string;
+              blockName?: string;
+              blockType: 'text';
+            }
+          | {
+              number: number;
+              id?: string;
+              blockName?: string;
+              blockType: 'number';
+            }
+        )[];
+        id?: string;
+        blockName?: string;
+        blockType: 'subBlocks';
+      }
+  )[];
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "code-fields".
+ */
+export interface CodeField {
+  id: string;
+  javascript?: string;
+  typescript?: string;
+  json?: string;
+  html?: string;
+  css?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -188,6 +241,9 @@ export interface TabsField {
   blocks: (
     | {
         text: string;
+        richText?: {
+          [k: string]: unknown;
+        }[];
         id?: string;
         blockName?: string;
         blockType: 'text';
@@ -235,6 +291,7 @@ export interface TabsField {
 export interface TextField {
   id: string;
   text: string;
+  localizedText?: string;
   defaultFunction?: string;
   defaultAsync?: string;
   createdAt: string;
@@ -292,6 +349,22 @@ export interface IndexedField {
      */
     point?: [number, number];
   };
+  collapsibleLocalizedUnique?: string;
+  collapsibleTextUnique?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "date-fields".
+ */
+export interface DateField {
+  id: string;
+  default: string;
+  timeOnly?: string;
+  dayOnly?: string;
+  dayAndTime?: string;
+  monthOnly?: string;
   createdAt: string;
   updatedAt: string;
 }

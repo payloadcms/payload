@@ -1,37 +1,25 @@
 import { Editor, Transforms, Range, Element } from 'slate';
-import isElementActive from '../isActive';
 
 export const unwrapLink = (editor: Editor): void => {
   Transforms.unwrapNodes(editor, { match: (n) => Element.isElement(n) && n.type === 'link' });
 };
 
-export const wrapLink = (editor: Editor, url?: string, newTab?: boolean): void => {
-  const { selection, blurSelection } = editor;
+export const wrapLink = (editor: Editor): void => {
+  const { selection } = editor;
+  const isCollapsed = selection && Range.isCollapsed(selection);
 
-  if (blurSelection) {
-    Transforms.select(editor, blurSelection);
-  }
+  const link = {
+    type: 'link',
+    url: undefined,
+    newTab: false,
+    children: isCollapsed ? [{ text: '' }] : [],
+  };
 
-  if (isElementActive(editor, 'link')) {
-    unwrapLink(editor);
+  if (isCollapsed) {
+    Transforms.insertNodes(editor, link);
   } else {
-    const selectionToUse = selection || blurSelection;
-
-    const isCollapsed = selectionToUse && Range.isCollapsed(selectionToUse);
-
-    const link = {
-      type: 'link',
-      url,
-      newTab,
-      children: isCollapsed ? [{ text: url }] : [],
-    };
-
-    if (isCollapsed) {
-      Transforms.insertNodes(editor, link);
-    } else {
-      Transforms.wrapNodes(editor, link, { split: true });
-      Transforms.collapse(editor, { edge: 'end' });
-    }
+    Transforms.wrapNodes(editor, link, { split: true });
+    Transforms.collapse(editor, { edge: 'end' });
   }
 };
 

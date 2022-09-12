@@ -29,7 +29,7 @@ Each collection is mounted using its `slug` value. For example, if a collection'
 | `GET`    | `/api/{collectionSlug}`     | Find paginated documents               |
 | `GET`    | `/api/{collectionSlug}/:id` | Find a specific document by ID         |
 | `POST`   | `/api/{collectionSlug}`     | Create a new document                  |
-| `PUT`    | `/api/{collectionSlug}/:id` | Update a document by ID                |
+| `PATCH`  | `/api/{collectionSlug}/:id` | Update a document by ID                |
 | `DELETE` | `/api/{collectionSlug}/:id` | Delete an existing document by ID      |
 
 ##### Additional `find` query parameters
@@ -77,7 +77,7 @@ In addition to the dynamically generated endpoints above Payload also has REST e
 
 ## Custom Endpoints
 
-Additional REST API endpoints can be added to `collections` and `globals` by providing array of `endpoints` in the configuration. These can be used to write additional middleware on existing routes or build custom functionality into Payload apps and plugins.
+Additional REST API endpoints can be added to your application by providing an array of `endpoints` in various places within a Payload config. Custom endpoints are useful for adding additional middleware on existing routes or for building custom functionality into Payload apps and plugins. Endpoints can be added at the top of the Payload config, `collections`, and `globals` and accessed respective of the api and slugs you have configured.
 
 Each endpoint object needs to have:
 
@@ -89,10 +89,11 @@ Each endpoint object needs to have:
 
 Example:
 
-```js
+```ts
+import { CollectionConfig } from 'payload/types';
 
 // a collection of 'orders' with an additional route for tracking details, reachable at /api/orders/:id/tracking
-const Orders = {
+const Orders: CollectionConfig = {
 	slug: 'orders',
 	fields: [ /* ... */ ],
   // highlight-start

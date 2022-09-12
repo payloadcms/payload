@@ -31,6 +31,7 @@ const DateTime: React.FC<Props> = (props) => {
   if (dateTimeFormat === undefined) {
     if (pickerAppearance === 'dayAndTime') dateTimeFormat = 'MMM d, yyy h:mm a';
     else if (pickerAppearance === 'timeOnly') dateTimeFormat = 'h:mm a';
+    else if (pickerAppearance === 'monthOnly') dateTimeFormat = 'MM/yyyy';
     else dateTimeFormat = 'MMM d, yyy';
   }
 
@@ -50,6 +51,7 @@ const DateTime: React.FC<Props> = (props) => {
     showPopperArrow: false,
     selected: value && new Date(value),
     customInputRef: 'ref',
+    showMonthYearPicker: pickerAppearance === 'monthOnly',
   };
 
   const classes = [

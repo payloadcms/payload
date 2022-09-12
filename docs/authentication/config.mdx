@@ -49,7 +49,7 @@ To utilize your API key while interacting with the REST or GraphQL API, add the 
 
 **For example, using Fetch:**
 
-```js
+```ts
 const response = await fetch("http://localhost:3000/api/pages", {
   headers: {
     Authorization: `${collection.labels.singular} API-Key ${YOUR_API_KEY}`,
@@ -77,8 +77,10 @@ Function that accepts one argument, containing `{ req, token, user }`, that allo
 
 Example:
 
-```js
-{
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Customers: CollectionConfig = {
   slug: 'customers',
   auth: {
     forgotPassword: {
@@ -104,7 +106,7 @@ Example:
       // highlight-end
     }
   }
-}
+};
 ```
 
 <Banner type="warning">
@@ -123,7 +125,7 @@ Similarly to the above `generateEmailHTML`, you can also customize the subject o
 
 Example:
 
-```js
+```ts
 {
   slug: 'customers',
   auth: {
@@ -148,8 +150,11 @@ Function that accepts one argument, containing `{ req, token, user }`, that allo
 
 Example:
 
-```js
-{
+```ts
+import { CollectionConfig } from 'payload/types';
+
+
+const Customers: CollectionConfig = {
   slug: 'customers',
   auth: {
     verify: {
@@ -163,7 +168,7 @@ Example:
       // highlight-end
     }
   }
-}
+};
 ```
 
 <Banner type="warning">
@@ -182,7 +187,7 @@ Similarly to the above `generateEmailHTML`, you can also customize the subject o
 
 Example:
 
-```js
+```ts
 {
   slug: 'customers',
   auth: {

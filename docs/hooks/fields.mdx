@@ -26,8 +26,10 @@ Field-level hooks offer incredible potential for encapsulating your logic. They 
 ## Config
 
 Example field configuration:
-```js
-{
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const ExampleCollection: CollectionConfig = {
   name: 'name',
   type: 'text',
   // highlight-start
@@ -77,7 +79,7 @@ All field hooks can optionally modify the return value of the field before the o
 
 Payload exports a type for field hooks which can be accessed and used as follows:
 
-```js
+```ts
 import type { FieldHook } from 'payload/types';
 
 // Field hook type is a generic that takes three arguments:

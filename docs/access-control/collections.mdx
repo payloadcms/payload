@@ -27,8 +27,10 @@ If a Collection supports [`Authentication`](/docs/authentication/overview), the 
 | **[`unlock`](#unlock)** | Used to restrict which users can access the `unlock` operation |
 
 **Example Collection config:**
-```js
-export default {
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const Posts: CollectionConfig = {
   slug: "posts",
   // highlight-start
   access: {
@@ -40,6 +42,8 @@ export default {
   },
   // highlight-end
 };
+
+export default Categories;
 ```
 
 ### Create
@@ -55,7 +59,7 @@ Returns a boolean which allows/denies access to the `create` request.
 
 **Example:**
 
-```js
+```ts
 const PublicUsers = {
   slug: 'public-users',
   access: {
@@ -82,8 +86,10 @@ Read access functions can return a boolean result or optionally return a [query 
 
 **Example:**
 
-```js
-const canReadPage = ({ req: { user } }) => {
+```ts
+import { Access } from 'payload/config';
+
+const canReadPage: Access = ({ req: { user } }) => {
   // allow authenticated users
   if (user) {
     return true;
@@ -92,8 +98,8 @@ const canReadPage = ({ req: { user } }) => {
   return {
     // assumes we have a checkbox field named 'isPublic'
     isPublic: {
-      equals: true
-    }
+      equals: true,
+    },
   }
 };
 ```
@@ -112,11 +118,12 @@ Update access functions can return a boolean result or optionally return a [quer
 
 **Example:**
 
-```js
+```ts
+import { Access } from 'payload/config';
 
-const canUpdateUser = ({ req: { user }, id }) => {
+const canUpdateUser: Access = ({ req: { user }, id }) => {
   // allow users with a role of 'admin'
-  if (user.roles && user.roles.some((role) => role === 'admin')) {
+  if (user.roles && user.roles.some(role => role === 'admin')) {
     return true;
   }
   // allow any other users to update only oneself
@@ -137,8 +144,10 @@ Similarly to the Update function, returns a boolean or a [query constraint](/doc
 
 **Example:**
 
-```js
-const canDeleteCustomer = async ({ req, id }) => {
+```ts
+import { Access } from 'payload/config'
+
+const canDeleteCustomer: Access = async ({ req, id }) => {
   if (!id) {
     // allow the admin UI to show controls to delete since it is indeterminate without the id
     return true;

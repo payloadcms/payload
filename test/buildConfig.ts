@@ -3,9 +3,6 @@ import { Config, SanitizedConfig } from '../src/config/types';
 import { buildConfig as buildPayloadConfig } from '../src/config/build';
 
 const baseConfig: Config = {
-  typescript: {
-    outputFile: process.env.PAYLOAD_TS_OUTPUT_PATH,
-  },
   telemetry: false,
 };
 

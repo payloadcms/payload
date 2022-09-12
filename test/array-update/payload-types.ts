@@ -12,7 +12,7 @@ export interface Config {}
  */
 export interface Array {
   id: string;
-  array?: {
+  array: {
     required: string;
     optional?: string;
     id?: string;

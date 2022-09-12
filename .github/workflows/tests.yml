@@ -1,6 +1,10 @@
 name: build
 
-on: [push, pull_request]
+on:
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
+  push:
+    branches: ['master']
 
 jobs:
   build_yarn:

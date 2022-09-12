@@ -81,7 +81,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
         <OperationContext.Provider value={operation}>
           <Form
             className={`${baseClass}__form`}
-            method={id ? 'put' : 'post'}
+            method={id ? 'patch' : 'post'}
             action={action}
             onSuccess={onSave}
             disabled={!hasSavePermission}
@@ -142,8 +142,14 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           Create New
                         </Link>
                       </li>
-                      {!disableDuplicate && (
-                      <li><DuplicateDocument slug={slug} /></li>
+                      {!disableDuplicate && isEditing && (
+                      <li>
+                        <DuplicateDocument
+                          collection={collection}
+                          id={id}
+                          slug={slug}
+                        />
+                      </li>
                       )}
                     </React.Fragment>
                     )}

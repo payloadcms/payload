@@ -168,6 +168,35 @@ describe('Relationships', () => {
           const { doc } = await client.findByID<Post>({ id: post.id });
           expect(doc?.customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber });
         });
+
+        it('should validate the format of text id relationships', async () => {
+          await expect(async () => createPost({
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore Sending bad data to test error handling
+            customIdRelation: 1234,
+          })).rejects.toThrow('The following field is invalid: customIdRelation');
+        });
+
+        it('should validate the format of number id relationships', async () => {
+          await expect(async () => createPost({
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore Sending bad data to test error handling
+            customIdNumberRelation: 'bad-input',
+          })).rejects.toThrow('The following field is invalid: customIdNumberRelation');
+        });
+
+        it('should allow update removing a relationship', async () => {
+          const result = await client.update<Post>({
+            slug,
+            id: post.id,
+            data: {
+              relationField: null,
+            },
+          });
+
+          expect(result.status).toEqual(200);
+          expect(result.doc.relationField).toBeNull();
+        });
       });
 
       describe('depth', () => {

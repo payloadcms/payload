@@ -22,7 +22,7 @@ const RenderFields: React.FC<Props> = (props) => {
     forceRender,
   } = props;
 
-  const [hasRendered, setHasRendered] = useState(false);
+  const [hasRendered, setHasRendered] = useState(Boolean(forceRender));
   const [intersectionRef, entry] = useIntersect(intersectionObserverOptions);
   const operation = useOperation();
 

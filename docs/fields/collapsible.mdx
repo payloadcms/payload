@@ -22,9 +22,11 @@ keywords: row, fields, config, configuration, documentation, Content Management 
 
 ### Example
 
-`collections/ExampleCollection.js`
-```js
-{
+`collections/ExampleCollection.ts`
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
@@ -39,6 +41,5 @@ keywords: row, fields, config, configuration, documentation, Content Management 
       ],
     }
   ]
-}
-
+};
 ```

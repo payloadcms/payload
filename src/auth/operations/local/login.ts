@@ -23,7 +23,7 @@ export type Options = {
 async function localLogin<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<Result & { user: T}> {
   const {
     collection: collectionSlug,
-    req: incomingReq = {},
+    req = {} as PayloadRequest,
     res,
     depth,
     locale,
@@ -35,13 +35,10 @@ async function localLogin<T extends TypeWithID = any>(payload: Payload, options:
 
   const collection = payload.collections[collectionSlug];
 
-  const req = {
-    ...incomingReq,
-    payloadAPI: 'local',
-    payload,
-    locale: undefined,
-    fallbackLocale: undefined,
-  } as PayloadRequest;
+  req.payloadAPI = 'local';
+  req.payload = payload;
+  req.locale = undefined;
+  req.fallbackLocale = undefined;
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 

@@ -131,13 +131,15 @@ export const code = baseField.keys({
 export const select = baseField.keys({
   type: joi.string().valid('select').required(),
   name: joi.string().required(),
-  options: joi.array().items(joi.alternatives().try(
-    joi.string(),
-    joi.object({
-      value: joi.string().required().allow(''),
-      label: joi.string().required(),
-    }),
-  )).required(),
+  options: joi.array().min(1).items(
+    joi.alternatives().try(
+      joi.string(),
+      joi.object({
+        value: joi.string().required().allow(''),
+        label: joi.string().required(),
+      }),
+    ),
+  ).required(),
   hasMany: joi.boolean().default(false),
   defaultValue: joi.alternatives().try(
     joi.string().allow(''),
@@ -146,19 +148,22 @@ export const select = baseField.keys({
   ),
   admin: baseAdminFields.keys({
     isClearable: joi.boolean().default(false),
+    isSortable: joi.boolean().default(false),
   }),
 });
 
 export const radio = baseField.keys({
   type: joi.string().valid('radio').required(),
   name: joi.string().required(),
-  options: joi.array().items(joi.alternatives().try(
-    joi.string(),
-    joi.object({
-      value: joi.string().required().allow(''),
-      label: joi.string().required(),
-    }),
-  )).required(),
+  options: joi.array().min(1).items(
+    joi.alternatives().try(
+      joi.string(),
+      joi.object({
+        value: joi.string().required().allow(''),
+        label: joi.string().required(),
+      }),
+    ),
+  ).required(),
   defaultValue: joi.alternatives().try(
     joi.string().allow(''),
     joi.func(),
@@ -221,7 +226,7 @@ export const array = baseField.keys({
   name: joi.string().required(),
   minRows: joi.number(),
   maxRows: joi.number(),
-  fields: joi.array().items(joi.link('#field')),
+  fields: joi.array().items(joi.link('#field')).required(),
   labels: joi.object({
     singular: joi.string(),
     plural: joi.string(),
@@ -277,6 +282,9 @@ export const relationship = baseField.keys({
   defaultValue: joi.alternatives().try(
     joi.func(),
   ),
+  admin: baseAdminFields.keys({
+    isSortable: joi.boolean().default(false),
+  }),
 });
 
 export const blocks = baseField.keys({
@@ -299,7 +307,7 @@ export const blocks = baseField.keys({
       }),
       fields: joi.array().items(joi.link('#field')),
     }),
-  ),
+  ).required(),
   defaultValue: joi.alternatives().try(
     joi.array().items(joi.object()),
     joi.func(),
@@ -342,6 +350,9 @@ export const richText = baseField.keys({
       collections: joi.object().pattern(joi.string(), joi.object().keys({
         fields: joi.array().items(joi.link('#field')),
       })),
+    }),
+    link: joi.object({
+      fields: joi.array().items(joi.link('#field')),
     }),
   }),
 });

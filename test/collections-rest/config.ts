@@ -2,7 +2,6 @@ import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
 import type { Post } from './payload-types';
-import Endpoints from './Endpoints';
 
 export interface Relation {
   id: string;
@@ -102,8 +101,13 @@ export default buildConfig({
           type: 'text',
         },
         {
-          name: 'name',
-          type: 'text',
+          type: 'row',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+            },
+          ],
         },
       ],
     },
@@ -121,7 +125,6 @@ export default buildConfig({
         },
       ],
     },
-    Endpoints,
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -195,6 +198,22 @@ export default buildConfig({
             value: rel2.id,
           },
         ],
+      },
+    });
+
+    await payload.create({
+      collection: customIdSlug,
+      data: {
+        id: 'test',
+        name: 'inside row',
+      },
+    });
+
+    await payload.create({
+      collection: customIdNumberSlug,
+      data: {
+        id: 123,
+        name: 'name',
       },
     });
   },

@@ -31,9 +31,11 @@ keywords: checkbox, fields, config, configuration, documentation, Content Manage
 
 ### Example
 
-`collections/ExampleCollection.js`
-```js
-{
+`collections/ExampleCollection.ts`
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
@@ -43,6 +45,5 @@ keywords: checkbox, fields, config, configuration, documentation, Content Manage
       defaultValue: false,
     }
   ]
-}
-
+};
 ```

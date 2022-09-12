@@ -1,6 +1,9 @@
 import DataLoader, { BatchLoadFn } from 'dataloader';
 import { PayloadRequest } from '../express/types';
 import { TypeWithID } from '../globals/config/types';
+import { isValidID } from '../utilities/isValidID';
+import { getIDType } from '../utilities/getIDType';
+import { fieldAffectsData } from '../fields/config/types';
 
 // Payload uses `dataloader` to solve the classic GraphQL N+1 problem.
 
@@ -49,13 +52,18 @@ const batchAndLoadDocs = (req: PayloadRequest): BatchLoadFn<string, TypeWithID> 
 
     const batchKey = JSON.stringify(batchKeyArray);
 
-    return {
-      ...batches,
-      [batchKey]: [
-        ...batches[batchKey] || [],
-        id,
-      ],
-    };
+    const idField = payload.collections?.[collection].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+
+    if (isValidID(id, getIDType(idField))) {
+      return {
+        ...batches,
+        [batchKey]: [
+          ...batches[batchKey] || [],
+          id,
+        ],
+      };
+    }
+    return batches;
   }, {});
 
   // Run find requests in parallel

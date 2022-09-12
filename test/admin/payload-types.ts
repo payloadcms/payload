@@ -8,6 +8,14 @@
 export interface Config {}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global".
+ */
+export interface Global {
+  id: string;
+  title?: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {

@@ -17,9 +17,12 @@ import {
   TextField,
   UploadField,
   Validate,
+  fieldAffectsData,
 } from './config/types';
 import { TypeWithID } from '../collections/config/types';
 import canUseDOM from '../utilities/canUseDOM';
+import { isValidID } from '../utilities/isValidID';
+import { getIDType } from '../utilities/getIDType';
 
 const defaultMessage = 'This field is required.';
 
@@ -232,12 +235,60 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
     return defaultMessage;
   }
 
+  if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
+    const idField = options.payload.collections[options.relationTo].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+    const type = getIDType(idField);
+
+    if (!isValidID(value, type)) {
+      return 'This field is not a valid upload ID';
+    }
+  }
+
   return validateFilterOptions(value, options);
 };
 
 export const relationship: Validate<unknown, unknown, RelationshipField> = async (value: RelationshipValue, options) => {
   if ((!value || (Array.isArray(value) && value.length === 0)) && options.required) {
     return defaultMessage;
+  }
+
+  if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
+    const values = Array.isArray(value) ? value : [value];
+
+    const invalidRelationships = values.filter((val) => {
+      let collection: string;
+      let requestedID: string | number;
+
+      if (typeof options.relationTo === 'string') {
+        collection = options.relationTo;
+
+        // custom id
+        if (typeof val === 'string' || typeof val === 'number') {
+          requestedID = val;
+        }
+      }
+
+      if (Array.isArray(options.relationTo) && typeof val === 'object' && val?.relationTo) {
+        collection = val.relationTo;
+        requestedID = val.value;
+      }
+
+      const idField = options.payload.collections[collection].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+      let type;
+      if (idField) {
+        type = idField.type === 'number' ? 'number' : 'text';
+      } else {
+        type = 'ObjectID';
+      }
+
+      return !isValidID(requestedID, type);
+    });
+
+    if (invalidRelationships.length > 0) {
+      return `This field has the following invalid selections: ${invalidRelationships.map((err, invalid) => {
+        return `${err} ${JSON.stringify(invalid)}`;
+      }).join(', ')}` as string;
+    }
   }
 
   return validateFilterOptions(value, options);

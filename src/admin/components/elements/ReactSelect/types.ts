@@ -2,6 +2,11 @@ import { OptionsType, GroupedOptionsType } from 'react-select';
 
 export type Options = OptionsType<Value> | GroupedOptionsType<Value>;
 
+export type OptionType = {
+  [key: string]: any,
+};
+
+
 export type Value = {
   label: string
   value: string | null
@@ -16,10 +21,14 @@ export type Props = {
   showError?: boolean,
   options: Options
   isMulti?: boolean,
+  isSortable?: boolean,
   isDisabled?: boolean
   onInputChange?: (val: string) => void
   onMenuScrollToBottom?: () => void
   placeholder?: string
   isSearchable?: boolean
   isClearable?: boolean
+  filterOption?:
+  | (({ label, value, data }: { label: string, value: string, data: OptionType }, search: string) => boolean)
+  | undefined,
 }

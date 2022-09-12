@@ -71,7 +71,10 @@ const WhereBuilder: React.FC<Props> = (props) => {
 
     if (handleChange) handleChange(newWhereQuery as Where);
 
-    if (modifySearchQuery) {
+    const hasExistingConditions = typeof currentParams?.where === 'object' && 'or' in currentParams.where;
+    const hasNewWhereConditions = conditions.length > 0;
+
+    if (modifySearchQuery && ((hasExistingConditions && !hasNewWhereConditions) || hasNewWhereConditions)) {
       history.replace({
         search: queryString.stringify({
           ...currentParams,

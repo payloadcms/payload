@@ -40,7 +40,7 @@ The following options are configurable in the `email` property object as part of
 Simple Mail Transfer Protocol, also known as SMTP can be passed in using the `transportOptions` object on the `email` options.
 
 **Example email part using SMTP:**
-```js
+```ts
 payload.init({
   email: {
     transportOptions: {
@@ -60,6 +60,7 @@ payload.init({
     fromAddress: 'hello@example.com'
   }
   // ...
+})
 ```
 
 <Banner type="warning">
@@ -70,9 +71,9 @@ payload.init({
 
 Many third party mail providers are available and offer benefits beyond basic SMTP. As an example your payload init could look this if you wanted to use SendGrid.com though the same approach would work for any other [NodeMailer transports](https://nodemailer.com/transports/) shown here or provided by another third party.
 
-```js
-const nodemailerSendgrid = require('nodemailer-sendgrid');
-const payload = require('payload');
+```ts
+import payload from 'payload'
+import nodemailerSendgrid from 'nodemailer-sendgrid'
 
 const sendGridAPIKey = process.env.SENDGRID_API_KEY;
 
@@ -92,7 +93,10 @@ payload.init({
 ### Use a custom NodeMailer transport
 To take full control of the mail transport you may wish to use `nodemailer.createTransport()` on your server and provide it to Payload init.
 
-```js
+```ts
+import payload from 'payload'
+import nodemailer from 'nodemailer'
+
 const payload = require('payload');
 const nodemailer = require('nodemailer');
 
@@ -112,7 +116,7 @@ payload.init({
     transport
   },
   // ...
-}
+});
 ```
 
 ### Sending Mail
@@ -123,7 +127,7 @@ By default, Payload uses a mock implementation that only sends mail to the [ethe
 
 To see ethereal credentials, add `logMockCredentials: true` to the email options. This will cause them to be logged to console on startup.
 
-```js
+```ts
 payload.init({
   email: {
     fromName: 'Admin',

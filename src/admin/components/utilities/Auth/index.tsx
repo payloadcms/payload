@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [permissions, setPermissions] = useState<Permissions>();
 
 
-  const { open: openModal, closeAll: closeAllModals } = useModal();
+  const { openModal, closeAllModals } = useModal();
   const [lastLocationChange, setLastLocationChange] = useState(0);
   const debouncedLocationChange = useDebounce(lastLocationChange, 10000);
 
@@ -64,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [setUser, push, exp, admin, api, serverURL, userSlug]);
 
   const setToken = useCallback((token: string) => {
-    const decoded = jwtDecode(token) as User;
+    const decoded = jwtDecode<User>(token);
     setUser(decoded);
     setTokenInMemory(token);
   }, []);

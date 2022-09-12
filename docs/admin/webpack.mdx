@@ -10,8 +10,8 @@ Payload uses Webpack 5 to build the Admin panel. It comes with support for many 
 
 To extend the Webpack config, add the `webpack` key to your base Payload config, and provide a function that accepts the default Webpack config as its only argument:
 
-`payload.config.js`
-```js
+`payload.config.ts`
+```ts
 import { buildConfig } from 'payload/config';
 
 export default buildConfig({
@@ -24,7 +24,7 @@ export default buildConfig({
 		}
 		// highlight-end
 	}
-})
+});
 ```
 
 ### Aliasing server-only modules
@@ -52,16 +52,17 @@ You may rely on server-only packages such as the above to perform logic in acces
 <br/><br/>
 
 `collections/Subscriptions/index.js`
-```js
+```ts
+import { CollectionConfig } from 'payload/types';
 import createStripeSubscription from './hooks/createStripeSubscription';
 
-const Subscription = {
+const Subscription: CollectionConfig = {
 	slug: 'subscriptions',
 	hooks: {
 		beforeChange: [
 			createStripeSubscription,
 		]
-	}
+	},
 	fields: [
 		{
 			name: 'stripeSubscriptionID',
@@ -69,7 +70,7 @@ const Subscription = {
 			required: true,
 		}
 	]
-}
+};
 
 export default Subscription;
 ```

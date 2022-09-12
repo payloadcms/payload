@@ -27,7 +27,7 @@ export type Preferences = {
 export type Props = {
   disabled?: boolean
   onSubmit?: (fields: Fields, data: Data) => void
-  method?: 'get' | 'put' | 'delete' | 'post'
+  method?: 'get' | 'patch' | 'delete' | 'post'
   action?: string
   handleResponse?: (res: Response) => void
   onSuccess?: (json: unknown) => void

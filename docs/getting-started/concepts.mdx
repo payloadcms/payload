@@ -22,7 +22,7 @@ By default, the Payload config lives in the root folder of your code and is name
 	A Collection represents a type of content that Payload will store and can contain many documents.
 </Banner>
 
-Collections define the shape of your data as well as all functionalities attached to that data. They will contain or many "documents", all corresponding with the same fields and functionalities that you define.
+Collections define the shape of your data as well as all functionalities attached to that data. They will contain one or many "documents", all corresponding with the same fields and functionalities that you define.
 
 They can represent anything you can store in a database - for example - pages, posts, users, people, orders, categories, events, customers, transactions, and anything else your app needs.
 
@@ -70,7 +70,7 @@ For more, visit the [Access Control documentation](/docs/access-control/overview
 
 You can specify population `depth` via query parameter in the REST API and by an option in the local API. *Depth has no effect in the GraphQL API, because there, depth is based on the shape of your queries.*
 It is also possible to limit the depth for specific `relation` and `upload` fields using the `maxDepth` property in your configuration.
-**For example, let's look the following Collections:** `departments`, `users`, `posts`
+**For example, let's look at the following Collections:** `departments`, `users`, `posts`
 
 ```
 // type: 'relationship' fields are equal to 1 depth level

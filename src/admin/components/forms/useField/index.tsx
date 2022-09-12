@@ -13,7 +13,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     path,
     validate,
     enableDebouncedValue,
-    disableFormData,
+    disableFormData = false,
     condition,
   } = options;
 

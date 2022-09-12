@@ -4,7 +4,9 @@ import { FileData } from '../uploads/types';
 
 export { PayloadRequest } from '../express/types';
 
-export type Operator = 'equals'
+export type Operator =
+  | 'equals'
+  | 'contains'
   | 'not_equals'
   | 'in'
   | 'not_in'

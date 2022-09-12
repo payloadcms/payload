@@ -30,6 +30,7 @@ const SelectFields: CollectionConfig = {
       type: 'select',
       admin: {
         isClearable: true,
+        isSortable: true,
       },
       options: [
         {

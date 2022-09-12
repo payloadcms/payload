@@ -1,4 +1,4 @@
-import { Express, Handler } from 'express';
+import { Express, NextFunction, Response } from 'express';
 import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import { Options } from 'express-fileupload';
@@ -79,10 +79,16 @@ export type AccessResult = boolean | Where;
  */
 export type Access = (args?: any) => AccessResult | Promise<AccessResult>;
 
+export interface PayloadHandler {(
+    req: PayloadRequest,
+    res: Response,
+    next: NextFunction,
+  ): void }
+
 export type Endpoint = {
   path: string
   method: 'get' | 'head' | 'post' | 'put' | 'patch' | 'delete' | 'connect' | 'options' | string
-  handler: Handler | Handler[]
+  handler: PayloadHandler | PayloadHandler[]
 }
 
 export type AdminView = React.ComponentType<{ user: User, canAccessAdmin: boolean }>
@@ -116,20 +122,20 @@ export type Config = {
     components?: {
       routes?: AdminRoute[]
       providers?: React.ComponentType<{ children: React.ReactNode }>[]
-      beforeDashboard?: React.ComponentType[]
-      afterDashboard?: React.ComponentType[]
-      beforeLogin?: React.ComponentType[]
-      afterLogin?: React.ComponentType[]
-      beforeNavLinks?: React.ComponentType[]
-      afterNavLinks?: React.ComponentType[]
-      Nav?: React.ComponentType
+      beforeDashboard?: React.ComponentType<any>[]
+      afterDashboard?: React.ComponentType<any>[]
+      beforeLogin?: React.ComponentType<any>[]
+      afterLogin?: React.ComponentType<any>[]
+      beforeNavLinks?: React.ComponentType<any>[]
+      afterNavLinks?: React.ComponentType<any>[]
+      Nav?: React.ComponentType<any>
       graphics?: {
-        Icon?: React.ComponentType
-        Logo?: React.ComponentType
+        Icon?: React.ComponentType<any>
+        Logo?: React.ComponentType<any>
       }
       views?: {
-        Account?: React.ComponentType
-        Dashboard?: React.ComponentType
+        Account?: React.ComponentType<any>
+        Dashboard?: React.ComponentType<any>
       }
     }
     pagination?: {
@@ -139,6 +145,7 @@ export type Config = {
     webpack?: (config: Configuration) => Configuration;
   };
   collections?: CollectionConfig[];
+  endpoints?: Endpoint[];
   globals?: GlobalConfig[];
   serverURL?: string;
   cookiePrefix?: string;
@@ -202,4 +209,4 @@ export type SanitizedConfig = Omit<DeepRequired<Config>, 'collections' | 'global
   paths: { [key: string]: string };
 }
 
-export type EntityDescription = string | (() => string) | React.ComponentType
+export type EntityDescription = string | (() => string) | React.ComponentType<any>

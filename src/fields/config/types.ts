@@ -51,9 +51,9 @@ type Admin = {
   condition?: Condition;
   description?: Description;
   components?: {
-    Filter?: React.ComponentType;
-    Cell?: React.ComponentType;
-    Field?: React.ComponentType;
+    Filter?: React.ComponentType<any>;
+    Cell?: React.ComponentType<any>;
+    Field?: React.ComponentType<any>;
   }
   hidden?: boolean
 }
@@ -245,6 +245,7 @@ export type SelectField = FieldBase & {
   hasMany?: boolean
   admin?: Admin & {
     isClearable?: boolean;
+    isSortable?: boolean;
   }
 }
 
@@ -254,6 +255,9 @@ export type RelationshipField = FieldBase & {
   hasMany?: boolean;
   maxDepth?: number;
   filterOptions?: FilterOptions;
+  admin?: Admin & {
+    isSortable?: boolean;
+  }
 }
 
 export type ValueWithRelation = {
@@ -274,15 +278,15 @@ type RichTextPlugin = (editor: Editor) => Editor;
 
 export type RichTextCustomElement = {
   name: string
-  Button: React.ComponentType
-  Element: React.ComponentType
+  Button: React.ComponentType<any>
+  Element: React.ComponentType<any>
   plugins?: RichTextPlugin[]
 }
 
 export type RichTextCustomLeaf = {
   name: string
-  Button: React.ComponentType
-  Leaf: React.ComponentType
+  Button: React.ComponentType<any>
+  Leaf: React.ComponentType<any>
   plugins?: RichTextPlugin[]
 }
 
@@ -303,6 +307,9 @@ export type RichTextField = FieldBase & {
         }
       }
     }
+    link?: {
+      fields?: Field[];
+    }
   }
 }
 
@@ -311,7 +318,7 @@ export type ArrayField = FieldBase & {
   minRows?: number;
   maxRows?: number;
   labels?: Labels;
-  fields?: Field[];
+  fields: Field[];
 }
 
 export type RadioField = FieldBase & {
@@ -334,7 +341,7 @@ export type BlockField = FieldBase & {
   type: 'blocks';
   minRows?: number;
   maxRows?: number;
-  blocks?: Block[];
+  blocks: Block[];
   defaultValue?: unknown
   labels?: Labels
 }
@@ -384,7 +391,8 @@ export type FieldAffectingData =
   | CodeField
   | PointField
 
-export type NonPresentationalField = TextField
+export type NonPresentationalField =
+  TextField
   | NumberField
   | EmailField
   | TextareaField

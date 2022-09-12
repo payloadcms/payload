@@ -139,4 +139,75 @@ describe('fields', () => {
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue);
     });
   });
+
+  describe('fields - richText', () => {
+    test('should create new url link', async () => {
+      const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields');
+      await page.goto(url.list);
+      await page.locator('.row-1 .cell-id').click();
+
+      // Open link popup
+      await page.locator('.rich-text__toolbar .link').click();
+
+      const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+      await expect(editLinkModal).toBeVisible();
+
+      // Fill values and click Confirm
+      await editLinkModal.locator('#field-text').fill('link text');
+      await editLinkModal.locator('label[for="field-linkType-custom"]').click();
+      await editLinkModal.locator('#field-url').fill('https://payloadcms.com');
+      await wait(200);
+      await editLinkModal.locator('button[type="submit"]').click();
+
+      // Remove link
+      await page.locator('span >> text="link text"').click();
+      const popup = page.locator('.popup--active .rich-text-link__popup');
+      await expect(popup.locator('.rich-text-link__link-label')).toBeVisible();
+      await popup.locator('.rich-text-link__link-close').click();
+      await expect(page.locator('span >> text="link text"')).toHaveCount(0);
+    });
+
+    test('should populate url link', async () => {
+      const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields');
+      await page.goto(url.list);
+      await page.locator('.row-1 .cell-id').click();
+
+      // Open link popup
+      await page.locator('span >> text="render links"').click();
+      const popup = page.locator('.popup--active .rich-text-link__popup');
+      await expect(popup).toBeVisible();
+      await expect(popup.locator('a')).toHaveAttribute('href', 'https://payloadcms.com');
+
+      // Open link edit modal
+      await popup.locator('.rich-text-link__link-edit').click();
+      const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+      await expect(editLinkModal).toBeVisible();
+
+      // Close link edit modal
+      await editLinkModal.locator('button[type="submit"]').click();
+      await expect(editLinkModal).not.toBeVisible();
+    });
+
+    test('should populate relationship link', async () => {
+      const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields');
+      await page.goto(url.list);
+      await page.locator('.row-1 .cell-id').click();
+
+      // Open link popup
+      await page.locator('span >> text="link to relationships"').click();
+      const popup = page.locator('.popup--active .rich-text-link__popup');
+      await expect(popup).toBeVisible();
+      await expect(popup.locator('a')).toHaveAttribute('href', /\/admin\/collections\/array-fields\/.*/);
+
+      // Open link edit modal
+      await popup.locator('.rich-text-link__link-edit').click();
+      const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+      await expect(editLinkModal).toBeVisible();
+
+      // Close link edit modal
+      await editLinkModal.locator('button[type="submit"]').click();
+      await expect(editLinkModal).not.toBeVisible();
+      // await page.locator('span >> text="render links"').click();
+    });
+  });
 });

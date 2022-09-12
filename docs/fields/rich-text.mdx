@@ -77,6 +77,13 @@ The default `leaves` available in Payload are:
 
 Set this property to `true` to hide this field's gutter within the admin panel. The field gutter is rendered as a vertical line and padding, but often if this field is nested within a Group, Block, or Array, you may want to hide the gutter.
 
+**`link.fields`**
+
+This allows [fields](/docs/fields/overview) to be saved as extra fields on a link inside the Rich Text Editor. When this is present, the fields will render inside a modal that can be opened by clicking the "edit" button on the link element.
+
+![RichText link fields](https://payloadcms.com/images/fields/richText/rte-link-fields-modal.jpg)
+*RichText link with custom fields*
+
 **`upload.collections[collection-name].fields`**
 
 This allows [fields](/docs/fields/overview) to be saved as meta data on an upload field inside the Rich Text Editor. When this is present, the fields will render inside a modal that can be opened by clicking the "edit" button on the upload element.
@@ -126,9 +133,11 @@ Custom `Leaf` objects follow a similar pattern but require you to define the `Le
 
 ### Example
 
-`collections/ExampleCollection.js`
-```js
-{
+`collections/ExampleCollection.ts`
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
@@ -178,7 +187,7 @@ Custom `Leaf` objects follow a similar pattern but require you to define the `Le
       }
     }
   ]
-}
+};
 ```
 
 For more examples regarding how to define your own elements and leaves, check out the example [`RichText` field](https://github.com/payloadcms/public-demo/blob/master/src/fields/hero.ts) within the Public Demo source code.
@@ -187,7 +196,7 @@ For more examples regarding how to define your own elements and leaves, check ou
 
 As the Rich Text field saves its content in a JSON format, you'll need to render it as HTML yourself. Here is an example for how to generate JSX / HTML from Rich Text content:
 
-```js
+```ts
 import React, { Fragment } from 'react';
 import escapeHTML from 'escape-html';
 import { Text } from 'slate';
@@ -308,7 +317,7 @@ If you want to utilize this functionality within your own custom elements, you c
 
 `customLargeBodyElement.js`:
 
-```js
+```ts
 import Button from './Button';
 import Element from './Element';
 import withLargeBody from './plugin';
@@ -338,7 +347,7 @@ The plugin itself extends Payload's built-in `shouldBreakOutOnEnter` Slate funct
 
 If you are building your own custom Rich Text elements or leaves, you may benefit from importing the following types:
 
-```js
+```ts
 import type {
   RichTextCustomElement,
   RichTextCustomLeaf,

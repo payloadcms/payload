@@ -14,6 +14,10 @@ export const blocksField: Field = {
           type: 'text',
           required: true,
         },
+        {
+          name: 'richText',
+          type: 'richText',
+        },
       ],
     },
     {
@@ -63,12 +67,55 @@ export const blocksField: Field = {
         },
       ],
     },
+    {
+      slug: 'tabs',
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab with Collapsible',
+              fields: [
+                {
+                  type: 'collapsible',
+                  label: 'Collapsible within Block',
+                  fields: [
+                    {
+                      // collapsible
+                      name: 'textInCollapsible',
+                      type: 'text',
+                    },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      // collapsible
+                      name: 'textInRow',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 };
 
 const BlockFields: CollectionConfig = {
   slug: 'block-fields',
-  fields: [blocksField],
+  fields: [
+    blocksField,
+    {
+      ...blocksField,
+      name: 'localizedBlocks',
+      localized: true,
+    },
+  ],
 };
 
 export const blocksFieldSeedData = [
@@ -76,6 +123,7 @@ export const blocksFieldSeedData = [
     blockName: 'First block',
     blockType: 'text',
     text: 'first block',
+    richText: [],
   },
   {
     blockName: 'Second block',
@@ -102,6 +150,7 @@ export const blocksFieldSeedData = [
 
 export const blocksDoc = {
   blocks: blocksFieldSeedData,
+  localizedBlocks: blocksFieldSeedData,
 };
 
 export default BlockFields;

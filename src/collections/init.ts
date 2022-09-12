@@ -1,9 +1,8 @@
-import mongoose, { UpdateAggregationStage } from 'mongoose';
+import mongoose, { UpdateAggregationStage, UpdateQuery } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 import express from 'express';
 import passport from 'passport';
 import passportLocalMongoose from 'passport-local-mongoose';
-import { UpdateQuery } from 'mongodb';
 import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
 import buildQueryPlugin from '../mongoose/buildQuery';
 import apiKeyStrategy from '../auth/strategies/apiKey';

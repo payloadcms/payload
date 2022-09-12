@@ -77,7 +77,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
 
         if (collection && id) {
           url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true&locale=${locale}`;
-          method = 'PUT';
+          method = 'PATCH';
         }
 
         if (global) {

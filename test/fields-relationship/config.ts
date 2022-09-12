@@ -128,7 +128,7 @@ export default buildConfig({
     });
 
     const relationOneIDs = [];
-    await mapAsync([...Array(5)], async () => {
+    await mapAsync([...Array(11)], async () => {
       const doc = await payload.create<RelationOne>({
         collection: relationOneSlug,
         data: {
@@ -156,18 +156,22 @@ export default buildConfig({
         name: 'relation-restricted',
       },
     });
-    const { id: relationWithTitleDocId } = await payload.create<RelationWithTitle>({
-      collection: relationWithTitleSlug,
-      data: {
-        name: 'relation-title',
-      },
+    const relationsWithTitle = [];
+    await mapAsync(['relation-title', 'word boundary search'], async (title) => {
+      const { id } = await payload.create<RelationWithTitle>({
+        collection: relationWithTitleSlug,
+        data: {
+          name: title,
+        },
+      });
+      relationsWithTitle.push(id);
     });
     await payload.create<FieldsRelationship>({
       collection: slug,
       data: {
         relationship: relationOneDocId,
         relationshipRestricted: restrictedDocId,
-        relationshipWithTitle: relationWithTitleDocId,
+        relationshipWithTitle: relationsWithTitle[0],
       },
     });
     await mapAsync([...Array(11)], async () => {

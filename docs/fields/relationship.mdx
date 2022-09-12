@@ -45,6 +45,14 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
   The <a href="/docs/getting-started/concepts#depth">Depth</a> parameter can be used to automatically populate related documents that are returned by the API.
 </Banner>
 
+### Admin config
+
+In addition to the default [field admin config](/docs/fields/overview#admin-config), the Relationship field type also allows for the following admin-specific properties:
+
+**`isSortable`**
+
+Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop. (Only works when `hasMany` is set to `true`)
+
 ### Filtering relationship options
 
 Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both for validating input and filtering available relationships in the UI.
@@ -61,26 +69,26 @@ The `filterOptions` property can either be a `Where` query directly, or a functi
 
 **Example:**
 
-```js
-  const relationshipField = {
-    name: 'purchase',
-    type: 'relationship',
-    relationTo: ['products', 'services'],
-    filterOptions: ({ relationTo, siblingData }) => {
-      // returns a Where query dynamically by the type of relationship
-      if (relationTo === 'products') {
-        return {
-          'stock': { is_greater_than: siblingData.quantity }
-        }
+```ts
+const relationshipField = {
+  name: 'purchase',
+  type: 'relationship',
+  relationTo: ['products', 'services'],
+  filterOptions: ({ relationTo, siblingData }) => {
+    // returns a Where query dynamically by the type of relationship
+    if (relationTo === 'products') {
+      return {
+        'stock': { greater_than: siblingData.quantity }
       }
+    }
 
-      if (relationTo === 'services') {
-        return {
-          'isAvailable': { equals: true }
-        }
+    if (relationTo === 'services') {
+      return {
+        'isAvailable': { equals: true }
       }
-    },
-  };
+    }
+  },
+};
 ```
 
 You can learn more about writing queries [here](/docs/queries/overview).
@@ -98,7 +106,7 @@ Given the variety of options possible within the `relationship` field type, the 
 
 The most simple pattern of a relationship is to use `hasMany: false` with a `relationTo` that allows for only one type of collection.
 
-```js
+```ts
 {
   slug: 'example-collection',
   fields: [
@@ -129,7 +137,7 @@ When querying documents in this collection via REST API, you could query as foll
 
 Also known as **dynamic references**, in this configuration, the `relationTo` field is an array of Collection slugs that tells Payload which Collections are valid to reference.
 
-```js
+```ts
 {
   slug: 'example-collection',
   fields: [
@@ -168,7 +176,7 @@ This query would return only documents that have an owner relationship to organi
 
 The `hasMany` tells Payload that there may be more than one collection saved to the field.
 
-```js
+```ts
 {
   slug: 'example-collection',
   fields: [
@@ -196,7 +204,7 @@ When querying documents, the format does not change for arrays:
 
 #### Has Many - Polymorphic
 
-```js
+```ts
 {
   slug: 'example-collection',
   fields: [

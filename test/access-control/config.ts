@@ -9,6 +9,7 @@ export const readOnlySlug = 'read-only-collection';
 export const restrictedSlug = 'restricted';
 export const restrictedVersionsSlug = 'restricted-versions';
 export const siblingDataSlug = 'sibling-data';
+export const relyOnRequestHeadersSlug = 'rely-on-request-headers';
 
 const openAccess = {
   create: () => true,
@@ -22,6 +23,11 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
   if (siblingData?.allowPublicReadability) return true;
 
   return false;
+};
+
+export const requestHeaders = {authorization: 'Bearer testBearerToken'};
+const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
+  return !!headers && headers.authorization === requestHeaders.authorization;
 };
 
 export default buildConfig({
@@ -112,6 +118,21 @@ export default buildConfig({
               ],
             },
           ],
+        },
+      ],
+    },
+    {
+      slug: relyOnRequestHeadersSlug,
+      access: {
+        create: UseRequestHeadersAccess,
+        read: UseRequestHeadersAccess,
+        update: UseRequestHeadersAccess,
+        delete: UseRequestHeadersAccess,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
         },
       ],
     },

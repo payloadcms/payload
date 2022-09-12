@@ -4,7 +4,7 @@ import { SanitizedConfig } from '../../config/types';
 export default (config: SanitizedConfig) => (
   (req: Request, res: Response, next: NextFunction) => {
     if (config.cors) {
-      res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+      res.header('Access-Control-Allow-Methods', 'PUT, PATCH, POST, GET, DELETE, OPTIONS');
       res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Content-Encoding');
 
       if (config.cors === '*') {

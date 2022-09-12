@@ -1,5 +1,4 @@
 import equal from 'deep-equal';
-import ObjectID from 'bson-objectid';
 import { unflatten, flatten } from 'flatley';
 import flattenFilters from './flattenFilters';
 import getSiblingData from './getSiblingData';
@@ -65,7 +64,7 @@ function fieldReducer(state: Fields, action): Fields {
 
     case 'REMOVE': {
       const newState = { ...state };
-      delete newState[action.path];
+      if (newState[action.path]) delete newState[action.path];
       return newState;
     }
 

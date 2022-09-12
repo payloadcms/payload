@@ -120,6 +120,9 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
+      // mongoose model schema indexes do not always create indexes in the actual database
+      // see: https://github.com/payloadcms/payload/issues/571
+
       indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
 
       indexes.forEach((index) => {
@@ -149,10 +152,19 @@ describe('Fields', () => {
       expect(definitions['group.localizedUnique.es']).toEqual(1);
       expect(options['group.localizedUnique.es']).toMatchObject({ unique: true, sparse: true });
     });
+    it('should have unique indexes in a collapsible', () => {
+      expect(definitions['collapsibleLocalizedUnique.en']).toEqual(1);
+      expect(options['collapsibleLocalizedUnique.en']).toMatchObject({ unique: true, sparse: true });
+      expect(definitions.collapsibleTextUnique).toEqual(1);
+      expect(options.collapsibleTextUnique).toMatchObject({ unique: true });
+    });
   });
 
   describe('point', () => {
     let doc;
+    const point = [7, -7];
+    const localized = [5, -2];
+    const group = { point: [1, 9] };
 
     beforeAll(async () => {
       const findDoc = await payload.find({
@@ -176,9 +188,6 @@ describe('Fields', () => {
     });
 
     it('should create', async () => {
-      const point = [7, -7];
-      const localized = [5, -2];
-      const group = { point: [1, 9] };
       doc = await payload.create({
         collection: 'point-fields',
         data: {
@@ -187,6 +196,30 @@ describe('Fields', () => {
           group,
         },
       });
+
+      expect(doc.point).toEqual(point);
+      expect(doc.localized).toEqual(localized);
+      expect(doc.group).toMatchObject(group);
+    });
+
+    it('should not create duplicate point when unique', async () => {
+      await expect(() => payload.create({
+        collection: 'point-fields',
+        data: {
+          point,
+          localized,
+          group,
+        },
+      }))
+        .rejects
+        .toThrow(Error);
+
+      await expect(async () => payload.create({
+        collection: 'number-fields',
+        data: {
+          min: 5,
+        },
+      })).rejects.toThrow('The following field is invalid: min');
 
       expect(doc.point).toEqual(point);
       expect(doc.localized).toEqual(localized);
@@ -359,6 +392,78 @@ describe('Fields', () => {
       expect(blockFields.docs[0].blocks[2].subBlocks[0].number).toEqual(blocksFieldSeedData[2].subBlocks[0].number);
       expect(blockFields.docs[0].blocks[2].subBlocks[1].text).toEqual(blocksFieldSeedData[2].subBlocks[1].text);
     });
+
+    it('should query based on richtext data within a block', async () => {
+      const blockFieldsSuccess = await payload.find({
+        collection: 'block-fields',
+        where: {
+          'blocks.richText.children.text': {
+            like: 'fun',
+          },
+        },
+      });
+
+      expect(blockFieldsSuccess.docs).toHaveLength(1);
+
+      const blockFieldsFail = await payload.find({
+        collection: 'block-fields',
+        where: {
+          'blocks.richText.children.text': {
+            like: 'funny',
+          },
+        },
+      });
+
+      expect(blockFieldsFail.docs).toHaveLength(0);
+    });
+
+    it('should query based on richtext data within a localized block, specifying locale', async () => {
+      const blockFieldsSuccess = await payload.find({
+        collection: 'block-fields',
+        where: {
+          'localizedBlocks.en.richText.children.text': {
+            like: 'fun',
+          },
+        },
+      });
+
+      expect(blockFieldsSuccess.docs).toHaveLength(1);
+
+      const blockFieldsFail = await payload.find({
+        collection: 'block-fields',
+        where: {
+          'localizedBlocks.en.richText.children.text': {
+            like: 'funny',
+          },
+        },
+      });
+
+      expect(blockFieldsFail.docs).toHaveLength(0);
+    });
+
+    it('should query based on richtext data within a localized block, without specifying locale', async () => {
+      const blockFieldsSuccess = await payload.find({
+        collection: 'block-fields',
+        where: {
+          'localizedBlocks.richText.children.text': {
+            like: 'fun',
+          },
+        },
+      });
+
+      expect(blockFieldsSuccess.docs).toHaveLength(1);
+
+      const blockFieldsFail = await payload.find({
+        collection: 'block-fields',
+        where: {
+          'localizedBlocks.richText.children.text': {
+            like: 'funny',
+          },
+        },
+      });
+
+      expect(blockFieldsFail.docs).toHaveLength(0);
+    });
   });
 
   describe('richText', () => {
@@ -384,6 +489,29 @@ describe('Fields', () => {
       });
 
       expect(workingRichTextQuery.docs).toHaveLength(1);
+    });
+
+    it('should populate link relationship', async () => {
+      const query = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.linkType': {
+            equals: 'internal',
+          },
+        },
+      });
+
+      const nodes = query.docs[0].richText;
+      expect(nodes).toBeDefined();
+      const child = nodes.flatMap((n) => n.children)
+        .find((c) => c.doc);
+      expect(child).toMatchObject({
+        type: 'link',
+        linkType: 'internal',
+      });
+      expect(child.doc.relationTo).toEqual('array-fields');
+      expect(typeof child.doc.value.id).toBe('string');
+      expect(child.doc.value.items).toHaveLength(6);
     });
   });
 });

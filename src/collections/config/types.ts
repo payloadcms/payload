@@ -165,8 +165,8 @@ export type CollectionAdminOptions = {
    */
   components?: {
     views?: {
-      Edit?: React.ComponentType
-      List?: React.ComponentType
+      Edit?: React.ComponentType<any>
+      List?: React.ComponentType<any>
     }
   };
   pagination?: {
