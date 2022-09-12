@@ -1,0 +1,46 @@
+@import '../../../scss/styles.scss';
+
+.nav-group {
+  width: 100%;
+
+  &__toggle {
+    cursor: pointer;
+    color: var(--theme-elevation-400);
+    background: transparent;
+    padding-left: 0;
+    border: 0;
+    margin-top: base(.25);
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      color: var(--theme-elevation-1000);
+      .stroke {
+        stroke: var(--theme-elevation-1000);
+      }
+    }
+  }
+
+  &__indicator {
+    transform: rotate(.5turn);
+    margin-left: auto;
+
+    .stroke {
+      stroke: var(--theme-elevation-400);
+    }
+  }
+
+  &--collapsed {
+    .collapsible__toggle {
+      border-bottom-right-radius: $style-radius-s;
+      border-bottom-left-radius: $style-radius-s;
+    }
+
+    .nav-group__indicator {
+      transform: rotate(0turn);
+    }
+  }
+
+}
