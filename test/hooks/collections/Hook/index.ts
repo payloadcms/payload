@@ -13,7 +13,12 @@ const Hooks: CollectionConfig = {
   hooks: {
     beforeValidate: [({ data }) => validateHookOrder('collectionBeforeValidate', data)],
     beforeChange: [({ data }) => validateHookOrder('collectionBeforeChange', data)],
-    afterChange: [({ doc }) => validateHookOrder('collectionAfterChange', doc)],
+    afterChange: [({ doc, previousDoc }) => {
+      if (!previousDoc) {
+        throw new Error('previousDoc is missing in afterChange hook');
+      }
+      return validateHookOrder('collectionAfterChange', doc);
+    }],
     beforeRead: [({ doc }) => validateHookOrder('collectionBeforeRead', doc)],
     afterRead: [({ doc }) => validateHookOrder('collectionAfterRead', doc)],
   },
@@ -49,8 +54,14 @@ const Hooks: CollectionConfig = {
       type: 'checkbox',
       hooks: {
         afterChange: [
-          ({ data }) => {
+          ({ data, previousDoc, previousSiblingDoc }) => {
             data.fieldAfterChange = true;
+            if (!previousDoc) {
+              throw new Error('previousDoc is missing in afterChange hook');
+            }
+            if (!previousSiblingDoc) {
+              throw new Error('previousSiblingDoc is missing in afterChange hook');
+            }
             validateHookOrder('fieldAfterChange', data);
             return true;
           },

@@ -79,6 +79,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
+  previousDoc: T,
   /**
    * Hook operation being performed
    */

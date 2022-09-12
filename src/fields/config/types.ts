@@ -16,6 +16,10 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   findMany?: boolean
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: T,
+  /** The document before changes were applied, only in `afterChange` hooks. */
+  previousDoc?: T,
+  /** The sibling data from the previous document in `afterChange` hook. */
+  previousSiblingDoc?: T,
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'read' | 'update' | 'delete',
   /** The Express request object. It is mocked for Local API operations. */
@@ -24,6 +28,7 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   siblingData: Partial<S>
   /** The value of the field. */
   value?: P,
+  previousValue?: P,
 }
 
 export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;

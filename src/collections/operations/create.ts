@@ -252,6 +252,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
   result = await afterChange({
     data,
     doc: result,
+    previousDoc: {},
     entityConfig: collectionConfig,
     operation: 'create',
     req,
@@ -266,6 +267,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
 
     result = await hook({
       doc: result,
+      previousDoc: {},
       req: args.req,
       operation: 'create',
     }) || result;

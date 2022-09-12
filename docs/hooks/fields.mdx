@@ -56,15 +56,17 @@ All field-level hooks are formatted to accept the same arguments, although some 
 
 Field Hooks receive one `args` argument that contains the following properties:
 
-| Option            | Description  |
-| ----------------- | -------------|
-| **`data`**        | The data passed to update the document within `create` and `update` operations, and the full document itself in the `afterRead` hook. |
-| **`findMany`**    | Boolean to denote if this hook is running against finding one, or finding many within the `afterRead` hook. |
-| **`operation`**   | A string relating to which operation the field type is currently executing within. Useful within `beforeValidate`, `beforeChange`, and `afterChange` hooks to differentiate between `create` and `update` operations. |
-| **`originalDoc`** | The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. |
-| **`req`**         | The Express `request` object. It is mocked for Local API operations. |
-| **`siblingData`** | The sibling data passed to a field that the hook is running against. |
-| **`value`**       | The value of the field. |
+| Option                   | Description                                                                                                                                                                                                           |
+|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`data`**               | The data passed to update the document within `create` and `update` operations, and the full document itself in the `afterRead` hook.                                                                                 |
+| **`siblingData`**        | The sibling data passed to a field that the hook is running against.                                                                                                                                                  |
+| **`findMany`**           | Boolean to denote if this hook is running against finding one, or finding many within the `afterRead` hook.                                                                                                           |
+| **`operation`**          | A string relating to which operation the field type is currently executing within. Useful within `beforeValidate`, `beforeChange`, and `afterChange` hooks to differentiate between `create` and `update` operations. |
+| **`originalDoc`**        | The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation.                                                                                        |
+| **`previousDoc`**        | The document before changes were applied, only in `afterChange` hooks.                                                                                                                                                |
+| **`previousSiblingDoc`** | The sibling data from the previous document in `afterChange` hook.                                                                                                                                                    |
+| **`req`**                | The Express `request` object. It is mocked for Local API operations.                                                                                                                                                  |
+| **`value`**              | The value of the field.                                                                                                                                                                                               |
 
 #### Return value
 
