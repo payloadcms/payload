@@ -56,6 +56,11 @@ export default joi.object({
     indexHTML: joi.string(),
     css: joi.string(),
     dateFormat: joi.string(),
+    avatar: joi.alternatives()
+      .try(
+        joi.string(),
+        component,
+      ),
     components: joi.object()
       .keys({
         routes: joi.array()
