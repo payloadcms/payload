@@ -82,7 +82,7 @@ const Dashboard: React.FC<Props> = (props) => {
 
                   if (type === EntityType.global) {
                     title = entity.label;
-                    onClick = () => push({ pathname: `${admin}/globals/${global.slug}` });
+                    onClick = () => push({ pathname: `${admin}/globals/${entity.slug}` });
                   }
 
                   return (
