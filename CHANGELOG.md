@@ -1,3 +1,23 @@
+# [1.1.0](https://github.com/payloadcms/payload/compare/v1.0.36...v1.1.0) (2022-09-13)
+
+
+### Bug Fixes
+
+* [#1106](https://github.com/payloadcms/payload/issues/1106) ([9a461b8](https://github.com/payloadcms/payload/commit/9a461b853689fdbc8229c8e103c5e237e451425f))
+* word boundaries, no regex lookbehind support for Safari ([#1114](https://github.com/payloadcms/payload/issues/1114)) ([391c9d8](https://github.com/payloadcms/payload/commit/391c9d8682175ea37f1f7b2bb9d1361dc4ac8140))
+
+
+### Features
+
+* [#1001](https://github.com/payloadcms/payload/issues/1001) - builds a way to allow list view to search multiple fields ([a108372](https://github.com/payloadcms/payload/commit/a1083727ef54ec15ea2c3b4dfd114567639dfef1))
+* collection groups ([dffeaf6](https://github.com/payloadcms/payload/commit/dffeaf6a69746b944bf36bd172da3cc19fa025a0))
+* globals groups ([59af872](https://github.com/payloadcms/payload/commit/59af8725b4625f8e08aaab730fce177e870279ca))
+* hide nav labels with no un-grouped collections ([c40e232](https://github.com/payloadcms/payload/commit/c40e232ac67e7bc1ced3775060beb835efff46b9))
+* implement gravatar ([#1107](https://github.com/payloadcms/payload/issues/1107)) ([ca434b8](https://github.com/payloadcms/payload/commit/ca434b8a929af081bb3b92b51f35058a23ce5e37))
+* support localized tab fields ([a83921a](https://github.com/payloadcms/payload/commit/a83921a2fe927d59562272cb111c68a840b1914f))
+* tabs support localization at the tab level ([6a6a691](https://github.com/payloadcms/payload/commit/6a6a69190fe13bebf3e0b089265d71be2a691488))
+* WIP tab compatible with traverseFields ([2ae33b6](https://github.com/payloadcms/payload/commit/2ae33b603abaec4ff80261a465781f508b4a1e06))
+
 ## [1.0.36](https://github.com/payloadcms/payload/compare/v1.0.35...v1.0.36) (2022-09-10)
 
 
