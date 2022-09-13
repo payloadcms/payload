@@ -1,3 +1,11 @@
+## [1.1.1](https://github.com/payloadcms/payload/compare/v1.1.0...v1.1.1) (2022-09-13)
+
+
+### Bug Fixes
+
+* conditions on conditionals ([9c4f2b6](https://github.com/payloadcms/payload/commit/9c4f2b68b07bbdd2ac9a6dee280f50379638fc50))
+* dashboard links to globals ([dcc8dad](https://github.com/payloadcms/payload/commit/dcc8dad53b006f86e93150f9439eafc8d9e01d79))
+
 # [1.1.0](https://github.com/payloadcms/payload/compare/v1.0.36...v1.1.0) (2022-09-13)
 
 
