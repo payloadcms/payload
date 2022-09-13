@@ -62,11 +62,25 @@ const WhereBuilder: React.FC<Props> = (props) => {
   const [reducedFields] = useState(() => reduceFields(collection.fields));
 
   useThrottledEffect(() => {
-    const currentParams = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 10 });
+    const currentParams = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 10 }) as { where: Where };
+
+    const paramsToKeep = typeof currentParams?.where === 'object' && 'or' in currentParams.where ? currentParams.where.or.reduce((keptParams, param) => {
+      const newParam = { ...param };
+      if (param.and) {
+        delete newParam.and;
+      }
+      return [
+        ...keptParams,
+        newParam,
+      ];
+    }, []) : [];
 
     const newWhereQuery = {
       ...typeof currentParams?.where === 'object' ? currentParams.where : {},
-      or: conditions,
+      or: [
+        ...conditions,
+        ...paramsToKeep,
+      ],
     };
 
     if (handleChange) handleChange(newWhereQuery as Where);

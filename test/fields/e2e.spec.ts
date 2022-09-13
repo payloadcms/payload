@@ -107,6 +107,8 @@ describe('fields', () => {
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click();
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();
 
+      await wait(100);
+
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue);
       await expect(page.locator('#field-numberInRow')).toHaveValue(numberInRowValue);
     });

@@ -23,9 +23,9 @@ export type WhereField = {
 }
 
 export type Where = {
+  [key: string]: WhereField | Where[]
   or?: Where[]
   and?: Where[]
-  [key: string]: Where[] | WhereField
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

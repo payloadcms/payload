@@ -5,7 +5,7 @@ import { Props } from './types';
 import Search from '../../icons/Search';
 import useDebounce from '../../../hooks/useDebounce';
 import { useSearchParams } from '../../utilities/SearchParams';
-import { Where } from '../../../../types';
+import { Where, WhereField } from '../../../../types';
 
 import './index.scss';
 
@@ -23,47 +23,44 @@ const SearchFilter: React.FC<Props> = (props) => {
   const params = useSearchParams();
   const history = useHistory();
 
-  const [search, setSearch] = useState(() => params?.where?.[fieldName]?.like || '');
+  const [search, setSearch] = useState('');
+  const [previousSearch, setPreviousSearch] = useState('');
 
   const placeholder = useRef(`Search by ${fieldLabel}`);
 
   const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
-    if (debouncedSearch || params?.where) {
-      let newWhere = listSearchableFields?.length > 0 ? {
-        ...(typeof params?.where === 'object' ? params.where : {}),
-        or: [
-          {
-            [fieldName]: {
+    const newWhere: Where = { ...typeof params?.where === 'object' ? params.where as Where : {} };
+    const fieldNamesToSearch = [fieldName, ...(listSearchableFields || []).map(({ name }) => name)];
+
+    fieldNamesToSearch.forEach((fieldNameToSearch) => {
+      const hasOrQuery = Array.isArray(newWhere.or);
+      const existingFieldSearchIndex = hasOrQuery ? newWhere.or.findIndex((condition) => {
+        return (condition?.[fieldNameToSearch] as WhereField)?.like;
+      }) : -1;
+
+      if (debouncedSearch) {
+        if (!hasOrQuery) newWhere.or = [];
+
+        if (existingFieldSearchIndex > -1) {
+          (newWhere.or[existingFieldSearchIndex][fieldNameToSearch] as WhereField).like = debouncedSearch;
+        } else {
+          newWhere.or.push({
+            [fieldNameToSearch]: {
               like: debouncedSearch,
             },
-          },
-          ...listSearchableFields.reduce<Record<string, unknown>[]>((prev, curr) => {
-            return [
-              ...prev,
-              {
-                [curr.name]: {
-                  like: debouncedSearch,
-                },
-              },
-            ];
-          }, []),
-        ],
-      } : {
-        ...(typeof params?.where === 'object' ? params.where : {}),
-        [fieldName]: {
-          like: debouncedSearch,
-        },
-      };
-
-      if (!debouncedSearch) {
-        newWhere = undefined;
+          });
+        }
+      } else if (existingFieldSearchIndex > -1) {
+        newWhere.or.splice(existingFieldSearchIndex, 1);
       }
+    });
 
+    if (debouncedSearch !== previousSearch) {
       if (handleChange) handleChange(newWhere as Where);
 
-      if (modifySearchQuery && queryString.stringify(params?.where) !== queryString.stringify(newWhere)) {
+      if (modifySearchQuery) {
         history.replace({
           search: queryString.stringify({
             ...params,
@@ -71,9 +68,10 @@ const SearchFilter: React.FC<Props> = (props) => {
             where: newWhere,
           }),
         });
+        setPreviousSearch(debouncedSearch);
       }
     }
-  }, [debouncedSearch, history, fieldName, params, handleChange, modifySearchQuery, listSearchableFields]);
+  }, [debouncedSearch, previousSearch, history, fieldName, params, handleChange, modifySearchQuery, listSearchableFields]);
 
   useEffect(() => {
     if (listSearchableFields?.length > 0) {
