@@ -45,17 +45,18 @@ However, you can create your own adapter for any third-party service you would l
 
 This plugin is configurable to work across many different Payload collections. A `*` denotes that the property is required.
 
-| Option                  | Description |
-| ----------------------- | ----------- |
-| `collections` *         | Object with keys set to the slug of collections you want to enable the plugin for, and values set to collection-specific options. |
+| Option                  | Type                                    | Description |
+|-------------------------|-----------------------------------------| ----------- |
+| `collections` *         | Record<string, [CollectionOptions](https://github.com/payloadcms/plugin-cloud-storage/blob/c4a492a62abc2f21b4cd6a7c97778acd8e831212/src/types.ts#L48)> | Object with keys set to the slug of collections you want to enable the plugin for, and values set to collection-specific options. |
 
 **Collection-specific options:**
 
-| Option                       | Description                     |
-|------------------------------|---------------------------------|
-| `adapter` *            | Pass in the adapter that you'd like to use for this collection. You can also set this field to `null` for local development if you'd like to bypass cloud storage in certain scenarios and use local storage. |
-| `disableLocalStorage`  | Choose to disable local storage on this collection. Defaults to `true`. |
-| `disablePayloadAccessControl` | Set to `true` to disable Payload's access control. [More](#payload-access-control) |
+| Option                        | Type                                                                                                                                | Description                                                                        |
+|-------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| `adapter` *                   | [Adapter](https://github.com/payloadcms/plugin-cloud-storage/blob/c4a492a62abc2f21b4cd6a7c97778acd8e831212/src/types.ts#L46)        | Pass in the adapter that you'd like to use for this collection. You can also set this field to `null` for local development if you'd like to bypass cloud storage in certain scenarios and use local storage.                |
+| `disableLocalStorage`         | `boolean`                                                                                                                           | Choose to disable local storage on this collection. Defaults to `true`.            |
+| `disablePayloadAccessControl` | `true`                                                                                                                              | Set to `true` to disable Payload's access control. [More](#payload-access-control)                                           |
+| `prefix`                      | `string`                                                                                                                            | Set to `media/images` to upload files inside `media/images` folder in the bucket.                                            |
 
 ### Azure Blob Storage Adapter
 

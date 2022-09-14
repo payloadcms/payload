@@ -29,7 +29,7 @@ export const extendWebpackConfig =
       (resultingWebpackConfig, [slug, collectionOptions]) => {
         const matchedCollection = config.collections?.find(coll => coll.slug === slug)
 
-        if (matchedCollection) {
+        if (matchedCollection && typeof collectionOptions.adapter === 'function') {
           const adapter: GeneratedAdapter = collectionOptions.adapter({
             collection: matchedCollection,
           })
