@@ -188,7 +188,6 @@
     "webpack-hot-middleware": "^2.25.0"
   },
   "devDependencies": {
-    "@bahmutov/cy-api": "^2.1.3",
     "@playwright/test": "^1.23.1",
     "@release-it/conventional-changelog": "^2.0.0",
     "@testing-library/jest-dom": "^5.11.4",
