@@ -10,10 +10,16 @@ export const getHandler = ({ containerClient }: Args): StaticHandler => {
     try {
       const blockBlobClient = containerClient.getBlockBlobClient(req.params.filename)
 
-      const downloadBlockBlobResponse = await blockBlobClient.download(0)
+      const blob = await blockBlobClient.download(0)
 
-      if (downloadBlockBlobResponse?.readableStreamBody) {
-        return downloadBlockBlobResponse.readableStreamBody.pipe(res)
+      res.set({
+        'Content-Length': blob.contentLanguage,
+        'Content-Type': blob.contentType,
+        ETag: blob.etag,
+      })
+
+      if (blob?.readableStreamBody) {
+        return blob.readableStreamBody.pipe(res)
       }
 
       return next()

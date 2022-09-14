@@ -1,4 +1,4 @@
-import { Storage } from '@google-cloud/storage'
+import type { Storage } from '@google-cloud/storage'
 import type { CollectionConfig } from 'payload/types'
 import type { HandleUpload } from '../../types'
 
@@ -13,8 +13,11 @@ export const getHandleUpload = ({ gcs, bucket, acl }: Args): HandleUpload => {
   return async ({ data, file }) => {
     const gcsFile = gcs.bucket(bucket).file(file.filename)
     await gcsFile.save(file.buffer, {
-      contentType: file.mimeType,
+      metadata: {
+        contentType: file.mimeType,
+      },
     })
+
     if (acl) {
       await gcsFile[`make${acl}`]()
     }

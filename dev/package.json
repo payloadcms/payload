@@ -16,7 +16,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.142.0",
     "@azure/storage-blob": "^12.11.0",
-    "@google-cloud/storage": "^6.4.1",
+    "@google-cloud/storage": "^6.4.2",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "payload": "^1.0.27"

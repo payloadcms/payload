@@ -9,18 +9,27 @@ interface Args {
 
 export const getHandler = ({ s3, bucket }: Args): StaticHandler => {
   return async (req, res, next) => {
+    const params = {
+      Bucket: bucket,
+      Key: req.params.filename,
+    }
+
     try {
-      const response = await s3.getObject({
-        Bucket: bucket,
-        Key: req.params.filename,
+      const object = await s3.getObject(params)
+
+      res.set({
+        'Content-Length': object.ContentLength,
+        'Content-Type': object.ContentType,
+        ETag: object.ETag,
       })
 
-      if (response?.Body) {
-        return (response.Body as Readable).pipe(res)
+      if (object?.Body) {
+        return (object.Body as Readable).pipe(res)
       }
 
       return next()
     } catch (err: unknown) {
+      req.payload.logger.error(err)
       return next()
     }
   }
