@@ -1,18 +1,18 @@
+import { fromBuffer } from 'file-type';
 import mkdirp from 'mkdirp';
 import path from 'path';
-import sharp, { Sharp } from 'sharp';
-import { fromBuffer } from 'file-type';
 import sanitize from 'sanitize-filename';
-import { SanitizedConfig } from '../config/types';
+import sharp, { Sharp } from 'sharp';
 import { Collection } from '../collections/config/types';
+import { SanitizedConfig } from '../config/types';
 import { FileUploadError, MissingFile } from '../errors';
 import { PayloadRequest } from '../express/types';
-import { FileData } from './types';
-import saveBufferToFile from './saveBufferToFile';
-import getSafeFileName from './getSafeFilename';
 import getImageSize from './getImageSize';
+import getSafeFileName from './getSafeFilename';
 import resizeAndSave from './imageResizer';
 import isImage from './isImage';
+import saveBufferToFile from './saveBufferToFile';
+import { FileData } from './types';
 
 type Args = {
   config: SanitizedConfig,
@@ -103,7 +103,7 @@ const uploadFile = async ({
               dimensions,
               staticPath,
               config: collectionConfig,
-              savedFilename: fsSafeName,
+              savedFilename: fsSafeName || file.name,
               mimeType: fileData.mimeType,
             });
           }
