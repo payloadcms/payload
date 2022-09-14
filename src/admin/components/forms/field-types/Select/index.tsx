@@ -34,7 +34,7 @@ const Select: React.FC<Props> = (props) => {
       description,
       isClearable,
       condition,
-      isSortable
+      isSortable = true,
     } = {},
   } = props;
 
