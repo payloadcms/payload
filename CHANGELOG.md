@@ -1,3 +1,11 @@
+## [1.1.2](https://github.com/payloadcms/payload/compare/v1.1.1...v1.1.2) (2022-09-14)
+
+
+### Bug Fixes
+
+* resize images without local storage ([1496679](https://github.com/payloadcms/payload/commit/14966796ae0d0bcff8cb56b62e3a21c2de2176da))
+* resize images without local storage ([7b756f3](https://github.com/payloadcms/payload/commit/7b756f3421f02d1ff55374a72396e15e9f3e23d7))
+
 ## [1.1.1](https://github.com/payloadcms/payload/compare/v1.1.0...v1.1.1) (2022-09-13)
 
 
