@@ -31,7 +31,7 @@
     "build:tsc": "tsc --p tsconfig.admin.json && tsc --p tsconfig.server.json",
     "build:components": "webpack --config dist/webpack/components.config.js",
     "build": "yarn copyfiles && yarn build:tsc && yarn build:components",
-    "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec 'yarn build:tsc'",
+    "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"yarn build:tsc\"",
     "dev": "nodemon",
     "dev:generate-types": "node ./test/generateTypes.js",
     "pretest": "yarn build",
