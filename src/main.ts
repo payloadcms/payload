@@ -3,7 +3,7 @@ import arg from 'arg'
 import commandExists from 'command-exists'
 import { createProject } from './lib/createProject'
 import { getDatabaseConnection } from './lib/getDatabaseConnection'
-import { getPayloadSecret } from './lib/getPayloadSecret'
+import { generateSecret } from './lib/generateSecret'
 import { parseLanguage } from './lib/parseLanguage'
 import { parseProjectName } from './lib/parseProjectName'
 import { parseTemplate } from './lib/parseTemplate'
@@ -59,7 +59,7 @@ export class Main {
       const validTemplates = await getValidTemplates()
       const template = await parseTemplate(this.args, validTemplates, language)
       const databaseUri = await getDatabaseConnection(this.args, projectName)
-      const payloadSecret = await getPayloadSecret(this.args)
+      const payloadSecret = await generateSecret()
       const projectDir = `./${slugify(projectName)}`
       const packageManager = await getPackageManager(this.args)
 
