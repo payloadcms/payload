@@ -19,8 +19,8 @@ export const getHandler = ({ gcs, bucket, collection }: Args): StaticHandler => 
       const [metadata] = await file.getMetadata()
 
       res.set({
-        'Content-Length': metadata.contentType,
-        'Content-Type': metadata.contentLength,
+        'Content-Length': metadata.size,
+        'Content-Type': metadata.contentType,
         ETag: metadata.etag,
       })
 
