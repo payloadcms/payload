@@ -60,53 +60,52 @@ const uploadFile = async ({
     if (file) {
       try {
         let fsSafeName: string;
-        let fileBuffer: Buffer;
-        let mimeType: string;
-        let fileSize: number;
-
-        if (!disableLocalStorage) {
-          let resized: Sharp | undefined;
+        let resized: Sharp | undefined;
+        if (isImage(file.mimetype)) {
           if (resizeOptions) {
-            resized = sharp(file.data).resize(resizeOptions);
+            resized = sharp(file.data)
+              .resize(resizeOptions);
           }
           if (formatOptions) {
             resized = (resized ?? sharp(file.data)).toFormat(formatOptions.format, formatOptions.options);
           }
-          fileBuffer = resized ? (await resized.toBuffer()) : file.data;
-          const { mime, ext } = await fromBuffer(fileBuffer);
-          mimeType = mime;
-          fileSize = fileBuffer.length;
-          const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
-          fsSafeName = `${baseFilename}.${ext}`;
+        }
 
-          if (!overwriteExistingFiles) {
-            fsSafeName = await getSafeFileName(Model, staticPath, fsSafeName);
-          }
+        const fileBuffer = resized ? (await resized.toBuffer()) : file.data;
+        const {
+          mime,
+          ext,
+        } = await fromBuffer(fileBuffer);
+        const fileSize = fileBuffer.length;
+        const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
+        fsSafeName = `${baseFilename}.${ext}`;
 
+        if (!overwriteExistingFiles) {
+          fsSafeName = await getSafeFileName(Model, staticPath, fsSafeName);
+        }
+
+        if (!disableLocalStorage) {
           await saveBufferToFile(fileBuffer, `${staticPath}/${fsSafeName}`);
         }
 
         fileData.filename = fsSafeName || (!overwriteExistingFiles ? await getSafeFileName(Model, staticPath, file.name) : file.name);
         fileData.filesize = fileSize || file.size;
-        fileData.mimeType = mimeType || (await fromBuffer(file.data)).mime;
+        fileData.mimeType = mime || (await fromBuffer(file.data)).mime;
+        const dimensions = await getImageSize(file);
+        fileData.width = dimensions.width;
+        fileData.height = dimensions.height;
 
-        if (isImage(file.mimetype)) {
-          const dimensions = await getImageSize(file);
-          fileData.width = dimensions.width;
-          fileData.height = dimensions.height;
-
-          if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
-            req.payloadUploadSizes = {};
-            fileData.sizes = await resizeAndSave({
-              req,
-              file: file.data,
-              dimensions,
-              staticPath,
-              config: collectionConfig,
-              savedFilename: fsSafeName || file.name,
-              mimeType: fileData.mimeType,
-            });
-          }
+        if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
+          req.payloadUploadSizes = {};
+          fileData.sizes = await resizeAndSave({
+            req,
+            file: file.data,
+            dimensions,
+            staticPath,
+            config: collectionConfig,
+            savedFilename: fsSafeName || file.name,
+            mimeType: fileData.mimeType,
+          });
         }
       } catch (err) {
         console.error(err);
