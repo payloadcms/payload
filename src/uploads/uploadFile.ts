@@ -7,12 +7,12 @@ import { Collection } from '../collections/config/types';
 import { SanitizedConfig } from '../config/types';
 import { FileUploadError, MissingFile } from '../errors';
 import { PayloadRequest } from '../express/types';
-import getImageSize from './getImageSize';
+import getImageSize, { ProbedImageSize } from './getImageSize';
 import getSafeFileName from './getSafeFilename';
 import resizeAndSave from './imageResizer';
-import isImage from './isImage';
 import saveBufferToFile from './saveBufferToFile';
 import { FileData } from './types';
+import canResizeImage from './canResizeImage';
 
 type Args = {
   config: SanitizedConfig,
@@ -59,9 +59,11 @@ const uploadFile = async ({
 
     if (file) {
       try {
+        const shouldResize = canResizeImage(file.mimetype);
         let fsSafeName: string;
         let resized: Sharp | undefined;
-        if (isImage(file.mimetype)) {
+        let dimensions: ProbedImageSize;
+        if (shouldResize) {
           if (resizeOptions) {
             resized = sharp(file.data)
               .resize(resizeOptions);
@@ -69,13 +71,14 @@ const uploadFile = async ({
           if (formatOptions) {
             resized = (resized ?? sharp(file.data)).toFormat(formatOptions.format, formatOptions.options);
           }
+          dimensions = await getImageSize(file);
+          fileData.width = dimensions.width;
+          fileData.height = dimensions.height;
         }
 
         const fileBuffer = resized ? (await resized.toBuffer()) : file.data;
-        const {
-          mime,
-          ext,
-        } = await fromBuffer(fileBuffer);
+
+        const { mime, ext } = await fromBuffer(fileBuffer) ?? { mime: file.mimetype, ext: file.name.split('.').pop() };
         const fileSize = fileBuffer.length;
         const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
         fsSafeName = `${baseFilename}.${ext}`;
@@ -91,11 +94,8 @@ const uploadFile = async ({
         fileData.filename = fsSafeName || (!overwriteExistingFiles ? await getSafeFileName(Model, staticPath, file.name) : file.name);
         fileData.filesize = fileSize || file.size;
         fileData.mimeType = mime || (await fromBuffer(file.data)).mime;
-        const dimensions = await getImageSize(file);
-        fileData.width = dimensions.width;
-        fileData.height = dimensions.height;
 
-        if (Array.isArray(imageSizes) && file.mimetype !== 'image/svg+xml') {
+        if (Array.isArray(imageSizes) && shouldResize) {
           req.payloadUploadSizes = {};
           fileData.sizes = await resizeAndSave({
             req,
