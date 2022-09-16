@@ -1,3 +1,11 @@
+## [1.1.3](https://github.com/payloadcms/payload/compare/v1.1.2...v1.1.3) (2022-09-16)
+
+
+### Bug Fixes
+
+* adjust prevPage and nextPage graphql typing ([#1140](https://github.com/payloadcms/payload/issues/1140)) ([b3bb421](https://github.com/payloadcms/payload/commit/b3bb421c6ca4176974488b3270384386a151560c))
+* duplicate with relationships ([eabb981](https://github.com/payloadcms/payload/commit/eabb981243e005facb5fff6d9222903d4704ca55))
+
 ## [1.1.2](https://github.com/payloadcms/payload/compare/v1.1.1...v1.1.2) (2022-09-14)
 
 
