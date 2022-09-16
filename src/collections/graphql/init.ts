@@ -119,7 +119,7 @@ function initCollectionsGraphQL(payload: Payload): void {
       singularLabel,
     );
 
-    if (collection.config.auth) {
+    if (collection.config.auth && !collection.config.auth.disableLocalStrategy) {
       fields.push({
         name: 'password',
         label: 'Password',
@@ -274,21 +274,23 @@ function initCollectionsGraphQL(payload: Payload): void {
     }
 
     if (collection.config.auth) {
+      const authFields: Field[] = collection.config.auth.disableLocalStrategy ? [] : [{
+        name: 'email',
+        type: 'email',
+        required: true,
+      }]
       collection.graphQL.JWT = buildObjectType({
         payload,
         name: formatName(`${slug}JWT`),
-        fields: collection.config.fields.filter((field) => fieldAffectsData(field) && field.saveToJWT).concat([
-          {
-            name: 'email',
-            type: 'email',
-            required: true,
-          },
+        fields: [
+          ...collection.config.fields.filter((field) => fieldAffectsData(field) && field.saveToJWT), 
+          ...authFields,
           {
             name: 'collection',
             type: 'text',
             required: true,
-          },
-        ]),
+          }
+        ],
         parentName: formatName(`${slug}JWT`),
       });
 
