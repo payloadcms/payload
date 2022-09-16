@@ -14,8 +14,8 @@ const buildPaginatedListType = (name, docType) => new GraphQLObjectType({
     pagingCounter: { type: GraphQLInt },
     hasPrevPage: { type: GraphQLBoolean },
     hasNextPage: { type: GraphQLBoolean },
-    prevPage: { type: GraphQLBoolean },
-    nextPage: { type: GraphQLBoolean },
+    prevPage: { type: GraphQLInt },
+    nextPage: { type: GraphQLInt },
   },
 });
 
