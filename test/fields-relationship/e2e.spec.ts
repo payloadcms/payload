@@ -169,6 +169,16 @@ describe('fields - relationship', () => {
     await saveDocAndAssert(page);
   });
 
+  test('should duplicate document with relationships', async () => {
+    await page.goto(url.edit(docWithExistingRelations.id));
+
+    await page.locator('.btn.duplicate').first().click();
+    await expect(page.locator('.Toastify')).toContainText('successfully');
+    const field = page.locator('#field-relationship .rs__value-container');
+
+    await expect(field).toHaveText(relationOneDoc.id);
+  });
+
   describe('existing relationships', () => {
     test('should highlight existing relationship', async () => {
       await page.goto(url.edit(docWithExistingRelations.id));
