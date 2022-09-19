@@ -1,6 +1,9 @@
 import { APIError } from 'payload/errors';
+import Stripe from 'stripe';
 import type { CollectionBeforeValidateHook } from 'payload/types';
-import { stripeProxy } from '../../../../../src/utilities/stripeProxy';
+
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripe = new Stripe(stripeSecretKey, { apiVersion: '2022-08-01' });
 
 export const syncNewCustomer: CollectionBeforeValidateHook = async ({ req, operation, data }) => {
   const {
@@ -33,22 +36,12 @@ export const syncNewCustomer: CollectionBeforeValidateHook = async ({ req, opera
     } else {
       // Send this new customer to Stripe
       try {
-        const customer = await stripeProxy({
-          stripeSecretKey: process.env.STRIPE_SECRET_KEY,
-          stripeMethod: 'customers.create',
-          stripeArgs: [{
-            email: data.email,
-            name: `${data.firstName || ''} ${data.lastName || ''}`,
-          }]
+        const customer = await stripe.customers.create({
+          email: data.email,
+          name: `${data.firstName || ''} ${data.lastName || ''}`,
         });
 
-        if (customer.status === 200) {
-          dataRef.stripeCustomerID = customer.data.id;
-        }
-
-        if (customer.status >= 400) {
-          throw new Error(customer.message);
-        }
+        dataRef.stripeCustomerID = customer.id;
       } catch (error) {
         throw new APIError(error.message);
       }

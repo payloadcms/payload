@@ -1,10 +1,11 @@
 import { buildConfig } from 'payload/config';
 import path from 'path';
-// import stripe from '../../dist';
-import stripe from '../../src';
+import stripePlugin from '../../src';
 import Users from './collections/Users';
 import Customers from './collections/Customers';
 import { handleUpdatedSubscription } from './webhooks/handleUpdatedSubscription';
+
+const mockModulePath = path.resolve(__dirname, 'mocks/serverModule.js');
 
 export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
@@ -18,6 +19,10 @@ export default buildConfig({
           alias: {
             ...config.resolve.alias,
             "payload": path.join(__dirname, "../node_modules/payload"),
+            [path.resolve(__dirname, 'stripe/syncNewCustomer')]: mockModulePath,
+            [path.resolve(__dirname, 'stripe/updateExistingCustomer')]: mockModulePath,
+            [path.resolve(__dirname, '../../src/routes/rest')]: mockModulePath,
+            [path.resolve(__dirname, '../../src/routes/webhooks')]: mockModulePath,
           },
         },
       };
@@ -39,7 +44,7 @@ export default buildConfig({
     fallback: true,
   },
   plugins: [
-    stripe({
+    stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
       stripeWebhookEndpointSecret: process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET,
       webhooks: {

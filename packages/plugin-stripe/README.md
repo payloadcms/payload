@@ -24,11 +24,11 @@ In the `plugins` array of your [Payload config](https://payloadcms.com/docs/conf
 
 ```js
 import { buildConfig } from 'payload/config';
-import stripe from '@payloadcms/plugin-stripe';
+import stripePlugin from '@payloadcms/plugin-stripe';
 
 const config = buildConfig({
   plugins: [
-    stripe({
+    stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
     })
   ]
@@ -98,11 +98,11 @@ Production:
 
 ```js
 import { buildConfig } from 'payload/config';
-import stripe from '@payloadcms/plugin-stripe';
+import stripePlugin from '@payloadcms/plugin-stripe';
 
 const config = buildConfig({
   plugins: [
-    stripe({
+    stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
       stripeWebhookEndpointSecret: process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET,
       webhooks: {

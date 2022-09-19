@@ -1,6 +1,6 @@
 import { CollectionConfig } from 'payload/types';
-import { syncNewCustomer } from './stripe/syncNewCustomer';
-import { updateExistingCustomer } from './stripe/updateExistingCustomer';
+import { syncNewCustomer } from '../../stripe/syncNewCustomer';
+import { updateExistingCustomer } from '../../stripe/updateExistingCustomer';
 
 const Customers: CollectionConfig = {
   slug: 'customers',
