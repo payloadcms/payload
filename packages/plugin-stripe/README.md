@@ -84,10 +84,15 @@ One core functionality of this plugin is to enable a two-way communication chann
 
 ### Webhooks
 
-[Stripe webhooks](https://stripe.com/docs/webhooks) are used to sync from Stripe to Payload. Webhooks listen for events on your Stripe account so you can trigger reactions to them. To enable webhooks:
+[Stripe webhooks](https://stripe.com/docs/webhooks) are used to sync from Stripe to Payload. Webhooks listen for events on your Stripe account so you can trigger reactions to them. Follow the steps below to enable webhooks.
 
+Development:
+1. Login using Stripe cli `stripe login`
+1. Forward events to localhost `stripe listen --forward-to localhost:3000/api/stripe/webhooks`
+
+Production:
 1. Login and [create a new webhook](https://dashboard.stripe.com/test/webhooks/create) from the Stripe dashboard
-1. Paste `/api/stripe/webhooks` as the "Webhook Endpoint URL"
+1. Paste `YOUR_DOMAIN_NAME/api/stripe/webhooks` as the "Webhook Endpoint URL"
 1. Select which events to broadcast
 1. Then, handle these events using the `webhooks` portion of this plugin's config:
 
@@ -99,7 +104,7 @@ const config = buildConfig({
   plugins: [
     stripe({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
-      stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
+      stripeWebhookEndpointSecret: process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET,
       webhooks: {
         'customer.subscription.updated': () => {}
       }
