@@ -44,7 +44,7 @@ export default buildConfig({
   plugins: [
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
-      stripeWebhookEndpointSecret: process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET,
+      stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
       webhooks: {
         'customer.subscription.updated': handleUpdatedSubscription
       },

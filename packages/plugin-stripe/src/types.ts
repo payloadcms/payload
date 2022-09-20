@@ -4,7 +4,7 @@ export type StripeWebhookHandler = (event: any, stripe: Stripe, stripeConfig: St
 
 export type StripeConfig = {
   stripeSecretKey: string
-  stripeWebhookEndpointSecret?: string
+  stripeWebhooksEndpointSecret?: string
   webhooks?: {
     [webhookName: string]: StripeWebhookHandler
   }

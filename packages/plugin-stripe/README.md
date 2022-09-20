@@ -43,7 +43,7 @@ export default config;
 
   Required. Your Stripe secret key.
 
-- `stripeWebhookEndpointSecret`
+- `stripeWebhooksEndpointSecret`
 
   Optional. Your Stripe webhook endpoint secret. This is needed only if you wish to sync data from Stripe to Payload.
 
@@ -104,7 +104,7 @@ const config = buildConfig({
   plugins: [
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
-      stripeWebhookEndpointSecret: process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET,
+      stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
       webhooks: {
         'customer.subscription.updated': () => {}
       }

@@ -11,11 +11,11 @@ export const stripeWebhooks = (
 ) => {
   const {
     stripeSecretKey,
-    stripeWebhookEndpointSecret,
+    stripeWebhooksEndpointSecret,
     webhooks
   } = stripeConfig;
 
-  if (webhooks && stripeWebhookEndpointSecret) {
+  if (webhooks && stripeWebhooksEndpointSecret) {
     const stripe = new Stripe(stripeSecretKey, { apiVersion: '2022-08-01' });
 
     const stripeSignature = req.headers['stripe-signature'];
@@ -24,7 +24,7 @@ export const stripeWebhooks = (
       let event: Stripe.Event | undefined;
 
       try {
-        event = stripe.webhooks.constructEvent(req.body, stripeSignature, stripeWebhookEndpointSecret);
+        event = stripe.webhooks.constructEvent(req.body, stripeSignature, stripeWebhooksEndpointSecret);
       } catch (err: any) {
         res.status(400).send(`Webhook Error: ${err.message}`);
       }
