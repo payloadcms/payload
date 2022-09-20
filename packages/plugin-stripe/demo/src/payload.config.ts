@@ -21,8 +21,6 @@ export default buildConfig({
             "payload": path.join(__dirname, "../node_modules/payload"),
             [path.resolve(__dirname, 'stripe/syncNewCustomer')]: mockModulePath,
             [path.resolve(__dirname, 'stripe/updateExistingCustomer')]: mockModulePath,
-            [path.resolve(__dirname, '../../src/routes/rest')]: mockModulePath,
-            [path.resolve(__dirname, '../../src/routes/webhooks')]: mockModulePath,
           },
         },
       };

@@ -2,10 +2,15 @@ import { Config } from 'payload/config';
 import { stripeREST } from './routes/rest';
 import { stripeWebhooks } from './routes/webhooks';
 import { StripeConfig } from './types';
+import { extendWebpackConfig } from './extendWebpackConfig';
 
-const stripe = (stripeConfig: StripeConfig) => (config: Config): Config => {
+const stripePlugin = (stripeConfig: StripeConfig) => (config: Config): Config => {
   return ({
     ...config,
+    admin: {
+      ...config.admin,
+      webpack: extendWebpackConfig(config),
+    },
     endpoints: [
       ...config?.endpoints || [],
       {
@@ -26,4 +31,4 @@ const stripe = (stripeConfig: StripeConfig) => (config: Config): Config => {
   })
 };
 
-export default stripe;
+export default stripePlugin;
