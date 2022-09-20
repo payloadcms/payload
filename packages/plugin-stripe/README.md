@@ -119,7 +119,28 @@ For a full list of available webhooks, see [here](https://stripe.com/docs/cli/tr
 
 ### Node
 
-You can also proxy the Stripe API server-side using the `stripeProxy` function exported by the plugin. This is exactly what the `/api/stripe/rest` endpoint does behind-the-scenes. Here's an example:
+On the server you should interface with Stripe directly using the [stripe](https://www.npmjs.com/package/stripe) npm module. That might look something like this:
+
+```js
+import Stripe from 'stripe';
+
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripe = new Stripe(stripeSecretKey, { apiVersion: '2022-08-01' });
+
+export const MyFunction = async () => {
+  try {
+    const customer = await stripe.customers.create({
+      email: data.email,
+    });
+
+    // DO SOMETHING
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+```
+
+Alternatively, you can interface with the Stripe using the `stripeProxy`, which is exactly what the `/api/stripe/rest` endpoint does behind-the-scenes. Here's the same example as above, but piped through the proxy:
 
 ```js
 import { stripeProxy } from '@payloadcms/plugin-stripe';
