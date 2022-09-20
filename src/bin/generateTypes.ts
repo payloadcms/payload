@@ -131,33 +131,50 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
             if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
                 fieldSchema = {
-                  type: 'array',
-                  items: {
-                    oneOf: field.relationTo.map((relation) => {
-                      const idFieldType = getCollectionIDType(config.collections, relation);
+                  oneOf: [
+                    {
+                      type: 'array',
+                      items: {
+                        oneOf: field.relationTo.map((relation) => {
+                          const idFieldType = getCollectionIDType(config.collections, relation);
 
-                      return {
-                        type: 'object',
-                        additionalProperties: false,
-                        properties: {
-                          value: {
-                            oneOf: [
-                              {
+                          return {
+                            type: 'object',
+                            additionalProperties: false,
+                            properties: {
+                              value: {
                                 type: idFieldType,
                               },
-                              {
+                              relationTo: {
+                                const: relation,
+                              },
+                            },
+                            required: ['value', 'relationTo'],
+                          };
+                        }),
+                      },
+                    },
+                    {
+                      type: 'array',
+                      items: {
+                        oneOf: field.relationTo.map((relation) => {
+                          return {
+                            type: 'object',
+                            additionalProperties: false,
+                            properties: {
+                              value: {
                                 $ref: `#/definitions/${relation}`,
                               },
-                            ],
-                          },
-                          relationTo: {
-                            const: relation,
-                          },
-                        },
-                        required: ['value', 'relationTo'],
-                      };
-                    }),
-                  },
+                              relationTo: {
+                                const: relation,
+                              },
+                            },
+                            required: ['value', 'relationTo'],
+                          };
+                        }),
+                      },
+                    },
+                  ],
                 };
               } else {
                 fieldSchema = {
@@ -192,17 +209,20 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
 
               if (field.hasMany) {
                 fieldSchema = {
-                  type: 'array',
-                  items: {
-                    oneOf: [
-                      {
+                  oneOf: [
+                    {
+                      type: 'array',
+                      items: {
                         type: idFieldType,
                       },
-                      {
+                    },
+                    {
+                      type: 'array',
+                      items: {
                         $ref: `#/definitions/${field.relationTo}`,
                       },
-                    ],
-                  },
+                    },
+                  ],
                 };
               } else {
                 fieldSchema = {
