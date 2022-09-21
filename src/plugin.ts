@@ -39,6 +39,7 @@ export const cloudStorage =
           const fields = getFields({
             collection: existingCollection,
             disablePayloadAccessControl: options.disablePayloadAccessControl,
+            generateFileURL: options.generateFileURL,
             prefix: options.prefix,
             adapter,
           })

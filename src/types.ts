@@ -1,6 +1,6 @@
 import type { NextFunction, Response } from 'express'
 import type { TypeWithID } from 'payload/dist/collections/config/types'
-import type { FileData } from 'payload/dist/uploads/types'
+import type { FileData, ImageSize } from 'payload/dist/uploads/types'
 import type { CollectionConfig, PayloadRequest } from 'payload/types'
 import type { Configuration as WebpackConfig } from 'webpack'
 
@@ -50,9 +50,17 @@ export interface GeneratedAdapter {
 
 export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) => GeneratedAdapter
 
+export type GenerateFileURL = (args: {
+  collection: CollectionConfig
+  filename: string
+  prefix?: string
+  size?: ImageSize
+}) => Promise<string> | string
+
 export interface CollectionOptions {
   disableLocalStorage?: boolean
   disablePayloadAccessControl?: true
+  generateFileURL?: GenerateFileURL
   prefix?: string
   adapter: Adapter | null
 }
