@@ -30,10 +30,16 @@ export const stripeWebhooks = (
       }
 
       if (event) {
-        const webhookEventHandler = webhooks[event.type];
-        if (typeof webhookEventHandler === 'function') {
-          webhookEventHandler(event, stripe, stripeConfig)
-        };
+        if (typeof webhooks === 'function') {
+          webhooks(event, stripe, stripeConfig);
+        }
+
+        if (typeof webhooks === 'object') {
+          const webhookEventHandler = webhooks[event.type];
+          if (typeof webhookEventHandler === 'function') {
+            webhookEventHandler(event, stripe, stripeConfig)
+          };
+        }
       }
     }
   }

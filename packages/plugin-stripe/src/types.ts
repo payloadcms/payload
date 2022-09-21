@@ -2,12 +2,14 @@ import Stripe from "stripe"
 
 export type StripeWebhookHandler = (event: any, stripe: Stripe, stripeConfig: StripeConfig) => void;
 
+export type StripeWebhookHandlers = {
+  [webhookName: string]: StripeWebhookHandler
+}
+
 export type StripeConfig = {
   stripeSecretKey: string
   stripeWebhooksEndpointSecret?: string
-  webhooks?: {
-    [webhookName: string]: StripeWebhookHandler
-  }
+  webhooks?: StripeWebhookHandler | StripeWebhookHandlers
 }
 
 export type StripeProxy = (args: {

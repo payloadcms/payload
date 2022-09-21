@@ -49,7 +49,7 @@ export default config;
 
 - `webhooks`
 
-  Optional. An object of Stripe webhook handlers, keyed to the name of the event. See [webhooks](#webhooks) for more details or for a list of all available webhooks, see [here](https://stripe.com/docs/cli/trigger#trigger-event).
+  Optional. Either a function to handle all webhooks events, or an object of Stripe webhook handlers, keyed to the name of the event. See [webhooks](#webhooks) for more details or for a list of all available webhooks, see [here](https://stripe.com/docs/cli/trigger#trigger-event).
 
 ### Endpoints
 
@@ -106,8 +106,22 @@ const config = buildConfig({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
       webhooks: {
-        'customer.subscription.updated': () => {}
+        'customer.subscription.updated': (event, stripe, stripeConfig) => {
+          // DO SOMETHING
+        }
       }
+      // NOTE: you can also catch all Stripe webhook events and handle the event types yourself
+      // webhooks: (event, stripe, stripeConfig) => {
+      //   switch (event.type): {
+      //     case 'customer.subscription.updated': {
+      //       // DO SOMETHING
+      //       break;
+      //     }
+      //     default: {
+      //       break;
+      //     }
+      //   }
+      // }
     })
   ]
 });
