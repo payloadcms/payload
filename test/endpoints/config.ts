@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import express, { Response } from 'express';
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
 import { openAccess } from '../helpers/configHelpers';
@@ -91,8 +91,19 @@ const MyConfig: Config = {
       method: 'get',
       root: true,
       handler: (req: PayloadRequest, res: Response): void => {
-        res.json({ message: 'Root.' });
+        res.json({ message: 'Hello, world!' });
       },
+    },
+    {
+      path: `/${rootEndpoint}`,
+      method: 'post',
+      root: true,
+      handler: [
+        express.json({ type: 'application/json' }),
+        (req: PayloadRequest, res: Response): void => {
+          res.json(req.body);
+        }
+      ],
     },
   ],
   onInit: async (payload) => {
