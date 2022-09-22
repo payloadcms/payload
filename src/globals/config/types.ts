@@ -56,7 +56,7 @@ export type GlobalConfig = {
     beforeRead?: BeforeReadHook[]
     afterRead?: AfterReadHook[]
   }
-  endpoints?: Endpoint[],
+  endpoints?: Omit<Endpoint, 'root'>[],
   access?: {
     read?: Access;
     readDrafts?: Access;

@@ -226,7 +226,7 @@ export type CollectionConfig = {
   /**
    * Custom rest api endpoints
    */
-  endpoints?: Endpoint[]
+  endpoints?: Omit<Endpoint, 'root'>[]
   /**
    * Access control
    */

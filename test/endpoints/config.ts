@@ -3,14 +3,16 @@ import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
 import { openAccess } from '../helpers/configHelpers';
 import { PayloadRequest } from '../../src/express/types';
+import { Config } from '../../src/config/types';
 
 export const collectionSlug = 'endpoints';
 export const globalSlug = 'global-endpoints';
 
 export const globalEndpoint = 'global';
 export const applicationEndpoint = 'path';
+export const rootEndpoint = 'root';
 
-export default buildConfig({
+const MyConfig: Config = {
   collections: [
     {
       slug: collectionSlug,
@@ -77,6 +79,21 @@ export default buildConfig({
         res.json(req.body);
       },
     },
+    {
+      path: `/${applicationEndpoint}`,
+      method: 'get',
+      handler: (req: PayloadRequest, res: Response): void => {
+        res.json({ message: 'Hello, world!' });
+      },
+    },
+    {
+      path: `/${rootEndpoint}`,
+      method: 'get',
+      root: true,
+      handler: (req: PayloadRequest, res: Response): void => {
+        res.json({ message: 'Root.' });
+      },
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -87,4 +104,6 @@ export default buildConfig({
       },
     });
   },
-});
+}
+
+export default buildConfig(MyConfig);
