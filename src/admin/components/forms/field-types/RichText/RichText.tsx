@@ -70,6 +70,7 @@ const RichText: React.FC<Props> = (props) => {
   const [enabledLeaves, setEnabledLeaves] = useState({});
   const [initialValueKey, setInitialValueKey] = useState('');
   const editorRef = useRef(null);
+  const toolbarRef = useRef(null);
 
   const renderElement = useCallback(({ attributes, children, element }) => {
     const matchedElement = enabledElements[element?.type];
@@ -176,6 +177,17 @@ const RichText: React.FC<Props> = (props) => {
     setInitialValueKey(JSON.stringify(initialValue || ''));
   }, [initialValue]);
 
+  useEffect(() => {
+    if (loaded && readOnly) {
+      // disable interactions on all editor elements when read only
+      Array.from(editorRef.current.children).forEach((child) => {
+        const childAsElement = child as HTMLElement;
+        childAsElement.tabIndex = -1;
+        childAsElement.style.pointerEvents = 'none';
+      });
+    }
+  }, [loaded, readOnly]);
+
   if (!loaded) {
     return null;
   }
@@ -215,14 +227,14 @@ const RichText: React.FC<Props> = (props) => {
           editor={editor}
           value={valueToRender as any[]}
           onChange={(val) => {
-            if (val !== defaultValue && val !== value) {
+            if (!readOnly && val !== defaultValue && val !== value) {
               setValue(val);
             }
           }}
         >
           <div className={`${baseClass}__wrapper`}>
-            <div className={`${baseClass}__toolbar`}>
-              <div className={`${baseClass}__toolbar-wrap`}>
+            <div className={`${baseClass}__toolbar`} ref={toolbarRef}>
+              <div className={`${baseClass}__toolbar-wrap`} tabIndex={readOnly ? -1 : undefined}>
                 {elements.map((element, i) => {
                   let elementName: string;
                   if (typeof element === 'object' && element?.name) elementName = element.name;

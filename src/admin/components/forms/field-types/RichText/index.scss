@@ -3,6 +3,7 @@
 .rich-text {
   margin-bottom: base(2);
   display: flex;
+  isolation: isolate;
 
   &__toolbar {
     @include blur-bg(var(--theme-elevation-0));
@@ -103,6 +104,25 @@
     .rich-text__editor {
       background-color: var(--theme-elevation-150);
       padding: base(.5);
+    }
+
+    .rich-text__toolbar {
+      pointer-events: none;
+      position: relative;
+      top: 0;
+
+      &::after {
+        content: ' ';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--theme-elevation-150);
+        opacity: .85;
+        z-index: 2;
+        backdrop-filter: unset;
+      }
     }
   }
 

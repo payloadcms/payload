@@ -92,6 +92,7 @@ export default buildConfig({
 
     const richTextUploadIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'upload');
     richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdUploadDoc.id };
+    richTextDocWithRelationship.richTextReadOnly[richTextUploadIndex].value = { id: createdUploadDoc.id };
 
     await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship });
 
