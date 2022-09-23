@@ -169,7 +169,7 @@
     "react-sortable-hoc": "^2.0.0",
     "react-toastify": "^8.2.0",
     "sanitize-filename": "^1.6.3",
-    "sass": "^1.52.1",
+    "sass": "^1.55.0",
     "sass-loader": "^12.6.0",
     "sharp": "^0.29.3",
     "slate": "^0.72.8",
