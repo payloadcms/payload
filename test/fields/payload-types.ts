@@ -16,6 +16,10 @@ export interface ArrayField {
     text: string;
     id?: string;
   }[];
+  collapsedArray: {
+    text: string;
+    id?: string;
+  }[];
   localized: {
     text: string;
     id?: string;
@@ -38,6 +42,49 @@ export interface ArrayField {
 export interface BlockField {
   id: string;
   blocks: (
+    | {
+        text: string;
+        richText?: {
+          [k: string]: unknown;
+        }[];
+        id?: string;
+        blockName?: string;
+        blockType: 'text';
+      }
+    | {
+        number: number;
+        id?: string;
+        blockName?: string;
+        blockType: 'number';
+      }
+    | {
+        subBlocks: (
+          | {
+              text: string;
+              id?: string;
+              blockName?: string;
+              blockType: 'text';
+            }
+          | {
+              number: number;
+              id?: string;
+              blockName?: string;
+              blockType: 'number';
+            }
+        )[];
+        id?: string;
+        blockName?: string;
+        blockType: 'subBlocks';
+      }
+    | {
+        textInCollapsible?: string;
+        textInRow?: string;
+        id?: string;
+        blockName?: string;
+        blockType: 'tabs';
+      }
+  )[];
+  collapsedByDefaultBlocks: (
     | {
         text: string;
         richText?: {
@@ -153,6 +200,7 @@ export interface CollapsibleField {
       textWithinSubGroup?: string;
     };
   };
+  someText?: string;
   createdAt: string;
   updatedAt: string;
 }
