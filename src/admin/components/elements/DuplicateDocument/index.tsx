@@ -32,9 +32,11 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
       return;
     }
 
-    const create = async (locale?: string): Promise<string | null> => {
-      const localeParam = locale ? `locale=${locale}` : '';
-      const response = await requests.get(`${serverURL}${api}/${slug}/${id}?${localeParam}`);
+    const create = async (locale = ''): Promise<string | null> => {
+      const response = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
+        locale,
+        depth: 0,
+      });
       const data = await response.json();
       const result = await requests.post(`${serverURL}${api}/${slug}`, {
         headers: {
@@ -59,7 +61,10 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         .filter((locale) => locale !== localization.defaultLocale)
         .forEach(async (locale) => {
           if (!abort) {
-            const res = await requests.get(`${serverURL}${api}/${slug}/${id}?locale=${locale}`);
+            const res = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
+              locale,
+              depth: 0,
+            });
             const localizedDoc = await res.json();
             const patchResult = await requests.patch(`${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`, {
               headers: {

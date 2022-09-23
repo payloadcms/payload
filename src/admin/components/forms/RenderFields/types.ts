@@ -6,7 +6,7 @@ export type Props = {
   className?: string
   readOnly?: boolean
   forceRender?: boolean
-  permissions?: {
+  permissions?: FieldPermissions | {
     [field: string]: FieldPermissions
   }
   filter?: (field: Field) => boolean

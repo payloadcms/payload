@@ -1,12 +1,12 @@
-import fs from 'fs';
-import sharp from 'sharp';
-import sanitize from 'sanitize-filename';
 import { fromBuffer } from 'file-type';
-import { ProbedImageSize } from './getImageSize';
-import fileExists from './fileExists';
+import fs from 'fs';
+import sanitize from 'sanitize-filename';
+import sharp from 'sharp';
 import { SanitizedCollectionConfig } from '../collections/config/types';
-import { FileSizes, ImageSize } from './types';
 import { PayloadRequest } from '../express/types';
+import fileExists from './fileExists';
+import { ProbedImageSize } from './getImageSize';
+import { FileSizes, ImageSize } from './types';
 
 type Args = {
   req: PayloadRequest
@@ -50,7 +50,7 @@ export default async function resizeAndSave({
   const sizes = imageSizes
     .filter((desiredSize) => needsResize(desiredSize, dimensions))
     .map(async (desiredSize) => {
-      let resized = await sharp(file).resize(desiredSize);
+      let resized = sharp(file).resize(desiredSize);
 
       if (desiredSize.formatOptions) {
         resized = resized.toFormat(desiredSize.formatOptions.format, desiredSize.formatOptions.options);

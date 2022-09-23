@@ -88,7 +88,7 @@ const RenderFields: React.FC<Props> = (props) => {
                         DefaultComponent={FieldComponent}
                         componentProps={{
                           ...field,
-                          path: field.path || (isFieldAffectingData ? field.name : undefined),
+                          path: field.path || (isFieldAffectingData ? field.name : ''),
                           fieldTypes,
                           admin: {
                             ...(field.admin || {}),

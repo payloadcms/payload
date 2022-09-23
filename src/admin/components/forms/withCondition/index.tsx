@@ -28,7 +28,7 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
       path?: string
     };
 
-    const path = pathFromProps || name;
+    const path = typeof pathFromProps === 'string' ? pathFromProps : name;
 
     const { getData, getSiblingData, getField, dispatchFields } = useWatchForm();
 

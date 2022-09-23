@@ -48,7 +48,7 @@ export default function initGlobals(ctx: Payload): void {
         const { slug } = global;
 
         const endpoints = buildEndpoints(global);
-        mountEndpoints(router, endpoints);
+        mountEndpoints(ctx.express, router, endpoints);
 
         ctx.router.use(`/globals/${slug}`, router);
       });

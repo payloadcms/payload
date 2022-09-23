@@ -8,6 +8,7 @@ const component = joi.alternatives().try(
 export const endpointsSchema = joi.array().items(joi.object({
   path: joi.string(),
   method: joi.string().valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
+  root: joi.bool(),
   handler: joi.alternatives().try(
     joi.array().items(joi.func()),
     joi.func(),

@@ -79,16 +79,19 @@ export type AccessResult = boolean | Where;
  */
 export type Access = (args?: any) => AccessResult | Promise<AccessResult>;
 
-export interface PayloadHandler {(
+export interface PayloadHandler {
+  (
     req: PayloadRequest,
     res: Response,
     next: NextFunction,
-  ): void }
+  ): void
+}
 
 export type Endpoint = {
   path: string
   method: 'get' | 'head' | 'post' | 'put' | 'patch' | 'delete' | 'connect' | 'options' | string
   handler: PayloadHandler | PayloadHandler[]
+  root?: boolean
 }
 
 export type AdminView = React.ComponentType<{ user: User, canAccessAdmin: boolean }>

@@ -1,9 +1,13 @@
-import { Router } from 'express';
+import { Express, Router } from 'express';
 import { Endpoint } from '../config/types';
 
-function mountEndpoints(router: Router, endpoints: Endpoint[]): void {
+function mountEndpoints(express: Express, router: Router, endpoints: Endpoint[]): void {
   endpoints.forEach((endpoint) => {
-    router[endpoint.method](endpoint.path, endpoint.handler);
+    if (!endpoint.root) {
+      router[endpoint.method](endpoint.path, endpoint.handler);
+    } else {
+      express[endpoint.method](endpoint.path, endpoint.handler);
+    }
   });
 }
 

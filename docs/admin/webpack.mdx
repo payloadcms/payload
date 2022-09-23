@@ -155,6 +155,11 @@ export default {};
 
 Now, when Webpack sees that you're attempting to import your `createStripeSubscriptionPath` file, it'll disregard that actual file and load your mock file instead. Not only will your Admin panel now bundle successfully, you will have optimized its filesize by removing unnecessary code! And you might have learned something about Webpack, too.
 
+<Banner type="success">
+	<strong>Tip:</strong><br/>
+	If changes to your Webpack aliases are not surfacing, they might be [cached](https://webpack.js.org/configuration/cache/) in `node_modules/.cache/webpack`. Try deleting that folder and restarting your server.
+</Banner>
+
 ## Admin environment vars
 
 <Banner type="warning">
