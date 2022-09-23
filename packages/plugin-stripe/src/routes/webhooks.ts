@@ -38,13 +38,13 @@ export const stripeWebhooks = (
 
       if (event) {
         if (typeof webhooks === 'function') {
-          webhooks(event, stripe, stripeConfig);
+          webhooks(req.payload, event, stripe, stripeConfig);
         }
 
         if (typeof webhooks === 'object') {
           const webhookEventHandler = webhooks[event.type];
           if (typeof webhookEventHandler === 'function') {
-            webhookEventHandler(event, stripe, stripeConfig)
+            webhookEventHandler(req.payload, event, stripe, stripeConfig)
           };
         }
       }

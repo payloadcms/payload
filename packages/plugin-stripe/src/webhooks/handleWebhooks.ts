@@ -1,8 +1,7 @@
-import payload from 'payload';
 import Stripe from 'stripe';
-import { StripeWebhookHandler } from '../../../src/types';
+import { StripeWebhookHandler } from '../types';
 
-export const handleWebhooks: StripeWebhookHandler = async (event) => {
+export const handleWebhooks: StripeWebhookHandler = async (payload, event) => {
   console.log(`Processing Stripe '${event.type}' webhook event with ID: '${event.id}'`);
 
   switch (event.type) {

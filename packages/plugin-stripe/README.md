@@ -10,6 +10,7 @@ Core features:
   - Enables a two-way communication channel between Stripe and Payload
     - Proxies the [Stripe REST API](https://stripe.com/docs/api)
     - Proxies [Stripe webhooks](https://stripe.com/docs/webhooks)
+  - Enable your Payload instance to function as a SaaS platform
 
 ## Installation
 
@@ -43,6 +44,10 @@ export default config;
 - `stripeSecretKey`
 
   Required. Your Stripe secret key.
+
+- `collections`
+
+  Optional. An array of collection slugs. Automatically creates a two-way sync between Payload and Stripe on create, delete, and update. It does this by attaching all the necessary collection-level hooks and webhook handlers. See [SaaS](#saas) for more details.
 
 - `stripeWebhooksEndpointSecret`
 
@@ -184,6 +189,21 @@ export const MyFunction = async () => {
   }
 }
 ```
+
+## SaaS
+
+One common use for this plugin is to configure Payload as a SaaS platform. Between custom hooks and webhooks handlers you have unlimited flexibility, but for many projects, this setup will be exactly the same: sync data between Payload and Stripe on create, delete, and update. To automatically set this up on any collection, use the `collections` option in your plugin config. This will do the following:
+
+- Maintains a `stripeCustomerID` read-only field on each collection which is a field generated _by Stripe_ and used as a reference
+- Maintains a `isSyncedToStripe` read-only flag on each collection to prevent infinite hooks when documents are updated via webhooks
+- Adds the following hooks to each collection:
+  - `beforeValidate`: `createNewStripeCustomer`
+  - `afterChange`: `syncExistingStripeCustomer`
+  - `afterDelete`: `deleteStripeCustomer`
+- Handles the following Stripe webhooks
+  - `customer.created`
+  - `customer.updated`
+  - `customer.deleted`
 
 ## TypeScript
 

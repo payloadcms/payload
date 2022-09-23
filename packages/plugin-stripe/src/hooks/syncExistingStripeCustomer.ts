@@ -2,7 +2,7 @@ import type { CollectionAfterChangeHook } from 'payload/types';
 import Stripe from 'stripe';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const stripe = new Stripe(stripeSecretKey, { apiVersion: '2022-08-01' });
+const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' });
 
 export const syncExistingStripeCustomer: CollectionAfterChangeHook = async ({ req, operation, doc }) => {
   const { payload } = req;
@@ -24,8 +24,8 @@ export const syncExistingStripeCustomer: CollectionAfterChangeHook = async ({ re
         doc.isSyncedToStripe = false;
 
         console.log(`Successfully updated customer ID: '${customer.id}' in Stripe.`);
-      } catch (error) {
-        payload.logger.error(error.message);
+      } catch (error: any) {
+        payload.logger.error(`Error updating customer ID: '${doc.stripeCustomerID}' in Stripe: ${error?.message || ''}`);
       }
     }
   }

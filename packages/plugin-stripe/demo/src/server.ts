@@ -2,7 +2,7 @@ import express from 'express';
 import payload from 'payload';
 // import authenticate 'payload/dist/express/middleware/authenticate';
 import Stripe from 'stripe';
-import { handleWebhooks } from './webhooks/handleWebhooks';
+import { handleWebhooks } from '../../src/webhooks/handleWebhooks';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2022-08-01',
@@ -38,7 +38,7 @@ app.post('/stripe/webhooks', [
 
     try {
       event = stripe.webhooks.constructEvent(req.body, stripeSignature, process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET);
-      await handleWebhooks(event, stripe);
+      await handleWebhooks(payload, event, stripe);
     } catch (err) {
       console.error(`Webhook Error: ${err.message}`);
       res.status(400);
