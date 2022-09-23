@@ -97,11 +97,51 @@ All Payload fields support the ability to swap in your own React components. So,
 
 **Fields support the following custom components:**
 
-| Component       | Description  |
-| --------------- | -------------|
-| **`Filter`**    | Override the text input that is presented in the `List` view when a user is filtering documents by the customized field. |
-| **`Cell`**      | Used in the `List` view's table to represent a table-based preview of the data stored in the field. |
-| **`Field`**     | Swap out the field itself within all `Edit` views. |
+| Component       | Description                                                                                                                  |
+| --------------- |------------------------------------------------------------------------------------------------------------------------------|
+| **`Filter`**    | Override the text input that is presented in the `List` view when a user is filtering documents by the customized field.     |
+| **`Cell`**      | Used in the `List` view's table to represent a table-based preview of the data stored in the field.  [More](#cell-component) |
+| **`Field`**     | Swap out the field itself within all `Edit` views. [More](#field-component)                                                  |
+
+## Cell Component
+
+These are the props that will be passed to your custom Cell to use in your own components.
+
+| Property     | Description                                                       |
+|--------------|-------------------------------------------------------------------|
+| **`field`** | An object that includes the field configuration.                  |
+| **`colIndex`** | A unique number for the column in the list.                       |
+| **`collection`** | An object with the config of the collection that the field is in. |
+| **`cellData`**   | The data for the field that the cell represents.                  |
+| **`rowData`**  | An object with all the field values for the row.                  |
+
+#### Example
+
+```tsx
+import React from 'react';
+import './index.scss';
+const baseClass = 'custom-cell';
+
+const CustomCell: React.FC<Props> = (props) => {
+  const {
+    field,
+    colIndex,
+    collection,
+    cellData,
+    rowData,
+  } = props;
+
+  return (
+    <span className={baseClass}>
+      { cellData }
+    </span>
+  );
+};
+```
+
+## Field Component
+
+When writing your own custom components you can make use of a number of hooks to set data, get reactive changes to other fields, get the id of the document or interact with a context from a custom provider.
 
 ### Sending and receiving values from the form
 
