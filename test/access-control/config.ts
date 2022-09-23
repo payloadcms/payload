@@ -25,7 +25,7 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
   return false;
 };
 
-export const requestHeaders = {authorization: 'Bearer testBearerToken'};
+export const requestHeaders = { authorization: 'Bearer testBearerToken' };
 const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
   return !!headers && headers.authorization === requestHeaders.authorization;
 };
@@ -46,6 +46,50 @@ export default buildConfig({
             read: () => false,
             update: () => false,
           },
+        },
+        {
+          type: 'group',
+          name: 'group',
+          fields: [
+            {
+              name: 'restrictedGroupText',
+              type: 'text',
+              access: {
+                read: () => false,
+                update: () => false,
+                create: () => false,
+              },
+            },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'restrictedRowText',
+              type: 'text',
+              access: {
+                read: () => false,
+                update: () => false,
+                create: () => false,
+              },
+            },
+          ],
+        },
+        {
+          type: 'collapsible',
+          label: 'Access',
+          fields: [
+            {
+              name: 'restrictedCollapsibleText',
+              type: 'text',
+              access: {
+                read: () => false,
+                update: () => false,
+                create: () => false,
+              },
+            },
+          ],
         },
       ],
     },
