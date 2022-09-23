@@ -15,10 +15,9 @@ export const getAfterReadHook =
   async ({ data, value }) => {
     const filename = size ? data?.sizes?.[size.name]?.filename : data?.filename
     const prefix = data?.prefix
-
     let url = value
 
-    if (disablePayloadAccessControl) {
+    if (disablePayloadAccessControl && filename) {
       url = await adapter.generateURL({
         collection,
         filename,
