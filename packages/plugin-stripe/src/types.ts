@@ -1,6 +1,6 @@
 import Stripe from "stripe"
 
-export type StripeWebhookHandler = (event: any, stripe: Stripe, stripeConfig: StripeConfig) => void;
+export type StripeWebhookHandler = (event: any, stripe: Stripe, stripeConfig?: StripeConfig) => void;
 
 export type StripeWebhookHandlers = {
   [webhookName: string]: StripeWebhookHandler

@@ -7,7 +7,13 @@ export const stripeProxy: StripeProxy = async ({
   stripeMethod,
   stripeArgs,
 }) => {
-  const stripe = new Stripe(stripeSecretKey, { apiVersion: '2022-08-01' });
+  const stripe = new Stripe(stripeSecretKey, {
+    apiVersion: '2022-08-01',
+    appInfo: {
+      name: 'Stripe Payload Plugin',
+      url: 'https://payloadcms.com',
+    }
+  });
 
   if (typeof stripeMethod === 'string') {
     const topLevelMethod = stripeMethod.split('.')[0] as keyof Stripe;

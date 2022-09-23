@@ -2,10 +2,11 @@
 
 [![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-stripe)](https://www.npmjs.com/package/@payloadcms/plugin-stripe)
 
-A plugin for [Payload CMS](https://github.com/payloadcms/payload) to manage [Stripe](https://stripe.com) through Payload.
+A plugin for [Payload CMS](https://github.com/payloadcms/payload) to connect [Stripe](https://stripe.com) and Payload.
 
 Core features:
-  - Layers your Stripe account behind [Payload access control](https://payloadcms.com/docs/access-control/overview)
+  - Hides your Stripe credentials when shipping SaaS applications
+  - Allows restricted keys through [Payload access control](https://payloadcms.com/docs/access-control/overview)
   - Enables a two-way communication channel between Stripe and Payload
     - Proxies the [Stripe REST API](https://stripe.com/docs/api)
     - Proxies [Stripe webhooks](https://stripe.com/docs/webhooks)
@@ -78,7 +79,7 @@ One core functionality of this plugin is to enable a two-way communication chann
     })
   ```
 
-- `POST /api/stripe/webhooks`
+- `POST /stripe/webhooks`
 
   Returns an http status code. This is where all Stripe webhook events are sent to be handled. See [webhooks](#webhooks).
 
@@ -88,12 +89,14 @@ One core functionality of this plugin is to enable a two-way communication chann
 
 Development:
 1. Login using Stripe cli `stripe login`
-1. Forward events to localhost `stripe listen --forward-to localhost:3000/api/stripe/webhooks`
+1. Forward events to localhost `stripe listen --forward-to localhost:3000/stripe/webhooks`
+1. Paste the given secret into your `.env` file as `STRIPE_WEBHOOKS_ENDPOINT_SECRET`
 
 Production:
 1. Login and [create a new webhook](https://dashboard.stripe.com/test/webhooks/create) from the Stripe dashboard
 1. Paste `YOUR_DOMAIN_NAME/api/stripe/webhooks` as the "Webhook Endpoint URL"
 1. Select which events to broadcast
+1. Paste the given secret into your `.env` file as `STRIPE_WEBHOOKS_ENDPOINT_SECRET`
 1. Then, handle these events using the `webhooks` portion of this plugin's config:
 
 ```js

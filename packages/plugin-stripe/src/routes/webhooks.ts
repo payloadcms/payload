@@ -13,10 +13,16 @@ export const stripeWebhooks = (
     stripeSecretKey,
     stripeWebhooksEndpointSecret,
     webhooks
-  } = stripeConfig;
+  } = stripeConfig
 
   if (webhooks && stripeWebhooksEndpointSecret) {
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2022-08-01' });
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: '2022-08-01',
+      appInfo: {
+        name: 'Stripe Payload Plugin',
+        url: 'https://payloadcms.com',
+      }
+    });
 
     const stripeSignature = req.headers['stripe-signature'];
 
@@ -26,7 +32,8 @@ export const stripeWebhooks = (
       try {
         event = stripe.webhooks.constructEvent(req.body, stripeSignature, stripeWebhooksEndpointSecret);
       } catch (err: any) {
-        res.status(400).send(`Webhook Error: ${err.message}`);
+        console.error(err?.message || 'Error constructing Stripe event');
+        res.status(400);
       }
 
       if (event) {

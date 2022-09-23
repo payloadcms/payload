@@ -3,7 +3,7 @@ import path from 'path';
 import stripePlugin from '../../src';
 import Users from './collections/Users';
 import Customers from './collections/Customers';
-import { handleUpdatedSubscription } from './webhooks/handleUpdatedSubscription';
+import { handleWebhooks } from './webhooks/handleWebhooks';
 
 const mockModulePath = path.resolve(__dirname, 'mocks/serverModule.js');
 
@@ -19,8 +19,10 @@ export default buildConfig({
           alias: {
             ...config.resolve.alias,
             "payload": path.join(__dirname, "../node_modules/payload"),
-            [path.resolve(__dirname, 'stripe/syncNewCustomer')]: mockModulePath,
-            [path.resolve(__dirname, 'stripe/updateExistingCustomer')]: mockModulePath,
+            "express": mockModulePath,
+            [path.resolve(__dirname, 'hooks/createNewStripeCustomer')]: mockModulePath,
+            [path.resolve(__dirname, 'hooks/syncExistingStripeCustomer')]: mockModulePath,
+            [path.resolve(__dirname, 'hooks/deleteStripeCustomer')]: mockModulePath,
           },
         },
       };
@@ -45,9 +47,7 @@ export default buildConfig({
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
-      webhooks: {
-        'customer.subscription.updated': handleUpdatedSubscription
-      },
+      webhooks: handleWebhooks
     }),
   ],
   typescript: {
