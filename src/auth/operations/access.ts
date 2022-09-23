@@ -1,6 +1,7 @@
 import { PayloadRequest } from '../../express/types';
 import { Permissions } from '../types';
 import { adminInit as adminInitTelemetry } from '../../utilities/telemetry/events/adminInit';
+import { tabHasName } from '../../fields/config/types';
 
 const allOperations = ['create', 'read', 'update', 'delete'];
 
@@ -66,7 +67,12 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
         executeFieldPolicies(updatedObj, field.fields, operation);
       } else if (field.type === 'tabs') {
         field.tabs.forEach((tab) => {
-          executeFieldPolicies(updatedObj, tab.fields, operation);
+          if (tabHasName(tab)) {
+            if (!updatedObj[tab.name]) updatedObj[tab.name] = { fields: {} };
+            executeFieldPolicies(updatedObj[tab.name].fields, tab.fields, operation);
+          } else {
+            executeFieldPolicies(updatedObj, tab.fields, operation);
+          }
         });
       }
     });

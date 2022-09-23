@@ -44,7 +44,31 @@ describe('access control', () => {
 
     await page.goto(url.edit(id));
 
-    await expect(page.locator('input[name="restrictedField"]')).toHaveCount(0);
+    await expect(page.locator('#field-restrictedField')).toHaveCount(0);
+  });
+
+  test('field without read access inside a group should not show', async () => {
+    const { id } = await createDoc({ restrictedField: 'restricted' });
+
+    await page.goto(url.edit(id));
+
+    await expect(page.locator('#field-group__restrictedGroupText')).toHaveCount(0);
+  });
+
+  test('field without read access inside a collapsible should not show', async () => {
+    const { id } = await createDoc({ restrictedField: 'restricted' });
+
+    await page.goto(url.edit(id));
+
+    await expect(page.locator('#field-restrictedRowText')).toHaveCount(0);
+  });
+
+  test('field without read access inside a row should not show', async () => {
+    const { id } = await createDoc({ restrictedField: 'restricted' });
+
+    await page.goto(url.edit(id));
+
+    await expect(page.locator('#field-restrictedCollapsibleText')).toHaveCount(0);
   });
 
   describe('restricted collection', () => {

@@ -75,7 +75,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
         <RenderFields
           forceRender
           readOnly={readOnly}
-          permissions={permissions?.fields}
+          permissions={permissions}
           fieldTypes={fieldTypes}
           fieldSchema={fields.map((field) => ({
             ...field,

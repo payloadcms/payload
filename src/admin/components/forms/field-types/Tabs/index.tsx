@@ -71,7 +71,7 @@ const TabsField: React.FC<Props> = (props) => {
                 key={String(activeTab.label)}
                 forceRender
                 readOnly={readOnly}
-                permissions={permissions?.fields}
+                permissions={tabHasName(activeTab) ? permissions[activeTab.name].fields : permissions}
                 fieldTypes={fieldTypes}
                 fieldSchema={activeTab.fields.map((field) => ({
                   ...field,
