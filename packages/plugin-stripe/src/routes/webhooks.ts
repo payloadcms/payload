@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import { PayloadRequest } from 'payload/dist/types';
 import { StripeConfig } from '../types';
 import { Response } from 'express';
+import { handleWebhooks } from '../webhooks/handleWebhooks';
 
 export const stripeWebhooks = (
   req: PayloadRequest,
@@ -15,7 +16,7 @@ export const stripeWebhooks = (
     webhooks
   } = stripeConfig
 
-  if (webhooks && stripeWebhooksEndpointSecret) {
+  if (stripeWebhooksEndpointSecret) {
     const stripe = new Stripe(stripeSecretKey, {
       apiVersion: '2022-08-01',
       appInfo: {
@@ -46,6 +47,10 @@ export const stripeWebhooks = (
           if (typeof webhookEventHandler === 'function') {
             webhookEventHandler(req.payload, event, stripe, stripeConfig)
           };
+        }
+
+        if (!webhooks) {
+          handleWebhooks(req.payload, event, stripe, stripeConfig);
         }
       }
     }

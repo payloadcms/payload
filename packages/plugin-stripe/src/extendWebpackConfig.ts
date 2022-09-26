@@ -18,8 +18,10 @@ export const extendWebpackConfig = (config: Config): ((webpackConfig: WebpackCon
         alias: {
           ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
           "stripe": mockModulePath,
+          "express": mockModulePath,
           [path.resolve(__dirname, './routes/rest')]: mockModulePath,
           [path.resolve(__dirname, './routes/webhooks')]: mockModulePath,
+          [path.resolve(__dirname, './webhooks/handleWebhooks')]: mockModulePath,
           [path.resolve(__dirname, './hooks/createNewStripeCustomer')]: mockModulePath,
           [path.resolve(__dirname, './hooks/deleteStripeCustomer')]: mockModulePath,
           [path.resolve(__dirname, './hooks/syncExistingStripeCustomer')]: mockModulePath,

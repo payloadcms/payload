@@ -29,7 +29,7 @@ export const handleWebhooks: StripeWebhookHandler = async (payload, event) => {
       const payloadCustomer = customerQuery.docs[0] as any; // TODO: type this as Customer
 
       if (!payloadCustomer) {
-        console.log(`No existing customer found, creating a new customer in Payload with email: '${email}'`);
+        console.log(`- No existing customer found, creating a new customer in Payload with email: '${email}'`);
 
         try {
           await payload.create({
@@ -45,12 +45,12 @@ export const handleWebhooks: StripeWebhookHandler = async (payload, event) => {
             disableVerificationEmail: true,
           });
 
-          console.log(`Successfully created new customer in Payload from stripe customer ID: '${customerID}'`);
+          console.log(`- Successfully created new customer in Payload from stripe customer ID: '${customerID}'`);
         } catch (error) {
           console.error('Error creating new customer', error);
         }
       } else {
-        console.log(`Existing customer found with email: '${email}', updating now`);
+        console.log(`- Existing customer found with email: '${email}', updating now`);
 
         try {
           await payload.update({
@@ -64,7 +64,7 @@ export const handleWebhooks: StripeWebhookHandler = async (payload, event) => {
             },
           });
 
-          console.log(`Successfully updated customer in Payload from stripe customer ID: '${customerID}'`);
+          console.log(`- Successfully updated customer in Payload from stripe customer ID: '${customerID}'`);
         } catch (error) {
           console.error('Error updating customer', error);
         }
@@ -93,7 +93,7 @@ export const handleWebhooks: StripeWebhookHandler = async (payload, event) => {
         if (payloadCustomer) {
           // Found existing customer, update it
           try {
-            console.log(`Updating existing customer in Payload ID: '${payloadCustomer.id}'`);
+            console.log(`- Updating existing customer in Payload ID: '${payloadCustomer.id}'`);
 
             payload.update({
               collection: 'customers',
@@ -108,7 +108,7 @@ export const handleWebhooks: StripeWebhookHandler = async (payload, event) => {
           }
         } else {
           // No existing customer found, create a new one
-          console.log(`Could not find an existing customer with Stripe customer ID: '${customerID}', creating a new one.`);
+          console.log(`- Could not find an existing customer with Stripe customer ID: '${customerID}', creating a new one.`);
 
           try {
             await payload.create({
@@ -149,11 +149,11 @@ export const handleWebhooks: StripeWebhookHandler = async (payload, event) => {
         const payloadCustomer = customerQuery.docs[0] as any; // TODO: type this as Customer
 
         if (!payloadCustomer) {
-          console.log(`Nothing to delete, no existing customer found with Stripe customer ID: '${customerID}'`);
+          console.log(`- Nothing to delete, no existing customer found with Stripe customer ID: '${customerID}'`);
         }
 
         if (payloadCustomer) {
-          console.log(`Deleting Payload customer with ID: '${payloadCustomer.id}'`);
+          console.log(`- Deleting Payload customer with ID: '${payloadCustomer.id}'`);
 
           try {
             payload.delete({
@@ -164,7 +164,7 @@ export const handleWebhooks: StripeWebhookHandler = async (payload, event) => {
             // NOTE: the customers `afterDelete` hook will trigger, which will attempt to delete the customer from Stripe and safely error out
             // There is no known way of preventing this from happening. In other hooks we use the `isSyncedToStripe` field, but here the document is already deleted.
 
-            console.log(`Successfully deleted Payload customer with ID: '${payloadCustomer.id}'`);
+            console.log(`- Successfully deleted Payload customer with ID: '${payloadCustomer.id}'`);
           } catch (error) {
             console.error('Error deleting customer', error);
           }

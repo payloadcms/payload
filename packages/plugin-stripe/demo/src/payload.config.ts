@@ -42,7 +42,6 @@ export default buildConfig({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
       collections: ['customers'],
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
-      // webhooks: handleWebhooks, TODO: uncomment when custom root endpoints are released, then remove the custom route in server.ts
     }),
   ],
   typescript: {
