@@ -40,7 +40,16 @@ export default buildConfig({
   plugins: [
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
-      collections: ['customers'],
+      sync: [{
+        collection: 'customers',
+        object: 'customers',
+        fields: [
+          {
+            field: 'name',
+            property: 'name',
+          }
+        ]
+      }],
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
     }),
   ],

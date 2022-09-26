@@ -4,7 +4,7 @@ import { StripeConfig } from '../types';
 import { Response } from 'express';
 import { handleWebhooks } from '../webhooks/handleWebhooks';
 
-export const stripeWebhooks = (
+export const stripeWebhooks = async (
   req: PayloadRequest,
   res: Response,
   next: any,
@@ -33,11 +33,14 @@ export const stripeWebhooks = (
       try {
         event = stripe.webhooks.constructEvent(req.body, stripeSignature, stripeWebhooksEndpointSecret);
       } catch (err: any) {
-        console.error(err?.message || 'Error constructing Stripe event');
+        req.payload.logger.error(err?.message || 'Error constructing Stripe event');
         res.status(400);
       }
 
       if (event) {
+        await handleWebhooks(req.payload, event, stripe, stripeConfig);
+
+        // Fire external webhook handlers if they exist
         if (typeof webhooks === 'function') {
           webhooks(req.payload, event, stripe, stripeConfig);
         }
@@ -47,10 +50,6 @@ export const stripeWebhooks = (
           if (typeof webhookEventHandler === 'function') {
             webhookEventHandler(req.payload, event, stripe, stripeConfig)
           };
-        }
-
-        if (!webhooks) {
-          handleWebhooks(req.payload, event, stripe, stripeConfig);
         }
       }
     }

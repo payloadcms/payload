@@ -7,11 +7,20 @@ export type StripeWebhookHandlers = {
   [webhookName: string]: StripeWebhookHandler
 }
 
+export type FieldSyncConfig = {
+  field: string
+  property: string
+}
+
 export type StripeConfig = {
   stripeSecretKey: string
   stripeWebhooksEndpointSecret?: string
   webhooks?: StripeWebhookHandler | StripeWebhookHandlers
-  collections?: string[]
+  sync?: { // NOTE: can this also be string[] ??
+    collection: string
+    object: 'customers' // TODO: get this from Stripe types
+    fields: FieldSyncConfig[]
+  }[]
 }
 
 export type StripeProxy = (args: {

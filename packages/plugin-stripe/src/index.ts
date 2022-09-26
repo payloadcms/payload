@@ -4,9 +4,9 @@ import { stripeWebhooks } from './routes/webhooks';
 import express from 'express';
 import { StripeConfig } from './types';
 import { extendWebpackConfig } from './extendWebpackConfig';
-import { createNewStripeCustomer } from './hooks/createNewStripeCustomer';
-import { syncExistingStripeCustomer } from './hooks/syncExistingStripeCustomer';
-import { deleteStripeCustomer } from './hooks/deleteStripeCustomer';
+import { createNewInStripe } from './hooks/createNewInStripe';
+import { syncExistingWithStripe } from './hooks/syncExistingWithStripe';
+import { deleteFromStripe } from './hooks/deleteFromStripe';
 
 const stripePlugin = (stripeConfig: StripeConfig) => (config: Config): Config => {
   const { collections } = config;
@@ -43,33 +43,49 @@ const stripePlugin = (stripeConfig: StripeConfig) => (config: Config): Config =>
         hooks: existingHooks
       } = collection;
 
-      const enabledCollections = stripeConfig.collections || [];
+      const syncConfig = stripeConfig.sync?.find((sync) => sync.collection === collection.slug);
 
-      const isEnabled = enabledCollections.indexOf(collection.slug) > -1;
-
-      if (isEnabled) {
+      if (syncConfig) {
         return {
           ...collection,
           hooks: {
             ...collection.hooks,
             beforeValidate: [
               ...(existingHooks?.beforeValidate || []),
-              createNewStripeCustomer
+              async (args) => {
+                createNewInStripe({
+                  ...args,
+                  collection,
+                  stripeConfig,
+                })
+              }
             ],
             afterChange: [
               ...(existingHooks?.afterChange || []),
-              syncExistingStripeCustomer
+              async (args) => {
+                syncExistingWithStripe({
+                  ...args,
+                  collection,
+                  stripeConfig
+                })
+              }
             ],
             afterDelete: [
               ...(existingHooks?.afterDelete || []),
-              deleteStripeCustomer
+              async (args) => {
+                deleteFromStripe({
+                  ...args,
+                  collection,
+                  stripeConfig
+                })
+              }
             ],
           },
           fields: [
             ...collection.fields,
             {
-              name: 'stripeCustomerID',
-              label: 'Stripe Customer ID',
+              name: 'stripeID',
+              label: 'Stripe ID',
               type: 'text',
               saveToJWT: true,
               admin: {
