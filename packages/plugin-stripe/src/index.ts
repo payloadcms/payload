@@ -105,7 +105,7 @@ const stripePlugin = (incomingStripeConfig: StripeConfig) => (config: Config): C
               },
             },
             {
-              name: 'isSyncedToStripe',
+              name: 'skipSync',
               label: 'Synced To Sync',
               type: 'checkbox',
               admin: {

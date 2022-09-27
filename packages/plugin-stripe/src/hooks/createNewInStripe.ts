@@ -30,12 +30,12 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
   }
 
   if (payload) {
-    if (dataRef.isSyncedToStripe) {
+    if (dataRef.skipSync) {
       // payload.logger.info(`Bypassing collection-level hooks.`);
     } else {
       // Initialize false so that all Payload events sync to Stripe
       // conditionally set to true to prevent events that originate from webhooks from triggering an unnecessary sync
-      dataRef.isSyncedToStripe = false;
+      dataRef.skipSync = false;
 
       const { slug: collectionSlug } = collection || {};
 
@@ -60,7 +60,7 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
               dataRef.stripeID = stripeObject.id;
 
               // NOTE: this is to prevent sync in the "afterChange" hook
-              dataRef.isSyncedToStripe = true;
+              dataRef.skipSync = true;
             } catch (error: any) {
               payload.logger.error(`- Error creating Stripe document: ${error?.message || ''}`);
             }
@@ -81,7 +81,7 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
             dataRef.stripeID = stripeObject.id;
 
             // NOTE: this is to prevent sync in the "afterChange" hook
-            dataRef.isSyncedToStripe = true;
+            dataRef.skipSync = true;
           } catch (error: any) {
             payload.logger.error(`- Failed to create new '${syncConfig.object}' object in Stripe: ${error?.message || ''}`);
           }

@@ -43,7 +43,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
   syncedData = {
     ...syncedData,
     stripeID,
-    isSyncedToStripe: true,
+    skipSync: true,
   }
 
   if (!foundDoc) {

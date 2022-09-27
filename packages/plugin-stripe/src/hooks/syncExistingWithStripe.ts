@@ -23,7 +23,7 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
 
   const { slug: collectionSlug } = collection || {};
 
-  if (process.env.NODE_ENV !== 'test' && !doc.isSyncedToStripe) {
+  if (process.env.NODE_ENV !== 'test' && !doc.skipSync) {
     const syncConfig = stripeConfig?.sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
 
     if (syncConfig) {
@@ -59,7 +59,7 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
   }
 
   // Set back to false so that all changes continue to sync to Stripe, see note in './createNewInStripe.ts'
-  doc.isSyncedToStripe = false;
+  doc.skipSync = false;
 
   return doc;
 }

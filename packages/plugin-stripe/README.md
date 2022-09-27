@@ -95,7 +95,7 @@ export default config;
 Using `sync` will do the following:
 
 - Adds and maintains a `stripeID` read-only field on each collection. This is a field generated _by Stripe_ and used as a cross-reference.
-- Adds and maintains an `isSyncedToStripe` read-only flag on each collection to prevent infinite hooks when documents are updated via webhooks.
+- Adds and maintains an `skipSync` read-only flag on each collection to prevent infinite syncs when hooks trigger webhooks
 - Adds the following hooks to each collection:
   - `beforeValidate`: `createNewInStripe`
   - `afterChange`: `syncExistingWithStripe`
