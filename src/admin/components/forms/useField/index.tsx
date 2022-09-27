@@ -58,7 +58,8 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     valid = internallyValid;
   }
 
-  const showError = valid === false && submitted;
+
+  const showError = valid === false;
 
   // Method to send update field values from field component(s)
   // Should only be used internally
