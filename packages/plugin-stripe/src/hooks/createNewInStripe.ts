@@ -1,6 +1,6 @@
 import { APIError } from 'payload/errors';
 import Stripe from 'stripe';
-import type { CollectionBeforeValidateHook, CollectionConfig } from 'payload/types';
+import type { CollectionBeforeValidateHook, CollectionConfig, PayloadRequest } from 'payload/types';
 import { StripeConfig } from '../types';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -24,6 +24,11 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
 
   const dataRef = data || {};
 
+  if (process.env.NODE_ENV === 'test') {
+    dataRef.stripeID = 'test';
+    return dataRef;
+  }
+
   if (payload) {
     if (dataRef.isSyncedToStripe) {
       // payload.logger.info(`Bypassing collection-level hooks.`);
@@ -37,40 +42,17 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
       const syncConfig = stripeConfig?.sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
 
       if (syncConfig) {
-        if (operation === 'create') {
-          payload.logger.info(`A new '${collectionSlug}' document has been created, syncing with Stripe.`);
 
-          // TODO: if we're going to reenable this next block, then we need to somehow flag the collection as an "auth" collection or similar
-          // First, ensure this customer is unique based on 'email'
-          // let existingCustomer = null;
-          // if (data?.email) {
-          //   const customerQuery = await payload.find({
-          //     collection: 'customers',
-          //     where: {
-          //       email: {
-          //         equals: data.email,
-          //       },
-          //     },
-          //   });
-          // }
-          // existingCustomer = customerQuery.docs[0];
-          // if (existingCustomer) {
-          //   payload.logger.error(`- Account already exists with e-mail: ${data.email}. If this is your e-mail, please log in and checkout again.`);
-          // }
+        const syncedFields = syncConfig.fields.reduce((acc, field) => {
+          const { field: fieldName, property } = field;
+          acc[fieldName] = dataRef[property];
+          return acc;
+        }, {} as Record<string, any>);
 
-          if (process.env.NODE_ENV === 'test') {
-            dataRef.stripeID = 'test';
-          } else {
-            payload.logger.info(`- Creating new '${syncConfig.object}' object in Stripe.`);
-
-            const syncedFields = syncConfig.fields.reduce((acc, field) => {
-              const { field: fieldName, property } = field;
-              acc[fieldName] = dataRef[property];
-              return acc;
-            }, {} as Record<string, any>);
-
+        if (operation === 'update') {
+          // NOTE: the Stripe document will be created in the "afterChange" hook, so create a new stripe document here if no stripeID exists
+          if (!dataRef.stripeID) {
             try {
-              // NOTE: ts will surface an issue here once the 'syncConfig.object' type improves in 'types.ts', where the 'create' method is not on all Stripe resources
               const stripeObject = await stripe?.[syncConfig.object]?.create(syncedFields);
 
               payload.logger.info(`- Successfully created new '${syncConfig.object}' object in Stripe with ID: '${stripeObject.id}'.`);
@@ -80,8 +62,28 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
               // NOTE: this is to prevent sync in the "afterChange" hook
               dataRef.isSyncedToStripe = true;
             } catch (error: any) {
-              payload.logger.error(`- Failed to create new '${syncConfig.object}' object in Stripe: ${error?.message || ''}`);
+              payload.logger.error(`- Error creating Stripe document: ${error?.message || ''}`);
             }
+          }
+        }
+
+        if (operation === 'create') {
+          payload.logger.info(`A new '${collectionSlug}' document has been created, syncing with Stripe.`);
+
+          try {
+            payload.logger.info(`- Creating new '${syncConfig.object}' object in Stripe.`);
+
+            // NOTE: ts will surface an issue here once the 'syncConfig.object' type improves in 'types.ts', where the 'create' method is not on all Stripe resources
+            const stripeObject = await stripe?.[syncConfig.object]?.create(syncedFields);
+
+            payload.logger.info(`- Successfully created new '${syncConfig.object}' object in Stripe with ID: '${stripeObject.id}'.`);
+
+            dataRef.stripeID = stripeObject.id;
+
+            // NOTE: this is to prevent sync in the "afterChange" hook
+            dataRef.isSyncedToStripe = true;
+          } catch (error: any) {
+            payload.logger.error(`- Failed to create new '${syncConfig.object}' object in Stripe: ${error?.message || ''}`);
           }
         }
       }

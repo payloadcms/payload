@@ -10,7 +10,7 @@ Core features:
   - Enables a two-way communication channel between Stripe and Payload
     - Proxies the [Stripe REST API](https://stripe.com/docs/api)
     - Proxies [Stripe webhooks](https://stripe.com/docs/webhooks)
-  - Easily sync data between the two platforms
+  - Automatically syncs data between the two platforms
 
 ## Installation
 
@@ -59,7 +59,7 @@ export default config;
 
 ## Sync
 
-To achieve a sync between Payload and Stripe, custom hooks and webhooks handlers need to be configured. Use the `sync` option to have this plugin handle setup for you. All you need to do is map Payload fields to corresponding Stripe fields to automatically configure everything needed for basic create, update, and delete operations.
+This option will setup a basic sync between Payload and Stripe for you automatically. It will create all the necessary hooks and webhooks handlers, so the only thing you have to do is map your Payload fields to their corresponding Stripe properties. As documents are created, updated, and deleted from either Stripe or Payload, the changes are reflected on either side.
 
 > NOTE: If you wish to enable a _two-way_ sync, be sure to setup [`webhooks`](#webhooks) and pass the `stripeWebhooksEndpointSecret` through your config.
 
@@ -76,6 +76,7 @@ const config = buildConfig({
         {
           collection: 'customers',
           object: 'customers', // one of the Stripe object types
+          objectSingular: 'customer',
           fields: [
             {
               field: 'name', // this is a field on your own Payload config
@@ -97,12 +98,12 @@ Using `sync` will do the following:
 - Adds and maintains an `isSyncedToStripe` read-only flag on each collection to prevent infinite hooks when documents are updated via webhooks.
 - Adds the following hooks to each collection:
   - `beforeValidate`: `createNewInStripe`
-  - `afterChange`: `syncExistingFromStripe`
+  - `afterChange`: `syncExistingWithStripe`
   - `afterDelete`: `deleteFromStripe`
 - Handles the following Stripe webhooks
-  - `STRIPE_TYPE.created`
-  - `STRIPE_TYPE.updated`
-  - `STRIPE_TYPE.deleted`
+  - `STRIPE_TYPE.created`: `handleCreatedOrUpdated`
+  - `STRIPE_TYPE.updated`: `handleCreatedOrUpdated`
+  - `STRIPE_TYPE.deleted`: `handleDeleted`
 
 ### Endpoints
 
