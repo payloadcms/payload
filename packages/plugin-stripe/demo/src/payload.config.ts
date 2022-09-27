@@ -42,8 +42,8 @@ export default buildConfig({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
       sync: [{
         collection: 'customers',
-        object: 'customers',
-        objectSingular: 'customer',
+        resource: 'customers',
+        resourceSingular: 'customer',
         fields: [
           {
             field: 'name',

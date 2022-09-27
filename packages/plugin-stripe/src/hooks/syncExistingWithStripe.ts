@@ -44,12 +44,12 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
           payload.logger.info(`- Syncing to Stripe ID: '${doc.stripeID}'.`);
 
           try {
-            const stripeObject = await stripe?.[syncConfig?.object]?.update(
+            const stripeResource = await stripe?.[syncConfig?.resource]?.update(
               doc.stripeID,
               syncedFields
             );
 
-            payload.logger.info(`- Successfully synced Stripe document ID: '${stripeObject.id}'.`);
+            payload.logger.info(`- Successfully synced Stripe document ID: '${stripeResource.id}'.`);
           } catch (error: any) {
             payload.logger.error(`- Error syncing document with ID: '${doc.id}' to Stripe: ${error?.message || ''}`);
           }
