@@ -31,7 +31,7 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
         payload.logger.info(`Syncing changes from document with ID: '${doc?.id}' in collection: '${collectionSlug}' to Stripe.`);
 
         if (!doc.stripeID) {
-          payload.logger.error(`- There is no Stripe ID for this document, skipping`);
+          payload.logger.error(`- There is no Stripe ID for this document, skipping.`);
           // TODO: create a new Stripe object here
         } else {
           payload.logger.info(`- Syncing to Stripe ID: '${doc.stripeID}'.`);

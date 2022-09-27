@@ -20,64 +20,68 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
     stripeConfig
   } = args;
 
+  const payload = req?.payload;
+
   const dataRef = data || {};
 
-  // Initialize false so that all Payload events sync to Stripe
-  // conditionally set to true to prevent events that originate from webhooks from triggering an unnecessary sync
-  dataRef.isSyncedToStripe = false;
+  if (payload) {
+    if (dataRef.isSyncedToStripe) {
+      // payload.logger.info(`Bypassing collection-level hooks.`);
+    } else {
+      // Initialize false so that all Payload events sync to Stripe
+      // conditionally set to true to prevent events that originate from webhooks from triggering an unnecessary sync
+      dataRef.isSyncedToStripe = false;
 
-  const { slug: collectionSlug } = collection || {};
+      const { slug: collectionSlug } = collection || {};
 
-  const syncConfig = stripeConfig?.sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
+      const syncConfig = stripeConfig?.sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
 
-  if (req && syncConfig) {
-    const { payload } = req;
+      if (syncConfig) {
+        if (operation === 'create') {
+          payload.logger.info(`A new '${collectionSlug}' document has been created, syncing with Stripe.`);
 
-    if (operation === 'create') {
-      payload.logger.info(`A new '${collectionSlug}' document has been created, syncing with Stripe.`);
+          // TODO: if we're going to reenable this next block, then we need to somehow flag the collection as an "auth" collection or similar
+          // First, ensure this customer is unique based on 'email'
+          // let existingCustomer = null;
+          // if (data?.email) {
+          //   const customerQuery = await payload.find({
+          //     collection: 'customers',
+          //     where: {
+          //       email: {
+          //         equals: data.email,
+          //       },
+          //     },
+          //   });
+          // }
+          // existingCustomer = customerQuery.docs[0];
+          // if (existingCustomer) {
+          //   payload.logger.error(`- Account already exists with e-mail: ${data.email}. If this is your e-mail, please log in and checkout again.`);
+          // }
 
-      // TODO: if we're going to reenable this next block, then we need to somehow flag the collection as an "auth" collection or similar
-      // First, ensure this customer is unique based on 'email'
-      // let existingCustomer = null;
-      // if (data?.email) {
-      //   const customerQuery = await payload.find({
-      //     collection: 'customers',
-      //     where: {
-      //       email: {
-      //         equals: data.email,
-      //       },
-      //     },
-      //   });
-      // }
-      // existingCustomer = customerQuery.docs[0];
-      // if (existingCustomer) {
-      //   payload.logger.error(`- Account already exists with e-mail: ${data.email}. If this is your e-mail, please log in and checkout again.`);
-      // }
+          if (process.env.NODE_ENV === 'test') {
+            dataRef.stripeID = 'test';
+          } else {
+            payload.logger.info(`- Creating new '${syncConfig.object}' object in Stripe.`);
 
-      if (process.env.NODE_ENV === 'test') {
-        dataRef.stripeID = 'test';
-      } else {
-        if (!dataRef.isSyncedToStripe) {
-          payload.logger.info(`- Creating new '${syncConfig.object}' object in Stripe.`);
+            const syncedFields = syncConfig.fields.reduce((acc, field) => {
+              const { field: fieldName, property } = field;
+              acc[fieldName] = dataRef[property];
+              return acc;
+            }, {} as Record<string, any>);
 
-          const syncedFields = syncConfig.fields.reduce((acc, field) => {
-            const { field: fieldName, property } = field;
-            acc[fieldName] = dataRef[property];
-            return acc;
-          }, {} as Record<string, any>);
+            try {
+              // NOTE: ts will surface an issue here once the 'syncConfig.object' type improves in 'types.ts', where the 'create' method is not on all Stripe resources
+              const stripeObject = await stripe?.[syncConfig.object]?.create(syncedFields);
 
-          try {
-            // NOTE: ts will surface an issue here once the 'syncConfig.object' type improves in 'types.ts', where the 'create' method is not on all Stripe resources
-            const stripeObject = await stripe?.[syncConfig.object]?.create(syncedFields);
+              payload.logger.info(`- Successfully created new '${syncConfig.object}' object in Stripe with ID: '${stripeObject.id}'.`);
 
-            payload.logger.info(`- Successfully created new '${syncConfig.object}' object in Stripe with ID: '${stripeObject.id}'.`);
+              dataRef.stripeID = stripeObject.id;
 
-            dataRef.stripeID = stripeObject.id;
-
-            // NOTE: this is to prevent sync in the "afterChange" hook
-            dataRef.isSyncedToStripe = true;
-          } catch (error: any) {
-            payload.logger.error(`- Failed to create new '${syncConfig.object}' object in Stripe: ${error?.message || ''}`);
+              // NOTE: this is to prevent sync in the "afterChange" hook
+              dataRef.isSyncedToStripe = true;
+            } catch (error: any) {
+              payload.logger.error(`- Failed to create new '${syncConfig.object}' object in Stripe: ${error?.message || ''}`);
+            }
           }
         }
       }

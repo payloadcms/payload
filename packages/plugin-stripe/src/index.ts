@@ -2,14 +2,20 @@ import { Config } from 'payload/config';
 import { stripeREST } from './routes/rest';
 import { stripeWebhooks } from './routes/webhooks';
 import express from 'express';
-import { StripeConfig } from './types';
+import { SanitizedStripeConfig, StripeConfig } from './types';
 import { extendWebpackConfig } from './extendWebpackConfig';
 import { createNewInStripe } from './hooks/createNewInStripe';
 import { syncExistingWithStripe } from './hooks/syncExistingWithStripe';
 import { deleteFromStripe } from './hooks/deleteFromStripe';
 
-const stripePlugin = (stripeConfig: StripeConfig) => (config: Config): Config => {
+const stripePlugin = (incomingStripeConfig: StripeConfig) => (config: Config): Config => {
   const { collections } = config;
+
+  // set config defaults here
+  const stripeConfig: SanitizedStripeConfig = {
+    ...incomingStripeConfig || {},
+    sync: incomingStripeConfig?.sync || []
+  }
 
   return ({
     ...config,
@@ -26,7 +32,13 @@ const stripePlugin = (stripeConfig: StripeConfig) => (config: Config): Config =>
         handler: [
           express.raw({ type: 'application/json' }),
           (req, res, next) => {
-            stripeWebhooks(req, res, next, stripeConfig)
+            stripeWebhooks({
+              req,
+              res,
+              next,
+              config,
+              stripeConfig
+            })
           }
         ]
       },
@@ -34,7 +46,12 @@ const stripePlugin = (stripeConfig: StripeConfig) => (config: Config): Config =>
         path: '/stripe/rest',
         method: 'post',
         handler: (req, res, next) => {
-          stripeREST(req, res, next, stripeConfig)
+          stripeREST({
+            req,
+            res,
+            next,
+            stripeConfig
+          })
         }
       },
     ],

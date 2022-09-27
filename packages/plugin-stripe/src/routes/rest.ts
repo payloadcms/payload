@@ -4,12 +4,19 @@ import { StripeConfig } from '../types';
 import { Response } from 'express';
 import { stripeProxy } from '../utilities/stripeProxy';
 
-export const stripeREST = async (
+export const stripeREST = async (args: {
   req: PayloadRequest,
   res: Response,
   next: any,
   stripeConfig: StripeConfig
-) => {
+}) => {
+  const {
+    req,
+    res,
+    next,
+    stripeConfig
+  } = args;
+
   const {
     payload,
     user,

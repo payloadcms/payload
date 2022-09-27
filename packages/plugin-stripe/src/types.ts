@@ -1,7 +1,14 @@
 import { Payload } from "payload";
+import { Config as PayloadConfig } from "payload/config";
 import Stripe from "stripe";
 
-export type StripeWebhookHandler = (payload: Payload, event: any, stripe: Stripe, stripeConfig?: StripeConfig) => void;
+export type StripeWebhookHandler = (args: {
+  payload: Payload,
+  event: any,
+  stripe: Stripe,
+  config: PayloadConfig
+  stripeConfig?: StripeConfig
+}) => void;
 
 export type StripeWebhookHandlers = {
   [webhookName: string]: StripeWebhookHandler
@@ -12,15 +19,22 @@ export type FieldSyncConfig = {
   property: string
 }
 
+export type SyncConfig = {
+  collection: string
+  object: 'customers' // TODO: get this from Stripe types
+  objectSingular: 'customer' // TODO: there must be a better way to do this
+  fields: FieldSyncConfig[]
+}
+
 export type StripeConfig = {
   stripeSecretKey: string
   stripeWebhooksEndpointSecret?: string
   webhooks?: StripeWebhookHandler | StripeWebhookHandlers
-  sync?: { // NOTE: can this also be string[] ??
-    collection: string
-    object: 'customers' // TODO: get this from Stripe types
-    fields: FieldSyncConfig[]
-  }[]
+  sync?: SyncConfig[]
+}
+
+export type SanitizedStripeConfig = StripeConfig & {
+  sync: SyncConfig[] // convert to required
 }
 
 export type StripeProxy = (args: {

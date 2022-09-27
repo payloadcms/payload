@@ -43,10 +43,15 @@ export default buildConfig({
       sync: [{
         collection: 'customers',
         object: 'customers',
+        objectSingular: 'customer',
         fields: [
           {
             field: 'name',
             property: 'name',
+          },
+          {
+            field: 'email',
+            property: 'email',
           }
         ]
       }],

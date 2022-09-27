@@ -2,14 +2,24 @@ import Stripe from 'stripe';
 import { PayloadRequest } from 'payload/dist/types';
 import { StripeConfig } from '../types';
 import { Response } from 'express';
-import { handleWebhooks } from '../webhooks/handleWebhooks';
+import { handleWebhooks } from '../webhooks';
+import { Config as PayloadConfig } from 'payload/config';
 
-export const stripeWebhooks = async (
+export const stripeWebhooks = async (args: {
   req: PayloadRequest,
   res: Response,
   next: any,
+  config: PayloadConfig,
   stripeConfig: StripeConfig
-) => {
+}) => {
+  const {
+    req,
+    res,
+    next,
+    config,
+    stripeConfig
+  } = args;
+
   const {
     stripeSecretKey,
     stripeWebhooksEndpointSecret,
@@ -38,17 +48,35 @@ export const stripeWebhooks = async (
       }
 
       if (event) {
-        await handleWebhooks(req.payload, event, stripe, stripeConfig);
+        await handleWebhooks({
+          payload: req.payload,
+          event,
+          stripe,
+          config,
+          stripeConfig
+        });
 
         // Fire external webhook handlers if they exist
         if (typeof webhooks === 'function') {
-          webhooks(req.payload, event, stripe, stripeConfig);
+          webhooks({
+            payload: req.payload,
+            event,
+            stripe,
+            config,
+            stripeConfig
+          });
         }
 
         if (typeof webhooks === 'object') {
           const webhookEventHandler = webhooks[event.type];
           if (typeof webhookEventHandler === 'function') {
-            webhookEventHandler(req.payload, event, stripe, stripeConfig)
+            webhookEventHandler({
+              payload: req.payload,
+              event,
+              stripe,
+              config,
+              stripeConfig
+            });
           };
         }
       }
