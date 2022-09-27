@@ -52,33 +52,27 @@ const stripePlugin = (stripeConfig: StripeConfig) => (config: Config): Config =>
             ...collection.hooks,
             beforeValidate: [
               ...(existingHooks?.beforeValidate || []),
-              async (args) => {
-                createNewInStripe({
-                  ...args,
-                  collection,
-                  stripeConfig,
-                })
-              }
+              async (args) => createNewInStripe({
+                ...args,
+                collection,
+                stripeConfig,
+              })
             ],
             afterChange: [
               ...(existingHooks?.afterChange || []),
-              async (args) => {
-                syncExistingWithStripe({
-                  ...args,
-                  collection,
-                  stripeConfig
-                })
-              }
+              async (args) => syncExistingWithStripe({
+                ...args,
+                collection,
+                stripeConfig
+              })
             ],
             afterDelete: [
               ...(existingHooks?.afterDelete || []),
-              async (args) => {
-                deleteFromStripe({
-                  ...args,
-                  collection,
-                  stripeConfig
-                })
-              }
+              async (args) => deleteFromStripe({
+                ...args,
+                collection,
+                stripeConfig
+              })
             ],
           },
           fields: [

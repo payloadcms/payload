@@ -6,10 +6,12 @@ import { StripeConfig } from '../types';
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' });
 
-export const createNewInStripe: CollectionBeforeValidateHook = async (args: Parameters<CollectionBeforeValidateHook>[0] & {
+export type CollectionBeforeValidateHookWithArgs = (args: Parameters<CollectionBeforeValidateHook>[0] & {
   collection?: CollectionConfig,
   stripeConfig?: StripeConfig,
-}) => {
+}) => void;
+
+export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (args) => {
   const {
     req,
     operation,
@@ -20,6 +22,10 @@ export const createNewInStripe: CollectionBeforeValidateHook = async (args: Para
 
   const dataRef = data || {};
 
+  // Initialize false so that all Payload events sync to Stripe
+  // conditionally set to true to prevent events that originate from webhooks from triggering an unnecessary sync
+  dataRef.isSyncedToStripe = false;
+
   const { slug: collectionSlug } = collection || {};
 
   const syncConfig = stripeConfig?.sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
@@ -28,7 +34,7 @@ export const createNewInStripe: CollectionBeforeValidateHook = async (args: Para
     const { payload } = req;
 
     if (operation === 'create') {
-      payload.logger.info(`A new ${collectionSlug} has been created, syncing with Stripe.`);
+      payload.logger.info(`A new '${collectionSlug}' document has been created, syncing with Stripe.`);
 
       // TODO: if we're going to reenable this next block, then we need to somehow flag the collection as an "auth" collection or similar
       // First, ensure this customer is unique based on 'email'
@@ -52,7 +58,7 @@ export const createNewInStripe: CollectionBeforeValidateHook = async (args: Para
         dataRef.stripeID = 'test';
       } else {
         if (!dataRef.isSyncedToStripe) {
-          payload.logger.info(`- Creating new document in Stripe from ID: '${dataRef.id}'`);
+          payload.logger.info(`- Creating new '${syncConfig.object}' object in Stripe.`);
 
           const syncedFields = syncConfig.fields.reduce((acc, field) => {
             const { field: fieldName, property } = field;
@@ -64,18 +70,18 @@ export const createNewInStripe: CollectionBeforeValidateHook = async (args: Para
             // NOTE: ts will surface an issue here once the 'syncConfig.object' type improves in 'types.ts', where the 'create' method is not on all Stripe resources
             const stripeObject = await stripe?.[syncConfig.object]?.create(syncedFields);
 
-            payload.logger.info(`- Successfully created new document in Stripe. Their ID is: '${stripeObject.id}'.`);
+            payload.logger.info(`- Successfully created new '${syncConfig.object}' object in Stripe with ID: '${stripeObject.id}'.`);
 
             dataRef.stripeID = stripeObject.id;
+
+            // NOTE: this is to prevent sync in the "afterChange" hook
+            dataRef.isSyncedToStripe = true;
           } catch (error: any) {
-            payload.logger.error(`- Error creating new document in Stripe: ${error?.message || ''}`);
+            payload.logger.error(`- Failed to create new '${syncConfig.object}' object in Stripe: ${error?.message || ''}`);
           }
         }
       }
     }
-
-    // Set to false so that all Payload events sync to Stripe, EXCEPT for those that originate from webhooks
-    dataRef.isSyncedToStripe = false;
   }
 
   return dataRef;

@@ -8,7 +8,6 @@ const Customers: CollectionConfig = {
     defaultColumns: [
       'email',
       'name',
-      'stripeCustomerID',
     ]
   },
   auth: true,

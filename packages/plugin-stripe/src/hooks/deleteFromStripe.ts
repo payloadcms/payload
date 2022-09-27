@@ -5,10 +5,12 @@ import { StripeConfig } from '../types';
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' });
 
-export const deleteFromStripe: CollectionAfterDeleteHook = async (args: Parameters<CollectionAfterDeleteHook>[0] & {
+export type CollectionAfterDeleteHookWithArgs = (args: Parameters<CollectionAfterDeleteHook>[0] & {
   collection?: CollectionConfig,
   stripeConfig?: StripeConfig,
-}) => {
+}) => void;
+
+export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async (args) => {
   const {
     req,
     doc,
@@ -19,7 +21,7 @@ export const deleteFromStripe: CollectionAfterDeleteHook = async (args: Paramete
   const { payload } = req;
   const { slug: collectionSlug } = collection || {};
 
-  payload.logger.info(`Document with id: '${doc?.id}' in collection: '${collectionSlug}' has been deleted, syncing with Stripe`);
+  payload.logger.info(`Document with ID: '${doc?.id}' in collection: '${collectionSlug}' has been deleted, deleting from Stripe.`);
 
   if (process.env.NODE_ENV !== 'test') {
     payload.logger.info(`- Deleting Stripe document with ID: '${doc.stripeID}'.`);
@@ -30,7 +32,7 @@ export const deleteFromStripe: CollectionAfterDeleteHook = async (args: Paramete
       try {
         await stripe?.[syncConfig.object]?.del(doc.stripeID);
 
-        payload.logger.error(`- Successfully deleted Stripe document with ID: '${doc.stripeID}'.`);
+        payload.logger.log(`- Successfully deleted Stripe document with ID: '${doc.stripeID}'.`);
       } catch (error: any) {
         payload.logger.error(`- Error deleting Stripe document with ID: '${doc.stripeID}': ${error?.message || ''}`);
       }
