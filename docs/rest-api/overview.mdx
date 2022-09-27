@@ -22,15 +22,17 @@ All Payload API routes are mounted prefixed to your config's `routes.api` URL se
 
 Each collection is mounted using its `slug` value. For example, if a collection's slug is `users`, all corresponding routes will be mounted on `/api/users`.
 
+Note: Collection slugs must be formatted in kebab-case
+
 **All CRUD operations are exposed as follows:**
 
 | Method   | Path                        | Description                            |
 | -------- | --------------------------- | -------------------------------------- |
-| `GET`    | `/api/{collectionSlug}`     | Find paginated documents               |
-| `GET`    | `/api/{collectionSlug}/:id` | Find a specific document by ID         |
-| `POST`   | `/api/{collectionSlug}`     | Create a new document                  |
-| `PATCH`  | `/api/{collectionSlug}/:id` | Update a document by ID                |
-| `DELETE` | `/api/{collectionSlug}/:id` | Delete an existing document by ID      |
+| `GET`    | `/api/{collection-slug}`     | Find paginated documents               |
+| `GET`    | `/api/{collection-slug}/:id` | Find a specific document by ID         |
+| `POST`   | `/api/{collection-slug}`     | Create a new document                  |
+| `PATCH`  | `/api/{collection-slug}/:id` | Update a document by ID                |
+| `DELETE` | `/api/{collection-slug}/:id` | Delete an existing document by ID      |
 
 ##### Additional `find` query parameters
 
@@ -47,14 +49,14 @@ Auth enabled collections are also given the following endpoints:
 
 | Method   | Path                        | Description |
 | -------- | --------------------------- | ----------- |
-| `POST`   | `/api/{collectionSlug}/verify/:token`   | [Email verification](/docs/authentication/operations#verify-by-email), if enabled. |
-| `POST`   | `/api/{collectionSlug}/unlock`          | [Unlock a user's account](/docs/authentication/operations#unlock), if enabled. |
-| `POST`   | `/api/{collectionSlug}/login`           | [Logs in](/docs/authentication/operations#login) a user with email / password. |
-| `POST`   | `/api/{collectionSlug}/logout`          | [Logs out](/docs/authentication/operations#logout) a user. |
-| `POST`   | `/api/{collectionSlug}/refresh-token`   | [Refreshes a token](/docs/authentication/operations#refresh) that has not yet expired. |
-| `GET`    | `/api/{collectionSlug}/me`              | [Returns the currently logged in user with token](/docs/authentication/operations#me). |
-| `POST`   | `/api/{collectionSlug}/forgot-password` | [Password reset workflow](/docs/authentication/operations#forgot-password) entry point. |
-| `POST`   | `/api/{collectionSlug}/reset-password`  | [To reset the user's password](/docs/authentication/operations#reset-password). |
+| `POST`   | `/api/{collection-slug}/verify/:token`   | [Email verification](/docs/authentication/operations#verify-by-email), if enabled. |
+| `POST`   | `/api/{collection-slug}/unlock`          | [Unlock a user's account](/docs/authentication/operations#unlock), if enabled. |
+| `POST`   | `/api/{collection-slug}/login`           | [Logs in](/docs/authentication/operations#login) a user with email / password. |
+| `POST`   | `/api/{collection-slug}/logout`          | [Logs out](/docs/authentication/operations#logout) a user. |
+| `POST`   | `/api/{collection-slug}/refresh-token`   | [Refreshes a token](/docs/authentication/operations#refresh) that has not yet expired. |
+| `GET`    | `/api/{collection-slug}/me`              | [Returns the currently logged in user with token](/docs/authentication/operations#me). |
+| `POST`   | `/api/{collection-slug}/forgot-password` | [Password reset workflow](/docs/authentication/operations#forgot-password) entry point. |
+| `POST`   | `/api/{collection-slug}/reset-password`  | [To reset the user's password](/docs/authentication/operations#reset-password). |
 
 ## Globals
 
