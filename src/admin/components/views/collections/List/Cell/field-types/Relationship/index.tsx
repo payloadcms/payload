@@ -10,7 +10,7 @@ const baseClass = 'relationship-cell';
 const totalToShow = 3;
 
 const RelationshipCell = (props) => {
-  const { field, data: cellData } = props;
+  const { field, cellData } = props;
   const { collections, routes } = useConfig();
   const [intersectionRef, entry] = useIntersect();
   const [values, setValues] = useState<Value[]>([]);
