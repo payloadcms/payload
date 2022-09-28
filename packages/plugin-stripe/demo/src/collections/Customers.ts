@@ -17,6 +17,20 @@ const Customers: CollectionConfig = {
       label: 'Name',
       type: 'text',
     },
+    {
+      name: 'subscriptions',
+      label: 'Subscriptions',
+      type: 'array',
+      admin: {
+        readOnly: true,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text'
+        }
+      ]
+    },
   ]
 }
 

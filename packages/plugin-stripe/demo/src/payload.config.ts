@@ -40,21 +40,29 @@ export default buildConfig({
   plugins: [
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
-      sync: [{
-        collection: 'customers',
-        resource: 'customers',
-        resourceSingular: 'customer',
-        fields: [
-          {
-            field: 'name',
-            property: 'name',
-          },
-          {
-            field: 'email',
-            property: 'email',
-          }
-        ]
-      }],
+      sync: [
+        {
+          collection: 'customers',
+          resource: 'customers',
+          resourceSingular: 'customer',
+          fields: [
+            {
+              field: 'name',
+              property: 'name',
+            },
+            {
+              field: 'email',
+              property: 'email',
+            },
+            // NOTE: nested fields are not supported yet, because the Stripe API keeps everything separate at the top-level
+            // that pattern might look something like this
+            // {
+            //   field: 'subscriptions.name',
+            //   property: 'plan.nme',
+            // }
+          ]
+        },
+      ],
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
     }),
   ],
