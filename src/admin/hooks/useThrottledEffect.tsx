@@ -7,7 +7,7 @@ const useThrottledEffect: useThrottledEffect = (callback, delay, deps = []) => {
   const lastRan = useRef<number>(null);
 
   useEffect(() => {
-    if (lastRan) {
+    if (lastRan.current) {
       const handler = setTimeout(() => {
         if (Date.now() - lastRan.current >= delay) {
           callback();
