@@ -9,7 +9,7 @@ export const handleWebhooks: StripeWebhookHandler = async (args) => {
     stripeConfig
   } = args;
 
-  payload.logger.info(`Processing Stripe '${event.type}' webhook event with ID: '${event.id}'.`);
+  payload.logger.info(`Received Stripe '${event.type}' webhook event with ID: '${event.id}'.`);
 
   // could also traverse into event.data.object.object to get the type, but that seems unreliable
   // use cli: `stripe resources` to see all available resources
@@ -19,9 +19,6 @@ export const handleWebhooks: StripeWebhookHandler = async (args) => {
   const syncConfig = stripeConfig?.sync?.find((sync) => sync.resourceSingular === resourceType);
 
   if (syncConfig) {
-    console.log('resourceType', resourceType);
-    console.log('method', method);
-
     switch (method) {
       case 'created': {
         await handleCreatedOrUpdated({

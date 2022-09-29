@@ -28,6 +28,13 @@ const Customers: CollectionConfig = {
         {
           name: 'name',
           type: 'text'
+        },
+        {
+          name: 'stripeID',
+          type: 'text',
+          admin: {
+            readOnly: true,
+          }
         }
       ]
     },

@@ -47,7 +47,7 @@ export default config;
 
 - `sync`
 
-  Optional. An array of sync configs. Use this option to avoid manual setup. This will automatically configure a sync between Payload and Stripe on create, delete, and update. See [sync](#sync) for more details.
+  Optional. An array of sync configs. This will automatically configure a sync between Payload collections and Stripe resources on create, delete, and update. See [sync](#sync) for more details.
 
 - `stripeWebhooksEndpointSecret`
 
@@ -59,9 +59,11 @@ export default config;
 
 ## Sync
 
-This option will setup a basic sync between Payload and Stripe for you automatically. It will create all the necessary hooks and webhooks handlers, so the only thing you have to do is map your Payload fields to their corresponding Stripe properties. As documents are created, updated, and deleted from either Stripe or Payload, the changes are reflected on either side.
+This option will setup a basic sync between Payload collections and Stripe resources for you automatically. It will create all the necessary hooks and webhooks handlers, so the only thing you have to do is map your Payload fields to their corresponding Stripe properties. As documents are created, updated, and deleted from either Stripe or Payload, the changes are reflected on either side.
 
 > NOTE: If you wish to enable a _two-way_ sync, be sure to setup [`webhooks`](#webhooks) and pass the `stripeWebhooksEndpointSecret` through your config.
+
+> NOTE: Due to limitations in the Stripe API, this currently only works with top-level fields. This is because Stripe manages data objects separately, so a webhook originating from a customer's subscription include all customer data. Inversely, you cannot update a customer's subscription by updating the customer. In the future, we can build a pattern around this. But for now, cases like that will need to be hard-coded. See the [demo](./demo) for an example of this.
 
 ```js
 import { buildConfig } from 'payload/config';
@@ -162,7 +164,7 @@ const config = buildConfig({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
       webhooks: {
-        'customer.subscription.updated': (event, stripe, stripeConfig) => {
+        'customer.subscription.updated': ({ event, stripe, stripeConfig }) => {
           // DO SOMETHING
         }
       }

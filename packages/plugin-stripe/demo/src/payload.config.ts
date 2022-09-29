@@ -3,7 +3,7 @@ import path from 'path';
 import stripePlugin from '../../src';
 import Users from './collections/Users';
 import Customers from './collections/Customers';
-// import { handleWebhooks } from '../../src/webhooks/handleWebhooks';
+import { subscriptionCreatedOrUpdated } from './webhooks/subscriptionCreatedOrUpdated';
 
 export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
@@ -55,7 +55,8 @@ export default buildConfig({
               property: 'email',
             },
             // NOTE: nested fields are not supported yet, because the Stripe API keeps everything separate at the top-level
-            // that pattern might look something like this
+            // because of this, we need to wire our own custom webhooks to handle these changes
+            // In the future, support for nested fields may something like this:
             // {
             //   field: 'subscriptions.name',
             //   property: 'plan.nme',
@@ -63,6 +64,10 @@ export default buildConfig({
           ]
         },
       ],
+      webhooks: {
+        'customer.subscription.created': subscriptionCreatedOrUpdated,
+        'customer.subscription.updated': subscriptionCreatedOrUpdated
+      },
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
     }),
   ],
