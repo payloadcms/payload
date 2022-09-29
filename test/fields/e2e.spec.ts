@@ -102,7 +102,7 @@ describe('fields', () => {
       await page.locator('#field-textInRow').fill(textInRowValue);
       await page.locator('#field-numberInRow').fill(numberInRowValue);
 
-      await wait(100);
+      await wait(300);
 
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click();
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();
