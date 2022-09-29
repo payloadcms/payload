@@ -100,6 +100,13 @@ export const init = (payload: Payload, options: InitOptions): void => {
     if (!payload.config.graphQL.disable) {
       payload.router.use(
         payload.config.routes.graphQL,
+        (req, res, next): void => {
+          if (req.method === 'OPTIONS') {
+            res.sendStatus(204);
+          } else {
+            next();
+          }
+        },
         identifyAPI('GraphQL'),
         (req: PayloadRequest, res: Response) => graphQLHandler(req, res)(req, res),
       );
