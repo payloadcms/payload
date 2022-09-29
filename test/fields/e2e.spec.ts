@@ -134,7 +134,7 @@ describe('fields', () => {
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click();
       await page.click('#action-save', { delay: 100 });
 
-      await wait(100);
+      await wait(250);
 
       // Go back to row tab, make sure the new value is still present
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();
