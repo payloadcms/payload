@@ -106,7 +106,7 @@ export const init = (payload: Payload, options: InitOptions): void => {
       initGraphQLPlayground(payload);
     }
 
-    mountEndpoints(payload.router, payload.config.endpoints);
+    mountEndpoints(options.express, payload.router, payload.config.endpoints);
 
     // Bind router to API
     payload.express.use(payload.config.routes.api, payload.router);

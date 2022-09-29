@@ -1,3 +1,16 @@
+## [1.1.4](https://github.com/payloadcms/payload/compare/v1.1.3...v1.1.4) (2022-09-24)
+
+
+### Bug Fixes
+
+* field level access for nested fields ([22ea98c](https://github.com/payloadcms/payload/commit/22ea98ca33770a0ec6652f814726454abb6da24e))
+* refine type generation for relationships ([ef83bdb](https://github.com/payloadcms/payload/commit/ef83bdb709ebde008b90930a6875b24f042a41b0))
+
+
+### Features
+
+* supports root endpoints ([52cd3b4](https://github.com/payloadcms/payload/commit/52cd3b4a7ed9bc85e93d753a3aaf190489ca98cd))
+
 ## [1.1.3](https://github.com/payloadcms/payload/compare/v1.1.2...v1.1.3) (2022-09-16)
 
 

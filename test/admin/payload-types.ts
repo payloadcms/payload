@@ -16,14 +16,19 @@ export interface Global {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "group-globals-one".
  */
-export interface Post {
+export interface GroupGlobalsOne {
   id: string;
   title?: string;
-  description?: string;
-  createdAt: string;
-  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-globals-two".
+ */
+export interface GroupGlobalsTwo {
+  id: string;
+  title?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -36,6 +41,58 @@ export interface User {
   resetPasswordExpiration?: string;
   loginAttempts?: number;
   lockUntil?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title?: string;
+  description?: string;
+  number?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-one-collection-ones".
+ */
+export interface GroupOneCollectionOne {
+  id: string;
+  title?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-one-collection-twos".
+ */
+export interface GroupOneCollectionTwo {
+  id: string;
+  title?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-two-collection-ones".
+ */
+export interface GroupTwoCollectionOne {
+  id: string;
+  title?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-two-collection-twos".
+ */
+export interface GroupTwoCollectionTwo {
+  id: string;
+  title?: string;
   createdAt: string;
   updatedAt: string;
 }

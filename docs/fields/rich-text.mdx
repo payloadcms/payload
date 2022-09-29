@@ -174,6 +174,20 @@ const ExampleCollection: CollectionConfig = {
             ]
           }
         ],
+        link: {
+          // Inject your own fields into the Link element
+          fields: [
+            {
+              name: 'rel',
+              label: 'Rel Attribute',
+              type: 'select',
+              hasMany: true,
+              options: [
+                'noopener', 'noreferrer', 'nofollow',
+              ],
+            },
+          ],
+        },
         upload: {
           collections: {
             media: {

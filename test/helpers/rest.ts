@@ -255,8 +255,8 @@ export class RESTClient {
     return { status, doc: result };
   }
 
-  async endpoint<T = any>(path: string, method = 'get', params = undefined): Promise<{status: number, data: T}> {
-    const response = await fetch(`${this.serverURL}/api${path}`, {
+  async endpoint<T = any>(path: string, method = 'get', params = undefined): Promise<{ status: number, data: T }> {
+    const response = await fetch(`${this.serverURL}${path}`, {
       headers: {
         'Content-Type': 'application/json',
       },

@@ -113,7 +113,7 @@ export default function registerCollections(ctx: Payload): void {
       }
 
       const endpoints = buildEndpoints(collection);
-      mountEndpoints(router, endpoints);
+      mountEndpoints(ctx.express, router, endpoints);
 
       ctx.router.use(`/${slug}`, router);
     }
