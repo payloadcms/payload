@@ -24,7 +24,7 @@ In the `plugins` array of your [Payload config](https://payloadcms.com/docs/conf
 
 ```js
 import { buildConfig } from 'payload/config';
-import search from 'payload-search';
+import search from '@payloadcms/plugin-search';
 
 const config = buildConfig({
   collections: [
