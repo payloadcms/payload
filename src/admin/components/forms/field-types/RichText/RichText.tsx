@@ -178,14 +178,28 @@ const RichText: React.FC<Props> = (props) => {
   }, [initialValue]);
 
   useEffect(() => {
-    if (loaded && readOnly) {
-      // disable interactions on all editor elements when read only
-      Array.from(editorRef.current.children).forEach((child) => {
-        const childAsElement = child as HTMLElement;
-        childAsElement.tabIndex = -1;
-        childAsElement.style.pointerEvents = 'none';
+    function setClickableState(clickState: 'disabled' | 'enabled') {
+      const selectors = 'button, a, [role="button"]';
+      const toolbarButtons: (HTMLButtonElement | HTMLAnchorElement)[] = toolbarRef.current.querySelectorAll(selectors);
+      const editorButtons: (HTMLButtonElement | HTMLAnchorElement)[] = editorRef.current.querySelectorAll(selectors);
+
+      [...(toolbarButtons || []), ...(editorButtons || [])].forEach((child) => {
+        const isButton = child.tagName === 'BUTTON';
+        const isDisabling = clickState === 'disabled';
+        child.setAttribute('tabIndex', isDisabling ? '-1' : '0');
+        if (isButton) child.setAttribute('disabled', isDisabling ? 'disabled' : null);
       });
     }
+
+    if (loaded && readOnly) {
+      setClickableState('disabled');
+    }
+
+    return () => {
+      if (loaded && readOnly) {
+        setClickableState('enabled');
+      }
+    };
   }, [loaded, readOnly]);
 
   if (!loaded) {
@@ -233,8 +247,11 @@ const RichText: React.FC<Props> = (props) => {
           }}
         >
           <div className={`${baseClass}__wrapper`}>
-            <div className={`${baseClass}__toolbar`} ref={toolbarRef}>
-              <div className={`${baseClass}__toolbar-wrap`} tabIndex={readOnly ? -1 : undefined}>
+            <div
+              className={`${baseClass}__toolbar`}
+              ref={toolbarRef}
+            >
+              <div className={`${baseClass}__toolbar-wrap`}>
                 {elements.map((element, i) => {
                   let elementName: string;
                   if (typeof element === 'object' && element?.name) elementName = element.name;

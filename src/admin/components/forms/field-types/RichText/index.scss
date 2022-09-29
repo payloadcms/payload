@@ -104,6 +104,10 @@
     .rich-text__editor {
       background-color: var(--theme-elevation-150);
       padding: base(.5);
+
+      .popup button {
+        display: none;
+      }
     }
 
     .rich-text__toolbar {
