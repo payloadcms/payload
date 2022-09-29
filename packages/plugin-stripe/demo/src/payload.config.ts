@@ -4,6 +4,7 @@ import stripePlugin from '../../src';
 import Users from './collections/Users';
 import Customers from './collections/Customers';
 import { subscriptionCreatedOrUpdated } from './webhooks/subscriptionCreatedOrUpdated';
+import Products from './collections/Products';
 
 export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
@@ -26,7 +27,8 @@ export default buildConfig({
   },
   collections: [
     Users,
-    Customers
+    Customers,
+    Products
   ],
   localization: {
     locales: [
@@ -56,11 +58,22 @@ export default buildConfig({
             },
             // NOTE: nested fields are not supported yet, because the Stripe API keeps everything separate at the top-level
             // because of this, we need to wire our own custom webhooks to handle these changes
-            // In the future, support for nested fields may something like this:
+            // In the future, support for nested fields may look something like this:
             // {
             //   field: 'subscriptions.name',
-            //   property: 'plan.nme',
+            //   property: 'plan.name',
             // }
+          ]
+        },
+        {
+          collection: 'products',
+          resource: 'products',
+          resourceSingular: 'product',
+          fields: [
+            {
+              field: 'name',
+              property: 'name',
+            },
           ]
         },
       ],

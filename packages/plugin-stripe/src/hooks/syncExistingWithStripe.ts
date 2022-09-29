@@ -35,7 +35,7 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
       }, {} as Record<string, any>);
 
       if (operation === 'update') {
-        payload.logger.info(`Syncing changes from document with ID: '${doc?.id}' in collection: '${collectionSlug}' to Stripe.`);
+        payload.logger.info(`A '${collectionSlug}' document has changed in Payload with ID: '${doc?.id}'. Syncing with Stripe.`);
 
         if (!doc.stripeID) {
           // NOTE: the "beforeValidate" hook populates this
