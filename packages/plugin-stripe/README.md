@@ -57,6 +57,10 @@ export default config;
 
   Optional. Either a function to handle all webhooks events, or an object of Stripe webhook handlers, keyed to the name of the event. See [webhooks](#webhooks) for more details or for a list of all available webhooks, see [here](https://stripe.com/docs/cli/trigger#trigger-event).
 
+- `logs`
+
+  Optional. When `true`, logs sync events to the console as they happen.
+
 ## Sync
 
 This option will setup a basic sync between Payload collections and Stripe resources for you automatically. It will create all the necessary hooks and webhooks handlers, so the only thing you have to do is map your Payload fields to their corresponding Stripe properties. As documents are created, updated, and deleted from either Stripe or Payload, the changes are reflected on either side.

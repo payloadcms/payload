@@ -19,12 +19,17 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
     stripeConfig
   } = args;
 
+  const {
+    logs,
+    sync
+  } = stripeConfig || {};
+
   const { payload } = req;
 
   const { slug: collectionSlug } = collection || {};
 
   if (process.env.NODE_ENV !== 'test' && !doc.skipSync) {
-    const syncConfig = stripeConfig?.sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
+    const syncConfig = sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
 
     if (syncConfig) {
       // combine all fields of this object and match their respective values within the document
@@ -35,13 +40,13 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
       }, {} as Record<string, any>);
 
       if (operation === 'update') {
-        payload.logger.info(`A '${collectionSlug}' document has changed in Payload with ID: '${doc?.id}'. Syncing with Stripe.`);
+        if (logs) payload.logger.info(`A '${collectionSlug}' document has changed in Payload with ID: '${doc?.id}', syncing with Stripe...`);
 
         if (!doc.stripeID) {
           // NOTE: the "beforeValidate" hook populates this
-          payload.logger.error(`- There is no Stripe ID for this document, skipping.`);
+          if (logs) payload.logger.error(`- There is no Stripe ID for this document, skipping.`);
         } else {
-          payload.logger.info(`- Syncing to Stripe ID: '${doc.stripeID}'.`);
+          if (logs) payload.logger.info(`- Syncing to Stripe ID: '${doc.stripeID}'...`);
 
           try {
             const stripeResource = await stripe?.[syncConfig?.resource]?.update(
@@ -49,9 +54,9 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
               syncedFields
             );
 
-            payload.logger.info(`- Successfully synced Stripe document ID: '${stripeResource.id}'.`);
+            if (logs) payload.logger.info(`✅ Successfully synced Stripe document ID: '${stripeResource.id}'.`);
           } catch (error: any) {
-            payload.logger.error(`- Error syncing document with ID: '${doc.id}' to Stripe: ${error?.message || ''}`);
+            if (logs) payload.logger.error(`- Error syncing document with ID: '${doc.id}' to Stripe: ${error?.message || ''}`);
           }
         }
       }

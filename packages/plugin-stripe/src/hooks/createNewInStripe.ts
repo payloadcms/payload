@@ -20,6 +20,11 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
     stripeConfig
   } = args;
 
+  const {
+    sync,
+    logs
+  } = stripeConfig || {};
+
   const payload = req?.payload;
 
   const dataRef = data || {};
@@ -29,18 +34,17 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
     return dataRef;
   }
 
-  // Initialize false so that all Payload events sync to Stripe
-  // conditionally set to true to prevent events that originate from webhooks from triggering an unnecessary sync
-  dataRef.skipSync = false;
-
   if (payload) {
     if (dataRef.skipSync) {
-      // payload.logger.info(`Bypassing collection-level hooks.`);
+      //if (logs) payload.logger.info(`Bypassing collection-level hooks.`);
     } else {
+      // Initialize false so that all Payload events sync to Stripe
+      // conditionally set to true to prevent events that originate from webhooks from triggering an unnecessary sync
+      dataRef.skipSync = false;
 
       const { slug: collectionSlug } = collection || {};
 
-      const syncConfig = stripeConfig?.sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
+      const syncConfig = sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
 
       if (syncConfig) {
         const syncedFields = syncConfig.fields.reduce((acc, field) => {
@@ -50,7 +54,7 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
         }, {} as Record<string, any>);
 
         if (operation === 'update') {
-          payload.logger.info(`A '${collectionSlug}' document has changed in Payload with ID: '${data?.id}'. Syncing with Stripe.`);
+          if (logs) payload.logger.info(`A '${collectionSlug}' document has changed in Payload with ID: '${data?.id}', syncing with Stripe...`);
 
           // NOTE: the Stripe document will be created in the "afterChange" hook, so create a new stripe document here if no stripeID exists
           if (!dataRef.stripeID) {
@@ -58,35 +62,35 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
               // NOTE: Typed as "any" because the "create" method is not standard across all Stripe resources
               const stripeResource = await stripe?.[syncConfig.resource]?.create(syncedFields as any);
 
-              payload.logger.info(`- Successfully created new '${syncConfig.resource}' resource in Stripe with ID: '${stripeResource.id}'.`);
+              if (logs) payload.logger.info(`✅ Successfully created new '${syncConfig.resource}' resource in Stripe with ID: '${stripeResource.id}'.`);
 
               dataRef.stripeID = stripeResource.id;
 
               // NOTE: this is to prevent sync in the "afterChange" hook
               dataRef.skipSync = true;
             } catch (error: any) {
-              payload.logger.error(`- Error creating Stripe document: ${error?.message || ''}`);
+              if (logs) payload.logger.error(`- Error creating Stripe document: ${error?.message || ''}`);
             }
           }
         }
 
         if (operation === 'create') {
-          payload.logger.info(`A new '${collectionSlug}' document was created in Payload with ID: '${data?.id}'. Syncing with Stripe.`);
+          if (logs) payload.logger.info(`A new '${collectionSlug}' document was created in Payload with ID: '${data?.id}', syncing with Stripe...`);
 
           try {
-            payload.logger.info(`- Creating new '${syncConfig.resource}' resource in Stripe.`);
+            if (logs) payload.logger.info(`- Creating new '${syncConfig.resource}' resource in Stripe...`);
 
             // NOTE: Typed as "any" because the "create" method is not standard across all Stripe resources
             const stripeResource = await stripe?.[syncConfig.resource]?.create(syncedFields as any);
 
-            payload.logger.info(`- Successfully created new '${syncConfig.resource}' resource in Stripe with ID: '${stripeResource.id}'.`);
+            if (logs) payload.logger.info(`✅ Successfully created new '${syncConfig.resource}' resource in Stripe with ID: '${stripeResource.id}'.`);
 
             dataRef.stripeID = stripeResource.id;
 
             // NOTE: this is to prevent sync in the "afterChange" hook
             dataRef.skipSync = true;
           } catch (error: any) {
-            payload.logger.error(`- Failed to create new '${syncConfig.resource}' resource in Stripe: ${error?.message || ''}`);
+            if (logs) payload.logger.error(`- Failed to create new '${syncConfig.resource}' resource in Stripe: ${error?.message || ''}`);
           }
         }
       }

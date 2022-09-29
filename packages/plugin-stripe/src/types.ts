@@ -31,6 +31,7 @@ export type StripeConfig = {
   stripeWebhooksEndpointSecret?: string
   webhooks?: StripeWebhookHandler | StripeWebhookHandlers
   sync?: SyncConfig[]
+  logs?: boolean
 }
 
 export type SanitizedStripeConfig = StripeConfig & {

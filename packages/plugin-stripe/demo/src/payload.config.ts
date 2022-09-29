@@ -42,6 +42,7 @@ export default buildConfig({
   plugins: [
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+      logs: true,
       sync: [
         {
           collection: 'customers',

@@ -18,23 +18,28 @@ export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async (args) 
     collection,
   } = args;
 
+  const {
+    logs,
+    sync
+  } = stripeConfig || {};
+
   const { payload } = req;
   const { slug: collectionSlug } = collection || {};
 
-  payload.logger.info(`Document with ID: '${doc?.id}' in collection: '${collectionSlug}' has been deleted, deleting from Stripe.`);
+  if (logs) payload.logger.info(`Document with ID: '${doc?.id}' in collection: '${collectionSlug}' has been deleted, deleting from Stripe...`);
 
   if (process.env.NODE_ENV !== 'test') {
-    payload.logger.info(`- Deleting Stripe document with ID: '${doc.stripeID}'.`);
+    if (logs) payload.logger.info(`- Deleting Stripe document with ID: '${doc.stripeID}'...`);
 
-    const syncConfig = stripeConfig?.sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
+    const syncConfig = sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
 
     if (syncConfig) {
       try {
         await stripe?.[syncConfig.resource]?.del(doc.stripeID);
 
-        payload.logger.log(`- Successfully deleted Stripe document with ID: '${doc.stripeID}'.`);
+        if (logs) payload.logger.log(`✅ Successfully deleted Stripe document with ID: '${doc.stripeID}'.`);
       } catch (error: any) {
-        payload.logger.error(`- Error deleting Stripe document with ID: '${doc.stripeID}': ${error?.message || ''}`);
+        if (logs) payload.logger.error(`- Error deleting Stripe document with ID: '${doc.stripeID}': ${error?.message || ''}`);
       }
     }
   }
