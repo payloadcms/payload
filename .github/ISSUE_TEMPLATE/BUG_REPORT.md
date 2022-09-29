@@ -8,20 +8,21 @@ labels: 'possible-bug'
 
 <!--- Provide a general summary of the issue in the Title above -->
 
-## Expected Behavior
-
-<!--- Tell us what should happen -->
-
 ## Current Behavior
 
 <!--- Tell us what happens instead of the expected behavior -->
 
+## Expected Behavior
+
+<!--- Tell us what you expected happen -->
+
 ## Possible Solution
 
-<!--- Not obligatory, but suggest a fix/reason for the bug, -->
+<!--- Optional. If familiar with the codebase, suggest a fix/reason for the bug. -->
 
 ## Steps to Reproduce
 <!--- Steps to reproduce this bug. Include any code, if relevant -->
+
 1.
 2.
 3.
