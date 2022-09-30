@@ -1,7 +1,7 @@
-import { APIError } from 'payload/errors';
 import Stripe from 'stripe';
 import type { CollectionBeforeValidateHook, CollectionConfig, PayloadRequest } from 'payload/types';
 import { StripeConfig } from '../types';
+import { APIError } from 'payload/errors';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' });
@@ -36,7 +36,7 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
 
   if (payload) {
     if (dataRef.skipSync) {
-      //if (logs) payload.logger.info(`Bypassing collection-level hooks.`);
+      if (logs) payload.logger.info(`Bypassing collection-level hooks.`);
     } else {
       // Initialize false so that all Payload events sync to Stripe
       // conditionally set to true to prevent events that originate from webhooks from triggering an unnecessary sync
@@ -90,7 +90,7 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
             // NOTE: this is to prevent sync in the "afterChange" hook
             dataRef.skipSync = true;
           } catch (error: any) {
-            if (logs) payload.logger.error(`- Failed to create new '${syncConfig.resource}' resource in Stripe: ${error?.message || ''}`);
+            throw new APIError(`Failed to create new '${syncConfig.resource}' resource in Stripe: ${error?.message || ''}`);
           }
         }
       }

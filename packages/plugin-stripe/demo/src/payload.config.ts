@@ -5,6 +5,7 @@ import Users from './collections/Users';
 import Customers from './collections/Customers';
 import { subscriptionCreatedOrUpdated } from './webhooks/subscriptionCreatedOrUpdated';
 import Products from './collections/Products';
+import { subscriptionDeleted } from './webhooks/subscriptionDeleted';
 
 export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
@@ -80,7 +81,8 @@ export default buildConfig({
       ],
       webhooks: {
         'customer.subscription.created': subscriptionCreatedOrUpdated,
-        'customer.subscription.updated': subscriptionCreatedOrUpdated
+        'customer.subscription.updated': subscriptionCreatedOrUpdated,
+        'customer.subscription.deleted': subscriptionDeleted,
       },
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
     }),

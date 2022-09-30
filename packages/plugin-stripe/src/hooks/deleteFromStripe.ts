@@ -1,6 +1,7 @@
 import type { CollectionAfterDeleteHook, CollectionConfig, } from 'payload/types';
 import Stripe from 'stripe';
 import { StripeConfig } from '../types';
+import { APIError } from 'payload/errors';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' });
@@ -36,10 +37,9 @@ export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async (args) 
     if (syncConfig) {
       try {
         await stripe?.[syncConfig.resource]?.del(doc.stripeID);
-
-        if (logs) payload.logger.log(`✅ Successfully deleted Stripe document with ID: '${doc.stripeID}'.`);
+        if (logs) payload.logger.info(`✅ Successfully deleted Stripe document with ID: '${doc.stripeID}'.`);
       } catch (error: any) {
-        if (logs) payload.logger.error(`- Error deleting Stripe document with ID: '${doc.stripeID}': ${error?.message || ''}`);
+        throw new APIError(`Failed to delete Stripe document with ID: '${doc.stripeID}': ${error?.message || ''}`)
       }
     }
   }

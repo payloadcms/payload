@@ -1,6 +1,6 @@
 import { APIError } from 'payload/errors';
 
-export const subscriptionCreatedOrUpdated = async (args) => {
+export const subscriptionDeleted = async (args) => {
   const {
     event,
     payload,
@@ -10,37 +10,12 @@ export const subscriptionCreatedOrUpdated = async (args) => {
 
   const customerStripeID = event.data.object.customer;
 
-  payload.logger.info(`🪝 A new subscription was created or updated in Stripe on customer ID: ${customerStripeID}, syncing to Payload...`);
+  payload.logger.info(`🪝 A new subscription was deleted in Stripe on customer ID: ${customerStripeID}, deleting from Payload...`);
 
   const {
     id: eventID,
     plan
   } = event.data.object;
-
-  let payloadProductID;
-
-  // First lookup the product in Payload
-  try {
-    payload.logger.info(`- Looking up existing Payload product with Stripe ID: ${plan.product}...`);
-
-    const productQuery = await payload.find({
-      collection: 'products',
-      where: {
-        stripeID: {
-          equals: plan.product
-        }
-      }
-    });
-
-    payloadProductID = productQuery.docs?.[0]?.id;
-
-    if (payloadProductID) {
-      payload.logger.info(`- Found existing product with Stripe ID: ${plan.product}. Creating relationship...`);
-    }
-
-  } catch (error: any) {
-    payload.logger.error(`Error finding product ${error?.message}`);
-  }
 
   // Now look up the customer in Payload
   try {
@@ -62,17 +37,7 @@ export const subscriptionCreatedOrUpdated = async (args) => {
       const indexOfSubscription = subscriptions.findIndex(({ stripeID: subscriptionID }) => subscriptionID === eventID);
 
       if (indexOfSubscription > -1) {
-        // update existing subscription
-        subscriptions[indexOfSubscription] = {
-          product: payloadProductID,
-        };
-      } else {
-        // create new subscription
-        subscriptions.push({
-          product: payloadProductID,
-          productID: plan.product,
-          stripeID: eventID
-        })
+        delete subscriptions[indexOfSubscription];
       }
 
       try {
@@ -85,9 +50,9 @@ export const subscriptionCreatedOrUpdated = async (args) => {
           }
         })
 
-        payload.logger.info(`✅ Successfully updated subscription.`);
+        payload.logger.info(`✅ Successfully deleted subscription.`);
       } catch (error) {
-        payload.logger.error(`- Error updating subscription: ${error}`);
+        payload.logger.error(`- Error deleting subscription: ${error}`);
       }
     } else {
       payload.logger.info(`- No existing customer found, cannot update subscription.`);

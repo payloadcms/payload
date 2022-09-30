@@ -1,6 +1,7 @@
 import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types';
 import Stripe from 'stripe';
 import { StripeConfig } from '../types';
+import { APIError } from 'payload/errors';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' });
@@ -56,7 +57,7 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
 
             if (logs) payload.logger.info(`✅ Successfully synced Stripe document ID: '${stripeResource.id}'.`);
           } catch (error: any) {
-            if (logs) payload.logger.error(`- Error syncing document with ID: '${doc.id}' to Stripe: ${error?.message || ''}`);
+            throw new APIError(`Failed to sync document with ID: '${doc.id}' to Stripe: ${error?.message || ''}`);
           }
         }
       }

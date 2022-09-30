@@ -26,16 +26,20 @@ const Customers: CollectionConfig = {
       },
       fields: [
         {
-          name: 'name',
-          type: 'text'
+          name: 'stripeID',
+          label: 'Stripe ID',
+          type: 'text',
         },
         {
-          name: 'stripeID',
+          name: 'productID',
+          label: 'Product ID',
           type: 'text',
-          admin: {
-            readOnly: true,
-          }
-        }
+        },
+        {
+          name: 'product',
+          type: 'relationship',
+          relationTo: 'products',
+        },
       ]
     },
   ]
