@@ -1,3 +1,10 @@
+## [1.1.5](https://github.com/payloadcms/payload/compare/v1.1.4...v1.1.5) (2022-09-29)
+
+
+### Bug Fixes
+
+* bug in useThrottledEffect ([3ce8ee4](https://github.com/payloadcms/payload/commit/3ce8ee4661bfa3825c5b8c41232d5da57f7591ed))
+
 ## [1.1.4](https://github.com/payloadcms/payload/compare/v1.1.3...v1.1.4) (2022-09-24)
 
 
