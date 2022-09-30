@@ -67,7 +67,7 @@ This option will setup a basic sync between Payload collections and Stripe resou
 
 > NOTE: If you wish to enable a _two-way_ sync, be sure to setup [`webhooks`](#webhooks) and pass the `stripeWebhooksEndpointSecret` through your config.
 
-> NOTE: Due to limitations in the Stripe API, this currently only works with top-level fields. This is because Stripe manages data objects separately, so a webhook originating from a customer's subscription include all customer data. Inversely, you cannot update a customer's subscription by updating the customer. In the future, we can build a pattern around this. But for now, cases like that will need to be hard-coded. See the [demo](./demo) for an example of this.
+> NOTE: Due to limitations in the Stripe API, this currently only works with top-level fields. This is because every Stripe object is a separate entity, making it difficult to abstract into a simple reusable library. In the future, we may find a pattern around this. But for now, cases like that will need to be hard-coded. See the [demo](./demo) for an example of this.
 
 ```js
 import { buildConfig } from 'payload/config';

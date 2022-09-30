@@ -11,121 +11,115 @@ import { deleteFromStripe } from './hooks/deleteFromStripe';
 const stripePlugin = (incomingStripeConfig: StripeConfig) => (config: Config): Config => {
   const { collections } = config;
 
-  if (incomingStripeConfig?.stripeSecretKey) {
-    // set config defaults here
-    const stripeConfig: SanitizedStripeConfig = {
-      ...incomingStripeConfig,
-      sync: incomingStripeConfig?.sync || []
-    }
+  // set config defaults here
+  const stripeConfig: SanitizedStripeConfig = {
+    ...incomingStripeConfig,
+    sync: incomingStripeConfig?.sync || []
+  }
 
-    return ({
-      ...config,
-      admin: {
-        ...config.admin,
-        webpack: extendWebpackConfig(config),
-      },
-      endpoints: [
-        ...config?.endpoints || [],
-        {
-          path: '/stripe/webhooks',
-          method: 'post',
-          root: true,
-          handler: [
-            express.raw({ type: 'application/json' }),
-            (req, res, next) => {
-              stripeWebhooks({
-                req,
-                res,
-                next,
-                config,
-                stripeConfig
-              })
-            }
-          ]
-        },
-        {
-          path: '/stripe/rest',
-          method: 'post',
-          handler: (req, res, next) => {
-            stripeREST({
+  return ({
+    ...config,
+    admin: {
+      ...config.admin,
+      webpack: extendWebpackConfig(config),
+    },
+    endpoints: [
+      ...config?.endpoints || [],
+      {
+        path: '/stripe/webhooks',
+        method: 'post',
+        root: true,
+        handler: [
+          express.raw({ type: 'application/json' }),
+          (req, res, next) => {
+            stripeWebhooks({
               req,
               res,
               next,
+              config,
               stripeConfig
             })
           }
-        },
-      ],
-      collections: collections?.map((collection) => {
-        const {
-          hooks: existingHooks
-        } = collection;
-
-        const syncConfig = stripeConfig.sync?.find((sync) => sync.collection === collection.slug);
-
-        if (syncConfig) {
-          return {
-            ...collection,
-            hooks: {
-              ...collection.hooks,
-              beforeValidate: [
-                ...(existingHooks?.beforeValidate || []),
-                async (args) => createNewInStripe({
-                  ...args,
-                  collection,
-                  stripeConfig,
-                })
-              ],
-              afterChange: [
-                ...(existingHooks?.afterChange || []),
-                async (args) => syncExistingWithStripe({
-                  ...args,
-                  collection,
-                  stripeConfig
-                })
-              ],
-              afterDelete: [
-                ...(existingHooks?.afterDelete || []),
-                async (args) => deleteFromStripe({
-                  ...args,
-                  collection,
-                  stripeConfig
-                })
-              ],
-            },
-            fields: [
-              ...collection.fields,
-              {
-                name: 'stripeID',
-                label: 'Stripe ID',
-                type: 'text',
-                saveToJWT: true,
-                admin: {
-                  position: 'sidebar',
-                  readOnly: true,
-                },
-              },
-              {
-                name: 'skipSync',
-                label: 'Synced To Sync',
-                type: 'checkbox',
-                admin: {
-                  position: 'sidebar',
-                  readOnly: true,
-                },
-              }
-            ]
-          };
+        ]
+      },
+      {
+        path: '/stripe/rest',
+        method: 'post',
+        handler: (req, res, next) => {
+          stripeREST({
+            req,
+            res,
+            next,
+            stripeConfig
+          })
         }
+      },
+    ],
+    collections: collections?.map((collection) => {
+      const {
+        hooks: existingHooks
+      } = collection;
 
-        return collection;
-      })
+      const syncConfig = stripeConfig.sync?.find((sync) => sync.collection === collection.slug);
+
+      if (syncConfig) {
+        return {
+          ...collection,
+          hooks: {
+            ...collection.hooks,
+            beforeValidate: [
+              ...(existingHooks?.beforeValidate || []),
+              async (args) => createNewInStripe({
+                ...args,
+                collection,
+                stripeConfig,
+              })
+            ],
+            afterChange: [
+              ...(existingHooks?.afterChange || []),
+              async (args) => syncExistingWithStripe({
+                ...args,
+                collection,
+                stripeConfig
+              })
+            ],
+            afterDelete: [
+              ...(existingHooks?.afterDelete || []),
+              async (args) => deleteFromStripe({
+                ...args,
+                collection,
+                stripeConfig
+              })
+            ],
+          },
+          fields: [
+            ...collection.fields,
+            {
+              name: 'stripeID',
+              label: 'Stripe ID',
+              type: 'text',
+              saveToJWT: true,
+              admin: {
+                position: 'sidebar',
+                readOnly: true,
+              },
+            },
+            {
+              name: 'skipSync',
+              label: 'Synced To Sync',
+              type: 'checkbox',
+              admin: {
+                position: 'sidebar',
+                readOnly: true,
+              },
+            }
+          ]
+        };
+      }
+
+      return collection;
     })
-  } else {
-    console.error("Stripe plugin: No 'stripeSecretKey' provided. Plugin not enabled.");
-  }
-
-  return config
-};
+  })
+}
 
 export default stripePlugin;
