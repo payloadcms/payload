@@ -58,6 +58,12 @@ export default buildConfig({
             formatOptions: { format: 'png', options: { quality: 90 } },
           },
           {
+            name: 'differentFormatFromMainImage',
+            width: 200,
+            height: null,
+            formatOptions: { format: 'jpg', options: { quality: 90 } },
+          },
+          {
             name: 'tablet',
             width: 640,
             height: 480,
