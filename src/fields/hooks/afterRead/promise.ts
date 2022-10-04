@@ -127,7 +127,7 @@ export const promise = async ({
               value,
               originalDoc: doc,
               data: doc,
-              siblingData: siblingDoc[field.name],
+              siblingData: siblingDoc,
               operation: 'read',
               req,
             });
@@ -144,7 +144,7 @@ export const promise = async ({
             findMany,
             originalDoc: doc,
             operation: 'read',
-            siblingData: siblingDoc[field.name],
+            siblingData: siblingDoc,
             req,
             value: siblingDoc[field.name],
           });
