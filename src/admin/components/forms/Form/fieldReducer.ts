@@ -186,6 +186,18 @@ function fieldReducer(state: Fields, action): Fields {
       }, {});
     }
 
+    case 'UPDATE_VALUE': {
+      const existingField = state[action.path] || {};
+
+      return {
+        ...state,
+        [action.path]: {
+          ...existingField,
+          value: action.value,
+        },
+      };
+    }
+
     default: {
       const newField = {
         value: action.value,
