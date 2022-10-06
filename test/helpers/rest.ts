@@ -55,7 +55,6 @@ type UpdateArgs<T = any> = {
 };
 type DeleteArgs = {
   slug?: string;
-  id: string;
   auth?: boolean;
 };
 
@@ -145,7 +144,7 @@ export class RESTClient {
     return { status, doc };
   }
 
-  async find<T = any>(args?: FindArgs): Promise<QueryResponse<T>> {
+  async find<T = any>(args: FindArgs = {}): Promise<QueryResponse<T>> {
     const options = {
       headers: {
         ...headers,
@@ -154,7 +153,11 @@ export class RESTClient {
     };
 
     const slug = args?.slug || this.defaultSlug;
-    const whereQuery = qs.stringify(args?.query ? { where: args.query } : {}, {
+    const params: Record<string, unknown> = {};
+    if (args.depth !== undefined) {
+      params.depth = args.depth;
+    }
+    const whereQuery = qs.stringify(args?.query ? { where: args.query, ...params } : params, {
       addQueryPrefix: true,
     });
     const fetchURL = `${this.serverURL}/api/${slug}${whereQuery}`;

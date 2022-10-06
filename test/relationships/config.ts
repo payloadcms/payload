@@ -1,8 +1,10 @@
+import { Payload } from '../../src';
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
 import type { CustomIdNumberRelation, CustomIdRelation, Post, Relation } from './payload-types';
 import { ChainedRelation } from './payload-types';
+import { mapAsync } from '../../src/utilities/mapAsync';
 
 const openAccess = {
   create: () => true,
@@ -40,8 +42,135 @@ export const defaultAccessRelSlug = 'strict-access';
 export const chainedRelSlug = 'chained-relation';
 export const customIdSlug = 'custom-id-relation';
 export const customIdNumberSlug = 'custom-id-number-relation';
+export const cascadingSlug = 'cascading';
+export const cascadingHasManySlug = 'cascading-has-many';
+export const cascadingPolySlug = 'cascading-poly';
+export const cascadingHasManyPolySlug = 'cascading-has-many-poly';
+export const cascadingNested = 'cascading-nested';
+
+export const seedCascadeRelationships = async (payload: Payload): Promise<void> => {
+  const cascadingIDs = [];
+  await mapAsync([...Array(6)], async (ignore, i) => {
+    const doc = await payload.create({
+      collection: relationSlug,
+      data: {
+        name: `cascading ${i}`,
+      },
+    });
+    cascadingIDs.push(doc.id);
+  });
+  const cascadingSlugIDs = [];
+  await mapAsync([...Array(2)], async (i) => {
+    const doc = await payload.create({
+      collection: slug,
+      data: {
+        name: `cascading ${i}`,
+      },
+    });
+    cascadingSlugIDs.push(doc.id);
+  });
+
+  // cascading hooks
+  await payload.create({
+    collection: cascadingSlug,
+    data: {
+      relation: cascadingIDs.shift(),
+    },
+  });
+
+  await payload.create({
+    collection: cascadingHasManySlug,
+    data: {
+      relation: [cascadingIDs.shift(), cascadingIDs.shift()],
+    },
+  });
+
+  await payload.create({
+    collection: cascadingPolySlug,
+    data: {
+      relation: { value: cascadingSlugIDs.shift(), relationTo: slug },
+    },
+  });
+
+  await payload.create({
+    collection: cascadingHasManyPolySlug,
+    data: {
+      relation: [{
+        value: cascadingIDs.shift(),
+        relationTo: relationSlug,
+      }, {
+        value: cascadingSlugIDs.shift(),
+        relationTo: slug,
+      }],
+    },
+  });
+};
+
 export default buildConfig({
   collections: [
+    // TODO: cascade working only when relationship fields come before relationTo
+    {
+      slug: cascadingSlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'relation',
+          relationTo: relationSlug,
+          cascade: true,
+        },
+      ],
+    },
+    {
+      slug: cascadingHasManySlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'relation',
+          hasMany: true,
+          relationTo: relationSlug,
+          cascade: true,
+        },
+      ],
+    },
+    {
+      slug: cascadingPolySlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'relation',
+          relationTo: [slug, relationSlug],
+          cascade: true,
+        },
+      ],
+    },
+    {
+      slug: cascadingHasManyPolySlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'relation',
+          hasMany: true,
+          relationTo: [slug, relationSlug],
+          cascade: true,
+        },
+      ],
+    },
+    {
+      slug: cascadingNested,
+      fields: [
+        {
+          type: 'group',
+          name: 'group',
+          fields: [
+            {
+              type: 'relationship',
+              name: 'relation',
+              relationTo: relationSlug,
+              cascade: true,
+            }],
+        },
+      ],
+    },
     {
       slug,
       access: openAccess,
@@ -248,5 +377,7 @@ export default buildConfig({
         filteredRelation: filteredRelation.id,
       },
     });
+
+    await seedCascadeRelationships(payload);
   },
 });

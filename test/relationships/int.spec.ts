@@ -1,7 +1,15 @@
 import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
 import { initPayloadTest } from '../helpers/configHelpers';
-import config, { customIdSlug, chainedRelSlug, defaultAccessRelSlug, slug, relationSlug, customIdNumberSlug } from './config';
+import config, {
+  customIdSlug,
+  chainedRelSlug,
+  defaultAccessRelSlug,
+  slug,
+  relationSlug,
+  customIdNumberSlug,
+  cascadingSlug, cascadingHasManySlug, cascadingPolySlug, cascadingHasManyPolySlug, seedCascadeRelationships,
+} from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
 import type { ChainedRelation, CustomIdNumberRelation, CustomIdRelation, Post, Relation } from './payload-types';
@@ -222,6 +230,39 @@ describe('Relationships', () => {
           expect(doc?.relationField).toMatchObject({ id: relation.id, name: relation.name });
         });
       });
+    });
+  });
+
+  describe('Cascade deletes', () => {
+    beforeEach(async () => {
+      await seedCascadeRelationships(payload);
+    });
+
+    it('should remove cascade relationships', async () => {
+      const { result } = await client.find({ slug: cascadingSlug, depth: 0 });
+      await payload.delete({ collection: relationSlug, id: result.docs[0].relation });
+      const { doc } = await client.findByID({ slug: cascadingSlug, id: result.docs[0].id });
+      expect(doc.relation).toBeNull();
+    });
+    it('should remove cascade relationships with hasMany', async () => {
+      const { result } = await client.find({ slug: cascadingHasManySlug, depth: 0 });
+      await payload.delete({ collection: relationSlug, id: result.docs[0].relation[1] });
+      const { doc } = await client.findByID({ slug: cascadingHasManySlug, id: result.docs[0].id, options: { depth: 0 } });
+      expect(doc.relation).not.toContain(result.docs[0].relation[1]);
+      expect(doc.relation).toContain(result.docs[0].relation[0]);
+    });
+    it('should remove cascade relationships with relationTo many', async () => {
+      const { result } = await client.find({ slug: cascadingPolySlug, depth: 0 });
+      await payload.delete({ collection: slug, id: result.docs[0].relation.value });
+      const { doc } = await client.findByID({ slug: cascadingPolySlug, id: result.docs[0].id, options: { depth: 0 } });
+      expect(doc.relation).toBeNull();
+    });
+    it('should remove cascade relationships with hasMany relationTo many', async () => {
+      const { result } = await client.find({ slug: cascadingHasManyPolySlug, depth: 0 });
+      await payload.delete({ collection: result.docs[0].relation[0].relationTo, id: result.docs[0].relation[0].value });
+      const { doc } = await client.findByID({ slug: cascadingHasManyPolySlug, id: result.docs[0].id, options: { depth: 0 } });
+      expect(doc.relation).not.toContain(result.docs[0].relation[1].value);
+      expect(doc.relation[0].value).not.toEqual(result.docs[0].relation[0].value);
     });
   });
 });

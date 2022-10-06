@@ -100,8 +100,7 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = config.collections.map((c) => c.slug);
-  sanitized.fields = sanitizeFields(sanitized.fields, validRelationships);
+  sanitized.fields = sanitizeFields(sanitized.fields, config, sanitized);
 
   return sanitized as SanitizedCollectionConfig;
 };

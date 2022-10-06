@@ -12,7 +12,7 @@ const stat = promisify(fs.stat);
 
 require('isomorphic-fetch');
 
-let client;
+let client: RESTClient;
 
 describe('Collections - Uploads', () => {
   beforeAll(async (done) => {
@@ -33,7 +33,6 @@ describe('Collections - Uploads', () => {
           file: true,
           data: formData,
           auth: true,
-          headers: {},
         });
 
         expect(status).toBe(201);
@@ -65,7 +64,6 @@ describe('Collections - Uploads', () => {
         file: true,
         data: formData,
         auth: true,
-        headers: {},
       });
 
       expect(status).toBe(201);
@@ -88,7 +86,6 @@ describe('Collections - Uploads', () => {
         file: true,
         data: formData,
         auth: true,
-        headers: {},
       });
 
       expect(status).toBe(201);
@@ -114,7 +111,6 @@ describe('Collections - Uploads', () => {
         file: true,
         data: formData,
         auth: true,
-        headers: {},
       });
 
       expect(status).toBe(201);
@@ -144,10 +140,8 @@ describe('Collections - Uploads', () => {
 
     const { status } = await client.update({
       id: mediaDoc.id,
-      file: true,
       data: formData,
       auth: true,
-      headers: {},
     });
 
     expect(status).toBe(200);
@@ -194,7 +188,6 @@ describe('Collections - Uploads', () => {
       file: true,
       data: formData,
       auth: true,
-      headers: {},
     });
 
     const { status } = await client.delete(doc.id, {

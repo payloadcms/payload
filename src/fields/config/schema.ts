@@ -283,6 +283,7 @@ export const relationship = baseField.keys({
   defaultValue: joi.alternatives().try(
     joi.func(),
   ),
+  cascade: joi.boolean(),
   admin: baseAdminFields.keys({
     isSortable: joi.boolean().default(false),
   }),

@@ -30,7 +30,7 @@ const sanitizeConfig = (config: Config): SanitizedConfig => {
   checkDuplicateCollections(sanitizedConfig.collections);
 
   if (sanitizedConfig.globals.length > 0) {
-    sanitizedConfig.globals = sanitizeGlobals(sanitizedConfig.collections, sanitizedConfig.globals);
+    sanitizedConfig.globals = sanitizeGlobals(config);
   }
 
   if (typeof sanitizedConfig.serverURL === 'undefined') {

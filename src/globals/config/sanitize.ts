@@ -1,15 +1,15 @@
 import merge from 'deepmerge';
 import { toWords } from '../../utilities/formatLabels';
-import { CollectionConfig } from '../../collections/config/types';
 import sanitizeFields from '../../fields/config/sanitize';
-import { GlobalConfig, SanitizedGlobalConfig } from './types';
+import { SanitizedGlobalConfig } from './types';
+import { Config } from '../../config/types';
 import defaultAccess from '../../auth/defaultAccess';
 import baseVersionFields from '../../versions/baseFields';
 import mergeBaseFields from '../../fields/mergeBaseFields';
 import { versionGlobalDefaults } from '../../versions/defaults';
 
-const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[]): SanitizedGlobalConfig[] => {
-  const sanitizedGlobals = globals.map((global) => {
+const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
+  return config.globals.map((global) => {
     const sanitizedGlobal = { ...global };
 
     sanitizedGlobal.label = sanitizedGlobal.label || toWords(sanitizedGlobal.slug);
@@ -54,13 +54,10 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
     // Sanitize fields
     // /////////////////////////////////
 
-    const validRelationships = collections.map((c) => c.slug);
-    sanitizedGlobal.fields = sanitizeFields(sanitizedGlobal.fields, validRelationships);
+    sanitizedGlobal.fields = sanitizeFields(sanitizedGlobal.fields, config, sanitizedGlobal);
 
     return sanitizedGlobal as SanitizedGlobalConfig;
   });
-
-  return sanitizedGlobals;
 };
 
 export default sanitizeGlobals;

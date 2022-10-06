@@ -5,8 +5,12 @@ import validations from '../validations';
 import { baseIDField } from '../baseFields/baseIDField';
 import { Field, fieldAffectsData } from './types';
 import withCondition from '../../admin/components/forms/withCondition';
+import { Config } from '../../config/types';
+import { CollectionConfig } from '../../collections/config/types';
+import { GlobalConfig } from '../../globals/config/types';
+import afterDeleteCascadeHook from '../afterDeleteCascadeHook';
 
-const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] => {
+const sanitizeFields = (fields: Field[], config: Config, collection: CollectionConfig | GlobalConfig, path = ''): Field[] => {
   if (!fields) return [];
 
   return fields.map((unsanitizedField) => {
@@ -31,8 +35,19 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
     if (field.type === 'relationship' || field.type === 'upload') {
       const relationships = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo];
       relationships.forEach((relationship: string) => {
-        if (!validRelationships.includes(relationship)) {
+        const relatedCollection = config.collections.find((c) => c.slug === relationship);
+        if (!relatedCollection) {
           throw new InvalidFieldRelationship(field, relationship);
+        }
+        if (field.cascade) {
+          const afterDelete = [
+            ...relatedCollection?.hooks?.afterDelete ?? [],
+            afterDeleteCascadeHook(field, collection, path),
+          ];
+          relatedCollection.hooks = {
+            ...relatedCollection.hooks,
+            afterDelete,
+          };
         }
       });
     }
@@ -71,12 +86,16 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
       field.admin = {};
     }
 
-    if ('fields' in field && field.fields) field.fields = sanitizeFields(field.fields, validRelationships);
+    if ('fields' in field && field.fields) {
+      const fieldPath = `${path ? `${path}.` : ''}${'name' in field ? field.name : ''}`;
+      field.fields = sanitizeFields(field.fields, config, collection, fieldPath);
+    }
 
     if (field.type === 'tabs') {
       field.tabs = field.tabs.map((tab) => {
         const unsanitizedTab = { ...tab };
-        unsanitizedTab.fields = sanitizeFields(tab.fields, validRelationships);
+        const fieldPath = `${path ? `${path}.` : ''}${'name' in tab ? tab.name : ''}`;
+        unsanitizedTab.fields = sanitizeFields(tab.fields, config, collection, fieldPath);
         return unsanitizedTab;
       });
     }
@@ -84,8 +103,9 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
     if ('blocks' in field && field.blocks) {
       field.blocks = field.blocks.map((block) => {
         const unsanitizedBlock = { ...block };
+        const fieldPath = `${path ? `${path}.` : ''}${'name' in field ? field.name : ''}`;
         unsanitizedBlock.labels = !unsanitizedBlock.labels ? formatLabels(unsanitizedBlock.slug) : unsanitizedBlock.labels;
-        unsanitizedBlock.fields = sanitizeFields(block.fields, validRelationships);
+        unsanitizedBlock.fields = sanitizeFields(block.fields, config, collection, fieldPath);
         return unsanitizedBlock;
       });
     }

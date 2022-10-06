@@ -241,7 +241,8 @@ export type UploadField = FieldBase & {
   type: 'upload'
   relationTo: string
   maxDepth?: number
-  filterOptions?: FilterOptions;
+  cascade?: boolean
+  filterOptions?: FilterOptions
 }
 
 type CodeAdmin = Admin & {
@@ -271,6 +272,8 @@ export type RelationshipField = FieldBase & {
   hasMany?: boolean;
   maxDepth?: number;
   filterOptions?: FilterOptions;
+  /** When a related document is deleted, remove it from the relationship */
+  cascade?: boolean;
   admin?: Admin & {
     isSortable?: boolean;
   }
@@ -282,7 +285,7 @@ export type ValueWithRelation = {
 }
 
 export function valueIsValueWithRelation(value: unknown): value is ValueWithRelation {
-  return typeof value === 'object' && 'relationTo' in value && 'value' in value;
+  return value !== null && typeof value === 'object' && 'relationTo' in value && 'value' in value;
 }
 
 export type RelationshipValue = (string | number)

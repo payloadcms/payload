@@ -9,6 +9,11 @@ export const relationOneSlug = 'relation-one';
 export const relationTwoSlug = 'relation-two';
 export const relationRestrictedSlug = 'relation-restricted';
 export const relationWithTitleSlug = 'relation-with-title';
+export const cascadingSlug = 'cascading';
+export const cascadingHasManySlug = 'cascading-has-many';
+export const cascadingPolySlug = 'cascading-poly';
+export const cascadingHasManyPolySlug = 'cascading-has-many-poly';
+export const cascadingNested = 'cascading-nested';
 
 export interface FieldsRelationship {
   id: string;
@@ -82,6 +87,68 @@ export default buildConfig({
           type: 'relationship',
           name: 'relationshipWithTitle',
           relationTo: relationWithTitleSlug,
+        },
+      ],
+    },
+    {
+      slug: cascadingSlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'relation',
+          relationTo: relationOneSlug,
+          cascade: true,
+        },
+      ],
+    },
+    {
+      slug: cascadingHasManySlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'relation',
+          hasMany: true,
+          relationTo: relationOneSlug,
+          cascade: true,
+        },
+      ],
+    },
+    {
+      slug: cascadingPolySlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'relation',
+          relationTo: [relationOneSlug, relationTwoSlug],
+          cascade: true,
+        },
+      ],
+    },
+    {
+      slug: cascadingHasManyPolySlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'relation',
+          hasMany: true,
+          relationTo: [relationOneSlug, relationTwoSlug],
+          cascade: true,
+        },
+      ],
+    },
+    {
+      slug: cascadingNested,
+      fields: [
+        {
+          type: 'group',
+          name: 'group',
+          fields: [
+            {
+              type: 'relationship',
+              name: 'relation',
+              relationTo: relationOneSlug,
+              cascade: true,
+            }],
         },
       ],
     },
@@ -199,6 +266,37 @@ export default buildConfig({
           relationshipHasManyMultiple: [{ relationTo: relationTwoSlug, value: relationTwoID }],
         },
       });
+    });
+
+    // cascading hooks
+    await payload.create({
+      collection: cascadingSlug,
+      data: {
+        relation: relationOneIDs[1],
+      },
+    });
+    await payload.create({
+      collection: cascadingHasManySlug,
+      data: {
+        relation: [relationOneIDs[2], relationOneIDs[3]],
+      },
+    });
+    await payload.create({
+      collection: cascadingPolySlug,
+      data: {
+        relation: { value: relationTwoIDs[2], relationTo: relationTwoSlug },
+      },
+    });
+    await payload.create({
+      collection: cascadingHasManyPolySlug,
+      data: {
+        relation: [{
+          value: relationOneIDs[4], relationTo: relationOneSlug,
+        }, {
+          value: relationTwoIDs[5],
+          relationTo: relationTwoSlug,
+        }],
+      },
     });
   },
 });

@@ -16,16 +16,16 @@ describe('sanitizeFields', () => {
       sanitizeFields(fields, []);
     }).toThrow(MissingFieldType);
   });
-  it("should throw on invalid field name", () => {
+  it('should throw on invalid field name', () => {
     const fields: Field[] = [
       {
-        label: "some.collection",
-        name: "some.collection",
-        type: "text",
-      }
+        label: 'some.collection',
+        name: 'some.collection',
+        type: 'text',
+      },
     ];
     expect(() => {
-      sanitizeFields(fields, []);
+      sanitizeFields(fields, {}, { slug: 'slug', fields: [] });
     }).toThrow(InvalidFieldName);
   });
 
@@ -35,7 +35,7 @@ describe('sanitizeFields', () => {
         name: 'someField',
         type: 'text',
       }];
-      const sanitizedField = sanitizeFields(fields, [])[0] as TextField;
+      const sanitizedField = sanitizeFields(fields, {}, { slug: 'slug', fields: [] })[0] as TextField;
       expect(sanitizedField.name).toStrictEqual('someField');
       expect(sanitizedField.label).toStrictEqual('Some Field');
       expect(sanitizedField.type).toStrictEqual('text');
@@ -46,7 +46,7 @@ describe('sanitizeFields', () => {
         type: 'text',
         label: 'Do not label',
       }];
-      const sanitizedField = sanitizeFields(fields, [])[0] as TextField;
+      const sanitizedField = sanitizeFields(fields, {}, { slug: 'slug', fields: [] })[0] as TextField;
       expect(sanitizedField.name).toStrictEqual('someField');
       expect(sanitizedField.label).toStrictEqual('Do not label');
       expect(sanitizedField.type).toStrictEqual('text');
@@ -59,7 +59,7 @@ describe('sanitizeFields', () => {
           type: 'text',
           label: false,
         }];
-        const sanitizedField = sanitizeFields(fields, [])[0] as TextField;
+        const sanitizedField = sanitizeFields(fields, {}, { slug: 'slug', fields: [] })[0] as TextField;
         expect(sanitizedField.name).toStrictEqual('someField');
         expect(sanitizedField.label).toStrictEqual(false);
         expect(sanitizedField.type).toStrictEqual('text');
@@ -77,7 +77,7 @@ describe('sanitizeFields', () => {
             },
           ],
         };
-        const sanitizedField = sanitizeFields([arrayField], [])[0] as ArrayField;
+        const sanitizedField = sanitizeFields([arrayField], {}, { slug: 'slug', fields: [] })[0] as ArrayField;
         expect(sanitizedField.name).toStrictEqual('items');
         expect(sanitizedField.label).toStrictEqual(false);
         expect(sanitizedField.type).toStrictEqual('array');
@@ -100,7 +100,7 @@ describe('sanitizeFields', () => {
             },
           ],
         }];
-        const sanitizedField = sanitizeFields(fields, [])[0] as BlockField;
+        const sanitizedField = sanitizeFields(fields, {}, { slug: 'slug', fields: [] })[0] as BlockField;
         expect(sanitizedField.name).toStrictEqual('noLabelBlock');
         expect(sanitizedField.label).toStrictEqual(false);
         expect(sanitizedField.type).toStrictEqual('blocks');
@@ -120,7 +120,7 @@ describe('sanitizeFields', () => {
           },
         ],
       }];
-      const sanitizedField = sanitizeFields(fields, [])[0] as ArrayField;
+      const sanitizedField = sanitizeFields(fields, {}, { slug: 'slug', fields: [] })[0] as ArrayField;
       expect(sanitizedField.name).toStrictEqual('items');
       expect(sanitizedField.label).toStrictEqual('Items');
       expect(sanitizedField.type).toStrictEqual('array');
@@ -138,7 +138,7 @@ describe('sanitizeFields', () => {
           },
         ],
       }];
-      const sanitizedField = sanitizeFields(fields, [])[0] as BlockField;
+      const sanitizedField = sanitizeFields(fields, {}, { slug: 'slug', fields: [] })[0] as BlockField;
       expect(sanitizedField.name).toStrictEqual('specialBlock');
       expect(sanitizedField.label).toStrictEqual('Special Block');
       expect(sanitizedField.type).toStrictEqual('blocks');
@@ -149,7 +149,6 @@ describe('sanitizeFields', () => {
 
   describe('relationships', () => {
     it('should not throw on valid relationship', () => {
-      const validRelationships = ['some-collection'];
       const fields: Field[] = [{
         type: 'relationship',
         label: 'my-relationship',
@@ -157,12 +156,11 @@ describe('sanitizeFields', () => {
         relationTo: 'some-collection',
       }];
       expect(() => {
-        sanitizeFields(fields, validRelationships);
+        sanitizeFields(fields, { collections: [{ slug: 'some-collection', fields: [] }] }, { slug: 'slug', fields: [] });
       }).not.toThrow();
     });
 
     it('should not throw on valid relationship - multiple', () => {
-      const validRelationships = ['some-collection', 'another-collection'];
       const fields: Field[] = [{
         type: 'relationship',
         label: 'my-relationship',
@@ -170,12 +168,11 @@ describe('sanitizeFields', () => {
         relationTo: ['some-collection', 'another-collection'],
       }];
       expect(() => {
-        sanitizeFields(fields, validRelationships);
+        sanitizeFields(fields, { collections: [{ slug: 'some-collection', fields: [] }, { slug: 'another-collection', fields: [] }] }, { slug: 'slug', fields: [] });
       }).not.toThrow();
     });
 
     it('should not throw on valid relationship inside blocks', () => {
-      const validRelationships = ['some-collection'];
       const relationshipBlock: Block = {
         slug: 'relationshipBlock',
         fields: [{
@@ -192,12 +189,11 @@ describe('sanitizeFields', () => {
         blocks: [relationshipBlock],
       }];
       expect(() => {
-        sanitizeFields(fields, validRelationships);
+        sanitizeFields(fields, { collections: [{ slug: 'some-collection', fields: [] }] }, { slug: 'slug', fields: [] });
       }).not.toThrow();
     });
 
     it('should throw on invalid relationship', () => {
-      const validRelationships = ['some-collection'];
       const fields: Field[] = [{
         type: 'relationship',
         label: 'my-relationship',
@@ -205,12 +201,11 @@ describe('sanitizeFields', () => {
         relationTo: 'not-valid',
       }];
       expect(() => {
-        sanitizeFields(fields, validRelationships);
+        sanitizeFields(fields, { collections: [{ slug: 'some-collection', fields: [] }] }, { slug: 'slug', fields: [] });
       }).toThrow(InvalidFieldRelationship);
     });
 
     it('should throw on invalid relationship - multiple', () => {
-      const validRelationships = ['some-collection', 'another-collection'];
       const fields: Field[] = [{
         type: 'relationship',
         label: 'my-relationship',
@@ -218,12 +213,11 @@ describe('sanitizeFields', () => {
         relationTo: ['some-collection', 'not-valid'],
       }];
       expect(() => {
-        sanitizeFields(fields, validRelationships);
+        sanitizeFields(fields, { collections: [{ slug: 'some-collection', fields: [] }, { slug: 'another-collection', fields: [] }] }, { slug: 'slug', fields: [] });
       }).toThrow(InvalidFieldRelationship);
     });
 
     it('should throw on invalid relationship inside blocks', () => {
-      const validRelationships = ['some-collection'];
       const relationshipBlock: Block = {
         slug: 'relationshipBlock',
         fields: [{
@@ -240,7 +234,7 @@ describe('sanitizeFields', () => {
         blocks: [relationshipBlock],
       }];
       expect(() => {
-        sanitizeFields(fields, validRelationships);
+        sanitizeFields(fields, { collections: [{ slug: 'some-collection', fields: [] }] }, { slug: 'slug', fields: [] });
       }).toThrow(InvalidFieldRelationship);
     });
 
@@ -251,12 +245,12 @@ describe('sanitizeFields', () => {
         required: true,
       }];
 
-      const sanitizedField = sanitizeFields(fields, [])[0] as CheckboxField;
+      const sanitizedField = sanitizeFields(fields, {}, { slug: 'slug', fields: [] })[0] as CheckboxField;
       expect(sanitizedField.defaultValue).toStrictEqual(false);
     });
 
     it('should return empty field array if no fields', () => {
-      const sanitizedFields = sanitizeFields([], []);
+      const sanitizedFields = sanitizeFields([], {}, { slug: 'slug', fields: [] });
       expect(sanitizedFields).toStrictEqual([]);
     });
   });
