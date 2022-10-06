@@ -140,7 +140,7 @@ describe('fields - relationship', () => {
     await expect(field).toContainText(anotherRelationOneDoc.id);
 
     // No options left
-    await field.click({ delay: 100 });
+    await field.locator('.rs__input').click({ delay: 100 });
     await expect(page.locator('.rs__menu')).toHaveText('No options');
 
     await saveDocAndAssert(page);
