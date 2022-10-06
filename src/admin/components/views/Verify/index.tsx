@@ -25,7 +25,7 @@ const Verify: React.FC<{ collection: SanitizedCollectionConfig }> = ({ collectio
 
   useEffect(() => {
     async function verifyToken() {
-      const result = await fetch(`${serverURL}/api/${collectionSlug}/verify/${token}`, { method: 'POST' });
+      const result = await fetch(`${serverURL}/api/${collectionSlug}/verify/${token}`, { method: 'POST', credentials: 'include' });
       setVerifyResult(result);
     }
     verifyToken();

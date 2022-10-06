@@ -39,6 +39,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   const createCollectionDoc = useCallback(async () => {
     const res = await fetch(`${serverURL}${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&draft=true`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -94,6 +95,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
           setTimeout(async () => {
             const res = await fetch(url, {
               method,
+              credentials: 'include',
               headers: {
                 'Content-Type': 'application/json',
               },
