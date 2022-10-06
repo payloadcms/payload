@@ -77,7 +77,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   useEffect(() => {
     if (typeof value === 'string' && value !== '') {
       const fetchFile = async () => {
-        const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`);
+        const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`, { credentials: 'include' });
         if (response.ok) {
           const json = await response.json();
           setFile(json);

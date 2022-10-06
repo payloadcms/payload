@@ -52,7 +52,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
         };
 
         const query = querystring.stringify(params, { addQueryPrefix: true });
-        const result = await fetch(`${url}${query}`);
+        const result = await fetch(`${url}${query}`, { credentials: 'include' });
         if (result.ok) {
           const json = await result.json();
           if (json.docs) {

@@ -61,7 +61,7 @@ const CompareVersion: React.FC<Props> = (props) => {
     }
 
     const search = qs.stringify(query);
-    const response = await fetch(`${baseURL}?${search}`);
+    const response = await fetch(`${baseURL}?${search}`, { credentials: 'include' });
 
     if (response.ok) {
       const data: PaginatedDocs<any> = await response.json();

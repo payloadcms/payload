@@ -42,6 +42,7 @@ const Auth: React.FC<Props> = (props) => {
   const unlock = useCallback(async () => {
     const url = `${serverURL}${api}/${slug}/unlock`;
     const response = await fetch(url, {
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },

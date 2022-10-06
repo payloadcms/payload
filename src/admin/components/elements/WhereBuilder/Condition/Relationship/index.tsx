@@ -60,7 +60,7 @@ const RelationshipField: React.FC<Props> = (props) => {
           const fieldToSearch = collection?.admin?.useAsTitle || 'id';
           const searchParam = searchArg ? `&where[${fieldToSearch}][like]=${searchArg}` : '';
 
-          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`);
+          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`, { credentials: 'include' });
 
           if (response.ok) {
             const data: PaginatedDocs<any> = await response.json();
@@ -152,7 +152,7 @@ const RelationshipField: React.FC<Props> = (props) => {
 
   const addOptionByID = useCallback(async (id, relation) => {
     if (!errorLoading && id !== 'null') {
-      const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`);
+      const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`, { credentials: 'include' });
 
       if (response.ok) {
         const data = await response.json();
