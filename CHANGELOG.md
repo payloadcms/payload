@@ -1,3 +1,27 @@
+## [1.1.6](https://github.com/payloadcms/payload/compare/v1.1.5...v1.1.6) (2022-10-06)
+
+
+### Bug Fixes
+
+* [#1184](https://github.com/payloadcms/payload/issues/1184) ([c2ec54a](https://github.com/payloadcms/payload/commit/c2ec54a7cbd8cd94bcd4a68d885e35986fec7f18))
+* [#1189](https://github.com/payloadcms/payload/issues/1189) ([3641dfd](https://github.com/payloadcms/payload/commit/3641dfd38a147b24e0e3ef93a125b12ad7763f66))
+* [#1204](https://github.com/payloadcms/payload/issues/1204) ([b4becd1](https://github.com/payloadcms/payload/commit/b4becd1493d55aae887008ab573ab710c400103a))
+* [#940](https://github.com/payloadcms/payload/issues/940) ([7926083](https://github.com/payloadcms/payload/commit/7926083732fbaec78d87f67742cdbd8bd00cd48a))
+* ajusts how disabled states are being set on anchors and buttons ([00ef170](https://github.com/payloadcms/payload/commit/00ef1700ae41e68ff0831a587bf3f09fe6c2c966))
+* remove min-width from fileupload ([73848b6](https://github.com/payloadcms/payload/commit/73848b603790b3c3d8ad8c9dac81b33c0b65fc7e))
+* resize textarea only vertically ([6e1dfff](https://github.com/payloadcms/payload/commit/6e1dfff1b8195a1f81e6ea6ccf3b36dd5359c039))
+* richText e2e test, specific selectors ([09a8144](https://github.com/payloadcms/payload/commit/09a8144f3cc63f7ec15fd75f51b8ac8d0cf3f1b5))
+* styles readOnly RichTextEditor, removes interactivity within when readOnly ([9181304](https://github.com/payloadcms/payload/commit/918130486e1e38a3d57fb993f466207209c5c0bb))
+* **style:** system dark scrollbars ([a30d9dc](https://github.com/payloadcms/payload/commit/a30d9dc1d70340cc6c5ac5b3415a6f57bec117ae))
+* threads readOnly to ReactSelect ([b454811](https://github.com/payloadcms/payload/commit/b454811698c7ea0cee944ed50030c13163cf72c9))
+* upload xls renaming ext ([7fd8124](https://github.com/payloadcms/payload/commit/7fd8124df68d208813de46172c5cd3f479b9b8be))
+
+
+### Features
+
+* async admin access control ([1cfce87](https://github.com/payloadcms/payload/commit/1cfce8754947487e6c598ed5bc881526295acabf))
+* sort select and relationship fields by default ([813c46c](https://github.com/payloadcms/payload/commit/813c46c86d86f8b0a3ba7280d31f24e844c916b6))
+
 ## [1.1.5](https://github.com/payloadcms/payload/compare/v1.1.4...v1.1.5) (2022-09-29)
 
 
