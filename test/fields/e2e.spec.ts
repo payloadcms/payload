@@ -122,7 +122,7 @@ describe('fields', () => {
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();
       await page.locator('#field-textInRow').fill(textInRowValue);
 
-      await wait(100);
+      await wait(250);
 
       // Go to Array tab, then back to Row. Make sure new value is still there
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click();
