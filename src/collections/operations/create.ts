@@ -10,11 +10,12 @@ import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } 
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
 import { fieldAffectsData } from '../../fields/config/types';
-import uploadFile from '../../uploads/uploadFile';
+import { uploadFiles } from '../../uploads/uploadFiles';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { generateFileData } from '../../uploads/generateFileData';
 
 export type Arguments = {
   collection: Collection
@@ -91,10 +92,10 @@ async function create(incomingArgs: Arguments): Promise<Document> {
   }
 
   // /////////////////////////////////////
-  // Upload and resize potential files
+  // Generate data for all files and sizes
   // /////////////////////////////////////
 
-  data = await uploadFile({
+  const { data: newFileData, files: filesToUpload } = await generateFileData({
     config,
     collection,
     req,
@@ -102,6 +103,8 @@ async function create(incomingArgs: Arguments): Promise<Document> {
     throwOnMissingFile: !shouldSaveDraft,
     overwriteExistingFiles,
   });
+
+  data = newFileData;
 
   // /////////////////////////////////////
   // beforeValidate - Fields
@@ -129,6 +132,14 @@ async function create(incomingArgs: Arguments): Promise<Document> {
       operation: 'create',
     })) || data;
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // Write files to local storage
+  // /////////////////////////////////////
+
+  if (!collectionConfig.upload.disableLocalStorage) {
+    await uploadFiles(payload, filesToUpload);
+  }
 
   // /////////////////////////////////////
   // beforeChange - Collection

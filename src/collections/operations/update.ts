@@ -8,13 +8,14 @@ import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult, UserDocument } from '../../auth/types';
 import { saveCollectionDraft } from '../../versions/drafts/saveCollectionDraft';
 import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
-import uploadFile from '../../uploads/uploadFile';
+import { uploadFiles } from '../../uploads/uploadFiles';
 import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
 import { ensurePublishedCollectionVersion } from '../../versions/ensurePublishedCollectionVersion';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { generateFileData } from '../../uploads/generateFileData';
 
 export type Arguments = {
   collection: Collection
@@ -125,10 +126,10 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   });
 
   // /////////////////////////////////////
-  // Upload and resize potential files
+  // Generate data for all files and sizes
   // /////////////////////////////////////
 
-  data = await uploadFile({
+  const { data: newFileData, files: filesToUpload } = await generateFileData({
     config,
     collection,
     req,
@@ -136,6 +137,8 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     throwOnMissingFile: false,
     overwriteExistingFiles,
   });
+
+  data = newFileData;
 
   // /////////////////////////////////////
   // beforeValidate - Fields
@@ -165,6 +168,14 @@ async function update(incomingArgs: Arguments): Promise<Document> {
       originalDoc,
     })) || data;
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // Write files to local storage
+  // /////////////////////////////////////
+
+  if (!collectionConfig.upload.disableLocalStorage) {
+    await uploadFiles(payload, filesToUpload);
+  }
 
   // /////////////////////////////////////
   // beforeChange - Collection
