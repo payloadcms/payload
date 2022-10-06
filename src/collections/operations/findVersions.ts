@@ -9,6 +9,7 @@ import { buildSortParam } from '../../mongoose/buildSortParam';
 import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
 
 export type Arguments = {
   collection: Collection
@@ -46,7 +47,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where} = {};
+  const queryToBuild: { where?: Where } = {};
   let useEstimatedCount = false;
 
   if (where) {
@@ -89,7 +90,13 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam(args.sort || '-updatedAt', true);
+  const [sortProperty, sortOrder] = buildSortParam({
+    sort: args.sort || '-updatedAt',
+    fields: buildVersionCollectionFields(collectionConfig),
+    timestamps: true,
+    config: payload.config,
+    locale,
+  });
 
   const optionsToExecute = {
     page: page || 1,

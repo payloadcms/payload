@@ -9,6 +9,7 @@ import { buildSortParam } from '../../mongoose/buildSortParam';
 import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -44,7 +45,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where} = {};
+  const queryToBuild: { where?: Where } = {};
   let useEstimatedCount = false;
 
   if (where) {
@@ -87,7 +88,13 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam(args.sort || '-updatedAt', true);
+  const [sortProperty, sortOrder] = buildSortParam({
+    sort: args.sort || '-updatedAt',
+    fields: buildVersionGlobalFields(globalConfig),
+    timestamps: true,
+    config: payload.config,
+    locale,
+  });
 
   const optionsToExecute = {
     page: page || 1,
