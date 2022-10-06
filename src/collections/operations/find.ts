@@ -70,7 +70,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where} = {
+  const queryToBuild: { where?: Where } = {
     where: {
       and: [],
     },
@@ -128,7 +128,13 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam(args.sort, collectionConfig.timestamps);
+  const [sortProperty, sortOrder] = buildSortParam({
+    sort: args.sort,
+    config: payload.config,
+    fields: collectionConfig.fields,
+    timestamps: collectionConfig.timestamps,
+    locale,
+  });
 
   const optionsToExecute = {
     page: page || 1,
