@@ -11,6 +11,7 @@ import { SanitizedGlobalConfig } from '../../globals/config/types';
 type Arguments<T> = {
   payload: Payload
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
+  entityType: 'collection' | 'global'
   doc: T
   locale: string
   accessResult: AccessResult
@@ -19,70 +20,74 @@ type Arguments<T> = {
 const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   payload,
   entity,
+  entityType,
   doc,
   locale,
   accessResult,
 }: Arguments<T>): Promise<T> => {
-  if (docHasTimestamps(doc)) {
-    const VersionModel = payload.versions[entity.slug] as CollectionModel;
+  const VersionModel = payload.versions[entity.slug] as CollectionModel;
 
-    let useEstimatedCount = false;
-    const queryToBuild: { where: Where } = {
-      where: {
-        and: [
-          {
-            parent: {
-              equals: doc.id,
-            },
+  let useEstimatedCount = false;
+
+  const queryToBuild: { where: Where } = {
+    where: {
+      and: [
+        {
+          'version._status': {
+            equals: 'draft',
           },
-          {
-            'version._status': {
-              equals: 'draft',
-            },
-          },
-          {
-            updatedAt: {
-              greater_than: doc.updatedAt,
-            },
-          },
-        ],
+        },
+      ],
+    },
+  };
+
+  if (entityType === 'collection') {
+    queryToBuild.where.and.push({
+      parent: {
+        equals: doc.id,
       },
-    };
-
-    if (hasWhereAccessResult(accessResult)) {
-      const versionAccessResult = appendVersionToQueryKey(accessResult);
-      queryToBuild.where.and.push(versionAccessResult);
-    }
-
-    const constraints = flattenWhereConstraints(queryToBuild);
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
-    const query = await VersionModel.buildQuery(queryToBuild, locale);
-
-    let draft = await VersionModel.findOne(query, {}, {
-      lean: true,
-      useEstimatedCount,
-      sort: { updatedAt: 'desc' },
     });
-
-    if (!draft) {
-      return doc;
-    }
-
-    draft = JSON.parse(JSON.stringify(draft));
-    draft = sanitizeInternalFields(draft);
-
-    // Disregard all other draft content at this point,
-    // Only interested in the version itself.
-    // Operations will handle firing hooks, etc.
-    return {
-      id: doc.id,
-      ...draft.version,
-      createdAt: draft.createdAt,
-      updatedAt: draft.updatedAt,
-    };
   }
 
-  return doc;
+  if (docHasTimestamps(doc)) {
+    queryToBuild.where.and.push({
+      updatedAt: {
+        greater_than: doc.updatedAt,
+      },
+    });
+  }
+
+  if (hasWhereAccessResult(accessResult)) {
+    const versionAccessResult = appendVersionToQueryKey(accessResult);
+    queryToBuild.where.and.push(versionAccessResult);
+  }
+
+  const constraints = flattenWhereConstraints(queryToBuild);
+  useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+  const query = await VersionModel.buildQuery(queryToBuild, locale);
+
+  let draft = await VersionModel.findOne(query, {}, {
+    lean: true,
+    useEstimatedCount,
+    sort: { updatedAt: 'desc' },
+  });
+
+  if (!draft) {
+    return doc;
+  }
+
+  draft = JSON.parse(JSON.stringify(draft));
+  draft = sanitizeInternalFields(draft);
+
+  // Disregard all other draft content at this point,
+  // Only interested in the version itself.
+  // Operations will handle firing hooks, etc.
+  return {
+    id: doc.id,
+    ...draft.version,
+    createdAt: draft.createdAt,
+    updatedAt: draft.updatedAt,
+  };
 };
 
 export default replaceWithDraftIfAvailable;

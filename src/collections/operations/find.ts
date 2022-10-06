@@ -171,6 +171,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
         accessResult,
         payload,
         entity: collectionConfig,
+        entityType: 'collection',
         doc,
         locale,
       }))),
