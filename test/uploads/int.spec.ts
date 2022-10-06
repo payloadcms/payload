@@ -102,6 +102,8 @@ describe('Collections - Uploads', () => {
       expect(doc.mimeType).toEqual('image/png');
       expect(doc.sizes.maintainedAspectRatio.filename).toContain('.png');
       expect(doc.sizes.maintainedAspectRatio.mimeType).toContain('image/png');
+      expect(doc.sizes.differentFormatFromMainImage.filename).toContain('.jpg');
+      expect(doc.sizes.differentFormatFromMainImage.mimeType).toContain('image/jpeg');
     });
 
     it('creates media without storing a file', async () => {

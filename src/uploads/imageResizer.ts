@@ -62,8 +62,9 @@ export default async function resizeAndSave({
 
       req.payloadUploadSizes[desiredSize.name] = bufferObject.data;
 
+      const mimeType = (await fromBuffer(bufferObject.data));
       const outputImage = getOutputImage(savedFilename, desiredSize);
-      const imageNameWithDimensions = createImageName(outputImage, bufferObject);
+      const imageNameWithDimensions = createImageName(outputImage, bufferObject, mimeType.ext);
       const imagePath = `${staticPath}/${imageNameWithDimensions}`;
       const fileAlreadyExists = await fileExists(imagePath);
 
@@ -81,7 +82,7 @@ export default async function resizeAndSave({
         height: bufferObject.info.height,
         filename: imageNameWithDimensions,
         filesize: bufferObject.info.size,
-        mimeType: (await fromBuffer(bufferObject.data)).mime,
+        mimeType: mimeType.mime,
       };
     });
 
@@ -104,8 +105,9 @@ export default async function resizeAndSave({
 function createImageName(
   outputImage: OutputImage,
   bufferObject: { data: Buffer; info: sharp.OutputInfo },
+  extension: string
 ): string {
-  return `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${outputImage.extension}`;
+  return `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${extension}`;
 }
 
 function needsResize(desiredSize: ImageSize, dimensions: ProbedImageSize): boolean {
