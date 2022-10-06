@@ -9,9 +9,10 @@
     padding: base(1.5) base(1.5) $baseline;
     background: var(--theme-elevation-50);
     flex-wrap: wrap;
-    
+
     .btn {
       margin: 0 $baseline base(.5) 0;
+      min-width: base(7);
     }
   }
 
@@ -22,6 +23,7 @@
 
       .btn {
         width: 100%;
+        min-width: initial;
       }
     }
   }
