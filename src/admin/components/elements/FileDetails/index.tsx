@@ -102,7 +102,7 @@ const FileDetails: React.FC<Props> = (props) => {
                     </div>
                     <Meta
                       {...val}
-                      mimeType={mimeType}
+                      mimeType={val.mimeType}
                       staticURL={staticURL}
                     />
                   </li>

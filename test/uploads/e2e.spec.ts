@@ -75,13 +75,16 @@ describe('uploads', () => {
     const maintainedAspectRatioMeta = page.locator('.file-details__sizes .file-meta').nth(0);
     await expect(maintainedAspectRatioMeta).toContainText('1024x1024');
 
-    const tabletMeta = page.locator('.file-details__sizes .file-meta').nth(1);
+    const differentFormatFromMainImageMeta = page.locator('.file-details__sizes .file-meta').nth(1);
+    await expect(differentFormatFromMainImageMeta).toContainText('image/jpeg');
+
+    const tabletMeta = page.locator('.file-details__sizes .file-meta').nth(2);
     await expect(tabletMeta).toContainText('640x480');
 
-    const mobileMeta = page.locator('.file-details__sizes .file-meta').nth(2);
+    const mobileMeta = page.locator('.file-details__sizes .file-meta').nth(3);
     await expect(mobileMeta).toContainText('320x240');
 
-    const iconMeta = page.locator('.file-details__sizes .file-meta').nth(3);
+    const iconMeta = page.locator('.file-details__sizes .file-meta').nth(4);
     await expect(iconMeta).toContainText('16x16');
   });
 });

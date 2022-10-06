@@ -78,7 +78,7 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
     });
   };
 
-  const executeEntityPolicies = (entity, operations, type) => {
+  const executeEntityPolicies = async (entity, operations, type) => {
     if (!results[type]) results[type] = {};
 
     results[type][entity.slug] = {
@@ -99,7 +99,7 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
   };
 
   if (userCollectionConfig) {
-    results.canAccessAdmin = userCollectionConfig.access.admin ? userCollectionConfig.access.admin(args) : isLoggedIn;
+    results.canAccessAdmin = userCollectionConfig.access.admin ? await userCollectionConfig.access.admin(args) : isLoggedIn;
   } else {
     results.canAccessAdmin = false;
   }

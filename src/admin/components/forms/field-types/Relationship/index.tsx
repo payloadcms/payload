@@ -47,7 +47,7 @@ const Relationship: React.FC<Props> = (props) => {
       width,
       description,
       condition,
-      isSortable,
+      isSortable = true,
     } = {},
   } = props;
 
