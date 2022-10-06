@@ -78,3 +78,8 @@ export type File = {
   name: string
   size: number
 }
+
+export type FileToSave = {
+  buffer: Buffer
+  path: string
+}
