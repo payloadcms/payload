@@ -3,6 +3,7 @@ import AutosavePosts from './collections/Autosave';
 import DraftPosts from './collections/Drafts';
 import AutosaveGlobal from './globals/Autosave';
 import { devUser } from '../credentials';
+import DraftGlobal from './globals/Draft';
 
 export default buildConfig({
   collections: [
@@ -11,6 +12,7 @@ export default buildConfig({
   ],
   globals: [
     AutosaveGlobal,
+    DraftGlobal,
   ],
   localization: {
     locales: ['en', 'es'],

@@ -40,7 +40,7 @@ async function findOne<T extends TypeWithID = any>(args: Args): Promise<T> {
   // Retrieve and execute access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where} = {
+  const queryToBuild: { where?: Where } = {
     where: {
       and: [
         {
@@ -89,6 +89,7 @@ async function findOne<T extends TypeWithID = any>(args: Args): Promise<T> {
     doc = await replaceWithDraftIfAvailable({
       payload,
       entity: globalConfig,
+      entityType: 'global',
       doc,
       locale,
       accessResult,
