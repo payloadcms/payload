@@ -236,7 +236,7 @@ export type CollectionConfig = {
     readVersions?: Access;
     update?: Access;
     delete?: Access;
-    admin?: (args?: any) => boolean;
+    admin?: (args?: any) => boolean | Promise<boolean>;
     unlock?: Access;
   };
   /**
