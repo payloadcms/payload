@@ -24,6 +24,7 @@ import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
 
 import './index.scss';
+import RowLabel from '../../RowLabel';
 
 const baseClass = 'array-field';
 
@@ -42,6 +43,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     admin: {
       readOnly,
       description,
+      header,
       condition,
       initCollapsed,
       className,
@@ -271,7 +273,14 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                           className={`${baseClass}__row`}
                           key={row.id}
                           dragHandleProps={providedDrag.dragHandleProps}
-                          header={`${labels.singular} ${rowNumber >= 10 ? rowNumber : `0${rowNumber}`}`}
+                          header={(
+                            <RowLabel
+                              path={`${path}.${i}.0`}
+                              header={header}
+                              fallback={`${labels.singular} ${rowNumber >= 10 ? rowNumber : `0${rowNumber}`}`}
+                              rowNumber={rowNumber}
+                            />
+                          )}
                           actions={!readOnly ? (
                             <ArrayAction
                               rowCount={rows.length}
