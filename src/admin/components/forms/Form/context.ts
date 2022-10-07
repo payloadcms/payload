@@ -3,12 +3,14 @@ import { useContextSelector, createContext as createSelectorContext } from 'use-
 import { Context, FormFieldsContext as FormFieldsContextType } from './types';
 
 const FormContext = createContext({} as Context);
+const FormWatchContext = createContext({} as Context);
 const SubmittedContext = createContext(false);
 const ProcessingContext = createContext(false);
 const ModifiedContext = createContext(false);
 const FormFieldsContext = createSelectorContext<FormFieldsContextType>([{}, () => null]);
 
 const useForm = (): Context => useContext(FormContext);
+const useWatchForm = (): Context => useContext(FormWatchContext);
 const useFormSubmitted = (): boolean => useContext(SubmittedContext);
 const useFormProcessing = (): boolean => useContext(ProcessingContext);
 const useFormModified = (): boolean => useContext(ModifiedContext);
@@ -23,7 +25,9 @@ export {
   useFormProcessing,
   useFormModified,
   useForm,
+  useWatchForm,
   FormContext,
+  FormWatchContext,
   FormFieldsContext,
   useFormFields,
 };

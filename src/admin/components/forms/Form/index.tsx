@@ -21,7 +21,7 @@ import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
 import { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types';
-import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext } from './context';
+import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
 
@@ -395,15 +395,21 @@ const Form: React.FC<Props> = (props) => {
       ref={formRef}
     >
       <FormContext.Provider value={contextRef.current}>
-        <SubmittedContext.Provider value={submitted}>
-          <ProcessingContext.Provider value={processing}>
-            <ModifiedContext.Provider value={modified}>
-              <FormFieldsContext.Provider value={fieldsReducer}>
-                {children}
-              </FormFieldsContext.Provider>
-            </ModifiedContext.Provider>
-          </ProcessingContext.Provider>
-        </SubmittedContext.Provider>
+        <FormWatchContext.Provider value={{
+          fields,
+          ...contextRef.current,
+        }}
+        >
+          <SubmittedContext.Provider value={submitted}>
+            <ProcessingContext.Provider value={processing}>
+              <ModifiedContext.Provider value={modified}>
+                <FormFieldsContext.Provider value={fieldsReducer}>
+                  {children}
+                </FormFieldsContext.Provider>
+              </ModifiedContext.Provider>
+            </ProcessingContext.Provider>
+          </SubmittedContext.Provider>
+        </FormWatchContext.Provider>
       </FormContext.Provider>
     </form>
   );

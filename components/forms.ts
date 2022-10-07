@@ -1,12 +1,17 @@
 export {
   useForm,
   useWatchForm,
+  useFormFields,
   useFormSubmitted,
   useFormProcessing,
   useFormModified,
 } from '../dist/admin/components/forms/Form/context';
 
 export { default as useField } from '../dist/admin/components/forms/useField';
+
+/**
+ * @deprecated This method is now called useField. The useFieldType alias will be removed in an upcoming version.y
+ */
 export { default as useFieldType } from '../dist/admin/components/forms/useField';
 
 export { default as Form } from '../dist/admin/components/forms/Form';
