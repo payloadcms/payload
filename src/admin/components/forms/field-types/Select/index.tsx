@@ -34,7 +34,7 @@ const Select: React.FC<Props> = (props) => {
       description,
       isClearable,
       condition,
-      isSortable
+      isSortable = true,
     } = {},
   } = props;
 
@@ -95,6 +95,7 @@ const Select: React.FC<Props> = (props) => {
       showError={showError}
       errorMessage={errorMessage}
       required={required}
+      readOnly={readOnly}
       description={description}
       style={style}
       className={className}

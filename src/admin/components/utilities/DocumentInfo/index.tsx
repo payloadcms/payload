@@ -112,14 +112,14 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
 
     if (shouldFetch) {
-      let publishedJSON = await fetch(publishedFetchURL).then((res) => res.json());
+      let publishedJSON = await fetch(publishedFetchURL, { credentials: 'include' }).then((res) => res.json());
 
       if (collection) {
         publishedJSON = publishedJSON?.docs?.[0];
       }
 
       if (shouldFetchVersions) {
-        versionJSON = await fetch(`${versionFetchURL}?${qs.stringify(versionParams)}`).then((res) => res.json());
+        versionJSON = await fetch(`${versionFetchURL}?${qs.stringify(versionParams)}`, { credentials: 'include' }).then((res) => res.json());
 
         if (publishedJSON?.updatedAt) {
           const newerVersionParams = {
@@ -138,7 +138,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
           };
 
           // Get any newer versions available
-          const newerVersionRes = await fetch(`${versionFetchURL}?${qs.stringify(newerVersionParams)}`);
+          const newerVersionRes = await fetch(`${versionFetchURL}?${qs.stringify(newerVersionParams)}`, { credentials: 'include' });
 
           if (newerVersionRes.status === 200) {
             unpublishedVersionJSON = await newerVersionRes.json();

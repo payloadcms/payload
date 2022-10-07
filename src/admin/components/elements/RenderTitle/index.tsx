@@ -5,7 +5,7 @@ import IDLabel from '../IDLabel';
 
 const baseClass = 'render-title';
 
-const RenderTitle : React.FC<Props> = (props) => {
+const RenderTitle: React.FC<Props> = (props) => {
   const {
     useAsTitle,
     title: titleFromProps,
@@ -14,10 +14,8 @@ const RenderTitle : React.FC<Props> = (props) => {
   } = props;
 
   const titleFromForm = useTitle(useAsTitle);
-  const titleFromData = data && data[useAsTitle];
 
-  let title = titleFromData;
-  if (!title) title = titleFromForm;
+  let title = titleFromForm;
   if (!title) title = data?.id;
   if (!title) title = fallback;
   title = titleFromProps || title;

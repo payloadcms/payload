@@ -30,7 +30,7 @@ const flattenFields = (fields: Field[], keepPresentationalFields?: boolean): (Fi
         ...field.tabs.reduce((tabFields, tab) => {
           return [
             ...tabFields,
-            ...(tabHasName(tab) ? [tab] : flattenFields(tab.fields, keepPresentationalFields)),
+            ...(tabHasName(tab) ? [{ ...tab, type: 'tab' }] : flattenFields(tab.fields, keepPresentationalFields)),
           ];
         }, []),
       ];

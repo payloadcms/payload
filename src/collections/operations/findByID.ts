@@ -127,6 +127,7 @@ async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Pr
     result = await replaceWithDraftIfAvailable({
       payload,
       entity: collectionConfig,
+      entityType: 'collection',
       doc: result,
       accessResult,
       locale,

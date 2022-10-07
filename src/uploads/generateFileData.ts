@@ -10,8 +10,7 @@ import { PayloadRequest } from '../express/types';
 import getImageSize, { ProbedImageSize } from './getImageSize';
 import getSafeFileName from './getSafeFilename';
 import resizeAndSave from './imageResizer';
-import saveBufferToFile from './saveBufferToFile';
-import { FileData } from './types';
+import { FileData, FileToSave } from './types';
 import canResizeImage from './canResizeImage';
 
 type Args = {
@@ -23,7 +22,12 @@ type Args = {
   overwriteExistingFiles?: boolean
 }
 
-const uploadFile = async ({
+type Result = Promise<{
+  data: Record<string, unknown>
+  files: FileToSave[]
+}>
+
+export const generateFileData = async ({
   config,
   collection: {
     config: collectionConfig,
@@ -33,8 +37,9 @@ const uploadFile = async ({
   data,
   throwOnMissingFile,
   overwriteExistingFiles,
-}: Args): Promise<Record<string, unknown>> => {
+}: Args): Result => {
   let newData = data;
+  const filesToSave: FileToSave[] = [];
 
   if (collectionConfig.upload) {
     const fileData: Partial<FileData> = {};
@@ -77,8 +82,9 @@ const uploadFile = async ({
         }
 
         const fileBuffer = resized ? (await resized.toBuffer()) : file.data;
-
-        const { mime, ext } = await fromBuffer(fileBuffer) ?? { mime: file.mimetype, ext: file.name.split('.').pop() };
+        const bufferInfo = await fromBuffer(fileBuffer);
+        const mime = bufferInfo.mime ?? file.mimetype;
+        const ext = resized ? bufferInfo.ext : file.name.split('.').pop();
         const fileSize = fileBuffer.length;
         const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
         fsSafeName = `${baseFilename}.${ext}`;
@@ -87,9 +93,10 @@ const uploadFile = async ({
           fsSafeName = await getSafeFileName(Model, staticPath, fsSafeName);
         }
 
-        if (!disableLocalStorage) {
-          await saveBufferToFile(fileBuffer, `${staticPath}/${fsSafeName}`);
-        }
+        filesToSave.push({
+          path: `${staticPath}/${fsSafeName}`,
+          buffer: fileBuffer,
+        });
 
         fileData.filename = fsSafeName || (!overwriteExistingFiles ? await getSafeFileName(Model, staticPath, file.name) : file.name);
         fileData.filesize = fileSize || file.size;
@@ -97,7 +104,7 @@ const uploadFile = async ({
 
         if (Array.isArray(imageSizes) && shouldResize) {
           req.payloadUploadSizes = {};
-          fileData.sizes = await resizeAndSave({
+          const { sizeData, sizesToSave } = await resizeAndSave({
             req,
             file: file.data,
             dimensions,
@@ -106,6 +113,9 @@ const uploadFile = async ({
             savedFilename: fsSafeName || file.name,
             mimeType: fileData.mimeType,
           });
+
+          fileData.sizes = sizeData;
+          filesToSave.push(...sizesToSave);
         }
       } catch (err) {
         console.error(err);
@@ -119,7 +129,8 @@ const uploadFile = async ({
     }
   }
 
-  return newData;
+  return {
+    data: newData,
+    files: filesToSave,
+  };
 };
-
-export default uploadFile;

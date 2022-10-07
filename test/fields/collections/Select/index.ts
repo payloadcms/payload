@@ -25,6 +25,27 @@ const SelectFields: CollectionConfig = {
       ],
     },
     {
+      name: 'selectReadOnly',
+      type: 'select',
+      admin: {
+        readOnly: true,
+      },
+      options: [
+        {
+          label: 'Value One',
+          value: 'one',
+        },
+        {
+          label: 'Value Two',
+          value: 'two',
+        },
+        {
+          label: 'Value Three',
+          value: 'three',
+        },
+      ],
+    },
+    {
       name: 'selectHasMany',
       hasMany: true,
       type: 'select',

@@ -122,7 +122,7 @@ describe('fields', () => {
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click();
       await page.locator('#field-textInRow').fill(textInRowValue);
 
-      await wait(100);
+      await wait(250);
 
       // Go to Array tab, then back to Row. Make sure new value is still there
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click();
@@ -143,73 +143,84 @@ describe('fields', () => {
   });
 
   describe('fields - richText', () => {
-    test('should create new url link', async () => {
+    async function navigateToRichTextFields() {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields');
       await page.goto(url.list);
       await page.locator('.row-1 .cell-id').click();
+    }
 
-      // Open link popup
-      await page.locator('.rich-text__toolbar .link').click();
+    describe('toolbar', () => {
+      test('should create new url link', async () => {
+        await navigateToRichTextFields();
 
-      const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
-      await expect(editLinkModal).toBeVisible();
+        // Open link popup
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').click();
 
-      // Fill values and click Confirm
-      await editLinkModal.locator('#field-text').fill('link text');
-      await editLinkModal.locator('label[for="field-linkType-custom"]').click();
-      await editLinkModal.locator('#field-url').fill('https://payloadcms.com');
-      await wait(200);
-      await editLinkModal.locator('button[type="submit"]').click();
+        const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+        await expect(editLinkModal).toBeVisible();
 
-      // Remove link
-      await page.locator('span >> text="link text"').click();
-      const popup = page.locator('.popup--active .rich-text-link__popup');
-      await expect(popup.locator('.rich-text-link__link-label')).toBeVisible();
-      await popup.locator('.rich-text-link__link-close').click();
-      await expect(page.locator('span >> text="link text"')).toHaveCount(0);
+        // Fill values and click Confirm
+        await editLinkModal.locator('#field-text').fill('link text');
+        await editLinkModal.locator('label[for="field-linkType-custom"]').click();
+        await editLinkModal.locator('#field-url').fill('https://payloadcms.com');
+        await wait(200);
+        await editLinkModal.locator('button[type="submit"]').click();
+
+        // Remove link from editor body
+        await page.locator('span >> text="link text"').click();
+        const popup = page.locator('.popup--active .rich-text-link__popup');
+        await expect(popup.locator('.rich-text-link__link-label')).toBeVisible();
+        await popup.locator('.rich-text-link__link-close').click();
+        await expect(page.locator('span >> text="link text"')).toHaveCount(0);
+      });
+
+      test('should not create new url link when read only', async () => {
+        await navigateToRichTextFields();
+
+        // Attempt to open link popup
+        const modalTrigger = page.locator('.rich-text--read-only .rich-text__toolbar button .link');
+        await expect(modalTrigger).toBeDisabled();
+      });
     });
 
-    test('should populate url link', async () => {
-      const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields');
-      await page.goto(url.list);
-      await page.locator('.row-1 .cell-id').click();
+    describe('editor', () => {
+      test('should populate url link', async () => {
+        navigateToRichTextFields();
 
-      // Open link popup
-      await page.locator('span >> text="render links"').click();
-      const popup = page.locator('.popup--active .rich-text-link__popup');
-      await expect(popup).toBeVisible();
-      await expect(popup.locator('a')).toHaveAttribute('href', 'https://payloadcms.com');
+        // Open link popup
+        await page.locator('#field-richText span >> text="render links"').click();
+        const popup = page.locator('.popup--active .rich-text-link__popup');
+        await expect(popup).toBeVisible();
+        await expect(popup.locator('a')).toHaveAttribute('href', 'https://payloadcms.com');
 
-      // Open link edit modal
-      await popup.locator('.rich-text-link__link-edit').click();
-      const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
-      await expect(editLinkModal).toBeVisible();
+        // Open link edit modal
+        await popup.locator('.rich-text-link__link-edit').click();
+        const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+        await expect(editLinkModal).toBeVisible();
 
-      // Close link edit modal
-      await editLinkModal.locator('button[type="submit"]').click();
-      await expect(editLinkModal).not.toBeVisible();
-    });
+        // Close link edit modal
+        await editLinkModal.locator('button[type="submit"]').click();
+        await expect(editLinkModal).not.toBeVisible();
+      });
 
-    test('should populate relationship link', async () => {
-      const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields');
-      await page.goto(url.list);
-      await page.locator('.row-1 .cell-id').click();
+      test('should populate relationship link', async () => {
+        navigateToRichTextFields();
 
-      // Open link popup
-      await page.locator('span >> text="link to relationships"').click();
-      const popup = page.locator('.popup--active .rich-text-link__popup');
-      await expect(popup).toBeVisible();
-      await expect(popup.locator('a')).toHaveAttribute('href', /\/admin\/collections\/array-fields\/.*/);
+        // Open link popup
+        await page.locator('#field-richText span >> text="link to relationships"').click();
+        const popup = page.locator('.popup--active .rich-text-link__popup');
+        await expect(popup).toBeVisible();
+        await expect(popup.locator('a')).toHaveAttribute('href', /\/admin\/collections\/array-fields\/.*/);
 
-      // Open link edit modal
-      await popup.locator('.rich-text-link__link-edit').click();
-      const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
-      await expect(editLinkModal).toBeVisible();
+        // Open link edit modal
+        await popup.locator('.rich-text-link__link-edit').click();
+        const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+        await expect(editLinkModal).toBeVisible();
 
-      // Close link edit modal
-      await editLinkModal.locator('button[type="submit"]').click();
-      await expect(editLinkModal).not.toBeVisible();
-      // await page.locator('span >> text="render links"').click();
+        // Close link edit modal
+        await editLinkModal.locator('button[type="submit"]').click();
+        await expect(editLinkModal).not.toBeVisible();
+      });
     });
   });
 });

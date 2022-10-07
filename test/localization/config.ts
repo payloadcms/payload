@@ -56,6 +56,7 @@ export default buildConfig({
           name: 'title',
           type: 'text',
           localized: true,
+          index: true,
         },
         {
           name: 'description',

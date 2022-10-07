@@ -47,7 +47,7 @@ const Relationship: React.FC<Props> = (props) => {
       width,
       description,
       condition,
-      isSortable,
+      isSortable = true,
     } = {},
   } = props;
 
@@ -148,7 +148,7 @@ const Relationship: React.FC<Props> = (props) => {
             query.where.and.push(optionFilters[relation]);
           }
 
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
+          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, { credentials: 'include' });
 
           if (response.ok) {
             const data: PaginatedDocs<unknown> = await response.json();
@@ -284,7 +284,7 @@ const Relationship: React.FC<Props> = (props) => {
           };
 
           if (!errorLoading) {
-            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`);
+            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, { credentials: 'include' });
             const collection = collections.find((coll) => coll.slug === relation);
             if (response.ok) {
               const data = await response.json();
