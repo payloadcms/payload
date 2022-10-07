@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { Field as FieldConfig, Condition, Validate } from '../../../../fields/config/types';
 
 export type Field = {
@@ -65,11 +65,70 @@ export type SetProcessing = (processing: boolean) => void;
 
 export type Reset = (fieldSchema: FieldConfig[], data: unknown) => Promise<void>
 
+export type REPLACE_STATE = {
+  type: 'REPLACE_STATE'
+  state: Fields
+}
+
+export type REMOVE = {
+  type: 'REMOVE'
+  path: string
+}
+
+export type REMOVE_ROW = {
+  type: 'REMOVE_ROW'
+  rowIndex: number
+  path: string
+}
+
+export type ADD_ROW = {
+  type: 'ADD_ROW'
+  rowIndex: number
+  path: string
+  subFieldState?: Fields
+  blockType?: string
+}
+
+export type DUPLICATE_ROW = {
+  type: 'DUPLICATE_ROW'
+  rowIndex: number
+  path: string
+}
+
+export type MOVE_ROW = {
+  type: 'MOVE_ROW'
+  moveFromIndex: number
+  moveToIndex: number
+  path: string
+}
+
+export type MODIFY_CONDITION = {
+  type: 'MODIFY_CONDITION'
+  path: string
+  result: boolean
+}
+
+export type UPDATE = {
+  type: 'UPDATE'
+  path: string
+} & Partial<Field>
+
+export type FieldAction =
+  | REPLACE_STATE
+  | REMOVE
+  | REMOVE_ROW
+  | ADD_ROW
+  | DUPLICATE_ROW
+  | MOVE_ROW
+  | MODIFY_CONDITION
+  | UPDATE
+
+export type FormFieldsContext = [Fields, Dispatch<FieldAction>]
+
 export type Context = {
-  dispatchFields: DispatchFields
   submit: Submit
   fields: Fields
-  initialState: Fields
+  dispatchFields: Dispatch<FieldAction>
   validateForm: ValidateForm
   createFormData: CreateFormData
   disabled: boolean

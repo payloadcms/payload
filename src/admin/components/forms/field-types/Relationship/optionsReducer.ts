@@ -50,8 +50,7 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
               ];
             }
             return docs;
-          },
-            []),
+          }, []),
         ];
 
         ids.forEach((id) => {

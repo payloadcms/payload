@@ -3,10 +3,10 @@ import { unflatten, flatten } from 'flatley';
 import flattenFilters from './flattenFilters';
 import getSiblingData from './getSiblingData';
 import reduceFieldsToValues from './reduceFieldsToValues';
-import { Fields } from './types';
+import { FieldAction, Fields } from './types';
 import deepCopyObject from '../../../../utilities/deepCopyObject';
 
-const unflattenRowsFromState = (state: Fields, path) => {
+const unflattenRowsFromState = (state: Fields, path: string) => {
   // Take a copy of state
   const remainingFlattenedState = { ...state };
 
@@ -37,7 +37,7 @@ const unflattenRowsFromState = (state: Fields, path) => {
   };
 };
 
-function fieldReducer(state: Fields, action): Fields {
+function fieldReducer(state: Fields, action: FieldAction): Fields {
   switch (action.type) {
     case 'REPLACE_STATE': {
       const newState = {};
@@ -186,19 +186,7 @@ function fieldReducer(state: Fields, action): Fields {
       }, {});
     }
 
-    case 'UPDATE_VALUE': {
-      const existingField = state[action.path] || {};
-
-      return {
-        ...state,
-        [action.path]: {
-          ...existingField,
-          value: action.value,
-        },
-      };
-    }
-
-    default: {
+    case 'UPDATE': {
       const newField = {
         value: action.value,
         valid: action.valid,
@@ -214,6 +202,10 @@ function fieldReducer(state: Fields, action): Fields {
         ...state,
         [action.path]: newField,
       };
+    }
+
+    default: {
+      return state;
     }
   }
 }

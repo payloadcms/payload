@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { useConfig } from '../../../../../../../utilities/Config';
 import { useAuth } from '../../../../../../../utilities/Auth';
-import { useWatchForm } from '../../../../../../Form/context';
+import { useFormFields } from '../../../../../../Form/context';
 import Relationship from '../../../../../Relationship';
 import Select from '../../../../../Select';
 
@@ -24,9 +24,7 @@ const RelationshipFields = () => {
   const { permissions } = useAuth();
 
   const [options, setOptions] = useState(() => createOptions(collections, permissions));
-
-  const { getData } = useWatchForm();
-  const { relationTo } = getData();
+  const relationTo = useFormFields<string>(([fields]) => fields.relationTo?.value as string);
 
   useEffect(() => {
     setOptions(createOptions(collections, permissions));

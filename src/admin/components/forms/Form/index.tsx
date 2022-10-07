@@ -21,7 +21,7 @@ import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
 import { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types';
-import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormWatchContext } from './context';
+import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
 
@@ -63,12 +63,11 @@ const Form: React.FC<Props> = (props) => {
   if (formattedInitialData) initialFieldState = formattedInitialData;
   if (initialState) initialFieldState = initialState;
 
-  // Allow access to initialState for field types such as Blocks and Array
-  contextRef.current.initialState = initialState;
-
-  const [fields, dispatchFields] = useReducer(fieldReducer, {}, () => initialFieldState);
+  const fieldsReducer = useReducer(fieldReducer, {}, () => initialFieldState);
+  const [fields, dispatchFields] = fieldsReducer;
 
   contextRef.current.fields = fields;
+  contextRef.current.dispatchFields = dispatchFields;
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {};
@@ -111,7 +110,7 @@ const Form: React.FC<Props> = (props) => {
     }
 
     return isValid;
-  }, [contextRef, id, user, operation]);
+  }, [contextRef, id, user, operation, dispatchFields]);
 
   const submit = useCallback(async (options: SubmitOptions = {}, e): Promise<void> => {
     const {
@@ -254,6 +253,7 @@ const Form: React.FC<Props> = (props) => {
 
           fieldErrors.forEach((err) => {
             dispatchFields({
+              type: 'UPDATE',
               ...(contextRef.current?.fields?.[err.field] || {}),
               valid: false,
               errorMessage: err.message,
@@ -283,6 +283,7 @@ const Form: React.FC<Props> = (props) => {
     action,
     disableSuccessStatus,
     disabled,
+    dispatchFields,
     fields,
     handleResponse,
     history,
@@ -328,9 +329,8 @@ const Form: React.FC<Props> = (props) => {
     const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation, locale });
     contextRef.current = { ...initContextState } as FormContextType;
     dispatchFields({ type: 'REPLACE_STATE', state });
-  }, [id, user, operation, locale]);
+  }, [id, user, operation, locale, dispatchFields]);
 
-  contextRef.current.dispatchFields = dispatchFields;
   contextRef.current.submit = submit;
   contextRef.current.getFields = getFields;
   contextRef.current.getField = getField;
@@ -352,7 +352,7 @@ const Form: React.FC<Props> = (props) => {
       contextRef.current = { ...initContextState } as FormContextType;
       dispatchFields({ type: 'REPLACE_STATE', state: initialState });
     }
-  }, [initialState]);
+  }, [initialState, dispatchFields]);
 
   useEffect(() => {
     if (initialData) {
@@ -361,7 +361,7 @@ const Form: React.FC<Props> = (props) => {
       setFormattedInitialData(builtState);
       dispatchFields({ type: 'REPLACE_STATE', state: builtState });
     }
-  }, [initialData]);
+  }, [initialData, dispatchFields]);
 
   useThrottledEffect(() => {
     refreshCookie();
@@ -395,19 +395,15 @@ const Form: React.FC<Props> = (props) => {
       ref={formRef}
     >
       <FormContext.Provider value={contextRef.current}>
-        <FormWatchContext.Provider value={{
-          fields,
-          ...contextRef.current,
-        }}
-        >
-          <SubmittedContext.Provider value={submitted}>
-            <ProcessingContext.Provider value={processing}>
-              <ModifiedContext.Provider value={modified}>
+        <SubmittedContext.Provider value={submitted}>
+          <ProcessingContext.Provider value={processing}>
+            <ModifiedContext.Provider value={modified}>
+              <FormFieldsContext.Provider value={fieldsReducer}>
                 {children}
-              </ModifiedContext.Provider>
-            </ProcessingContext.Provider>
-          </SubmittedContext.Provider>
-        </FormWatchContext.Provider>
+              </FormFieldsContext.Provider>
+            </ModifiedContext.Provider>
+          </ProcessingContext.Provider>
+        </SubmittedContext.Provider>
       </FormContext.Provider>
     </form>
   );

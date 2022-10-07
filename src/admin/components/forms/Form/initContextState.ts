@@ -28,7 +28,7 @@ const setSubmitted: SetSubmitted = () => undefined;
 const reset: Reset = () => undefined;
 
 const initialContextState: Context = {
-  getFields: (): Fields => ({ }),
+  getFields: (): Fields => ({}),
   getField: (): Field => undefined,
   getData: (): Data => undefined,
   getSiblingData,
@@ -41,7 +41,6 @@ const initialContextState: Context = {
   setModified,
   setProcessing,
   setSubmitted,
-  initialState: {},
   fields: {},
   disabled: false,
   formRef: null,

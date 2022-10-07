@@ -6,7 +6,7 @@ import Password from '../../../../forms/field-types/Password';
 import Checkbox from '../../../../forms/field-types/Checkbox';
 import Button from '../../../../elements/Button';
 import ConfirmPassword from '../../../../forms/field-types/ConfirmPassword';
-import { useWatchForm, useFormModified } from '../../../../forms/Form/context';
+import { useFormModified, useFormFields } from '../../../../forms/Form/context';
 import { Props } from './types';
 
 import APIKey from './APIKey';
@@ -18,10 +18,9 @@ const baseClass = 'auth-fields';
 const Auth: React.FC<Props> = (props) => {
   const { useAPIKey, requirePassword, verify, collection: { slug }, collection, email, operation } = props;
   const [changingPassword, setChangingPassword] = useState(requirePassword);
-  const { getField, dispatchFields } = useWatchForm();
+  const enableAPIKey = useFormFields(([fields]) => fields.enableAPIKey);
+  const dispatchFields = useFormFields((reducer) => reducer[1]);
   const modified = useFormModified();
-
-  const enableAPIKey = getField('enableAPIKey');
 
   const {
     serverURL,

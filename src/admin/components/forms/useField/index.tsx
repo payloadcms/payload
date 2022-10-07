@@ -1,11 +1,12 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import { useAuth } from '../../utilities/Auth';
-import { FormContext, useFormProcessing, useFormSubmitted, useFormModified } from '../Form/context';
+import { useFormProcessing, useFormSubmitted, useFormModified, FormFieldsContext, useForm } from '../Form/context';
 import { Options, FieldType } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useOperation } from '../../utilities/OperationProvider';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
+import { UPDATE } from '../Form/types';
 
 const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const {
@@ -22,13 +23,12 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const { id } = useDocumentInfo();
   const operation = useOperation();
 
-  const field = useContextSelector(FormContext, (state) => state.fields[path]);
-  const dispatchFields = useContextSelector(FormContext, (state) => state.dispatchFields);
-  const getData = useContextSelector(FormContext, (state) => state.getData);
-  const getSiblingData = useContextSelector(FormContext, (state) => state.getSiblingData);
-  const setModified = useContextSelector(FormContext, (state) => state.setModified);
+  const field = useContextSelector(FormFieldsContext, ([fields]) => fields[path]);
+  const dispatchField = useContextSelector(FormFieldsContext, ([_, dispatch]) => dispatch);
+  const { getData, getSiblingData, setModified } = useForm();
 
   const value = field?.value as T;
+  const initialValue = field?.initialValue as T;
   const valid = typeof field?.valid === 'boolean' ? field.valid : true;
   const showError = valid === false && submitted;
 
@@ -42,22 +42,38 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
         setModified(true);
       }
     }
-    dispatchFields({
-      type: 'UPDATE_VALUE',
+
+    dispatchField({
+      type: 'UPDATE',
       path,
       value: val,
+      disableFormData,
     });
   }, [
     setModified,
     modified,
     path,
-    dispatchFields,
+    dispatchField,
+    disableFormData,
   ]);
+
+  // Store result from hook as ref
+  // to prevent unnecessary rerenders
+  const result = useMemo(() => ({
+    showError,
+    errorMessage: field?.errorMessage,
+    value,
+    formSubmitted: submitted,
+    formProcessing: processing,
+    setValue,
+    initialValue,
+  }), [field, processing, setValue, showError, submitted, value, initialValue]);
 
   // Throttle the validate function
   useThrottledEffect(() => {
     const validateField = async () => {
-      const fieldToDispatch = {
+      const action: UPDATE = {
+        type: 'UPDATE',
         path,
         disableFormData,
         validate,
@@ -78,15 +94,15 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       const validationResult = typeof validate === 'function' ? await validate(value, validateOptions) : true;
 
       if (typeof validationResult === 'string') {
-        fieldToDispatch.errorMessage = validationResult;
-        fieldToDispatch.valid = false;
+        action.errorMessage = validationResult;
+        action.valid = false;
       } else {
-        fieldToDispatch.valid = validationResult;
-        fieldToDispatch.errorMessage = undefined;
+        action.valid = validationResult;
+        action.errorMessage = undefined;
       }
 
-      if (fieldToDispatch.valid !== valid && typeof dispatchFields === 'function') {
-        dispatchFields(fieldToDispatch);
+      if (action.valid !== valid && typeof dispatchField === 'function') {
+        dispatchField(action);
       }
     };
 
@@ -95,7 +111,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     value,
     condition,
     disableFormData,
-    dispatchFields,
+    dispatchField,
     getData,
     getSiblingData,
     id,
@@ -106,19 +122,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     valid,
   ]);
 
-  useEffect(() => {
-    console.log(path);
-  });
-
-  return {
-    ...options,
-    showError,
-    errorMessage: field?.errorMessage,
-    value,
-    formSubmitted: submitted,
-    formProcessing: processing,
-    setValue,
-  };
+  return result;
 };
 
 export default useField;
