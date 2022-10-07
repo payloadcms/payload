@@ -50,7 +50,7 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
           if (logs) payload.logger.info(`- Syncing to Stripe ID: '${doc.stripeID}'...`);
 
           try {
-            const stripeResource = await stripe?.[syncConfig?.resource]?.update(
+            const stripeResource = await stripe?.[syncConfig?.stripeResourceType]?.update(
               doc.stripeID,
               syncedFields
             );

@@ -21,8 +21,8 @@ export type FieldSyncConfig = {
 
 export type SyncConfig = {
   collection: string
-  resource: 'customers' | 'products' // TODO: get this from Stripe types
-  resourceSingular: 'customer' | 'product' // TODO: there must be a better way to do this
+  stripeResourceType: 'customers' | 'products' // TODO: get this from Stripe types
+  stripeResourceTypeSingular: 'customer' | 'product' // TODO: there must be a better way to do this
   fields: FieldSyncConfig[]
 }
 

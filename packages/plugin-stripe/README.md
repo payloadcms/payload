@@ -81,8 +81,8 @@ const config = buildConfig({
       sync: [
         {
           collection: 'customers',
-          object: 'customers', // one of the Stripe object types
-          objectSingular: 'customer',
+          stripeResourceType: 'customers',
+          stripeResourceTypeSingular: 'customer',
           fields: [
             {
               field: 'name', // this is a field on your own Payload config

@@ -125,7 +125,7 @@ const stripePlugin = (incomingStripeConfig: StripeConfig) => (config: Config): C
                   Field: (args) => LinkToDoc({
                     ...args,
                     isTestKey,
-                    stripeResourceType: syncConfig.resource,
+                    stripeResourceType: syncConfig.stripeResourceType,
                   })
                 },
               },

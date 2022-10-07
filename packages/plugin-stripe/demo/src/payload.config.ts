@@ -55,8 +55,8 @@ export default buildConfig({
       sync: [
         {
           collection: 'customers',
-          resource: 'customers',
-          resourceSingular: 'customer',
+          stripeResourceType: 'customers',
+          stripeResourceTypeSingular: 'customer',
           fields: [
             {
               field: 'name',
@@ -77,8 +77,8 @@ export default buildConfig({
         },
         {
           collection: 'products',
-          resource: 'products',
-          resourceSingular: 'product',
+          stripeResourceType: 'products',
+          stripeResourceTypeSingular: 'product',
           fields: [
             {
               field: 'name',

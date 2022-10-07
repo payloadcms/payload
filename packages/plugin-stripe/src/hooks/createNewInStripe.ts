@@ -60,9 +60,9 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
           if (!dataRef.stripeID) {
             try {
               // NOTE: Typed as "any" because the "create" method is not standard across all Stripe resources
-              const stripeResource = await stripe?.[syncConfig.resource]?.create(syncedFields as any);
+              const stripeResource = await stripe?.[syncConfig.stripeResourceType]?.create(syncedFields as any);
 
-              if (logs) payload.logger.info(`✅ Successfully created new '${syncConfig.resource}' resource in Stripe with ID: '${stripeResource.id}'.`);
+              if (logs) payload.logger.info(`✅ Successfully created new '${syncConfig.stripeResourceType}' resource in Stripe with ID: '${stripeResource.id}'.`);
 
               dataRef.stripeID = stripeResource.id;
 
@@ -78,19 +78,19 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
           if (logs) payload.logger.info(`A new '${collectionSlug}' document was created in Payload with ID: '${data?.id}', syncing with Stripe...`);
 
           try {
-            if (logs) payload.logger.info(`- Creating new '${syncConfig.resource}' resource in Stripe...`);
+            if (logs) payload.logger.info(`- Creating new '${syncConfig.stripeResourceType}' resource in Stripe...`);
 
             // NOTE: Typed as "any" because the "create" method is not standard across all Stripe resources
-            const stripeResource = await stripe?.[syncConfig.resource]?.create(syncedFields as any);
+            const stripeResource = await stripe?.[syncConfig.stripeResourceType]?.create(syncedFields as any);
 
-            if (logs) payload.logger.info(`✅ Successfully created new '${syncConfig.resource}' resource in Stripe with ID: '${stripeResource.id}'.`);
+            if (logs) payload.logger.info(`✅ Successfully created new '${syncConfig.stripeResourceType}' resource in Stripe with ID: '${stripeResource.id}'.`);
 
             dataRef.stripeID = stripeResource.id;
 
             // NOTE: this is to prevent sync in the "afterChange" hook
             dataRef.skipSync = true;
           } catch (error: any) {
-            throw new APIError(`Failed to create new '${syncConfig.resource}' resource in Stripe: ${error?.message || ''}`);
+            throw new APIError(`Failed to create new '${syncConfig.stripeResourceType}' resource in Stripe: ${error?.message || ''}`);
           }
         }
       }

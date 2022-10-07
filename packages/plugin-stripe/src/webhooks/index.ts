@@ -16,7 +16,7 @@ export const handleWebhooks: StripeWebhookHandler = async (args) => {
   const resourceType = event.type.split('.')[0];
   const method = event.type.split('.').pop();
 
-  const syncConfig = stripeConfig?.sync?.find((sync) => sync.resourceSingular === resourceType);
+  const syncConfig = stripeConfig?.sync?.find((sync) => sync.stripeResourceTypeSingular === resourceType);
 
   if (syncConfig) {
     switch (method) {
