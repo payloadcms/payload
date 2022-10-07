@@ -100,7 +100,8 @@ export default config;
 
 Using `sync` will do the following:
 
-- Adds and maintains a `stripeID` read-only field on each collection. This is a field generated _by Stripe_ and used as a cross-reference.
+- Adds and maintains a `stripeID` read-only field on each collection, this is a field generated _by Stripe_ and used as a cross-reference
+- Adds a direct link to the resource on Stripe.com
 - Adds and maintains an `skipSync` read-only flag on each collection to prevent infinite syncs when hooks trigger webhooks
 - Adds the following hooks to each collection:
   - `beforeValidate`: `createNewInStripe`
@@ -117,7 +118,7 @@ The following custom endpoints are automatically opened for you:
 
 >NOTE: the `/api` part of these routes may be different based on the settings defined in your Payload config.
 
-- `POST /api/stripe/rest`
+- #### `POST /api/stripe/rest`
 
   Proxies the [Stripe REST API](https://stripe.com/docs/api) behind [Payload access control](https://payloadcms.com/docs/access-control/overview) and returns the result. If you need to proxy the API server-side, use the [stripeProxy](#node) function.
 
@@ -138,7 +139,7 @@ The following custom endpoints are automatically opened for you:
     })
   ```
 
-- `POST /stripe/webhooks`
+- #### `POST /stripe/webhooks`
 
   Returns an http status code. This is where all Stripe webhook events are sent to be handled. See [webhooks](#webhooks).
 

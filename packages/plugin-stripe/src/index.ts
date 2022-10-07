@@ -7,6 +7,7 @@ import { extendWebpackConfig } from './extendWebpackConfig';
 import { createNewInStripe } from './hooks/createNewInStripe';
 import { syncExistingWithStripe } from './hooks/syncExistingWithStripe';
 import { deleteFromStripe } from './hooks/deleteFromStripe';
+import { LinkToDoc } from './ui';
 
 const stripePlugin = (incomingStripeConfig: StripeConfig) => (config: Config): Config => {
   const { collections } = config;
@@ -16,6 +17,8 @@ const stripePlugin = (incomingStripeConfig: StripeConfig) => (config: Config): C
     ...incomingStripeConfig,
     sync: incomingStripeConfig?.sync || []
   }
+
+  const isTestKey = stripeConfig.stripeSecretKey?.startsWith('sk_test_');
 
   return ({
     ...config,
@@ -106,13 +109,27 @@ const stripePlugin = (incomingStripeConfig: StripeConfig) => (config: Config): C
             },
             {
               name: 'skipSync',
-              label: 'Synced To Sync',
+              label: 'Skip Sync',
               type: 'checkbox',
               admin: {
                 position: 'sidebar',
                 readOnly: true,
               },
-            }
+            },
+            {
+              name: 'docUrl',
+              type: 'ui',
+              admin: {
+                position: 'sidebar',
+                components: {
+                  Field: (args) => LinkToDoc({
+                    ...args,
+                    isTestKey,
+                    stripeResourceType: syncConfig.resource,
+                  })
+                },
+              },
+            },
           ]
         };
       }

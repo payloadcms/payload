@@ -21,6 +21,8 @@ export default buildConfig({
           alias: {
             ...config.resolve.alias,
             "payload": path.join(__dirname, "../node_modules/payload"),
+            "react": path.join(__dirname, "../node_modules/react"),
+            "react-dom": path.join(__dirname, "../node_modules/react-dom"),
             "stripe": mockModulePath,
             "express": mockModulePath,
             [path.resolve(__dirname, './webhooks/subscriptionCreatedOrUpdated')]: mockModulePath,
