@@ -184,7 +184,9 @@ export const collapsible = baseField.keys({
   label: joi.string().required(),
   type: joi.string().valid('collapsible').required(),
   fields: joi.array().items(joi.link('#field')),
-  admin: baseAdminFields.default(),
+  admin: baseAdminFields.keys({
+    header: joi.func(),
+  }),
 });
 
 const tab = baseField.keys({
@@ -236,6 +238,9 @@ export const array = baseField.keys({
     joi.array().items(joi.object()),
     joi.func(),
   ),
+  admin: {
+    header: joi.func(),
+  },
 });
 
 export const upload = baseField.keys({

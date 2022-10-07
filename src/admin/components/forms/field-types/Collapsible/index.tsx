@@ -9,6 +9,7 @@ import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import FieldDescription from '../../FieldDescription';
 import { getFieldPath } from '../getFieldPath';
+import RowLabel from '../../RowLabel';
 
 import './index.scss';
 
@@ -26,6 +27,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
       className,
       initCollapsed,
       description,
+      header,
     },
   } = props;
 
@@ -69,7 +71,13 @@ const CollapsibleField: React.FC<Props> = (props) => {
           baseClass,
           className,
         ].filter(Boolean).join(' ')}
-        header={<div className={`${baseClass}__label`}>{label}</div>}
+        header={(
+          <RowLabel
+            path={path}
+            fallback={<div className={`${baseClass}__label`}>{label}</div>}
+            header={header}
+          />
+        )}
         onToggle={onToggle}
       >
         <RenderFields
