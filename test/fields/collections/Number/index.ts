@@ -47,6 +47,18 @@ const NumberFields: CollectionConfig = {
       type: 'number',
       defaultValue: defaultNumber,
     },
+    {
+      name: 'defaultMinMaxOverrideTest',
+      type : 'number',
+      min : -200,
+      max : 999999999999999,
+    },
+    {
+      name: 'defaultMinMaxOverrideTest2',
+      type : 'number',
+      min : -99999999999999,
+      max : 999,
+    }
   ],
 };
 
