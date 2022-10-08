@@ -99,7 +99,9 @@ export default joi.object({
   maxDepth: joi.number()
     .min(0)
     .max(100),
-  defaultMaxFieldLength : joi.number(),
+  defaultMaxTextLength : joi.number(),
+  defaultMaxNum : joi.number(),
+  defaultMinNum : joi.number(),
   csrf: joi.array()
     .items(joi.string().allow(''))
     .sparse(),

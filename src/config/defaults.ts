@@ -5,7 +5,9 @@ export const defaults: Config = {
   serverURL: '',
   defaultDepth: 2,
   maxDepth: 10,
-  defaultMaxFieldLength : 500,
+  defaultMaxTextLength : 500,
+  defaultMaxNum : 2147483647, //32 bit integer ranges
+  defaultMinNum : -2147483648,
   collections: [],
   globals: [],
   endpoints: [],

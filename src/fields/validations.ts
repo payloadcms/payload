@@ -45,13 +45,15 @@ export const number: Validate<unknown, unknown, NumberField> = (value: string, {
     return defaultMessage;
   }
 
+  
+
   return true;
 };
 
 export const text: Validate<unknown, unknown, TextField> = (value: string, { minLength, maxLength : fieldMaxLength, required, payload }) => {
   let maxLength: number;
 
-  if (typeof payload?.config?.defaultMaxFieldLength === 'number') maxLength = payload.config.defaultMaxFieldLength;
+  if (typeof payload?.config?.defaultMaxTextLength === 'number') maxLength = payload.config.defaultMaxTextLength;
   if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength;
   if (value && maxLength && value.length > maxLength) {
     return `This value must be shorter than the max length of ${maxLength} characters.`;
@@ -73,7 +75,7 @@ export const text: Validate<unknown, unknown, TextField> = (value: string, { min
 export const password: Validate<unknown, unknown, TextField> = (value: string, { required, maxLength : fieldMaxLength, minLength , payload }) => {
   let maxLength: number;
 
-  if (typeof payload?.config?.defaultMaxFieldLength === 'number') maxLength = payload.config.defaultMaxFieldLength;
+  if (typeof payload?.config?.defaultMaxTextLength === 'number') maxLength = payload.config.defaultMaxTextLength;
   if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength;
 
   if (value && maxLength && value.length > maxLength) {
@@ -108,7 +110,7 @@ export const textarea: Validate<unknown, unknown, TextareaField> = (value: strin
 }) => {
   let maxLength: number;
 
-  if (typeof payload?.config?.defaultMaxFieldLength === 'number') maxLength = payload.config.defaultMaxFieldLength;
+  if (typeof payload?.config?.defaultMaxTextLength === 'number') maxLength = payload.config.defaultMaxTextLength;
   if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength;
   if (value && maxLength && value.length > maxLength) {
     return `This value must be shorter than the max length of ${maxLength} characters.`;
