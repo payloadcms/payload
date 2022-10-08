@@ -26,15 +26,22 @@ import { getIDType } from '../utilities/getIDType';
 
 const defaultMessage = 'This field is required.';
 
-export const number: Validate<unknown, unknown, NumberField> = (value: string, { required, min, max , payload}) => {
+export const number: Validate<unknown, unknown, NumberField> = (value: string, { required, min: setMin, max: setMax, payload }) => {
   const parsedValue = parseFloat(value);
+  let max: number;
+  let min: number;
 
-  if (typeof max !== 'number' && typeof payload?.config?.defaultMaxNum === 'number') {
+  if (typeof payload?.config?.defaultMaxNum === 'number') {
     max = payload.config.defaultMaxNum;
   }
-
-  if (typeof min !== 'number' && typeof payload?.config?.defaultMinNum === 'number') {
+  if (typeof setMax === 'number') {
+    max = setMax;
+  }
+  if (typeof payload?.config?.defaultMinNum === 'number') {
     min = payload.config.defaultMinNum;
+  }
+  if (typeof min === 'number') {
+    min = setMin;
   }
 
   if ((value && typeof parsedValue !== 'number') || (required && Number.isNaN(parsedValue)) || (value && Number.isNaN(parsedValue))) {
@@ -53,12 +60,10 @@ export const number: Validate<unknown, unknown, NumberField> = (value: string, {
     return defaultMessage;
   }
 
-  
-
   return true;
 };
 
-export const text: Validate<unknown, unknown, TextField> = (value: string, { minLength, maxLength : fieldMaxLength, required, payload }) => {
+export const text: Validate<unknown, unknown, TextField> = (value: string, { minLength, maxLength: fieldMaxLength, required, payload }) => {
   let maxLength: number;
 
   if (typeof payload?.config?.defaultMaxTextLength === 'number') maxLength = payload.config.defaultMaxTextLength;
@@ -80,7 +85,7 @@ export const text: Validate<unknown, unknown, TextField> = (value: string, { min
   return true;
 };
 
-export const password: Validate<unknown, unknown, TextField> = (value: string, { required, maxLength : fieldMaxLength, minLength , payload }) => {
+export const password: Validate<unknown, unknown, TextField> = (value: string, { required, maxLength: fieldMaxLength, minLength, payload }) => {
   let maxLength: number;
 
   if (typeof payload?.config?.defaultMaxTextLength === 'number') maxLength = payload.config.defaultMaxTextLength;
@@ -112,9 +117,9 @@ export const email: Validate<unknown, unknown, EmailField> = (value: string, { r
 
 export const textarea: Validate<unknown, unknown, TextareaField> = (value: string, {
   required,
-  maxLength : fieldMaxLength,
+  maxLength: fieldMaxLength,
   minLength,
-  payload
+  payload,
 }) => {
   let maxLength: number;
 
