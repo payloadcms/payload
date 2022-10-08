@@ -6,8 +6,8 @@ export const defaults: Config = {
   defaultDepth: 2,
   maxDepth: 10,
   defaultMaxTextLength: 500,
-  defaultMaxNum: 2147483647, // 32 bit integer ranges
-  defaultMinNum: -2147483648,
+  defaultMaxNum: 9007199254740991, // 2^53 - 1 which is the MAX_SAFE_INTEGER for JS
+  defaultMinNum: -9007199254740991,
   collections: [],
   globals: [],
   endpoints: [],
