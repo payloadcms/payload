@@ -26,8 +26,18 @@ import { getIDType } from '../utilities/getIDType';
 
 const defaultMessage = 'This field is required.';
 
-export const number: Validate<unknown, unknown, NumberField> = (value: string, { required, min, max }) => {
+export const number: Validate<unknown, unknown, NumberField> = (value: string, { required, min, max , payload}) => {
   const parsedValue = parseFloat(value);
+
+  if (typeof max !== 'number' && typeof payload?.config?.defaultMaxNum === 'number') {
+    max = payload.config.defaultMaxNum;
+    return `"${value}" is greater than the DEFAULT max allowed value of ${max}.`;
+  }
+
+  if (typeof min !== 'number' && typeof payload?.config?.defaultMinNum === 'number') {
+    min = payload.config.defaultMinNum;
+    return `"${value}" is less than the DEFAULT min allowed value of ${min}.`;
+  }
 
   if ((value && typeof parsedValue !== 'number') || (required && Number.isNaN(parsedValue)) || (value && Number.isNaN(parsedValue))) {
     return 'Please enter a valid number.';
