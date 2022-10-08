@@ -342,20 +342,6 @@ describe('Field Validations', () => {
       const result = number(val, { ...options });
       expect(result).toBe(true);
     });
-
-
-    it('should not accept number above default max', async () => {
-      const val = 99999999999999;
-      const result = number(val, { ...options, required: true });
-      expect(result).toBe(maxValueMessage(val, 2147483647));
-    });
-    it('should not accept number below default min', async () => {
-      const val = -99999999999999;
-      const result = number(val, { ...options, required: true });
-      expect(result).toBe(minValueMessage(val, -2147483648));
-    });
-
-    // These 2 below are when the default max and mins are overwritten
     it('should handle required value', () => {
       const val = '';
       const result = number(val, { ...options, required: true });

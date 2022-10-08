@@ -49,16 +49,16 @@ const NumberFields: CollectionConfig = {
     },
     {
       name: 'defaultMinMaxOverrideTest',
-      type : 'number',
-      min : -200,
-      max : 999999999999999,
+      type: 'number',
+      min: -200,
+      max: 999999999999999,
     },
     {
       name: 'defaultMinMaxOverrideTest2',
-      type : 'number',
-      min : -99999999999999,
-      max : 999,
-    }
+      type: 'number',
+      min: -99999999999999,
+      max: 999,
+    },
   ],
 };
 
