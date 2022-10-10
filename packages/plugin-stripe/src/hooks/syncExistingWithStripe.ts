@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types';
+import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types';
 import Stripe from 'stripe';
 import { StripeConfig } from '../types';
 import { APIError } from 'payload/errors';
@@ -7,16 +7,17 @@ import { deepen } from '../utilities/deepen';
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' });
 
-export type CollectionAfterChangeHookWithArgs = (args: Parameters<CollectionAfterChangeHook>[0] & {
+export type CollectionBeforeChangeHookWithArgs = (args: Parameters<CollectionBeforeChangeHook>[0] & {
   collection?: CollectionConfig,
   stripeConfig?: StripeConfig,
 }) => void;
 
-export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (args) => {
+export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async (args) => {
   const {
     req,
     operation,
-    doc,
+    data,
+    originalDoc,
     collection,
     stripeConfig
   } = args;
@@ -30,7 +31,7 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
 
   const { slug: collectionSlug } = collection || {};
 
-  if (process.env.NODE_ENV !== 'test' && !doc.skipSync) {
+  if (process.env.NODE_ENV !== 'test' && !data.skipSync) {
     const syncConfig = sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
 
     if (syncConfig) {
@@ -42,29 +43,29 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
             stripeProperty
           } = field;
 
-          acc[stripeProperty] = doc[fieldPath];
+          acc[stripeProperty] = data[fieldPath];
           return acc;
         }, {} as Record<string, any>);
 
         syncedFields = deepen(syncedFields);
 
-        if (logs) payload.logger.info(`A '${collectionSlug}' document has changed in Payload with ID: '${doc?.id}', syncing with Stripe...`);
+        if (logs) payload.logger.info(`A '${collectionSlug}' document has changed in Payload with ID: '${originalDoc?._id}', syncing with Stripe...`);
 
-        if (!doc.stripeID) {
+        if (!data.stripeID) {
           // NOTE: the "beforeValidate" hook populates this
           if (logs) payload.logger.error(`- There is no Stripe ID for this document, skipping.`);
         } else {
-          if (logs) payload.logger.info(`- Syncing to Stripe resource with ID: '${doc.stripeID}'...`);
+          if (logs) payload.logger.info(`- Syncing to Stripe resource with ID: '${data.stripeID}'...`);
 
           try {
             const stripeResource = await stripe?.[syncConfig?.stripeResourceType]?.update(
-              doc.stripeID,
+              data.stripeID,
               syncedFields
             );
 
             if (logs) payload.logger.info(`✅ Successfully synced Stripe resource with ID: '${stripeResource.id}'.`);
           } catch (error: any) {
-            throw new APIError(`Failed to sync document with ID: '${doc.id}' to Stripe: ${error?.message || ''}`);
+            throw new APIError(`Failed to sync document with ID: '${data.id}' to Stripe: ${error?.message || ''}`);
           }
         }
       }
@@ -72,7 +73,7 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
   }
 
   // Set back to 'false' so that all changes continue to sync to Stripe, see note in './createNewInStripe.ts'
-  doc.skipSync = false;
+  data.skipSync = false;
 
-  return doc;
+  return data;
 }

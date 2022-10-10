@@ -78,8 +78,8 @@ const stripePlugin = (incomingStripeConfig: StripeConfig) => (config: Config): C
                 stripeConfig,
               })
             ],
-            afterChange: [
-              ...(existingHooks?.afterChange || []),
+            beforeChange: [
+              ...(existingHooks?.beforeChange || []),
               async (args) => syncExistingWithStripe({
                 ...args,
                 collection,

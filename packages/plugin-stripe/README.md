@@ -105,7 +105,7 @@ Using `sync` will do the following:
 - Adds and maintains an `skipSync` read-only flag on each collection to prevent infinite syncs when hooks trigger webhooks
 - Adds the following hooks to each collection:
   - `beforeValidate`: `createNewInStripe`
-  - `afterChange`: `syncExistingWithStripe`
+  - `beforeChange`: `syncExistingWithStripe`
   - `afterDelete`: `deleteFromStripe`
 - Handles the following Stripe webhooks
   - `STRIPE_TYPE.created`: `handleCreatedOrUpdated`
