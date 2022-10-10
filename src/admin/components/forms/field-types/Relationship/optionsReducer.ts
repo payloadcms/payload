@@ -29,7 +29,8 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
     }
 
     case 'ADD': {
-      const { hasMultipleRelations, collection, relation, data, sort, ids = [] } = action;
+      const { hasMultipleRelations, collection, docs, sort, ids = [] } = action;
+      const relation = collection.slug;
 
       const labelKey = collection.admin.useAsTitle || 'id';
 
@@ -38,18 +39,18 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
       if (!hasMultipleRelations) {
         const options = [
           ...state,
-          ...data.docs.reduce((docs, doc) => {
+          ...docs.reduce((docOptions, doc) => {
             if (loadedIDs.indexOf(doc.id) === -1) {
               loadedIDs.push(doc.id);
               return [
-                ...docs,
+                ...docOptions,
                 {
                   label: doc[labelKey] || `Untitled - ID: ${doc.id}`,
                   value: doc.id,
                 },
               ];
             }
-            return docs;
+            return docOptions;
           }, []),
         ];
 
@@ -68,12 +69,12 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
       const newOptions = [...state];
       const optionsToAddTo = newOptions.find((optionGroup) => optionGroup.label === collection.labels.plural);
 
-      const newSubOptions = data.docs.reduce((docs, doc) => {
+      const newSubOptions = docs.reduce((docSubOptions, doc) => {
         if (loadedIDs.indexOf(doc.id) === -1) {
           loadedIDs.push(doc.id);
 
           return [
-            ...docs,
+            ...docSubOptions,
             {
               label: doc[labelKey] || `Untitled - ID: ${doc.id}`,
               relationTo: relation,
@@ -82,7 +83,7 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
           ];
         }
 
-        return docs;
+        return docSubOptions;
       }, []);
 
       ids.forEach((id) => {

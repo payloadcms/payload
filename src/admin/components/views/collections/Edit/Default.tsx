@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useRouteMatch } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import format from 'date-fns/format';
 import { useConfig } from '../../../utilities/Config';
 import Eyebrow from '../../../elements/Eyebrow';
@@ -32,7 +32,6 @@ import './index.scss';
 const baseClass = 'collection-edit';
 
 const DefaultEditView: React.FC<Props> = (props) => {
-  const { params: { id } = {} } = useRouteMatch<Record<string, string>>();
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { publishedDoc } = useDocumentInfo();
 
@@ -47,6 +46,11 @@ const DefaultEditView: React.FC<Props> = (props) => {
     apiURL,
     action,
     hasSavePermission,
+    disableEyebrow,
+    disableActions,
+    disableLeaveWithoutSaving,
+    customHeader,
+    id,
   } = props;
 
   const {
@@ -92,15 +96,20 @@ const DefaultEditView: React.FC<Props> = (props) => {
                 description={`${isEditing ? 'Editing' : 'Creating'} - ${collection.labels.singular}`}
                 keywords={`${collection.labels.singular}, Payload, CMS`}
               />
-              <Eyebrow />
-              {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && (
+              {!disableEyebrow && (
+                <Eyebrow />
+              )}
+              {(!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && !disableLeaveWithoutSaving) && (
                 <LeaveWithoutSaving />
               )}
               <Gutter className={`${baseClass}__edit`}>
                 <header className={`${baseClass}__header`}>
-                  <h1>
-                    <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
-                  </h1>
+                  {customHeader && customHeader}
+                  {!customHeader && (
+                    <h1>
+                      <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
+                    </h1>
+                  )}
                 </header>
                 {auth && (
                   <Auth
@@ -130,38 +139,40 @@ const DefaultEditView: React.FC<Props> = (props) => {
             <div className={`${baseClass}__sidebar-wrap`}>
               <div className={`${baseClass}__sidebar`}>
                 <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                  <ul className={`${baseClass}__collection-actions`}>
-                    {(permissions?.create?.permission) && (
-                      <React.Fragment>
-                        <li>
-                          <Link
-                            id="action-create"
-                            to={`${admin}/collections/${slug}/create`}
-                          >
-                            Create New
-                          </Link>
-                        </li>
-                        {!disableDuplicate && isEditing && (
+                  {!disableActions && (
+                    <ul className={`${baseClass}__collection-actions`}>
+                      {(permissions?.create?.permission) && (
+                        <React.Fragment>
                           <li>
-                            <DuplicateDocument
-                              collection={collection}
-                              id={id}
-                              slug={slug}
-                            />
+                            <Link
+                              id="action-create"
+                              to={`${admin}/collections/${slug}/create`}
+                            >
+                              Create New
+                            </Link>
                           </li>
-                        )}
-                      </React.Fragment>
-                    )}
-                    {permissions?.delete?.permission && (
-                      <li>
-                        <DeleteDocument
-                          collection={collection}
-                          id={id}
-                          buttonId="action-delete"
-                        />
-                      </li>
-                    )}
-                  </ul>
+                          {!disableDuplicate && isEditing && (
+                            <li>
+                              <DuplicateDocument
+                                collection={collection}
+                                id={id}
+                                slug={slug}
+                              />
+                            </li>
+                          )}
+                        </React.Fragment>
+                      )}
+                      {permissions?.delete?.permission && (
+                        <li>
+                          <DeleteDocument
+                            collection={collection}
+                            id={id}
+                            buttonId="action-delete"
+                          />
+                        </li>
+                      )}
+                    </ul>
+                  )}
                   <div className={`${baseClass}__document-actions${((collection.versions?.drafts && !collection.versions?.drafts?.autosave) || (isEditing && preview)) ? ` ${baseClass}__document-actions--has-2` : ''}`}>
                     {(preview && (!collection.versions?.drafts || collection.versions?.drafts?.autosave)) && (
                       <PreviewButton
@@ -212,51 +223,53 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       fieldSchema={fields}
                     />
                   </div>
-                  {isEditing && (
-                    <ul className={`${baseClass}__meta`}>
-                      {!hideAPIURL && (
-                        <li className={`${baseClass}__api-url`}>
-                          <span className={`${baseClass}__label`}>
-                            API URL
-                            {' '}
-                            <CopyToClipboard value={apiURL} />
-                          </span>
-                          <a
-                            href={apiURL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {apiURL}
-                          </a>
-                        </li>
-                      )}
-                      {versions && (
-                        <li>
-                          <div className={`${baseClass}__label`}>Versions</div>
-                          <VersionsCount
-                            collection={collection}
-                            id={id}
-                          />
-                        </li>
-                      )}
-                      {timestamps && (
-                        <React.Fragment>
-                          {data.updatedAt && (
-                            <li>
-                              <div className={`${baseClass}__label`}>Last Modified</div>
-                              <div>{format(new Date(data.updatedAt), dateFormat)}</div>
-                            </li>
-                          )}
-                          {(publishedDoc?.createdAt || data?.createdAt) && (
-                            <li>
-                              <div className={`${baseClass}__label`}>Created</div>
-                              <div>{format(new Date(publishedDoc?.createdAt || data?.createdAt), dateFormat)}</div>
-                            </li>
-                          )}
-                        </React.Fragment>
-                      )}
-                    </ul>
-                  )}
+                  {
+                    isEditing && (
+                      <ul className={`${baseClass}__meta`}>
+                        {!hideAPIURL && (
+                          <li className={`${baseClass}__api-url`}>
+                            <span className={`${baseClass}__label`}>
+                              API URL
+                              {' '}
+                              <CopyToClipboard value={apiURL} />
+                            </span>
+                            <a
+                              href={apiURL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {apiURL}
+                            </a>
+                          </li>
+                        )}
+                        {versions && (
+                          <li>
+                            <div className={`${baseClass}__label`}>Versions</div>
+                            <VersionsCount
+                              collection={collection}
+                              id={id}
+                            />
+                          </li>
+                        )}
+                        {timestamps && (
+                          <React.Fragment>
+                            {data.updatedAt && (
+                              <li>
+                                <div className={`${baseClass}__label`}>Last Modified</div>
+                                <div>{format(new Date(data.updatedAt), dateFormat)}</div>
+                              </li>
+                            )}
+                            {(publishedDoc?.createdAt || data?.createdAt) && (
+                              <li>
+                                <div className={`${baseClass}__label`}>Created</div>
+                                <div>{format(new Date(publishedDoc?.createdAt || data?.createdAt), dateFormat)}</div>
+                              </li>
+                            )}
+                          </React.Fragment>
+                        )}
+                      </ul>
+                    )
+                  }
                 </div>
               </div>
             </div>
