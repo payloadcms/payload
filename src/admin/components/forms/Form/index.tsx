@@ -299,7 +299,6 @@ const Form: React.FC<Props> = (props) => {
   const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [contextRef]);
   const getSiblingData = useCallback((path: string) => getSiblingDataFunc(contextRef.current.fields, path), [contextRef]);
   const getDataByPath = useCallback<GetDataByPath>((path: string) => getDataByPathFunc(contextRef.current.fields, path), [contextRef]);
-  const getUnflattenedValues = useCallback(() => reduceFieldsToValues(contextRef.current.fields), [contextRef]);
 
   const createFormData = useCallback((overrides: any = {}) => {
     const data = reduceFieldsToValues(contextRef.current.fields, true);
@@ -337,7 +336,6 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.getData = getData;
   contextRef.current.getSiblingData = getSiblingData;
   contextRef.current.getDataByPath = getDataByPath;
-  contextRef.current.getUnflattenedValues = getUnflattenedValues;
   contextRef.current.validateForm = validateForm;
   contextRef.current.createFormData = createFormData;
   contextRef.current.setModified = setModified;

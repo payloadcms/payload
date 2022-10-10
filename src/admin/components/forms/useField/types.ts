@@ -3,9 +3,7 @@ import { Condition, Validate } from '../../../../fields/config/types';
 export type Options = {
   path: string
   validate?: Validate
-  enableDebouncedValue?: boolean
   disableFormData?: boolean
-  ignoreWhileFlattening?: boolean
   condition?: Condition
 }
 

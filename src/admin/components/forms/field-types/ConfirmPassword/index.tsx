@@ -31,7 +31,6 @@ const ConfirmPassword: React.FC = () => {
     path: 'confirm-password',
     disableFormData: true,
     validate,
-    enableDebouncedValue: true,
   });
 
   const classes = [

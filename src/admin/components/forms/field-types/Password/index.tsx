@@ -37,7 +37,6 @@ const Password: React.FC<Props> = (props) => {
   } = useField({
     path,
     validate: memoizedValidate,
-    enableDebouncedValue: true,
   });
 
   const classes = [

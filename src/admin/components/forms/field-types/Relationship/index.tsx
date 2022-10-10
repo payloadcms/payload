@@ -3,7 +3,6 @@ import React, {
 } from 'react';
 import equal from 'deep-equal';
 import qs from 'qs';
-import { useContext } from 'use-context-selector';
 import { useConfig } from '../../../utilities/Config';
 import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
@@ -16,7 +15,7 @@ import FieldDescription from '../../FieldDescription';
 import { relationship } from '../../../../../fields/validations';
 import { Where } from '../../../../../types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
-import { useFormProcessing, FormFieldsContext } from '../../Form/context';
+import { useFormProcessing, useAllFormFields } from '../../Form/context';
 import optionsReducer from './optionsReducer';
 import { Props, Option, ValueWithRelation, GetResults } from './types';
 import { createRelationMap } from './createRelationMap';
@@ -65,7 +64,7 @@ const Relationship: React.FC<Props> = (props) => {
 
   const { id } = useDocumentInfo();
   const { user, permissions } = useAuth();
-  const [fields] = useContext(FormFieldsContext);
+  const [fields] = useAllFormFields();
   const formProcessing = useFormProcessing();
   const hasMultipleRelations = Array.isArray(relationTo);
   const [options, dispatchOptions] = useReducer(optionsReducer, required || hasMany ? [] : [{ value: null, label: 'None' }]);

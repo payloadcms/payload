@@ -57,7 +57,6 @@ export type GetFields = () => Fields;
 export type GetField = (path: string) => Field;
 export type GetData = () => Data;
 export type GetSiblingData = (path: string) => Data;
-export type GetUnflattenedValues = () => Data;
 export type GetDataByPath = <T = unknown>(path: string) => T;
 export type SetModified = (modified: boolean) => void;
 export type SetSubmitted = (submitted: boolean) => void;
@@ -126,8 +125,11 @@ export type FieldAction =
 export type FormFieldsContext = [Fields, Dispatch<FieldAction>]
 
 export type Context = {
-  submit: Submit
+  /**
+   * @deprecated Form context fields may be outdated and should not be relied on. Instead, prefer `useFormFields`.
+   */
   fields: Fields
+  submit: Submit
   dispatchFields: Dispatch<FieldAction>
   validateForm: ValidateForm
   createFormData: CreateFormData
@@ -136,7 +138,6 @@ export type Context = {
   getField: GetField
   getData: GetData
   getSiblingData: GetSiblingData
-  getUnflattenedValues: GetUnflattenedValues
   getDataByPath: GetDataByPath
   setModified: SetModified
   setProcessing: SetProcessing

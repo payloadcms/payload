@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { useContextSelector, createContext as createSelectorContext } from 'use-context-selector';
+import { useContextSelector, createContext as createSelectorContext, useContext as useFullContext } from 'use-context-selector';
 import { Context, FormFieldsContext as FormFieldsContextType } from './types';
 
 const FormContext = createContext({} as Context);
@@ -16,6 +16,7 @@ const useFormProcessing = (): boolean => useContext(ProcessingContext);
 const useFormModified = (): boolean => useContext(ModifiedContext);
 
 const useFormFields = <Value = unknown>(selector: (context: FormFieldsContextType) => Value): Value => useContextSelector(FormFieldsContext, selector);
+const useAllFormFields = (): FormFieldsContextType => useFullContext(FormFieldsContext);
 
 export {
   SubmittedContext,
@@ -25,9 +26,10 @@ export {
   useFormProcessing,
   useFormModified,
   useForm,
-  useWatchForm,
   FormContext,
-  FormWatchContext,
   FormFieldsContext,
   useFormFields,
+  useAllFormFields,
+  FormWatchContext,
+  useWatchForm,
 };

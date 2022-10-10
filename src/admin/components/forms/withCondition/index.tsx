@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import { useContext } from 'use-context-selector';
 import { FieldBase } from '../../../../fields/config/types';
-import { FormFieldsContext } from '../Form/context';
+import { useAllFormFields } from '../Form/context';
 import getSiblingData from '../Form/getSiblingData';
 import reduceFieldsToValues from '../Form/reduceFieldsToValues';
 
@@ -33,7 +32,7 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
 
     const path = typeof pathFromProps === 'string' ? pathFromProps : name;
 
-    const [fields, dispatchFields] = useContext(FormFieldsContext);
+    const [fields, dispatchFields] = useAllFormFields();
 
     const data = reduceFieldsToValues(fields, true);
     const siblingData = getSiblingData(fields, path);

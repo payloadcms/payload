@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import { useContextSelector } from 'use-context-selector';
 import { useAuth } from '../../utilities/Auth';
-import { useFormProcessing, useFormSubmitted, useFormModified, FormFieldsContext, useForm } from '../Form/context';
+import { useFormProcessing, useFormSubmitted, useFormModified, useForm, useFormFields } from '../Form/context';
 import { Options, FieldType } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useOperation } from '../../utilities/OperationProvider';
@@ -22,9 +21,9 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const { user } = useAuth();
   const { id } = useDocumentInfo();
   const operation = useOperation();
+  const field = useFormFields(([fields]) => fields[path]);
+  const dispatchField = useFormFields(([_, dispatch]) => dispatch);
 
-  const field = useContextSelector(FormFieldsContext, ([fields]) => fields[path]);
-  const dispatchField = useContextSelector(FormFieldsContext, ([_, dispatch]) => dispatch);
   const { getData, getSiblingData, setModified } = useForm();
 
   const value = field?.value as T;

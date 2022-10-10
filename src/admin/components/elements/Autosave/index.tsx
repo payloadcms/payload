@@ -1,10 +1,9 @@
 import { formatDistance } from 'date-fns';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useContext } from 'use-context-selector';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useConfig } from '../../utilities/Config';
-import { useFormModified, FormFieldsContext } from '../../forms/Form/context';
+import { useFormModified, useAllFormFields } from '../../forms/Form/context';
 import { useLocale } from '../../utilities/Locale';
 import { Props } from './types';
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues';
@@ -18,7 +17,7 @@ const baseClass = 'autosave';
 const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdatedAt }) => {
   const { serverURL, routes: { api, admin } } = useConfig();
   const { versions, getVersions } = useDocumentInfo();
-  const [fields] = useContext(FormFieldsContext);
+  const [fields] = useAllFormFields();
   const modified = useFormModified();
   const locale = useLocale();
   const { replace } = useHistory();
