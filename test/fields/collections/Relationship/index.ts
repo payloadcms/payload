@@ -8,7 +8,7 @@ const RelationshipFields: CollectionConfig = {
     {
       name: 'relationship',
       type: 'relationship',
-      relationTo: ['uploads', 'array-fields'],
+      relationTo: ['text-fields', 'array-fields'],
       required: true,
     },
     {

@@ -77,12 +77,14 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
   }, [modalState, modalSlug]);
 
   return hasPermission ? (
-    <div className={baseClass}>
+    <div
+      className={baseClass}
+      id={`${path}-add-new`}
+    >
       {relatedCollections.length === 1 && (
         <Button
           className={`${baseClass}__add-button`}
           onClick={() => openModal(relatedCollections[0])}
-          id={`${path}-add-new`}
           buttonStyle="none"
           tooltip={`Add new ${relatedCollections[0].labels.singular}`}
         >
@@ -97,7 +99,6 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
           button={(
             <Button
               className={`${baseClass}__add-button`}
-              id={`${path}-add-new`}
               buttonStyle="none"
               tooltip={popupOpen ? undefined : 'Add new'}
             >
@@ -111,7 +112,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
                   return (
                     <li key={relatedCollection.slug}>
                       <button
-                        className={`${baseClass}__relation-button`}
+                        className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
                         type="button"
                         onClick={() => { closePopup(); openModal(relatedCollection); }}
                       >
