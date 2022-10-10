@@ -2,6 +2,7 @@ import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types'
 import Stripe from 'stripe';
 import { StripeConfig } from '../types';
 import { APIError } from 'payload/errors';
+import { deepen } from '../utilities/deepen';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' });
@@ -33,25 +34,27 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
     const syncConfig = sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
 
     if (syncConfig) {
-      // combine all fields of this object and match their respective values within the document
-      const syncedFields = syncConfig.fields.reduce((acc, field) => {
-        const {
-          fieldName,
-          stripeProperty
-        } = field;
-
-        acc[fieldName] = doc[stripeProperty];
-        return acc;
-      }, {} as Record<string, any>);
-
       if (operation === 'update') {
+        // combine all fields of this object and match their respective values within the document
+        let syncedFields = syncConfig.fields.reduce((acc, field) => {
+          const {
+            fieldPath,
+            stripeProperty
+          } = field;
+
+          acc[stripeProperty] = doc[fieldPath];
+          return acc;
+        }, {} as Record<string, any>);
+
+        syncedFields = deepen(syncedFields);
+
         if (logs) payload.logger.info(`A '${collectionSlug}' document has changed in Payload with ID: '${doc?.id}', syncing with Stripe...`);
 
         if (!doc.stripeID) {
           // NOTE: the "beforeValidate" hook populates this
           if (logs) payload.logger.error(`- There is no Stripe ID for this document, skipping.`);
         } else {
-          if (logs) payload.logger.info(`- Syncing to Stripe ID: '${doc.stripeID}'...`);
+          if (logs) payload.logger.info(`- Syncing to Stripe resource with ID: '${doc.stripeID}'...`);
 
           try {
             const stripeResource = await stripe?.[syncConfig?.stripeResourceType]?.update(
@@ -59,7 +62,7 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
               syncedFields
             );
 
-            if (logs) payload.logger.info(`✅ Successfully synced Stripe document ID: '${stripeResource.id}'.`);
+            if (logs) payload.logger.info(`✅ Successfully synced Stripe resource with ID: '${stripeResource.id}'.`);
           } catch (error: any) {
             throw new APIError(`Failed to sync document with ID: '${doc.id}' to Stripe: ${error?.message || ''}`);
           }
@@ -68,7 +71,7 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
     }
   }
 
-  // Set back to false so that all changes continue to sync to Stripe, see note in './createNewInStripe.ts'
+  // Set back to 'false' so that all changes continue to sync to Stripe, see note in './createNewInStripe.ts'
   doc.skipSync = false;
 
   return doc;

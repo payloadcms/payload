@@ -36,7 +36,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
   // }
 
   if (isNestedChange) {
-    if (logs) payload.logger.info(`- This change occurred on a nested field of ${resourceType}. Nested fields are not yet supported.`);
+    if (logs) payload.logger.info(`- This change occurred on a nested field of ${resourceType}. Nested fields are not yet supported in auto-sync but can be manually setup.`);
   }
 
   if (!isNestedChange) {
@@ -61,11 +61,11 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
     // combine all properties of the Stripe doc and match their respective fields within the document
     let syncedData = syncConfig.fields.reduce((acc, field) => {
       const {
-        fieldName,
+        fieldPath,
         stripeProperty
       } = field;
 
-      acc[fieldName] = stripeDoc[stripeProperty];
+      acc[fieldPath] = stripeDoc[stripeProperty];
       return acc;
     }, {} as Record<string, any>);
 
@@ -74,8 +74,6 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
       stripeID,
       skipSync: true,
     });
-
-    console.log('syncedData', syncedData);
 
     if (!foundDoc) {
       if (logs) payload.logger.info(`- No existing '${collectionSlug}' document found with Stripe ID: '${stripeID}', creating new...`);

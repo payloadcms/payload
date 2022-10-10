@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import type { CollectionBeforeValidateHook, CollectionConfig, PayloadRequest } from 'payload/types';
 import { StripeConfig } from '../types';
 import { APIError } from 'payload/errors';
+import { deepen } from '../utilities/deepen';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' });
@@ -35,27 +36,30 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
   }
 
   if (payload) {
-    if (dataRef.skipSync) {
+    if (data?.skipSync) {
       if (logs) payload.logger.info(`Bypassing collection-level hooks.`);
     } else {
-      // Initialize false so that all Payload events sync to Stripe
-      // conditionally set to true to prevent events that originate from webhooks from triggering an unnecessary sync
+      // initialize as 'false' so that all Payload admin events sync to Stripe
+      // then conditionally set to 'true' to for events that originate from webhooks
+      // this will prevent webhook events from triggering an unnecessary sync / infinite loop
       dataRef.skipSync = false;
 
       const { slug: collectionSlug } = collection || {};
-
       const syncConfig = sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
 
       if (syncConfig) {
-        const syncedFields = syncConfig.fields.reduce((acc, field) => {
+        // combine all fields of this object and match their respective values within the document
+        let syncedFields = syncConfig.fields.reduce((acc, field) => {
           const {
-            fieldName,
+            fieldPath,
             stripeProperty
           } = field;
 
-          acc[fieldName] = dataRef[stripeProperty];
+          acc[stripeProperty] = dataRef[fieldPath];
           return acc;
         }, {} as Record<string, any>);
+
+        syncedFields = deepen(syncedFields);
 
         if (operation === 'update') {
           if (logs) payload.logger.info(`A '${collectionSlug}' document has changed in Payload with ID: '${data?.id}', syncing with Stripe...`);
@@ -91,7 +95,7 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
 
             dataRef.stripeID = stripeResource.id;
 
-            // NOTE: this is to prevent sync in the "afterChange" hook
+            // IMPORTANT: this is to prevent sync in the "afterChange" hook
             dataRef.skipSync = true;
           } catch (error: any) {
             throw new APIError(`Failed to create new '${syncConfig.stripeResourceType}' resource in Stripe: ${error?.message || ''}`);
