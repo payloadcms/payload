@@ -1,10 +1,38 @@
 @import '../../../../../scss/styles.scss';
 
 .relationship-add-new {
-  &__button {
-    @extend %btn-reset;
-    cursor: pointer;
+  display: flex;
+  align-items: stretch;
+
+  .popup__wrapper {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
   }
+
+  &__add-button {
+    @include formInput;
+    height: 100%;
+    margin-left: -1px;
+    display: flex;
+    padding: 0;
+
+    .btn__content,
+    .btn__label {
+      display: flex;
+    }
+
+    .btn__content,
+    .btn__label {
+      height: 100%;
+    }
+
+    .btn__label {
+      padding: 0 base(.5);
+      align-items: center;
+    }
+  }
+
 
   &__relations {
     list-style: none;
@@ -16,76 +44,17 @@
     }
   }
 
-  &__button {
+  &__relation-button {
+    @extend %btn-reset;
+    cursor: pointer;
     @extend %btn-reset;
     display: block;
     padding: base(.125) 0;
+    text-align: center;
+    width: 100%;
 
     &:hover {
       opacity: .7;
     }
-  }
-
-  &__modal {
-    @include blur-bg();
-    min-height: 100vh;
-    display: flex;
-
-    .collection-edit {
-      position: relative;
-      z-index: 1;
-    }
-
-    .collection-edit__document-actions {
-      margin-top: base(2.75);
-    }
-  }
-
-  &__modal-close {
-    @extend %btn-reset;
-    width: base(9);
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-    text-indent: -9999px;
-    background: rgba(0, 0, 0, 0.08);
-    cursor: pointer;
-
-    &:active,
-    &:focus {
-      outline: 0;
-    }
-  }
-
-  &__modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-top: base(2.5);
-  }
-
-  &__modal-header-close {
-    svg {
-      width: base(2.5);
-      height: base(2.5);
-      position: relative;
-      top: base(-.5);
-
-      .stroke {
-        stroke-width: .5px;
-      }
-    }
-  }
-
-  @include large-break {
-    &__modal-close {
-      width: base(8);
-    }
-  }
-}
-
-html[data-theme=dark] {
-  .relationship-add-new__modal-close {
-    background: rgba(0, 0, 0, 0.2);
   }
 }

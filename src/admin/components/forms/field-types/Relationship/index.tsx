@@ -381,50 +381,57 @@ const Relationship: React.FC<Props> = (props) => {
         required={required}
       />
       {!errorLoading && (
-        <ReactSelect
-          isDisabled={readOnly}
-          onInputChange={(newSearch) => handleInputChange(newSearch, value)}
-          onChange={!readOnly ? (selected) => {
-            if (hasMany) {
-              setValue(selected ? selected.map((option) => {
-                if (hasMultipleRelations) {
-                  return {
-                    relationTo: option.relationTo,
-                    value: option.value,
-                  };
-                }
+        <div className={`${baseClass}__wrap`}>
+          <ReactSelect
+            isDisabled={readOnly}
+            onInputChange={(newSearch) => handleInputChange(newSearch, value)}
+            onChange={!readOnly ? (selected) => {
+              if (hasMany) {
+                setValue(selected ? selected.map((option) => {
+                  if (hasMultipleRelations) {
+                    return {
+                      relationTo: option.relationTo,
+                      value: option.value,
+                    };
+                  }
 
-                return option.value;
-              }) : null);
-            } else if (hasMultipleRelations) {
-              setValue({
-                relationTo: selected.relationTo,
-                value: selected.value,
+                  return option.value;
+                }) : null);
+              } else if (hasMultipleRelations) {
+                setValue({
+                  relationTo: selected.relationTo,
+                  value: selected.value,
+                });
+              } else {
+                setValue(selected.value);
+              }
+            } : undefined}
+            onMenuScrollToBottom={() => {
+              getResults({
+                lastFullyLoadedRelation,
+                lastLoadedPage: lastLoadedPage + 1,
+                search,
+                value: initialValue,
+                sort: false,
               });
-            } else {
-              setValue(selected.value);
-            }
-          } : undefined}
-          onMenuScrollToBottom={() => {
-            getResults({
-              lastFullyLoadedRelation,
-              lastLoadedPage: lastLoadedPage + 1,
-              search,
-              value: initialValue,
-              sort: false,
-            });
-          }}
-          value={valueToRender}
-          showError={showError}
-          disabled={formProcessing}
-          options={options}
-          isMulti={hasMany}
-          isSortable={isSortable}
-          filterOption={enableWordBoundarySearch ? (item, searchFilter) => {
-            const r = wordBoundariesRegex(searchFilter || '');
-            return r.test(item.label);
-          } : undefined}
-        />
+            }}
+            value={valueToRender}
+            showError={showError}
+            disabled={formProcessing}
+            options={options}
+            isMulti={hasMany}
+            isSortable={isSortable}
+            filterOption={enableWordBoundarySearch ? (item, searchFilter) => {
+              const r = wordBoundariesRegex(searchFilter || '');
+              return r.test(item.label);
+            } : undefined}
+          />
+          {!readOnly && (
+            <AddNewRelation
+              {...{ path, hasMany, relationTo, value, setValue, dispatchOptions }}
+            />
+          )}
+        </div>
       )}
       {errorLoading && (
         <div className={`${baseClass}__error-loading`}>
@@ -435,11 +442,6 @@ const Relationship: React.FC<Props> = (props) => {
         value={value}
         description={description}
       />
-      {!readOnly && (
-        <AddNewRelation
-          {...{ path, hasMany, relationTo, value, setValue, dispatchOptions }}
-        />
-      )}
     </div>
   );
 };

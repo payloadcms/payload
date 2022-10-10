@@ -7,9 +7,10 @@ import Popup from '../../../../elements/Popup';
 import { useRelatedCollections } from './useRelatedCollections';
 import { useAuth } from '../../../../utilities/Auth';
 import { AddNewRelationModal } from './Modal';
+import { useEditDepth } from '../../../../utilities/EditDepth';
+import Plus from '../../../../icons/Plus';
 
 import './index.scss';
-import { useEditDepth } from '../../../../utilities/EditDepth';
 
 const baseClass = 'relationship-add-new';
 
@@ -19,6 +20,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
   const { permissions } = useAuth();
   const [hasPermission, setHasPermission] = useState(false);
   const [modalCollection, setModalCollection] = useState<SanitizedCollectionConfig>();
+  const [popupOpen, setPopupOpen] = useState(false);
   const editDepth = useEditDepth();
 
   const modalSlug = `${path}-add-modal-depth-${editDepth}`;
@@ -54,6 +56,10 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
     toggleModal(modalSlug);
   }, [relationTo, modalCollection, hasMany, toggleModal, modalSlug, setValue, value, dispatchOptions]);
 
+  const onPopopToggle = useCallback((state) => {
+    setPopupOpen(state);
+  }, []);
+
   useEffect(() => {
     if (permissions) {
       if (relatedCollections.length === 1) {
@@ -71,32 +77,31 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
   }, [modalState, modalSlug]);
 
   return hasPermission ? (
-    <React.Fragment>
+    <div className={baseClass}>
       {relatedCollections.length === 1 && (
         <Button
+          className={`${baseClass}__add-button`}
           onClick={() => openModal(relatedCollections[0])}
           id={`${path}-add-new`}
-          buttonStyle="icon-label"
-          icon="plus"
-          iconStyle="with-border"
-          iconPosition="left"
+          buttonStyle="none"
+          tooltip={`Add new ${relatedCollections[0].labels.singular}`}
         >
-          {`Add new ${relatedCollections[0].labels.singular}`}
+          <Plus />
         </Button>
       )}
       {relatedCollections.length > 1 && (
         <Popup
           buttonType="custom"
-          horizontalAlign="left"
+          horizontalAlign="center"
+          onToggleOpen={onPopopToggle}
           button={(
             <Button
-              buttonStyle="icon-label"
+              className={`${baseClass}__add-button`}
               id={`${path}-add-new`}
-              icon="plus"
-              iconPosition="left"
-              iconStyle="with-border"
+              buttonStyle="none"
+              tooltip={popupOpen ? undefined : 'Add new'}
             >
-              Add new
+              <Plus />
             </Button>
           )}
           render={({ close: closePopup }) => (
@@ -106,7 +111,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
                   return (
                     <li key={relatedCollection.slug}>
                       <button
-                        className={`${baseClass}__button`}
+                        className={`${baseClass}__relation-button`}
                         type="button"
                         onClick={() => { closePopup(); openModal(relatedCollection); }}
                       >
@@ -127,6 +132,6 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
           {...{ onSave, modalSlug, modalCollection }}
         />
       )}
-    </React.Fragment>
+    </div>
   ) : null;
 };
