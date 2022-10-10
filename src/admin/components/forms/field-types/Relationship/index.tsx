@@ -23,6 +23,7 @@ import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { getFilterOptionsQuery } from '../getFilterOptionsQuery';
 import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
+import { AddNewRelation } from './AddNew';
 
 import './index.scss';
 
@@ -154,7 +155,7 @@ const Relationship: React.FC<Props> = (props) => {
             const data: PaginatedDocs<unknown> = await response.json();
             if (data.docs.length > 0) {
               resultsFetched += data.docs.length;
-              dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort });
+              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort });
               setLastLoadedPage(data.page);
 
               if (!data.nextPage) {
@@ -170,7 +171,7 @@ const Relationship: React.FC<Props> = (props) => {
           } else if (response.status === 403) {
             setLastFullyLoadedRelation(relations.indexOf(relation));
             lastLoadedPageToUse = 1;
-            dispatchOptions({ type: 'ADD', data: { docs: [] } as PaginatedDocs<unknown>, relation, hasMultipleRelations, collection, sort, ids: relationMap[relation] });
+            dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort, ids: relationMap[relation] });
           } else {
             setErrorLoading('An error has occurred.');
           }
@@ -251,11 +252,11 @@ const Relationship: React.FC<Props> = (props) => {
     setSearch(searchArg);
   }, [getResults]);
 
-  const handleInputChange = (searchArg: string, valueArg: unknown) => {
+  const handleInputChange = useCallback((searchArg: string, valueArg: unknown) => {
     if (search !== searchArg) {
       updateSearch(searchArg, valueArg);
     }
-  };
+  }, [search, updateSearch]);
 
   // ///////////////////////////
   // Fetch value options when initialValue changes
@@ -288,9 +289,9 @@ const Relationship: React.FC<Props> = (props) => {
             const collection = collections.find((coll) => coll.slug === relation);
             if (response.ok) {
               const data = await response.json();
-              dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort: true, ids });
+              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort: true, ids });
             } else if (response.status === 403) {
-              dispatchOptions({ type: 'ADD', data: { docs: [] } as PaginatedDocs, relation, hasMultipleRelations, collection, sort: true, ids });
+              dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort: true, ids });
             }
           }
         }
@@ -434,6 +435,11 @@ const Relationship: React.FC<Props> = (props) => {
         value={value}
         description={description}
       />
+      {!readOnly && (
+        <AddNewRelation
+          {...{ path, hasMany, relationTo, value, setValue, dispatchOptions }}
+        />
+      )}
     </div>
   );
 };

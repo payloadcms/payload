@@ -1,0 +1,91 @@
+@import '../../../../../scss/styles.scss';
+
+.relationship-add-new {
+  &__button {
+    @extend %btn-reset;
+    cursor: pointer;
+  }
+
+  &__relations {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li:not(:last-child) {
+      margin-bottom: base(.375);
+    }
+  }
+
+  &__button {
+    @extend %btn-reset;
+    display: block;
+    padding: base(.125) 0;
+
+    &:hover {
+      opacity: .7;
+    }
+  }
+
+  &__modal {
+    @include blur-bg();
+    min-height: 100vh;
+    display: flex;
+
+    .collection-edit {
+      position: relative;
+      z-index: 1;
+    }
+
+    .collection-edit__document-actions {
+      margin-top: base(2.75);
+    }
+  }
+
+  &__modal-close {
+    @extend %btn-reset;
+    width: base(9);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    text-indent: -9999px;
+    background: rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+
+    &:active,
+    &:focus {
+      outline: 0;
+    }
+  }
+
+  &__modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: base(2.5);
+  }
+
+  &__modal-header-close {
+    svg {
+      width: base(2.5);
+      height: base(2.5);
+      position: relative;
+      top: base(-.5);
+
+      .stroke {
+        stroke-width: .5px;
+      }
+    }
+  }
+
+  @include large-break {
+    &__modal-close {
+      width: base(8);
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .relationship-add-new__modal-close {
+    background: rgba(0, 0, 0, 0.2);
+  }
+}
