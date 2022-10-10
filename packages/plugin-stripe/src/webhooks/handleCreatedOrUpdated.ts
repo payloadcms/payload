@@ -1,4 +1,5 @@
 import { SanitizedStripeConfig, StripeWebhookHandler } from '../types';
+import { deepen } from '../utilities/deepen';
 
 type HandleCreatedOrUpdated = (args: Parameters<StripeWebhookHandler>[0] & {
   syncConfig: SanitizedStripeConfig['sync'][0]
@@ -68,11 +69,13 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
       return acc;
     }, {} as Record<string, any>);
 
-    syncedData = {
+    syncedData = deepen({
       ...syncedData,
       stripeID,
       skipSync: true,
-    }
+    });
+
+    console.log('syncedData', syncedData);
 
     if (!foundDoc) {
       if (logs) payload.logger.info(`- No existing '${collectionSlug}' document found with Stripe ID: '${stripeID}', creating new...`);
@@ -139,18 +142,13 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
       }
     } else {
       if (logs) payload.logger.info(`- Existing '${collectionSlug}' document found in Payload with Stripe ID: '${stripeID}', updating now...`);
-      console.log('foundDoc', foundDoc);
-      console.log('syncedData', syncedData);
+
       try {
         await payload.update({
           collection: collectionSlug,
           id: foundDoc.id,
-          data: {
-            ...foundDoc,
-            // price: ''
-          }
-        }
-        );
+          data: syncedData,
+        });
 
         if (logs) payload.logger.info(`✅ Successfully updated '${collectionSlug}' document in Payload from Stripe ID: '${stripeID}'.`);
       } catch (error: any) {
