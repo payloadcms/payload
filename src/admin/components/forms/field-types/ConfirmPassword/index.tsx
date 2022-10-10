@@ -2,15 +2,15 @@ import React, { useCallback } from 'react';
 import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
-import { useWatchForm } from '../../Form/context';
+import { useFormFields } from '../../Form/context';
 
 import './index.scss';
+import { Field } from '../../Form/types';
 
 const ConfirmPassword: React.FC = () => {
-  const { getField } = useWatchForm();
-  const password = getField('password');
+  const password = useFormFields<Field>(([fields]) => fields.password);
 
-  const validate = useCallback((value) => {
+  const validate = useCallback((value: string) => {
     if (!value) {
       return 'This field is required';
     }
@@ -31,7 +31,6 @@ const ConfirmPassword: React.FC = () => {
     path: 'confirm-password',
     disableFormData: true,
     validate,
-    enableDebouncedValue: true,
   });
 
   const classes = [

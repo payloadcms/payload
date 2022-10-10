@@ -15,7 +15,7 @@ import FieldDescription from '../../FieldDescription';
 import { relationship } from '../../../../../fields/validations';
 import { Where } from '../../../../../types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
-import { useFormProcessing, useWatchForm } from '../../Form/context';
+import { useFormProcessing, useAllFormFields } from '../../Form/context';
 import optionsReducer from './optionsReducer';
 import { Props, Option, ValueWithRelation, GetResults } from './types';
 import { createRelationMap } from './createRelationMap';
@@ -23,6 +23,8 @@ import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { getFilterOptionsQuery } from '../getFilterOptionsQuery';
 import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
+import reduceFieldsToValues from '../../Form/reduceFieldsToValues';
+import getSiblingData from '../../Form/getSiblingData';
 import { AddNewRelation } from './AddNew';
 
 import './index.scss';
@@ -62,7 +64,7 @@ const Relationship: React.FC<Props> = (props) => {
 
   const { id } = useDocumentInfo();
   const { user, permissions } = useAuth();
-  const { getData, getSiblingData } = useWatchForm();
+  const [fields] = useAllFormFields();
   const formProcessing = useFormProcessing();
   const hasMultipleRelations = Array.isArray(relationTo);
   const [options, dispatchOptions] = useReducer(optionsReducer, required || hasMany ? [] : [{ value: null, label: 'None' }]);
@@ -74,6 +76,7 @@ const Relationship: React.FC<Props> = (props) => {
   const [search, setSearch] = useState('');
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false);
   const firstRun = useRef(true);
+  const fieldsRef = useRef(fields);
 
   const memoizedValidate = useCallback((value, validationOptions) => {
     return validate(value, { ...validationOptions, required });
@@ -90,6 +93,13 @@ const Relationship: React.FC<Props> = (props) => {
     validate: memoizedValidate,
     condition,
   });
+
+  const getFormData = useCallback(() => {
+    return [
+      reduceFieldsToValues(fieldsRef.current, true),
+      getSiblingData(fieldsRef.current, path),
+    ];
+  }, [fieldsRef, path]);
 
   const getResults: GetResults = useCallback(async ({
     lastFullyLoadedRelation: lastFullyLoadedRelationArg,
@@ -302,20 +312,21 @@ const Relationship: React.FC<Props> = (props) => {
   }, [hasMany, hasMultipleRelations, relationTo, initialValue, hasLoadedValueOptions, errorLoading, collections, api, serverURL]);
 
   useEffect(() => {
-    if (!filterOptions) {
-      return;
-    }
+    if (!filterOptions) return;
+
+    const [data, siblingData] = getFormData();
+
     const newOptionFilters = getFilterOptionsQuery(filterOptions, {
       id,
-      data: getData(),
+      data,
       relationTo,
-      siblingData: getSiblingData(path),
+      siblingData,
       user,
     });
     if (!equal(newOptionFilters, optionFilters)) {
       setOptionFilters(newOptionFilters);
     }
-  }, [relationTo, filterOptions, optionFilters, id, getData, getSiblingData, path, user]);
+  }, [relationTo, filterOptions, optionFilters, id, getFormData, path, user]);
 
   useEffect(() => {
     if (optionFilters || !filterOptions) {

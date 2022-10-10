@@ -1,0 +1,271 @@
+---
+title: React Hooks
+label: React Hooks
+order: 30
+desc: Make use of all of the powerful React hooks that Payload provides.
+keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Payload provides a variety of powerful hooks that can be used within your own React components. With them, you can interface with Payload itself and build just about any type of complex customization you can think of—directly in familiar React code.
+
+### useField
+
+The `useField` hook is used internally within every applicable Payload field component, and it manages sending and receiving a field's state from its parent form.
+
+Outside of internal use, its most common use-case is in custom `Field` components. When you build a custom React `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useField` hook as follows:
+
+```tsx
+import { useField } from 'payload/components/forms'
+
+type Props = { path: string }
+
+const CustomTextField: React.FC<Props> = ({ path }) => {
+  // highlight-start
+  const { value, setValue } = useField<string>({ path })
+  // highlight-end
+
+  return <input onChange={e => setValue(e.target.value)} value={value.path} />
+}
+```
+
+The `useField` hook accepts an `args` object and sends back information and helpers for you to make use of:
+
+```ts
+const field = useField<string>({
+  path: 'fieldPathHere', // required
+  validate: myValidateFunc, // optional
+  disableFormData?: false, // if true, the field's data will be ignored
+  condition?: myConditionHere, // optional, used to skip validation if condition fails
+})
+
+// Here is what `useField` sends back
+const {
+  showError, // whether or not the field should show as errored
+  errorMessage, // the error message to show, if showError
+  value, // the current value of the field from the form
+  formSubmitted, // if the form has been submitted
+  formProcessing, // if the form is currently processing
+  setValue, // method to set the field's value in form state
+  initialValue, // the initial value that the field mounted with
+} = field;
+
+// The rest of your component goes here
+```
+
+### useFormFields
+
+There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields' form states from anywhere within a form.  
+
+<Banner type="success">
+  <strong>This hook is great for retrieving only certain fields from form state</strong> because it ensures that it will only cause a rerender when the items that you ask for change. 
+</Banner>
+
+Thanks to the awesome package [`use-context-selector`](https://github.com/dai-shi/use-context-selector), you can retrieve a specific field's state easily. This is ideal because you can ensure you have an up-to-date field state, and your component will only re-render when _that field's state_ changes.
+
+You can pass a Redux-like selector into the hook, which will ensure that you retrieve only the field that you want. The selector takes an argument with type of `[fields: Fields, dispatch: React.Dispatch<Action>]]`.
+
+```tsx
+import { useFormFields } from 'payload/components/forms';
+
+const MyComponent: React.FC = () => {
+  // Get only the `amount` field state, and only cause a rerender when that field changes
+  const amount = useFormFields(([fields, dispatch]) => fields.amount);
+
+  // Do the same thing as above, but to the `feePercentage` field
+  const feePercentage = useFormFields(([fields, dispatch]) => fields.feePercentage);
+
+  if (typeof amount?.value !== 'undefined' && typeof feePercentage?.value !== 'undefined') {
+    return (
+      <span>The fee is ${(amount.value * feePercentage.value) / 100}</span>
+    );
+  }
+};
+```
+
+### useAllFormFields
+
+**To retrieve more than one field**, you can use the `useAllFormFields` hook. Your component will re-render when _any_ field changes, so use this hook only if you absolutely need to. Unlike the `useFormFields` hook, this hook does not accept a "selector", and it always returns an array with type of `[fields: Fields, dispatch: React.Dispatch<Action>]]`. 
+
+You can do lots of powerful stuff by retrieving the full form state, like using built-in helper functions to reduce field state to values only, or to retrieve sibling data by path.
+
+```tsx
+import { useAllFormFields, reduceFieldsToValues, getSiblingData } from 'payload/components/forms';
+
+const ExampleComponent: React.FC = () => {
+  // the `fields` const will be equal to all fields' state,
+  // and the `dispatchFields` method is usable to send field state up to the form
+  const [fields, dispatchFields] = useAllFormFields();
+
+  // Pass in fields, and indicate if you'd like to "unflatten" field data.
+  // The result below will reflect the data stored in the form at the given time
+  const formData = reduceFieldsToValues(fields, true);
+
+  // Pass in field state and a path, 
+  // and you will be sent all sibling data of the path that you've specified
+  const siblingData = getSiblingData(fields, 'someFieldName');
+
+  return (
+    // return some JSX here if necessary
+  )
+};
+```
+
+##### Updating other fields' values
+
+If you are building a custom component, then you should use `setValue` which is returned from the `useField` hook to programmatically set your field's value. But if you're looking to update _another_ field's value, you can use `dispatchFields` returned from `useFormFields`.
+
+You can send the following actions to the `dispatchFields` function.
+
+| Action                 | Description                                                                |
+|------------------------|----------------------------------------------------------------------------|
+| **`ADD_ROW`**          | Adds a row of data (useful in array / block field data)                    |
+| **`DUPLICATE_ROW`**    | Duplicates a row of data (useful in array / block field data)              |
+| **`MODIFY_CONDITION`** | Updates a field's conditional logic result (true / false)                  |
+| **`MOVE_ROW`**         | Moves a row of data (useful in array / block field data)                   |
+| **`REMOVE`**           | Removes a field from form state                                            |
+| **`REMOVE_ROW`**       | Removes a row of data from form state (useful in array / block field data) |
+| **`REPLACE_STATE`**    | Completely replaces form state                                             |
+| **`UPDATE`**           | Update any property of a specific field's state                            |
+
+To see types for each action supported within the `dispatchFields` hook, check out the Form types [here](https://github.com/payloadcms/payload/blob/master/src/admin/components/forms/Form/types.ts).
+
+### useForm
+
+The `useForm` hook can be used to interact with the form itself, and sends back many methods that can be used to reactively fetch form state without causing rerenders within your components each time a field is changed. This is useful if you have action-based callbacks that your components fire, and need to interact with form state _based on a user action_.
+
+<Banner type="warning">
+  <strong>Warning:</strong><br/>
+  This hook is optimized to avoid causing rerenders when fields change, and as such, its `fields` property will be out of date. You should only leverage this hook if you need to perform actions against the form in response to your users' actions. Do not rely on its returned "fields" as being up-to-date. They will be removed from this hook's response in an upcoming version. 
+</Banner>
+
+The `useForm` hook returns an object with the following properties:
+
+| Action               | Description                                                         |
+|----------------------|---------------------------------------------------------------------|
+| **`fields`**         | Deprecated. This property cannot be relied on as up-to-date.        |
+| **`submit`**         | Method to trigger the form to submit                                |
+| **`dispatchFields`** | Dispatch actions to the form field state                            |
+| **`validateForm`**   | Trigger a validation of the form state                              |
+| **`createFormData`** | Create a `multipart/form-data` object from the current form's state |
+| **`disabled`**       | Boolean denoting whether or not the form is disabled                |
+| **`getFields`**      | Gets all fields from state                                          |
+| **`getField`**       | Gets a single field from state by path                              |
+| **`getData`**        | Returns the data stored in the form                                 |
+| **`getSiblingData`** | Returns form sibling data for the given field path                  |
+| **`setModified`**    | Set the form's `modified` state                                     |
+| **`setProcessing`**  | Set the form's `processing` state                                   |
+| **`setSubmitted`**   | Set the form's `submitted` state                                    |
+| **`formRef`**        | The ref from the form HTML element                                  |
+| **`reset`**          | Method to reset the form to its initial state                       |
+
+### useDocumentInfo
+
+The `useDocumentInfo` hook provides lots of information about the document currently being edited, including the following:
+
+| Property                  | Description                                                                        |
+|---------------------------|------------------------------------------------------------------------------------|
+| **`collection`**          | If the doc is a collection, its collection config will be returned                 |
+| **`global`**              | If the doc is a global, its global config will be returned                         |
+| **`type`**                | The type of document being edited (collection or global)                           |
+| **`id`**                  | If the doc is a collection, its ID will be returned                                |
+| **`preferencesKey`**      | The `preferences` key to use when interacting with document-level user preferences |
+| **`versions`**            | Versions of the current doc                                                        |
+| **`unpublishedVersions`** | Unpublished versions of the current doc                                            |
+| **`publishedDoc`**        | The currently published version of the doc being edited                            |
+| **`getVersions`**         | Method to trigger the retrieval of document versions                               |
+
+**Example:**
+
+```tsx
+import { useDocumentInfo } from 'payload/components/utilities';
+
+const LinkFromCategoryToPosts: React.FC = () => {
+  // highlight-start
+  const { id } = useDocumentInfo();
+  // highlight-end
+
+  // id will be undefined on the create form
+  if (!id) {
+    return null;
+  }
+
+  return (
+    <a href={`/admin/collections/posts?where[or][0][and][0][category][in][0]=[${id}]`} >
+      View posts
+    </a>
+  )
+};
+```
+
+### useLocale
+
+In any custom component you can get the selected locale with the `useLocale` hook. Here is a simple example:
+
+```tsx
+import { useLocale } from 'payload/components/utilities';
+
+const Greeting: React.FC = () => {
+  // highlight-start
+  const locale = useLocale();
+  // highlight-end
+
+  const trans = {
+    en: 'Hello',
+    es: 'Hola',
+  };
+
+  return (
+    <span> { trans[locale] } </span>
+  );
+};
+```
+
+### useAuth
+
+Useful to retrieve info about the currently logged in user as well as methods for interacting with it. It sends back an object with the following properties:
+
+| Property            | Description                                                                             |
+|---------------------|-----------------------------------------------------------------------------------------|
+| **`user`**          | The currently logged in user                                                            |
+| **`logOut`**        | A method to log out the currently logged in user                                        |
+| **`refreshCookie`** | A method to trigger the silent refreshing of a user's auth token                        |
+| **`setToken`**      | Set the token of the user, to be decoded and used to reset the user and token in memory |
+| **`token`**         | The logged in user's token (useful for creating preview links, etc.)                    |
+| **`permissions`**   | The permissions of the current user                                                     |
+
+```tsx
+import { useAuth } from 'payload/components/utilities';
+import { User } from '../payload-types.ts';
+
+const Greeting: React.FC = () => {
+  // highlight-start
+  const { user } = useConfig<User>();
+  // highlight-end
+
+  return (
+    <span>Hi, {user.email}!</span>
+  );
+};
+```
+
+### useConfig
+
+Used to easily fetch the full Payload config. 
+
+```tsx
+import { useConfig } from 'payload/components/utilities';
+
+const MyComponent: React.FC = () => {
+  // highlight-start
+  const config = useConfig();
+  // highlight-end
+
+  return (
+    <span>{config.serverURL}</span>
+  );
+};
+```
+
+### usePreferences
+
+Returns methods to set and get user preferences. More info can be found [here](https://payloadcms.com/docs/admin/preferences).

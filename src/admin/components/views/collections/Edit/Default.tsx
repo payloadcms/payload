@@ -20,7 +20,6 @@ import VersionsCount from '../../../elements/VersionsCount';
 import Upload from './Upload';
 import { Props } from './types';
 import Autosave from '../../../elements/Autosave';
-
 import Status from '../../../elements/Status';
 import Publish from '../../../elements/Publish';
 import SaveDraft from '../../../elements/SaveDraft';
@@ -224,51 +223,53 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       fieldSchema={fields}
                     />
                   </div>
-                  {isEditing && (
-                    <ul className={`${baseClass}__meta`}>
-                      {!hideAPIURL && (
-                        <li className={`${baseClass}__api-url`}>
-                          <span className={`${baseClass}__label`}>
-                            API URL
-                            {' '}
-                            <CopyToClipboard value={apiURL} />
-                          </span>
-                          <a
-                            href={apiURL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {apiURL}
-                          </a>
-                        </li>
-                      )}
-                      {versions && (
-                        <li>
-                          <div className={`${baseClass}__label`}>Versions</div>
-                          <VersionsCount
-                            collection={collection}
-                            id={id}
-                          />
-                        </li>
-                      )}
-                      {timestamps && (
-                        <React.Fragment>
-                          {data.updatedAt && (
-                            <li>
-                              <div className={`${baseClass}__label`}>Last Modified</div>
-                              <div>{format(new Date(data.updatedAt), dateFormat)}</div>
-                            </li>
-                          )}
-                          {(publishedDoc?.createdAt || data?.createdAt) && (
-                            <li>
-                              <div className={`${baseClass}__label`}>Created</div>
-                              <div>{format(new Date(publishedDoc?.createdAt || data?.createdAt), dateFormat)}</div>
-                            </li>
-                          )}
-                        </React.Fragment>
-                      )}
-                    </ul>
-                  )}
+                  {
+                    isEditing && (
+                      <ul className={`${baseClass}__meta`}>
+                        {!hideAPIURL && (
+                          <li className={`${baseClass}__api-url`}>
+                            <span className={`${baseClass}__label`}>
+                              API URL
+                              {' '}
+                              <CopyToClipboard value={apiURL} />
+                            </span>
+                            <a
+                              href={apiURL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {apiURL}
+                            </a>
+                          </li>
+                        )}
+                        {versions && (
+                          <li>
+                            <div className={`${baseClass}__label`}>Versions</div>
+                            <VersionsCount
+                              collection={collection}
+                              id={id}
+                            />
+                          </li>
+                        )}
+                        {timestamps && (
+                          <React.Fragment>
+                            {data.updatedAt && (
+                              <li>
+                                <div className={`${baseClass}__label`}>Last Modified</div>
+                                <div>{format(new Date(data.updatedAt), dateFormat)}</div>
+                              </li>
+                            )}
+                            {(publishedDoc?.createdAt || data?.createdAt) && (
+                              <li>
+                                <div className={`${baseClass}__label`}>Created</div>
+                                <div>{format(new Date(publishedDoc?.createdAt || data?.createdAt), dateFormat)}</div>
+                              </li>
+                            )}
+                          </React.Fragment>
+                        )}
+                      </ul>
+                    )
+                  }
                 </div>
               </div>
             </div>

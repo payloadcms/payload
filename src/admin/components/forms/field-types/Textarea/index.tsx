@@ -42,7 +42,6 @@ const Textarea: React.FC<Props> = (props) => {
   } = useField({
     path,
     validate: memoizedValidate,
-    enableDebouncedValue: true,
     condition,
   });
 

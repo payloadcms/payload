@@ -181,6 +181,7 @@
     "terser-webpack-plugin": "^5.0.3",
     "ts-essentials": "^7.0.1",
     "url-loader": "^4.1.1",
+    "use-context-selector": "^1.4.1",
     "uuid": "^8.1.0",
     "webpack": "^5.6.0",
     "webpack-bundle-analyzer": "^4.4.1",

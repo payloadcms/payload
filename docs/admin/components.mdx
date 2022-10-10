@@ -161,51 +161,9 @@ const CustomTextField: React.FC<Props> = ({ path }) => {
 }
 ```
 
-### Getting other field values from the form
-
-There are times when a custom field component needs to have access to data from other fields. This can be done using `getDataByPath` from `useWatchForm` as follows:
-
-```tsx
-import { useWatchForm } from 'payload/components/forms';
-
-const DisplayFee: React.FC = () => {
-  const { getDataByPath } = useWatchForm();
-
-  const amount = getDataByPath('amount');
-  const feePercentage = getDataByPath('feePercentage');
-
-  if (amount && feePercentage) {
-    return (
-      <span>The fee is ${(amount * feePercentage) / 100}</span>
-    );
-  }
-};
-```
-
-### Getting the document ID
-
-The document ID can be very useful for certain custom components. You can get the `id` from the `useDocumentInfo` hook. Here is an example of a `UI` field using `id` to link to related collections:
-
-```tsx
-import { useDocumentInfo } from 'payload/components/utilities';
-
-const LinkFromCategoryToPosts: React.FC = () => {
-  // highlight-start
-  const { id } = useDocumentInfo();
-  // highlight-end
-
-  // id will be undefined on the create form
-  if (!id) {
-    return null;
-  }
-
-  return (
-    <a href={`/admin/collections/posts?where[or][0][and][0][category][in][0]=[${id}]`} >
-      View posts
-    </a>
-  )
-};
-```
+<Banner type="success">
+  For more information regarding the hooks that are available to you while you build custom components, including the <strong>useField</strong> hook, <a href="/docs/admin/hooks" style={{color: 'black'}}>click here</a>.
+</Banner>
 
 ## Custom routes
 

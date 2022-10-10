@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { FieldBase } from '../../../../fields/config/types';
-import { useWatchForm } from '../Form/context';
+import { useAllFormFields } from '../Form/context';
+import getSiblingData from '../Form/getSiblingData';
+import reduceFieldsToValues from '../Form/reduceFieldsToValues';
 
 const withCondition = <P extends Record<string, unknown>>(Field: React.ComponentType<P>): React.FC<P> => {
   const CheckForCondition: React.FC<P> = (props) => {
@@ -30,13 +32,13 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
 
     const path = typeof pathFromProps === 'string' ? pathFromProps : name;
 
-    const { getData, getSiblingData, getField, dispatchFields } = useWatchForm();
+    const [fields, dispatchFields] = useAllFormFields();
 
-    const data = getData();
-    const siblingData = getSiblingData(path);
+    const data = reduceFieldsToValues(fields, true);
+    const siblingData = getSiblingData(fields, path);
     const hasCondition = Boolean(condition);
     const currentlyPassesCondition = hasCondition ? condition(data, siblingData) : true;
-    const field = getField(path);
+    const field = fields[path];
     const existingConditionPasses = field?.passesCondition;
 
     useEffect(() => {
