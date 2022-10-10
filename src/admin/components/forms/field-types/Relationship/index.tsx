@@ -23,6 +23,7 @@ import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { getFilterOptionsQuery } from '../getFilterOptionsQuery';
 import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
+import { AddNewRelation } from './AddNew';
 
 import './index.scss';
 
@@ -154,7 +155,7 @@ const Relationship: React.FC<Props> = (props) => {
             const data: PaginatedDocs<unknown> = await response.json();
             if (data.docs.length > 0) {
               resultsFetched += data.docs.length;
-              dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort });
+              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort });
               setLastLoadedPage(data.page);
 
               if (!data.nextPage) {
@@ -170,7 +171,7 @@ const Relationship: React.FC<Props> = (props) => {
           } else if (response.status === 403) {
             setLastFullyLoadedRelation(relations.indexOf(relation));
             lastLoadedPageToUse = 1;
-            dispatchOptions({ type: 'ADD', data: { docs: [] } as PaginatedDocs<unknown>, relation, hasMultipleRelations, collection, sort, ids: relationMap[relation] });
+            dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort, ids: relationMap[relation] });
           } else {
             setErrorLoading('An error has occurred.');
           }
@@ -251,11 +252,11 @@ const Relationship: React.FC<Props> = (props) => {
     setSearch(searchArg);
   }, [getResults]);
 
-  const handleInputChange = (searchArg: string, valueArg: unknown) => {
+  const handleInputChange = useCallback((searchArg: string, valueArg: unknown) => {
     if (search !== searchArg) {
       updateSearch(searchArg, valueArg);
     }
-  };
+  }, [search, updateSearch]);
 
   // ///////////////////////////
   // Fetch value options when initialValue changes
@@ -288,9 +289,9 @@ const Relationship: React.FC<Props> = (props) => {
             const collection = collections.find((coll) => coll.slug === relation);
             if (response.ok) {
               const data = await response.json();
-              dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, sort: true, ids });
+              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort: true, ids });
             } else if (response.status === 403) {
-              dispatchOptions({ type: 'ADD', data: { docs: [] } as PaginatedDocs, relation, hasMultipleRelations, collection, sort: true, ids });
+              dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort: true, ids });
             }
           }
         }
@@ -380,50 +381,57 @@ const Relationship: React.FC<Props> = (props) => {
         required={required}
       />
       {!errorLoading && (
-        <ReactSelect
-          isDisabled={readOnly}
-          onInputChange={(newSearch) => handleInputChange(newSearch, value)}
-          onChange={!readOnly ? (selected) => {
-            if (hasMany) {
-              setValue(selected ? selected.map((option) => {
-                if (hasMultipleRelations) {
-                  return {
-                    relationTo: option.relationTo,
-                    value: option.value,
-                  };
-                }
+        <div className={`${baseClass}__wrap`}>
+          <ReactSelect
+            isDisabled={readOnly}
+            onInputChange={(newSearch) => handleInputChange(newSearch, value)}
+            onChange={!readOnly ? (selected) => {
+              if (hasMany) {
+                setValue(selected ? selected.map((option) => {
+                  if (hasMultipleRelations) {
+                    return {
+                      relationTo: option.relationTo,
+                      value: option.value,
+                    };
+                  }
 
-                return option.value;
-              }) : null);
-            } else if (hasMultipleRelations) {
-              setValue({
-                relationTo: selected.relationTo,
-                value: selected.value,
+                  return option.value;
+                }) : null);
+              } else if (hasMultipleRelations) {
+                setValue({
+                  relationTo: selected.relationTo,
+                  value: selected.value,
+                });
+              } else {
+                setValue(selected.value);
+              }
+            } : undefined}
+            onMenuScrollToBottom={() => {
+              getResults({
+                lastFullyLoadedRelation,
+                lastLoadedPage: lastLoadedPage + 1,
+                search,
+                value: initialValue,
+                sort: false,
               });
-            } else {
-              setValue(selected.value);
-            }
-          } : undefined}
-          onMenuScrollToBottom={() => {
-            getResults({
-              lastFullyLoadedRelation,
-              lastLoadedPage: lastLoadedPage + 1,
-              search,
-              value: initialValue,
-              sort: false,
-            });
-          }}
-          value={valueToRender}
-          showError={showError}
-          disabled={formProcessing}
-          options={options}
-          isMulti={hasMany}
-          isSortable={isSortable}
-          filterOption={enableWordBoundarySearch ? (item, searchFilter) => {
-            const r = wordBoundariesRegex(searchFilter || '');
-            return r.test(item.label);
-          } : undefined}
-        />
+            }}
+            value={valueToRender}
+            showError={showError}
+            disabled={formProcessing}
+            options={options}
+            isMulti={hasMany}
+            isSortable={isSortable}
+            filterOption={enableWordBoundarySearch ? (item, searchFilter) => {
+              const r = wordBoundariesRegex(searchFilter || '');
+              return r.test(item.label);
+            } : undefined}
+          />
+          {!readOnly && (
+            <AddNewRelation
+              {...{ path, hasMany, relationTo, value, setValue, dispatchOptions }}
+            />
+          )}
+        </div>
       )}
       {errorLoading && (
         <div className={`${baseClass}__error-loading`}>

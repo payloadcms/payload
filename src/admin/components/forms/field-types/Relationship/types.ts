@@ -1,5 +1,4 @@
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { PaginatedDocs } from '../../../../../mongoose/types';
 import { RelationshipField } from '../../../../../fields/config/types';
 
 export type Props = Omit<RelationshipField, 'type'> & {
@@ -19,8 +18,7 @@ type CLEAR = {
 
 type ADD = {
   type: 'ADD'
-  data: PaginatedDocs<any>
-  relation: string
+  docs: any[]
   hasMultipleRelations: boolean
   collection: SanitizedCollectionConfig
   sort?: boolean

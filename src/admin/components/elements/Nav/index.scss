@@ -6,7 +6,7 @@
   top: 0;
   left: 0;
   height: 100vh;
-  width: base(9);
+  width: var(--nav-width);
   overflow: hidden;
   border-right: 1px solid var(--theme-elevation-100);
 
@@ -118,10 +118,6 @@
         opacity: 1;
       }
     }
-  }
-
-  @include large-break {
-    width: base(8);
   }
 
   @include mid-break {
