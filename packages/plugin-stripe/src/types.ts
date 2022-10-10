@@ -15,8 +15,8 @@ export type StripeWebhookHandlers = {
 }
 
 export type FieldSyncConfig = {
-  field: string
-  property: string
+  fieldName: string
+  stripeProperty: string
 }
 
 export type SyncConfig = {

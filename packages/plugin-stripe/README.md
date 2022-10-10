@@ -85,8 +85,8 @@ const config = buildConfig({
           stripeResourceTypeSingular: 'customer',
           fields: [
             {
-              field: 'name', // this is a field on your own Payload config
-              property: 'name' // use dot notation, if applicable
+              fieldName: 'name', // this is a field on your own Payload config
+              stripeProperty: 'name' // use dot notation, if applicable
             }
           ]
         }

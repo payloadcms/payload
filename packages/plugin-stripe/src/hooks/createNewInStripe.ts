@@ -48,8 +48,12 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
 
       if (syncConfig) {
         const syncedFields = syncConfig.fields.reduce((acc, field) => {
-          const { field: fieldName, property } = field;
-          acc[fieldName] = dataRef[property];
+          const {
+            fieldName,
+            stripeProperty
+          } = field;
+
+          acc[fieldName] = dataRef[stripeProperty];
           return acc;
         }, {} as Record<string, any>);
 

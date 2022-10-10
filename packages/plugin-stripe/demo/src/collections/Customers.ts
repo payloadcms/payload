@@ -23,6 +23,7 @@ const Customers: CollectionConfig = {
       type: 'array',
       admin: {
         readOnly: true,
+        description: 'All subscriptions are managed in Stripe and will be reflected here. Use the link in the sidebar go directly to this customer in Stripe to begin managing their subscriptions.',
       },
       fields: [
         {

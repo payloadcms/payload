@@ -35,8 +35,12 @@ export const syncExistingWithStripe: CollectionAfterChangeHookWithArgs = async (
     if (syncConfig) {
       // combine all fields of this object and match their respective values within the document
       const syncedFields = syncConfig.fields.reduce((acc, field) => {
-        const { field: fieldName, property } = field;
-        acc[fieldName] = doc[property];
+        const {
+          fieldName,
+          stripeProperty
+        } = field;
+
+        acc[fieldName] = doc[stripeProperty];
         return acc;
       }, {} as Record<string, any>);
 

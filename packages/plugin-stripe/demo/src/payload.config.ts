@@ -59,12 +59,12 @@ export default buildConfig({
           stripeResourceTypeSingular: 'customer',
           fields: [
             {
-              field: 'name',
-              property: 'name',
+              fieldName: 'name',
+              stripeProperty: 'name',
             },
             {
-              field: 'email',
-              property: 'email',
+              fieldName: 'email',
+              stripeProperty: 'email',
             },
             // NOTE: nested fields are not supported yet, because the Stripe API keeps everything separate at the top-level
             // because of this, we need to wire our own custom webhooks to handle these changes
@@ -81,9 +81,13 @@ export default buildConfig({
           stripeResourceTypeSingular: 'product',
           fields: [
             {
-              field: 'name',
-              property: 'name',
+              fieldName: 'name',
+              stripeProperty: 'name',
             },
+            {
+              fieldName: 'price.stripePriceID',
+              stripeProperty: 'default_price'
+            }
           ]
         },
       ],

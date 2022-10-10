@@ -59,8 +59,12 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
 
     // combine all properties of the Stripe doc and match their respective fields within the document
     let syncedData = syncConfig.fields.reduce((acc, field) => {
-      const { field: fieldName, property } = field;
-      acc[fieldName] = stripeDoc[property];
+      const {
+        fieldName,
+        stripeProperty
+      } = field;
+
+      acc[fieldName] = stripeDoc[stripeProperty];
       return acc;
     }, {} as Record<string, any>);
 
@@ -135,13 +139,18 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
       }
     } else {
       if (logs) payload.logger.info(`- Existing '${collectionSlug}' document found in Payload with Stripe ID: '${stripeID}', updating now...`);
-
+      console.log('foundDoc', foundDoc);
+      console.log('syncedData', syncedData);
       try {
         await payload.update({
           collection: collectionSlug,
           id: foundDoc.id,
-          data: syncedData,
-        });
+          data: {
+            ...foundDoc,
+            // price: ''
+          }
+        }
+        );
 
         if (logs) payload.logger.info(`✅ Successfully updated '${collectionSlug}' document in Payload from Stripe ID: '${stripeID}'.`);
       } catch (error: any) {
