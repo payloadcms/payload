@@ -4,11 +4,3 @@
   position: relative;
   margin-bottom: $baseline;
 }
-
-.select--read-only {
-  div.react-select {
-    div.rs__control {
-      background: var(--theme-elevation-100);
-    }
-  }
-}

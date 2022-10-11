@@ -22,12 +22,4 @@
     background-color: var(--theme-error-500);
     color: var(--theme-elevation-0);
   }
-
-  &--read-only {
-    div.react-select {
-      div.rs__control {
-        background: var(--theme-elevation-100);
-      }
-    }
-  }
 }
