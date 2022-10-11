@@ -1,3 +1,11 @@
+## [1.1.8](https://github.com/payloadcms/payload/compare/v1.1.7...v1.1.8) (2022-10-11)
+
+
+### Features
+
+* adds ability to create related docs while editing another ([1e048fe](https://github.com/payloadcms/payload/commit/1e048fe03787577fe4d584cec9c2d7c78bc90a17))
+* implements use-context-selector for form field access ([5c1a3fa](https://github.com/payloadcms/payload/commit/5c1a3fabeef48b78f173af084f9117515e1297ba))
+
 ## [1.1.7](https://github.com/payloadcms/payload/compare/v1.1.6...v1.1.7) (2022-10-06)
 
 ## [1.1.6](https://github.com/payloadcms/payload/compare/v1.1.5...v1.1.6) (2022-10-06)
