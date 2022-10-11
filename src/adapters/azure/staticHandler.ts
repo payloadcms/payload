@@ -20,7 +20,7 @@ export const getHandler = ({ containerClient, collection }: Args): StaticHandler
       const blob = await blockBlobClient.download(0)
 
       res.set({
-        'Content-Length': blob.contentLanguage,
+        'Content-Length': blob.contentLength,
         'Content-Type': blob.contentType,
         ETag: blob.etag,
       })
