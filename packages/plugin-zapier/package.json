@@ -1,11 +1,18 @@
 {
   "name": "@payloadcms/plugin-zapier",
   "description": "The Payload plugin for Zapier",
+  "repository": "git@github.com:payloadcms/plugin-zapier.git",
   "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
+  ],
+  "keywords": [
+    "payload",
+    "zapier",
+    "cms",
+    "plugin"
   ],
   "license": "MIT",
   "scripts": {
