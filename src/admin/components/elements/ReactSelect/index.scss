@@ -116,4 +116,8 @@ div.react-select {
       background-color: var(--theme-error-200);
     }
   }
+
+  &.rs--is-disabled .rs__control {
+    background: var(--theme-elevation-200);
+  }
 }

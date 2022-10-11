@@ -3,7 +3,7 @@
 .leave-without-saving {
   @include blur-bg;
   position: fixed;
-  z-index: var(--z-modal);
+  z-index: calc(var(--z-modal) + 1);
   top: 0;
   right: 0;
   bottom: 0;

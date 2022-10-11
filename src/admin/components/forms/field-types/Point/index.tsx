@@ -44,7 +44,6 @@ const PointField: React.FC<Props> = (props) => {
   } = useField<[number, number]>({
     path,
     validate: memoizedValidate,
-    enableDebouncedValue: true,
     condition,
   });
 

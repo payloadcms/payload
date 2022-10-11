@@ -7,19 +7,19 @@ import { User } from '../auth/types';
 import { Document } from '../types';
 import { TypeWithID } from '../globals/config/types';
 
-export type PayloadRequest = Request & {
+export declare type PayloadRequest<T = any> = Request & {
   payload: Payload;
-  payloadDataLoader: DataLoader<string, TypeWithID>
+  payloadDataLoader: DataLoader<string, TypeWithID>;
   locale?: string;
   fallbackLocale?: string;
   collection?: Collection;
-  payloadAPI: 'REST' | 'local' | 'graphQL'
+  payloadAPI: 'REST' | 'local' | 'graphQL';
   files?: {
-    file: UploadedFile
-  }
-  user: User | null
-  payloadUploadSizes?: Record<string, Buffer>
+    file: UploadedFile;
+  };
+  user: T & User | null;
+  payloadUploadSizes?: Record<string, Buffer>;
   findByID?: {
-    [slug: string]: (q: unknown) => Document
-  }
+    [slug: string]: (q: unknown) => Document;
+  };
 };

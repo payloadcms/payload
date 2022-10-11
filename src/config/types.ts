@@ -74,10 +74,16 @@ export type InitOptions = {
 
 export type AccessResult = boolean | Where;
 
+type AccessArgs<T = any, U = any> = {
+  req: PayloadRequest<U>
+  id?: string | number
+  data?: T
+}
+
 /**
  * Access function
  */
-export type Access = (args?: any) => AccessResult | Promise<AccessResult>;
+export type Access<T = any, U = any> = (args: AccessArgs<T, U>) => AccessResult | Promise<AccessResult>;
 
 export interface PayloadHandler {
   (

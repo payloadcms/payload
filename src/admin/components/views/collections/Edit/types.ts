@@ -1,3 +1,4 @@
+import React from 'react';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { CollectionPermission } from '../../../../../auth/types';
 import { Document } from '../../../../../types';
@@ -11,6 +12,7 @@ export type IndexProps = {
 export type Props = IndexProps & {
   data: Document
   onSave?: () => void
+  id?: string
   permissions: CollectionPermission
   isLoading: boolean
   initialState?: Fields
@@ -18,4 +20,8 @@ export type Props = IndexProps & {
   action: string
   hasSavePermission: boolean
   autosaveEnabled: boolean
+  disableEyebrow?: boolean
+  disableActions?: boolean
+  disableLeaveWithoutSaving?: boolean
+  customHeader?: React.ReactNode
 }

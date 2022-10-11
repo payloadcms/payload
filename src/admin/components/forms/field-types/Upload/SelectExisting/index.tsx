@@ -15,7 +15,7 @@ import PerPage from '../../../../elements/PerPage';
 import formatFields from '../../../../views/collections/List/formatFields';
 import { getFilterOptionsQuery } from '../../getFilterOptionsQuery';
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
-import { useWatchForm } from '../../../Form/context';
+import { useForm } from '../../../Form/context';
 import ViewDescription from '../../../../elements/ViewDescription';
 
 import './index.scss';
@@ -43,7 +43,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
   const { serverURL, routes: { api } } = useConfig();
   const { id } = useDocumentInfo();
   const { user } = useAuth();
-  const { getData, getSiblingData } = useWatchForm();
+  const { getData, getSiblingData } = useForm();
   const { toggleModal, modalState } = useModal();
   const [fields] = useState(() => formatFields(collection));
   const [limit, setLimit] = useState(defaultLimit);

@@ -33,8 +33,8 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
 
 export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;
 
-export type FieldAccess<T extends TypeWithID = any, P = any> = (args: {
-  req: PayloadRequest
+export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
+  req: PayloadRequest<U>
   id?: string | number
   data?: Partial<T>
   siblingData?: Partial<P>
