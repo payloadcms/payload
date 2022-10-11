@@ -14,7 +14,8 @@ export const subscriptionCreatedOrUpdated = async (args) => {
 
   const {
     id: eventID,
-    plan
+    plan,
+    status: subscriptionStatus
   } = event.data.object;
 
   let payloadProductID;
@@ -59,19 +60,22 @@ export const subscriptionCreatedOrUpdated = async (args) => {
       payload.logger.info(`- Found existing customer, now updating.`);
 
       const subscriptions = foundCustomer.subscriptions || [];
-      const indexOfSubscription = subscriptions.findIndex(({ stripeID: subscriptionID }) => subscriptionID === eventID);
+      const indexOfSubscription = subscriptions.findIndex(({ stripeSubscriptionID }) => stripeSubscriptionID === eventID);
 
       if (indexOfSubscription > -1) {
         // update existing subscription
         subscriptions[indexOfSubscription] = {
+          stripeProductID: plan.product,
           product: payloadProductID,
+          status: subscriptionStatus
         };
       } else {
         // create new subscription
         subscriptions.push({
+          stripeSubscriptionID: eventID,
+          stripeProductID: plan.product,
           product: payloadProductID,
-          productID: plan.product,
-          stripeID: eventID
+          status: subscriptionStatus
         })
       }
 

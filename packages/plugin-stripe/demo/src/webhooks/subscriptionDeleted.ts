@@ -34,7 +34,7 @@ export const subscriptionDeleted = async (args) => {
       payload.logger.info(`- Found existing customer, now updating.`);
 
       const subscriptions = foundCustomer.subscriptions || [];
-      const indexOfSubscription = subscriptions.findIndex(({ stripeID: subscriptionID }) => subscriptionID === eventID);
+      const indexOfSubscription = subscriptions.findIndex(({ stripeSubscriptionID }) => stripeSubscriptionID === eventID);
 
       if (indexOfSubscription > -1) {
         delete subscriptions[indexOfSubscription];
