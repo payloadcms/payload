@@ -6,6 +6,7 @@ import Customers from './collections/Customers';
 import { subscriptionCreatedOrUpdated } from './webhooks/subscriptionCreatedOrUpdated';
 import Products from './collections/Products';
 import { subscriptionDeleted } from './webhooks/subscriptionDeleted';
+import { syncPriceJSON } from './webhooks/syncPriceJSON';
 
 const mockModulePath = path.resolve(__dirname, 'mocks/serverModule.js');
 
@@ -95,6 +96,8 @@ export default buildConfig({
         'customer.subscription.created': subscriptionCreatedOrUpdated,
         'customer.subscription.updated': subscriptionCreatedOrUpdated,
         'customer.subscription.deleted': subscriptionDeleted,
+        'product.created': syncPriceJSON,
+        'product.updated': syncPriceJSON,
       },
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
     }),
