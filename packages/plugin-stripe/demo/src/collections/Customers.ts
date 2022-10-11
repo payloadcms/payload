@@ -1,4 +1,5 @@
 import { CollectionConfig } from 'payload/types';
+import { LinkToDoc } from '../ui';
 
 const Customers: CollectionConfig = {
   slug: 'customers',
@@ -27,6 +28,20 @@ const Customers: CollectionConfig = {
         description: 'All subscriptions are managed in Stripe and will be reflected here. Use the link in the sidebar to go directly to this customer in Stripe to begin managing their subscriptions.',
       },
       fields: [
+        {
+          name: 'link',
+          label: 'Link',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: (args) => LinkToDoc({
+                ...args,
+                stripeResourceType: 'subscriptions',
+                nameOfIDField: 'stripeSubscriptionID'
+              }),
+            }
+          }
+        },
         {
           name: 'stripeSubscriptionID',
           label: 'Stripe ID',
