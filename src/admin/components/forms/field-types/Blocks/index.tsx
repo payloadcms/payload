@@ -37,7 +37,7 @@ const labelDefaults = {
   plural: 'Blocks',
 };
 
-const Index: React.FC<Props> = (props) => {
+const BlocksField: React.FC<Props> = (props) => {
   const {
     label,
     name,
@@ -76,7 +76,7 @@ const Index: React.FC<Props> = (props) => {
     return validate(value, { ...options, minRows, maxRows, required });
   }, [maxRows, minRows, required, validate]);
 
-  const [disableFormData, setDisableFormData] = useState(false);
+  const [disableFormData, setDisableFormData] = useState(true);
   const [selectorIndexOpen, setSelectorIndexOpen] = useState<number>();
 
   const {
@@ -419,4 +419,4 @@ const Index: React.FC<Props> = (props) => {
   );
 };
 
-export default withCondition(Index);
+export default withCondition(BlocksField);

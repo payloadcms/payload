@@ -76,7 +76,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     return validate(value, { ...options, minRows, maxRows, required });
   }, [maxRows, minRows, required, validate]);
 
-  const [disableFormData, setDisableFormData] = useState(false);
+  const [disableFormData, setDisableFormData] = useState(true);
 
   const {
     showError,
