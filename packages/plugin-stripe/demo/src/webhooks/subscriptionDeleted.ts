@@ -23,6 +23,7 @@ export const subscriptionDeleted = async (args) => {
 
     const customerReq: any = await payload.find({
       collection: 'customers',
+      depth: 0,
       where: {
         stripeID: customerStripeID
       }

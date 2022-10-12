@@ -26,6 +26,7 @@ export const subscriptionCreatedOrUpdated = async (args) => {
 
     const productQuery = await payload.find({
       collection: 'products',
+      depth: 0,
       where: {
         stripeID: {
           equals: plan.product
@@ -49,9 +50,10 @@ export const subscriptionCreatedOrUpdated = async (args) => {
 
     const customerReq: any = await payload.find({
       collection: 'customers',
+      depth: 0,
       where: {
         stripeID: customerStripeID
-      }
+      },
     })
 
     const foundCustomer = customerReq.docs[0];
@@ -60,9 +62,11 @@ export const subscriptionCreatedOrUpdated = async (args) => {
       payload.logger.info(`- Found existing customer, now updating.`);
 
       const subscriptions = foundCustomer.subscriptions || [];
+
       const indexOfSubscription = subscriptions.findIndex(({ stripeSubscriptionID }) => stripeSubscriptionID === eventID);
 
       if (indexOfSubscription > -1) {
+        payload.logger.info(`- Subscription already exists, now updating.`);
         // update existing subscription
         subscriptions[indexOfSubscription] = {
           stripeProductID: plan.product,
@@ -70,6 +74,7 @@ export const subscriptionCreatedOrUpdated = async (args) => {
           status: subscriptionStatus
         };
       } else {
+        payload.logger.info(`- This is a new subscription, now adding.`);
         // create new subscription
         subscriptions.push({
           stripeSubscriptionID: eventID,
