@@ -62,6 +62,7 @@ You can customize the way that the Admin panel behaves on a collection-by-collec
 | Option                       | Description  |
 | ---------------------------- | -------------|
 | `group`                      | Text used as a label for grouping collection links together in the navigation. |
+| `hooks`                      | Admin-specific hooks for this collection. [More](#admin-hooks) |
 | `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title. |
 | `description`                | Text or React component to display below the Collection label in the List view to give editors more information. |
 | `defaultColumns`             | Array of field names that correspond to which columns to show by default in this collection's List view. |
@@ -130,6 +131,50 @@ For example, let's say you have a Posts collection with `title`, `metaDescriptio
   <strong>Note:</strong><br/>
   If you are adding <strong>listSearchableFields</strong>, make sure you index each of these fields so your admin queries can remain performant. 
 </Banner>
+
+### Admin Hooks
+
+In addition to collection hooks themselves, Payload provides for admin UI-specific hooks that you can leverage.
+
+**`beforeDuplicate`**
+
+The `beforeDuplicate` hook is an async function that accepts an object containing the data to duplicate, as well as the locale of the doc to duplicate. Within this hook, you can modify the data to be duplicated, which is useful in cases where you have unique fields that need to be incremented or similar, as well as if you want to automatically modify a document's `title`. 
+
+Example:
+
+```ts
+import { BeforeDuplicate, CollectionConfig } from 'payload/types';
+// Your auto-generated Page type
+import { Page } from '../payload-types.ts';
+
+const beforeDuplicate: BeforeDuplicate<Page> = ({ data }) => {
+  return {
+    ...data,
+    title: `${data.title} Copy`,
+    uniqueField: data.uniqueField ? `${data.uniqueField}-copy` : '',
+  };
+};
+
+export const Page: CollectionConfig = {
+  slug: 'pages',
+  admin: {
+    hooks: {
+      beforeDuplicate,
+    }
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+    {
+      name: 'uniqueField',
+      type: 'text',
+      unique: true,
+    }
+  ]
+}
+```
 
 ### TypeScript
 

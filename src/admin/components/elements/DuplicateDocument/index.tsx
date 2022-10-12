@@ -37,7 +37,15 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         locale,
         depth: 0,
       });
-      const data = await response.json();
+      let data = await response.json();
+
+      if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
+        data = await collection.admin.hooks.beforeDuplicate({
+          data,
+          locale,
+        });
+      }
+
       const result = await requests.post(`${serverURL}${api}/${slug}`, {
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +105,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         pathname: `${admin}/collections/${slug}/${duplicateID}`,
       });
     }, 10);
-  }, [modified, localization, collection.labels.singular, setModified, toggleModal, modalSlug, serverURL, api, slug, id, push, admin]);
+  }, [modified, localization, collection, setModified, toggleModal, modalSlug, serverURL, api, slug, id, push, admin]);
 
   const confirm = useCallback(async () => {
     setHasClicked(false);
