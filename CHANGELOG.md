@@ -1,3 +1,15 @@
+## [1.1.11](https://github.com/payloadcms/payload/compare/v1.1.10...v1.1.11) (2022-10-12)
+
+
+### Bug Fixes
+
+* ensures arrays and blocks mount as disableFormData: true, fixes [#1242](https://github.com/payloadcms/payload/issues/1242) ([5ca5aba](https://github.com/payloadcms/payload/commit/5ca5abab422ad1cdb1b449a8298f439c57dda464))
+
+
+### Features
+
+* builds beforeDuplicate admin hook, closes [#1243](https://github.com/payloadcms/payload/issues/1243) ([6f6f2f8](https://github.com/payloadcms/payload/commit/6f6f2f8e7b83821ae2f2d30d08460439746cc0c6))
+
 ## [1.1.10](https://github.com/payloadcms/payload/compare/v1.1.9...v1.1.10) (2022-10-11)
 
 ## [1.1.9](https://github.com/payloadcms/payload/compare/v1.1.8...v1.1.9) (2022-10-11)
