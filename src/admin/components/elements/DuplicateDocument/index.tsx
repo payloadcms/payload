@@ -73,7 +73,15 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
               locale,
               depth: 0,
             });
-            const localizedDoc = await res.json();
+            let localizedDoc = await res.json();
+
+            if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
+              localizedDoc = await collection.admin.hooks.beforeDuplicate({
+                data: localizedDoc,
+                locale,
+              });
+            }
+
             const patchResult = await requests.patch(`${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`, {
               headers: {
                 'Content-Type': 'application/json',
