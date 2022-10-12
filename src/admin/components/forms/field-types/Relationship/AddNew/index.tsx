@@ -16,7 +16,7 @@ const baseClass = 'relationship-add-new';
 
 export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, value, setValue, dispatchOptions }) => {
   const relatedCollections = useRelatedCollections(relationTo);
-  const { toggleModal, modalState } = useModal();
+  const { toggleModal, isModalOpen } = useModal();
   const { permissions } = useAuth();
   const [hasPermission, setHasPermission] = useState(false);
   const [modalCollection, setModalCollection] = useState<SanitizedCollectionConfig>();
@@ -71,10 +71,10 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
   }, [permissions, relatedCollections]);
 
   useEffect(() => {
-    if (!modalState[modalSlug]?.isOpen) {
+    if (!isModalOpen(modalSlug)) {
       setModalCollection(undefined);
     }
-  }, [modalState, modalSlug]);
+  }, [isModalOpen, modalSlug]);
 
   return hasPermission ? (
     <div
