@@ -34,7 +34,7 @@ const Index = () => (
           <Router>
             <ModalProvider
               classPrefix="payload"
-              zIndex={'var(--z-modal)' as unknown as number}
+              zIndex="var(--z-modal)"
               transTime={0}
             >
               <AuthProvider>

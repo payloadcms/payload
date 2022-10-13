@@ -1262,10 +1262,10 @@
   resolved "https://registry.npmjs.org/@emotion/weak-memoize/-/weak-memoize-0.2.5.tgz#8eed982e2ee6f7f4e44c253e12962980791efd46"
   integrity sha512-6U71C2Wp7r5XtFtQzYrW5iKFT67OixrSxjI4MptCHzdSVlgabczzqLe0ZSgnub/5Kp4hSbpDB1tMytZY9pwxxA==
 
-"@faceless-ui/modal@^2.0.0-alpha.4":
-  version "2.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@faceless-ui/modal/-/modal-2.0.0-alpha.4.tgz#f47c373433f186dc4b7e85c3e310562db3420eaa"
-  integrity sha512-v2b+vPhswX7ZBVQXdziUr89qst2ZdshLDQE8No/9LeGnQAo1TmNw1zPDuCBXF6Xi0gmHO6yUyfMFwFzUPcZl3Q==
+"@faceless-ui/modal@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@faceless-ui/modal/-/modal-2.0.1.tgz#8a47299442eff450c09432cfaef35c5471becad6"
+  integrity sha512-z1PaaLxwuX+1In4vhUxODZndGKdCY+WIqzvtnas3CaYGGCVJBSJ4jfv9UEEGZzcahmSy+71bEL89cUT6d36j1Q==
   dependencies:
     body-scroll-lock "^3.1.5"
     focus-trap "^6.9.2"
