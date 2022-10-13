@@ -14,9 +14,5 @@ export const Posts: CollectionConfig = {
       name: 'description',
       type: 'text',
     },
-    {
-      name: 'enableZap',
-      type: 'checkbox',
-    },
   ],
 }

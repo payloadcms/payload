@@ -30,7 +30,6 @@ export interface Post {
   id: string;
   title?: string;
   description?: string;
-  enableZap?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -41,7 +40,7 @@ export interface Post {
 export interface Zap {
   id: string;
   title: string;
-  relatedCollection: 'posts';
+  relatedCollection: 'users' | 'posts';
   webhookEndpoint: string;
   hooks: {
     afterChange?: boolean;

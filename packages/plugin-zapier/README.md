@@ -37,7 +37,14 @@ export default buildConfig({
 ## Features
 
 **Send Zaps**
-The plugin adds a Zaps collection that allows you to connect `afterChange` and `afterDelete` events from specific collections to a zapier webhook endpoint within the Payload admin panel.
+The plugin adds a Zaps collection that allows you to configure `afterChange` and `afterDelete` events from specific collections to a zapier webhook endpoint within the Payload admin panel.
+
+**Adding a Zap**
+To add a zap, navigate to the Zaps collection in the Payload admin panel and click the `Add Zap` button. You will be presented with a form to configure the zap. You will need to provide the following information:
+  - **Title**: A name for the zap
+  - **Related Collection**: What collection you want to configure the zap for (i.e. Posts)
+  - **Webhook URL**: The URL of the zapier webhook you want to send the zap to
+  - **Hooks**: What events you want to trigger the zap for (`afterChange` and/or `afterDelete`)
 
 ## Plugin options
 
