@@ -1,19 +1,22 @@
+/* eslint-disable no-process-env, import/no-relative-packages */
+import type { Access } from 'payload/config'
 import { buildConfig } from 'payload/config'
-import Users from './collections/Users'
-// eslint-disable-next-line import/no-relative-packages
-import { zapierPlugin } from '../../src/plugin'
+import { Users } from './collections/Users'
+import { Posts } from './collections/Posts'
+import { zapierPlugin } from '../../src'
+
+const isAdmin: Access = ({ req }) => req?.user?.role === 'admin'
 
 export default buildConfig({
-  collections: [Users],
+  collections: [Users, Posts],
   plugins: [
     zapierPlugin({
-      collections: [
-        {
-          slug: 'users',
-          webhook: 'https://hooks.zapier.com/hooks/catch/13379170/bc9s17l/',
-          hooks: ['afterUpdate', 'afterDelete'],
-        },
-      ],
+      access: {
+        create: isAdmin,
+        read: isAdmin,
+        update: isAdmin,
+        delete: isAdmin,
+      },
     }),
   ],
 })

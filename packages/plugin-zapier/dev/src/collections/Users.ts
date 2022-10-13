@@ -1,6 +1,6 @@
-import { CollectionConfig } from 'payload/types';
+import type { CollectionConfig } from 'payload/types'
 
-const Users: CollectionConfig = {
+export const Users: CollectionConfig = {
   slug: 'users',
   auth: true,
   fields: [
@@ -8,7 +8,24 @@ const Users: CollectionConfig = {
       name: 'name',
       type: 'text',
     },
+    {
+      name: 'role',
+      type: 'select',
+      saveToJWT: true,
+      options: [
+        {
+          label: 'Admin',
+          value: 'admin',
+        },
+        {
+          label: 'Publisher',
+          value: 'publisher',
+        },
+        {
+          label: 'Editor',
+          value: 'editor',
+        },
+      ],
+    },
   ],
 }
-
-export default Users;
