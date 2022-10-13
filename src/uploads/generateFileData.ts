@@ -83,7 +83,7 @@ export const generateFileData = async ({
 
         const fileBuffer = resized ? (await resized.toBuffer()) : file.data;
         const bufferInfo = await fromBuffer(fileBuffer);
-        const mime = bufferInfo.mime ?? file.mimetype;
+        const mime = bufferInfo?.mime ?? file.mimetype;
         const ext = resized ? bufferInfo.ext : file.name.split('.').pop();
         const fileSize = fileBuffer.length;
         const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
