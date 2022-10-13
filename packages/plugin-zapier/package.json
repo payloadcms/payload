@@ -2,7 +2,7 @@
   "name": "@payloadcms/plugin-zapier",
   "description": "The Payload plugin for Zapier",
   "repository": "git@github.com:payloadcms/plugin-zapier.git",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
