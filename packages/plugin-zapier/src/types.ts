@@ -1,10 +1,13 @@
 import type { Access } from 'payload/config'
-import type { AfterChangeHook, AfterDeleteHook } from 'payload/dist/collections/config/types'
+import type {
+  AfterChangeHook,
+  AfterDeleteHook,
+  CollectionConfig,
+} from 'payload/dist/collections/config/types'
 import type { PaginatedDocs } from 'payload/dist/mongoose/types'
 import type { PayloadRequest } from 'payload/dist/types'
 
 export interface PluginOptions {
-  zapierCollectionSlug?: string
   access?: {
     create?: Access
     read?: Access
@@ -13,6 +16,10 @@ export interface PluginOptions {
   }
   collections?: string[]
   enabled?: boolean | ((args: { req: PayloadRequest }) => Promise<boolean> | boolean)
+  collectionConfig?: {
+    slug?: string
+    admin?: Omit<CollectionConfig['admin'], 'useAsTitle'>
+  }
 }
 
 export type FindRelatedZaps = (options: {

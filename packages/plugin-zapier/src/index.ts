@@ -75,7 +75,8 @@ const zapEventHook: ZapEventHook = async (args): Promise<void> => {
 export const zapierPlugin =
   (options: PluginOptions) =>
   (config: Config): Config => {
-    const { zapierCollectionSlug = 'zaps', enabled = true } = options
+    const { enabled = true } = options
+    const zapierCollectionSlug = options?.collectionConfig?.slug || 'zaps'
     const zapierEnabledCollectionOptions: Option[] = []
 
     const configCopy: Config = {
@@ -136,6 +137,7 @@ export const zapierPlugin =
       slug: zapierCollectionSlug,
       access: options?.access || {},
       admin: {
+        ...(options?.collectionConfig?.admin || {}),
         useAsTitle: 'title',
       },
       fields: [
@@ -163,6 +165,7 @@ export const zapierPlugin =
             {
               name: 'afterChange',
               type: 'checkbox',
+              defaultValue: true,
             },
             {
               name: 'afterDelete',

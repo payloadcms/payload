@@ -11,6 +11,11 @@ export default buildConfig({
   collections: [Users, Posts],
   plugins: [
     zapierPlugin({
+      collectionConfig: {
+        admin: {
+          group: 'Syndication',
+        },
+      },
       access: {
         create: isAdmin,
         read: isAdmin,
