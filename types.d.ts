@@ -18,6 +18,7 @@ export {
   BeforeLoginHook as CollectionBeforeLoginHook,
   AfterLoginHook as CollectionAfterLoginHook,
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
+  BeforeDuplicate,
 } from './dist/collections/config/types';
 
 export {
