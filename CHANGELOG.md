@@ -1,3 +1,10 @@
+## [1.1.12](https://github.com/payloadcms/payload/compare/v1.1.11...v1.1.12) (2022-10-13)
+
+
+### Bug Fixes
+
+* [#1183](https://github.com/payloadcms/payload/issues/1183) - better handling of mime types with svgs + similar files ([21ba237](https://github.com/payloadcms/payload/commit/21ba2371350521a0c8da44af2b4ffc99a90a5df3))
+
 ## [1.1.11](https://github.com/payloadcms/payload/compare/v1.1.10...v1.1.11) (2022-10-12)
 
 
