@@ -18,6 +18,7 @@ import Users from './collections/Users';
 import { zapierPlugin } from '@payloadcms/plugin-zapier';
 
 export default buildConfig({
+  // ...rest of your config goes here
   plugins: [
     zapierPlugin({
       zapierCollectionSlug: 'zaps', // optional, defaults to 'zaps'
@@ -31,7 +32,7 @@ export default buildConfig({
       enabled: async ({ req }) => false, // optional, defaults to true
     })
   ],
-  // The rest of your config goes here
+})
 ```
 
 ## Features
