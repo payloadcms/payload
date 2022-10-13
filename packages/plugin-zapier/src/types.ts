@@ -1,34 +1,18 @@
 import type { Access } from 'payload/config'
-import type {
-  AfterChangeHook,
-  AfterDeleteHook,
-  TypeWithID,
-} from 'payload/dist/collections/config/types'
+import type { AfterChangeHook, AfterDeleteHook } from 'payload/dist/collections/config/types'
 import type { PaginatedDocs } from 'payload/dist/mongoose/types'
 import type { PayloadRequest } from 'payload/dist/types'
 
-export type ZapCondition<DocType extends TypeWithID> = (
-  args:
-    | (Parameters<AfterChangeHook<DocType>>[0] & { hook: 'afterChange'; collectionSlug: string })
-    | (Parameters<AfterDeleteHook<DocType>>[0] & { hook: 'afterDelete'; collectionSlug: string }),
-) => Promise<boolean>
-
 export interface PluginOptions {
   zapierCollectionSlug?: string
-  condition?: ZapCondition<unknown & TypeWithID>
   access?: {
     create?: Access
     read?: Access
     update?: Access
     delete?: Access
   }
-  zapCollections: Array<{
-    slug: string
-    zapHooks: Array<{
-      type: 'afterChange' | 'afterDelete'
-      condition?: ZapCondition<unknown & TypeWithID>
-    }>
-  }>
+  collections?: string[]
+  enabled?: boolean | ((args: { req: PayloadRequest }) => Promise<boolean> | boolean)
 }
 
 export type FindRelatedZaps = (options: {
@@ -37,8 +21,6 @@ export type FindRelatedZaps = (options: {
   hook: 'afterChange' | 'afterDelete'
   req: PayloadRequest
 }) => Promise<PaginatedDocs>
-
-export type SendZaps = (args: ZapHookArgs) => Promise<void>
 
 export type ZapHookArgs = {
   collectionSlug: string
@@ -52,8 +34,8 @@ export type ZapHookArgs = {
     } & Parameters<AfterDeleteHook>[0])
 )
 
-export type AddZapHook = (
+export type ZapEventHook = (
   args: {
-    condition?: ZapCondition<unknown & TypeWithID>
+    enabled: boolean | ((args: { req: PayloadRequest }) => Promise<boolean> | boolean)
   } & ZapHookArgs,
 ) => Promise<void>

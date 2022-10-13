@@ -2,9 +2,9 @@ import payload from 'payload'
 import type { Config } from 'payload/config'
 import type { CollectionConfig } from 'payload/dist/collections/config/types'
 import type { Option } from 'payload/dist/fields/config/types'
-import type { AddZapHook, FindRelatedZaps, PluginOptions, SendZaps, ZapHookArgs } from './types'
+import type { ZapEventHook, FindRelatedZaps, PluginOptions } from './types'
 
-const findRelatedZapDocs: FindRelatedZaps = async ({
+const queryRelatedZapDocs: FindRelatedZaps = async ({
   zapCollectionSlug,
   collectionSlug,
   hook,
@@ -30,23 +30,35 @@ const findRelatedZapDocs: FindRelatedZaps = async ({
   })
 }
 
-const sendZaps: SendZaps = async args => {
-  const relatedZaps = await findRelatedZapDocs(args)
+const httpMethods = {
+  create: 'POST',
+  update: 'PUT',
+  delete: 'DELETE',
+}
 
-  const getMethod = (): string => {
-    if (args.hook === 'afterDelete') {
-      return 'DELETE'
-    }
-    return args.operation === 'create' ? 'POST' : 'PUT'
-  }
+const zapEventHook: ZapEventHook = async (args): Promise<void> => {
+  const { collectionSlug, zapCollectionSlug, hook, enabled } = args
+
+  const isEnabled = typeof enabled === 'function' ? await enabled(args) : enabled
+  if (!isEnabled) return
+
+  const relatedZaps = await queryRelatedZapDocs({
+    zapCollectionSlug,
+    collectionSlug,
+    hook,
+    req: args.req,
+  })
+
+  const operation = hook === 'afterChange' ? args.operation : 'delete'
 
   if (relatedZaps?.totalDocs > 0) {
     relatedZaps.docs.forEach(zap => {
       try {
         fetch(zap.webhookEndpoint, {
-          method: getMethod(),
+          method: httpMethods[operation],
           body: JSON.stringify({
-            collection: args.collectionSlug,
+            collection: collectionSlug,
+            operation,
             ...args.doc,
           }),
           headers: {
@@ -60,40 +72,21 @@ const sendZaps: SendZaps = async args => {
   }
 }
 
-const addZapHook: AddZapHook = async (args): Promise<void> => {
-  const { condition, collectionSlug, zapCollectionSlug, hook, ...rest } = args
-  const passesCondition =
-    condition &&
-    (await condition({
-      ...rest,
-      hook,
-      collectionSlug,
-    } as ZapHookArgs))
-
-  if (!condition || passesCondition) {
-    sendZaps({
-      hook,
-      collectionSlug,
-      zapCollectionSlug,
-      ...rest,
-    } as ZapHookArgs)
-  }
-}
-
 export const zapierPlugin =
   (options: PluginOptions) =>
   (config: Config): Config => {
-    const zapierCollectionSlug = options.zapierCollectionSlug || 'zaps'
+    const { zapierCollectionSlug = 'zaps', enabled = true } = options
     const zapierEnabledCollectionOptions: Option[] = []
 
     const configCopy: Config = {
       ...config,
       collections: (config.collections || []).map(ogCollection => {
-        const zapCollectionOptions = options.zapCollections.find(
-          ({ slug }) => slug === ogCollection.slug,
-        )
+        const zapAllCollections = !options?.collections || options.collections.length === 0
+        const isZapCollection = zapAllCollections
+          ? true
+          : options?.collections?.find(slug => slug === ogCollection.slug)
 
-        if (zapCollectionOptions) {
+        if (isZapCollection) {
           zapierEnabledCollectionOptions.push({
             // TODO(label): use the exported `formatLabel` function from payload
             label: ogCollection?.labels?.plural || ogCollection.slug,
@@ -107,38 +100,28 @@ export const zapierPlugin =
               afterChange: [
                 ...(ogCollection.hooks?.afterChange || []),
                 async hookArgs => {
-                  const matchingHook = zapCollectionOptions.zapHooks.find(
-                    ({ type }) => type === 'afterChange',
-                  )
+                  zapEventHook({
+                    ...hookArgs,
+                    hook: 'afterChange',
+                    zapCollectionSlug: zapierCollectionSlug,
+                    collectionSlug: ogCollection.slug,
+                    enabled,
+                  })
 
-                  if (matchingHook) {
-                    addZapHook({
-                      ...hookArgs,
-                      hook: 'afterChange',
-                      zapCollectionSlug: zapierCollectionSlug,
-                      collectionSlug: ogCollection.slug,
-                      condition: matchingHook?.condition,
-                    })
-                  }
                   return hookArgs.doc
                 },
               ],
               afterDelete: [
                 ...(ogCollection.hooks?.afterDelete || []),
                 async hookArgs => {
-                  const matchingHook = zapCollectionOptions.zapHooks.find(
-                    ({ type }) => type === 'afterDelete',
-                  )
+                  zapEventHook({
+                    ...hookArgs,
+                    hook: 'afterDelete',
+                    zapCollectionSlug: zapierCollectionSlug,
+                    collectionSlug: ogCollection.slug,
+                    enabled,
+                  })
 
-                  if (matchingHook) {
-                    addZapHook({
-                      ...hookArgs,
-                      hook: 'afterDelete',
-                      zapCollectionSlug: zapierCollectionSlug,
-                      collectionSlug: ogCollection.slug,
-                      condition: matchingHook?.condition,
-                    })
-                  }
                   return hookArgs.doc
                 },
               ],
