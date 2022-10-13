@@ -5,12 +5,12 @@ import type { HandleDelete } from '../../types'
 
 interface Args {
   collection: CollectionConfig
-  containerClient: ContainerClient
+  getStorageClient: () => ContainerClient
 }
 
-export const getHandleDelete = ({ containerClient }: Args): HandleDelete => {
+export const getHandleDelete = ({ getStorageClient }: Args): HandleDelete => {
   return async ({ filename, doc: { prefix = '' } }) => {
-    const blockBlobClient = containerClient.getBlockBlobClient(path.posix.join(prefix, filename))
+    const blockBlobClient = getStorageClient().getBlockBlobClient(path.posix.join(prefix, filename))
     await blockBlobClient.deleteIfExists()
   }
 }

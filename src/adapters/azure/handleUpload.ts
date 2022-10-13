@@ -5,22 +5,13 @@ import type { HandleUpload } from '../../types'
 
 interface Args {
   collection: CollectionConfig
-  containerClient: ContainerClient
-  allowContainerCreate: boolean
+  getStorageClient: () => ContainerClient
   prefix?: string
 }
 
-export const getHandleUpload = ({
-  allowContainerCreate,
-  containerClient,
-  prefix = '',
-}: Args): HandleUpload => {
-  if (allowContainerCreate) {
-    containerClient.createIfNotExists({ access: 'blob' })
-  }
-
+export const getHandleUpload = ({ getStorageClient, prefix = '' }: Args): HandleUpload => {
   return async ({ data, file }) => {
-    const blockBlobClient = containerClient.getBlockBlobClient(
+    const blockBlobClient = getStorageClient().getBlockBlobClient(
       path.posix.join(prefix, file.filename),
     )
 
