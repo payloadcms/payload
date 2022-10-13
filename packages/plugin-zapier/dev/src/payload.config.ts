@@ -1,17 +1,42 @@
+/* eslint-disable no-process-env, import/no-relative-packages */
+import type { Access } from 'payload/config'
 import { buildConfig } from 'payload/config'
-import Users from './collections/Users'
-// eslint-disable-next-line import/no-relative-packages
-import { zapierPlugin } from '../../src/plugin'
+import { Users } from './collections/Users'
+import { Posts } from './collections/Posts'
+import { zapierPlugin } from '../../src'
+import type { ZapCondition } from '../../src/types'
+import type { Post } from '../payload-types'
+
+const isAdmin: Access = ({ req }) => req?.user?.role === 'admin'
+
+const zapCondition: ZapCondition<Post> = async args => {
+  const { doc, hook } = args
+  if (hook === 'afterChange' && args.operation === 'create' && doc.enableZap) {
+    return true
+  }
+
+  return false
+}
 
 export default buildConfig({
-  collections: [Users],
+  collections: [Users, Posts],
   plugins: [
     zapierPlugin({
-      collections: [
+      access: {
+        create: isAdmin,
+        read: isAdmin,
+        update: isAdmin,
+        delete: isAdmin,
+      },
+      zapCollections: [
         {
-          slug: 'users',
-          webhook: 'https://hooks.zapier.com/hooks/catch/13379170/bc9s17l/',
-          hooks: ['afterUpdate', 'afterDelete'],
+          slug: 'posts',
+          zapHooks: [
+            {
+              type: 'afterChange',
+              condition: zapCondition,
+            },
+          ],
         },
       ],
     }),

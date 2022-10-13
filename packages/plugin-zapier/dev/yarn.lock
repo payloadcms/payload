@@ -6655,10 +6655,10 @@ pause@0.0.1:
   resolved "https://registry.npmjs.org/pause/-/pause-0.0.1.tgz#1d408b3fdb76923b9543d96fb4c9dfd535d9cb5d"
   integrity sha512-KG8UEiEVkR3wGEb4m5yZkVCzigAD+cVEJck2CzYZO37ZGJfctvVptVO192MwrtPhzONn6go8ylnOdMhKqi4nfg==
 
-payload@^1.1.4:
-  version "1.1.4"
-  resolved "https://registry.npmjs.org/payload/-/payload-1.1.4.tgz#55e47546026213f893917a96a2337b73c3cdb912"
-  integrity sha512-qbDOSb80KbML2s1b9eAJovKClKp6gMJZuCO93st9e24b6Q7lyLJM8mfbDXZ6gW05rRZj7peU5DJOIMTDmwltSQ==
+payload@^1.1.11:
+  version "1.1.11"
+  resolved "https://registry.yarnpkg.com/payload/-/payload-1.1.11.tgz#4e209e70017632719c43843368961fea0f2985a0"
+  integrity sha512-B8xNJAAqmrO/kWnWaf9j0f2IxsmzdAk0K3llexRPfhMKIlujhcICLwJDcNiKqV++I80EQUykLiSyI7SMd7fmhA==
   dependencies:
     "@babel/cli" "^7.12.8"
     "@babel/core" "^7.11.6"
@@ -6766,6 +6766,7 @@ payload@^1.1.4:
     terser-webpack-plugin "^5.0.3"
     ts-essentials "^7.0.1"
     url-loader "^4.1.1"
+    use-context-selector "^1.4.1"
     uuid "^8.1.0"
     webpack "^5.6.0"
     webpack-bundle-analyzer "^4.4.1"
@@ -9103,6 +9104,11 @@ url-loader@^4.1.1:
     loader-utils "^2.0.0"
     mime-types "^2.1.27"
     schema-utils "^3.0.0"
+
+use-context-selector@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/use-context-selector/-/use-context-selector-1.4.1.tgz#eb96279965846b72915d7f899b8e6ef1d768b0ae"
+  integrity sha512-Io2ArvcRO+6MWIhkdfMFt+WKQX+Vb++W8DS2l03z/Vw/rz3BclKpM0ynr4LYGyU85Eke+Yx5oIhTY++QR0ZDoA==
 
 use-memo-one@^1.1.1:
   version "1.1.2"
