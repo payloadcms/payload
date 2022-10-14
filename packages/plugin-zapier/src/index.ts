@@ -1,6 +1,6 @@
 import type { Config } from 'payload/config'
 import type { CollectionConfig } from 'payload/dist/collections/config/types'
-import type { PluginOptions, Zap } from './types'
+import type { PluginConfig, Zap } from './types'
 
 const zap: Zap = ({ collectionSlug, data, operation, webhookEndpoint }) =>
   fetch(webhookEndpoint, {
@@ -20,7 +20,7 @@ const zap: Zap = ({ collectionSlug, data, operation, webhookEndpoint }) =>
   })
 
 export const zapierPlugin =
-  (options: PluginOptions) =>
+  (options: PluginConfig) =>
   (config: Config): Config => {
     const { collections: collectionSlugs, webhookURL: webhookEndpoint } = options
 

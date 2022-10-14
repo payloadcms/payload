@@ -1,4 +1,4 @@
-export interface PluginOptions {
+export interface PluginConfig {
   collections: string[] | '*'
   webhookURL: string
 }
