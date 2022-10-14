@@ -3,13 +3,13 @@ import type * as AWS from '@aws-sdk/client-s3'
 import type { HandleDelete } from '../../types'
 
 interface Args {
-  s3: AWS.S3
+  getStorageClient: () => AWS.S3
   bucket: string
 }
 
-export const getHandleDelete = ({ s3, bucket }: Args): HandleDelete => {
+export const getHandleDelete = ({ getStorageClient, bucket }: Args): HandleDelete => {
   return async ({ filename, doc: { prefix = '' } }) => {
-    await s3.deleteObject({
+    await getStorageClient().deleteObject({
       Bucket: bucket,
       Key: path.posix.join(prefix, filename),
     })

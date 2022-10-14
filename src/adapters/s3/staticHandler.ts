@@ -6,17 +6,17 @@ import type { StaticHandler } from '../../types'
 import { getFilePrefix } from '../../utilities/getFilePrefix'
 
 interface Args {
-  s3: AWS.S3
+  getStorageClient: () => AWS.S3
   bucket: string
   collection: CollectionConfig
 }
 
-export const getHandler = ({ s3, bucket, collection }: Args): StaticHandler => {
+export const getHandler = ({ getStorageClient, bucket, collection }: Args): StaticHandler => {
   return async (req, res, next) => {
     try {
       const prefix = await getFilePrefix({ req, collection })
 
-      const object = await s3.getObject({
+      const object = await getStorageClient().getObject({
         Bucket: bucket,
         Key: path.posix.join(prefix, req.params.filename),
       })

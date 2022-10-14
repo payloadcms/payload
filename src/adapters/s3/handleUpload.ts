@@ -8,12 +8,17 @@ interface Args {
   bucket: string
   acl?: 'private' | 'public-read'
   prefix?: string
-  s3: AWS.S3
+  getStorageClient: () => AWS.S3
 }
 
-export const getHandleUpload = ({ s3, bucket, acl, prefix = '' }: Args): HandleUpload => {
+export const getHandleUpload = ({
+  getStorageClient,
+  bucket,
+  acl,
+  prefix = '',
+}: Args): HandleUpload => {
   return async ({ data, file }) => {
-    await s3.putObject({
+    await getStorageClient().putObject({
       Bucket: bucket,
       Key: path.posix.join(prefix, file.filename),
       Body: file.buffer,

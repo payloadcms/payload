@@ -46,6 +46,7 @@ export interface GeneratedAdapter {
   generateURL: GenerateURL
   staticHandler: StaticHandler
   webpack?: (config: WebpackConfig) => WebpackConfig
+  onInit?: () => void
 }
 
 export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) => GeneratedAdapter
