@@ -53,10 +53,10 @@ export const zapierPlugin =
             ...collection.hooks,
             afterChange: [
               ...(collection.hooks?.afterChange || []),
-              (hookArgs): void => {
+              async hookArgs => {
                 const { operation, doc } = hookArgs
 
-                if (shouldSendZap({ enabled, hookArgs, operation })) {
+                if (await shouldSendZap({ enabled, hookArgs, operation })) {
                   zap({
                     collectionSlug: collection.slug,
                     operation,
@@ -68,9 +68,10 @@ export const zapierPlugin =
             ],
             afterDelete: [
               ...(collection.hooks?.afterDelete || []),
-              (hookArgs): void => {
+              async hookArgs => {
                 const operation = 'delete'
-                if (shouldSendZap({ enabled, hookArgs, operation })) {
+
+                if (await shouldSendZap({ enabled, hookArgs, operation })) {
                   zap({
                     collectionSlug: collection.slug,
                     operation,
