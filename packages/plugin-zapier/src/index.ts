@@ -1,9 +1,10 @@
+import payload from 'payload'
 import type { Config } from 'payload/config'
 import type { CollectionConfig } from 'payload/dist/collections/config/types'
-import type { PluginConfig, Zap } from './types'
+import type { PluginConfig, ShouldSendZap, Zap } from './types'
 
-const zap: Zap = ({ collectionSlug, data, operation, webhookEndpoint }) =>
-  fetch(webhookEndpoint, {
+const zap: Zap = ({ collectionSlug, data, operation, webhookURL }) =>
+  fetch(webhookURL, {
     headers: {
       'Content-Type': 'application/json',
     },
@@ -19,10 +20,23 @@ const zap: Zap = ({ collectionSlug, data, operation, webhookEndpoint }) =>
     }),
   })
 
+const shouldSendZap: ShouldSendZap = async ({ enabled, hookArgs, operation }) => {
+  if (typeof enabled === 'function') {
+    try {
+      return await enabled({ ...hookArgs, operation })
+    } catch (error: unknown) {
+      payload.logger.error(`🚨 [Zapier plugin]: Error checking enabled status on. ${error}`)
+      return false
+    }
+  }
+
+  return enabled ?? true
+}
+
 export const zapierPlugin =
   (options: PluginConfig) =>
   (config: Config): Config => {
-    const { collections: zapCollections, webhookURL: webhookEndpoint } = options
+    const { collections: zapCollections, webhookURL, enabled } = options
 
     return {
       ...config,
@@ -39,24 +53,31 @@ export const zapierPlugin =
             ...collection.hooks,
             afterChange: [
               ...(collection.hooks?.afterChange || []),
-              ({ operation, doc }): void => {
-                zap({
-                  collectionSlug: collection.slug,
-                  operation,
-                  data: doc,
-                  webhookEndpoint,
-                })
+              (hookArgs): void => {
+                const { operation, doc } = hookArgs
+
+                if (shouldSendZap({ enabled, hookArgs, operation })) {
+                  zap({
+                    collectionSlug: collection.slug,
+                    operation,
+                    data: doc,
+                    webhookURL,
+                  })
+                }
               },
             ],
             afterDelete: [
               ...(collection.hooks?.afterDelete || []),
-              ({ doc }): void => {
-                zap({
-                  collectionSlug: collection.slug,
-                  operation: 'delete',
-                  data: doc,
-                  webhookEndpoint,
-                })
+              (hookArgs): void => {
+                const operation = 'delete'
+                if (shouldSendZap({ enabled, hookArgs, operation })) {
+                  zap({
+                    collectionSlug: collection.slug,
+                    operation,
+                    data: hookArgs.doc,
+                    webhookURL,
+                  })
+                }
               },
             ],
           },

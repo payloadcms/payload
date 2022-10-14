@@ -29,6 +29,16 @@ export default buildConfig({
     zapierPlugin({
       collections: ['posts'],
       webhookURL: 'https://hooks.zapier.com/hooks/catch/123456/abcdef/',
+      enabled: async req => {
+        // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        // `enabled` can be a boolean OR a function that returns a boolean.
+        //
+        // if it is a function, it will be passed the following arguments:
+        //  - all arguments from the hook that triggered the Zap
+        //  - operation (create/update/delete)
+        // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        return req.user.role === 'admin'
+      },
     }),
   ],
 })
@@ -38,6 +48,7 @@ This plugin is configurable to work across many different Payload collections. A
 | ----------------------------- | ----------- |
 | **`collections`***            | Array of collection slugs that will  send data to Zapier. `["*"]` can be used to zap every collection. |
 | **`webhookURL`***             | Zapier webhook URL to send events to. |
+| **`enabled`**                 | Function or boolean value that is checked before a Zap is sent. |
 
 ## Features
 

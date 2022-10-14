@@ -10,6 +10,9 @@ export default buildConfig({
     zapierPlugin({
       collections: ['*'],
       webhookURL: process.env.ZAPIER_WEBHOOK_URL,
+      enabled: ({ req }) => {
+        return req.user.role === 'admin'
+      },
     }),
   ],
 })
