@@ -36,8 +36,8 @@ export default buildConfig({
 This plugin is configurable to work across many different Payload collections. A * denotes that the property is required. [Types file](./src/types.ts).
 | Option                        | Description |
 | ----------------------------- | ----------- |
-| **`collections`** *         | Array of collection slugs that will  send data to Zapier. `"*"` can be used to zap every collection afterChange/afterDelete. |
-| **`webhookURL`** *         | Zapier webhook URL to send events to.                         |
+| **`collections`***            | Array of collection slugs that will  send data to Zapier. `"*"` can be used to zap every collection afterChange/afterDelete. |
+| **`webhookURL`***             | Zapier webhook URL to send events to. |
 
 ## Features
 
