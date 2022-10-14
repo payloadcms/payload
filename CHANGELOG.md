@@ -1,3 +1,10 @@
+## [1.1.15](https://github.com/payloadcms/payload/compare/v1.1.14...v1.1.15) (2022-10-14)
+
+
+### Bug Fixes
+
+* ensures svg mime type is always image/svg+xml ([0b0d971](https://github.com/payloadcms/payload/commit/0b0d9714917b1a56fb899a053e2e35c878a00992))
+
 ## [1.1.14](https://github.com/payloadcms/payload/compare/v1.1.13...v1.1.14) (2022-10-14)
 
 ## [1.1.11](https://github.com/payloadcms/payload/compare/v1.1.10...v1.1.11) (2022-10-12)
