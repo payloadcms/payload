@@ -5,9 +5,7 @@ export const defaults: Config = {
   serverURL: '',
   defaultDepth: 2,
   maxDepth: 10,
-  defaultMaxTextLength: 500,
-  defaultMaxNum: 9007199254740991, // 2^53 - 1 which is the MAX_SAFE_INTEGER for JS
-  defaultMinNum: -9007199254740991,
+  defaultMaxTextLength: 40000,
   collections: [],
   globals: [],
   endpoints: [],

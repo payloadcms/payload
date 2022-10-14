@@ -1,6 +1,5 @@
 import { text, textarea, password, select, point, number } from './validations';
 import { ValidateOptions } from './config/types';
-import payload from '..';
 
 const minLengthMessage = (length: number) => `This value must be longer than the minimum length of ${length} characters.`;
 const maxLengthMessage = (length: number) => `This value must be shorter than the max length of ${length} characters.`;
@@ -12,7 +11,6 @@ let options: ValidateOptions<any, any, any> = {
   operation: 'create',
   data: undefined,
   siblingData: undefined,
-  payload,
 };
 
 describe('Field Validations', () => {
