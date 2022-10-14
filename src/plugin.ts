@@ -86,9 +86,9 @@ export const cloudStorage =
 
         return existingCollection
       }),
-      onInit: payload => {
+      onInit: async payload => {
         initFunctions.forEach(fn => fn())
-        if (config.onInit) config.onInit(payload)
+        if (config.onInit) await config.onInit(payload)
       },
     }
   }
