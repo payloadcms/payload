@@ -5,16 +5,18 @@ import type { StaticHandler } from '../../types'
 import { getFilePrefix } from '../../utilities/getFilePrefix'
 
 interface Args {
-  gcs: Storage
+  getStorageClient: () => Storage
   bucket: string
   collection: CollectionConfig
 }
 
-export const getHandler = ({ gcs, bucket, collection }: Args): StaticHandler => {
+export const getHandler = ({ getStorageClient, bucket, collection }: Args): StaticHandler => {
   return async (req, res, next) => {
     try {
       const prefix = await getFilePrefix({ req, collection })
-      const file = gcs.bucket(bucket).file(path.posix.join(prefix, req.params.filename))
+      const file = getStorageClient()
+        .bucket(bucket)
+        .file(path.posix.join(prefix, req.params.filename))
 
       const [metadata] = await file.getMetadata()
 
