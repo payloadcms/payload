@@ -3,7 +3,7 @@ import type { AfterChangeHook, AfterDeleteHook } from 'payload/dist/collections/
 export interface PluginConfig {
   collections: string[]
   webhookURL: string
-  enabled: Enabled
+  enabled?: Enabled
 }
 
 type Operations = 'create' | 'update' | 'delete'
@@ -20,7 +20,7 @@ export type Zap = (options: {
 }) => void
 
 export type ShouldSendZap = (args: {
-  enabled: Enabled
+  enabled?: Enabled
   hookArgs: HookArgs
   operation: Operations
 }) => boolean | Promise<boolean>
