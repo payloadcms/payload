@@ -8,7 +8,7 @@ export default buildConfig({
   collections: [Users, Posts],
   plugins: [
     zapierPlugin({
-      collections: ['posts'],
+      collections: ['*'],
       webhookURL: process.env.ZAPIER_WEBHOOK_URL,
     }),
   ],

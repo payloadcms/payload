@@ -1,5 +1,5 @@
 export interface PluginConfig {
-  collections: string[] | '*'
+  collections: string[]
   webhookURL: string
 }
 

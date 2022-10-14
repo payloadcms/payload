@@ -22,13 +22,14 @@ const zap: Zap = ({ collectionSlug, data, operation, webhookEndpoint }) =>
 export const zapierPlugin =
   (options: PluginConfig) =>
   (config: Config): Config => {
-    const { collections: collectionSlugs, webhookURL: webhookEndpoint } = options
+    const { collections: zapCollections, webhookURL: webhookEndpoint } = options
 
     return {
       ...config,
       collections: (config.collections || []).map((collection: CollectionConfig) => {
+        const allCollections = zapCollections[0] === '*'
         const isZapCollection =
-          collectionSlugs === '*' || collectionSlugs?.find(c => c === collection.slug)
+          allCollections || zapCollections?.find(slug => slug === collection.slug)
 
         if (!isZapCollection) return collection
 
