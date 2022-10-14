@@ -33,12 +33,6 @@
   &__tabs-wrap {
     overflow: auto;
     margin-bottom: $baseline;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
   }
 
   &__tabs {
