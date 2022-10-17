@@ -22,6 +22,7 @@ export const getHandler = ({ getStorageClient, bucket, collection }: Args): Stat
       })
 
       res.set({
+        'Accept-Ranges': object.AcceptRanges,
         'Content-Length': object.ContentLength,
         'Content-Type': object.ContentType,
         ETag: object.ETag,

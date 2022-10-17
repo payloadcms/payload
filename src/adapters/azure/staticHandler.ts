@@ -20,6 +20,7 @@ export const getHandler = ({ getStorageClient, collection }: Args): StaticHandle
       const blob = await blockBlobClient.download(0)
 
       res.set({
+        'Accept-Ranges': blob.acceptRanges,
         'Content-Length': blob.contentLength,
         'Content-Type': blob.contentType,
         ETag: blob.etag,
