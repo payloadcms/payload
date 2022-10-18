@@ -1,3 +1,4 @@
+import { JSONDefinition } from 'graphql-scalars';
 import joi from 'joi';
 
 const component = joi.alternatives().try(
@@ -82,6 +83,11 @@ export default joi.object({
         beforeNavLinks: joi.array().items(component),
         afterNavLinks: joi.array().items(component),
         Nav: component,
+        logout: joi.object({
+          Component: component,
+          route: joi.string(),
+          inactivityRoute: joi.string()
+        }),
         views: joi.object({
           Dashboard: component,
           Account: component,
