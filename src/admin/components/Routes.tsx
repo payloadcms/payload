@@ -46,7 +46,7 @@ const Routes = () => {
     collections,
     globals,
   } = useConfig();
-  const { route: logoutRoute = logoutDefaultRoute, logoutInactivityRoute = logoutDefaultInactivityRoute } = logout;
+  const { route: logoutRoute = logoutDefaultRoute, inactivityRoute = logoutDefaultInactivityRoute } = logout;
   const userCollection = collections.find(({ slug }) => slug === userSlug);
 
   useEffect(() => {
@@ -109,7 +109,7 @@ const Routes = () => {
                 <Route path={`${match.url}${logoutRoute}`}>
                   <Logout />
                 </Route>
-                <Route path={`${match.url}${logoutInactivityRoute}`}>
+                <Route path={`${match.url}${inactivityRoute}`}>
                   <Logout inactivity />
                 </Route>
 

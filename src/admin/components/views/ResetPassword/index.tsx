@@ -18,7 +18,7 @@ import { logoutDefaultRoute } from '../../elements/Logout';
 const baseClass = 'reset-password';
 
 const ResetPassword: React.FC = () => {
-  const { admin: { user: userSlug, components: logout }, serverURL, routes: { admin, api } } = useConfig();
+  const { admin: { user: userSlug, components: { logout } }, serverURL, routes: { admin, api } } = useConfig();
   const { route: logoutRoute = logoutDefaultRoute } = logout;
   const { token } = useParams<{token?: string}>();
   const history = useHistory();
