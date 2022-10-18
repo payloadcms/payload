@@ -7,6 +7,7 @@ import Button from '../../elements/Button';
 import { Props } from './types';
 
 import './index.scss';
+import { logoutDefaultRoute } from '../../elements/Logout';
 
 const baseClass = 'stay-logged-in';
 
@@ -15,7 +16,15 @@ const modalSlug = 'stay-logged-in';
 const StayLoggedInModal: React.FC<Props> = (props) => {
   const { refreshCookie } = props;
   const history = useHistory();
-  const { routes: { admin } } = useConfig();
+  const { 
+    routes: { admin },
+    admin: {
+      components: {
+        logout
+      },
+    }, 
+  } = useConfig();
+  const { route: logoutRoute = logoutDefaultRoute } = logout;
   const { toggleModal } = useModal();
 
   return (
@@ -31,7 +40,7 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
             buttonStyle="secondary"
             onClick={() => {
               toggleModal(modalSlug);
-              history.push(`${admin}/logout`);
+              history.push(`${admin}${logout.route}`);
             }}
           >
             Log out

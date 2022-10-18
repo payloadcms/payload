@@ -13,11 +13,13 @@ import Meta from '../../utilities/Meta';
 
 import './index.scss';
 import HiddenInput from '../../forms/field-types/HiddenInput';
+import { logoutDefaultRoute } from '../../elements/Logout';
 
 const baseClass = 'reset-password';
 
 const ResetPassword: React.FC = () => {
-  const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = useConfig();
+  const { admin: { user: userSlug, components: logout }, serverURL, routes: { admin, api } } = useConfig();
+  const { route: logoutRoute = logoutDefaultRoute } = logout;
   const { token } = useParams<{token?: string}>();
   const history = useHistory();
   const { user, setToken } = useAuth();
@@ -43,7 +45,7 @@ const ResetPassword: React.FC = () => {
           <p>
             To log in with another user, you should
             {' '}
-            <Link to={`${admin}/logout`}>log out</Link>
+            <Link to={`${admin}${logoutRoute}`}>log out</Link>
             {' '}
             first.
           </p>

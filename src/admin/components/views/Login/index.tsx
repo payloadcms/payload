@@ -12,6 +12,7 @@ import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 
 import './index.scss';
+import { logoutDefaultRoute } from '../../elements/Logout';
 
 const baseClass = 'login';
 
@@ -24,6 +25,7 @@ const Login: React.FC = () => {
       components: {
         beforeLogin,
         afterLogin,
+        logout
       } = {},
     },
     serverURL,
@@ -33,6 +35,7 @@ const Login: React.FC = () => {
     },
     collections,
   } = useConfig();
+  const { route: logoutRoute = logoutDefaultRoute } = logout;
 
   const collection = collections.find(({ slug }) => slug === userSlug);
 
@@ -56,7 +59,7 @@ const Login: React.FC = () => {
           <p>
             To log in with another user, you should
             {' '}
-            <Link to={`${admin}/logout`}>log out</Link>
+            <Link to={`${admin}${logoutRoute}`}>log out</Link>
             {' '}
             first.
           </p>

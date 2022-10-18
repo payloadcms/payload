@@ -9,6 +9,7 @@ import { useConfig } from '../Config';
 import { requests } from '../../../api';
 import useDebounce from '../../../hooks/useDebounce';
 import { AuthContext } from './types';
+import { logoutDefaultInactivityRoute } from '../../elements/Logout';
 
 const Context = createContext({} as AuthContext);
 
@@ -25,6 +26,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const {
     admin: {
       user: userSlug,
+      components: {
+        logout
+      },
     },
     serverURL,
     routes: {
@@ -32,6 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       api,
     },
   } = config;
+  const { route: logoutInactivityRoute = logoutDefaultInactivityRoute } = logout;
 
   const exp = user?.exp;
 
@@ -57,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(json.user);
         } else {
           setUser(null);
-          push(`${admin}/logout-inactivity`);
+          push(`${admin}${logoutInactivityRoute}`);
         }
       }, 1000);
     }
@@ -145,7 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
         setUser(null);
-        push(`${admin}/logout-inactivity`);
+        push(`${admin}${logout.inactivityRoute}`);
         closeAllModals();
       }, Math.min(remainingTime * 1000, maxTimeoutTime));
     }

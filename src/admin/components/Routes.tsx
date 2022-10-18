@@ -12,6 +12,7 @@ import StayLoggedIn from './modals/StayLoggedIn';
 import Versions from './views/Versions';
 import Version from './views/Version';
 import { DocumentInfoProvider } from './utilities/DocumentInfo';
+import { logoutDefaultInactivityRoute, logoutDefaultRoute } from './elements/Logout';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -35,15 +36,17 @@ const Routes = () => {
   const {
     admin: {
       user: userSlug,
+      
       components: {
         routes: customRoutes,
+        logout
       } = {},
     },
     routes,
     collections,
     globals,
   } = useConfig();
-
+  const { route: logoutRoute = logoutDefaultRoute, logoutInactivityRoute = logoutDefaultInactivityRoute } = logout;
   const userCollection = collections.find(({ slug }) => slug === userSlug);
 
   useEffect(() => {
@@ -103,10 +106,10 @@ const Routes = () => {
                 <Route path={`${match.url}/login`}>
                   <Login />
                 </Route>
-                <Route path={`${match.url}/logout`}>
+                <Route path={`${match.url}${logoutRoute}`}>
                   <Logout />
                 </Route>
-                <Route path={`${match.url}/logout-inactivity`}>
+                <Route path={`${match.url}${logoutInactivityRoute}`}>
                   <Logout inactivity />
                 </Route>
 
