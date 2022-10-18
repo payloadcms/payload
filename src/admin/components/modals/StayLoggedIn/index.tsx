@@ -40,7 +40,7 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
             buttonStyle="secondary"
             onClick={() => {
               toggleModal(modalSlug);
-              history.push(`${admin}${logout.route}`);
+              history.push(`${admin}${logoutRoute}`);
             }}
           >
             Log out
