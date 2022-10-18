@@ -12,6 +12,7 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
     {
       draftsEnabled: Boolean(typeof collection?.versions === 'object' && collection.versions.drafts),
       options: { timestamps: collection.timestamps !== false, ...schemaOptions },
+      indexSortableFields: config.indexSortableFields,
     },
   );
 
