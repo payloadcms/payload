@@ -127,7 +127,7 @@ The following custom endpoints are automatically opened for you:
       method: 'POST',
       credentials: 'include',
       headers: {
-        ContentType: 'application/json',
+        'Content-Type': 'application/json',
         // Authorization: `JWT ${token}` // NOTE: do this if not in a browser (i.e. curl or Postman)
       },
       body: JSON.stringify({
