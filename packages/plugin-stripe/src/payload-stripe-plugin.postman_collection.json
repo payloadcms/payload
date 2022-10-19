@@ -59,7 +59,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"stripeMethod\": \"products.list\",\n    \"stripeArgs\": {\n        \"limit\": 100\n    }\n}"
+					"raw": "{\n    \"stripeMethod\": \"products.list\",\n    \"stripeArgs\": [{\n        \"limit\": 100\n    }]\n}"
 				},
 				"url": {
 					"raw": "localhost:3000/api/stripe/rest",

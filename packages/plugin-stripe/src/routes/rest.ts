@@ -22,7 +22,7 @@ export const stripeREST = async (args: {
     user,
     body: {
       stripeMethod, // example: 'subscriptions.list',
-      stripeArgs // example: 'cus_MGgt3Tuj3D66f2'
+      stripeArgs // example: ['cus_MGgt3Tuj3D66f2'] or [{ limit: 100 }, { stripeAccount: 'acct_1J9Z4pKZ4Z4Z4Z4Z' }]
     },
   } = req;
 
@@ -35,8 +35,8 @@ export const stripeREST = async (args: {
 
     const pluginRes = await stripeProxy({
       stripeSecretKey,
-      stripeMethod, // example: 'subscriptions.list',
-      stripeArgs // example: 'cus_MGgt3Tuj3D66f2'
+      stripeMethod,
+      stripeArgs
     });
 
     const {

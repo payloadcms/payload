@@ -23,17 +23,21 @@ export const stripeProxy: StripeProxy = async ({
     const foundMethod = lodashGet(stripe, stripeMethod).bind(contextToBind);
 
     if (typeof foundMethod === 'function') {
-      try {
-        const stripeResponse = await foundMethod(stripeArgs);
-        return {
-          status: 200,
-          data: stripeResponse
-        };
-      } catch (error) {
-        return {
-          status: 404,
-          message: `A Stripe API error has occurred: ${error}`
-        };
+      if (Array.isArray(stripeArgs)) {
+        try {
+          const stripeResponse = await foundMethod(...stripeArgs);
+          return {
+            status: 200,
+            data: stripeResponse
+          };
+        } catch (error) {
+          return {
+            status: 404,
+            message: `A Stripe API error has occurred: ${error}`
+          };
+        }
+      } else {
+        throw new Error(`Argument 'stripeArgs' must be an array.`);
       }
     } else {
       throw Error(`The provided Stripe method of '${stripeMethod}' is not a part of the Stripe API.`)
