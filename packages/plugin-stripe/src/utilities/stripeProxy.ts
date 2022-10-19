@@ -24,7 +24,7 @@ export const stripeProxy: StripeProxy = async ({
 
     if (typeof foundMethod === 'function') {
       try {
-        const stripeResponse = await foundMethod(...stripeArgs);
+        const stripeResponse = await foundMethod(stripeArgs);
         return {
           status: 200,
           data: stripeResponse
