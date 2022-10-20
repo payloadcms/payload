@@ -14,6 +14,7 @@ export const generateSubmissionCollection = (formConfig: FormConfig): Collection
       ...formConfig?.formSubmissionOverrides?.access || {}
     },
     admin: {
+      ...formConfig?.formSubmissionOverrides?.admin || {},
       enableRichTextRelationship: false
     },
     hooks: {

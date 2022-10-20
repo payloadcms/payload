@@ -65,6 +65,7 @@ export const generateFormCollection = (formConfig: FormConfig): CollectionConfig
   const config: CollectionConfig = {
     slug: formConfig?.formOverrides?.slug || 'forms',
     admin: {
+      ...formConfig?.formOverrides?.admin || {},
       useAsTitle: 'title',
       enableRichTextRelationship: false,
     },
