@@ -32,6 +32,9 @@ const collectionSchema = joi.object().keys({
       joi.string(),
       componentSchema,
     ),
+    hooks: joi.object({
+      beforeDuplicate: joi.func(),
+    }),
     enableRichTextRelationship: joi.boolean(),
     components: joi.object({
       views: joi.object({

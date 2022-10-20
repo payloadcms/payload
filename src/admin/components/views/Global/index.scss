@@ -68,7 +68,6 @@
     min-height: 100%;
   }
 
-  &__collection-actions,
   &__document-actions,
   &__meta,
   &__sidebar-fields {
@@ -88,7 +87,7 @@
     }
   }
 
-  &__document-actions--with-preview {
+  &__document-actions--has-2 {
     display: flex;
 
     >* {
@@ -106,8 +105,8 @@
     .form-submit {
       .btn {
         width: 100%;
-        padding-left: base(2);
-        padding-right: base(2);
+        padding-left: base(.5);
+        padding-right: base(.5);
       }
     }
   }

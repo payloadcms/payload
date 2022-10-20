@@ -80,9 +80,9 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                     {label}
                   </h1>
                   {description && (
-                  <div className={`${baseClass}__sub-header`}>
-                    <ViewDescription description={description} />
-                  </div>
+                    <div className={`${baseClass}__sub-header`}>
+                      <ViewDescription description={description} />
+                    </div>
                   )}
                 </header>
                 <RenderFields

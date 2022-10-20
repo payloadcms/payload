@@ -1,7 +1,26 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { BeforeDuplicate, CollectionConfig } from '../../../../src/collections/config/types';
+import { IndexedField } from '../../payload-types';
+
+const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
+  return {
+    ...data,
+    uniqueText: data.uniqueText ? `${data.uniqueText}-copy` : '',
+    group: {
+      ...data.group || {},
+      localizedUnique: data.group?.localizedUnique ? `${data.group?.localizedUnique}-copy` : '',
+    },
+    collapsibleTextUnique: data.collapsibleTextUnique ? `${data.collapsibleTextUnique}-copy` : '',
+    collapsibleLocalizedUnique: data.collapsibleLocalizedUnique ? `${data.collapsibleLocalizedUnique}-copy` : '',
+  };
+};
 
 const IndexedFields: CollectionConfig = {
   slug: 'indexed-fields',
+  admin: {
+    hooks: {
+      beforeDuplicate,
+    },
+  },
   fields: [
     {
       name: 'text',

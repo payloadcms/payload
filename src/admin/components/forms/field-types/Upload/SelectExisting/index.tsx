@@ -44,7 +44,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
   const { id } = useDocumentInfo();
   const { user } = useAuth();
   const { getData, getSiblingData } = useForm();
-  const { toggleModal, modalState } = useModal();
+  const { toggleModal, isModalOpen } = useModal();
   const [fields] = useState(() => formatFields(collection));
   const [limit, setLimit] = useState(defaultLimit);
   const [sort, setSort] = useState(null);
@@ -56,7 +56,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
     baseClass,
   ].filter(Boolean).join(' ');
 
-  const isOpen = modalState[modalSlug]?.isOpen;
+  const isOpen = isModalOpen(modalSlug);
 
   const apiURL = isOpen ? `${serverURL}${api}/${collectionSlug}` : null;
 
