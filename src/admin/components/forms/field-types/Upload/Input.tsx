@@ -11,6 +11,7 @@ import { FieldTypes } from '..';
 import AddModal from './Add';
 import SelectExistingModal from './SelectExisting';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
+import { useEditDepth, EditDepthContext } from '../../../utilities/EditDepth';
 
 import './index.scss';
 
@@ -58,13 +59,15 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     filterOptions,
   } = props;
 
-  const { toggleModal } = useModal();
+  const { toggleModal, modalState } = useModal();
+  const editDepth = useEditDepth();
 
-  const addModalSlug = `${path}-add`;
-  const selectExistingModalSlug = `${path}-select-existing`;
+  const addModalSlug = `${path}-add-depth-${editDepth}`;
+  const selectExistingModalSlug = `${path}-select-existing-depth-${editDepth}`;
 
   const [file, setFile] = useState(undefined);
   const [missingFile, setMissingFile] = useState(false);
+  const [modalToRender, setModalToRender] = useState<string>();
 
   const classes = [
     'field-type',
@@ -97,6 +100,12 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     api,
     serverURL,
   ]);
+
+  useEffect(() => {
+    if (!modalState[addModalSlug]?.isOpen && !modalState[selectExistingModalSlug]?.isOpen) {
+      setModalToRender(undefined);
+    }
+  }, [modalState, addModalSlug, selectExistingModalSlug]);
 
   return (
     <div
@@ -132,6 +141,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
                 buttonStyle="secondary"
                 onClick={() => {
                   toggleModal(addModalSlug);
+                  setModalToRender(addModalSlug);
                 }}
               >
                 Upload new
@@ -142,33 +152,40 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
                 buttonStyle="secondary"
                 onClick={() => {
                   toggleModal(selectExistingModalSlug);
+                  setModalToRender(selectExistingModalSlug);
                 }}
               >
                 Choose from existing
               </Button>
             </div>
           )}
-          <AddModal
-            {...{
-              collection,
-              slug: addModalSlug,
-              fieldTypes,
-              setValue: (e) => {
-                setMissingFile(false);
-                onChange(e);
-              },
-            }}
-          />
-          <SelectExistingModal
-            {...{
-              collection,
-              slug: selectExistingModalSlug,
-              setValue: onChange,
-              addModalSlug,
-              filterOptions,
-              path,
-            }}
-          />
+          <EditDepthContext.Provider value={editDepth + 1}>
+            {modalToRender === addModalSlug && (
+              <AddModal
+                {...{
+                  collection,
+                  slug: addModalSlug,
+                  fieldTypes,
+                  setValue: (e) => {
+                    setMissingFile(false);
+                    onChange(e);
+                  },
+                }}
+              />
+            )}
+            {modalToRender === selectExistingModalSlug && (
+              <SelectExistingModal
+                {...{
+                  collection,
+                  slug: selectExistingModalSlug,
+                  setValue: onChange,
+                  addModalSlug,
+                  filterOptions,
+                  path,
+                }}
+              />
+            )}
+          </EditDepthContext.Provider>
           <FieldDescription
             value={file}
             description={description}

@@ -1,5 +1,5 @@
-import { CollectionConfig } from '../../../../src/collections/config/types';
 import path from 'path';
+import { CollectionConfig } from '../../../../src/collections/config/types';
 
 const Uploads: CollectionConfig = {
   slug: 'uploads',
@@ -10,6 +10,11 @@ const Uploads: CollectionConfig = {
     {
       type: 'text',
       name: 'text',
+    },
+    {
+      type: 'upload',
+      name: 'media',
+      relationTo: 'uploads',
     },
   ],
 };
