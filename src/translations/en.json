@@ -1,0 +1,14 @@
+{
+  "general": {
+    "email": "Email",
+    "password": "Password"
+  },
+  "login": {
+    "login": "Login",
+    "description": "Login user",
+    "loggedInTitle": "Already logged in",
+    "loggedIn": "To log in with another user, you should <0>log out</0> first.",
+    "backToDashboard": "Back to Dashboard",
+    "forgotPassword": "Forgot password?"
+  }
+}

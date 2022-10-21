@@ -17,8 +17,11 @@ import { LocaleProvider } from './components/utilities/Locale';
 import Routes from './components/Routes';
 import { StepNavProvider } from './components/elements/StepNav';
 import { ThemeProvider } from './components/utilities/Theme';
+import i18n from './utilities/i18n';
 
 import './scss/app.scss';
+// eslint-disable-next-line no-unused-expressions
+i18n.isInitialized; // preserves ts from removing unused import
 
 const Index = () => (
   <React.Fragment>
