@@ -144,12 +144,14 @@ describe('collections-rest', () => {
       let relation2: Relation;
       const nameToQuery = 'name';
       const nameToQuery2 = 'name2';
+      const otherField = 'otherField';
 
       beforeEach(async () => {
         ({ doc: relation } = await client.create<Relation>({
           slug: relationSlug,
           data: {
             name: nameToQuery,
+            otherField,
           },
         }));
 
@@ -157,6 +159,7 @@ describe('collections-rest', () => {
           slug: relationSlug,
           data: {
             name: nameToQuery2,
+            otherField,
           },
         }));
 
@@ -173,6 +176,9 @@ describe('collections-rest', () => {
             query: {
               'relationField.name': {
                 equals: relation.name,
+              },
+              'relationField.otherField': {
+                equals: undefined,
               },
             },
           });
@@ -207,6 +213,9 @@ describe('collections-rest', () => {
             'relationHasManyField.name': {
               equals: relation.name,
             },
+            'relationHasManyField.otherField': {
+              equals: undefined,
+            },
           },
         });
 
@@ -219,6 +228,9 @@ describe('collections-rest', () => {
           query: {
             'relationHasManyField.name': {
               equals: relation2.name,
+            },
+            'relationHasManyField.otherField': {
+              equals: undefined,
             },
           },
         });

@@ -237,11 +237,12 @@ export type UIField = {
   type: 'ui';
 }
 
-export type UploadField = FieldBase & {
+export type UploadField<T extends TypeWithID = any> = FieldBase & {
   type: 'upload'
   relationTo: string
   maxDepth?: number
   filterOptions?: FilterOptions;
+  select?: Array<Exclude<keyof T, 'id'>>;
 }
 
 type CodeAdmin = Admin & {
@@ -265,12 +266,13 @@ export type SelectField = FieldBase & {
   }
 }
 
-export type RelationshipField = FieldBase & {
+export type RelationshipField<T extends TypeWithID = any> = FieldBase & {
   type: 'relationship';
   relationTo: string | string[];
   hasMany?: boolean;
   maxDepth?: number;
   filterOptions?: FilterOptions;
+  select?: Array<Exclude<keyof T, 'id'>>;
   admin?: Admin & {
     isSortable?: boolean;
   }

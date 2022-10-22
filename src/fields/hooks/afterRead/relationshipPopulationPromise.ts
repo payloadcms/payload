@@ -53,6 +53,16 @@ const populate = async ({
     if (!relationshipValue) {
       // ids are visible regardless of access controls
       relationshipValue = id;
+    } else if (field.select) {
+      const newRelationShipValue = {
+        id: relationshipValue.id,
+      };
+      field.select.forEach((fieldName) => {
+        if (relationshipValue[fieldName] !== undefined) {
+          newRelationShipValue[fieldName] = relationshipValue[fieldName];
+        }
+      });
+      relationshipValue = newRelationShipValue;
     }
 
     if (typeof index === 'number') {

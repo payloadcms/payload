@@ -23,6 +23,7 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 | **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
 | **`relationTo`** *   | Provide one or many collection `slug`s to be able to assign relationships to. |
 | **`filterOptions`**  | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options). |
+| **`select`**         | An array of fields to be returned from the related collection. [More](#selecting-fields). |
 | **`hasMany`**        | Boolean when, if set to `true`, allows this field to have many relations instead of only one. |
 | **`maxDepth`**       | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth) |
 | **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type. |
@@ -96,6 +97,27 @@ You can learn more about writing queries [here](/docs/queries/overview).
 <Banner type="warning">
   <strong>Note:</strong><br/>
   When a relationship field has both <strong>filterOptions</strong> and a custom <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong> unless you call the default relationship field validation function imported from <strong>payload/fields/validations</strong> in your validate function.
+</Banner>
+
+### Selecting fields
+
+By default, the entire related document is returned when querying for a relationship field. You can limit the fields returned by using the `select` property. This property is an array of field names to be returned. The `id` field is always returned. 
+
+**Example:**
+
+```js
+  const relationshipField = {
+    name: 'purchase',
+    type: 'relationship',
+    relationTo: ['products', 'services'],
+    select: ['name', 'price'],
+  };
+```
+
+<Banner type="warning">
+  <strong>Note:</strong><br/>
+  When a relationship field has a custom <strong>select</strong> property, the api will not return the entire related document unless you query the related collection with the provided <strong>id</strong>.
+  This can lead to unexpected behavior when using the <strong>select</strong> property in conjunction with <strong>QraphQL</strong>.
 </Banner>
 
 ### How the data is saved

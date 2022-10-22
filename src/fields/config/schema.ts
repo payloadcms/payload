@@ -243,6 +243,7 @@ export const upload = baseField.keys({
   relationTo: joi.string().required(),
   name: joi.string().required(),
   maxDepth: joi.number(),
+  select: joi.array().optional(),
   filterOptions: joi.alternatives().try(
     joi.object(),
     joi.func(),
@@ -280,6 +281,7 @@ export const relationship = baseField.keys({
     joi.object(),
     joi.func(),
   ),
+  select: joi.array().optional(),
   defaultValue: joi.alternatives().try(
     joi.func(),
   ),
