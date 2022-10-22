@@ -8,6 +8,9 @@ import { hooksSlug } from './collections/Hook';
 import { generatedAfterReadText, nestedAfterReadHooksSlug } from './collections/NestedAfterReadHooks';
 import { relationsSlug } from './collections/Relations';
 import type { NestedAfterReadHook } from './payload-types';
+import { hooksUsersSlug } from './collections/Users';
+import { devUser, regularUser } from '../credentials';
+import { AuthenticationError } from '../../src/errors';
 
 let client: RESTClient;
 
@@ -115,6 +118,22 @@ describe('Hooks', () => {
 
       expect(retrievedDoc.group.array[0].shouldPopulate.title).toEqual(relation.title);
       expect(retrievedDoc.group.subGroup.shouldPopulate.title).toEqual(relation.title);
+    });
+  });
+  describe('auth collection hooks', () => {
+    it('allow admin login', async () => {
+      const { user } = await payload.login({
+        collection: hooksUsersSlug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      });
+      expect(user).toBeDefined();
+    });
+
+    it('deny user login', async () => {
+      await expect(() => payload.login({ collection: hooksUsersSlug, data: { email: regularUser.email, password: regularUser.password } })).rejects.toThrow(AuthenticationError);
     });
   });
 });
