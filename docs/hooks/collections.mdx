@@ -19,7 +19,6 @@ Collections feature the ability to define the following hooks:
 
 Additionally, `auth`-enabled collections feature the following hooks:
 
-- [beforeLogin](#beforelogin)
 - [afterLogin](#afterlogin)
 - [afterLogout](#afterlogout)
 - [afterRefresh](#afterrefresh)
@@ -50,7 +49,6 @@ const ExampleHooks: CollectionConfig = {
     afterDelete: [(args) => {...}],
 
     // Auth-enabled hooks
-    beforeLogin: [(args) => {...}],
     afterLogin: [(args) => {...}],
     afterLogout: [(args) => {...}],
     afterRefresh: [(args) => {...}],
@@ -188,22 +186,6 @@ const afterDeleteHook: CollectionAfterDeleteHook = async ({
 }) => {...}
 ```
 
-### beforeLogin
-
-For auth-enabled Collections, this hook runs after successful `login` operations. You can optionally modify the user that is returned.
-
-```ts
-import { CollectionBeforeLoginHook } from 'payload/types';
-
-const beforeLoginHook: CollectionBeforeLoginHook = async ({
-  req, // full express request
-  user, // user being logged in
-  token, // user token
-}) => {
-  return user;
-}
-```
-
 ### afterLogin
 
 For auth-enabled Collections, this hook runs after successful `login` operations. You can optionally modify the user that is returned.
@@ -285,7 +267,6 @@ import type {
   CollectionBeforeReadHook,
   CollectionBeforeDeleteHook,
   CollectionAfterDeleteHook,
-  CollectionBeforeLoginHook,
   CollectionAfterLoginHook,
   CollectionAfterLogoutHook,
   CollectionAfterRefreshHook,

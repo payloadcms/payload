@@ -112,10 +112,6 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
 
 export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
 
-export type BeforeLoginHook = (args: {
-  req: PayloadRequest;
-}) => any;
-
 export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   doc: T;
@@ -229,7 +225,6 @@ export type CollectionConfig = {
     beforeDelete?: BeforeDeleteHook[];
     afterDelete?: AfterDeleteHook[];
     afterError?: AfterErrorHook;
-    beforeLogin?: BeforeLoginHook[];
     afterLogin?: AfterLoginHook[];
     afterLogout?: AfterLogoutHook[];
     afterMe?: AfterMeHook[];

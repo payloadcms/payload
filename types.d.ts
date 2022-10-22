@@ -15,7 +15,6 @@ export {
   BeforeReadHook as CollectionBeforeReadHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
-  BeforeLoginHook as CollectionBeforeLoginHook,
   AfterLoginHook as CollectionAfterLoginHook,
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
   BeforeDuplicate,
