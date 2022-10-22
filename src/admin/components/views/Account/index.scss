@@ -150,6 +150,10 @@
     border-top: 1px solid var(--theme-elevation-100);
   }
 
+  &__language {
+    margin-bottom: $baseline;
+  }
+
   @include mid-break {
     &__main {
       width: 100%;

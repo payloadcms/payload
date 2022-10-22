@@ -2,6 +2,7 @@ import React, {
   useState, createContext, useContext,
 } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Chevron from '../../icons/Chevron';
 import { Context as ContextType } from './types';
 
@@ -26,7 +27,8 @@ const StepNavProvider: React.FC<{children?: React.ReactNode}> = ({ children }) =
 const useStepNav = (): ContextType => useContext(Context);
 
 const StepNav: React.FC = () => {
-  const dashboardLabel = <span>Dashboard</span>;
+  const { t } = useTranslation();
+  const dashboardLabel = <span>{t('general:dashboard')}</span>;
   const { stepNav } = useStepNav();
 
   return (

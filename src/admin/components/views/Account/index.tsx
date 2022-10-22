@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
@@ -39,6 +40,7 @@ const AccountView: React.FC = () => {
       user: 'users',
     },
   } = useConfig();
+  const { t } = useTranslation('account');
 
   const collection = collections.find((coll) => coll.slug === adminUser);
 
@@ -59,11 +61,11 @@ const AccountView: React.FC = () => {
 
   useEffect(() => {
     const nav = [{
-      label: 'Account',
+      label: t('account'),
     }];
 
     setStepNav(nav);
-  }, [setStepNav]);
+  }, [setStepNav, t]);
 
   useEffect(() => {
     const awaitInitialState = async () => {

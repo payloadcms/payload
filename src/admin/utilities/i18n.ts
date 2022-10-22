@@ -11,9 +11,6 @@ i18n
     debug: false,
     supportedLngs: Object.keys(translations),
     resources: translations,
-    interpolation: {
-      escapeValue: false, // not needed for react as it escapes by default
-    },
   });
 
 

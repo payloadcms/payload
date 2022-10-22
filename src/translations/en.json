@@ -1,7 +1,20 @@
 {
   "general": {
+    "thisLanguage": "English",
+    "language": "Language",
     "email": "Email",
-    "password": "Password"
+    "password": "Password",
+    "untitled": "Untitled",
+    "createNew": "Create New",
+    "save": "Save",
+    "lastModified": "Last Modified",
+    "created": "Created",
+    "dashboard": "Dashboard"
+  },
+  "account": {
+    "account": "Account",
+    "description": "Account of current user",
+    "payloadSettings": "Payload Settings"
   },
   "login": {
     "login": "Login",

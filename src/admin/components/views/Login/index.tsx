@@ -18,7 +18,7 @@ const baseClass = 'login';
 
 const Login: React.FC = () => {
   const history = useHistory();
-  const { t } = useTranslation(['login']);
+  const { t } = useTranslation('login');
   const { user, setToken } = useAuth();
   const {
     admin: {
