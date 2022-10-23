@@ -2,7 +2,7 @@
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
 import { Operation, Where } from '../../types';
-import { TypeWithID } from '../../collections/config/types';
+import { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
@@ -237,13 +237,22 @@ export type UIField = {
   type: 'ui';
 }
 
+type SelectOptionsProp<T extends TypeWithID> = {
+  data: T,
+  collection: SanitizedCollectionConfig
+}
+
+export type SelectOptions<T extends TypeWithID> =
+  | Array<Exclude<keyof T, 'id'>>
+  | ((options: SelectOptionsProp<T>) => Array<Exclude<keyof T, 'id'>>);
+
 export type UploadField<T extends TypeWithID = any> = FieldBase & {
   type: 'upload'
   relationTo: string
   maxDepth?: number
   filterOptions?: FilterOptions;
-  select?: Array<Exclude<keyof T, 'id'>>;
-}
+  select?: SelectOptions<T>;
+};
 
 type CodeAdmin = Admin & {
   language?: string;
@@ -272,7 +281,7 @@ export type RelationshipField<T extends TypeWithID = any> = FieldBase & {
   hasMany?: boolean;
   maxDepth?: number;
   filterOptions?: FilterOptions;
-  select?: Array<Exclude<keyof T, 'id'>>;
+  select?: SelectOptions<T>;
   admin?: Admin & {
     isSortable?: boolean;
   }

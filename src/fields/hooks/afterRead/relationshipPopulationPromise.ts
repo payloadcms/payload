@@ -57,7 +57,13 @@ const populate = async ({
       const newRelationShipValue = {
         id: relationshipValue.id,
       };
-      field.select.forEach((fieldName) => {
+      const fields = Array.isArray(field.select)
+        ? field.select
+        : field.select({
+          data: relationshipValue,
+          collection: relatedCollection.config,
+        });
+      fields.forEach((fieldName) => {
         if (relationshipValue[fieldName] !== undefined) {
           newRelationShipValue[fieldName] = relationshipValue[fieldName];
         }

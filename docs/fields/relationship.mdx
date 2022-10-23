@@ -23,7 +23,7 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 | **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
 | **`relationTo`** *   | Provide one or many collection `slug`s to be able to assign relationships to. |
 | **`filterOptions`**  | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options). |
-| **`select`**         | An array of fields to be returned from the related collection. [More](#selecting-fields). |
+| **`select`**         | Provides a way to select which fields to return from the related documents. [More](#selecting-fields) |
 | **`hasMany`**        | Boolean when, if set to `true`, allows this field to have many relations instead of only one. |
 | **`maxDepth`**       | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth) |
 | **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type. |
@@ -101,7 +101,14 @@ You can learn more about writing queries [here](/docs/queries/overview).
 
 ### Selecting fields
 
-By default, the entire related document is returned when querying for a relationship field. You can limit the fields returned by using the `select` property. This property is an array of field names to be returned. The `id` field is always returned. 
+By default, the entire related document is returned when querying for a relationship field. You can limit the fields returned by using the `select` property. This property can either be a function that returns an array of field names, or an array of field names. The function will be called with an argument object with the following properties:
+
+| Property      | Description  |
+| ------------- | -------------|
+| `data`             | An object of the full relationship value |
+| `collection`       | The collection config of the related collection |
+
+and should return an array of field names to select.
 
 **Example:**
 
@@ -111,6 +118,22 @@ By default, the entire related document is returned when querying for a relation
     type: 'relationship',
     relationTo: ['products', 'services'],
     select: ['name', 'price'],
+  };
+```
+
+**Example with function:**
+
+```js
+  const relationshipField = {
+    name: 'purchase',
+    type: 'relationship',
+    relationTo: ['products', 'services'],
+    select: ({ data, collection }) => {
+      if (collection.slug === 'products') {
+        return ['name', 'price'];
+      }
+      return ['name', 'price', 'duration'];
+    },
   };
 ```
 
