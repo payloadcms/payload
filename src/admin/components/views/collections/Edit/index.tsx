@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Redirect, useRouteMatch, useHistory, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import { useAuth } from '../../../utilities/Auth';
 import { useStepNav } from '../../../elements/StepNav';
@@ -49,6 +50,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { permissions, user } = useAuth();
   const { getVersions, preferencesKey } = useDocumentInfo();
   const { getPreference } = usePreferences();
+  const { t } = useTranslation('edit');
 
   const onSave = useCallback(async (json: any) => {
     getVersions();
@@ -81,7 +83,7 @@ const EditView: React.FC<IndexProps> = (props) => {
           if (dataToRender[useAsTitle]) {
             label = dataToRender[useAsTitle];
           } else {
-            label = '[Untitled]';
+            label = `[${t('general:untitled')}]`;
           }
         } else {
           label = dataToRender.id;
@@ -93,12 +95,12 @@ const EditView: React.FC<IndexProps> = (props) => {
       });
     } else {
       nav.push({
-        label: 'Create New',
+        label: t('general:createNew'),
       });
     }
 
     setStepNav(nav);
-  }, [setStepNav, isEditing, pluralLabel, dataToRender, slug, useAsTitle, admin]);
+  }, [setStepNav, isEditing, pluralLabel, dataToRender, slug, useAsTitle, admin, t]);
 
   useEffect(() => {
     if (isLoadingDocument) {

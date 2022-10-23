@@ -4,17 +4,36 @@
     "language": "Language",
     "email": "Email",
     "password": "Password",
+    "newPassword": "New Password",
     "untitled": "Untitled",
     "createNew": "Create New",
     "save": "Save",
     "lastModified": "Last Modified",
     "created": "Created",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "cancel": "Cancel"
   },
   "account": {
     "account": "Account",
     "description": "Account of current user",
     "payloadSettings": "Payload Settings"
+  },
+  "authentication": {
+    "successfullyUnlocked": "Successfully unlocked",
+    "failedToUnlock": "Failed to unlock",
+    "forceUnlock": "Force Unlock",
+    "changePassword": "Change Password",
+    "enableAPIKey": "Enable API Key",
+    "verified": "Verified"
+  },
+  "upload": {
+    "selectFile": "Select a file",
+    "dragAndDropHere": "or drag and drop a file here"
+  },
+  "edit": {
+    "creating": "Creating",
+    "editing": "Editing",
+    "versions": "Versions"
   },
   "login": {
     "login": "Login",
@@ -23,5 +42,11 @@
     "loggedIn": "To log in with another user, you should <0>log out</0> first.",
     "backToDashboard": "Back to Dashboard",
     "forgotPassword": "Forgot password?"
+  },
+  "theme": {
+    "adminTheme": "Admin Theme",
+    "automatic": "Automatic",
+    "light": "Light",
+    "dark": "Dark"
   }
 }

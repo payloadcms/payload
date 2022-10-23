@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../utilities/Config';
 import Email from '../../../../forms/field-types/Email';
 import Password from '../../../../forms/field-types/Password';
@@ -21,6 +22,7 @@ const Auth: React.FC<Props> = (props) => {
   const enableAPIKey = useFormFields(([fields]) => fields.enableAPIKey);
   const dispatchFields = useFormFields((reducer) => reducer[1]);
   const modified = useFormModified();
+  const { t } = useTranslation('authentication');
 
   const {
     serverURL,
@@ -52,11 +54,11 @@ const Auth: React.FC<Props> = (props) => {
     });
 
     if (response.status === 200) {
-      toast.success('Successfully unlocked', { autoClose: 3000 });
+      toast.success(t('successfullyUnlocked'), { autoClose: 3000 });
     } else {
-      toast.error('Successfully unlocked');
+      toast.error(t('failedToUnlock'));
     }
-  }, [serverURL, api, slug, email]);
+  }, [serverURL, api, slug, email, t]);
 
   useEffect(() => {
     if (!modified) {
@@ -73,7 +75,7 @@ const Auth: React.FC<Props> = (props) => {
       <Email
         required
         name="email"
-        label="Email"
+        label={t('general:email')}
         admin={{ autoComplete: 'email' }}
       />
       {(changingPassword || requirePassword) && (
@@ -82,7 +84,7 @@ const Auth: React.FC<Props> = (props) => {
             autoComplete="off"
             required
             name="password"
-            label="New Password"
+            label={t('newPassword')}
           />
           <ConfirmPassword />
           {!requirePassword && (
@@ -91,7 +93,7 @@ const Auth: React.FC<Props> = (props) => {
               buttonStyle="secondary"
               onClick={() => handleChangePassword(false)}
             >
-              Cancel
+              {t('general:cancel')}
             </Button>
           )}
         </div>
@@ -102,7 +104,7 @@ const Auth: React.FC<Props> = (props) => {
           buttonStyle="secondary"
           onClick={() => handleChangePassword(true)}
         >
-          Change Password
+          {t('changePassword')}
         </Button>
       )}
       {operation === 'update' && (
@@ -111,13 +113,13 @@ const Auth: React.FC<Props> = (props) => {
           buttonStyle="secondary"
           onClick={() => unlock()}
         >
-          Force Unlock
+          {t('forceUnlock')}
         </Button>
       )}
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <Checkbox
-            label="Enable API Key"
+            label={t('enableAPIKey')}
             name="enableAPIKey"
           />
           {enableAPIKey?.value && (
@@ -127,7 +129,7 @@ const Auth: React.FC<Props> = (props) => {
       )}
       {verify && (
         <Checkbox
-          label="Verified"
+          label={t('verified')}
           name="_verified"
         />
       )}

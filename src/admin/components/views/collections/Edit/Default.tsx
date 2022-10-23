@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import format from 'date-fns/format';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import Eyebrow from '../../../elements/Eyebrow';
 import Form from '../../../forms/Form';
@@ -34,6 +35,7 @@ const baseClass = 'collection-edit';
 const DefaultEditView: React.FC<Props> = (props) => {
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { publishedDoc } = useDocumentInfo();
+  const { t } = useTranslation('edit');
 
   const {
     collection,
@@ -92,8 +94,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
           >
             <div className={`${baseClass}__main`}>
               <Meta
-                title={`${isEditing ? 'Editing' : 'Creating'} - ${collection.labels.singular}`}
-                description={`${isEditing ? 'Editing' : 'Creating'} - ${collection.labels.singular}`}
+                title={`${isEditing ? t('editing') : t('creating')} - ${collection.labels.singular}`}
+                description={`${isEditing ? t('editing') : t('creating')} - ${collection.labels.singular}`}
                 keywords={`${collection.labels.singular}, Payload, CMS`}
               />
               {!disableEyebrow && (
@@ -107,7 +109,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   {customHeader && customHeader}
                   {!customHeader && (
                     <h1>
-                      <RenderTitle {...{ data, useAsTitle, fallback: '[Untitled]' }} />
+                      <RenderTitle {...{ data, useAsTitle, fallback: `[${t('general:untitled')}]` }} />
                     </h1>
                   )}
                 </header>
@@ -148,7 +150,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                               id="action-create"
                               to={`${admin}/collections/${slug}/create`}
                             >
-                              Create New
+                              {t('general:createNew')}
                             </Link>
                           </li>
                           {!disableDuplicate && isEditing && (
@@ -191,7 +193,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           </React.Fragment>
                         )}
                         {!collection.versions?.drafts && (
-                          <FormSubmit buttonId="action-save">Save</FormSubmit>
+                          <FormSubmit buttonId="action-save">{t('general:save')}</FormSubmit>
                         )}
                       </React.Fragment>
                     )}
@@ -244,7 +246,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         )}
                         {versions && (
                           <li>
-                            <div className={`${baseClass}__label`}>Versions</div>
+                            <div className={`${baseClass}__label`}>{t('versions')}</div>
                             <VersionsCount
                               collection={collection}
                               id={id}
@@ -255,13 +257,13 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           <React.Fragment>
                             {data.updatedAt && (
                               <li>
-                                <div className={`${baseClass}__label`}>Last Modified</div>
+                                <div className={`${baseClass}__label`}>{t('lastModified')}</div>
                                 <div>{format(new Date(data.updatedAt), dateFormat)}</div>
                               </li>
                             )}
                             {(publishedDoc?.createdAt || data?.createdAt) && (
                               <li>
-                                <div className={`${baseClass}__label`}>Created</div>
+                                <div className={`${baseClass}__label`}>{t('general:created')}</div>
                                 <div>{format(new Date(publishedDoc?.createdAt || data?.createdAt), dateFormat)}</div>
                               </li>
                             )}
