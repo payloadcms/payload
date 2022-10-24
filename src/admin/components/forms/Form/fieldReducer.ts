@@ -3,7 +3,7 @@ import { unflatten, flatten } from 'flatley';
 import flattenFilters from './flattenFilters';
 import getSiblingData from './getSiblingData';
 import reduceFieldsToValues from './reduceFieldsToValues';
-import { FieldAction, Fields } from './types';
+import { Field, FieldAction, Fields } from './types';
 import deepCopyObject from '../../../../utilities/deepCopyObject';
 
 const unflattenRowsFromState = (state: Fields, path: string) => {
@@ -187,16 +187,16 @@ function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'UPDATE': {
-      const newField = {
-        value: action.value,
-        valid: action.valid,
-        errorMessage: action.errorMessage,
-        disableFormData: action.disableFormData,
-        initialValue: action.initialValue,
-        validate: action.validate,
-        condition: action.condition,
-        passesCondition: action.passesCondition,
-      };
+      const newField = Object.entries(action).reduce((field, [key, value]) => {
+        if (['value', 'valid', 'errorMessage', 'disableFormData', 'initialValue', 'validate', 'condition', 'passesCondition'].includes(key)) {
+          return {
+            ...field,
+            [key]: value,
+          };
+        }
+
+        return field;
+      }, state[action.path] || {} as Field);
 
       return {
         ...state,

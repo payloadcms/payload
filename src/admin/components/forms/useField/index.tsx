@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useAuth } from '../../utilities/Auth';
 import { useFormProcessing, useFormSubmitted, useFormModified, useForm, useFormFields } from '../Form/context';
 import { Options, FieldType } from './types';
@@ -28,6 +28,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
   const value = field?.value as T;
   const initialValue = field?.initialValue as T;
+  const fieldDisableFormData = field?.disableFormData;
   const valid = typeof field?.valid === 'boolean' ? field.valid : true;
   const showError = valid === false && submitted;
 
@@ -120,6 +121,16 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     validate,
     valid,
   ]);
+
+  useEffect(() => {
+    if (fieldDisableFormData !== disableFormData) {
+      dispatchField({
+        type: 'UPDATE',
+        path,
+        disableFormData,
+      });
+    }
+  }, [disableFormData, fieldDisableFormData, path, dispatchField]);
 
   return result;
 };
