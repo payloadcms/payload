@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Modal } from '@faceless-ui/modal';
 import { Element, Transforms } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../../utilities/Config';
 import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types';
 import usePayloadAPI from '../../../../../../../../hooks/usePayloadAPI';
@@ -29,11 +30,12 @@ type Props = {
 export const SwapUploadModal: React.FC<Props> = ({ closeModal, element, setRelatedCollectionConfig, relatedCollectionConfig, slug }) => {
   const { collections, serverURL, routes: { api } } = useConfig();
   const editor = useSlateStatic();
+  const { t } = useTranslation('upload');
 
   const [modalCollection, setModalCollection] = React.useState(relatedCollectionConfig);
   const [modalCollectionOption, setModalCollectionOption] = React.useState<{ label: string, value: string }>({ label: relatedCollectionConfig.labels.singular, value: relatedCollectionConfig.slug });
   const [availableCollections] = React.useState(() => collections.filter(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
-  const [fields, setFields] = React.useState(() => formatFields(modalCollection));
+  const [fields, setFields] = React.useState(() => formatFields(modalCollection, t));
 
   const [limit, setLimit] = React.useState<number>();
   const [sort, setSort] = React.useState(null);
@@ -82,9 +84,9 @@ export const SwapUploadModal: React.FC<Props> = ({ closeModal, element, setRelat
   }, [setParams, page, sort, where, limit]);
 
   React.useEffect(() => {
-    setFields(formatFields(modalCollection));
+    setFields(formatFields(modalCollection, t));
     setLimit(modalCollection.admin.pagination.defaultLimit);
-  }, [modalCollection]);
+  }, [modalCollection, t]);
 
   React.useEffect(() => {
     setModalCollection(collections.find(({ slug: collectionSlug }) => modalCollectionOption.value === collectionSlug));
@@ -98,9 +100,11 @@ export const SwapUploadModal: React.FC<Props> = ({ closeModal, element, setRelat
       <MinimalTemplate width="wide">
         <header className={`${baseClass}__header`}>
           <h1>
-            Choose
-            {' '}
-            {modalCollection.labels.singular}
+            <Trans
+              i18nKey="choose"
+              t={t}
+              values={{ collection: modalCollection.labels.singular }}
+            />
           </h1>
           <Button
             icon="x"
@@ -113,7 +117,7 @@ export const SwapUploadModal: React.FC<Props> = ({ closeModal, element, setRelat
         {
           moreThanOneAvailableCollection && (
             <div className={`${baseClass}__select-collection-wrap`}>
-              <Label label="Select a Collection to Browse" />
+              <Label label={t('selectCollectionToBrowse')} />
               <ReactSelect
                 className={`${baseClass}__select-collection`}
                 value={modalCollectionOption}
@@ -161,13 +165,11 @@ export const SwapUploadModal: React.FC<Props> = ({ closeModal, element, setRelat
           {data?.totalDocs > 0 && (
             <React.Fragment>
               <div className={`${baseClass}__page-info`}>
-                {data.page}
-                -
-                {data.totalPages > 1 ? data.limit : data.totalDocs}
-                {' '}
-                of
-                {' '}
-                {data.totalDocs}
+                <Trans
+                  i18nKey="pages"
+                  t={t}
+                  values={{ page: data.page, limit: data.totalPages > 1 ? data.limit : data.totalDocs, totalDocs: data.totalDocs }}
+                />
               </div>
               <PerPage
                 limits={modalCollection?.admin?.pagination?.limits}

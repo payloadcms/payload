@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { Transforms } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../utilities/Config';
 import ElementButton from '../../Button';
 import UploadIcon from '../../../../../../icons/Upload';
@@ -56,8 +56,8 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
     return undefined;
   });
   const [modalCollection, setModalCollection] = useState<SanitizedCollectionConfig>(() => collections.find(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
-
-  const [fields, setFields] = useState(() => (modalCollection ? formatFields(modalCollection) : undefined));
+  const { t } = useTranslation('upload');
+  const [fields, setFields] = useState(() => (modalCollection ? formatFields(modalCollection, t) : undefined));
   const [limit, setLimit] = useState<number>();
   const [sort, setSort] = useState(null);
   const [where, setWhere] = useState(null);
@@ -73,9 +73,9 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
 
   useEffect(() => {
     if (modalCollection) {
-      setFields(formatFields(modalCollection));
+      setFields(formatFields(modalCollection, t));
     }
-  }, [modalCollection]);
+  }, [modalCollection, t]);
 
   useEffect(() => {
     if (renderModal) {
@@ -144,7 +144,7 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
               </header>
               {moreThanOneAvailableCollection && (
                 <div className={`${baseModalClass}__select-collection-wrap`}>
-                  <Label label="Select a Collection to Browse" />
+                  <Label label={t('selectCollection')} />
                   <ReactSelect
                     className={`${baseClass}__select-collection`}
                     value={modalCollectionOption}
@@ -194,13 +194,11 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
                 {data?.totalDocs > 0 && (
                   <Fragment>
                     <div className={`${baseModalClass}__page-info`}>
-                      {data.page}
-                      -
-                      {data.totalPages > 1 ? data.limit : data.totalDocs}
-                      {' '}
-                      of
-                      {' '}
-                      {data.totalDocs}
+                      <Trans
+                        i18nKey="pages"
+                        t={t}
+                        values={{ page: data.page, limit: data.totalPages > 1 ? data.limit : data.totalDocs, totalDocs: data.totalDocs }}
+                      />
                     </div>
                     <PerPage
                       limits={modalCollection?.admin?.pagination?.limits}

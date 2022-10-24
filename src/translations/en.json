@@ -9,6 +9,8 @@
     "createNew": "Create New",
     "save": "Save",
     "lastModified": "Last Modified",
+    "updatedAt": "Updated At",
+    "createdAt": "Created At",
     "created": "Created",
     "dashboard": "Dashboard",
     "cancel": "Cancel"
@@ -27,8 +29,14 @@
     "verified": "Verified"
   },
   "upload": {
+    "filename": "Filename",
     "selectFile": "Select a file",
-    "dragAndDropHere": "or drag and drop a file here"
+    "dragAndDropHere": "or drag and drop a file here",
+    "selectCollection": "Select a Collection to Browse",
+    "pages": "{{page}} - {{limit}} of {{totalDocs}}",
+    "selectExisting": "Select existing {{collection}}",
+    "choose": "Choose {{collection}}",
+    "selectCollectionToBrowse": "Select a Collection to Browse"
   },
   "edit": {
     "creating": "Creating",
@@ -42,6 +50,10 @@
     "loggedIn": "To log in with another user, you should <0>log out</0> first.",
     "backToDashboard": "Back to Dashboard",
     "forgotPassword": "Forgot password?"
+  },
+  "list": {
+    "noResults": "No {{pluralLabel}} found. Either no {{pluralLabel}} exist yet or none match the filters you&apos;ve specified above.",
+    "createNew": "Create new {{singularLabel}}"
   },
   "theme": {
     "adminTheme": "Admin Theme",
