@@ -5,6 +5,7 @@ export const defaults: Config = {
   serverURL: '',
   defaultDepth: 2,
   maxDepth: 10,
+  defaultMaxTextLength: 40000,
   collections: [],
   globals: [],
   endpoints: [],
