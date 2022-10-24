@@ -232,6 +232,7 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
           style={{
             ...unstyled !== true ? {
               display: 'flex',
+              marginRight: '10px',
               flexShrink: 1,
               flexGrow: 1,
               alignItems: 'center',
@@ -287,7 +288,6 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
               {...createProps}
               style={{
                 ...unstyled !== true ? {
-                  marginRight: '10px',
                   flexShrink: 1,
                   display: 'block',
                   textDecoration: 'none',
@@ -321,6 +321,7 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
               {...previewProps}
               style={{
                 ...unstyled !== true ? {
+                  marginLeft: '10px',
                   background: 'none',
                   border: 'none',
                   padding: 0,
