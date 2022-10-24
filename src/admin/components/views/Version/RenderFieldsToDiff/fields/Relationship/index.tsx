@@ -22,7 +22,7 @@ const generateLabelFromValue = (
 ): string => {
   let relation: string;
   let relatedDoc: RelationshipValue;
-  let valueToReturn = '';
+  let valueToReturn = '' as any;
 
   if (Array.isArray(field.relationTo)) {
     if (typeof value === 'object') {
@@ -58,7 +58,7 @@ const generateLabelFromValue = (
   return valueToReturn;
 };
 
-const Relationship: React.FC<Props & { field: RelationshipField}> = ({ field, version, comparison }) => {
+const Relationship: React.FC<Props & { field: RelationshipField }> = ({ field, version, comparison }) => {
   const { collections } = useConfig();
   const locale = useLocale();
 
