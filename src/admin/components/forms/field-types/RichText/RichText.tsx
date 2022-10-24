@@ -94,22 +94,27 @@ const RichText: React.FC<Props> = (props) => {
   }, [enabledElements, path, props]);
 
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
-    const matchedLeafName = Object.keys(enabledLeaves).find((leafName) => leaf[leafName]);
+    const matchedLeaves = Object.entries(enabledLeaves).filter(([leafName]) => leaf[leafName]);
 
-    if (enabledLeaves[matchedLeafName]?.Leaf) {
-      const { Leaf } = enabledLeaves[matchedLeafName];
+    if (matchedLeaves.length > 0) {
+      return matchedLeaves.reduce((result, [leafName], i) => {
+        if (enabledLeaves[leafName]?.Leaf) {
+          const Leaf = enabledLeaves[leafName]?.Leaf;
+          return (
+            <Leaf
+              key={i}
+              leaf={leaf}
+              path={path}
+              fieldProps={props}
+              editorRef={editorRef}
+            >
+              {result}
+            </Leaf>
+          );
+        }
 
-      return (
-        <Leaf
-          attributes={attributes}
-          leaf={leaf}
-          path={path}
-          fieldProps={props}
-          editorRef={editorRef}
-        >
-          {children}
-        </Leaf>
-      );
+        return result;
+      }, <span {...attributes}>{children}</span>);
     }
 
     return (
@@ -180,8 +185,8 @@ const RichText: React.FC<Props> = (props) => {
   useEffect(() => {
     function setClickableState(clickState: 'disabled' | 'enabled') {
       const selectors = 'button, a, [role="button"]';
-      const toolbarButtons: (HTMLButtonElement | HTMLAnchorElement)[] = toolbarRef.current.querySelectorAll(selectors);
-      const editorButtons: (HTMLButtonElement | HTMLAnchorElement)[] = editorRef.current.querySelectorAll(selectors);
+      const toolbarButtons: (HTMLButtonElement | HTMLAnchorElement)[] = toolbarRef.current?.querySelectorAll(selectors);
+      const editorButtons: (HTMLButtonElement | HTMLAnchorElement)[] = editorRef.current?.querySelectorAll(selectors);
 
       [...(toolbarButtons || []), ...(editorButtons || [])].forEach((child) => {
         const isButton = child.tagName === 'BUTTON';
