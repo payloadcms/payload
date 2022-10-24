@@ -3,6 +3,10 @@
   "version": "1.1.16",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
+  "engines": {
+    "node": ">=14",
+    "yarn": ">=1.22 <2"
+  },
   "author": {
     "email": "info@payloadcms.com",
     "name": "Payload CMS",
