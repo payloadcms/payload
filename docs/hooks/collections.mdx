@@ -190,7 +190,7 @@ const afterDeleteHook: CollectionAfterDeleteHook = async ({
 
 ### beforeLogin
 
-For auth-enabled Collections, this hook runs after successful `login` operations. You can optionally modify the user that is returned.
+For auth-enabled Collections, this hook runs during `login` operations where a user with the provided credentials exist, but before a token is generated and added too the response. You can optionally modify the user that is returned, or throw an error in order to deny the login operation.
 
 ```ts
 import { CollectionBeforeLoginHook } from 'payload/types';
@@ -198,7 +198,6 @@ import { CollectionBeforeLoginHook } from 'payload/types';
 const beforeLoginHook: CollectionBeforeLoginHook = async ({
   req, // full express request
   user, // user being logged in
-  token, // user token
 }) => {
   return user;
 }
@@ -213,6 +212,8 @@ import { CollectionAfterLoginHook } from 'payload/types';
 
 const afterLoginHook: CollectionAfterLoginHook = async ({
   req, // full express request
+  user, // user that was logged in
+  token, // user token
 }) => {...}
 ```
 
