@@ -1,3 +1,11 @@
+## [1.1.16](https://github.com/payloadcms/payload/compare/v1.1.15...v1.1.16) (2022-10-21)
+
+
+### Bug Fixes
+
+* indexSortableFields not respected ([785b992](https://github.com/payloadcms/payload/commit/785b992c3ea31f7818f1c87c816b8b8de644851d))
+* obscure bug where upload collection has upload field relating to itself ([36ef378](https://github.com/payloadcms/payload/commit/36ef3789fbe00cafe8b3587d6c370e28efd5a187))
+
 ## [1.1.15](https://github.com/payloadcms/payload/compare/v1.1.14...v1.1.15) (2022-10-14)
 
 
