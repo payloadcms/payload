@@ -12,6 +12,7 @@ import X from '../../../../../icons/X';
 import { Fields } from '../../../../Form/types';
 import buildStateFromSchema from '../../../../Form/buildStateFromSchema';
 import { EditDepthContext, useEditDepth } from '../../../../../utilities/EditDepth';
+import { DocumentInfoProvider } from '../../../../../utilities/DocumentInfo';
 
 import './index.scss';
 
@@ -53,54 +54,56 @@ export const AddNewRelationModal: React.FC<Props> = ({ modalCollection, onSave, 
       {editDepth === 1 && (
         <div className={`${baseClass}__blur-bg`} />
       )}
-      <EditDepthContext.Provider value={editDepth + 1}>
-        <button
-          className={`${baseClass}__close`}
-          type="button"
-          onClick={() => toggleModal(modalSlug)}
-          style={{
-            width: `calc(${midBreak ? 'var(--gutter-h)' : 'var(--nav-width)'} + ${editDepth - 1} * 25px)`,
-          }}
-        >
-          <span>
-            Close
-          </span>
-        </button>
-        <RenderCustomComponent
-          DefaultComponent={DefaultEdit}
-          CustomComponent={modalCollection.admin?.components?.views?.Edit}
-          componentProps={{
-            isLoading: !initialState,
-            data: {},
-            collection: modalCollection,
-            permissions: permissions.collections[modalCollection.slug],
-            isEditing: false,
-            onSave,
-            initialState,
-            hasSavePermission: true,
-            action: modalAction,
-            disableEyebrow: true,
-            disableActions: true,
-            disableLeaveWithoutSaving: true,
-            customHeader: (
-              <div className={`${baseClass}__header`}>
-                <h2>
-                  Add new
-                  {' '}
-                  {modalCollection.labels.singular}
-                </h2>
-                <Button
-                  buttonStyle="none"
-                  className={`${baseClass}__header-close`}
-                  onClick={() => toggleModal(modalSlug)}
-                >
-                  <X />
-                </Button>
-              </div>
-            ),
-          }}
-        />
-      </EditDepthContext.Provider>
+      <DocumentInfoProvider collection={modalCollection}>
+        <EditDepthContext.Provider value={editDepth + 1}>
+          <button
+            className={`${baseClass}__close`}
+            type="button"
+            onClick={() => toggleModal(modalSlug)}
+            style={{
+              width: `calc(${midBreak ? 'var(--gutter-h)' : 'var(--nav-width)'} + ${editDepth - 1} * 25px)`,
+            }}
+          >
+            <span>
+              Close
+            </span>
+          </button>
+          <RenderCustomComponent
+            DefaultComponent={DefaultEdit}
+            CustomComponent={modalCollection.admin?.components?.views?.Edit}
+            componentProps={{
+              isLoading: !initialState,
+              data: {},
+              collection: modalCollection,
+              permissions: permissions.collections[modalCollection.slug],
+              isEditing: false,
+              onSave,
+              initialState,
+              hasSavePermission: true,
+              action: modalAction,
+              disableEyebrow: true,
+              disableActions: true,
+              disableLeaveWithoutSaving: true,
+              customHeader: (
+                <div className={`${baseClass}__header`}>
+                  <h2>
+                    Add new
+                    {' '}
+                    {modalCollection.labels.singular}
+                  </h2>
+                  <Button
+                    buttonStyle="none"
+                    className={`${baseClass}__header-close`}
+                    onClick={() => toggleModal(modalSlug)}
+                  >
+                    <X />
+                  </Button>
+                </div>
+              ),
+            }}
+          />
+        </EditDepthContext.Provider>
+      </DocumentInfoProvider>
     </Modal>
   );
 };
