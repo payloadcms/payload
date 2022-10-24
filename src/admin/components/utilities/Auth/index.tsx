@@ -9,7 +9,7 @@ import { useConfig } from '../Config';
 import { requests } from '../../../api';
 import useDebounce from '../../../hooks/useDebounce';
 import { AuthContext } from './types';
-import { logoutDefaultInactivityRoute } from '../../elements/Logout';
+import { getSanitizedLogoutRoutes, logoutDefaultInactivityRoute } from '../../elements/Logout';
 
 const Context = createContext({} as AuthContext);
 
@@ -36,7 +36,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       api,
     },
   } = config;
-  const { route: logoutInactivityRoute = logoutDefaultInactivityRoute } = logout;
+  
+  const {  logoutInactivityRoute } = getSanitizedLogoutRoutes(config);
 
   const exp = user?.exp;
 

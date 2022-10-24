@@ -3,9 +3,10 @@ import { useConfig } from '../../utilities/Config';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 import MinimalTemplate from '../../templates/Minimal';
-import { logoutDefaultRoute } from '../../elements/Logout';
+import { getSanitizedLogoutRoutes } from '../../elements/Logout';
 
 const Unauthorized: React.FC = () => {
+  const config = useConfig();
   const { 
     routes: { admin },
     admin: {
@@ -13,8 +14,8 @@ const Unauthorized: React.FC = () => {
         logout
       },
     },
-  } = useConfig();
-  const { route: logoutRoute = logoutDefaultRoute } = logout;
+  } = config;
+  const { logoutRoute } = getSanitizedLogoutRoutes(config);
 
   return (
     <MinimalTemplate className="unauthorized">

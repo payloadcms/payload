@@ -12,20 +12,21 @@ import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 
 import './index.scss';
-import { logoutDefaultRoute } from '../../elements/Logout';
+import { getSanitizedLogoutRoutes, logoutDefaultRoute } from '../../elements/Logout';
 
 const baseClass = 'login';
 
 const Login: React.FC = () => {
   const history = useHistory();
   const { user, setToken } = useAuth();
+  const config = useConfig();
   const {
     admin: {
       user: userSlug,
       components: {
         beforeLogin,
         afterLogin,
-        logout
+        
       } = {},
     },
     serverURL,
@@ -34,8 +35,8 @@ const Login: React.FC = () => {
       api,
     },
     collections,
-  } = useConfig();
-  const { route: logoutRoute = logoutDefaultRoute } = logout;
+  } = config;
+  const { logoutRoute } = getSanitizedLogoutRoutes(config);
 
   const collection = collections.find(({ slug }) => slug === userSlug);
 

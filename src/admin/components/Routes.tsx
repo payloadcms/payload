@@ -12,7 +12,7 @@ import StayLoggedIn from './modals/StayLoggedIn';
 import Versions from './views/Versions';
 import Version from './views/Version';
 import { DocumentInfoProvider } from './utilities/DocumentInfo';
-import { logoutDefaultInactivityRoute, logoutDefaultRoute } from './elements/Logout';
+import { getSanitizedLogoutRoutes } from './elements/Logout';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -33,20 +33,22 @@ const Routes = () => {
 
   const canAccessAdmin = permissions?.canAccessAdmin;
 
+  const config = useConfig();
   const {
     admin: {
       user: userSlug,
       
       components: {
         routes: customRoutes,
-        logout
+        
       } = {},
     },
     routes,
     collections,
     globals,
-  } = useConfig();
-  const { route: logoutRoute = logoutDefaultRoute, inactivityRoute = logoutDefaultInactivityRoute } = logout;
+  } = config;
+  
+  const { logoutRoute, logoutInactivityRoute } = getSanitizedLogoutRoutes(config);
   const userCollection = collections.find(({ slug }) => slug === userSlug);
 
   useEffect(() => {
@@ -109,7 +111,7 @@ const Routes = () => {
                 <Route path={`${match.url}${logoutRoute}`}>
                   <Logout />
                 </Route>
-                <Route path={`${match.url}${inactivityRoute}`}>
+                <Route path={`${match.url}${logoutInactivityRoute}`}>
                   <Logout inactivity />
                 </Route>
 
