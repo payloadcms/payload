@@ -117,11 +117,14 @@ function buildObjectType({
       [field.name]: {
         type: withNullableType(field, GraphQLJSON, forceNullable),
         async resolve(parent, args, context) {
-          if (args.depth > 0) {
+          let depth = payload.config.defaultDepth;
+          if (typeof args.depth !== 'undefined') depth = args.depth;
+
+          if (depth > 0) {
             await createRichTextRelationshipPromise({
               req: context.req,
               siblingDoc: parent,
-              depth: args.depth,
+              depth,
               field,
               showHiddenFields: false,
             });
