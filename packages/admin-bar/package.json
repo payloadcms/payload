@@ -1,6 +1,6 @@
 {
   "name": "payload-admin-bar",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": "git@github.com:jacobsfletch/payload-admin-bar.git",
