@@ -21,6 +21,7 @@ export default function restoreVersionResolver(collection: Collection): Resolver
       collection,
       id: args.id,
       req: context.req,
+      depth: 0,
     };
 
     const result = await restoreVersion(options);
