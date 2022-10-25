@@ -7,8 +7,8 @@ import {
   updatePayloadVersion,
 } from './create-project'
 
+const projectDir = path.resolve(__dirname, './tmp')
 describe('createProject', () => {
-  const projectDir = path.resolve(__dirname, './tmp')
   beforeAll(() => {
     console.log = jest.fn()
   })
@@ -31,20 +31,28 @@ describe('createProject', () => {
 
     it('creates static project', async () => {
       const expectedPayloadVersion = await getLatestPayloadVersion()
-      const template: ProjectTemplate = { name: 'ts-todo', type: 'static' }
+      const template: ProjectTemplate = {
+        name: 'ts-todo',
+        type: 'static',
+        language: 'typescript',
+      }
       await createProject(args, projectDir, template, packageManager)
 
       const packageJsonPath = path.resolve(projectDir, 'package.json')
       const packageJson = fse.readJsonSync(packageJsonPath)
+
       expect(packageJson.dependencies.payload).toBe(expectedPayloadVersion)
 
-      expect(fse.pathExists(path.resolve(projectDir, '.npmrc'))).resolves.toBe(true)
-      expect(fse.pathExists(path.resolve(projectDir, '.gitignore'))).resolves.toBe(
-        true,
-      )
-      expect(fse.pathExists(path.resolve(projectDir, 'README.md'))).resolves.toBe(
-        true,
-      )
+      // Check package name comtains template name
+      expect(packageJson.name).toContain('ts-todo')
+
+      // Check all common files are create
+      assertProjectFileExists('.npmrc')
+      assertProjectFileExists('.gitignore')
+      assertProjectFileExists('nodemon.json')
+      assertProjectFileExists('README.md')
+      assertProjectFileExists('tsconfig.json')
+      assertProjectFileExists('docker-compose.yml')
     })
   })
 
@@ -63,3 +71,8 @@ describe('createProject', () => {
     })
   })
 })
+
+async function assertProjectFileExists(fileName: string) {
+  const filePath = path.resolve(projectDir, fileName)
+  expect(await fse.pathExists(filePath)).toBe(true)
+}

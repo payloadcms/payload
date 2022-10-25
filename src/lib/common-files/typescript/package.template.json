@@ -1,6 +1,6 @@
 {
-  "name": "payload-template-ts-todo",
-  "description": "Simple to-do list example",
+  "name": "payload-template-{{templateName}}",
+  "description": "Payload project created from {{templateName}} template",
   "version": "1.0.0",
   "main": "dist/server.js",
   "license": "MIT",
@@ -15,7 +15,7 @@
     "generate:graphQLSchema": "PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:graphQLSchema"
   },
   "dependencies": {
-    "payload": "1.0.8",
+    "payload": "1.1.17",
     "dotenv": "^8.2.0",
     "express": "^4.17.1"
   },
@@ -24,6 +24,7 @@
     "cross-env": "^7.0.3",
     "nodemon": "^2.0.6",
     "ts-node": "^9.1.1",
-    "copyfiles": "^2.4.1"
+    "copyfiles": "^2.4.1",
+    "typescript": "^4.8.4"
   }
 }

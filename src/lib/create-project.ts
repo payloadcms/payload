@@ -4,10 +4,10 @@ import fse from 'fs-extra'
 import execa from 'execa'
 import ora from 'ora'
 import degit from 'degit'
-import handlebars from 'handlebars'
 
 import { success, error, warning } from '../utils/log'
 import type { CliArgs, ProjectTemplate } from '../types'
+import { writeCommonFiles } from './write-common-files'
 
 async function createProjectDir(projectDir: string): Promise<void> {
   const pathExists = await fse.pathExists(projectDir)
@@ -100,25 +100,7 @@ export async function createProject(
   } else {
     try {
       await fse.copy(templateDir, projectDir, { recursive: true })
-
-      const src = path.resolve(templateDir, '..', 'npmrc.template')
-      const dest = path.resolve(projectDir, '.npmrc')
-      await fse.copy(src, dest)
-
-      const gi = path.resolve(templateDir, '..', 'gitignore.template')
-      const giDest = path.resolve(projectDir, '.gitignore')
-      await fse.copy(gi, giDest)
-
-      const readmeTemplate = await fse.readFile(
-        path.resolve(templateDir, '..', 'README.template.md'),
-        'utf8',
-      )
-
-      const readme = handlebars.compile(readmeTemplate)({
-        projectName: path.basename(projectDir),
-        templateName: template.name,
-      })
-      await fse.writeFile(path.resolve(projectDir, 'README.md'), readme)
+      await writeCommonFiles(projectDir, template, packageManager)
 
       success('Project directory created')
     } catch (err: unknown) {

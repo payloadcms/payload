@@ -18,7 +18,11 @@ export async function getValidTemplates(): Promise<ProjectTemplate[]> {
   const dirs = getDirectories(templateDir)
 
   const templates: ProjectTemplate[] = dirs.map(name => {
-    return { name, type: 'static' }
+    return {
+      name,
+      type: 'static',
+      language: name.startsWith('js-') ? 'javascript' : 'typescript',
+    }
   })
   return templates
 }

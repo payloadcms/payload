@@ -19,13 +19,17 @@ export type CliArgs = arg.Result<Args>
 
 export type ProjectTemplate = StaticTemplate | GitTemplate
 
-export interface StaticTemplate {
-  name: string
+export interface StaticTemplate extends Template {
   type: 'static'
 }
 
-export interface GitTemplate {
-  name: string
+export interface GitTemplate extends Template {
   type: 'starter'
   url: string
+}
+
+interface Template {
+  name: string
+  type: 'static' | 'starter'
+  language: 'typescript' | 'javascript'
 }
