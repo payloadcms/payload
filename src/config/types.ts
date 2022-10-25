@@ -187,7 +187,7 @@ export type Config = {
   },
   defaultDepth?: number;
   maxDepth?: number;
-  defaultMaxTextLength: number;
+  defaultMaxTextLength?: number;
   indexSortableFields?: boolean;
   rateLimit?: {
     window?: number;
