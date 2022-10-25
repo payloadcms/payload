@@ -40,7 +40,7 @@ export default buildConfig({
         BeforeLogin,
       ],
       logout: {
-        Component: Logout,
+        Button: Logout,
       },
       afterNavLinks: [
         AfterNavLinks,
