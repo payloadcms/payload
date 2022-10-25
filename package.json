@@ -196,7 +196,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.23.1",
-    "@release-it/conventional-changelog": "^2.0.0",
+    "@release-it/conventional-changelog": "^5.1.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^13.0.1",
     "@trbl/eslint-config": "^1.2.4",
