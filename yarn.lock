@@ -11079,7 +11079,7 @@ relateurl@^0.2.7:
 
 release-it@^15.5.0:
   version "15.5.0"
-  resolved "https://registry.yarnpkg.com/release-it/-/release-it-15.5.0.tgz#773c247d4fd5a5e5c8801b02bf1e7e9e536bee27"
+  resolved "https://registry.npmjs.org/release-it/-/release-it-15.5.0.tgz#773c247d4fd5a5e5c8801b02bf1e7e9e536bee27"
   integrity sha512-/pQo/PwEXAWRBgVGLE+3IQ3hUoeiDZMGAo/Egin1envCyLyjzrU7+0P2w4iZ1Xv5OxhC2AcaPaN5eY1ql47cBA==
   dependencies:
     "@iarna/toml" "2.2.5"
