@@ -84,9 +84,9 @@ export default joi.object({
         afterNavLinks: joi.array().items(component),
         Nav: component,
         logout: joi.object({
-          Component: component,
-          route: joi.string(),
-          inactivityRoute: joi.string()
+          Button: component,
+          Route: joi.string(),
+          InactivityRoute: joi.string()
         }),
         views: joi.object({
           Dashboard: component,

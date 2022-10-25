@@ -140,9 +140,9 @@ export type Config = {
       afterNavLinks?: React.ComponentType<any>[]
       Nav?: React.ComponentType<any>
       logout?: {
-        Component?: React.ComponentType<any>,
-        route?: string,
-        inactivityRoute?: string
+        Button?: React.ComponentType<any>,
+        Route?: string,
+        InactivityRoute?: string
       }
       graphics?: {
         Icon?: React.ComponentType<any>
