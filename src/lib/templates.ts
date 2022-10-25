@@ -23,8 +23,8 @@ export async function getValidTemplates(): Promise<ProjectTemplate[]> {
   return templates
 }
 
-function getDirectories(dir: string) {
+function getDirectories(dir: string): string[] {
   return fs.readdirSync(dir).filter(file => {
-    return fs.statSync(dir + '/' + file).isDirectory()
+    return fs.statSync(`${dir}/${file}`).isDirectory()
   })
 }

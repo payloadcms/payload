@@ -1,5 +1,5 @@
 {
-  "name": "payload-blog-typescript",
+  "name": "payload-template-ts-blog",
   "description": "Blog template",
   "version": "1.0.0",
   "main": "dist/server.js",

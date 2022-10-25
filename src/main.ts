@@ -1,23 +1,23 @@
 import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
 import commandExists from 'command-exists'
-import { createProject } from './lib/createProject'
-import { getDatabaseConnection } from './lib/getDatabaseConnection'
-import { generateSecret } from './lib/generateSecret'
-import { parseLanguage } from './lib/parseLanguage'
-import { parseProjectName } from './lib/parseProjectName'
-import { parseTemplate } from './lib/parseTemplate'
+import { createProject } from './lib/create-project'
+import { getDatabaseConnection } from './lib/get-db-connection'
+import { generateSecret } from './lib/generate-secret'
+import { parseLanguage } from './lib/parse-language'
+import { parseProjectName } from './lib/parse-project-name'
+import { parseTemplate } from './lib/parse-template'
 import { getValidTemplates, validateTemplate } from './lib/templates'
-import { writeEnvFile } from './lib/writeEnvFile'
+import { writeEnvFile } from './lib/write-env-file'
 import type { CliArgs } from './types'
 import { success } from './utils/log'
 import { helpMessage, successMessage, welcomeMessage } from './utils/messages'
-import { setTags } from './utils/usage'
 
 export class Main {
   args: CliArgs
 
   constructor() {
+    // @ts-expect-error
     this.args = arg(
       {
         '--help': Boolean,
@@ -70,7 +70,7 @@ export class Main {
 
       success('Payload project successfully created')
       console.log(await successMessage(projectDir, packageManager))
-    } catch (error) {
+    } catch (error: unknown) {
       console.log(error)
     }
   }
@@ -84,10 +84,9 @@ async function getPackageManager(args: CliArgs): Promise<string> {
     try {
       await commandExists('yarn')
       packageManager = 'yarn'
-    } catch (error) {
+    } catch (error: unknown) {
       packageManager = 'npm'
     }
   }
-  setTags({ package_manager: packageManager })
   return packageManager
 }

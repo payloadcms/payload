@@ -1,5 +1,5 @@
 {
-  "name": "payload-starter-typescript",
+  "name": "payload-template-ts-blank",
   "description": "Blank template - no collections",
   "version": "1.0.0",
   "main": "dist/server.js",

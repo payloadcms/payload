@@ -1,5 +1,5 @@
 {
-  "name": "payload-starter-typescript",
+  "name": "payload-template-ts-todo",
   "description": "Simple to-do list example",
   "version": "1.0.0",
   "main": "dist/server.js",
@@ -24,7 +24,6 @@
     "cross-env": "^7.0.3",
     "nodemon": "^2.0.6",
     "ts-node": "^9.1.1",
-    "copyfiles": "^2.4.1",
-    "typescript": "^4.1.3"
+    "copyfiles": "^2.4.1"
   }
 }

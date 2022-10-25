@@ -6,7 +6,6 @@ import ora from 'ora'
 import degit from 'degit'
 
 import { success, error, warning } from '../utils/log'
-import { setTags } from '../utils/usage'
 import type { CliArgs, ProjectTemplate } from '../types'
 
 async function createProjectDir(projectDir: string): Promise<void> {
@@ -33,7 +32,7 @@ async function installDeps(
       cwd: path.resolve(dir),
     })
     return true
-  } catch (error: unknown) {
+  } catch (err: unknown) {
     return false
   }
 }
@@ -48,7 +47,11 @@ export async function getLatestPayloadVersion(
       shell: true,
     })
     return `^${stdout}`
-  } catch (error: unknown) {
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error(err.message)
+      console.error(err.stack)
+    }
     return false
   }
 }
@@ -64,14 +67,13 @@ export async function updatePayloadVersion(
     )
     return
   }
-  setTags({ payload_version: payloadVersion })
 
   const packageJsonPath = path.resolve(projectDir, 'package.json')
   try {
     const packageObj = await fse.readJson(packageJsonPath)
     packageObj.dependencies.payload = payloadVersion
     await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
-  } catch (err) {
+  } catch (err: unknown) {
     warning(
       'Unable to write Payload version to package.json. Please update your package.json manually.',
     )
@@ -107,10 +109,13 @@ export async function createProject(
       await fse.copy(gi, giDest)
 
       success('Project directory created')
-    } catch (err) {
+    } catch (err: unknown) {
       const msg =
         'Unable to copy template files. Please check template name or directory permissions.'
       error(msg)
+      if (err instanceof Error) {
+        console.error({ err })
+      }
       process.exit(1)
     }
   }

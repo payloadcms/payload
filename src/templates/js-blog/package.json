@@ -1,5 +1,5 @@
 {
-  "name": "payload-blog",
+  "name": "payload-template-js-blog",
   "description": "Blog template",
   "version": "1.0.0",
   "main": "server.js",

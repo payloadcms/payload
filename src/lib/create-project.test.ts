@@ -1,11 +1,7 @@
 import fse from 'fs-extra'
 import path from 'path'
-import type { ProjectTemplate } from '../types'
-import {
-  createProject,
-  getLatestPayloadVersion,
-  updatePayloadVersion,
-} from './createProject'
+import type { CliArgs, ProjectTemplate } from '../types'
+import { createProject, getLatestPayloadVersion, updatePayloadVersion } from './create-project'
 
 describe('createProject', () => {
   const projectDir = path.resolve(__dirname, './tmp')
@@ -25,7 +21,8 @@ describe('createProject', () => {
   })
 
   describe('#createProject', () => {
-    const args = { _: ['project-name'], '--no-deps': true }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const args = { _: ['project-name'], '--no-deps': true } as CliArgs
     const packageManager = 'yarn'
 
     it('creates static project', async () => {
@@ -43,11 +40,7 @@ describe('createProject', () => {
     it('updates payload version in package.json', async () => {
       const packageJsonPath = path.resolve(projectDir, 'package.json')
       await fse.mkdir(projectDir)
-      await fse.writeJson(
-        packageJsonPath,
-        { dependencies: { payload: '0.0.1' } },
-        { spaces: 2 },
-      )
+      await fse.writeJson(packageJsonPath, { dependencies: { payload: '0.0.1' } }, { spaces: 2 })
       await updatePayloadVersion(projectDir)
       const modified = await fse.readJson(packageJsonPath)
       expect(modified.dependencies.payload).not.toBe('0.0.1')

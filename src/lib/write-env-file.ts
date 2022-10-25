@@ -13,7 +13,7 @@ export async function writeEnvFile(
     const projectDir = `./${slugify(projectName)}`
     await fs.outputFile(`${projectDir}/.env`, content)
     success('.env file created')
-  } catch (err) {
+  } catch (err: unknown) {
     error('Unable to write .env file')
     if (err instanceof Error) {
       error(err.message)

@@ -1,6 +1,6 @@
 import type arg from 'arg'
 
-export type Args = {
+export interface Args extends arg.Spec {
   '--help': BooleanConstructor
   '--name': StringConstructor
   '--template': StringConstructor
@@ -19,12 +19,12 @@ export type CliArgs = arg.Result<Args>
 
 export type ProjectTemplate = StaticTemplate | GitTemplate
 
-export type StaticTemplate = {
+export interface StaticTemplate {
   name: string
   type: 'static'
 }
 
-export type GitTemplate = {
+export interface GitTemplate {
   name: string
   type: 'starter'
   url: string
