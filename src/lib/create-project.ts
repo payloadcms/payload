@@ -4,6 +4,7 @@ import fse from 'fs-extra'
 import execa from 'execa'
 import ora from 'ora'
 import degit from 'degit'
+import handlebars from 'handlebars'
 
 import { success, error, warning } from '../utils/log'
 import type { CliArgs, ProjectTemplate } from '../types'
@@ -107,6 +108,17 @@ export async function createProject(
       const gi = path.resolve(templateDir, '..', 'gitignore.template')
       const giDest = path.resolve(projectDir, '.gitignore')
       await fse.copy(gi, giDest)
+
+      const readmeTemplate = await fse.readFile(
+        path.resolve(templateDir, '..', 'README.template.md'),
+        'utf8',
+      )
+
+      const readme = handlebars.compile(readmeTemplate)({
+        projectName: path.basename(projectDir),
+        templateName: template.name,
+      })
+      await fse.writeFile(path.resolve(projectDir, 'README.md'), readme)
 
       success('Project directory created')
     } catch (err: unknown) {
