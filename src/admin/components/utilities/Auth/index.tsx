@@ -9,7 +9,6 @@ import { useConfig } from '../Config';
 import { requests } from '../../../api';
 import useDebounce from '../../../hooks/useDebounce';
 import { AuthContext } from './types';
-import { getSanitizedLogoutRoutes, logoutDefaultInactivityRoute } from '../../elements/Logout';
 
 const Context = createContext({} as AuthContext);
 
@@ -36,8 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       api,
     },
   } = config;
-  
-  const {  logoutInactivityRoute } = getSanitizedLogoutRoutes(config);
+  const { InactivityRoute: logoutInactivityRoute } = logout;
 
   const exp = user?.exp;
 
@@ -151,7 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
         setUser(null);
-        push(`${admin}${logout.inactivityRoute}`);
+        push(`${admin}${logoutInactivityRoute}`);
         closeAllModals();
       }, Math.min(remainingTime * 1000, maxTimeoutTime));
     }

@@ -3,7 +3,6 @@ import { useConfig } from '../../utilities/Config';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 import MinimalTemplate from '../../templates/Minimal';
-import { getSanitizedLogoutRoutes } from '../../elements/Logout';
 
 const Unauthorized: React.FC = () => {
   const config = useConfig();
@@ -15,7 +14,7 @@ const Unauthorized: React.FC = () => {
       },
     },
   } = config;
-  const { logoutRoute } = getSanitizedLogoutRoutes(config);
+  const { Route: logoutRoute } = logout;
 
   return (
     <MinimalTemplate className="unauthorized">

@@ -12,7 +12,6 @@ import StayLoggedIn from './modals/StayLoggedIn';
 import Versions from './views/Versions';
 import Version from './views/Version';
 import { DocumentInfoProvider } from './utilities/DocumentInfo';
-import { getSanitizedLogoutRoutes } from './elements/Logout';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -40,7 +39,7 @@ const Routes = () => {
       
       components: {
         routes: customRoutes,
-        
+        logout
       } = {},
     },
     routes,
@@ -48,7 +47,8 @@ const Routes = () => {
     globals,
   } = config;
   
-  const { logoutRoute, logoutInactivityRoute } = getSanitizedLogoutRoutes(config);
+  const { Route: logoutRoute, InactivityRoute: logoutInactivityRoute } = logout;
+
   const userCollection = collections.find(({ slug }) => slug === userSlug);
 
   useEffect(() => {

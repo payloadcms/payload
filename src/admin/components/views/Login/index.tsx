@@ -12,7 +12,6 @@ import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 
 import './index.scss';
-import { getSanitizedLogoutRoutes, logoutDefaultRoute } from '../../elements/Logout';
 
 const baseClass = 'login';
 
@@ -26,7 +25,7 @@ const Login: React.FC = () => {
       components: {
         beforeLogin,
         afterLogin,
-        
+        logout        
       } = {},
     },
     serverURL,
@@ -36,7 +35,7 @@ const Login: React.FC = () => {
     },
     collections,
   } = config;
-  const { logoutRoute } = getSanitizedLogoutRoutes(config);
+  const { Route: logoutRoute } = logout;
 
   const collection = collections.find(({ slug }) => slug === userSlug);
 

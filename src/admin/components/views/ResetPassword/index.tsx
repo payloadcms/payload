@@ -13,14 +13,13 @@ import Meta from '../../utilities/Meta';
 
 import './index.scss';
 import HiddenInput from '../../forms/field-types/HiddenInput';
-import { getSanitizedLogoutRoutes } from '../../elements/Logout';
 
 const baseClass = 'reset-password';
 
 const ResetPassword: React.FC = () => {
   const config = useConfig();
-  const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = config;
-  const { logoutRoute } = getSanitizedLogoutRoutes(config);
+  const { admin: { user: userSlug, components: { logout } }, serverURL, routes: { admin, api } } = config;
+  const { Route: logoutRoute } = logout;
   const { token } = useParams<{token?: string}>();
   const history = useHistory();
   const { user, setToken } = useAuth();

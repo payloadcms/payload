@@ -16,7 +16,7 @@ const Logout: React.FC = () => {
         },
       },
     } = config;
-    const { logoutRoute } = getSanitizedLogoutRoutes(config);
+    const { Route: logoutRoute } = logout;
   return (
     <a href={`${admin}${logoutRoute}#custom`}>
       <LogOut />

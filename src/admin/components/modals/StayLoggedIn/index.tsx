@@ -7,7 +7,6 @@ import Button from '../../elements/Button';
 import { Props } from './types';
 
 import './index.scss';
-import { getSanitizedLogoutRoutes } from '../../elements/Logout';
 
 const baseClass = 'stay-logged-in';
 
@@ -19,8 +18,11 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
   const config = useConfig();
   const { 
     routes: { admin },
+    admin: {
+      components: { logout }
+    }
   } = config;
-  const { logoutRoute } = getSanitizedLogoutRoutes(config);
+  const { Route: logoutRoute } = logout;
   const { toggleModal } = useModal();
 
   return (
