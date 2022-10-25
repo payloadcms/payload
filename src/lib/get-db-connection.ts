@@ -2,7 +2,10 @@ import prompts from 'prompts'
 import slugify from '@sindresorhus/slugify'
 import type { CliArgs } from '../types'
 
-export async function getDatabaseConnection(args: CliArgs, projectName: string): Promise<string> {
+export async function getDatabaseConnection(
+  args: CliArgs,
+  projectName: string,
+): Promise<string> {
   if (args['--db']) return args['--db']
 
   const response = await prompts(

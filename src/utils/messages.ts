@@ -3,7 +3,8 @@ import figures from 'figures'
 import terminalLink from 'terminal-link'
 import { getValidTemplates } from '../lib/templates'
 
-const header = (message: string): string => `${chalk.yellow(figures.star)} ${chalk.bold(message)}`
+const header = (message: string): string =>
+  `${chalk.yellow(figures.star)} ${chalk.bold(message)}`
 
 export const welcomeMessage = chalk`
   {green Welcome to Payload. Let's create a project! }
@@ -42,7 +43,10 @@ export function successMessage(projectDir: string, packageManager: string): stri
       'Getting Started',
       'https://payloadcms.com/docs/getting-started/what-is-payload',
     )}
-    - ${terminalLink('Configuration', 'https://payloadcms.com/docs/configuration/overview')}
+    - ${terminalLink(
+      'Configuration',
+      'https://payloadcms.com/docs/configuration/overview',
+    )}
 
 `
 }

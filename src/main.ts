@@ -17,7 +17,7 @@ export class Main {
   args: CliArgs
 
   constructor() {
-    // @ts-expect-error
+    // @ts-expect-error bad typings
     this.args = arg(
       {
         '--help': Boolean,
@@ -69,7 +69,7 @@ export class Main {
       }
 
       success('Payload project successfully created')
-      console.log(await successMessage(projectDir, packageManager))
+      console.log(successMessage(projectDir, packageManager))
     } catch (error: unknown) {
       console.log(error)
     }
