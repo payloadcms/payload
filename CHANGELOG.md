@@ -1,3 +1,24 @@
+
+
+## [1.1.17](https://github.com/payloadcms/payload/compare/v1.1.16...v1.1.17) (2022-10-25)
+
+
+### Bug Fixes
+
+* [#1286](https://github.com/payloadcms/payload/issues/1286), uses defaultDepth in graphql rich text depth ([66bf8c3](https://github.com/payloadcms/payload/commit/66bf8c3cbd080ee5a28b7af521d427d3aae59ba2))
+* [#1290](https://github.com/payloadcms/payload/issues/1290), renders more than one rich text leaf where applicable ([a9f2f0e](https://github.com/payloadcms/payload/commit/a9f2f0ec03383ef4c3ef3ba98274b0abaaf962ed))
+* [#1291](https://github.com/payloadcms/payload/issues/1291), add inline relationship drafts ([3967c12](https://github.com/payloadcms/payload/commit/3967c1233fda00b48e9df15276502a6b14b737ff))
+* enforces depth: 0 in graphql resolvers ([3301f59](https://github.com/payloadcms/payload/commit/3301f598223d517ac310909bb74e455891c27693))
+* ensures field updates when disableFormData changes ([c929725](https://github.com/payloadcms/payload/commit/c929725dd565de08871dad655442ee9ac4f29dd5))
+* group + group styles within collapsible ([17dbbc7](https://github.com/payloadcms/payload/commit/17dbbc77757a7cd6e517bac443859561fee86e32))
+
+
+### Features
+
+* added beforeLogin hook ([#1289](https://github.com/payloadcms/payload/issues/1289)) ([09d7939](https://github.com/payloadcms/payload/commit/09d793926dbb642bbcb6ab975735d069df355a8a))
+* adds default max length for text-based fields ([6a1b25a](https://github.com/payloadcms/payload/commit/6a1b25ab302cbdf7f312012b29b78288815810af))
+* specify node 14+ and yarn classic LTS ([#1240](https://github.com/payloadcms/payload/issues/1240)) ([9181477](https://github.com/payloadcms/payload/commit/91814777b0bf3830c4a468b76783ff6f42ad824a))
+
 ## [1.1.16](https://github.com/payloadcms/payload/compare/v1.1.15...v1.1.16) (2022-10-21)
 
 
