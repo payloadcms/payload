@@ -1,7 +1,11 @@
 import fse from 'fs-extra'
 import path from 'path'
 import type { CliArgs, ProjectTemplate } from '../types'
-import { createProject, getLatestPayloadVersion, updatePayloadVersion } from './create-project'
+import {
+  createProject,
+  getLatestPayloadVersion,
+  updatePayloadVersion,
+} from './create-project'
 
 describe('createProject', () => {
   const projectDir = path.resolve(__dirname, './tmp')
@@ -33,6 +37,14 @@ describe('createProject', () => {
       const packageJsonPath = path.resolve(projectDir, 'package.json')
       const packageJson = fse.readJsonSync(packageJsonPath)
       expect(packageJson.dependencies.payload).toBe(expectedPayloadVersion)
+
+      expect(fse.pathExists(path.resolve(projectDir, '.npmrc'))).resolves.toBe(true)
+      expect(fse.pathExists(path.resolve(projectDir, '.gitignore'))).resolves.toBe(
+        true,
+      )
+      expect(fse.pathExists(path.resolve(projectDir, 'README.md'))).resolves.toBe(
+        true,
+      )
     })
   })
 
@@ -40,7 +52,11 @@ describe('createProject', () => {
     it('updates payload version in package.json', async () => {
       const packageJsonPath = path.resolve(projectDir, 'package.json')
       await fse.mkdir(projectDir)
-      await fse.writeJson(packageJsonPath, { dependencies: { payload: '0.0.1' } }, { spaces: 2 })
+      await fse.writeJson(
+        packageJsonPath,
+        { dependencies: { payload: '0.0.1' } },
+        { spaces: 2 },
+      )
       await updatePayloadVersion(projectDir)
       const modified = await fse.readJson(packageJsonPath)
       expect(modified.dependencies.payload).not.toBe('0.0.1')
