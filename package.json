@@ -6,14 +6,16 @@
   },
   "scripts": {
     "build": "tsc && yarn copyfiles",
-    "copyfiles": "copyfiles -u 1 \"src/templates/**\" dist",
+    "copyfiles": "copyfiles -u 1 \"src/templates/**\" \"src/lib/common-files/**\" dist",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "lint-staged": "lint-staged --quiet",
     "test": "jest",
     "prepublishOnly": "yarn test && yarn build",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "release:beta": "yarn publish --tag beta",
+    "release": "yarn publish"
   },
   "files": [
     "package.json",
