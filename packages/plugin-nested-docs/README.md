@@ -129,9 +129,15 @@ When defined, the `breadcrumbs` field will not be provided for you, and instead,
 
 > Note - if you opt out of automatically being provided a `parent` or `breadcrumbs` field, you need to make sure that both fields are placed at the top-level of your document. They cannot exist within any nested data structures like a `group`, `array`, or `blocks`.
 
-## More
+## Helper methods
 
-You can also extend the built-in `parent` and `breadcrumbs` fields on a page-by-page basis by importing helper methods as follows:
+There are two helper methods that can be used to create the `parent` and `breadcrumbs` fields with a default configuration instead of typing them out manually.
+
+`createParentField` method (used by this plugin internally as well) allows you to create a `parent` field with an expected set of defaults. By default it also sets the `filterOptions` in such a way that it disallows the item to reference itself as a parent. This behavior and other parts of the default field configuration can be overridden. See the [source](src/fields/parent.ts) for more details.
+
+`createBreadcrumbField` method (used by this plugin internally as well) allows you to create a `parent` field with a sensible set of defaults. Parts of the default field configuration can be overridden. See the [source](src/fields/breadcrumbs.ts) for more details.
+
+You can use these two methods to create these fields in a collection that uses this plugin by importing helper methods as follows:
 
 ```js
 import { CollectionConfig } from 'payload/types';
