@@ -6,6 +6,7 @@ const createParentField = (relationTo: string, overrides?: Partial<RelationshipF
   relationTo,
   type: 'relationship',
   maxDepth: 1,
+  filterOptions: ({id}) => ({id: {not_equals: id}}),
   admin: {
     position: 'sidebar',
     ...overrides?.admin || {},
