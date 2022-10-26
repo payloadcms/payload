@@ -61,14 +61,39 @@ export function hasTransportOptions(emailConfig: EmailOptions): emailConfig is E
 
 
 export type InitOptions = {
+  /** Express app for Payload to use */
   express?: Express;
   mongoURL: string | false;
   mongoOptions?: ConnectOptions;
+
+  /** Secure string that Payload will use for any encryption workflows */
   secret: string;
+
+  /**
+   * Configuration for Payload's email functionality
+   *
+   * https://payloadcms.com/docs/email/overview
+   */
   email?: EmailOptions;
+
+  /**
+   * Make Payload start in local-only mode.
+   *
+   * This will bypass setting up REST and GraphQL API routes.
+   * Express will not be required if set to `true`.
+   */
   local?: boolean;
+
+  /**
+   * A function that is called immediately following startup that receives the Payload instance as it's only argument.
+   */
   onInit?: (payload: Payload) => Promise<void> | void;
-  /** Pino LoggerOptions */
+
+  /**
+   * Specify options for the built-in Pino logger that Payload uses for internal logging.
+   *
+   * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
+   */
   loggerOptions?: LoggerOptions;
 };
 
