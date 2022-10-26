@@ -165,11 +165,13 @@ export const SwapUploadModal: React.FC<Props> = ({ closeModal, element, setRelat
           {data?.totalDocs > 0 && (
             <React.Fragment>
               <div className={`${baseClass}__page-info`}>
-                <Trans
-                  i18nKey="pages"
-                  t={t}
-                  values={{ page: data.page, limit: data.totalPages > 1 ? data.limit : data.totalDocs, totalDocs: data.totalDocs }}
-                />
+                {data.page}
+                -
+                {data.totalPages > 1 ? data.limit : data.totalDocs}
+                {' '}
+                {t('general:of')}
+                {' '}
+                {data.totalDocs}
               </div>
               <PerPage
                 limits={modalCollection?.admin?.pagination?.limits}

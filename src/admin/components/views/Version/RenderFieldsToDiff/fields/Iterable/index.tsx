@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import RenderFieldsToDiff from '../..';
 import { Props } from '../types';
 import Label from '../../Label';
@@ -21,6 +22,7 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
   const versionRowCount = Array.isArray(version) ? version.length : 0;
   const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0;
   const maxRows = Math.max(versionRowCount, comparisonRowCount);
+  const { t } = useTranslation('version');
 
   return (
     <div className={baseClass}>
@@ -46,7 +48,7 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
               subFields = [
                 {
                   name: 'blockType',
-                  label: 'Block Type',
+                  label: t('fields:blockType'),
                   type: 'text',
                 },
               ];
@@ -89,11 +91,11 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
       )}
       {maxRows === 0 && (
         <div className={`${baseClass}__no-rows`}>
-          No
-          {' '}
-          {field.labels?.plural ?? 'rows'}
-          {' '}
-          found
+          <Trans
+            i18nKey="noRowsFound"
+            values={{ label: field.labels?.plural ?? t('general:rows') }}
+            t={t}
+          />
         </div>
       )}
     </div>

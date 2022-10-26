@@ -2,6 +2,7 @@ import React, { Fragment, useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import { Button, MinimalTemplate, Pill } from '../../..';
 import { Props } from './types';
@@ -17,6 +18,7 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
   const history = useHistory();
   const { toggleModal } = useModal();
   const [processing, setProcessing] = useState(false);
+  const { t } = useTranslation('version');
 
   let fetchURL = `${serverURL}${api}`;
   let redirectURL: string;
@@ -25,13 +27,13 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
   if (collection) {
     fetchURL = `${fetchURL}/${collection.slug}/versions/${versionID}`;
     redirectURL = `${admin}/collections/${collection.slug}/${originalDocID}`;
-    restoreMessage = `You are about to restore this ${collection.labels.singular} document to the state that it was in on ${versionDate}.`;
+    restoreMessage = t('aboutToRestore', { label: collection.labels.singular, versionDate });
   }
 
   if (global) {
     fetchURL = `${fetchURL}/globals/${global.slug}/versions/${versionID}`;
     redirectURL = `${admin}/globals/${global.slug}`;
-    restoreMessage = `You are about to restore the global ${global.label} to the state that it was in on ${versionDate}.`;
+    restoreMessage = t('aboutToRestoreGlobal', { label: global.label, versionDate });
   }
 
   const handleRestore = useCallback(async () => {
@@ -44,9 +46,9 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
       toast.success(json.message);
       history.push(redirectURL);
     } else {
-      toast.error('There was a problem while restoring this version.');
+      toast.error(t('problemRestoringVersion'));
     }
-  }, [history, fetchURL, redirectURL]);
+  }, [fetchURL, history, redirectURL, t]);
 
   return (
     <Fragment>
@@ -54,26 +56,26 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
         onClick={() => toggleModal(modalSlug)}
         className={[baseClass, className].filter(Boolean).join(' ')}
       >
-        Restore this version
+        {t('restoreThisVersion')}
       </Pill>
       <Modal
         slug={modalSlug}
         className={`${baseClass}__modal`}
       >
         <MinimalTemplate className={`${baseClass}__modal-template`}>
-          <h1>Confirm version restoration</h1>
+          <h1>{t('confirmVersionRestoration')}</h1>
           <p>{restoreMessage}</p>
           <Button
             buttonStyle="secondary"
             type="button"
             onClick={processing ? undefined : () => toggleModal(modalSlug)}
           >
-            Cancel
+            {t('general:cancel')}
           </Button>
           <Button
             onClick={processing ? undefined : handleRestore}
           >
-            {processing ? 'Restoring...' : 'Confirm'}
+            {processing ? t('restoring') : t('general:confirm')}
           </Button>
         </MinimalTemplate>
       </Modal>

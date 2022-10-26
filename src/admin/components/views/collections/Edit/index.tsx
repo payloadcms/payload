@@ -50,7 +50,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { permissions, user } = useAuth();
   const { getVersions, preferencesKey } = useDocumentInfo();
   const { getPreference } = usePreferences();
-  const { t } = useTranslation('edit');
+  const { t } = useTranslation('general');
 
   const onSave = useCallback(async (json: any) => {
     getVersions();
@@ -83,7 +83,7 @@ const EditView: React.FC<IndexProps> = (props) => {
           if (dataToRender[useAsTitle]) {
             label = dataToRender[useAsTitle];
           } else {
-            label = `[${t('general:untitled')}]`;
+            label = `[${t('untitled')}]`;
           }
         } else {
           label = dataToRender.id;
@@ -95,7 +95,7 @@ const EditView: React.FC<IndexProps> = (props) => {
       });
     } else {
       nav.push({
-        label: t('general:createNew'),
+        label: t('createNew'),
       });
     }
 

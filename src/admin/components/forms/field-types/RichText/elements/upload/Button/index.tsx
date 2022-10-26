@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { ReactEditor, useSlate } from 'slate-react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../utilities/Config';
 import ElementButton from '../../Button';
 import UploadIcon from '../../../../../../icons/Upload';
@@ -194,11 +194,13 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
                 {data?.totalDocs > 0 && (
                   <Fragment>
                     <div className={`${baseModalClass}__page-info`}>
-                      <Trans
-                        i18nKey="pages"
-                        t={t}
-                        values={{ page: data.page, limit: data.totalPages > 1 ? data.limit : data.totalDocs, totalDocs: data.totalDocs }}
-                      />
+                      {data.page}
+                      -
+                      {data.totalPages > 1 ? data.limit : data.totalDocs}
+                      {' '}
+                      {t('general:of')}
+                      {' '}
+                      {data.totalDocs}
                     </div>
                     <PerPage
                       limits={modalCollection?.admin?.pagination?.limits}

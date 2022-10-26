@@ -35,7 +35,7 @@ const baseClass = 'collection-edit';
 const DefaultEditView: React.FC<Props> = (props) => {
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { publishedDoc } = useDocumentInfo();
-  const { t } = useTranslation('edit');
+  const { t } = useTranslation('general');
 
   const {
     collection,
@@ -109,7 +109,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   {customHeader && customHeader}
                   {!customHeader && (
                     <h1>
-                      <RenderTitle {...{ data, useAsTitle, fallback: `[${t('general:untitled')}]` }} />
+                      <RenderTitle {...{ data, useAsTitle, fallback: `[${t('untitled')}]` }} />
                     </h1>
                   )}
                 </header>
@@ -150,7 +150,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                               id="action-create"
                               to={`${admin}/collections/${slug}/create`}
                             >
-                              {t('general:createNew')}
+                              {t('createNew')}
                             </Link>
                           </li>
                           {!disableDuplicate && isEditing && (
@@ -193,7 +193,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           </React.Fragment>
                         )}
                         {!collection.versions?.drafts && (
-                          <FormSubmit buttonId="action-save">{t('general:save')}</FormSubmit>
+                          <FormSubmit buttonId="action-save">{t('save')}</FormSubmit>
                         )}
                       </React.Fragment>
                     )}
@@ -246,7 +246,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         )}
                         {versions && (
                           <li>
-                            <div className={`${baseClass}__label`}>{t('versions')}</div>
+                            <div className={`${baseClass}__label`}>{t('version:versions')}</div>
                             <VersionsCount
                               collection={collection}
                               id={id}
@@ -263,7 +263,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                             )}
                             {(publishedDoc?.createdAt || data?.createdAt) && (
                               <li>
-                                <div className={`${baseClass}__label`}>{t('general:created')}</div>
+                                <div className={`${baseClass}__label`}>{t('created')}</div>
                                 <div>{format(new Date(publishedDoc?.createdAt || data?.createdAt), dateFormat)}</div>
                               </li>
                             )}

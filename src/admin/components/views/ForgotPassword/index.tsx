@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Trans, useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import MinimalTemplate from '../../templates/Minimal';
@@ -18,6 +19,7 @@ const baseClass = 'forgot-password';
 const ForgotPassword: React.FC = () => {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const { user } = useAuth();
+  const { t } = useTranslation('authentication');
   const {
     admin: { user: userSlug },
     serverURL,
@@ -32,7 +34,7 @@ const ForgotPassword: React.FC = () => {
       .then(() => {
         setHasSubmitted(true);
       }, () => {
-        toast.error('The email provided is not valid.');
+        toast.error(t('emailNotValid'));
       });
   };
 
@@ -40,18 +42,19 @@ const ForgotPassword: React.FC = () => {
     return (
       <MinimalTemplate className={baseClass}>
         <Meta
-          title="Forgot Password"
-          description="Forgot password"
-          keywords="Forgot, Password, Payload, CMS"
+          title={t('forgotPassword')}
+          description={t('forgotPassword')}
+          keywords={t('forgotPassword')}
         />
 
-        <h1>You&apos;re already logged in</h1>
+        <h1>{t('alreadyLoggedIn')}</h1>
         <p>
-          To change your password, go to your
-          {' '}
-          <Link to={`${admin}/account`}>account</Link>
-          {' '}
-          and edit your password there.
+          <Trans
+            i18nKey="loggedInChangePassword"
+            t={t}
+          >
+            <Link to={`${admin}/account`}>account</Link>
+          </Trans>
         </p>
         <br />
         <Button
@@ -59,7 +62,7 @@ const ForgotPassword: React.FC = () => {
           buttonStyle="secondary"
           to={admin}
         >
-          Back to Dashboard
+          {t('general:backToDashboard')}
         </Button>
       </MinimalTemplate>
     );
@@ -68,9 +71,9 @@ const ForgotPassword: React.FC = () => {
   if (hasSubmitted) {
     return (
       <MinimalTemplate className={baseClass}>
-        <h1>Email sent</h1>
+        <h1>{t('emailSent')}</h1>
         <p>
-          Check your email for a link that will allow you to securely reset your password.
+          {t('checkYourEmailForPasswordReset')}
         </p>
       </MinimalTemplate>
     );
@@ -83,17 +86,17 @@ const ForgotPassword: React.FC = () => {
         method="post"
         action={`${serverURL}${api}/${userSlug}/forgot-password`}
       >
-        <h1>Forgot Password</h1>
-        <p>Please enter your email below. You will receive an email message with instructions on how to reset your password.</p>
+        <h1>{t('forgotPassword')}</h1>
+        <p>{t('forgotPasswordEmailInstructions')}</p>
         <Email
-          label="Email Address"
+          label={t('general:emailAddress')}
           name="email"
           admin={{ autoComplete: 'email' }}
           required
         />
-        <FormSubmit>Submit</FormSubmit>
+        <FormSubmit>{t('general:submit')}</FormSubmit>
       </Form>
-      <Link to={`${admin}/login`}>Back to login</Link>
+      <Link to={`${admin}/login`}>{t('backToLogin')}</Link>
     </MinimalTemplate>
   );
 };

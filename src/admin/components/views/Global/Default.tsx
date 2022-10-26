@@ -1,5 +1,6 @@
 import React from 'react';
 import format from 'date-fns/format';
+import { Trans, useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import Eyebrow from '../../elements/Eyebrow';
 import Form from '../../forms/Form';
@@ -29,6 +30,7 @@ const baseClass = 'global-edit';
 const DefaultGlobalView: React.FC<Props> = (props) => {
   const { admin: { dateFormat } } = useConfig();
   const { publishedDoc } = useDocumentInfo();
+  const { t } = useTranslation('general');
 
   const {
     global, data, onSave, permissions, action, apiURL, initialState, isLoading,
@@ -75,9 +77,11 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
               <Gutter className={`${baseClass}__edit`}>
                 <header className={`${baseClass}__header`}>
                   <h1>
-                    Edit
-                    {' '}
-                    {label}
+                    <Trans
+                      i18nKey="editLabel"
+                      t={t}
+                      values={{ label }}
+                    />
                   </h1>
                   {description && (
                     <div className={`${baseClass}__sub-header`}>
@@ -115,7 +119,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                           </React.Fragment>
                         )}
                         {!global.versions?.drafts && (
-                          <FormSubmit buttonId="action-save">Save</FormSubmit>
+                          <FormSubmit buttonId="action-save">{t('save')}</FormSubmit>
                         )}
                       </React.Fragment>
                     )}
@@ -149,7 +153,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                   <ul className={`${baseClass}__meta`}>
                     {versions && (
                       <li>
-                        <div className={`${baseClass}__label`}>Versions</div>
+                        <div className={`${baseClass}__label`}>{t('version:versions')}</div>
                         <VersionsCount global={global} />
                       </li>
                     )}
@@ -171,7 +175,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                     )}
                     {data.updatedAt && (
                       <li>
-                        <div className={`${baseClass}__label`}>Last Modified</div>
+                        <div className={`${baseClass}__label`}>{t('lastModified')}</div>
                         <div>{format(new Date(data.updatedAt as string), dateFormat)}</div>
                       </li>
                     )}

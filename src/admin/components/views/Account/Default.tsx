@@ -76,7 +76,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
             <div className={`${baseClass}__main`}>
               <Meta
                 title={t('account')}
-                description={t('description')}
+                description={t('accountOfCurrentUser')}
                 keywords={t('account')}
               />
               <Eyebrow />

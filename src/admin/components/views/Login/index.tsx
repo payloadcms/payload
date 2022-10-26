@@ -18,7 +18,7 @@ const baseClass = 'login';
 
 const Login: React.FC = () => {
   const history = useHistory();
-  const { t } = useTranslation('login');
+  const { t } = useTranslation('authentication');
   const { user, setToken } = useAuth();
   const {
     admin: {
@@ -50,17 +50,17 @@ const Login: React.FC = () => {
       <MinimalTemplate className={baseClass}>
         <Meta
           title={t('login')}
-          description={t('description')}
+          description={t('loginUser')}
           keywords={t('login')}
         />
         <div className={`${baseClass}__wrap`}>
-          <h1>{t('loggedInTitle')}</h1>
+          <h1>{t('alreadyLoggedIn')}</h1>
           <p>
             <Trans
               i18nKey="loggedIn"
               t={t}
             >
-              <Link to={`${admin}/logout`}>log out</Link>
+              <Link to={`${admin}/logout`}>{t('logOut')}</Link>
             </Trans>
           </p>
           <br />
@@ -69,7 +69,7 @@ const Login: React.FC = () => {
             buttonStyle="secondary"
             to={admin}
           >
-            {t('backToDashboard')}
+            {t('general:backToDashboard')}
           </Button>
         </div>
       </MinimalTemplate>
@@ -80,7 +80,7 @@ const Login: React.FC = () => {
     <MinimalTemplate className={baseClass}>
       <Meta
         title={t('login')}
-        description={t('description')}
+        description={t('loginUser')}
         keywords={t('login')}
       />
       <div className={`${baseClass}__brand`}>
