@@ -58,7 +58,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
     } else {
       toast.error(t('error.autosaving'));
     }
-  }, [serverURL, api, collection.slug, locale, replace, admin, t]);
+  }, [serverURL, api, collection, locale, replace, admin, t]);
 
   useEffect(() => {
     // If no ID, but this is used for a collection doc,
