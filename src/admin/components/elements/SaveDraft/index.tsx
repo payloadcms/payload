@@ -6,6 +6,7 @@ import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useLocale } from '../../utilities/Locale';
 
 import './index.scss';
+import { useTranslation } from 'react-i18next';
 
 const baseClass = 'save-draft';
 
@@ -15,6 +16,7 @@ const SaveDraft: React.FC = () => {
   const { collection, global, id } = useDocumentInfo();
   const modified = useFormModified();
   const locale = useLocale();
+  const { t } = useTranslation('version');
 
   const canSaveDraft = modified;
 
@@ -50,7 +52,7 @@ const SaveDraft: React.FC = () => {
       onClick={saveDraft}
       disabled={!canSaveDraft}
     >
-      Save draft
+      {t('saveDraft')}
     </FormSubmit>
   );
 };

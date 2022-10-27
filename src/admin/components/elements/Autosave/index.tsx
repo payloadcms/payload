@@ -2,6 +2,7 @@ import { formatDistance } from 'date-fns';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useFormModified, useAllFormFields } from '../../forms/Form/context';
 import { useLocale } from '../../utilities/Locale';
@@ -21,6 +22,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   const modified = useFormModified();
   const locale = useLocale();
   const { replace } = useHistory();
+  const { t, i18n } = useTranslation('general');
 
   let interval = 800;
   if (collection?.versions.drafts && collection.versions?.drafts?.autosave) interval = collection.versions.drafts.autosave.interval;
@@ -54,9 +56,9 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
         },
       });
     } else {
-      toast.error('There was a problem while autosaving this document.');
+      toast.error(t('error.autosaving'));
     }
-  }, [collection, serverURL, api, admin, locale, replace]);
+  }, [serverURL, api, collection.slug, locale, replace, admin, t]);
 
   useEffect(() => {
     // If no ID, but this is used for a collection doc,
@@ -126,12 +128,10 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
 
   return (
     <div className={baseClass}>
-      {saving && 'Saving...'}
+      {saving && t('saving')}
       {(!saving && lastSaved) && (
         <React.Fragment>
-          Last saved&nbsp;
-          {formatDistance(new Date(), new Date(lastSaved))}
-          &nbsp;ago
+          {t('lastSavedAgo', { distance: formatDistance(new Date(), new Date(lastSaved), { locale: { code: i18n.language } }) })}
         </React.Fragment>
       )}
     </div>

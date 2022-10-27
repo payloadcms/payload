@@ -4,9 +4,9 @@ import queryString from 'qs';
 import { Props } from './types';
 import Chevron from '../../icons/Chevron';
 import Button from '../Button';
+import { useSearchParams } from '../../utilities/SearchParams';
 
 import './index.scss';
-import { useSearchParams } from '../../utilities/SearchParams';
 
 const baseClass = 'sort-column';
 

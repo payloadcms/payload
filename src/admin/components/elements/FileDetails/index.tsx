@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
+import { useTranslation } from 'react-i18next';
 import Thumbnail from '../Thumbnail';
 import Button from '../Button';
 import Meta from './Meta';
-import { Props } from './types';
-
 import Chevron from '../../icons/Chevron';
+import { Props } from './types';
 
 import './index.scss';
 
@@ -35,6 +35,7 @@ const FileDetails: React.FC<Props> = (props) => {
   } = doc;
 
   const [moreInfoOpen, setMoreInfoOpen] = useState(false);
+  const { t } = useTranslation('upload');
 
   const hasSizes = sizes && Object.keys(sizes)?.length > 0;
 
@@ -63,13 +64,13 @@ const FileDetails: React.FC<Props> = (props) => {
             >
               {!moreInfoOpen && (
                 <React.Fragment>
-                  More info
+                  {t('moreInfo')}
                   <Chevron />
                 </React.Fragment>
               )}
               {moreInfoOpen && (
                 <React.Fragment>
-                  Less info
+                  {t('lessInfo')}
                   <Chevron />
                 </React.Fragment>
               )}

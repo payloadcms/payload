@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
+import { useTranslation } from 'react-i18next';
 import { FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
 import WhereBuilder from '../WhereBuilder';
+import validateWhereQuery from '../WhereBuilder/validateWhereQuery';
 import SortComplex from '../SortComplex';
 import Button from '../Button';
 import { Props } from './types';
 import { useSearchParams } from '../../utilities/SearchParams';
 
-import validateWhereQuery from '../WhereBuilder/validateWhereQuery';
 
 import './index.scss';
 
@@ -40,6 +41,7 @@ const ListControls: React.FC<Props> = (props) => {
   const [titleField] = useState(() => fields.find((field) => fieldAffectsData(field) && field.name === useAsTitle));
   const [textFieldsToBeSearched] = useState(listSearchableFields ? () => fields.filter((field) => fieldAffectsData(field) && listSearchableFields.includes(field.name)) as FieldAffectingData[] : null);
   const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
+  const { t } = useTranslation('general');
 
   return (
     <div className={baseClass}>
@@ -61,7 +63,7 @@ const ListControls: React.FC<Props> = (props) => {
                 icon="chevron"
                 iconStyle="none"
               >
-                Columns
+                {t('columns')}
               </Button>
             )}
             <Button
@@ -71,7 +73,7 @@ const ListControls: React.FC<Props> = (props) => {
               icon="chevron"
               iconStyle="none"
             >
-              Filters
+              {t('filters')}
             </Button>
             {enableSort && (
               <Button
@@ -81,7 +83,7 @@ const ListControls: React.FC<Props> = (props) => {
                 icon="chevron"
                 iconStyle="none"
               >
-                Sort
+                {t('sort')}
               </Button>
             )}
           </div>

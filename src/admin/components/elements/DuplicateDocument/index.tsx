@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { Props } from './types';
 import Button from '../Button';
@@ -21,6 +22,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
   const { serverURL, routes: { api }, localization } = useConfig();
   const { routes: { admin } } = useConfig();
   const [hasClicked, setHasClicked] = useState<boolean>(false);
+  const { t } = useTranslation('general');
 
   const modalSlug = `duplicate-${id}`;
 
@@ -103,7 +105,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
       duplicateID = await create();
     }
 
-    toast.success(`${collection.labels.singular} successfully duplicated.`,
+    toast.success(t('successfullyDuplicated', { label: collection.labels.singular }),
       { autoClose: 3000 });
 
     setModified(false);
@@ -113,7 +115,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         pathname: `${admin}/collections/${slug}/${duplicateID}`,
       });
     }, 10);
-  }, [modified, localization, collection, setModified, toggleModal, modalSlug, serverURL, api, slug, id, push, admin]);
+  }, [modified, localization, t, collection.labels.singular, collection.admin.hooks, setModified, toggleModal, modalSlug, serverURL, api, slug, id, push, admin]);
 
   const confirm = useCallback(async () => {
     setHasClicked(false);
@@ -136,9 +138,9 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
           className={`${baseClass}__modal`}
         >
           <MinimalTemplate className={`${baseClass}__modal-template`}>
-            <h1>Confirm duplicate</h1>
+            <h1>{t('confirmDuplication')}</h1>
             <p>
-              You have unsaved changes. Would you like to continue to duplicate?
+              {t('unsavedChangesDuplicate')}
             </p>
             <Button
               id="confirm-cancel"
@@ -152,7 +154,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
               onClick={confirm}
               id="confirm-duplicate"
             >
-              Duplicate without saving changes
+              {t('duplicateWithoutSaving')}
             </Button>
           </MinimalTemplate>
         </Modal>

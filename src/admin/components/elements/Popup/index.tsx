@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useWindowInfo } from '@faceless-ui/window-info';
 import { Props } from './types';
 import PopupButton from './PopupButton';
+import useIntersect from '../../../hooks/useIntersect';
 
 import './index.scss';
-import useIntersect from '../../../hooks/useIntersect';
 
 const baseClass = 'popup';
 
