@@ -36,7 +36,7 @@
     "notFound": "Not Found",
     "pageNotFound": "Page not found",
     "nothingFound": "Nothing found",
-    "sorryNotFound": "Sorry&mdash;there is nothing to correspond with your request.",
+    "sorryNotFound": "Sorry—there is nothing to correspond with your request.",
     "welcome": "Welcome",
     "youAreNotAllowed": "You are not allowed to access this page.",
     "unauthorized": "Unauthorized",
@@ -151,7 +151,7 @@
     "revertToPublished": "Revert to published",
     "reverting": "Reverting...",
     "confirmRevertToSaved": "Confirm revert to saved",
-    "aboutToRevertToPublished": "You are about to revert this document&apos;s changes to its published state. Are you sure?",
+    "aboutToRevertToPublished": "You are about to revert this document's changes to its published state. Are you sure?",
     "unpublish": "Unpublish",
     "unpublishing": "Unpublishing...",
     "confirmUnpublish": "Confirm unpublish",
@@ -164,7 +164,7 @@
     "toggleBlock": "Toggle block"
   },
   "list": {
-    "noResults": "No {{pluralLabel}} found. Either no {{pluralLabel}} exist yet or none match the filters you&apos;ve specified above.",
+    "noResults": "No {{pluralLabel}} found. Either no {{pluralLabel}} exist yet or none match the filters you've specified above.",
     "createNew": "Create new {{singularLabel}}"
   },
   "theme": {
