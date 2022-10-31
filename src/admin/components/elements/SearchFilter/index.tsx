@@ -68,8 +68,9 @@ const SearchFilter: React.FC<Props> = (props) => {
             where: newWhere,
           }),
         });
-        setPreviousSearch(debouncedSearch);
       }
+
+      setPreviousSearch(debouncedSearch);
     }
   }, [debouncedSearch, previousSearch, history, fieldName, params, handleChange, modifySearchQuery, listSearchableFields]);
 
