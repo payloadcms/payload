@@ -101,9 +101,9 @@ Versions expose new operations for both collections and globals. They allow you 
 
 | Method   | Path                                 | Description                            |
 | -------- | ------------------------------------ | -------------------------------------- |
-| `GET`    | `/api/{collectionSlug}/versions`     | Find and query paginated versions      |
-| `GET`    | `/api/{collectionSlug}/versions/:id` | Find a specific version by ID          |
-| `POST`   | `/api/{collectionSlug}/versions/:id` | Restore a version by ID                |
+| `GET`    | `/api/{collection-slug}/versions`     | Find and query paginated versions      |
+| `GET`    | `/api/{collection-slug}/versions/:id` | Find a specific version by ID          |
+| `POST`   | `/api/{collection-slug}/versions/:id` | Restore a version by ID                |
 
 **Collection GraphQL queries:**
 
@@ -174,9 +174,9 @@ const result = await payload.restoreVersion({
 
 | Method   | Path                                     | Description                            |
 | -------- | ---------------------------------------- | -------------------------------------- |
-| `GET`    | `/api/globals/{globalSlug}/versions`     | Find and query paginated versions      |
-| `GET`    | `/api/globals/{globalSlug}/versions/:id` | Find a specific version by ID          |
-| `POST`   | `/api/globals/{globalSlug}/versions/:id` | Restore a version by ID                |
+| `GET`    | `/api/globals/{global-slug}/versions`     | Find and query paginated versions      |
+| `GET`    | `/api/globals/{global-slug}/versions/:id` | Find a specific version by ID          |
+| `POST`   | `/api/globals/{global-slug}/versions/:id` | Restore a version by ID                |
 
 **Global GraphQL queries:**
 
