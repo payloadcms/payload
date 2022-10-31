@@ -204,9 +204,6 @@ export type CollectionAdminOptions = {
 }
 
 export type CollectionConfig = {
-  /**
-   * Name of the collection in kebab-case
-   */
   slug: string;
   /**
    * Label configuration
