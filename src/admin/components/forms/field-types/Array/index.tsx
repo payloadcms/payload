@@ -70,7 +70,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const locale = useLocale();
   const operation = useOperation();
 
-  const { dispatchFields } = formContext;
+  const { dispatchFields, setModified } = formContext;
 
   const memoizedValidate = useCallback((value, options) => {
     return validate(value, { ...options, minRows, maxRows, required });
@@ -117,7 +117,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const moveRow = useCallback((moveFromIndex: number, moveToIndex: number) => {
     dispatchRows({ type: 'MOVE', moveFromIndex, moveToIndex });
     dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
-  }, [dispatchRows, dispatchFields, path]);
+    setModified(true);
+  }, [dispatchRows, dispatchFields, path, setModified]);
 
   const onDragEnd = useCallback((result) => {
     if (!result.destination) return;
