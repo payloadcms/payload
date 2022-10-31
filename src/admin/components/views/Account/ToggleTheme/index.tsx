@@ -6,7 +6,7 @@ import { Theme, useTheme } from '../../../utilities/Theme';
 
 export const ToggleTheme: React.FC = () => {
   const { theme, setTheme, autoMode } = useTheme();
-  const { t } = useTranslation('theme');
+  const { t } = useTranslation('general');
 
   const onChange = useCallback<OnChange<Theme>>((newTheme) => {
     setTheme(newTheme);

@@ -51,7 +51,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
   } = collection;
 
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
-  const { t, i18n } = useTranslation('account');
+  const { t, i18n } = useTranslation('authentication');
 
   const languageOptions = Object.entries(i18n.options.resources).map(([language, resource]) => ({ label: (resource as Translation).general.thisLanguage, value: language }));
 
@@ -105,7 +105,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
                 <Gutter
                   className={`${baseClass}__payload-settings`}
                 >
-                  <h3>{t('payloadSettings')}</h3>
+                  <h3>{t('general:payloadSettings')}</h3>
                   <div className={`${baseClass}__language`}>
                     <Label
                       label={t('general:language')}
