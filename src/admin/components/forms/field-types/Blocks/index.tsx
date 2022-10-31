@@ -76,7 +76,6 @@ const BlocksField: React.FC<Props> = (props) => {
     return validate(value, { ...options, minRows, maxRows, required });
   }, [maxRows, minRows, required, validate]);
 
-  const [disableFormData, setDisableFormData] = useState(true);
   const [selectorIndexOpen, setSelectorIndexOpen] = useState<number>();
 
   const {
@@ -87,7 +86,6 @@ const BlocksField: React.FC<Props> = (props) => {
   } = useField<number>({
     path,
     validate: memoizedValidate,
-    disableFormData,
     condition,
   });
 
@@ -200,14 +198,17 @@ const BlocksField: React.FC<Props> = (props) => {
   }, [formContext, path, getPreference, preferencesKey, initCollapsed]);
 
   useEffect(() => {
-    setValue(rows?.length || 0, true);
+    if (typeof rows !== 'undefined') {
+      const disableFormData = rows.length > 0;
 
-    if (rows?.length === 0) {
-      setDisableFormData(false);
-    } else {
-      setDisableFormData(true);
+      dispatchFields({
+        type: 'UPDATE',
+        path,
+        disableFormData,
+        value: rows.length,
+      });
     }
-  }, [rows, setValue]);
+  }, [rows, dispatchFields, path]);
 
   const hasMaxRows = maxRows && rows?.length >= maxRows;
 
