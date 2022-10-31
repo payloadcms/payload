@@ -1,6 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useModal, Modal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import MinimalTemplate from '../../templates/Minimal';
 import Button from '../../elements/Button';
@@ -17,6 +18,7 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
   const history = useHistory();
   const { routes: { admin } } = useConfig();
   const { toggleModal } = useModal();
+  const { t } = useTranslation('authentication');
 
   return (
     <Modal
@@ -24,8 +26,8 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
       slug="stay-logged-in"
     >
       <MinimalTemplate className={`${baseClass}__template`}>
-        <h1>Stay logged in</h1>
-        <p>You haven&apos;t been active in a little while and will shortly be automatically logged out for your own security. Would you like to stay logged in?</p>
+        <h1>{t('stayLoggedIn')}</h1>
+        <p>{t('youAreInactive')}</p>
         <div className={`${baseClass}__actions`}>
           <Button
             buttonStyle="secondary"
@@ -34,14 +36,14 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
               history.push(`${admin}/logout`);
             }}
           >
-            Log out
+            {t('logOut')}
           </Button>
           <Button onClick={() => {
             refreshCookie();
             toggleModal(modalSlug);
           }}
           >
-            Stay logged in
+            {t('stayLoggedIn')}
           </Button>
         </div>
       </MinimalTemplate>

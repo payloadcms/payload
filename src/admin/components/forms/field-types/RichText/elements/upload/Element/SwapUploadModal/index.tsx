@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Modal } from '@faceless-ui/modal';
 import { Element, Transforms } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../../utilities/Config';
 import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types';
 import usePayloadAPI from '../../../../../../../../hooks/usePayloadAPI';
@@ -100,11 +100,7 @@ export const SwapUploadModal: React.FC<Props> = ({ closeModal, element, setRelat
       <MinimalTemplate width="wide">
         <header className={`${baseClass}__header`}>
           <h1>
-            <Trans
-              i18nKey="choose"
-              t={t}
-              values={{ collection: modalCollection.labels.singular }}
-            />
+            {t('chooseLabel', { label: modalCollection.labels.singular })}
           </h1>
           <Button
             icon="x"

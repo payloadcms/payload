@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useWindowInfo } from '@faceless-ui/window-info';
+import { useTranslation } from 'react-i18next';
 import Button from '../../../../../elements/Button';
 import { Props } from './types';
 import { useAuth } from '../../../../../utilities/Auth';
@@ -26,6 +27,7 @@ export const AddNewRelationModal: React.FC<Props> = ({ modalCollection, onSave, 
   const [initialState, setInitialState] = useState<Fields>();
   const [isAnimated, setIsAnimated] = useState(false);
   const editDepth = useEditDepth();
+  const { t } = useTranslation('fields');
 
   const modalAction = `${serverURL}${api}/${modalCollection.slug}?locale=${locale}&depth=0&fallback-locale=null`;
 
@@ -85,9 +87,7 @@ export const AddNewRelationModal: React.FC<Props> = ({ modalCollection, onSave, 
             customHeader: (
               <div className={`${baseClass}__header`}>
                 <h2>
-                  Add new
-                  {' '}
-                  {modalCollection.labels.singular}
+                  {t('addNewLabel', { label: modalCollection.labels.singular })}
                 </h2>
                 <Button
                   buttonStyle="none"

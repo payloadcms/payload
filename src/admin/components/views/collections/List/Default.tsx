@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import UploadGallery from '../../../elements/UploadGallery';
 import Eyebrow from '../../../elements/Eyebrow';
@@ -45,7 +45,7 @@ const DefaultList: React.FC<Props> = (props) => {
 
   const { routes: { admin } } = useConfig();
   const history = useHistory();
-  const { t } = useTranslation('list');
+  const { t } = useTranslation('general');
 
   return (
     <div className={baseClass}>
@@ -58,7 +58,7 @@ const DefaultList: React.FC<Props> = (props) => {
           <h1>{pluralLabel}</h1>
           {hasCreatePermission && (
             <Pill to={newDocumentURL}>
-              {t('general:createNew')}
+              {t('createNew')}
             </Pill>
           )}
           {description && (
@@ -96,22 +96,14 @@ const DefaultList: React.FC<Props> = (props) => {
         {data.docs && data.docs.length === 0 && (
           <div className={`${baseClass}__no-results`}>
             <p>
-              <Trans
-                i18nKey="noResults"
-                t={t}
-                values={{ pluralLabel }}
-              />
+              {t('noResults', { label: pluralLabel })}
             </p>
             {hasCreatePermission && (
               <Button
                 el="link"
                 to={newDocumentURL}
               >
-                <Trans
-                  i18nKey="createNew"
-                  t={t}
-                  values={{ singularLabel }}
-                />
+                {t('createNewLabel', { label: singularLabel })}
               </Button>
             )}
           </div>
@@ -134,7 +126,7 @@ const DefaultList: React.FC<Props> = (props) => {
                 -
                 {data.totalPages > 1 && data.totalPages !== data.page ? (data.limit * data.page) : data.totalDocs}
                 {' '}
-                of
+                {t('of')}
                 {' '}
                 {data.totalDocs}
               </div>

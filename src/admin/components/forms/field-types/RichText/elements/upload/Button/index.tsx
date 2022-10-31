@@ -127,9 +127,7 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
             <MinimalTemplate width="wide">
               <header className={`${baseModalClass}__header`}>
                 <h1>
-                  Add
-                  {' '}
-                  {modalCollection.labels.singular}
+                  {t('addLabel', { label: modalCollection.labels.singular })}
                 </h1>
                 <Button
                   icon="x"

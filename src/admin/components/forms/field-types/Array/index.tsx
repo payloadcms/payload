@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
@@ -69,6 +70,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const { id } = useDocumentInfo();
   const locale = useLocale();
   const operation = useOperation();
+  const { t } = useTranslation('fields');
 
   const { dispatchFields } = formContext;
 
@@ -235,7 +237,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   onClick={() => toggleCollapseAll(true)}
                   className={`${baseClass}__header-action`}
                 >
-                  Collapse All
+                  {t('collapseAll')}
                 </button>
               </li>
               <li>
@@ -244,7 +246,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   onClick={() => toggleCollapseAll(false)}
                   className={`${baseClass}__header-action`}
                 >
-                  Show All
+                  {t('showAll')}
                 </button>
               </li>
             </ul>
@@ -318,19 +320,17 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               })}
               {(rows.length < minRows || (required && rows.length === 0)) && (
                 <Banner type="error">
-                  This field requires at least
-                  {' '}
-                  {minRows
-                    ? `${minRows} ${labels.plural}`
-                    : `1 ${labels.singular}`}
+                  {t('fieldRequiresRows', {
+                    count: minRows,
+                    label: minRows
+                      ? labels.plural
+                      : labels.singular,
+                  })}
                 </Banner>
               )}
               {(rows.length === 0 && readOnly) && (
                 <Banner>
-                  This field has no
-                  {' '}
-                  {labels.plural}
-                  .
+                  {t('fieldHasNo', { label: labels.plural })}
                 </Banner>
               )}
               {provided.placeholder}
@@ -346,7 +346,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               iconStyle="with-border"
               iconPosition="left"
             >
-              {`Add ${labels.singular}`}
+              {t('addLabel', { label: labels.singular })}
             </Button>
           </div>
         )}

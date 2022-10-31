@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import equal from 'deep-equal';
 import qs from 'qs';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
@@ -77,6 +78,7 @@ const Relationship: React.FC<Props> = (props) => {
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false);
   const firstRun = useRef(true);
   const fieldsRef = useRef(fields);
+  const { t } = useTranslation('fields');
 
   const memoizedValidate = useCallback((value, validationOptions) => {
     return validate(value, { ...validationOptions, required });
@@ -183,7 +185,7 @@ const Relationship: React.FC<Props> = (props) => {
             lastLoadedPageToUse = 1;
             dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort, ids: relationMap[relation] });
           } else {
-            setErrorLoading('An error has occurred.');
+            setErrorLoading(t('error:unspecific'));
           }
         }
       }, Promise.resolve());
@@ -198,6 +200,7 @@ const Relationship: React.FC<Props> = (props) => {
     serverURL,
     api,
     hasMultipleRelations,
+    t,
   ]);
 
   const findOptionsByValue = useCallback((): Option | Option[] => {

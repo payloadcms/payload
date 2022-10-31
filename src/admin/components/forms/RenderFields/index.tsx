@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import useIntersect from '../../../hooks/useIntersect';
 import { Props } from './types';
@@ -22,6 +23,7 @@ const RenderFields: React.FC<Props> = (props) => {
     forceRender,
   } = props;
 
+  const { t } = useTranslation('general');
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender));
   const [intersectionRef, entry] = useIntersect(intersectionObserverOptions);
   const operation = useOperation();
@@ -105,11 +107,7 @@ const RenderFields: React.FC<Props> = (props) => {
                       className="missing-field"
                       key={i}
                     >
-                      No matched field found for
-                      {' '}
-                      &quot;
-                      {field.label}
-                      &quot;
+                      {t('error:noMatchedField', { label: field.label })}
                     </div>
                   );
                 }

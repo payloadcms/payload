@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import Button from '../../../../elements/Button';
 import { Props } from './types';
 import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
@@ -22,6 +23,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
   const [modalCollection, setModalCollection] = useState<SanitizedCollectionConfig>();
   const [popupOpen, setPopupOpen] = useState(false);
   const editDepth = useEditDepth();
+  const { t } = useTranslation('fields');
 
   const modalSlug = `${path}-add-modal-depth-${editDepth}`;
 
@@ -100,7 +102,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
             <Button
               className={`${baseClass}__add-button`}
               buttonStyle="none"
-              tooltip={popupOpen ? undefined : 'Add new'}
+              tooltip={popupOpen ? undefined : t('addNew')}
             >
               <Plus />
             </Button>

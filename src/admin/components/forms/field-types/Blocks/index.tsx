@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../utilities/Auth';
 import { usePreferences } from '../../../utilities/Preferences';
 import { useLocale } from '../../../utilities/Locale';
@@ -32,18 +33,17 @@ import './index.scss';
 
 const baseClass = 'blocks-field';
 
-const labelDefaults = {
-  singular: 'Block',
-  plural: 'Blocks',
-};
-
 const BlocksField: React.FC<Props> = (props) => {
+  const { t } = useTranslation('fields');
   const {
     label,
     name,
     path: pathFromProps,
     blocks,
-    labels = labelDefaults,
+    labels = {
+      singular: t('block'),
+      plural: t('blocks'),
+    },
     fieldTypes,
     maxRows,
     minRows,
@@ -241,7 +241,7 @@ const BlocksField: React.FC<Props> = (props) => {
                   onClick={() => toggleCollapseAll(true)}
                   className={`${baseClass}__header-action`}
                 >
-                  Collapse All
+                  {t('collapseAll')}
                 </button>
               </li>
               <li>
@@ -250,7 +250,7 @@ const BlocksField: React.FC<Props> = (props) => {
                   onClick={() => toggleCollapseAll(false)}
                   className={`${baseClass}__header-action`}
                 >
-                  Show All
+                  {t('showAll')}
                 </button>
               </li>
             </ul>
@@ -400,7 +400,7 @@ const BlocksField: React.FC<Props> = (props) => {
                   iconPosition="left"
                   iconStyle="with-border"
                 >
-                  {`Add ${labels.singular}`}
+                  {t('addLabel', { label: labels.singular })}
                 </Button>
               )}
               render={({ close }) => (

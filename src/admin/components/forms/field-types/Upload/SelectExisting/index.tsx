@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import equal from 'deep-equal';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../utilities/Config';
 import { useAuth } from '../../../../utilities/Auth';
 import { Where } from '../../../../../../types';
@@ -46,7 +46,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
   const { user } = useAuth();
   const { getData, getSiblingData } = useForm();
   const { toggleModal, isModalOpen } = useModal();
-  const { t } = useTranslation('upload');
+  const { t } = useTranslation('fields');
   const [fields] = useState(() => formatFields(collection, t));
   const [limit, setLimit] = useState(defaultLimit);
   const [sort, setSort] = useState(null);
@@ -107,11 +107,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
           <header className={`${baseClass}__header`}>
             <div>
               <h1>
-                <Trans
-                  i18nKey="selectExisting"
-                  t={t}
-                  values={{ collection: collection.labels.singular }}
-                />
+                {t('selectExistingLabel', { label: collection.labels.singular })}
               </h1>
               <Button
                 icon="x"
@@ -166,7 +162,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
                   -
                   {data.totalPages > 1 ? data.limit : data.totalDocs}
                   {' '}
-                  of
+                  {t('general:of')}
                   {' '}
                   {data.totalDocs}
                 </div>

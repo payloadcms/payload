@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import RenderFieldsToDiff from '../..';
 import { Props } from '../types';
 import Label from '../../Label';
@@ -91,11 +91,7 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
       )}
       {maxRows === 0 && (
         <div className={`${baseClass}__no-rows`}>
-          <Trans
-            i18nKey="noRowsFound"
-            values={{ label: field.labels?.plural ?? t('general:rows') }}
-            t={t}
-          />
+          {t('noRowsFound', { label: field.labels?.plural ?? t('general:rows') })}
         </div>
       )}
     </div>

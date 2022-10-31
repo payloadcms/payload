@@ -1,6 +1,7 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { ReactEditor, useSlate } from 'slate-react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../utilities/Config';
 import ElementButton from '../../Button';
 import RelationshipIcon from '../../../../../../icons/Relationship';
@@ -42,6 +43,7 @@ const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
   const { serverURL, routes: { api }, collections } = useConfig();
   const [renderModal, setRenderModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation('fields');
   const [hasEnabledCollections] = useState(() => collections.find(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship));
   const modalSlug = `${path}-add-relationship`;
 
@@ -99,7 +101,7 @@ const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
             >
               <Fields />
               <Submit>
-                Add relationship
+                {t('addRelationship')}
               </Submit>
             </Form>
           </MinimalTemplate>

@@ -9,7 +9,7 @@ const Publish: React.FC<Props> = () => {
   const { unpublishedVersions, publishedDoc } = useDocumentInfo();
   const { submit } = useForm();
   const modified = useFormModified();
-  const { t } = useTranslation('publishChanges');
+  const { t } = useTranslation('version');
 
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0;
   const canPublish = modified || hasNewerVersions || !publishedDoc;

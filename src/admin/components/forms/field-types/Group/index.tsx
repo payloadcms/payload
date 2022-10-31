@@ -5,10 +5,10 @@ import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
 import { fieldAffectsData } from '../../../../../fields/config/types';
 import { useCollapsible } from '../../../elements/Collapsible/provider';
-
-import './index.scss';
 import { GroupProvider, useGroup } from './provider';
 import { useTabs } from '../Tabs/provider';
+
+import './index.scss';
 
 const baseClass = 'group-field';
 

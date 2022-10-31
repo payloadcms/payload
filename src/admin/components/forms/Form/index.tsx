@@ -6,6 +6,7 @@ import isDeepEqual from 'deep-equal';
 import { serialize } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../utilities/Auth';
 import { useLocale } from '../../utilities/Locale';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
@@ -46,6 +47,7 @@ const Form: React.FC<Props> = (props) => {
 
   const history = useHistory();
   const locale = useLocale();
+  const { t } = useTranslation('general');
   const { refreshCookie, user } = useAuth();
   const { id } = useDocumentInfo();
   const operation = useOperation();
@@ -142,7 +144,7 @@ const Form: React.FC<Props> = (props) => {
 
     // If not valid, prevent submission
     if (!isValid) {
-      toast.error('Please correct invalid fields.');
+      toast.error(t('error:correctInvalidFields'));
       setProcessing(false);
 
       return;
@@ -206,7 +208,7 @@ const Form: React.FC<Props> = (props) => {
 
           history.push(destination);
         } else if (!disableSuccessStatus) {
-          toast.success(json.message || 'Submission successful.', { autoClose: 3000 });
+          toast.success(json.message || t('submissionSuccessful'), { autoClose: 3000 });
         }
       } else {
         contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form
@@ -262,13 +264,13 @@ const Form: React.FC<Props> = (props) => {
           });
 
           nonFieldErrors.forEach((err) => {
-            toast.error(err.message || 'An unknown error occurred.');
+            toast.error(err.message || t('error:unknown'));
           });
 
           return;
         }
 
-        const message = errorMessages[res.status] || 'An unknown error occurrred.';
+        const message = errorMessages[res.status] || t('error:unknown');
 
         toast.error(message);
       }
@@ -291,6 +293,7 @@ const Form: React.FC<Props> = (props) => {
     onSubmit,
     onSuccess,
     redirect,
+    t,
     waitForAutocomplete,
   ]);
 

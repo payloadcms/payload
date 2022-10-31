@@ -102,11 +102,12 @@ const DeleteDocument: React.FC<Props> = (props) => {
                 i18nKey="aboutToDelete"
                 values={{ label: singular, title: titleToRender }}
                 t={t}
-              />
-              aboutToDelete
-              <strong>
-                {titleToRender}
-              </strong>
+              >
+                aboutToDelete
+                <strong>
+                  {titleToRender}
+                </strong>
+              </Trans>
             </p>
             <Button
               id="confirm-cancel"

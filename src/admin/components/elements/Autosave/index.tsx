@@ -1,4 +1,3 @@
-import { formatDistance } from 'date-fns';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -22,7 +21,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   const modified = useFormModified();
   const locale = useLocale();
   const { replace } = useHistory();
-  const { t, i18n } = useTranslation('general');
+  const { t } = useTranslation('version');
 
   let interval = 800;
   if (collection?.versions.drafts && collection.versions?.drafts?.autosave) interval = collection.versions.drafts.autosave.interval;
@@ -131,7 +130,9 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
       {saving && t('saving')}
       {(!saving && lastSaved) && (
         <React.Fragment>
-          {t('lastSavedAgo', { distance: formatDistance(new Date(), new Date(lastSaved), { locale: { code: i18n.language } }) })}
+          {t('lastSavedAgo', {
+            distance: Math.round((Number(new Date(lastSaved)) - Number(new Date())) / 1000 / 60),
+          })}
         </React.Fragment>
       )}
     </div>

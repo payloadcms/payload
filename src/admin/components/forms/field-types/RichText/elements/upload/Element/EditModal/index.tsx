@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Transforms, Element } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';
 import { Modal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../../../../../utilities/Auth';
 import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types';
 import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema';
@@ -32,6 +33,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
   const [initialState, setInitialState] = useState({});
   const { user } = useAuth();
   const locale = useLocale();
+  const { t } = useTranslation('fields');
 
   const handleUpdateEditData = useCallback((_, data) => {
     const newNode = {
@@ -65,11 +67,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
       <MinimalTemplate width="wide">
         <header className={`${baseClass}__header`}>
           <h1>
-            Edit
-            {' '}
-            {relatedCollectionConfig.labels.singular}
-            {' '}
-            data
+            { t('editLabelData', { label: relatedCollectionConfig.labels.singular }) }
           </h1>
           <Button
             icon="x"
@@ -90,7 +88,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
               fieldSchema={fieldSchema}
             />
             <Submit>
-              Save changes
+              {t('saveChanges')}
             </Submit>
           </Form>
         </div>

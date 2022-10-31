@@ -1,6 +1,6 @@
 import React from 'react';
 import format from 'date-fns/format';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import Eyebrow from '../../elements/Eyebrow';
 import Form from '../../forms/Form';
@@ -77,11 +77,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
               <Gutter className={`${baseClass}__edit`}>
                 <header className={`${baseClass}__header`}>
                   <h1>
-                    <Trans
-                      i18nKey="editLabel"
-                      t={t}
-                      values={{ label }}
-                    />
+                    {t('editLabel', { label })}
                   </h1>
                   {description && (
                     <div className={`${baseClass}__sub-header`}>

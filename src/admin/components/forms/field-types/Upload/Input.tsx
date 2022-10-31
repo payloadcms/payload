@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import Button from '../../../elements/Button';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -59,6 +60,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   } = props;
 
   const { toggleModal } = useModal();
+  const { t } = useTranslation('fields');
 
   const addModalSlug = `${path}-add`;
   const selectExistingModalSlug = `${path}-select-existing`;
@@ -134,9 +136,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
                   toggleModal(addModalSlug);
                 }}
               >
-                Upload new
-                {' '}
-                {collection.labels.singular}
+                {t('uploadNewLabel', { label: collection.labels.singular })}
               </Button>
               <Button
                 buttonStyle="secondary"
@@ -144,7 +144,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
                   toggleModal(selectExistingModalSlug);
                 }}
               >
-                Choose from existing
+                {t('chooseFromExisting')}
               </Button>
             </div>
           )}

@@ -51,9 +51,10 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
             <Trans
               i18nKey="generatingNewAPIKeyWillInvalidate"
               t={t}
-            />
-            generatingNewAPIKeyWillInvalidate
-            <strong>invalidate</strong>
+            >
+              generatingNewAPIKeyWillInvalidate
+              <strong>invalidate</strong>
+            </Trans>
           </p>
 
           <Button

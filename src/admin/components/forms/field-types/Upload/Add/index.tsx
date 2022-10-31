@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../utilities/Config';
 import { useAuth } from '../../../../utilities/Auth';
 import MinimalTemplate from '../../../../templates/Minimal';
@@ -31,6 +32,7 @@ const AddUploadModal: React.FC<Props> = (props) => {
   const { permissions } = useAuth();
   const { serverURL, routes: { api } } = useConfig();
   const { toggleModal } = useModal();
+  const { t } = useTranslation('fields');
 
   const onSuccess = useCallback((json) => {
     toggleModal(slug);
@@ -59,11 +61,9 @@ const AddUploadModal: React.FC<Props> = (props) => {
           <header className={`${baseClass}__header`}>
             <div>
               <h1>
-                New
-                {' '}
-                {collection.labels.singular}
+                {t('newLabel', { label: collection.labels.singular })}
               </h1>
-              <FormSubmit>Save</FormSubmit>
+              <FormSubmit>{t('general:save')}</FormSubmit>
               <Button
                 icon="x"
                 round

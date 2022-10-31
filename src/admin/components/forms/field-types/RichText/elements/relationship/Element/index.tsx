@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useFocused, useSelected } from 'slate-react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../utilities/Config';
 import RelationshipIcon from '../../../../../../icons/Relationship';
 import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
@@ -19,6 +20,7 @@ const Element = (props) => {
   const [relatedCollection] = useState(() => collections.find((coll) => coll.slug === relationTo));
   const selected = useSelected();
   const focused = useFocused();
+  const { t } = useTranslation('fields');
 
   const [{ data }] = usePayloadAPI(
     `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
@@ -37,9 +39,7 @@ const Element = (props) => {
       <RelationshipIcon />
       <div className={`${baseClass}__wrap`}>
         <div className={`${baseClass}__label`}>
-          {relatedCollection.labels.singular}
-          {' '}
-          Relationship
+          {t('labelRelationship', { label: relatedCollection.labels.singular })}
         </div>
         <h5>{data[relatedCollection?.admin?.useAsTitle || 'id']}</h5>
       </div>
