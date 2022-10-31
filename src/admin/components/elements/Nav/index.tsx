@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
@@ -22,6 +23,7 @@ const DefaultNav = () => {
   const [menuActive, setMenuActive] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const history = useHistory();
+  const { t } = useTranslation('general');
   const {
     collections,
     globals,
@@ -60,8 +62,8 @@ const DefaultNav = () => {
 
         return entityToGroup;
       }),
-    ], permissions));
-  }, [collections, globals, permissions]);
+    ], permissions, t));
+  }, [collections, globals, permissions, t]);
 
   useEffect(() => history.listen(() => {
     setMenuActive(false);

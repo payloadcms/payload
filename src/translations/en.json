@@ -11,8 +11,11 @@
     "saving": "Saving...",
     "submit": "Submit",
     "lastModified": "Last Modified",
+    "locales": "Locales",
     "updatedAt": "Updated At",
     "confirm": "Confirm",
+    "collections": "Collections",
+    "globals": "Globals",
     "create": "Create",
     "created": "Created",
     "createdAt": "Created At",
@@ -166,13 +169,15 @@
     "currentDocumentStatus": "Current {{docStatus}} document",
     "noRowsFound": "No {{label}} found"
   },
+  "validation": {
+    "required": "This field is required"
+  },
   "fields": {
     "collapseAll": "Collapse All",
     "showAll": "Show All",
     "blockType": "Block Type",
     "searchForBlock": "Search for a block",
     "toggleBlock": "Toggle block",
-    "required": "This field is required",
     "passwordsDoNotMatch": "Passwords do not match.",
     "fieldRequiresRows": "This field requires at least {{label}}",
     "fieldHasNo": "This field has no {{label}}",

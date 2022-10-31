@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 
 import Eyebrow from '../../elements/Eyebrow';
@@ -21,6 +22,7 @@ const Dashboard: React.FC<Props> = (props) => {
   } = props;
 
   const { push } = useHistory();
+  const { t } = useTranslation('general');
 
   const {
     routes: {
@@ -54,8 +56,8 @@ const Dashboard: React.FC<Props> = (props) => {
 
         return entityToGroup;
       }),
-    ], permissions));
-  }, [collections, globals, permissions]);
+    ], permissions, t));
+  }, [collections, globals, permissions, t]);
 
   return (
     <div className={baseClass}>

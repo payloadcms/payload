@@ -14,7 +14,7 @@ const ConfirmPassword: React.FC = () => {
 
   const validate = useCallback((value: string) => {
     if (!value) {
-      return t('required');
+      return t('validation:required');
     }
 
     if (value === password?.value) {

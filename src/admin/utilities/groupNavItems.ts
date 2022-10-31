@@ -1,3 +1,4 @@
+import type { TFunction } from 'react-i18next';
 import { Permissions } from '../../auth';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
@@ -20,7 +21,7 @@ export type Group = {
   entities: EntityToGroup[]
 }
 
-export function groupNavItems(entities: EntityToGroup[], permissions: Permissions): Group[] {
+export function groupNavItems(entities: EntityToGroup[], permissions: Permissions, t: TFunction): Group[] {
   const result = entities.reduce((groups, entityToGroup) => {
     if (permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read.permission) {
       if (entityToGroup.entity.admin.group) {
@@ -41,11 +42,11 @@ export function groupNavItems(entities: EntityToGroup[], permissions: Permission
     return groups;
   }, [
     {
-      label: 'Collections',
+      label: t('collections'),
       entities: [],
     },
     {
-      label: 'Globals',
+      label: t('globals'),
       entities: [],
     },
   ]);
