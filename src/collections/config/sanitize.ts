@@ -15,7 +15,6 @@ import { versionCollectionDefaults } from '../../versions/defaults';
 import baseVersionFields from '../../versions/baseFields';
 import TimestampsRequired from '../../errors/TimestampsRequired';
 import mergeBaseFields from '../../fields/mergeBaseFields';
-import Logger from '../../utilities/logger';
 
 const sanitizeCollection = (config: Config, collection: CollectionConfig): SanitizedCollectionConfig => {
   // /////////////////////////////////
@@ -26,15 +25,6 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
     isMergeableObject: isPlainObject,
   });
 
-  const logger = Logger();
-
-  // Pre-validate slug to enforce kebab-case
-  if (!sanitized.slug.match(new RegExp('^([a-z][a-z0-9]*)(-[a-z0-9]+)*$'))) {
-    logger.error(`Collection slug "${sanitized.slug}" should be kebab-case.`);
-    process.exit(1);
-  }
-
-  // Normalize slug and labels to kebab-case
   sanitized.slug = toKebabCase(sanitized.slug);
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
 
