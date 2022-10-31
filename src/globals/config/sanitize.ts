@@ -7,10 +7,19 @@ import defaultAccess from '../../auth/defaultAccess';
 import baseVersionFields from '../../versions/baseFields';
 import mergeBaseFields from '../../fields/mergeBaseFields';
 import { versionGlobalDefaults } from '../../versions/defaults';
+import Logger from '../../utilities/logger';
 
 const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[]): SanitizedGlobalConfig[] => {
   const sanitizedGlobals = globals.map((global) => {
     const sanitizedGlobal = { ...global };
+
+    const logger = Logger();
+
+    // Pre-validate slug to enforce kebab-case
+    if (!sanitizedGlobal.slug.match(new RegExp('^([a-z][a-z0-9]*)(-[a-z0-9]+)*$'))) {
+      logger.error(`Global slug "${sanitizedGlobal.slug}" should be kebab-case.`);
+      process.exit(1);
+    }
 
     sanitizedGlobal.label = sanitizedGlobal.label || toWords(sanitizedGlobal.slug);
 

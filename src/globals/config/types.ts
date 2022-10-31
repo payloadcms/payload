@@ -45,6 +45,9 @@ export interface GlobalModel extends Model<Document> {
 }
 
 export type GlobalConfig = {
+  /**
+   * Name of the global in kebab-case
+   */
   slug: string
   label?: string
   preview?: GeneratePreviewURL
