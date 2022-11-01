@@ -142,7 +142,7 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
               </header>
               {moreThanOneAvailableCollection && (
                 <div className={`${baseModalClass}__select-collection-wrap`}>
-                  <Label label={t('selectCollection')} />
+                  <Label label={t('selectCollectionToBrowse')} />
                   <ReactSelect
                     className={`${baseClass}__select-collection`}
                     value={modalCollectionOption}

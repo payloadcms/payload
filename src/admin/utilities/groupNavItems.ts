@@ -4,8 +4,8 @@ import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
 
 export enum EntityType {
-  collection = 'Collections',
-  global = 'Globals'
+  collection = 'collections',
+  global = 'globals'
 }
 
 export type EntityToGroup = {
@@ -34,7 +34,7 @@ export function groupNavItems(entities: EntityToGroup[], permissions: Permission
 
         matchedGroup.entities.push(entityToGroup);
       } else {
-        const defaultGroup = groups.find((group) => group.label === entityToGroup.type);
+        const defaultGroup = groups.find((group) => group.label === t(entityToGroup.type));
         defaultGroup.entities.push(entityToGroup);
       }
     }
@@ -42,11 +42,11 @@ export function groupNavItems(entities: EntityToGroup[], permissions: Permission
     return groups;
   }, [
     {
-      label: t('collections'),
+      label: t('general:collections'),
       entities: [],
     },
     {
-      label: t('globals'),
+      label: t('general:globals'),
       entities: [],
     },
   ]);

@@ -33,7 +33,7 @@ const formatFields = (config: SanitizedCollectionConfig, t: TFunction): Field[] 
     fields = fields.concat([
       {
         name: 'filename',
-        label: t('upload:filename'),
+        label: t('upload:fileName'),
         type: 'text',
       },
     ]);
