@@ -17,7 +17,7 @@ const Unauthorized: React.FC = () => {
         keywords={t('unauthorized')}
       />
       <h2>{t('unauthorized')}</h2>
-      <p>{t('youAreNotAllowed')}</p>
+      <p>{t('error:notAllowedToAccessPage')}</p>
       <br />
       <Button
         el="link"

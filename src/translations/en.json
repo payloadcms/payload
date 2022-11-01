@@ -63,7 +63,6 @@
     "emailOrPasswordIncorrect": "The email or password provided is incorrect.",
     "followingFieldsInvalid_many": "The following fields are invalid:",
     "followingFieldsInvalid_one": "The following field is invalid:",
-    "forbidden": "You are not allowed to perform this action.",
     "incorrectCollection": "Incorrect Collection",
     "invalidFileType": "Invalid file type",
     "invalidFileTypeValue": "Invalid file type: {{value}}",
@@ -75,6 +74,8 @@
     "noFilesUploaded": "No files were uploaded.",
     "noMatchedField": "No matched field found for \"{{label}}\"",
     "noUser": "No User",
+    "notAllowedToAccessPage": "You are not allowed to access this page.",
+    "notAllowedToPerformAction": "You are not allowed to perform this action.",
     "notFound": "The requested resource was not found.",
     "problemUploadingFile": "There was a problem while uploading the file.",
     "tokenInvalidOrExpired": "Token is either invalid or has expired.",
@@ -83,6 +84,7 @@
     "unknown": "An unknown error has occurred.",
     "unspecific": "An error has occurred.",
     "userLocked": "This user is locked due to having too many failed login attempts.",
+    "valueMustBeUnique": "Value must be unique",
     "verificationTokenInvalid": "Verification token is invalid."
   },
   "fields": {
@@ -186,8 +188,7 @@
     "updatedAt": "Updated At",
     "user": "user",
     "users": "users",
-    "welcome": "Welcome",
-    "youAreNotAllowed": "You are not allowed to access this page."
+    "welcome": "Welcome"
   },
   "upload": {
     "dragAndDropHere": "or drag and drop a file here",
