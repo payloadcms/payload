@@ -10,12 +10,6 @@
 * [#1318](https://github.com/payloadcms/payload/issues/1318), improves popup positioning and logic ([c651835](https://github.com/payloadcms/payload/commit/c6518350617d14818dfc537b5b0a147274c1119b))
 * custom pino logger options ([#1299](https://github.com/payloadcms/payload/issues/1299)) ([2500026](https://github.com/payloadcms/payload/commit/25000261bd6ecb0f05ae79de9a0693078a0e3e0d))
 
-
-### Features
-
-* enforce kebab-case slugs ([#1322](https://github.com/payloadcms/payload/issues/1322)) ([0420b6d](https://github.com/payloadcms/payload/commit/0420b6dc27319ee56d2eed9ab42352f221af3c72))
-* revert enforce kebab-case slugs ([#1322](https://github.com/payloadcms/payload/issues/1322)) ([#1325](https://github.com/payloadcms/payload/issues/1325)) ([2255ebb](https://github.com/payloadcms/payload/commit/2255ebb64a529b76a54e1e0ab40fba8149244b3d))
-
 ## [1.1.18](https://github.com/payloadcms/payload/compare/v1.1.17...v1.1.18) (2022-10-25)
 
 ## [1.1.17](https://github.com/payloadcms/payload/compare/v1.1.16...v1.1.17) (2022-10-25)
