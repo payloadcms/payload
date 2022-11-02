@@ -37,11 +37,11 @@
     "logout": "Wyloguj",
     "logoutUser": "Wyloguj użytkownika",
     "newAPIKeyGenerated": "Wygenerowano nowy klucz API.",
-    "newAccountCreated": "A new account has just been created for you to access <0>{{serverURL}}</0> Please click on the following link or paste the URL below into your browser to verify your email: <1>{{verificationURL}}</1><br> After verifying your email, you will be able to log in successfully.",
+    "newAccountCreated": "Właśnie utworzono nowe konto, w celu uzyskania dostępu do <0>{{serverURL}}</0>. Kliknij poniższy link lub wklej go do przeglądarki, aby zweryfikować swój adres email: <1>{{verificationURL}} </1><br>. Po zweryfikowaniu adresu email będziesz mógł się pomyślnie zalogować.",
     "newPassword": "Nowe hasło",
     "resetPassword": "Zresetuj hasło",
-    "resetPasswordExpiration": "Reset Password Expiration",
-    "resetPasswordToken": "Reset Password Token",
+    "resetPasswordExpiration": "Zresetuj czas wygaśnięcia hasła",
+    "resetPasswordToken": "Zresetuj token hasła",
     "resetYourPassword": "Zresetuj swoje hasło",
     "stayLoggedIn": "Pozostań zalogowany",
     "successfullyUnlocked": "Pomyślnie odblokowano",
@@ -50,7 +50,7 @@
     "verifiedSuccessfully": "Pomyślnie zweryfikowany",
     "verify": "Zweryfikuj",
     "verifyUser": "Zweryfikuj użytkownika",
-    "verifyYourEmail": "Verify your email",
+    "verifyYourEmail": "Zweryfikuj swój email",
     "youAreInactive": "Nie byłeś aktywny od dłuższego czasu i wkrótce zostaniesz automatycznie wylogowany dla własnego bezpieczeństwa. Czy chcesz pozostać zalogowany?",
     "youAreReceivingResetPassword": "Otrzymałeś tę wiadomość, ponieważ Ty (lub ktoś inny) poprosiłeś o zresetowanie hasła do Twojego konta. Kliknij poniższy link lub wklej go w przeglądarce, aby zakończyć proces:",
     "youDidNotRequestPassword": "Jeśli nie prosiłeś o zmianę hasła, zignoruj tę wiadomość, a Twoje hasło pozostanie niezmienione."
@@ -64,8 +64,8 @@
     "followingFieldsInvalid_many": "Następujące pola są nieprawidłowe:",
     "followingFieldsInvalid_one": "To pole jest nieprawidłowe:",
     "incorrectCollection": "Nieprawidłowa kolekcja",
-    "invalidFileType": "Invalid file type",
-    "invalidFileTypeValue": "Invalid file type: {{value}}",
+    "invalidFileType": "Nieprawidłowy typ pliku",
+    "invalidFileTypeValue": "Nieprawidłowy typ pliku: {{value}}",
     "loadingDocument": "Wystapił problem podczas ładowania dokumentu o ID {{id}}.",
     "missingEmail": "Brak adresu email.",
     "missingIDOfDocument": "Brak ID dokumentu do aktualizacji.",
@@ -84,7 +84,7 @@
     "unknown": "Wystąpił nieznany błąd.",
     "unspecific": "Wystąpił błąd",
     "userLocked": "Ten użytkownik został zablokowany z powodu zbyt wielu nieudanych prób logowania.",
-    "valueMustBeUnique": "Value must be unique",
+    "valueMustBeUnique": "Wartość musi być unikalna",
     "verificationTokenInvalid": "Token weryfikacyjny jest nieprawidłowy."
   },
   "fields": {
@@ -194,14 +194,14 @@
   "upload": {
     "dragAndDropHere": "lub złap i upuść plik tutaj",
     "filename": "Nazwa pliku",
-    "fileSize": "File Size",
-    "height": "Height",
+    "fileSize": "Rozmiar pliku",
+    "height": "Wysokość",
     "lessInfo": "Mniej informacji",
     "moreInfo": "Więcej informacji",
     "selectCollectionToBrowse": "Wybierz kolekcję aby przejrzeć",
     "selectFile": "Wybierz plik",
-    "sizes": "Sizes",
-    "width": "Width"
+    "sizes": "Rozmiary",
+    "width": "Szerokość"
   },
   "validation": {
     "atLeastOneRow": "To pole wymaga co najmniej jednego wiersza.",
