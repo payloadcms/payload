@@ -118,6 +118,7 @@
   },
   "general": {
     "aboutToDelete": "Stai per eliminare {{label}} <1>{{title}}</1>. Sei sicuro?",
+    "addBelow": "Aggiungi sotto",
     "adminTheme": "Tema Admin",
     "automatic": "Automatico",
     "backToDashboard": "Torna alla Dashboard",

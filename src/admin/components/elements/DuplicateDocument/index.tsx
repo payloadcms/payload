@@ -130,7 +130,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         className={baseClass}
         onClick={() => handleClick(false)}
       >
-        Duplicate
+        {t('duplicate')}
       </Button>
       {modified && hasClicked && (
         <Modal
@@ -148,7 +148,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
               type="button"
               onClick={() => toggleModal(modalSlug)}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               onClick={confirm}

@@ -65,7 +65,7 @@ export const ArrayAction: React.FC<Props> = ({
               }}
             >
               <Plus />
-              Add Below
+              {t('addBelow')}
             </button>
             <button
               className={`${baseClass}__action ${baseClass}__duplicate`}
