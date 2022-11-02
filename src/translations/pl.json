@@ -81,7 +81,7 @@
     "tokenInvalidOrExpired": "Token jest nieprawidłowy lub wygasł.",
     "unPublishingDocument": "Wystąpił problem podczas cofania publikacji tego dokumentu.",
     "unauthorized": "Brak dostępu, musisz być zalogowany.",
-    "unknown": "Wystapił nieznany błąd.",
+    "unknown": "Wystąpił nieznany błąd.",
     "unspecific": "Wystąpił błąd",
     "userLocked": "Ten użytkownik został zablokowany z powodu zbyt wielu nieudanych prób logowania.",
     "valueMustBeUnique": "Value must be unique",
@@ -181,7 +181,7 @@
     "submit": "Zatwierdź",
     "successfullyCreated": "{{label}} successfully created.",
     "successfullyDuplicated": "Pomyślnie zduplikowano {{label}}",
-    "thisLanguage": "Angielski",
+    "thisLanguage": "Polski",
     "titleDeleted": "Pomyślnie usunięto {{label}} {{title}}",
     "unauthorized": "Brak autoryzacji",
     "unsavedChangesDuplicate": "Masz niezapisane zmiany. Czy chcesz kontynuować duplikowanie?",
@@ -210,18 +210,18 @@
     "greaterThanMax": "Wartość \"{{value}}\" przekracza maksymalną, dozwoloną liczbę {{max}} znaków.",
     "invalidInput": "To pole zawiera nieprawidłowe dane.",
     "invalidSelection": "To pole ma nieprawidłowy wybór.",
-    "invalidSelections": "'To pole zawiera następujące, nieprawidłowe wybory:'",
+    "invalidSelections": "To pole zawiera następujące, nieprawidłowe wybory:",
     "lessThanMin": "Wartość \"{{value}}\" jest mniejsza niż dozwolona, minimalna wartość: {{min}}.",
     "longerThanMin": "Ta wartość musi być dłuższa niż minimalna długość znaków: {{minLength}}.",
-    "maxRows": "To pole może posiadać conajmniej {{maxRows}} wiersz(y).",
-    "minRows": "To pole musi posiadać conajmniej {{minRows}} wiersz(y).",
+    "maxRows": "To pole może posiadać co najmniej {{maxRows}} wiersz(y).",
+    "minRows": "To pole musi posiadać co najmniej {{minRows}} wiersz(y).",
     "notValidDate": "\"{{value}}\" nie jest prawidłową datą.",
     "required": "To pole jest wymagane.",
-    "requiresOneRow": "To pole wymaga conajmniej jednego wiersza.",
+    "requiresOneRow": "To pole wymaga co najmniej jednego wiersza.",
     "requiresTwoNumbers": "To pole wymaga dwóch liczb.",
     "shorterThanMax": "Ta wartość musi być krótsza niż maksymalna długość znaków: {{maxLength}}.",
     "trueOrFalse": "To pole może mieć wartość tylko 'true' lub 'false'.",
-    "validUploadID": "'To pole nie jest prawidłowym identyfikatorem przesyłania.'"
+    "validUploadID": "To pole nie jest prawidłowym identyfikatorem przesyłania."
   },
   "version": {
     "aboutToRestore": "Zamierzasz przywrócić dokument {{label}} do stanu, w jakim znajdował się w dniu {{versionDate}}.",
@@ -241,7 +241,7 @@
     "noFurtherVersionsFound": "Nie znaleziono dalszych wersji",
     "noRowsFound": "Nie znaleziono {{label}}",
     "preview": "Podgląd",
-    "problemRestoringVersion": "Wystapił problem podczas przywracania tej wersji",
+    "problemRestoringVersion": "Wystąpił problem podczas przywracania tej wersji",
     "publishChanges": "Opublikuj zmiany",
     "published": "Opublikowano",
     "restoreThisVersion": "Przywróć tę wersję",
@@ -264,8 +264,8 @@
     "versionID": "ID wersji",
     "versions": "Wersje",
     "viewingVersion": "Przeglądanie wersji dla {{entityLabel}} {{documentTitle}}",
-    "viewingVersionGlobal": "`Przeglądanie wersji dla globalnej kolekcji {{entityLabel}}",
+    "viewingVersionGlobal": "Przeglądanie wersji dla globalnej kolekcji {{entityLabel}}",
     "viewingVersions": "Przeglądanie wersji {{entityLabel}} {{documentTitle}}",
-    "viewingVersionsGlobal": "`Przeglądanie ersji dla globalnej kolekcji {{entityLabel}}"
+    "viewingVersionsGlobal": "Przeglądanie wersji dla globalnej kolekcji {{entityLabel}}"
   }
 }
