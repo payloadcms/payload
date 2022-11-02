@@ -173,6 +173,12 @@ describe('admin', () => {
     });
   });
 
+  describe('i18n', () => {
+    test('should allow custom translation', async () => {
+      await expect(page.locator('.step-nav')).toContainText('Home');
+    });
+  });
+
   describe('list view', () => {
     const tableRowLocator = 'table >> tbody >> tr';
 
