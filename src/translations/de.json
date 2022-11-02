@@ -179,6 +179,7 @@
       "stayOnThisPage": "Auf dieser Seite bleiben",
       "submissionSuccessful": "Einrichung erfolgreich.",
       "submit": "Abschicken",
+      "successfullyCreated": "{{label}} erfolgreich erstellt.",
       "successfullyDuplicated": "{{label}} wurde erfolgreich dupliziert.",
       "thisLanguage": "Deutsch",
       "titleDeleted": "{{label}} {{title}} wurde erfolgreich gelöscht.",
