@@ -20,12 +20,13 @@ function accessResolver(payload: Payload) {
       req: context.req,
     };
 
-    let accessResults = await access(options);
+    const accessResults = await access(options);
 
-    accessResults = formatConfigNames(accessResults, payload.config.collections);
-    accessResults = formatConfigNames(accessResults, payload.config.globals);
-
-    return accessResults;
+    return {
+      ...accessResults,
+      ...formatConfigNames(accessResults.collections, payload.config.collections),
+      ...formatConfigNames(accessResults.globals, payload.config.globals)
+    };
   }
 
   return resolver;
