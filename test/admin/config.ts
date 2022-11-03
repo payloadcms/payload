@@ -47,6 +47,15 @@ export default buildConfig({
       },
     },
   },
+  i18n: {
+    resources: {
+      en: {
+        general: {
+          dashboard: 'Home',
+        },
+      },
+    },
+  },
   collections: [
     {
       slug: 'users',
