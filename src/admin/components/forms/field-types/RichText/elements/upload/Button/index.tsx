@@ -18,6 +18,12 @@ import { SanitizedCollectionConfig } from '../../../../../../../../collections/c
 import PerPage from '../../../../../../elements/PerPage';
 import { injectVoidElement } from '../../injectVoid';
 
+import Upload from '../../../../../../views/collections/Edit/Upload';
+import Pill from '../../../../../../elements/Pill';
+import Form from '../../../../../Form';
+import Submit from '../../../../../Submit';
+import { requests } from '../../../../../../../api';
+
 import './index.scss';
 import '../addSwapModals.scss';
 
@@ -45,6 +51,7 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
   const { toggleModal, isModalOpen } = useModal();
   const editor = useSlate();
   const { serverURL, routes: { api }, collections } = useConfig();
+  const [loading, setLoading] = useState(false);
   const [availableCollections] = useState(() => collections.filter(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
   const [renderModal, setRenderModal] = useState(false);
   const [modalCollectionOption, setModalCollectionOption] = useState<{ label: string, value: string }>(() => {
@@ -66,6 +73,8 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
   const modalSlug = `${path}-add-upload`;
   const moreThanOneAvailableCollection = availableCollections.length > 1;
   const isOpen = isModalOpen(modalSlug);
+
+  const uploadModalSlug = `upload-${path}-add-upload`;
 
   // If modal is open, get active page of upload gallery
   const apiURL = isOpen ? `${serverURL}${api}/${modalCollection.slug}` : null;
@@ -105,6 +114,20 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
     }
   }, [modalCollectionOption, collections]);
 
+  const handleAddUpload = async (upload) => {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append('file', upload.file.value)
+    const result = await requests.post(`${serverURL}${api}/${modalCollection.slug}`, {
+      body: formData
+    })
+    if (result.ok === true) {
+      setLoading(false);
+      toggleModal(uploadModalSlug);
+      setPage(1)
+    }
+  };
+
   if (!modalCollection) {
     return null;
   }
@@ -131,6 +154,35 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
                   {' '}
                   {modalCollection.labels.singular}
                 </h1>
+                <Pill onClick={() => {
+                  toggleModal(uploadModalSlug);
+                  setRenderModal(true);
+                }}>
+                  Create New
+                </Pill>
+                {renderModal && (
+                  <Modal className={baseModalClass} slug={uploadModalSlug}>
+                    <MinimalTemplate width="wide">
+                      <header className={`${baseModalClass}__header`}>
+                      <h1>Upload</h1>
+                      <Button
+                        icon="x"
+                        round
+                        buttonStyle="icon-label"
+                        iconStyle="with-border"
+                        onClick={() => {
+                          toggleModal(uploadModalSlug);
+                          setRenderModal(false);
+                        }}
+                      />
+                      </header>
+                      <Form onSubmit={handleAddUpload} disabled={loading}>
+                        <Upload data={data} collection={modalCollection} />
+                        <Submit>Add new Image</Submit>
+                      </Form>
+                    </MinimalTemplate>
+                  </Modal>
+                )}
                 <Button
                   icon="x"
                   round
