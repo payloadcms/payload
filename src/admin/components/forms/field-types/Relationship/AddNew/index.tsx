@@ -88,7 +88,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
           className={`${baseClass}__add-button`}
           onClick={() => openModal(relatedCollections[0])}
           buttonStyle="none"
-          tooltip={`Add new ${relatedCollections[0].labels.singular}`}
+          tooltip={t('addNewLabel', { label: relatedCollections[0].labels.singular })}
         >
           <Plus />
         </Button>
