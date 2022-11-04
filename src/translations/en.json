@@ -121,6 +121,7 @@
   },
   "general": {
     "aboutToDelete": "You are about to delete the {{label}} <1>{{title}}</1>. Are you sure?",
+    "addBelow": "Add Below",
     "addFilter": "Add Filter",
     "adminTheme": "Admin Theme",
     "and": "And",
