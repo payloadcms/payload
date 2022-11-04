@@ -204,16 +204,16 @@
     "welcome": "Xin chào"
   },
   "upload": {
-    "dragAndDropHere": "or drag and drop a file here",
-    "fileName": "File Name",
-    "fileSize": "File Size",
-    "height": "Height",
-    "lessInfo": "Less info",
-    "moreInfo": "More info",
-    "selectCollectionToBrowse": "Select a Collection to Browse",
-    "selectFile": "Select a file",
-    "sizes": "Sizes",
-    "width": "Width"
+    "dragAndDropHere": "hoặc kéo và thả file vào đây",
+    "fileName": "Tên file",
+    "fileSize": "Dung lượng file",
+    "height": "Chiều cao",
+    "lessInfo": "Hiển thị ít hơn",
+    "moreInfo": "Hiển thị nhiều hơn",
+    "selectCollectionToBrowse": "Chọn một Collection để tìm",
+    "selectFile": "Chọn một file",
+    "sizes": "Các độ phân giải",
+    "width": "Chiều rộng"
   },
   "validation": {
     "atLeastOneRow": "This field requires at least one row.",
