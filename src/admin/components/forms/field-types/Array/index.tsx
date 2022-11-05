@@ -80,39 +80,39 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     showError,
     errorMessage,
     value,
-    setValue,
   } = useField({
     path,
     validate: memoizedValidate,
     condition,
+    disableFormData: rows?.length > 0,
   });
 
   const addRow = useCallback(async (rowIndex: number) => {
     const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user, locale });
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     dispatchRows({ type: 'ADD', rowIndex });
-    setValue(value as number + 1);
+    setModified(true);
 
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [dispatchRows, dispatchFields, fields, path, setValue, value, operation, id, user, locale]);
+  }, [dispatchRows, dispatchFields, fields, path, operation, id, user, locale, setModified]);
 
   const duplicateRow = useCallback(async (rowIndex: number) => {
     dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });
     dispatchRows({ type: 'ADD', rowIndex });
-    setValue(value as number + 1);
+    setModified(true);
 
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [dispatchRows, dispatchFields, path, setValue, value]);
+  }, [dispatchRows, dispatchFields, path, setModified]);
 
   const removeRow = useCallback((rowIndex: number) => {
     dispatchRows({ type: 'REMOVE', rowIndex });
     dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
-    setValue(value as number - 1);
-  }, [dispatchRows, dispatchFields, path, value, setValue]);
+    setModified(true);
+  }, [dispatchRows, dispatchFields, path, setModified]);
 
   const moveRow = useCallback((moveFromIndex: number, moveToIndex: number) => {
     dispatchRows({ type: 'MOVE', moveFromIndex, moveToIndex });
@@ -190,19 +190,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
     initializeRowState();
   }, [formContext, path, getPreference, preferencesKey, initCollapsed]);
-
-  useEffect(() => {
-    if (typeof rows !== 'undefined') {
-      const disableFormData = rows.length > 0;
-
-      dispatchFields({
-        type: 'UPDATE',
-        path,
-        disableFormData,
-        value: rows.length,
-      });
-    }
-  }, [rows, dispatchFields, path]);
 
   const hasMaxRows = maxRows && rows?.length >= maxRows;
 

@@ -78,6 +78,10 @@ function fieldReducer(state: Fields, action: FieldAction): Fields {
 
       return {
         ...remainingFlattenedState,
+        [path]: {
+          ...(state[path] || {}),
+          disableFormData: unflattenedRows.length > 0,
+        },
         ...flattenedRowState,
       };
     }
@@ -104,6 +108,10 @@ function fieldReducer(state: Fields, action: FieldAction): Fields {
 
       const newState = {
         ...remainingFlattenedState,
+        [path]: {
+          ...(state[path] || {}),
+          disableFormData: true,
+        },
         ...(flatten({ [path]: unflattenedRows }, { filters: flattenFilters })),
       };
 
@@ -128,6 +136,10 @@ function fieldReducer(state: Fields, action: FieldAction): Fields {
 
       const newState = {
         ...remainingFlattenedState,
+        [path]: {
+          ...(state[path] || {}),
+          disableFormData: true,
+        },
         ...(flatten({ [path]: unflattenedRows }, { filters: flattenFilters })),
       };
 
