@@ -1,4 +1,5 @@
 {
+  "$schema": "./translation-schema.json",
   "authentication": {
     "account": "Account",
     "accountOfCurrentUser": "Account dell'utente corrente",
@@ -88,8 +89,8 @@
     "verificationTokenInvalid": "Il token di verifica non è valido."
   },
   "fields": {
-    "Block": "blocco",
-    "Blocks": "blocchi",
+    "block": "blocco",
+    "blocks": "blocchi",
     "addLabel": "Aggiungi {{label}}",
     "addNew": "Aggiungi nuovo",
     "addNewLabel": "Aggiungi nuovo {{label}}",
@@ -99,8 +100,6 @@
     "chooseLabel": "Scegli {{label}}",
     "collapseAll": "Comprimi tutto",
     "editLabelData": "Modifica i dati di {{label}}",
-    "fieldHasNo": "Questo campo non ha {{label}}",
-    "fieldRequiresRows": "Questo campo richiede almeno {{label}}",
     "itemsAndMore": "{{items}} e altri {{count}}",
     "labelRelationship": "Relazione {{label}}",
     "latitude": "Latitudine",
@@ -198,7 +197,14 @@
     "updatedAt": "Aggiornato il",
     "user": "utente",
     "users": "utenti",
-    "welcome": "Benvenuto"
+    "welcome": "Benvenuto",
+    "enterAValue": "Inserisci un valore",
+    "filter": "Filtro",
+    "loading": "Caricamento...",
+    "noFiltersSet": "Nessun filtro impostato",
+    "none": "Nessuno",
+    "searchBy": "Cercato da",
+    "successfullyCreated": "{{label}} creato con successo."
   },
   "upload": {
     "dragAndDropHere": "oppure trascina e rilascia un file qui",
@@ -213,20 +219,19 @@
     "width": "Larghezza"
   },
   "validation": {
-    "atLeastOneRow": "Questo campo richiede almeno una riga.",
     "emailAddress": "Si prega di inserire un indirizzo email valido.",
     "enterNumber": "Si prega di inserire un numero valido.",
+    "fieldHasNo": "Questo campo non ha {{label}}",
     "greaterThanMax": "\"{{value}}\" è maggiore del valore massimo consentito di {{max}}.",
     "invalidInput": "Questo campo ha un input non valido.",
     "invalidSelection": "Questo campo ha una selezione non valida.",
     "invalidSelections": "'In questo campo sono presenti le seguenti selezioni non valide:'",
     "lessThanMin": "\"{{value}}\" è inferiore al valore minimo consentito di {{min}}.",
     "longerThanMin": "Questo valore deve essere più lungo della lunghezza minima di {{minLength}} caratteri.",
-    "maxRows": "Questo campo richiede non più di {{maxRows}} riga/righe.",
-    "minRows": "Questo campo richiede almeno {{minRows}} riga/righe.",
     "notValidDate": "\"{{value}}\" non è una data valida.",
     "required": "Questo campo è obbligatorio.",
-    "requiresOneRow": "Questo campo richiede almeno una riga.",
+    "requiresAtLeast": "Questo campo richiede almeno {{count}} {{label}}.",
+    "requiresNoMoreThan": "Questo campo richiede non più di {{count}} {{label}}.",
     "requiresTwoNumbers": "Questo campo richiede due numeri.",
     "shorterThanMax": "Questo valore deve essere inferiore alla lunghezza massima di {{maxLength}} caratteri.",
     "trueOrFalse": "Questo campo può essere solo uguale a 'true' o 'false'.",

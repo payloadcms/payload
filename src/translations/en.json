@@ -1,4 +1,5 @@
 {
+  "$schema": "./translation-schema.json",
   "authentication": {
     "account": "Account",
     "accountOfCurrentUser": "Account of current user",
@@ -88,8 +89,8 @@
     "verificationTokenInvalid": "Verification token is invalid."
   },
   "fields": {
-    "Block": "block",
-    "Blocks": "blocks",
+    "block": "block",
+    "blocks": "blocks",
     "addLabel": "Add {{label}}",
     "addNew": "Add new",
     "addNewLabel": "Add new {{label}}",
@@ -230,7 +231,7 @@
     "notValidDate": "\"{{value}}\" is not a valid date.",
     "required": "This field is required.",
     "requiresAtLeast": "This field requires at least {{count}} {{label}}.",
-    "requiresNoMoreThan": "This field requires no more than {{maxRows}} {{label}}.",
+    "requiresNoMoreThan": "This field requires no more than {{count}} {{label}}.",
     "requiresTwoNumbers": "This field requires two numbers.",
     "shorterThanMax": "This value must be shorter than the max length of {{maxLength}} characters.",
     "trueOrFalse": "This field can only be equal to true or false.",
