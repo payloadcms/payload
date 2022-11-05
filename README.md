@@ -16,7 +16,7 @@
   </a>
 
   <a href="https://discord.com/invite/r6sCXqVk3v">
-    <img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord" />
+    <img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord&color=7289da" />
   </a>
 </p>
 
@@ -68,6 +68,7 @@ Alternatively, it only takes about five minutes to [create an app from scratch](
 ### Documentation
 
 Check out the [Payload website](https://payloadcms.com/docs/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
+
 ### Contributing
 
 If you want to add contributions to this repository, please follow the instructions in [contributing.md](./contributing.md).
