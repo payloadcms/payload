@@ -100,7 +100,7 @@ export default config;
     A [beforeChange]([beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange)) hook that is called just after emails are prepared, but before they are sent. This is a great place to inject your own HTML template to add custom styles.
 
     ```js
-    beforeEmails: (emailsToSend) => {
+    beforeEmail: (emailsToSend) => {
       // modify the emails in any way before they are sent
       return emails.map((email) => ({
         ...email,
