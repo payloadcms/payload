@@ -66,11 +66,15 @@ export default buildConfig({
       slug,
       admin: {
         listSearchableFields: ['title', 'description', 'number'],
-        group: 'One',
+        group: { en: 'One', es: 'Una' },
       },
       fields: [
         {
           name: 'title',
+          label: {
+            en: 'Title en',
+            es: 'Title es',
+          },
           type: 'text',
         },
         {
@@ -86,7 +90,7 @@ export default buildConfig({
     {
       slug: 'group-one-collection-ones',
       admin: {
-        group: 'One',
+        group: { en: 'One', es: 'Una' },
       },
       fields: [
         {
@@ -98,7 +102,7 @@ export default buildConfig({
     {
       slug: 'group-one-collection-twos',
       admin: {
-        group: 'One',
+        group: { en: 'One', es: 'Una' },
       },
       fields: [
         {

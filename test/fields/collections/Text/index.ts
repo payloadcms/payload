@@ -19,6 +19,24 @@ const TextFields: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'i18nText',
+      type: 'text',
+      label: {
+        en: 'Text en',
+        es: 'Text es',
+      },
+      admin: {
+        placeholder: {
+          en: 'en placeholder',
+          es: 'es placeholder',
+        },
+        description: {
+          en: 'en description',
+          es: 'es description',
+        },
+      },
+    },
+    {
       name: 'defaultFunction',
       type: 'text',
       defaultValue: () => (defaultText),

@@ -7,6 +7,7 @@ import { useConfig } from '../../../utilities/Config';
 import { Button, MinimalTemplate, Pill } from '../../..';
 import { Props } from './types';
 import { requests } from '../../../../api';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -18,7 +19,7 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
   const history = useHistory();
   const { toggleModal } = useModal();
   const [processing, setProcessing] = useState(false);
-  const { t } = useTranslation('version');
+  const { t, i18n } = useTranslation('version');
 
   let fetchURL = `${serverURL}${api}`;
   let redirectURL: string;
@@ -27,13 +28,13 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
   if (collection) {
     fetchURL = `${fetchURL}/${collection.slug}/versions/${versionID}`;
     redirectURL = `${admin}/collections/${collection.slug}/${originalDocID}`;
-    restoreMessage = t('aboutToRestore', { label: collection.labels.singular, versionDate });
+    restoreMessage = t('aboutToRestore', { label: getTranslation(collection.labels.singular, i18n), versionDate });
   }
 
   if (global) {
     fetchURL = `${fetchURL}/globals/${global.slug}/versions/${versionID}`;
     redirectURL = `${admin}/globals/${global.slug}`;
-    restoreMessage = t('aboutToRestoreGlobal', { label: global.label, versionDate });
+    restoreMessage = t('aboutToRestoreGlobal', { label: getTranslation(global.label, i18n), versionDate });
   }
 
   const handleRestore = useCallback(async () => {

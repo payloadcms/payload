@@ -11,6 +11,7 @@ import Button from '../../../../../../elements/Button';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import { SwapUploadModal } from './SwapUploadModal';
 import { EditModal } from './EditModal';
+import { getTranslation } from '../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -26,7 +27,7 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
   const { collections, serverURL, routes: { api } } = useConfig();
   const [modalToRender, setModalToRender] = useState(undefined);
   const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
-  const { t } = useTranslation('fields');
+  const { t, i18n } = useTranslation('fields');
 
   const editor = useSlateStatic();
   const selected = useSelected();
@@ -87,7 +88,7 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
           </div>
           <div className={`${baseClass}__topRowRightPanel`}>
             <div className={`${baseClass}__collectionLabel`}>
-              {relatedCollection.labels.singular}
+              {getTranslation(relatedCollection.labels.singular, i18n)}
             </div>
             <div className={`${baseClass}__actions`}>
               {fieldSchema && (

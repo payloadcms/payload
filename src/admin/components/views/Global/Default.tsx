@@ -24,13 +24,14 @@ import { OperationContext } from '../../utilities/OperationProvider';
 import { Gutter } from '../../elements/Gutter';
 
 import './index.scss';
+import { getTranslation } from '../../../utilities/getTranslation';
 
 const baseClass = 'global-edit';
 
 const DefaultGlobalView: React.FC<Props> = (props) => {
   const { admin: { dateFormat } } = useConfig();
   const { publishedDoc } = useDocumentInfo();
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
 
   const {
     global, data, onSave, permissions, action, apiURL, initialState, isLoading,
@@ -66,9 +67,9 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
           >
             <div className={`${baseClass}__main`}>
               <Meta
-                title={label}
-                description={label}
-                keywords={`${label}, Payload, CMS`}
+                title={getTranslation(label, i18n)}
+                description={getTranslation(label, i18n)}
+                keywords={`${getTranslation(label, i18n)}, Payload, CMS`}
               />
               <Eyebrow />
               {!(global.versions?.drafts && global.versions?.drafts?.autosave) && (
@@ -77,7 +78,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
               <Gutter className={`${baseClass}__edit`}>
                 <header className={`${baseClass}__header`}>
                   <h1>
-                    {t('editLabel', { label })}
+                    {t('editLabel', { label: getTranslation(label, i18n) })}
                   </h1>
                   {description && (
                     <div className={`${baseClass}__sub-header`}>

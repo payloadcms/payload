@@ -18,6 +18,7 @@ import { getFilterOptionsQuery } from '../../getFilterOptionsQuery';
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
 import { useForm } from '../../../Form/context';
 import ViewDescription from '../../../../elements/ViewDescription';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -46,7 +47,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
   const { user } = useAuth();
   const { getData, getSiblingData } = useForm();
   const { toggleModal, isModalOpen } = useModal();
-  const { t } = useTranslation('fields');
+  const { t, i18n } = useTranslation('fields');
   const [fields] = useState(() => formatFields(collection, t));
   const [limit, setLimit] = useState(defaultLimit);
   const [sort, setSort] = useState(null);
@@ -107,7 +108,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
           <header className={`${baseClass}__header`}>
             <div>
               <h1>
-                {t('selectExistingLabel', { label: collection.labels.singular })}
+                {t('selectExistingLabel', { label: getTranslation(collection.labels.singular, i18n) })}
               </h1>
               <Button
                 icon="x"

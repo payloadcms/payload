@@ -33,12 +33,12 @@ const RelationshipField: React.FC<Props> = (props) => {
   const [errorLoading, setErrorLoading] = useState('');
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
 
   const addOptions = useCallback((data, relation) => {
     const collection = collections.find((coll) => coll.slug === relation);
-    dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection });
-  }, [collections, hasMultipleRelations]);
+    dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, i18n });
+  }, [collections, hasMultipleRelations, i18n]);
 
   const getResults = useCallback<GetResults>(async ({
     lastFullyLoadedRelation: lastFullyLoadedRelationArg,
@@ -173,13 +173,14 @@ const RelationshipField: React.FC<Props> = (props) => {
     dispatchOptions({
       type: 'CLEAR',
       required: true,
+      i18n,
     });
 
     setHasLoadedFirstOptions(true);
     setLastLoadedPage(1);
     setLastFullyLoadedRelation(-1);
     getResults({ search: debouncedSearch });
-  }, [getResults, debouncedSearch, relationTo]);
+  }, [getResults, debouncedSearch, relationTo, i18n]);
 
   // ///////////////////////////
   // Format options once first options have been retrieved

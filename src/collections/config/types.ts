@@ -172,7 +172,7 @@ export type CollectionAdminOptions = {
   /**
    * Place collections into a navigational group
    * */
-  group?: string;
+  group?: Record<string, string> | string;
   /**
    * Custom description for collection
    */
@@ -208,8 +208,8 @@ export type CollectionConfig = {
    * Label configuration
    */
   labels?: {
-    singular?: string;
-    plural?: string;
+    singular?: Record<string, string> | string;
+    plural?: Record<string, string> | string;
   };
   fields: Field[];
   /**

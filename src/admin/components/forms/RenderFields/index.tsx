@@ -5,6 +5,7 @@ import useIntersect from '../../../hooks/useIntersect';
 import { Props } from './types';
 import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../fields/config/types';
 import { useOperation } from '../../utilities/OperationProvider';
+import { getTranslation } from '../../../utilities/getTranslation';
 
 const baseClass = 'render-fields';
 
@@ -23,7 +24,7 @@ const RenderFields: React.FC<Props> = (props) => {
     forceRender,
   } = props;
 
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender));
   const [intersectionRef, entry] = useIntersect(intersectionObserverOptions);
   const operation = useOperation();
@@ -107,7 +108,7 @@ const RenderFields: React.FC<Props> = (props) => {
                       className="missing-field"
                       key={i}
                     >
-                      {t('error:noMatchedField', { label: field.label })}
+                      {t('error:noMatchedField', { label: getTranslation(field.label, i18n) })}
                     </div>
                   );
                 }

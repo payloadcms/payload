@@ -61,7 +61,7 @@ const AccountView: React.FC = () => {
 
   useEffect(() => {
     const nav = [{
-      label: t('account'),
+      label: t('authentication:account'),
     }];
 
     setStepNav(nav);

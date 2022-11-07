@@ -27,7 +27,10 @@ const collectionSchema = joi.object().keys({
     useAsTitle: joi.string(),
     defaultColumns: joi.array().items(joi.string()),
     listSearchableFields: joi.array().items(joi.string()),
-    group: joi.string(),
+    group: joi.alternatives().try(
+      joi.string(),
+      joi.object().pattern(joi.string(), [joi.string()]),
+    ),
     description: joi.alternatives().try(
       joi.string(),
       componentSchema,

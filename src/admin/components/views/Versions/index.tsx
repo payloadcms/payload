@@ -21,6 +21,7 @@ import { SanitizedCollectionConfig } from '../../../../collections/config/types'
 import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 import { shouldIncrementVersionCount } from '../../../../versions/shouldIncrementVersionCount';
 import { Gutter } from '../../elements/Gutter';
+import { getTranslation } from '../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -30,7 +31,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   const { serverURL, routes: { admin, api }, admin: { dateFormat } } = useConfig();
   const { setStepNav } = useStepNav();
   const { params: { id } } = useRouteMatch<{ id: string }>();
-  const { t } = useTranslation('version');
+  const { t, i18n } = useTranslation('version');
   const [tableColumns] = useState(() => getColumns(collection, global, t));
   const [fetchURL, setFetchURL] = useState('');
   const { page, sort, limit } = useSearchParams();
@@ -44,7 +45,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   if (collection) {
     ({ slug } = collection);
     docURL = `${serverURL}${api}/${slug}/${id}`;
-    entityLabel = collection.labels.singular;
+    entityLabel = getTranslation(collection.labels.singular, i18n);
     entity = collection;
     editURL = `${admin}/collections/${collection.slug}/${id}`;
   }
@@ -52,7 +53,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   if (global) {
     ({ slug } = global);
     docURL = `${serverURL}${api}/globals/${slug}`;
-    entityLabel = global.label;
+    entityLabel = getTranslation(global.label, i18n);
     entity = global;
     editURL = `${admin}/globals/${global.slug}`;
   }
@@ -82,7 +83,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
       nav = [
         {
           url: `${admin}/collections/${collection.slug}`,
-          label: collection.labels.plural,
+          label: getTranslation(collection.labels.plural, i18n),
         },
         {
           label: docLabel,
@@ -98,7 +99,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
       nav = [
         {
           url: editURL,
-          label: global.label,
+          label: getTranslation(global.label, i18n),
         },
         {
           label: t('versions'),
@@ -107,7 +108,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     }
 
     setStepNav(nav);
-  }, [setStepNav, collection, global, useAsTitle, doc, admin, id, editURL, t]);
+  }, [setStepNav, collection, global, useAsTitle, doc, admin, id, editURL, t, i18n]);
 
   useEffect(() => {
     const params = {

@@ -12,6 +12,7 @@ import { FieldTypes } from '..';
 import AddModal from './Add';
 import SelectExistingModal from './SelectExisting';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -60,7 +61,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   } = props;
 
   const { toggleModal } = useModal();
-  const { t } = useTranslation('fields');
+  const { t, i18n } = useTranslation('fields');
 
   const addModalSlug = `${path}-add`;
   const selectExistingModalSlug = `${path}-select-existing`;
@@ -136,7 +137,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
                   toggleModal(addModalSlug);
                 }}
               >
-                {t('uploadNewLabel', { label: collection.labels.singular })}
+                {t('uploadNewLabel', { label: getTranslation(collection.labels.singular, i18n) })}
               </Button>
               <Button
                 buttonStyle="secondary"

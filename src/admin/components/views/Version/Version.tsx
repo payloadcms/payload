@@ -17,7 +17,7 @@ import Restore from './Restore';
 import SelectLocales from './SelectLocales';
 import RenderFieldsToDiff from './RenderFieldsToDiff';
 import fieldComponents from './RenderFieldsToDiff/fields';
-
+import { getTranslation } from '../../../utilities/getTranslation';
 import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
 import { FieldPermissions } from '../../../../auth';
 import { useLocale } from '../../utilities/Locale';
@@ -36,7 +36,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
   const { permissions } = useAuth();
   const locale = useLocale();
-  const { t } = useTranslation('version');
+  const { t, i18n } = useTranslation('version');
 
   let originalDocFetchURL: string;
   let versionFetchURL: string;
@@ -52,7 +52,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     originalDocFetchURL = `${serverURL}${api}/${slug}/${id}`;
     versionFetchURL = `${serverURL}${api}/${slug}/versions/${versionID}`;
     compareBaseURL = `${serverURL}${api}/${slug}/versions`;
-    entityLabel = collection.labels.singular;
+    entityLabel = getTranslation(collection.labels.singular, i18n);
     parentID = id;
     fields = collection.fields;
     fieldPermissions = permissions.collections[collection.slug].fields;
@@ -63,7 +63,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     originalDocFetchURL = `${serverURL}${api}/globals/${slug}`;
     versionFetchURL = `${serverURL}${api}/globals/${slug}/versions/${versionID}`;
     compareBaseURL = `${serverURL}${api}/globals/${slug}/versions`;
-    entityLabel = global.label;
+    entityLabel = getTranslation(global.label, i18n);
     fields = global.fields;
     fieldPermissions = permissions.globals[global.slug].fields;
   }
@@ -104,7 +104,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
       nav = [
         {
           url: `${admin}/collections/${collection.slug}`,
-          label: collection.labels.plural,
+          label: getTranslation(collection.labels.plural, i18n),
         },
         {
           label: docLabel,
@@ -137,7 +137,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     }
 
     setStepNav(nav);
-  }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale, t]);
+  }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale, t, i18n]);
 
   let metaTitle: string;
   let metaDesc: string;

@@ -25,6 +25,7 @@ import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
 
 import './index.scss';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 const baseClass = 'array-field';
 
@@ -50,14 +51,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  // Handle labeling for Arrays, Global Arrays, and Blocks
-  const getLabels = (p: Props) => {
-    if (p?.labels) return p.labels;
-    if (p?.label) return { singular: p.label, plural: undefined };
-    return { singular: 'Row', plural: 'Rows' };
-  };
-
-  const labels = getLabels(props);
   // eslint-disable-next-line react/destructuring-assignment
   const label = props?.label ?? props?.labels?.singular;
 
@@ -70,7 +63,16 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const { id } = useDocumentInfo();
   const locale = useLocale();
   const operation = useOperation();
-  const { t } = useTranslation('fields');
+  const { t, i18n } = useTranslation('fields');
+
+  // Handle labeling for Arrays, Global Arrays, and Blocks
+  const getLabels = (p: Props) => {
+    if (p?.labels) return p.labels;
+    if (p?.label) return { singular: p.label, plural: undefined };
+    return { singular: t('row'), plural: t('rows') };
+  };
+
+  const labels = getLabels(props);
 
   const { dispatchFields } = formContext;
 
@@ -229,7 +231,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         </div>
         <header className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-wrap`}>
-            <h3>{label}</h3>
+            <h3>{getTranslation(label, i18n)}</h3>
             <ul className={`${baseClass}__header-actions`}>
               <li>
                 <button
@@ -252,6 +254,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
             </ul>
           </div>
           <FieldDescription
+            className={`field-description-${path.replace(/\./gi, '__')}`}
             value={value}
             description={description}
           />
@@ -284,7 +287,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                           className={`${baseClass}__row`}
                           key={row.id}
                           dragHandleProps={providedDrag.dragHandleProps}
-                          header={`${labels.singular} ${rowNumber >= 10 ? rowNumber : `0${rowNumber}`}`}
+                          header={`${getTranslation(labels.singular, i18n)} ${rowNumber >= 10 ? rowNumber : `0${rowNumber}`}`}
                           actions={!readOnly ? (
                             <ArrayAction
                               rowCount={rows.length}
@@ -320,17 +323,18 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               })}
               {(rows.length < minRows || (required && rows.length === 0)) && (
                 <Banner type="error">
-                  {t('fieldRequiresRows', {
+                  {t('validation:requiresAtLeast', {
                     count: minRows,
-                    label: minRows
+                    label: getTranslation(minRows
                       ? labels.plural
                       : labels.singular,
+                    i18n) || t(minRows > 1 ? 'general:row' : 'general:rows'),
                   })}
                 </Banner>
               )}
               {(rows.length === 0 && readOnly) && (
                 <Banner>
-                  {t('fieldHasNo', { label: labels.plural })}
+                  {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
                 </Banner>
               )}
               {provided.placeholder}
@@ -346,7 +350,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               iconStyle="with-border"
               iconPosition="left"
             >
-              {t('addLabel', { label: labels.singular })}
+              {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
             </Button>
           </div>
         )}

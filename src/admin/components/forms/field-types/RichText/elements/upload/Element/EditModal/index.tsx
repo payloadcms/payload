@@ -14,6 +14,7 @@ import Form from '../../../../../../Form';
 import Submit from '../../../../../../Submit';
 import { Field } from '../../../../../../../../../fields/config/types';
 import { useLocale } from '../../../../../../../utilities/Locale';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -33,7 +34,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
   const [initialState, setInitialState] = useState({});
   const { user } = useAuth();
   const locale = useLocale();
-  const { t } = useTranslation('fields');
+  const { t, i18n } = useTranslation('fields');
 
   const handleUpdateEditData = useCallback((_, data) => {
     const newNode = {
@@ -67,7 +68,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
       <MinimalTemplate width="wide">
         <header className={`${baseClass}__header`}>
           <h1>
-            { t('editLabelData', { label: relatedCollectionConfig.labels.singular }) }
+            { t('editLabelData', { label: getTranslation(relatedCollectionConfig.labels.singular, i18n) }) }
           </h1>
           <Button
             icon="x"

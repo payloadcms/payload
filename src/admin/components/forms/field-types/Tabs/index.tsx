@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
@@ -7,6 +8,7 @@ import FieldDescription from '../../FieldDescription';
 import toKebabCase from '../../../../../utilities/toKebabCase';
 import { useCollapsible } from '../../../elements/Collapsible/provider';
 import { TabsProvider } from './provider';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -26,7 +28,7 @@ const TabsField: React.FC<Props> = (props) => {
 
   const isWithinCollapsible = useCollapsible();
   const [active, setActive] = useState(0);
-
+  const { i18n } = useTranslation();
   const activeTab = tabs[active];
 
   return (
@@ -50,7 +52,7 @@ const TabsField: React.FC<Props> = (props) => {
                   ].filter(Boolean).join(' ')}
                   onClick={() => setActive(i)}
                 >
-                  {tab.label ? tab.label : (tabHasName(tab) && tab.name)}
+                  {tab.label ? getTranslation(tab.label, i18n) : (tabHasName(tab) && tab.name)}
                 </button>
               );
             })}

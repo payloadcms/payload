@@ -71,8 +71,8 @@ type Admin = {
 }
 
 export type Labels = {
-  singular: string;
-  plural: string;
+  singular: Record<string, string> | string;
+  plural: Record<string, string> | string;
 };
 
 export type ValidateOptions<T, S, F> = {
@@ -87,7 +87,7 @@ export type ValidateOptions<T, S, F> = {
 export type Validate<T = any, S = any, F = any> = (value?: T, options?: ValidateOptions<F, S, Partial<F>>) => string | true | Promise<string | true>;
 
 export type OptionObject = {
-  label: string
+  label: Record<string, string> | string
   value: string
 }
 
@@ -95,7 +95,7 @@ export type Option = OptionObject | string
 
 export interface FieldBase {
   name: string;
-  label?: string | false;
+  label?: Record<string, string> | string;
   required?: boolean;
   unique?: boolean;
   index?: boolean;
@@ -122,7 +122,7 @@ export type NumberField = FieldBase & {
   type: 'number';
   admin?: Admin & {
     autoComplete?: string
-    placeholder?: string
+    placeholder?: Record<string, string> | string
     step?: number
   }
   min?: number
@@ -134,7 +134,7 @@ export type TextField = FieldBase & {
   maxLength?: number
   minLength?: number
   admin?: Admin & {
-    placeholder?: string
+    placeholder?: Record<string, string> | string
     autoComplete?: string
   }
 }
@@ -142,7 +142,7 @@ export type TextField = FieldBase & {
 export type EmailField = FieldBase & {
   type: 'email';
   admin?: Admin & {
-    placeholder?: string
+    placeholder?: Record<string, string> | string
     autoComplete?: string
   }
 }
@@ -152,7 +152,7 @@ export type TextareaField = FieldBase & {
   maxLength?: number
   minLength?: number
   admin?: Admin & {
-    placeholder?: string
+    placeholder?: Record<string, string> | string
     rows?: number
   }
 }
@@ -164,7 +164,7 @@ export type CheckboxField = FieldBase & {
 export type DateField = FieldBase & {
   type: 'date';
   admin?: Admin & {
-    placeholder?: string
+    placeholder?: Record<string, string> | string
     date?: ConditionalDateProps
   }
 }
@@ -187,7 +187,7 @@ export type RowField = Omit<FieldBase, 'admin' | 'name'> & {
 
 export type CollapsibleField = Omit<FieldBase, 'name'> & {
   type: 'collapsible';
-  label: string
+  label: Record<string, string> | string
   fields: Field[];
   admin?: Admin & {
     initCollapsed?: boolean | false;
@@ -204,7 +204,7 @@ type TabBase = {
 export type NamedTab = TabBase & FieldBase
 
 export type UnnamedTab = TabBase & Omit<FieldBase, 'name'> & {
-  label: string
+  label: Record<string, string> | string
   localized?: never
 }
 
@@ -223,7 +223,7 @@ export type TabAsField = Tab & {
 
 export type UIField = {
   name: string
-  label?: string
+  label?: Record<string, string> | string
   admin: {
     position?: string
     width?: string
@@ -312,7 +312,7 @@ export type RichTextLeaf = 'bold' | 'italic' | 'underline' | 'strikethrough' | '
 export type RichTextField = FieldBase & {
   type: 'richText';
   admin?: Admin & {
-    placeholder?: string
+    placeholder?: Record<string, string> | string
     elements?: RichTextElement[];
     leaves?: RichTextLeaf[];
     hideGutter?: boolean

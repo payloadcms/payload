@@ -17,6 +17,7 @@ import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { Fields } from '../../../forms/Form/types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { EditDepthContext } from '../../../utilities/EditDepth';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props;
@@ -50,7 +51,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { permissions, user } = useAuth();
   const { getVersions, preferencesKey } = useDocumentInfo();
   const { getPreference } = usePreferences();
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
 
   const onSave = useCallback(async (json: any) => {
     getVersions();
@@ -72,7 +73,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   useEffect(() => {
     const nav: StepNavItem[] = [{
       url: `${admin}/collections/${slug}`,
-      label: pluralLabel,
+      label: getTranslation(pluralLabel, i18n),
     }];
 
     if (isEditing) {
@@ -100,7 +101,7 @@ const EditView: React.FC<IndexProps> = (props) => {
     }
 
     setStepNav(nav);
-  }, [setStepNav, isEditing, pluralLabel, dataToRender, slug, useAsTitle, admin, t]);
+  }, [setStepNav, isEditing, pluralLabel, dataToRender, slug, useAsTitle, admin, t, i18n]);
 
   useEffect(() => {
     if (isLoadingDocument) {

@@ -1,7 +1,8 @@
-import type { TFunction } from 'react-i18next';
+import { i18n as Ii18n } from 'i18next';
 import { Permissions } from '../../auth';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
+import { getTranslation } from './getTranslation';
 
 export enum EntityType {
   collection = 'collections',
@@ -21,20 +22,21 @@ export type Group = {
   entities: EntityToGroup[]
 }
 
-export function groupNavItems(entities: EntityToGroup[], permissions: Permissions, t: TFunction): Group[] {
+export function groupNavItems(entities: EntityToGroup[], permissions: Permissions, i18n: Ii18n): Group[] {
   const result = entities.reduce((groups, entityToGroup) => {
     if (permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read.permission) {
+      const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n);
       if (entityToGroup.entity.admin.group) {
-        const existingGroup = groups.find((group) => group.label === entityToGroup.entity.admin.group);
+        const existingGroup = groups.find((group) => getTranslation(group.label, i18n) === translatedGroup) as Group;
         let matchedGroup: Group = existingGroup;
         if (!existingGroup) {
-          matchedGroup = { label: entityToGroup.entity.admin.group, entities: [] };
+          matchedGroup = { label: translatedGroup, entities: [] };
           groups.push(matchedGroup);
         }
 
         matchedGroup.entities.push(entityToGroup);
       } else {
-        const defaultGroup = groups.find((group) => group.label === t(entityToGroup.type));
+        const defaultGroup = groups.find((group) => getTranslation(group.label, i18n) === i18n.t(`general:${entityToGroup.type}`)) as Group;
         defaultGroup.entities.push(entityToGroup);
       }
     }
@@ -42,11 +44,11 @@ export function groupNavItems(entities: EntityToGroup[], permissions: Permission
     return groups;
   }, [
     {
-      label: t('general:collections'),
+      label: i18n.t('general:collections') as string,
       entities: [],
     },
     {
-      label: t('general:globals'),
+      label: i18n.t('general:globals') as string,
       entities: [],
     },
   ]);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { SelectField } from '../../../../../../fields/config/types';
+import { BlockField, SelectField } from '../../../../../../fields/config/types';
 import BlocksCell from './field-types/Blocks';
 import DateCell from './field-types/Date';
 import Checkbox from './field-types/Checkbox';
@@ -13,7 +13,7 @@ jest.mock('../../../../utilities/Config', () => ({
 
 describe('Cell Types', () => {
   describe('Blocks', () => {
-    const field = {
+    const field: BlockField = {
       label: 'Blocks Content',
       name: 'blocks',
       labels: {
@@ -25,8 +25,10 @@ describe('Cell Types', () => {
         {
           slug: 'number',
           labels: {
+            plural: 'Numbers',
             singular: 'Number',
           },
+          fields: [],
         },
       ],
     };

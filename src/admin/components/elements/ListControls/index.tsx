@@ -10,6 +10,7 @@ import SortComplex from '../SortComplex';
 import Button from '../Button';
 import { Props } from './types';
 import { useSearchParams } from '../../utilities/SearchParams';
+import { getTranslation } from '../../../utilities/getTranslation';
 
 
 import './index.scss';
@@ -41,7 +42,7 @@ const ListControls: React.FC<Props> = (props) => {
   const [titleField] = useState(() => fields.find((field) => fieldAffectsData(field) && field.name === useAsTitle));
   const [textFieldsToBeSearched] = useState(listSearchableFields ? () => fields.filter((field) => fieldAffectsData(field) && listSearchableFields.includes(field.name)) as FieldAffectingData[] : null);
   const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
 
   return (
     <div className={baseClass}>
@@ -50,7 +51,7 @@ const ListControls: React.FC<Props> = (props) => {
           fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
           handleChange={handleWhereChange}
           modifySearchQuery={modifySearchQuery}
-          fieldLabel={titleField && titleField.label ? titleField.label : undefined}
+          fieldLabel={getTranslation(titleField.label, i18n) ?? undefined}
           listSearchableFields={textFieldsToBeSearched}
         />
         <div className={`${baseClass}__buttons`}>

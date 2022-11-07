@@ -46,7 +46,7 @@ export interface GlobalModel extends Model<Document> {
 
 export type GlobalConfig = {
   slug: string
-  label?: string
+  label?: Record<string, string> | string
   preview?: GeneratePreviewURL
   versions?: IncomingGlobalVersions | boolean
   hooks?: {

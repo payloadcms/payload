@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
@@ -9,6 +10,7 @@ import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import FieldDescription from '../../FieldDescription';
 import { getFieldPath } from '../getFieldPath';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -33,6 +35,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
   const { preferencesKey } = useDocumentInfo();
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>();
   const [fieldPreferencesKey] = useState(() => `collapsible-${toKebabCase(label)}`);
+  const { i18n } = useTranslation();
 
   const onToggle = useCallback(async (newCollapsedState: boolean) => {
     const existingPreferences: DocumentPreferences = await getPreference(preferencesKey);
@@ -69,7 +72,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
           baseClass,
           className,
         ].filter(Boolean).join(' ')}
-        header={<div className={`${baseClass}__label`}>{label}</div>}
+        header={<div className={`${baseClass}__label`}>{getTranslation(label, i18n)}</div>}
         onToggle={onToggle}
       >
         <RenderFields

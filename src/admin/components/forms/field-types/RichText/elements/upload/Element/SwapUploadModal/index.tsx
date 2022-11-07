@@ -15,6 +15,7 @@ import UploadGallery from '../../../../../../../elements/UploadGallery';
 import Paginator from '../../../../../../../elements/Paginator';
 import PerPage from '../../../../../../../elements/PerPage';
 import formatFields from '../../../../../../../views/collections/List/formatFields';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 
 import '../../addSwapModals.scss';
 
@@ -30,10 +31,10 @@ type Props = {
 export const SwapUploadModal: React.FC<Props> = ({ closeModal, element, setRelatedCollectionConfig, relatedCollectionConfig, slug }) => {
   const { collections, serverURL, routes: { api } } = useConfig();
   const editor = useSlateStatic();
-  const { t } = useTranslation('upload');
+  const { t, i18n } = useTranslation('upload');
 
   const [modalCollection, setModalCollection] = React.useState(relatedCollectionConfig);
-  const [modalCollectionOption, setModalCollectionOption] = React.useState<{ label: string, value: string }>({ label: relatedCollectionConfig.labels.singular, value: relatedCollectionConfig.slug });
+  const [modalCollectionOption, setModalCollectionOption] = React.useState<{ label: string, value: string }>({ label: getTranslation(relatedCollectionConfig.labels.singular, i18n), value: relatedCollectionConfig.slug });
   const [availableCollections] = React.useState(() => collections.filter(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
   const [fields, setFields] = React.useState(() => formatFields(modalCollection, t));
 
@@ -100,7 +101,7 @@ export const SwapUploadModal: React.FC<Props> = ({ closeModal, element, setRelat
       <MinimalTemplate width="wide">
         <header className={`${baseClass}__header`}>
           <h1>
-            {t('chooseLabel', { label: modalCollection.labels.singular })}
+            {t('chooseLabel', { label: getTranslation(modalCollection.labels.singular, i18n) })}
           </h1>
           <Button
             icon="x"
@@ -118,7 +119,7 @@ export const SwapUploadModal: React.FC<Props> = ({ closeModal, element, setRelat
                 className={`${baseClass}__select-collection`}
                 value={modalCollectionOption}
                 onChange={setModalCollectionOption}
-                options={availableCollections.map((coll) => ({ label: coll.labels.singular, value: coll.slug }))}
+                options={availableCollections.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
               />
             </div>
           )

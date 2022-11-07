@@ -17,6 +17,7 @@ import Button from '../../../../../../elements/Button';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import PerPage from '../../../../../../elements/PerPage';
 import { injectVoidElement } from '../../injectVoid';
+import { getTranslation } from '../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 import '../addSwapModals.scss';
@@ -42,6 +43,7 @@ const insertUpload = (editor, { value, relationTo }) => {
 };
 
 const UploadButton: React.FC<{ path: string }> = ({ path }) => {
+  const { t, i18n } = useTranslation('upload');
   const { toggleModal, isModalOpen } = useModal();
   const editor = useSlate();
   const { serverURL, routes: { api }, collections } = useConfig();
@@ -50,13 +52,12 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
   const [modalCollectionOption, setModalCollectionOption] = useState<{ label: string, value: string }>(() => {
     const firstAvailableCollection = collections.find(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship));
     if (firstAvailableCollection) {
-      return { label: firstAvailableCollection.labels.singular, value: firstAvailableCollection.slug };
+      return { label: getTranslation(firstAvailableCollection.labels.singular, i18n), value: firstAvailableCollection.slug };
     }
 
     return undefined;
   });
   const [modalCollection, setModalCollection] = useState<SanitizedCollectionConfig>(() => collections.find(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
-  const { t } = useTranslation('upload');
   const [fields, setFields] = useState(() => (modalCollection ? formatFields(modalCollection, t) : undefined));
   const [limit, setLimit] = useState<number>();
   const [sort, setSort] = useState(null);
@@ -147,7 +148,7 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
                     className={`${baseClass}__select-collection`}
                     value={modalCollectionOption}
                     onChange={setModalCollectionOption}
-                    options={availableCollections.map((coll) => ({ label: coll.labels.singular, value: coll.slug }))}
+                    options={availableCollections.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
                   />
                 </div>
               )}

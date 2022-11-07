@@ -9,6 +9,7 @@ import Button from '../../elements/Button';
 import { Props } from './types';
 import { Gutter } from '../../elements/Gutter';
 import { groupNavItems, Group, EntityToGroup, EntityType } from '../../../utilities/groupNavItems';
+import { getTranslation } from '../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -22,7 +23,7 @@ const Dashboard: React.FC<Props> = (props) => {
   } = props;
 
   const { push } = useHistory();
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
 
   const {
     routes: {
@@ -56,8 +57,8 @@ const Dashboard: React.FC<Props> = (props) => {
 
         return entityToGroup;
       }),
-    ], permissions, t));
-  }, [collections, globals, permissions, t]);
+    ], permissions, i18n));
+  }, [collections, globals, i18n, permissions]);
 
   return (
     <div className={baseClass}>
@@ -76,14 +77,14 @@ const Dashboard: React.FC<Props> = (props) => {
                   let hasCreatePermission: boolean;
 
                   if (type === EntityType.collection) {
-                    title = entity.labels.plural;
+                    title = getTranslation(entity.labels.plural, i18n);
                     onClick = () => push({ pathname: `${admin}/collections/${entity.slug}` });
                     createHREF = `${admin}/collections/${entity.slug}/create`;
                     hasCreatePermission = permissions?.collections?.[entity.slug]?.create?.permission;
                   }
 
                   if (type === EntityType.global) {
-                    title = entity.label;
+                    title = getTranslation(entity.label, i18n);
                     onClick = () => push({ pathname: `${admin}/globals/${entity.slug}` });
                   }
 

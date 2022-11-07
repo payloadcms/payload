@@ -28,13 +28,14 @@ import SectionTitle from './SectionTitle';
 import Pill from '../../../elements/Pill';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
 const baseClass = 'blocks-field';
 
 const BlocksField: React.FC<Props> = (props) => {
-  const { t } = useTranslation('fields');
+  const { t, i18n } = useTranslation('fields');
   const {
     label,
     name,
@@ -233,7 +234,7 @@ const BlocksField: React.FC<Props> = (props) => {
         </div>
         <header className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-wrap`}>
-            <h3>{label}</h3>
+            <h3>{getTranslation(label, i18n)}</h3>
             <ul className={`${baseClass}__header-actions`}>
               <li>
                 <button
@@ -305,7 +306,7 @@ const BlocksField: React.FC<Props> = (props) => {
                                   pillStyle="white"
                                   className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
                                 >
-                                  {blockToRender.labels.singular}
+                                  {getTranslation(blockToRender.labels.singular, i18n)}
                                 </Pill>
                                 <SectionTitle
                                   path={`${path}.${i}.blockName`}
@@ -369,17 +370,15 @@ const BlocksField: React.FC<Props> = (props) => {
               })}
               {(rows.length < minRows || (required && rows.length === 0)) && (
                 <Banner type="error">
-                  This field requires at least
-                  {' '}
-                  {`${minRows || 1} ${minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural}`}
+                  {t('requiresAtLeast', {
+                    count: minRows,
+                    label: getTranslation(minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural, i18n),
+                  })}
                 </Banner>
               )}
               {(rows.length === 0 && readOnly) && (
                 <Banner>
-                  This field has no
-                  {' '}
-                  {labels.plural}
-                  .
+                  {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
                 </Banner>
               )}
               {provided.placeholder}
@@ -400,7 +399,7 @@ const BlocksField: React.FC<Props> = (props) => {
                   iconPosition="left"
                   iconStyle="with-border"
                 >
-                  {t('addLabel', { label: labels.singular })}
+                  {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
                 </Button>
               )}
               render={({ close }) => (

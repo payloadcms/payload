@@ -17,6 +17,7 @@ import { Gutter } from '../../../elements/Gutter';
 import { RelationshipProvider } from './RelationshipProvider';
 
 import './index.scss';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 const baseClass = 'collection-list';
 
@@ -45,17 +46,17 @@ const DefaultList: React.FC<Props> = (props) => {
 
   const { routes: { admin } } = useConfig();
   const history = useHistory();
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
 
   return (
     <div className={baseClass}>
       <Meta
-        title={collection.labels.plural}
+        title={getTranslation(collection.labels.plural, i18n)}
       />
       <Eyebrow />
       <Gutter className={`${baseClass}__wrap`}>
         <header className={`${baseClass}__header`}>
-          <h1>{pluralLabel}</h1>
+          <h1>{getTranslation(pluralLabel, i18n)}</h1>
           {hasCreatePermission && (
             <Pill to={newDocumentURL}>
               {t('createNew')}
@@ -96,14 +97,14 @@ const DefaultList: React.FC<Props> = (props) => {
         {data.docs && data.docs.length === 0 && (
           <div className={`${baseClass}__no-results`}>
             <p>
-              {t('noResults', { label: pluralLabel })}
+              {t('noResults', { label: getTranslation(pluralLabel, i18n) })}
             </p>
             {hasCreatePermission && (
               <Button
                 el="link"
                 to={newDocumentURL}
               >
-                {t('createNewLabel', { label: singularLabel })}
+                {t('createNewLabel', { label: getTranslation(singularLabel, i18n) })}
               </Button>
             )}
           </div>

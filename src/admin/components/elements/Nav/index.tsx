@@ -13,6 +13,7 @@ import Account from '../../graphics/Account';
 import Localizer from '../Localizer';
 import NavGroup from '../NavGroup';
 import { groupNavItems, Group, EntityToGroup, EntityType } from '../../../utilities/groupNavItems';
+import { getTranslation } from '../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -23,7 +24,7 @@ const DefaultNav = () => {
   const [menuActive, setMenuActive] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const history = useHistory();
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
   const {
     collections,
     globals,
@@ -62,8 +63,8 @@ const DefaultNav = () => {
 
         return entityToGroup;
       }),
-    ], permissions, t));
-  }, [collections, globals, permissions, t]);
+    ], permissions, i18n));
+  }, [collections, globals, permissions, i18n, i18n.language]);
 
   useEffect(() => history.listen(() => {
     setMenuActive(false);
@@ -104,13 +105,13 @@ const DefaultNav = () => {
 
                   if (type === EntityType.collection) {
                     href = `${admin}/collections/${entity.slug}`;
-                    entityLabel = entity.labels.plural;
+                    entityLabel = getTranslation(entity.labels.plural, i18n);
                     id = `nav-${entity.slug}`;
                   }
 
                   if (type === EntityType.global) {
                     href = `${admin}/globals/${entity.slug}`;
-                    entityLabel = entity.label;
+                    entityLabel = getTranslation(entity.label, i18n);
                     id = `nav-global-${entity.slug}`;
                   }
 

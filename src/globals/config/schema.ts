@@ -6,7 +6,10 @@ const globalSchema = joi.object().keys({
   slug: joi.string().required(),
   label: joi.string(),
   admin: joi.object({
-    group: joi.string(),
+    group: joi.alternatives().try(
+      joi.string(),
+      joi.object().pattern(joi.string(), [joi.string()]),
+    ),
     hideAPIURL: joi.boolean(),
     description: joi.alternatives().try(
       joi.string(),

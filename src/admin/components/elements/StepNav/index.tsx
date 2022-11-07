@@ -7,6 +7,7 @@ import Chevron from '../../icons/Chevron';
 import { Context as ContextType } from './types';
 
 import './index.scss';
+import { getTranslation } from '../../../utilities/getTranslation';
 
 const Context = createContext({} as ContextType);
 
@@ -27,7 +28,7 @@ const StepNavProvider: React.FC<{children?: React.ReactNode}> = ({ children }) =
 const useStepNav = (): ContextType => useContext(Context);
 
 const StepNav: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dashboardLabel = <span>{t('general:dashboard')}</span>;
   const { stepNav } = useStepNav();
 
@@ -42,7 +43,7 @@ const StepNav: React.FC = () => {
         )
         : dashboardLabel}
       {stepNav.map((item, i) => {
-        const StepLabel = <span key={i}>{item.label}</span>;
+        const StepLabel = <span key={i}>{getTranslation(item.label, i18n)}</span>;
 
         const Step = stepNav.length === i + 1
           ? StepLabel

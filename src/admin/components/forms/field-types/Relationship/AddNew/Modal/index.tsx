@@ -13,6 +13,7 @@ import X from '../../../../../icons/X';
 import { Fields } from '../../../../Form/types';
 import buildStateFromSchema from '../../../../Form/buildStateFromSchema';
 import { EditDepthContext, useEditDepth } from '../../../../../utilities/EditDepth';
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -27,7 +28,7 @@ export const AddNewRelationModal: React.FC<Props> = ({ modalCollection, onSave, 
   const [initialState, setInitialState] = useState<Fields>();
   const [isAnimated, setIsAnimated] = useState(false);
   const editDepth = useEditDepth();
-  const { t } = useTranslation('fields');
+  const { t, i18n } = useTranslation('fields');
 
   const modalAction = `${serverURL}${api}/${modalCollection.slug}?locale=${locale}&depth=0&fallback-locale=null`;
 
@@ -87,7 +88,7 @@ export const AddNewRelationModal: React.FC<Props> = ({ modalCollection, onSave, 
             customHeader: (
               <div className={`${baseClass}__header`}>
                 <h2>
-                  {t('addNewLabel', { label: modalCollection.labels.singular })}
+                  {t('addNewLabel', { label: getTranslation(modalCollection.labels.singular, i18n) })}
                 </h2>
                 <Button
                   buttonStyle="none"

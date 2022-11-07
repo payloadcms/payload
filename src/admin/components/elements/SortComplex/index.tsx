@@ -7,6 +7,7 @@ import ReactSelect from '../ReactSelect';
 import sortableFieldTypes from '../../../../fields/sortableFieldTypes';
 import { useSearchParams } from '../../utilities/SearchParams';
 import { fieldAffectsData } from '../../../../fields/config/types';
+import { getTranslation } from '../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -23,13 +24,13 @@ const SortComplex: React.FC<Props> = (props) => {
 
   const history = useHistory();
   const params = useSearchParams();
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
 
   const [sortFields] = useState(() => collection.fields.reduce((fields, field) => {
     if (fieldAffectsData(field) && sortableFieldTypes.indexOf(field.type) > -1) {
       return [
         ...fields,
-        { label: field.label, value: field.name },
+        { label: getTranslation(field.label, i18n), value: field.name },
       ];
     }
     return fields;

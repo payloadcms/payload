@@ -53,7 +53,9 @@ const DefaultAccount: React.FC<Props> = (props) => {
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { t, i18n } = useTranslation('authentication');
 
-  const languageOptions = Object.entries(i18n.options.resources).map(([language, resource]) => ({ label: (resource as Translation).general.thisLanguage, value: language }));
+  const languageOptions = Object.entries(i18n.options.resources).map(([language, resource]) => (
+    { label: (resource as Translation).general.thisLanguage, value: language }
+  ));
 
   const classes = [
     baseClass,
