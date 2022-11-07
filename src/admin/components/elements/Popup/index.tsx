@@ -41,26 +41,20 @@ const Popup: React.FC<Props> = (props) => {
   const [verticalAlign, setVerticalAlign] = useState(verticalAlignFromProps);
   const [horizontalAlign, setHorizontalAlign] = useState(horizontalAlignFromProps);
 
-  const handleClickOutside = useCallback((e) => {
-    if (contentRef.current.contains(e.target)) {
-      return;
-    }
-
-    setActive(false);
-  }, [contentRef]);
-
-  useEffect(() => {
+  const setPosition = useCallback(({ horizontal = false, vertical = false }) => {
     if (contentRef.current) {
+      const bounds = contentRef.current.getBoundingClientRect();
+
       const {
         left: contentLeftPos,
         right: contentRightPos,
         top: contentTopPos,
         bottom: contentBottomPos,
-      } = contentRef.current.getBoundingClientRect();
+      } = bounds;
 
       let boundingTopPos = 100;
-      let boundingRightPos = windowWidth;
-      let boundingBottomPos = windowHeight;
+      let boundingRightPos = window.innerWidth;
+      let boundingBottomPos = window.innerHeight;
       let boundingLeftPos = 0;
 
       if (boundingRef?.current) {
@@ -72,19 +66,39 @@ const Popup: React.FC<Props> = (props) => {
         } = boundingRef.current.getBoundingClientRect());
       }
 
-      if (contentRightPos > boundingRightPos && contentLeftPos > boundingLeftPos) {
-        setHorizontalAlign('right');
-      } else if (contentLeftPos < boundingLeftPos && contentRightPos < boundingRightPos) {
-        setHorizontalAlign('left');
+      if (horizontal) {
+        if (contentRightPos > boundingRightPos && contentLeftPos > boundingLeftPos) {
+          setHorizontalAlign('right');
+        } else if (contentLeftPos < boundingLeftPos && contentRightPos < boundingRightPos) {
+          setHorizontalAlign('left');
+        }
       }
 
-      if (contentTopPos < boundingTopPos && contentBottomPos < boundingBottomPos) {
-        setVerticalAlign('bottom');
-      } else if (contentBottomPos > boundingBottomPos && contentTopPos > boundingTopPos) {
-        setVerticalAlign('top');
+      if (vertical) {
+        if (contentTopPos < boundingTopPos && contentBottomPos < boundingBottomPos) {
+          setVerticalAlign('bottom');
+        } else if (contentBottomPos > boundingBottomPos && contentTopPos > boundingTopPos) {
+          setVerticalAlign('top');
+        }
       }
     }
-  }, [boundingRef, intersectionEntry, windowHeight, windowWidth]);
+  }, [boundingRef]);
+
+  const handleClickOutside = useCallback((e) => {
+    if (contentRef.current.contains(e.target)) {
+      return;
+    }
+
+    setActive(false);
+  }, [contentRef]);
+
+  useEffect(() => {
+    setPosition({ horizontal: true });
+  }, [intersectionEntry, setPosition, windowWidth]);
+
+  useEffect(() => {
+    setPosition({ vertical: true });
+  }, [intersectionEntry, setPosition, windowHeight]);
 
   useEffect(() => {
     if (typeof onToggleOpen === 'function') onToggleOpen(active);

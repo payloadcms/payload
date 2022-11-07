@@ -1,8 +1,12 @@
 {
   "name": "payload",
-  "version": "1.1.15",
+  "version": "1.1.21",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
+  "engines": {
+    "node": ">=14",
+    "yarn": ">=1.22 <2"
+  },
   "author": {
     "email": "info@payloadcms.com",
     "name": "Payload CMS",
@@ -175,7 +179,7 @@
     "sanitize-filename": "^1.6.3",
     "sass": "^1.55.0",
     "sass-loader": "^12.6.0",
-    "sharp": "^0.29.3",
+    "sharp": "^0.31.1",
     "slate": "^0.72.8",
     "slate-history": "^0.66.0",
     "slate-hyperscript": "^0.66.0",
@@ -194,7 +198,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.23.1",
-    "@release-it/conventional-changelog": "^2.0.0",
+    "@release-it/conventional-changelog": "^5.1.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^13.0.1",
     "@trbl/eslint-config": "^1.2.4",
@@ -279,7 +283,7 @@
     "mongodb-memory-server": "^7.2.0",
     "nodemon": "^2.0.6",
     "passport-strategy": "^1.0.0",
-    "release-it": "^14.2.2",
+    "release-it": "^15.5.0",
     "rimraf": "^3.0.2",
     "serve-static": "^1.14.2",
     "shelljs": "^0.8.5",

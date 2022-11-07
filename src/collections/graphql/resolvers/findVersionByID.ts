@@ -28,6 +28,7 @@ export default function findVersionByIDResolver(collection: Collection): Resolve
       id: args.id,
       req: context.req,
       draft: args.draft,
+      depth: 0,
     };
 
     const result = await findVersionByID(options);

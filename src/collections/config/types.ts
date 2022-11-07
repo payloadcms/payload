@@ -112,13 +112,14 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
 
 export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
 
-export type BeforeLoginHook = (args: {
+export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
+  user: T
 }) => any;
 
 export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
-  doc: T;
+  user: T;
   token: string;
 }) => any;
 

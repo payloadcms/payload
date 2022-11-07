@@ -1,3 +1,53 @@
+
+
+## [1.1.21](https://github.com/payloadcms/payload/compare/v1.1.20...v1.1.21) (2022-11-05)
+
+## [1.1.20](https://github.com/payloadcms/payload/compare/v1.1.19...v1.1.20) (2022-11-05)
+
+
+### Features
+
+* optimizes blocks and arrays by removing some additional rerenders ([483adf0](https://github.com/payloadcms/payload/commit/483adf08c4131d0401e47ec45d72200b9dc60de2))
+
+## [1.1.19](https://github.com/payloadcms/payload/compare/v1.1.18...v1.1.19) (2022-10-31)
+
+
+### Bug Fixes
+
+* [#1307](https://github.com/payloadcms/payload/issues/1307), [#1321](https://github.com/payloadcms/payload/issues/1321) - bug with disableFormData and blocks field ([2a09f15](https://github.com/payloadcms/payload/commit/2a09f15a158ff30e89c5454f81aa140448f15d30))
+* [#1311](https://github.com/payloadcms/payload/issues/1311), select existing upload modal always updates state ([e2ec2f7](https://github.com/payloadcms/payload/commit/e2ec2f7b97ed308c4ff7deefbc58cf0df6ff0602))
+* [#1318](https://github.com/payloadcms/payload/issues/1318), improves popup positioning and logic ([c651835](https://github.com/payloadcms/payload/commit/c6518350617d14818dfc537b5b0a147274c1119b))
+* custom pino logger options ([#1299](https://github.com/payloadcms/payload/issues/1299)) ([2500026](https://github.com/payloadcms/payload/commit/25000261bd6ecb0f05ae79de9a0693078a0e3e0d))
+
+## [1.1.18](https://github.com/payloadcms/payload/compare/v1.1.17...v1.1.18) (2022-10-25)
+
+## [1.1.17](https://github.com/payloadcms/payload/compare/v1.1.16...v1.1.17) (2022-10-25)
+
+
+### Bug Fixes
+
+* [#1286](https://github.com/payloadcms/payload/issues/1286), uses defaultDepth in graphql rich text depth ([66bf8c3](https://github.com/payloadcms/payload/commit/66bf8c3cbd080ee5a28b7af521d427d3aae59ba2))
+* [#1290](https://github.com/payloadcms/payload/issues/1290), renders more than one rich text leaf where applicable ([a9f2f0e](https://github.com/payloadcms/payload/commit/a9f2f0ec03383ef4c3ef3ba98274b0abaaf962ed))
+* [#1291](https://github.com/payloadcms/payload/issues/1291), add inline relationship drafts ([3967c12](https://github.com/payloadcms/payload/commit/3967c1233fda00b48e9df15276502a6b14b737ff))
+* enforces depth: 0 in graphql resolvers ([3301f59](https://github.com/payloadcms/payload/commit/3301f598223d517ac310909bb74e455891c27693))
+* ensures field updates when disableFormData changes ([c929725](https://github.com/payloadcms/payload/commit/c929725dd565de08871dad655442ee9ac4f29dd5))
+* group + group styles within collapsible ([17dbbc7](https://github.com/payloadcms/payload/commit/17dbbc77757a7cd6e517bac443859561fee86e32))
+
+
+### Features
+
+* added beforeLogin hook ([#1289](https://github.com/payloadcms/payload/issues/1289)) ([09d7939](https://github.com/payloadcms/payload/commit/09d793926dbb642bbcb6ab975735d069df355a8a))
+* adds default max length for text-based fields ([6a1b25a](https://github.com/payloadcms/payload/commit/6a1b25ab302cbdf7f312012b29b78288815810af))
+* specify node 14+ and yarn classic LTS ([#1240](https://github.com/payloadcms/payload/issues/1240)) ([9181477](https://github.com/payloadcms/payload/commit/91814777b0bf3830c4a468b76783ff6f42ad824a))
+
+## [1.1.16](https://github.com/payloadcms/payload/compare/v1.1.15...v1.1.16) (2022-10-21)
+
+
+### Bug Fixes
+
+* indexSortableFields not respected ([785b992](https://github.com/payloadcms/payload/commit/785b992c3ea31f7818f1c87c816b8b8de644851d))
+* obscure bug where upload collection has upload field relating to itself ([36ef378](https://github.com/payloadcms/payload/commit/36ef3789fbe00cafe8b3587d6c370e28efd5a187))
+
 ## [1.1.15](https://github.com/payloadcms/payload/compare/v1.1.14...v1.1.15) (2022-10-14)
 
 

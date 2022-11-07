@@ -7,15 +7,15 @@ import find from '../../operations/find';
 
 export type Resolver = (_: unknown,
   args: {
-  data: Record<string, unknown>,
-  locale?: string
-  draft: boolean
-  where?: Where
-  limit?: number,
-  page?: number,
-  sort?: string
-  fallbackLocale?: string
-},
+    data: Record<string, unknown>,
+    locale?: string
+    draft: boolean
+    where?: Where
+    limit?: number,
+    page?: number,
+    sort?: string
+    fallbackLocale?: string
+  },
   context: {
     req: PayloadRequest,
     res: Response
@@ -36,6 +36,7 @@ export default function findResolver(collection: Collection): Resolver {
       sort: args.sort,
       req: context.req,
       draft: args.draft,
+      depth: 0,
     };
 
     const results = await find(options);

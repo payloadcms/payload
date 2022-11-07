@@ -71,25 +71,23 @@ const BlocksField: React.FC<Props> = (props) => {
   const { id } = useDocumentInfo();
   const locale = useLocale();
   const operation = useOperation();
-  const { dispatchFields } = formContext;
+  const { dispatchFields, setModified } = formContext;
+  const [selectorIndexOpen, setSelectorIndexOpen] = useState<number>();
 
   const memoizedValidate = useCallback((value, options) => {
     return validate(value, { ...options, minRows, maxRows, required });
   }, [maxRows, minRows, required, validate]);
 
-  const [disableFormData, setDisableFormData] = useState(true);
-  const [selectorIndexOpen, setSelectorIndexOpen] = useState<number>();
 
   const {
     showError,
     errorMessage,
     value,
-    setValue,
   } = useField<number>({
     path,
     validate: memoizedValidate,
-    disableFormData,
     condition,
+    disableFormData: rows?.length > 0,
   });
 
   const onAddPopupToggle = useCallback((open) => {
@@ -103,33 +101,34 @@ const BlocksField: React.FC<Props> = (props) => {
     const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, operation, id, user, locale });
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
     dispatchRows({ type: 'ADD', rowIndex, blockType });
-    setValue(value as number + 1);
+    setModified(true);
 
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [path, setValue, value, blocks, dispatchFields, operation, id, user, locale]);
+  }, [path, blocks, dispatchFields, operation, id, user, locale, setModified]);
 
   const duplicateRow = useCallback(async (rowIndex: number, blockType: string) => {
     dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });
     dispatchRows({ type: 'ADD', rowIndex, blockType });
-    setValue(value as number + 1);
+    setModified(true);
 
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [dispatchRows, dispatchFields, path, setValue, value]);
+  }, [dispatchRows, dispatchFields, path, setModified]);
 
   const removeRow = useCallback((rowIndex: number) => {
     dispatchRows({ type: 'REMOVE', rowIndex });
     dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
-    setValue(value as number - 1);
-  }, [path, setValue, value, dispatchFields]);
+    setModified(true);
+  }, [path, dispatchFields, setModified]);
 
   const moveRow = useCallback((moveFromIndex: number, moveToIndex: number) => {
     dispatchRows({ type: 'MOVE', moveFromIndex, moveToIndex });
     dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
-  }, [dispatchRows, dispatchFields, path]);
+    setModified(true);
+  }, [dispatchRows, dispatchFields, path, setModified]);
 
   const onDragEnd = useCallback((result) => {
     if (!result.destination) return;
@@ -199,16 +198,6 @@ const BlocksField: React.FC<Props> = (props) => {
 
     initializeRowState();
   }, [formContext, path, getPreference, preferencesKey, initCollapsed]);
-
-  useEffect(() => {
-    setValue(rows?.length || 0, true);
-
-    if (rows?.length === 0) {
-      setDisableFormData(false);
-    } else {
-      setDisableFormData(true);
-    }
-  }, [rows, setValue]);
 
   const hasMaxRows = maxRows && rows?.length >= maxRows;
 

@@ -29,6 +29,7 @@ export default function findVersionsResolver(globalConfig: SanitizedGlobalConfig
       page: args.page,
       sort: args.sort,
       req: context.req,
+      depth: 0,
     };
 
     const result = await findVersions(options);
