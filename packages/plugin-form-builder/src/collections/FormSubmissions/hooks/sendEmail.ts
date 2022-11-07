@@ -61,7 +61,7 @@ const sendEmail = async (beforeChangeData: any, formConfig: FormConfig) => {
                 from,
                 replyTo,
                 subject: replaceDoubleCurlys(subject, submissionData),
-                html: `<div>${serialize(message, submissionData)}`
+                html: `<div>${serialize(message, submissionData)}</div>`
               });
             }
             return null
