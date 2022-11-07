@@ -3,7 +3,8 @@ import en from './en.json';
 import es from './es.json';
 import it from './it.json';
 import pl from './pl.json';
-import vn from './vn.json'
+import vn from './vn.json';
+import ja from './ja.json';
 
 export default {
   de,
@@ -11,5 +12,6 @@ export default {
   es,
   it,
   pl,
-  vn
+  vn,
+  ja,
 };
