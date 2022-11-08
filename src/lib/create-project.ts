@@ -9,13 +9,11 @@ import { success, error, warning } from '../utils/log'
 import type { CliArgs, ProjectTemplate } from '../types'
 import { writeCommonFiles } from './write-common-files'
 
-async function createProjectDir(projectDir: string): Promise<void> {
+async function createOrFindProjectDir(projectDir: string): Promise<void> {
   const pathExists = await fse.pathExists(projectDir)
-  if (pathExists) {
-    error(`The project directory '${projectDir}' already exists`)
-    process.exit(1)
+  if (!pathExists) {
+    await fse.mkdir(projectDir)
   }
-  await fse.mkdir(projectDir)
 }
 
 async function installDeps(
@@ -87,7 +85,7 @@ export async function createProject(
   template: ProjectTemplate,
   packageManager: string,
 ): Promise<void> {
-  await createProjectDir(projectDir)
+  await createOrFindProjectDir(projectDir)
   const templateDir = path.resolve(__dirname, `../templates/${template.name}`)
 
   console.log(

@@ -60,7 +60,8 @@ export class Main {
       const template = await parseTemplate(this.args, validTemplates, language)
       const databaseUri = await getDatabaseConnection(this.args, projectName)
       const payloadSecret = await generateSecret()
-      const projectDir = `./${slugify(projectName)}`
+      const projectDir =
+        projectName === '.' ? process.cwd() : `./${slugify(projectName)}`
       const packageManager = await getPackageManager(this.args)
 
       if (!this.args['--dry-run']) {

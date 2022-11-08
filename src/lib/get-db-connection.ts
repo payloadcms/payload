@@ -13,7 +13,11 @@ export async function getDatabaseConnection(
       type: 'text',
       name: 'value',
       message: 'Enter MongoDB connection',
-      initial: `mongodb://localhost/${slugify(projectName)}`,
+      initial: `mongodb://localhost/${
+        projectName === '.'
+          ? `payload-${getRandomDigitSuffix()}`
+          : slugify(projectName)
+      }`,
       validate: (value: string) => value.length,
     },
     {
@@ -24,4 +28,8 @@ export async function getDatabaseConnection(
   )
 
   return response.value
+}
+
+function getRandomDigitSuffix(): string {
+  return (Math.random() * Math.pow(10, 6)).toFixed(0)
 }
