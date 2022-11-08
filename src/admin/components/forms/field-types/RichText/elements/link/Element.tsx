@@ -31,7 +31,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
   const config = useConfig();
   const { user } = useAuth();
   const locale = useLocale();
-  const { t } = useTranslation('fields');
+  const { t, i18n } = useTranslation('fields');
   const { openModal, toggleModal } = useModal();
   const [renderModal, setRenderModal] = useState(false);
   const [renderPopup, setRenderPopup] = useState(false);
@@ -79,12 +79,12 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
         fields: deepCopyObject(element.fields),
       };
 
-      const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'update', locale });
+      const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'update', locale, i18n });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [renderModal, element, fieldSchema, user, locale]);
+  }, [renderModal, element, fieldSchema, user, locale, i18n]);
 
   return (
     <span

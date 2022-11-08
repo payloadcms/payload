@@ -4,7 +4,10 @@ import { endpointsSchema } from '../../config/schema';
 
 const globalSchema = joi.object().keys({
   slug: joi.string().required(),
-  label: joi.string(),
+  label: joi.alternatives().try(
+    joi.string(),
+    joi.object().pattern(joi.string(), [joi.string()]),
+  ),
   admin: joi.object({
     group: joi.alternatives().try(
       joi.string(),

@@ -53,12 +53,12 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema, data: { ...element?.fields || {} }, user, operation: 'update', locale });
+      const state = await buildStateFromSchema({ fieldSchema, data: { ...element?.fields || {} }, user, operation: 'update', locale, i18n });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [fieldSchema, element.fields, user, locale]);
+  }, [fieldSchema, element.fields, user, locale, i18n]);
 
   return (
     <Modal

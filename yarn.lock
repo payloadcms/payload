@@ -6966,6 +6966,11 @@ i18next-browser-languagedetector@^6.1.8:
   dependencies:
     "@babel/runtime" "^7.19.0"
 
+i18next-http-middleware@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.npmjs.org/i18next-http-middleware/-/i18next-http-middleware-3.2.1.tgz#a0dff150de2273ec650da67336ad882eef58d179"
+  integrity sha512-zBwXxDChT0YLoTXIR6jRuqnUUhXW0Iw7egoTnNXyaDRtTbfWNXwU0a53ThyuRPQ+k+tXu3ZMNKRzfLuononaRw==
+
 i18next@^22.0.1:
   version "22.0.4"
   resolved "https://registry.npmjs.org/i18next/-/i18next-22.0.4.tgz#77d8871687b0ab072b38991e3887187823667e30"

@@ -40,7 +40,7 @@ const AccountView: React.FC = () => {
       user: 'users',
     },
   } = useConfig();
-  const { t } = useTranslation('account');
+  const { t, i18n } = useTranslation('account');
 
   const collection = collections.find((coll) => coll.slug === adminUser);
 
@@ -69,13 +69,13 @@ const AccountView: React.FC = () => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user, locale });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user, locale, i18n });
       await getPreference(preferencesKey);
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference]);
+  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, i18n]);
 
   return (
     <RenderCustomComponent

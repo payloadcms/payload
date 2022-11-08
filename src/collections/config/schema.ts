@@ -10,8 +10,14 @@ const strategyBaseSchema = joi.object().keys({
 const collectionSchema = joi.object().keys({
   slug: joi.string().required(),
   labels: joi.object({
-    singular: joi.string(),
-    plural: joi.string(),
+    singular: joi.alternatives().try(
+      joi.string(),
+      joi.object().pattern(joi.string(), [joi.string()]),
+    ),
+    plural: joi.alternatives().try(
+      joi.string(),
+      joi.object().pattern(joi.string(), [joi.string()]),
+    ),
   }),
   access: joi.object({
     create: joi.func(),

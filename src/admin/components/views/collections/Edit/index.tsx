@@ -58,10 +58,10 @@ const EditView: React.FC<IndexProps> = (props) => {
     if (!isEditing) {
       setRedirect(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
-      const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc, user, id, operation: 'update', locale });
+      const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc, user, id, operation: 'update', locale, i18n });
       setInitialState(state);
     }
-  }, [admin, collection, isEditing, getVersions, user, id, locale]);
+  }, [admin, collection, isEditing, getVersions, user, id, i18n, locale]);
 
   const [{ data, isLoading: isLoadingDocument, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
@@ -108,13 +108,13 @@ const EditView: React.FC<IndexProps> = (props) => {
       return;
     }
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: isEditing ? 'update' : 'create', id, locale });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: isEditing ? 'update' : 'create', id, locale, i18n });
       await getPreference(preferencesKey);
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, isEditing, id, user, locale, isLoadingDocument, preferencesKey, getPreference]);
+  }, [dataToRender, fields, isEditing, id, user, locale, isLoadingDocument, preferencesKey, getPreference, i18n]);
 
   useEffect(() => {
     if (redirect) {

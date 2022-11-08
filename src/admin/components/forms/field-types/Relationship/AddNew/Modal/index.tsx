@@ -35,12 +35,12 @@ export const AddNewRelationModal: React.FC<Props> = ({ modalCollection, onSave, 
 
   useEffect(() => {
     const buildState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: modalCollection.fields, data: {}, user, operation: 'create', locale });
+      const state = await buildStateFromSchema({ fieldSchema: modalCollection.fields, data: {}, user, operation: 'create', locale, i18n });
       setInitialState(state);
     };
 
     buildState();
-  }, [modalCollection, locale, user]);
+  }, [modalCollection, locale, user, i18n]);
 
   useEffect(() => {
     setIsAnimated(true);

@@ -64,6 +64,16 @@ export default buildConfig({
     },
     {
       slug,
+      labels: {
+        singular: {
+          en: 'Post en',
+          es: 'Post es',
+        },
+        plural: {
+          en: 'Posts en',
+          es: 'Posts es',
+        },
+      },
       admin: {
         listSearchableFields: ['title', 'description', 'number'],
         group: { en: 'One', es: 'Una' },
@@ -139,6 +149,10 @@ export default buildConfig({
   globals: [
     {
       slug: globalSlug,
+      label: {
+        en: 'Global en',
+        es: 'Global es',
+      },
       admin: {
         group: 'Group',
       },

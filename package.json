@@ -126,6 +126,7 @@
     "http-status": "^1.4.2",
     "i18next": "^22.0.1",
     "i18next-browser-languagedetector": "^6.1.8",
+    "i18next-http-middleware": "^3.2.1",
     "is-hotkey": "^0.2.0",
     "is-plain-object": "^5.0.0",
     "isomorphic-fetch": "^3.0.0",

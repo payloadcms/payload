@@ -51,7 +51,7 @@ const ListControls: React.FC<Props> = (props) => {
           fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
           handleChange={handleWhereChange}
           modifySearchQuery={modifySearchQuery}
-          fieldLabel={getTranslation(titleField.label, i18n) ?? undefined}
+          fieldLabel={(titleField && fieldAffectsData(titleField) && getTranslation(titleField?.label ?? titleField.name, i18n)) ?? undefined}
           listSearchableFields={textFieldsToBeSearched}
         />
         <div className={`${baseClass}__buttons`}>

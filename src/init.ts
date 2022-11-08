@@ -2,10 +2,7 @@
 import express, { NextFunction, Response } from 'express';
 import crypto from 'crypto';
 import mongoose from 'mongoose';
-import {
-
-  InitOptions,
-} from './config/types';
+import { InitOptions } from './config/types';
 
 import authenticate from './express/middleware/authenticate';
 import connectMongoose from './mongoose/connect';

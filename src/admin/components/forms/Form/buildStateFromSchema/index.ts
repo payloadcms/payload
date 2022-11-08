@@ -1,3 +1,4 @@
+import { i18n as Ii18n } from 'i18next';
 import { User } from '../../../../../auth';
 import { Field as FieldSchema } from '../../../../../fields/config/types';
 import { Fields, Data } from '../types';
@@ -11,6 +12,7 @@ type Args = {
   id?: string | number,
   operation?: 'create' | 'update'
   locale: string
+  i18n: Ii18n
 }
 
 const buildStateFromSchema = async (args: Args): Promise<Fields> => {
@@ -21,6 +23,7 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
     id,
     operation,
     locale,
+    i18n,
   } = args;
 
   if (fieldSchema) {
@@ -39,6 +42,7 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
       data: fullData,
       fullData,
       parentPassesCondition: true,
+      i18n,
     });
 
     await Promise.all(fieldPromises);

@@ -1,6 +1,7 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
+import { i18n } from 'i18next';
 import { Operation, Where } from '../../types';
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
@@ -82,6 +83,7 @@ export type ValidateOptions<T, S, F> = {
   user?: Partial<User>
   operation?: Operation
   payload?: Payload
+  i18n: i18n
 } & F;
 
 export type Validate<T = any, S = any, F = any> = (value?: T, options?: ValidateOptions<F, S, Partial<F>>) => string | true | Promise<string | true>;

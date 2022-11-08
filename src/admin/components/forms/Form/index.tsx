@@ -47,7 +47,7 @@ const Form: React.FC<Props> = (props) => {
 
   const history = useHistory();
   const locale = useLocale();
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
   const { refreshCookie, user } = useAuth();
   const { id } = useDocumentInfo();
   const operation = useOperation();
@@ -92,6 +92,7 @@ const Form: React.FC<Props> = (props) => {
             user,
             id,
             operation,
+            i18n,
           });
         }
 
@@ -112,7 +113,7 @@ const Form: React.FC<Props> = (props) => {
     }
 
     return isValid;
-  }, [contextRef, id, user, operation, dispatchFields]);
+  }, [contextRef, id, user, operation, i18n, dispatchFields]);
 
   const submit = useCallback(async (options: SubmitOptions = {}, e): Promise<void> => {
     const {
@@ -328,10 +329,10 @@ const Form: React.FC<Props> = (props) => {
   }, [contextRef]);
 
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
-    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation, locale });
+    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation, locale, i18n });
     contextRef.current = { ...initContextState } as FormContextType;
     dispatchFields({ type: 'REPLACE_STATE', state });
-  }, [id, user, operation, locale, dispatchFields]);
+  }, [id, user, operation, locale, i18n, dispatchFields]);
 
   contextRef.current.submit = submit;
   contextRef.current.getFields = getFields;

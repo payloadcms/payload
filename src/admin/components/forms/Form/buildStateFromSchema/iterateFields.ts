@@ -1,3 +1,4 @@
+import type { i18n } from 'i18next';
 import { User } from '../../../../../auth';
 import {
   Field as FieldSchema,
@@ -18,6 +19,7 @@ type Args = {
   fieldPromises: Promise<void>[]
   id: string | number
   operation: 'create' | 'update'
+  i18n: i18n
 }
 
 export const iterateFields = ({
@@ -32,6 +34,7 @@ export const iterateFields = ({
   fieldPromises,
   id,
   state,
+  i18n,
 }: Args): void => {
   fields.forEach((field) => {
     const initialData = data;
@@ -51,6 +54,7 @@ export const iterateFields = ({
         field,
         passesCondition,
         data,
+        i18n,
       }));
     }
   });
