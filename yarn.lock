@@ -2427,7 +2427,7 @@
     "@types/node" "*"
     "@types/pino" "6.3"
 
-"@types/pino-std-serializers@*":
+"@types/pino-std-serializers@*", "@types/pino-std-serializers@^4.0.0":
   version "4.0.0"
   resolved "https://registry.npmjs.org/@types/pino-std-serializers/-/pino-std-serializers-4.0.0.tgz#1e28b80b554c8222858e99a4e0fc77fd070e10e8"
   integrity sha512-gXfUZx2xIBbFYozGms53fT0nvkacx/+62c8iTxrEqH5PkIGAQvDbXg2774VWOycMPbqn5YJBQ3BMsg4Li3dWbg==

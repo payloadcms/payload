@@ -314,8 +314,14 @@ export const blocks = baseField.keys({
   maxRows: joi.number(),
   name: joi.string().required(),
   labels: joi.object({
-    singular: joi.string(),
-    plural: joi.string(),
+    singular: joi.alternatives().try(
+      joi.string(),
+      joi.object().pattern(joi.string(), [joi.string()]),
+    ),
+    plural: joi.alternatives().try(
+      joi.string(),
+      joi.object().pattern(joi.string(), [joi.string()]),
+    ),
   }),
   blocks: joi.array().items(
     joi.object({
@@ -323,8 +329,14 @@ export const blocks = baseField.keys({
       imageURL: joi.string(),
       imageAltText: joi.string(),
       labels: joi.object({
-        singular: joi.string(),
-        plural: joi.string(),
+        singular: joi.alternatives().try(
+          joi.string(),
+          joi.object().pattern(joi.string(), [joi.string()]),
+        ),
+        plural: joi.alternatives().try(
+          joi.string(),
+          joi.object().pattern(joi.string(), [joi.string()]),
+        ),
       }),
       fields: joi.array().items(joi.link('#field')),
     }),

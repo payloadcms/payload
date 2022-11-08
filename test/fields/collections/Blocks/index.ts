@@ -154,6 +154,45 @@ const BlockFields: CollectionConfig = {
       name: 'localizedBlocks',
       localized: true,
     },
+    {
+      type: 'blocks',
+      name: 'i18nBlocks',
+      label: {
+        en: 'Block en',
+        es: 'Block es',
+      },
+      labels: {
+        singular: {
+          en: 'Block en',
+          es: 'Block es',
+        },
+        plural: {
+          en: 'Blocks en',
+          es: 'Blocks es',
+        },
+      },
+      blocks: [
+        {
+          slug: 'text',
+          labels: {
+            singular: {
+              en: 'Text en',
+              es: 'Text es',
+            },
+            plural: {
+              en: 'Texts en',
+              es: 'Texts es',
+            },
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
   ],
 };
 

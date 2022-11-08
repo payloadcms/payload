@@ -240,6 +240,7 @@
     "@types/passport-jwt": "^3.0.3",
     "@types/passport-local": "^1.0.33",
     "@types/pino": "^6.3.4",
+    "@types/pino-std-serializers": "^4.0.0",
     "@types/pluralize": "^0.0.29",
     "@types/prismjs": "^1.16.2",
     "@types/prop-types": "^15.7.3",

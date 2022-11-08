@@ -112,6 +112,28 @@ describe('fields', () => {
     });
   });
 
+  describe('blocks', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'block-fields');
+    });
+
+    test('should use i18n block labels', async () => {
+      await page.goto(url.create);
+      await expect(page.locator('#field-i18nBlocks .blocks-field__header')).toContainText('Block en');
+
+      const addButton = page.locator('#field-i18nBlocks .btn__label');
+      await expect(addButton).toContainText('Add Block en');
+      await addButton.click();
+
+      const blockSelector = page.locator('#field-i18nBlocks .block-selector .block-selection').first();
+      await expect(blockSelector).toContainText('Text en');
+      await blockSelector.click();
+
+      await expect(page.locator('#i18nBlocks-row-0 .blocks-field__block-pill-text')).toContainText('Text en');
+    });
+  });
+
   describe('fields - array', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
