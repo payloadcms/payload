@@ -97,7 +97,7 @@ export type Option = OptionObject | string
 
 export interface FieldBase {
   name: string;
-  label?: Record<string, string> | string;
+  label?: Record<string, string> | string | false;
   required?: boolean;
   unique?: boolean;
   index?: boolean;

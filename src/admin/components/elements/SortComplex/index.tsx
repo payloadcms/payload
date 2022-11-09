@@ -30,7 +30,7 @@ const SortComplex: React.FC<Props> = (props) => {
     if (fieldAffectsData(field) && sortableFieldTypes.indexOf(field.type) > -1) {
       return [
         ...fields,
-        { label: getTranslation(field.label, i18n), value: field.name },
+        { label: getTranslation(field.label || field.name, i18n), value: field.name },
       ];
     }
     return fields;

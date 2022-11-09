@@ -91,7 +91,7 @@ const Checkbox: React.FC<Props> = (props) => {
           <Check />
         </span>
         <span className={`${baseClass}__label`}>
-          {getTranslation(label, i18n)}
+          {getTranslation(label || name, i18n)}
         </span>
       </button>
       <FieldDescription

@@ -21,7 +21,7 @@ const baseClass = 'where-builder';
 const reduceFields = (fields, i18n) => flattenTopLevelFields(fields).reduce((reduced, field) => {
   if (typeof fieldTypes[field.type] === 'object') {
     const formattedField = {
-      label: getTranslation(field.label, i18n),
+      label: getTranslation(field.label || field.name, i18n),
       value: field.name,
       ...fieldTypes[field.type],
       props: {

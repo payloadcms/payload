@@ -108,7 +108,7 @@ const RenderFields: React.FC<Props> = (props) => {
                       className="missing-field"
                       key={i}
                     >
-                      {t('error:noMatchedField', { label: getTranslation(field.label, i18n) })}
+                      {t('error:noMatchedField', { label: fieldAffectsData(field) ? getTranslation(field.label || field.name, i18n) : field.path })}
                     </div>
                   );
                 }

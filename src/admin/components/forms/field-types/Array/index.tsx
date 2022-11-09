@@ -219,7 +219,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         </div>
         <header className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-wrap`}>
-            <h3>{getTranslation(label, i18n)}</h3>
+            <h3>{getTranslation(label || name, i18n)}</h3>
             <ul className={`${baseClass}__header-actions`}>
               <li>
                 <button

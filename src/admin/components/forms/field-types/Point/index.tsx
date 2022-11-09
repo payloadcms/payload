@@ -85,7 +85,7 @@ const PointField: React.FC<Props> = (props) => {
         <li>
           <Label
             htmlFor={`field-longitude-${path.replace(/\./gi, '__')}`}
-            label={`${getTranslation(label, i18n)} - ${t('longitude')}`}
+            label={`${getTranslation(label || name, i18n)} - ${t('longitude')}`}
             required={required}
           />
           <input
@@ -102,7 +102,7 @@ const PointField: React.FC<Props> = (props) => {
         <li>
           <Label
             htmlFor={`field-latitude-${path.replace(/\./gi, '__')}`}
-            label={`${getTranslation(label, i18n)} - ${t('latitude')}`}
+            label={`${getTranslation(label || name, i18n)} - ${t('latitude')}`}
             required={required}
           />
           <input
