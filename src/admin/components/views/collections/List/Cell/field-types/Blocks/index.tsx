@@ -23,7 +23,7 @@ const BlocksCell:React.FC<Props> = ({ data, field }: Props) => {
   const itemsToShow = 5;
   if (selectedBlocks.length > itemsToShow) {
     const more = selectedBlocks.length - itemsToShow;
-    label = `${selectedBlocks.length} ${getTranslation(field.labels.plural, i18n)} - ${t('itemsAndMore', { items: formatBlockList(selectedBlocks.slice(0, itemsToShow)), count: more })}`;
+    label = `${selectedBlocks.length} ${getTranslation(field.labels.plural, i18n)} - ${t('fields:itemsAndMore', { items: formatBlockList(selectedBlocks.slice(0, itemsToShow)), count: more })}`;
   } else if (selectedBlocks.length > 0) {
     label = `${selectedBlocks.length} ${getTranslation(selectedBlocks.length === 1 ? field.labels.singular : field.labels.plural, i18n)} - ${formatBlockList(selectedBlocks)}`;
   }

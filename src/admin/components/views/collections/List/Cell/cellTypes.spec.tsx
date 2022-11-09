@@ -11,6 +11,10 @@ jest.mock('../../../../utilities/Config', () => ({
   useConfig: () => ({ admin: { dateFormat: 'MMMM do yyyy, h:mm a' } }),
 }));
 
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (string) => string }),
+}));
+
 describe('Cell Types', () => {
   describe('Blocks', () => {
     const field: BlockField = {
@@ -71,7 +75,7 @@ describe('Cell Types', () => {
         field={field}
       />);
       const el = container.querySelector('span');
-      expect(el).toHaveTextContent('6 Blocks Content - Number, Number, Number, Number, Number and 1 more');
+      expect(el).toHaveTextContent('fields:itemsAndMore');
     });
   });
 
