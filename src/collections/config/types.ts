@@ -212,6 +212,13 @@ export type CollectionConfig = {
     singular?: Record<string, string> | string;
     plural?: Record<string, string> | string;
   };
+  /**
+   * GraphQL configuration
+   */
+  graphQL?: {
+    singularName?: string
+    pluralName?: string
+  }
   fields: Field[];
   /**
    * Collection admin options

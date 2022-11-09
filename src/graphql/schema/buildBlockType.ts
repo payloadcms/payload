@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
 import { Payload } from '../..';
 import { Block } from '../../fields/config/types';
-import formatName from '../utilities/formatName';
 import buildObjectType from './buildObjectType';
+import { toWords } from '../../utilities/formatLabels';
 
 type Args = {
   payload: Payload
@@ -17,13 +17,10 @@ function buildBlockType({
 }: Args): void {
   const {
     slug,
-    labels: {
-      singular,
-    },
   } = block;
 
   if (!payload.types.blockTypes[slug]) {
-    const formattedBlockName = formatName(singular);
+    const formattedBlockName = toWords(slug);
     payload.types.blockTypes[slug] = buildObjectType({
       payload,
       name: formattedBlockName,

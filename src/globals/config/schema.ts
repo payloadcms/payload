@@ -19,6 +19,7 @@ const globalSchema = joi.object().keys({
       componentSchema,
     ),
   }),
+  graphQLName: joi.string(),
   hooks: joi.object({
     beforeValidate: joi.array().items(joi.func()),
     beforeChange: joi.array().items(joi.func()),

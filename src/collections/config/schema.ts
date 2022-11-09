@@ -28,6 +28,10 @@ const collectionSchema = joi.object().keys({
     unlock: joi.func(),
     admin: joi.func(),
   }),
+  graphQL: joi.object().keys({
+    singularName: joi.string(),
+    pluralName: joi.string(),
+  }),
   timestamps: joi.boolean(),
   admin: joi.object({
     useAsTitle: joi.string(),
