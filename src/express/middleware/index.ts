@@ -13,7 +13,7 @@ import { Payload } from '../..';
 import { PayloadRequest } from '../types';
 import corsHeaders from './corsHeaders';
 import convertPayload from './convertPayload';
-import i18nMiddleware from './i18n';
+import { i18nMiddleware } from './i18n';
 
 const middleware = (payload: Payload): any => {
   const rateLimitOptions: {

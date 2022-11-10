@@ -33,7 +33,21 @@ const formatLabels = ((slug: string): { singular: string, plural: string } => {
     };
 });
 
+const formatNames = ((slug: string): { singular: string, plural: string } => {
+  const words = toWords(slug, true);
+  return (isPlural(slug))
+    ? {
+      singular: singular(words),
+      plural: words,
+    }
+    : {
+      singular: words,
+      plural: pluralize(words),
+    };
+});
+
 export {
+  formatNames,
   formatLabels,
   toWords,
 };

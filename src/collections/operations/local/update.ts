@@ -4,6 +4,7 @@ import getFileByPath from '../../../uploads/getFileByPath';
 import update from '../update';
 import { PayloadRequest } from '../../../express/types';
 import { getDataLoader } from '../../dataloader';
+import i18n from '../../../translations/init';
 
 export type Options<T> = {
   collection: string
@@ -48,6 +49,7 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
     locale,
     fallbackLocale,
     payload,
+    i18n: i18n(payload.config.i18n),
     files: {
       file: file ?? await getFileByPath(filePath),
     },

@@ -33,7 +33,7 @@ import { Field, fieldAffectsData } from '../../fields/config/types';
 import buildObjectType, { ObjectTypeConfig } from '../../graphql/schema/buildObjectType';
 import buildWhereInputType from '../../graphql/schema/buildWhereInputType';
 import getDeleteResolver from './resolvers/delete';
-import { toWords, formatLabels } from '../../utilities/formatLabels';
+import { toWords, formatNames } from '../../utilities/formatLabels';
 import { Collection, SanitizedCollectionConfig } from '../config/types';
 
 function initCollectionsGraphQL(payload: Payload): void {
@@ -50,7 +50,7 @@ function initCollectionsGraphQL(payload: Payload): void {
 
     let singularName;
     let pluralName;
-    const fromSlug = formatLabels(collection.config.slug);
+    const fromSlug = formatNames(collection.config.slug);
     if (graphQL.singularName) {
       singularName = toWords(graphQL.singularName, true);
     } else {
@@ -70,7 +70,7 @@ function initCollectionsGraphQL(payload: Payload): void {
       pluralName = `all${singularName}`;
     }
 
-    collection.graphQL = {} as any;
+    collection.graphQL = {} as Collection['graphQL'];
 
     const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id');
     const idType = getCollectionIDType(collection.config);

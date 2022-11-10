@@ -127,8 +127,8 @@ export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
 
     fields[formatName(collection.slug)] = {
       type: new GraphQLObjectType({
-        name: formatName(`${collection.labels.singular}Access`),
-        fields: buildEntity(collection.graphQL.singularName || collection.slug, collection.fields, collectionOperations),
+        name: formatName(`${collection.slug}Access`),
+        fields: buildEntity(collection.slug, collection.fields, collectionOperations),
       }),
     };
   });
@@ -142,7 +142,7 @@ export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
 
     fields[formatName(global.slug)] = {
       type: new GraphQLObjectType({
-        name: formatName(`${global.label}Access`),
+        name: formatName(`${global.graphQLName || global.slug}Access`),
         fields: buildEntity(global.graphQLName || global.slug, global.fields, globalOperations),
       }),
     };

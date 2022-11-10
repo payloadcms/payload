@@ -4,6 +4,7 @@ import { PayloadRequest } from '../../../express/types';
 import { Payload } from '../../../index';
 import deleteOperation from '../delete';
 import { getDataLoader } from '../../dataloader';
+import i18n from '../../../translations/init';
 
 export type Options = {
   collection: string
@@ -36,6 +37,7 @@ export default async function deleteLocal<T extends TypeWithID = any>(payload: P
     locale,
     fallbackLocale,
     payload,
+    i18n: i18n(payload.config.i18n),
   } as PayloadRequest;
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
