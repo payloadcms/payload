@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import payload from '../../src';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { slug } from './config';
+import { organizationSlug, slug } from './config';
 import { devUser } from '../credentials';
+import jwt from 'jsonwebtoken';
 
 require('isomorphic-fetch');
 
@@ -27,10 +28,18 @@ describe('Auth', () => {
 
   describe('admin user', () => {
     beforeAll(async () => {
+      const org = await payload.create({
+        collection: organizationSlug,
+        data: {
+          name: 'Test Org',
+        }
+      });
+
       await fetch(`${apiUrl}/${slug}/first-register`, {
         body: JSON.stringify({
           email,
           password,
+          [organizationSlug]: org.id
         }),
         headers,
         method: 'post',
@@ -69,7 +78,7 @@ describe('Auth', () => {
     describe('logged in', () => {
       let token: string | undefined;
       beforeAll(async () => {
-        const response = await fetch(`${apiUrl}/${slug}/login`, {
+        const response = await fetch(`${apiUrl}/${slug}/login?depth=2`, {
           body: JSON.stringify({
             email,
             password,
@@ -108,6 +117,15 @@ describe('Auth', () => {
 
         expect(response.status).toBe(200);
         expect(data.refreshedToken).toBeDefined();
+      });
+
+      it('token should hold nested relationship data', async () => {
+        const decodedToken = jwt.decode((token as string)) as jwt.JwtPayload
+
+        expect(decodedToken.organization).toBeDefined();
+        expect(typeof decodedToken.organization).toBe('object'); // Fails here. No nested relationship data.
+        expect(decodedToken.organization).toHaveProperty('name');
+        expect(decodedToken.organization.name).toEqual('Test Org');
       });
 
       it('should allow a user to be created', async () => {
@@ -286,5 +304,6 @@ describe('Auth', () => {
 
       expect(response.status).toBe(200);
     });
+
   });
 });

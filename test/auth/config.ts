@@ -1,11 +1,13 @@
 import { buildConfig } from '../buildConfig';
 
 export const slug = 'users';
+export const organizationSlug = 'organization';
 
 export default buildConfig({
   admin: {
     user: 'users',
   },
+  defaultDepth: 10,
   collections: [
     {
       slug,
@@ -15,7 +17,7 @@ export default buildConfig({
         maxLoginAttempts: 2,
         lockTime: 600 * 1000, // lock time in ms
         useAPIKey: true,
-        depth: 0,
+        depth: 2,
         cookies: {
           secure: false,
           sameSite: 'lax',
@@ -33,8 +35,25 @@ export default buildConfig({
           saveToJWT: true,
           hasMany: true,
         },
-
+        {
+          name: 'organization',
+          label: 'Organization',
+          type: 'relationship',
+          relationTo: organizationSlug,
+          saveToJWT: true,
+          maxDepth: 10
+        }
       ],
     },
+    {
+      slug: organizationSlug,
+      fields: [
+        {
+          name: 'name',
+          label: 'Name',
+          type: 'text',
+        }
+      ]
+    }
   ],
 });
