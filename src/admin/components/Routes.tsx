@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useState, useEffect } from 'react';
 import {
   Route, Switch, withRouter, Redirect,
 } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from './utilities/Auth';
 import { useConfig } from './utilities/Config';
 import List from './views/collections/List';
@@ -29,6 +30,7 @@ const Account = lazy(() => import('./views/Account'));
 const Routes = () => {
   const [initialized, setInitialized] = useState(null);
   const { user, permissions, refreshCookie } = useAuth();
+  const { i18n } = useTranslation();
 
   const canAccessAdmin = permissions?.canAccessAdmin;
 
@@ -50,7 +52,11 @@ const Routes = () => {
     const { slug } = userCollection;
 
     if (!userCollection.auth.disableLocalStrategy) {
-      requests.get(`${routes.api}/${slug}/init`).then((res) => res.json().then((data) => {
+      requests.get(`${routes.api}/${slug}/init`, {
+        headers: {
+          'accept-language': i18n.language,
+        },
+      }).then((res) => res.json().then((data) => {
         if (data && 'initialized' in data) {
           setInitialized(data.initialized);
         }
@@ -58,7 +64,7 @@ const Routes = () => {
     } else {
       setInitialized(true);
     }
-  }, [routes, userCollection]);
+  }, [i18n.language, routes, userCollection]);
 
   return (
     <Suspense fallback={<Loading />}>

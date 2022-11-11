@@ -9,6 +9,7 @@ import Button from '../Button';
 import { requests } from '../../../api';
 import { useForm, useFormModified } from '../../forms/Form/context';
 import MinimalTemplate from '../../templates/Minimal';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -22,7 +23,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
   const { serverURL, routes: { api }, localization } = useConfig();
   const { routes: { admin } } = useConfig();
   const [hasClicked, setHasClicked] = useState<boolean>(false);
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
 
   const modalSlug = `duplicate-${id}`;
 
@@ -38,6 +39,9 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
       const response = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
         locale,
         depth: 0,
+        headers: {
+          'accept-language': i18n.language,
+        },
       });
       let data = await response.json();
 
@@ -51,6 +55,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
       const result = await requests.post(`${serverURL}${api}/${slug}`, {
         headers: {
           'Content-Type': 'application/json',
+          'accept-language': i18n.language,
         },
         body: JSON.stringify(data),
       });
@@ -74,6 +79,9 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
             const res = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
               locale,
               depth: 0,
+              headers: {
+                'accept-language': i18n.language,
+              },
             });
             let localizedDoc = await res.json();
 
@@ -87,6 +95,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
             const patchResult = await requests.patch(`${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`, {
               headers: {
                 'Content-Type': 'application/json',
+                'accept-language': i18n.language,
               },
               body: JSON.stringify(localizedDoc),
             });
@@ -99,13 +108,17 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         });
       if (abort) {
         // delete the duplicate doc to prevent incomplete
-        await requests.delete(`${serverURL}${api}/${slug}/${id}`);
+        await requests.delete(`${serverURL}${api}/${slug}/${id}`, {
+          headers: {
+            'accept-language': i18n.language,
+          },
+        });
       }
     } else {
       duplicateID = await create();
     }
 
-    toast.success(t('successfullyDuplicated', { label: collection.labels.singular }),
+    toast.success(t('successfullyDuplicated', { label: getTranslation(collection.labels.singular, i18n) }),
       { autoClose: 3000 });
 
     setModified(false);
@@ -115,7 +128,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         pathname: `${admin}/collections/${slug}/${duplicateID}`,
       });
     }, 10);
-  }, [modified, localization, t, collection.labels.singular, collection.admin.hooks, setModified, toggleModal, modalSlug, serverURL, api, slug, id, push, admin]);
+  }, [modified, localization, t, i18n, collection.labels.singular, collection.admin.hooks, setModified, toggleModal, modalSlug, serverURL, api, slug, id, push, admin]);
 
   const confirm = useCallback(async () => {
     setHasClicked(false);

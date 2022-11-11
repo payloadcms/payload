@@ -4,6 +4,7 @@ import React, {
 import jwtDecode from 'jwt-decode';
 import { useLocation, useHistory } from 'react-router-dom';
 import { useModal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import { User, Permissions } from '../../../../auth/types';
 import { useConfig } from '../Config';
 import { requests } from '../../../api';
@@ -37,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [permissions, setPermissions] = useState<Permissions>();
 
-
+  const { i18n } = useTranslation();
   const { openModal, closeAllModals } = useModal();
   const [lastLocationChange, setLastLocationChange] = useState(0);
   const debouncedLocationChange = useDebounce(lastLocationChange, 10000);
@@ -78,7 +79,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // On mount, get user and set
   useEffect(() => {
     const fetchMe = async () => {
-      const request = await requests.get(`${serverURL}${api}/${userSlug}/me`);
+      const request = await requests.get(`${serverURL}${api}/${userSlug}/me`, {
+        headers: {
+          'accept-language': i18n.language,
+        },
+      });
 
       if (request.status === 200) {
         const json = await request.json();
@@ -92,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     fetchMe();
-  }, [setToken, api, serverURL, userSlug]);
+  }, [i18n, setToken, api, serverURL, userSlug]);
 
   // When location changes, refresh cookie
   useEffect(() => {
@@ -108,7 +113,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // When user changes, get new access
   useEffect(() => {
     async function getPermissions() {
-      const request = await requests.get(`${serverURL}${api}/access`);
+      const request = await requests.get(`${serverURL}${api}/access`, {
+        headers: {
+          'accept-language': i18n.language,
+        },
+      });
 
       if (request.status === 200) {
         const json: Permissions = await request.json();
@@ -119,7 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (id) {
       getPermissions();
     }
-  }, [id, api, serverURL]);
+  }, [i18n, id, api, serverURL]);
 
   useEffect(() => {
     let reminder: ReturnType<typeof setTimeout>;
