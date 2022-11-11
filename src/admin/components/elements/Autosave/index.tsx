@@ -21,7 +21,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   const modified = useFormModified();
   const locale = useLocale();
   const { replace } = useHistory();
-  const { t } = useTranslation('version');
+  const { t, i18n } = useTranslation('version');
 
   let interval = 800;
   if (collection?.versions.drafts && collection.versions?.drafts?.autosave) interval = collection.versions.drafts.autosave.interval;
@@ -43,6 +43,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        'accept-language': i18n.language,
       },
       body: JSON.stringify({}),
     });
@@ -55,9 +56,9 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
         },
       });
     } else {
-      toast.error(t('error.autosaving'));
+      toast.error(t('error:autosaving'));
     }
-  }, [serverURL, api, collection, locale, replace, admin, t]);
+  }, [i18n, serverURL, api, collection, locale, replace, admin, t]);
 
   useEffect(() => {
     // If no ID, but this is used for a collection doc,
@@ -99,6 +100,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
               credentials: 'include',
               headers: {
                 'Content-Type': 'application/json',
+                'accept-language': i18n.language,
               },
               body: JSON.stringify(body),
             });
@@ -115,7 +117,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
     };
 
     autosave();
-  }, [debouncedFields, modified, serverURL, api, collection, global, id, getVersions, locale]);
+  }, [i18n, debouncedFields, modified, serverURL, api, collection, global, id, getVersions, locale]);
 
   useEffect(() => {
     if (versions?.docs?.[0]) {

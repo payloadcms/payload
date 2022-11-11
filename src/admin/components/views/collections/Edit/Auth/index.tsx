@@ -22,7 +22,7 @@ const Auth: React.FC<Props> = (props) => {
   const enableAPIKey = useFormFields(([fields]) => fields.enableAPIKey);
   const dispatchFields = useFormFields((reducer) => reducer[1]);
   const modified = useFormModified();
-  const { t } = useTranslation('authentication');
+  const { t, i18n } = useTranslation('authentication');
 
   const {
     serverURL,
@@ -46,6 +46,7 @@ const Auth: React.FC<Props> = (props) => {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        'accept-language': i18n.language,
       },
       body: JSON.stringify({
         email,
@@ -58,7 +59,7 @@ const Auth: React.FC<Props> = (props) => {
     } else {
       toast.error(t('failedToUnlock'));
     }
-  }, [serverURL, api, slug, email, t]);
+  }, [i18n, serverURL, api, slug, email, t]);
 
   useEffect(() => {
     if (!modified) {

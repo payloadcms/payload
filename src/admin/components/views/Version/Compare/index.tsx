@@ -31,7 +31,7 @@ const CompareVersion: React.FC<Props> = (props) => {
   const [options, setOptions] = useState(baseOptions);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [errorLoading, setErrorLoading] = useState('');
-  const { t } = useTranslation('version');
+  const { t, i18n } = useTranslation('version');
 
   const getResults = useCallback(async ({
     lastLoadedPage: lastLoadedPageArg,
@@ -63,7 +63,12 @@ const CompareVersion: React.FC<Props> = (props) => {
     }
 
     const search = qs.stringify(query);
-    const response = await fetch(`${baseURL}?${search}`, { credentials: 'include' });
+    const response = await fetch(`${baseURL}?${search}`, {
+      credentials: 'include',
+      headers: {
+        'accept-language': i18n.language,
+      },
+    });
 
     if (response.ok) {
       const data: PaginatedDocs = await response.json();
@@ -80,7 +85,7 @@ const CompareVersion: React.FC<Props> = (props) => {
     } else {
       setErrorLoading(t('error:unspecific'));
     }
-  }, [dateFormat, baseURL, parentID, versionID, t]);
+  }, [dateFormat, baseURL, parentID, versionID, t, i18n]);
 
   const classes = [
     'field-type',

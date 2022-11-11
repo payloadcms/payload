@@ -62,7 +62,12 @@ const RelationshipField: React.FC<Props> = (props) => {
           const fieldToSearch = collection?.admin?.useAsTitle || 'id';
           const searchParam = searchArg ? `&where[${fieldToSearch}][like]=${searchArg}` : '';
 
-          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`, { credentials: 'include' });
+          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`, {
+            credentials: 'include',
+            headers: {
+              'accept-language': i18n.language,
+            },
+          });
 
           if (response.ok) {
             const data: PaginatedDocs = await response.json();
@@ -87,7 +92,7 @@ const RelationshipField: React.FC<Props> = (props) => {
         }
       }, Promise.resolve());
     }
-  }, [relationTo, errorLoading, collections, serverURL, api, addOptions, t]);
+  }, [i18n, relationTo, errorLoading, collections, serverURL, api, addOptions, t]);
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
@@ -154,7 +159,12 @@ const RelationshipField: React.FC<Props> = (props) => {
 
   const addOptionByID = useCallback(async (id, relation) => {
     if (!errorLoading && id !== 'null') {
-      const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`, { credentials: 'include' });
+      const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`, {
+        credentials: 'include',
+        headers: {
+          'accept-language': i18n.language,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -163,7 +173,7 @@ const RelationshipField: React.FC<Props> = (props) => {
         console.error(t('error:loadingDocument', { id }));
       }
     }
-  }, [addOptions, api, errorLoading, serverURL, t]);
+  }, [i18n, addOptions, api, errorLoading, serverURL, t]);
 
   // ///////////////////////////
   // Get results when search input changes

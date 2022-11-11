@@ -83,7 +83,12 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   useEffect(() => {
     if (typeof value === 'string' && value !== '') {
       const fetchFile = async () => {
-        const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`, { credentials: 'include' });
+        const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`, {
+          credentials: 'include',
+          headers: {
+            'accept-language': i18n.language,
+          },
+        });
         if (response.ok) {
           const json = await response.json();
           setFile(json);
@@ -102,6 +107,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     relationTo,
     api,
     serverURL,
+    i18n,
   ]);
 
   useEffect(() => {
