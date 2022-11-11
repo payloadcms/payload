@@ -9,7 +9,7 @@ import Button from '../../elements/Button';
 import { Props } from './types';
 import { Gutter } from '../../elements/Gutter';
 import { groupNavItems, Group, EntityToGroup, EntityType } from '../../../utilities/groupNavItems';
-import { getTranslation } from '../../../utilities/getTranslation';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -23,7 +23,7 @@ const Dashboard: React.FC<Props> = (props) => {
   } = props;
 
   const { push } = useHistory();
-  const { t, i18n } = useTranslation('general');
+  const { i18n } = useTranslation('general');
 
   const {
     routes: {

@@ -10,7 +10,7 @@ import SortComplex from '../SortComplex';
 import Button from '../Button';
 import { Props } from './types';
 import { useSearchParams } from '../../utilities/SearchParams';
-import { getTranslation } from '../../../utilities/getTranslation';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 
 import './index.scss';

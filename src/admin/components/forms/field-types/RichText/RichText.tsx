@@ -22,7 +22,7 @@ import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/type
 import listTypes from './elements/listTypes';
 import mergeCustomFunctions from './mergeCustomFunctions';
 import withEnterBreakOut from './plugins/withEnterBreakOut';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 

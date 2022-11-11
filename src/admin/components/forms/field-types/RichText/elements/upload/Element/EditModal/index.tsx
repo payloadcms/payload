@@ -14,7 +14,7 @@ import Form from '../../../../../../Form';
 import Submit from '../../../../../../Submit';
 import { Field } from '../../../../../../../../../fields/config/types';
 import { useLocale } from '../../../../../../../utilities/Locale';
-import { getTranslation } from '../../../../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 

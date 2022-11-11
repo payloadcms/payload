@@ -6,7 +6,7 @@ import { Props } from './types';
 import Chevron from '../../icons/Chevron';
 import Button from '../Button';
 import { useSearchParams } from '../../utilities/SearchParams';
-import { getTranslation } from '../../../utilities/getTranslation';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 

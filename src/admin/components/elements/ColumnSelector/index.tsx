@@ -5,7 +5,7 @@ import Pill from '../Pill';
 import Plus from '../../icons/Plus';
 import X from '../../icons/X';
 import { Props } from './types';
-import { getTranslation } from '../../../utilities/getTranslation';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 

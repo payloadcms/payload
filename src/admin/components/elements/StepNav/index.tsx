@@ -7,7 +7,7 @@ import Chevron from '../../icons/Chevron';
 import { Context as ContextType } from './types';
 
 import './index.scss';
-import { getTranslation } from '../../../utilities/getTranslation';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 const Context = createContext({} as ContextType);
 

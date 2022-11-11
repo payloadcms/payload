@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { BlockField } from '../../../../../../../../fields/config/types';
-import { getTranslation } from '../../../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 
 type Props = {
   data: any

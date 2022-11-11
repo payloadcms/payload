@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { arrayMove } from '../../../../utilities/arrayMove';
 import { Props, Value } from './types';
 import Chevron from '../../icons/Chevron';
-import { getTranslation } from '../../../utilities/getTranslation';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 

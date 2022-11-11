@@ -17,7 +17,7 @@ import Button from '../../../../../../elements/Button';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import PerPage from '../../../../../../elements/PerPage';
 import { injectVoidElement } from '../../injectVoid';
-import { getTranslation } from '../../../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 import '../addSwapModals.scss';

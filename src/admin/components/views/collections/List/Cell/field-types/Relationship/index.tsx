@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../utilities/Config';
 import useIntersect from '../../../../../../../hooks/useIntersect';
 import { useListRelationships } from '../../../RelationshipProvider';
-import { getTranslation } from '../../../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 

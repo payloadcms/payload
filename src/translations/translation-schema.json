@@ -556,6 +556,9 @@
         "delete": {
           "type": "string"
         },
+        "deletedSuccessfully": {
+          "type": "string"
+        },
         "deleting": {
           "type": "string"
         },
@@ -727,6 +730,9 @@
         "updatedAt": {
           "type": "string"
         },
+        "updatedSuccessfully": {
+          "type": "string"
+        },
         "user": {
           "type": "string"
         },
@@ -764,6 +770,7 @@
         "dark",
         "dashboard",
         "delete",
+        "deletedSuccessfully",
         "deleting",
         "descending",
         "duplicate",
@@ -821,6 +828,7 @@
         "unsavedChangesDuplicate",
         "untitled",
         "updatedAt",
+        "updatedSuccessfully",
         "user",
         "users",
         "welcome"
@@ -969,6 +977,9 @@
         "autosave": {
           "type": "string"
         },
+        "autosavedSuccessfully": {
+          "type": "string"
+        },
         "autosavedVersion": {
           "type": "string"
         },
@@ -993,6 +1004,9 @@
         "draft": {
           "type": "string"
         },
+        "draftSavedSuccessfully": {
+          "type": "string"
+        },
         "lastSavedAgo": {
           "type": "string"
         },
@@ -1015,6 +1029,9 @@
           "type": "string"
         },
         "restoreThisVersion": {
+          "type": "string"
+        },
+        "restoredSuccessfully": {
           "type": "string"
         },
         "restoring": {
@@ -1090,6 +1107,7 @@
         "aboutToRevertToPublished",
         "aboutToUnpublish",
         "autosave",
+        "autosavedSuccessfully",
         "autosavedVersion",
         "changed",
         "compareVersion",
@@ -1098,6 +1116,7 @@
         "confirmVersionRestoration",
         "currentDocumentStatus",
         "draft",
+        "draftSavedSuccessfully",
         "lastSavedAgo",
         "noFurtherVersionsFound",
         "noRowsFound",
@@ -1106,6 +1125,7 @@
         "publishChanges",
         "published",
         "restoreThisVersion",
+        "restoredSuccessfully",
         "restoring",
         "revertToPublished",
         "reverting",

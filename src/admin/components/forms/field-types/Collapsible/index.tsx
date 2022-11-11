@@ -10,7 +10,7 @@ import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import FieldDescription from '../../FieldDescription';
 import { getFieldPath } from '../getFieldPath';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 

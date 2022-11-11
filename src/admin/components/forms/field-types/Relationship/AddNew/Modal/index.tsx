@@ -13,7 +13,7 @@ import X from '../../../../../icons/X';
 import { Fields } from '../../../../Form/types';
 import buildStateFromSchema from '../../../../Form/buildStateFromSchema';
 import { EditDepthContext, useEditDepth } from '../../../../../utilities/EditDepth';
-import { getTranslation } from '../../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../../utilities/getTranslation';
 import { DocumentInfoProvider } from '../../../../../utilities/DocumentInfo';
 
 import './index.scss';

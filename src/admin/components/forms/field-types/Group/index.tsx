@@ -8,7 +8,7 @@ import { fieldAffectsData } from '../../../../../fields/config/types';
 import { useCollapsible } from '../../../elements/Collapsible/provider';
 import { GroupProvider, useGroup } from './provider';
 import { useTabs } from '../Tabs/provider';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 

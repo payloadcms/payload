@@ -7,7 +7,7 @@ import { OptionObject, SelectField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
 import ReactSelect from '../../../elements/ReactSelect';
 import { Value as ReactSelectValue } from '../../../elements/ReactSelect/types';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 

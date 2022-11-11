@@ -158,7 +158,7 @@ describe('admin', () => {
       await page.locator('#action-delete').click();
       await page.locator('#confirm-delete').click();
 
-      await expect(page.locator(`text=Post "${id}" successfully deleted.`)).toBeVisible();
+      await expect(page.locator(`text=Post en "${id}" successfully deleted.`)).toBeVisible();
       expect(page.url()).toContain(url.list);
     });
 

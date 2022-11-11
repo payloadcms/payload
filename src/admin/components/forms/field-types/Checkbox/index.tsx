@@ -7,7 +7,7 @@ import { checkbox } from '../../../../../fields/validations';
 import Check from '../../../icons/Check';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 

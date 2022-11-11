@@ -17,7 +17,7 @@ import { Gutter } from '../../../elements/Gutter';
 import { RelationshipProvider } from './RelationshipProvider';
 
 import './index.scss';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 const baseClass = 'collection-list';
 

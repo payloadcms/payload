@@ -10,7 +10,7 @@ import RenderFields from '../../../RenderFields';
 import FormSubmit from '../../../Submit';
 import Upload from '../../../../views/collections/Edit/Upload';
 import ViewDescription from '../../../../elements/ViewDescription';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 import { Props } from './types';
 
 import './index.scss';

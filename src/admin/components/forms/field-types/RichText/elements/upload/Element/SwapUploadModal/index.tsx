@@ -15,7 +15,7 @@ import UploadGallery from '../../../../../../../elements/UploadGallery';
 import Paginator from '../../../../../../../elements/Paginator';
 import PerPage from '../../../../../../../elements/PerPage';
 import formatFields from '../../../../../../../views/collections/List/formatFields';
-import { getTranslation } from '../../../../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../../../../utilities/getTranslation';
 
 import '../../addSwapModals.scss';
 

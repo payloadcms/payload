@@ -5,7 +5,7 @@ import { useConfig } from '../../../../utilities/Config';
 import RenderCustomComponent from '../../../../utilities/RenderCustomComponent';
 import cellComponents from './field-types';
 import { Props } from './types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 
 const DefaultCell: React.FC<Props> = (props) => {
   const {

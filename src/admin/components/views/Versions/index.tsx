@@ -21,7 +21,7 @@ import { SanitizedCollectionConfig } from '../../../../collections/config/types'
 import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 import { shouldIncrementVersionCount } from '../../../../versions/shouldIncrementVersionCount';
 import { Gutter } from '../../elements/Gutter';
-import { getTranslation } from '../../../utilities/getTranslation';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 

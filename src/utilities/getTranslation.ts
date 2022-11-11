@@ -1,4 +1,6 @@
-export const getTranslation = (label: Record<string, string> | string | JSX.Element, i18n): string => {
+import type { i18n as Ii18n } from 'i18next';
+
+export const getTranslation = (label: Record<string, string> | string | JSX.Element, i18n: Ii18n): string => {
   if (typeof label === 'object') {
     if (label[i18n.language]) {
       return label[i18n.language];

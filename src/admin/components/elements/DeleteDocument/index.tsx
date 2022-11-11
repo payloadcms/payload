@@ -12,6 +12,7 @@ import { requests } from '../../../api';
 import { Props } from './types';
 
 import './index.scss';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 const baseClass = 'delete-document';
 
@@ -36,7 +37,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const [deleting, setDeleting] = useState(false);
   const { toggleModal } = useModal();
   const history = useHistory();
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
   const title = useTitle(useAsTitle) || id;
   const titleToRender = titleFromProps || title;
 
@@ -58,7 +59,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
         const json = await res.json();
         if (res.status < 400) {
           toggleModal(modalSlug);
-          toast.success(t('titleDeleted', { label: singular, title }));
+          toast.success(t('titleDeleted', { label: getTranslation(singular, i18n), title }));
           return history.push(`${admin}/collections/${slug}`);
         }
 
@@ -74,7 +75,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
         return addDefaultError();
       }
     });
-  }, [setModified, serverURL, api, slug, id, toggleModal, modalSlug, t, singular, title, history, admin, addDefaultError]);
+  }, [setModified, serverURL, api, slug, id, toggleModal, modalSlug, t, singular, i18n, title, history, admin, addDefaultError]);
 
   if (id) {
     return (

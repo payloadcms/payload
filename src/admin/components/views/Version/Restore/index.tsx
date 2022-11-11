@@ -7,7 +7,7 @@ import { useConfig } from '../../../utilities/Config';
 import { Button, MinimalTemplate, Pill } from '../../..';
 import { Props } from './types';
 import { requests } from '../../../../api';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 

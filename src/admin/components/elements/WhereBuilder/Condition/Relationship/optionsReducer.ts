@@ -1,5 +1,5 @@
 import { Option, Action } from './types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 
 const reduceToIDs = (options) => options.reduce((ids, option) => {
   if (option.options) {

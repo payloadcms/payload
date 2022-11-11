@@ -10,7 +10,7 @@ import { useAuth } from '../../../../utilities/Auth';
 import { AddNewRelationModal } from './Modal';
 import { useEditDepth } from '../../../../utilities/EditDepth';
 import Plus from '../../../../icons/Plus';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 
 import './index.scss';
 

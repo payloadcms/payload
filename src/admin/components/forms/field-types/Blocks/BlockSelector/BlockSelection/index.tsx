@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getTranslation } from '../../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../../utilities/getTranslation';
 import DefaultBlockImage from '../../../../../graphics/DefaultBlockImage';
 import { Props } from './types';
 

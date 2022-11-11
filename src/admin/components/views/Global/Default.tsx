@@ -24,7 +24,7 @@ import { OperationContext } from '../../utilities/OperationProvider';
 import { Gutter } from '../../elements/Gutter';
 
 import './index.scss';
-import { getTranslation } from '../../../utilities/getTranslation';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 const baseClass = 'global-edit';
 

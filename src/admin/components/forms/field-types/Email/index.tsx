@@ -7,7 +7,7 @@ import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { email } from '../../../../../fields/validations';
 import { Props } from './types';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 

@@ -5,7 +5,7 @@ import withCondition from '../../withCondition';
 import { textarea } from '../../../../../fields/validations';
 import { Props } from './types';
 import TextareaInput from './Input';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 

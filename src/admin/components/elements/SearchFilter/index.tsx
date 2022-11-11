@@ -7,7 +7,7 @@ import Search from '../../icons/Search';
 import useDebounce from '../../../hooks/useDebounce';
 import { useSearchParams } from '../../utilities/SearchParams';
 import { Where, WhereField } from '../../../../types';
-import { getTranslation } from '../../../utilities/getTranslation';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 

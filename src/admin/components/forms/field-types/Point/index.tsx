@@ -7,7 +7,7 @@ import FieldDescription from '../../FieldDescription';
 import withCondition from '../../withCondition';
 import { point } from '../../../../../fields/validations';
 import { Props } from './types';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 

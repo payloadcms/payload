@@ -28,7 +28,7 @@ import SectionTitle from './SectionTitle';
 import Pill from '../../../elements/Pill';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 

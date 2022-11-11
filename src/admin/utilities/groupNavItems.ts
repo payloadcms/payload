@@ -2,7 +2,7 @@ import { i18n as Ii18n } from 'i18next';
 import { Permissions } from '../../auth';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
-import { getTranslation } from './getTranslation';
+import { getTranslation } from '../../utilities/getTranslation';
 
 export enum EntityType {
   collection = 'collections',

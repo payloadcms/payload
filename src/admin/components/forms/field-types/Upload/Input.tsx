@@ -13,7 +13,7 @@ import AddModal from './Add';
 import SelectExistingModal from './SelectExisting';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { useEditDepth, EditDepthContext } from '../../../utilities/EditDepth';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 

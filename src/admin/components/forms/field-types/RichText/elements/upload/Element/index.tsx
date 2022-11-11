@@ -11,7 +11,7 @@ import Button from '../../../../../../elements/Button';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import { SwapUploadModal } from './SwapUploadModal';
 import { EditModal } from './EditModal';
-import { getTranslation } from '../../../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 

@@ -18,7 +18,7 @@ import { getFilterOptionsQuery } from '../../getFilterOptionsQuery';
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
 import { useForm } from '../../../Form/context';
 import ViewDescription from '../../../../elements/ViewDescription';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 
 import './index.scss';
 

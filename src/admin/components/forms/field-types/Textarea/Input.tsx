@@ -5,7 +5,7 @@ import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { TextareaField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 

@@ -12,7 +12,7 @@ import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 import { useSearchParams } from '../../utilities/SearchParams';
 import validateWhereQuery from './validateWhereQuery';
 import { Where } from '../../../../types';
-import { getTranslation } from '../../../utilities/getTranslation';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 

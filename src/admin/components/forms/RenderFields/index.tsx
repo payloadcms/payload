@@ -5,7 +5,7 @@ import useIntersect from '../../../hooks/useIntersect';
 import { Props } from './types';
 import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../fields/config/types';
 import { useOperation } from '../../utilities/OperationProvider';
-import { getTranslation } from '../../../utilities/getTranslation';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 const baseClass = 'render-fields';
 
