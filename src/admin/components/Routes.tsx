@@ -36,18 +36,17 @@ const Routes = () => {
   const {
     admin: {
       user: userSlug,
-      
+      logoutRoute,
+      inactivityRoute: logoutInactivityRoute,
       components: {
         routes: customRoutes,
-        logout
       } = {},
     },
     routes,
     collections,
     globals,
   } = config;
-  
-  const { Route: logoutRoute, InactivityRoute: logoutInactivityRoute } = logout;
+
 
   const userCollection = collections.find(({ slug }) => slug === userSlug);
 

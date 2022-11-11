@@ -18,9 +18,8 @@ const baseClass = 'reset-password';
 
 const ResetPassword: React.FC = () => {
   const config = useConfig();
-  const { admin: { user: userSlug, components: { logout } }, serverURL, routes: { admin, api } } = config;
-  const { Route: logoutRoute } = logout;
-  const { token } = useParams<{token?: string}>();
+  const { admin: { user: userSlug, logoutRoute }, serverURL, routes: { admin, api } } = config;
+  const { token } = useParams<{ token?: string }>();
   const history = useHistory();
   const { user, setToken } = useAuth();
 

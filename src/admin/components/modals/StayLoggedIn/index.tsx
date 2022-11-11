@@ -16,13 +16,12 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
   const { refreshCookie } = props;
   const history = useHistory();
   const config = useConfig();
-  const { 
+  const {
     routes: { admin },
     admin: {
-      components: { logout }
+      logoutRoute
     }
   } = config;
-  const { Route: logoutRoute } = logout;
   const { toggleModal } = useModal();
 
   return (

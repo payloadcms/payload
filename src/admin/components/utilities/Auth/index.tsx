@@ -25,9 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const {
     admin: {
       user: userSlug,
-      components: {
-        logout
-      },
+      inactivityRoute: logoutInactivityRoute,
     },
     serverURL,
     routes: {
@@ -35,7 +33,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       api,
     },
   } = config;
-  const { InactivityRoute: logoutInactivityRoute } = logout;
 
   const exp = user?.exp;
 

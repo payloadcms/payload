@@ -22,10 +22,11 @@ const Login: React.FC = () => {
   const {
     admin: {
       user: userSlug,
+      logoutRoute,
       components: {
         beforeLogin,
         afterLogin,
-        logout        
+        logout
       } = {},
     },
     serverURL,
@@ -35,7 +36,6 @@ const Login: React.FC = () => {
     },
     collections,
   } = config;
-  const { Route: logoutRoute } = logout;
 
   const collection = collections.find(({ slug }) => slug === userSlug);
 

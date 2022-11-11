@@ -11,10 +11,10 @@ const DefaultLogout = () => {
   const {
     routes: { admin },
     admin: {
+      logoutRoute,
       components: { logout }
     }
   } = config;
-  const { Route: logoutRoute } = logout;
   return (
     <Link to={`${admin}${logoutRoute}`} className={`${baseClass}__log-out`}>
       <LogOut />

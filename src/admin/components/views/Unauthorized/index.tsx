@@ -6,16 +6,12 @@ import MinimalTemplate from '../../templates/Minimal';
 
 const Unauthorized: React.FC = () => {
   const config = useConfig();
-  const { 
+  const {
     routes: { admin },
     admin: {
-      components: {
-        logout
-      },
+      logoutRoute
     },
   } = config;
-  const { Route: logoutRoute } = logout;
-
   return (
     <MinimalTemplate className="unauthorized">
       <Meta
