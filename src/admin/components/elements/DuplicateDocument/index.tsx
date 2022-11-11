@@ -37,8 +37,10 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
 
     const create = async (locale = ''): Promise<string | null> => {
       const response = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
-        locale,
-        depth: 0,
+        params: {
+          locale,
+          depth: 0,
+        },
         headers: {
           'accept-language': i18n.language,
         },
@@ -77,8 +79,10 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         .forEach(async (locale) => {
           if (!abort) {
             const res = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
-              locale,
-              depth: 0,
+              params: {
+                locale,
+                depth: 0,
+              },
               headers: {
                 'accept-language': i18n.language,
               },
