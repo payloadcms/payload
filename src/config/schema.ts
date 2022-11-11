@@ -63,6 +63,8 @@ export default joi.object({
         joi.string(),
         component,
       ),
+    logoutRoute: joi.string(),
+    inactivityRoute: joi.string(),
     components: joi.object()
       .keys({
         routes: joi.array()
@@ -85,8 +87,6 @@ export default joi.object({
         Nav: component,
         logout: joi.object({
           Button: component,
-          Route: joi.string(),
-          InactivityRoute: joi.string()
         }),
         views: joi.object({
           Dashboard: component,

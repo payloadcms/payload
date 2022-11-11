@@ -18,12 +18,8 @@ export const defaults: Config = {
     disable: false,
     indexHTML: path.resolve(__dirname, '../admin/index.html'),
     avatar: 'default',
-    components: {
-      logout: {
-        Route: '/logout',
-        InactivityRoute: '/logout-inactivity', 
-      },
-    },
+    logoutRoute: '/logout',
+    inactivityRoute: '/logout-inactivity', 
     css: path.resolve(__dirname, '../admin/scss/custom.css'),
     dateFormat: 'MMMM do yyyy, h:mm a',
   },

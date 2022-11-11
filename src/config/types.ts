@@ -129,6 +129,8 @@ export type Config = {
     css?: string
     dateFormat?: string
     avatar?: 'default' | 'gravatar' | React.ComponentType<any>,
+    logoutRoute?: string,
+    inactivityRoute?: string,
     components?: {
       routes?: AdminRoute[]
       providers?: React.ComponentType<{ children: React.ReactNode }>[]
@@ -141,8 +143,6 @@ export type Config = {
       Nav?: React.ComponentType<any>
       logout?: {
         Button?: React.ComponentType<any>,
-        Route?: string,
-        InactivityRoute?: string
       }
       graphics?: {
         Icon?: React.ComponentType<any>
