@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch } from 'react';
 import { Field as FieldConfig, Condition, Validate } from '../../../../fields/config/types';
 
 export type Field = {
