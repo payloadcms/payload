@@ -46,6 +46,7 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
     id,
     req,
     req: {
+      i18n,
       locale,
       payload: {
         config,
@@ -102,8 +103,8 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
 
   const docToDelete = await Model.findOne(query);
 
-  if (!docToDelete && !hasWhereAccess) throw new NotFound();
-  if (!docToDelete && hasWhereAccess) throw new Forbidden();
+  if (!docToDelete && !hasWhereAccess) throw new NotFound(i18n);
+  if (!docToDelete && hasWhereAccess) throw new Forbidden(i18n);
 
   const resultToDelete = docToDelete.toJSON({ virtuals: true });
 
@@ -121,7 +122,7 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
     if (await fileExists(fileToDelete)) {
       fs.unlink(fileToDelete, (err) => {
         if (err) {
-          throw new ErrorDeletingFile();
+          throw new ErrorDeletingFile(i18n);
         }
       });
     }
@@ -132,7 +133,7 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
         if (await fileExists(sizeToDelete)) {
           fs.unlink(sizeToDelete, (err) => {
             if (err) {
-              throw new ErrorDeletingFile();
+              throw new ErrorDeletingFile(i18n);
             }
           });
         }

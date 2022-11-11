@@ -239,6 +239,9 @@
         "correctInvalidFields": {
           "type": "string"
         },
+        "deletingFile": {
+          "type": "string"
+        },
         "deletingTitle": {
           "type": "string"
         },
@@ -325,6 +328,7 @@
         "accountAlreadyActivated",
         "autosaving",
         "correctInvalidFields",
+        "deletingFile",
         "deletingTitle",
         "emailOrPasswordIncorrect",
         "followingFieldsInvalid_many",

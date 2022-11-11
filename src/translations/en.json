@@ -60,6 +60,7 @@
     "accountAlreadyActivated": "This account has already been activated.",
     "autosaving": "There was a problem while autosaving this document.",
     "correctInvalidFields": "Please correct invalid fields.",
+    "deletingFile": "There was an error deleting file.",
     "deletingTitle": "There was an error while deleting {{title}}. Please check your connection and try again.",
     "emailOrPasswordIncorrect": "The email or password provided is incorrect.",
     "followingFieldsInvalid_many": "The following fields are invalid:",

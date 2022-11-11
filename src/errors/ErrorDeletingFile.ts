@@ -1,9 +1,10 @@
 import httpStatus from 'http-status';
+import type { i18n as Ii18n } from 'i18next';
 import APIError from './APIError';
 
 class ErrorDeletingFile extends APIError {
-  constructor() {
-    super('There was an error deleting file.', httpStatus.INTERNAL_SERVER_ERROR);
+  constructor(i18n: Ii18n) {
+    super(i18n.t('error:deletingFile'), httpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 

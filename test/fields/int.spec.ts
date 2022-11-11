@@ -157,6 +157,23 @@ describe('Fields', () => {
       expect(definitions.collapsibleTextUnique).toEqual(1);
       expect(options.collapsibleTextUnique).toMatchObject({ unique: true });
     });
+
+    it('should throw validation error saving on unique fields', async () => {
+      const data = {
+        text: 'a',
+        uniqueText: 'a',
+      };
+      await payload.create({
+        collection: 'indexed-fields',
+        data,
+      });
+      const response = await payload.create({
+        collection: 'indexed-fields',
+        data,
+      });
+      console.log(response.error);
+      expect(response.error).toBeDefined();
+    });
   });
 
   describe('point', () => {
