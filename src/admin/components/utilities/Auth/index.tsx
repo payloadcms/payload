@@ -69,11 +69,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTokenInMemory(token);
   }, []);
 
-  const logOut = () => {
+  const logOut = useCallback(() => {
     setUser(null);
     setTokenInMemory(undefined);
     requests.post(`${serverURL}${api}/${userSlug}/logout`);
-  };
+  }, [serverURL, api, userSlug]);
 
   // On mount, get user and set
   useEffect(() => {
