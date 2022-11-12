@@ -167,12 +167,13 @@ describe('Fields', () => {
         collection: 'indexed-fields',
         data,
       });
-      const response = await payload.create({
-        collection: 'indexed-fields',
-        data,
-      });
-      console.log(response.error);
-      expect(response.error).toBeDefined();
+      expect(async () => {
+        const result = await payload.create({
+          collection: 'indexed-fields',
+          data,
+        });
+        return result.error;
+      }).toBeDefined();
     });
   });
 
