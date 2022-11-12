@@ -1,5 +1,18 @@
 
 
+## [1.1.22](https://github.com/payloadcms/payload/compare/v1.1.21...v1.1.22) (2022-11-12)
+
+
+### Bug Fixes
+
+* [#1353](https://github.com/payloadcms/payload/issues/1353), ensures errors returned from server make their way to UI ([3f28a69](https://github.com/payloadcms/payload/commit/3f28a69959be9c98869f81bcd379b8c7cd505a12))
+* [#1357](https://github.com/payloadcms/payload/issues/1357), nested arrays and blocks sometimes not allowing save ([86855d6](https://github.com/payloadcms/payload/commit/86855d68f65dfadbf51050bdaf6a28c3220add6f))
+* [#1358](https://github.com/payloadcms/payload/issues/1358), allows listSearchableFields to work when indicated fields are nested ([eb0023e](https://github.com/payloadcms/payload/commit/eb0023e9617894873fe75748de187d85279498c8))
+* [#1360](https://github.com/payloadcms/payload/issues/1360), relationship field onMenuScrollToBottom not working in some browsers ([7136db4](https://github.com/payloadcms/payload/commit/7136db4c718b70833fa75f5c8e9ae596298b3aa9))
+* [#1367](https://github.com/payloadcms/payload/issues/1367), allows custom global components within schema validation ([1d76e97](https://github.com/payloadcms/payload/commit/1d76e973bb8e6e33e40b469bd410042ae4b90e2e))
+* 1309, duplicative logout in admin UI ([35f91b0](https://github.com/payloadcms/payload/commit/35f91b038b66d74468dad250dbe7cbf1ea88b444))
+* fixed GraphQL Access query resolver to return the correct data ([#1339](https://github.com/payloadcms/payload/issues/1339)) ([cfef68f](https://github.com/payloadcms/payload/commit/cfef68f36477e34b9943d9334c65fa46ee3eb339))
+
 ## [1.1.21](https://github.com/payloadcms/payload/compare/v1.1.20...v1.1.21) (2022-11-05)
 
 ## [1.1.20](https://github.com/payloadcms/payload/compare/v1.1.19...v1.1.20) (2022-11-05)
