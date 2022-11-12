@@ -18,6 +18,11 @@ const globalSchema = joi.object().keys({
       joi.string(),
       componentSchema,
     ),
+    components: joi.object({
+      views: joi.object({
+        Edit: componentSchema,
+      }),
+    }),
   }),
   graphQLName: joi.string(),
   hooks: joi.object({

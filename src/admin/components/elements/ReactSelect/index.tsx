@@ -103,6 +103,7 @@ const ReactSelect: React.FC<Props> = (props) => {
         disabled={disabled ? 'disabled' : undefined}
         className={classes}
         classNamePrefix="rs"
+        captureMenuScroll
         options={options}
         isSearchable={isSearchable}
         isClearable={isClearable}
@@ -121,6 +122,7 @@ const ReactSelect: React.FC<Props> = (props) => {
   return (
     <Select
       placeholder={getTranslation(placeholder, i18n)}
+      captureMenuScroll
       {...props}
       value={value}
       onChange={onChange}

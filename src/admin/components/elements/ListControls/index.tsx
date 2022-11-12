@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { useTranslation } from 'react-i18next';
-import { FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
+import { fieldAffectsData } from '../../../../fields/config/types';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
 import WhereBuilder from '../WhereBuilder';
-import validateWhereQuery from '../WhereBuilder/validateWhereQuery';
 import SortComplex from '../SortComplex';
 import Button from '../Button';
 import { Props } from './types';
 import { useSearchParams } from '../../utilities/SearchParams';
+import validateWhereQuery from '../WhereBuilder/validateWhereQuery';
+import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched';
 import { getTranslation } from '../../../../utilities/getTranslation';
-
 
 import './index.scss';
 
@@ -40,7 +40,7 @@ const ListControls: React.FC<Props> = (props) => {
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where);
 
   const [titleField] = useState(() => fields.find((field) => fieldAffectsData(field) && field.name === useAsTitle));
-  const [textFieldsToBeSearched] = useState(listSearchableFields ? () => fields.filter((field) => fieldAffectsData(field) && listSearchableFields.includes(field.name)) as FieldAffectingData[] : null);
+  const [textFieldsToBeSearched] = useState(getTextFieldsToBeSearched(listSearchableFields, fields));
   const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
   const { t, i18n } = useTranslation('general');
 

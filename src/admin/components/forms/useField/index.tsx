@@ -103,7 +103,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
         action.errorMessage = undefined;
       }
 
-      if (action.valid !== valid && typeof dispatchField === 'function') {
+      if (typeof dispatchField === 'function') {
         dispatchField(action);
       }
     };
@@ -121,7 +121,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     path,
     user,
     validate,
-    valid,
   ]);
 
   return result;
