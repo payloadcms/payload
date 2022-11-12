@@ -63,8 +63,8 @@ You can specify more options within the Local API vs. REST or GraphQL due to the
 | `depth`              | [Control auto-population](/docs/getting-started/concepts#depth) of nested relationship and upload fields. |
 | `locale`             | Specify [locale](/docs/configuration/localization) for any returned documents. |
 | `fallbackLocale`     | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents. |
-| `overrideAccess`     | Skip access control. By default, this property is set to false. |
-| `user`               | If you re-enable access control, you can specify a user to use against the access control checks. |
+| `overrideAccess`     | Skip access control. By default, this property is set to true within all Local API operations.  |
+| `user`               | If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks. |
 | `showHiddenFields`   | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config. |
 | `pagination`         | Set to false to return all documents and avoid querying for document counts. |
 
