@@ -268,7 +268,7 @@ const Form: React.FC<Props> = (props) => {
           return;
         }
 
-        const message = errorMessages[res.status] || 'An unknown error occurrred.';
+        const message = errorMessages[res.status] || 'An unknown error occurred.';
 
         toast.error(message);
       }
@@ -364,14 +364,6 @@ const Form: React.FC<Props> = (props) => {
   useThrottledEffect(() => {
     refreshCookie();
   }, 15000, [fields]);
-
-  // Re-run form validation every second
-  // as fields change, because field validations can
-  // potentially rely on OTHER field values to determine
-  // if they are valid or not (siblingData, data)
-  useThrottledEffect(() => {
-    validateForm();
-  }, 1000, [validateForm, fields]);
 
   useEffect(() => {
     contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form
