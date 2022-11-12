@@ -1,5 +1,17 @@
 
 
+## [1.1.23](https://github.com/payloadcms/payload/compare/v1.1.22...v1.1.23) (2022-11-12)
+
+
+### Bug Fixes
+
+* [#1361](https://github.com/payloadcms/payload/issues/1361), ensures collection auth depth works while retrieving static assets ([2f68404](https://github.com/payloadcms/payload/commit/2f684040fc9ca717d48b0d95cbd3468c35973993))
+
+
+### Features
+
+* optimizes field performance by storing internal values in useField hook ([66210b8](https://github.com/payloadcms/payload/commit/66210b856b97139f9959fac47154bca44f0a4de0))
+
 ## [1.1.22](https://github.com/payloadcms/payload/compare/v1.1.21...v1.1.22) (2022-11-12)
 
 
