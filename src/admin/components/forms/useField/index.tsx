@@ -38,7 +38,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
     if (!modified && !disableModifyingForm) {
       if (typeof setModified === 'function') {
-        setModified(true);
+        Promise.resolve(() => setModified(true))
       }
     }
 
