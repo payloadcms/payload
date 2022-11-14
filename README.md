@@ -6,6 +6,10 @@ This repository contains the officially supported Payload Cloud Storage plugin. 
 
 - Payload version `1.0.19` or higher is required
 
+## Installation
+
+`yarn add @payloadcms/plugin-cloud-storage` or `npm install @payloadcms/plugin-cloud-storage`
+
 ## Usage
 
 Install this plugin within your Payload as follows:
