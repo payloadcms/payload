@@ -7,10 +7,16 @@
   .textarea-outer {
     @include formInput();
     resize: vertical;
+    height: auto;
+    min-height: base(3);
 
     // Scrollbar for giant content
     max-height: 90vh;
     overflow: auto;
+
+    @include mid-break {
+      max-height: 60vh;
+    }
   }
 
   &.error {
@@ -48,6 +54,10 @@
     resize: none;
     outline: none;
     text-transform: inherit;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   // Clone of textarea with same height
@@ -62,6 +72,7 @@
     white-space: pre-wrap;
     pointer-events: none;
   }
+
   .textarea-clone::before {
     content: attr(data-value) " ";
     visibility: hidden;
@@ -69,6 +80,7 @@
     white-space: pre-wrap;
     overflow-wrap: break-word;
   }
+
   .textarea-clone::after {
     content: attr(data-after);
     opacity: 0.5;
