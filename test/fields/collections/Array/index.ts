@@ -1,3 +1,4 @@
+import { RowHeaderFunction } from '../../../../src/admin/components/forms/RowHeader/types';
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 import HeaderComponent from './HeaderComponent';
 
@@ -94,7 +95,7 @@ const ArrayFields: CollectionConfig = {
       ],
       admin: {
         components: {
-          RowHeader: ({ value }) => value.title || 'untitled',
+          RowHeader: ({ value, index }) => value.title || `item ${index}`,
         },
       },
     },
