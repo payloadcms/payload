@@ -17,6 +17,6 @@ export type Props = {
   rowNumber?: number;
 };
 
-export function isComponent(RowLabel: RowHeader): RowLabel is RowHeaderComponent {
-  return React.isValidElement(RowLabel);
+export function isComponent(RowHeader: RowHeader): RowHeader is RowHeaderComponent {
+  return React.isValidElement(RowHeader);
 }
