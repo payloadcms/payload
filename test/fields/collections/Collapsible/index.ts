@@ -73,6 +73,40 @@ const CollapsibleFields: CollectionConfig = {
         },
       ],
     },
+    {
+      label: 'Collapsible Field - RowHeaderFunction',
+      type: 'collapsible',
+      admin: {
+        description: 'This is a collapsible field.',
+        initCollapsed: true,
+        components: {
+          RowHeader: ({ value }) => value.title1 || 'untitled',
+        },
+      },
+      fields: [
+        {
+          name: 'title1',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      label: 'Collapsible Field - RowHeaderComponent',
+      type: 'collapsible',
+      admin: {
+        description: 'This is a collapsible field.',
+        initCollapsed: true,
+        components: {
+          RowHeader: ({ value }) => value.title2 || 'untitled',
+        },
+      },
+      fields: [
+        {
+          name: 'title2',
+          type: 'text',
+        },
+      ],
+    },
   ],
 };
 
