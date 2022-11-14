@@ -1,10 +1,10 @@
-import React from 'react';
-import { Props } from './types';
-import UploadCard from '../UploadCard';
+import React from "react";
+import { Props } from "./types";
+import UploadCard from "../UploadCard";
 
-import './index.scss';
+import "./index.scss";
 
-const baseClass = 'upload-gallery';
+const baseClass = "upload-gallery";
 
 const UploadGallery: React.FC<Props> = (props) => {
   const { docs, onCardClick, collection } = props;
@@ -12,8 +12,8 @@ const UploadGallery: React.FC<Props> = (props) => {
   if (docs && docs.length > 0) {
     return (
       <ul className={baseClass}>
-        {docs.map((doc, i) => (
-          <li key={i}>
+        {docs.map((doc) => (
+          <li key={doc.id}>
             <UploadCard
               doc={doc}
               {...{ collection }}
