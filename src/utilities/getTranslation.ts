@@ -6,10 +6,12 @@ export const getTranslation = (label: Record<string, string> | string | JSX.Elem
       return label[i18n.language];
     }
     let fallbacks = [];
-    if (typeof i18n.options.fallbackLng === 'object') {
-      fallbacks = Object.keys(i18n.options.fallbackLng);
+    if (typeof i18n.options.fallbackLng === 'string') {
+      fallbacks = [i18n.options.fallbackLng];
     } else if (Array.isArray(i18n.options.fallbackLng)) {
-      fallbacks = typeof i18n.options.fallbackLng === 'string' ? [i18n.options.fallbackLng] : i18n.options.fallbackLng;
+      fallbacks = i18n.options.fallbackLng;
+    } else if (typeof i18n.options.fallbackLng === 'object') {
+      fallbacks = Object.keys(i18n.options.fallbackLng);
     } else if (typeof i18n.options.fallbackLng === 'function') {
       console.warn('Use of i18next fallbackLng functions are not supported.');
     }
