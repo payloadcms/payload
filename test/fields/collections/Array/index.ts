@@ -1,4 +1,5 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
+import HeaderComponent from './HeaderComponent';
 
 export const arrayDefaultValue = [
   { text: 'row one' },
@@ -81,6 +82,36 @@ const ArrayFields: CollectionConfig = {
           name: 'text',
         },
       ],
+    },
+    {
+      type: 'array',
+      name: 'arrayWithRowHeaderFunction',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      admin: {
+        components: {
+          RowHeader: ({ value }) => value.title || 'untitled',
+        },
+      },
+    },
+    {
+      type: 'array',
+      name: 'arrayWithRowHeaderComponent',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      admin: {
+        components: {
+          RowHeader: HeaderComponent,
+        },
+      },
     },
   ],
 };
