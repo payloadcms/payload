@@ -70,7 +70,12 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, 'radio-fields');
     });
 
-    test('should show i18n label', async () => {
+    test('should show i18n label in list', async () => {
+      await page.goto(url.list);
+      await expect(page.locator('.cell-radio')).toHaveText('Value One');
+    });
+
+    test('should show i18n label while editing', async () => {
       await page.goto(url.create);
       await expect(page.locator('label[for="field-radio"]')).toHaveText('Radio en');
     });
