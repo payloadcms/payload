@@ -363,6 +363,20 @@ describe('admin', () => {
         await expect(await page.locator('#heading-title .sort-column__label')).toHaveText('Title en');
         await expect(await page.locator('.search-filter input')).toHaveAttribute('placeholder', /(Title en)/);
       });
+      test('should use fallback language on field titles', async () => {
+        // change language German
+        await page.goto(url.account);
+        const field = page.locator('.account__language .react-select');
+        await field.click({ delay: 100 });
+        const languageSelect = page.locator('.rs__option');
+        // text field does not have a 'de' label
+        await languageSelect.locator('text=Deutsch').click();
+
+        await page.goto(url.list);
+        await page.locator('.list-controls__toggle-columns').click();
+        // expecting the label to fall back to english as default fallbackLng
+        await expect(await page.locator('.column-selector__column >> text=Title en')).toHaveText('Title en');
+      });
     });
   });
 });

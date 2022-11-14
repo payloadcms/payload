@@ -15,7 +15,7 @@ export const getTranslation = (label: Record<string, string> | string | JSX.Elem
     } else if (typeof i18n.options.fallbackLng === 'function') {
       console.warn('Use of i18next fallbackLng functions are not supported.');
     }
-    return fallbacks.find((language) => (label[language])) ?? label[Object.keys(label)[0]];
+    return label[fallbacks.find((language) => (label[language]))] ?? label[Object.keys(label)[0]];
   }
   return label;
 };
