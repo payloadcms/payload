@@ -2,7 +2,7 @@ import React from 'react';
 import { Props, isComponent } from './types';
 import { useWatchForm } from '../Form/context';
 
-const RowLabel: React.FC<Props> = (props) => {
+const RowHeader: React.FC<Props> = (props) => {
   const {
     path,
     fallback,
@@ -26,10 +26,10 @@ const RowLabel: React.FC<Props> = (props) => {
     return (
       <React.Fragment>
         {
-        typeof header === 'function'
-          ? header(siblingData, rowNumber)
-          : header
-      }
+          typeof header === 'function'
+            ? header({ value: siblingData, index: rowNumber })
+            : header
+        }
       </React.Fragment>
     );
   }
@@ -37,4 +37,4 @@ const RowLabel: React.FC<Props> = (props) => {
   return fallback;
 };
 
-export default RowLabel;
+export default RowHeader;
