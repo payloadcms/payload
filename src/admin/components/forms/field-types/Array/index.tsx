@@ -49,7 +49,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     },
   } = props;
 
-  const RowHeaderFromProps = components.RowHeader || undefined;
+  const RowHeaderFromProps = components?.RowHeader || undefined;
 
   const path = pathFromProps || name;
 
