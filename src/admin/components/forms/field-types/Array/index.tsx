@@ -38,6 +38,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     maxRows,
     minRows,
     permissions,
+    indexPath,
     admin: {
       readOnly,
       description,
@@ -292,6 +293,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                             readOnly={readOnly}
                             fieldTypes={fieldTypes}
                             permissions={permissions?.fields}
+                            indexPath={indexPath}
                             fieldSchema={fields.map((field) => ({
                               ...field,
                               path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,

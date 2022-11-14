@@ -21,7 +21,7 @@ const TabsField: React.FC<Props> = (props) => {
     fieldTypes,
     path,
     permissions,
-    pathByIndex,
+    indexPath,
     admin: {
       readOnly,
       className,
@@ -33,15 +33,16 @@ const TabsField: React.FC<Props> = (props) => {
 
   const isWithinCollapsible = useCollapsible();
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
+  const tabsPrefKey = `tabs-${indexPath}`;
 
   useEffect(() => {
     const getInitialPref = async () => {
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey);
-      const initialIndex = path ? existingPreferences?.fields?.[path]?.tabIndex : existingPreferences?.fields?.[pathByIndex]?.tabIndex;
+      const initialIndex = path ? existingPreferences?.fields?.[path]?.tabIndex : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex;
       setActiveTabIndex(initialIndex || 0)
     }
     getInitialPref();
-  }, [path, pathByIndex])
+  }, [path, indexPath])
 
   const handleTabChange = useCallback((incomingTabIndex: number) => {
     setActiveTabIndex(incomingTabIndex)
@@ -62,8 +63,8 @@ const TabsField: React.FC<Props> = (props) => {
         } : {
           fields: {
             ...existingPreferences?.fields,
-            [pathByIndex]: {
-              ...existingPreferences?.fields?.[pathByIndex],
+            [tabsPrefKey]: {
+              ...existingPreferences?.fields?.[tabsPrefKey],
               tabIndex: incomingTabIndex,
             }
           },
@@ -72,7 +73,7 @@ const TabsField: React.FC<Props> = (props) => {
     }
 
     handlePref();
-  }, [pathByIndex, preferencesKey, getPreference, setPreference, path])
+  }, [indexPath, preferencesKey, getPreference, setPreference, path])
 
   const activeTabConfig = tabs[activeTabIndex];
 
@@ -126,7 +127,7 @@ const TabsField: React.FC<Props> = (props) => {
                   ...field,
                   path: `${path ? `${path}.` : ''}${tabHasName(activeTabConfig) ? `${activeTabConfig.name}.` : ''}${fieldAffectsData(field) ? field.name : ''}`,
                 }))}
-                pathByIndex={pathByIndex}
+                indexPath={indexPath}
               />
             </div>
           )}

@@ -20,7 +20,7 @@ const RenderFields: React.FC<Props> = (props) => {
     readOnly: readOnlyOverride,
     className,
     forceRender,
-    pathByIndex: incomingFieldIndex
+    indexPath: incomingIndexPath
   } = props;
 
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender));
@@ -91,7 +91,7 @@ const RenderFields: React.FC<Props> = (props) => {
                           ...field,
                           path: field.path || (isFieldAffectingData ? field.name : ''),
                           fieldTypes,
-                          pathByIndex: incomingFieldIndex ? `${incomingFieldIndex}[${fieldIndex}]` : `[${fieldIndex}]`,
+                          indexPath: incomingIndexPath ? `${incomingIndexPath}.${fieldIndex}` : `${fieldIndex}`,
                           admin: {
                             ...(field.admin || {}),
                             readOnly,

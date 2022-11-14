@@ -12,5 +12,5 @@ export type Props = {
   filter?: (field: Field) => boolean
   fieldSchema: FieldWithPath[]
   fieldTypes: FieldTypes
-  pathByIndex: string
+  indexPath?: string
 }

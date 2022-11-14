@@ -6,5 +6,5 @@ export type Props = Omit<TabsField, 'type'> & {
   path?: string
   fieldTypes: FieldTypes
   permissions: FieldPermissions
-  pathByIndex: string
+  indexPath: string
 }
