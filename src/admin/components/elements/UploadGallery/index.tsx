@@ -12,8 +12,8 @@ const UploadGallery: React.FC<Props> = (props) => {
   if (docs && docs.length > 0) {
     return (
       <ul className={baseClass}>
-        {docs.map((doc, i) => (
-          <li key={i}>
+        {docs.map((doc) => (
+          <li key={String(doc.id)}>
             <UploadCard
               doc={doc}
               {...{ collection }}

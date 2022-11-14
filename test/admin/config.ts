@@ -8,6 +8,7 @@ import CustomDefaultRoute from './components/views/CustomDefault';
 import BeforeLogin from './components/BeforeLogin';
 import AfterNavLinks from './components/AfterNavLinks';
 import { slug, globalSlug } from './shared';
+import Logout from './components/Logout';
 
 export interface Post {
   id: string;
@@ -38,6 +39,9 @@ export default buildConfig({
       beforeLogin: [
         BeforeLogin,
       ],
+      logout: {
+        Button: Logout,
+      },
       afterNavLinks: [
         AfterNavLinks,
       ],
