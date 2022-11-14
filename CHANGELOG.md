@@ -1,5 +1,12 @@
 
 
+## [1.1.24](https://github.com/payloadcms/payload/compare/v1.1.23...v1.1.24) (2022-11-14)
+
+
+### Bug Fixes
+
+* cursor jumping while typing in inputs ([216b9f8](https://github.com/payloadcms/payload/commit/216b9f88d988c692d6acdf920ee4dbb9903020ae)), closes [#1393](https://github.com/payloadcms/payload/issues/1393)
+
 ## [1.1.23](https://github.com/payloadcms/payload/compare/v1.1.22...v1.1.23) (2022-11-12)
 
 
