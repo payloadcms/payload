@@ -2,8 +2,8 @@ import express from 'express';
 import { v4 as uuid } from 'uuid';
 import payload from '../src';
 
+require("dotenv").config();
 const expressApp = express();
-
 const init = async () => {
   await payload.initAsync({
     secret: uuid(),

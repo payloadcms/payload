@@ -18,12 +18,15 @@ const baseClass = 'login';
 const Login: React.FC = () => {
   const history = useHistory();
   const { user, setToken } = useAuth();
+  const config = useConfig();
   const {
     admin: {
       user: userSlug,
+      logoutRoute,
       components: {
         beforeLogin,
         afterLogin,
+        logout
       } = {},
     },
     serverURL,
@@ -32,7 +35,7 @@ const Login: React.FC = () => {
       api,
     },
     collections,
-  } = useConfig();
+  } = config;
 
   const collection = collections.find(({ slug }) => slug === userSlug);
 
@@ -56,7 +59,7 @@ const Login: React.FC = () => {
           <p>
             To log in with another user, you should
             {' '}
-            <Link to={`${admin}/logout`}>log out</Link>
+            <Link to={`${admin}${logoutRoute}`}>log out</Link>
             {' '}
             first.
           </p>

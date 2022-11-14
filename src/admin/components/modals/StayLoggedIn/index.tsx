@@ -15,7 +15,13 @@ const modalSlug = 'stay-logged-in';
 const StayLoggedInModal: React.FC<Props> = (props) => {
   const { refreshCookie } = props;
   const history = useHistory();
-  const { routes: { admin } } = useConfig();
+  const config = useConfig();
+  const {
+    routes: { admin },
+    admin: {
+      logoutRoute
+    }
+  } = config;
   const { toggleModal } = useModal();
 
   return (
@@ -31,7 +37,7 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
             buttonStyle="secondary"
             onClick={() => {
               toggleModal(modalSlug);
-              history.push(`${admin}/logout`);
+              history.push(`${admin}${logoutRoute}`);
             }}
           >
             Log out
