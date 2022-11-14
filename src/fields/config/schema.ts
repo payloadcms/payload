@@ -238,9 +238,11 @@ export const array = baseField.keys({
     joi.array().items(joi.object()),
     joi.func(),
   ),
-  admin: {
-    header: joi.func(),
-  },
+  admin: baseAdminFields.keys({
+    components: joi.object().keys({
+      RowHeader: componentSchema,
+    }).default({}),
+  }).default({}),
 });
 
 export const upload = baseField.keys({
