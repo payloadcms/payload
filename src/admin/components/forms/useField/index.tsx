@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useAuth } from '../../utilities/Auth';
 import { useFormProcessing, useFormSubmitted, useFormModified, useForm, useFormFields } from '../Form/context';
 import { Options, FieldType } from './types';
@@ -26,15 +26,10 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
   const { getData, getSiblingData, setModified } = useForm();
 
+  const value = field?.value as T;
   const initialValue = field?.initialValue as T;
   const valid = typeof field?.valid === 'boolean' ? field.valid : true;
   const showError = valid === false && submitted;
-
-  // We store internal value to ensure that components react immediately
-  // to any value changes, therefore preventing "cursor jump" that can be seen
-  // if a user types quickly in an input
-  const [internalValue, setInternalValue] = useState<T>(() => field?.value as T);
-  const [internalInitialValue, setInternalInitialValue] = useState<T>(() => field?.initialValue as T);
 
   // Method to return from `useField`, used to
   // update field values from field component(s)
@@ -43,11 +38,9 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
     if (!modified && !disableModifyingForm) {
       if (typeof setModified === 'function') {
-        setModified(true);
+        Promise.resolve(() => setModified(true))
       }
     }
-
-    setInternalValue(val);
 
     dispatchField({
       type: 'UPDATE',
@@ -68,12 +61,12 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const result = useMemo(() => ({
     showError,
     errorMessage: field?.errorMessage,
-    value: internalValue,
+    value,
     formSubmitted: submitted,
     formProcessing: processing,
     setValue,
     initialValue,
-  }), [field, processing, setValue, showError, submitted, internalValue, initialValue]);
+  }), [field, processing, setValue, showError, submitted, value, initialValue]);
 
   // Throttle the validate function
   useThrottledEffect(() => {
@@ -84,7 +77,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
         disableFormData,
         validate,
         condition,
-        value: internalValue,
+        value,
         valid: false,
         errorMessage: undefined,
       };
@@ -97,7 +90,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
         operation,
       };
 
-      const validationResult = typeof validate === 'function' ? await validate(internalValue, validateOptions) : true;
+      const validationResult = typeof validate === 'function' ? await validate(value, validateOptions) : true;
 
       if (typeof validationResult === 'string') {
         action.errorMessage = validationResult;
@@ -114,7 +107,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
     validateField();
   }, 150, [
-    internalValue,
+    value,
     condition,
     disableFormData,
     dispatchField,
@@ -126,13 +119,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     user,
     validate,
   ]);
-
-  useEffect(() => {
-    if (initialValue !== internalInitialValue) {
-      setInternalValue(initialValue);
-      setInternalInitialValue(initialValue);
-    }
-  }, [initialValue, internalInitialValue]);
 
   return result;
 };
