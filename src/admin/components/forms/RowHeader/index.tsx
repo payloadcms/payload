@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Props, isComponent } from './types';
 import { useWatchForm } from '../Form/context';
 
@@ -24,17 +24,17 @@ const RowHeader: React.FC<Props> = (props) => {
 
   if (header) {
     return (
-      <React.Fragment>
+      <Fragment>
         {
           typeof header === 'function'
             ? header({ value: siblingData, index: rowNumber })
             : header
         }
-      </React.Fragment>
+      </Fragment>
     );
   }
 
-  return fallback;
+  return <Fragment>{fallback}</Fragment>;
 };
 
 export default RowHeader;

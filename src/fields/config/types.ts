@@ -8,7 +8,7 @@ import { ConditionalDateProps } from '../../admin/components/elements/DatePicker
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
 import { Payload } from '../..';
-import { RowLabel } from '../../admin/components/forms/RowLabel/types';
+import { RowHeader } from '../../admin/components/forms/RowHeader/types';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
@@ -339,9 +339,11 @@ export type ArrayField = FieldBase & {
   fields: Field[];
   admin?: Admin & {
     initCollapsed?: boolean | false;
-    header?: RowLabel
-  }
-}
+    components?: {
+      RowHeader?: RowHeader
+    }
+  };
+};
 
 export type RadioField = FieldBase & {
   type: 'radio';
