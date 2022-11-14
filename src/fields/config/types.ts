@@ -192,7 +192,9 @@ export type CollapsibleField = Omit<FieldBase, 'name'> & {
   fields: Field[];
   admin?: Admin & {
     initCollapsed?: boolean | false;
-    header?: RowLabel
+    components?: {
+      RowHeader?: RowHeader
+    }
   }
 }
 
