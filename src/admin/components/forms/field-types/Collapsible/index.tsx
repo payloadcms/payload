@@ -28,9 +28,11 @@ const CollapsibleField: React.FC<Props> = (props) => {
       className,
       initCollapsed,
       description,
-      header,
+      components,
     },
   } = props;
+
+  const RowHeaderFromProps = components?.RowHeader || undefined;
 
   const { getPreference, setPreference } = usePreferences();
   const { preferencesKey } = useDocumentInfo();
@@ -76,7 +78,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
           <RowHeader
             path={path}
             fallback={<div className={`${baseClass}__label`}>{label}</div>}
-            header={header}
+            header={RowHeaderFromProps}
           />
         )}
         onToggle={onToggle}
