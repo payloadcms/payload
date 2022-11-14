@@ -1,20 +1,22 @@
 import React from 'react';
 import { Data } from '../Form/types';
 
+export type RowHeaderFunction = (value: Data, index?: number) => React.ReactNode;
+
 export type RowHeaderComponent = React.ComponentType<{
   value: Data;
   index?: number;
 }>;
 
-export type RowLabel = string | RowHeaderComponent;
+export type RowHeader = string | RowHeaderComponent | RowHeaderFunction;
 
 export type Props = {
-  fallback: React.ReactElement;
+  fallback: string | React.ReactElement;
   path: string;
-  header?: RowLabel;
+  header?: RowHeader;
   rowNumber?: number;
 };
 
-export function isComponent(RowLabel: RowLabel): RowLabel is RowHeaderComponent {
+export function isComponent(RowLabel: RowHeader): RowLabel is RowHeaderComponent {
   return React.isValidElement(RowLabel);
 }
