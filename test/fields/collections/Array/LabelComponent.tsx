@@ -3,5 +3,5 @@ import { RowLabelComponent } from '../../../../src/admin/components/forms/RowLab
 
 export const ArrayRowLabel: RowLabelComponent = (props) => {
   const { data, fallback } = props;
-  return <span style={{ color: 'hotpink' }}>{data.title || fallback}</span>;
+  return <div style={{ color: 'hotpink' }}>{data.title || fallback}</div>;
 };

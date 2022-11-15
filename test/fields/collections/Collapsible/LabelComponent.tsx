@@ -3,5 +3,5 @@ import { RowLabelComponent } from '../../../../src/admin/components/forms/RowLab
 
 export const CollapsibleLabelComponent: RowLabelComponent = (props) => {
   const { data, fallback } = props;
-  return <span style={{ color: 'coral' }}>{data.componentTitleField || fallback}</span>;
+  return <div style={{ color: 'coral' }}>{data.componentTitleField || fallback}</div>;
 };
