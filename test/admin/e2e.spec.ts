@@ -343,11 +343,6 @@ describe('admin', () => {
     });
 
     describe('i18n', () => {
-      beforeAll(async () => {
-        await createPost();
-        await createPost();
-      });
-
       test('should display translated collections and globals config options', async () => {
         await page.goto(url.list);
 
@@ -362,7 +357,9 @@ describe('admin', () => {
       });
 
       test('should display translated field titles', async () => {
-        // columns
+        await createPost();
+
+        // column controls
         await page.locator('.list-controls__toggle-columns').click();
         await expect(await page.locator('.column-selector__column >> text=Title en')).toHaveText('Title en');
 
@@ -373,9 +370,11 @@ describe('admin', () => {
         const options = page.locator('.rs__option');
         await expect(await options.locator('text=Title en')).toHaveText('Title en');
 
+        // list columns
         await expect(await page.locator('#heading-title .sort-column__label')).toHaveText('Title en');
         await expect(await page.locator('.search-filter input')).toHaveAttribute('placeholder', /(Title en)/);
       });
+
       test('should use fallback language on field titles', async () => {
         // change language German
         await page.goto(url.account);
