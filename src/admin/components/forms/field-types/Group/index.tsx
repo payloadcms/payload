@@ -19,6 +19,7 @@ const Group: React.FC<Props> = (props) => {
     name,
     path: pathFromProps,
     fieldTypes,
+    indexPath,
     admin: {
       readOnly,
       style,
@@ -70,6 +71,7 @@ const Group: React.FC<Props> = (props) => {
             permissions={permissions?.fields}
             readOnly={readOnly}
             fieldTypes={fieldTypes}
+            indexPath={indexPath}
             fieldSchema={fields.map((subField) => ({
               ...subField,
               path: `${path}${fieldAffectsData(subField) ? `.${subField.name}` : ''}`,

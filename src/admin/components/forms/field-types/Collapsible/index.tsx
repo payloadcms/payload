@@ -21,6 +21,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
     fieldTypes,
     path,
     permissions,
+    indexPath,
     admin: {
       readOnly,
       className,
@@ -77,6 +78,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
           readOnly={readOnly}
           permissions={permissions}
           fieldTypes={fieldTypes}
+          indexPath={indexPath}
           fieldSchema={fields.map((field) => ({
             ...field,
             path: getFieldPath(path, field),
