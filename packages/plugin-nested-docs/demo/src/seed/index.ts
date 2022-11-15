@@ -19,12 +19,21 @@ export const seed = async (payload: Payload) => {
     },
   })
 
-  await payload.create({
+  const {id: childID} = await payload.create({
     collection: 'pages',
     data: {
       title: 'Child page',
       slug: 'child-page',
       parent: parentID
+    },
+  })
+
+  await payload.create({
+    collection: 'pages',
+    data: {
+      title: 'Grandchild page',
+      slug: 'grandchild-page',
+      parent: childID
     },
   })
 }
