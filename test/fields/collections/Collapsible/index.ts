@@ -1,4 +1,5 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
+import { CollapsibleLabelComponent } from './HeaderComponent';
 
 const CollapsibleFields: CollectionConfig = {
   slug: 'collapsible-fields',
@@ -74,35 +75,35 @@ const CollapsibleFields: CollectionConfig = {
       ],
     },
     {
-      label: 'Collapsible Field - RowHeaderFunction',
+      label: 'Collapsible Header Function',
       type: 'collapsible',
       admin: {
-        description: 'This is a collapsible field.',
+        description: 'Collapsible label rendered from a function.',
         initCollapsed: true,
         components: {
-          RowHeader: ({ value }) => value.title1 || 'untitled',
+          CollapsibleLabel: ({ collapsibleData }) => collapsibleData.functionTitleField || 'Untitled',
         },
       },
       fields: [
         {
-          name: 'title1',
+          name: 'functionTitleField',
           type: 'text',
         },
       ],
     },
     {
-      label: 'Collapsible Field - RowHeaderComponent',
+      label: 'Collapsible Header Component',
       type: 'collapsible',
       admin: {
-        description: 'This is a collapsible field.',
+        description: 'Collapsible label rendered as a react component.',
         initCollapsed: true,
         components: {
-          RowHeader: ({ value }) => value.title2 || 'untitled',
+          CollapsibleLabel: CollapsibleLabelComponent,
         },
       },
       fields: [
         {
-          name: 'title2',
+          name: 'componentTitleField',
           type: 'text',
         },
       ],

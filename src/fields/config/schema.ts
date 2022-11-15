@@ -186,7 +186,7 @@ export const collapsible = baseField.keys({
   fields: joi.array().items(joi.link('#field')),
   admin: baseAdminFields.keys({
     components: joi.object().keys({
-      RowHeader: componentSchema,
+      CollapsibleLabel: componentSchema,
     }).default({}),
   }).default({}),
 });
@@ -242,7 +242,7 @@ export const array = baseField.keys({
   ),
   admin: baseAdminFields.keys({
     components: joi.object().keys({
-      RowHeader: componentSchema,
+      CollapsibleLabel: componentSchema,
     }).default({}),
   }).default({}),
 });

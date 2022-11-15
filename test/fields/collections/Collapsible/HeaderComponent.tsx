@@ -1,9 +1,7 @@
 import React from 'react';
-import { RowHeaderComponent } from '../../../../src/admin/components/forms/RowHeader/types';
+import { CollapsibleLabel } from '../../../../src/admin/components/forms/CollapsibleLabel/types';
 
-const ArrayRowHeader: RowHeaderComponent = (props) => {
-  const { value } = props;
-  return <React.Fragment>{value.title || 'enter title'}</React.Fragment>;
+export const CollapsibleLabelComponent: CollapsibleLabel = (props) => {
+  const { collapsibleData, fallback } = props;
+  return <span style={{ color: 'coral' }}>{collapsibleData.componentTitleField || fallback}</span>;
 };
-
-export default ArrayRowHeader;

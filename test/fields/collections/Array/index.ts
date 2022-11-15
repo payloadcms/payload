@@ -1,6 +1,5 @@
-import { RowHeaderFunction } from '../../../../src/admin/components/forms/RowHeader/types';
 import type { CollectionConfig } from '../../../../src/collections/config/types';
-import HeaderComponent from './HeaderComponent';
+import { ArrayCollapsibleLabel } from './HeaderComponent';
 
 export const arrayDefaultValue = [
   { text: 'row one' },
@@ -86,7 +85,7 @@ const ArrayFields: CollectionConfig = {
     },
     {
       type: 'array',
-      name: 'arrayWithRowHeaderFunction',
+      name: 'collapsibleLabelAsFunction',
       fields: [
         {
           name: 'title',
@@ -94,14 +93,15 @@ const ArrayFields: CollectionConfig = {
         },
       ],
       admin: {
+        description: 'Collapsible labels rendered from a function.',
         components: {
-          RowHeader: ({ value, index }) => value.title || `item ${index}`,
+          CollapsibleLabel: ({ collapsibleData, fallback }) => collapsibleData.title || fallback,
         },
       },
     },
     {
       type: 'array',
-      name: 'arrayWithRowHeaderComponent',
+      name: 'rowHeaderAsComponent',
       fields: [
         {
           name: 'title',
@@ -109,8 +109,9 @@ const ArrayFields: CollectionConfig = {
         },
       ],
       admin: {
+        description: 'Collapsible labels rendered as components.',
         components: {
-          RowHeader: HeaderComponent,
+          CollapsibleLabel: ArrayCollapsibleLabel,
         },
       },
     },
