@@ -8,7 +8,7 @@ import { ConditionalDateProps } from '../../admin/components/elements/DatePicker
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
 import { Payload } from '../..';
-import { CollapsibleLabel } from '../../admin/components/forms/CollapsibleLabel/types';
+import { RowLabel } from '../../admin/components/forms/RowLabel/types';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
@@ -193,8 +193,8 @@ export type CollapsibleField = Omit<FieldBase, 'name'> & {
   admin?: Admin & {
     initCollapsed?: boolean | false;
     components?: {
-      CollapsibleLabel?: CollapsibleLabel
-    }
+      CollapsibleLabel?: RowLabel
+    } & Admin['components']
   }
 }
 
@@ -342,8 +342,8 @@ export type ArrayField = FieldBase & {
   admin?: Admin & {
     initCollapsed?: boolean | false;
     components?: {
-      CollapsibleLabel?: CollapsibleLabel
-    }
+      RowLabel?: RowLabel
+    } & Admin['components']
   };
 };
 
