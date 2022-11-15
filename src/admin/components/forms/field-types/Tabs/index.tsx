@@ -44,35 +44,31 @@ const TabsField: React.FC<Props> = (props) => {
     getInitialPref();
   }, [path, indexPath])
 
-  const handleTabChange = useCallback((incomingTabIndex: number) => {
+  const handleTabChange = useCallback(async (incomingTabIndex: number) => {
     setActiveTabIndex(incomingTabIndex)
 
-    const handlePref = async () => {
-      const existingPreferences: DocumentPreferences = await getPreference(preferencesKey);
+    const existingPreferences: DocumentPreferences = await getPreference(preferencesKey);
 
-      setPreference(preferencesKey, {
-        ...existingPreferences,
-        ...path ? {
-          fields: {
-            ...existingPreferences?.fields || {},
-            [path]: {
-              ...existingPreferences?.fields?.[path],
-              tabIndex: incomingTabIndex,
-            },
+    setPreference(preferencesKey, {
+      ...existingPreferences,
+      ...path ? {
+        fields: {
+          ...existingPreferences?.fields || {},
+          [path]: {
+            ...existingPreferences?.fields?.[path],
+            tabIndex: incomingTabIndex,
           },
-        } : {
-          fields: {
-            ...existingPreferences?.fields,
-            [tabsPrefKey]: {
-              ...existingPreferences?.fields?.[tabsPrefKey],
-              tabIndex: incomingTabIndex,
-            }
-          },
-        }
-      });
-    }
-
-    handlePref();
+        },
+      } : {
+        fields: {
+          ...existingPreferences?.fields,
+          [tabsPrefKey]: {
+            ...existingPreferences?.fields?.[tabsPrefKey],
+            tabIndex: incomingTabIndex,
+          }
+        },
+      }
+    });
   }, [indexPath, preferencesKey, getPreference, setPreference, path])
 
   const activeTabConfig = tabs[activeTabIndex];
