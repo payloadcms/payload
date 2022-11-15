@@ -6,9 +6,14 @@ import Meta from '../../utilities/Meta';
 import MinimalTemplate from '../../templates/Minimal';
 
 const Unauthorized: React.FC = () => {
-  const { routes: { admin } } = useConfig();
   const { t } = useTranslation('general');
-
+  const config = useConfig();
+  const {
+    routes: { admin },
+    admin: {
+      logoutRoute,
+    },
+  } = config;
   return (
     <MinimalTemplate className="unauthorized">
       <Meta
@@ -21,7 +26,7 @@ const Unauthorized: React.FC = () => {
       <br />
       <Button
         el="link"
-        to={`${admin}/logout`}
+        to={`${admin}${logoutRoute}`}
       >
         {t('authentication:logOut')}
       </Button>

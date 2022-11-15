@@ -7,4 +7,5 @@ export type Props = Omit<ArrayField, 'type'> & {
   fieldTypes: FieldTypes
   permissions: FieldPermissions
   label: string | false
+  indexPath: string
 }

@@ -20,12 +20,15 @@ const Login: React.FC = () => {
   const history = useHistory();
   const { t } = useTranslation('authentication');
   const { user, setToken } = useAuth();
+  const config = useConfig();
   const {
     admin: {
       user: userSlug,
+      logoutRoute,
       components: {
         beforeLogin,
         afterLogin,
+        logout
       } = {},
     },
     serverURL,
@@ -34,7 +37,7 @@ const Login: React.FC = () => {
       api,
     },
     collections,
-  } = useConfig();
+  } = config;
 
   const collection = collections.find(({ slug }) => slug === userSlug);
 
@@ -60,7 +63,7 @@ const Login: React.FC = () => {
               i18nKey="loggedIn"
               t={t}
             >
-              <Link to={`${admin}/logout`}>{t('logOut')}</Link>
+              <Link to={`${admin}${logoutRoute}`}>{t('logOut')}</Link>
             </Trans>
           </p>
           <br />

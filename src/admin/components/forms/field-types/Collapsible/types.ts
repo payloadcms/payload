@@ -6,4 +6,5 @@ export type Props = Omit<CollapsibleField, 'type'> & {
   path?: string
   fieldTypes: FieldTypes
   permissions: FieldPermissions
+  indexPath: string
 }

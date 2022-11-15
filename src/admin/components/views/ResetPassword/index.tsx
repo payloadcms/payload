@@ -18,8 +18,9 @@ import './index.scss';
 const baseClass = 'reset-password';
 
 const ResetPassword: React.FC = () => {
-  const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = useConfig();
-  const { token } = useParams<{token?: string}>();
+  const config = useConfig();
+  const { admin: { user: userSlug, logoutRoute }, serverURL, routes: { admin, api } } = config;
+  const { token } = useParams<{ token?: string }>();
   const history = useHistory();
   const { user, setToken } = useAuth();
   const { t } = useTranslation('authentication');
@@ -47,7 +48,7 @@ const ResetPassword: React.FC = () => {
               i18nKey="loginWithAnotherUser"
               t={t}
             >
-              <Link to={`${admin}/logout`}>log out</Link>
+              <Link to={`${admin}${logoutRoute}`}>log out</Link>
             </Trans>
           </p>
           <br />

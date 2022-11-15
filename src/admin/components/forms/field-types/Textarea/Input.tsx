@@ -70,15 +70,24 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         label={label}
         required={required}
       />
-      <textarea
-        id={`field-${path.replace(/\./gi, '__')}`}
-        value={value || ''}
-        onChange={onChange}
-        disabled={readOnly}
-        placeholder={getTranslation(placeholder, i18n)}
-        name={path}
-        rows={rows}
-      />
+      <div className="textarea-outer">
+        <div className="textarea-inner">
+          <div
+            className="textarea-clone"
+            data-value={value || placeholder || ''}
+          />
+          <textarea
+            className="textarea-element"
+            id={`field-${path.replace(/\./gi, '__')}`}
+            value={value || ''}
+            onChange={onChange}
+            disabled={readOnly}
+            placeholder={getTranslation(placeholder, i18n)}
+            name={path}
+            rows={rows}
+          />
+        </div>
+      </div>
       <FieldDescription
         value={value}
         description={description}

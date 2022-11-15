@@ -26,8 +26,13 @@ export type PreferenceUpdateRequest = PreferenceRequest & {value: undefined};
 
 export type CollapsedPreferences = string[]
 
+export type TabsPreferences = Array<{
+  [path: string]: number
+}>
+
 export type FieldsPreferences = {
   [key: string]: {
+    tabIndex: number
     collapsed: CollapsedPreferences
   }
 }

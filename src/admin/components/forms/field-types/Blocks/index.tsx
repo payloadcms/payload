@@ -51,6 +51,7 @@ const BlocksField: React.FC<Props> = (props) => {
     required,
     validate = blocksValidator,
     permissions,
+    indexPath,
     admin: {
       readOnly,
       description,
@@ -346,6 +347,7 @@ const BlocksField: React.FC<Props> = (props) => {
                                 ...field,
                                 path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,
                               }))}
+                              indexPath={indexPath}
                             />
 
                           </Collapsible>

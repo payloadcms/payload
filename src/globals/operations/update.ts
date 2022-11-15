@@ -234,12 +234,11 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   // afterRead - Global
   // /////////////////////////////////////
 
-  await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+  await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
     await priorHook;
 
     global = await hook({
       doc: global,
-      previousDoc: originalDoc,
       req,
     }) || global;
   }, Promise.resolve());

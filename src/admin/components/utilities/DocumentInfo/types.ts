@@ -10,6 +10,8 @@ export type ContextType = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
   type: 'global' | 'collection'
+  /** Slug of the collection or global */
+  slug?: string
   id?: string | number
   preferencesKey?: string
   versions?: PaginatedDocs<Version>

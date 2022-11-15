@@ -40,7 +40,11 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
     if (!modified && !disableModifyingForm) {
       if (typeof setModified === 'function') {
-        setModified(true);
+        // Update modified state after field value comes back
+        // to avoid cursor jump caused by state value / DOM mismatch
+        setTimeout(() => {
+          setModified(true);
+        }, 10);
       }
     }
 

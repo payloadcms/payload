@@ -15,7 +15,7 @@ const suiteName = args[0];
 // Run all
 if (!suiteName || args[0].startsWith('-')) {
   const bail = args.includes('--bail');
-  const files = glob.sync(`${path.resolve(__dirname)}/**/*e2e.spec.ts`);
+  const files = glob.sync(`${path.resolve(__dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`);
   console.log(`\n\nExecuting all ${files.length} E2E tests...`);
   files.forEach((file) => {
     clearWebpackCache();
