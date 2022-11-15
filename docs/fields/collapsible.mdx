@@ -27,6 +27,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 | Option                 | Description                     |
 | ---------------------- | ------------------------------- |
 | **`initCollapsed`**    | Set the initial collapsed state |
+| **`components.CollapsibleLabel`**  | React component to be rendered as the label on the collapsible. [More](/admin/components/#field-component) |
 
 ### Example
 
@@ -42,11 +43,21 @@ const ExampleCollection: CollectionConfig = {
       type: 'collapsible', // required
       fields: [ // required
         {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
           name: 'someTextField',
           type: 'text',
           required: true,
         },
       ],
+      admin: {
+        components: {
+          CollapsibleLabel: ({ data, fallback }) => data?.title || fallback,
+        },
+      },
     }
   ]
 };
