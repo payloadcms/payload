@@ -9,7 +9,7 @@ import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import FieldDescription from '../../FieldDescription';
 import { getFieldPath } from '../getFieldPath';
-import RowHeader from '../../RowHeader';
+import { CollapsibleLabel } from '../../CollapsibleLabel';
 
 import './index.scss';
 
@@ -31,7 +31,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
     },
   } = props;
 
-  const RowHeaderFromProps = components?.RowHeader || undefined;
+  const CollapsibleLabelFromProps = components?.CollapsibleLabel || undefined;
 
   const { getPreference, setPreference } = usePreferences();
   const { preferencesKey } = useDocumentInfo();
@@ -74,10 +74,10 @@ const CollapsibleField: React.FC<Props> = (props) => {
           className,
         ].filter(Boolean).join(' ')}
         header={(
-          <RowHeader
+          <CollapsibleLabel
             path={path}
-            fallback={<div className={`${baseClass}__label`}>{label}</div>}
-            header={RowHeaderFromProps}
+            fallback={label}
+            label={CollapsibleLabelFromProps}
           />
         )}
         onToggle={onToggle}

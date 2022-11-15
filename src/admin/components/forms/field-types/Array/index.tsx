@@ -22,9 +22,9 @@ import { usePreferences } from '../../../utilities/Preferences';
 import { ArrayAction } from '../../../elements/ArrayAction';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
+import { CollapsibleLabel } from '../../CollapsibleLabel';
 
 import './index.scss';
-import RowHeader from '../../RowHeader';
 
 const baseClass = 'array-field';
 
@@ -49,7 +49,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     },
   } = props;
 
-  const RowHeaderFromProps = components?.RowHeader || undefined;
+  const CollapsibleLabelFromProps = components?.CollapsibleLabel || undefined;
 
   const path = pathFromProps || name;
 
@@ -287,10 +287,10 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                           key={row.id}
                           dragHandleProps={providedDrag.dragHandleProps}
                           header={(
-                            <RowHeader
-                              path={`${path}.${i}.0`}
-                              header={RowHeaderFromProps}
-                              fallback={`${labels.singular} ${rowNumber >= 10 ? rowNumber : `0${rowNumber}`}`}
+                            <CollapsibleLabel
+                              path={`${path}.${i}`}
+                              label={CollapsibleLabelFromProps}
+                              fallback={`${labels.singular} ${String(rowNumber).padStart(2, '0')}`}
                               rowNumber={rowNumber}
                             />
                           )}
