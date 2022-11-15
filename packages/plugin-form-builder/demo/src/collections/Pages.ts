@@ -16,6 +16,12 @@ export const Pages: CollectionConfig = {
       label: 'Title',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'form',
+      label: 'Form',
+      type: 'relationship',
+      relationTo: 'forms',
     }
   ],
 };

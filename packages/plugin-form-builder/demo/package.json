@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "license": "MIT",
   "scripts": {
-    "dev": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
+    "dev": "cross-env PAYLOAD_SEED=true PAYLOAD_DROP_DATABASE=true PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
     "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload build",
     "build:server": "tsc",
     "build": "yarn build:payload && yarn build:server",
@@ -17,7 +17,7 @@
     "deepmerge": "^4.2.2",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "^0.18.5"
+    "payload": "^1.1.26"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",

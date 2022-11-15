@@ -1,5 +1,6 @@
 import express from 'express';
 import payload from 'payload';
+import { seed } from './seed';
 
 require('dotenv').config();
 const app = express();
@@ -10,20 +11,21 @@ app.get('/', (_, res) => {
 });
 
 // Initialize Payload
-payload.init({
-  secret: process.env.PAYLOAD_SECRET,
-  mongoURL: process.env.MONGODB_URI,
-  email: {
-    fromAddress: 'dev@email.com',
-    fromName: 'First Last',
-    logMockCredentials: true
-  },
-  express: app,
-  onInit: () => {
-    payload.logger.info(`Payload Admin URL: ${payload.getAdminURL()}`);
-  },
-});
+const start = async () => {
+  await payload.initAsync({
+    secret: process.env.PAYLOAD_SECRET,
+    mongoURL: process.env.MONGODB_URI,
+    express: app,
+    onInit: () => {
+      payload.logger.info(`Payload Admin URL: ${payload.getAdminURL()}`)
+    },
+  })
 
-// Add your own express routes here
+  if (process.env.PAYLOAD_SEED === 'true') {
+    await seed(payload);
+  }
 
-app.listen(3000);
+  app.listen(3000);
+}
+
+start();
