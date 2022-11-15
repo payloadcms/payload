@@ -5,6 +5,17 @@ import { useWatchForm } from '../Form/context';
 const baseClass = 'row-label';
 
 export const RowLabel: React.FC<Props> = (props) => {
+  return (
+    <span style={{
+      pointerEvents: 'none',
+    }}
+    >
+      <RowLabelContent {...props} />
+    </span>
+  );
+};
+
+const RowLabelContent: React.FC<Props> = (props) => {
   const {
     path,
     fallback,
