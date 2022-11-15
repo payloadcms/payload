@@ -1,4 +1,4 @@
-import type { i18n } from 'i18next';
+import { i18n as Ii18n } from 'i18next';
 import { User } from '../../../../../auth';
 import {
   Field as FieldSchema,
@@ -19,7 +19,7 @@ type Args = {
   fieldPromises: Promise<void>[]
   id: string | number
   operation: 'create' | 'update'
-  i18n: i18n
+  i18n: Ii18n
 }
 
 export const iterateFields = ({

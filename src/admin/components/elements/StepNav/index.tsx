@@ -5,9 +5,9 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Chevron from '../../icons/Chevron';
 import { Context as ContextType } from './types';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
-import { getTranslation } from '../../../../utilities/getTranslation';
 
 const Context = createContext({} as ContextType);
 

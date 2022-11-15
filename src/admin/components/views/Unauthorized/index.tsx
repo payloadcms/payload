@@ -17,11 +17,11 @@ const Unauthorized: React.FC = () => {
   return (
     <MinimalTemplate className="unauthorized">
       <Meta
-        title={t('unauthorized')}
-        description={t('unauthorized')}
-        keywords={t('unauthorized')}
+        title={t('error:unauthorized')}
+        description={t('error:unauthorized')}
+        keywords={t('error:unauthorized')}
       />
-      <h2>{t('unauthorized')}</h2>
+      <h2>{t('error:unauthorized')}</h2>
       <p>{t('error:notAllowedToAccessPage')}</p>
       <br />
       <Button

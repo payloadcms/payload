@@ -1050,7 +1050,7 @@
         "saveDraft": {
           "type": "string"
         },
-        "selectLocals": {
+        "selectLocales": {
           "type": "string"
         },
         "selectVersionToCompare": {
@@ -1134,7 +1134,7 @@
         "revertToPublished",
         "reverting",
         "saveDraft",
-        "selectLocals",
+        "selectLocales",
         "selectVersionToCompare",
         "showLocales",
         "status",

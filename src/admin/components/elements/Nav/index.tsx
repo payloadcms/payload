@@ -11,11 +11,11 @@ import Icon from '../../graphics/Icon';
 import Account from '../../graphics/Account';
 import Localizer from '../Localizer';
 import NavGroup from '../NavGroup';
+import Logout from '../Logout';
 import { groupNavItems, Group, EntityToGroup, EntityType } from '../../../utilities/groupNavItems';
 import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
-import Logout from '../Logout';
 
 const baseClass = 'nav';
 
@@ -34,7 +34,7 @@ const DefaultNav = () => {
     admin: {
       components: {
         beforeNavLinks,
-        afterNavLinks
+        afterNavLinks,
       },
     },
   } = useConfig();
@@ -140,7 +140,7 @@ const DefaultNav = () => {
             >
               <Account />
             </Link>
-            <Logout/>
+            <Logout />
           </div>
         </nav>
       </div>

@@ -10,9 +10,9 @@ import { useForm } from '../../forms/Form/context';
 import useTitle from '../../../hooks/useTitle';
 import { requests } from '../../../api';
 import { Props } from './types';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
-import { getTranslation } from '../../../../utilities/getTranslation';
 
 const baseClass = 'delete-document';
 

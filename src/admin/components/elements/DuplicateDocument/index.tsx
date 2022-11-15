@@ -132,7 +132,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         pathname: `${admin}/collections/${slug}/${duplicateID}`,
       });
     }, 10);
-  }, [modified, localization, t, i18n, collection.labels.singular, collection.admin.hooks, setModified, toggleModal, modalSlug, serverURL, api, slug, id, push, admin]);
+  }, [modified, localization, t, i18n, collection, setModified, toggleModal, modalSlug, serverURL, api, slug, id, push, admin]);
 
   const confirm = useCallback(async () => {
     setHasClicked(false);

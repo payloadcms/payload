@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import FormSubmit from '../../forms/Submit';
 import { useForm, useFormModified } from '../../forms/Form/context';
@@ -6,7 +7,6 @@ import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useLocale } from '../../utilities/Locale';
 
 import './index.scss';
-import { useTranslation } from 'react-i18next';
 
 const baseClass = 'save-draft';
 

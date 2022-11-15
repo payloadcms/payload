@@ -268,7 +268,7 @@
     "revertToPublished": "公開時の内容に戻す",
     "reverting": "内容を戻しています...",
     "saveDraft": "ドラフトを保存",
-    "selectLocals": "表示するロケールを選択",
+    "selectLocales": "表示するロケールを選択",
     "selectVersionToCompare": "比較するバージョンを選択",
     "showLocales": "ロケールを表示:",
     "status": "ステータス",
