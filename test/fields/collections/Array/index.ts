@@ -1,5 +1,5 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
-import { ArrayRowLabel } from './HeaderComponent';
+import { ArrayRowLabel } from './LabelComponent';
 
 export const arrayDefaultValue = [
   { text: 'row one' },
