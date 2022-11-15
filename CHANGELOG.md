@@ -1,5 +1,12 @@
 
 
+## [1.1.26](https://github.com/payloadcms/payload/compare/v1.1.25...v1.1.26) (2022-11-15)
+
+
+### Bug Fixes
+
+* [#1414](https://github.com/payloadcms/payload/issues/1414) ([50bcf00](https://github.com/payloadcms/payload/commit/50bcf001ea613c65cfe0545e7257d5b13ca688f3))
+
 ## [1.1.25](https://github.com/payloadcms/payload/compare/v1.1.24...v1.1.25) (2022-11-15)
 
 
