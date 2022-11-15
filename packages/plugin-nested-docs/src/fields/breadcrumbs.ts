@@ -4,7 +4,6 @@ import { Field } from 'payload/types';
 const createBreadcrumbsField = (relationTo: string, overrides: Partial<ArrayField> = {}): Field => ({
   name: 'breadcrumbs',
   type: 'array',
-  localized: true,
   fields: [
     {
       name: 'doc',

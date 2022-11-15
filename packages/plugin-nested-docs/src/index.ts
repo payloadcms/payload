@@ -17,7 +17,9 @@ const nestedDocs = (options: Options) => (config: Config): Config => ({
       }
 
       if (!options.breadcrumbsFieldSlug) {
-        fields.push(createBreadcrumbsField(collection.slug));
+        fields.push(createBreadcrumbsField(collection.slug, {
+          localized: Boolean(config.localization)
+        }));
       }
 
       return {
