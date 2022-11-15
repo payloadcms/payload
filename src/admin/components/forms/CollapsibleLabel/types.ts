@@ -1,7 +1,7 @@
 import React from 'react';
 import { Data } from '../Form/types';
 
-export type CollapsibleHeader = (props: {
+export type CollapsibleLabel = (props: {
   formData: Data,
   collapsibleData: Data,
   index?: number,
@@ -11,6 +11,6 @@ export type CollapsibleHeader = (props: {
 export type Props = {
   fallback: string;
   path: string;
-  header?: CollapsibleHeader;
+  label?: CollapsibleLabel;
   rowNumber?: number;
 }
