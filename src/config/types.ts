@@ -252,4 +252,4 @@ export type SanitizedConfig = Omit<DeepRequired<Config>, 'collections' | 'global
   paths: { [key: string]: string };
 }
 
-export type EntityDescription = string | (() => string) | React.ComponentType<any>
+export type EntityDescription = string | Record<string, string> | (() => string) | React.ComponentType<any>

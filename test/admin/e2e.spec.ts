@@ -348,6 +348,19 @@ describe('admin', () => {
         await createPost();
       });
 
+      test('should display translated collections and globals config options', async () => {
+        await page.goto(url.list);
+
+        // collection label
+        await expect(page.locator('#nav-posts')).toContainText('Posts en');
+
+        // global label
+        await expect(page.locator('#nav-global-global')).toContainText('Global en');
+
+        // view description
+        await expect(page.locator('.view-description')).toContainText('Description en');
+      });
+
       test('should display translated field titles', async () => {
         // columns
         await page.locator('.list-controls__toggle-columns').click();

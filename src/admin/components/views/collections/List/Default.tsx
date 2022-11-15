@@ -15,9 +15,9 @@ import ViewDescription from '../../../elements/ViewDescription';
 import PerPage from '../../../elements/PerPage';
 import { Gutter } from '../../../elements/Gutter';
 import { RelationshipProvider } from './RelationshipProvider';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
-import { getTranslation } from '../../../../../utilities/getTranslation';
 
 const baseClass = 'collection-list';
 

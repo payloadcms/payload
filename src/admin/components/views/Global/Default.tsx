@@ -22,9 +22,9 @@ import Status from '../../elements/Status';
 import Autosave from '../../elements/Autosave';
 import { OperationContext } from '../../utilities/OperationProvider';
 import { Gutter } from '../../elements/Gutter';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
-import { getTranslation } from '../../../../utilities/getTranslation';
 
 const baseClass = 'global-edit';
 
