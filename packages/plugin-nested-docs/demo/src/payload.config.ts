@@ -30,6 +30,15 @@ export default buildConfig({
     Users,
     Pages
   ],
+  //  localization: {
+  //   locales: [
+  //     'en',
+  //     'es',
+  //     'de',
+  //   ],
+  //   defaultLocale: 'en',
+  //   fallback: true,
+  // },
   plugins: [
     nestedPages({
       collections: [
