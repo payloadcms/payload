@@ -28,10 +28,10 @@ const resaveSelfAfterCreate = (collection: CollectionConfig): CollectionAfterCha
         draft: updateAsDraft,
         data: {
           ...originalDocWithDepth0,
-          breadcrumbs: breadcrumbs.map((crumb, i) => ({
+          breadcrumbs: breadcrumbs?.map((crumb, i) => ({
             ...crumb,
-            doc: breadcrumbs?.length === i + 1 ? doc.id : crumb.doc,
-          })),
+            doc: breadcrumbs.length === i + 1 ? doc.id : crumb.doc,
+          })) || [],
         },
       });
     } catch(err) {
