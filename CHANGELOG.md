@@ -16,7 +16,6 @@
 * admin UI logout extensibility ([#1274](https://github.com/payloadcms/payload/issues/1274)) ([a345ef0](https://github.com/payloadcms/payload/commit/a345ef0d3179000a2930f8b09886e06fd0801d21))
 * let textarea grow based on value ([#1398](https://github.com/payloadcms/payload/issues/1398)) ([0f27b10](https://github.com/payloadcms/payload/commit/0f27b103b44935480b8ffe17427fc5ed05b92446))
 * saves tab index to user preferences ([5eb8e4a](https://github.com/payloadcms/payload/commit/5eb8e4a28f34a1c51790d4eabfb21606b7fb41c6))
-* updates tab preference keys ([35426ee](https://github.com/payloadcms/payload/commit/35426eef3620f312abafdc1d3869273d674caaab))
 
 ## [1.1.24](https://github.com/payloadcms/payload/compare/v1.1.23...v1.1.24) (2022-11-14)
 
