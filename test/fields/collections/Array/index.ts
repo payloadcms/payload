@@ -1,5 +1,5 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
-import { ArrayCollapsibleLabel } from './HeaderComponent';
+import { ArrayRowLabel } from './HeaderComponent';
 
 export const arrayDefaultValue = [
   { text: 'row one' },
@@ -85,7 +85,7 @@ const ArrayFields: CollectionConfig = {
     },
     {
       type: 'array',
-      name: 'collapsibleLabelAsFunction',
+      name: 'rowLabelAsFunction',
       fields: [
         {
           name: 'title',
@@ -93,15 +93,15 @@ const ArrayFields: CollectionConfig = {
         },
       ],
       admin: {
-        description: 'Collapsible labels rendered from a function.',
+        description: 'Row labels rendered from a function.',
         components: {
-          CollapsibleLabel: ({ collapsibleData, fallback }) => collapsibleData.title || fallback,
+          RowLabel: ({ data, fallback }) => data.title || fallback,
         },
       },
     },
     {
       type: 'array',
-      name: 'rowHeaderAsComponent',
+      name: 'rowLabelAsComponent',
       fields: [
         {
           name: 'title',
@@ -109,9 +109,9 @@ const ArrayFields: CollectionConfig = {
         },
       ],
       admin: {
-        description: 'Collapsible labels rendered as components.',
+        description: 'Row labels rendered as react components.',
         components: {
-          CollapsibleLabel: ArrayCollapsibleLabel,
+          RowLabel: ArrayRowLabel,
         },
       },
     },

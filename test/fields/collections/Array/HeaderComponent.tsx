@@ -1,7 +1,7 @@
 import React from 'react';
-import { CollapsibleLabel } from '../../../../src/admin/components/forms/CollapsibleLabel/types';
+import { RowLabelComponent } from '../../../../src/admin/components/forms/RowLabel/types';
 
-export const ArrayCollapsibleLabel: CollapsibleLabel = (props) => {
-  const { collapsibleData, fallback } = props;
-  return <span style={{ color: 'hotpink' }}>{collapsibleData.title || fallback}</span>;
+export const ArrayRowLabel: RowLabelComponent = (props) => {
+  const { data, fallback } = props;
+  return <span style={{ color: 'hotpink' }}>{data.title || fallback}</span>;
 };

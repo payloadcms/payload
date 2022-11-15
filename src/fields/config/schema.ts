@@ -1,6 +1,12 @@
 import joi from 'joi';
 import { componentSchema } from '../../utilities/componentSchema';
 
+export const baseAdminComponentFields = joi.object().keys({
+  Cell: componentSchema,
+  Field: componentSchema,
+  Filter: componentSchema,
+}).default({});
+
 export const baseAdminFields = joi.object().keys({
   description: joi.alternatives().try(
     joi.string(),
@@ -15,11 +21,7 @@ export const baseAdminFields = joi.object().keys({
   hidden: joi.boolean().default(false),
   disabled: joi.boolean().default(false),
   condition: joi.func(),
-  components: joi.object().keys({
-    Cell: componentSchema,
-    Field: componentSchema,
-    Filter: componentSchema,
-  }).default({}),
+  components: baseAdminComponentFields,
 });
 
 export const baseField = joi.object().keys({
@@ -185,7 +187,7 @@ export const collapsible = baseField.keys({
   type: joi.string().valid('collapsible').required(),
   fields: joi.array().items(joi.link('#field')),
   admin: baseAdminFields.keys({
-    components: joi.object().keys({
+    components: baseAdminComponentFields.keys({
       CollapsibleLabel: componentSchema,
     }).default({}),
   }).default({}),
@@ -241,8 +243,8 @@ export const array = baseField.keys({
     joi.func(),
   ),
   admin: baseAdminFields.keys({
-    components: joi.object().keys({
-      CollapsibleLabel: componentSchema,
+    components: baseAdminComponentFields.keys({
+      RowLabel: componentSchema,
     }).default({}),
   }).default({}),
 });

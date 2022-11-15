@@ -81,7 +81,7 @@ const CollapsibleFields: CollectionConfig = {
         description: 'Collapsible label rendered from a function.',
         initCollapsed: true,
         components: {
-          CollapsibleLabel: ({ collapsibleData }) => collapsibleData.functionTitleField || 'Untitled',
+          CollapsibleLabel: ({ data }) => data.functionTitleField || 'Untitled',
         },
       },
       fields: [

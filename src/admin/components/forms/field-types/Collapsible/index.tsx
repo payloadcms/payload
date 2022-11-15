@@ -9,7 +9,7 @@ import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import FieldDescription from '../../FieldDescription';
 import { getFieldPath } from '../getFieldPath';
-import { CollapsibleLabel } from '../../CollapsibleLabel';
+import { RowLabel } from '../../RowLabel';
 
 import './index.scss';
 
@@ -74,7 +74,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
           className,
         ].filter(Boolean).join(' ')}
         header={(
-          <CollapsibleLabel
+          <RowLabel
             path={path}
             fallback={label}
             label={CollapsibleLabelFromProps}
