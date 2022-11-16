@@ -6,6 +6,7 @@
 
   .textarea-outer {
     @include formInput();
+    display: block;
     resize: vertical;
     height: auto;
     min-height: base(3);

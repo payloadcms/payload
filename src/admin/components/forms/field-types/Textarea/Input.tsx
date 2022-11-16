@@ -66,7 +66,10 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         label={label}
         required={required}
       />
-      <div className="textarea-outer">
+      <label
+        className="textarea-outer"
+        htmlFor={`field-${path.replace(/\./gi, '__')}`}
+      >
         <div className="textarea-inner">
           <div
             className="textarea-clone"
@@ -83,7 +86,7 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             rows={rows}
           />
         </div>
-      </div>
+      </label>
       <FieldDescription
         value={value}
         description={description}
