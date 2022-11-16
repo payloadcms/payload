@@ -14,7 +14,7 @@ keywords: row, fields, config, configuration, documentation, Content Management 
 
 | Option         | Description                                                               |
 | -------------- | ------------------------------------------------------------------------- |
-| **`label`** *  | A label to render within the header of the collapsible component.         |
+| **`label`** *  | A label to render within the header of the collapsible component. This can be a string, function or react component. Function/components receive `({ data, path })` as args. |
 | **`fields`** * | Array of field types to nest within this Collapsible.                     |
 | **`admin`**    | Admin-specific configuration. See below for [more detail](#admin-config). |
 
@@ -27,7 +27,6 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 | Option                 | Description                     |
 | ---------------------- | ------------------------------- |
 | **`initCollapsed`**    | Set the initial collapsed state |
-| **`components.CollapsibleLabel`**  | React component to be rendered as the label on the collapsible. [More](/admin/components/#field-component) |
 
 ### Example
 
@@ -39,7 +38,7 @@ const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
-      label: 'Header of collapsible goes here',
+      label: ({ data }) => data?.title || 'Untitled',
       type: 'collapsible', // required
       fields: [ // required
         {
@@ -53,11 +52,6 @@ const ExampleCollection: CollectionConfig = {
           required: true,
         },
       ],
-      admin: {
-        components: {
-          CollapsibleLabel: ({ data, fallback }) => data?.title || fallback,
-        },
-      },
     }
   ]
 };
