@@ -20,6 +20,7 @@ const RenderFields: React.FC<Props> = (props) => {
     readOnly: readOnlyOverride,
     className,
     forceRender,
+    indexPath: incomingIndexPath
   } = props;
 
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender));
@@ -48,7 +49,7 @@ const RenderFields: React.FC<Props> = (props) => {
         className={classes}
       >
         {hasRendered && (
-          fieldSchema.map((field, i) => {
+          fieldSchema.map((field, fieldIndex) => {
             const fieldIsPresentational = fieldIsPresentationalOnly(field);
             let FieldComponent = fieldTypes[field.type];
 
@@ -58,7 +59,7 @@ const RenderFields: React.FC<Props> = (props) => {
                   return (
                     <FieldComponent
                       {...field}
-                      key={i}
+                      key={fieldIndex}
                     />
                   );
                 }
@@ -83,13 +84,14 @@ const RenderFields: React.FC<Props> = (props) => {
                   if (FieldComponent) {
                     return (
                       <RenderCustomComponent
-                        key={i}
+                        key={fieldIndex}
                         CustomComponent={field?.admin?.components?.Field}
                         DefaultComponent={FieldComponent}
                         componentProps={{
                           ...field,
                           path: field.path || (isFieldAffectingData ? field.name : ''),
                           fieldTypes,
+                          indexPath: incomingIndexPath ? `${incomingIndexPath}.${fieldIndex}` : `${fieldIndex}`,
                           admin: {
                             ...(field.admin || {}),
                             readOnly,
@@ -103,7 +105,7 @@ const RenderFields: React.FC<Props> = (props) => {
                   return (
                     <div
                       className="missing-field"
-                      key={i}
+                      key={fieldIndex}
                     >
                       No matched field found for
                       {' '}

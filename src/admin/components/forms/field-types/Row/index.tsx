@@ -16,6 +16,7 @@ const Row: React.FC<Props> = (props) => {
       readOnly,
       className,
     },
+    indexPath
   } = props;
 
   const classes = [
@@ -30,6 +31,7 @@ const Row: React.FC<Props> = (props) => {
       className={classes}
       permissions={permissions}
       fieldTypes={fieldTypes}
+      indexPath={indexPath}
       fieldSchema={fields.map((field) => ({
         ...field,
         path: getFieldPath(path, field),

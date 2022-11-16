@@ -1,5 +1,29 @@
 
 
+## [1.1.26](https://github.com/payloadcms/payload/compare/v1.1.25...v1.1.26) (2022-11-15)
+
+
+### Bug Fixes
+
+* [#1414](https://github.com/payloadcms/payload/issues/1414) ([50bcf00](https://github.com/payloadcms/payload/commit/50bcf001ea613c65cfe0545e7257d5b13ca688f3))
+
+## [1.1.25](https://github.com/payloadcms/payload/compare/v1.1.24...v1.1.25) (2022-11-15)
+
+
+### Bug Fixes
+
+* add slug to DocumentInfo context ([#1389](https://github.com/payloadcms/payload/issues/1389)) ([4d8cc97](https://github.com/payloadcms/payload/commit/4d8cc97475c73e5131699ef03dca275a17535a25))
+* adds unique key to upload cards to prevent old images being shown while navigating to new page ([5e8a8b2](https://github.com/payloadcms/payload/commit/5e8a8b2df9af435f0df8a8a07dddf7dcc24cf9ac))
+* ensures admin components is defaulted ([d103f6c](https://github.com/payloadcms/payload/commit/d103f6c94f91b5359aea722c2d7781bf144f6a26))
+* global afterRead and afterChange execution ([#1405](https://github.com/payloadcms/payload/issues/1405)) ([cdaa8cc](https://github.com/payloadcms/payload/commit/cdaa8cc29f58308a387375ec41eafd0d38b13bcb))
+
+
+### Features
+
+* admin UI logout extensibility ([#1274](https://github.com/payloadcms/payload/issues/1274)) ([a345ef0](https://github.com/payloadcms/payload/commit/a345ef0d3179000a2930f8b09886e06fd0801d21))
+* let textarea grow based on value ([#1398](https://github.com/payloadcms/payload/issues/1398)) ([0f27b10](https://github.com/payloadcms/payload/commit/0f27b103b44935480b8ffe17427fc5ed05b92446))
+* saves tab index to user preferences ([5eb8e4a](https://github.com/payloadcms/payload/commit/5eb8e4a28f34a1c51790d4eabfb21606b7fb41c6))
+
 ## [1.1.24](https://github.com/payloadcms/payload/compare/v1.1.23...v1.1.24) (2022-11-14)
 
 
