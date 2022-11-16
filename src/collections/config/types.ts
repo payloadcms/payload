@@ -219,6 +219,15 @@ export type CollectionConfig = {
     singularName?: string
     pluralName?: string
   }
+  /**
+   * Options used in typescript generation
+   */
+  typescript?: {
+    /**
+     * Typescript generation name given to the interface type
+     */
+    interface?: string
+  }
   fields: Field[];
   /**
    * Collection admin options
