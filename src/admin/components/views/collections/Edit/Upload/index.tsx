@@ -164,6 +164,7 @@ const Upload: React.FC<Props> = (props) => {
               />
             </div>
           )}
+
           {!value && (
             <React.Fragment>
               <div
@@ -185,15 +186,16 @@ const Upload: React.FC<Props> = (props) => {
                   {t('selectFile')}
                 </Button>
                 <div className={`${baseClass}__or-other-options-container`}>
-                  <p className={`${baseClass}__or-text`}>OR</p>
+                  <p className={`${baseClass}__or-text`}>{t('general:or')}</p>
                   <div className={`${baseClass}__other-options`}>
-                    <p>drag and drop a file</p>
-                    <p>copy and paste a file</p>
+                    <p>{t('dragAndDrop')}</p>
+                    <p>{t('copyAndPaste')}</p>
                   </div>
                 </div>
               </div>
             </React.Fragment>
           )}
+
           <input
             ref={inputRef}
             type="file"
