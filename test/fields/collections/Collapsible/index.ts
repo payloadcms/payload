@@ -77,14 +77,11 @@ const CollapsibleFields: CollectionConfig = {
       ],
     },
     {
-      label: 'Collapsible Header Function',
+      label: ({ data }) => data.functionTitleField || 'Custom Collapsible Label',
       type: 'collapsible',
       admin: {
         description: 'Collapsible label rendered from a function.',
         initCollapsed: true,
-        components: {
-          CollapsibleLabel: ({ data }) => data.functionTitleField || 'Untitled',
-        },
       },
       fields: [
         {
@@ -94,14 +91,10 @@ const CollapsibleFields: CollectionConfig = {
       ],
     },
     {
-      label: 'Collapsible Header Component',
+      label: ({ data }) => data?.componentTitleField || 'Untitled',
       type: 'collapsible',
       admin: {
         description: 'Collapsible label rendered as a react component.',
-        initCollapsed: true,
-        components: {
-          CollapsibleLabel: CollapsibleLabelComponent,
-        },
       },
       fields: [
         {
@@ -110,11 +103,26 @@ const CollapsibleFields: CollectionConfig = {
         },
         {
           type: 'collapsible',
-          label: 'Nested Collapsible',
+          label: ({ data }) => data?.nestedTitle || 'Nested Collapsible',
           fields: [
             {
               type: 'text',
-              name: 'nestedText',
+              name: 'nestedTitle',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          label: CollapsibleLabelComponent,
+          type: 'collapsible',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
             },
           ],
         },

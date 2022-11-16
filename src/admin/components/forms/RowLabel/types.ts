@@ -2,7 +2,6 @@ import React from 'react';
 import { Data } from '../Form/types';
 
 export type Props = {
-  fallback: string;
   path: string;
   label?: RowLabel;
   rowNumber?: number;
@@ -12,8 +11,7 @@ export type Props = {
 export type RowLabelArgs = {
   data: Data,
   path: string,
-  index: number,
-  fallback: string
+  index?: number,
 }
 
 export type RowLabelFunction = (args: RowLabelArgs) => string

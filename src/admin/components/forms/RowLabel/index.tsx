@@ -4,24 +4,27 @@ import { useWatchForm } from '../Form/context';
 
 const baseClass = 'row-label';
 
-export const RowLabel: React.FC<Props> = (props) => {
+export const RowLabel: React.FC<Props> = ({ className, ...rest }) => {
   return (
-    <span style={{
-      pointerEvents: 'none',
-    }}
+    <span
+      style={{
+        pointerEvents: 'none',
+      }}
+      className={[
+        baseClass,
+        className,
+      ].filter(Boolean).join(' ')}
     >
-      <RowLabelContent {...props} />
+      <RowLabelContent {...rest} />
     </span>
   );
 };
 
-const RowLabelContent: React.FC<Props> = (props) => {
+const RowLabelContent: React.FC<Omit<Props, 'className'>> = (props) => {
   const {
     path,
-    fallback,
     label,
     rowNumber,
-    className,
   } = props;
 
   const { getDataByPath, getSiblingData } = useWatchForm();
@@ -35,37 +38,18 @@ const RowLabelContent: React.FC<Props> = (props) => {
       <Label
         data={data}
         path={path}
-        fallback={fallback}
         index={rowNumber}
       />
     );
   }
 
-  if (label) {
-    return (
-      <span
-        className={[
-          baseClass,
-          className,
-        ].filter(Boolean).join(' ')}
-      >
-        {typeof label === 'function' ? label({
-          data,
-          path,
-          fallback,
-          index: rowNumber,
-        }) : label}
-      </span>
-    );
-  }
-
-  if (fallback) {
-    return (
-      <React.Fragment>
-        {fallback}
-      </React.Fragment>
-    );
-  }
-
-  return null;
+  return (
+    <React.Fragment>
+      {typeof label === 'function' ? label({
+        data,
+        path,
+        index: rowNumber,
+      }) : label}
+    </React.Fragment>
+  );
 };
