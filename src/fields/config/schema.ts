@@ -183,14 +183,13 @@ export const row = baseField.keys({
 });
 
 export const collapsible = baseField.keys({
-  label: joi.string().required(),
+  label: joi.alternatives().try(
+    joi.string(),
+    componentSchema,
+  ),
   type: joi.string().valid('collapsible').required(),
   fields: joi.array().items(joi.link('#field')),
-  admin: baseAdminFields.keys({
-    components: baseAdminComponentFields.keys({
-      CollapsibleLabel: componentSchema,
-    }).default({}),
-  }).default({}),
+  admin: baseAdminFields.default(),
 });
 
 const tab = baseField.keys({

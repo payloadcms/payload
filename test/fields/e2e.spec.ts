@@ -67,32 +67,29 @@ describe('fields', () => {
     });
   });
 
-  // describe('fields - collapsible', () => {
-  //   let url: AdminUrlUtil;
-  //   beforeAll(() => {
-  //     url = new AdminUrlUtil(serverURL, collapsibleFieldsSlug);
-  //   });
+  describe('fields - collapsible', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, collapsibleFieldsSlug);
+    });
 
-  //   test('should render CollapsibleLabel using a function', async () => {
-  //     await page.goto(url.create);
-  //     await page.locator('#field-collapsibleLabelAsFunction >> .array-field__add-button-wrap >> button').click();
+    test('should render CollapsibleLabel using a function', async () => {
+      await page.goto(url.create);
+      await page.locator('#field-collapsible-3__1 >> #field-nestedTitle').fill('custom row label');
+      await wait(100);
+      const customCollapsibleLabel = await page.locator('#field-collapsible-3__1 >> .row-label');
+      await expect(customCollapsibleLabel).toContainText('custom row label');
+    });
 
-  //     await page.locator('#field-collapsibleLabelAsFunction__0__title').fill('custom row label');
-  //     await wait(100);
-  //     const customCollapsibleLabel = await page.locator('#collapsibleLabelAsFunction-row-0 >> .row-label');
-  //     await expect(customCollapsibleLabel).toContainText('custom row label');
-  //   });
-
-  //   test('should render CollapsibleLabel using a component', async () => {
-  //     await page.goto(url.create);
-  //     await page.locator('#field-collapsibleLabelAsComponent>> .array-field__add-button-wrap >> button').click();
-
-  //     await page.locator('#field-collapsibleLabelAsComponent__0__title').fill('custom row label');
-  //     await wait(100);
-  //     const customCollapsibleLabel = await page.locator('#collapsibleLabelAsComponent-row-0 >> .row-label :text("custom row label")');
-  //     await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase');
-  //   });
-  // });
+    test('should render CollapsibleLabel using a component', async () => {
+      const customLabel = 'custom row label as component';
+      await page.goto(url.create);
+      await page.locator('#field-collapsible-4__0 >> #field-title').fill(customLabel);
+      await wait(100);
+      const customCollapsibleLabel = await page.locator(`#field-collapsible-4__0 >> .row-label :text("${customLabel}")`);
+      await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase');
+    });
+  });
 
   describe('fields - array', () => {
     let url: AdminUrlUtil;
