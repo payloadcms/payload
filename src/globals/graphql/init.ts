@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { GraphQLNonNull, GraphQLBoolean, GraphQLInt, GraphQLString } from 'graphql';
+import { singular } from 'pluralize';
 import formatName from '../../graphql/utilities/formatName';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
@@ -19,18 +20,13 @@ import { SanitizedGlobalConfig } from '../config/types';
 function initGlobalsGraphQL(payload: Payload): void {
   if (payload.config.globals) {
     Object.keys(payload.globals.config).forEach((slug) => {
-      const global: SanitizedGlobalConfig = payload.globals.config[slug];
+      const global = payload.globals.config[slug];
       const {
         fields,
         versions,
       } = global;
 
-      let formattedName;
-      if (global.graphQLName) {
-        formattedName = toWords(global.graphQLName, true);
-      } else {
-        formattedName = toWords(global.slug, true);
-      }
+      const formattedName = global.graphQL?.name ? global.graphQL.name : singular(toWords(global.slug, true));
 
       global.graphQL = {} as SanitizedGlobalConfig['graphQL'];
 

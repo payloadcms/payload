@@ -142,8 +142,8 @@ export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
 
     fields[formatName(global.slug)] = {
       type: new GraphQLObjectType({
-        name: formatName(`${global.graphQLName || global.slug}Access`),
-        fields: buildEntity(global.graphQLName || global.slug, global.fields, globalOperations),
+        name: formatName(`${global?.graphQL?.name || global.slug}Access`),
+        fields: buildEntity(global?.graphQL?.name || global.slug, global.fields, globalOperations),
       }),
     };
   });

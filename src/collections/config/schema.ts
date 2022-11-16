@@ -32,6 +32,9 @@ const collectionSchema = joi.object().keys({
     singularName: joi.string(),
     pluralName: joi.string(),
   }),
+  typescript: joi.object().keys({
+    interface: joi.string(),
+  }),
   timestamps: joi.boolean(),
   admin: joi.object({
     useAsTitle: joi.string(),

@@ -24,7 +24,12 @@ const globalSchema = joi.object().keys({
       }),
     }),
   }),
-  graphQLName: joi.string(),
+  typescript: joi.object().keys({
+    interface: joi.string(),
+  }),
+  graphQL: joi.object().keys({
+    name: joi.string(),
+  }),
   hooks: joi.object({
     beforeValidate: joi.array().items(joi.func()),
     beforeChange: joi.array().items(joi.func()),
