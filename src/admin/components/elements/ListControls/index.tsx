@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
-import { fieldAffectsData } from '../../../../fields/config/types';
+import { FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
 import WhereBuilder from '../WhereBuilder';
@@ -48,7 +48,7 @@ const ListControls: React.FC<Props> = (props) => {
           fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
           handleChange={handleWhereChange}
           modifySearchQuery={modifySearchQuery}
-          fieldLabel={titleField && titleField.label ? titleField.label : undefined}
+          fieldLabel={titleField && fieldAffectsData(titleField) && titleField.label ? titleField.label : undefined}
           listSearchableFields={textFieldsToBeSearched}
         />
         <div className={`${baseClass}__buttons`}>
