@@ -206,7 +206,7 @@ To actively develop or debug this plugin you can either work directly within the
    You can alternatively link your own project to the source code:
 
    1. First clone the repo
-   1. Then, `cd YOUR_PLUGIN_REPO && yarn && yarn build && yarn link`
+   1. Then, `cd YOUR_PLUGIN_REPO && yarn && cd demo && cp env.example .env && yarn && yarn dev`
    1. Now `cd` back into your own project and run, `yarn link @payloadcms/plugin-nested-docs`
    1. If this plugin using React in any way, continue to the next step. Otherwise skip to step 7.
    1. From your own project, `cd node_modules/react && yarn link && cd ../react-dom && yarn link && cd ../../`
