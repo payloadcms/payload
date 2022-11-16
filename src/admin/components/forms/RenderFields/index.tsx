@@ -22,7 +22,7 @@ const RenderFields: React.FC<Props> = (props) => {
     readOnly: readOnlyOverride,
     className,
     forceRender,
-    indexPath: incomingIndexPath
+    indexPath: incomingIndexPath,
   } = props;
 
   const { t, i18n } = useTranslation('general');
