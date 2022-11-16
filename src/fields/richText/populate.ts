@@ -24,6 +24,7 @@ export const populate = async ({
   currentDepth,
   req,
   showHiddenFields,
+  field,
 }: Omit<Arguments, 'field'> & {
   id: string,
   field: Field
@@ -43,7 +44,29 @@ export const populate = async ({
   });
 
   if (doc) {
-    dataRef[key] = doc;
+    if (field.type === 'richText' && field.select && req.payloadAPI !== 'graphQL') {
+      const fieldsOrTrue = field.select({
+        data: doc,
+        collection: collection.config,
+        siblingData: dataRef,
+      });
+      if (fieldsOrTrue !== true) {
+        // if fieldsOrTrue is true then we want to return the entire related document
+        const newDoc = {
+          id: doc.id,
+        };
+        fieldsOrTrue.forEach((fieldName) => {
+          if (doc[fieldName] !== undefined) {
+            newDoc[fieldName] = doc[fieldName];
+          }
+        });
+        dataRef[key] = newDoc;
+      } else {
+        dataRef[key] = doc;
+      }
+    } else {
+      dataRef[key] = doc;
+    }
   } else {
     dataRef[key] = null;
   }

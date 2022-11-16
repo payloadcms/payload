@@ -326,6 +326,7 @@ export const blocks = baseField.keys({
 export const richText = baseField.keys({
   type: joi.string().valid('richText').required(),
   name: joi.string().required(),
+  select: joi.func(),
   defaultValue: joi.alternatives().try(
     joi.array().items(joi.object()),
     joi.func(),

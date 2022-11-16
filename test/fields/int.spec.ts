@@ -512,5 +512,32 @@ describe('Fields', () => {
       expect(typeof child.doc.value.id).toBe('string');
       expect(child.doc.value.items).toHaveLength(6);
     });
+    it('should only return selected fields of the relationship', async () => {
+      const query = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.linkType': {
+            equals: 'internal',
+          },
+        },
+      });
+
+      const nodes = query.docs[0].richText;
+      expect(nodes).toBeDefined();
+      expect(nodes).toContainEqual({
+        children: expect.arrayContaining([
+          expect.objectContaining({
+            doc: expect.objectContaining({
+              relationTo: 'array-fields',
+              value: {
+                id: expect.any(String),
+                items: expect.any(Array),
+                localized: expect.any(Array),
+              },
+            }),
+          }),
+        ]),
+      });
+    });
   });
 });

@@ -237,21 +237,28 @@ export type UIField = {
   type: 'ui';
 }
 
-type SelectOptionsProp<T extends TypeWithID> = {
+type SelectOptionsProps<T extends TypeWithID, P = any> = {
   data: T,
   collection: SanitizedCollectionConfig
+  siblingData: Partial<P>
 }
 
-export type SelectOptions<T extends TypeWithID> =
-  | Array<Exclude<keyof T, 'id'>>
-  | ((options: SelectOptionsProp<T>) => Array<Exclude<keyof T, 'id'>>);
+type KeysOfUnion<T> = T extends T ? keyof T: never;
 
-export type UploadField<T extends TypeWithID = any> = FieldBase & {
+export type SelectFunction<T extends TypeWithID = any, P = any> = (
+  options: SelectOptionsProps<T, P>
+) => Array<Exclude<KeysOfUnion<T>, 'id'>> | true;
+
+export type SelectOptions<T extends TypeWithID = any, P = any> =
+  | Array<Exclude<keyof T, 'id'>>
+  | SelectFunction<T, P>;
+
+export type UploadField = FieldBase & {
   type: 'upload'
   relationTo: string
   maxDepth?: number
   filterOptions?: FilterOptions;
-  select?: SelectOptions<T>;
+  select?: SelectOptions;
 };
 
 type CodeAdmin = Admin & {
@@ -275,13 +282,13 @@ export type SelectField = FieldBase & {
   }
 }
 
-export type RelationshipField<T extends TypeWithID = any> = FieldBase & {
+export type RelationshipField = FieldBase & {
   type: 'relationship';
   relationTo: string | string[];
   hasMany?: boolean;
   maxDepth?: number;
   filterOptions?: FilterOptions;
-  select?: SelectOptions<T>;
+  select?: SelectOptions;
   admin?: Admin & {
     isSortable?: boolean;
   }
@@ -322,6 +329,7 @@ export type RichTextLeaf = 'bold' | 'italic' | 'underline' | 'strikethrough' | '
 
 export type RichTextField = FieldBase & {
   type: 'richText';
+  select?: SelectFunction;
   admin?: Admin & {
     placeholder?: string
     elements?: RichTextElement[];

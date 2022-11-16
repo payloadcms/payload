@@ -343,6 +343,35 @@ describe('collections-rest', () => {
           });
           expect(result.totalDocs).toEqual(1);
         });
+        it('should select all fields when function returns true', async () => {
+          const post1 = await createPost({
+            relationMultiRelationToHasMany: [
+              { relationTo: relationSlug, value: relation.id },
+              { relationTo: relationSlug, value: relation2.id },
+            ],
+          });
+          await createPost();
+
+          const { status, result } = await client.find<Post>({
+            query: {
+              'relationMultiRelationToHasMany.value': {
+                equals: relation.id,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toEqual([post1]);
+          expect(result.docs[0].relationMultiRelationToHasMany).toContainEqual({
+            relationTo: relationSlug,
+            value: relation,
+          });
+          expect(result.docs[0].relationMultiRelationToHasMany).toContainEqual({
+            relationTo: relationSlug,
+            value: relation2,
+          });
+          expect(result.totalDocs).toEqual(1);
+        });
         it('should call function with data and collection', async () => {
           const collection = payload.config.collections.find((col) => col.slug === slug);
           const field = collection?.fields.find((collectionField) => ((collectionField as FieldBase).name === 'relationField'));

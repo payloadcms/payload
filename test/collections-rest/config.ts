@@ -84,7 +84,7 @@ export default buildConfig({
           name: 'relationMultiRelationToHasMany',
           type: 'relationship',
           relationTo: [relationSlug, 'dummy'],
-          select: () => ['name'],
+          select: () => true,
           hasMany: true,
         },
       ],

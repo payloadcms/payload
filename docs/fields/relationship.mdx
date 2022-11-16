@@ -101,14 +101,18 @@ You can learn more about writing queries [here](/docs/queries/overview).
 
 ### Selecting fields
 
-By default, the entire related document is returned when querying for a relationship field. You can limit the fields returned by using the `select` property. This property can either be a function that returns an array of field names, or an array of field names. The function will be called with an argument object with the following properties:
+By default, the entire related document is returned when querying for a relationship field.
+You can limit the fields returned by using the `select` property.
+This property can either be a function or an array of field names that will be selected.
+The function will be called with an argument object with the following properties:
 
-| Property      | Description  |
-| ------------- | -------------|
-| `data`             | An object of the full relationship value |
-| `collection`       | The collection config of the related collection |
+| Property      | Description                                                                          |
+| ------------- | ------------------------------------------------------------------------------------ |
+| `data`        | An object of the full relationship value                                             |
+| `collection`  | The collection config of the related collection                                      |
+| `siblingData` | An object of the document data limited to fields within the same parent to the field |
 
-and should return an array of field names to select.
+and should return an array of field names to select or `true` to select all fields.
 
 **Example:**
 

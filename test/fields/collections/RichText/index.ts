@@ -1,5 +1,13 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
+import { SelectFunction } from '../../../../src/fields/config/types';
 import { loremIpsum } from './loremIpsum';
+
+const richtTextSelect: SelectFunction<any> = ({ collection }) => {
+  if (collection.slug === 'array-fields') {
+    return ['items', 'localized'];
+  }
+  return true;
+};
 
 const RichTextFields: CollectionConfig = {
   slug: 'rich-text-fields',
@@ -41,6 +49,7 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richText',
       type: 'richText',
+      select: richtTextSelect,
       required: true,
       admin: {
         link: {

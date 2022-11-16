@@ -53,22 +53,26 @@ const populate = async ({
     if (!relationshipValue) {
       // ids are visible regardless of access controls
       relationshipValue = id;
-    } else if (field.select) {
-      const newRelationShipValue = {
-        id: relationshipValue.id,
-      };
-      const fields = Array.isArray(field.select)
+    } else if (field.select && req.payloadAPI !== 'graphQL') {
+      const fieldsOrTrue = Array.isArray(field.select)
         ? field.select
         : field.select({
           data: relationshipValue,
           collection: relatedCollection.config,
+          siblingData: dataToUpdate,
         });
-      fields.forEach((fieldName) => {
-        if (relationshipValue[fieldName] !== undefined) {
-          newRelationShipValue[fieldName] = relationshipValue[fieldName];
-        }
-      });
-      relationshipValue = newRelationShipValue;
+      if (fieldsOrTrue !== true) {
+        // if fieldsOrTrue is true then we want to return the entire related document
+        const newRelationShipValue = {
+          id: relationshipValue.id,
+        };
+        fieldsOrTrue.forEach((fieldName) => {
+          if (relationshipValue[fieldName] !== undefined) {
+            newRelationShipValue[fieldName] = relationshipValue[fieldName];
+          }
+        });
+        relationshipValue = newRelationShipValue;
+      }
     }
 
     if (typeof index === 'number') {
