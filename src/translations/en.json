@@ -238,7 +238,7 @@
     "requiresTwoNumbers": "This field requires two numbers.",
     "shorterThanMax": "This value must be shorter than the max length of {{maxLength}} characters.",
     "trueOrFalse": "This field can only be equal to true or false.",
-    "validUploadID": "'This field is not a valid upload ID.'"
+    "validUploadID": "This field is not a valid upload ID."
   },
   "version": {
     "aboutToRestore": "You are about to restore this {{label}} document to the state that it was in on {{versionDate}}.",
