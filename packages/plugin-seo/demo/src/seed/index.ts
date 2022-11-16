@@ -19,4 +19,13 @@ export const seed = async (payload: Payload) => {
       excerpt: 'This is the home page'
     },
   })
+
+  await payload.create({
+    collection: 'posts',
+    data: {
+      title: 'Hello, world!',
+      slug: 'hello-world',
+      excerpt: 'This is a post'
+    },
+  })
 }
