@@ -3,3 +3,5 @@ node_modules
 dist
 demo/uploads
 build
+.DS_Store
+package-lock.json

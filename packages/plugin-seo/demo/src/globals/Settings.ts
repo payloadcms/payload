@@ -1,7 +1,7 @@
 import { GlobalConfig } from 'payload/types';
 
-const HomePage: GlobalConfig = {
-  slug: 'homePage',
+const Settings: GlobalConfig = {
+  slug: 'settings',
   fields: [
     {
       name: 'title',
@@ -15,4 +15,4 @@ const HomePage: GlobalConfig = {
   ],
 }
 
-export default HomePage;
+export default Settings;
