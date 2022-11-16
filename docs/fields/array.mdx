@@ -46,6 +46,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 | Option                 | Description                     |
 | ---------------------- | ------------------------------- |
 | **`initCollapsed`**    | Set the initial collapsed state |
+| **`components.RowLabel`**  | Function or React component to be rendered as the label on the array row. Recieves `({ data, index, path })` as args |
 
 
 ### Example
@@ -69,6 +70,10 @@ const ExampleCollection: CollectionConfig = {
       },
       fields: [ // required
         {
+          name: 'title',
+          type: 'text',
+        }
+        {
           name: 'image',
           type: 'upload',
           relationTo: 'media',
@@ -78,7 +83,14 @@ const ExampleCollection: CollectionConfig = {
           name: 'caption',
           type: 'text',
         }
-      ]
+      ],
+      admin: {
+        components: {
+          RowLabel: ({ data, index }) => {
+            return data?.title || `Slide ${String(index).padStart(2, '0')}`;
+          },
+        },
+      },
     }
   ]
 };

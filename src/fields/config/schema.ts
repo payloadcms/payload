@@ -1,6 +1,12 @@
 import joi from 'joi';
 import { componentSchema } from '../../utilities/componentSchema';
 
+export const baseAdminComponentFields = joi.object().keys({
+  Cell: componentSchema,
+  Field: componentSchema,
+  Filter: componentSchema,
+}).default({});
+
 export const baseAdminFields = joi.object().keys({
   description: joi.alternatives().try(
     joi.string(),
@@ -15,11 +21,7 @@ export const baseAdminFields = joi.object().keys({
   hidden: joi.boolean().default(false),
   disabled: joi.boolean().default(false),
   condition: joi.func(),
-  components: joi.object().keys({
-    Cell: componentSchema,
-    Field: componentSchema,
-    Filter: componentSchema,
-  }).default({}),
+  components: baseAdminComponentFields,
 });
 
 export const baseField = joi.object().keys({
@@ -181,7 +183,10 @@ export const row = baseField.keys({
 });
 
 export const collapsible = baseField.keys({
-  label: joi.string().required(),
+  label: joi.alternatives().try(
+    joi.string(),
+    componentSchema,
+  ),
   type: joi.string().valid('collapsible').required(),
   fields: joi.array().items(joi.link('#field')),
   admin: baseAdminFields.default(),
@@ -236,6 +241,11 @@ export const array = baseField.keys({
     joi.array().items(joi.object()),
     joi.func(),
   ),
+  admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      RowLabel: componentSchema,
+    }).default({}),
+  }).default({}),
 });
 
 export const upload = baseField.keys({

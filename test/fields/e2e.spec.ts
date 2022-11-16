@@ -7,6 +7,7 @@ import { textDoc } from './collections/Text';
 import { arrayFieldsSlug } from './collections/Array';
 import { pointFieldsSlug } from './collections/Point';
 import { tabsSlug } from './collections/Tabs';
+import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
 import { relationshipFieldsSlug } from './collections/Relationship';
 
@@ -66,6 +67,33 @@ describe('fields', () => {
     });
   });
 
+  describe('fields - collapsible', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, collapsibleFieldsSlug);
+    });
+
+    test('should render CollapsibleLabel using a function', async () => {
+      const label = 'custom row label';
+      await page.goto(url.create);
+      await page.locator('#field-collapsible-3__1 >> #field-nestedTitle').fill(label);
+      await wait(100);
+      const customCollapsibleLabel = await page.locator('#field-collapsible-3__1 >> .row-label');
+      await expect(customCollapsibleLabel).toContainText(label);
+    });
+
+    test('should render CollapsibleLabel using a component', async () => {
+      const label = 'custom row label as component';
+      await page.goto(url.create);
+      await page.locator('#field-arrayWithCollapsibles >> .array-field__add-button-wrap >> button').click();
+
+      await page.locator('#field-collapsible-4__0-arrayWithCollapsibles__0 >> #field-arrayWithCollapsibles__0__innerCollapsible').fill(label);
+      await wait(100);
+      const customCollapsibleLabel = await page.locator(`#field-collapsible-4__0-arrayWithCollapsibles__0 >> .row-label :text("${label}")`);
+      await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase');
+    });
+  });
+
   describe('fields - array', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
@@ -84,6 +112,28 @@ describe('fields', () => {
       const field = page.locator('#field-readOnly__0__text');
       await expect(field)
         .toHaveValue('defaultValue');
+    });
+
+    test('should render RowLabel using a function', async () => {
+      const label = 'custom row label as function';
+      await page.goto(url.create);
+      await page.locator('#field-rowLabelAsFunction >> .array-field__add-button-wrap >> button').click();
+
+      await page.locator('#field-rowLabelAsFunction__0__title').fill(label);
+      await wait(100);
+      const customRowLabel = await page.locator('#rowLabelAsFunction-row-0 >> .row-label');
+      await expect(customRowLabel).toContainText(label);
+    });
+
+    test('should render RowLabel using a component', async () => {
+      const label = 'custom row label as component';
+      await page.goto(url.create);
+      await page.locator('#field-rowLabelAsComponent >> .array-field__add-button-wrap >> button').click();
+
+      await page.locator('#field-rowLabelAsComponent__0__title').fill(label);
+      await wait(100);
+      const customRowLabel = await page.locator('#rowLabelAsComponent-row-0 >> .row-label :text("custom row label")');
+      await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase');
     });
   });
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
@@ -22,6 +22,7 @@ import { usePreferences } from '../../../utilities/Preferences';
 import { ArrayAction } from '../../../elements/ArrayAction';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
+import { RowLabel } from '../../RowLabel';
 
 import './index.scss';
 
@@ -45,6 +46,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       condition,
       initCollapsed,
       className,
+      components,
     },
   } = props;
 
@@ -60,6 +62,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const labels = getLabels(props);
   // eslint-disable-next-line react/destructuring-assignment
   const label = props?.label ?? props?.labels?.singular;
+
+  const CustomRowLabel = components?.RowLabel || undefined;
 
   const { preferencesKey } = useDocumentInfo();
   const { getPreference } = usePreferences();
@@ -251,6 +255,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
             >
               {rows.length > 0 && rows.map((row, i) => {
                 const rowNumber = i + 1;
+                const fallbackLabel = `${labels.singular} ${String(rowNumber).padStart(2, '0')}`;
 
                 return (
                   <Draggable
@@ -271,7 +276,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                           className={`${baseClass}__row`}
                           key={row.id}
                           dragHandleProps={providedDrag.dragHandleProps}
-                          header={`${labels.singular} ${rowNumber >= 10 ? rowNumber : `0${rowNumber}`}`}
+                          header={(
+                            <RowLabel
+                              path={`${path}.${i}`}
+                              label={CustomRowLabel || fallbackLabel}
+                              rowNumber={rowNumber}
+                            />
+                          )}
                           actions={!readOnly ? (
                             <ArrayAction
                               rowCount={rows.length}
