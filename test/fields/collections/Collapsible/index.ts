@@ -114,35 +114,16 @@ const CollapsibleFields: CollectionConfig = {
       ],
     },
     {
-      type: 'row',
+      name: 'arrayWithCollapsibles',
+      type: 'array',
       fields: [
         {
           label: CollapsibleLabelComponent,
           type: 'collapsible',
           fields: [
             {
-              name: 'title',
+              name: 'innerCollapsible',
               type: 'text',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'arrayWithCollapsibles',
-      type: 'array',
-      fields: [
-        {
-          type: 'collapsible',
-          label: 'Collapsible In Array',
-          fields: [
-            {
-              type: 'text',
-              name: 'title',
-            },
-            {
-              type: 'text',
-              name: 'description',
             },
           ],
         },
@@ -159,6 +140,11 @@ export const collapsibleDoc = {
       textWithinSubGroup: 'hello, get out',
     },
   },
+  arrayWithCollapsibles: [
+    {
+      innerCollapsible: '',
+    },
+  ],
 };
 
 export default CollapsibleFields;
