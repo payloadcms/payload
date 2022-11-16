@@ -228,7 +228,7 @@
     "greaterThanMax": "\"{{value}}\" is greater than the max allowed value of {{max}}.",
     "invalidInput": "This field has an invalid input.",
     "invalidSelection": "This field has an invalid selection.",
-    "invalidSelections": "'This field has the following invalid selections:'",
+    "invalidSelections": "This field has the following invalid selections:",
     "lessThanMin": "\"{{value}}\" is less than the min allowed value of {{min}}.",
     "longerThanMin": "This value must be longer than the minimum length of {{minLength}} characters.",
     "notValidDate": "\"{{value}}\" is not a valid date.",
@@ -238,7 +238,7 @@
     "requiresTwoNumbers": "This field requires two numbers.",
     "shorterThanMax": "This value must be shorter than the max length of {{maxLength}} characters.",
     "trueOrFalse": "This field can only be equal to true or false.",
-    "validUploadID": "'This field is not a valid upload ID.'"
+    "validUploadID": "This field is not a valid upload ID."
   },
   "version": {
     "aboutToRestore": "You are about to restore this {{label}} document to the state that it was in on {{versionDate}}.",
@@ -284,8 +284,8 @@
     "versionID": "Version ID",
     "versions": "Versions",
     "viewingVersion": "Viewing version for the {{entityLabel}} {{documentTitle}}",
-    "viewingVersionGlobal": "`Viewing version for the global {{entityLabel}}",
+    "viewingVersionGlobal": "Viewing version for the global {{entityLabel}}",
     "viewingVersions": "Viewing versions for the {{entityLabel}} {{documentTitle}}",
-    "viewingVersionsGlobal": "`Viewing versions for the global {{entityLabel}}"
+    "viewingVersionsGlobal": "Viewing versions for the global {{entityLabel}}"
   }
 }
