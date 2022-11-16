@@ -7,7 +7,7 @@ import my from './my.json';
 import pl from './pl.json';
 import pt from './pt.json';
 import ru from './ru.json';
-import vn from './vn.json';
+import vi from './vi.json';
 
 export default {
   de,
@@ -19,5 +19,5 @@ export default {
   pl,
   pt,
   ru,
-  vn,
+  vi,
 };
