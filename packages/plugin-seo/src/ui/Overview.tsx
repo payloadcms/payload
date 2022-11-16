@@ -1,5 +1,5 @@
 // import { Button } from 'payload/components';
-import { useForm, useWatchForm } from 'payload/components/forms';
+import { useForm, useAllFormFields } from 'payload/components/forms';
 import { Field } from 'payload/dist/admin/components/forms/Form/types';
 import React, { useCallback, useState, useEffect } from 'react';
 import { defaults } from '../defaults';
@@ -21,19 +21,17 @@ export const Overview: React.FC = () => {
     getFields,
   } = useForm();
 
-  const {
-    fields: {
-      'meta.title': {
-        value: metaTitle,
-      } = {} as Field,
-      'meta.description': {
-        value: metaDesc,
-      } = {} as Field,
-      'meta.image': {
-        value: metaImage,
-      } = {} as Field,
-    },
-  } = useWatchForm();
+  const [{
+    'meta.title': {
+      value: metaTitle,
+    } = {} as Field,
+    'meta.description': {
+      value: metaDesc,
+    } = {} as Field,
+    'meta.image': {
+      value: metaImage,
+    } = {} as Field,
+  }] = useAllFormFields();
 
   const [titleIsValid, setTitleIsValid] = useState<boolean | undefined>();
   const [descIsValid, setDescIsValid] = useState<boolean | undefined>();
@@ -45,7 +43,7 @@ export const Overview: React.FC = () => {
     fieldsWithoutMeta['meta.title'].value = '';
     fieldsWithoutMeta['meta.description'].value = '';
     fieldsWithoutMeta['meta.image'].value = '';
-    dispatchFields(fieldsWithoutMeta);
+    // dispatchFields(fieldsWithoutMeta);
   }, [
     dispatchFields,
     getFields,

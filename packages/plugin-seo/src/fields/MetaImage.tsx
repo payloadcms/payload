@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useLocale, useConfig } from 'payload/components/utilities';
 import { Props as UploadFieldType } from 'payload/dist/admin/components/forms/field-types/Upload/types';
 import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/Input';
-import { useField, useWatchForm } from 'payload/components/forms';
+import { useField, useAllFormFields } from 'payload/components/forms';
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { Pill } from '../ui/Pill';
 import { SEOConfig } from '../types';
@@ -23,7 +23,7 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = (props) => {
 
   const field: FieldType<string> = useField(props as Options);
 
-  const { fields } = useWatchForm();
+  const [fields] = useAllFormFields();
   const locale = useLocale();
 
   const {

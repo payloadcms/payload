@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';
 import { useLocale } from 'payload/components/utilities';
 import TextInputField from 'payload/dist/admin/components/forms/field-types/Text/Input';
-import { useField, useWatchForm } from 'payload/components/forms';
+import { useAllFormFields, useField } from 'payload/components/forms';
 import { FieldType as FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { LengthIndicator } from '../ui/LengthIndicator';
 import { defaults } from '../defaults';
@@ -33,7 +33,7 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
   } as Options);
 
   const locale = useLocale();
-  const { fields } = useWatchForm();
+  const [fields] = useAllFormFields();
 
   const {
     value,

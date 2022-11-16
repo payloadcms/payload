@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { useField, useWatchForm } from 'payload/components/forms';
+import { useField, useAllFormFields } from 'payload/components/forms';
 import { useLocale } from 'payload/components/utilities';
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { LengthIndicator } from '../ui/LengthIndicator';
@@ -29,7 +29,7 @@ export const MetaDescription: React.FC<(TextareaFieldWithProps | {}) & {
   } = props as TextareaFieldWithProps || {}; // TODO: this typing is temporary until payload types are updated for custom field props
 
   const locale = useLocale();
-  const { fields } = useWatchForm();
+  const [fields] = useAllFormFields();
 
   const field: FieldType<string> = useField({
     label,
