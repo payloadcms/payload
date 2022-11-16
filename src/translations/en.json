@@ -228,7 +228,7 @@
     "greaterThanMax": "\"{{value}}\" is greater than the max allowed value of {{max}}.",
     "invalidInput": "This field has an invalid input.",
     "invalidSelection": "This field has an invalid selection.",
-    "invalidSelections": "'This field has the following invalid selections:'",
+    "invalidSelections": "This field has the following invalid selections:",
     "lessThanMin": "\"{{value}}\" is less than the min allowed value of {{min}}.",
     "longerThanMin": "This value must be longer than the minimum length of {{minLength}} characters.",
     "notValidDate": "\"{{value}}\" is not a valid date.",
