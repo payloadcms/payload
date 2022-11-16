@@ -167,6 +167,13 @@ const Upload: React.FC<Props> = (props) => {
               <div
                 className={`${baseClass}__drop-zone`}
                 ref={dropRef}
+                onPaste={(e) => {
+                  // handle pasted file
+                  if (e.clipboardData.files.length) {
+                    const fileObject = e.clipboardData.files[0];
+                    setValue(fileObject || null);
+                  }
+                }}
               >
                 <Button
                   size="small"
@@ -175,7 +182,7 @@ const Upload: React.FC<Props> = (props) => {
                 >
                   Select a file
                 </Button>
-                <span className={`${baseClass}__drag-label`}>or drag and drop a file here</span>
+                <span className={`${baseClass}__drag-label`}>or 1.drag and drop a file here 2.copy and paste a file here</span>
               </div>
             </React.Fragment>
           )}
