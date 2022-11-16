@@ -7,6 +7,7 @@ import { textDoc } from './collections/Text';
 import { arrayFieldsSlug } from './collections/Array';
 import { pointFieldsSlug } from './collections/Point';
 import { tabsSlug } from './collections/Tabs';
+import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
 
 const { beforeAll, describe } = test;
@@ -65,6 +66,33 @@ describe('fields', () => {
     });
   });
 
+  // describe('fields - collapsible', () => {
+  //   let url: AdminUrlUtil;
+  //   beforeAll(() => {
+  //     url = new AdminUrlUtil(serverURL, collapsibleFieldsSlug);
+  //   });
+
+  //   test('should render CollapsibleLabel using a function', async () => {
+  //     await page.goto(url.create);
+  //     await page.locator('#field-collapsibleLabelAsFunction >> .array-field__add-button-wrap >> button').click();
+
+  //     await page.locator('#field-collapsibleLabelAsFunction__0__title').fill('custom row label');
+  //     await wait(100);
+  //     const customCollapsibleLabel = await page.locator('#collapsibleLabelAsFunction-row-0 >> .row-label');
+  //     await expect(customCollapsibleLabel).toContainText('custom row label');
+  //   });
+
+  //   test('should render CollapsibleLabel using a component', async () => {
+  //     await page.goto(url.create);
+  //     await page.locator('#field-collapsibleLabelAsComponent>> .array-field__add-button-wrap >> button').click();
+
+  //     await page.locator('#field-collapsibleLabelAsComponent__0__title').fill('custom row label');
+  //     await wait(100);
+  //     const customCollapsibleLabel = await page.locator('#collapsibleLabelAsComponent-row-0 >> .row-label :text("custom row label")');
+  //     await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase');
+  //   });
+  // });
+
   describe('fields - array', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
@@ -83,6 +111,26 @@ describe('fields', () => {
       const field = page.locator('#field-readOnly__0__text');
       await expect(field)
         .toHaveValue('defaultValue');
+    });
+
+    test('should render RowLabel using a function', async () => {
+      await page.goto(url.create);
+      await page.locator('#field-rowLabelAsFunction >> .array-field__add-button-wrap >> button').click();
+
+      await page.locator('#field-rowLabelAsFunction__0__title').fill('custom row label');
+      await wait(100);
+      const customRowLabel = await page.locator('#rowLabelAsFunction-row-0 >> .row-label');
+      await expect(customRowLabel).toContainText('custom row label');
+    });
+
+    test('should render RowLabel using a component', async () => {
+      await page.goto(url.create);
+      await page.locator('#field-rowLabelAsComponent>> .array-field__add-button-wrap >> button').click();
+
+      await page.locator('#field-rowLabelAsComponent__0__title').fill('custom row label');
+      await wait(100);
+      const customRowLabel = await page.locator('#rowLabelAsComponent-row-0 >> .row-label :text("custom row label")');
+      await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase');
     });
   });
 

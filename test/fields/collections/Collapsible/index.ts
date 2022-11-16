@@ -1,8 +1,10 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 import { CollapsibleLabelComponent } from './LabelComponent';
 
+export const collapsibleFieldsSlug = 'collapsible-fields';
+
 const CollapsibleFields: CollectionConfig = {
-  slug: 'collapsible-fields',
+  slug: collapsibleFieldsSlug,
   versions: true,
   fields: [
     {
@@ -105,6 +107,36 @@ const CollapsibleFields: CollectionConfig = {
         {
           name: 'componentTitleField',
           type: 'text',
+        },
+        {
+          type: 'collapsible',
+          label: 'Nested Collapsible',
+          fields: [
+            {
+              type: 'text',
+              name: 'nestedText',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'arrayWithCollapsibles',
+      type: 'array',
+      fields: [
+        {
+          type: 'collapsible',
+          label: 'Collapsible In Array',
+          fields: [
+            {
+              type: 'text',
+              name: 'title',
+            },
+            {
+              type: 'text',
+              name: 'description',
+            },
+          ],
         },
       ],
     },
