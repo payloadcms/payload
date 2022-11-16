@@ -6,6 +6,7 @@ import Users from './collections/Users';
 import Pages from './collections/Pages';
 import Media from './collections/Media';
 import HomePage from './globals/Settings';
+import Posts from './collections/Posts';
 
 export default buildConfig({
   serverURL: 'http://localhost:3000',
@@ -31,6 +32,7 @@ export default buildConfig({
   collections: [
     Users,
     Pages,
+    Posts,
     Media
   ],
   globals: [
@@ -49,10 +51,12 @@ export default buildConfig({
     seo({
       collections: [
         'pages',
+        'posts'
       ],
       globals: [
         'settings',
       ],
+      tabbedUI: true,
       uploadsCollection: 'media',
       generateTitle: ({ doc }: any) => `Website.com — ${doc?.title?.value}`,
       generateDescription: ({ doc }: any) => doc?.excerpt?.value,

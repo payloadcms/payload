@@ -5,10 +5,10 @@ import { getMetaTitleField } from './fields/MetaTitle';
 import { getPreviewField } from './ui/Preview';
 import { getMetaImageField } from './fields/MetaImage';
 import { PluginConfig } from './types';
-import { Field } from 'payload/dist/fields/config/types';
+import { Field, GroupField, TabsField } from 'payload/dist/fields/config/types';
 
 const seo = (pluginConfig: PluginConfig) => (config: Config): Config => {
-  const seoFields: Field[] = [
+  const seoFields: GroupField[] = [
     {
       name: 'meta',
       label: 'SEO',
@@ -78,21 +78,40 @@ const seo = (pluginConfig: PluginConfig) => (config: Config): Config => {
       const isEnabled = pluginConfig?.collections?.includes(slug);
 
       if (isEnabled) {
+        if (pluginConfig?.tabbedUI) {
+          const seoFieldsAsTabs: TabsField[]  =  [{
+            type: 'tabs',
+            tabs: [
+              // if the collection is already tab-enabled, spread them into this new tabs field
+              // otherwise create a new tab to contain this collection's fields
+              // either way, append a new tab for the SEO fields
+              ...collection?.fields?.[0].type === 'tabs'
+                ? collection?.fields?.[0]?.tabs : [{
+                  label: collection?.labels?.singular || 'Content',
+                  fields: [...(collection?.fields || [])]
+                }],
+              {
+                label: 'SEO',
+                fields: seoFields,
+              }
+            ]
+          }]
+
+          return ({
+            ...collection,
+            fields: seoFieldsAsTabs,
+          })
+        }
+
         return ({
           ...collection,
-          fields: (pluginConfig?.tabbedUI ? [
-            {
-              type: 'tabs', tabs: [
-                { label: collection?.labels?.singular || 'Content', fields: [...(collection?.fields || [])] },
-                { label: 'SEO', fields: [...seoFields] },
-              ]
-            },
-          ] : [
+          fields: [
             ...collection?.fields || [],
             ...seoFields,
-          ]),
+          ],
         })
       }
+
       return collection;
     }) || [],
     globals: config.globals?.map((global) => {
@@ -100,21 +119,40 @@ const seo = (pluginConfig: PluginConfig) => (config: Config): Config => {
       const isEnabled = pluginConfig?.globals?.includes(slug);
 
       if (isEnabled) {
+        if (pluginConfig?.tabbedUI) {
+          const seoFieldsAsTabs: TabsField[]  =  [{
+            type: 'tabs',
+            tabs: [
+              // if the global is already tab-enabled, spread them into this new tabs field
+              // otherwise create a new tab to contain this global's fields
+              // either way, append a new tab for the SEO fields
+              ...global?.fields?.[0].type === 'tabs'
+                ? global?.fields?.[0]?.tabs : [{
+                  label: global?.label || 'Content',
+                  fields: [...(global?.fields || [])]
+                }],
+              {
+                label: 'SEO',
+                fields: seoFields,
+              }
+            ]
+          }]
+
+          return ({
+            ...global,
+            fields: seoFieldsAsTabs,
+          })
+        }
+
         return ({
           ...global,
-          fields: (pluginConfig?.tabbedUI ? [
-            {
-              type: 'tabs', tabs: [
-                { label: global?.label || 'Content', fields: [...(global?.fields || [])] },
-                { label: 'SEO', fields: [...seoFields] },
-              ]
-            },
-          ] : [
+          fields: [
             ...global?.fields || [],
             ...seoFields,
-          ]),
+          ],
         })
       }
+
       return global;
     }) || []
   })
