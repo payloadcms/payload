@@ -284,8 +284,8 @@
     "versionID": "Version ID",
     "versions": "Versions",
     "viewingVersion": "Viewing version for the {{entityLabel}} {{documentTitle}}",
-    "viewingVersionGlobal": "`Viewing version for the global {{entityLabel}}",
+    "viewingVersionGlobal": "Viewing version for the global {{entityLabel}}",
     "viewingVersions": "Viewing versions for the {{entityLabel}} {{documentTitle}}",
-    "viewingVersionsGlobal": "`Viewing versions for the global {{entityLabel}}"
+    "viewingVersionsGlobal": "Viewing versions for the global {{entityLabel}}"
   }
 }
