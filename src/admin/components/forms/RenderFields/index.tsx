@@ -20,7 +20,7 @@ const RenderFields: React.FC<Props> = (props) => {
     readOnly: readOnlyOverride,
     className,
     forceRender,
-    indexPath: incomingIndexPath
+    indexPath: incomingIndexPath,
   } = props;
 
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender));
@@ -107,11 +107,7 @@ const RenderFields: React.FC<Props> = (props) => {
                       className="missing-field"
                       key={fieldIndex}
                     >
-                      No matched field found for
-                      {' '}
-                      &quot;
-                      {field.label}
-                      &quot;
+                      {`No matched field found for "${field.label}"`}
                     </div>
                   );
                 }
