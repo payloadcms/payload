@@ -66,7 +66,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
   if (typeof collapsedOnMount !== 'boolean') return null;
 
   return (
-    <React.Fragment>
+    <div id={fieldPreferencesKey}>
       <Collapsible
         initCollapsed={collapsedOnMount}
         className={[
@@ -98,7 +98,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
       <FieldDescription
         description={description}
       />
-    </React.Fragment>
+    </div>
   );
 };
 
