@@ -126,11 +126,11 @@ All types can be directly imported:
 
 ```js
 import {
-  SEOConfig,
+  PluginConfig,
   GenerateTitle,
   GenerateDescription
   GenerateURL
-  } from '@payloadcms/plugin-seo/dist/types';
+} from '@payloadcms/plugin-seo/dist/types';
 ```
 
 ## Development

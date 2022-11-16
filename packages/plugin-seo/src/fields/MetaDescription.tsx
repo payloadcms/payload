@@ -6,7 +6,7 @@ import { LengthIndicator } from '../ui/LengthIndicator';
 import { defaults } from '../defaults';
 import TextareaInput from 'payload/dist/admin/components/forms/field-types/Textarea/Input';
 import { TextareaField } from 'payload/dist/fields/config/types';
-import { SEOConfig } from '../types';
+import { PluginConfig } from '../types';
 
 const {
   minLength,
@@ -15,17 +15,17 @@ const {
 
 type TextareaFieldWithProps = TextareaField & {
   path: string
-  seoConfig: SEOConfig
+  pluginConfig: PluginConfig
 };
 
 export const MetaDescription: React.FC<(TextareaFieldWithProps | {}) & {
-  seoConfig: SEOConfig
+  pluginConfig: PluginConfig
 }> = (props) => {
   const {
     path,
     label,
     name,
-    seoConfig,
+    pluginConfig,
   } = props as TextareaFieldWithProps || {}; // TODO: this typing is temporary until payload types are updated for custom field props
 
   const locale = useLocale();
@@ -44,7 +44,7 @@ export const MetaDescription: React.FC<(TextareaFieldWithProps | {}) & {
   } = field;
 
   const regenerateDescription = useCallback(() => {
-    const { generateDescription } = seoConfig;
+    const { generateDescription } = pluginConfig;
 
     const getDescription = async () => {
       let generatedDescription;
@@ -57,7 +57,7 @@ export const MetaDescription: React.FC<(TextareaFieldWithProps | {}) & {
   }, [
     fields,
     setValue,
-    seoConfig,
+    pluginConfig,
     locale
   ]);
 

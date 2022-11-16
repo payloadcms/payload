@@ -6,7 +6,7 @@ import { useAllFormFields, useField } from 'payload/components/forms';
 import { FieldType as FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { LengthIndicator } from '../ui/LengthIndicator';
 import { defaults } from '../defaults';
-import { SEOConfig } from '../types';
+import { PluginConfig } from '../types';
 
 const {
   minLength,
@@ -15,7 +15,7 @@ const {
 
 type TextFieldWithProps = TextFieldType & {
   path: string
-  seoConfig: SEOConfig
+  pluginConfig: PluginConfig
 };
 
 export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
@@ -23,7 +23,7 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
     label,
     name,
     path,
-    seoConfig
+    pluginConfig
   } = props as TextFieldWithProps || {}; // TODO: this typing is temporary until payload types are updated for custom field props
 
   const field: FieldType<string> = useField({
@@ -42,7 +42,7 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
   } = field;
 
   const regenerateTitle = useCallback(() => {
-    const { generateTitle } = seoConfig;
+    const { generateTitle } = pluginConfig;
 
     const getTitle = async () => {
       let generatedTitle;
@@ -55,7 +55,7 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
   }, [
     fields,
     setValue,
-    seoConfig,
+    pluginConfig,
     locale,
   ]);
 

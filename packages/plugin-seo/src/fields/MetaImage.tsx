@@ -5,11 +5,11 @@ import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/
 import { useField, useAllFormFields } from 'payload/components/forms';
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
 import { Pill } from '../ui/Pill';
-import { SEOConfig } from '../types';
+import { PluginConfig } from '../types';
 
 type UploadFieldWithProps = UploadFieldType & {
   path: string
-  seoConfig: SEOConfig
+  pluginConfig: PluginConfig
 };
 
 export const MetaImage: React.FC<UploadFieldWithProps | {}> = (props) => {
@@ -18,7 +18,7 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = (props) => {
     relationTo,
     fieldTypes,
     name,
-    seoConfig,
+    pluginConfig,
   } = props as UploadFieldWithProps || {}; // TODO: this typing is temporary until payload types are updated for custom field props
 
   const field: FieldType<string> = useField(props as Options);
@@ -33,7 +33,7 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = (props) => {
   } = field;
 
   const regenerateImage = useCallback(() => {
-    const { generateImage } = seoConfig;
+    const { generateImage } = pluginConfig;
     const getDescription = async () => {
       let generatedImage;
       if (typeof generateImage === 'function') {
@@ -45,7 +45,7 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = (props) => {
   }, [
     fields,
     setValue,
-    seoConfig,
+    pluginConfig,
     locale,
   ]);
 

@@ -1,6 +1,6 @@
 import { Field } from "payload/dist/fields/config/types";
 
-export type SEOConfig = {
+export type PluginConfig = {
   collections?: string[]
   globals?: string[]
   uploadsCollection?: string

@@ -1,14 +1,14 @@
 import { useWatchForm } from 'payload/components/forms';
 import React, { useEffect, useState } from 'react';
 import { Field } from 'payload/dist/admin/components/forms/Form/types';
-import { SEOConfig } from '../types';
+import { PluginConfig } from '../types';
 
 type PreviewFieldWithProps = Field & {
-  seoConfig: SEOConfig
+  pluginConfig: PluginConfig
 }
 export const Preview: React.FC<PreviewFieldWithProps | {}> = (props) => {
   const {
-    seoConfig: {
+    pluginConfig: {
       generateURL
     }
   } = props as PreviewFieldWithProps || {}; // TODO: this typing is temporary until payload types are updated for custom field props;

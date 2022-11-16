@@ -4,10 +4,10 @@ import { Overview } from './ui/Overview';
 import { getMetaTitleField } from './fields/MetaTitle';
 import { getPreviewField } from './ui/Preview';
 import { getMetaImageField } from './fields/MetaImage';
-import { SEOConfig } from './types';
+import { PluginConfig } from './types';
 import { Field } from 'payload/dist/fields/config/types';
 
-const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
+const seo = (pluginConfig: PluginConfig) => (config: Config): Config => {
   const seoFields: Field[] = [
     {
       name: 'meta',
@@ -30,7 +30,7 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
           localized: true,
           admin: {
             components: {
-              Field: (props) => getMetaTitleField({ ...props, seoConfig }),
+              Field: (props) => getMetaTitleField({ ...props, pluginConfig }),
             },
           },
         },
@@ -40,20 +40,20 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
           localized: true,
           admin: {
             components: {
-              Field: (props) => getMetaDescriptionField({ ...props, seoConfig }),
+              Field: (props) => getMetaDescriptionField({ ...props, pluginConfig }),
             },
           },
         },
-        ...seoConfig?.uploadsCollection ? [{
+        ...pluginConfig?.uploadsCollection ? [{
           name: 'image',
           label: 'Meta Image',
           type: 'upload',
           localized: true,
-          relationTo: seoConfig?.uploadsCollection,
+          relationTo: pluginConfig?.uploadsCollection,
           admin: {
             description: 'Maximum upload file size: 12MB. Recommended file size for images is <500KB.',
             components: {
-              Field: (props) => getMetaImageField({ ...props, seoConfig }),
+              Field: (props) => getMetaImageField({ ...props, pluginConfig }),
             },
           },
         } as Field] : [],
@@ -63,7 +63,7 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
           type: 'ui',
           admin: {
             components: {
-              Field: (props) => getPreviewField({ ...props, seoConfig }),
+              Field: (props) => getPreviewField({ ...props, pluginConfig }),
             },
           },
         },
@@ -75,12 +75,12 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
     ...config,
     collections: config.collections?.map((collection) => {
       const { slug } = collection;
-      const isEnabled = seoConfig?.collections?.includes(slug);
+      const isEnabled = pluginConfig?.collections?.includes(slug);
 
       if (isEnabled) {
         return ({
           ...collection,
-          fields: (seoConfig?.tabbedUI ? [
+          fields: (pluginConfig?.tabbedUI ? [
             {
               type: 'tabs', tabs: [
                 { label: collection?.labels?.singular || 'Content', fields: [...(collection?.fields || [])] },
@@ -97,12 +97,12 @@ const seo = (seoConfig: SEOConfig) => (config: Config): Config => {
     }) || [],
     globals: config.globals?.map((global) => {
       const { slug } = global;
-      const isEnabled = seoConfig?.globals?.includes(slug);
+      const isEnabled = pluginConfig?.globals?.includes(slug);
 
       if (isEnabled) {
         return ({
           ...global,
-          fields: (seoConfig?.tabbedUI ? [
+          fields: (pluginConfig?.tabbedUI ? [
             {
               type: 'tabs', tabs: [
                 { label: global?.label || 'Content', fields: [...(global?.fields || [])] },
