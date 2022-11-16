@@ -6,7 +6,6 @@ import {
   Submit,
   Context,
   GetSiblingData,
-  GetUnflattenedValues,
   ValidateForm,
   CreateFormData,
   SetModified,
@@ -17,7 +16,6 @@ import {
 
 const submit: Submit = () => undefined;
 const getSiblingData: GetSiblingData = () => undefined;
-const getUnflattenedValues: GetUnflattenedValues = () => ({});
 const dispatchFields: DispatchFields = () => undefined;
 const validateForm: ValidateForm = () => undefined;
 const createFormData: CreateFormData = () => undefined;
@@ -28,12 +26,11 @@ const setSubmitted: SetSubmitted = () => undefined;
 const reset: Reset = () => undefined;
 
 const initialContextState: Context = {
-  getFields: (): Fields => ({ }),
+  getFields: (): Fields => ({}),
   getField: (): Field => undefined,
   getData: (): Data => undefined,
   getSiblingData,
   getDataByPath: () => undefined,
-  getUnflattenedValues,
   validateForm,
   createFormData,
   submit,
@@ -41,7 +38,6 @@ const initialContextState: Context = {
   setModified,
   setProcessing,
   setSubmitted,
-  initialState: {},
   fields: {},
   disabled: false,
   formRef: null,

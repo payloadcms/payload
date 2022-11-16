@@ -74,57 +74,55 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const locale = useLocale();
   const operation = useOperation();
 
-  const { dispatchFields } = formContext;
+  const { dispatchFields, setModified } = formContext;
 
   const memoizedValidate = useCallback((value, options) => {
     return validate(value, { ...options, minRows, maxRows, required });
   }, [maxRows, minRows, required, validate]);
 
-  const [disableFormData, setDisableFormData] = useState(false);
-
   const {
     showError,
     errorMessage,
     value,
-    setValue,
   } = useField({
     path,
     validate: memoizedValidate,
-    disableFormData,
     condition,
+    disableFormData: rows?.length > 0,
   });
 
   const addRow = useCallback(async (rowIndex: number) => {
     const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user, locale });
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     dispatchRows({ type: 'ADD', rowIndex });
-    setValue(value as number + 1);
+    setModified(true);
 
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [dispatchRows, dispatchFields, fields, path, setValue, value, operation, id, user, locale]);
+  }, [dispatchRows, dispatchFields, fields, path, operation, id, user, locale, setModified]);
 
   const duplicateRow = useCallback(async (rowIndex: number) => {
     dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });
     dispatchRows({ type: 'ADD', rowIndex });
-    setValue(value as number + 1);
+    setModified(true);
 
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [dispatchRows, dispatchFields, path, setValue, value]);
+  }, [dispatchRows, dispatchFields, path, setModified]);
 
   const removeRow = useCallback((rowIndex: number) => {
     dispatchRows({ type: 'REMOVE', rowIndex });
     dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
-    setValue(value as number - 1);
-  }, [dispatchRows, dispatchFields, path, value, setValue]);
+    setModified(true);
+  }, [dispatchRows, dispatchFields, path, setModified]);
 
   const moveRow = useCallback((moveFromIndex: number, moveToIndex: number) => {
     dispatchRows({ type: 'MOVE', moveFromIndex, moveToIndex });
     dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
-  }, [dispatchRows, dispatchFields, path]);
+    setModified(true);
+  }, [dispatchRows, dispatchFields, path, setModified]);
 
   const onDragEnd = useCallback((result) => {
     if (!result.destination) return;
@@ -196,16 +194,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
     initializeRowState();
   }, [formContext, path, getPreference, preferencesKey, initCollapsed]);
-
-  useEffect(() => {
-    setValue(rows?.length || 0, true);
-
-    if (rows?.length === 0) {
-      setDisableFormData(false);
-    } else {
-      setDisableFormData(true);
-    }
-  }, [rows, setValue]);
 
   const hasMaxRows = maxRows && rows?.length >= maxRows;
 

@@ -15,6 +15,7 @@ import { StepNavItem } from '../../../elements/StepNav/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { Fields } from '../../../forms/Form/types';
 import { usePreferences } from '../../../utilities/Preferences';
+import { EditDepthContext } from '../../../utilities/EditDepth';
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props;
@@ -130,22 +131,25 @@ const EditView: React.FC<IndexProps> = (props) => {
   const hasSavePermission = (isEditing && collectionPermissions?.update?.permission) || (!isEditing && collectionPermissions?.create?.permission);
 
   return (
-    <RenderCustomComponent
-      DefaultComponent={DefaultEdit}
-      CustomComponent={CustomEdit}
-      componentProps={{
-        isLoading: !initialState,
-        data: dataToRender,
-        collection,
-        permissions: collectionPermissions,
-        isEditing,
-        onSave,
-        initialState,
-        hasSavePermission,
-        apiURL,
-        action,
-      }}
-    />
+    <EditDepthContext.Provider value={1}>
+      <RenderCustomComponent
+        DefaultComponent={DefaultEdit}
+        CustomComponent={CustomEdit}
+        componentProps={{
+          id,
+          isLoading: !initialState,
+          data: dataToRender,
+          collection,
+          permissions: collectionPermissions,
+          isEditing,
+          onSave,
+          initialState,
+          hasSavePermission,
+          apiURL,
+          action,
+        }}
+      />
+    </EditDepthContext.Provider>
   );
 };
 export default EditView;

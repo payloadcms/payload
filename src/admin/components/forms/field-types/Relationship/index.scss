@@ -5,18 +5,21 @@
   margin-bottom: $baseline;
 }
 
-.relationship__error-loading {
-  border: 1px solid var(--theme-error-500);
-  min-height: base(2);
-  padding: base(.5) base(.75);
-  background-color: var(--theme-error-500);
-  color: var(--theme-elevation-0);
-}
+.relationship {
+  &__wrap {
+    display: flex;
+    width: 100%;
 
-.relationship--read-only {
-  div.react-select {
-    div.rs__control {
-      background: var(--theme-elevation-100);
+    div.react-select {
+      flex-grow: 1;
     }
+  }
+
+  &__error-loading {
+    border: 1px solid var(--theme-error-500);
+    min-height: base(2);
+    padding: base(.5) base(.75);
+    background-color: var(--theme-error-500);
+    color: var(--theme-elevation-0);
   }
 }

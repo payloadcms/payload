@@ -4,7 +4,7 @@ import useField from '../../../../forms/useField';
 import Label from '../../../../forms/Label';
 import CopyToClipboard from '../../../../elements/CopyToClipboard';
 import { text } from '../../../../../../fields/validations';
-import { useWatchForm } from '../../../../forms/Form/context';
+import { useFormFields } from '../../../../forms/Form/context';
 
 import GenerateConfirmation from '../../../../elements/GenerateConfirmation';
 
@@ -16,9 +16,7 @@ const APIKey: React.FC = () => {
   const [initialAPIKey, setInitialAPIKey] = useState(null);
   const [highlightedField, setHighlightedField] = useState(false);
 
-  const { getField } = useWatchForm();
-
-  const apiKey = getField(path);
+  const apiKey = useFormFields(([fields]) => fields[path]);
 
   const apiKeyValue = apiKey?.value;
 

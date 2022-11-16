@@ -37,7 +37,6 @@ const Email: React.FC<Props> = (props) => {
   const fieldType = useField({
     path,
     validate: memoizedValidate,
-    enableDebouncedValue: true,
     condition,
   });
 

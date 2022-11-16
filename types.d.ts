@@ -1,6 +1,10 @@
 export * from './dist/types';
 
 export {
+  Access,
+} from './dist/config/types';
+
+export {
   CollectionConfig,
   SanitizedCollectionConfig,
   BeforeOperationHook as CollectionBeforeOperationHook,
@@ -14,6 +18,7 @@ export {
   BeforeLoginHook as CollectionBeforeLoginHook,
   AfterLoginHook as CollectionAfterLoginHook,
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
+  BeforeDuplicate,
 } from './dist/collections/config/types';
 
 export {

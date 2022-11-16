@@ -11,35 +11,39 @@ While designing the Payload Admin panel, we determined it should be as minimal a
 To swap in your own React component, first, consult the list of available component overrides below. Determine the scope that corresponds to what you are trying to accomplish, and then author your React component accordingly.
 
 <Banner type="success">
-  <strong>Tip:</strong><br/>
-  Custom components will automatically be provided with all props that the default component would accept.
+  <strong>Tip:</strong>
+  <br />
+  Custom components will automatically be provided with all props that the
+  default component would accept.
 </Banner>
 
 ### Base Component Overrides
 
 You can override a set of admin panel-wide components by providing a component to your base Payload config's `admin.components` property. The following options are available:
 
-| Path                  | Description  |
-| --------------------- | -------------|
-| **`Nav`**             | Contains the sidebar and mobile Nav in its entirety. |
-| **`BeforeDashboard`** | Array of components to inject into the built-in Dashboard, _before_ the default dashboard contents. |
-| **`AfterDashboard`**  | Array of components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/master/test/admin/components/AfterDashboard/index.tsx)|
-| **`BeforeLogin`**     | Array of components to inject into the built-in Login, _before_ the default login form. |
-| **`AfterLogin`**      | Array of components to inject into the built-in Login, _after_ the default login form. |
-| **`BeforeNavLinks`**  | Array of components to inject into the built-in Nav, _before_ the links themselves. |
-| **`AfterNavLinks`**   | Array of components to inject into the built-in Nav, _after_ the links. |
-| **`views.Account`**   | The Account view is used to show the currently logged in user's Account page. |
-| **`views.Dashboard`** | The main landing page of the Admin panel. |
-| **`graphics.Icon`**   | Used as a graphic within the `Nav` component. Often represents a condensed version of a full logo. |
-| **`graphics.Logo`**   | The full logo to be used in contexts like the `Login` view. |
-| **`routes`**          | Define your own routes to add to the Payload Admin UI. [More](#custom-routes) |
-| **`providers`**       | Define your own provider components that will wrap the Payload Admin UI. [More](#custom-providers) |
+| Path                         | Description                                                                                                                                                                                                 |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Nav`**                    | Contains the sidebar and mobile Nav in its entirety.                                                                                                                                                        |
+| **`logout.Button`**          | A custom React component.
+| **`BeforeDashboard`**        | Array of components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                         |
+| **`AfterDashboard`**         | Array of components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/master/test/admin/components/AfterDashboard/index.tsx) |
+| **`BeforeLogin`**            | Array of components to inject into the built-in Login, _before_ the default login form.                                                                                                                     |
+| **`AfterLogin`**             | Array of components to inject into the built-in Login, _after_ the default login form.                                                                                                                      |
+| **`BeforeNavLinks`**         | Array of components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                         |
+| **`AfterNavLinks`**          | Array of components to inject into the built-in Nav, _after_ the links.                                                                                                                                     |
+| **`views.Account`**          | The Account view is used to show the currently logged in user's Account page.                                                                                                                               |
+| **`views.Dashboard`**        | The main landing page of the Admin panel.                                                                                                                                                                   |
+| **`graphics.Icon`**          | Used as a graphic within the `Nav` component. Often represents a condensed version of a full logo.                                                                                                          |
+| **`graphics.Logo`**          | The full logo to be used in contexts like the `Login` view.                                                                                                                                                 |
+| **`routes`**                 | Define your own routes to add to the Payload Admin UI. [More](#custom-routes)                                                                                                                               |
+| **`providers`**              | Define your own provider components that will wrap the Payload Admin UI. [More](#custom-providers)                                                                                                          |
 
 #### Full example:
 
 `payload.config.js`
+
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from "payload/config";
 import {
   MyCustomNav,
   MyCustomLogo,
@@ -47,7 +51,7 @@ import {
   MyCustomAccount,
   MyCustomDashboard,
   MyProvider,
-} from './customComponents';
+} from "./customComponents";
 
 export default buildConfig({
   admin: {
@@ -67,75 +71,69 @@ export default buildConfig({
 });
 ```
 
-*For more examples regarding how to customize components, look at the following [examples](https://github.com/payloadcms/payload/tree/master/test/admin/components).*
+_For more examples regarding how to customize components, look at the following [examples](https://github.com/payloadcms/payload/tree/master/test/admin/components)._
 
 ### Collections
 
 You can override components on a Collection-by-Collection basis via each Collection's `admin` property.
 
-| Path    | Description  |
-| ----------------  | -------------|
-| **`views.Edit`**  | Used while a document within this Collection is being edited. |
-| **`views.List`**  | The `List` view is used to render a paginated, filterable table of Documents in this Collection. |
+| Path             | Description                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------ |
+| **`views.Edit`** | Used while a document within this Collection is being edited.                                    |
+| **`views.List`** | The `List` view is used to render a paginated, filterable table of Documents in this Collection. |
 
 ### Globals
 
 As with Collections, You can override components on a global-by-global basis via their `admin` property.
 
-| Path    | Description  |
-| ----------------  | -------------|
-| **`views.Edit`**  | Used while this Global is being edited. |
+| Path             | Description                             |
+| ---------------- | --------------------------------------- |
+| **`views.Edit`** | Used while this Global is being edited. |
 
 ### Fields
 
 All Payload fields support the ability to swap in your own React components. So, for example, instead of rendering a default Text input, you might need to render a color picker that provides the editor with a custom color picker interface to restrict the data entered to colors only.
 
 <Banner type="success">
-  <strong>Tip:</strong><br/>
-  Don't see a built-in field type that you need? Build it! Using a combination of custom validation and custom components, you can override the entirety of how a component functions within the admin panel and effectively create your own field type.
+  <strong>Tip:</strong>
+  <br />
+  Don't see a built-in field type that you need? Build it! Using a combination
+  of custom validation and custom components, you can override the entirety of
+  how a component functions within the admin panel and effectively create your
+  own field type.
 </Banner>
 
 **Fields support the following custom components:**
 
-| Component       | Description                                                                                                                  |
-| --------------- |------------------------------------------------------------------------------------------------------------------------------|
-| **`Filter`**    | Override the text input that is presented in the `List` view when a user is filtering documents by the customized field.     |
-| **`Cell`**      | Used in the `List` view's table to represent a table-based preview of the data stored in the field.  [More](#cell-component) |
-| **`Field`**     | Swap out the field itself within all `Edit` views. [More](#field-component)                                                  |
+| Component    | Description                                                                                                                 |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| **`Filter`** | Override the text input that is presented in the `List` view when a user is filtering documents by the customized field.    |
+| **`Cell`**   | Used in the `List` view's table to represent a table-based preview of the data stored in the field. [More](#cell-component) |
+| **`Field`**  | Swap out the field itself within all `Edit` views. [More](#field-component)                                                 |
 
 ## Cell Component
 
 These are the props that will be passed to your custom Cell to use in your own components.
 
-| Property     | Description                                                       |
-|--------------|-------------------------------------------------------------------|
-| **`field`** | An object that includes the field configuration.                  |
-| **`colIndex`** | A unique number for the column in the list.                       |
+| Property         | Description                                                       |
+| ---------------- | ----------------------------------------------------------------- |
+| **`field`**      | An object that includes the field configuration.                  |
+| **`colIndex`**   | A unique number for the column in the list.                       |
 | **`collection`** | An object with the config of the collection that the field is in. |
 | **`cellData`**   | The data for the field that the cell represents.                  |
-| **`rowData`**  | An object with all the field values for the row.                  |
+| **`rowData`**    | An object with all the field values for the row.                  |
 
 #### Example
 
 ```tsx
-import React from 'react';
-import './index.scss';
-const baseClass = 'custom-cell';
+import React from "react";
+import "./index.scss";
+const baseClass = "custom-cell";
 
 const CustomCell: React.FC<Props> = (props) => {
-  const {
-    field,
-    colIndex,
-    collection,
-    cellData,
-    rowData,
-  } = props;
+  const { field, colIndex, collection, cellData, rowData } = props;
 
-  return (
-    <span className={baseClass}>
-      { cellData }
-    </span>
-  );
+  return <span className={baseClass}>{cellData}</span>;
 };
 ```
 
@@ -148,64 +146,29 @@ When writing your own custom components you can make use of a number of hooks to
 When swapping out the `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useField` hook as follows:
 
 ```tsx
-import { useField } from 'payload/components/forms'
+import { useField } from "payload/components/forms";
 
-type Props = { path: string }
+type Props = { path: string };
 
 const CustomTextField: React.FC<Props> = ({ path }) => {
   // highlight-start
-  const { value, setValue } = useField<Props>({ path })
+  const { value, setValue } = useField<Props>({ path });
   // highlight-end
-
-  return <input onChange={e => setValue(e.target.value)} value={value.path} />
-}
-```
-
-### Getting other field values from the form
-
-There are times when a custom field component needs to have access to data from other fields. This can be done using `getDataByPath` from `useWatchForm` as follows:
-
-```tsx
-import { useWatchForm } from 'payload/components/forms';
-
-const DisplayFee: React.FC = () => {
-  const { getDataByPath } = useWatchForm();
-
-  const amount = getDataByPath('amount');
-  const feePercentage = getDataByPath('feePercentage');
-
-  if (amount && feePercentage) {
-    return (
-      <span>The fee is ${(amount * feePercentage) / 100}</span>
-    );
-  }
-};
-```
-
-### Getting the document ID
-
-The document ID can be very useful for certain custom components. You can get the `id` from the `useDocumentInfo` hook. Here is an example of a `UI` field using `id` to link to related collections:
-
-```tsx
-import { useDocumentInfo } from 'payload/components/utilities';
-
-const LinkFromCategoryToPosts: React.FC = () => {
-  // highlight-start
-  const { id } = useDocumentInfo();
-  // highlight-end
-
-  // id will be undefined on the create form
-  if (!id) {
-    return null;
-  }
 
   return (
-    <a href={`/admin/collections/posts?where[or][0][and][0][category][in][0]=[${id}]`} >
-      View posts
-    </a>
-  )
+    <input onChange={(e) => setValue(e.target.value)} value={value.path} />
+  );
 };
 ```
+
+<Banner type="success">
+  For more information regarding the hooks that are available to you while you
+  build custom components, including the <strong>useField</strong> hook,{" "}
+  <a href="/docs/admin/hooks" style={{ color: "black" }}>
+    click here
+  </a>
+  .
+</Banner>
 
 ## Custom routes
 
@@ -213,28 +176,31 @@ You can easily add your own custom routes to the Payload Admin panel using the `
 
 **Custom routes support the following properties:**
 
-| Property          | Description  |
-| ----------------- | -------------|
-| **`Component`** * | Pass in the component that should be rendered when a user navigates to this route. |
-| **`path`** *      | React Router `path`. [See the React Router docs](https://v5.reactrouter.com/web/api/Route/path-string-string) for more info.  |
-| **`exact`**       | React Router `exact` property. [More](https://v5.reactrouter.com/web/api/Route/exact-bool) |
-| **`strict`**      | React Router `strict` property. [More](https://v5.reactrouter.com/web/api/Route/strict-bool) |
-| **`sensitive`**   | React Router `sensitive` property. [More](https://v5.reactrouter.com/web/api/Route/sensitive-bool) |
+| Property           | Description                                                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| **`Component`** \* | Pass in the component that should be rendered when a user navigates to this route.                                           |
+| **`path`** \*      | React Router `path`. [See the React Router docs](https://v5.reactrouter.com/web/api/Route/path-string-string) for more info. |
+| **`exact`**        | React Router `exact` property. [More](https://v5.reactrouter.com/web/api/Route/exact-bool)                                   |
+| **`strict`**       | React Router `strict` property. [More](https://v5.reactrouter.com/web/api/Route/strict-bool)                                 |
+| **`sensitive`**    | React Router `sensitive` property. [More](https://v5.reactrouter.com/web/api/Route/sensitive-bool)                           |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
 #### Custom route components
 
 Your custom route components will be given all the props that a React Router `<Route />` typically would receive, as well as two props from Payload:
 
-| Prop                   | Description  |
-| ---------------------- | -------------|
-| **`user`**             | The currently logged in user. Will be `null` if no user is logged in. |
-| **`canAccessAdmin`** * | If the currently logged in user is allowed to access the admin panel or not. |
+| Prop                    | Description                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| **`user`**              | The currently logged in user. Will be `null` if no user is logged in.        |
+| **`canAccessAdmin`** \* | If the currently logged in user is allowed to access the admin panel or not. |
 
 <Banner type="warning">
-  <strong>Note:</strong><br/>
-  It's up to you to secure your custom routes. If your route requires a user to be logged in or to have certain access rights, you should handle that within your route component yourself.
+  <strong>Note:</strong>
+  <br />
+  It's up to you to secure your custom routes. If your route requires a user to
+  be logged in or to have certain access rights, you should handle that within
+  your route component yourself.
 </Banner>
 
 #### Example
@@ -250,7 +216,10 @@ To see how to pass in your custom views to create custom routes of your own, tak
 
 As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to do add your own context to any Payload app for use in other custom components within the admin panel. Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. Read the [React context](https://reactjs.org/docs/context.html) docs to learn more.
 
-<Banner type="warning"><strong>Reminder:</strong> Don't forget to pass the **children** prop through the provider component for the admin UI to show</Banner>
+<Banner type="warning">
+  <strong>Reminder:</strong> Don't forget to pass the **children** prop through
+  the provider component for the admin UI to show
+</Banner>
 
 ### Styling Custom Components
 
@@ -267,7 +236,7 @@ To make use of Payload SCSS variables / mixins to use directly in your own compo
 In any custom component you can get the selected locale with the `useLocale` hook. Here is a simple example:
 
 ```tsx
-import { useLocale } from 'payload/components/utilities';
+import { useLocale } from "payload/components/utilities";
 
 const Greeting: React.FC = () => {
   // highlight-start
@@ -275,12 +244,10 @@ const Greeting: React.FC = () => {
   // highlight-end
 
   const trans = {
-    en: 'Hello',
-    es: 'Hola',
+    en: "Hello",
+    es: "Hola",
   };
 
-  return (
-    <span> { trans[locale] } </span>
-  );
+  return <span> {trans[locale]} </span>;
 };
 ```

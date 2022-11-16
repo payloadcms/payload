@@ -40,18 +40,20 @@ export type BuildSchemaOptions = {
   disableUnique?: boolean
   draftsEnabled?: boolean
   global?: boolean
+  indexSortableFields?: boolean
 }
 
 type FieldSchemaGenerator = (field: Field, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => void;
 
 const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSchemaOptions) => {
+  const { disableUnique, draftsEnabled, indexSortableFields } = buildSchemaOptions;
   const schema: SchemaTypeOptions<unknown> = {
-    unique: (!buildSchemaOptions.disableUnique && field.unique) || false,
+    unique: (!disableUnique && field.unique) || false,
     required: false,
-    index: field.index || (!buildSchemaOptions.disableUnique && field.unique) || false,
+    index: field.index || (!disableUnique && field.unique) || indexSortableFields || false,
   };
 
-  if ((schema.unique && (field.localized || buildSchemaOptions.draftsEnabled))) {
+  if ((schema.unique && (field.localized || draftsEnabled))) {
     schema.sparse = true;
   }
 

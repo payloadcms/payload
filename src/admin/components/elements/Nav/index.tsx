@@ -4,7 +4,6 @@ import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import Chevron from '../../icons/Chevron';
-import LogOut from '../../icons/LogOut';
 import Menu from '../../icons/Menu';
 import CloseMenu from '../../icons/CloseMenu';
 import Icon from '../../graphics/Icon';
@@ -14,6 +13,7 @@ import NavGroup from '../NavGroup';
 import { groupNavItems, Group, EntityToGroup, EntityType } from '../../../utilities/groupNavItems';
 
 import './index.scss';
+import Logout from '../Logout';
 
 const baseClass = 'nav';
 
@@ -31,7 +31,7 @@ const DefaultNav = () => {
     admin: {
       components: {
         beforeNavLinks,
-        afterNavLinks,
+        afterNavLinks
       },
     },
   } = useConfig();
@@ -137,12 +137,7 @@ const DefaultNav = () => {
             >
               <Account />
             </Link>
-            <Link
-              to={`${admin}/logout`}
-              className={`${baseClass}__log-out`}
-            >
-              <LogOut />
-            </Link>
+            <Logout/>
           </div>
         </nav>
       </div>

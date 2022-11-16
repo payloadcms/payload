@@ -19,6 +19,7 @@ import Uploads, { uploadsDoc } from './collections/Upload';
 import IndexedFields from './collections/Indexed';
 import NumberFields, { numberDoc } from './collections/Number';
 import CodeFields, { codeDoc } from './collections/Code';
+import RelationshipFields from './collections/Relationship';
 
 export default buildConfig({
   admin: {
@@ -39,16 +40,17 @@ export default buildConfig({
     CodeFields,
     CollapsibleFields,
     ConditionalLogic,
+    DateFields,
     GroupFields,
+    IndexedFields,
+    NumberFields,
     PointFields,
+    RelationshipFields,
     RichTextFields,
     SelectFields,
     TabsFields,
     TextFields,
-    NumberFields,
     Uploads,
-    IndexedFields,
-    DateFields,
   ],
   localization: {
     defaultLocale: 'en',

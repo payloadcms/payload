@@ -25,6 +25,7 @@ export default function getDeleteResolver(collection: Collection): Resolver {
       collection,
       id: args.id,
       req: context.req,
+      depth: 0,
     };
 
     const result = await deleteOperation(options);

@@ -12,6 +12,11 @@ const globalSchema = joi.object().keys({
       joi.string(),
       componentSchema,
     ),
+    components: joi.object({
+      views: joi.object({
+        Edit: componentSchema,
+      }),
+    }),
   }),
   hooks: joi.object({
     beforeValidate: joi.array().items(joi.func()),

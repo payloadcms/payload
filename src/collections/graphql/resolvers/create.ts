@@ -5,10 +5,10 @@ import { Collection } from '../../config/types';
 import create from '../../operations/create';
 
 export type Resolver = (_: unknown, args: {
-    data: Record<string, unknown>,
-    locale?: string
-    draft: boolean
-  },
+  data: Record<string, unknown>,
+  locale?: string
+  draft: boolean
+},
   context: {
     req: PayloadRequest,
     res: Response
@@ -26,6 +26,7 @@ export default function createResolver(collection: Collection): Resolver {
       data: args.data,
       req: context.req,
       draft: args.draft,
+      depth: 0,
     };
 
     const result = await create(options);

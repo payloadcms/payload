@@ -35,7 +35,6 @@ const Text: React.FC<Props> = (props) => {
   const field = useField<string>({
     path,
     validate: memoizedValidate,
-    enableDebouncedValue: true,
     condition,
   });
 

@@ -325,7 +325,7 @@ describe('Field Validations', () => {
       const result = number(val, options);
       expect(result).toBe(true);
     });
-    it('should validate', () => {
+    it('should validate 2', () => {
       const val = 1.5;
       const result = number(val, options);
       expect(result).toBe(true);
@@ -336,23 +336,23 @@ describe('Field Validations', () => {
       expect(result).toBe(validNumberMessage);
     });
     it('should handle empty value', () => {
-      const val = "";
+      const val = '';
       const result = number(val, { ...options });
       expect(result).toBe(true);
     });
     it('should handle required value', () => {
-      const val = "";
+      const val = '';
       const result = number(val, { ...options, required: true });
       expect(result).toBe(validNumberMessage);
     });
     it('should validate minValue', () => {
       const val = 2.4;
-      const result = number(val, { ...options, min: 2.5});
+      const result = number(val, { ...options, min: 2.5 });
       expect(result).toBe(minValueMessage(val, 2.5));
     });
     it('should validate maxValue', () => {
       const val = 1.25;
-      const result = number(val, { ...options, max: 1});
+      const result = number(val, { ...options, max: 1 });
       expect(result).toBe(maxValueMessage(val, 1));
     });
   });

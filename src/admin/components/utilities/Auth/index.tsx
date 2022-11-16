@@ -25,6 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const {
     admin: {
       user: userSlug,
+      inactivityRoute: logoutInactivityRoute,
     },
     serverURL,
     routes: {
@@ -57,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(json.user);
         } else {
           setUser(null);
-          push(`${admin}/logout-inactivity`);
+          push(`${admin}${logoutInactivityRoute}`);
         }
       }, 1000);
     }
@@ -69,11 +70,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTokenInMemory(token);
   }, []);
 
-  const logOut = () => {
+  const logOut = useCallback(() => {
     setUser(null);
     setTokenInMemory(undefined);
     requests.post(`${serverURL}${api}/${userSlug}/logout`);
-  };
+  }, [serverURL, api, userSlug]);
 
   // On mount, get user and set
   useEffect(() => {
@@ -145,7 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
         setUser(null);
-        push(`${admin}/logout-inactivity`);
+        push(`${admin}${logoutInactivityRoute}`);
         closeAllModals();
       }, Math.min(remainingTime * 1000, maxTimeoutTime));
     }

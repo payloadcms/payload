@@ -35,6 +35,7 @@ export default function findVersionsResolver(collection: Collection): Resolver {
       page: args.page,
       sort: args.sort,
       req: context.req,
+      depth: 0,
     };
 
     const result = await findVersions(options);

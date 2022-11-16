@@ -59,17 +59,18 @@ You can find an assortment of [example collection configs](https://github.com/pa
 
 You can customize the way that the Admin panel behaves on a collection-by-collection basis by defining the `admin` property on a collection's config.
 
-| Option                       | Description  |
-| ---------------------------- | -------------|
-| `group`                      | Text used as a label for grouping collection links together in the navigation. |
-| `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title. |
-| `description`                | Text or React component to display below the Collection label in the List view to give editors more information. |
-| `defaultColumns`             | Array of field names that correspond to which columns to show by default in this collection's List view. |
-| `disableDuplicate `          | Disables the "Duplicate" button while editing documents within this collection. |
+| Option                      | Description  |
+| --------------------------- | -------------|
+| `group`                     | Text used as a label for grouping collection links together in the navigation. |
+| `hooks`                     | Admin-specific hooks for this collection. [More](#admin-hooks) |
+| `useAsTitle`                | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title. |
+| `description`               | Text or React component to display below the Collection label in the List view to give editors more information. |
+| `defaultColumns`            | Array of field names that correspond to which columns to show by default in this collection's List view. |
+| `disableDuplicate `         | Disables the "Duplicate" button while editing documents within this collection. |
 | `enableRichTextRelationship` | The [Rich Text](/docs/fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default. |
-| `preview`                    | Function to generate preview URLS within the Admin panel that can point to your app. [More](#preview). |
-| `components`                 | Swap in your own React components to be used within this collection. [More](/docs/admin/components#collections) |
-| `listSearchableFields `      | Specify which fields should be searched in the List search view. [More](/docs/configuration/collections#list-searchable-fields) |
+| `preview`                   | Function to generate preview URLS within the Admin panel that can point to your app. [More](#preview). |
+| `components`                | Swap in your own React components to be used within this collection. [More](/docs/admin/components#collections) |
+| `listSearchableFields`      | Specify which fields should be searched in the List search view. [More](#list-searchable-fields) |
 
 ### Preview
 
@@ -120,7 +121,7 @@ Hooks are a powerful way to extend collection functionality and execute your own
 
 Collections support all field types that Payload has to offer—including simple fields like text and checkboxes all the way to more complicated layout-building field groups like Blocks. [Click here](/docs/fields/overview) to learn more about field types.
 
-#### List Searchable Fields
+### List Searchable Fields
 
 In the List view, there is a "search" box that allows you to quickly find a document with a search. By default, it searches on the ID field. If you have `admin.useAsTitle` defined, the list search will use that field. However, you can define more than one field to search to make it easier on your admin editors to find the data they need.
 
@@ -128,8 +129,52 @@ For example, let's say you have a Posts collection with `title`, `metaDescriptio
 
 <Banner type="warning">
   <strong>Note:</strong><br/>
-  If you are adding <strong>listSearchableFields</strong>, make sure you index each of these fields so your admin queries can remain performant. 
+  If you are adding <strong>listSearchableFields</strong>, make sure you index each of these fields so your admin queries can remain performant.
 </Banner>
+
+### Admin Hooks
+
+In addition to collection hooks themselves, Payload provides for admin UI-specific hooks that you can leverage.
+
+**`beforeDuplicate`**
+
+The `beforeDuplicate` hook is an async function that accepts an object containing the data to duplicate, as well as the locale of the doc to duplicate. Within this hook, you can modify the data to be duplicated, which is useful in cases where you have unique fields that need to be incremented or similar, as well as if you want to automatically modify a document's `title`.
+
+Example:
+
+```ts
+import { BeforeDuplicate, CollectionConfig } from 'payload/types';
+// Your auto-generated Page type
+import { Page } from '../payload-types.ts';
+
+const beforeDuplicate: BeforeDuplicate<Page> = ({ data }) => {
+  return {
+    ...data,
+    title: `${data.title} Copy`,
+    uniqueField: data.uniqueField ? `${data.uniqueField}-copy` : '',
+  };
+};
+
+export const Page: CollectionConfig = {
+  slug: 'pages',
+  admin: {
+    hooks: {
+      beforeDuplicate,
+    }
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+    {
+      name: 'uniqueField',
+      type: 'text',
+      unique: true,
+    }
+  ]
+}
+```
 
 ### TypeScript
 

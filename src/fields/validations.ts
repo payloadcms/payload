@@ -48,7 +48,11 @@ export const number: Validate<unknown, unknown, NumberField> = (value: string, {
   return true;
 };
 
-export const text: Validate<unknown, unknown, TextField> = (value: string, { minLength, maxLength, required }) => {
+export const text: Validate<unknown, unknown, TextField> = (value: string, { minLength, maxLength: fieldMaxLength, required, payload }) => {
+  let maxLength: number;
+
+  if (typeof payload?.config?.defaultMaxTextLength === 'number') maxLength = payload.config.defaultMaxTextLength;
+  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength;
   if (value && maxLength && value.length > maxLength) {
     return `This value must be shorter than the max length of ${maxLength} characters.`;
   }
@@ -66,7 +70,12 @@ export const text: Validate<unknown, unknown, TextField> = (value: string, { min
   return true;
 };
 
-export const password: Validate<unknown, unknown, TextField> = (value: string, { required, maxLength, minLength }) => {
+export const password: Validate<unknown, unknown, TextField> = (value: string, { required, maxLength: fieldMaxLength, minLength, payload }) => {
+  let maxLength: number;
+
+  if (typeof payload?.config?.defaultMaxTextLength === 'number') maxLength = payload.config.defaultMaxTextLength;
+  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength;
+
   if (value && maxLength && value.length > maxLength) {
     return `This value must be shorter than the max length of ${maxLength} characters.`;
   }
@@ -93,9 +102,14 @@ export const email: Validate<unknown, unknown, EmailField> = (value: string, { r
 
 export const textarea: Validate<unknown, unknown, TextareaField> = (value: string, {
   required,
-  maxLength,
+  maxLength: fieldMaxLength,
   minLength,
+  payload,
 }) => {
+  let maxLength: number;
+
+  if (typeof payload?.config?.defaultMaxTextLength === 'number') maxLength = payload.config.defaultMaxTextLength;
+  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength;
   if (value && maxLength && value.length > maxLength) {
     return `This value must be shorter than the max length of ${maxLength} characters.`;
   }

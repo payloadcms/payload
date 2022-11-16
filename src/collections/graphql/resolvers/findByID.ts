@@ -25,6 +25,7 @@ export default function findByIDResolver(collection: Collection): Resolver {
       id: args.id,
       req,
       draft: args.draft,
+      depth: 0,
     };
 
     const result = await findByID(options);

@@ -112,13 +112,14 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
 
 export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
 
-export type BeforeLoginHook = (args: {
+export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
+  user: T
 }) => any;
 
 export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
-  doc: T;
+  user: T;
   token: string;
 }) => any;
 
@@ -143,6 +144,13 @@ export type AfterForgotPasswordHook = (args: {
   args?: any;
 }) => any;
 
+type BeforeDuplicateArgs<T> = {
+  data: T
+  locale?: string
+}
+
+export type BeforeDuplicate<T = any> = (args: BeforeDuplicateArgs<T>) => T | Promise<T>
+
 export type CollectionAdminOptions = {
   /**
    * Field to use as title in Edit view and first column in List view
@@ -156,6 +164,12 @@ export type CollectionAdminOptions = {
    * Additional fields to be searched via the full text search
    */
   listSearchableFields?: string[];
+  hooks?: {
+    /**
+     * Function that allows you to modify a document's data before it is duplicated
+     */
+    beforeDuplicate?: BeforeDuplicate;
+  }
   /**
    * Place collections into a navigational group
    * */

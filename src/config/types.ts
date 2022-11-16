@@ -61,23 +61,54 @@ export function hasTransportOptions(emailConfig: EmailOptions): emailConfig is E
 
 
 export type InitOptions = {
+  /** Express app for Payload to use */
   express?: Express;
   mongoURL: string | false;
   mongoOptions?: ConnectOptions;
+
+  /** Secure string that Payload will use for any encryption workflows */
   secret: string;
+
+  /**
+   * Configuration for Payload's email functionality
+   *
+   * https://payloadcms.com/docs/email/overview
+   */
   email?: EmailOptions;
+
+  /**
+   * Make Payload start in local-only mode.
+   *
+   * This will bypass setting up REST and GraphQL API routes.
+   * Express will not be required if set to `true`.
+   */
   local?: boolean;
+
+  /**
+   * A function that is called immediately following startup that receives the Payload instance as it's only argument.
+   */
   onInit?: (payload: Payload) => Promise<void> | void;
-  /** Pino LoggerOptions */
+
+  /**
+   * Specify options for the built-in Pino logger that Payload uses for internal logging.
+   *
+   * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
+   */
   loggerOptions?: LoggerOptions;
 };
 
 export type AccessResult = boolean | Where;
 
+type AccessArgs<T = any, U = any> = {
+  req: PayloadRequest<U>
+  id?: string | number
+  data?: T
+}
+
 /**
  * Access function
  */
-export type Access = (args?: any) => AccessResult | Promise<AccessResult>;
+export type Access<T = any, U = any> = (args: AccessArgs<T, U>) => AccessResult | Promise<AccessResult>;
 
 export interface PayloadHandler {
   (
@@ -123,6 +154,8 @@ export type Config = {
     css?: string
     dateFormat?: string
     avatar?: 'default' | 'gravatar' | React.ComponentType<any>,
+    logoutRoute?: string,
+    inactivityRoute?: string,
     components?: {
       routes?: AdminRoute[]
       providers?: React.ComponentType<{ children: React.ReactNode }>[]
@@ -133,6 +166,9 @@ export type Config = {
       beforeNavLinks?: React.ComponentType<any>[]
       afterNavLinks?: React.ComponentType<any>[]
       Nav?: React.ComponentType<any>
+      logout?: {
+        Button?: React.ComponentType<any>,
+      }
       graphics?: {
         Icon?: React.ComponentType<any>
         Logo?: React.ComponentType<any>
@@ -181,6 +217,7 @@ export type Config = {
   },
   defaultDepth?: number;
   maxDepth?: number;
+  defaultMaxTextLength?: number;
   indexSortableFields?: boolean;
   rateLimit?: {
     window?: number;

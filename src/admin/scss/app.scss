@@ -9,10 +9,13 @@
   --breakpoint-m-width : #{$breakpoint-m-width};
   --breakpoint-l-width : #{$breakpoint-l-width};
   --scrollbar-width: 17px;
+  --nav-width: #{base(9)};
 
   --theme-bg: var(--theme-elevation-0);
   --theme-input-bg: var(--theme-elevation-0);
   --theme-text: var(--theme-elevation-800);
+  --theme-baseline: #{$baseline-px};
+  --theme-baseline-body-size: #{$baseline-body-size};
   --font-body: 'Suisse Intl', system-ui;
   --font-mono: monospace;
   --font-serif: 'Merriweather', serif;
@@ -26,10 +29,12 @@
 
   @include large-break {
     --gutter-h: #{base(3)};
+    --nav-width: #{base(8)};
   }
 
   @include mid-break {
     --gutter-h: #{base(2)};
+    --nav-width: 100%;
   }
 
   @include small-break {

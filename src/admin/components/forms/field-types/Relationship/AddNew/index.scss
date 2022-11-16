@@ -1,0 +1,60 @@
+@import '../../../../../scss/styles.scss';
+
+.relationship-add-new {
+  display: flex;
+  align-items: stretch;
+
+  .popup__wrapper {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+  }
+
+  &__add-button {
+    @include formInput;
+    height: 100%;
+    margin-left: -1px;
+    display: flex;
+    padding: 0;
+
+    .btn__content,
+    .btn__label {
+      display: flex;
+    }
+
+    .btn__content,
+    .btn__label {
+      height: 100%;
+    }
+
+    .btn__label {
+      padding: 0 base(.5);
+      align-items: center;
+    }
+  }
+
+
+  &__relations {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li:not(:last-child) {
+      margin-bottom: base(.375);
+    }
+  }
+
+  &__relation-button {
+    @extend %btn-reset;
+    cursor: pointer;
+    @extend %btn-reset;
+    display: block;
+    padding: base(.125) 0;
+    text-align: center;
+    width: 100%;
+
+    &:hover {
+      opacity: .7;
+    }
+  }
+}

@@ -32,9 +32,12 @@ const Routes = () => {
 
   const canAccessAdmin = permissions?.canAccessAdmin;
 
+  const config = useConfig();
   const {
     admin: {
       user: userSlug,
+      logoutRoute,
+      inactivityRoute: logoutInactivityRoute,
       components: {
         routes: customRoutes,
       } = {},
@@ -42,7 +45,8 @@ const Routes = () => {
     routes,
     collections,
     globals,
-  } = useConfig();
+  } = config;
+
 
   const userCollection = collections.find(({ slug }) => slug === userSlug);
 
@@ -103,10 +107,10 @@ const Routes = () => {
                 <Route path={`${match.url}/login`}>
                   <Login />
                 </Route>
-                <Route path={`${match.url}/logout`}>
+                <Route path={`${match.url}${logoutRoute}`}>
                   <Logout />
                 </Route>
-                <Route path={`${match.url}/logout-inactivity`}>
+                <Route path={`${match.url}${logoutInactivityRoute}`}>
                   <Logout inactivity />
                 </Route>
 

@@ -32,6 +32,12 @@ const TextFields: CollectionConfig = {
         }, 1));
       },
     },
+    {
+      label: 'Override the 40k text length default',
+      name: 'overrideLength',
+      type: 'text',
+      maxLength: 50000,
+    },
   ],
 };
 
