@@ -29,6 +29,11 @@ export const blocksFieldSeedData = [
       },
     ],
   },
+  {
+    blockName: 'I18n Block',
+    blockType: 'i18n-text',
+    text: 'first block',
+  },
 ] as const;
 
 export const blocksField: Field = {
@@ -173,7 +178,7 @@ const BlockFields: CollectionConfig = {
       },
       blocks: [
         {
-          slug: 'i18n-text',
+          slug: 'text',
           graphQL: {
             singularName: 'I18nText',
           },
