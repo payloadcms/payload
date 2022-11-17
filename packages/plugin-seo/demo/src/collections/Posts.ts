@@ -5,6 +5,7 @@ const Posts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
+  versions: true,
   fields: [
     {
       type: 'tabs',

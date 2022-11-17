@@ -1,4 +1,5 @@
 import { Payload } from 'payload';
+import path from 'path';
 
 export const seed = async (payload: Payload) => {
   payload.logger.info('Seeding data...');
@@ -11,12 +12,23 @@ export const seed = async (payload: Payload) => {
     }
   });
 
+  const { id: mountainPhotoID } = await payload.create({
+    collection: 'media',
+    filePath: path.resolve(__dirname, 'mountain-range.jpg'),
+    data: {
+      alt: 'Mountains',
+    },
+  });
+
   await payload.create({
     collection: 'pages',
     data: {
       title: 'Home Page',
       slug: 'home',
-      excerpt: 'This is the home page'
+      excerpt: 'This is the home page',
+      meta: {
+        image: mountainPhotoID
+      }
     },
   })
 
@@ -25,7 +37,10 @@ export const seed = async (payload: Payload) => {
     data: {
       title: 'Hello, world!',
       slug: 'hello-world',
-      excerpt: 'This is a post'
+      excerpt: 'This is a post',
+      meta: {
+        image: mountainPhotoID
+      }
     },
   })
 }
