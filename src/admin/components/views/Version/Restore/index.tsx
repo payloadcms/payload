@@ -40,7 +40,11 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
   const handleRestore = useCallback(async () => {
     setProcessing(true);
 
-    const res = await requests.post(fetchURL);
+    const res = await requests.post(fetchURL, {
+      headers: {
+        'Accept-Language': i18n.language,
+      },
+    });
 
     if (res.status === 200) {
       const json = await res.json();
@@ -49,7 +53,7 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
     } else {
       toast.error(t('problemRestoringVersion'));
     }
-  }, [fetchURL, history, redirectURL, t]);
+  }, [fetchURL, history, redirectURL, t, i18n]);
 
   return (
     <Fragment>

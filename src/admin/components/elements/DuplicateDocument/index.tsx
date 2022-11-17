@@ -42,7 +42,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
           depth: 0,
         },
         headers: {
-          'accept-language': i18n.language,
+          'Accept-Language': i18n.language,
         },
       });
       let data = await response.json();
@@ -57,7 +57,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
       const result = await requests.post(`${serverURL}${api}/${slug}`, {
         headers: {
           'Content-Type': 'application/json',
-          'accept-language': i18n.language,
+          'Accept-Language': i18n.language,
         },
         body: JSON.stringify(data),
       });
@@ -84,7 +84,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
                 depth: 0,
               },
               headers: {
-                'accept-language': i18n.language,
+                'Accept-Language': i18n.language,
               },
             });
             let localizedDoc = await res.json();
@@ -99,7 +99,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
             const patchResult = await requests.patch(`${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`, {
               headers: {
                 'Content-Type': 'application/json',
-                'accept-language': i18n.language,
+                'Accept-Language': i18n.language,
               },
               body: JSON.stringify(localizedDoc),
             });
@@ -114,7 +114,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         // delete the duplicate doc to prevent incomplete
         await requests.delete(`${serverURL}${api}/${slug}/${id}`, {
           headers: {
-            'accept-language': i18n.language,
+            'Accept-Language': i18n.language,
           },
         });
       }

@@ -31,7 +31,7 @@ const Verify: React.FC<{ collection: SanitizedCollectionConfig }> = ({ collectio
         method: 'POST',
         credentials: 'include',
         headers: {
-          'accept-language': i18n.language,
+          'Accept-Language': i18n.language,
         },
       });
       setVerifyResult(result);

@@ -33,7 +33,7 @@ const Status: React.FC<Props> = () => {
   const [processing, setProcessing] = useState(false);
   const { reset: resetForm } = useForm();
   const locale = useLocale();
-  const { t } = useTranslation('version');
+  const { t, i18n } = useTranslation('version');
 
   const unPublishModalSlug = `confirm-un-publish-${id}`;
   const revertModalSlug = `confirm-revert-${id}`;
@@ -77,6 +77,7 @@ const Status: React.FC<Props> = () => {
     const res = await requests[method](url, {
       headers: {
         'Content-Type': 'application/json',
+        'Accept-Language': i18n.language,
       },
       body: JSON.stringify(body),
     });
@@ -111,7 +112,7 @@ const Status: React.FC<Props> = () => {
     if (action === 'unpublish') {
       toggleModal(unPublishModalSlug);
     }
-  }, [collection, global, publishedDoc, serverURL, api, id, locale, resetForm, getVersions, t, toggleModal, revertModalSlug, unPublishModalSlug]);
+  }, [collection, global, publishedDoc, serverURL, api, id, i18n, locale, resetForm, getVersions, t, toggleModal, revertModalSlug, unPublishModalSlug]);
 
   if (statusToRender) {
     return (

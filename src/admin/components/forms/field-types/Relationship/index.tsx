@@ -164,7 +164,7 @@ const Relationship: React.FC<Props> = (props) => {
           const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
             credentials: 'include',
             headers: {
-              'accept-language': i18n.language,
+              'Accept-Language': i18n.language,
             },
           });
 
@@ -307,7 +307,7 @@ const Relationship: React.FC<Props> = (props) => {
             const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
               credentials: 'include',
               headers: {
-                'accept-language': i18n.language,
+                'Accept-Language': i18n.language,
               },
             });
             const collection = collections.find((coll) => coll.slug === relation);

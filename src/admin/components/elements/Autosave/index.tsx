@@ -43,7 +43,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'accept-language': i18n.language,
+        'Accept-Language': i18n.language,
       },
       body: JSON.stringify({}),
     });
@@ -100,7 +100,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
               credentials: 'include',
               headers: {
                 'Content-Type': 'application/json',
-                'accept-language': i18n.language,
+                'Accept-Language': i18n.language,
               },
               body: JSON.stringify(body),
             });

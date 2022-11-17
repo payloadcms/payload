@@ -117,7 +117,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       let publishedJSON = await fetch(publishedFetchURL, {
         credentials: 'include',
         headers: {
-          'accept-language': i18n.language,
+          'Accept-Language': i18n.language,
         },
       }).then((res) => res.json());
 
@@ -129,7 +129,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
         versionJSON = await fetch(`${versionFetchURL}?${qs.stringify(versionParams)}`, {
           credentials: 'include',
           headers: {
-            'accept-language': i18n.language,
+            'Accept-Language': i18n.language,
           },
         }).then((res) => res.json());
 
@@ -153,7 +153,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
           const newerVersionRes = await fetch(`${versionFetchURL}?${qs.stringify(newerVersionParams)}`, {
             credentials: 'include',
             headers: {
-              'accept-language': i18n.language,
+              'Accept-Language': i18n.language,
             },
           });
 

@@ -48,7 +48,7 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
       try {
         const response = await requests.get(`${url}?${search}`, {
           headers: {
-            'accept-language': i18n.language,
+            'Accept-Language': i18n.language,
           },
         });
 

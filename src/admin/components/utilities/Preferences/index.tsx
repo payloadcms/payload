@@ -16,7 +16,7 @@ const requestOptions = (value, language) => ({
   body: JSON.stringify({ value }),
   headers: {
     'Content-Type': 'application/json',
-    'accept-language': language,
+    'Accept-Language': language,
   },
 });
 
@@ -41,7 +41,7 @@ export const PreferencesProvider: React.FC<{children?: React.ReactNode}> = ({ ch
       (async () => {
         const request = await requests.get(`${serverURL}${api}/_preferences/${key}`, {
           headers: {
-            'accept-language': i18n.language,
+            'Accept-Language': i18n.language,
           },
         });
         let value = null;

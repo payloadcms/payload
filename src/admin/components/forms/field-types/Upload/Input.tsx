@@ -86,7 +86,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
         const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`, {
           credentials: 'include',
           headers: {
-            'accept-language': i18n.language,
+            'Accept-Language': i18n.language,
           },
         });
         if (response.ok) {

@@ -46,7 +46,7 @@ const Auth: React.FC<Props> = (props) => {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'accept-language': i18n.language,
+        'Accept-Language': i18n.language,
       },
       body: JSON.stringify({
         email,

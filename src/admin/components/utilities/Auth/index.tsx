@@ -52,7 +52,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (exp && remainingTime < 120) {
       setTimeout(async () => {
-        const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`);
+        const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        });
 
         if (request.status === 200) {
           const json = await request.json();
@@ -63,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }, 1000);
     }
-  }, [setUser, push, exp, admin, api, serverURL, userSlug]);
+  }, [exp, serverURL, api, userSlug, push, admin, logoutInactivityRoute, i18n]);
 
   const setToken = useCallback((token: string) => {
     const decoded = jwtDecode<User>(token);
@@ -82,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const fetchMe = async () => {
       const request = await requests.get(`${serverURL}${api}/${userSlug}/me`, {
         headers: {
-          'accept-language': i18n.language,
+          'Accept-Language': i18n.language,
         },
       });
 
@@ -116,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     async function getPermissions() {
       const request = await requests.get(`${serverURL}${api}/access`, {
         headers: {
-          'accept-language': i18n.language,
+          'Accept-Language': i18n.language,
         },
       });
 
@@ -163,7 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       if (forceLogOut) clearTimeout(forceLogOut);
     };
-  }, [exp, push, closeAllModals, admin]);
+  }, [exp, push, closeAllModals, admin, i18n, logoutInactivityRoute]);
 
   return (
     <Context.Provider value={{

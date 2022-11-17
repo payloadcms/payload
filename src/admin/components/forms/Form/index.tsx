@@ -167,6 +167,9 @@ const Form: React.FC<Props> = (props) => {
     try {
       const res = await requests[methodToUse.toLowerCase()](actionToUse, {
         body: formData,
+        headers: {
+          'Accept-Language': i18n.language,
+        },
       });
 
       setModified(false);
@@ -295,6 +298,7 @@ const Form: React.FC<Props> = (props) => {
     onSuccess,
     redirect,
     t,
+    i18n,
     waitForAutocomplete,
   ]);
 

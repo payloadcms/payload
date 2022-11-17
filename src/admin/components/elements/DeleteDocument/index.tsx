@@ -53,6 +53,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
     requests.delete(`${serverURL}${api}/${slug}/${id}`, {
       headers: {
         'Content-Type': 'application/json',
+        'Accept-Language': i18n.language,
       },
     }).then(async (res) => {
       try {

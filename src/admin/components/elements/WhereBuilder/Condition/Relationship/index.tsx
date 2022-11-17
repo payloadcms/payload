@@ -65,7 +65,7 @@ const RelationshipField: React.FC<Props> = (props) => {
           const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`, {
             credentials: 'include',
             headers: {
-              'accept-language': i18n.language,
+              'Accept-Language': i18n.language,
             },
           });
 
@@ -162,7 +162,7 @@ const RelationshipField: React.FC<Props> = (props) => {
       const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`, {
         credentials: 'include',
         headers: {
-          'accept-language': i18n.language,
+          'Accept-Language': i18n.language,
         },
       });
 

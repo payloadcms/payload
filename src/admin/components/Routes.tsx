@@ -58,7 +58,7 @@ const Routes = () => {
     if (!userCollection.auth.disableLocalStrategy) {
       requests.get(`${routes.api}/${slug}/init`, {
         headers: {
-          'accept-language': i18n.language,
+          'Accept-Language': i18n.language,
         },
       }).then((res) => res.json().then((data) => {
         if (data && 'initialized' in data) {

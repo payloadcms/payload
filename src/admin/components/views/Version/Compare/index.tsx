@@ -66,7 +66,7 @@ const CompareVersion: React.FC<Props> = (props) => {
     const response = await fetch(`${baseURL}?${search}`, {
       credentials: 'include',
       headers: {
-        'accept-language': i18n.language,
+        'Accept-Language': i18n.language,
       },
     });
 

@@ -52,7 +52,7 @@ const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
 
     const res = await requests.get(`${serverURL}${api}/${relationTo}/${value}?depth=0`, {
       headers: {
-        'accept-language': i18n.language,
+        'Accept-Language': i18n.language,
       },
     });
     const json = await res.json();
