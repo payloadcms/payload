@@ -196,19 +196,19 @@ pre::-webkit-scrollbar-thumb {
 
 #options-button {
   position: fixed;
-  left: 20px;
+  left: 100px;
   bottom: 20px;
 }
 
 #test-recorder-button {
   position: fixed;
-  left: 70px;
+  left: 150px;
   bottom: 20px;
 }
 
 #paste-log-button {
   position: fixed;
-  left: 120px;
+  left: 200px;
   bottom: 20px;
 }
 

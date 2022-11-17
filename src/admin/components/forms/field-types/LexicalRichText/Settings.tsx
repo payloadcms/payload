@@ -7,10 +7,10 @@
  */
 
 import * as React from 'react';
-import {useMemo, useState} from 'react';
+import { useMemo, useState } from 'react';
 
-import {isDevPlayground} from './appSettings';
-import {useSettings} from './context/SettingsContext';
+import { isDevPlayground } from './appSettings';
+import { useSettings } from './context/SettingsContext';
 import Switch from './ui/Switch';
 
 export default function Settings(): JSX.Element {
@@ -35,13 +35,12 @@ export default function Settings(): JSX.Element {
   const [isSplitScreen, search] = useMemo(() => {
     const parentWindow = window.parent;
     const _search = windowLocation.search;
-    const _isSplitScreen =
-      parentWindow && parentWindow.location.pathname === '/split/';
+    const _isSplitScreen = parentWindow && parentWindow.location.pathname === '/split/';
     return [_isSplitScreen, _search];
   }, [windowLocation]);
 
   return (
-    <>
+    <React.Fragment>
       <button
         id="options-button"
         className={`editor-dev-button ${showSettings ? 'active' : ''}`}
@@ -83,9 +82,7 @@ export default function Settings(): JSX.Element {
             text="Debug View"
           />
           <Switch
-            onClick={() =>
-              setOption('showNestedEditorTreeView', !showNestedEditorTreeView)
-            }
+            onClick={() => setOption('showNestedEditorTreeView', !showNestedEditorTreeView)}
             checked={showNestedEditorTreeView}
             text="Nested Editors Debug View"
           />
@@ -134,6 +131,6 @@ export default function Settings(): JSX.Element {
           />
         </div>
       ) : null}
-    </>
+    </React.Fragment>
   );
 }
