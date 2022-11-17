@@ -1,22 +1,22 @@
 import { Config } from 'payload/config';
-import { Options } from './types';
+import { PluginConfig } from './types';
 import createBreadcrumbsField from './fields/breadcrumbs';
 import createParentField from './fields/parent';
 import populateBreadcrumbs from './utilities/populateBreadcrumbs';
 import resaveChildren from './hooks/resaveChildren';
 import resaveSelfAfterCreate from './hooks/resaveSelfAfterCreate';
 
-const nestedDocs = (options: Options) => (config: Config): Config => ({
+const nestedDocs = (pluginConfig: PluginConfig) => (config: Config): Config => ({
   ...config,
   collections: (config.collections || []).map((collection) => {
-    if (options.collections.indexOf(collection.slug) > -1) {
+    if (pluginConfig.collections.indexOf(collection.slug) > -1) {
       const fields = [...collection?.fields || []];
 
-      if (!options.parentFieldSlug) {
+      if (!pluginConfig.parentFieldSlug) {
         fields.push(createParentField(collection.slug));
       }
 
-      if (!options.breadcrumbsFieldSlug) {
+      if (!pluginConfig.breadcrumbsFieldSlug) {
         fields.push(createBreadcrumbsField(collection.slug, {
           localized: Boolean(config.localization)
         }));
@@ -27,11 +27,11 @@ const nestedDocs = (options: Options) => (config: Config): Config => ({
         hooks: {
           ...collection.hooks || {},
           beforeChange: [
-            async ({ req, data, originalDoc }) => populateBreadcrumbs(req, options, collection, data, originalDoc),
+            async ({ req, data, originalDoc }) => populateBreadcrumbs(req, pluginConfig, collection, data, originalDoc),
             ...collection?.hooks?.beforeChange || [],
           ],
           afterChange: [
-            resaveChildren(options, collection),
+            resaveChildren(pluginConfig, collection),
             resaveSelfAfterCreate(collection),
             ...collection?.hooks?.afterChange || [],
           ],

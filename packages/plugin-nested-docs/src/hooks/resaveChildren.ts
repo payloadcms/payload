@@ -1,8 +1,8 @@
 import { CollectionConfig, CollectionAfterChangeHook } from 'payload/types';
 import populateBreadcrumbs from '../utilities/populateBreadcrumbs';
-import { Options } from '../types';
+import { PluginConfig } from '../types';
 
-const resaveChildren = (options: Options, collection: CollectionConfig): CollectionAfterChangeHook => ({ req: { payload }, req, doc }) => {
+const resaveChildren = (pluginConfig: PluginConfig, collection: CollectionConfig): CollectionAfterChangeHook => ({ req: { payload }, req, doc }) => {
   const resaveChildrenAsync = async () => {
     const children = await payload.find({
       collection: collection.slug,
@@ -24,7 +24,7 @@ const resaveChildren = (options: Options, collection: CollectionConfig): Collect
           draft: updateAsDraft,
           data: {
             ...child,
-            breadcrumbs: populateBreadcrumbs(req, options, collection, child),
+            breadcrumbs: populateBreadcrumbs(req, pluginConfig, collection, child),
           },
           depth: 0,
         });

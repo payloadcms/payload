@@ -8,7 +8,7 @@ export type GenerateURL = (docs: Record<string, unknown>[], currentDoc: Record<s
 
 export type GenerateLabel = (docs: Record<string, unknown>[], currentDoc: Record<string, unknown>) => string;
 
-export type Options = {
+export type PluginConfig = {
   collections: string[]
   generateURL?: GenerateURL
   generateLabel?: GenerateLabel

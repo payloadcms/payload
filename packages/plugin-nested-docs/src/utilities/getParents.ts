@@ -1,14 +1,14 @@
 import { CollectionConfig } from 'payload/types';
-import { Options } from '../types';
+import { PluginConfig } from '../types';
 
 const getParents = async (
   req: any,
-  options: Options,
+  pluginConfig: PluginConfig,
   collection: CollectionConfig,
   doc: Record<string, unknown>,
   docs: Record<string, unknown>[] = [],
 ): Promise<Record<string, unknown>[]> => {
-  const parent = doc[options?.parentFieldSlug || 'parent'];
+  const parent = doc[pluginConfig?.parentFieldSlug || 'parent'];
   let retrievedParent;
 
   if (parent) {
@@ -32,7 +32,7 @@ const getParents = async (
       if (retrievedParent.parent) {
         return getParents(
           req,
-          options,
+          pluginConfig,
           collection,
           retrievedParent,
           [

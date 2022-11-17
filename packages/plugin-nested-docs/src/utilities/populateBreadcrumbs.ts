@@ -1,12 +1,12 @@
 import { CollectionConfig } from 'payload/types';
-import { Options } from '../types';
+import { PluginConfig } from '../types';
 import getParents from './getParents';
 import formatBreadcrumb from './formatBreadcrumb';
 
-const populateBreadcrumbs = async (req: any, options: Options, collection: CollectionConfig, data: any, originalDoc?: any): Promise<any> => {
+const populateBreadcrumbs = async (req: any, pluginConfig: PluginConfig, collection: CollectionConfig, data: any, originalDoc?: any): Promise<any> => {
   const newData = data;
   const breadcrumbDocs = [
-    ...await getParents(req, options, collection, {
+    ...await getParents(req, pluginConfig, collection, {
       ...originalDoc,
       ...data,
     }),
@@ -17,11 +17,11 @@ const populateBreadcrumbs = async (req: any, options: Options, collection: Colle
     },
   ];
 
-  const breadcrumbs = breadcrumbDocs.map((_, i) => formatBreadcrumb(options, collection, breadcrumbDocs.slice(0, i + 1)));
+  const breadcrumbs = breadcrumbDocs.map((_, i) => formatBreadcrumb(pluginConfig, collection, breadcrumbDocs.slice(0, i + 1)));
 
   return {
     ...newData,
-    [options?.breadcrumbsFieldSlug || 'breadcrumbs']: breadcrumbs,
+    [pluginConfig?.breadcrumbsFieldSlug || 'breadcrumbs']: breadcrumbs,
   };
 };
 
