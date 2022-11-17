@@ -1,10 +1,10 @@
 import { Block, CollectionConfig, Field } from 'payload/types';
 import merge from 'deepmerge';
-import { FieldConfig, FormConfig } from '../../types';
+import { FieldConfig, PluginConfig } from '../../types';
 import fields from './fields';
 
 // all settings can be overridden by the config
-export const generateFormCollection = (formConfig: FormConfig): CollectionConfig => {
+export const generateFormCollection = (formConfig: PluginConfig): CollectionConfig => {
 
   const redirect: Field = {
     name: 'redirect',

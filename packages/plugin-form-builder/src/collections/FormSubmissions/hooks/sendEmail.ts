@@ -1,8 +1,8 @@
 import { serialize } from '../../../utilities/serializeRichText';
-import { Email, FormattedEmail, FormConfig } from '../../../types';
+import { Email, FormattedEmail, PluginConfig } from '../../../types';
 import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys';
 
-const sendEmail = async (beforeChangeData: any, formConfig: FormConfig) => {
+const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig) => {
   const {
     operation,
     data

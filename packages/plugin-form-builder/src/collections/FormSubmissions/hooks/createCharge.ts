@@ -1,6 +1,6 @@
-import { FormConfig } from "../../../types";
+import { PluginConfig } from "../../../types";
 
-const createCharge = async (beforeChangeData: any, formConfig: FormConfig) => {
+const createCharge = async (beforeChangeData: any, formConfig: PluginConfig) => {
   const {
     operation,
     data

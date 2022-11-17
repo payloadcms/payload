@@ -1,13 +1,13 @@
 import { Config } from 'payload/config';
 import { generateFormCollection } from './collections/Forms';
 import { generateSubmissionCollection } from './collections/FormSubmissions';
-import { FormConfig } from './types';
+import { PluginConfig } from './types';
 // import path from 'path';
 
 export { getPaymentTotal } from './utilities/getPaymentTotal'
 
-const FormBuilder = (incomingFormConfig: FormConfig) => (config: Config): Config => {
-  const formConfig: FormConfig = {
+const FormBuilder = (incomingFormConfig: PluginConfig) => (config: Config): Config => {
+  const formConfig: PluginConfig = {
     ...incomingFormConfig,
     fields: {
       text: true,

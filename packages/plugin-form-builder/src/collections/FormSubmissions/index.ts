@@ -1,10 +1,10 @@
 import { CollectionConfig } from 'payload/types';
-import { FormConfig } from '../../types';
+import { PluginConfig } from '../../types';
 import sendEmail from './hooks/sendEmail';
 import createCharge from './hooks/createCharge';
 
 // all settings can be overridden by the config
-export const generateSubmissionCollection = (formConfig: FormConfig): CollectionConfig => {
+export const generateSubmissionCollection = (formConfig: PluginConfig): CollectionConfig => {
   const newConfig: CollectionConfig = {
     slug: formConfig?.formSubmissionOverrides?.slug || 'formSubmissions',
     access: {
