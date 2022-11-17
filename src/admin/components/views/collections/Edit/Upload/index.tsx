@@ -179,10 +179,17 @@ const Upload: React.FC<Props> = (props) => {
                   size="small"
                   buttonStyle="secondary"
                   onClick={() => setSelectingFile(true)}
+                  className={`${baseClass}__file-button`}
                 >
                   Select a file
                 </Button>
-                <span className={`${baseClass}__drag-label`}>or 1.drag and drop a file here 2.copy and paste a file here</span>
+                <div className={`${baseClass}__or-other-options-container`}>
+                  <p className={`${baseClass}__or-text`}>OR</p>
+                  <div className={`${baseClass}__other-options`}>
+                    <p>drag and drop a file</p>
+                    <p>copy and paste a file</p>
+                  </div>
+                </div>
               </div>
             </React.Fragment>
           )}
