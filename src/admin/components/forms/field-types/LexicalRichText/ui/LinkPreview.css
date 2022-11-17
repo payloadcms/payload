@@ -1,0 +1,69 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ *
+ */
+
+@keyframes glimmer-animation {
+  0% {
+    background: #f9f9f9;
+  }
+  .50% {
+    background: #eeeeee;
+  }
+  .100% {
+    background: #f9f9f9;
+  }
+}
+
+.LinkPreview__container {
+  padding-bottom: 12px;
+}
+
+.LinkPreview__imageWrapper {
+  text-align: center;
+}
+
+.LinkPreview__image {
+  max-width: 100%;
+  max-height: 250px;
+  margin: auto;
+}
+
+.LinkPreview__title {
+  margin-left: 12px;
+  margin-right: 12px;
+  margin-top: 4px;
+}
+
+.LinkPreview__description {
+  color: #999;
+  font-size: 90%;
+  margin-left: 12px;
+  margin-right: 12px;
+  margin-top: 4px;
+}
+
+.LinkPreview__domain {
+  color: #999;
+  font-size: 90%;
+  margin-left: 12px;
+  margin-right: 12px;
+  margin-top: 4px;
+}
+
+.LinkPreview__glimmer {
+  background: #f9f9f9;
+  border-radius: 8px;
+  height: 18px;
+  margin-bottom: 8px;
+  margin-left: 12px;
+  margin-right: 12px;
+  animation-duration: 3s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  animation-name: glimmer-animation;
+}

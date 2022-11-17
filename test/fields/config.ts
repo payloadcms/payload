@@ -20,6 +20,7 @@ import IndexedFields from './collections/Indexed';
 import NumberFields, { numberDoc } from './collections/Number';
 import CodeFields, { codeDoc } from './collections/Code';
 import RelationshipFields from './collections/Relationship';
+import LexicalRichTextFields from './collections/LexicalRichText';
 
 export default buildConfig({
   admin: {
@@ -51,6 +52,7 @@ export default buildConfig({
     TabsFields,
     TextFields,
     Uploads,
+    LexicalRichTextFields
   ],
   localization: {
     defaultLocale: 'en',

@@ -8,11 +8,6 @@ const init = async () => {
     secret: uuid(),
     mongoURL: process.env.MONGO_URL || 'mongodb://localhost/payload',
     express: expressApp,
-    email: {
-      logMockCredentials: true,
-      fromName: 'Payload',
-      fromAddress: 'hello@payloadcms.com',
-    },
     onInit: async (app) => {
       app.logger.info('Payload Dev Server Initialized');
     },

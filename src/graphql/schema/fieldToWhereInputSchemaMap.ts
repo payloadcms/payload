@@ -15,7 +15,7 @@ import {
   EmailField, fieldAffectsData, fieldHasSubFields, GroupField,
   NumberField, optionIsObject, PointField,
   RadioField, RelationshipField,
-  RichTextField, RowField, SelectField,
+  RichTextField, LexicalRichTextField, RowField, SelectField,
   TabsField,
   TextareaField,
   TextField, UploadField,
@@ -72,6 +72,17 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
     };
   },
   richText: (field: RichTextField) => {
+    const type = GraphQLJSON;
+    return {
+      type: withOperators(
+        field,
+        type,
+        parentName,
+        [...operators.equality, 'like', 'contains'],
+      ),
+    };
+  },
+  lexicalRichText: (field: LexicalRichTextField) => {
     const type = GraphQLJSON;
     return {
       type: withOperators(

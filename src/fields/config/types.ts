@@ -330,6 +330,10 @@ export type RichTextField = FieldBase & {
   }
 }
 
+export type LexicalRichTextField = FieldBase & {
+  type: 'lexicalRichText';
+}
+
 export type ArrayField = FieldBase & {
   type: 'array';
   minRows?: number;
@@ -397,7 +401,8 @@ export type Field =
   | RowField
   | CollapsibleField
   | TabsField
-  | UIField;
+  | UIField
+  | LexicalRichTextField;
 
 export type FieldAffectingData =
   TextField
@@ -417,6 +422,7 @@ export type FieldAffectingData =
   | CodeField
   | PointField
   | TabAsField
+  | LexicalRichTextField
 
 export type NonPresentationalField =
   TextField
@@ -437,7 +443,8 @@ export type NonPresentationalField =
   | PointField
   | RowField
   | TabsField
-  | CollapsibleField;
+  | CollapsibleField
+  | LexicalRichTextField;
 
 export type FieldWithPath = Field & {
   path?: string

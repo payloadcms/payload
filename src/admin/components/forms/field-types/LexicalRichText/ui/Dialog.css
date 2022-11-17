@@ -1,0 +1,17 @@
+.DialogActions {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+  margin-top: 20px;
+}
+
+.DialogButtonsList {
+  display: flex;
+  flex-direction: column;
+  justify-content: right;
+  margin-top: 20px;
+}
+
+.DialogButtonsList button {
+  margin-bottom: 20px;
+}

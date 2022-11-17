@@ -24,6 +24,8 @@ import tabs from './Tabs';
 import upload from './Upload';
 import ui from './UI';
 
+import lexicalRichText from './LexicalRichText';
+
 export type FieldTypes = {
   code: React.ComponentType<any>
   email: React.ComponentType<any>
@@ -48,6 +50,7 @@ export type FieldTypes = {
   tabs: React.ComponentType<any>
   upload: React.ComponentType<any>
   ui: React.ComponentType<any>
+  lexicalRichText: React.ComponentType<any>
 }
 
 const fieldTypes: FieldTypes = {
@@ -74,6 +77,7 @@ const fieldTypes: FieldTypes = {
   tabs,
   upload,
   ui,
+  lexicalRichText,
 };
 
 export default fieldTypes;

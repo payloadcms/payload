@@ -25,6 +25,7 @@ import {
   ArrayField,
   GroupField,
   RichTextField,
+  LexicalRichTextField,
   NumberField,
   TextField,
   EmailField,

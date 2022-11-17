@@ -1,0 +1,14 @@
+.code-action-menu-container .prettier-wrapper {
+  position: relative;
+}
+
+.code-action-menu-container .prettier-wrapper .code-error-tips {
+  padding: 5px;
+  border-radius: 4px;
+  color: #fff;
+  background: #222;
+  margin-top: 4px;
+  position: absolute;
+  top: 26px;
+  right: 0;
+}

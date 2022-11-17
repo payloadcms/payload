@@ -1,0 +1,130 @@
+.floating-text-format-popup {
+  display: flex;
+  background: #fff;
+  padding: 4px;
+  vertical-align: middle;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  opacity: 0;
+  background-color: #fff;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  transition: opacity 0.5s;
+  height: 35px;
+  will-change: transform;
+}
+
+.floating-text-format-popup button.popup-item {
+  border: 0;
+  display: flex;
+  background: none;
+  border-radius: 10px;
+  padding: 8px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.floating-text-format-popup button.popup-item:disabled {
+  cursor: not-allowed;
+}
+
+.floating-text-format-popup button.popup-item.spaced {
+  margin-right: 2px;
+}
+
+.floating-text-format-popup button.popup-item i.format {
+  background-size: contain;
+  display: inline-block;
+  height: 18px;
+  width: 18px;
+  margin-top: 2px;
+  vertical-align: -0.25em;
+  display: flex;
+  opacity: 0.6;
+}
+
+.floating-text-format-popup button.popup-item:disabled i.format {
+  opacity: 0.2;
+}
+
+.floating-text-format-popup button.popup-item.active {
+  background-color: rgba(223, 232, 250, 0.3);
+}
+
+.floating-text-format-popup button.popup-item.active i {
+  opacity: 1;
+}
+
+.floating-text-format-popup .popup-item:hover:not([disabled]) {
+  background-color: #eee;
+}
+
+.floating-text-format-popup select.popup-item {
+  border: 0;
+  display: flex;
+  background: none;
+  border-radius: 10px;
+  padding: 8px;
+  vertical-align: middle;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 70px;
+  font-size: 14px;
+  color: #777;
+  text-overflow: ellipsis;
+}
+
+.floating-text-format-popup select.code-language {
+  text-transform: capitalize;
+  width: 130px;
+}
+
+.floating-text-format-popup .popup-item .text {
+  display: flex;
+  line-height: 20px;
+  width: 200px;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #777;
+  text-overflow: ellipsis;
+  width: 70px;
+  overflow: hidden;
+  height: 20px;
+  text-align: left;
+}
+
+.floating-text-format-popup .popup-item .icon {
+  display: flex;
+  width: 20px;
+  height: 20px;
+  user-select: none;
+  margin-right: 8px;
+  line-height: 16px;
+  background-size: contain;
+}
+
+.floating-text-format-popup i.chevron-down {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  user-select: none;
+}
+
+.floating-text-format-popup i.chevron-down.inside {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  margin-left: -25px;
+  margin-top: 11px;
+  margin-right: 10px;
+  pointer-events: none;
+}
+
+.floating-text-format-popup .divider {
+  width: 1px;
+  background-color: #eee;
+  margin: 0 4px;
+}

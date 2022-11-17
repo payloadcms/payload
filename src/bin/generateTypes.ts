@@ -82,6 +82,16 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
 
             break;
           }
+          case 'lexicalRichText': {
+            fieldSchema = {
+              type: 'array',
+              items: {
+                type: 'object',
+              },
+            };
+
+            break;
+          }
 
           case 'radio': {
             fieldSchema = {

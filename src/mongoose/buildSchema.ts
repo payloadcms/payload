@@ -24,6 +24,7 @@ import {
   RadioField,
   RelationshipField,
   RichTextField,
+  LexicalRichTextField,
   RowField,
   SelectField,
   Tab,
@@ -136,6 +137,13 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     });
   },
   richText: (field: RichTextField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Schema.Types.Mixed };
+
+    schema.add({
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
+    });
+  },
+  lexicalRichText: (field: LexicalRichTextField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Schema.Types.Mixed };
 
     schema.add({
