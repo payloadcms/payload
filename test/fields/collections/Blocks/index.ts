@@ -173,7 +173,10 @@ const BlockFields: CollectionConfig = {
       },
       blocks: [
         {
-          slug: 'text',
+          slug: 'i18n-text',
+          graphQL: {
+            singularName: 'I18nText',
+          },
           labels: {
             singular: {
               en: 'Text en',

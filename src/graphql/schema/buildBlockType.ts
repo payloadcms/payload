@@ -17,10 +17,13 @@ function buildBlockType({
 }: Args): void {
   const {
     slug,
+    graphQL: {
+      singularName,
+    } = {},
   } = block;
 
   if (!payload.types.blockTypes[slug]) {
-    const formattedBlockName = toWords(slug);
+    const formattedBlockName = singularName || toWords(slug, true);
     payload.types.blockTypes[slug] = buildObjectType({
       payload,
       name: formattedBlockName,

@@ -360,6 +360,9 @@ export type Block = {
   fields: Field[];
   imageURL?: string;
   imageAltText?: string;
+  graphQL?: {
+    singularName?: string
+  }
 }
 
 export type BlockField = FieldBase & {

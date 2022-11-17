@@ -338,6 +338,9 @@ export const blocks = baseField.keys({
       slug: joi.string().required(),
       imageURL: joi.string(),
       imageAltText: joi.string(),
+      graphQL: joi.object().keys({
+        singularName: joi.string(),
+      }),
       labels: joi.object({
         singular: joi.alternatives().try(
           joi.string(),
