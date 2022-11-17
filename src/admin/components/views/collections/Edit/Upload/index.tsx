@@ -168,8 +168,7 @@ const Upload: React.FC<Props> = (props) => {
                 className={`${baseClass}__drop-zone`}
                 ref={dropRef}
                 onPaste={(e) => {
-                  // handle pasted file
-                  if (e.clipboardData.files.length) {
+                  if (Array.isArray(e?.clipboardData?.files) && e.clipboardData.files.length) {
                     const fileObject = e.clipboardData.files[0];
                     setValue(fileObject || null);
                   }
