@@ -60,3 +60,15 @@
 .Modal__content {
   padding-top: 20px;
 }
+
+html[data-theme=dark] {
+  .Modal__modal {
+    background-color: var(--theme-elevation-100);
+    border: 1px solid var(--theme-elevation-150);
+    box-shadow: none;
+  }
+
+  .Modal__title{
+    color: #c2c2c2;
+  }
+}

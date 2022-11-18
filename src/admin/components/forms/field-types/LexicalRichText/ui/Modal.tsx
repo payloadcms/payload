@@ -6,7 +6,7 @@
  *
  */
 
-import './Modal.css';
+import './Modal.scss';
 
 import * as React from 'react';
 import { ReactNode, useEffect, useRef } from 'react';

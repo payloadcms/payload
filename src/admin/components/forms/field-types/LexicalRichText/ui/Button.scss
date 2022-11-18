@@ -34,3 +34,13 @@
 .Button__disabled:hover {
   background-color: #eee;
 }
+
+html[data-theme=dark] {
+  .Button__root {
+    background-color: #1a1a1a;
+  }
+  .Button__root:hover {
+    background-color: #000;
+  }
+}
+
