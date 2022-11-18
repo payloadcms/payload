@@ -96,6 +96,7 @@
     "@lexical/code": "^0.6.0",
     "@lexical/file": "^0.6.0",
     "@lexical/hashtag": "^0.6.0",
+    "@lexical/headless": "^0.6.0",
     "@lexical/link": "^0.6.0",
     "@lexical/list": "^0.6.0",
     "@lexical/mark": "^0.6.0",

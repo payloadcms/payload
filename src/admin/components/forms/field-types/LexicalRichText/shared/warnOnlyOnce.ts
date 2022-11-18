@@ -7,7 +7,7 @@
  */
 
 export default function warnOnlyOnce(message: string) {
-  if (!__DEV__) {
+  if (process.env.NODE_ENV === 'production') { // return if not dev
     return;
   }
   let run = false;
