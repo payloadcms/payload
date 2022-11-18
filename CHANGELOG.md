@@ -1,5 +1,43 @@
 
 
+# [1.2.0](https://github.com/payloadcms/payload/compare/v1.1.26...v1.2.0) (2022-11-18)
+
+
+### Bug Fixes
+
+* build errors ([65f0e1c](https://github.com/payloadcms/payload/commit/65f0e1caace193f034139e331883d01d8eb92d2c))
+* components optional chaining ([d5e725c](https://github.com/payloadcms/payload/commit/d5e725c608588e96b974291fa86d5e89dea9060d))
+* corrects exported custom component type ([2878b4b](https://github.com/payloadcms/payload/commit/2878b4b1bec5c0c9997c1ba2a080640d4d3f8e5f))
+* corrects type for CollapsibleLabel example type, adjusts custom component filenames ([ccb4231](https://github.com/payloadcms/payload/commit/ccb42319abf0679d998e15b6b47fff3ce95d4ca1))
+* sets pointer-events to none so the entire label bar is clickable ([e458087](https://github.com/payloadcms/payload/commit/e458087a55cbbad29ca3568ca4c089aaee49693a))
+
+
+### Features
+
+* add i18n to admin panel ([#1326](https://github.com/payloadcms/payload/issues/1326)) ([bab34d8](https://github.com/payloadcms/payload/commit/bab34d82f5fddad32ceafd116ad97e87cab4c862))
+* adds docs example ([2bf0fff](https://github.com/payloadcms/payload/commit/2bf0fffa0dd83f395aa3318b3baba1e22dd58b51))
+* adds playwright tests for array fields ([57a8c35](https://github.com/payloadcms/payload/commit/57a8c352e44750d1785b65074c15812dc8226585))
+* converts rowHeader to collapsibleLabel, extends data passed to functions/components ([13ec1e0](https://github.com/payloadcms/payload/commit/13ec1e0398d2a9ce1aeddc5692008173acfde45e))
+* customizable header-labels ([d45de99](https://github.com/payloadcms/payload/commit/d45de99956273c59e6d1a3a11c7cce36f3d123f6))
+* simplifies collapsible label API, adds e2e tests ([d9df98f](https://github.com/payloadcms/payload/commit/d9df98ff22041908fc2ce0972c844116edd409be))
+* specifies component names for arrays/collapsibles, simplifies threaded data ([b74ea21](https://github.com/payloadcms/payload/commit/b74ea218ca47ce9db9d20586dbbce73e4ce0f917))
+
+
+### BREAKING CHANGES
+
+* If you assigned labels to collections, globals or block names, you need to update your config! Your GraphQL schema and generated Typescript interfaces may have changed. Payload no longer uses labels for code based naming. To prevent breaking changes to your GraphQL API and typescript types in your project, you can assign the below properties to match what Payload previously generated for you from labels.
+
+On Collections
+Use `graphQL.singularName`, `graphQL.pluralName` for GraphQL schema names.
+Use `typescript.interface` for typescript generation name.
+
+On Globals
+Use `graphQL.name` for GraphQL Schema name.
+Use `typescript.interface` for typescript generation name.
+
+On Blocks (within Block fields)
+Use `graphQL.singularName` for graphQL schema names.
+
 ## [1.1.26](https://github.com/payloadcms/payload/compare/v1.1.25...v1.1.26) (2022-11-15)
 
 
