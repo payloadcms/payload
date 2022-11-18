@@ -6,8 +6,8 @@
  *
  */
 
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {INSERT_TABLE_COMMAND} from '@lexical/table';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { INSERT_TABLE_COMMAND } from '@lexical/table';
 import {
   $createNodeSelection,
   $createParagraphNode,
@@ -23,13 +23,13 @@ import {
   LexicalEditor,
   LexicalNode,
 } from 'lexical';
-import {createContext, useContext, useEffect, useMemo, useState} from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import * as React from 'react';
 import invariant from '../shared/invariant';
 
-import {$createTableNodeWithDimensions, TableNode} from '../nodes/TableNode';
+import { $createTableNodeWithDimensions, TableNode } from '../nodes/TableNode';
 import Button from '../ui/Button';
-import {DialogActions} from '../ui/Dialog';
+import { DialogActions } from '../ui/Dialog';
 import TextInput from '../ui/TextInput';
 
 export type InsertTableCommandPayload = Readonly<{
@@ -55,8 +55,7 @@ export type CellEditorConfig = Readonly<{
   theme?: EditorThemeClasses;
 }>;
 
-export const INSERT_NEW_TABLE_COMMAND: LexicalCommand<InsertTableCommandPayload> =
-  createCommand('INSERT_NEW_TABLE_COMMAND');
+export const INSERT_NEW_TABLE_COMMAND: LexicalCommand<InsertTableCommandPayload> = createCommand('INSERT_NEW_TABLE_COMMAND');
 
 // @ts-ignore: not sure why TS doesn't like using null as the value?
 export const CellContext: React.Context<CellContextShape> = createContext({
@@ -67,7 +66,7 @@ export const CellContext: React.Context<CellContextShape> = createContext({
   },
 });
 
-export function TableContext({children}: {children: JSX.Element}) {
+export function TableContext({ children }: {children: JSX.Element}) {
   const [contextValue, setContextValue] = useState<{
     cellEditorConfig: null | CellEditorConfig;
     cellEditorPlugins: null | JSX.Element | Array<JSX.Element>;
@@ -82,11 +81,12 @@ export function TableContext({children}: {children: JSX.Element}) {
           cellEditorConfig: contextValue.cellEditorConfig,
           cellEditorPlugins: contextValue.cellEditorPlugins,
           set: (cellEditorConfig, cellEditorPlugins) => {
-            setContextValue({cellEditorConfig, cellEditorPlugins});
+            setContextValue({ cellEditorConfig, cellEditorPlugins });
           },
         }),
         [contextValue.cellEditorConfig, contextValue.cellEditorPlugins],
-      )}>
+      )}
+    >
       {children}
     </CellContext.Provider>
   );
@@ -103,18 +103,26 @@ export function InsertTableDialog({
   const [columns, setColumns] = useState('5');
 
   const onClick = () => {
-    activeEditor.dispatchCommand(INSERT_TABLE_COMMAND, {columns, rows});
+    activeEditor.dispatchCommand(INSERT_TABLE_COMMAND, { columns, rows });
     onClose();
   };
 
   return (
-    <>
-      <TextInput label="No of rows" onChange={setRows} value={rows} />
-      <TextInput label="No of columns" onChange={setColumns} value={columns} />
+    <React.Fragment>
+      <TextInput
+        label="No of rows"
+        onChange={setRows}
+        value={rows}
+      />
+      <TextInput
+        label="No of columns"
+        onChange={setColumns}
+        value={columns}
+      />
       <DialogActions data-test-id="table-model-confirm-insert">
         <Button onClick={onClick}>Confirm</Button>
       </DialogActions>
-    </>
+    </React.Fragment>
   );
 }
 
@@ -129,18 +137,26 @@ export function InsertNewTableDialog({
   const [columns, setColumns] = useState('5');
 
   const onClick = () => {
-    activeEditor.dispatchCommand(INSERT_NEW_TABLE_COMMAND, {columns, rows});
+    activeEditor.dispatchCommand(INSERT_NEW_TABLE_COMMAND, { columns, rows });
     onClose();
   };
 
   return (
-    <>
-      <TextInput label="No of rows" onChange={setRows} value={rows} />
-      <TextInput label="No of columns" onChange={setColumns} value={columns} />
+    <React.Fragment>
+      <TextInput
+        label="No of rows"
+        onChange={setRows}
+        value={rows}
+      />
+      <TextInput
+        label="No of columns"
+        onChange={setColumns}
+        value={columns}
+      />
       <DialogActions data-test-id="table-model-confirm-insert">
         <Button onClick={onClick}>Confirm</Button>
       </DialogActions>
-    </>
+    </React.Fragment>
   );
 }
 
@@ -163,14 +179,14 @@ export function TablePlugin({
 
     return editor.registerCommand<InsertTableCommandPayload>(
       INSERT_TABLE_COMMAND,
-      ({columns, rows, includeHeaders}) => {
+      ({ columns, rows, includeHeaders }) => {
         const selection = $getSelection();
 
         if (!$isRangeSelection(selection)) {
           return true;
         }
 
-        const focus = selection.focus;
+        const { focus } = selection;
         const focusNode = focus.getNode();
 
         if (focusNode !== null) {

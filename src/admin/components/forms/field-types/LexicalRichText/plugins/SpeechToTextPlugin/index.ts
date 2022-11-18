@@ -6,9 +6,9 @@
  *
  */
 
-import type {LexicalCommand, LexicalEditor, RangeSelection} from 'lexical';
+import type { LexicalCommand, LexicalEditor, RangeSelection } from 'lexical';
 
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
   $getSelection,
   $isRangeSelection,
@@ -17,7 +17,7 @@ import {
   REDO_COMMAND,
   UNDO_COMMAND,
 } from 'lexical';
-import {useEffect, useRef, useState} from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import useReport from '../../hooks/useReport';
 
@@ -31,19 +31,18 @@ const VOICE_COMMANDS: Readonly<
     (arg0: {editor: LexicalEditor; selection: RangeSelection}) => void
   >
 > = {
-  '\n': ({selection}) => {
+  '\n': ({ selection }) => {
     selection.insertParagraph();
   },
-  redo: ({editor}) => {
+  redo: ({ editor }) => {
     editor.dispatchCommand(REDO_COMMAND, undefined);
   },
-  undo: ({editor}) => {
+  undo: ({ editor }) => {
     editor.dispatchCommand(UNDO_COMMAND, undefined);
   },
 };
 
-export const SUPPORT_SPEECH_RECOGNITION: boolean =
-  'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
+export const SUPPORT_SPEECH_RECOGNITION: boolean = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
 
 function SpeechToTextPlugin(): null {
   const [editor] = useLexicalComposerContext();
@@ -63,7 +62,7 @@ function SpeechToTextPlugin(): null {
         'result',
         (event: typeof SpeechRecognition) => {
           const resultItem = event.results.item(event.resultIndex);
-          const {transcript} = resultItem.item(0);
+          const { transcript } = resultItem.item(0);
           report(transcript);
 
           if (!resultItem.isFinal) {

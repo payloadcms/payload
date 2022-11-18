@@ -6,7 +6,7 @@
  *
  */
 
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
   LexicalTypeaheadMenuPlugin,
   TypeaheadOption,
@@ -19,12 +19,14 @@ import {
   TextNode,
 } from 'lexical';
 import * as React from 'react';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as ReactDOM from 'react-dom';
 
 class EmojiOption extends TypeaheadOption {
   title: string;
+
   emoji: string;
+
   keywords: Array<string>;
 
   constructor(
@@ -65,11 +67,14 @@ function EmojiMenuItem({
       ref={option.setRefElement}
       role="option"
       aria-selected={isSelected}
-      id={'typeahead-item-' + index}
+      id={`typeahead-item-${index}`}
       onMouseEnter={onMouseEnter}
-      onClick={onClick}>
+      onClick={onClick}
+    >
       <span className="text">
-        {option.emoji} {option.title}
+        {option.emoji}
+        {' '}
+        {option.title}
       </span>
     </li>
   );
@@ -99,15 +104,13 @@ export default function EmojiPickerPlugin() {
   }, []);
 
   const emojiOptions = useMemo(
-    () =>
-      emojis != null
-        ? emojis.map(
-            ({emoji, aliases, tags}) =>
-              new EmojiOption(aliases[0], emoji, {
-                keywords: [...aliases, ...tags],
-              }),
-          )
-        : [],
+    () => (emojis != null
+      ? emojis.map(
+        ({ emoji, aliases, tags }) => new EmojiOption(aliases[0], emoji, {
+          keywords: [...aliases, ...tags],
+        }),
+      )
+      : []),
     [emojis],
   );
 
@@ -119,11 +122,9 @@ export default function EmojiPickerPlugin() {
     return emojiOptions
       .filter((option: EmojiOption) => {
         return queryString != null
-          ? new RegExp(queryString, 'gi').exec(option.title) ||
-            option.keywords != null
-            ? option.keywords.some((keyword: string) =>
-                new RegExp(queryString, 'gi').exec(keyword),
-              )
+          ? new RegExp(queryString, 'gi').exec(option.title)
+            || option.keywords != null
+            ? option.keywords.some((keyword: string) => new RegExp(queryString, 'gi').exec(keyword))
             : false
           : emojiOptions;
       })
@@ -163,7 +164,7 @@ export default function EmojiPickerPlugin() {
       options={options}
       menuRenderFn={(
         anchorElementRef,
-        {selectedIndex, selectOptionAndCleanUp, setHighlightedIndex},
+        { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex },
       ) => {
         if (anchorElementRef.current == null || options.length === 0) {
           return null;
@@ -171,28 +172,28 @@ export default function EmojiPickerPlugin() {
 
         return anchorElementRef.current && options.length
           ? ReactDOM.createPortal(
-              <div className="typeahead-popover emoji-menu">
-                <ul>
-                  {options.map((option: EmojiOption, index) => (
-                    <div key={option.key}>
-                      <EmojiMenuItem
-                        index={index}
-                        isSelected={selectedIndex === index}
-                        onClick={() => {
-                          setHighlightedIndex(index);
-                          selectOptionAndCleanUp(option);
-                        }}
-                        onMouseEnter={() => {
-                          setHighlightedIndex(index);
-                        }}
-                        option={option}
-                      />
-                    </div>
-                  ))}
-                </ul>
-              </div>,
-              anchorElementRef.current,
-            )
+            <div className="typeahead-popover emoji-menu">
+              <ul>
+                {options.map((option: EmojiOption, index) => (
+                  <div key={option.key}>
+                    <EmojiMenuItem
+                      index={index}
+                      isSelected={selectedIndex === index}
+                      onClick={() => {
+                        setHighlightedIndex(index);
+                        selectOptionAndCleanUp(option);
+                      }}
+                      onMouseEnter={() => {
+                        setHighlightedIndex(index);
+                      }}
+                      option={option}
+                    />
+                  </div>
+                ))}
+              </ul>
+            </div>,
+            anchorElementRef.current,
+          )
           : null;
       }}
     />

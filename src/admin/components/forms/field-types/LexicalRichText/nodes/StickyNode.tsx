@@ -15,10 +15,10 @@ import type {
   Spread,
 } from 'lexical';
 
-import {$setSelection, createEditor, DecoratorNode} from 'lexical';
+import { $setSelection, createEditor, DecoratorNode } from 'lexical';
 import * as React from 'react';
-import {Suspense} from 'react';
-import {createPortal} from 'react-dom';
+import { Suspense } from 'react';
+import { createPortal } from 'react-dom';
 
 const StickyComponent = React.lazy(
   // @ts-ignore
@@ -41,8 +41,11 @@ export type SerializedStickyNode = Spread<
 
 export class StickyNode extends DecoratorNode<JSX.Element> {
   __x: number;
+
   __y: number;
+
   __color: StickyNoteColor;
+
   __caption: LexicalEditor;
 
   static getType(): string {
@@ -58,6 +61,7 @@ export class StickyNode extends DecoratorNode<JSX.Element> {
       node.__key,
     );
   }
+
   static importJSON(serializedNode: SerializedStickyNode): StickyNode {
     return new StickyNode(
       serializedNode.xOffset,

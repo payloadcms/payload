@@ -9,9 +9,9 @@
 import './KatexEquationAlterer.css';
 
 import * as React from 'react';
-import {useCallback, useState} from 'react';
+import { useCallback, useState } from 'react';
 
-import Button from '../ui/Button';
+import Button from './Button';
 import KatexRenderer from './KatexRenderer';
 
 type Props = {
@@ -35,10 +35,14 @@ export default function KatexEquationAlterer({
   }, [setInline, inline]);
 
   return (
-    <>
+    <React.Fragment>
       <div className="KatexEquationAlterer_defaultRow">
         Inline
-        <input type="checkbox" checked={inline} onChange={onCheckboxChange} />
+        <input
+          type="checkbox"
+          checked={inline}
+          onChange={onCheckboxChange}
+        />
       </div>
       <div className="KatexEquationAlterer_defaultRow">Equation </div>
       <div className="KatexEquationAlterer_centerRow">
@@ -71,6 +75,6 @@ export default function KatexEquationAlterer({
       <div className="KatexEquationAlterer_dialogActions">
         <Button onClick={onClick}>Confirm</Button>
       </div>
-    </>
+    </React.Fragment>
   );
 }

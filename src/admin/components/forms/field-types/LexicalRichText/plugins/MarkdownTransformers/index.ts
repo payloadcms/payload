@@ -11,7 +11,7 @@ import type {
   TextMatchTransformer,
   Transformer,
 } from '@lexical/markdown';
-import type {ElementNode, LexicalNode} from 'lexical';
+import type { ElementNode, LexicalNode } from 'lexical';
 
 import {
   CHECK_LIST,
@@ -48,8 +48,8 @@ import {
   $isEquationNode,
   EquationNode,
 } from '../../nodes/EquationNode';
-import {$createImageNode, $isImageNode, ImageNode} from '../../nodes/ImageNode';
-import {$createTweetNode, $isTweetNode, TweetNode} from '../../nodes/TweetNode';
+import { $createImageNode, $isImageNode, ImageNode } from '../../nodes/ImageNode';
+import { $createTweetNode, $isTweetNode, TweetNode } from '../../nodes/TweetNode';
 
 export const HR: ElementTransformer = {
   dependencies: [HorizontalRuleNode],
@@ -220,8 +220,8 @@ export const TABLE: ElementTransformer = {
 
     const previousSibling = parentNode.getPreviousSibling();
     if (
-      $isTableNode(previousSibling) &&
-      getTableColumnsSize(previousSibling) === maxCells
+      $isTableNode(previousSibling)
+      && getTableColumnsSize(previousSibling) === maxCells
     ) {
       previousSibling.append(...table.getChildren());
       parentNode.remove();

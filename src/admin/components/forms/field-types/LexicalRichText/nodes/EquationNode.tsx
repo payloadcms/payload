@@ -14,9 +14,9 @@ import type {
   Spread,
 } from 'lexical';
 
-import {DecoratorNode} from 'lexical';
+import { DecoratorNode } from 'lexical';
 import * as React from 'react';
-import {Suspense} from 'react';
+import { Suspense } from 'react';
 
 const EquationComponent = React.lazy(
   // @ts-ignore
@@ -34,6 +34,7 @@ export type SerializedEquationNode = Spread<
 
 export class EquationNode extends DecoratorNode<JSX.Element> {
   __equation: string;
+
   __inline: boolean;
 
   static getType(): string {

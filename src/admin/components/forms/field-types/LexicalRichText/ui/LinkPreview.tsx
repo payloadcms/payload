@@ -9,7 +9,7 @@
 import './LinkPreview.css';
 
 import * as React from 'react';
-import {CSSProperties, Suspense} from 'react';
+import { CSSProperties, Suspense } from 'react';
 
 type Preview = {
   title: string;
@@ -21,14 +21,13 @@ type Preview = {
 // Cached responses or running request promises
 const PREVIEW_CACHE: Record<string, Promise<Preview> | {preview: Preview}> = {};
 
-const URL_MATCHER =
-  /((https?:\/\/(www\.)?)|(www\.))[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+const URL_MATCHER = /((https?:\/\/(www\.)?)|(www\.))[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 
 function useSuspenseRequest(url: string) {
   let cached = PREVIEW_CACHE[url];
 
   if (!url.match(URL_MATCHER)) {
-    return {preview: null};
+    return { preview: null };
   }
 
   if (!cached) {
@@ -41,7 +40,7 @@ function useSuspenseRequest(url: string) {
         return preview;
       })
       .catch(() => {
-        PREVIEW_CACHE[url] = {preview: null};
+        PREVIEW_CACHE[url] = { preview: null };
       });
   }
 
@@ -57,7 +56,7 @@ function LinkPreviewContent({
 }: Readonly<{
   url: string;
 }>): JSX.Element | null {
-  const {preview} = useSuspenseRequest(url);
+  const { preview } = useSuspenseRequest(url);
   if (preview === null) {
     return null;
   }
@@ -105,13 +104,23 @@ export default function LinkPreview({
 }>): JSX.Element {
   return (
     <Suspense
-      fallback={
-        <>
-          <Glimmer style={{height: '80px'}} index={0} />
-          <Glimmer style={{width: '60%'}} index={1} />
-          <Glimmer style={{width: '80%'}} index={2} />
-        </>
-      }>
+      fallback={(
+        <React.Fragment>
+          <Glimmer
+            style={{ height: '80px' }}
+            index={0}
+          />
+          <Glimmer
+            style={{ width: '60%' }}
+            index={1}
+          />
+          <Glimmer
+            style={{ width: '80%' }}
+            index={2}
+          />
+        </React.Fragment>
+      )}
+    >
       <LinkPreviewContent url={url} />
     </Suspense>
   );

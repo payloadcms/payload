@@ -17,7 +17,7 @@ import {
   Spread,
 } from 'lexical';
 import * as React from 'react';
-import {Suspense} from 'react';
+import { Suspense } from 'react';
 
 export type Options = ReadonlyArray<Option>;
 
@@ -73,13 +73,14 @@ function convertPollElement(domNode: HTMLElement): DOMConversionOutput | null {
   const question = domNode.getAttribute('data-lexical-poll-question');
   if (question !== null) {
     const node = $createPollNode(question);
-    return {node};
+    return { node };
   }
   return null;
 }
 
 export class PollNode extends DecoratorNode<JSX.Element> {
   __question: string;
+
   __options: Options;
 
   static getType(): string {
@@ -137,7 +138,7 @@ export class PollNode extends DecoratorNode<JSX.Element> {
 
   toggleVote(option: Option, clientID: number): void {
     const self = this.getWritable();
-    const votes = option.votes;
+    const { votes } = option;
     const votesClone = Array.from(votes);
     const voteIndex = votes.indexOf(clientID);
     if (voteIndex === -1) {
@@ -169,7 +170,7 @@ export class PollNode extends DecoratorNode<JSX.Element> {
   exportDOM(): DOMExportOutput {
     const element = document.createElement('span');
     element.setAttribute('data-lexical-poll-question', this.__question);
-    return {element};
+    return { element };
   }
 
   createDOM(): HTMLElement {

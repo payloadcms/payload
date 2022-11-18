@@ -6,7 +6,7 @@
  *
  */
 
-import {useCallback, useMemo, useState} from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import * as React from 'react';
 
 import Modal from '../ui/Modal';
@@ -14,7 +14,7 @@ import Modal from '../ui/Modal';
 export default function useModal(): [
   JSX.Element | null,
   (title: string, showModal: (onClose: () => void) => JSX.Element) => void,
-] {
+  ] {
   const [modalContent, setModalContent] = useState<null | {
     closeOnClickOutside: boolean;
     content: JSX.Element;
@@ -29,12 +29,13 @@ export default function useModal(): [
     if (modalContent === null) {
       return null;
     }
-    const {title, content, closeOnClickOutside} = modalContent;
+    const { title, content, closeOnClickOutside } = modalContent;
     return (
       <Modal
         onClose={onClose}
         title={title}
-        closeOnClickOutside={closeOnClickOutside}>
+        closeOnClickOutside={closeOnClickOutside}
+      >
         {content}
       </Modal>
     );

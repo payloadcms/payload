@@ -124,7 +124,7 @@ export const App: React.FC<OnChangeProps> = (props) => {
     settings: { isCollab, emptyEditor, measureTypingPerf },
   } = useSettings();
 
-  //console.log('InitialJSON', initialJSON);
+  // console.log('InitialJSON', initialJSON);
   const initialConfig = {
     /* editorState: isCollab
       ? null
@@ -170,7 +170,10 @@ export const PlaygroundApp: React.FC<OnChangeProps> = (props) => {
 
   return (
     <SettingsContext>
-      <App onChange={onChange} initialJSON={initialJSON} />
+      <App
+        onChange={onChange}
+        initialJSON={initialJSON}
+      />
     </SettingsContext>
   );
 };

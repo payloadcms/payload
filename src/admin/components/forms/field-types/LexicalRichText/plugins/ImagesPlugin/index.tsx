@@ -5,8 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {$wrapNodeInElement, mergeRegister} from '@lexical/utils';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $wrapNodeInElement, mergeRegister } from '@lexical/utils';
 import {
   $createParagraphNode,
   $createRangeSelection,
@@ -25,7 +25,7 @@ import {
   LexicalCommand,
   LexicalEditor,
 } from 'lexical';
-import {useEffect, useRef, useState} from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as React from 'react';
 import getSelection from '../../shared/getDOMSelection';
 
@@ -38,14 +38,13 @@ import {
   ImagePayload,
 } from '../../nodes/ImageNode';
 import Button from '../../ui/Button';
-import {DialogActions, DialogButtonsList} from '../../ui/Dialog';
+import { DialogActions, DialogButtonsList } from '../../ui/Dialog';
 import FileInput from '../../ui/FileInput';
 import TextInput from '../../ui/TextInput';
 
 export type InsertImagePayload = Readonly<ImagePayload>;
 
-export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> =
-  createCommand('INSERT_IMAGE_COMMAND');
+export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand('INSERT_IMAGE_COMMAND');
 
 export function InsertImageUriDialogBody({
   onClick,
@@ -58,7 +57,7 @@ export function InsertImageUriDialogBody({
   const isDisabled = src === '';
 
   return (
-    <>
+    <React.Fragment>
       <TextInput
         label="Image URL"
         placeholder="i.e. https://source.unsplash.com/random"
@@ -77,11 +76,12 @@ export function InsertImageUriDialogBody({
         <Button
           data-test-id="image-modal-confirm-btn"
           disabled={isDisabled}
-          onClick={() => onClick({altText, src})}>
+          onClick={() => onClick({ altText, src })}
+        >
           Confirm
         </Button>
       </DialogActions>
-    </>
+    </React.Fragment>
   );
 }
 
@@ -109,7 +109,7 @@ export function InsertImageUploadedDialogBody({
   };
 
   return (
-    <>
+    <React.Fragment>
       <FileInput
         label="Image Upload"
         onChange={loadImage}
@@ -127,11 +127,12 @@ export function InsertImageUploadedDialogBody({
         <Button
           data-test-id="image-modal-file-upload-btn"
           disabled={isDisabled}
-          onClick={() => onClick({altText, src})}>
+          onClick={() => onClick({ altText, src })}
+        >
           Confirm
         </Button>
       </DialogActions>
-    </>
+    </React.Fragment>
   );
 }
 
@@ -162,42 +163,43 @@ export function InsertImageDialog({
   };
 
   return (
-    <>
+    <React.Fragment>
       {!mode && (
         <DialogButtonsList>
           <Button
             data-test-id="image-modal-option-sample"
-            onClick={() =>
-              onClick(
-                hasModifier.current
-                  ? {
-                      altText:
+            onClick={() => onClick(
+              hasModifier.current
+                ? {
+                  altText:
                         'Daylight fir trees forest glacier green high ice landscape',
-                      src: landscapeImage,
-                    }
-                  : {
-                      altText: 'Yellow flower in tilt shift lens',
-                      src: yellowFlowerImage,
-                    },
-              )
-            }>
+                  src: landscapeImage,
+                }
+                : {
+                  altText: 'Yellow flower in tilt shift lens',
+                  src: yellowFlowerImage,
+                },
+            )}
+          >
             Sample
           </Button>
           <Button
             data-test-id="image-modal-option-url"
-            onClick={() => setMode('url')}>
+            onClick={() => setMode('url')}
+          >
             URL
           </Button>
           <Button
             data-test-id="image-modal-option-file"
-            onClick={() => setMode('file')}>
+            onClick={() => setMode('file')}
+          >
             File
           </Button>
         </DialogButtonsList>
       )}
       {mode === 'url' && <InsertImageUriDialogBody onClick={onClick} />}
       {mode === 'file' && <InsertImageUploadedDialogBody onClick={onClick} />}
-    </>
+    </React.Fragment>
   );
 }
 
@@ -254,8 +256,7 @@ export default function ImagesPlugin({
   return null;
 }
 
-const TRANSPARENT_IMAGE =
-  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+const TRANSPARENT_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 const img = document.createElement('img');
 img.src = TRANSPARENT_IMAGE;
 
@@ -264,7 +265,7 @@ function onDragStart(event: DragEvent): boolean {
   if (!node) {
     return false;
   }
-  const dataTransfer = event.dataTransfer;
+  const { dataTransfer } = event;
   if (!dataTransfer) {
     return false;
   }
@@ -339,7 +340,7 @@ function getDragImageData(event: DragEvent): null | InsertImagePayload {
   if (!dragData) {
     return null;
   }
-  const {type, data} = JSON.parse(dragData);
+  const { type, data } = JSON.parse(dragData);
   if (type !== 'image') {
     return null;
   }
@@ -355,13 +356,13 @@ declare global {
 }
 
 function canDropImage(event: DragEvent): boolean {
-  const target = event.target;
+  const { target } = event;
   return !!(
-    target &&
-    target instanceof HTMLElement &&
-    !target.closest('code, span.editor-image') &&
-    target.parentElement &&
-    target.parentElement.closest('div.ContentEditable__root')
+    target
+    && target instanceof HTMLElement
+    && !target.closest('code, span.editor-image')
+    && target.parentElement
+    && target.parentElement.closest('div.ContentEditable__root')
   );
 }
 
@@ -374,7 +375,7 @@ function getDragSelection(event: DragEvent): Range | null | undefined {
     domSelection.collapse(event.rangeParent, event.rangeOffset || 0);
     range = domSelection.getRangeAt(0);
   } else {
-    throw Error(`Cannot get the selection when dragging`);
+    throw Error('Cannot get the selection when dragging');
   }
 
   return range;

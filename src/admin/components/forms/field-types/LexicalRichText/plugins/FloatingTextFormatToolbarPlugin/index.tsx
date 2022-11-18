@@ -8,10 +8,10 @@
 
 import './index.css';
 
-import {$isCodeHighlightNode} from '@lexical/code';
-import {$isLinkNode, TOGGLE_LINK_COMMAND} from '@lexical/link';
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {mergeRegister} from '@lexical/utils';
+import { $isCodeHighlightNode } from '@lexical/code';
+import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { mergeRegister } from '@lexical/utils';
 import {
   $getSelection,
   $isRangeSelection,
@@ -21,13 +21,13 @@ import {
   LexicalEditor,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as React from 'react';
-import {createPortal} from 'react-dom';
+import { createPortal } from 'react-dom';
 
-import {getDOMRangeRect} from '../../utils/getDOMRangeRect';
-import {getSelectedNode} from '../../utils/getSelectedNode';
-import {setFloatingElemPosition} from '../../utils/setFloatingElemPosition';
+import { getDOMRangeRect } from '../../utils/getDOMRangeRect';
+import { getSelectedNode } from '../../utils/getSelectedNode';
+import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition';
 
 function TextFormatFloatingToolbar({
   editor,
@@ -75,11 +75,11 @@ function TextFormatFloatingToolbar({
 
     const rootElement = editor.getRootElement();
     if (
-      selection !== null &&
-      nativeSelection !== null &&
-      !nativeSelection.isCollapsed &&
-      rootElement !== null &&
-      rootElement.contains(nativeSelection.anchorNode)
+      selection !== null
+      && nativeSelection !== null
+      && !nativeSelection.isCollapsed
+      && rootElement !== null
+      && rootElement.contains(nativeSelection.anchorNode)
     ) {
       const rangeRect = getDOMRangeRect(nativeSelection, rootElement);
 
@@ -114,7 +114,7 @@ function TextFormatFloatingToolbar({
       updateTextFormatFloatingToolbar();
     });
     return mergeRegister(
-      editor.registerUpdateListener(({editorState}) => {
+      editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
           updateTextFormatFloatingToolbar();
         });
@@ -132,16 +132,20 @@ function TextFormatFloatingToolbar({
   }, [editor, updateTextFormatFloatingToolbar]);
 
   return (
-    <div ref={popupCharStylesEditorRef} className="floating-text-format-popup">
+    <div
+      ref={popupCharStylesEditorRef}
+      className="floating-text-format-popup"
+    >
       {editor.isEditable() && (
-        <>
+        <React.Fragment>
           <button
             onClick={(event) => {
               event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
             }}
-            className={'popup-item spaced ' + (isBold ? 'active' : '')}
-            aria-label="Format text as bold">
+            className={`popup-item spaced ${isBold ? 'active' : ''}`}
+            aria-label="Format text as bold"
+          >
             <i className="format bold" />
           </button>
           <button
@@ -149,8 +153,9 @@ function TextFormatFloatingToolbar({
               event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
             }}
-            className={'popup-item spaced ' + (isItalic ? 'active' : '')}
-            aria-label="Format text as italics">
+            className={`popup-item spaced ${isItalic ? 'active' : ''}`}
+            aria-label="Format text as italics"
+          >
             <i className="format italic" />
           </button>
           <button
@@ -158,8 +163,9 @@ function TextFormatFloatingToolbar({
               event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline');
             }}
-            className={'popup-item spaced ' + (isUnderline ? 'active' : '')}
-            aria-label="Format text to underlined">
+            className={`popup-item spaced ${isUnderline ? 'active' : ''}`}
+            aria-label="Format text to underlined"
+          >
             <i className="format underline" />
           </button>
           <button
@@ -167,8 +173,9 @@ function TextFormatFloatingToolbar({
               event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough');
             }}
-            className={'popup-item spaced ' + (isStrikethrough ? 'active' : '')}
-            aria-label="Format text with a strikethrough">
+            className={`popup-item spaced ${isStrikethrough ? 'active' : ''}`}
+            aria-label="Format text with a strikethrough"
+          >
             <i className="format strikethrough" />
           </button>
           <button
@@ -176,9 +183,10 @@ function TextFormatFloatingToolbar({
               event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript');
             }}
-            className={'popup-item spaced ' + (isSubscript ? 'active' : '')}
+            className={`popup-item spaced ${isSubscript ? 'active' : ''}`}
             title="Subscript"
-            aria-label="Format Subscript">
+            aria-label="Format Subscript"
+          >
             <i className="format subscript" />
           </button>
           <button
@@ -186,9 +194,10 @@ function TextFormatFloatingToolbar({
               event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'superscript');
             }}
-            className={'popup-item spaced ' + (isSuperscript ? 'active' : '')}
+            className={`popup-item spaced ${isSuperscript ? 'active' : ''}`}
             title="Superscript"
-            aria-label="Format Superscript">
+            aria-label="Format Superscript"
+          >
             <i className="format superscript" />
           </button>
           <button
@@ -196,8 +205,9 @@ function TextFormatFloatingToolbar({
               event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code');
             }}
-            className={'popup-item spaced ' + (isCode ? 'active' : '')}
-            aria-label="Insert code block">
+            className={`popup-item spaced ${isCode ? 'active' : ''}`}
+            aria-label="Insert code block"
+          >
             <i className="format code" />
           </button>
           <button
@@ -205,11 +215,12 @@ function TextFormatFloatingToolbar({
               event.preventDefault();
               insertLink();
             }}
-            className={'popup-item spaced ' + (isLink ? 'active' : '')}
-            aria-label="Insert link">
+            className={`popup-item spaced ${isLink ? 'active' : ''}`}
+            aria-label="Insert link"
+          >
             <i className="format link" />
           </button>
-        </>
+        </React.Fragment>
       )}
     </div>
   );
@@ -240,10 +251,10 @@ function useFloatingTextFormatToolbar(
       const rootElement = editor.getRootElement();
 
       if (
-        nativeSelection !== null &&
-        (!$isRangeSelection(selection) ||
-          rootElement === null ||
-          !rootElement.contains(nativeSelection.anchorNode))
+        nativeSelection !== null
+        && (!$isRangeSelection(selection)
+          || rootElement === null
+          || !rootElement.contains(nativeSelection.anchorNode))
       ) {
         setIsText(false);
         return;
@@ -273,8 +284,8 @@ function useFloatingTextFormatToolbar(
       }
 
       if (
-        !$isCodeHighlightNode(selection.anchor.getNode()) &&
-        selection.getTextContent() !== ''
+        !$isCodeHighlightNode(selection.anchor.getNode())
+        && selection.getTextContent() !== ''
       ) {
         setIsText($isTextNode(node));
       } else {

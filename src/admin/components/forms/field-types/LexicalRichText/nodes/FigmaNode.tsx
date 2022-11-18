@@ -15,7 +15,7 @@ import type {
   Spread,
 } from 'lexical';
 
-import {BlockWithAlignableContents} from '@lexical/react/LexicalBlockWithAlignableContents';
+import { BlockWithAlignableContents } from '@lexical/react/LexicalBlockWithAlignableContents';
 import {
   DecoratorBlockNode,
   SerializedDecoratorBlockNode,
@@ -42,13 +42,14 @@ function FigmaComponent({
     <BlockWithAlignableContents
       className={className}
       format={format}
-      nodeKey={nodeKey}>
+      nodeKey={nodeKey}
+    >
       <iframe
         width="560"
         height="315"
         src={`https://www.figma.com/embed?embed_host=lexical&url=\
         https://www.figma.com/file/${documentID}`}
-        allowFullScreen={true}
+        allowFullScreen
       />
     </BlockWithAlignableContents>
   );

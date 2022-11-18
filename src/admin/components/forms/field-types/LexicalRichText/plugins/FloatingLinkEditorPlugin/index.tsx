@@ -7,9 +7,9 @@
  */
 import './index.css';
 
-import {$isAutoLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND} from '@lexical/link';
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {$findMatchingParent, mergeRegister} from '@lexical/utils';
+import { $isAutoLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $findMatchingParent, mergeRegister } from '@lexical/utils';
 import {
   $getSelection,
   $isRangeSelection,
@@ -21,14 +21,14 @@ import {
   RangeSelection,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as React from 'react';
-import {createPortal} from 'react-dom';
+import { createPortal } from 'react-dom';
 
 import LinkPreview from '../../ui/LinkPreview';
-import {getSelectedNode} from '../../utils/getSelectedNode';
-import {sanitizeUrl} from '../../utils/sanitizeUrl';
-import {setFloatingElemPosition} from '../../utils/setFloatingElemPosition';
+import { getSelectedNode } from '../../utils/getSelectedNode';
+import { sanitizeUrl } from '../../utils/sanitizeUrl';
+import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition';
 
 function FloatingLinkEditor({
   editor,
@@ -60,7 +60,7 @@ function FloatingLinkEditor({
     }
     const editorElem = editorRef.current;
     const nativeSelection = window.getSelection();
-    const activeElement = document.activeElement;
+    const { activeElement } = document;
 
     if (editorElem === null) {
       return;
@@ -69,10 +69,10 @@ function FloatingLinkEditor({
     const rootElement = editor.getRootElement();
 
     if (
-      selection !== null &&
-      nativeSelection !== null &&
-      rootElement !== null &&
-      rootElement.contains(nativeSelection.anchorNode)
+      selection !== null
+      && nativeSelection !== null
+      && rootElement !== null
+      && rootElement.contains(nativeSelection.anchorNode)
     ) {
       const domRange = nativeSelection.getRangeAt(0);
       let rect;
@@ -126,7 +126,7 @@ function FloatingLinkEditor({
 
   useEffect(() => {
     return mergeRegister(
-      editor.registerUpdateListener(({editorState}) => {
+      editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
           updateLinkEditor();
         });
@@ -156,7 +156,10 @@ function FloatingLinkEditor({
   }, [isEditMode]);
 
   return (
-    <div ref={editorRef} className="link-editor">
+    <div
+      ref={editorRef}
+      className="link-editor"
+    >
       {isEditMode ? (
         <input
           ref={inputRef}
@@ -184,9 +187,13 @@ function FloatingLinkEditor({
           }}
         />
       ) : (
-        <>
+        <React.Fragment>
           <div className="link-input">
-            <a href={linkUrl} target="_blank" rel="noopener noreferrer">
+            <a
+              href={linkUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               {linkUrl}
             </a>
             <div
@@ -200,7 +207,7 @@ function FloatingLinkEditor({
             />
           </div>
           <LinkPreview url={linkUrl} />
-        </>
+        </React.Fragment>
       )}
     </div>
   );
@@ -243,9 +250,12 @@ function useFloatingLinkEditorToolbar(
 
   return isLink
     ? createPortal(
-        <FloatingLinkEditor editor={activeEditor} anchorElem={anchorElem} />,
-        anchorElem,
-      )
+      <FloatingLinkEditor
+        editor={activeEditor}
+        anchorElem={anchorElem}
+      />,
+      anchorElem,
+    )
     : null;
 }
 

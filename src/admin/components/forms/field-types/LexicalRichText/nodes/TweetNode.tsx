@@ -18,13 +18,13 @@ import type {
   Spread,
 } from 'lexical';
 
-import {BlockWithAlignableContents} from '@lexical/react/LexicalBlockWithAlignableContents';
+import { BlockWithAlignableContents } from '@lexical/react/LexicalBlockWithAlignableContents';
 import {
   DecoratorBlockNode,
   SerializedDecoratorBlockNode,
 } from '@lexical/react/LexicalDecoratorBlockNode';
 import * as React from 'react';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const WIDGET_SCRIPT_URL = 'https://platform.twitter.com/widgets.js';
 
@@ -47,7 +47,7 @@ function convertTweetElement(
   const id = domNode.getAttribute('data-lexical-tweet-id');
   if (id) {
     const node = $createTweetNode(id);
-    return {node};
+    return { node };
   }
   return null;
 }
@@ -113,10 +113,11 @@ function TweetComponent({
     <BlockWithAlignableContents
       className={className}
       format={format}
-      nodeKey={nodeKey}>
+      nodeKey={nodeKey}
+    >
       {isTweetLoading ? loadingComponent : null}
       <div
-        style={{display: 'inline-block', width: '550px'}}
+        style={{ display: 'inline-block', width: '550px' }}
         ref={containerRef}
       />
     </BlockWithAlignableContents>
@@ -177,7 +178,7 @@ export class TweetNode extends DecoratorBlockNode {
     element.setAttribute('data-lexical-tweet-id', this.__id);
     const text = document.createTextNode(this.getTextContent());
     element.append(text);
-    return {element};
+    return { element };
   }
 
   constructor(id: string, format?: ElementFormatType, key?: NodeKey) {

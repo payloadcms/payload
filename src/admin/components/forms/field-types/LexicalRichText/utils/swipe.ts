@@ -38,7 +38,7 @@ function addListener(element: HTMLElement, cb: Listener): () => void {
       if (elementValues === undefined) {
         return;
       }
-      const start = elementValues.start;
+      const { start } = elementValues;
       if (start === null) {
         return;
       }
@@ -69,7 +69,7 @@ function deleteListener(element: HTMLElement, cb: Listener): void {
   if (elementValues === undefined) {
     return;
   }
-  const listeners = elementValues.listeners;
+  const { listeners } = elementValues;
   listeners.delete(cb);
   if (listeners.size === 0) {
     elements.delete(element);

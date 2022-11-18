@@ -19,8 +19,8 @@ import {
   Spread,
 } from 'lexical';
 
-import {$isCollapsibleContainerNode} from './CollapsibleContainerNode';
-import {$isCollapsibleContentNode} from './CollapsibleContentNode';
+import { $isCollapsibleContainerNode } from './CollapsibleContainerNode';
+import { $isCollapsibleContentNode } from './CollapsibleContentNode';
 
 type SerializedCollapsibleTitleNode = Spread<
   {
@@ -92,16 +92,14 @@ export class CollapsibleTitleNode extends ElementNode {
       const firstChild = contentNode.getFirstChild();
       if ($isElementNode(firstChild)) {
         return firstChild;
-      } else {
-        const paragraph = $createParagraphNode();
-        contentNode.append(paragraph);
-        return paragraph;
       }
-    } else {
       const paragraph = $createParagraphNode();
-      containerNode.insertAfter(paragraph);
+      contentNode.append(paragraph);
       return paragraph;
     }
+    const paragraph = $createParagraphNode();
+    containerNode.insertAfter(paragraph);
+    return paragraph;
   }
 }
 

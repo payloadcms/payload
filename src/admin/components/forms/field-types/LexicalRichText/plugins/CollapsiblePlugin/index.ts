@@ -8,8 +8,8 @@
 
 import './Collapsible.css';
 
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {$findMatchingParent, mergeRegister} from '@lexical/utils';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $findMatchingParent, mergeRegister } from '@lexical/utils';
 import {
   $createParagraphNode,
   $getNodeByKey,
@@ -26,7 +26,7 @@ import {
   KEY_ARROW_DOWN_COMMAND,
   NodeKey,
 } from 'lexical';
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 
 import {
   $createCollapsibleContainerNode,
@@ -85,9 +85,9 @@ export default function CollapsiblePlugin(): JSX.Element | null {
       editor.registerNodeTransform(CollapsibleContainerNode, (node) => {
         const children = node.getChildren();
         if (
-          children.length !== 2 ||
-          !$isCollapsibleTitleNode(children[0]) ||
-          !$isCollapsibleContentNode(children[1])
+          children.length !== 2
+          || !$isCollapsibleTitleNode(children[0])
+          || !$isCollapsibleContentNode(children[1])
         ) {
           for (const child of children) {
             node.insertAfter(child);
@@ -104,9 +104,9 @@ export default function CollapsiblePlugin(): JSX.Element | null {
         () => {
           const selection = $getSelection();
           if (
-            !$isRangeSelection(selection) ||
-            !selection.isCollapsed() ||
-            selection.anchor.offset !== 0
+            !$isRangeSelection(selection)
+            || !selection.isCollapsed()
+            || selection.anchor.offset !== 0
           ) {
             return false;
           }
@@ -164,9 +164,9 @@ export default function CollapsiblePlugin(): JSX.Element | null {
           const windowEvent: KeyboardEvent | undefined = editor._window?.event;
 
           if (
-            windowEvent &&
-            (windowEvent.ctrlKey || windowEvent.metaKey) &&
-            windowEvent.key === 'Enter'
+            windowEvent
+            && (windowEvent.ctrlKey || windowEvent.metaKey)
+            && windowEvent.key === 'Enter'
           ) {
             const selection = $getPreviousSelection();
             if ($isRangeSelection(selection) && selection.isCollapsed()) {

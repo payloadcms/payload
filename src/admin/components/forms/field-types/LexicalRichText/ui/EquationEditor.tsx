@@ -9,7 +9,7 @@
 import './EquationEditor.css';
 
 import * as React from 'react';
-import {ChangeEvent, RefObject} from 'react';
+import { ChangeEvent, RefObject } from 'react';
 
 type BaseEquationEditorProps = {
   equation: string;
@@ -65,7 +65,7 @@ function InlineEquationEditor({
         className="EquationEditor_inlineEditor"
         value={equation}
         onChange={onChange}
-        autoFocus={true}
+        autoFocus
         ref={inputRef}
       />
       <span className="EquationEditor_dollarSign">$</span>

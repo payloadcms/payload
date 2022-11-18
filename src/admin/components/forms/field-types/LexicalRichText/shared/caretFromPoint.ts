@@ -10,11 +10,10 @@ export default function caretFromPoint(x: number, y: number): null | Range {
   if (typeof document.caretRangeFromPoint !== 'undefined') {
     return document.caretRangeFromPoint(x, y);
     // @ts-ignore
-  } else if (document.caretPositionFromPoint !== 'undefined') {
+  } if (document.caretPositionFromPoint !== 'undefined') {
     // @ts-ignore FF - no types
     return document.caretPositionFromPoint(x, y);
-  } else {
-    // Gracefully handle IE
-    return null;
   }
+  // Gracefully handle IE
+  return null;
 }

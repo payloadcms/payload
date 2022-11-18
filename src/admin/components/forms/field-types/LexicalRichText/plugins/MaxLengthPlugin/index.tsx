@@ -6,13 +6,13 @@
  *
  */
 
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {trimTextContentFromAnchor} from '@lexical/selection';
-import {$restoreEditorState} from '@lexical/utils';
-import {$getSelection, $isRangeSelection, EditorState, RootNode} from 'lexical';
-import {useEffect} from 'react';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { trimTextContentFromAnchor } from '@lexical/selection';
+import { $restoreEditorState } from '@lexical/utils';
+import { $getSelection, $isRangeSelection, EditorState, RootNode } from 'lexical';
+import { useEffect } from 'react';
 
-export function MaxLengthPlugin({maxLength}: {maxLength: number}): null {
+export function MaxLengthPlugin({ maxLength }: {maxLength: number}): null {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
@@ -24,21 +24,19 @@ export function MaxLengthPlugin({maxLength}: {maxLength: number}): null {
         return;
       }
       const prevEditorState = editor.getEditorState();
-      const prevTextContent = prevEditorState.read(() =>
-        rootNode.getTextContent(),
-      );
+      const prevTextContent = prevEditorState.read(() => rootNode.getTextContent());
       const textContent = rootNode.getTextContent();
       if (prevTextContent !== textContent) {
         const textLength = textContent.length;
         const delCount = textLength - maxLength;
-        const anchor = selection.anchor;
+        const { anchor } = selection;
 
         if (delCount > 0) {
           // Restore the old editor state instead if the last
           // text content was already at the limit.
           if (
-            prevTextContent.length === maxLength &&
-            lastRestoredEditorState !== prevEditorState
+            prevTextContent.length === maxLength
+            && lastRestoredEditorState !== prevEditorState
           ) {
             lastRestoredEditorState = prevEditorState;
             $restoreEditorState(editor, prevEditorState);

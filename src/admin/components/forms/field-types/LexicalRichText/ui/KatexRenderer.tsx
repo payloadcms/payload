@@ -8,7 +8,7 @@
 
 import katex from 'katex';
 import * as React from 'react';
-import {useEffect, useRef} from 'react';
+import { useEffect, useRef } from 'react';
 
 export default function KatexRenderer({
   equation,
@@ -40,7 +40,7 @@ export default function KatexRenderer({
     // We use spacers either side to ensure Android doesn't try and compose from the
     // inner text from Katex. There didn't seem to be any other way of making this work,
     // without having a physical space.
-    <>
+    <React.Fragment>
       <span className="spacer"> </span>
       <span
         role="button"
@@ -49,6 +49,6 @@ export default function KatexRenderer({
         ref={katexElementRef}
       />
       <span className="spacer"> </span>
-    </>
+    </React.Fragment>
   );
 }

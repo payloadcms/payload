@@ -6,10 +6,10 @@
  *
  */
 
-import type {LexicalEditor} from 'lexical';
+import type { LexicalEditor } from 'lexical';
 
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {useMemo, useRef, useState} from 'react';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useMemo, useRef, useState } from 'react';
 import useLayoutEffect from '../shared/useLayoutEffect';
 
 export type LexicalSubscription<T> = {
@@ -31,7 +31,7 @@ export default function useLexicalSubscription<T>(
   const valueRef = useRef<T>(initializedSubscription.initialValueFn());
   const [value, setValue] = useState<T>(valueRef.current);
   useLayoutEffect(() => {
-    const {initialValueFn, subscribe} = initializedSubscription;
+    const { initialValueFn, subscribe } = initializedSubscription;
     const currentValue = initialValueFn();
     if (valueRef.current !== currentValue) {
       valueRef.current = currentValue;

@@ -7,16 +7,16 @@
  */
 import './index.css';
 
-import {$isCodeNode} from '@lexical/code';
-import {$getNearestNodeFromDOMNode, LexicalEditor} from 'lexical';
-import {Options} from 'prettier';
+import { $isCodeNode } from '@lexical/code';
+import { $getNearestNodeFromDOMNode, LexicalEditor } from 'lexical';
+import { Options } from 'prettier';
 import * as babelParser from 'prettier/parser-babel';
 import * as htmlParser from 'prettier/parser-html';
 import * as markdownParser from 'prettier/parser-markdown';
 import * as cssParser from 'prettier/parser-postcss';
-import {format} from 'prettier/standalone';
+import { format } from 'prettier/standalone';
 import * as React from 'react';
-import {useState} from 'react';
+import { useState } from 'react';
 
 interface Props {
   lang: string;
@@ -60,7 +60,7 @@ function getPrettierOptions(lang: string): Options {
   return options;
 }
 
-export function PrettierButton({lang, editor, getCodeDOMNode}: Props) {
+export function PrettierButton({ lang, editor, getCodeDOMNode }: Props) {
   const [syntaxError, setSyntaxError] = useState<string>('');
   const [tipsVisible, setTipsVisible] = useState<boolean>(false);
 
@@ -119,7 +119,8 @@ export function PrettierButton({lang, editor, getCodeDOMNode}: Props) {
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        aria-label="prettier">
+        aria-label="prettier"
+      >
         {syntaxError ? (
           <i className="format prettier-error" />
         ) : (

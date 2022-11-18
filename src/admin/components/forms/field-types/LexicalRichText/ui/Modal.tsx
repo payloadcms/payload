@@ -9,8 +9,8 @@
 import './Modal.css';
 
 import * as React from 'react';
-import {ReactNode, useEffect, useRef} from 'react';
-import {createPortal} from 'react-dom';
+import { ReactNode, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 function PortalImpl({
   onClose,
@@ -39,11 +39,11 @@ function PortalImpl({
       }
     };
     const clickOutsideHandler = (event: MouseEvent) => {
-      const target = event.target;
+      const { target } = event;
       if (
-        modalRef.current !== null &&
-        !modalRef.current.contains(target as Node) &&
-        closeOnClickOutside
+        modalRef.current !== null
+        && !modalRef.current.contains(target as Node)
+        && closeOnClickOutside
       ) {
         onClose();
       }
@@ -66,14 +66,22 @@ function PortalImpl({
   }, [closeOnClickOutside, onClose]);
 
   return (
-    <div className="Modal__overlay" role="dialog">
-      <div className="Modal__modal" tabIndex={-1} ref={modalRef}>
+    <div
+      className="Modal__overlay"
+      role="dialog"
+    >
+      <div
+        className="Modal__modal"
+        tabIndex={-1}
+        ref={modalRef}
+      >
         <h2 className="Modal__title">{title}</h2>
         <button
           className="Modal__closeButton"
           aria-label="Close modal"
           type="button"
-          onClick={onClose}>
+          onClick={onClose}
+        >
           X
         </button>
         <div className="Modal__content">{children}</div>
@@ -97,7 +105,8 @@ export default function Modal({
     <PortalImpl
       onClose={onClose}
       title={title}
-      closeOnClickOutside={closeOnClickOutside}>
+      closeOnClickOutside={closeOnClickOutside}
+    >
       {children}
     </PortalImpl>,
     document.body,

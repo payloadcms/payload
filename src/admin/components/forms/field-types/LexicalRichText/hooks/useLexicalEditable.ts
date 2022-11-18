@@ -6,8 +6,8 @@
  *
  */
 
-import type {LexicalSubscription} from './useLexicalSubscription';
-import type {LexicalEditor} from 'lexical';
+import type { LexicalEditor } from 'lexical';
+import type { LexicalSubscription } from './useLexicalSubscription';
 
 import useLexicalSubscription from './useLexicalSubscription';
 

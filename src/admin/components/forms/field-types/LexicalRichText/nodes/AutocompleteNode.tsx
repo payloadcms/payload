@@ -6,7 +6,7 @@
  *
  */
 
-import type {Spread} from 'lexical';
+import type { Spread } from 'lexical';
 
 import {
   DecoratorNode,
@@ -16,8 +16,8 @@ import {
 } from 'lexical';
 import * as React from 'react';
 
-import {useSharedAutocompleteContext} from '../context/SharedAutocompleteContext';
-import {uuid as UUID} from '../plugins/AutocompletePlugin';
+import { useSharedAutocompleteContext } from '../context/SharedAutocompleteContext';
+import { uuid as UUID } from '../plugins/AutocompletePlugin';
 
 declare global {
   interface Navigator {
@@ -95,15 +95,19 @@ export function $createAutocompleteNode(uuid: string): AutocompleteNode {
 
 function AutocompleteComponent(): JSX.Element {
   const [suggestion] = useSharedAutocompleteContext();
-  const userAgentData = window.navigator.userAgentData;
-  const isMobile =
-    userAgentData !== undefined
-      ? userAgentData.mobile
-      : window.innerWidth <= 800 && window.innerHeight <= 600;
+  const { userAgentData } = window.navigator;
+  const isMobile = userAgentData !== undefined
+    ? userAgentData.mobile
+    : window.innerWidth <= 800 && window.innerHeight <= 600;
   // TODO Move to theme
   return (
-    <span style={{color: '#ccc'}} spellCheck="false">
-      {suggestion} {isMobile ? '(SWIPE \u2B95)' : '(TAB)'}
+    <span
+      style={{ color: '#ccc' }}
+      spellCheck="false"
+    >
+      {suggestion}
+      {' '}
+      {isMobile ? '(SWIPE \u2B95)' : '(TAB)'}
     </span>
   );
 }

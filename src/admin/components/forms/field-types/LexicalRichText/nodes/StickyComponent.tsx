@@ -6,25 +6,25 @@
  *
  */
 
-import type {LexicalEditor, NodeKey} from 'lexical';
+import type { LexicalEditor, NodeKey } from 'lexical';
 
 import './StickyNode.css';
 
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
-import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
-import {LexicalNestedComposer} from '@lexical/react/LexicalNestedComposer';
-import {PlainTextPlugin} from '@lexical/react/LexicalPlainTextPlugin';
-import {$getNodeByKey} from 'lexical';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { LexicalNestedComposer } from '@lexical/react/LexicalNestedComposer';
+import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
+import { $getNodeByKey } from 'lexical';
 import * as React from 'react';
-import {useEffect, useRef} from 'react';
+import { useEffect, useRef } from 'react';
 import useLayoutEffect from '../shared/useLayoutEffect';
 
-import {useSharedHistoryContext} from '../context/SharedHistoryContext';
+import { useSharedHistoryContext } from '../context/SharedHistoryContext';
 import StickyEditorTheme from '../themes/StickyEditorTheme';
 import ContentEditable from '../ui/ContentEditable';
 import Placeholder from '../ui/Placeholder';
-import {$isStickyNode} from './StickyNode';
+import { $isStickyNode } from './StickyNode';
 
 type Positioning = {
   isDragging: boolean;
@@ -39,12 +39,12 @@ function positionSticky(
   stickyElem: HTMLElement,
   positioning: Positioning,
 ): void {
-  const style = stickyElem.style;
-  const rootElementRect = positioning.rootElementRect;
+  const { style } = stickyElem;
+  const { rootElementRect } = positioning;
   const rectLeft = rootElementRect !== null ? rootElementRect.left : 0;
   const rectTop = rootElementRect !== null ? rootElementRect.top : 0;
-  style.top = rectTop + positioning.y + 'px';
-  style.left = rectLeft + positioning.x + 'px';
+  style.top = `${rectTop + positioning.y}px`;
+  style.left = `${rectLeft + positioning.x}px`;
 }
 
 export default function StickyComponent({
@@ -87,7 +87,7 @@ export default function StickyComponent({
     const resizeObserver = new ResizeObserver((entries) => {
       for (let i = 0; i < entries.length; i++) {
         const entry = entries[i];
-        const {target} = entry;
+        const { target } = entry;
         position.rootElementRect = target.getBoundingClientRect();
         const stickyContainer = stickyContainerRef.current;
         if (stickyContainer !== null) {
@@ -141,11 +141,11 @@ export default function StickyComponent({
   const handlePointerMove = (event: PointerEvent) => {
     const stickyContainer = stickyContainerRef.current;
     const positioning = positioningRef.current;
-    const rootElementRect = positioning.rootElementRect;
+    const { rootElementRect } = positioning;
     if (
-      stickyContainer !== null &&
-      positioning.isDragging &&
-      rootElementRect !== null
+      stickyContainer !== null
+      && positioning.isDragging
+      && rootElementRect !== null
     ) {
       positioning.x = event.pageX - positioning.offsetX - rootElementRect.left;
       positioning.y = event.pageY - positioning.offsetY - rootElementRect.top;
@@ -188,18 +188,21 @@ export default function StickyComponent({
     });
   };
 
-  const {historyState} = useSharedHistoryContext();
+  const { historyState } = useSharedHistoryContext();
 
   return (
-    <div ref={stickyContainerRef} className="sticky-note-container">
+    <div
+      ref={stickyContainerRef}
+      className="sticky-note-container"
+    >
       <div
         className={`sticky-note ${color}`}
         onPointerDown={(event) => {
           const stickyContainer = stickyContainerRef.current;
           if (
-            stickyContainer == null ||
-            event.button === 2 ||
-            event.target !== stickyContainer.firstChild
+            stickyContainer == null
+            || event.button === 2
+            || event.target !== stickyContainer.firstChild
           ) {
             // Right click or click on editor should not work
             return;
@@ -207,7 +210,7 @@ export default function StickyComponent({
           const stickContainer = stickyContainer;
           const positioning = positioningRef.current;
           if (stickContainer !== null) {
-            const {top, left} = stickContainer.getBoundingClientRect();
+            const { top, left } = stickContainer.getBoundingClientRect();
             positioning.offsetX = event.clientX - left;
             positioning.offsetY = event.clientY - top;
             positioning.isDragging = true;
@@ -216,34 +219,38 @@ export default function StickyComponent({
             document.addEventListener('pointerup', handlePointerUp);
             event.preventDefault();
           }
-        }}>
+        }}
+      >
         <button
           onClick={handleDelete}
           className="delete"
           aria-label="Delete sticky note"
-          title="Delete">
+          title="Delete"
+        >
           X
         </button>
         <button
           onClick={handleColorChange}
           className="color"
           aria-label="Change sticky note color"
-          title="Color">
+          title="Color"
+        >
           <i className="bucket" />
         </button>
         <LexicalNestedComposer
           initialEditor={caption}
-          initialTheme={StickyEditorTheme}>
+          initialTheme={StickyEditorTheme}
+        >
           <HistoryPlugin externalHistoryState={historyState} />
           <PlainTextPlugin
             contentEditable={
               <ContentEditable className="StickyNode__contentEditable" />
             }
-            placeholder={
+            placeholder={(
               <Placeholder className="StickyNode__placeholder">
                 What's up?
               </Placeholder>
-            }
+            )}
             ErrorBoundary={LexicalErrorBoundary}
           />
         </LexicalNestedComposer>

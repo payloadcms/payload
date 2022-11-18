@@ -18,9 +18,9 @@ import type {
   Spread,
 } from 'lexical';
 
-import {DecoratorNode} from 'lexical';
+import { DecoratorNode } from 'lexical';
 import * as React from 'react';
-import {Suspense} from 'react';
+import { Suspense } from 'react';
 
 export type Cell = {
   colSpan: number;
@@ -41,13 +41,11 @@ export type Rows = Array<Row>;
 export const cellHTMLCache: Map<string, string> = new Map();
 export const cellTextContentCache: Map<string, string> = new Map();
 
-const emptyEditorJSON =
-  '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}';
+const emptyEditorJSON = '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}';
 
-const plainTextEditorJSON = (text: string) =>
-  text === ''
-    ? emptyEditorJSON
-    : `{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":${text},"type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}`;
+const plainTextEditorJSON = (text: string) => (text === ''
+  ? emptyEditorJSON
+  : `{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":${text},"type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}`);
 
 const TableComponent = React.lazy(
   // @ts-ignore
@@ -140,7 +138,7 @@ function convertTableElement(domNode: HTMLElement): null | DOMConversionOutput {
     row.cells = cells;
     rows.push(row);
   }
-  return {node: $createTableNode(rows)};
+  return { node: $createTableNode(rows) };
 }
 
 export function exportTableCellsToHTML(
@@ -167,7 +165,7 @@ export function exportTableCellsToHTML(
     y++
   ) {
     const row = rows[y];
-    const cells = row.cells;
+    const { cells } = row;
     const rowElem = document.createElement('tr');
 
     for (
@@ -223,7 +221,7 @@ export class TableNode extends DecoratorNode<JSX.Element> {
   }
 
   exportDOM(): DOMExportOutput {
-    return {element: exportTableCellsToHTML(this.__rows)};
+    return { element: exportTableCellsToHTML(this.__rows) };
   }
 
   constructor(rows?: Rows, key?: NodeKey) {
@@ -248,15 +246,15 @@ export class TableNode extends DecoratorNode<JSX.Element> {
     for (let y = startY; y < endY; y++) {
       const row = rows[y];
       const mergeRow = mergeRows[y - startY];
-      const cells = row.cells;
+      const { cells } = row;
       const cellsClone = Array.from(cells);
-      const rowClone = {...row, cells: cellsClone};
+      const rowClone = { ...row, cells: cellsClone };
       const mergeCells = mergeRow.cells;
       const endX = Math.min(cells.length, startX + mergeCells.length);
       for (let x = startX; x < endX; x++) {
         const cell = cells[x];
         const mergeCell = mergeCells[x - startX];
-        const cellClone = {...cell, json: mergeCell.json, type: mergeCell.type};
+        const cellClone = { ...cell, json: mergeCell.json, type: mergeCell.type };
         cellsClone[x] = cellClone;
       }
       rows[y] = rowClone;
@@ -267,11 +265,11 @@ export class TableNode extends DecoratorNode<JSX.Element> {
     const self = this.getWritable();
     const rows = self.__rows;
     const row = rows[y];
-    const cells = row.cells;
+    const { cells } = row;
     const cell = cells[x];
     const cellsClone = Array.from(cells);
-    const cellClone = {...cell, json};
-    const rowClone = {...row, cells: cellsClone};
+    const cellClone = { ...cell, json };
+    const rowClone = { ...row, cells: cellsClone };
     cellsClone[x] = cellClone;
     rows[y] = rowClone;
   }
@@ -280,11 +278,11 @@ export class TableNode extends DecoratorNode<JSX.Element> {
     const self = this.getWritable();
     const rows = self.__rows;
     const row = rows[y];
-    const cells = row.cells;
+    const { cells } = row;
     const cell = cells[x];
     const cellsClone = Array.from(cells);
-    const cellClone = {...cell, type};
-    const rowClone = {...row, cells: cellsClone};
+    const cellClone = { ...cell, type };
+    const rowClone = { ...row, cells: cellsClone };
     cellsClone[x] = cellClone;
     rows[y] = rowClone;
   }
@@ -294,10 +292,10 @@ export class TableNode extends DecoratorNode<JSX.Element> {
     const rows = self.__rows;
     for (let y = 0; y < rows.length; y++) {
       const row = rows[y];
-      const cells = row.cells;
+      const { cells } = row;
       const cellsClone = Array.from(cells);
-      const rowClone = {...row, cells: cellsClone};
-      const type = (cells[x] || cells[x - 1]).type;
+      const rowClone = { ...row, cells: cellsClone };
+      const { type } = cells[x] || cells[x - 1];
       cellsClone.splice(x, 0, createCell(type));
       rows[y] = rowClone;
     }
@@ -308,9 +306,9 @@ export class TableNode extends DecoratorNode<JSX.Element> {
     const rows = self.__rows;
     for (let y = 0; y < rows.length; y++) {
       const row = rows[y];
-      const cells = row.cells;
+      const { cells } = row;
       const cellsClone = Array.from(cells);
-      const rowClone = {...row, cells: cellsClone};
+      const rowClone = { ...row, cells: cellsClone };
       cellsClone.splice(x, 1);
       rows[y] = rowClone;
     }
@@ -321,10 +319,10 @@ export class TableNode extends DecoratorNode<JSX.Element> {
     const rows = self.__rows;
     for (let y = 0; y < rows.length; y++) {
       const row = rows[y];
-      const cells = row.cells;
+      const { cells } = row;
       const cellsClone = Array.from(cells);
-      const rowClone = {...row, cells: cellsClone};
-      const type = cells[cells.length - 1].type;
+      const rowClone = { ...row, cells: cellsClone };
+      const { type } = cells[cells.length - 1];
       for (let x = 0; x < count; x++) {
         cellsClone.push(createCell(type));
       }
@@ -372,9 +370,9 @@ export class TableNode extends DecoratorNode<JSX.Element> {
     const rows = self.__rows;
     for (let y = 0; y < rows.length; y++) {
       const row = rows[y];
-      const cells = row.cells;
+      const { cells } = row;
       const cellsClone = Array.from(cells);
-      const rowClone = {...row, cells: cellsClone};
+      const rowClone = { ...row, cells: cellsClone };
       cellsClone[x].width = width;
       rows[y] = rowClone;
     }

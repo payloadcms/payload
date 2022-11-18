@@ -221,4 +221,4 @@ export const Editor: React.FC<OnChangeProps> = (props) => {
       {showTreeView && <TreeViewPlugin />}
     </React.Fragment>
   );
-}
+};

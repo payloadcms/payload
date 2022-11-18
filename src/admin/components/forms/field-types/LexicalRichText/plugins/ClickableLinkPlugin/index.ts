@@ -6,17 +6,17 @@
  *
  */
 
-import type {LinkNode} from '@lexical/link';
-import type {LexicalEditor} from 'lexical';
+import type { LinkNode } from '@lexical/link';
+import type { LexicalEditor } from 'lexical';
 
-import {$isLinkNode} from '@lexical/link';
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import { $isLinkNode } from '@lexical/link';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
   $getNearestNodeFromDOMNode,
   $getSelection,
   $isRangeSelection,
 } from 'lexical';
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 
 type LinkFilter = (event: MouseEvent, linkNode: LinkNode) => boolean;
 
@@ -40,8 +40,8 @@ export default function ClickableLinkPlugin({
       const href = linkDomNode.getAttribute('href');
 
       if (
-        linkDomNode.getAttribute('contenteditable') === 'false' ||
-        href === undefined
+        linkDomNode.getAttribute('contenteditable') === 'false'
+        || href === undefined
       ) {
         return;
       }
@@ -62,8 +62,8 @@ export default function ClickableLinkPlugin({
       });
 
       if (
-        linkNode === null ||
-        (filter !== undefined && !filter(event, linkNode))
+        linkNode === null
+        || (filter !== undefined && !filter(event, linkNode))
       ) {
         return;
       }

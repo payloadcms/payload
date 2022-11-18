@@ -19,9 +19,9 @@ import type {
   Spread,
 } from 'lexical';
 
-import {createEditor, DecoratorNode} from 'lexical';
+import { createEditor, DecoratorNode } from 'lexical';
 import * as React from 'react';
-import {Suspense} from 'react';
+import { Suspense } from 'react';
 
 const ImageComponent = React.lazy(
   // @ts-ignore
@@ -42,9 +42,9 @@ export interface ImagePayload {
 
 function convertImageElement(domNode: Node): null | DOMConversionOutput {
   if (domNode instanceof HTMLImageElement) {
-    const {alt: altText, src} = domNode;
-    const node = $createImageNode({altText, src});
-    return {node};
+    const { alt: altText, src } = domNode;
+    const node = $createImageNode({ altText, src });
+    return { node };
   }
   return null;
 }
@@ -66,12 +66,19 @@ export type SerializedImageNode = Spread<
 
 export class ImageNode extends DecoratorNode<JSX.Element> {
   __src: string;
+
   __altText: string;
+
   __width: 'inherit' | number;
+
   __height: 'inherit' | number;
+
   __maxWidth: number;
+
   __showCaption: boolean;
+
   __caption: LexicalEditor;
+
   // Captions cannot yet be used within editor cells
   __captionsEnabled: boolean;
 
@@ -94,8 +101,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 
   static importJSON(serializedNode: SerializedImageNode): ImageNode {
-    const {altText, height, width, maxWidth, caption, src, showCaption} =
-      serializedNode;
+    const { altText, height, width, maxWidth, caption, src, showCaption } = serializedNode;
     const node = $createImageNode({
       altText,
       height,
@@ -116,7 +122,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     const element = document.createElement('img');
     element.setAttribute('src', this.__src);
     element.setAttribute('alt', this.__altText);
-    return {element};
+    return { element };
   }
 
   static importDOM(): DOMConversionMap | null {
@@ -182,7 +188,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 
   createDOM(config: EditorConfig): HTMLElement {
     const span = document.createElement('span');
-    const theme = config.theme;
+    const { theme } = config;
     const className = theme.image;
     if (className !== undefined) {
       span.className = className;
@@ -215,7 +221,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
           showCaption={this.__showCaption}
           caption={this.__caption}
           captionsEnabled={this.__captionsEnabled}
-          resizable={true}
+          resizable
         />
       </Suspense>
     );

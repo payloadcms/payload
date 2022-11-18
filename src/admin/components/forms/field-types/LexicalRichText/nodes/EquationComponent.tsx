@@ -6,10 +6,10 @@
  *
  */
 
-import type {NodeKey} from 'lexical';
+import type { NodeKey } from 'lexical';
 
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {mergeRegister} from '@lexical/utils';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { mergeRegister } from '@lexical/utils';
 import {
   $getNodeByKey,
   $getSelection,
@@ -19,11 +19,11 @@ import {
   SELECTION_CHANGE_COMMAND,
 } from 'lexical';
 import * as React from 'react';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import EquationEditor from '../ui/EquationEditor';
 import KatexRenderer from '../ui/KatexRenderer';
-import {$isEquationNode} from './EquationNode';
+import { $isEquationNode } from './EquationNode';
 
 type EquationComponentProps = {
   equation: string;
@@ -69,7 +69,7 @@ export default function EquationComponent({
         editor.registerCommand(
           SELECTION_CHANGE_COMMAND,
           (payload) => {
-            const activeElement = document.activeElement;
+            const { activeElement } = document;
             const inputElem = inputRef.current;
             if (inputElem !== activeElement) {
               onHide();
@@ -81,7 +81,7 @@ export default function EquationComponent({
         editor.registerCommand(
           KEY_ESCAPE_COMMAND,
           (payload) => {
-            const activeElement = document.activeElement;
+            const { activeElement } = document;
             const inputElem = inputRef.current;
             if (inputElem === activeElement) {
               onHide(true);
@@ -92,25 +92,24 @@ export default function EquationComponent({
           COMMAND_PRIORITY_HIGH,
         ),
       );
-    } else {
-      return editor.registerUpdateListener(({editorState}) => {
-        const isSelected = editorState.read(() => {
-          const selection = $getSelection();
-          return (
-            $isNodeSelection(selection) &&
-            selection.has(nodeKey) &&
-            selection.getNodes().length === 1
-          );
-        });
-        if (isSelected) {
-          setShowEquationEditor(true);
-        }
-      });
     }
+    return editor.registerUpdateListener(({ editorState }) => {
+      const isSelected = editorState.read(() => {
+        const selection = $getSelection();
+        return (
+          $isNodeSelection(selection)
+            && selection.has(nodeKey)
+            && selection.getNodes().length === 1
+        );
+      });
+      if (isSelected) {
+        setShowEquationEditor(true);
+      }
+    });
   }, [editor, nodeKey, onHide, showEquationEditor]);
 
   return (
-    <>
+    <React.Fragment>
       {showEquationEditor ? (
         <EquationEditor
           equation={equationValue}
@@ -127,6 +126,6 @@ export default function EquationComponent({
           }}
         />
       )}
-    </>
+    </React.Fragment>
   );
 }

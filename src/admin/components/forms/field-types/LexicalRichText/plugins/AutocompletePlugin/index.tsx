@@ -13,9 +13,9 @@ import type {
   RangeSelection,
 } from 'lexical';
 
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {$isAtNodeEnd} from '@lexical/selection';
-import {mergeRegister} from '@lexical/utils';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $isAtNodeEnd } from '@lexical/selection';
+import { mergeRegister } from '@lexical/utils';
 import {
   $createTextNode,
   $getNodeByKey,
@@ -27,14 +27,14 @@ import {
   KEY_ARROW_RIGHT_COMMAND,
   KEY_TAB_COMMAND,
 } from 'lexical';
-import {useCallback, useEffect} from 'react';
+import { useCallback, useEffect } from 'react';
 
-import {useSharedAutocompleteContext} from '../../context/SharedAutocompleteContext';
+import { useSharedAutocompleteContext } from '../../context/SharedAutocompleteContext';
 import {
   $createAutocompleteNode,
   AutocompleteNode,
 } from '../../nodes/AutocompleteNode';
-import {addSwipeRightListener} from '../../utils/swipe';
+import { addSwipeRightListener } from '../../utils/swipe';
 
 type SearchPromise = {
   dismiss: () => void;
@@ -54,7 +54,7 @@ function $search(
     return [false, ''];
   }
   const node = selection.getNodes()[0];
-  const anchor = selection.anchor;
+  const { anchor } = selection;
   // Check siblings?
   if (!$isTextNode(node) || !node.isSimpleText() || !$isAtNodeEnd(anchor)) {
     return [false, ''];
@@ -94,10 +94,9 @@ export default function AutocompletePlugin(): JSX.Element | null {
     let lastSuggestion: null | string = null;
     let searchPromise: null | SearchPromise = null;
     function $clearSuggestion() {
-      const autocompleteNode =
-        autocompleteNodeKey !== null
-          ? $getNodeByKey(autocompleteNodeKey)
-          : null;
+      const autocompleteNode = autocompleteNodeKey !== null
+        ? $getNodeByKey(autocompleteNodeKey)
+        : null;
       if (autocompleteNode !== null && autocompleteNode.isAttached()) {
         autocompleteNode.remove();
         autocompleteNodeKey = null;
@@ -123,9 +122,9 @@ export default function AutocompletePlugin(): JSX.Element | null {
           const selection = $getSelection();
           const [hasMatch, match] = $search(selection);
           if (
-            !hasMatch ||
-            match !== lastMatch ||
-            !$isRangeSelection(selection)
+            !hasMatch
+            || match !== lastMatch
+            || !$isRangeSelection(selection)
           ) {
             // Outdated
             return;
@@ -138,7 +137,7 @@ export default function AutocompletePlugin(): JSX.Element | null {
           lastSuggestion = newSuggestion;
           setSuggestion(newSuggestion);
         },
-        {tag: 'history-merge'},
+        { tag: 'history-merge' },
       );
     }
 
@@ -242,6 +241,7 @@ export default function AutocompletePlugin(): JSX.Element | null {
  */
 class AutocompleteServer {
   DATABASE = DICTIONARY;
+
   LATENCY = 200;
 
   query = (searchText: string): SearchPromise => {
@@ -266,8 +266,7 @@ class AutocompleteServer {
           ? String.fromCharCode(char0 + 32) + searchText.substring(1)
           : searchText;
         const match = this.DATABASE.find(
-          (dictionaryWord) =>
-            dictionaryWord.startsWith(caseInsensitiveSearchText) ?? null,
+          (dictionaryWord) => dictionaryWord.startsWith(caseInsensitiveSearchText) ?? null,
         );
         if (match === undefined) {
           return resolve(null);

@@ -6,10 +6,10 @@
  *
  */
 
-import type {RangeSelection} from 'lexical';
+import type { RangeSelection } from 'lexical';
 
-import {$getListDepth, $isListItemNode, $isListNode} from '@lexical/list';
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import { $getListDepth, $isListItemNode, $isListNode } from '@lexical/list';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
   $getSelection,
   $isElementNode,
@@ -18,7 +18,7 @@ import {
   ElementNode,
   INDENT_CONTENT_COMMAND,
 } from 'lexical';
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 
 type Props = Readonly<{
   maxDepth: number | null | undefined;
@@ -48,8 +48,7 @@ function isIndentPermitted(maxDepth: number): boolean {
     return false;
   }
 
-  const elementNodesInSelection: Set<ElementNode> =
-    getElementNodesInSelection(selection);
+  const elementNodesInSelection: Set<ElementNode> = getElementNodesInSelection(selection);
 
   let totalDepth = 0;
 
@@ -72,7 +71,7 @@ function isIndentPermitted(maxDepth: number): boolean {
   return totalDepth <= maxDepth;
 }
 
-export default function ListMaxIndentLevelPlugin({maxDepth}: Props): null {
+export default function ListMaxIndentLevelPlugin({ maxDepth }: Props): null {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {

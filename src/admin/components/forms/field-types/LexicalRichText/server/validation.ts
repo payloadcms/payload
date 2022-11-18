@@ -6,10 +6,10 @@
  *
  */
 
-import {createHeadlessEditor} from '@lexical/headless';
-import {$isMarkNode, $unwrapMarkNode} from '@lexical/mark';
+import { createHeadlessEditor } from '@lexical/headless';
+import { $isMarkNode, $unwrapMarkNode } from '@lexical/mark';
 import * as http from 'http';
-import {$getRoot, $isElementNode, LexicalNode} from 'lexical';
+import { $getRoot, $isElementNode, LexicalNode } from 'lexical';
 import * as url from 'url';
 
 import PlaygroundNodes from '../nodes/PlaygroundNodes';
@@ -91,8 +91,8 @@ const validateEditorState = async (
 
 const server = http.createServer(async (req, res) => {
   // @ts-ignore
-  const pathname = url.parse(req.url).pathname;
-  const {method} = req;
+  const { pathname } = url.parse(req.url);
+  const { method } = req;
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Request-Method', '*');

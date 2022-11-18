@@ -14,7 +14,7 @@ import type {
   Spread,
 } from 'lexical';
 
-import {TextNode} from 'lexical';
+import { TextNode } from 'lexical';
 
 export type SerializedEmojiNode = Spread<
   {

@@ -6,7 +6,7 @@
  *
  */
 
-import {useCallback, useEffect, useRef} from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 const getElement = (): HTMLElement => {
   let element = document.getElementById('report-container');
