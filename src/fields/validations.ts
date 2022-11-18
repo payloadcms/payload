@@ -12,6 +12,7 @@ import {
   RelationshipField,
   RelationshipValue,
   RichTextField,
+  LexicalRichTextField,
   SelectField,
   TextareaField,
   TextField,
@@ -136,6 +137,16 @@ export const code: Validate<unknown, unknown, CodeField> = (value: string, { req
 export const richText: Validate<unknown, unknown, RichTextField> = (value, { required }) => {
   if (required) {
     const stringifiedDefaultValue = JSON.stringify(defaultRichTextValue);
+    if (value && JSON.stringify(value) !== stringifiedDefaultValue) return true;
+    return 'This field is required.';
+  }
+
+  return true;
+};
+
+export const lexicalRichText: Validate<unknown, unknown, RichTextField> = (value, { required }) => {
+  if (required) {
+    const stringifiedDefaultValue = JSON.stringify(defaultRichTextValue); //TODO: Adjust for lexical
     if (value && JSON.stringify(value) !== stringifiedDefaultValue) return true;
     return 'This field is required.';
   }
@@ -390,6 +401,7 @@ export default {
   textarea,
   code,
   richText,
+  lexicalRichText,
   checkbox,
   date,
   upload,

@@ -21,6 +21,7 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
 import * as React from 'react';
 import { useRef, useState } from 'react';
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 
 import { useSettings } from './context/SettingsContext';
 import { useSharedHistoryContext } from './context/SharedHistoryContext';
@@ -63,9 +64,14 @@ import YouTubePlugin from './plugins/YouTubePlugin';
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
 import ContentEditable from './ui/ContentEditable';
 import Placeholder from './ui/Placeholder';
+import { OnChangeProps } from './types';
 
 
-export default function Editor(): JSX.Element {
+export const Editor: React.FC<OnChangeProps> = (props) => {
+  const {
+    onChange,
+  } = props;
+
   const { historyState } = useSharedHistoryContext();
   const {
     settings: {
@@ -172,6 +178,10 @@ export default function Editor(): JSX.Element {
             <PollPlugin />
             <TwitterPlugin />
             <YouTubePlugin />
+            <OnChangePlugin onChange={(editorState, editor) => {
+              onChange(editorState, editor);
+            }}
+            />
             <FigmaPlugin />
             <ClickableLinkPlugin />
             <HorizontalRulePlugin />

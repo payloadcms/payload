@@ -4,10 +4,13 @@ import withCondition from '../../withCondition';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
-import PlaygroundApp from './App';
+import { PlaygroundApp } from './App';
 
 import './index.css';
 import Loading from '../../../elements/Loading';
+import { lexicalRichText as lexicalRichTextValidation } from '../../../../../fields/validations';
+import defaultValue from '../../../../../fields/richText/defaultValue';
+import { EditorState, LexicalEditor } from 'lexical';
 
 const baseClass = 'lexicalRichTextEditor';
 
@@ -22,6 +25,7 @@ const LexicalRichText2: React.FC<Props> = (props) => {
     path: pathFromProps,
     label,
     required,
+    validate = lexicalRichTextValidation,
     admin: {
       readOnly,
       style,
@@ -34,6 +38,10 @@ const LexicalRichText2: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
+  const memoizedValidate = useCallback((value, options) => {
+    return validate(value, { ...options, required });
+  }, [validate, required]);
+
 
   const {
     value,
@@ -43,6 +51,7 @@ const LexicalRichText2: React.FC<Props> = (props) => {
   } = useField({
     path,
     condition,
+    validate: memoizedValidate,
   });
 
   return (
@@ -66,7 +75,14 @@ const LexicalRichText2: React.FC<Props> = (props) => {
           message={errorMessage}
         />
       </div>
-      <PlaygroundApp />
+      <PlaygroundApp
+        onChange={(editorState: EditorState, editor: LexicalEditor) => {
+          const json = editorState.toJSON();
+          if (!readOnly && /* json !== defaultValue && */ json !== value) {
+            setValue(json);
+          }
+        }}
+      />
       <FieldDescription
         value={value}
         description={description}

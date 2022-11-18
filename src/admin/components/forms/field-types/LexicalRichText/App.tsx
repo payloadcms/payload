@@ -17,7 +17,7 @@ import { isDevPlayground } from './appSettings';
 import { SettingsContext, useSettings } from './context/SettingsContext';
 import { SharedAutocompleteContext } from './context/SharedAutocompleteContext';
 import { SharedHistoryContext } from './context/SharedHistoryContext';
-import Editor from './LexicalRichText';
+import { Editor } from './LexicalRichText';
 import logo from './images/logo.svg';
 import PlaygroundNodes from './nodes/PlaygroundNodes';
 import PasteLogPlugin from './plugins/PasteLogPlugin';
@@ -26,6 +26,9 @@ import TestRecorderPlugin from './plugins/TestRecorderPlugin';
 import TypingPerfPlugin from './plugins/TypingPerfPlugin';
 import Settings from './Settings';
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
+import { lexicalRichText as lexicalRichTextValidation } from '../../../../../fields/validations';
+import { OnChangeProps } from './types';
+
 
 console.warn(
   'If you are profiling the playground app, please ensure you turn off the debug view. You can disable it by pressing on the settings control in the bottom-left of your screen and toggling the debug view setting.',
@@ -111,7 +114,11 @@ function prepopulatedRichText() {
   }
 }
 
-function App(): JSX.Element {
+export const App: React.FC<OnChangeProps> = (props) => {
+  const {
+    onChange,
+  } = props;
+
   const {
     settings: { isCollab, emptyEditor, measureTypingPerf },
   } = useSettings();
@@ -136,7 +143,7 @@ function App(): JSX.Element {
         <TableContext>
           <SharedAutocompleteContext>
             <div className="editor-shell">
-              <Editor />
+              <Editor onChange={onChange} />
             </div>
             <Settings />
             {isDevPlayground ? <PasteLogPlugin /> : null}
@@ -147,12 +154,16 @@ function App(): JSX.Element {
       </SharedHistoryContext>
     </LexicalComposer>
   );
-}
+};
 
-export default function PlaygroundApp(): JSX.Element {
+export const PlaygroundApp: React.FC<OnChangeProps> = (props) => {
+  const {
+    onChange,
+  } = props;
+
   return (
     <SettingsContext>
-      <App />
+      <App onChange={onChange} />
     </SettingsContext>
   );
-}
+};
