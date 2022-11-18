@@ -1689,7 +1689,7 @@
   dependencies:
     "@lexical/utils" "0.6.1-next.0"
 
-"@lexical/markdown@0.6.1-next.0":
+"@lexical/markdown@0.6.1-next.0", "@lexical/markdown@^0.6.1-next.0":
   version "0.6.1-next.0"
   resolved "https://registry.yarnpkg.com/@lexical/markdown/-/markdown-0.6.1-next.0.tgz#9b00781ab1ed5c3887f6c969ce2d175a5cf63baf"
   integrity sha512-FFCnlq94dnguZxcj5+QjHEr4or70N7+GQHw7yuV6vJkBtWSAjHZSTFk1YB5mZk5Qk3Ci0I7yxsToc2/jKv9hIg==
@@ -1770,7 +1770,7 @@
     "@lexical/list" "0.6.1-next.0"
     "@lexical/table" "0.6.1-next.0"
 
-"@lexical/yjs@0.6.1-next.0":
+"@lexical/yjs@0.6.1-next.0", "@lexical/yjs@^0.6.1-next.0":
   version "0.6.1-next.0"
   resolved "https://registry.yarnpkg.com/@lexical/yjs/-/yjs-0.6.1-next.0.tgz#9c81cc49f8c8e1d136e20af3642c464b9cbc853e"
   integrity sha512-Xc2RsdCZc8Xb6n76zQM/0qTFXC7vCXZudDYOzh0mVf9pkUb30caELpoz53IGrfk33nS9QtH38Symzg3lWKeZqA==

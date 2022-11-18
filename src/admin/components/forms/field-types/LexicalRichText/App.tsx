@@ -18,7 +18,6 @@ import { SettingsContext, useSettings } from './context/SettingsContext';
 import { SharedAutocompleteContext } from './context/SharedAutocompleteContext';
 import { SharedHistoryContext } from './context/SharedHistoryContext';
 import { Editor } from './LexicalRichText';
-import logo from './images/logo.svg';
 import PlaygroundNodes from './nodes/PlaygroundNodes';
 import PasteLogPlugin from './plugins/PasteLogPlugin';
 import { TableContext } from './plugins/TablePlugin';
@@ -26,7 +25,6 @@ import TestRecorderPlugin from './plugins/TestRecorderPlugin';
 import TypingPerfPlugin from './plugins/TypingPerfPlugin';
 import Settings from './Settings';
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
-import { lexicalRichText as lexicalRichTextValidation } from '../../../../../fields/validations';
 import { OnChangeProps } from './types';
 
 
