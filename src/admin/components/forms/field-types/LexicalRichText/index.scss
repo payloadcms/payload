@@ -1603,4 +1603,22 @@ html[data-theme=dark] {
   .editor-shell {
     color: #fff;
   }
+
+  .dropdown {
+    border: 1px solid var(--theme-elevation-150);
+    background: var(--theme-input-bg);
+    color: var(--theme-elevation-800);
+    box-shadow: none;
+  }
+  .dropdown i{
+    filter: invert(1);
+  }
+
+  .dropdown .item {
+    color: unset;
+    background-color: unset;
+  }
+  .dropdown .item:hover {
+    background-color: #1c1c1c;
+  }
 }
