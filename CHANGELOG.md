@@ -3,7 +3,7 @@
 # [1.2.0](https://github.com/payloadcms/payload/compare/v1.1.26...v1.2.0) (2022-11-18)
 
 
-### Bug Fixes
+### 🐛 Bug Fixes
 
 * build errors ([65f0e1c](https://github.com/payloadcms/payload/commit/65f0e1caace193f034139e331883d01d8eb92d2c))
 * components optional chaining ([d5e725c](https://github.com/payloadcms/payload/commit/d5e725c608588e96b974291fa86d5e89dea9060d))
@@ -12,7 +12,7 @@
 * sets pointer-events to none so the entire label bar is clickable ([e458087](https://github.com/payloadcms/payload/commit/e458087a55cbbad29ca3568ca4c089aaee49693a))
 
 
-### Features
+### ✨ Features
 
 * add i18n to admin panel ([#1326](https://github.com/payloadcms/payload/issues/1326)) ([bab34d8](https://github.com/payloadcms/payload/commit/bab34d82f5fddad32ceafd116ad97e87cab4c862))
 * adds docs example ([2bf0fff](https://github.com/payloadcms/payload/commit/2bf0fffa0dd83f395aa3318b3baba1e22dd58b51))
@@ -23,20 +23,101 @@
 * specifies component names for arrays/collapsibles, simplifies threaded data ([b74ea21](https://github.com/payloadcms/payload/commit/b74ea218ca47ce9db9d20586dbbce73e4ce0f917))
 
 
-### BREAKING CHANGES
+### 🚨 BREAKING CHANGES
 
-* If you assigned labels to collections, globals or block names, you need to update your config! Your GraphQL schema and generated Typescript interfaces may have changed. Payload no longer uses labels for code based naming. To prevent breaking changes to your GraphQL API and typescript types in your project, you can assign the below properties to match what Payload previously generated for you from labels.
+* You ***might*** need to update your config. This change affects `collections`, `globals` and `block fields` with custom labeling.
+  * **Collections:** are affected if you have a custom `labels.singular` defined that differs from your collection slug.
+    ```typescript
+    // ExampleCollection.ts
 
-On Collections
-Use `graphQL.singularName`, `graphQL.pluralName` for GraphQL schema names.
-Use `typescript.interface` for typescript generation name.
+    // Before
+    const ExampleCollection: CollectionConfig = {
+      slug: 'case-studies',
+      labels: {
+        // Before Payload used `labels.singular` to generate types/graphQL schema
+        singular: 'Project',
+        plural: 'Projects',
+      },
+    }
 
-On Globals
-Use `graphQL.name` for GraphQL Schema name.
-Use `typescript.interface` for typescript generation name.
+    // After
+    const ExampleCollection: CollectionConfig = {
+      // Now Payload uses `slug` to generate types/graphQL schema
+      slug: 'case-studies',
+      labels: {
+        singular: 'Project',
+        plural: 'Projects',
+      },
+      // To override the usage of slug in graphQL schema generation
+      graphQL: {
+        singularName: 'Project',
+        pluralName: 'Projects',
+      },
+      // To override the usage of slug in type file generation
+      typescript: {
+        interface: 'Project',
+      }
+    }
+    ```
+  * **Globals:** are affected if you have a `label` defined that differs from your global slug.
+    ```typescript
+    // ExampleGlobal.ts
 
-On Blocks (within Block fields)
-Use `graphQL.singularName` for graphQL schema names.
+    // Before
+    const ExampleGlobal: GlobalConfig = {
+      slug: 'footer',
+      // Before Payload used `label` to generate types/graphQL schema
+      label: 'Page Footer',
+    }
+
+    // After
+    const ExampleGlobal: GlobalConfig = {
+      // Now Payload uses `slug` to generate types/graphQL schema
+      slug: 'footer',
+      label: 'Page Footer',
+      // To override the usage of slug in graphQL schema generation
+      graphQL: {
+        name: 'PageFooter',
+      },
+      // To override the usage of slug in type file generation
+      typescript: {
+        interface: 'PageFooter',
+      },
+    }
+    ```
+  * **Block Fields:** are affected if you have a `label` defined that differs from your block slug.
+    ```typescript
+    // ExampleBlock.ts
+
+    // Before
+    const ExampleBlock: Block = {
+      slug: 'content',
+      // Before Payload used `label` to generate graphQL schema
+      label: 'Content Block',
+    }
+
+    // After
+    const ExampleBlock: Block = {
+      // Now Payload uses `slug` to generate graphQL schema
+      slug: 'content',
+      label: 'Content Block',
+      // To override the usage of slug in graphQL schema generation
+      graphQL: {
+        singularName: 'ContentBlock',
+      },
+    }
+    ```
+**Breaking changes recap**:
+- On Collections
+  - Use `graphQL.singularName`, `graphQL.pluralName` for GraphQL schema names.
+  - Use `typescript.interface` for typescript generation name.
+
+- On Globals
+  - Use `graphQL.name` for GraphQL Schema name.
+  - Use `typescript.interface` for typescript generation name.
+
+- On Blocks (within Block fields)
+  - Use `graphQL.singularName` for graphQL schema names.
 
 ## [1.1.26](https://github.com/payloadcms/payload/compare/v1.1.25...v1.1.26) (2022-11-15)
 
