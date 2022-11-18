@@ -1281,14 +1281,12 @@ button.action-button:disabled {
 
 .toolbar {
   display: flex;
-  margin-bottom: 1px;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
   /*background: #fff;*/
   padding: 4px;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
   vertical-align: middle;
-  overflow: auto;
-  height: 36px;
+  border: 1px solid var(--theme-elevation-150);
 }
 
 
@@ -1594,9 +1592,14 @@ hr.selected {
 
 
 html[data-theme=dark] {
-  .toolbar {
-    filter: invert(1);
+  .toolbar i, .toolbar span{
+    filter: invert(1) brightness(1.2);
   }
+
+  .toolbar .toolbar-item:hover:not([disabled]), .toolbar .divider {
+    background-color: #1c1c1c;
+  }
+
   .editor-shell {
     color: #fff;
   }
