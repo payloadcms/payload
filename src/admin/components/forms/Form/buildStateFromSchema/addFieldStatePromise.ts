@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import ObjectID from 'bson-objectid';
-import { i18n as Ii18n } from 'i18next';
+import type { TFunction } from 'i18next';
 import { User } from '../../../../../auth';
 import {
   NonPresentationalField,
@@ -24,7 +24,7 @@ type Args = {
   operation: 'create' | 'update'
   data: Data
   fullData: Data
-  i18n: Ii18n
+  t: TFunction
 }
 
 export const addFieldStatePromise = async ({
@@ -39,7 +39,7 @@ export const addFieldStatePromise = async ({
   fieldPromises,
   id,
   operation,
-  i18n,
+  t,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
     const fieldState: Field = {
@@ -66,7 +66,7 @@ export const addFieldStatePromise = async ({
         siblingData: data,
         id,
         operation,
-        i18n,
+        t,
       });
     }
 
@@ -101,7 +101,7 @@ export const addFieldStatePromise = async ({
             id,
             locale,
             operation,
-            i18n,
+            t,
           });
         });
 
@@ -157,7 +157,7 @@ export const addFieldStatePromise = async ({
               operation,
               fieldPromises,
               id,
-              i18n,
+              t,
             });
           }
         });
@@ -189,7 +189,7 @@ export const addFieldStatePromise = async ({
           path: `${path}${field.name}.`,
           locale,
           user,
-          i18n,
+          t,
         });
 
         break;
@@ -219,7 +219,7 @@ export const addFieldStatePromise = async ({
       id,
       locale,
       operation,
-      i18n,
+      t,
     });
   } else if (field.type === 'tabs') {
     field.tabs.forEach((tab) => {
@@ -235,7 +235,7 @@ export const addFieldStatePromise = async ({
         id,
         locale,
         operation,
-        i18n,
+        t,
       });
     });
   }

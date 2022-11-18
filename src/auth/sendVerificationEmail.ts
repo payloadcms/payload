@@ -34,7 +34,7 @@ async function sendVerificationEmail(args: Args): Promise<void> {
   if (!disableEmail) {
     const verificationURL = `${config.serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`;
 
-    let html = `${req.i18n.t('authentication:newAccountCreated', { interpolation: { escapeValue: false }, serverURL: config.serverURL, verificationURL })}`;
+    let html = `${req.t('authentication:newAccountCreated', { interpolation: { escapeValue: false }, serverURL: config.serverURL, verificationURL })}`;
 
     const verify = collectionConfig.auth.verify as VerifyConfig;
 
@@ -47,7 +47,7 @@ async function sendVerificationEmail(args: Args): Promise<void> {
       });
     }
 
-    let subject = req.i18n.t('authentication:verifyYourEmail');
+    let subject = req.t('authentication:verifyYourEmail');
 
     // Allow config to override email subject
     if (typeof verify.generateEmailSubject === 'function') {

@@ -15,10 +15,10 @@ const baseClass = 'api-key';
 const APIKey: React.FC = () => {
   const [initialAPIKey, setInitialAPIKey] = useState(null);
   const [highlightedField, setHighlightedField] = useState(false);
-  const { i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const apiKey = useFormFields(([fields]) => fields[path]);
-  const validate = (val) => text(val, { minLength: 24, maxLength: 48, data: {}, siblingData: {}, i18n });
+  const validate = (val) => text(val, { minLength: 24, maxLength: 48, data: {}, siblingData: {}, t });
 
   const apiKeyValue = apiKey?.value;
 

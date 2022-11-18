@@ -27,6 +27,7 @@ import SaveDraft from '../../../elements/SaveDraft';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { OperationContext } from '../../../utilities/OperationProvider';
 import { Gutter } from '../../../elements/Gutter';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -35,7 +36,7 @@ const baseClass = 'collection-edit';
 const DefaultEditView: React.FC<Props> = (props) => {
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { publishedDoc } = useDocumentInfo();
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
 
   const {
     collection,
@@ -94,9 +95,9 @@ const DefaultEditView: React.FC<Props> = (props) => {
           >
             <div className={`${baseClass}__main`}>
               <Meta
-                title={`${isEditing ? t('editing') : t('creating')} - ${collection.labels.singular}`}
-                description={`${isEditing ? t('editing') : t('creating')} - ${collection.labels.singular}`}
-                keywords={`${collection.labels.singular}, Payload, CMS`}
+                title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(collection.labels.singular, i18n)}`}
+                description={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(collection.labels.singular, i18n)}`}
+                keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
               />
               {!disableEyebrow && (
                 <Eyebrow />

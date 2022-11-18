@@ -42,6 +42,7 @@ async function localLogin<T extends TypeWithID = any>(payload: Payload, options:
   req.locale = undefined;
   req.fallbackLocale = undefined;
 
+  if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   const args = {

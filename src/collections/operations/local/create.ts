@@ -56,6 +56,7 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
 
   if (typeof user !== 'undefined') req.user = user;
 
+  if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return create({

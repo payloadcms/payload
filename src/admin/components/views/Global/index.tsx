@@ -24,7 +24,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const [initialState, setInitialState] = useState<Fields>();
   const { getVersions, preferencesKey } = useDocumentInfo();
   const { getPreference } = usePreferences();
-  const { i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const {
     serverURL,
@@ -50,9 +50,9 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   const onSave = useCallback(async (json) => {
     getVersions();
-    const state = await buildStateFromSchema({ fieldSchema: fields, data: json.result, operation: 'update', user, locale, i18n });
+    const state = await buildStateFromSchema({ fieldSchema: fields, data: json.result, operation: 'update', user, locale, t });
     setInitialState(state);
-  }, [getVersions, fields, user, locale, i18n]);
+  }, [getVersions, fields, user, locale, t]);
 
   const [{ data }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
@@ -71,13 +71,13 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: 'update', locale, i18n });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: 'update', locale, t });
       await getPreference(preferencesKey);
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, user, locale, getPreference, preferencesKey, i18n]);
+  }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t]);
 
   const globalPermissions = permissions?.globals?.[slug];
 

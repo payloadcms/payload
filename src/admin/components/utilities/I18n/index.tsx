@@ -8,10 +8,15 @@ import { useConfig } from '../Config';
 
 export const I18n: React.FC = () => {
   const config = useConfig();
+
+  if (i18n.isInitialized) {
+    return null;
+  }
+
   i18n
     .use(LanguageDetector)
     .use(initReactI18next)
-    .init(deepmerge(defaultOptions, config.i18n || {}));
+    .init(deepmerge(defaultOptions, config.i18n || { debug: true }));
 
   return null;
 };

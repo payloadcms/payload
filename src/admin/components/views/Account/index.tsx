@@ -40,7 +40,7 @@ const AccountView: React.FC = () => {
       user: 'users',
     },
   } = useConfig();
-  const { t, i18n } = useTranslation('account');
+  const { t } = useTranslation('authentication');
 
   const collection = collections.find((coll) => coll.slug === adminUser);
 
@@ -61,7 +61,7 @@ const AccountView: React.FC = () => {
 
   useEffect(() => {
     const nav = [{
-      label: t('authentication:account'),
+      label: t('account'),
     }];
 
     setStepNav(nav);
@@ -69,13 +69,13 @@ const AccountView: React.FC = () => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user, locale, i18n });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user, locale, t });
       await getPreference(preferencesKey);
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, i18n]);
+  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, t]);
 
   return (
     <RenderCustomComponent

@@ -57,7 +57,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     id,
     req,
     req: {
-      i18n,
+      t,
       locale,
       payload,
       payload: {
@@ -110,8 +110,8 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
   const doc = await Model.findOne(query) as UserDocument;
 
-  if (!doc && !hasWherePolicy) throw new NotFound(i18n);
-  if (!doc && hasWherePolicy) throw new Forbidden(i18n);
+  if (!doc && !hasWherePolicy) throw new NotFound(t);
+  if (!doc && hasWherePolicy) throw new Forbidden(t);
 
   let docWithLocales: Document = doc.toJSON({ virtuals: true });
   docWithLocales = JSON.stringify(docWithLocales);
@@ -175,7 +175,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // /////////////////////////////////////
 
   if (!collectionConfig.upload.disableLocalStorage) {
-    await uploadFiles(payload, filesToUpload, i18n);
+    await uploadFiles(payload, filesToUpload, t);
   }
 
   // /////////////////////////////////////
@@ -274,7 +274,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
       // Handle uniqueness error from MongoDB
       throw error.code === 11000 && error.keyValue
-        ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }], i18n)
+        ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }], t)
         : error;
     }
 

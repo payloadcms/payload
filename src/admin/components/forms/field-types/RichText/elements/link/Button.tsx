@@ -23,7 +23,7 @@ export const LinkButton = ({ fieldProps }) => {
 
   const modalSlug = `${baseModalSlug}-${fieldProps.path}`;
 
-  const { i18n } = useTranslation();
+  const { t } = useTranslation();
   const config = useConfig();
   const editor = useSlate();
   const { user } = useAuth();
@@ -73,7 +73,7 @@ export const LinkButton = ({ fieldProps }) => {
                 text: editor.selection ? Editor.string(editor, editor.selection) : '',
               };
 
-              const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'create', locale, i18n });
+              const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'create', locale, t });
               setInitialState(state);
             }
           }

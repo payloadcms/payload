@@ -99,7 +99,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const addRow = useCallback(async (rowIndex: number, blockType: string) => {
     const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
-    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, operation, id, user, locale, i18n });
+    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, operation, id, user, locale, t });
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
     dispatchRows({ type: 'ADD', rowIndex, blockType });
     setModified(true);
@@ -107,7 +107,7 @@ const BlocksField: React.FC<Props> = (props) => {
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [blocks, operation, id, user, locale, i18n, dispatchFields, path, setModified]);
+  }, [blocks, operation, id, user, locale, t, dispatchFields, path, setModified]);
 
   const duplicateRow = useCallback(async (rowIndex: number, blockType: string) => {
     dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });

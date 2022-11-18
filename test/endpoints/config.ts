@@ -90,7 +90,7 @@ const MyConfig: Config = {
       path: `/${applicationEndpoint}/i18n`,
       method: 'get',
       handler: (req: PayloadRequest, res: Response): void => {
-        res.json({ message: req.i18n.t('general:backToDashboard') });
+        res.json({ message: req.t('general:backToDashboard') });
       },
     },
     {

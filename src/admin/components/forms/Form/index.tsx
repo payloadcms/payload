@@ -92,7 +92,7 @@ const Form: React.FC<Props> = (props) => {
             user,
             id,
             operation,
-            i18n,
+            t,
           });
         }
 
@@ -113,7 +113,7 @@ const Form: React.FC<Props> = (props) => {
     }
 
     return isValid;
-  }, [contextRef, id, user, operation, i18n, dispatchFields]);
+  }, [contextRef, id, user, operation, t, dispatchFields]);
 
   const submit = useCallback(async (options: SubmitOptions = {}, e): Promise<void> => {
     const {
@@ -333,10 +333,10 @@ const Form: React.FC<Props> = (props) => {
   }, [contextRef]);
 
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
-    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation, locale, i18n });
+    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation, locale, t });
     contextRef.current = { ...initContextState } as FormContextType;
     dispatchFields({ type: 'REPLACE_STATE', state });
-  }, [id, user, operation, locale, i18n, dispatchFields]);
+  }, [id, user, operation, locale, t, dispatchFields]);
 
   contextRef.current.submit = submit;
   contextRef.current.getFields = getFields;

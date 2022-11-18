@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import type { i18n as Ii18n } from 'i18next';
+import type { i18n as Ii18n, TFunction } from 'i18next';
 import DataLoader from 'dataloader';
 import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../index';
@@ -19,6 +19,7 @@ export declare type PayloadRequest<T = any> = Request & {
     file: UploadedFile;
   };
   i18n: Ii18n;
+  t: TFunction;
   user: T & User | null;
   payloadUploadSizes?: Record<string, Buffer>;
   findByID?: {

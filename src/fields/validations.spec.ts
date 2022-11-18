@@ -2,13 +2,12 @@ import { text, textarea, password, select, point, number } from './validations';
 import { ValidateOptions } from './config/types';
 
 const t = jest.fn((string) => string);
-const i18n = { t };
 
 let options: ValidateOptions<any, any, any> = {
   operation: 'create',
   data: undefined,
   siblingData: undefined,
-  i18n,
+  t,
 };
 
 describe('Field Validations', () => {

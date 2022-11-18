@@ -24,7 +24,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const operation = useOperation();
   const field = useFormFields(([fields]) => fields[path]);
   const dispatchField = useFormFields(([_, dispatch]) => dispatch);
-  const { i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const { getData, getSiblingData, setModified } = useForm();
 
@@ -94,7 +94,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
         data: getData(),
         siblingData: getSiblingData(path),
         operation,
-        i18n,
+        t,
       };
 
       const validationResult = typeof validate === 'function' ? await validate(value, validateOptions) : true;

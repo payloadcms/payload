@@ -47,7 +47,7 @@ const getExecuteStaticAccess = ({ config, Model }) => async (req: PayloadRequest
         const doc = await Model.findOne(query);
 
         if (!doc) {
-          throw new Forbidden(req.i18n);
+          throw new Forbidden(req.t);
         }
       }
     }

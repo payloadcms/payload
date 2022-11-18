@@ -6,7 +6,7 @@ import { devUser, regularUser } from '../../../credentials';
 const beforeLoginHook: BeforeLoginHook = ({ user, req }) => {
   const isAdmin = user.roles.includes('admin') ? user : undefined;
   if (!isAdmin) {
-    throw new AuthenticationError(req.i18n);
+    throw new AuthenticationError(req.t);
   }
   return user;
 };

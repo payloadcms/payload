@@ -17,7 +17,7 @@ export default async function updateHandler(req: PayloadRequest, res: Response, 
     });
 
     return res.status(httpStatus.OK).json({
-      ...formatSuccessResponse(req.i18n.t('general:updatedSuccessfully'), 'message'),
+      ...formatSuccessResponse(req.t('general:updatedSuccessfully'), 'message'),
       doc,
     });
   } catch (error) {

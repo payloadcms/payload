@@ -51,7 +51,7 @@ async function logout(incomingArgs: Arguments): Promise<string> {
 
   res.clearCookie(`${config.cookiePrefix}-token`, cookieOptions);
 
-  return req.i18n.t('authentication:loggedOutSuccessfully');
+  return req.t('authentication:loggedOutSuccessfully');
 }
 
 export default logout;

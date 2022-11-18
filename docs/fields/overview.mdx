@@ -78,7 +78,7 @@ There are two arguments available to custom validation functions.
 | `siblingData` | An object of the document data limited to fields within the same parent to the field.                                    |
 | `operation`   | Will be "create" or "update" depending on the UI action or API call.                                                     |
 | `id`          | The value of the collection `id`, will be `undefined` on create request.                                                 |
-| `i18n`        | An object for handling translations, [more](/docs/configuration/i18n).                                                   |
+| `t`           | The function for translating text, [more](/docs/configuration/i18n).                                                     |
 | `user`        | The currently authenticated user object.                                                                                 |
 | `payload`     | If the `validate` function is being executed on the server, Payload will be exposed for easily running local operations. |
 

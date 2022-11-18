@@ -6,7 +6,7 @@ const executeAccess = async (operation, access: Access): Promise<AccessResult> =
     const result = await access(operation);
 
     if (!result) {
-      if (!operation.disableErrors) throw new Forbidden(operation.req.i18n);
+      if (!operation.disableErrors) throw new Forbidden(operation.req.t);
     }
 
     return result;
@@ -16,7 +16,7 @@ const executeAccess = async (operation, access: Access): Promise<AccessResult> =
     return true;
   }
 
-  if (!operation.disableErrors) throw new Forbidden(operation.req.i18n);
+  if (!operation.disableErrors) throw new Forbidden(operation.req.t);
   return false;
 };
 

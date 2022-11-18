@@ -63,7 +63,7 @@ After a user logs in, they can change their language selection in the `/account`
 
 Payload's backend uses express middleware to set the language on incoming requests before they are handled. This allows backend validation to return error messages in the user's own language or system generated emails to be sent using the correct translation. You can make HTTP requests with the `accept-language` header and Payload will use that language.
 
-Anywhere in your Payload app that you have access to the `req` object, you can access i18next's extensive internationalization features. This allows access to translated text using `req.i18n.t('namespace:key')`.
+Anywhere in your Payload app that you have access to the `req` object, you can access i18next's extensive internationalization features assigned to `req.i18n`. To access text translations you can use `req.t('namespace:key')`.
 
 Read the i18next [API documentation](https://www.i18next.com/overview/api) to learn more.
 

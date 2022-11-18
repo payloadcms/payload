@@ -17,7 +17,7 @@ async function findOne(args: PreferenceRequest): Promise<Preference> {
   } = args;
 
   if (!user) {
-    throw new UnauthorizedError(req.i18n);
+    throw new UnauthorizedError(req.t);
   }
 
   if (!overrideAccess) {

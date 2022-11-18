@@ -97,7 +97,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   });
 
   const addRow = useCallback(async (rowIndex: number) => {
-    const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user, locale, i18n });
+    const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user, locale, t });
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     dispatchRows({ type: 'ADD', rowIndex });
     setModified(true);
@@ -105,7 +105,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [dispatchRows, dispatchFields, fields, path, operation, id, user, locale, setModified, i18n]);
+  }, [dispatchRows, dispatchFields, fields, path, operation, id, user, locale, setModified, t]);
 
   const duplicateRow = useCallback(async (rowIndex: number) => {
     dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });

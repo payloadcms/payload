@@ -46,7 +46,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     disableEmail,
     expiration,
     req: {
-      i18n,
+      t,
       payload: {
         config,
         sendEmail: email,
@@ -79,11 +79,11 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
   const userJSON = user.toJSON({ virtuals: true });
 
   if (!disableEmail) {
-    let html = `${i18n.t('authentication:youAreReceivingResetPassword')}
+    let html = `${t('authentication:youAreReceivingResetPassword')}
     <a href="${config.serverURL}${config.routes.admin}/reset/${token}">
      ${config.serverURL}${config.routes.admin}/reset/${token}
     </a>
-    ${i18n.t('authentication:youDidNotRequestPassword')}`;
+    ${t('authentication:youDidNotRequestPassword')}`;
 
     if (typeof collectionConfig.auth.forgotPassword.generateEmailHTML === 'function') {
       html = await collectionConfig.auth.forgotPassword.generateEmailHTML({
@@ -93,7 +93,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
       });
     }
 
-    let subject = i18n.t('authentication:resetYourPassword');
+    let subject = t('authentication:resetYourPassword');
 
     if (typeof collectionConfig.auth.forgotPassword.generateEmailSubject === 'function') {
       subject = await collectionConfig.auth.forgotPassword.generateEmailSubject({
