@@ -9,7 +9,6 @@
 import * as React from 'react';
 import { useMemo, useState } from 'react';
 
-import { isDevPlayground } from './appSettings';
 import { useSettings } from './context/SettingsContext';
 import Switch from './ui/Switch';
 
@@ -50,19 +49,6 @@ export default function Settings(): JSX.Element {
       />
       {showSettings ? (
         <div className="switches">
-          {isDevPlayground && (
-            <Switch
-              onClick={() => {
-                if (isSplitScreen) {
-                  window.parent.location.href = `/${search}`;
-                } else {
-                  window.location.href = `/split/${search}`;
-                }
-              }}
-              checked={isSplitScreen}
-              text="Split Screen"
-            />
-          )}
           <Switch
             onClick={() => setOption('measureTypingPerf', !measureTypingPerf)}
             checked={measureTypingPerf}

@@ -48,7 +48,6 @@ const plainTextEditorJSON = (text: string) => (text === ''
   : `{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":${text},"type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}`);
 
 const TableComponent = React.lazy(
-  // @ts-ignore
   () => import('./TableComponent'),
 );
 
@@ -96,7 +95,7 @@ export function extractRowsFromHTML(tableElem: HTMLTableElement): Rows {
       continue;
     }
     const cells: Array<Cell> = [];
-    for (let x = 0; x < cellElems.length; x++) {
+    for (let x = 0; x < cellElems.length; x += 1) {
       const cellElem = cellElems[x] as HTMLElement;
       const isHeader = cellElem.nodeName === 'TH';
       const cell = createCell(isHeader ? 'header' : 'normal');
@@ -118,14 +117,14 @@ function convertTableElement(domNode: HTMLElement): null | DOMConversionOutput {
     return null;
   }
   const rows: Rows = [];
-  for (let y = 0; y < rowElems.length; y++) {
+  for (let y = 0; y < rowElems.length; y += 1) {
     const rowElem = rowElems[y];
     const cellElems = rowElem.querySelectorAll('td,th');
     if (!cellElems || cellElems.length === 0) {
       continue;
     }
     const cells: Array<Cell> = [];
-    for (let x = 0; x < cellElems.length; x++) {
+    for (let x = 0; x < cellElems.length; x += 1) {
       const cellElem = cellElems[x] as HTMLElement;
       const isHeader = cellElem.nodeName === 'TH';
       const cell = createCell(isHeader ? 'header' : 'normal');

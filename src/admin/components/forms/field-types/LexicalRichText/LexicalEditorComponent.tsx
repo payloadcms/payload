@@ -9,7 +9,6 @@
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import * as React from 'react';
 
-import { isDevPlayground } from './appSettings';
 import { SettingsContext, useSettings } from './context/SettingsContext';
 import { SharedAutocompleteContext } from './context/SharedAutocompleteContext';
 import { SharedHistoryContext } from './context/SharedHistoryContext';
@@ -43,6 +42,7 @@ const LexicalEditor: React.FC<OnChangeProps> = (props) => {
     theme: PlaygroundEditorTheme,
   };
 
+  // TODO: When should {true ? <PasteLogPlugin /> : null} be enabled? Do we need it?
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <SharedHistoryContext>
@@ -55,8 +55,8 @@ const LexicalEditor: React.FC<OnChangeProps> = (props) => {
               />
             </div>
             <Settings />
-            {isDevPlayground ? <PasteLogPlugin /> : null}
-            {isDevPlayground ? <TestRecorderPlugin /> : null}
+            {true ? <PasteLogPlugin /> : null}
+            {true ? <TestRecorderPlugin /> : null}
             {measureTypingPerf ? <TypingPerfPlugin /> : null}
           </SharedAutocompleteContext>
         </TableContext>
