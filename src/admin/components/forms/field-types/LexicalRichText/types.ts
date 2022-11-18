@@ -7,4 +7,5 @@ export type Props = Omit<DateField, 'type'> & {
 
 export type OnChangeProps = {
   onChange: (editorState: EditorState, editor: LexicalEditor) => void;
+  initialJSON: any;
 };

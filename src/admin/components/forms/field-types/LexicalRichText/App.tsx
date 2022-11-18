@@ -117,18 +117,21 @@ function prepopulatedRichText() {
 export const App: React.FC<OnChangeProps> = (props) => {
   const {
     onChange,
+    initialJSON,
   } = props;
 
   const {
     settings: { isCollab, emptyEditor, measureTypingPerf },
   } = useSettings();
 
+  //console.log('InitialJSON', initialJSON);
   const initialConfig = {
-    editorState: isCollab
+    /* editorState: isCollab
       ? null
       : emptyEditor
         ? undefined
-        : prepopulatedRichText,
+        : prepopulatedRichText, */
+    editorState: initialJSON != null ? JSON.stringify(initialJSON) : undefined,
     namespace: 'Playground',
     nodes: [...PlaygroundNodes],
     onError: (error: Error) => {
@@ -143,7 +146,10 @@ export const App: React.FC<OnChangeProps> = (props) => {
         <TableContext>
           <SharedAutocompleteContext>
             <div className="editor-shell">
-              <Editor onChange={onChange} />
+              <Editor
+                onChange={onChange}
+                initialJSON={initialJSON}
+              />
             </div>
             <Settings />
             {isDevPlayground ? <PasteLogPlugin /> : null}
@@ -159,11 +165,12 @@ export const App: React.FC<OnChangeProps> = (props) => {
 export const PlaygroundApp: React.FC<OnChangeProps> = (props) => {
   const {
     onChange,
+    initialJSON,
   } = props;
 
   return (
     <SettingsContext>
-      <App onChange={onChange} />
+      <App onChange={onChange} initialJSON={initialJSON} />
     </SettingsContext>
   );
 };

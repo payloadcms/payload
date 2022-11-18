@@ -82,6 +82,7 @@ const LexicalRichText2: React.FC<Props> = (props) => {
             setValue(json);
           }
         }}
+        initialJSON={value}
       />
       <FieldDescription
         value={value}

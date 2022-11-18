@@ -70,6 +70,7 @@ import { OnChangeProps } from './types';
 export const Editor: React.FC<OnChangeProps> = (props) => {
   const {
     onChange,
+    initialJSON,
   } = props;
 
   const { historyState } = useSharedHistoryContext();
