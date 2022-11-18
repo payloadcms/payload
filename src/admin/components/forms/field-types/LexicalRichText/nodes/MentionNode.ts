@@ -107,6 +107,7 @@ export class MentionNode extends TextNode {
     };
   }
 
+  // eslint-disable-next-line class-methods-use-this
   isTextEntity(): true {
     return true;
   }

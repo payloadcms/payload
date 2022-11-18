@@ -28,7 +28,6 @@ export type Option = Readonly<{
 }>;
 
 const PollComponent = React.lazy(
-  // @ts-ignore
   () => import('./PollComponent'),
 );
 

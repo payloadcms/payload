@@ -24,7 +24,6 @@ import * as React from 'react';
 import { Suspense } from 'react';
 
 const ImageComponent = React.lazy(
-  // @ts-ignore
   () => import('./ImageComponent'),
 );
 
@@ -186,6 +185,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 
   // View
 
+  // eslint-disable-next-line class-methods-use-this
   createDOM(config: EditorConfig): HTMLElement {
     const span = document.createElement('span');
     const { theme } = config;
@@ -196,6 +196,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     return span;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   updateDOM(): false {
     return false;
   }
