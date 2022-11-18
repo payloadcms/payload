@@ -21,10 +21,7 @@
         "./src/auth/types.ts"
       ],
       "payload/types": [
-        "./src/types/index.ts"
-      ],
-      "payload/types": [
-        "./src/fields/config/index.ts"
+        "./src/types/index.ts",
       ],
     },
     "esModuleInterop": true, /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
