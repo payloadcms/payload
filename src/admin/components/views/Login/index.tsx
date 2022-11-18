@@ -111,7 +111,7 @@ const Login: React.FC = () => {
             required
           />
           <Link to={`${admin}/forgot`}>
-            {t('forgotPassword')}
+            {t('forgotPasswordQuestion')}
           </Link>
           <FormSubmit>{t('login')}</FormSubmit>
         </Form>
