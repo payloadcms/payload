@@ -40,7 +40,6 @@ import { EmbedConfigs } from '../AutoEmbedPlugin';
 import { INSERT_COLLAPSIBLE_COMMAND } from '../CollapsiblePlugin';
 import { InsertEquationDialog } from '../EquationsPlugin';
 import { INSERT_IMAGE_COMMAND, InsertImageDialog } from '../ImagesPlugin';
-import { InsertPollDialog } from '../PollPlugin';
 import { InsertTableDialog } from '../TablePlugin';
 
 class ComponentPickerOption extends TypeaheadOption {
@@ -251,16 +250,6 @@ export default function ComponentPickerMenuPlugin(): JSX.Element {
         icon: <i className="icon horizontal-rule" />,
         keywords: ['horizontal rule', 'divider', 'hr'],
         onSelect: () => editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined),
-      }),
-      new ComponentPickerOption('Poll', {
-        icon: <i className="icon poll" />,
-        keywords: ['poll', 'vote'],
-        onSelect: () => showModal('Insert Poll', (onClose) => (
-          <InsertPollDialog
-            activeEditor={editor}
-            onClose={onClose}
-          />
-        )),
       }),
       ...EmbedConfigs.map(
         (embedConfig) => new ComponentPickerOption(`Embed ${embedConfig.contentName}`, {

@@ -50,7 +50,6 @@ import ListMaxIndentLevelPlugin from './plugins/ListMaxIndentLevelPlugin';
 import MarkdownShortcutPlugin from './plugins/MarkdownShortcutPlugin';
 import { MaxLengthPlugin } from './plugins/MaxLengthPlugin';
 import MentionsPlugin from './plugins/MentionsPlugin';
-import PollPlugin from './plugins/PollPlugin';
 import SpeechToTextPlugin from './plugins/SpeechToTextPlugin';
 import TabFocusPlugin from './plugins/TabFocusPlugin';
 import TableCellActionMenuPlugin from './plugins/TableActionMenuPlugin';
@@ -173,7 +172,6 @@ export const Editor: React.FC<OnChangeProps> = (props) => {
             </NewTablePlugin>
             <ImagesPlugin />
             <LinkPlugin />
-            <PollPlugin />
             <TwitterPlugin />
             <YouTubePlugin />
             <OnChangePlugin onChange={(editorState, editor) => {
