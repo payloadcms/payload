@@ -20,7 +20,10 @@ import IndexedFields from './collections/Indexed';
 import NumberFields, { numberDoc } from './collections/Number';
 import CodeFields, { codeDoc } from './collections/Code';
 import RelationshipFields from './collections/Relationship';
+import RadioFields, { radiosDoc } from './collections/Radio';
+
 import LexicalRichTextFields from './collections/LexicalRichText';
+
 
 export default buildConfig({
   admin: {
@@ -42,6 +45,7 @@ export default buildConfig({
     CollapsibleFields,
     ConditionalLogic,
     DateFields,
+    RadioFields,
     GroupFields,
     IndexedFields,
     NumberFields,
@@ -72,6 +76,7 @@ export default buildConfig({
     await payload.create({ collection: 'conditional-logic', data: conditionalLogicDoc });
     await payload.create({ collection: 'group-fields', data: groupDoc });
     await payload.create({ collection: 'select-fields', data: selectsDoc });
+    await payload.create({ collection: 'radio-fields', data: radiosDoc });
     await payload.create({ collection: 'tabs-fields', data: tabsDoc });
     await payload.create({ collection: 'point-fields', data: pointDoc });
     await payload.create({ collection: 'date-fields', data: dateDoc });

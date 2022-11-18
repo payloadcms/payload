@@ -1,26 +1,28 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
 import { useFormFields } from '../../Form/context';
+import { Field } from '../../Form/types';
 
 import './index.scss';
-import { Field } from '../../Form/types';
 
 const ConfirmPassword: React.FC = () => {
   const password = useFormFields<Field>(([fields]) => fields.password);
+  const { t } = useTranslation('fields');
 
   const validate = useCallback((value: string) => {
     if (!value) {
-      return 'This field is required';
+      return t('validation:required');
     }
 
     if (value === password?.value) {
       return true;
     }
 
-    return 'Passwords do not match.';
-  }, [password]);
+    return t('passwordsDoNotMatch');
+  }, [password, t]);
 
   const {
     value,
@@ -47,7 +49,7 @@ const ConfirmPassword: React.FC = () => {
       />
       <Label
         htmlFor="field-confirm-password"
-        label="Confirm Password"
+        label={t('authentication:confirmPassword')}
         required
       />
       <input

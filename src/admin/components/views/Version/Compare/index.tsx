@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import qs from 'qs';
 import format from 'date-fns/format';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import { Props } from './types';
 import ReactSelect from '../../../elements/ReactSelect';
@@ -30,6 +31,7 @@ const CompareVersion: React.FC<Props> = (props) => {
   const [options, setOptions] = useState(baseOptions);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [errorLoading, setErrorLoading] = useState('');
+  const { t, i18n } = useTranslation('version');
 
   const getResults = useCallback(async ({
     lastLoadedPage: lastLoadedPageArg,
@@ -61,10 +63,15 @@ const CompareVersion: React.FC<Props> = (props) => {
     }
 
     const search = qs.stringify(query);
-    const response = await fetch(`${baseURL}?${search}`, { credentials: 'include' });
+    const response = await fetch(`${baseURL}?${search}`, {
+      credentials: 'include',
+      headers: {
+        'Accept-Language': i18n.language,
+      },
+    });
 
     if (response.ok) {
-      const data: PaginatedDocs<any> = await response.json();
+      const data: PaginatedDocs = await response.json();
       if (data.docs.length > 0) {
         setOptions((existingOptions) => [
           ...existingOptions,
@@ -76,9 +83,9 @@ const CompareVersion: React.FC<Props> = (props) => {
         setLastLoadedPage(data.page);
       }
     } else {
-      setErrorLoading('An error has occurred.');
+      setErrorLoading(t('error:unspecific'));
     }
-  }, [dateFormat, baseURL, parentID, versionID]);
+  }, [dateFormat, baseURL, parentID, versionID, t, i18n]);
 
   const classes = [
     'field-type',
@@ -97,12 +104,12 @@ const CompareVersion: React.FC<Props> = (props) => {
   return (
     <div className={classes}>
       <div className={`${baseClass}__label`}>
-        Compare version against:
+        {t('compareVersion')}
       </div>
       {!errorLoading && (
         <ReactSelect
           isSearchable={false}
-          placeholder="Select a version to compare"
+          placeholder={t('selectVersionToCompare')}
           onChange={onChange}
           onMenuScrollToBottom={() => {
             getResults({ lastLoadedPage: lastLoadedPage + 1 });

@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import ObjectID from 'bson-objectid';
+import type { TFunction } from 'i18next';
 import { User } from '../../../../../auth';
 import {
   NonPresentationalField,
@@ -23,6 +24,7 @@ type Args = {
   operation: 'create' | 'update'
   data: Data
   fullData: Data
+  t: TFunction
 }
 
 export const addFieldStatePromise = async ({
@@ -37,6 +39,7 @@ export const addFieldStatePromise = async ({
   fieldPromises,
   id,
   operation,
+  t,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
     const fieldState: Field = {
@@ -63,6 +66,7 @@ export const addFieldStatePromise = async ({
         siblingData: data,
         id,
         operation,
+        t,
       });
     }
 
@@ -97,6 +101,7 @@ export const addFieldStatePromise = async ({
             id,
             locale,
             operation,
+            t,
           });
         });
 
@@ -152,6 +157,7 @@ export const addFieldStatePromise = async ({
               operation,
               fieldPromises,
               id,
+              t,
             });
           }
         });
@@ -183,6 +189,7 @@ export const addFieldStatePromise = async ({
           path: `${path}${field.name}.`,
           locale,
           user,
+          t,
         });
 
         break;
@@ -212,6 +219,7 @@ export const addFieldStatePromise = async ({
       id,
       locale,
       operation,
+      t,
     });
   } else if (field.type === 'tabs') {
     field.tabs.forEach((tab) => {
@@ -227,6 +235,7 @@ export const addFieldStatePromise = async ({
         id,
         locale,
         operation,
+        t,
       });
     });
   }

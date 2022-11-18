@@ -1,9 +1,11 @@
 import React, { ChangeEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { TextField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -17,7 +19,7 @@ export type TextInputProps = Omit<TextField, 'type'> & {
   description?: Description
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
-  placeholder?: string
+  placeholder?: Record<string, string> | string
   style?: React.CSSProperties
   className?: string
   width?: string
@@ -42,6 +44,8 @@ const TextInput: React.FC<TextInputProps> = (props) => {
     width,
     inputRef,
   } = props;
+
+  const { i18n } = useTranslation();
 
   const classes = [
     'field-type',
@@ -75,11 +79,12 @@ const TextInput: React.FC<TextInputProps> = (props) => {
         onChange={onChange}
         onKeyDown={onKeyDown}
         disabled={readOnly}
-        placeholder={placeholder}
+        placeholder={getTranslation(placeholder, i18n)}
         type="text"
         name={path}
       />
       <FieldDescription
+        className={`field-description-${path.replace(/\./gi, '__')}`}
         value={value}
         description={description}
       />

@@ -1,9 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import RenderFieldsToDiff from '../..';
 import { Props } from '../types';
 import Label from '../../Label';
 import { ArrayField, BlockField, Field, fieldAffectsData } from '../../../../../../../fields/config/types';
 import getUniqueListBy from '../../../../../../../utilities/getUniqueListBy';
+import { getTranslation } from '../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -21,6 +23,7 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
   const versionRowCount = Array.isArray(version) ? version.length : 0;
   const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0;
   const maxRows = Math.max(versionRowCount, comparisonRowCount);
+  const { t, i18n } = useTranslation('version');
 
   return (
     <div className={baseClass}>
@@ -46,7 +49,7 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
               subFields = [
                 {
                   name: 'blockType',
-                  label: 'Block Type',
+                  label: t('fields:blockType'),
                   type: 'text',
                 },
               ];
@@ -89,11 +92,7 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
       )}
       {maxRows === 0 && (
         <div className={`${baseClass}__no-rows`}>
-          No
-          {' '}
-          {field.labels?.plural ?? 'rows'}
-          {' '}
-          found
+          {t('noRowsFound', { label: field.labels?.plural ? getTranslation(field.labels?.plural, i18n) : t('general:rows') })}
         </div>
       )}
     </div>

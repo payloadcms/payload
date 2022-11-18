@@ -1,6 +1,7 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { ReactEditor, useSlate } from 'slate-react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../utilities/Config';
 import ElementButton from '../../Button';
 import RelationshipIcon from '../../../../../../icons/Relationship';
@@ -42,20 +43,25 @@ const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
   const { serverURL, routes: { api }, collections } = useConfig();
   const [renderModal, setRenderModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { t, i18n } = useTranslation('fields');
   const [hasEnabledCollections] = useState(() => collections.find(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship));
   const modalSlug = `${path}-add-relationship`;
 
   const handleAddRelationship = useCallback(async (_, { relationTo, value }) => {
     setLoading(true);
 
-    const res = await requests.get(`${serverURL}${api}/${relationTo}/${value}?depth=0`);
+    const res = await requests.get(`${serverURL}${api}/${relationTo}/${value}?depth=0`, {
+      headers: {
+        'Accept-Language': i18n.language,
+      },
+    });
     const json = await res.json();
 
     insertRelationship(editor, { value: { id: json.id }, relationTo });
     toggleModal(modalSlug);
     setRenderModal(false);
     setLoading(false);
-  }, [editor, toggleModal, modalSlug, api, serverURL]);
+  }, [i18n.language, editor, toggleModal, modalSlug, api, serverURL]);
 
   useEffect(() => {
     if (renderModal) {
@@ -81,7 +87,7 @@ const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
         >
           <MinimalTemplate className={`${baseClass}__modal-template`}>
             <header className={`${baseClass}__header`}>
-              <h3>Add Relationship</h3>
+              <h3>{t('addRelationship')}</h3>
               <Button
                 buttonStyle="none"
                 onClick={() => {
@@ -99,7 +105,7 @@ const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
             >
               <Fields />
               <Submit>
-                Add relationship
+                {t('addRelationship')}
               </Submit>
             </Form>
           </MinimalTemplate>

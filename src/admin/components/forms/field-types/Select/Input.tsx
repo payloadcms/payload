@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
@@ -6,7 +7,7 @@ import { OptionObject, SelectField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
 import ReactSelect from '../../../elements/ReactSelect';
 import { Value as ReactSelectValue } from '../../../elements/ReactSelect/types';
-// import { FieldType } from '../../useField/types';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -48,6 +49,8 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
     isClearable,
   } = props;
 
+  const { i18n } = useTranslation();
+
   const classes = [
     'field-type',
     'select',
@@ -87,7 +90,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
         value={valueToRender as ReactSelectValue}
         showError={showError}
         isDisabled={readOnly}
-        options={options}
+        options={options.map((option) => ({ ...option, label: getTranslation(option.label, i18n) }))}
         isMulti={hasMany}
         isSortable={isSortable}
         isClearable={isClearable}

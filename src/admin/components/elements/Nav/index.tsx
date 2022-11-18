@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
@@ -10,10 +11,11 @@ import Icon from '../../graphics/Icon';
 import Account from '../../graphics/Account';
 import Localizer from '../Localizer';
 import NavGroup from '../NavGroup';
+import Logout from '../Logout';
 import { groupNavItems, Group, EntityToGroup, EntityType } from '../../../utilities/groupNavItems';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
-import Logout from '../Logout';
 
 const baseClass = 'nav';
 
@@ -22,6 +24,7 @@ const DefaultNav = () => {
   const [menuActive, setMenuActive] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const history = useHistory();
+  const { i18n } = useTranslation('general');
   const {
     collections,
     globals,
@@ -31,7 +34,7 @@ const DefaultNav = () => {
     admin: {
       components: {
         beforeNavLinks,
-        afterNavLinks
+        afterNavLinks,
       },
     },
   } = useConfig();
@@ -60,8 +63,8 @@ const DefaultNav = () => {
 
         return entityToGroup;
       }),
-    ], permissions));
-  }, [collections, globals, permissions]);
+    ], permissions, i18n));
+  }, [collections, globals, permissions, i18n, i18n.language]);
 
   useEffect(() => history.listen(() => {
     setMenuActive(false);
@@ -102,13 +105,13 @@ const DefaultNav = () => {
 
                   if (type === EntityType.collection) {
                     href = `${admin}/collections/${entity.slug}`;
-                    entityLabel = entity.labels.plural;
+                    entityLabel = getTranslation(entity.labels.plural, i18n);
                     id = `nav-${entity.slug}`;
                   }
 
                   if (type === EntityType.global) {
                     href = `${admin}/globals/${entity.slug}`;
-                    entityLabel = entity.label;
+                    entityLabel = getTranslation(entity.label, i18n);
                     id = `nav-global-${entity.slug}`;
                   }
 
@@ -137,7 +140,7 @@ const DefaultNav = () => {
             >
               <Account />
             </Link>
-            <Logout/>
+            <Logout />
           </div>
         </nav>
       </div>

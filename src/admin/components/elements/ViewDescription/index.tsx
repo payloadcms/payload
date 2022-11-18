@@ -1,8 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Props, isComponent } from './types';
+import { getTranslation } from '../../../../utilities/getTranslation';
 import './index.scss';
 
 const ViewDescription: React.FC<Props> = (props) => {
+  const { i18n } = useTranslation();
   const {
     description,
   } = props;
@@ -17,7 +20,7 @@ const ViewDescription: React.FC<Props> = (props) => {
       <div
         className="view-description"
       >
-        {typeof description === 'function' ? description() : description}
+        {typeof description === 'function' ? description() : getTranslation(description, i18n) }
       </div>
     );
   }

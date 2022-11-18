@@ -3,6 +3,9 @@ import { Config } from '../config/types';
 import { CollectionConfig } from '../collections/config/types';
 import { mimeTypeValidator } from './mimeTypeValidator';
 import { IncomingUploadType } from './types';
+import { extractTranslations } from '../translations/extractTranslations';
+
+const labels = extractTranslations(['upload:width', 'upload:height', 'upload:fileSize', 'upload:fileName', 'upload:sizes']);
 
 type Options = {
   config: Config
@@ -34,7 +37,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
 
   const width: Field = {
     name: 'width',
-    label: 'Width',
+    label: labels['upload:width'],
     type: 'number',
     admin: {
       readOnly: true,
@@ -44,7 +47,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
 
   const height: Field = {
     name: 'height',
-    label: 'Height',
+    label: labels['upload:height'],
     type: 'number',
     admin: {
       readOnly: true,
@@ -54,7 +57,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
 
   const filesize: Field = {
     name: 'filesize',
-    label: 'File Size',
+    label: labels['upload:fileSize'],
     type: 'number',
     admin: {
       readOnly: true,
@@ -64,7 +67,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
 
   const filename: Field = {
     name: 'filename',
-    label: 'File Name',
+    label: labels['upload:fileName'],
     type: 'text',
     index: true,
     unique: true,
@@ -104,7 +107,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     uploadFields = uploadFields.concat([
       {
         name: 'sizes',
-        label: 'Sizes',
+        label: labels['upload:Sizes'],
         type: 'group',
         admin: {
           disabled: true,

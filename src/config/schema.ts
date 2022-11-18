@@ -99,6 +99,7 @@ export default joi.object({
       }),
     webpack: joi.func(),
   }),
+  i18n: joi.object(),
   defaultDepth: joi.number()
     .min(0)
     .max(30),

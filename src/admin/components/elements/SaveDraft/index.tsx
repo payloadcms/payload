@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import FormSubmit from '../../forms/Submit';
 import { useForm, useFormModified } from '../../forms/Form/context';
@@ -15,6 +16,7 @@ const SaveDraft: React.FC = () => {
   const { collection, global, id } = useDocumentInfo();
   const modified = useFormModified();
   const locale = useLocale();
+  const { t } = useTranslation('version');
 
   const canSaveDraft = modified;
 
@@ -50,7 +52,7 @@ const SaveDraft: React.FC = () => {
       onClick={saveDraft}
       disabled={!canSaveDraft}
     >
-      Save draft
+      {t('saveDraft')}
     </FormSubmit>
   );
 };

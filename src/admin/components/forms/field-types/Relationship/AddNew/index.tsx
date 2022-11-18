@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import Button from '../../../../elements/Button';
 import { Props } from './types';
 import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
@@ -9,6 +10,7 @@ import { useAuth } from '../../../../utilities/Auth';
 import { AddNewRelationModal } from './Modal';
 import { useEditDepth } from '../../../../utilities/EditDepth';
 import Plus from '../../../../icons/Plus';
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -22,6 +24,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
   const [modalCollection, setModalCollection] = useState<SanitizedCollectionConfig>();
   const [popupOpen, setPopupOpen] = useState(false);
   const editDepth = useEditDepth();
+  const { t, i18n } = useTranslation('fields');
 
   const modalSlug = `${path}-add-modal-depth-${editDepth}`;
 
@@ -44,6 +47,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
         json.doc,
       ],
       sort: true,
+      i18n,
     });
 
     if (hasMany) {
@@ -54,7 +58,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
 
     setModalCollection(undefined);
     toggleModal(modalSlug);
-  }, [relationTo, modalCollection, hasMany, toggleModal, modalSlug, setValue, value, dispatchOptions]);
+  }, [relationTo, modalCollection, dispatchOptions, i18n, hasMany, toggleModal, modalSlug, setValue, value]);
 
   const onPopopToggle = useCallback((state) => {
     setPopupOpen(state);
@@ -86,7 +90,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
           className={`${baseClass}__add-button`}
           onClick={() => openModal(relatedCollections[0])}
           buttonStyle="none"
-          tooltip={`Add new ${relatedCollections[0].labels.singular}`}
+          tooltip={t('addNewLabel', { label: relatedCollections[0].labels.singular })}
         >
           <Plus />
         </Button>
@@ -100,7 +104,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
             <Button
               className={`${baseClass}__add-button`}
               buttonStyle="none"
-              tooltip={popupOpen ? undefined : 'Add new'}
+              tooltip={popupOpen ? undefined : t('addNew')}
             >
               <Plus />
             </Button>
@@ -116,7 +120,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
                         type="button"
                         onClick={() => { closePopup(); openModal(relatedCollection); }}
                       >
-                        {relatedCollection.labels.singular}
+                        {getTranslation(relatedCollection.labels.singular, i18n)}
                       </button>
                     </li>
                   );

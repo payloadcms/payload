@@ -9,7 +9,7 @@ const baseClass = 'field-error';
 const Error: React.FC<Props> = (props) => {
   const {
     showError = false,
-    message = 'Please complete this field.',
+    message,
   } = props;
 
   if (showError) {

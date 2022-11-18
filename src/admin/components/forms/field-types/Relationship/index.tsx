@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import equal from 'deep-equal';
 import qs from 'qs';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
@@ -62,12 +63,13 @@ const Relationship: React.FC<Props> = (props) => {
     collections,
   } = useConfig();
 
+  const { t, i18n } = useTranslation('fields');
   const { id } = useDocumentInfo();
   const { user, permissions } = useAuth();
   const [fields] = useAllFormFields();
   const formProcessing = useFormProcessing();
   const hasMultipleRelations = Array.isArray(relationTo);
-  const [options, dispatchOptions] = useReducer(optionsReducer, required || hasMany ? [] : [{ value: null, label: 'None' }]);
+  const [options, dispatchOptions] = useReducer(optionsReducer, required || hasMany ? [] : [{ value: null, label: t('general:none') }]);
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [errorLoading, setErrorLoading] = useState('');
@@ -159,13 +161,18 @@ const Relationship: React.FC<Props> = (props) => {
             query.where.and.push(optionFilters[relation]);
           }
 
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, { credentials: 'include' });
+          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          });
 
           if (response.ok) {
             const data: PaginatedDocs<unknown> = await response.json();
             if (data.docs.length > 0) {
               resultsFetched += data.docs.length;
-              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort });
+              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort, i18n });
               setLastLoadedPage(data.page);
 
               if (!data.nextPage) {
@@ -181,9 +188,9 @@ const Relationship: React.FC<Props> = (props) => {
           } else if (response.status === 403) {
             setLastFullyLoadedRelation(relations.indexOf(relation));
             lastLoadedPageToUse = 1;
-            dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort, ids: relationMap[relation] });
+            dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort, ids: relationMap[relation], i18n });
           } else {
-            setErrorLoading('An error has occurred.');
+            setErrorLoading(t('error:unspecific'));
           }
         }
       }, Promise.resolve());
@@ -198,6 +205,8 @@ const Relationship: React.FC<Props> = (props) => {
     serverURL,
     api,
     hasMultipleRelations,
+    t,
+    i18n,
   ]);
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
@@ -295,13 +304,18 @@ const Relationship: React.FC<Props> = (props) => {
           };
 
           if (!errorLoading) {
-            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, { credentials: 'include' });
+            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+            });
             const collection = collections.find((coll) => coll.slug === relation);
             if (response.ok) {
               const data = await response.json();
-              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort: true, ids });
+              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort: true, ids, i18n });
             } else if (response.status === 403) {
-              dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort: true, ids });
+              dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort: true, ids, i18n });
             }
           }
         }
@@ -309,7 +323,7 @@ const Relationship: React.FC<Props> = (props) => {
 
       setHasLoadedValueOptions(true);
     }
-  }, [hasMany, hasMultipleRelations, relationTo, initialValue, hasLoadedValueOptions, errorLoading, collections, api, serverURL]);
+  }, [hasMany, hasMultipleRelations, relationTo, initialValue, hasLoadedValueOptions, errorLoading, collections, api, serverURL, i18n]);
 
   useEffect(() => {
     if (!filterOptions) return;

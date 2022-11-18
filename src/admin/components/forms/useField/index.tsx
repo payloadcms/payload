@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../utilities/Auth';
 import { useFormProcessing, useFormSubmitted, useFormModified, useForm, useFormFields } from '../Form/context';
 import { Options, FieldType } from './types';
@@ -23,6 +24,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const operation = useOperation();
   const field = useFormFields(([fields]) => fields[path]);
   const dispatchField = useFormFields(([_, dispatch]) => dispatch);
+  const { t } = useTranslation();
 
   const { getData, getSiblingData, setModified } = useForm();
 
@@ -92,6 +94,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
         data: getData(),
         siblingData: getSiblingData(path),
         operation,
+        t,
       };
 
       const validationResult = typeof validate === 'function' ? await validate(value, validateOptions) : true;

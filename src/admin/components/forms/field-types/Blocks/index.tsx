@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../utilities/Auth';
 import { usePreferences } from '../../../utilities/Preferences';
 import { useLocale } from '../../../utilities/Locale';
@@ -27,23 +28,23 @@ import SectionTitle from './SectionTitle';
 import Pill from '../../../elements/Pill';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 
 const baseClass = 'blocks-field';
 
-const labelDefaults = {
-  singular: 'Block',
-  plural: 'Blocks',
-};
-
 const BlocksField: React.FC<Props> = (props) => {
+  const { t, i18n } = useTranslation('fields');
   const {
     label,
     name,
     path: pathFromProps,
     blocks,
-    labels = labelDefaults,
+    labels = {
+      singular: t('block'),
+      plural: t('blocks'),
+    },
     fieldTypes,
     maxRows,
     minRows,
@@ -98,7 +99,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const addRow = useCallback(async (rowIndex: number, blockType: string) => {
     const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
-    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, operation, id, user, locale });
+    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, operation, id, user, locale, t });
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
     dispatchRows({ type: 'ADD', rowIndex, blockType });
     setModified(true);
@@ -106,7 +107,7 @@ const BlocksField: React.FC<Props> = (props) => {
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [path, blocks, dispatchFields, operation, id, user, locale, setModified]);
+  }, [blocks, operation, id, user, locale, t, dispatchFields, path, setModified]);
 
   const duplicateRow = useCallback(async (rowIndex: number, blockType: string) => {
     dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });
@@ -223,7 +224,7 @@ const BlocksField: React.FC<Props> = (props) => {
         </div>
         <header className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-wrap`}>
-            <h3>{label}</h3>
+            <h3>{getTranslation(label || name, i18n)}</h3>
             <ul className={`${baseClass}__header-actions`}>
               <li>
                 <button
@@ -231,7 +232,7 @@ const BlocksField: React.FC<Props> = (props) => {
                   onClick={() => toggleCollapseAll(true)}
                   className={`${baseClass}__header-action`}
                 >
-                  Collapse All
+                  {t('collapseAll')}
                 </button>
               </li>
               <li>
@@ -240,7 +241,7 @@ const BlocksField: React.FC<Props> = (props) => {
                   onClick={() => toggleCollapseAll(false)}
                   className={`${baseClass}__header-action`}
                 >
-                  Show All
+                  {t('showAll')}
                 </button>
               </li>
             </ul>
@@ -295,7 +296,7 @@ const BlocksField: React.FC<Props> = (props) => {
                                   pillStyle="white"
                                   className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
                                 >
-                                  {blockToRender.labels.singular}
+                                  {getTranslation(blockToRender.labels.singular, i18n)}
                                 </Pill>
                                 <SectionTitle
                                   path={`${path}.${i}.blockName`}
@@ -360,17 +361,15 @@ const BlocksField: React.FC<Props> = (props) => {
               })}
               {(rows.length < minRows || (required && rows.length === 0)) && (
                 <Banner type="error">
-                  This field requires at least
-                  {' '}
-                  {`${minRows || 1} ${minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural}`}
+                  {t('requiresAtLeast', {
+                    count: minRows,
+                    label: getTranslation(minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural, i18n),
+                  })}
                 </Banner>
               )}
               {(rows.length === 0 && readOnly) && (
                 <Banner>
-                  This field has no
-                  {' '}
-                  {labels.plural}
-                  .
+                  {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
                 </Banner>
               )}
               {provided.placeholder}
@@ -391,7 +390,7 @@ const BlocksField: React.FC<Props> = (props) => {
                   iconPosition="left"
                   iconStyle="with-border"
                 >
-                  {`Add ${labels.singular}`}
+                  {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
                 </Button>
               )}
               render={({ close }) => (

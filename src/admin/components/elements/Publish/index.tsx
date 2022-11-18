@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import FormSubmit from '../../forms/Submit';
 import { Props } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
@@ -8,6 +9,7 @@ const Publish: React.FC<Props> = () => {
   const { unpublishedVersions, publishedDoc } = useDocumentInfo();
   const { submit } = useForm();
   const modified = useFormModified();
+  const { t } = useTranslation('version');
 
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0;
   const canPublish = modified || hasNewerVersions || !publishedDoc;
@@ -26,7 +28,7 @@ const Publish: React.FC<Props> = () => {
       onClick={publish}
       disabled={!canPublish}
     >
-      Publish changes
+      {t('publishChanges')}
     </FormSubmit>
   );
 };

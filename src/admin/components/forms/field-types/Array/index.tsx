@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useReducer } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
@@ -25,6 +26,7 @@ import HiddenInput from '../HiddenInput';
 import { RowLabel } from '../../RowLabel';
 
 import './index.scss';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 const baseClass = 'array-field';
 
@@ -52,14 +54,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  // Handle labeling for Arrays, Global Arrays, and Blocks
-  const getLabels = (p: Props) => {
-    if (p?.labels) return p.labels;
-    if (p?.label) return { singular: p.label, plural: undefined };
-    return { singular: 'Row', plural: 'Rows' };
-  };
-
-  const labels = getLabels(props);
   // eslint-disable-next-line react/destructuring-assignment
   const label = props?.label ?? props?.labels?.singular;
 
@@ -74,6 +68,16 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const { id } = useDocumentInfo();
   const locale = useLocale();
   const operation = useOperation();
+  const { t, i18n } = useTranslation('fields');
+
+  // Handle labeling for Arrays, Global Arrays, and Blocks
+  const getLabels = (p: Props) => {
+    if (p?.labels) return p.labels;
+    if (p?.label) return { singular: p.label, plural: undefined };
+    return { singular: t('row'), plural: t('rows') };
+  };
+
+  const labels = getLabels(props);
 
   const { dispatchFields, setModified } = formContext;
 
@@ -93,7 +97,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   });
 
   const addRow = useCallback(async (rowIndex: number) => {
-    const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user, locale });
+    const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user, locale, t });
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     dispatchRows({ type: 'ADD', rowIndex });
     setModified(true);
@@ -101,7 +105,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [dispatchRows, dispatchFields, fields, path, operation, id, user, locale, setModified]);
+  }, [dispatchRows, dispatchFields, fields, path, operation, id, user, locale, setModified, t]);
 
   const duplicateRow = useCallback(async (rowIndex: number) => {
     dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });
@@ -220,7 +224,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         </div>
         <header className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-wrap`}>
-            <h3>{label}</h3>
+            <h3>{getTranslation(label || name, i18n)}</h3>
             <ul className={`${baseClass}__header-actions`}>
               <li>
                 <button
@@ -228,7 +232,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   onClick={() => toggleCollapseAll(true)}
                   className={`${baseClass}__header-action`}
                 >
-                  Collapse All
+                  {t('collapseAll')}
                 </button>
               </li>
               <li>
@@ -237,12 +241,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   onClick={() => toggleCollapseAll(false)}
                   className={`${baseClass}__header-action`}
                 >
-                  Show All
+                  {t('showAll')}
                 </button>
               </li>
             </ul>
           </div>
           <FieldDescription
+            className={`field-description-${path.replace(/\./gi, '__')}`}
             value={value}
             description={description}
           />
@@ -319,19 +324,18 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               })}
               {(rows.length < minRows || (required && rows.length === 0)) && (
                 <Banner type="error">
-                  This field requires at least
-                  {' '}
-                  {minRows
-                    ? `${minRows} ${labels.plural}`
-                    : `1 ${labels.singular}`}
+                  {t('validation:requiresAtLeast', {
+                    count: minRows,
+                    label: getTranslation(minRows
+                      ? labels.plural
+                      : labels.singular,
+                    i18n) || t(minRows > 1 ? 'general:row' : 'general:rows'),
+                  })}
                 </Banner>
               )}
               {(rows.length === 0 && readOnly) && (
                 <Banner>
-                  This field has no
-                  {' '}
-                  {labels.plural}
-                  .
+                  {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
                 </Banner>
               )}
               {provided.placeholder}
@@ -347,7 +351,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               iconStyle="with-border"
               iconPosition="left"
             >
-              {`Add ${labels.singular}`}
+              {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
             </Button>
           </div>
         )}

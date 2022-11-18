@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../utilities/Config';
 import useIntersect from '../../../../../../../hooks/useIntersect';
 import { useListRelationships } from '../../../RelationshipProvider';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -16,6 +18,7 @@ const RelationshipCell = (props) => {
   const [values, setValues] = useState<Value[]>([]);
   const { getRelationships, documents } = useListRelationships();
   const [hasRequested, setHasRequested] = useState(false);
+  const { t, i18n } = useTranslation('general');
 
   const isAboveViewport = entry?.boundingClientRect?.top < window.innerHeight;
 
@@ -51,17 +54,20 @@ const RelationshipCell = (props) => {
         const relatedCollection = collections.find(({ slug }) => slug === relationTo);
         return (
           <React.Fragment key={i}>
-            { document === false && `Untitled - ID: ${value}`}
-            { document === null && 'Loading...'}
+            { document === false && `${t('untitled')} - ID: ${value}`}
+            { document === null && t('loading')}
             { document && (
-              document[relatedCollection.admin.useAsTitle] ? document[relatedCollection.admin.useAsTitle] : `Untitled - ID: ${value}`
+              document[relatedCollection.admin.useAsTitle] ? document[relatedCollection.admin.useAsTitle] : `${t('untitled')} - ID: ${value}`
             )}
             {values.length > i + 1 && ', '}
           </React.Fragment>
         );
       })}
-      { Array.isArray(cellData) && cellData.length > totalToShow && ` and ${cellData.length - totalToShow} more` }
-      { values.length === 0 && `No <${field.label}>`}
+      {
+        Array.isArray(cellData) && cellData.length > totalToShow
+        && t('fields:itemsAndMore', { items: '', count: cellData.length - totalToShow })
+      }
+      { values.length === 0 && t('noLabel', { label: getTranslation(field.label, i18n) })}
     </div>
   );
 };
