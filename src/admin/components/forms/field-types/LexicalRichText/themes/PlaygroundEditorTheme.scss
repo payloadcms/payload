@@ -86,7 +86,7 @@
   text-decoration: underline;
 }
 .PlaygroundEditorTheme__code {
-  background-color: rgb(240, 242, 245);
+  /*background-color: rgb(240, 242, 245);*/
   font-family: Menlo, Consolas, Monaco, monospace;
   display: block;
   padding: 8px 8px 8px 52px;
@@ -103,7 +103,7 @@
 .PlaygroundEditorTheme__code:before {
   content: attr(data-gutter);
   position: absolute;
-  background-color: #eee;
+  /*background-color: #eee;*/
   left: 0;
   top: 0;
   border-right: 1px solid #ccc;
