@@ -1,0 +1,38 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ *
+ */
+
+.EquationEditor_inlineEditor {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  color: #8421a2;
+  background-color: inherit;
+  resize: none;
+}
+
+.EquationEditor_blockEditor {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  color: #8421a2;
+  background-color: inherit;
+  resize: none;
+  width: '100%';
+}
+
+.EquationEditor_inputBackground {
+  background-color: #eee;
+}
+
+.EquationEditor_dollarSign {
+  text-align: left;
+  color: #b0b0b0;
+}

@@ -22,6 +22,9 @@ import CodeFields, { codeDoc } from './collections/Code';
 import RelationshipFields from './collections/Relationship';
 import RadioFields, { radiosDoc } from './collections/Radio';
 
+import LexicalRichTextFields from './collections/LexicalRichText';
+
+
 export default buildConfig({
   admin: {
     webpack: (config) => ({
@@ -53,6 +56,7 @@ export default buildConfig({
     TabsFields,
     TextFields,
     Uploads,
+    LexicalRichTextFields
   ],
   localization: {
     defaultLocale: 'en',

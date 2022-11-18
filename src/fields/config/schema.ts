@@ -441,6 +441,11 @@ export const ui = joi.object().keys({
   }).default(),
 });
 
+export const lexicalRichText = baseField.keys({
+  type: joi.string().valid('lexicalRichText').required(),
+  name: joi.string().required(),
+});
+
 const fieldSchema = joi.alternatives()
   .try(
     text,
@@ -463,6 +468,7 @@ const fieldSchema = joi.alternatives()
     date,
     point,
     ui,
+    lexicalRichText,
   )
   .id('field');
 

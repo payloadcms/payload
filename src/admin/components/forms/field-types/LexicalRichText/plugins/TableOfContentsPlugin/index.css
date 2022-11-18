@@ -1,0 +1,87 @@
+.table-of-contents .heading2 {
+  margin-left: 10px;
+}
+
+.table-of-contents .heading3 {
+  margin-left: 20px;
+}
+
+.selected-heading {
+  color: #3578e5;
+  position: relative;
+}
+
+.selected-heading-wrapper::before {
+  content: ' ';
+  position: absolute;
+  display: inline-block;
+  left: -30px;
+  top: 4px;
+  z-index: 10;
+  height: 4px;
+  width: 4px;
+  background-color: #3578e5;
+  border: solid 4px white;
+  border-radius: 50%;
+}
+
+.normal-heading {
+  cursor: pointer;
+  line-height: 20px;
+  font-size: 16px;
+}
+
+.table-of-contents {
+  color: #65676b;
+  position: fixed;
+  top: 200px;
+  right: -35px;
+  padding: 10px;
+  width: 250px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  z-index: 1;
+  height: 300px;
+}
+
+.first-heading {
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.headings {
+  list-style: none;
+  margin-top: 0;
+  margin-left: 10px;
+  padding: 0;
+  overflow: scroll;
+  width: 200px;
+  height: 220px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.headings::-webkit-scrollbar {
+  display: none;
+}
+
+.headings::before {
+  content: ' ';
+  position: absolute;
+  height: 220px;
+  width: 4px;
+  right: 240px;
+  margin-top: 5px;
+  background-color: #ccd0d5;
+  border-radius: 2px;
+}
+
+.normal-heading-wrapper {
+  margin-left: 32px;
+  position: relative;
+}

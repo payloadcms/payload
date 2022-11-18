@@ -20,6 +20,7 @@ export default {
   date: Text,
   select: Text,
   richText: Text,
+  lexicalRichText: Text,
   relationship: Relationship,
   upload: Relationship,
   point: Text,

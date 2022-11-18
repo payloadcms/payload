@@ -88,6 +88,10 @@ const fieldTypeConditions = {
     component: 'Text',
     operators: [...base, like, contains],
   },
+  lexicalRichText: {
+    component: 'Text',
+    operators: [...base, like, contains],
+  },
   number: {
     component: 'Number',
     operators: [...base, ...numeric],
