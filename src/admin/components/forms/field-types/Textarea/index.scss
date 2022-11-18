@@ -32,7 +32,6 @@
     position: relative;
     line-height: inherit;
     flex-grow: 1;
-    box-sizing: border-box;
     background: none;
     outline: none;
   }
@@ -50,7 +49,6 @@
     line-height: inherit;
     color: inherit;
     background: none;
-    box-sizing: border-box;
     overflow: auto;
     resize: none;
     outline: none;
@@ -66,8 +64,6 @@
     vertical-align: top;
     display: inline-block;
     flex-grow: 1;
-    white-space: pre;
-    box-sizing: border-box;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: pre-wrap;
