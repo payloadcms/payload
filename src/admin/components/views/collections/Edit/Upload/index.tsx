@@ -1,6 +1,7 @@
 import React, {
   useState, useRef, useEffect, useCallback,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import useField from '../../../../forms/useField';
 import Button from '../../../../elements/Button';
 import FileDetails from '../../../../elements/FileDetails';
@@ -31,6 +32,7 @@ const Upload: React.FC<Props> = (props) => {
   const [dragging, setDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
   const [replacingFile, setReplacingFile] = useState(false);
+  const { t } = useTranslation('upload');
 
   const {
     data = {} as Data,
@@ -180,7 +182,7 @@ const Upload: React.FC<Props> = (props) => {
                   onClick={() => setSelectingFile(true)}
                   className={`${baseClass}__file-button`}
                 >
-                  Select a file
+                  {t('selectFile')}
                 </Button>
                 <div className={`${baseClass}__or-other-options-container`}>
                   <p className={`${baseClass}__or-text`}>OR</p>

@@ -22,7 +22,7 @@ export default async function restoreVersionHandler(req: PayloadRequest, res: Re
   try {
     const doc = await restoreVersion(options);
     return res.status(httpStatus.OK).json({
-      ...formatSuccessResponse('Restored successfully.', 'message'),
+      ...formatSuccessResponse(req.t('version:restoredSuccessfully'), 'message'),
       doc,
     });
   } catch (error) {

@@ -71,7 +71,7 @@ export const saveGlobalVersion = async ({
       autosave: false,
     });
   } catch (err) {
-    payload.logger.error(`There was an error while saving a version for the Global ${config.label}.`);
+    payload.logger.error(`There was an error while saving a version for the Global ${config.slug}.`);
     payload.logger.error(err);
   }
 
@@ -79,7 +79,7 @@ export const saveGlobalVersion = async ({
     enforceMaxVersions({
       payload: this,
       Model: VersionModel,
-      entityLabel: config.label,
+      slug: config.slug,
       entityType: 'global',
       max: config.versions.max,
     });

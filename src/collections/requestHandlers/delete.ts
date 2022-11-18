@@ -20,7 +20,7 @@ export default async function deleteHandler(req: PayloadRequest, res: Response, 
     });
 
     if (!doc) {
-      return res.status(httpStatus.NOT_FOUND).json(new NotFound());
+      return res.status(httpStatus.NOT_FOUND).json(new NotFound(req.t));
     }
 
     return res.status(httpStatus.OK).send(doc);

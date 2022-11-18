@@ -54,6 +54,13 @@ describe('Endpoints', () => {
       expect(status).toBe(200);
       expect(params).toMatchObject(data);
     });
+
+    it('should have i18n on req', async () => {
+      const { status, data } = await client.endpoint(`/api/${applicationEndpoint}/i18n`, 'get');
+
+      expect(status).toBe(200);
+      expect(data.message).toStrictEqual('Back to Dashboard');
+    });
   });
 
   describe('Root', () => {

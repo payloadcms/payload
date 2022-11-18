@@ -138,7 +138,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
   // /////////////////////////////////////
 
   if (!collectionConfig.upload.disableLocalStorage) {
-    await uploadFiles(payload, filesToUpload);
+    await uploadFiles(payload, filesToUpload, req.t);
   }
 
   // /////////////////////////////////////
@@ -189,7 +189,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
     } catch (error) {
       // Handle user already exists from passport-local-mongoose
       if (error.name === 'UserExistsError') {
-        throw new ValidationError([{ message: error.message, field: 'email' }]);
+        throw new ValidationError([{ message: error.message, field: 'email' }], req.t);
       }
       throw error;
     }
@@ -199,7 +199,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
     } catch (error) {
       // Handle uniqueness error from MongoDB
       throw error.code === 11000 && error.keyValue
-        ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }])
+        ? new ValidationError([{ message: req.t('error:valueMustBeUnique'), field: Object.keys(error.keyValue)[0] }], req.t)
         : error;
     }
   }

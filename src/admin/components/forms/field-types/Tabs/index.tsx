@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
@@ -7,6 +8,7 @@ import FieldDescription from '../../FieldDescription';
 import toKebabCase from '../../../../../utilities/toKebabCase';
 import { useCollapsible } from '../../../elements/Collapsible/provider';
 import { TabsProvider } from './provider';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 import { usePreferences } from '../../../utilities/Preferences';
 import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
@@ -30,6 +32,7 @@ const TabsField: React.FC<Props> = (props) => {
 
   const { getPreference, setPreference } = usePreferences();
   const { preferencesKey } = useDocumentInfo();
+  const { i18n } = useTranslation();
 
   const isWithinCollapsible = useCollapsible();
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
@@ -93,10 +96,10 @@ const TabsField: React.FC<Props> = (props) => {
                     activeTabIndex === tabIndex && `${baseClass}__tab-button--active`,
                   ].filter(Boolean).join(' ')}
                   onClick={() => {
-                    handleTabChange(tabIndex)
+                    handleTabChange(tabIndex);
                   }}
                 >
-                  {tab.label ? tab.label : (tabHasName(tab) && tab.name)}
+                  {tab.label ? getTranslation(tab.label, i18n) : (tabHasName(tab) && tab.name)}
                 </button>
               );
             })}

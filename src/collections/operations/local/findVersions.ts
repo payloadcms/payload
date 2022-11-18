@@ -5,6 +5,7 @@ import { TypeWithVersion } from '../../../versions/types';
 import { PayloadRequest } from '../../../express/types';
 import findVersions from '../findVersions';
 import { getDataLoader } from '../../dataloader';
+import i18nInit from '../../../translations/init';
 
 export type Options = {
   collection: string
@@ -37,14 +38,17 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
 
   const collection = payload.collections[collectionSlug];
 
+  const i18n = i18nInit(payload.config.i18n);
   const req = {
     user,
     payloadAPI: 'local',
     locale,
     fallbackLocale,
     payload,
+    i18n,
   } as PayloadRequest;
 
+  if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findVersions({

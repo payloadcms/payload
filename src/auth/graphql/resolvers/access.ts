@@ -25,7 +25,7 @@ function accessResolver(payload: Payload) {
     return {
       ...accessResults,
       ...formatConfigNames(accessResults.collections, payload.config.collections),
-      ...formatConfigNames(accessResults.globals, payload.config.globals)
+      ...formatConfigNames(accessResults.globals, payload.config.globals),
     };
   }
 

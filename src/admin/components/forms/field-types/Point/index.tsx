@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -6,6 +7,7 @@ import FieldDescription from '../../FieldDescription';
 import withCondition from '../../withCondition';
 import { point } from '../../../../../fields/validations';
 import { Props } from './types';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -31,6 +33,8 @@ const PointField: React.FC<Props> = (props) => {
   } = props;
 
   const path = pathFromProps || name;
+
+  const { t, i18n } = useTranslation('fields');
 
   const memoizedValidate = useCallback((value, options) => {
     return validate(value, { ...options, required });
@@ -81,7 +85,7 @@ const PointField: React.FC<Props> = (props) => {
         <li>
           <Label
             htmlFor={`field-longitude-${path.replace(/\./gi, '__')}`}
-            label={`${label} - Longitude`}
+            label={`${getTranslation(label || name, i18n)} - ${t('longitude')}`}
             required={required}
           />
           <input
@@ -89,7 +93,7 @@ const PointField: React.FC<Props> = (props) => {
             value={(value && typeof value[0] === 'number') ? value[0] : ''}
             onChange={(e) => handleChange(e, 0)}
             disabled={readOnly}
-            placeholder={placeholder}
+            placeholder={getTranslation(placeholder, i18n)}
             type="number"
             name={`${path}.longitude`}
             step={step}
@@ -98,7 +102,7 @@ const PointField: React.FC<Props> = (props) => {
         <li>
           <Label
             htmlFor={`field-latitude-${path.replace(/\./gi, '__')}`}
-            label={`${label} - Latitude`}
+            label={`${getTranslation(label || name, i18n)} - ${t('latitude')}`}
             required={required}
           />
           <input
@@ -106,7 +110,7 @@ const PointField: React.FC<Props> = (props) => {
             value={(value && typeof value[1] === 'number') ? value[1] : ''}
             onChange={(e) => handleChange(e, 1)}
             disabled={readOnly}
-            placeholder={placeholder}
+            placeholder={getTranslation(placeholder, i18n)}
             type="number"
             name={`${path}.latitude`}
             step={step}

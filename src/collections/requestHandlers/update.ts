@@ -30,10 +30,10 @@ export default async function updateHandler(req: PayloadRequest, res: Response, 
       autosave,
     });
 
-    let message = 'Updated successfully.';
+    let message = req.t('general:updatedSuccessfully');
 
-    if (draft) message = 'Draft saved successfully.';
-    if (autosave) message = 'Autosaved successfully.';
+    if (draft) message = req.t('versions:draftSavedSuccessfully');
+    if (autosave) message = req.t('versions:autosavedSuccessfully');
 
     return res.status(httpStatus.OK).json({
       ...formatSuccessResponse(message, 'message'),

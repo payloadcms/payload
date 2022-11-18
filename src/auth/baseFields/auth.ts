@@ -1,10 +1,13 @@
 import { email } from '../../fields/validations';
 import { Field } from '../../fields/config/types';
+import { extractTranslations } from '../../translations/extractTranslations';
+
+const labels = extractTranslations(['general:email']);
 
 export default [
   {
     name: 'email',
-    label: 'Email',
+    label: labels['general:email'],
     type: 'email',
     validate: email,
     unique: true,

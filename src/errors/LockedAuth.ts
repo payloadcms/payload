@@ -1,9 +1,10 @@
 import httpStatus from 'http-status';
+import type { TFunction } from 'i18next';
 import APIError from './APIError';
 
 class LockedAuth extends APIError {
-  constructor() {
-    super('This user is locked due to having too many failed login attempts.', httpStatus.UNAUTHORIZED);
+  constructor(t?: TFunction) {
+    super(t ? t('error:userLocked') : 'This user is locked due to having too many failed login attempts.', httpStatus.UNAUTHORIZED);
   }
 }
 

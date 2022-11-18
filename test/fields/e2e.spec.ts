@@ -28,12 +28,63 @@ describe('fields', () => {
   });
 
   describe('text', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'text-fields');
+    });
+
     test('should display field in list view', async () => {
-      const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'text-fields');
       await page.goto(url.list);
       const textCell = page.locator('.row-1 .cell-text');
       await expect(textCell)
         .toHaveText(textDoc.text);
+    });
+
+    test('should display i18n label in cells when missing field data', async () => {
+      await page.goto(url.list);
+      const textCell = page.locator('.row-1 .cell-i18nText');
+      await expect(textCell)
+        .toHaveText('<No Text en>');
+    });
+
+    test('should show i18n label', async () => {
+      await page.goto(url.create);
+
+      await expect(page.locator('label[for="field-i18nText"]')).toHaveText('Text en');
+    });
+
+    test('should show i18n placeholder', async () => {
+      await page.goto(url.create);
+      await expect(await page.locator('#field-i18nText')).toHaveAttribute('placeholder', 'en placeholder');
+    });
+
+    test('should show i18n descriptions', async () => {
+      await page.goto(url.create);
+      const description = page.locator('.field-description-i18nText');
+      await expect(description).toHaveText('en description');
+    });
+  });
+
+  describe('radio', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'radio-fields');
+    });
+
+    test('should show i18n label in list', async () => {
+      await page.goto(url.list);
+      await expect(page.locator('.cell-radio')).toHaveText('Value One');
+    });
+
+    test('should show i18n label while editing', async () => {
+      await page.goto(url.create);
+      await expect(page.locator('label[for="field-radio"]')).toHaveText('Radio en');
+    });
+
+    test('should show i18n radio labels', async () => {
+      await page.goto(url.create);
+      await expect(await page.locator('label[for="field-radio-one"] .radio-input__label'))
+        .toHaveText('Value One');
     });
   });
 
@@ -91,6 +142,28 @@ describe('fields', () => {
       await wait(100);
       const customCollapsibleLabel = await page.locator(`#field-collapsible-4__0-arrayWithCollapsibles__0 >> .row-label :text("${label}")`);
       await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase');
+    });
+  });
+
+  describe('blocks', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'block-fields');
+    });
+
+    test('should use i18n block labels', async () => {
+      await page.goto(url.create);
+      await expect(page.locator('#field-i18nBlocks .blocks-field__header')).toContainText('Block en');
+
+      const addButton = page.locator('#field-i18nBlocks .btn__label');
+      await expect(addButton).toContainText('Add Block en');
+      await addButton.click();
+
+      const blockSelector = page.locator('#field-i18nBlocks .block-selector .block-selection').first();
+      await expect(blockSelector).toContainText('Text en');
+      await blockSelector.click();
+
+      await expect(page.locator('#i18nBlocks-row-0 .blocks-field__block-pill-text')).toContainText('Text en');
     });
   });
 

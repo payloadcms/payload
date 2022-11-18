@@ -1,9 +1,19 @@
 import qs from 'qs';
 
+type GetOptions = RequestInit & {
+  params?: Record<string, unknown>
+}
+
 export const requests = {
-  get: (url: string, params: unknown = {}): Promise<Response> => {
-    const query = qs.stringify(params, { addQueryPrefix: true });
-    return fetch(`${url}${query}`, { credentials: 'include' });
+  get: (url: string, options: GetOptions = { headers: {} }): Promise<Response> => {
+    let query = '';
+    if (options.params) {
+      query = qs.stringify(options.params, { addQueryPrefix: true });
+    }
+    return fetch(`${url}${query}`, {
+      credentials: 'include',
+      headers: options.headers,
+    });
   },
 
   post: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {

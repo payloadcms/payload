@@ -17,12 +17,14 @@ import { LocaleProvider } from './components/utilities/Locale';
 import Routes from './components/Routes';
 import { StepNavProvider } from './components/elements/StepNav';
 import { ThemeProvider } from './components/utilities/Theme';
+import { I18n } from './components/utilities/I18n';
 
 import './scss/app.scss';
 
 const Index = () => (
   <React.Fragment>
     <ConfigProvider config={config}>
+      <I18n />
       <WindowInfoProvider breakpoints={{
         xs: '(max-width: 400px)',
         s: '(max-width: 768px)',

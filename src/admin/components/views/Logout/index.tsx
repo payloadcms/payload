@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import Minimal from '../../templates/Minimal';
@@ -14,6 +15,7 @@ const Logout: React.FC<{inactivity?: boolean}> = (props) => {
 
   const { logOut } = useAuth();
   const { routes: { admin } } = useConfig();
+  const { t } = useTranslation('authentication');
 
   useEffect(() => {
     logOut();
@@ -22,16 +24,16 @@ const Logout: React.FC<{inactivity?: boolean}> = (props) => {
   return (
     <Minimal className={baseClass}>
       <Meta
-        title="Logout"
-        description="Logout user"
-        keywords="Logout, Payload, CMS"
+        title={t('logout')}
+        description={t('logoutUser')}
+        keywords={t('logout')}
       />
       <div className={`${baseClass}__wrap`}>
         {inactivity && (
-          <h2>You have been logged out due to inactivity.</h2>
+          <h2>{t('loggedOutInactivity')}</h2>
         )}
         {!inactivity && (
-          <h2>You have been logged out successfully.</h2>
+          <h2>{t('loggedOutSuccessfully')}</h2>
         )}
         <br />
         <Button
@@ -39,7 +41,7 @@ const Logout: React.FC<{inactivity?: boolean}> = (props) => {
           buttonStyle="secondary"
           url={`${admin}/login`}
         >
-          Log back in
+          {t('logBackIn')}
         </Button>
       </div>
     </Minimal>

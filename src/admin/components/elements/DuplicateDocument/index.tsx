@@ -2,12 +2,14 @@ import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { Props } from './types';
 import Button from '../Button';
 import { requests } from '../../../api';
 import { useForm, useFormModified } from '../../forms/Form/context';
 import MinimalTemplate from '../../templates/Minimal';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -21,6 +23,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
   const { serverURL, routes: { api }, localization } = useConfig();
   const { routes: { admin } } = useConfig();
   const [hasClicked, setHasClicked] = useState<boolean>(false);
+  const { t, i18n } = useTranslation('general');
 
   const modalSlug = `duplicate-${id}`;
 
@@ -34,8 +37,13 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
 
     const create = async (locale = ''): Promise<string | null> => {
       const response = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
-        locale,
-        depth: 0,
+        params: {
+          locale,
+          depth: 0,
+        },
+        headers: {
+          'Accept-Language': i18n.language,
+        },
       });
       let data = await response.json();
 
@@ -49,6 +57,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
       const result = await requests.post(`${serverURL}${api}/${slug}`, {
         headers: {
           'Content-Type': 'application/json',
+          'Accept-Language': i18n.language,
         },
         body: JSON.stringify(data),
       });
@@ -70,8 +79,13 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         .forEach(async (locale) => {
           if (!abort) {
             const res = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
-              locale,
-              depth: 0,
+              params: {
+                locale,
+                depth: 0,
+              },
+              headers: {
+                'Accept-Language': i18n.language,
+              },
             });
             let localizedDoc = await res.json();
 
@@ -85,6 +99,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
             const patchResult = await requests.patch(`${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`, {
               headers: {
                 'Content-Type': 'application/json',
+                'Accept-Language': i18n.language,
               },
               body: JSON.stringify(localizedDoc),
             });
@@ -97,13 +112,17 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         });
       if (abort) {
         // delete the duplicate doc to prevent incomplete
-        await requests.delete(`${serverURL}${api}/${slug}/${id}`);
+        await requests.delete(`${serverURL}${api}/${slug}/${id}`, {
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        });
       }
     } else {
       duplicateID = await create();
     }
 
-    toast.success(`${collection.labels.singular} successfully duplicated.`,
+    toast.success(t('successfullyDuplicated', { label: getTranslation(collection.labels.singular, i18n) }),
       { autoClose: 3000 });
 
     setModified(false);
@@ -113,7 +132,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         pathname: `${admin}/collections/${slug}/${duplicateID}`,
       });
     }, 10);
-  }, [modified, localization, collection, setModified, toggleModal, modalSlug, serverURL, api, slug, id, push, admin]);
+  }, [modified, localization, t, i18n, collection, setModified, toggleModal, modalSlug, serverURL, api, slug, id, push, admin]);
 
   const confirm = useCallback(async () => {
     setHasClicked(false);
@@ -128,7 +147,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         className={baseClass}
         onClick={() => handleClick(false)}
       >
-        Duplicate
+        {t('duplicate')}
       </Button>
       {modified && hasClicked && (
         <Modal
@@ -136,9 +155,9 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
           className={`${baseClass}__modal`}
         >
           <MinimalTemplate className={`${baseClass}__modal-template`}>
-            <h1>Confirm duplicate</h1>
+            <h1>{t('confirmDuplication')}</h1>
             <p>
-              You have unsaved changes. Would you like to continue to duplicate?
+              {t('unsavedChangesDuplicate')}
             </p>
             <Button
               id="confirm-cancel"
@@ -146,13 +165,13 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
               type="button"
               onClick={() => toggleModal(modalSlug)}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               onClick={confirm}
               id="confirm-duplicate"
             >
-              Duplicate without saving changes
+              {t('duplicateWithoutSaving')}
             </Button>
           </MinimalTemplate>
         </Modal>

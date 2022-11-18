@@ -95,7 +95,7 @@ const ArrayFields: CollectionConfig = {
       admin: {
         description: 'Row labels rendered from a function.',
         components: {
-          RowLabel: ({ data, fallback }) => data.title || fallback,
+          RowLabel: ({ data }) => data.title,
         },
       },
     },

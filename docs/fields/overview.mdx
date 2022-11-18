@@ -72,14 +72,15 @@ There are two arguments available to custom validation functions.
 1. The value which is currently assigned to the field
 2. An optional object with dynamic properties for more complex validation having the following:
 
-| Property      | Description  |
-| ------------- | -------------|
-| `data`             | An object of the full collection or global document |
-| `siblingData`      | An object of the document data limited to fields within the same parent to the field |
-| `operation`        | Will be "create" or "update" depending on the UI action or API call |
-| `id`               | The value of the collection `id`, will be `undefined` on create request |
-| `user`             | The currently authenticated user object |
-| `payload`          | If the `validate` function is being executed on the server, Payload will be exposed for easily running local operations. |
+| Property      | Description                                                                                                              |
+|---------------|--------------------------------------------------------------------------------------------------------------------------|
+| `data`        | An object of the full collection or global document.                                                                     |
+| `siblingData` | An object of the document data limited to fields within the same parent to the field.                                    |
+| `operation`   | Will be "create" or "update" depending on the UI action or API call.                                                     |
+| `id`          | The value of the collection `id`, will be `undefined` on create request.                                                 |
+| `t`           | The function for translating text, [more](/docs/configuration/i18n).                                                     |
+| `user`        | The currently authenticated user object.                                                                                 |
+| `payload`     | If the `validate` function is being executed on the server, Payload will be exposed for easily running local operations. |
 
 Example:
 ```ts

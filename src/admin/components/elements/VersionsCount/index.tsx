@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import Button from '../Button';
 import { Props } from './types';
@@ -14,6 +15,7 @@ const baseClass = 'versions-count';
 const VersionsCount: React.FC<Props> = ({ collection, global, id }) => {
   const { routes: { admin } } = useConfig();
   const { versions, publishedDoc, unpublishedVersions } = useDocumentInfo();
+  const { t } = useTranslation('version');
 
   // Doc status could come from three places:
   // 1. the newest unpublished version (a draft)
@@ -44,7 +46,7 @@ const VersionsCount: React.FC<Props> = ({ collection, global, id }) => {
 
   return (
     <div className={baseClass}>
-      {versionCount === 0 && 'No versions found'}
+      {versionCount === 0 && t('versionCount_none')}
       {versionCount > 0 && (
         <Button
           className={`${baseClass}__button`}
@@ -52,12 +54,7 @@ const VersionsCount: React.FC<Props> = ({ collection, global, id }) => {
           el="link"
           to={versionsURL}
         >
-          {versionCount}
-          {' '}
-          version
-          {versionCount > 1 && 's'}
-          {' '}
-          found
+          {t('versionCount', { count: versionCount })}
         </Button>
       )}
     </div>

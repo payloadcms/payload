@@ -77,11 +77,11 @@ async function login<T>(incomingArgs: Arguments): Promise<Result & { user: T}> {
   const userDoc = await Model.findByUsername(email);
 
   if (!userDoc || (args.collection.config.auth.verify && userDoc._verified === false)) {
-    throw new AuthenticationError();
+    throw new AuthenticationError(req.t);
   }
 
   if (userDoc && isLocked(userDoc.lockUntil)) {
-    throw new LockedAuth();
+    throw new LockedAuth(req.t);
   }
 
   const authResult = await userDoc.authenticate(password);
@@ -90,7 +90,7 @@ async function login<T>(incomingArgs: Arguments): Promise<Result & { user: T}> {
 
   if (!authResult.user) {
     if (maxLoginAttemptsEnabled) await userDoc.incLoginAttempts();
-    throw new AuthenticationError();
+    throw new AuthenticationError(req.t);
   }
 
   if (maxLoginAttemptsEnabled) {

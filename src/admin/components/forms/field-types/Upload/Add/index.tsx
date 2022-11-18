@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../utilities/Config';
 import { useAuth } from '../../../../utilities/Auth';
 import MinimalTemplate from '../../../../templates/Minimal';
@@ -9,6 +10,7 @@ import RenderFields from '../../../RenderFields';
 import FormSubmit from '../../../Submit';
 import Upload from '../../../../views/collections/Edit/Upload';
 import ViewDescription from '../../../../elements/ViewDescription';
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 import { Props } from './types';
 
 import './index.scss';
@@ -31,6 +33,7 @@ const AddUploadModal: React.FC<Props> = (props) => {
   const { permissions } = useAuth();
   const { serverURL, routes: { api } } = useConfig();
   const { toggleModal } = useModal();
+  const { t, i18n } = useTranslation('fields');
 
   const onSuccess = useCallback((json) => {
     toggleModal(slug);
@@ -59,11 +62,9 @@ const AddUploadModal: React.FC<Props> = (props) => {
           <header className={`${baseClass}__header`}>
             <div>
               <h1>
-                New
-                {' '}
-                {collection.labels.singular}
+                {t('newLabel', { label: getTranslation(collection.labels.singular, i18n) })}
               </h1>
-              <FormSubmit>Save</FormSubmit>
+              <FormSubmit>{t('general:save')}</FormSubmit>
               <Button
                 icon="x"
                 round

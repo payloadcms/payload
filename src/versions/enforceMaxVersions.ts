@@ -5,7 +5,7 @@ type Args = {
   payload: Payload
   Model: CollectionModel
   max: number
-  entityLabel: string
+  slug: string
   entityType: 'global' | 'collection'
   id?: string | number
 }
@@ -14,7 +14,7 @@ export const enforceMaxVersions = async ({
   payload,
   Model,
   max,
-  entityLabel,
+  slug,
   entityType,
   id,
 }: Args): Promise<void> => {
@@ -35,6 +35,6 @@ export const enforceMaxVersions = async ({
       });
     }
   } catch (err) {
-    payload.logger.error(`There was an error cleaning up old versions for the ${entityType} ${entityLabel}`);
+    payload.logger.error(`There was an error cleaning up old versions for the ${entityType} ${slug}`);
   }
 };

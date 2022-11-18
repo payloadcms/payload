@@ -6,6 +6,7 @@ import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
 import { Field } from '../../fields/config/types';
 import { Payload } from '../..';
+import { toWords } from '../../utilities/formatLabels';
 
 type OperationType = 'create' | 'read' | 'update' | 'delete' | 'unlock' | 'readVersions';
 
@@ -77,14 +78,14 @@ const buildFields = (label, fieldsToBuild) => fieldsToBuild.reduce((builtFields,
   return builtFields;
 }, {});
 
-const buildEntity = (label: string, entityFields: Field[], operations: OperationType[]) => {
-  const formattedLabel = formatName(label);
+const buildEntity = (name: string, entityFields: Field[], operations: OperationType[]) => {
+  const formattedName = toWords(name, true);
 
   const fields = {
     fields: {
       type: new GraphQLObjectType({
-        name: formatName(`${formattedLabel}Fields`),
-        fields: buildFields(`${formattedLabel}Fields`, entityFields),
+        name: formatName(`${formattedName}Fields`),
+        fields: buildFields(`${formattedName}Fields`, entityFields),
       }),
     },
   };
@@ -94,7 +95,7 @@ const buildEntity = (label: string, entityFields: Field[], operations: Operation
 
     fields[operation] = {
       type: new GraphQLObjectType({
-        name: `${formattedLabel}${capitalizedOperation}Access`,
+        name: `${formattedName}${capitalizedOperation}Access`,
         fields: {
           permission: { type: new GraphQLNonNull(GraphQLBoolean) },
           where: { type: GraphQLJSONObject },
@@ -126,8 +127,8 @@ export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
 
     fields[formatName(collection.slug)] = {
       type: new GraphQLObjectType({
-        name: formatName(`${collection.labels.singular}Access`),
-        fields: buildEntity(collection.labels.singular, collection.fields, collectionOperations),
+        name: formatName(`${collection.slug}Access`),
+        fields: buildEntity(collection.slug, collection.fields, collectionOperations),
       }),
     };
   });
@@ -141,8 +142,8 @@ export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
 
     fields[formatName(global.slug)] = {
       type: new GraphQLObjectType({
-        name: formatName(`${global.label}Access`),
-        fields: buildEntity(global.label, global.fields, globalOperations),
+        name: formatName(`${global?.graphQL?.name || global.slug}Access`),
+        fields: buildEntity(global?.graphQL?.name || global.slug, global.fields, globalOperations),
       }),
     };
   });

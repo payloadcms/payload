@@ -12,9 +12,11 @@ import {
   SortEndHandler,
   SortableHandle,
 } from 'react-sortable-hoc';
+import { useTranslation } from 'react-i18next';
 import { arrayMove } from '../../../../utilities/arrayMove';
 import { Props, Value } from './types';
 import Chevron from '../../icons/Chevron';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -64,6 +66,8 @@ const ReactSelect: React.FC<Props> = (props) => {
     filterOption = undefined,
   } = props;
 
+  const { i18n } = useTranslation();
+
   const classes = [
     className,
     'react-select',
@@ -92,7 +96,7 @@ const ReactSelect: React.FC<Props> = (props) => {
         // small fix for https://github.com/clauderic/react-sortable-hoc/pull/352:
         getHelperDimensions={({ node }) => node.getBoundingClientRect()}
         // react-select props:
-        placeholder={placeholder}
+        placeholder={getTranslation(placeholder, i18n)}
         {...props}
         value={value as Value[]}
         onChange={onChange}
@@ -117,7 +121,7 @@ const ReactSelect: React.FC<Props> = (props) => {
 
   return (
     <Select
-      placeholder={placeholder}
+      placeholder={getTranslation(placeholder, i18n)}
       captureMenuScroll
       {...props}
       value={value}
