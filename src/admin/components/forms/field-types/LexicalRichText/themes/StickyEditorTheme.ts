@@ -8,7 +8,7 @@
 
 import type { EditorThemeClasses } from 'lexical';
 
-import './StickyEditorTheme.css';
+import './StickyEditorTheme.scss';
 
 import baseTheme from './PlaygroundEditorTheme';
 

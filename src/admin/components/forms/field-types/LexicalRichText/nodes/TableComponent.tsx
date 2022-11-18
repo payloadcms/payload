@@ -308,7 +308,6 @@ function TableCellEditor({ cellEditor }: {cellEditor: LexicalEditor}) {
       initialEditor={cellEditor}
       initialTheme={cellEditorConfig.theme}
       initialNodes={cellEditorConfig.nodes}
-      skipCollabChecks
     >
       {cellEditorPlugins}
     </LexicalNestedComposer>

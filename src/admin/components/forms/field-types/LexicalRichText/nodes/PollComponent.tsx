@@ -10,7 +10,6 @@ import type { Option, Options, PollNode } from './PollNode';
 
 import './PollNode.css';
 
-import { useCollaborationContext } from '@lexical/react/LexicalCollaborationContext';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { mergeRegister } from '@lexical/utils';
@@ -53,11 +52,8 @@ function PollOptionComponent({
   totalVotes: number;
   withPollNode: (cb: (pollNode: PollNode) => void) => void;
 }): JSX.Element {
-  const { clientID } = useCollaborationContext();
   const checkboxRef = useRef(null);
   const votesArray = option.votes;
-  const checkedIndex = votesArray.indexOf(clientID);
-  const checked = checkedIndex !== -1;
   const votes = votesArray.length;
   const { text } = option;
 

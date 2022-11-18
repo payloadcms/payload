@@ -76,7 +76,6 @@ export const Editor: React.FC<OnChangeProps> = (props) => {
   const { historyState } = useSharedHistoryContext();
   const {
     settings: {
-      isCollab,
       isAutocomplete,
       isMaxLength,
       isCharLimit,
@@ -86,12 +85,10 @@ export const Editor: React.FC<OnChangeProps> = (props) => {
       showTableOfContents,
     },
   } = useSettings();
-  // eslint-disable-next-line no-nested-ternary
-  const text = isCollab
-    ? 'Enter some collaborative rich text...'
-    : isRichText
-      ? 'Enter some rich text...'
-      : 'Enter some plain text...';
+
+  const text = isRichText
+    ? 'Enter some rich text...'
+    : 'Enter some plain text...';
   const placeholder = <Placeholder>{text}</Placeholder>;
   const scrollRef = useRef(null);
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
