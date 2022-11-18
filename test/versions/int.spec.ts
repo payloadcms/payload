@@ -62,7 +62,10 @@ describe('Versions', () => {
 
         collectionLocalPostID = autosavePost.id;
 
-        const updatedPost = await payload.update({
+        const updatedPost: {
+          title: string
+          _status?: string
+        } = await payload.update({
           id: collectionLocalPostID,
           collection,
           data: {
@@ -541,6 +544,48 @@ describe('Versions', () => {
         const response = await graphQLClient.request(query);
         const data = response.AutosaveGlobal;
         expect(data.title).toStrictEqual(globalGraphQLOriginalTitle);
+      });
+    });
+
+    describe('Update', () => {
+      it('should allow a draft to be patched', async () => {
+        const originalTitle = 'Here is a published post';
+
+        const originalPublishedPost = await payload.create({
+          collection,
+          data: {
+            title: originalTitle,
+            description: 'kjnjyhbbdsfseankuhsjsfghb',
+            _status: 'published',
+          },
+        });
+
+        const updatedTitle = 'Here is a draft post with a patched title';
+
+        collectionLocalPostID = originalPublishedPost.id;
+
+        await payload.update({
+          id: collectionLocalPostID,
+          collection,
+          data: {
+            title: updatedTitle,
+          },
+          draft: true,
+        });
+
+        const publishedPost = await payload.findByID({
+          collection,
+          id: collectionLocalPostID,
+        });
+
+        const draftPost = await payload.findByID({
+          collection,
+          id: collectionLocalPostID,
+          draft: true,
+        });
+
+        expect(publishedPost.title).toBe(originalTitle);
+        expect(draftPost.title).toBe(updatedTitle);
       });
     });
   });
