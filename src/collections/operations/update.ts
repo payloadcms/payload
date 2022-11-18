@@ -78,7 +78,6 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   }
 
   const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
-  if (shouldSaveDraft) data._status = 'draft';
 
   // /////////////////////////////////////
   // Access
