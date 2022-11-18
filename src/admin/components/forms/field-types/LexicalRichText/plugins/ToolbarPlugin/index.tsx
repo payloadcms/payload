@@ -85,7 +85,7 @@ import {
   InsertImageDialog,
   InsertImagePayload,
 } from '../ImagesPlugin';
-import { InsertNewTableDialog, InsertTableDialog } from '../TablePlugin';
+import { InsertTableDialog } from '../TablePlugin';
 
 const blockTypeToBlockName = {
   bullet: 'Bulleted List',
@@ -872,20 +872,6 @@ export default function ToolbarPlugin(): JSX.Element {
             >
               <i className="icon table" />
               <span className="text">Table</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
-                showModal('Insert Table', (onClose) => (
-                  <InsertNewTableDialog
-                    activeEditor={activeEditor}
-                    onClose={onClose}
-                  />
-                ));
-              }}
-              className="item"
-            >
-              <i className="icon table" />
-              <span className="text">Table (Experimental)</span>
             </DropDownItem>
 
             <DropDownItem

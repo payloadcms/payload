@@ -55,7 +55,6 @@ export type CellEditorConfig = Readonly<{
   theme?: EditorThemeClasses;
 }>;
 
-export const INSERT_NEW_TABLE_COMMAND: LexicalCommand<InsertTableCommandPayload> = createCommand('INSERT_NEW_TABLE_COMMAND');
 
 // @ts-ignore: not sure why TS doesn't like using null as the value?
 export const CellContext: React.Context<CellContextShape> = createContext({
@@ -104,40 +103,6 @@ export function InsertTableDialog({
 
   const onClick = () => {
     activeEditor.dispatchCommand(INSERT_TABLE_COMMAND, { columns, rows });
-    onClose();
-  };
-
-  return (
-    <React.Fragment>
-      <TextInput
-        label="No of rows"
-        onChange={setRows}
-        value={rows}
-      />
-      <TextInput
-        label="No of columns"
-        onChange={setColumns}
-        value={columns}
-      />
-      <DialogActions data-test-id="table-model-confirm-insert">
-        <Button onClick={onClick}>Confirm</Button>
-      </DialogActions>
-    </React.Fragment>
-  );
-}
-
-export function InsertNewTableDialog({
-  activeEditor,
-  onClose,
-}: {
-  activeEditor: LexicalEditor;
-  onClose: () => void;
-}): JSX.Element {
-  const [rows, setRows] = useState('5');
-  const [columns, setColumns] = useState('5');
-
-  const onClick = () => {
-    activeEditor.dispatchCommand(INSERT_NEW_TABLE_COMMAND, { columns, rows });
     onClose();
   };
 
