@@ -21,7 +21,6 @@
   display: flex;
   background: none;
   border-radius: 10px;
-  padding: 8px;
   cursor: pointer;
   vertical-align: middle;
 }
@@ -39,7 +38,7 @@
   display: inline-block;
   height: 18px;
   width: 18px;
-  margin-top: 2px;
+  margin-top: 3px;
   vertical-align: -0.25em;
   display: flex;
   opacity: 0.6;
@@ -127,4 +126,17 @@
   width: 1px;
   background-color: #eee;
   margin: 0 4px;
+}
+
+html[data-theme=dark] {
+  .floating-text-format-popup {
+    background-color: black;
+    border: 1px solid var(--theme-elevation-150);
+  }
+  .floating-text-format-popup i {
+    filter: invert(1);
+  }
+  .floating-text-format-popup .popup-item:hover:not([disabled]){
+    background-color: #1c1c1c;
+  }
 }

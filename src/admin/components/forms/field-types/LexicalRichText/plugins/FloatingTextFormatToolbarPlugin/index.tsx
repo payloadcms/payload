@@ -6,7 +6,7 @@
  *
  */
 
-import './index.css';
+import './index.scss';
 
 import { $isCodeHighlightNode } from '@lexical/code';
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
