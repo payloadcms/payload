@@ -28,6 +28,7 @@ import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { OperationContext } from '../../../utilities/OperationProvider';
 import { Gutter } from '../../../elements/Gutter';
 import { getTranslation } from '../../../../../utilities/getTranslation';
+import { SetStepNav } from './SetStepNav';
 
 import './index.scss';
 
@@ -93,6 +94,11 @@ const DefaultEditView: React.FC<Props> = (props) => {
             disabled={!hasSavePermission}
             initialState={initialState}
           >
+            <SetStepNav
+              collection={collection}
+              isEditing={isEditing}
+              id={data.id}
+            />
             <div className={`${baseClass}__main`}>
               <Meta
                 title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(collection.labels.singular, i18n)}`}
