@@ -47,7 +47,6 @@ header h1 {
 }
 
 .editor-shell .editor-container {
-  background: #fff;
   position: relative;
   cursor: text;
   display: block;
@@ -1282,7 +1281,7 @@ button.action-button:disabled {
 .toolbar {
   display: flex;
   margin-bottom: 1px;
-  background: #fff;
+  /*background: #fff;*/
   padding: 4px;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
@@ -1290,6 +1289,8 @@ button.action-button:disabled {
   overflow: auto;
   height: 36px;
 }
+
+
 
 .toolbar button.toolbar-item {
   border: 0;
@@ -1588,4 +1589,14 @@ hr.selected {
   white-space: pre-wrap;
   word-break: break-word;
   z-index: 3;
+}
+
+
+html[data-theme=dark] {
+  .toolbar {
+    filter: invert(1);
+  }
+  .editor-shell {
+    color: #fff;
+  }
 }

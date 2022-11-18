@@ -1,4 +1,5 @@
 import React, { Suspense, useCallback } from 'react';
+import { EditorState, LexicalEditor } from 'lexical';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
 import Error from '../../Error';
@@ -6,11 +7,9 @@ import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
 import { PlaygroundApp } from './App';
 
-import './index.css';
+import './index.scss';
 import Loading from '../../../elements/Loading';
 import { lexicalRichText as lexicalRichTextValidation } from '../../../../../fields/validations';
-import defaultValue from '../../../../../fields/richText/defaultValue';
-import { EditorState, LexicalEditor } from 'lexical';
 
 const baseClass = 'lexicalRichTextEditor';
 

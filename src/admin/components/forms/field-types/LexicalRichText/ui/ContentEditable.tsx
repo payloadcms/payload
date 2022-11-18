@@ -6,7 +6,7 @@
  *
  */
 
-import './ContentEditable.css';
+import './ContentEditable.scss';
 
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import * as React from 'react';

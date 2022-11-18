@@ -8,7 +8,7 @@
 
 import type { EditorThemeClasses } from 'lexical';
 
-import './PlaygroundEditorTheme.css';
+import './PlaygroundEditorTheme.scss';
 
 const theme: EditorThemeClasses = {
   characterLimit: 'PlaygroundEditorTheme__characterLimit',

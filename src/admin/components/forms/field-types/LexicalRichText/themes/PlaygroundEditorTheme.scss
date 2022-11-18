@@ -429,3 +429,13 @@
 .PlaygroundEditorTheme__embedBlockFocus {
   outline: 2px solid rgb(60, 132, 244);
 }
+
+
+html[data-theme=dark] {
+  .PlaygroundEditorTheme__h1 {
+    color: rgb(255, 255, 255);
+  }
+  .PlaygroundEditorTheme__h2 {
+    color: rgb(148, 151, 157);
+  }
+}
