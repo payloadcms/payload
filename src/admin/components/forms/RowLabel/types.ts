@@ -18,7 +18,7 @@ export type RowLabelFunction = (args: RowLabelArgs) => string
 
 export type RowLabelComponent = React.ComponentType<RowLabelArgs>
 
-export type RowLabel = string | RowLabelFunction | RowLabelComponent
+export type RowLabel = string | Record<string, string> | RowLabelFunction | RowLabelComponent
 
 export function isComponent(label: RowLabel): label is RowLabelComponent {
   return React.isValidElement(label);

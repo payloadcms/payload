@@ -49,7 +49,7 @@ export const beforeChange = async ({
   });
 
   if (errors.length > 0) {
-    throw new ValidationError(errors);
+    throw new ValidationError(errors, req.t);
   }
 
   mergeLocaleActions.forEach((action) => action());

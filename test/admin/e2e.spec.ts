@@ -158,7 +158,7 @@ describe('admin', () => {
       await page.locator('#action-delete').click();
       await page.locator('#confirm-delete').click();
 
-      await expect(page.locator(`text=Post "${id}" successfully deleted.`)).toBeVisible();
+      await expect(page.locator(`text=Post en "${id}" successfully deleted.`)).toBeVisible();
       expect(page.url()).toContain(url.list);
     });
 
@@ -170,6 +170,29 @@ describe('admin', () => {
 
       await expect(page.locator('.Toastify__toast--success')).toHaveCount(1);
       await expect(page.locator('#field-title')).toHaveValue(title);
+    });
+  });
+
+  describe('i18n', () => {
+    test('should allow changing language', async () => {
+      await page.goto(url.account);
+
+      const field = page.locator('.account__language .react-select');
+
+      await field.click({ delay: 100 });
+      const options = page.locator('.rs__option');
+      await options.locator('text=Español').click();
+
+      await expect(page.locator('.step-nav')).toContainText('Tablero');
+
+      await field.click({ delay: 100 });
+      await options.locator('text=English').click();
+      await field.click({ delay: 100 });
+      await expect(page.locator('.form-submit .btn')).toContainText('Save');
+    });
+
+    test('should allow custom translation', async () => {
+      await expect(page.locator('.step-nav')).toContainText('Home');
     });
   });
 
@@ -316,6 +339,55 @@ describe('admin', () => {
         // Swap back
         expect(await page.locator('.row-1 .cell-id').innerText()).toEqual(firstId);
         expect(await page.locator('.row-2 .cell-id').innerText()).toEqual(secondId);
+      });
+    });
+
+    describe('i18n', () => {
+      test('should display translated collections and globals config options', async () => {
+        await page.goto(url.list);
+
+        // collection label
+        await expect(page.locator('#nav-posts')).toContainText('Posts en');
+
+        // global label
+        await expect(page.locator('#nav-global-global')).toContainText('Global en');
+
+        // view description
+        await expect(page.locator('.view-description')).toContainText('Description en');
+      });
+
+      test('should display translated field titles', async () => {
+        await createPost();
+
+        // column controls
+        await page.locator('.list-controls__toggle-columns').click();
+        await expect(await page.locator('.column-selector__column >> text=Title en')).toHaveText('Title en');
+
+        // filters
+        await page.locator('.list-controls__toggle-where').click();
+        await page.locator('.where-builder__add-first-filter').click();
+        await page.locator('.condition__field .rs__control').click();
+        const options = page.locator('.rs__option');
+        await expect(await options.locator('text=Title en')).toHaveText('Title en');
+
+        // list columns
+        await expect(await page.locator('#heading-title .sort-column__label')).toHaveText('Title en');
+        await expect(await page.locator('.search-filter input')).toHaveAttribute('placeholder', /(Title en)/);
+      });
+
+      test('should use fallback language on field titles', async () => {
+        // change language German
+        await page.goto(url.account);
+        const field = page.locator('.account__language .react-select');
+        await field.click({ delay: 100 });
+        const languageSelect = page.locator('.rs__option');
+        // text field does not have a 'de' label
+        await languageSelect.locator('text=Deutsch').click();
+
+        await page.goto(url.list);
+        await page.locator('.list-controls__toggle-columns').click();
+        // expecting the label to fall back to english as default fallbackLng
+        await expect(await page.locator('.column-selector__column >> text=Title en')).toHaveText('Title en');
       });
     });
   });

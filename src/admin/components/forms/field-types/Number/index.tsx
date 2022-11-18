@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -6,6 +7,7 @@ import FieldDescription from '../../FieldDescription';
 import withCondition from '../../withCondition';
 import { number } from '../../../../../fields/validations';
 import { Props } from './types';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -29,6 +31,8 @@ const NumberField: React.FC<Props> = (props) => {
       condition,
     } = {},
   } = props;
+
+  const { i18n } = useTranslation();
 
   const path = pathFromProps || name;
 
@@ -87,7 +91,7 @@ const NumberField: React.FC<Props> = (props) => {
         value={typeof value === 'number' ? value : ''}
         onChange={handleChange}
         disabled={readOnly}
-        placeholder={placeholder}
+        placeholder={getTranslation(placeholder, i18n)}
         type="number"
         name={path}
         step={step}

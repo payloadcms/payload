@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import useIntersect from '../../../hooks/useIntersect';
 import { Props } from './types';
 import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../fields/config/types';
 import { useOperation } from '../../utilities/OperationProvider';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 const baseClass = 'render-fields';
 
@@ -23,6 +25,7 @@ const RenderFields: React.FC<Props> = (props) => {
     indexPath: incomingIndexPath,
   } = props;
 
+  const { t, i18n } = useTranslation('general');
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender));
   const [intersectionRef, entry] = useIntersect(intersectionObserverOptions);
   const operation = useOperation();
@@ -107,7 +110,7 @@ const RenderFields: React.FC<Props> = (props) => {
                       className="missing-field"
                       key={fieldIndex}
                     >
-                      {`No matched field found for "${field.label}"`}
+                      {t('error:noMatchedField', { label: fieldAffectsData(field) ? getTranslation(field.label || field.name, i18n) : field.path })}
                     </div>
                   );
                 }

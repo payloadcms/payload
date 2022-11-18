@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
+import { useTranslation } from 'react-i18next';
 import { Props } from './types';
 import { CollapsibleProvider, useCollapsible } from './provider';
 import Chevron from '../../icons/Chevron';
@@ -22,6 +23,7 @@ export const Collapsible: React.FC<Props> = ({
   const [collapsedLocal, setCollapsedLocal] = useState(Boolean(initCollapsed));
   const [hovered, setHovered] = useState(false);
   const isNested = useCollapsible();
+  const { t } = useTranslation('fields');
 
   const collapsed = typeof collapsedFromProps === 'boolean' ? collapsedFromProps : collapsedLocal;
 
@@ -61,7 +63,7 @@ export const Collapsible: React.FC<Props> = ({
             }}
           >
             <span>
-              Toggle block
+              {t('toggleBlock')}
             </span>
           </button>
           {header && (

@@ -4,6 +4,7 @@ import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import { TypeWithID } from '../../config/types';
 import findOne from '../findOne';
+import i18nInit from '../../../translations/init';
 
 export type Options = {
   slug: string
@@ -29,6 +30,7 @@ export default async function findOneLocal<T extends TypeWithID = any>(payload: 
   } = options;
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
+  const i18n = i18nInit(payload.config.i18n);
 
   const req = {
     user,
@@ -36,6 +38,8 @@ export default async function findOneLocal<T extends TypeWithID = any>(payload: 
     locale,
     fallbackLocale,
     payload,
+    i18n,
+    t: i18n.t,
   } as PayloadRequest;
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

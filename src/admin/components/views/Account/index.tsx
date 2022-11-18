@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
@@ -39,6 +40,7 @@ const AccountView: React.FC = () => {
       user: 'users',
     },
   } = useConfig();
+  const { t } = useTranslation('authentication');
 
   const collection = collections.find((coll) => coll.slug === adminUser);
 
@@ -59,21 +61,21 @@ const AccountView: React.FC = () => {
 
   useEffect(() => {
     const nav = [{
-      label: 'Account',
+      label: t('account'),
     }];
 
     setStepNav(nav);
-  }, [setStepNav]);
+  }, [setStepNav, t]);
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user, locale });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user, locale, t });
       await getPreference(preferencesKey);
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference]);
+  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, t]);
 
   return (
     <RenderCustomComponent

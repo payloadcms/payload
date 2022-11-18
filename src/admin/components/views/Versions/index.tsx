@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import format from 'date-fns/format';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import Eyebrow from '../../elements/Eyebrow';
@@ -20,6 +21,7 @@ import { SanitizedCollectionConfig } from '../../../../collections/config/types'
 import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 import { shouldIncrementVersionCount } from '../../../../versions/shouldIncrementVersionCount';
 import { Gutter } from '../../elements/Gutter';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -29,7 +31,8 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   const { serverURL, routes: { admin, api }, admin: { dateFormat } } = useConfig();
   const { setStepNav } = useStepNav();
   const { params: { id } } = useRouteMatch<{ id: string }>();
-  const [tableColumns] = useState(() => getColumns(collection, global));
+  const { t, i18n } = useTranslation('version');
+  const [tableColumns] = useState(() => getColumns(collection, global, t));
   const [fetchURL, setFetchURL] = useState('');
   const { page, sort, limit } = useSearchParams();
 
@@ -42,7 +45,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   if (collection) {
     ({ slug } = collection);
     docURL = `${serverURL}${api}/${slug}/${id}`;
-    entityLabel = collection.labels.singular;
+    entityLabel = getTranslation(collection.labels.singular, i18n);
     entity = collection;
     editURL = `${admin}/collections/${collection.slug}/${id}`;
   }
@@ -50,7 +53,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   if (global) {
     ({ slug } = global);
     docURL = `${serverURL}${api}/globals/${slug}`;
-    entityLabel = global.label;
+    entityLabel = getTranslation(global.label, i18n);
     entity = global;
     editURL = `${admin}/globals/${global.slug}`;
   }
@@ -70,7 +73,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
           if (doc[useAsTitle]) {
             docLabel = doc[useAsTitle];
           } else {
-            docLabel = '[Untitled]';
+            docLabel = `[${t('general:untitled')}]`;
           }
         } else {
           docLabel = doc.id;
@@ -80,14 +83,14 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
       nav = [
         {
           url: `${admin}/collections/${collection.slug}`,
-          label: collection.labels.plural,
+          label: getTranslation(collection.labels.plural, i18n),
         },
         {
           label: docLabel,
           url: editURL,
         },
         {
-          label: 'Versions',
+          label: t('versions'),
         },
       ];
     }
@@ -96,16 +99,16 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
       nav = [
         {
           url: editURL,
-          label: global.label,
+          label: getTranslation(global.label, i18n),
         },
         {
-          label: 'Versions',
+          label: t('versions'),
         },
       ];
     }
 
     setStepNav(nav);
-  }, [setStepNav, collection, global, useAsTitle, doc, admin, id, editURL]);
+  }, [setStepNav, collection, global, useAsTitle, doc, admin, id, editURL, t, i18n]);
 
   useEffect(() => {
     const params = {
@@ -149,14 +152,14 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   let metaTitle: string;
 
   if (collection) {
-    metaTitle = `Versions - ${doc[useAsTitle]} - ${entityLabel}`;
-    metaDesc = `Viewing versions for the ${entityLabel} ${doc[useAsTitle]}`;
-    heading = doc?.[useAsTitle] || '[Untitled]';
+    metaTitle = `${t('versions')} - ${doc[useAsTitle]} - ${entityLabel}`;
+    metaDesc = t('viewingVersions', { documentTitle: doc[useAsTitle], entityLabel });
+    heading = doc?.[useAsTitle] || `[${t('general:untitled')}]`;
   }
 
   if (global) {
-    metaTitle = `Versions - ${entityLabel}`;
-    metaDesc = `Viewing versions for the global ${entityLabel}`;
+    metaTitle = `${t('versions')} - ${entityLabel}`;
+    metaDesc = t('viewingVersionsGlobal', { entityLabel });
     heading = entityLabel;
     useIDLabel = false;
   }
@@ -192,11 +195,8 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
             type={docStatus === 'published' ? 'success' : undefined}
             className={`${baseClass}__parent-doc`}
           >
-            Current
-            {' '}
-            {docStatus}
-            {' '}
-            document -
+            {t('currentDocumentStatus', { docStatus })}
+            -
             {' '}
             {format(new Date(docUpdatedAt), dateFormat)}
             <div className={`${baseClass}__parent-doc-pills`}>
@@ -205,7 +205,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
                 pillStyle="white"
                 to={editURL}
               >
-                Edit
+                {t('general:edit')}
               </Pill>
             </div>
           </Banner>
@@ -234,7 +234,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
                   -
                   {versionsData.totalPages > 1 && versionsData.totalPages !== versionsData.page ? (versionsData.limit * versionsData.page) : versionsData.totalDocs}
                   {' '}
-                  of
+                  {t('of')}
                   {' '}
                   {versionsData.totalDocs}
                 </div>
@@ -249,7 +249,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
         )}
         {versionsData?.totalDocs === 0 && (
           <div className={`${baseClass}__no-versions`}>
-            No further versions found
+            {t('noFurtherVersionsFound')}
           </div>
         )}
       </Gutter>

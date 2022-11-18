@@ -4,6 +4,7 @@ import { PayloadRequest } from '../../../express/types';
 import { TypeWithID } from '../../config/types';
 import update from '../update';
 import { getDataLoader } from '../../../collections/dataloader';
+import i18nInit from '../../../translations/init';
 
 export type Options = {
   slug: string
@@ -31,6 +32,7 @@ export default async function updateLocal<T extends TypeWithID = any>(payload: P
   } = options;
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
+  const i18n = i18nInit(payload.config.i18n);
 
   const req = {
     user,
@@ -38,6 +40,8 @@ export default async function updateLocal<T extends TypeWithID = any>(payload: P
     locale,
     fallbackLocale,
     payload,
+    i18n,
+    t: i18n.t,
   } as PayloadRequest;
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

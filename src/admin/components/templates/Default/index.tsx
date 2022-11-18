@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import DefaultNav from '../../elements/Nav';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
@@ -19,6 +20,7 @@ const Default: React.FC<Props> = ({ children, className }) => {
       },
     } = {},
   } = useConfig();
+  const { t } = useTranslation('general');
 
   const classes = [
     baseClass,
@@ -28,9 +30,9 @@ const Default: React.FC<Props> = ({ children, className }) => {
   return (
     <div className={classes}>
       <Meta
-        title="Dashboard"
-        description="Dashboard for Payload CMS"
-        keywords="Dashboard, Payload, CMS"
+        title={t('dashboard')}
+        description={`${t('dashboard')} Payload CMS`}
+        keywords={`${t('dashboard')}, Payload CMS`}
       />
       <RenderCustomComponent
         DefaultComponent={DefaultNav}

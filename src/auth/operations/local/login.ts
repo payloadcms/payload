@@ -4,6 +4,7 @@ import { PayloadRequest } from '../../../express/types';
 import { TypeWithID } from '../../../collections/config/types';
 import { Payload } from '../../..';
 import { getDataLoader } from '../../../collections/dataloader';
+import i18n from '../../../translations/init';
 
 export type Options = {
   collection: string
@@ -37,9 +38,11 @@ async function localLogin<T extends TypeWithID = any>(payload: Payload, options:
 
   req.payloadAPI = 'local';
   req.payload = payload;
+  req.i18n = i18n(payload.config.i18n);
   req.locale = undefined;
   req.fallbackLocale = undefined;
 
+  if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   const args = {

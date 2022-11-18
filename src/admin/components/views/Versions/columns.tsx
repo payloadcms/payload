@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useRouteMatch } from 'react-router-dom';
 import format from 'date-fns/format';
+import type { TFunction } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { Column } from '../../elements/Table/types';
 import SortColumn from '../../elements/SortColumn';
@@ -37,13 +38,13 @@ const TextCell: React.FC<{children?: React.ReactNode}> = ({ children }) => (
   </span>
 );
 
-export const getColumns = (collection: SanitizedCollectionConfig, global: SanitizedGlobalConfig): Column[] => [
+export const getColumns = (collection: SanitizedCollectionConfig, global: SanitizedGlobalConfig, t: TFunction): Column[] => [
   {
     accessor: 'updatedAt',
     components: {
       Heading: (
         <SortColumn
-          label="Updated At"
+          label={t('general:updatedAt')}
           name="updatedAt"
         />
       ),
@@ -62,7 +63,7 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
     components: {
       Heading: (
         <SortColumn
-          label="Version ID"
+          label={t('versionID')}
           disable
           name="id"
         />
@@ -75,7 +76,7 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
     components: {
       Heading: (
         <SortColumn
-          label="Type"
+          label={t('type')}
           name="autosave"
           disable
         />
@@ -85,7 +86,7 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
           {row?.autosave && (
             <React.Fragment>
               <Pill>
-                Autosave
+                {t('autosave')}
               </Pill>
               &nbsp;&nbsp;
             </React.Fragment>
@@ -93,14 +94,14 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
           {row?.version._status === 'published' && (
             <React.Fragment>
               <Pill pillStyle="success">
-                Published
+                {t('published')}
               </Pill>
               &nbsp;&nbsp;
             </React.Fragment>
           )}
           {row?.version._status === 'draft' && (
             <Pill>
-              Draft
+              {t('draft')}
             </Pill>
           )}
         </TextCell>

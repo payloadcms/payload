@@ -6,6 +6,7 @@ import isDeepEqual from 'deep-equal';
 import { serialize } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../utilities/Auth';
 import { useLocale } from '../../utilities/Locale';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
@@ -46,6 +47,7 @@ const Form: React.FC<Props> = (props) => {
 
   const history = useHistory();
   const locale = useLocale();
+  const { t, i18n } = useTranslation('general');
   const { refreshCookie, user } = useAuth();
   const { id } = useDocumentInfo();
   const operation = useOperation();
@@ -90,6 +92,7 @@ const Form: React.FC<Props> = (props) => {
             user,
             id,
             operation,
+            t,
           });
         }
 
@@ -110,7 +113,7 @@ const Form: React.FC<Props> = (props) => {
     }
 
     return isValid;
-  }, [contextRef, id, user, operation, dispatchFields]);
+  }, [contextRef, id, user, operation, t, dispatchFields]);
 
   const submit = useCallback(async (options: SubmitOptions = {}, e): Promise<void> => {
     const {
@@ -142,7 +145,7 @@ const Form: React.FC<Props> = (props) => {
 
     // If not valid, prevent submission
     if (!isValid) {
-      toast.error('Please correct invalid fields.');
+      toast.error(t('error:correctInvalidFields'));
       setProcessing(false);
 
       return;
@@ -164,6 +167,9 @@ const Form: React.FC<Props> = (props) => {
     try {
       const res = await requests[methodToUse.toLowerCase()](actionToUse, {
         body: formData,
+        headers: {
+          'Accept-Language': i18n.language,
+        },
       });
 
       setModified(false);
@@ -206,7 +212,7 @@ const Form: React.FC<Props> = (props) => {
 
           history.push(destination);
         } else if (!disableSuccessStatus) {
-          toast.success(json.message || 'Submission successful.', { autoClose: 3000 });
+          toast.success(json.message || t('submissionSuccessful'), { autoClose: 3000 });
         }
       } else {
         contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form
@@ -262,13 +268,13 @@ const Form: React.FC<Props> = (props) => {
           });
 
           nonFieldErrors.forEach((err) => {
-            toast.error(err.message || 'An unknown error occurred.');
+            toast.error(err.message || t('error:unknown'));
           });
 
           return;
         }
 
-        const message = errorMessages[res.status] || 'An unknown error occurred.';
+        const message = errorMessages[res.status] || t('error:unknown');
 
         toast.error(message);
       }
@@ -291,6 +297,8 @@ const Form: React.FC<Props> = (props) => {
     onSubmit,
     onSuccess,
     redirect,
+    t,
+    i18n,
     waitForAutocomplete,
   ]);
 
@@ -325,10 +333,10 @@ const Form: React.FC<Props> = (props) => {
   }, [contextRef]);
 
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
-    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation, locale });
+    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation, locale, t });
     contextRef.current = { ...initContextState } as FormContextType;
     dispatchFields({ type: 'REPLACE_STATE', state });
-  }, [id, user, operation, locale, dispatchFields]);
+  }, [id, user, operation, locale, t, dispatchFields]);
 
   contextRef.current.submit = submit;
   contextRef.current.getFields = getFields;

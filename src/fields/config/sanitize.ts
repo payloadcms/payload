@@ -20,7 +20,7 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
     }
 
     // Auto-label
-    if ('name' in field && field.name && typeof field.label !== 'string' && field.label !== false) {
+    if ('name' in field && field.name && typeof field.label !== 'object' && typeof field.label !== 'string' && field.label !== false) {
       field.label = toWords(field.name);
     }
 
@@ -45,7 +45,7 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
       field.fields.push(baseIDField);
     }
 
-    if ((field.type === 'blocks' || field.type === 'array') && field.label !== false) {
+    if ((field.type === 'blocks' || field.type === 'array') && field.label) {
       field.labels = field.labels || formatLabels(field.name);
     }
 

@@ -1,6 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import equal from 'deep-equal';
 import { Modal, useModal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../utilities/Config';
 import { useAuth } from '../../../../utilities/Auth';
 import { Where } from '../../../../../../types';
@@ -17,6 +18,7 @@ import { getFilterOptionsQuery } from '../../getFilterOptionsQuery';
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
 import { useForm } from '../../../Form/context';
 import ViewDescription from '../../../../elements/ViewDescription';
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -45,7 +47,8 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
   const { user } = useAuth();
   const { getData, getSiblingData } = useForm();
   const { toggleModal, isModalOpen } = useModal();
-  const [fields] = useState(() => formatFields(collection));
+  const { t, i18n } = useTranslation('fields');
+  const [fields] = useState(() => formatFields(collection, t));
   const [limit, setLimit] = useState(defaultLimit);
   const [sort, setSort] = useState(null);
   const [where, setWhere] = useState(null);
@@ -105,10 +108,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
           <header className={`${baseClass}__header`}>
             <div>
               <h1>
-                {' '}
-                Select existing
-                {' '}
-                {collection.labels.singular}
+                {t('selectExistingLabel', { label: getTranslation(collection.labels.singular, i18n) })}
               </h1>
               <Button
                 icon="x"
@@ -163,7 +163,7 @@ const SelectExistingUploadModal: React.FC<Props> = (props) => {
                   -
                   {data.totalPages > 1 ? data.limit : data.totalDocs}
                   {' '}
-                  of
+                  {t('general:of')}
                   {' '}
                   {data.totalDocs}
                 </div>

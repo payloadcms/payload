@@ -3,6 +3,7 @@ import isHotkey from 'is-hotkey';
 import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
+import { useTranslation } from 'react-i18next';
 import { richText } from '../../../../../fields/validations';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
@@ -21,6 +22,7 @@ import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/type
 import listTypes from './elements/listTypes';
 import mergeCustomFunctions from './mergeCustomFunctions';
 import withEnterBreakOut from './plugins/withEnterBreakOut';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -65,6 +67,7 @@ const RichText: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
+  const { i18n } = useTranslation();
   const [loaded, setLoaded] = useState(false);
   const [enabledElements, setEnabledElements] = useState({});
   const [enabledLeaves, setEnabledLeaves] = useState({});
@@ -308,7 +311,7 @@ const RichText: React.FC<Props> = (props) => {
                 className={`${baseClass}__input`}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}
-                placeholder={placeholder}
+                placeholder={getTranslation(placeholder, i18n)}
                 spellCheck
                 readOnly={readOnly}
                 onKeyDown={(event) => {

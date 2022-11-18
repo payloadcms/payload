@@ -8,6 +8,7 @@ import GraphQL from 'graphql';
 import { ConnectOptions } from 'mongoose';
 import React from 'react';
 import { LoggerOptions } from 'pino';
+import type { InitOptions as i18nInitOptions } from 'i18next';
 import { Payload } from '..';
 import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
 import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
@@ -187,6 +188,7 @@ export type Config = {
   collections?: CollectionConfig[];
   endpoints?: Endpoint[];
   globals?: GlobalConfig[];
+  i18n?: i18nInitOptions;
   serverURL?: string;
   cookiePrefix?: string;
   csrf?: string[];
@@ -250,4 +252,4 @@ export type SanitizedConfig = Omit<DeepRequired<Config>, 'collections' | 'global
   paths: { [key: string]: string };
 }
 
-export type EntityDescription = string | (() => string) | React.ComponentType<any>
+export type EntityDescription = string | Record<string, string> | (() => string) | React.ComponentType<any>

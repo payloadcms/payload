@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../utilities/Config';
 import RenderCustomComponent from '../../../../utilities/RenderCustomComponent';
 import cellComponents from './field-types';
 import { Props } from './types';
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 
 const DefaultCell: React.FC<Props> = (props) => {
   const {
@@ -19,6 +21,7 @@ const DefaultCell: React.FC<Props> = (props) => {
   } = props;
 
   const { routes: { admin } } = useConfig();
+  const { t, i18n } = useTranslation('general');
 
   let WrapElement: React.ComponentType<any> | string = 'span';
 
@@ -36,7 +39,7 @@ const DefaultCell: React.FC<Props> = (props) => {
   if (!CellComponent) {
     return (
       <WrapElement {...wrapElementProps}>
-        {(cellData === '' || typeof cellData === 'undefined') && `<No ${typeof field.label === 'string' ? field.label : 'data'}>`}
+        {(cellData === '' || typeof cellData === 'undefined') && t('noLabel', { label: getTranslation(typeof field.label === 'function' ? 'data' : field.label || 'data', i18n) })}
         {typeof cellData === 'string' && cellData}
         {typeof cellData === 'number' && cellData}
         {typeof cellData === 'object' && JSON.stringify(cellData)}

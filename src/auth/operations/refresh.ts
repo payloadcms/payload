@@ -55,7 +55,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     expiresIn: args.collection.config.auth.tokenExpiration,
   };
 
-  if (typeof args.token !== 'string') throw new Forbidden();
+  if (typeof args.token !== 'string') throw new Forbidden(args.req.t);
 
   const payload = jwt.verify(args.token, secret, {}) as Record<string, unknown>;
   delete payload.iat;

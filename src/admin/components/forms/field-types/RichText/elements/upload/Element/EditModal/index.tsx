@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Transforms, Element } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';
 import { Modal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../../../../../utilities/Auth';
 import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types';
 import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema';
@@ -13,6 +14,7 @@ import Form from '../../../../../../Form';
 import Submit from '../../../../../../Submit';
 import { Field } from '../../../../../../../../../fields/config/types';
 import { useLocale } from '../../../../../../../utilities/Locale';
+import { getTranslation } from '../../../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -32,6 +34,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
   const [initialState, setInitialState] = useState({});
   const { user } = useAuth();
   const locale = useLocale();
+  const { t, i18n } = useTranslation('fields');
 
   const handleUpdateEditData = useCallback((_, data) => {
     const newNode = {
@@ -50,12 +53,12 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema, data: { ...element?.fields || {} }, user, operation: 'update', locale });
+      const state = await buildStateFromSchema({ fieldSchema, data: { ...element?.fields || {} }, user, operation: 'update', locale, t });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [fieldSchema, element.fields, user, locale]);
+  }, [fieldSchema, element.fields, user, locale, t]);
 
   return (
     <Modal
@@ -65,11 +68,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
       <MinimalTemplate width="wide">
         <header className={`${baseClass}__header`}>
           <h1>
-            Edit
-            {' '}
-            {relatedCollectionConfig.labels.singular}
-            {' '}
-            data
+            { t('editLabelData', { label: getTranslation(relatedCollectionConfig.labels.singular, i18n) }) }
           </h1>
           <Button
             icon="x"
@@ -90,7 +89,7 @@ export const EditModal: React.FC<Props> = ({ slug, closeModal, relatedCollection
               fieldSchema={fieldSchema}
             />
             <Submit>
-              Save changes
+              {t('saveChanges')}
             </Submit>
           </Form>
         </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer';
+import { useTranslation } from 'react-i18next';
 import Label from '../../Label';
 import { diffStyles } from '../styles';
 import { Props } from '../types';
@@ -10,8 +11,9 @@ const baseClass = 'text-diff';
 
 const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText = false, diffMethod }) => {
   let placeholder = '';
+  const { t } = useTranslation('general');
 
-  if (version === comparison) placeholder = '[no value]';
+  if (version === comparison) placeholder = `[${t('noValue')}]`;
 
   let versionToRender = version;
   let comparisonToRender = comparison;
@@ -40,8 +42,6 @@ const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText 
       />
     </div>
   );
-
-  return null;
 };
 
 export default Text;

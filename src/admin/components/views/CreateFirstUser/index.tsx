@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import MinimalTemplate from '../../templates/Minimal';
@@ -20,6 +21,7 @@ const CreateFirstUser: React.FC<Props> = (props) => {
   const {
     admin: { user: userSlug }, collections, serverURL, routes: { admin, api },
   } = useConfig();
+  const { t } = useTranslation('authentication');
 
   const userConfig = collections.find((collection) => collection.slug === userSlug);
 
@@ -34,17 +36,17 @@ const CreateFirstUser: React.FC<Props> = (props) => {
   const fields = [
     {
       name: 'email',
-      label: 'Email Address',
+      label: t('general:emailAddress'),
       type: 'email',
       required: true,
     }, {
       name: 'password',
-      label: 'Password',
+      label: t('general:password'),
       type: 'password',
       required: true,
     }, {
       name: 'confirm-password',
-      label: 'Confirm Password',
+      label: t('confirmPassword'),
       type: 'confirmPassword',
       required: true,
     },
@@ -52,12 +54,12 @@ const CreateFirstUser: React.FC<Props> = (props) => {
 
   return (
     <MinimalTemplate className={baseClass}>
-      <h1>Welcome</h1>
-      <p>To begin, create your first user.</p>
+      <h1>{t('general:welcome')}</h1>
+      <p>{t('beginCreateFirstUser')}</p>
       <Meta
-        title="Create First User"
-        description="Create first user"
-        keywords="Create, Payload, CMS"
+        title={t('createFirstUser')}
+        description={t('createFirstUser')}
+        keywords={t('general:create')}
       />
       <Form
         onSuccess={onSuccess}
@@ -73,7 +75,7 @@ const CreateFirstUser: React.FC<Props> = (props) => {
           ]}
           fieldTypes={fieldTypes}
         />
-        <FormSubmit>Create</FormSubmit>
+        <FormSubmit>{t('general:create')}</FormSubmit>
       </Form>
     </MinimalTemplate>
   );

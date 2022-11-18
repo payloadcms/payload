@@ -39,7 +39,7 @@ async function registerFirstUser(args: Arguments): Promise<Result> {
 
   const count = await Model.countDocuments({});
 
-  if (count >= 1) throw new Forbidden();
+  if (count >= 1) throw new Forbidden(req.t);
 
   // /////////////////////////////////////
   // Register first user

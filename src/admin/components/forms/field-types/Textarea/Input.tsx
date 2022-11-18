@@ -1,9 +1,11 @@
 import React, { ChangeEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { TextareaField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -16,7 +18,7 @@ export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
   value?: string
   description?: Description
   onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void
-  placeholder?: string
+  placeholder?: Record<string, string> | string
   style?: React.CSSProperties
   className?: string
   width?: string
@@ -40,6 +42,8 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     onChange,
     rows,
   } = props;
+
+  const { i18n } = useTranslation();
 
   const classes = [
     'field-type',
@@ -78,7 +82,7 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             value={value || ''}
             onChange={onChange}
             disabled={readOnly}
-            placeholder={placeholder}
+            placeholder={getTranslation(placeholder, i18n)}
             name={path}
             rows={rows}
           />
