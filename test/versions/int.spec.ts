@@ -488,6 +488,44 @@ describe('Versions', () => {
         expect(restoredGlobal.title).toBe(restore.title);
       });
     });
+
+    describe('Patch', () => {
+      it('should allow a draft to be patched', async () => {
+        const originalTitle = 'Here is a published global';
+
+        await payload.updateGlobal({
+          slug: globalSlug,
+          data: {
+            title: originalTitle,
+            description: 'kjnjyhbbdsfseankuhsjsfghb',
+            _status: 'published',
+          },
+        });
+
+        const publishedGlobal = await payload.findGlobal({
+          slug: globalSlug,
+          draft: true,
+        });
+
+        const updatedTitle = 'Here is a draft global with a patched title';
+
+        await payload.updateGlobal({
+          slug: globalSlug,
+          data: {
+            title: updatedTitle,
+          },
+          draft: true,
+        });
+
+        const updatedGlobal = await payload.findGlobal({
+          slug: globalSlug,
+          draft: true,
+        });
+
+        expect(publishedGlobal.title).toBe(originalTitle);
+        expect(updatedGlobal.title).toBe(updatedTitle);
+      });
+    });
   });
 
   describe('Globals - GraphQL', () => {
