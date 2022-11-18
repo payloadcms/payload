@@ -21,6 +21,8 @@ export const saveCollectionDraft = async ({
 }: Args): Promise<Record<string, unknown>> => {
   const VersionsModel = payload.versions[config.slug];
 
+  const dataAsDraft = { ...data, _status: 'draft' };
+
   let existingAutosaveVersion;
 
   if (autosave) {
@@ -40,7 +42,7 @@ export const saveCollectionDraft = async ({
           _id: existingAutosaveVersion._id,
         },
         {
-          version: data,
+          version: dataAsDraft,
         },
         { new: true, lean: true },
       );
@@ -48,7 +50,7 @@ export const saveCollectionDraft = async ({
     } else {
       result = await VersionsModel.create({
         parent: id,
-        version: data,
+        version: dataAsDraft,
         autosave: Boolean(autosave),
       });
     }
