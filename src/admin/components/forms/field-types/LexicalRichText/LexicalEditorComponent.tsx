@@ -23,7 +23,7 @@ import Settings from './Settings';
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
 import { OnChangeProps } from './types';
 
-export const App: React.FC<OnChangeProps> = (props) => {
+const LexicalEditor: React.FC<OnChangeProps> = (props) => {
   const {
     onChange,
     initialJSON,
@@ -65,7 +65,7 @@ export const App: React.FC<OnChangeProps> = (props) => {
   );
 };
 
-export const PlaygroundApp: React.FC<OnChangeProps> = (props) => {
+export const LexicalEditorComponent: React.FC<OnChangeProps> = (props) => {
   const {
     onChange,
     initialJSON,
@@ -73,7 +73,7 @@ export const PlaygroundApp: React.FC<OnChangeProps> = (props) => {
 
   return (
     <SettingsContext>
-      <App
+      <LexicalEditor
         onChange={onChange}
         initialJSON={initialJSON}
       />

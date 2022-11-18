@@ -5,7 +5,7 @@ import withCondition from '../../withCondition';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
-import { PlaygroundApp } from './App';
+import { LexicalEditorComponent } from './LexicalEditorComponent';
 
 import './index.scss';
 import Loading from '../../../elements/Loading';
@@ -74,7 +74,7 @@ const LexicalRichText2: React.FC<Props> = (props) => {
           message={errorMessage}
         />
       </div>
-      <PlaygroundApp
+      <LexicalEditorComponent
         onChange={(editorState: EditorState, editor: LexicalEditor) => {
           const json = editorState.toJSON();
           if (!readOnly && /* json !== defaultValue && */ json !== value) {
