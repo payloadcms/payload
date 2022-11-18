@@ -73,7 +73,6 @@ import { IS_APPLE } from '../../shared/environment';
 
 import useModal from '../../hooks/useModal';
 import catTypingGif from '../../images/cat-typing.gif';
-import { $createStickyNode } from '../../nodes/StickyNode';
 import ColorPicker from '../../ui/ColorPicker';
 import DropDown, { DropDownItem } from '../../ui/DropDown';
 import { getSelectedNode } from '../../utils/getSelectedNode';
@@ -902,19 +901,6 @@ export default function ToolbarPlugin(): JSX.Element {
             >
               <i className="icon equation" />
               <span className="text">Equation</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
-                editor.update(() => {
-                  const root = $getRoot();
-                  const stickyNode = $createStickyNode(0, 0);
-                  root.append(stickyNode);
-                });
-              }}
-              className="item"
-            >
-              <i className="icon sticky" />
-              <span className="text">Sticky Note</span>
             </DropDownItem>
             <DropDownItem
               onClick={() => {
