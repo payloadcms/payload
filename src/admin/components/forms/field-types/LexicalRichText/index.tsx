@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { Suspense, useCallback } from 'react';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
 import Error from '../../Error';
@@ -7,10 +7,16 @@ import { Props } from './types';
 import PlaygroundApp from './App';
 
 import './index.css';
+import Loading from '../../../elements/Loading';
 
 const baseClass = 'lexicalRichTextEditor';
 
-const Checkbox: React.FC<Props> = (props) => {
+const LexicalRichText: React.FC<Props> = (props) => (
+  <Suspense fallback={<Loading />}>
+    <LexicalRichText2 {...props} />
+  </Suspense>
+);
+const LexicalRichText2: React.FC<Props> = (props) => {
   const {
     name,
     path: pathFromProps,
@@ -69,4 +75,4 @@ const Checkbox: React.FC<Props> = (props) => {
   );
 };
 
-export default withCondition(Checkbox);
+export default withCondition(LexicalRichText);

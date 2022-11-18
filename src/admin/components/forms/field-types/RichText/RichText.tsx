@@ -272,6 +272,7 @@ const RichText: React.FC<Props> = (props) => {
                         key={i}
                         path={path}
                       />
+
                     );
                   }
 

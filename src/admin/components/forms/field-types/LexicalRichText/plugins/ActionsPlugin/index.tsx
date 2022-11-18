@@ -6,18 +6,18 @@
  *
  */
 
-import type {LexicalEditor} from 'lexical';
+import type { LexicalEditor } from 'lexical';
 
-import {$createCodeNode, $isCodeNode} from '@lexical/code';
-import {exportFile, importFile} from '@lexical/file';
+import { $createCodeNode, $isCodeNode } from '@lexical/code';
+import { exportFile, importFile } from '@lexical/file';
 import {
   $convertFromMarkdownString,
   $convertToMarkdownString,
 } from '@lexical/markdown';
-import {useCollaborationContext} from '@lexical/react/LexicalCollaborationContext';
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {mergeRegister} from '@lexical/utils';
-import {CONNECTED_COMMAND, TOGGLE_CONNECT_COMMAND} from '@lexical/yjs';
+import { useCollaborationContext } from '@lexical/react/LexicalCollaborationContext';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { mergeRegister } from '@lexical/utils';
+import { CONNECTED_COMMAND, TOGGLE_CONNECT_COMMAND } from '@lexical/yjs';
 import {
   $createTextNode,
   $getRoot,
@@ -26,11 +26,11 @@ import {
   COMMAND_PRIORITY_EDITOR,
 } from 'lexical';
 import * as React from 'react';
-import {useCallback, useEffect, useState} from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import useModal from '../../hooks/useModal';
 import Button from '../../ui/Button';
-import {PLAYGROUND_TRANSFORMERS} from '../MarkdownTransformers';
+import { PLAYGROUND_TRANSFORMERS } from '../MarkdownTransformers';
 import {
   SPEECH_TO_TEXT_COMMAND,
   SUPPORT_SPEECH_RECOGNITION,
@@ -85,7 +85,7 @@ export default function ActionsPlugin({
   const [connected, setConnected] = useState(false);
   const [isEditorEmpty, setIsEditorEmpty] = useState(true);
   const [modal, showModal] = useModal();
-  const {isCollabActive} = useCollaborationContext();
+  const { isCollabActive } = useCollaborationContext();
 
   useEffect(() => {
     return mergeRegister(
@@ -106,14 +106,14 @@ export default function ActionsPlugin({
 
   useEffect(() => {
     return editor.registerUpdateListener(
-      ({dirtyElements, prevEditorState, tags}) => {
+      ({ dirtyElements, prevEditorState, tags }) => {
         // If we are in read only mode, send the editor state
         // to server and ask for validation if possible.
         if (
-          !isEditable &&
-          dirtyElements.size > 0 &&
-          !tags.has('historic') &&
-          !tags.has('collaboration')
+          !isEditable
+          && dirtyElements.size > 0
+          && !tags.has('historic')
+          && !tags.has('collaboration')
         ) {
           validateEditorState(editor);
         }
@@ -123,13 +123,11 @@ export default function ActionsPlugin({
 
           if (children.length > 1) {
             setIsEditorEmpty(false);
+          } else if ($isParagraphNode(children[0])) {
+            const paragraphChildren = children[0].getChildren();
+            setIsEditorEmpty(paragraphChildren.length === 0);
           } else {
-            if ($isParagraphNode(children[0])) {
-              const paragraphChildren = children[0].getChildren();
-              setIsEditorEmpty(paragraphChildren.length === 0);
-            } else {
-              setIsEditorEmpty(false);
-            }
+            setIsEditorEmpty(false);
           }
         });
       },
@@ -161,55 +159,69 @@ export default function ActionsPlugin({
     <div className="actions">
       {SUPPORT_SPEECH_RECOGNITION && (
         <button
-          onClick={() => {
+          onClick={(event) => {
+            event.preventDefault();
             editor.dispatchCommand(SPEECH_TO_TEXT_COMMAND, !isSpeechToText);
             setIsSpeechToText(!isSpeechToText);
           }}
           className={
-            'action-button action-button-mic ' +
-            (isSpeechToText ? 'active' : '')
+            `action-button action-button-mic ${
+              isSpeechToText ? 'active' : ''}`
           }
           title="Speech To Text"
           aria-label={`${
             isSpeechToText ? 'Enable' : 'Disable'
-          } speech to text`}>
+          } speech to text`}
+        >
           <i className="mic" />
         </button>
       )}
       <button
         className="action-button import"
-        onClick={() => importFile(editor)}
+        onClick={(event) => {
+          event.preventDefault();
+          importFile(editor);
+        }}
         title="Import"
-        aria-label="Import editor state from JSON">
+        aria-label="Import editor state from JSON"
+      >
         <i className="import" />
       </button>
       <button
         className="action-button export"
-        onClick={() =>
+        onClick={(event) => {
+          event.preventDefault();
           exportFile(editor, {
             fileName: `Playground ${new Date().toISOString()}`,
             source: 'Playground',
-          })
-        }
+          });
+        }}
         title="Export"
-        aria-label="Export editor state to JSON">
+        aria-label="Export editor state to JSON"
+      >
         <i className="export" />
       </button>
       <button
         className="action-button clear"
         disabled={isEditorEmpty}
-        onClick={() => {
+        onClick={(event) => {
+          event.preventDefault();
           showModal('Clear editor', (onClose) => (
-            <ShowClearDialog editor={editor} onClose={onClose} />
+            <ShowClearDialog
+              editor={editor}
+              onClose={onClose}
+            />
           ));
         }}
         title="Clear"
-        aria-label="Clear editor contents">
+        aria-label="Clear editor contents"
+      >
         <i className="clear" />
       </button>
       <button
         className={`action-button ${!isEditable ? 'unlock' : 'lock'}`}
-        onClick={() => {
+        onClick={(event) => {
+          event.preventDefault();
           // Send latest editor state to commenting validation server
           if (isEditable) {
             sendEditorState(editor);
@@ -217,20 +229,26 @@ export default function ActionsPlugin({
           editor.setEditable(!editor.isEditable());
         }}
         title="Read-Only Mode"
-        aria-label={`${!isEditable ? 'Unlock' : 'Lock'} read-only mode`}>
+        aria-label={`${!isEditable ? 'Unlock' : 'Lock'} read-only mode`}
+      >
         <i className={!isEditable ? 'unlock' : 'lock'} />
       </button>
       <button
         className="action-button"
-        onClick={handleMarkdownToggle}
+        onClick={(event) => {
+          event.preventDefault();
+          handleMarkdownToggle();
+        }}
         title="Convert From Markdown"
-        aria-label="Convert from markdown">
+        aria-label="Convert from markdown"
+      >
         <i className="markdown" />
       </button>
       {isCollabActive && (
         <button
           className="action-button connect"
-          onClick={() => {
+          onClick={(event) => {
+            event.preventDefault();
             editor.dispatchCommand(TOGGLE_CONNECT_COMMAND, !connected);
           }}
           title={`${
@@ -238,7 +256,8 @@ export default function ActionsPlugin({
           } Collaborative Editing`}
           aria-label={`${
             connected ? 'Disconnect from' : 'Connect to'
-          } a collaborative editing server`}>
+          } a collaborative editing server`}
+        >
           <i className={connected ? 'disconnect' : 'connect'} />
         </button>
       )}
@@ -255,7 +274,7 @@ function ShowClearDialog({
   onClose: () => void;
 }): JSX.Element {
   return (
-    <>
+    <React.Fragment>
       Are you sure you want to clear the editor?
       <div className="Modal__content">
         <Button
@@ -263,17 +282,20 @@ function ShowClearDialog({
             editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
             editor.focus();
             onClose();
-          }}>
+          }}
+        >
           Clear
-        </Button>{' '}
+        </Button>
+        {' '}
         <Button
           onClick={() => {
             editor.focus();
             onClose();
-          }}>
+          }}
+        >
           Cancel
         </Button>
       </div>
-    </>
+    </React.Fragment>
   );
 }

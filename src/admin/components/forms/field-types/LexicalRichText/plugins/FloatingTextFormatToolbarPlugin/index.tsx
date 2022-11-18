@@ -136,7 +136,8 @@ function TextFormatFloatingToolbar({
       {editor.isEditable() && (
         <>
           <button
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
             }}
             className={'popup-item spaced ' + (isBold ? 'active' : '')}
@@ -144,7 +145,8 @@ function TextFormatFloatingToolbar({
             <i className="format bold" />
           </button>
           <button
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
             }}
             className={'popup-item spaced ' + (isItalic ? 'active' : '')}
@@ -152,7 +154,8 @@ function TextFormatFloatingToolbar({
             <i className="format italic" />
           </button>
           <button
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline');
             }}
             className={'popup-item spaced ' + (isUnderline ? 'active' : '')}
@@ -160,7 +163,8 @@ function TextFormatFloatingToolbar({
             <i className="format underline" />
           </button>
           <button
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough');
             }}
             className={'popup-item spaced ' + (isStrikethrough ? 'active' : '')}
@@ -168,7 +172,8 @@ function TextFormatFloatingToolbar({
             <i className="format strikethrough" />
           </button>
           <button
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript');
             }}
             className={'popup-item spaced ' + (isSubscript ? 'active' : '')}
@@ -177,7 +182,8 @@ function TextFormatFloatingToolbar({
             <i className="format subscript" />
           </button>
           <button
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'superscript');
             }}
             className={'popup-item spaced ' + (isSuperscript ? 'active' : '')}
@@ -186,7 +192,8 @@ function TextFormatFloatingToolbar({
             <i className="format superscript" />
           </button>
           <button
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code');
             }}
             className={'popup-item spaced ' + (isCode ? 'active' : '')}
@@ -194,7 +201,10 @@ function TextFormatFloatingToolbar({
             <i className="format code" />
           </button>
           <button
-            onClick={insertLink}
+            onClick={(event) => {
+              event.preventDefault();
+              insertLink();
+            }}
             className={'popup-item spaced ' + (isLink ? 'active' : '')}
             aria-label="Insert link">
             <i className="format link" />

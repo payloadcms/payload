@@ -826,6 +826,9 @@ i.prettier-error {
 }
 
 .switches {
+  background: #ffffff;
+  border: 2px solid #cccccc;
+  border-radius: 15px;
   z-index: 6;
   position: fixed;
   left: 10px;

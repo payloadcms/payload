@@ -39,10 +39,14 @@ export default function Button({
         small && 'Button__small',
         className,
       )}
-      onClick={onClick}
+      onClick={(event) => {
+        event.preventDefault();
+        onClick();
+      }}
       title={title}
       aria-label={title}
-      {...(dataTestId && {'data-test-id': dataTestId})}>
+      {...(dataTestId && { 'data-test-id': dataTestId })}
+    >
       {children}
     </button>
   );

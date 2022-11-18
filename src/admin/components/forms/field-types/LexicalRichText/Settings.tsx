@@ -44,7 +44,10 @@ export default function Settings(): JSX.Element {
       <button
         id="options-button"
         className={`editor-dev-button ${showSettings ? 'active' : ''}`}
-        onClick={() => setShowSettings(!showSettings)}
+        onClick={(event) => {
+          event.preventDefault();
+          setShowSettings(!showSettings);
+        }}
       />
       {showSettings ? (
         <div className="switches">

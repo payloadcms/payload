@@ -422,7 +422,10 @@ ${steps.map(formatStep).join('\n')}
     <button
       id="test-recorder-button"
       className={`editor-dev-button ${isRecording ? 'active' : ''}`}
-      onClick={() => toggleEditorSelection(getCurrentEditor())}
+      onClick={(event) => {
+        event.preventDefault();
+        toggleEditorSelection(getCurrentEditor());
+      }}
       title={isRecording ? 'Disable test recorder' : 'Enable test recorder'}
     />
   );
@@ -433,19 +436,28 @@ ${steps.map(formatStep).join('\n')}
           className="test-recorder-button"
           id="test-recorder-button-snapshot"
           title="Insert snapshot"
-          onClick={onSnapshotClick}
+          onClick={(event) => {
+            event.preventDefault();
+            onSnapshotClick();
+          }}
         />
         <button
           className="test-recorder-button"
           id="test-recorder-button-copy"
           title="Copy to clipboard"
-          onClick={onCopyClick}
+          onClick={(event) => {
+            event.preventDefault();
+            onCopyClick();
+          }}
         />
         <button
           className="test-recorder-button"
           id="test-recorder-button-download"
           title="Download as a file"
-          onClick={onDownloadClick}
+          onClick={(event) => {
+            event.preventDefault();
+            onDownloadClick();
+          }}
         />
       </div>
       <pre

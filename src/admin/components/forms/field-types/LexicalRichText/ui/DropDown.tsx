@@ -15,7 +15,7 @@ import {
   useState,
 } from 'react';
 import * as React from 'react';
-import {createPortal} from 'react-dom';
+import { createPortal } from 'react-dom';
 
 type DropDownContextType = {
   registerItem: (ref: React.RefObject<HTMLButtonElement>) => void;
@@ -42,7 +42,7 @@ export function DropDownItem({
     throw new Error('DropDownItem must be used within a DropDown');
   }
 
-  const {registerItem} = dropDownContext;
+  const { registerItem } = dropDownContext;
 
   useEffect(() => {
     if (ref && ref.current) {
@@ -51,7 +51,12 @@ export function DropDownItem({
   }, [ref, registerItem]);
 
   return (
-    <button className={className} onClick={onClick} ref={ref} title={title}>
+    <button
+      className={className}
+      onClick={onClick}
+      ref={ref}
+      title={title}
+    >
       {children}
     </button>
   );
@@ -67,8 +72,7 @@ function DropDownItems({
   onClose: () => void;
 }) {
   const [items, setItems] = useState<React.RefObject<HTMLButtonElement>[]>();
-  const [highlightedItem, setHighlightedItem] =
-    useState<React.RefObject<HTMLButtonElement>>();
+  const [highlightedItem, setHighlightedItem] = useState<React.RefObject<HTMLButtonElement>>();
 
   const registerItem = useCallback(
     (itemRef: React.RefObject<HTMLButtonElement>) => {
@@ -80,7 +84,7 @@ function DropDownItems({
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (!items) return;
 
-    const key = event.key;
+    const { key } = event;
 
     if (['Escape', 'ArrowUp', 'ArrowDown', 'Tab'].includes(key)) {
       event.preventDefault();
@@ -121,7 +125,11 @@ function DropDownItems({
 
   return (
     <DropDownContext.Provider value={contextValue}>
-      <div className="dropdown" ref={dropDownRef} onKeyDown={handleKeyDown}>
+      <div
+        className="dropdown"
+        ref={dropDownRef}
+        onKeyDown={handleKeyDown}
+      >
         {children}
       </div>
     </DropDownContext.Provider>
@@ -161,7 +169,7 @@ export default function DropDown({
     const dropDown = dropDownRef.current;
 
     if (showDropDown && button !== null && dropDown !== null) {
-      const {top, left} = button.getBoundingClientRect();
+      const { top, left } = button.getBoundingClientRect();
       dropDown.style.top = `${top + 40}px`;
       dropDown.style.left = `${Math.min(
         left,
@@ -175,13 +183,12 @@ export default function DropDown({
 
     if (button !== null && showDropDown) {
       const handle = (event: MouseEvent) => {
-        const target = event.target;
+        const { target } = event;
         if (stopCloseOnClickSelf) {
           if (
-            dropDownRef.current &&
-            dropDownRef.current.contains(target as Node)
-          )
-            return;
+            dropDownRef.current
+            && dropDownRef.current.contains(target as Node)
+          ) { return; }
         }
         if (!button.contains(target as Node)) {
           setShowDropDown(false);
@@ -195,14 +202,19 @@ export default function DropDown({
     }
   }, [dropDownRef, buttonRef, showDropDown, stopCloseOnClickSelf]);
 
+
   return (
-    <>
+    <React.Fragment>
       <button
         disabled={disabled}
         aria-label={buttonAriaLabel || buttonLabel}
         className={buttonClassName}
-        onClick={() => setShowDropDown(!showDropDown)}
-        ref={buttonRef}>
+        onClick={(event) => {
+          event.preventDefault();
+          setShowDropDown(!showDropDown);
+        }}
+        ref={buttonRef}
+      >
         {buttonIconClassName && <span className={buttonIconClassName} />}
         {buttonLabel && (
           <span className="text dropdown-button-text">{buttonLabel}</span>
@@ -210,13 +222,16 @@ export default function DropDown({
         <i className="chevron-down" />
       </button>
 
-      {showDropDown &&
-        createPortal(
-          <DropDownItems dropDownRef={dropDownRef} onClose={handleClose}>
+      {showDropDown
+        && createPortal(
+          <DropDownItems
+            dropDownRef={dropDownRef}
+            onClose={handleClose}
+          >
             {children}
           </DropDownItems>,
           document.body,
         )}
-    </>
+    </React.Fragment>
   );
 }

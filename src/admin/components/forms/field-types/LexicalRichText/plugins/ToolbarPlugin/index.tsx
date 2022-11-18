@@ -606,7 +606,8 @@ export default function ToolbarPlugin(): JSX.Element {
     <div className="toolbar">
       <button
         disabled={!canUndo || !isEditable}
-        onClick={() => {
+        onClick={(event) => {
+          event.preventDefault();
           activeEditor.dispatchCommand(UNDO_COMMAND, undefined);
         }}
         title={IS_APPLE ? 'Undo (⌘Z)' : 'Undo (Ctrl+Z)'}
@@ -617,7 +618,8 @@ export default function ToolbarPlugin(): JSX.Element {
       </button>
       <button
         disabled={!canRedo || !isEditable}
-        onClick={() => {
+        onClick={(event) => {
+          event.preventDefault();
           activeEditor.dispatchCommand(REDO_COMMAND, undefined);
         }}
         title={IS_APPLE ? 'Redo (⌘Y)' : 'Redo (Ctrl+Y)'}
@@ -677,7 +679,8 @@ export default function ToolbarPlugin(): JSX.Element {
           <Divider />
           <button
             disabled={!isEditable}
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
             }}
             className={`toolbar-item spaced ${isBold ? 'active' : ''}`}
@@ -690,7 +693,8 @@ export default function ToolbarPlugin(): JSX.Element {
           </button>
           <button
             disabled={!isEditable}
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
             }}
             className={`toolbar-item spaced ${isItalic ? 'active' : ''}`}
@@ -703,7 +707,8 @@ export default function ToolbarPlugin(): JSX.Element {
           </button>
           <button
             disabled={!isEditable}
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline');
             }}
             className={`toolbar-item spaced ${isUnderline ? 'active' : ''}`}
@@ -716,7 +721,8 @@ export default function ToolbarPlugin(): JSX.Element {
           </button>
           <button
             disabled={!isEditable}
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code');
             }}
             className={`toolbar-item spaced ${isCode ? 'active' : ''}`}
@@ -727,7 +733,10 @@ export default function ToolbarPlugin(): JSX.Element {
           </button>
           <button
             disabled={!isEditable}
-            onClick={insertLink}
+            onClick={(event) => {
+              event.preventDefault();
+              insertLink();
+            }}
             className={`toolbar-item spaced ${isLink ? 'active' : ''}`}
             aria-label="Insert link"
             title="Insert link"
