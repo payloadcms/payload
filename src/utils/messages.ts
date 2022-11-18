@@ -39,14 +39,21 @@ export function successMessage(projectDir: string, packageManager: string): stri
 
   ${header('Documentation:')}
 
-    - ${terminalLink(
+    - ${createTerminalLink(
       'Getting Started',
       'https://payloadcms.com/docs/getting-started/what-is-payload',
     )}
-    - ${terminalLink(
+    - ${createTerminalLink(
       'Configuration',
       'https://payloadcms.com/docs/configuration/overview',
     )}
 
 `
+}
+
+// Create terminalLink with fallback for unsupported terminals
+function createTerminalLink(text: string, url: string) {
+  return terminalLink(text, url, {
+    fallback: (text, url) => `${text}: ${url}`,
+  })
 }
