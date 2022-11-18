@@ -9,7 +9,7 @@ type PopulateArgs = {
   dataReference: Record<string, any>
   data: Record<string, unknown>
   field: RelationshipField | UploadField
-  index?: number
+  index?: number | string
   showHiddenFields: boolean
 }
 
@@ -33,7 +33,7 @@ const populate = async ({
     let relationshipValue;
     const shouldPopulate = depth && currentDepth <= depth;
 
-    if (typeof id !== 'string' && typeof id !== 'number' && typeof id?.toString === 'function') {
+    if (typeof id !== 'string' && typeof id !== 'number' && typeof id?.toString === 'function' && typeof id !== 'object') {
       id = id.toString();
     }
 
@@ -111,6 +111,26 @@ const relationshipPopulationPromise = async ({
         }
       };
 
+      rowPromises.push(rowPromise());
+    });
+
+    await Promise.all(rowPromises);
+  } else if (typeof siblingDoc[field.name] === 'object' && req.locale === 'all') {
+    const rowPromises = [];
+    Object.keys(siblingDoc[field.name]).forEach((key) => {
+      const rowPromise = async () => {
+        await populate({
+          depth: populateDepth,
+          currentDepth,
+          req,
+          overrideAccess,
+          data: siblingDoc[field.name][key],
+          dataReference: resultingDoc,
+          field,
+          index: key,
+          showHiddenFields,
+        });
+      };
       rowPromises.push(rowPromise());
     });
 
