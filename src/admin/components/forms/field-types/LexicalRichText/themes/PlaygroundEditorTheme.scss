@@ -28,20 +28,24 @@
   padding-left: 16px;
 }
 .PlaygroundEditorTheme__h1 {
-  font-size: 24px;
+  font-size: 2.8rem;
+  line-height: 1.125;
   color: rgb(5, 5, 5);
-  font-weight: 400;
-  margin: 0;
+  font-weight: 500;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
 .PlaygroundEditorTheme__h2 {
-  font-size: 15px;
-  color: rgb(101, 103, 107);
+  font-size: 2rem;
+  color: rgb(5, 5, 5);
   font-weight: 700;
   margin: 0;
   text-transform: uppercase;
 }
 .PlaygroundEditorTheme__h3 {
-  font-size: 12px;
+  font-size: 1.4rem;
+  color: rgb(101, 103, 107);
+  font-weight: 700;
   margin: 0;
   text-transform: uppercase;
 }
@@ -432,10 +436,14 @@
 
 
 html[data-theme=dark] {
-  .PlaygroundEditorTheme__h1 {
+  .PlaygroundEditorTheme__h1, .PlaygroundEditorTheme__h2 {
     color: rgb(255, 255, 255);
   }
-  .PlaygroundEditorTheme__h2 {
+  .PlaygroundEditorTheme__h3 {
     color: rgb(148, 151, 157);
+  }
+
+  .PlaygroundEditorTheme__link {
+    color: rgb(102, 167, 255);
   }
 }
