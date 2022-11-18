@@ -6,7 +6,7 @@
  *
  */
 
-import './Input.css';
+import './Input.scss';
 
 import * as React from 'react';
 

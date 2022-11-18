@@ -6,7 +6,7 @@
  *
  */
 
-import './Collapsible.css';
+import './Collapsible.scss';
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $findMatchingParent, mergeRegister } from '@lexical/utils';

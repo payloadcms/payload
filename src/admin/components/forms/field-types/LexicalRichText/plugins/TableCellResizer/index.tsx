@@ -8,7 +8,7 @@
 import type { Cell } from '@lexical/table';
 import type { LexicalEditor } from 'lexical';
 
-import './index.css';
+import './index.scss';
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {

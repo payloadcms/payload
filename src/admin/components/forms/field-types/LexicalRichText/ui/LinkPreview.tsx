@@ -6,7 +6,7 @@
  *
  */
 
-import './LinkPreview.css';
+import './LinkPreview.scss';
 
 import * as React from 'react';
 import { CSSProperties, Suspense } from 'react';

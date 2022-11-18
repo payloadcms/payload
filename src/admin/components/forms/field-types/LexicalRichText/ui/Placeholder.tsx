@@ -6,7 +6,7 @@
  *
  */
 
-import './Placeholder.css';
+import './Placeholder.scss';
 
 import * as React from 'react';
 import { ReactNode } from 'react';

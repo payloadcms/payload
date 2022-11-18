@@ -8,7 +8,7 @@
 import type { HeadingTagType } from '@lexical/rich-text';
 import type { NodeKey } from 'lexical';
 
-import './index.css';
+import './index.scss';
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import LexicalTableOfContents__EXPERIMENTAL from '@lexical/react/LexicalTableOfContents__EXPERIMENTAL';

@@ -6,7 +6,7 @@
  *
  */
 
-import './EquationEditor.css';
+import './EquationEditor.scss';
 
 import * as React from 'react';
 import { ChangeEvent, RefObject } from 'react';
