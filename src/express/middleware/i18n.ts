@@ -8,11 +8,11 @@ import { defaultOptions } from '../../translations/defaultOptions';
 const i18nMiddleware = (options: InitOptions): Handler => {
   i18next.use(i18nHTTPMiddleware.LanguageDetector)
     .init({
-      preload: Object.keys(defaultOptions.supportedLngs),
+      preload: defaultOptions.supportedLngs,
       ...deepmerge(defaultOptions, options || {}),
     });
 
-  return i18nHTTPMiddleware.handle(i18next, {});
+  return i18nHTTPMiddleware.handle(i18next);
 };
 
 export { i18nMiddleware };
