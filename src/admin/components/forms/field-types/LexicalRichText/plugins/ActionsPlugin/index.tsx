@@ -28,7 +28,7 @@ import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 
 import useModal from '../../hooks/useModal';
-import Button from '../../ui/Button';
+import Button from '../../../../../elements/Button';
 import { PLAYGROUND_TRANSFORMERS } from '../MarkdownTransformers';
 import {
   SPEECH_TO_TEXT_COMMAND,

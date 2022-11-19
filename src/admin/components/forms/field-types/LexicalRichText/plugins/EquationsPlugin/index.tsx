@@ -7,6 +7,7 @@
  */
 
 import 'katex/dist/katex.css';
+import './modal.scss';
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $wrapNodeInElement } from '@lexical/utils';
@@ -22,8 +23,13 @@ import {
 import { useCallback, useEffect } from 'react';
 import * as React from 'react';
 
+import { useModal } from '@faceless-ui/modal';
 import { $createEquationNode, EquationNode } from '../../nodes/EquationNode';
 import KatexEquationAlterer from '../../ui/KatexEquationAlterer';
+import MinimalTemplate from '../../../../../templates/Minimal';
+import Button from '../../../../../elements/Button';
+import TextInput from '../../ui/TextInput';
+import { DialogActions } from '../../ui/Dialog';
 
 type CommandPayload = {
   equation: string;
@@ -34,20 +40,46 @@ export const INSERT_EQUATION_COMMAND: LexicalCommand<CommandPayload> = createCom
 
 export function InsertEquationDialog({
   activeEditor,
-  onClose,
 }: {
   activeEditor: LexicalEditor;
-  onClose: () => void;
 }): JSX.Element {
+
+  const {
+    toggleModal,
+  } = useModal();
+  const modalSlug = 'lexicalRichText-add-equation';
+  const baseModalClass = 'rich-text-equation-modal';
+
   const onEquationConfirm = useCallback(
     (equation: string, inline: boolean) => {
       activeEditor.dispatchCommand(INSERT_EQUATION_COMMAND, { equation, inline });
-      onClose();
+      toggleModal(modalSlug);
     },
-    [activeEditor, onClose],
+    [activeEditor/* , onClose */],
   );
 
-  return <KatexEquationAlterer onConfirm={onEquationConfirm} />;
+  return (
+    <React.Fragment>
+      <MinimalTemplate width="wide">
+        <header className={`${baseModalClass}__header`}>
+          <h1>
+            Add equation
+          </h1>
+          <Button
+            icon="x"
+            round
+            buttonStyle="icon-label"
+            iconStyle="with-border"
+            onClick={() => {
+              toggleModal(modalSlug);
+            }}
+          />
+        </header>
+        <KatexEquationAlterer onConfirm={onEquationConfirm} />
+      </MinimalTemplate>
+    </React.Fragment>
+  );
+
 }
 
 export default function EquationsPlugin(): JSX.Element | null {

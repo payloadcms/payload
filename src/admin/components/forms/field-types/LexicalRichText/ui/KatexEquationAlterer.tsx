@@ -11,7 +11,8 @@ import './KatexEquationAlterer.scss';
 import * as React from 'react';
 import { useCallback, useState } from 'react';
 
-import Button from './Button';
+import Button from '../../../../elements/Button';
+
 import KatexRenderer from './KatexRenderer';
 
 type Props = {

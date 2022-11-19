@@ -35,10 +35,10 @@ const DisplayedElement = ({ attributes, children, element, path, fieldProps, act
 
   const thumbnailSRC = useThumbnail(relatedCollection, upload);
 
-  //Remove upload element from editor
-  const removeUpload = useCallback(() =>
-    //TODO
-  , [activeEditor, element]);
+  // Remove upload element from editor
+  const removeUpload = useCallback(() => {
+    // TODO
+  }, [/* activeEditor, element] */]);
 
   const closeModal = useCallback(() => {
     toggleModal(modalSlug);
@@ -57,7 +57,7 @@ const DisplayedElement = ({ attributes, children, element, path, fieldProps, act
     <div
       className={[
         baseClass,
-        (/*selected && focused*/true) && `${baseClass}--selected`,
+        (/* selected && focused */true) && `${baseClass}--selected`,
       ].filter(Boolean).join(' ')}
       contentEditable={false}
       {...attributes}

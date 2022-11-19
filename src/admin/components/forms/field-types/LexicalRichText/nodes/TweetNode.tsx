@@ -70,10 +70,11 @@ function TweetComponent({
 
   const createTweet = useCallback(async () => {
     try {
-      // @ts-expect-error Twitter is attached to the window.
-      if (window.document.documentElement.getAttribute('data-theme') === 'dark'){
+      if (window.document.documentElement.getAttribute('data-theme') === 'dark') {
+        // @ts-expect-error Twitter is attached to the window.
         await window.twttr.widgets.createTweet(tweetID, containerRef.current, { theme: 'dark' });
       } else {
+        // @ts-expect-error Twitter is attached to the window.
         await window.twttr.widgets.createTweet(tweetID, containerRef.current);
       }
 
@@ -98,7 +99,7 @@ function TweetComponent({
         const script = document.createElement('script');
         script.src = WIDGET_SCRIPT_URL;
         script.async = true;
-        document.body?.appendChild(script);
+        document.body.appendChild(script);
         script.onload = createTweet;
         if (onError) {
           script.onerror = onError as OnErrorEventHandler;
@@ -218,7 +219,7 @@ export class TweetNode extends DecoratorBlockNode {
     );
   }
 
-  isInline(): false {
+  static isInline(): false {
     return false;
   }
 }

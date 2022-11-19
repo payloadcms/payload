@@ -25,12 +25,15 @@ import {
 } from 'lexical';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import * as React from 'react';
-import invariant from '../shared/invariant';
+import { useModal } from '@faceless-ui/modal';
+import invariant from '../../shared/invariant';
 
-import { $createTableNodeWithDimensions, TableNode } from '../nodes/TableNode';
-import Button from '../ui/Button';
-import { DialogActions } from '../ui/Dialog';
-import TextInput from '../ui/TextInput';
+import { $createTableNodeWithDimensions, TableNode } from '../../nodes/TableNode';
+import { DialogActions } from '../../ui/Dialog';
+import TextInput from '../../ui/TextInput';
+import MinimalTemplate from '../../../../../templates/Minimal';
+import './modal.scss';
+import Button from '../../../../../elements/Button';
 
 export type InsertTableCommandPayload = Readonly<{
   columns: string;
@@ -93,34 +96,56 @@ export function TableContext({ children }: {children: JSX.Element}) {
 
 export function InsertTableDialog({
   activeEditor,
-  onClose,
 }: {
   activeEditor: LexicalEditor;
-  onClose: () => void;
 }): JSX.Element {
   const [rows, setRows] = useState('5');
   const [columns, setColumns] = useState('5');
 
+  const {
+    toggleModal,
+  } = useModal();
+  const modalSlug = 'lexicalRichText-add-table';
+  const baseModalClass = 'rich-text-table-modal';
+
   const onClick = () => {
     activeEditor.dispatchCommand(INSERT_TABLE_COMMAND, { columns, rows });
-    onClose();
+    toggleModal(modalSlug);
   };
 
   return (
     <React.Fragment>
-      <TextInput
-        label="No of rows"
-        onChange={setRows}
-        value={rows}
-      />
-      <TextInput
-        label="No of columns"
-        onChange={setColumns}
-        value={columns}
-      />
-      <DialogActions data-test-id="table-model-confirm-insert">
-        <Button onClick={onClick}>Confirm</Button>
-      </DialogActions>
+      <MinimalTemplate width="wide">
+        <header className={`${baseModalClass}__header`}>
+          <h1>
+            Add table
+          </h1>
+          <Button
+            icon="x"
+            round
+            buttonStyle="icon-label"
+            iconStyle="with-border"
+            onClick={() => {
+              toggleModal(modalSlug);
+            }}
+          />
+        </header>
+        <TextInput
+          label="No of rows"
+          onChange={setRows}
+          value={rows}
+        />
+        <TextInput
+          label="No of columns"
+          onChange={setColumns}
+          value={columns}
+        />
+        <DialogActions data-test-id="table-model-confirm-insert">
+          <Button onClick={onClick}>
+            Confirm
+          </Button>
+        </DialogActions>
+      </MinimalTemplate>
     </React.Fragment>
   );
 }

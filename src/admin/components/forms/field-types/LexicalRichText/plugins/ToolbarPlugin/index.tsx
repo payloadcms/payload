@@ -50,7 +50,6 @@ import {
 import {
   $createParagraphNode,
   $getNodeByKey,
-  $getRoot,
   $getSelection,
   $isRangeSelection,
   $isRootOrShadowRoot,
@@ -58,6 +57,7 @@ import {
   CAN_REDO_COMMAND,
   CAN_UNDO_COMMAND,
   COMMAND_PRIORITY_CRITICAL,
+  // eslint-disable-next-line camelcase
   DEPRECATED_$isGridSelection,
   FORMAT_ELEMENT_COMMAND,
   FORMAT_TEXT_COMMAND,
@@ -79,11 +79,6 @@ import { sanitizeUrl } from '../../utils/sanitizeUrl';
 import { EmbedConfigs } from '../AutoEmbedPlugin';
 import { INSERT_COLLAPSIBLE_COMMAND } from '../CollapsiblePlugin';
 import { InsertEquationDialog } from '../EquationsPlugin';
-import {
-  INSERT_IMAGE_COMMAND,
-  InsertImageDialog,
-  InsertImagePayload,
-} from '../UploadPlugin';
 import { InsertTableDialog } from '../TablePlugin';
 import { UploadModal } from '../UploadPlugin/UploadUI';
 
@@ -326,12 +321,12 @@ function Divider(): JSX.Element {
 function FontDropDown({
   editor,
   value,
-  style,
+  styleText,
   disabled = false,
 }: {
   editor: LexicalEditor;
   value: string;
-  style: string;
+  styleText: string;
   disabled?: boolean;
 }): JSX.Element {
   const handleClick = useCallback(
@@ -340,33 +335,33 @@ function FontDropDown({
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
           $patchStyleText(selection, {
-            [style]: option,
+            [styleText]: option,
           });
         }
       });
     },
-    [editor, style],
+    [editor, styleText],
   );
 
-  const buttonAriaLabel = style === 'font-family'
+  const buttonAriaLabel = styleText === 'font-family'
     ? 'Formatting options for font family'
     : 'Formatting options for font size';
 
   return (
     <DropDown
       disabled={disabled}
-      buttonClassName={`toolbar-item ${style}`}
+      buttonClassName={`toolbar-item ${styleText}`}
       buttonLabel={value}
       buttonIconClassName={
-        style === 'font-family' ? 'icon block-type font-family' : ''
+        styleText === 'font-family' ? 'icon block-type font-family' : ''
       }
       buttonAriaLabel={buttonAriaLabel}
     >
-      {(style === 'font-family' ? FONT_FAMILY_OPTIONS : FONT_SIZE_OPTIONS).map(
+      {(styleText === 'font-family' ? FONT_FAMILY_OPTIONS : FONT_SIZE_OPTIONS).map(
         ([option, text]) => (
           <DropDownItem
             className={`item ${dropDownActiveClass(value === option)} ${
-              style === 'font-size' ? 'fontsize-item' : ''
+              styleText === 'font-size' ? 'fontsize-item' : ''
             }`}
             onClick={() => handleClick(option)}
             key={option}
@@ -600,6 +595,7 @@ export default function ToolbarPlugin(): JSX.Element {
   return (
     <div className="toolbar">
       <button
+        type="button"
         disabled={!canUndo || !isEditable}
         onClick={(event) => {
           event.preventDefault();
@@ -612,6 +608,7 @@ export default function ToolbarPlugin(): JSX.Element {
         <i className="format undo" />
       </button>
       <button
+        type="button"
         disabled={!canRedo || !isEditable}
         onClick={(event) => {
           event.preventDefault();
@@ -661,18 +658,19 @@ export default function ToolbarPlugin(): JSX.Element {
         <React.Fragment>
           <FontDropDown
             disabled={!isEditable}
-            style="font-family"
+            styleText="font-family"
             value={fontFamily}
             editor={editor}
           />
           <FontDropDown
             disabled={!isEditable}
-            style="font-size"
+            styleText="font-size"
             value={fontSize}
             editor={editor}
           />
           <Divider />
           <button
+            type="button"
             disabled={!isEditable}
             onClick={(event) => {
               event.preventDefault();
@@ -687,6 +685,7 @@ export default function ToolbarPlugin(): JSX.Element {
             <i className="format bold" />
           </button>
           <button
+            type="button"
             disabled={!isEditable}
             onClick={(event) => {
               event.preventDefault();
@@ -701,6 +700,7 @@ export default function ToolbarPlugin(): JSX.Element {
             <i className="format italic" />
           </button>
           <button
+            type="button"
             disabled={!isEditable}
             onClick={(event) => {
               event.preventDefault();
@@ -715,6 +715,7 @@ export default function ToolbarPlugin(): JSX.Element {
             <i className="format underline" />
           </button>
           <button
+            type="button"
             disabled={!isEditable}
             onClick={(event) => {
               event.preventDefault();
@@ -727,6 +728,7 @@ export default function ToolbarPlugin(): JSX.Element {
             <i className="format code" />
           </button>
           <button
+            type="button"
             disabled={!isEditable}
             onClick={(event) => {
               event.preventDefault();
@@ -833,7 +835,7 @@ export default function ToolbarPlugin(): JSX.Element {
               <span className="text">Horizontal Rule</span>
             </DropDownItem>
             <DropDownItem
-              onClick={(e) => {
+              onClick={() => {
                 toggleModal('lexicalRichText-add-upload');
               }}
               className="item"
@@ -843,12 +845,7 @@ export default function ToolbarPlugin(): JSX.Element {
             </DropDownItem>
             <DropDownItem
               onClick={() => {
-                showModal('Insert Table', (onClose) => (
-                  <InsertTableDialog
-                    activeEditor={activeEditor}
-                    onClose={onClose}
-                  />
-                ));
+                toggleModal('lexicalRichText-add-table');
               }}
               className="item"
             >
@@ -858,12 +855,7 @@ export default function ToolbarPlugin(): JSX.Element {
 
             <DropDownItem
               onClick={() => {
-                showModal('Insert Equation', (onClose) => (
-                  <InsertEquationDialog
-                    activeEditor={activeEditor}
-                    onClose={onClose}
-                  />
-                ));
+                toggleModal('lexicalRichText-add-equation');
               }}
               className="item"
             >
@@ -965,10 +957,32 @@ export default function ToolbarPlugin(): JSX.Element {
       {/* modal */}
       {isModalOpen('lexicalRichText-add-upload') && (
         <Modal
-          className={'rich-text-upload-modal'}
-          slug={'lexicalRichText-add-upload'}
+          className="rich-text-upload-modal"
+          slug="lexicalRichText-add-upload"
         >
           <UploadModal activeEditor={activeEditor} />
+        </Modal>
+      )}
+
+      {isModalOpen('lexicalRichText-add-table') && (
+        <Modal
+          className="rich-text-table-modal"
+          slug="lexicalRichText-add-table"
+        >
+          <InsertTableDialog
+            activeEditor={activeEditor}
+          />
+        </Modal>
+      )}
+
+      {isModalOpen('lexicalRichText-add-equation') && (
+        <Modal
+          className="rich-text-equation-modal"
+          slug="lexicalRichText-add-equation"
+        >
+          <InsertEquationDialog
+            activeEditor={activeEditor}
+          />
         </Modal>
       )}
     </div>
