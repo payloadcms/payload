@@ -18,8 +18,11 @@ const RichTextCell = ({ data }) => {
     return $getRoot().getTextContent();
   });
 
+  const textToShow = textContent?.length > 100 ? `${textContent.slice(0, 100)}\u2026` : textContent;
+
+
   return (
-    <span>{textContent}</span>
+    <span>{textToShow}</span>
   );
 };
 
