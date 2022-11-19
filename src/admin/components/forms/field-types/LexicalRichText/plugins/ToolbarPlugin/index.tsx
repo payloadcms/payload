@@ -72,7 +72,6 @@ import * as React from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { IS_APPLE } from '../../shared/environment';
 
-import catTypingGif from '../../images/cat-typing.gif';
 import ColorPicker from '../../ui/ColorPicker';
 import DropDown, { DropDownItem } from '../../ui/DropDown';
 import { getSelectedNode } from '../../utils/getSelectedNode';
@@ -597,9 +596,6 @@ export default function ToolbarPlugin(): JSX.Element {
     },
     [activeEditor, selectedElementKey],
   );
-  const insertGifOnClick = (payload: InsertImagePayload) => {
-    activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
-  };
 
   return (
     <div className="toolbar">
@@ -844,16 +840,6 @@ export default function ToolbarPlugin(): JSX.Element {
             >
               <i className="icon image" />
               <span className="text">Upload</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => insertGifOnClick({
-                altText: 'Cat typing on a laptop',
-                src: catTypingGif,
-              })}
-              className="item"
-            >
-              <i className="icon gif" />
-              <span className="text">GIF</span>
             </DropDownItem>
             <DropDownItem
               onClick={() => {
