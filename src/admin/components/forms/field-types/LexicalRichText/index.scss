@@ -424,6 +424,9 @@ i.image {
 
 i.table {
   background-image: url(images/icons/table.svg);
+  margin-bottom: unset;
+  overflow: unset;
+  max-width: unset;
 }
 
 i.close {
@@ -1527,5 +1530,5 @@ html[data-theme=dark] {
   .link-editor .link-input a {
     color: rgb(102, 167, 255);
   }
-  
+
 }
