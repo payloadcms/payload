@@ -38,6 +38,7 @@ import {
 } from '../../nodes/ImageNode';
 
 import payload from '../../../../../../../index';
+import { useConfig } from '../../../../../utilities/Config';
 
 
 export type InsertImagePayload = Readonly<RawImagePayload>;
@@ -60,10 +61,10 @@ export default function UploadPlugin({
     return mergeRegister(
       editor.registerCommand<InsertImagePayload>(
         INSERT_IMAGE_COMMAND,
-        (insertImagePayload) => {
+        (insertImagePayload) => { // This is run on the browser. Can't just use 'payload' object
           console.log('Received INSERT_IMAGE_COMMAND with payload', insertImagePayload);
-
-
+          //const { collections, serverURL, routes: { api } } = useConfig();
+          //console.log('Collections', collections);
 
           /*
           const { collections, serverURL, routes: { api } } = payload.config;
