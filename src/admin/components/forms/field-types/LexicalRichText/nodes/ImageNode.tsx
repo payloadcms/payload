@@ -41,7 +41,9 @@ export interface ImagePayload {
 
 export interface RawImagePayload {
   type: string;
-  value: string;
+  value: {
+    id: string;
+  };
   relationTo: string;
 }
 

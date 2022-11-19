@@ -33,18 +33,25 @@ import getSelection from '../../shared/getDOMSelection';
 import {
   $createImageNode,
   $isImageNode,
-  ImageNode,
+  ImageNode, ImagePayload,
   RawImagePayload,
 } from '../../nodes/ImageNode';
 
 import payload from '../../../../../../../index';
 import { useConfig } from '../../../../../utilities/Config';
+import { SanitizedCollectionConfig } from '../../../../../../../collections/config/types';
+import usePayloadAPI from '../../../../../../hooks/usePayloadAPI';
+import { useTranslation } from 'react-i18next';
+import { requests } from '../../../../../../api';
 
 
 export type InsertImagePayload = Readonly<RawImagePayload>;
 
 export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand('INSERT_IMAGE_COMMAND');
 
+const initialParams = {
+  depth: 0,
+};
 
 export default function UploadPlugin({
   captionsEnabled,
@@ -52,6 +59,9 @@ export default function UploadPlugin({
   captionsEnabled?: boolean;
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
+
+  const { collections, serverURL, routes: { api } } = useConfig();
+  const { i18n } = useTranslation();
 
   useEffect(() => {
     if (!editor.hasNodes([ImageNode])) {
@@ -63,8 +73,40 @@ export default function UploadPlugin({
         INSERT_IMAGE_COMMAND,
         (insertImagePayload) => { // This is run on the browser. Can't just use 'payload' object
           console.log('Received INSERT_IMAGE_COMMAND with payload', insertImagePayload);
-          //const { collections, serverURL, routes: { api } } = useConfig();
-          //console.log('Collections', collections);
+
+
+          const relatedCollection = collections.find((coll) => {
+            console.log('coll.slug', coll.slug, 'insertImagePayload.relationTo', insertImagePayload.relationTo);
+            return coll.slug === insertImagePayload.relationTo;
+          });
+
+          requests.get(`${serverURL}${api}/${relatedCollection.slug}/${insertImagePayload.value?.id}`, {
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          }).then((response) => {
+            response.json().then((json) => {
+              console.log('JSON', json);
+
+              const imagePayload: ImagePayload = {
+                altText: json?.text,
+                height: json?.height,
+                width: json?.width,
+                src: json?.url,
+              };
+              console.log('image payload', imagePayload);
+              editor.update(() => {
+                const imageNode = $createImageNode(imagePayload);
+                $insertNodes([imageNode]);
+                if ($isRootOrShadowRoot(imageNode.getParentOrThrow())) {
+                  $wrapNodeInElement(imageNode, $createParagraphNode).selectEnd();
+                }
+              });
+            });
+          });
+
+
+          console.log('relatedCollection', relatedCollection);
 
           /*
           const { collections, serverURL, routes: { api } } = payload.config;
