@@ -1,2 +1,2 @@
-icensed under Unsplash License
+Licensed under Unsplash License
 https://unsplash.com/license
