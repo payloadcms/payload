@@ -39,7 +39,7 @@ import catTypingGif from '../../images/cat-typing.gif';
 import { EmbedConfigs } from '../AutoEmbedPlugin';
 import { INSERT_COLLAPSIBLE_COMMAND } from '../CollapsiblePlugin';
 import { InsertEquationDialog } from '../EquationsPlugin';
-import { INSERT_IMAGE_COMMAND, InsertImageDialog } from '../ImagesPlugin';
+import { INSERT_IMAGE_COMMAND, InsertImageDialog } from '../UploadPlugin'; //TODO: InsertImageDialog begone! What is ComponentPickerPlugin even used for?
 import { InsertTableDialog } from '../TablePlugin';
 
 class ComponentPickerOption extends TypeaheadOption {

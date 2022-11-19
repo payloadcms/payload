@@ -69,9 +69,9 @@ import {
 } from 'lexical';
 import { useCallback, useEffect, useState } from 'react';
 import * as React from 'react';
+import { Modal, useModal } from '@faceless-ui/modal';
 import { IS_APPLE } from '../../shared/environment';
 
-import useModal from '../../hooks/useModal';
 import catTypingGif from '../../images/cat-typing.gif';
 import ColorPicker from '../../ui/ColorPicker';
 import DropDown, { DropDownItem } from '../../ui/DropDown';
@@ -84,9 +84,9 @@ import {
   INSERT_IMAGE_COMMAND,
   InsertImageDialog,
   InsertImagePayload,
-} from '../ImagesPlugin';
+} from '../UploadPlugin';
 import { InsertTableDialog } from '../TablePlugin';
-import { InsertUploadDialog } from '../UploadPlugin';
+import { UploadModal } from '../UploadPlugin/UploadUI';
 
 const blockTypeToBlockName = {
   bullet: 'Bulleted List',
@@ -401,10 +401,10 @@ export default function ToolbarPlugin(): JSX.Element {
   const [isCode, setIsCode] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
-  const [modal, showModal] = useModal();
   const [isRTL, setIsRTL] = useState(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('');
   const [isEditable, setIsEditable] = useState(() => editor.isEditable());
+  const { toggleModal, isModalOpen } = useModal();
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();
@@ -837,27 +837,8 @@ export default function ToolbarPlugin(): JSX.Element {
               <span className="text">Horizontal Rule</span>
             </DropDownItem>
             <DropDownItem
-              onClick={() => {
-                showModal('Insert Image', (onClose) => (
-                  <InsertImageDialog
-                    activeEditor={activeEditor}
-                    onClose={onClose}
-                  />
-                ));
-              }}
-              className="item"
-            >
-              <i className="icon image" />
-              <span className="text">Image</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
-                showModal('Insert Upload', (onClose) => (
-                  <InsertUploadDialog
-                    activeEditor={activeEditor}
-                    onClose={onClose}
-                  />
-                ));
+              onClick={(e) => {
+                toggleModal('lexicalRichText-add-upload');
               }}
               className="item"
             >
@@ -995,7 +976,15 @@ export default function ToolbarPlugin(): JSX.Element {
         </DropDownItem>
       </DropDown>
 
-      {modal}
+      {/* modal */}
+      {isModalOpen('lexicalRichText-add-upload') && (
+        <Modal
+          className={'rich-text-upload-modal'}
+          slug={'lexicalRichText-add-upload'}
+        >
+          <UploadModal activeEditor={activeEditor} />
+        </Modal>
+      )}
     </div>
   );
 }

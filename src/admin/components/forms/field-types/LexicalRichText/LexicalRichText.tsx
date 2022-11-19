@@ -44,7 +44,6 @@ import FigmaPlugin from './plugins/FigmaPlugin';
 import FloatingLinkEditorPlugin from './plugins/FloatingLinkEditorPlugin';
 import FloatingTextFormatToolbarPlugin from './plugins/FloatingTextFormatToolbarPlugin';
 import HorizontalRulePlugin from './plugins/HorizontalRulePlugin';
-import ImagesPlugin from './plugins/ImagesPlugin';
 import KeywordsPlugin from './plugins/KeywordsPlugin';
 import ListMaxIndentLevelPlugin from './plugins/ListMaxIndentLevelPlugin';
 import MarkdownShortcutPlugin from './plugins/MarkdownShortcutPlugin';
@@ -166,13 +165,12 @@ export const Editor: React.FC<OnChangeProps> = (props) => {
               />
               <MentionsPlugin />
               <HistoryPlugin />
-              <ImagesPlugin captionsEnabled={false} />
               <UploadPlugin captionsEnabled={false} />
               <LinkPlugin />
               <ClickableLinkPlugin />
               <FloatingTextFormatToolbarPlugin />
             </NewTablePlugin>
-            <ImagesPlugin />
+            <UploadPlugin captionsEnabled={false} />
             <LinkPlugin />
             <TwitterPlugin />
             <YouTubePlugin />

@@ -85,6 +85,11 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
   }, [renderModal, toggleModal, modalSlug]);
 
   useEffect(() => {
+    console.log('isOpen', isOpen);
+    console.log('isModalOpen', isModalOpen);
+  }, [isOpen, isModalOpen]);
+
+  useEffect(() => {
     const params: {
       page?: number
       sort?: string
