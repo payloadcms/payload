@@ -39,6 +39,12 @@ export interface ImagePayload {
   captionsEnabled?: boolean;
 }
 
+export interface RawImagePayload {
+  type: string;
+  value: string;
+  relationTo: string;
+}
+
 function convertImageElement(domNode: Node): null | DOMConversionOutput {
   if (domNode instanceof HTMLImageElement) {
     const { alt: altText, src } = domNode;

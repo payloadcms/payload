@@ -39,7 +39,7 @@ import catTypingGif from '../../images/cat-typing.gif';
 import { EmbedConfigs } from '../AutoEmbedPlugin';
 import { INSERT_COLLAPSIBLE_COMMAND } from '../CollapsiblePlugin';
 import { InsertEquationDialog } from '../EquationsPlugin';
-import { INSERT_IMAGE_COMMAND, InsertImageDialog } from '../UploadPlugin'; //TODO: InsertImageDialog begone! What is ComponentPickerPlugin even used for?
+import { INSERT_IMAGE_COMMAND/* , InsertImageDialog */ } from '../UploadPlugin'; //TODO: InsertImageDialog begone! What is ComponentPickerPlugin even used for?
 import { InsertTableDialog } from '../TablePlugin';
 
 class ComponentPickerOption extends TypeaheadOption {
@@ -280,10 +280,11 @@ export default function ComponentPickerMenuPlugin(): JSX.Element {
         icon: <i className="icon image" />,
         keywords: ['image', 'photo', 'picture', 'file'],
         onSelect: () => showModal('Insert Image', (onClose) => (
-          <InsertImageDialog
+          /* <InsertImageDialog
             activeEditor={editor}
             onClose={onClose}
-          />
+          /> */
+          <p>Todo</p>
         )),
       }),
       new ComponentPickerOption('Collapsible', {

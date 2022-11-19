@@ -25,7 +25,7 @@ import {
   LexicalCommand,
   LexicalEditor,
 } from 'lexical';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as React from 'react';
 import getSelection from '../../shared/getDOMSelection';
 
@@ -34,11 +34,13 @@ import {
   $createImageNode,
   $isImageNode,
   ImageNode,
-  ImagePayload,
+  RawImagePayload,
 } from '../../nodes/ImageNode';
 
+import payload from '../../../../../../../index';
 
-export type InsertImagePayload = Readonly<ImagePayload>;
+
+export type InsertImagePayload = Readonly<RawImagePayload>;
 
 export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand('INSERT_IMAGE_COMMAND');
 
@@ -58,13 +60,37 @@ export default function UploadPlugin({
     return mergeRegister(
       editor.registerCommand<InsertImagePayload>(
         INSERT_IMAGE_COMMAND,
-        (payload) => {
-          console.log('Received INSERT_IMAGE_COMMAND with payload', payload);
-          const imageNode = $createImageNode(payload);
+        (insertImagePayload) => {
+          console.log('Received INSERT_IMAGE_COMMAND with payload', insertImagePayload);
+
+
+
+          /*
+          const { collections, serverURL, routes: { api } } = payload.config;
+          const relatedCollection = collections.find((coll) => coll.slug === insertImagePayload.relationTo);
+
+          console.log('relatedCollection', relatedCollection);
+
+          // Get the referenced document
+          const foundReferencedUploadDocument = payload.find(
+            {
+              collection: relatedCollection.slug,
+              where: {
+                id: {
+                  equals: insertImagePayload.value
+                },
+              },
+            },
+          );
+
+          console.log('foundReferencedUploadDocument', foundReferencedUploadDocument);
+
+
+          /* const imageNode = $createImageNode(payload);
           $insertNodes([imageNode]);
           if ($isRootOrShadowRoot(imageNode.getParentOrThrow())) {
             $wrapNodeInElement(imageNode, $createParagraphNode).selectEnd();
-          }
+          } */
 
           return true;
         },

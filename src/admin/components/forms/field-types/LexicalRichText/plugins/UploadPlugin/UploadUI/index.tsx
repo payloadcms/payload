@@ -18,7 +18,7 @@ import { getTranslation } from '../../../../../../../../utilities/getTranslation
 
 import './index.scss';
 import '../addSwapModals.scss';
-import { ImagePayload } from '../../../nodes/ImageNode';
+import { ImagePayload, RawImagePayload } from '../../../nodes/ImageNode';
 import landscapeImage from '../../../images/landscape.jpg';
 import { INSERT_IMAGE_COMMAND } from '../index';
 
@@ -31,24 +31,15 @@ const insertUpload = ({
   activeEditor,
 }) => {
   console.log('insertUpload value:', value, 'relationTo:', relationTo);
-  const text = { text: ' ' };
 
-  const upload = {
+  const rawImagePayload: RawImagePayload = {
     type: 'upload',
     value,
     relationTo,
-    children: [
-      text,
-    ],
   };
 
-  const imagePayload: ImagePayload = {
-    altText:
-      'Daylight fir trees forest glacier green high ice landscape',
-    src: landscapeImage,
-  };
-  activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, imagePayload);
-  console.log('Distpatched insert image command');
+  activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, rawImagePayload);
+  console.log('Dispatched insert image command');
 
   // injectVoidElement(editor, upload);
 };
