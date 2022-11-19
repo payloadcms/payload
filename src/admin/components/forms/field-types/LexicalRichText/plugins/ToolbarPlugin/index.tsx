@@ -86,6 +86,7 @@ import {
   InsertImagePayload,
 } from '../ImagesPlugin';
 import { InsertTableDialog } from '../TablePlugin';
+import { InsertUploadDialog } from '../UploadPlugin';
 
 const blockTypeToBlockName = {
   bullet: 'Bulleted List',
@@ -848,6 +849,20 @@ export default function ToolbarPlugin(): JSX.Element {
             >
               <i className="icon image" />
               <span className="text">Image</span>
+            </DropDownItem>
+            <DropDownItem
+              onClick={() => {
+                showModal('Insert Upload', (onClose) => (
+                  <InsertUploadDialog
+                    activeEditor={activeEditor}
+                    onClose={onClose}
+                  />
+                ));
+              }}
+              className="item"
+            >
+              <i className="icon image" />
+              <span className="text">Upload</span>
             </DropDownItem>
             <DropDownItem
               onClick={() => insertGifOnClick({

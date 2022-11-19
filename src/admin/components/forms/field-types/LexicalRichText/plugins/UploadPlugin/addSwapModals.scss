@@ -1,0 +1,57 @@
+@import '../../../../../../scss/styles.scss';
+
+.rich-text-upload-modal {
+  @include blur-bg;
+  display: flex;
+  align-items: center;
+
+  .template-minimal {
+    padding-top: base(4);
+    align-items: flex-start;
+    position: relative;
+    z-index: 1;
+  }
+
+  &__header {
+    margin-bottom: $baseline;
+    display: flex;
+
+    h1 {
+      margin: 0 auto 0 0;
+    }
+
+    .btn {
+      margin: 0 0 0 $baseline;
+    }
+  }
+
+  &__select-collection-wrap {
+    margin-bottom: base(1);
+  }
+
+  &__page-info {
+    margin-right: base(1);
+    margin-left: auto;
+  }
+
+  &__page-controls {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  @include mid-break {
+    .paginator {
+      width: 100%;
+      margin-bottom: $baseline;
+    }
+
+    &__page-controls {
+      flex-wrap: wrap;
+    }
+
+    &__page-info {
+      margin-left: 0;
+    }
+  }
+}

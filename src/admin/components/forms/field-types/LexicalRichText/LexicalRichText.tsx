@@ -64,6 +64,7 @@ import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
 import ContentEditable from './ui/ContentEditable';
 import Placeholder from './ui/Placeholder';
 import { OnChangeProps } from './types';
+import UploadPlugin from './plugins/UploadPlugin';
 
 
 export const Editor: React.FC<OnChangeProps> = (props) => {
@@ -166,6 +167,7 @@ export const Editor: React.FC<OnChangeProps> = (props) => {
               <MentionsPlugin />
               <HistoryPlugin />
               <ImagesPlugin captionsEnabled={false} />
+              <UploadPlugin captionsEnabled={false} />
               <LinkPlugin />
               <ClickableLinkPlugin />
               <FloatingTextFormatToolbarPlugin />
