@@ -55,3 +55,18 @@
   display: none;
   user-select: none;
 }
+
+html[data-theme=dark] {
+  .Collapsible__container {
+    background: var(--theme-elevation-50);
+    border: 1px solid var(--theme-elevation-150);
+  }
+
+  .Collapsible__title:before {
+    border-left-color: #fff;
+  }
+
+  .Collapsible__container[open] .Collapsible__title:before {
+    border-top-color: #fff;
+  }
+}

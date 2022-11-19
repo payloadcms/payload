@@ -71,4 +71,11 @@ html[data-theme=dark] {
   .Modal__title{
     color: #c2c2c2;
   }
+
+  .Modal__closeButton {
+    background-color: var(--theme-elevation-150);
+  }
+  .Modal__closeButton:hover {
+    background-color: var(--theme-elevation-200);
+  }
 }

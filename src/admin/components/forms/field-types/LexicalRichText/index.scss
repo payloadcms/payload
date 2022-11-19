@@ -434,10 +434,6 @@ i.figma {
   background-image: url(images/icons/figma.svg);
 }
 
-i.poll {
-  background-image: url(images/icons/card-checklist.svg);
-}
-
 i.tweet {
   background-image: url(images/icons/tweet.svg);
 }
@@ -1492,6 +1488,7 @@ html[data-theme=dark] {
     color: var(--theme-elevation-800);
     box-shadow: none;
   }
+
   .dropdown i{
     filter: invert(1);
   }
@@ -1500,7 +1497,34 @@ html[data-theme=dark] {
     color: unset;
     background-color: unset;
   }
+
   .dropdown .item:hover {
     background-color: #1c1c1c;
+  }
+
+  .action-button {
+    background-color: #262626;
+  }
+
+  .action-button:hover {
+    background-color: #383838;
+    color: #fff;
+  }
+
+  .action-button i {
+    filter: invert(1);
+  }
+
+  .link-editor .link-input {
+    background-color: var(--theme-elevation-100);
+    color: #fff;
+  }
+
+  .link-editor div.link-edit {
+    filter: invert(1);
+  }
+
+  .link-editor .link-input a {
+    color: rgb(102, 167, 255);
   }
 }

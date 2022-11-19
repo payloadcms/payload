@@ -44,3 +44,18 @@
   background-color: rgba(223, 232, 250);
   border: 1px solid rgba(0, 0, 0, 0.45);
 }
+
+html[data-theme=dark] {
+  .code-action-menu-container {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .code-action-menu-container button.menu-item i{
+    filter: invert(1);
+  }
+
+  .code-action-menu-container button.menu-item:active {
+    background-color: #1c1c1c;
+    border: 1px solid var(--theme-elevation-150);
+  }
+}

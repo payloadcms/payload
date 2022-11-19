@@ -116,10 +116,14 @@ export function PrettierButton({ lang, editor, getCodeDOMNode }: Props) {
     <div className="prettier-wrapper">
       <button
         className="menu-item"
-        onClick={handleClick}
+        onClick={(event) => {
+          event.preventDefault();
+          return handleClick();
+        }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         aria-label="prettier"
+        title="Prettier"
       >
         {syntaxError ? (
           <i className="format prettier-error" />

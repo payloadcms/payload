@@ -38,3 +38,9 @@
   width: 20px;
   vertical-align: -0.25em;
 }
+
+html[data-theme=dark] {
+  .link-editor {
+    background-color: var(--theme-elevation-100);
+  }
+}

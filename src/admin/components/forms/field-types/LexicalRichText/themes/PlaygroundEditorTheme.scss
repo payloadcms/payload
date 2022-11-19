@@ -441,11 +441,25 @@ html[data-theme=dark] {
   .PlaygroundEditorTheme__h1, .PlaygroundEditorTheme__h2 {
     color: rgb(255, 255, 255);
   }
+
   .PlaygroundEditorTheme__h3 {
     color: rgb(148, 151, 157);
   }
 
   .PlaygroundEditorTheme__link {
     color: rgb(102, 167, 255);
+  }
+
+  .PlaygroundEditorTheme__tableCellHeader {
+    background-color: var(--theme-elevation-50);
+  }
+
+  .PlaygroundEditorTheme__quote {
+    color: rgb(193, 198, 206);
+    border-left-color: var(--theme-elevation-150);
+  }
+
+  .PlaygroundEditorTheme__textCode {
+    background-color: rgb(0, 0, 0);
   }
 }

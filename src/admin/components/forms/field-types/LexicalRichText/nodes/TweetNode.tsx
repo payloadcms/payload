@@ -71,7 +71,11 @@ function TweetComponent({
   const createTweet = useCallback(async () => {
     try {
       // @ts-expect-error Twitter is attached to the window.
-      await window.twttr.widgets.createTweet(tweetID, containerRef.current);
+      if (window.document.documentElement.getAttribute('data-theme') === 'dark'){
+        await window.twttr.widgets.createTweet(tweetID, containerRef.current, { theme: 'dark' });
+      } else {
+        await window.twttr.widgets.createTweet(tweetID, containerRef.current);
+      }
 
       setIsTweetLoading(false);
       isTwitterScriptLoading = false;
