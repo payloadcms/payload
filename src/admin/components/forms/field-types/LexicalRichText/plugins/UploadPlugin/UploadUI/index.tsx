@@ -18,8 +18,7 @@ import { getTranslation } from '../../../../../../../../utilities/getTranslation
 
 import './index.scss';
 import '../addSwapModals.scss';
-import { ImagePayload, RawImagePayload } from '../../../nodes/ImageNode';
-import landscapeImage from '../../../images/landscape.jpg';
+import { RawImagePayload } from '../../../nodes/ImageNode';
 import { INSERT_IMAGE_COMMAND } from '../index';
 
 const baseClass = 'upload-rich-text-button';
