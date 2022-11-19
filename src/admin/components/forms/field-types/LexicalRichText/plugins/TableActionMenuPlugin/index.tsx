@@ -547,6 +547,7 @@ function TableCellActionMenuContainer({
           <button
             className="table-cell-action-button chevron-down"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               setIsMenuOpen(!isMenuOpen);
             }}

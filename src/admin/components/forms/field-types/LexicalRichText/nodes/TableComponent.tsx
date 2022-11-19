@@ -401,7 +401,8 @@ function TableActionMenu({
     >
       <button
         className="item"
-        onClick={() => {
+        onClick={(event) => {
+          event.preventDefault();
           updateTableNode((tableNode) => {
             $addUpdateTag('history-push');
             tableNode.updateCellType(
@@ -419,7 +420,8 @@ function TableActionMenu({
       </button>
       <button
         className="item"
-        onClick={() => {
+        onClick={(event) => {
+          event.preventDefault();
           updateCellsByID([cell.id], () => {
             const root = $getRoot();
             root.clear();
@@ -436,7 +438,8 @@ function TableActionMenu({
           {sortingOptions !== null && sortingOptions.x === x && (
             <button
               className="item"
-              onClick={() => {
+              onClick={(event) => {
+                event.preventDefault();
                 setSortingOptions(null);
                 onClose();
               }}
@@ -449,7 +452,8 @@ function TableActionMenu({
             || sortingOptions.type === 'descending') && (
             <button
               className="item"
-              onClick={() => {
+              onClick={(event) => {
+                event.preventDefault();
                 setSortingOptions({ type: 'ascending', x });
                 onClose();
               }}
@@ -462,7 +466,8 @@ function TableActionMenu({
             || sortingOptions.type === 'ascending') && (
             <button
               className="item"
-              onClick={() => {
+              onClick={(event) => {
+                event.preventDefault();
                 setSortingOptions({ type: 'descending', x });
                 onClose();
               }}
@@ -475,7 +480,8 @@ function TableActionMenu({
       )}
       <button
         className="item"
-        onClick={() => {
+        onClick={(event) => {
+          event.preventDefault();
           updateTableNode((tableNode) => {
             $addUpdateTag('history-push');
             tableNode.insertRowAt(y);
@@ -487,7 +493,8 @@ function TableActionMenu({
       </button>
       <button
         className="item"
-        onClick={() => {
+        onClick={(event) => {
+          event.preventDefault();
           updateTableNode((tableNode) => {
             $addUpdateTag('history-push');
             tableNode.insertRowAt(y + 1);
@@ -500,7 +507,8 @@ function TableActionMenu({
       <hr />
       <button
         className="item"
-        onClick={() => {
+        onClick={(event) => {
+          event.preventDefault();
           updateTableNode((tableNode) => {
             $addUpdateTag('history-push');
             tableNode.insertColumnAt(x);
@@ -512,7 +520,8 @@ function TableActionMenu({
       </button>
       <button
         className="item"
-        onClick={() => {
+        onClick={(event) => {
+          event.preventDefault();
           updateTableNode((tableNode) => {
             $addUpdateTag('history-push');
             tableNode.insertColumnAt(x + 1);
@@ -526,7 +535,8 @@ function TableActionMenu({
       {rows[0].cells.length !== 1 && (
         <button
           className="item"
-          onClick={() => {
+          onClick={(event) => {
+            event.preventDefault();
             updateTableNode((tableNode) => {
               $addUpdateTag('history-push');
               tableNode.deleteColumnAt(x);
@@ -540,7 +550,8 @@ function TableActionMenu({
       {rows.length !== 1 && (
         <button
           className="item"
-          onClick={() => {
+          onClick={(event) => {
+            event.preventDefault();
             updateTableNode((tableNode) => {
               $addUpdateTag('history-push');
               tableNode.deleteRowAt(y);
@@ -553,7 +564,8 @@ function TableActionMenu({
       )}
       <button
         className="item"
-        onClick={() => {
+        onClick={(event) => {
+          event.preventDefault();
           updateTableNode((tableNode) => {
             $addUpdateTag('history-push');
             tableNode.selectNext();
@@ -657,6 +669,7 @@ function TableCell({
           <button
             className={theme.tableCellActionButton}
             onClick={(e) => {
+              e.preventDefault();
               setShowMenu(!showMenu);
               e.stopPropagation();
             }}
