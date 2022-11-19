@@ -5,6 +5,7 @@ import code from './Code';
 import date from './Date';
 import relationship from './Relationship';
 import richText from './Richtext';
+import lexicalRichText from './LexicalRichText';
 import select from './Select';
 import textarea from './Textarea';
 
@@ -17,6 +18,7 @@ export default {
   date,
   relationship,
   richText,
+  lexicalRichText,
   select,
   radio: select,
   textarea,
