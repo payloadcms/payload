@@ -91,7 +91,7 @@ export default function UploadPlugin({
               const imagePayload: ImagePayload = {
                 altText: json?.text,
                 height: json?.height,
-                width: json?.width,
+                maxWidth: json?.width,
                 src: json?.url,
               };
               console.log('image payload', imagePayload);
