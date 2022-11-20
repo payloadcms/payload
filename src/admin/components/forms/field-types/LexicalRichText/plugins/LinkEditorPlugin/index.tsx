@@ -42,7 +42,6 @@ function LinkEditor({
   anchorElem: HTMLElement;
 }): JSX.Element {
   const editorRef = useRef<HTMLDivElement | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [linkUrl, setLinkUrl] = useState('');
   const [isEditMode, setEditMode] = useState(false);
   const [lastSelection, setLastSelection] = useState<
@@ -160,11 +159,6 @@ function LinkEditor({
     });
   }, [editor, updateLinkEditor]);
 
-  useEffect(() => {
-    if (isEditMode && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isEditMode]);
 
   return (
     <div
@@ -177,35 +171,13 @@ function LinkEditor({
           slug={modalSlug}
         >
           <EditLinkModal
-            activeEditor={editor}
+            editor={editor}
             setEditMode={setEditMode}
+            linkUrl={linkUrl}
+            setLinkUrl={setLinkUrl}
+            lastSelection={lastSelection}
           />
         </Modal>
-        /* <input
-          ref={inputRef}
-          className="link-input"
-          value={linkUrl}
-          onChange={(event) => {
-            setLinkUrl(event.target.value);
-          }}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault();
-              if (lastSelection !== null) {
-                if (linkUrl !== '') {
-                  editor.dispatchCommand(
-                    TOGGLE_LINK_COMMAND,
-                    sanitizeUrl(linkUrl),
-                  );
-                }
-                setEditMode(false);
-              }
-            } else if (event.key === 'Escape') {
-              event.preventDefault();
-              setEditMode(false);
-            }
-          }}
-        /> */
       ) : (
         <React.Fragment>
           <div className="link-input">
@@ -291,17 +263,28 @@ export default function FloatingLinkEditorPlugin({
 
 
 export function EditLinkModal({
-  activeEditor,
+  editor,
   setEditMode,
+  linkUrl,
+  setLinkUrl,
+  lastSelection,
 }: {
-  activeEditor: LexicalEditor;
+  editor: LexicalEditor;
   setEditMode;
+  linkUrl: string;
+  setLinkUrl;
+  lastSelection;
 }): JSX.Element {
   const modalSlug = 'lexicalRichText-edit-link';
   const baseModalClass = 'rich-text-link-modal';
   const {
     toggleModal,
   } = useModal();
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  if (inputRef.current) {
+    inputRef.current.focus();
+  }
 
   return (
     <React.Fragment>
@@ -322,6 +305,31 @@ export function EditLinkModal({
           />
         </header>
         {/* Add functionality here */}
+        <input
+          ref={inputRef}
+          className="link-input"
+          value={linkUrl}
+          onChange={(event) => {
+            setLinkUrl(event.target.value);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              if (lastSelection !== null) {
+                if (linkUrl !== '') {
+                  editor.dispatchCommand(
+                    TOGGLE_LINK_COMMAND,
+                    sanitizeUrl(linkUrl),
+                  );
+                }
+                setEditMode(false);
+              }
+            } else if (event.key === 'Escape') {
+              event.preventDefault();
+              setEditMode(false);
+            }
+          }}
+        />
       </MinimalTemplate>
     </React.Fragment>
   );
