@@ -27,6 +27,8 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 
 import { Modal, useModal } from '@faceless-ui/modal';
+import { Editor, Node } from 'slate';
+import { useTranslation } from 'react-i18next';
 import { $isAutoLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '../LinkPlugin/LinkPluginModified';
 import type { PayloadLinkData } from '../LinkPlugin/LinkPluginModified';
 import LinkPreview from '../../ui/LinkPreview';
@@ -45,6 +47,10 @@ import { Fields } from '../../../../Form/types';
 import { Field } from '../../../../../../../fields/config/types';
 import { getBaseFields } from '../../../RichText/elements/link/Modal/baseFields';
 import { useConfig } from '../../../../../utilities/Config';
+import buildStateFromSchema from '../../../../Form/buildStateFromSchema';
+import { useAuth } from '../../../../../utilities/Auth';
+import { useLocale } from '../../../../../utilities/Locale';
+import deepCopyObject from '../../../../../../../utilities/deepCopyObject';
 
 function LinkEditor({
   editor,
@@ -60,6 +66,38 @@ function LinkEditor({
     RangeSelection | GridSelection | NodeSelection | null
   >(null);
 
+  const customFieldSchema = false/* fieldProps?.admin?.link?.fields */; // TODO: Field props
+  const config = useConfig();
+
+  const { user } = useAuth();
+  const locale = useLocale();
+  const { t } = useTranslation('fields');
+
+  const [initialState, setInitialState] = useState<Fields>({});
+  const [fieldSchema] = useState(() => {
+    const fields: Field[] = [
+      ...getBaseFields(config),
+    ];
+
+    if (customFieldSchema) {
+      fields.push({
+        name: 'fields',
+        type: 'group',
+        admin: {
+          style: {
+            margin: 0,
+            padding: 0,
+            borderTop: 0,
+            borderBottom: 0,
+          },
+        },
+        fields: customFieldSchema,
+      });
+    }
+
+    return fields;
+  });
+
   const {
     toggleModal,
     isModalOpen,
@@ -72,14 +110,40 @@ function LinkEditor({
     if ($isRangeSelection(selection)) {
       const node = getSelectedNode(selection);
       const parent = node.getParent();
+
+
+      // Initial state thingy
+
+      // Initial state:
+      const data = {
+        text: '',
+        url: '',
+        linkType: undefined,
+        doc: undefined,
+        newTab: undefined,
+        fields: undefined,
+      };
+
+
       if ($isLinkNode(parent)) {
         setLinkUrl(parent.getURL());
+        data.text = parent.getTextContent();
+        data.url = parent.getURL();
       } else if ($isLinkNode(node)) {
         setLinkUrl(node.getURL());
+        data.text = node.getTextContent(); // ?
+        data.url = node.getURL();
       } else {
         setLinkUrl('');
       }
+
+      buildStateFromSchema({ fieldSchema, data, user, operation: 'create', locale, t }).then(
+        (state) => {
+          setInitialState(state);
+        },
+      );
     }
+
     const editorElem = editorRef.current;
     const nativeSelection = window.getSelection();
     const { activeElement } = document;
@@ -171,34 +235,6 @@ function LinkEditor({
     });
   }, [editor, updateLinkEditor]);
 
-
-  const customFieldSchema = false/* fieldProps?.admin?.link?.fields */; // TODO: Field props
-  const config = useConfig();
-
-  const [initialState, setInitialState] = useState<Fields>({});
-  const [fieldSchema] = useState(() => {
-    const fields: Field[] = [
-      ...getBaseFields(config),
-    ];
-
-    if (customFieldSchema) {
-      fields.push({
-        name: 'fields',
-        type: 'group',
-        admin: {
-          style: {
-            margin: 0,
-            padding: 0,
-            borderTop: 0,
-            borderBottom: 0,
-          },
-        },
-        fields: customFieldSchema,
-      });
-    }
-
-    return fields;
-  });
 
   return (
     <div
@@ -293,14 +329,12 @@ function useFloatingLinkEditorToolbar(
   const [activeEditor, setActiveEditor] = useState(editor);
   const [isLink, setIsLink] = useState(false);
 
-  const updateToolbar = useCallback(() => {
+  const updateToolbar = useCallback(async () => {
     const selection = $getSelection();
     if ($isRangeSelection(selection)) {
       const node = getSelectedNode(selection);
       const linkParent = $findMatchingParent(node, $isLinkNode);
       const autoLinkParent = $findMatchingParent(node, $isAutoLinkNode);
-
-      // We don't want this menu to open for auto links.
       if (linkParent != null && autoLinkParent == null) {
         setIsLink(true);
       } else {
@@ -366,6 +400,8 @@ export function EditLinkModal({
   if (inputRef.current) {
     inputRef.current.focus();
   }
+
+  console.log('ISTATE', initialState);
 
   return (
     <React.Fragment>
