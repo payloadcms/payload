@@ -54,7 +54,7 @@ const VersionsCount: React.FC<Props> = ({ collection, global, id }) => {
           el="link"
           to={versionsURL}
         >
-          {t('versionCount', { count: versionCount })}
+          {t(versionCount === 1 ? 'versionCount_one' : 'versionCount_many', { count: versionCount })}
         </Button>
       )}
     </div>
