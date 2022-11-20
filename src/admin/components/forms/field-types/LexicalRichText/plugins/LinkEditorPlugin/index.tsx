@@ -27,7 +27,6 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 
 import { Modal, useModal } from '@faceless-ui/modal';
-import { Editor, Node } from 'slate';
 import { useTranslation } from 'react-i18next';
 import { $isAutoLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '../LinkPlugin/LinkPluginModified';
 import type { PayloadLinkData } from '../LinkPlugin/LinkPluginModified';
