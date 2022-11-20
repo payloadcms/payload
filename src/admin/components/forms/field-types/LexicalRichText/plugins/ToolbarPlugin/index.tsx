@@ -15,7 +15,6 @@ import {
   CODE_LANGUAGE_MAP,
   getLanguageFriendlyName,
 } from '@lexical/code';
-import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
 import {
   $isListNode,
   INSERT_CHECK_LIST_COMMAND,
@@ -70,12 +69,13 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import * as React from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
+import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../LinkPlugin/LinkPluginModified';
 import { IS_APPLE } from '../../shared/environment';
 
 import ColorPicker from '../../ui/ColorPicker';
 import DropDown, { DropDownItem } from '../../ui/DropDown';
 import { getSelectedNode } from '../../utils/getSelectedNode';
-import {sanitizeUrl} from '../../utils/url';
+import { sanitizeUrl } from '../../utils/url';
 import { EmbedConfigs } from '../AutoEmbedPlugin';
 import { INSERT_COLLAPSIBLE_COMMAND } from '../CollapsiblePlugin';
 import { InsertEquationDialog } from '../EquationsPlugin';

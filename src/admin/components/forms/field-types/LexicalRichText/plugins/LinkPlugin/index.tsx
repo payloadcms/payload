@@ -6,11 +6,11 @@
  *
  */
 
-import {LinkPlugin as LexicalLinkPlugin} from '@lexical/react/LexicalLinkPlugin';
 import * as React from 'react';
+import { LinkPlugin as LexicalLinkPlugin } from './ReactLinkPluginModified';
 
-import {validateUrl} from '../../utils/url';
+import { validateUrl } from '../../utils/url';
 
 export default function LinkPlugin(): JSX.Element {
-  return <LexicalLinkPlugin /* validateUrl={validateUrl} */ />;
+  return <LexicalLinkPlugin validateUrl={validateUrl} />;
 }

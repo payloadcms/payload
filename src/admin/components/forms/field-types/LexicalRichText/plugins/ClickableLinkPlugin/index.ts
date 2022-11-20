@@ -6,10 +6,8 @@
  *
  */
 
-import type { LinkNode } from '@lexical/link';
 import type { LexicalEditor } from 'lexical';
 
-import { $isLinkNode } from '@lexical/link';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
   $getNearestNodeFromDOMNode,
@@ -17,6 +15,8 @@ import {
   $isRangeSelection,
 } from 'lexical';
 import { useEffect } from 'react';
+import { $isLinkNode } from '../LinkPlugin/LinkPluginModified';
+import type { LinkNode } from '../LinkPlugin/LinkPluginModified';
 
 type LinkFilter = (event: MouseEvent, linkNode: LinkNode) => boolean;
 

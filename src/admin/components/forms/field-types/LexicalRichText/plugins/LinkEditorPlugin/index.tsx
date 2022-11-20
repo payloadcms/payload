@@ -7,7 +7,8 @@
  */
 import './index.scss';
 
-import { $isAutoLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
+// import { $isAutoLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $findMatchingParent, mergeRegister } from '@lexical/utils';
 import {
@@ -26,9 +27,11 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 
 import { Modal, useModal } from '@faceless-ui/modal';
+import { $isAutoLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '../LinkPlugin/LinkPluginModified';
+import type { PayloadLinkData } from '../LinkPlugin/LinkPluginModified';
 import LinkPreview from '../../ui/LinkPreview';
 import { getSelectedNode } from '../../utils/getSelectedNode';
-import {sanitizeUrl} from '../../utils/url';
+import { sanitizeUrl } from '../../utils/url';
 import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition';
 import MinimalTemplate from '../../../../../templates/Minimal';
 import Button from '../../../../../elements/Button';
@@ -215,10 +218,12 @@ function LinkEditor({
             initialState={initialState}
             handleModalSubmit={(fields) => {
               console.log('Submit! fields:', fields);
-              setLinkUrl(fields.url.value);
+              // setLinkUrl(sanitizeUrl(fields.url.value));
 
-              return;
-              const isCollapsed = editor.selection && Range.isCollapsed(editor.selection);
+              setEditMode(false);
+              toggleModal(modalSlug);
+
+
               const data = reduceFieldsToValues(fields, true);
 
               const newLink = {
@@ -231,27 +236,25 @@ function LinkEditor({
                 children: [],
               };
 
-              if (isCollapsed || !editor.selection) {
-                // If selection anchor and focus are the same,
-                // Just inject a new node with children already set
-                Transforms.insertNodes(editor, {
-                  ...newLink,
-                  children: [{ text: String(data.text) }],
-                });
-              } else if (editor.selection) {
-                // Otherwise we need to wrap the selected node in a link,
-                // Delete its old text,
-                // Move the selection one position forward into the link,
-                // And insert the text back into the new link
-                Transforms.wrapNodes(editor, newLink, { split: true });
-                Transforms.delete(editor, { at: editor.selection.focus.path, unit: 'word' });
-                Transforms.move(editor, { distance: 1, unit: 'offset' });
-                Transforms.insertText(editor, String(data.text), { at: editor.selection.focus.path });
+
+              console.log('newLink', newLink);
+
+              const newNode: PayloadLinkData = {
+                newTab: data.newTab,
+                url: data.url,
+                linkType: data.linkType,
+                doc: data.doc,
+                type: 'payload',
+              };
+
+              if (customFieldSchema) {
+                newNode.fields = data.fields;
               }
 
-              setEditMode(false);
-              toggleModal(modalSlug);
-              ReactEditor.focus(editor);
+              editor.dispatchCommand(
+                TOGGLE_LINK_COMMAND,
+                newNode,
+              );
             }}
           />
         </Modal>

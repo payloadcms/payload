@@ -10,13 +10,13 @@ import type { Klass, LexicalNode } from 'lexical';
 
 import { CodeHighlightNode, CodeNode } from '@lexical/code';
 import { HashtagNode } from '@lexical/hashtag';
-import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { ListItemNode, ListNode } from '@lexical/list';
 import { MarkNode } from '@lexical/mark';
 import { OverflowNode } from '@lexical/overflow';
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
+import { AutoLinkNode, LinkNode } from '../plugins/LinkPlugin/LinkPluginModified';
 
 import { CollapsibleContainerNode } from '../plugins/CollapsiblePlugin/CollapsibleContainerNode';
 import { CollapsibleContentNode } from '../plugins/CollapsiblePlugin/CollapsibleContentNode';
