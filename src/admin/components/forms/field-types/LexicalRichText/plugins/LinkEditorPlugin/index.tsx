@@ -214,6 +214,10 @@ function LinkEditor({
             fieldSchema={fieldSchema}
             initialState={initialState}
             handleModalSubmit={(fields) => {
+              console.log('Submit! fields:', fields);
+              setLinkUrl(fields.url.value);
+
+              return;
               const isCollapsed = editor.selection && Range.isCollapsed(editor.selection);
               const data = reduceFieldsToValues(fields, true);
 
