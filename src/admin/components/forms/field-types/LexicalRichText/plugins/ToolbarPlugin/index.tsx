@@ -81,7 +81,6 @@ import { INSERT_COLLAPSIBLE_COMMAND } from '../CollapsiblePlugin';
 import { InsertEquationDialog } from '../EquationsPlugin';
 import { InsertTableDialog } from '../TablePlugin';
 import { UploadModal } from '../UploadPlugin/UploadUI';
-import { EditLinkModal } from '../LinkEditorPlugin';
 
 const blockTypeToBlockName = {
   bullet: 'Bulleted List',

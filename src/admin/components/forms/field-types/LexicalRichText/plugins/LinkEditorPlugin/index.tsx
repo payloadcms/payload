@@ -33,6 +33,15 @@ import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition';
 import MinimalTemplate from '../../../../../templates/Minimal';
 import Button from '../../../../../elements/Button';
 import './modal.scss';
+import RenderFields from '../../../../RenderFields';
+import fieldTypes from '../../../index';
+import FormSubmit from '../../../../Submit';
+import Form from '../../../../Form';
+import reduceFieldsToValues from '../../../../Form/reduceFieldsToValues';
+import { Fields } from '../../../../Form/types';
+import { Field } from '../../../../../../../fields/config/types';
+import { getBaseFields } from '../../../RichText/elements/link/Modal/baseFields';
+import { useConfig } from '../../../../../utilities/Config';
 
 function LinkEditor({
   editor,
@@ -53,7 +62,7 @@ function LinkEditor({
     isModalOpen,
   } = useModal();
   const modalSlug = 'lexicalRichText-edit-link';
-  const baseModalClass = 'rich-text-link-modal';
+  const baseModalClass = 'rich-text-link-edit-modal';
 
   const updateLinkEditor = useCallback(() => {
     const selection = $getSelection();
@@ -160,6 +169,34 @@ function LinkEditor({
   }, [editor, updateLinkEditor]);
 
 
+  const customFieldSchema = false/* fieldProps?.admin?.link?.fields */; // TODO: Field props
+  const config = useConfig();
+
+  const [initialState, setInitialState] = useState<Fields>({});
+  const [fieldSchema] = useState(() => {
+    const fields: Field[] = [
+      ...getBaseFields(config),
+    ];
+
+    if (customFieldSchema) {
+      fields.push({
+        name: 'fields',
+        type: 'group',
+        admin: {
+          style: {
+            margin: 0,
+            padding: 0,
+            borderTop: 0,
+            borderBottom: 0,
+          },
+        },
+        fields: customFieldSchema,
+      });
+    }
+
+    return fields;
+  });
+
   return (
     <div
       ref={editorRef}
@@ -173,9 +210,45 @@ function LinkEditor({
           <EditLinkModal
             editor={editor}
             setEditMode={setEditMode}
-            linkUrl={linkUrl}
-            setLinkUrl={setLinkUrl}
-            lastSelection={lastSelection}
+            modalSlug={modalSlug}
+            fieldSchema={fieldSchema}
+            initialState={initialState}
+            handleModalSubmit={(fields) => {
+              const isCollapsed = editor.selection && Range.isCollapsed(editor.selection);
+              const data = reduceFieldsToValues(fields, true);
+
+              const newLink = {
+                type: 'link',
+                linkType: data.linkType,
+                url: data.url,
+                doc: data.doc,
+                newTab: data.newTab,
+                fields: data.fields,
+                children: [],
+              };
+
+              if (isCollapsed || !editor.selection) {
+                // If selection anchor and focus are the same,
+                // Just inject a new node with children already set
+                Transforms.insertNodes(editor, {
+                  ...newLink,
+                  children: [{ text: String(data.text) }],
+                });
+              } else if (editor.selection) {
+                // Otherwise we need to wrap the selected node in a link,
+                // Delete its old text,
+                // Move the selection one position forward into the link,
+                // And insert the text back into the new link
+                Transforms.wrapNodes(editor, newLink, { split: true });
+                Transforms.delete(editor, { at: editor.selection.focus.path, unit: 'word' });
+                Transforms.move(editor, { distance: 1, unit: 'offset' });
+                Transforms.insertText(editor, String(data.text), { at: editor.selection.focus.path });
+              }
+
+              setEditMode(false);
+              toggleModal(modalSlug);
+              ReactEditor.focus(editor);
+            }}
           />
         </Modal>
       ) : (
@@ -265,18 +338,19 @@ export default function FloatingLinkEditorPlugin({
 export function EditLinkModal({
   editor,
   setEditMode,
-  linkUrl,
-  setLinkUrl,
-  lastSelection,
+  modalSlug,
+  handleModalSubmit,
+  initialState,
+  fieldSchema,
 }: {
   editor: LexicalEditor;
   setEditMode;
-  linkUrl: string;
-  setLinkUrl;
-  lastSelection;
+  modalSlug: string;
+  handleModalSubmit;
+  initialState;
+  fieldSchema;
 }): JSX.Element {
-  const modalSlug = 'lexicalRichText-edit-link';
-  const baseModalClass = 'rich-text-link-modal';
+  const baseModalClass = 'rich-text-link-edit-modal';
   const {
     toggleModal,
   } = useModal();
@@ -288,11 +362,11 @@ export function EditLinkModal({
 
   return (
     <React.Fragment>
-      <MinimalTemplate width="wide">
+      <MinimalTemplate className={`${baseModalClass}__template`}>
         <header className={`${baseModalClass}__header`}>
-          <h1>
+          <h3>
             Edit Link
-          </h1>
+          </h3>
           <Button
             icon="x"
             round
@@ -304,7 +378,7 @@ export function EditLinkModal({
             }}
           />
         </header>
-        {/* Add functionality here */}
+        {/* Add functionality here
         <input
           ref={inputRef}
           className="link-input"
@@ -328,8 +402,21 @@ export function EditLinkModal({
               event.preventDefault();
               setEditMode(false);
             }
-          }}
-        />
+          }}/> */ }
+        <Form
+          onSubmit={handleModalSubmit}
+          initialState={initialState}
+        >
+          <RenderFields
+            fieldTypes={fieldTypes}
+            readOnly={false}
+            fieldSchema={fieldSchema}
+            forceRender
+          />
+          <FormSubmit>
+            Confirm
+          </FormSubmit>
+        </Form>
       </MinimalTemplate>
     </React.Fragment>
   );
