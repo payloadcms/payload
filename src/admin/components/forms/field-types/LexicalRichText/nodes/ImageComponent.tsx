@@ -21,7 +21,6 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 import { HashtagPlugin } from '@lexical/react/LexicalHashtagPlugin';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 import { LexicalNestedComposer } from '@lexical/react/LexicalNestedComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
@@ -41,6 +40,7 @@ import {
 } from 'lexical';
 import * as React from 'react';
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import LinkPlugin from '../plugins/LinkPlugin';
 
 import { useSettings } from '../context/SettingsContext';
 import { useSharedHistoryContext } from '../context/SharedHistoryContext';

@@ -1614,7 +1614,7 @@
   resolved "https://registry.npmjs.org/@jsdevtools/ono/-/ono-7.1.3.tgz#9df03bbd7c696a5c58885c34aa06da41c8543796"
   integrity sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==
 
-"@lexical/clipboard@0.6.1-next.0":
+"@lexical/clipboard@0.6.1-next.0", "@lexical/clipboard@^0.6.1-next.0":
   version "0.6.1-next.0"
   resolved "https://registry.yarnpkg.com/@lexical/clipboard/-/clipboard-0.6.1-next.0.tgz#2d9234c244e95fb0cea6114d7cb43a8c5cc5fd25"
   integrity sha512-o+tGku+BjQSkO1t8kngsVDlmR9yD7Fg0gos55wFhTqtB0wUIzB8eTr4XNuRGirnialvZ6KF77dVGZNk+6CXIKQ==
@@ -1661,7 +1661,7 @@
   dependencies:
     "@lexical/utils" "0.6.1-next.0"
 
-"@lexical/html@0.6.1-next.0":
+"@lexical/html@0.6.1-next.0", "@lexical/html@^0.6.1-next.0":
   version "0.6.1-next.0"
   resolved "https://registry.yarnpkg.com/@lexical/html/-/html-0.6.1-next.0.tgz#5fa802b48b3488d7e80840b135495647f64bd673"
   integrity sha512-wNS76TRVZWsj78YaMR8zsKSaB8pYTMBX1QCLe4zPu5//pLNlULZX6HFyJsMMkBRRIzBASA5NUPQrSBRKLpnR0w==

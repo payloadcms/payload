@@ -28,7 +28,7 @@ import { createPortal } from 'react-dom';
 import { Modal, useModal } from '@faceless-ui/modal';
 import LinkPreview from '../../ui/LinkPreview';
 import { getSelectedNode } from '../../utils/getSelectedNode';
-import { sanitizeUrl } from '../../utils/sanitizeUrl';
+import {sanitizeUrl} from '../../utils/url';
 import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition';
 import MinimalTemplate from '../../../../../templates/Minimal';
 import Button from '../../../../../elements/Button';

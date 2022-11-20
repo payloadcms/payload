@@ -75,7 +75,7 @@ import { IS_APPLE } from '../../shared/environment';
 import ColorPicker from '../../ui/ColorPicker';
 import DropDown, { DropDownItem } from '../../ui/DropDown';
 import { getSelectedNode } from '../../utils/getSelectedNode';
-import { sanitizeUrl } from '../../utils/sanitizeUrl';
+import {sanitizeUrl} from '../../utils/url';
 import { EmbedConfigs } from '../AutoEmbedPlugin';
 import { INSERT_COLLAPSIBLE_COMMAND } from '../CollapsiblePlugin';
 import { InsertEquationDialog } from '../EquationsPlugin';
