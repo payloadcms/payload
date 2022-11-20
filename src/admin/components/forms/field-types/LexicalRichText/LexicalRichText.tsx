@@ -41,7 +41,7 @@ import EmojiPickerPlugin from './plugins/EmojiPickerPlugin';
 import EmojisPlugin from './plugins/EmojisPlugin';
 import EquationsPlugin from './plugins/EquationsPlugin';
 import FigmaPlugin from './plugins/FigmaPlugin';
-import FloatingLinkEditorPlugin from './plugins/FloatingLinkEditorPlugin';
+import FloatingLinkEditorPlugin from './plugins/LinkEditorPlugin';
 import FloatingTextFormatToolbarPlugin from './plugins/FloatingTextFormatToolbarPlugin';
 import HorizontalRulePlugin from './plugins/HorizontalRulePlugin';
 import KeywordsPlugin from './plugins/KeywordsPlugin';

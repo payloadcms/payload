@@ -25,12 +25,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import * as React from 'react';
 import { createPortal } from 'react-dom';
 
+import { Modal, useModal } from '@faceless-ui/modal';
 import LinkPreview from '../../ui/LinkPreview';
 import { getSelectedNode } from '../../utils/getSelectedNode';
 import { sanitizeUrl } from '../../utils/sanitizeUrl';
 import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition';
+import MinimalTemplate from '../../../../../templates/Minimal';
+import Button from '../../../../../elements/Button';
+import './modal.scss';
 
-function FloatingLinkEditor({
+function LinkEditor({
   editor,
   anchorElem,
 }: {
@@ -44,6 +48,13 @@ function FloatingLinkEditor({
   const [lastSelection, setLastSelection] = useState<
     RangeSelection | GridSelection | NodeSelection | null
   >(null);
+
+  const {
+    toggleModal,
+    isModalOpen,
+  } = useModal();
+  const modalSlug = 'lexicalRichText-edit-link';
+  const baseModalClass = 'rich-text-link-modal';
 
   const updateLinkEditor = useCallback(() => {
     const selection = $getSelection();
@@ -160,8 +171,17 @@ function FloatingLinkEditor({
       ref={editorRef}
       className="link-editor"
     >
-      {isEditMode ? (
-        <input
+      {isEditMode && isModalOpen(modalSlug) ? (
+        <Modal
+          className={baseModalClass}
+          slug={modalSlug}
+        >
+          <EditLinkModal
+            activeEditor={editor}
+            setEditMode={setEditMode}
+          />
+        </Modal>
+        /* <input
           ref={inputRef}
           className="link-input"
           value={linkUrl}
@@ -185,7 +205,7 @@ function FloatingLinkEditor({
               setEditMode(false);
             }
           }}
-        />
+        /> */
       ) : (
         <React.Fragment>
           <div className="link-input">
@@ -203,6 +223,7 @@ function FloatingLinkEditor({
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => {
                 setEditMode(true);
+                toggleModal(modalSlug);
               }}
             />
           </div>
@@ -250,7 +271,7 @@ function useFloatingLinkEditorToolbar(
 
   return isLink
     ? createPortal(
-      <FloatingLinkEditor
+      <LinkEditor
         editor={activeEditor}
         anchorElem={anchorElem}
       />,
@@ -266,4 +287,42 @@ export default function FloatingLinkEditorPlugin({
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   return useFloatingLinkEditorToolbar(editor, anchorElem);
+}
+
+
+export function EditLinkModal({
+  activeEditor,
+  setEditMode,
+}: {
+  activeEditor: LexicalEditor;
+  setEditMode;
+}): JSX.Element {
+  const modalSlug = 'lexicalRichText-edit-link';
+  const baseModalClass = 'rich-text-link-modal';
+  const {
+    toggleModal,
+  } = useModal();
+
+  return (
+    <React.Fragment>
+      <MinimalTemplate width="wide">
+        <header className={`${baseModalClass}__header`}>
+          <h1>
+            Edit Link
+          </h1>
+          <Button
+            icon="x"
+            round
+            buttonStyle="icon-label"
+            iconStyle="with-border"
+            onClick={() => {
+              setEditMode(false);
+              toggleModal(modalSlug);
+            }}
+          />
+        </header>
+        {/* Add functionality here */}
+      </MinimalTemplate>
+    </React.Fragment>
+  );
 }
