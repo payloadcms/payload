@@ -3,6 +3,7 @@ import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
 import type { CustomIdNumberRelation, CustomIdRelation, Post, Relation } from './payload-types';
 import { ChainedRelation } from './payload-types';
+import { FilterOptions, FilterOptionsProps } from '../../src/fields/config/types';
 
 const openAccess = {
   create: () => true,
@@ -17,6 +18,9 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
   return {
     slug: collectionSlug,
     access: openAccess,
+    admin: {
+      useAsTitle: 'name',
+    },
     fields: [
       {
         name: 'name',
@@ -100,6 +104,16 @@ export default buildConfig({
               not_equals: true,
             },
           },
+        },
+        {
+          name: 'filteredBySibling',
+          type: 'relationship',
+          relationTo: relationSlug,
+          filterOptions: (args: FilterOptionsProps<Post>) => ({
+            id: {
+              equals: args?.data?.filteredRelation,
+            },
+          }),
         },
       ],
     },

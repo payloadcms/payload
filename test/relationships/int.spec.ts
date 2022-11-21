@@ -124,6 +124,7 @@ describe('Relationships', () => {
           customIdRelation: customIdRelation.id,
           customIdNumberRelation: customIdNumberRelation.id,
           filteredRelation: filteredRelation.id,
+          filteredBySibling: '',
         });
 
         await createPost(); // Extra post to allow asserting totalDoc count
@@ -153,6 +154,32 @@ describe('Relationships', () => {
 
         // Attempt to update post with a now filtered relation
         const { status, errors } = await client.update<Post>({ id: post.id, data: { filteredRelation: filteredRelation.id } });
+
+        expect(errors?.[0]).toMatchObject({ name: 'ValidationError', message: expect.any(String), data: expect.anything() });
+        expect(status).toEqual(400);
+      });
+
+      it('should use dynamic filterOptions based on sibling data', async () => {
+        const { doc } = await client.findByID<Post>({ id: post.id });
+
+        // first try and update to a relation that works
+        await client.update<Post>({
+          id: post.id,
+          data: { filteredBySibling: filteredRelation.id },
+        });
+
+        expect(doc.filteredRelation).toMatchObject({ id: filteredRelation.id });
+
+        const { doc: newRelationDoc } = await client.create<Relation>({
+          slug: relationSlug,
+          data: { name: 'new relation' },
+        });
+
+        // try and update to a relation that is out of scope
+        const { status, errors } = await client.update<Post>({
+          id: post.id,
+          data: { filteredBySibling: newRelationDoc.id },
+        });
 
         expect(errors?.[0]).toMatchObject({ name: 'ValidationError', message: expect.any(String), data: expect.anything() });
         expect(status).toEqual(400);
@@ -190,7 +217,7 @@ describe('Relationships', () => {
             slug,
             id: post.id,
             data: {
-              relationField: null,
+              relationField: undefined,
             },
           });
 

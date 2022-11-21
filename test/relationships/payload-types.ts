@@ -22,6 +22,7 @@ export interface Post {
   customIdRelation?: string | CustomIdRelation;
   customIdNumberRelation?: number | CustomIdNumberRelation;
   filteredRelation?: string | Relation;
+  filteredBySibling?: string | Relation;
   createdAt: string;
   updatedAt: string;
 }
