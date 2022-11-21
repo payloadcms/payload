@@ -7,7 +7,7 @@ export const PrePopulateFieldUI: React.FC<{ path: string, hasMultipleRelations: 
 
   const addDefaults = React.useCallback(() => {
     const fetchRelationDocs = async () => {
-      const res = await fetch(`/api/${textFieldsSlug}?limit=20`);
+      const res = await fetch(`/api/${textFieldsSlug}?limit=20&where[text][contains]=relationship-test`);
       const json = await res.json();
       const docIds = json.docs.map((doc) => {
         if (hasMultipleRelations) {

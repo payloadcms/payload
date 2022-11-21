@@ -9,7 +9,6 @@ import { pointFieldsSlug } from './collections/Point';
 import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
-import { relationshipFieldsSlug } from './collections/Relationship';
 
 const { beforeAll, describe } = test;
 
@@ -118,7 +117,7 @@ describe('fields', () => {
     });
   });
 
-  describe('fields - collapsible', () => {
+  describe('collapsible', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, collapsibleFieldsSlug);
@@ -167,7 +166,7 @@ describe('fields', () => {
     });
   });
 
-  describe('fields - array', () => {
+  describe('array', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, arrayFieldsSlug);
@@ -210,7 +209,7 @@ describe('fields', () => {
     });
   });
 
-  describe('fields - tabs', () => {
+  describe('tabs', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, tabsSlug);
@@ -266,7 +265,7 @@ describe('fields', () => {
     });
   });
 
-  describe('fields - richText', () => {
+  describe('richText', () => {
     async function navigateToRichTextFields() {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields');
       await page.goto(url.list);
@@ -346,86 +345,84 @@ describe('fields', () => {
         await expect(editLinkModal).not.toBeVisible();
       });
     });
+  });
 
-    describe('relationship', () => {
-      let url: AdminUrlUtil;
+  describe('relationship', () => {
+    let url: AdminUrlUtil;
 
-      beforeAll(() => {
-        url = new AdminUrlUtil(serverURL, relationshipFieldsSlug);
-      });
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'relationship-fields');
+    });
 
-      test('should create inline relationship within field with many relations', async () => {
-        await page.goto(url.create);
+    test('should create inline relationship within field with many relations', async () => {
+      await page.goto(url.create);
 
-        const button = page.locator('#relationship-add-new .relationship-add-new__add-button');
-        await button.click();
-        await page.locator('.relationship-add-new__relation-button--text-fields').click();
+      const button = page.locator('#relationship-add-new .relationship-add-new__add-button');
+      await button.click();
+      await page.locator('#field-relationship .relationship-add-new__relation-button--text-fields').click();
 
-        const textField = page.locator('#field-text');
-        const textValue = 'hello';
+      const textField = page.locator('#field-text');
+      const textValue = 'hello';
 
-        await textField.fill(textValue);
+      await textField.fill(textValue);
 
-        await page.locator('#relationship-add-modal-depth-1 #action-save').click();
-        await expect(page.locator('.Toastify')).toContainText('successfully');
+      await page.locator('#relationship-add-modal-depth-1 #action-save').click();
+      await expect(page.locator('.Toastify')).toContainText('successfully');
 
-        await expect(page.locator('#field-relationship .rs__single-value')).toContainText(textValue);
+      await expect(page.locator('#field-relationship .rs__single-value')).toContainText(textValue);
 
-        await page.locator('#action-save').click();
-        await expect(page.locator('.Toastify')).toContainText('successfully');
-      });
+      await page.locator('#action-save').click();
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+    });
 
-      test('should create nested inline relationships', async () => {
-        await page.goto(url.create);
+    test('should create nested inline relationships', async () => {
+      await page.goto(url.create);
 
-        // Open first modal
-        await page.locator('#relationToSelf-add-new .relationship-add-new__add-button').click();
+      // Open first modal
+      await page.locator('#relationToSelf-add-new .relationship-add-new__add-button').click();
 
-        // Fill first modal's required relationship field
-        await page.locator('#relationToSelf-add-modal-depth-1 #field-relationship').click();
-        await page.locator('#relationToSelf-add-modal-depth-1 .rs__option:has-text("Seeded text document")').click();
+      // Fill first modal's required relationship field
+      await page.locator('#relationToSelf-add-modal-depth-1 #field-relationship').click();
+      await page.locator('#relationToSelf-add-modal-depth-1 .rs__option:has-text("Seeded text document")').click();
 
-        // Open second modal
-        await page.locator('#relationToSelf-add-modal-depth-1 #relationToSelf-add-new button').click();
+      // Open second modal
+      await page.locator('#relationToSelf-add-modal-depth-1 #relationToSelf-add-new button').click();
 
-        // Fill second modal's required relationship field
-        await page.locator('#relationToSelf-add-modal-depth-2 #field-relationship').click();
-        await page.locator('#relationToSelf-add-modal-depth-2 .rs__option:has-text("Seeded text document")').click();
+      // Fill second modal's required relationship field
+      await page.locator('#relationToSelf-add-modal-depth-2 #field-relationship').click();
+      await page.locator('#relationToSelf-add-modal-depth-2 .rs__option:has-text("Seeded text document")').click();
 
-        // Save second modal
-        await page.locator('#relationToSelf-add-modal-depth-2 #action-save').click();
+      // Save second modal
+      await page.locator('#relationToSelf-add-modal-depth-2 #action-save').click();
 
-        // Assert that the first modal is still open
-        // and that the Relation to Self field now has a value in its input
-        await expect(page.locator('#relationToSelf-add-modal-depth-1 #field-relationToSelf .rs__single-value')).toBeVisible();
+      // Assert that the first modal is still open
+      // and that the Relation to Self field now has a value in its input
+      await expect(page.locator('#relationToSelf-add-modal-depth-1 #field-relationToSelf .rs__single-value')).toBeVisible();
 
-        // Save first modal
-        await page.locator('#relationToSelf-add-modal-depth-1 #action-save').click();
+      // Save first modal
+      await page.locator('#relationToSelf-add-modal-depth-1 #action-save').click();
 
-        await wait(200);
+      await wait(200);
 
-        // Expect the original field to have a value filled
-        await expect(page.locator('#field-relationToSelf .rs__single-value')).toBeVisible();
+      // Expect the original field to have a value filled
+      await expect(page.locator('#field-relationToSelf .rs__single-value')).toBeVisible();
 
-        // Fill the required field
-        await page.locator('#field-relationship').click();
-        await page.locator('.rs__option:has-text("Seeded text document")').click();
+      // Fill the required field
+      await page.locator('#field-relationship').click();
+      await page.locator('.rs__option:has-text("Seeded text document")').click();
 
-        await page.locator('#action-save').click();
+      await page.locator('#action-save').click();
 
-        await expect(page.locator('.Toastify')).toContainText('successfully');
-      });
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+    });
 
-      test('should resolve relationships when added by form context', async () => {
-        await page.goto(url.create);
+    test('should resolve relationships when added by form context', async () => {
+      await page.goto(url.create);
 
-        await page.locator('#field-relationHasMany + .pre-populate-field-ui button').click();
-        await wait(200);
+      await page.locator('#field-relationHasMany + .pre-populate-field-ui button').click();
+      await wait(300);
 
-        const addedItemCount = page.locator('#field-relationHasMany .rs__value-container').count();
-
-        await expect(addedItemCount).toBe(15);
-      });
+      expect(await page.locator('#field-relationHasMany .rs__value-container > .rs__multi-value').count()).toEqual(15);
     });
   });
 });

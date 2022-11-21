@@ -82,8 +82,8 @@ export default buildConfig({
       payload.create({
         collection: textFieldsSlug,
         data: {
-          text: `Text ${i}`,
-          localizedText: `Localized text ${i}`,
+          text: `relationship-test ${i}`,
+          localizedText: `relationship-test ${i}`,
         },
       });
     });
