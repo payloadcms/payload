@@ -1056,6 +1056,9 @@
         "selectVersionToCompare": {
           "type": "string"
         },
+        "showingVersionsFor": {
+          "type": "string"
+        },
         "showLocales": {
           "type": "string"
         },
@@ -1075,6 +1078,9 @@
           "type": "string"
         },
         "versionCount_many": {
+          "type": "string"
+        },
+        "versionCount_other": {
           "type": "string"
         },
         "versionCount_none": {
@@ -1136,6 +1142,7 @@
         "saveDraft",
         "selectLocales",
         "selectVersionToCompare",
+        "showingVersionsFor",
         "showLocales",
         "status",
         "type",
@@ -1143,6 +1150,7 @@
         "unpublishing",
         "version",
         "versionCount_many",
+        "versionCount_other",
         "versionCount_none",
         "versionCount_one",
         "versionCreatedOn",
