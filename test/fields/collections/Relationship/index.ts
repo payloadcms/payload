@@ -21,6 +21,29 @@ const RelationshipFields: CollectionConfig = {
       type: 'row',
       fields: [
         {
+          name: 'relationPrePopulate',
+          type: 'relationship',
+          relationTo: 'text-fields',
+          admin: {
+            width: '75%',
+          },
+        },
+        {
+          type: 'ui',
+          name: 'prePopulate',
+          admin: {
+            width: '25%',
+            components: {
+              Field: () => PrePopulateFieldUI({ path: 'relationPrePopulate', hasMany: false }),
+            },
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
           name: 'relationHasMany',
           type: 'relationship',
           relationTo: 'text-fields',

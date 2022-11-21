@@ -74,7 +74,7 @@ const Relationship: React.FC<Props> = (props) => {
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [errorLoading, setErrorLoading] = useState('');
   const [optionFilters, setOptionFilters] = useState<{ [relation: string]: Where }>();
-  const [hasLoadedValueOptions, setHasLoadedValueOptions] = useState(false);
+  const [hasLoadedInitialValues, setHasLoadedInitialValues] = useState(false);
   const [search, setSearch] = useState('');
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false);
   const firstRun = useRef(true);
@@ -277,7 +277,7 @@ const Relationship: React.FC<Props> = (props) => {
     }
   }, [search, updateSearch]);
 
-  const resolveRelationshipOptions = useCallback((valueToResolve) => {
+  const ensureValuesAreLoaded = useCallback((valueToResolve) => {
     const relationMap = createRelationMap({
       hasMany,
       relationTo,
@@ -331,27 +331,37 @@ const Relationship: React.FC<Props> = (props) => {
   // ///////////////////////////
 
   useEffect(() => {
-    if (initialValue && !hasLoadedValueOptions) {
-      resolveRelationshipOptions(initialValue);
-      setHasLoadedValueOptions(true);
-    }
-  }, [initialValue, hasLoadedValueOptions, resolveRelationshipOptions]);
+    if (value) {
+      // hasMany: true
+      if (Array.isArray(value)) {
+        const unresolvedRelationIds = value.reduce<string[]>((unresolvedIds, option) => {
+          if (typeof option === 'object' && 'value' in option) {
+            // relationTo many collections
+            if (!options.find((opt) => opt.value === option.value)) {
+              unresolvedIds.push(option.value);
+            }
+          } else if (typeof option === 'string') {
+            // relationTo one collection
+            if (!options.find((opt) => opt.value === option)) {
+              unresolvedIds.push(option);
+            }
+          }
 
-  useEffect(() => {
-    // Handle external changes to the value
-    if (value && Array.isArray(value)) {
-      const unresolvedRelationIds = value.reduce<string[]>((unresolvedIds, val) => {
-        if (!options.find((opt) => opt.value === val)) {
-          unresolvedIds.push(val);
+          return unresolvedIds;
+        }, []);
+
+        if (unresolvedRelationIds.length > 0) {
+          ensureValuesAreLoaded(unresolvedRelationIds);
         }
-        return unresolvedIds;
-      }, []);
-
-      if (unresolvedRelationIds.length > 0) {
-        resolveRelationshipOptions(unresolvedRelationIds);
+      } else if (!options.find((opt) => opt.value === value)) {
+        // hasMany: false
+        ensureValuesAreLoaded(value);
       }
+    } else if (initialValue && !hasLoadedInitialValues) {
+      ensureValuesAreLoaded(initialValue);
+      setHasLoadedInitialValues(true);
     }
-  }, [value, options, resolveRelationshipOptions]);
+  }, [ensureValuesAreLoaded, hasLoadedInitialValues, initialValue, options, value]);
 
   useEffect(() => {
     if (!filterOptions) return;
@@ -372,7 +382,7 @@ const Relationship: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (optionFilters || !filterOptions) {
-      setHasLoadedValueOptions(false);
+      setHasLoadedInitialValues(false);
       getResults({
         value: initialValue,
       });
@@ -400,7 +410,7 @@ const Relationship: React.FC<Props> = (props) => {
     }
 
     dispatchOptions({ type: 'CLEAR' });
-    setHasLoadedValueOptions(false);
+    setHasLoadedInitialValues(false);
   }, [relationTo]);
 
   const classes = [
