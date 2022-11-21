@@ -326,10 +326,10 @@ const Relationship: React.FC<Props> = (props) => {
     serverURL,
   ]);
 
-  // ///////////////////////////
-  // Fetch value options when initialValue changes
-  // ///////////////////////////
-
+  // ///////////////////////////////////
+  // Ensure values are loaded even
+  // when the field value changes
+  // ///////////////////////////////////
   useEffect(() => {
     if (value) {
       // hasMany: true
