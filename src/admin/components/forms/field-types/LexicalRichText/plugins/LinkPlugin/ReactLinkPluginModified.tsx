@@ -33,7 +33,7 @@ export function LinkPlugin({ validateUrl }: Props): null {
         TOGGLE_LINK_COMMAND,
         (payload) => {
           if (payload === null) {
-            toggleLink(payload);
+            toggleLink(null);
             return true;
           } if (typeof payload === 'string') {
             if (validateUrl === undefined || validateUrl(payload)) {
@@ -41,14 +41,15 @@ export function LinkPlugin({ validateUrl }: Props): null {
               return true;
             }
             return false;
-          } if (payload.type && payload.type === 'payload') {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          } // @ts-ignore
+          if (payload.payloadType && payload.payloadType === 'payload') {
             console.log('Payload type!', payload);
             // DO PAYLOAD SHIT
             const payloadLinkData: PayloadLinkData = payload as PayloadLinkData;
             if (payloadLinkData.url) { // Just a simple URL! No doc
               if (validateUrl === undefined || validateUrl(payloadLinkData.url)) {
-                const target = (payloadLinkData.newTab ? '_BLANK' : undefined);
-                toggleLink(payloadLinkData.url, { rel: undefined, target });
+                toggleLink(payloadLinkData.url, { newTab: payloadLinkData.newTab });
                 return true;
               }
               toggleLinkPayload(payloadLinkData);
@@ -56,8 +57,8 @@ export function LinkPlugin({ validateUrl }: Props): null {
             } // internal linking where I have a doc
             return false;
           }
-          const { url, target, rel } = payload;
-          toggleLink(url, { rel, target });
+          const { url, newTab } = payload;
+          toggleLink(url, { newTab });
           return true;
         },
         COMMAND_PRIORITY_LOW,

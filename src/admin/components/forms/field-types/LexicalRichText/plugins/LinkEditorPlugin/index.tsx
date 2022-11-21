@@ -49,7 +49,6 @@ import { useConfig } from '../../../../../utilities/Config';
 import buildStateFromSchema from '../../../../Form/buildStateFromSchema';
 import { useAuth } from '../../../../../utilities/Auth';
 import { useLocale } from '../../../../../utilities/Locale';
-import deepCopyObject from '../../../../../../../utilities/deepCopyObject';
 
 function LinkEditor({
   editor,
@@ -128,10 +127,14 @@ function LinkEditor({
         setLinkUrl(parent.getURL());
         data.text = parent.getTextContent();
         data.url = parent.getURL();
+        data.newTab = parent.isNewTab();
+        data.linkType = parent.getLinkType();
       } else if ($isLinkNode(node)) {
         setLinkUrl(node.getURL());
         data.text = node.getTextContent(); // ?
         data.url = node.getURL();
+        data.newTab = node.isNewTab();
+        data.linkType = node.getLinkType();
       } else {
         setLinkUrl('');
       }
@@ -279,7 +282,7 @@ function LinkEditor({
                 url: data.url,
                 linkType: data.linkType,
                 doc: data.doc,
-                type: 'payload',
+                payloadType: 'payload',
               };
 
               if (customFieldSchema) {
