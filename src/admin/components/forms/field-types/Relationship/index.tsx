@@ -277,53 +277,81 @@ const Relationship: React.FC<Props> = (props) => {
     }
   }, [search, updateSearch]);
 
+  const resolveRelationshipOptions = useCallback((valueToResolve) => {
+    const relationMap = createRelationMap({
+      hasMany,
+      relationTo,
+      value: valueToResolve,
+    });
+
+    Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
+      await priorRelation;
+
+      if (ids.length > 0) {
+        const query = {
+          where: {
+            id: {
+              in: ids,
+            },
+          },
+          depth: 0,
+          limit: ids.length,
+        };
+
+        if (!errorLoading) {
+          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          });
+          const collection = collections.find((coll) => coll.slug === relation);
+          if (response.ok) {
+            const data = await response.json();
+            dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort: true, ids, i18n });
+          } else if (response.status === 403) {
+            dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort: true, ids, i18n });
+          }
+        }
+      }
+    }, Promise.resolve());
+  }, [
+    api,
+    collections,
+    errorLoading,
+    hasMany,
+    hasMultipleRelations,
+    i18n,
+    relationTo,
+    serverURL,
+  ]);
+
   // ///////////////////////////
   // Fetch value options when initialValue changes
   // ///////////////////////////
 
   useEffect(() => {
     if (initialValue && !hasLoadedValueOptions) {
-      const relationMap = createRelationMap({
-        hasMany,
-        relationTo,
-        value: initialValue,
-      });
-
-      Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
-        await priorRelation;
-
-        if (ids.length > 0) {
-          const query = {
-            where: {
-              id: {
-                in: ids,
-              },
-            },
-            depth: 0,
-            limit: ids.length,
-          };
-
-          if (!errorLoading) {
-            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
-              credentials: 'include',
-              headers: {
-                'Accept-Language': i18n.language,
-              },
-            });
-            const collection = collections.find((coll) => coll.slug === relation);
-            if (response.ok) {
-              const data = await response.json();
-              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort: true, ids, i18n });
-            } else if (response.status === 403) {
-              dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort: true, ids, i18n });
-            }
-          }
-        }
-      }, Promise.resolve());
-
+      resolveRelationshipOptions(initialValue);
       setHasLoadedValueOptions(true);
     }
-  }, [hasMany, hasMultipleRelations, relationTo, initialValue, hasLoadedValueOptions, errorLoading, collections, api, serverURL, i18n]);
+  }, [initialValue, hasLoadedValueOptions, resolveRelationshipOptions]);
+
+  useEffect(() => {
+    // Handle external changes to the value
+    if (value && Array.isArray(value)) {
+      const unresolvedRelationIds = value.reduce<string[]>((unresolvedIds, val) => {
+        if (!options.find((opt) => opt.value === val)) {
+          unresolvedIds.push(val);
+        }
+        return unresolvedIds;
+      }, []);
+
+      if (unresolvedRelationIds.length > 0) {
+        resolveRelationshipOptions(unresolvedRelationIds);
+      }
+    }
+  }, [value, options, resolveRelationshipOptions]);
 
   useEffect(() => {
     if (!filterOptions) return;

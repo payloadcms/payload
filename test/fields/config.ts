@@ -11,7 +11,7 @@ import DateFields, { dateDoc } from './collections/Date';
 import RichTextFields, { richTextDoc } from './collections/RichText';
 import SelectFields, { selectsDoc } from './collections/Select';
 import TabsFields, { tabsDoc } from './collections/Tabs';
-import TextFields, { textDoc } from './collections/Text';
+import TextFields, { textDoc, textFieldsSlug } from './collections/Text';
 import PointFields, { pointDoc } from './collections/Point';
 import GroupFields, { groupDoc } from './collections/Group';
 import getFileByPath from '../../src/uploads/getFileByPath';
@@ -78,7 +78,17 @@ export default buildConfig({
     await payload.create({ collection: 'date-fields', data: dateDoc });
     await payload.create({ collection: 'code-fields', data: codeDoc });
 
-    const createdTextDoc = await payload.create({ collection: 'text-fields', data: textDoc });
+    [...Array(15)].forEach((_, i) => {
+      payload.create({
+        collection: textFieldsSlug,
+        data: {
+          text: `Text ${i}`,
+          localizedText: `Localized text ${i}`,
+        },
+      });
+    });
+
+    const createdTextDoc = await payload.create({ collection: textFieldsSlug, data: textDoc });
 
     const uploadsDir = path.resolve(__dirname, './collections/Upload/uploads');
 
