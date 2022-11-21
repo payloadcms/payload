@@ -46,6 +46,7 @@ export const ensurePublishedGlobalVersion = async ({
         req,
         overrideAccess: true,
         showHiddenFields: true,
+        flattenLocales: false,
       });
 
       try {

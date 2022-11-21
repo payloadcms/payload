@@ -2,7 +2,7 @@ import { request, GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
 import payload from '../../src';
 import config from './config';
-import DraftPosts from './collections/Autosave';
+import AutosavePosts from './collections/Autosave';
 import AutosaveGlobal from './globals/Autosave';
 import { devUser } from '../credentials';
 
@@ -18,7 +18,7 @@ let collectionGraphQLPostID;
 let collectionGraphQLVersionID;
 const collectionGraphQLOriginalTitle = 'autosave title';
 
-const collection = DraftPosts.slug;
+const collection = AutosavePosts.slug;
 const globalSlug = AutosaveGlobal.slug;
 
 let globalLocalVersionID;
@@ -62,7 +62,10 @@ describe('Versions', () => {
 
         collectionLocalPostID = autosavePost.id;
 
-        const updatedPost = await payload.update({
+        const updatedPost: {
+          title: string
+          _status?: string
+        } = await payload.update({
           id: collectionLocalPostID,
           collection,
           data: {
@@ -195,6 +198,48 @@ describe('Versions', () => {
         });
 
         expect(restoredPost.title).toBe(restore.title);
+      });
+    });
+
+    describe('Update', () => {
+      it('should allow a draft to be patched', async () => {
+        const originalTitle = 'Here is a published post';
+
+        const originalPublishedPost = await payload.create({
+          collection,
+          data: {
+            title: originalTitle,
+            description: 'kjnjyhbbdsfseankuhsjsfghb',
+            _status: 'published',
+          },
+        });
+
+        const updatedTitle = 'Here is a draft post with a patched title';
+
+        collectionLocalPostID = originalPublishedPost.id;
+
+        await payload.update({
+          id: collectionLocalPostID,
+          collection,
+          data: {
+            title: updatedTitle,
+          },
+          draft: true,
+        });
+
+        const publishedPost = await payload.findByID({
+          collection,
+          id: collectionLocalPostID,
+        });
+
+        const draftPost = await payload.findByID({
+          collection,
+          id: collectionLocalPostID,
+          draft: true,
+        });
+
+        expect(publishedPost.title).toBe(originalTitle);
+        expect(draftPost.title).toBe(updatedTitle);
       });
     });
   });
@@ -441,6 +486,44 @@ describe('Versions', () => {
         });
 
         expect(restoredGlobal.title).toBe(restore.title);
+      });
+    });
+
+    describe('Patch', () => {
+      it('should allow a draft to be patched', async () => {
+        const originalTitle = 'Here is a published global';
+
+        await payload.updateGlobal({
+          slug: globalSlug,
+          data: {
+            title: originalTitle,
+            description: 'kjnjyhbbdsfseankuhsjsfghb',
+            _status: 'published',
+          },
+        });
+
+        const publishedGlobal = await payload.findGlobal({
+          slug: globalSlug,
+          draft: true,
+        });
+
+        const updatedTitle = 'Here is a draft global with a patched title';
+
+        await payload.updateGlobal({
+          slug: globalSlug,
+          data: {
+            title: updatedTitle,
+          },
+          draft: true,
+        });
+
+        const updatedGlobal = await payload.findGlobal({
+          slug: globalSlug,
+          draft: true,
+        });
+
+        expect(publishedGlobal.title).toBe(originalTitle);
+        expect(updatedGlobal.title).toBe(updatedTitle);
       });
     });
   });
