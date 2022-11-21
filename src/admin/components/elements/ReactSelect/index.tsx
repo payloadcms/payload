@@ -51,6 +51,8 @@ const SortableMultiValueLabel = SortableHandle((props) => <components.MultiValue
 const SortableSelect = SortableContainer(Select) as React.ComponentClass<SelectProps<Value, true> & SortableContainerProps>;
 
 const ReactSelect: React.FC<Props> = (props) => {
+  const { t, i18n } = useTranslation();
+
   const {
     className,
     showError = false,
@@ -58,15 +60,13 @@ const ReactSelect: React.FC<Props> = (props) => {
     onChange,
     value,
     disabled = false,
-    placeholder,
+    placeholder = t('general:selectValue'),
     isSearchable = true,
     isClearable,
     isMulti,
     isSortable,
     filterOption = undefined,
   } = props;
-
-  const { i18n } = useTranslation();
 
   const classes = [
     className,
