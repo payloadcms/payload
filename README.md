@@ -93,7 +93,6 @@ import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3';
 
 const adapter = s3Adapter({
   config: {
-    endpoint: process.env.S3_ENDPOINT,
     credentials: {
       accessKeyId: process.env.S3_ACCESS_KEY_ID,
       secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
@@ -103,6 +102,22 @@ const adapter = s3Adapter({
 })
 
 // Now you can pass this adapter to the plugin
+```
+
+#### Other S3-Compatible Storage
+
+If you're running an S3-compatible object storage such as MinIO or Digital Ocean Spaces, you'll have to set the `endpoint` appropriately for the provider.
+
+```js
+import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3';
+
+const adapter = s3Adapter({
+  config: {
+    endpoint: process.env.S3_ENDPOINT, // Configure for your provider
+    // ...
+  },
+  // ...
+})
 ```
 
 ### GCS Adapter
