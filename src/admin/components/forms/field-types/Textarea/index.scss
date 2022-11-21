@@ -6,12 +6,13 @@
 
   .textarea-outer {
     @include formInput();
+    display: flex;
     resize: vertical;
-    height: auto;
     min-height: base(3);
+    height: 100%;
 
     // Scrollbar for giant content
-    max-height: 90vh;
+    max-height: calc(100vh - $top-header-offset - calc(#{base(5)}));
     overflow: auto;
 
     @include mid-break {
@@ -31,7 +32,6 @@
     position: relative;
     line-height: inherit;
     flex-grow: 1;
-    box-sizing: border-box;
     background: none;
     outline: none;
   }
@@ -49,7 +49,6 @@
     line-height: inherit;
     color: inherit;
     background: none;
-    box-sizing: border-box;
     overflow: auto;
     resize: none;
     outline: none;
@@ -65,8 +64,6 @@
     vertical-align: top;
     display: inline-block;
     flex-grow: 1;
-    white-space: pre;
-    box-sizing: border-box;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: pre-wrap;
