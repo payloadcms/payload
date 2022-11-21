@@ -49,8 +49,13 @@ const AccountView: React.FC = () => {
   const collectionPermissions = permissions?.collections?.[adminUser];
 
   const [{ data }] = usePayloadAPI(
-    `${serverURL}${api}/${collection?.slug}/${user?.id}?depth=0`,
-    { initialParams: { 'fallback-locale': 'null' } },
+    `${serverURL}${api}/${collection?.slug}/${user?.id}`,
+    {
+      initialParams: {
+        'fallback-locale': 'null',
+        depth: 0,
+      },
+    },
   );
 
   const hasSavePermission = collectionPermissions?.update?.permission;

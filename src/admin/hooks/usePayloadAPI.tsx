@@ -38,6 +38,8 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const search = queryString.stringify({
     locale,
     ...(typeof params === 'object' ? params : {}),
+  }, {
+    addQueryPrefix: true,
   });
 
   useEffect(() => {
@@ -46,7 +48,7 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
       setIsLoading(true);
 
       try {
-        const response = await requests.get(`${url}?${search}`, {
+        const response = await requests.get(`${url}${search}`, {
           headers: {
             'Accept-Language': i18n.language,
           },
