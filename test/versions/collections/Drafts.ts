@@ -50,6 +50,31 @@ const DraftPosts: CollectionConfig = {
       type: 'textarea',
       required: true,
     },
+    {
+      name: 'radio',
+      type: 'radio',
+      options: [
+        {
+          value: 'test',
+          label: { en: 'Test en', es: 'Test es' },
+        },
+      ],
+    },
+    {
+      name: 'select',
+      type: 'select',
+      hasMany: true,
+      options: [
+        {
+          value: 'test1',
+          label: { en: 'Test1 en', es: 'Test1 es' },
+        },
+        {
+          value: 'test2',
+          label: { en: 'Test2 en', es: 'Test2 es' },
+        },
+      ],
+    },
   ],
 };
 
