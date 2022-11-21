@@ -203,6 +203,7 @@ export type CollectionAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
+/** Manage all aspects of a data collection */
 export type CollectionConfig = {
   slug: string;
   /**
@@ -276,10 +277,22 @@ export type CollectionConfig = {
    */
   auth?: IncomingAuthType | boolean;
   /**
-   * Upload options
+   * Customize the handling of incoming file uploads
+   *
+   * @default false // disable uploads
    */
   upload?: IncomingUploadType | boolean;
+  /**
+   * Customize the handling of incoming file uploads
+   *
+   * @default false // disable versioning
+   */
   versions?: IncomingCollectionVersions | boolean;
+  /**
+   * Add `createdAt` and `updatedAt` fields
+   *
+   * @default true
+   */
   timestamps?: boolean
 };
 
