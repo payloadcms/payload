@@ -15,7 +15,13 @@ import {
   PASTE_COMMAND,
 } from 'lexical';
 import { useEffect } from 'react';
-import { LinkNode, PayloadLinkData, TOGGLE_LINK_COMMAND, toggleLink, toggleLinkPayload } from './LinkPluginModified';
+import {
+  LinkNode,
+  PayloadLinkData,
+  TOGGLE_LINK_COMMAND,
+  toggleLink,
+  toggleLinkDoc,
+} from './LinkPluginModified';
 
 type Props = {
   validateUrl?: (url: string) => boolean;
@@ -47,15 +53,15 @@ export function LinkPlugin({ validateUrl }: Props): null {
             console.log('Payload type!', payload);
             // DO PAYLOAD SHIT
             const payloadLinkData: PayloadLinkData = payload as PayloadLinkData;
-            if (payloadLinkData.url) { // Just a simple URL! No doc
+            if (payloadLinkData.linkType === 'custom') { // Just a simple URL! No doc
               if (validateUrl === undefined || validateUrl(payloadLinkData.url)) {
                 toggleLink(payloadLinkData.url, { newTab: payloadLinkData.newTab });
                 return true;
               }
-              toggleLinkPayload(payloadLinkData);
-              return true;
+              return false;
             } // internal linking where I have a doc
-            return false;
+            toggleLinkDoc(payloadLinkData);
+            return true;
           }
           const { url, newTab } = payload;
           toggleLink(url, { newTab });

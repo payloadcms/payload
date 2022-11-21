@@ -117,24 +117,34 @@ function LinkEditor({
         text: '',
         url: '',
         linkType: undefined,
-        doc: undefined,
         newTab: undefined,
+        doc: undefined,
         fields: undefined,
       };
 
 
       if ($isLinkNode(parent)) {
-        setLinkUrl(parent.getURL());
         data.text = parent.getTextContent();
         data.url = parent.getURL();
-        data.newTab = parent.isNewTab();
         data.linkType = parent.getLinkType();
+        data.newTab = parent.isNewTab();
+        data.doc = parent.getDoc();
+        if (parent.getLinkType() === 'custom') {
+          setLinkUrl(parent.getURL());
+        } else { // internal
+          setLinkUrl(`relation to ${parent.getDoc().relationTo}: ${parent.getDoc().value}`);
+        }
       } else if ($isLinkNode(node)) {
-        setLinkUrl(node.getURL());
         data.text = node.getTextContent(); // ?
         data.url = node.getURL();
-        data.newTab = node.isNewTab();
         data.linkType = node.getLinkType();
+        data.newTab = node.isNewTab();
+        data.doc = node.getDoc();
+        if (node.getLinkType() === 'custom') {
+          setLinkUrl(node.getURL());
+        } else { // internal
+          setLinkUrl(`relation to ${node.getDoc().relationTo}: ${node.getDoc().value}`);
+        }
       } else {
         setLinkUrl('');
       }
@@ -264,24 +274,22 @@ function LinkEditor({
 
               const data = reduceFieldsToValues(fields, true);
 
-              const newLink = {
+              /* const newLink = {
                 type: 'link',
                 linkType: data.linkType,
-                url: data.url,
-                doc: data.doc,
+                url: data.linkType === 'custom' ? data.url : undefined,
+                doc: data.linkType === 'internal' ? data.doc : undefined,
                 newTab: data.newTab,
                 fields: data.fields,
                 children: [],
-              };
+              }; */
 
-
-              console.log('newLink', newLink);
 
               const newNode: PayloadLinkData = {
                 newTab: data.newTab,
-                url: data.url,
+                url: data.linkType === 'custom' ? data.url : undefined,
                 linkType: data.linkType,
-                doc: data.doc,
+                doc: data.linkType === 'internal' ? data.doc : undefined,
                 payloadType: 'payload',
               };
 
