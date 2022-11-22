@@ -18,7 +18,7 @@ import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
 import * as React from 'react';
-import {useState} from 'react';
+import { useState } from 'react';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import LinkPlugin from './plugins/LinkPlugin';
 
