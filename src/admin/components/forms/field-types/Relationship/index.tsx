@@ -109,6 +109,7 @@ const Relationship: React.FC<Props> = (props) => {
     search: searchArg,
     value: valueArg,
     sort,
+    reset // this will clear all options before appending new ones, and resets the page to 1
   }) => {
     if (!permissions) {
       return;
@@ -172,7 +173,7 @@ const Relationship: React.FC<Props> = (props) => {
             const data: PaginatedDocs<unknown> = await response.json();
             if (data.docs.length > 0) {
               resultsFetched += data.docs.length;
-              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort, i18n });
+              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort, i18n, reset });
               setLastLoadedPage(data.page);
 
               if (!data.nextPage) {
@@ -186,9 +187,10 @@ const Relationship: React.FC<Props> = (props) => {
               }
             }
           } else if (response.status === 403) {
+            console.log('error', relations.indexOf(relation))
             setLastFullyLoadedRelation(relations.indexOf(relation));
             lastLoadedPageToUse = 1;
-            dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort, ids: relationMap[relation], i18n });
+            dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort, ids: relationMap[relation], i18n, reset });
           } else {
             setErrorLoading(t('error:unspecific'));
           }
@@ -282,7 +284,7 @@ const Relationship: React.FC<Props> = (props) => {
   // ///////////////////////////
 
   useEffect(() => {
-    if (initialValue && !hasLoadedValueOptions) {
+    if (initialValue) {
       const relationMap = createRelationMap({
         hasMany,
         relationTo,
@@ -320,14 +322,10 @@ const Relationship: React.FC<Props> = (props) => {
           }
         }
       }, Promise.resolve());
-
-      setHasLoadedValueOptions(true);
     }
   }, [hasMany, hasMultipleRelations, relationTo, initialValue, hasLoadedValueOptions, errorLoading, collections, api, serverURL, i18n]);
 
-  useEffect(() => {
-    if (!filterOptions) return;
-
+  const getNewFilterOptions = useCallback(() => {
     const [data, siblingData] = getFormData();
 
     const newOptionFilters = getFilterOptionsQuery(filterOptions, {
@@ -337,16 +335,36 @@ const Relationship: React.FC<Props> = (props) => {
       siblingData,
       user,
     });
+
     if (!equal(newOptionFilters, optionFilters)) {
       setOptionFilters(newOptionFilters);
     }
-  }, [relationTo, filterOptions, optionFilters, id, getFormData, path, user]);
+  }, [relationTo, filterOptions, optionFilters, id, getFormData, path, user])
 
   useEffect(() => {
+    // format new filter options every time the `filterOptions` prop changes
+    if (!filterOptions) return;
+    getNewFilterOptions();
+  }, [getNewFilterOptions, filterOptions]);
+
+  useEffect(() => {
+    // if 'filterOptions' is a function, then we need to fire it every time 'fields' change (expensive)
+    // this is because the function may be using values from 'data' or 'siblingData',
+    // and we need to respond to changes in those values without needing to refresh the page
+    if (filterOptions && typeof filterOptions === 'function') {
+      fieldsRef.current = fields;
+      getNewFilterOptions();
+    }
+  }, [fields, filterOptions, getNewFilterOptions])
+
+  useEffect(() => {
+    // finally once `optionFilters` has been formatted, we can load new results
+    // we want to reset the options every time this happens, and start from page 1
     if (optionFilters || !filterOptions) {
       setHasLoadedValueOptions(false);
       getResults({
         value: initialValue,
+        reset: true,
       });
     }
   }, [initialValue, getResults, optionFilters, filterOptions]);

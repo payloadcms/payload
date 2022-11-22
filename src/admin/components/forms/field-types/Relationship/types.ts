@@ -25,6 +25,7 @@ type ADD = {
   sort?: boolean
   ids?: unknown[]
   i18n: typeof i18n
+  reset?: boolean
 }
 
 export type Action = CLEAR | ADD
@@ -40,4 +41,5 @@ export type GetResults = (args: {
   search?: string
   value?: unknown
   sort?: boolean
+  reset?: boolean
 }) => Promise<void>

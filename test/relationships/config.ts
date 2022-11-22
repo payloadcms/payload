@@ -109,11 +109,13 @@ export default buildConfig({
           name: 'filteredBySibling',
           type: 'relationship',
           relationTo: relationSlug,
-          filterOptions: (args: FilterOptionsProps<Post>) => ({
-            id: {
-              equals: args?.data?.filteredRelation,
-            },
-          }),
+          filterOptions: (args: FilterOptionsProps<Post>) => {
+            return ({
+              id: {
+                equals: args?.data?.filteredRelation,
+              },
+            });
+          },
         },
       ],
     },
@@ -181,14 +183,21 @@ export default buildConfig({
     const rel1 = await payload.create<Relation>({
       collection: relationSlug,
       data: {
-        name: 'name',
+        name: 'Relation 1',
       },
     });
 
-    const filteredRelation = await payload.create<Relation>({
+    const rel2 = await payload.create<Relation>({
       collection: relationSlug,
       data: {
-        name: 'filtered',
+        name: 'Relation 2',
+      },
+    });
+
+    const rel3 = await payload.create<Relation>({
+      collection: relationSlug,
+      data: {
+        name: 'Relation 3',
       },
     });
 
@@ -259,7 +268,7 @@ export default buildConfig({
         maxDepthRelation: rel1.id,
         customIdRelation: customIdRelation.id,
         customIdNumberRelation: customIdNumberRelation.id,
-        filteredRelation: filteredRelation.id,
+        filteredRelation: rel2.id,
       },
     });
   },

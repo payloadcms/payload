@@ -30,16 +30,16 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
     }
 
     case 'ADD': {
-      const { hasMultipleRelations, collection, docs, sort, ids = [], i18n } = action;
+      const { hasMultipleRelations, collection, docs, sort, ids = [], i18n, reset } = action;
       const relation = collection.slug;
 
       const labelKey = collection.admin.useAsTitle || 'id';
 
-      const loadedIDs = reduceToIDs(state);
+      const loadedIDs = reduceToIDs(!reset ? state : []);
 
       if (!hasMultipleRelations) {
         const options = [
-          ...state,
+          ...!reset ? state : [],
           ...docs.reduce((docOptions, doc) => {
             if (loadedIDs.indexOf(doc.id) === -1) {
               loadedIDs.push(doc.id);
@@ -67,7 +67,7 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
         return sort ? sortOptions(options) : options;
       }
 
-      const newOptions = [...state];
+      const newOptions = !reset ? [...state] : [];
       const optionsToAddTo = newOptions.find((optionGroup) => optionGroup.label === collection.labels.plural);
 
       const newSubOptions = docs.reduce((docSubOptions, doc) => {
