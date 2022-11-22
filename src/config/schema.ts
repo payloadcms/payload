@@ -36,7 +36,7 @@ export default joi.object({
   cookiePrefix: joi.string(),
   routes: joi.object({
     admin: joi.string(),
-    api: joi.string(),
+    api: joi.string().allow(''),
     graphQL: joi.string(),
     graphQLPlayground: joi.string(),
   }),
