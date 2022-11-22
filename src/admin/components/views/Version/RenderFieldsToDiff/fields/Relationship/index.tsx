@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDiffViewer from 'react-diff-viewer';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../utilities/Config';
 import { useLocale } from '../../../../../utilities/Locale';
 import { SanitizedCollectionConfig } from '../../../../../../../collections/config/types';
@@ -7,6 +8,7 @@ import { fieldAffectsData, fieldIsPresentationalOnly, RelationshipField } from '
 import Label from '../../Label';
 import { Props } from '../types';
 import { diffStyles } from '../styles';
+import { getTranslation } from '../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -60,11 +62,12 @@ const generateLabelFromValue = (
 
 const Relationship: React.FC<Props & { field: RelationshipField }> = ({ field, version, comparison }) => {
   const { collections } = useConfig();
+  const { t, i18n } = useTranslation('general');
   const locale = useLocale();
 
   let placeholder = '';
 
-  if (version === comparison) placeholder = '[no value]';
+  if (version === comparison) placeholder = `[${t('noValue')}]`;
 
   let versionToRender = version;
   let comparisonToRender = comparison;
@@ -83,7 +86,7 @@ const Relationship: React.FC<Props & { field: RelationshipField }> = ({ field, v
         {locale && (
           <span className={`${baseClass}__locale-label`}>{locale}</span>
         )}
-        {field.label}
+        {getTranslation(field.label, i18n)}
       </Label>
       <ReactDiffViewer
         styles={diffStyles}

@@ -32,7 +32,7 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
           {locale && (
           <span className={`${baseClass}__locale-label`}>{locale}</span>
           )}
-          {field.label}
+          {getTranslation(field.label, i18n)}
         </Label>
       )}
       {maxRows > 0 && (
