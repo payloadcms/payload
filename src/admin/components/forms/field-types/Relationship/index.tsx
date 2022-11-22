@@ -277,77 +277,68 @@ const Relationship: React.FC<Props> = (props) => {
     }
   }, [search, updateSearch]);
 
-  const ensureValuesAreLoaded = useCallback((valueToResolve) => {
-    const relationMap = createRelationMap({
-      hasMany,
-      relationTo,
-      value: valueToResolve,
-    });
-
-    Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
-      await priorRelation;
-
-      if (ids.length > 0) {
-        const query = {
-          where: {
-            id: {
-              in: ids,
-            },
-          },
-          depth: 0,
-          limit: ids.length,
-        };
-
-        if (!errorLoading) {
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
-            },
-          });
-          const collection = collections.find((coll) => coll.slug === relation);
-          if (response.ok) {
-            const data = await response.json();
-            dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort: true, ids, i18n });
-          } else if (response.status === 403) {
-            dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort: true, ids, i18n });
-          }
-        }
-      }
-    }, Promise.resolve());
-  }, [
-    api,
-    collections,
-    errorLoading,
-    hasMany,
-    hasMultipleRelations,
-    i18n,
-    relationTo,
-    serverURL,
-  ]);
-
   // ///////////////////////////////////
   // Ensure values are loaded even
   // when the field value changes
   // ///////////////////////////////////
   useEffect(() => {
+    const ensureValuesAreLoaded = (valueToResolve) => {
+      const relationMap = createRelationMap({
+        hasMany,
+        relationTo,
+        value: valueToResolve,
+      });
+
+      Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
+        await priorRelation;
+
+        if (ids.length > 0) {
+          const query = {
+            where: {
+              id: {
+                in: ids,
+              },
+            },
+            depth: 0,
+            limit: ids.length,
+          };
+
+          if (!errorLoading) {
+            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+            });
+            const collection = collections.find((coll) => coll.slug === relation);
+            if (response.ok) {
+              const data = await response.json();
+              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort: true, ids, i18n });
+            } else if (response.status === 403) {
+              dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort: true, ids, i18n });
+            }
+          }
+        }
+      }, Promise.resolve());
+    };
+
     if (value) {
       // hasMany: true
       if (Array.isArray(value)) {
-        const unresolvedRelationIds = value.reduce<string[]>((unresolvedIds, option) => {
+        const unresolvedRelationIds = value.reduce<any[]>((unresolved, option) => {
           if (typeof option === 'object' && 'value' in option) {
             // relationTo many collections
             if (!options.find((opt) => opt.value === option.value)) {
-              unresolvedIds.push(option.value);
+              unresolved.push(option);
             }
           } else if (typeof option === 'string') {
             // relationTo one collection
             if (!options.find((opt) => opt.value === option)) {
-              unresolvedIds.push(option);
+              unresolved.push(option);
             }
           }
 
-          return unresolvedIds;
+          return unresolved;
         }, []);
 
         if (unresolvedRelationIds.length > 0) {
@@ -357,11 +348,19 @@ const Relationship: React.FC<Props> = (props) => {
         // hasMany: false
         ensureValuesAreLoaded(value);
       }
-    } else if (initialValue && !hasLoadedInitialValues) {
-      ensureValuesAreLoaded(initialValue);
-      setHasLoadedInitialValues(true);
     }
-  }, [ensureValuesAreLoaded, hasLoadedInitialValues, initialValue, options, value]);
+  }, [
+    options,
+    value,
+    hasMany,
+    errorLoading,
+    collections,
+    hasMultipleRelations,
+    serverURL,
+    api,
+    i18n,
+    relationTo,
+  ]);
 
   useEffect(() => {
     if (!filterOptions) return;
