@@ -177,7 +177,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
       <Eyebrow />
       <Gutter className={`${baseClass}__wrap`}>
         <header className={`${baseClass}__header`}>
-          <div className={`${baseClass}__intro`}>Showing versions for:</div>
+          <div className={`${baseClass}__intro`}>{t('showingVersionsFor')}</div>
           {useIDLabel && (
             <IDLabel id={doc?.id} />
           )}

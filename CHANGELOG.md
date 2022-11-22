@@ -1,5 +1,31 @@
 
 
+## [1.2.1](https://github.com/payloadcms/payload/compare/v1.2.0...v1.2.1) (2022-11-22)
+
+
+### Bug Fixes
+
+* adjusts styles to allow error bg to fill textarea ([2e57b76](https://github.com/payloadcms/payload/commit/2e57b76df01acf7ed1ce5fcb824ef5f96d11621d))
+* allows patching global drafts [#1415](https://github.com/payloadcms/payload/issues/1415) ([25822a9](https://github.com/payloadcms/payload/commit/25822a91b1e4f2bf4804f15947d211138d696219))
+* dynamically sets stepnav from default edit view ([40c8778](https://github.com/payloadcms/payload/commit/40c87784b0c6281c599b6d2a46a27b70b0568c30))
+* ensures drafts operations saves as draft [#1415](https://github.com/payloadcms/payload/issues/1415) ([fc16ffe](https://github.com/payloadcms/payload/commit/fc16ffefdb354ea023462d784cdac7ab6fcc26d3))
+* flattens locales before versioning published docs [#1415](https://github.com/payloadcms/payload/issues/1415) ([f700f51](https://github.com/payloadcms/payload/commit/f700f51f2bcdd657d1fab6b6d83ac00a11ed870d))
+* **i18n:** version count ([#1465](https://github.com/payloadcms/payload/issues/1465)) ([075b7e9](https://github.com/payloadcms/payload/commit/075b7e9f02498ea253cf270654dcce0f11ec1f93))
+* Increase textarea click area ([c303913](https://github.com/payloadcms/payload/commit/c303913e61881a3b0d90615dda905b20347d6f1e))
+* invalid query string user account request ([#1478](https://github.com/payloadcms/payload/issues/1478)) ([400cb9b](https://github.com/payloadcms/payload/commit/400cb9b6bcfd09c39cb6aa438daad876d12e8e13))
+* removes incorrectly import/export option type - [#1441](https://github.com/payloadcms/payload/issues/1441) ([ed01a17](https://github.com/payloadcms/payload/commit/ed01a176210a02a32874f4d0d1c5206d9a772e7e))
+* rendering of localized select value ([1d1d249](https://github.com/payloadcms/payload/commit/1d1d2493aa08db4c300c01e72ccb6c11e03f9e09))
+* sanitizes select values on the server, allowing isClearable selects to be cleared without error ([699ca14](https://github.com/payloadcms/payload/commit/699ca14434eeff3025cffd3f6e00efada80e021f))
+* translate version comparison view field labels ([#1470](https://github.com/payloadcms/payload/issues/1470)) ([8123585](https://github.com/payloadcms/payload/commit/8123585592b9a53ef746f17476b36a2661cca025))
+* versionCount was broken & other i18n improvements ([#1450](https://github.com/payloadcms/payload/issues/1450)) ([078c28b](https://github.com/payloadcms/payload/commit/078c28bd5fd08fd17a0b0b360e904f51fe8a2e98))
+* versions tests ([af6a7aa](https://github.com/payloadcms/payload/commit/af6a7aa9e850c0817ea40d755f51255ccf0938c2))
+
+
+### Features
+
+* add i18n to option labels in version comparison ([#1477](https://github.com/payloadcms/payload/issues/1477)) ([7b6a9ed](https://github.com/payloadcms/payload/commit/7b6a9ede6e3a72e7e64358cb88946b16153d8dc6))
+* exports field types properly ([7c6d6fd](https://github.com/payloadcms/payload/commit/7c6d6fd1caeb25e1a871fa1b9cecc53be8a2a7a1))
+
 # [1.2.0](https://github.com/payloadcms/payload/compare/v1.1.26...v1.2.0) (2022-11-18)
 
 

@@ -17,6 +17,8 @@ export const saveGlobalDraft = async ({
 }: Args): Promise<void> => {
   const VersionsModel = payload.versions[config.slug];
 
+  const dataAsDraft = { ...data, _status: 'draft' };
+
   let existingAutosaveVersion;
 
   if (autosave) {
@@ -34,14 +36,14 @@ export const saveGlobalDraft = async ({
           _id: existingAutosaveVersion._id,
         },
         {
-          version: data,
+          version: dataAsDraft,
         },
         { new: true, lean: true },
       );
     // Otherwise, create a new one
     } else {
       result = await VersionsModel.create({
-        version: data,
+        version: dataAsDraft,
         autosave: Boolean(autosave),
       });
     }
