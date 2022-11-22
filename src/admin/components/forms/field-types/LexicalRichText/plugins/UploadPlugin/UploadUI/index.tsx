@@ -131,7 +131,7 @@ export const UploadModal: React.FC<{activeEditor: LexicalEditor}> = ({ activeEdi
       <MinimalTemplate width="wide">
         <header className={`${baseModalClass}__header`}>
           <h1>
-            {t('addLabel', { label: getTranslation(modalCollection.labels.singular, i18n) })}
+            {t('fields:addLabel', { label: getTranslation(modalCollection.labels.singular, i18n) })}
           </h1>
           <Button
             icon="x"
