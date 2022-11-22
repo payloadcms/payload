@@ -52,6 +52,7 @@
     "release:minor": "release-it minor",
     "release:major": "release-it major",
     "release:beta": "release-it prepatch --config .release-it.beta.json",
+    "fix": "eslint \"src/**/*.ts\" --fix",
     "lint": "eslint \"src/**/*.ts\""
   },
   "bugs": {

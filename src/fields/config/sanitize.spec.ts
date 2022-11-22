@@ -16,13 +16,13 @@ describe('sanitizeFields', () => {
       sanitizeFields(fields, []);
     }).toThrow(MissingFieldType);
   });
-  it("should throw on invalid field name", () => {
+  it('should throw on invalid field name', () => {
     const fields: Field[] = [
       {
-        label: "some.collection",
-        name: "some.collection",
-        type: "text",
-      }
+        label: 'some.collection',
+        name: 'some.collection',
+        type: 'text',
+      },
     ];
     expect(() => {
       sanitizeFields(fields, []);

@@ -10,7 +10,11 @@ import React from 'react';
 import { LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
 import { Payload } from '..';
-import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
+import {
+  AfterErrorHook,
+  CollectionConfig,
+  SanitizedCollectionConfig,
+} from '../collections/config/types';
 import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types';
 import { Where } from '../types';
@@ -20,17 +24,20 @@ type Email = {
   fromName: string;
   fromAddress: string;
   logMockCredentials?: boolean;
-}
+};
 
 // eslint-disable-next-line no-use-before-define
 export type Plugin = (config: Config) => Config;
 
 type GeneratePreviewURLOptions = {
-  locale: string
-  token: string
-}
+  locale: string;
+  token: string;
+};
 
-export type GeneratePreviewURL = (doc: Record<string, unknown>, options: GeneratePreviewURLOptions) => Promise<string> | string
+export type GeneratePreviewURL = (
+  doc: Record<string, unknown>,
+  options: GeneratePreviewURLOptions
+) => Promise<string> | string;
 
 export type EmailTransport = Email & {
   transport: Transporter;
@@ -48,7 +55,9 @@ export type EmailOptions = EmailTransport | EmailTransportOptions | Email;
  * type guard for EmailOptions
  * @param emailConfig
  */
-export function hasTransport(emailConfig: EmailOptions): emailConfig is EmailTransport {
+export function hasTransport(
+  emailConfig: EmailOptions,
+): emailConfig is EmailTransport {
   return (emailConfig as EmailTransport).transport !== undefined;
 }
 
@@ -56,15 +65,18 @@ export function hasTransport(emailConfig: EmailOptions): emailConfig is EmailTra
  * type guard for EmailOptions
  * @param emailConfig
  */
-export function hasTransportOptions(emailConfig: EmailOptions): emailConfig is EmailTransportOptions {
+export function hasTransportOptions(
+  emailConfig: EmailOptions,
+): emailConfig is EmailTransportOptions {
   return (emailConfig as EmailTransportOptions).transportOptions !== undefined;
 }
-
 
 export type InitOptions = {
   /** Express app for Payload to use */
   express?: Express;
+  /** Mongo connection URL, starts with `mongo` */
   mongoURL: string | false;
+  /** Extra configuration options that will be passed to Mongo */
   mongoOptions?: ConnectOptions;
 
   /** Secure string that Payload will use for any encryption workflows */

@@ -16,28 +16,28 @@ export type Operator =
   | 'less_than'
   | 'less_than_equal'
   | 'like'
-  | 'near'
+  | 'near';
 
 export type WhereField = {
-  [key in Operator]?: unknown
-}
+  [key in Operator]?: unknown;
+};
 
 export type Where = {
-  [key: string]: WhereField | Where[]
-  or?: Where[]
-  and?: Where[]
-}
+  [key: string]: WhereField | Where[];
+  or?: Where[];
+  and?: Where[];
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any;
 
 export interface PayloadMongooseDocument extends MongooseDocument {
-  setLocale: (locale: string, fallback: string) => void
-  filename?: string
-  sizes?: FileData[]
+  setLocale: (locale: string, fallback: string) => void;
+  filename?: string;
+  sizes?: FileData[];
 }
 
-export type Operation = 'create' | 'read' | 'update' | 'delete'
+export type Operation = 'create' | 'read' | 'update' | 'delete';
 
 export function docHasTimestamps(doc: any): doc is TypeWithTimestamps {
   return doc?.createdAt && doc?.updatedAt;
