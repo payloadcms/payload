@@ -88,6 +88,26 @@ describe('fields', () => {
     });
   });
 
+  describe('select', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'select-fields');
+    });
+
+    test('should use i18n option labels', async () => {
+      await page.goto(url.create);
+
+      const field = page.locator('#field-selectI18n');
+      await field.click({ delay: 100 });
+      const options = page.locator('.rs__option');
+      // Select an option
+      await options.locator('text=One').click();
+
+      await saveDocAndAssert(page);
+      await expect(field.locator('.rs__value-container')).toContainText('One');
+    });
+  });
+
   describe('point', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
