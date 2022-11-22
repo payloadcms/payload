@@ -19,7 +19,7 @@ import type {
   Spread,
 } from 'lexical';
 
-import { createEditor, DecoratorNode } from 'lexical';
+import { $applyNodeReplacement, createEditor, DecoratorNode } from 'lexical';
 import * as React from 'react';
 import { Suspense } from 'react';
 
@@ -248,16 +248,18 @@ export function $createImageNode({
   caption,
   key,
 }: ImagePayload): ImageNode {
-  return new ImageNode(
-    src,
-    altText,
-    maxWidth,
-    width,
-    height,
-    showCaption,
-    caption,
-    captionsEnabled,
-    key,
+  return $applyNodeReplacement(
+    new ImageNode(
+      src,
+      altText,
+      maxWidth,
+      width,
+      height,
+      showCaption,
+      caption,
+      captionsEnabled,
+      key,
+    ),
   );
 }
 

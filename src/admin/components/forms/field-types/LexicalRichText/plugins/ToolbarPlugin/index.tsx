@@ -841,7 +841,7 @@ export default function ToolbarPlugin(): JSX.Element {
               <i className="icon image" />
               <span className="text">Upload</span>
             </DropDownItem>
-            <DropDownItem
+            {/* <DropDownItem
               onClick={() => {
                 toggleModal('lexicalRichText-add-table');
               }}
@@ -849,7 +849,7 @@ export default function ToolbarPlugin(): JSX.Element {
             >
               <i className="icon table" />
               <span className="text">Table</span>
-            </DropDownItem>
+            </DropDownItem> TODO: Replace this with experimental table once not experimental anymore. Might be worth the wait as it's better, and its data structure is different */}
 
             <DropDownItem
               onClick={() => {

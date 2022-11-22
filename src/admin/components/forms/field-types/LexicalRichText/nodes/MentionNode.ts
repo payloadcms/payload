@@ -9,13 +9,14 @@
 import type { Spread } from 'lexical';
 
 import {
-  DOMConversionMap,
-  DOMConversionOutput,
-  DOMExportOutput,
-  EditorConfig,
-  LexicalNode,
-  NodeKey,
-  SerializedTextNode,
+  type DOMConversionMap,
+  type DOMConversionOutput,
+  type DOMExportOutput,
+  type EditorConfig,
+  type LexicalNode,
+  type NodeKey,
+  type SerializedTextNode,
+  $applyNodeReplacement,
   TextNode,
 } from 'lexical';
 
@@ -116,7 +117,7 @@ export class MentionNode extends TextNode {
 export function $createMentionNode(mentionName: string): MentionNode {
   const mentionNode = new MentionNode(mentionName);
   mentionNode.setMode('segmented').toggleDirectionless();
-  return mentionNode;
+  return $applyNodeReplacement(mentionNode);
 }
 
 export function $isMentionNode(
