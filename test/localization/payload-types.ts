@@ -63,7 +63,7 @@ export interface LocalizedRequired {
 export interface WithLocalizedRelationship {
   id: string;
   localizedRelationship?: string | LocalizedPost;
-  localizedRelationHasManyField?: (string | LocalizedPost)[];
+  localizedRelationHasManyField?: string[] | LocalizedPost[];
   localizedRelationMultiRelationTo?:
     | {
         value: string | LocalizedPost;
@@ -73,16 +73,27 @@ export interface WithLocalizedRelationship {
         value: string | Dummy;
         relationTo: 'dummy';
       };
-  localizedRelationMultiRelationToHasMany?: (
-    | {
-        value: string | LocalizedPost;
-        relationTo: 'localized-posts';
-      }
-    | {
-        value: string | Dummy;
-        relationTo: 'dummy';
-      }
-  )[];
+  localizedRelationMultiRelationToHasMany?:
+    | (
+        | {
+            value: string;
+            relationTo: 'localized-posts';
+          }
+        | {
+            value: string;
+            relationTo: 'dummy';
+          }
+      )[]
+    | (
+        | {
+            value: LocalizedPost;
+            relationTo: 'localized-posts';
+          }
+        | {
+            value: Dummy;
+            relationTo: 'dummy';
+          }
+      )[];
   createdAt: string;
   updatedAt: string;
 }
@@ -93,6 +104,47 @@ export interface WithLocalizedRelationship {
 export interface Dummy {
   id: string;
   name?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationship-localized".
+ */
+export interface RelationshipLocalized {
+  id: string;
+  relationship?: string | LocalizedPost;
+  relationshipHasMany?: string[] | LocalizedPost[];
+  relationMultiRelationTo?:
+    | {
+        value: string | LocalizedPost;
+        relationTo: 'localized-posts';
+      }
+    | {
+        value: string | Dummy;
+        relationTo: 'dummy';
+      };
+  relationMultiRelationToHasMany?:
+    | (
+        | {
+            value: string;
+            relationTo: 'localized-posts';
+          }
+        | {
+            value: string;
+            relationTo: 'dummy';
+          }
+      )[]
+    | (
+        | {
+            value: LocalizedPost;
+            relationTo: 'localized-posts';
+          }
+        | {
+            value: Dummy;
+            relationTo: 'dummy';
+          }
+      )[];
   createdAt: string;
   updatedAt: string;
 }
