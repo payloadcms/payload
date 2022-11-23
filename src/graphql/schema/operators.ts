@@ -1,6 +1,7 @@
 const operators = {
   equality: ['equals', 'not_equals'],
-  contains: ['contains', 'in', 'not_in', 'all'],
+  partial: ['like', 'contains'],
+  contains: ['in', 'not_in', 'all'],
   comparison: ['greater_than_equal', 'greater_than', 'less_than_equal', 'less_than'],
   geo: ['near'],
 };
