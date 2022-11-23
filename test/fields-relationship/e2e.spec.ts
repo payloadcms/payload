@@ -110,10 +110,10 @@ describe('fields - relationship', () => {
 
     const options = page.locator('.rs__option');
 
-    await expect(options).toHaveCount(3); // None + two docs
+    await expect(options).toHaveCount(2); // two docs
 
     // Select a relationship
-    await options.nth(1).click();
+    await options.nth(0).click();
     await expect(field).toContainText(relationOneDoc.id);
 
     await saveDocAndAssert(page);
@@ -155,7 +155,7 @@ describe('fields - relationship', () => {
 
     const options = page.locator('.rs__option');
 
-    await expect(options).toHaveCount(4); // None + 3 docs
+    await expect(options).toHaveCount(3); // 3 docs
 
     // Add one relationship
     await options.locator(`text=${relationOneDoc.id}`).click();
@@ -204,7 +204,7 @@ describe('fields - relationship', () => {
       await field.click({ delay: 100 });
       const options = page.locator('.rs__option');
 
-      await expect(options).toHaveCount(2); // None + 1 Unitled ID
+      await expect(options).toHaveCount(1); // None + 1 Unitled ID
     });
 
     // test.todo('should paginate within the dropdown');
@@ -239,7 +239,7 @@ describe('fields - relationship', () => {
       await field.click({ delay: 100 });
       const options = page.locator('.rs__option');
 
-      await expect(options).toHaveCount(3); // None + 2 Doc
+      await expect(options).toHaveCount(2);
     });
 
     test('should show id on relation in list view', async () => {

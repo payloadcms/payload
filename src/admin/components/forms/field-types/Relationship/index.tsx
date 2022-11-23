@@ -279,7 +279,7 @@ const Relationship: React.FC<Props> = (props) => {
     setEnableWordBoundarySearch(!isIdOnly);
   }, [relationTo, collections]);
 
-  // When relationTo changes, reset relationship options
+  // When relationTo or filterOptionsResult changes, reset component
   // Note - effect should not run on first run
   useEffect(() => {
     if (firstRun.current) {
@@ -288,7 +288,10 @@ const Relationship: React.FC<Props> = (props) => {
     }
 
     dispatchOptions({ type: 'CLEAR' });
-  }, [relationTo]);
+    setLastFullyLoadedRelation(-1);
+    setLastLoadedPage(1);
+    setHasLoadedFirstPage(false);
+  }, [relationTo, filterOptionsResult]);
 
   const classes = [
     'field-type',
