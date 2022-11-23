@@ -37,18 +37,7 @@ type ADD = {
   i18n: typeof i18n
 }
 
-type LOAD = {
-  type: 'LOAD'
-  collection: SanitizedCollectionConfig
-  sort?: boolean
-  ids?: unknown[]
-  i18n: typeof i18n
-  serverURL: string
-  relationTo: string
-  api: string
-}
-
-export type Action = CLEAR | ADD | LOAD
+export type Action = CLEAR | ADD
 
 export type ValueWithRelation = {
   relationTo: string

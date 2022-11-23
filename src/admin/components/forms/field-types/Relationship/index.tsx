@@ -73,7 +73,6 @@ const Relationship: React.FC<Props> = (props) => {
   const [hasLoadedFirstPage, setHasLoadedFirstPage] = useState(false);
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false);
   const firstRun = useRef(true);
-  const [idsToLoad, setIdsToLoad] = useState<string[]>([]);
 
   const memoizedValidate = useCallback((value, validationOptions) => {
     return validate(value, { ...validationOptions, required });
@@ -221,12 +220,43 @@ const Relationship: React.FC<Props> = (props) => {
       value,
     });
 
-    Object.entries(relationMap).reduce(async (priorRelation, [relationTo, relationIDs]) => {
+    Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
       await priorRelation;
-      const collection = collections.find((coll) => coll.slug === relationTo);
-      dispatchOptions({ type: 'LOAD', collection, serverURL, sort: true, relationTo, ids: relationIDs, i18n, api });
+
+      const idsToLoad = ids.filter((id) => {
+        return !options.find((optionGroup) => optionGroup?.options?.find((option) => option.value === id && option.relationTo === relation));
+      });
+
+      if (idsToLoad.length > 0) {
+        const query = {
+          where: {
+            id: {
+              in: idsToLoad,
+            },
+          },
+          depth: 0,
+          limit: idsToLoad.length,
+        };
+
+        if (!errorLoading) {
+          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          });
+          const collection = collections.find((coll) => coll.slug === relation);
+          if (response.ok) {
+            const data = await response.json();
+            dispatchOptions({ type: 'ADD', docs: data.docs, collection, sort: true, ids: idsToLoad, i18n });
+          } else if (response.status === 403) {
+            dispatchOptions({ type: 'ADD', docs: [], collection, sort: true, ids: idsToLoad, i18n });
+          }
+        }
+      }
     }, Promise.resolve());
   }, [
+    options,
     value,
     hasMany,
     errorLoading,
