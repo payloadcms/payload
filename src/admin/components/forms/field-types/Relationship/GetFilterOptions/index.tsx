@@ -3,9 +3,11 @@ import equal from 'deep-equal';
 import { FilterOptions } from '../../../../../../fields/config/types';
 import { useAuth } from '../../../../utilities/Auth';
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
-import { useWatchForm } from '../../../Form/context';
+import { useAllFormFields } from '../../../Form/context';
 import { getFilterOptionsQuery } from '../../getFilterOptionsQuery';
 import { FilterOptionsResult } from '../types';
+import reduceFieldsToValues from '../../../Form/reduceFieldsToValues';
+import getSiblingData from '../../../Form/getSiblingData';
 
 type Args = {
   filterOptions: FilterOptions
@@ -22,13 +24,13 @@ export const GetFilterOptions = ({
   relationTo,
   path,
 }: Args): null => {
-  const { getSiblingData, getData } = useWatchForm();
+  const [fields] = useAllFormFields();
   const { id } = useDocumentInfo();
   const { user } = useAuth();
 
   useEffect(() => {
-    const data = getData();
-    const siblingData = getSiblingData(path);
+    const data = reduceFieldsToValues(fields);
+    const siblingData = getSiblingData(fields, path);
 
     const newFilterOptionsResult = getFilterOptionsQuery(filterOptions, {
       id,
@@ -42,8 +44,7 @@ export const GetFilterOptions = ({
       setFilterOptionsResult(newFilterOptionsResult);
     }
   }, [
-    getData,
-    getSiblingData,
+    fields,
     filterOptions,
     id,
     relationTo,

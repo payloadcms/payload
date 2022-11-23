@@ -2,6 +2,7 @@ import type { CollectionConfig } from '../../src/collections/config/types';
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
 import { mapAsync } from '../../src/utilities/mapAsync';
+import { FilterOptionsProps } from '../../src/fields/config/types';
 
 export const slug = 'fields-relationship';
 
@@ -83,6 +84,18 @@ export default buildConfig({
           name: 'relationshipWithTitle',
           relationTo: relationWithTitleSlug,
         },
+        {
+          type: 'relationship',
+          name: 'relationshipFiltered',
+          relationTo: relationOneSlug,
+          filterOptions: (args: FilterOptionsProps<FieldsRelationship>) => {
+            return ({
+              id: {
+                equals: args.data.relationship,
+              },
+            })
+          }
+        },
       ],
     },
     {
@@ -127,7 +140,7 @@ export default buildConfig({
       },
     });
 
-    const relationOneIDs = [];
+    const relationOneIDs: string[] = [];
     await mapAsync([...Array(11)], async () => {
       const doc = await payload.create<RelationOne>({
         collection: relationOneSlug,
@@ -138,7 +151,7 @@ export default buildConfig({
       relationOneIDs.push(doc.id);
     });
 
-    const relationTwoIDs = [];
+    const relationTwoIDs: string[] = [];
     await mapAsync([...Array(11)], async () => {
       const doc = await payload.create<RelationTwo>({
         collection: relationTwoSlug,
@@ -156,7 +169,7 @@ export default buildConfig({
         name: 'relation-restricted',
       },
     });
-    const relationsWithTitle = [];
+    const relationsWithTitle: string[] = [];
     await mapAsync(['relation-title', 'word boundary search'], async (title) => {
       const { id } = await payload.create<RelationWithTitle>({
         collection: relationWithTitleSlug,
