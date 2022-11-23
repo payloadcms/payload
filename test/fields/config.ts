@@ -78,16 +78,6 @@ export default buildConfig({
     await payload.create({ collection: 'date-fields', data: dateDoc });
     await payload.create({ collection: 'code-fields', data: codeDoc });
 
-    [...Array(15)].forEach((_, i) => {
-      payload.create({
-        collection: textFieldsSlug,
-        data: {
-          text: `relationship-test ${i}`,
-          localizedText: `relationship-test ${i}`,
-        },
-      });
-    });
-
     const createdTextDoc = await payload.create({ collection: textFieldsSlug, data: textDoc });
 
     const uploadsDir = path.resolve(__dirname, './collections/Upload/uploads');

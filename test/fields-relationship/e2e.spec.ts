@@ -12,14 +12,14 @@ import type {
   RelationTwo,
   RelationWithTitle,
 } from './config';
-import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationWithTitleSlug, slug } from './config';
+import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationUpdatedExternallySlug, relationWithTitleSlug, slug } from './collectionSlugs';
 import wait from '../../src/utilities/wait';
 
 const { beforeAll, beforeEach, describe } = test;
 
-let url: AdminUrlUtil;
 
 describe('fields - relationship', () => {
+  let url: AdminUrlUtil;
   let page: Page;
   let relationOneDoc: RelationOne;
   let anotherRelationOneDoc: RelationOne;
@@ -28,9 +28,11 @@ describe('fields - relationship', () => {
   let docWithExistingRelations: CollectionWithRelationships;
   let restrictedRelation: RelationRestricted;
   let relationWithTitle: RelationWithTitle;
+  let serverURL: string;
 
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(__dirname);
+    const { serverURL: serverURLFromConfig } = await initPayloadE2E(__dirname);
+    serverURL = serverURLFromConfig;
 
     url = new AdminUrlUtil(serverURL, slug);
 
@@ -261,6 +263,29 @@ describe('fields - relationship', () => {
       await wait(110);
       const relationship = page.locator('.row-1 .cell-relationshipWithTitle');
       await expect(relationship).toHaveText(relationWithTitle.name);
+    });
+  });
+
+  describe('externally update field', () => {
+    beforeAll(async () => {
+      url = new AdminUrlUtil(serverURL, relationUpdatedExternallySlug);
+      await page.goto(url.create);
+    });
+
+    test('has many, one collection', async () => {
+      await page.goto(url.create);
+
+      await page.locator('#field-relationHasMany + .pre-populate-field-ui button').click();
+      await wait(300);
+
+      expect(await page.locator('#field-relationHasMany .rs__value-container > .rs__multi-value').count()).toEqual(15);
+    });
+
+    test('has many, many collections', async () => {
+      await page.locator('#field-relationToManyHasMany + .pre-populate-field-ui button').click();
+      await wait(300);
+
+      expect(await page.locator('#field-relationToManyHasMany .rs__value-container > .rs__multi-value').count()).toEqual(15);
     });
   });
 });

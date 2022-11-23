@@ -415,14 +415,5 @@ describe('fields', () => {
 
       await expect(page.locator('.Toastify')).toContainText('successfully');
     });
-
-    test('should resolve relationships when added by form context', async () => {
-      await page.goto(url.create);
-
-      await page.locator('#field-relationHasMany + .pre-populate-field-ui button').click();
-      await wait(300);
-
-      expect(await page.locator('#field-relationHasMany .rs__value-container > .rs__multi-value').count()).toEqual(15);
-    });
   });
 });
