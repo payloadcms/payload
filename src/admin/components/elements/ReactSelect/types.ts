@@ -1,26 +1,24 @@
-import { OptionsType, GroupedOptionsType } from 'react-select';
+export type Option = {
+  [key: string]: unknown
+  value: unknown
+}
 
-export type Options = OptionsType<Value> | GroupedOptionsType<Value>;
-
-export type OptionType = {
-  [key: string]: any,
-};
-
-
-export type Value = {
+export type OptionGroup = {
   label: string
-  value: string | null
-  options?: Options
+  options: Option[]
 }
 
 export type Props = {
   className?: string
-  value?: Value | Value[],
+  value?: Option | Option[],
   onChange?: (value: any) => void, // eslint-disable-line @typescript-eslint/no-explicit-any
+  onMenuOpen?: () => void
   disabled?: boolean,
   showError?: boolean,
-  options: Options
+  options: Option[] | OptionGroup[]
   isMulti?: boolean,
+  isLoading?: boolean
+  isOptionSelected?: any
   isSortable?: boolean,
   isDisabled?: boolean
   onInputChange?: (val: string) => void
@@ -29,6 +27,6 @@ export type Props = {
   isSearchable?: boolean
   isClearable?: boolean
   filterOption?:
-  | (({ label, value, data }: { label: string, value: string, data: OptionType }, search: string) => boolean)
+  | (({ label, value, data }: { label: string, value: string, data: Option }, search: string) => boolean)
   | undefined,
 }

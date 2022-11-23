@@ -16,7 +16,7 @@ const Row: React.FC<Props> = (props) => {
       readOnly,
       className,
     },
-    indexPath
+    indexPath,
   } = props;
 
   const classes = [

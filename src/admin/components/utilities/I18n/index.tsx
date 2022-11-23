@@ -16,7 +16,7 @@ export const I18n: React.FC = () => {
   i18n
     .use(LanguageDetector)
     .use(initReactI18next)
-    .init(deepmerge(defaultOptions, config.i18n || { debug: true }));
+    .init(deepmerge(defaultOptions, config.i18n || {}));
 
   return null;
 };

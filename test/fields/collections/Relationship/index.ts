@@ -54,7 +54,7 @@ const RelationshipFields: CollectionConfig = {
         },
         {
           type: 'ui',
-          name: 'prePopulate',
+          name: 'prePopulateRelationHasMany',
           admin: {
             width: '25%',
             components: {
