@@ -181,6 +181,37 @@ describe('fields - relationship', () => {
     await expect(field).toHaveText(relationOneDoc.id);
   });
 
+  test('should allow dynamic filterOptions', async () => {
+    await page.goto(url.edit(docWithExistingRelations.id));
+
+    // fill the first relation field
+    let field = page.locator('#field-relationship');
+    await field.click({ delay: 100 });
+    const options = page.locator('.rs__option');
+    await options.nth(0).click();
+    await expect(field).toContainText(relationOneDoc.id);
+
+    // then verify that the filtered field's options match
+    let filteredField = page.locator('#field-relationshipFiltered .react-select');
+    await filteredField.click({ delay: 100 });
+    const filteredOptions = filteredField.locator('.rs__option');
+    await expect(filteredOptions).toHaveCount(1); // one doc
+    await filteredOptions.nth(0).click();
+    await expect(filteredField).toContainText(relationOneDoc.id);
+
+    // change the first relation field
+    await field.click({ delay: 100 });
+    await options.nth(1).click();
+    await expect(field).toContainText(anotherRelationOneDoc.id);
+
+    // then verify that the filtered field's options match
+    filteredField = page.locator('#field-relationshipFiltered .react-select');
+    await filteredField.click({ delay: 100 });
+    await expect(filteredOptions).toHaveCount(2); // two options because the currently selected option is still there
+    await filteredOptions.nth(1).click();
+    await expect(filteredField).toContainText(anotherRelationOneDoc.id);
+  });
+
   describe('existing relationships', () => {
     test('should highlight existing relationship', async () => {
       await page.goto(url.edit(docWithExistingRelations.id));
