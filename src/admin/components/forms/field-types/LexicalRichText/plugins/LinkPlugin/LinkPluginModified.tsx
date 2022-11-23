@@ -21,15 +21,7 @@ import {
   Spread,
 } from 'lexical';
 
-
-export type LinkAttributes = {
-  newTab?: null | boolean;
-  doc?: {
-    value: string,
-    relationTo: string
-  }|undefined;
-};
-
+// This is just what's passed in the command - not what's used as attributes in the final link
 export type PayloadLinkData = {
   payloadType: string,
   url: string,
@@ -40,6 +32,14 @@ export type PayloadLinkData = {
     relationTo: string
   }|undefined,
   fields?,
+};
+
+export type LinkAttributes = {
+  newTab?: null | boolean;
+  doc?: {
+    value: string,
+    relationTo: string
+  }|null;
 };
 
 export type SerializedLinkNode = Spread<{
@@ -59,13 +59,13 @@ export class LinkNode extends ElementNode {
   __linkType: 'custom'|'internal';
 
   /** @internal */
-  __newTab: null | boolean;
+  __newTab: boolean | null;
 
   /** @internal */
   __doc: {
     value: string,
     relationTo: string
-  }|undefined;
+  }|null;
 
   static getType(): string {
     return 'link';
@@ -101,9 +101,9 @@ export class LinkNode extends ElementNode {
     if (this.__newTab) {
       element.target = '_blank';
     }
-    if (this.__rel !== null) {
+    /* if (this.__rel !== null) {
       element.rel = this.__rel; // TODO. Maybe this should be just in fields?
-    }
+    } */
     // TODO: Check if doc is needed
     addClassNamesToElement(element, config.theme.link);
     return element;
@@ -121,7 +121,7 @@ export class LinkNode extends ElementNode {
       anchor.href = url;
     }
 
-    if (target !== prevNode.__target) {
+    if (this.__newTab !== prevNode.__newTab) {
       if (target) {
         anchor.target = target;
       } else {
@@ -165,10 +165,10 @@ export class LinkNode extends ElementNode {
     return {
       ...super.exportJSON(),
       newTab: this.isNewTab(),
-      doc: this.getLinkType() === 'internal' ? this.getDoc() : undefined,
+      doc: this.getLinkType() === 'internal' ? this.getDoc() : null,
       type: 'link',
       linkType: this.getLinkType(),
-      url: this.getLinkType() === 'custom' ? this.getURL() : undefined,
+      url: this.getLinkType() === 'custom' ? this.getURL() : null,
       version: 1,
     };
   }
@@ -203,14 +203,14 @@ export class LinkNode extends ElementNode {
   getDoc(): {
     value: string,
     relationTo: string
-  }|undefined {
+  }|null {
     return this.getLatest().__doc;
   }
 
   setDoc(doc: {
     value: string,
     relationTo: string
-  }|undefined): void {
+  }|null): void {
     const writable = this.getWritable();
     writable.__doc = doc;
   }
@@ -392,6 +392,8 @@ export function toggleLink(
   } = attributes;
   const selection = $getSelection();
 
+  console.log('Ran toggleLink');
+
   const linkType = 'custom';
 
   if (!$isRangeSelection(selection)) {
@@ -427,7 +429,7 @@ export function toggleLink(
         linkNode.setURL(url);
         linkNode.setLinkType(linkType);
         linkNode.setNewTab(newTab);
-        linkNode.setDoc(doc);
+        linkNode.setDoc(null);
         /* if (rel !== undefined) {
           linkNode.setRel(rel);
         } */
@@ -454,7 +456,7 @@ export function toggleLink(
         parent.setURL(url);
         parent.setLinkType(linkType);
         parent.setNewTab(newTab);
-        parent.setDoc(doc);
+        parent.setDoc(null);
         /* if (rel !== undefined) {
           parent.setRel(rel);
         } */
@@ -508,6 +510,7 @@ export function toggleLinkDoc(
   const linkType = 'internal';
 
   const selection = $getSelection();
+  console.log('Ran toggleLinkPayload');
 
   if (!$isRangeSelection(selection)) {
     return;
@@ -539,6 +542,7 @@ export function toggleLinkDoc(
         ? firstNode
         : $getLinkAncestor(firstNode);
       if (linkNode !== null) {
+        linkNode.setURL(null);
         linkNode.setDoc(payloadLinkData.doc);
         linkNode.setLinkType(linkType);
         linkNode.setNewTab(payloadLinkData.newTab);
@@ -564,6 +568,7 @@ export function toggleLinkDoc(
 
       if ($isLinkNode(parent)) {
         linkNode = parent;
+        parent.setURL(null);
         parent.setDoc(payloadLinkData.doc);
         parent.setLinkType(linkType);
         parent.setNewTab(payloadLinkData.newTab);

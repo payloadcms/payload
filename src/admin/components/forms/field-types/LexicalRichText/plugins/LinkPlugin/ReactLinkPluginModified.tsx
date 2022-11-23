@@ -15,13 +15,7 @@ import {
   PASTE_COMMAND,
 } from 'lexical';
 import { useEffect } from 'react';
-import {
-  LinkNode,
-  PayloadLinkData,
-  TOGGLE_LINK_COMMAND,
-  toggleLink,
-  toggleLinkDoc,
-} from './LinkPluginModified';
+import { LinkNode, PayloadLinkData, TOGGLE_LINK_COMMAND, toggleLink, toggleLinkDoc } from './LinkPluginModified';
 
 type Props = {
   validateUrl?: (url: string) => boolean;
