@@ -153,7 +153,6 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
                   i18nKey="fields:linkedTo"
                   values={{ label: getTranslation(config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels?.singular, i18n) }}
                 >
-                  {' '}
                   <a
                     className={`${baseClass}__link-label`}
                     href={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}

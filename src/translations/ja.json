@@ -103,7 +103,7 @@
     "itemsAndMore": "{{items}} 他{{count}}件",
     "labelRelationship": "{{label}} リレーションシップ",
     "latitude": "緯度",
-    "linkedTo": "<1>{{label}}</1> にリンク",
+    "linkedTo": "<0>{{label}}</0> にリンク",
     "longitude": "経度",
     "newLabel": "新規 {{label}}",
     "passwordsDoNotMatch": "パスワードが一致しません",
