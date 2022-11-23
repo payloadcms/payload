@@ -71,7 +71,7 @@ export default function CollapsiblePlugin(): JSX.Element | null {
         if (!$isCollapsibleContainerNode(parent)) {
           const children = node.getChildren();
           for (const child of children) {
-            node.insertAfter(child);
+            node.insertBefore(child);
           }
           node.remove();
         }
@@ -90,7 +90,7 @@ export default function CollapsiblePlugin(): JSX.Element | null {
           || !$isCollapsibleContentNode(children[1])
         ) {
           for (const child of children) {
-            node.insertAfter(child);
+            node.insertBefore(child);
           }
           node.remove();
         }

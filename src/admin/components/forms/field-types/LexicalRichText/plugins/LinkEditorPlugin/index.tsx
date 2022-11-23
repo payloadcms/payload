@@ -171,6 +171,7 @@ function LinkEditor({
       && nativeSelection !== null
       && rootElement !== null
       && rootElement.contains(nativeSelection.anchorNode)
+      && editor.isEditable()
     ) {
       const domRange = nativeSelection.getRangeAt(0);
       let rect;
