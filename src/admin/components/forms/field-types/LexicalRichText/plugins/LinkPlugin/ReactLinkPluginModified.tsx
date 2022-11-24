@@ -15,7 +15,8 @@ import {
   PASTE_COMMAND,
 } from 'lexical';
 import { useEffect } from 'react';
-import { LinkNode, PayloadLinkData, TOGGLE_LINK_COMMAND, toggleLink, toggleLinkDoc } from './LinkPluginModified';
+import { LinkNode, TOGGLE_LINK_COMMAND, toggleLink } from './LinkPluginModified';
+import type { PayloadLinkData } from './LinkPluginModified';
 
 type Props = {
   validateUrl?: (url: string) => boolean;
@@ -32,33 +33,46 @@ export function LinkPlugin({ validateUrl }: Props): null {
       editor.registerCommand(
         TOGGLE_LINK_COMMAND,
         (payload) => {
+          console.log('Payload received:', payload);
+          let linkData: PayloadLinkData = {
+            url: null,
+            doc: null,
+            linkType: 'custom',
+            newTab: false,
+          };
+
           if (payload === null) {
-            toggleLink(null);
-            return true;
-          } if (typeof payload === 'string') {
+            linkData = null;
+          } else if (typeof payload === 'string') {
             if (validateUrl === undefined || validateUrl(payload)) {
-              toggleLink(payload);
-              return true;
-            }
-            return false;
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          } // @ts-ignore
-          if (payload.payloadType && payload.payloadType === 'payload') {
-            console.log('Payload type!', payload);
-            // DO PAYLOAD SHIT
-            const payloadLinkData: PayloadLinkData = payload as PayloadLinkData;
-            if (payloadLinkData.linkType === 'custom') { // Just a simple URL! No doc
-              if (validateUrl === undefined || validateUrl(payloadLinkData.url)) {
-                toggleLink(payloadLinkData.url, { newTab: payloadLinkData.newTab });
-                return true;
-              }
+              linkData.url = payload;
+            } else {
               return false;
-            } // internal linking where I have a doc
-            toggleLinkDoc(payloadLinkData);
-            return true;
+            }
+          } else if (payload.payloadType && payload.payloadType === 'payload') {
+            const receivedLinkData: PayloadLinkData = payload as PayloadLinkData;
+            linkData.linkType = receivedLinkData.linkType;
+            linkData.newTab = receivedLinkData.newTab;
+            linkData.fields = receivedLinkData.fields;
+            if (receivedLinkData.linkType === 'custom') { // Just a simple URL! No doc
+              if (validateUrl === undefined || validateUrl(receivedLinkData.url)) {
+                linkData.url = receivedLinkData.url;
+              } else {
+                return false;
+              }
+            } else if (receivedLinkData.linkType === 'internal') {
+              linkData.doc = receivedLinkData.doc;
+              if (!linkData.doc) {
+                linkData = null;
+              }
+            } else {
+              return false;
+            }
+          } else {
+            return false;
           }
-          const { url, newTab } = payload;
-          toggleLink(url, { newTab });
+
+          toggleLink(linkData);
           return true;
         },
         COMMAND_PRIORITY_LOW,

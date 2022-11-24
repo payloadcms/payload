@@ -1,3 +1,12 @@
+/** @module @lexical/link */
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -23,32 +32,30 @@ import {
 
 // This is just what's passed in the command - not what's used as attributes in the final link
 export type PayloadLinkData = {
-  payloadType: string,
-  url: string,
+  payloadType?: string,
+  url: string|null,
   linkType: 'custom'|'internal',
-  newTab: boolean|undefined,
+  newTab: boolean,
   doc: {
     value: string,
     relationTo: string
-  }|undefined,
+  }|null,
   fields?,
 };
 
 export type LinkAttributes = {
-  newTab?: null | boolean;
-  doc?: {
-    value: string,
-    relationTo: string
-  }|null;
+  rel?: null | string;
+  newTab?: boolean;
 };
 
-export type SerializedLinkNode = Spread<{
-  type: 'link';
-  url: string;
-  linkType: 'custom'|'internal';
-  version: 1;
-},
-  Spread<LinkAttributes, SerializedElementNode>>;
+export type SerializedLinkNode = Spread<
+  {
+    type: 'link';
+    url: string;
+    version: 1;
+  },
+  Spread<LinkAttributes, SerializedElementNode>
+  >;
 
 /** @noInheritDoc */
 export class LinkNode extends ElementNode {
@@ -56,16 +63,10 @@ export class LinkNode extends ElementNode {
   __url: string;
 
   /** @internal */
-  __linkType: 'custom'|'internal';
+  __newTab: boolean;
 
   /** @internal */
-  __newTab: boolean | null;
-
-  /** @internal */
-  __doc: {
-    value: string,
-    relationTo: string
-  }|null;
+  __rel: null | string;
 
   static getType(): string {
     return 'link';
@@ -74,25 +75,17 @@ export class LinkNode extends ElementNode {
   static clone(node: LinkNode): LinkNode {
     return new LinkNode(
       node.__url,
-      node.__linkType,
-      {
-        newTab: node.__newTab,
-        doc: node.__doc,
-      },
+      { rel: node.__rel, newTab: node.__newTab },
       node.__key,
     );
   }
 
-  constructor(url: string, linkType: 'custom'|'internal', attributes: LinkAttributes = {}, key?: NodeKey) {
+  constructor(url: string, attributes: LinkAttributes = {}, key?: NodeKey) {
     super(key);
-    const {
-      newTab = null,
-      doc = null,
-    } = attributes;
+    const { newTab = false, rel = null } = attributes;
     this.__url = url;
-    this.__linkType = linkType;
     this.__newTab = newTab;
-    this.__doc = doc;
+    this.__rel = rel;
   }
 
   createDOM(config: EditorConfig): HTMLAnchorElement {
@@ -101,10 +94,10 @@ export class LinkNode extends ElementNode {
     if (this.__newTab) {
       element.target = '_blank';
     }
-    /* if (this.__rel !== null) {
-      element.rel = this.__rel; // TODO. Maybe this should be just in fields?
-    } */
-    // TODO: Check if doc is needed
+
+    if (this.__rel !== null) {
+      element.rel = this.__rel;
+    }
     addClassNamesToElement(element, config.theme.link);
     return element;
   }
@@ -115,27 +108,27 @@ export class LinkNode extends ElementNode {
     config: EditorConfig,
   ): boolean {
     const url = this.__url;
-    const target = this.__newTab ? '_blank' : null;
-    // const rel = this.__rel;
+    const newTab = this.__newTab;
+    const rel = this.__rel;
     if (url !== prevNode.__url) {
       anchor.href = url;
     }
 
-    if (this.__newTab !== prevNode.__newTab) {
-      if (target) {
-        anchor.target = target;
+    if (newTab !== prevNode.__newTab) {
+      if (newTab) {
+        anchor.target = '_blank';
       } else {
         anchor.removeAttribute('target');
       }
     }
 
-    /* if (rel !== prevNode.__rel) {
+    if (rel !== prevNode.__rel) {
       if (rel) {
         anchor.rel = rel;
       } else {
         anchor.removeAttribute('rel');
       }
-    } */
+    }
     return false;
   }
 
@@ -151,9 +144,9 @@ export class LinkNode extends ElementNode {
   static importJSON(
     serializedNode: SerializedLinkNode | SerializedAutoLinkNode,
   ): LinkNode {
-    const node = $createLinkNode(serializedNode.url, serializedNode.linkType, {
+    const node = $createLinkNode(serializedNode.url, {
+      rel: serializedNode.rel,
       newTab: serializedNode.newTab,
-      doc: serializedNode.doc,
     });
     node.setFormat(serializedNode.format);
     node.setIndent(serializedNode.indent);
@@ -164,11 +157,10 @@ export class LinkNode extends ElementNode {
   exportJSON(): SerializedLinkNode | SerializedAutoLinkNode {
     return {
       ...super.exportJSON(),
+      rel: this.getRel(),
       newTab: this.isNewTab(),
-      doc: this.getLinkType() === 'internal' ? this.getDoc() : null,
       type: 'link',
-      linkType: this.getLinkType(),
-      url: this.getLinkType() === 'custom' ? this.getURL() : null,
+      url: this.getURL(),
       version: 1,
     };
   }
@@ -182,55 +174,30 @@ export class LinkNode extends ElementNode {
     writable.__url = url;
   }
 
-  getLinkType(): 'custom'|'internal' {
-    return this.getLatest().__linkType;
-  }
-
-  setLinkType(linkType: 'custom'|'internal'): void {
-    const writable = this.getWritable();
-    writable.__linkType = linkType;
-  }
-
-  isNewTab(): null | boolean {
+  isNewTab(): boolean {
     return this.getLatest().__newTab;
   }
 
-  setNewTab(newTab: null | boolean): void {
+  setNewTab(newTab: boolean): void {
     const writable = this.getWritable();
     writable.__newTab = newTab;
   }
 
-  getDoc(): {
-    value: string,
-    relationTo: string
-  }|null {
-    return this.getLatest().__doc;
-  }
-
-  setDoc(doc: {
-    value: string,
-    relationTo: string
-  }|null): void {
-    const writable = this.getWritable();
-    writable.__doc = doc;
-  }
-
-  /* getRel(): null | string {
+  getRel(): null | string {
     return this.getLatest().__rel;
   }
 
   setRel(rel: null | string): void {
     const writable = this.getWritable();
     writable.__rel = rel;
-  } */
+  }
 
   insertNewAfter(selection: RangeSelection): null | ElementNode {
-    const element = this.getParentOrThrow()
-      .insertNewAfter(selection);
+    const element = this.getParentOrThrow().insertNewAfter(selection);
     if ($isElementNode(element)) {
-      const linkNode = $createLinkNode(this.__url, this.__linkType, {
+      const linkNode = $createLinkNode(this.__url, {
+        rel: this.__rel,
         newTab: this.__newTab,
-        doc: this.__doc,
       });
       element.append(linkNode);
       return linkNode;
@@ -238,19 +205,19 @@ export class LinkNode extends ElementNode {
     return null;
   }
 
-  static canInsertTextBefore(): false {
+  canInsertTextBefore(): false {
     return false;
   }
 
-  static canInsertTextAfter(): false {
+  canInsertTextAfter(): false {
     return false;
   }
 
-  static canBeEmpty(): false {
+  canBeEmpty(): false {
     return false;
   }
 
-  static isInline(): true {
+  isInline(): true {
     return true;
   }
 
@@ -279,9 +246,9 @@ function convertAnchorElement(domNode: Node): DOMConversionOutput {
   if (domNode instanceof HTMLAnchorElement) {
     const content = domNode.textContent;
     if (content !== null && content !== '') {
-      node = $createLinkNode(domNode.getAttribute('href') || '', 'custom', {
-        newTab: domNode.getAttribute('target') === '_blank' ? true : null,
-        doc: null,
+      node = $createLinkNode(domNode.getAttribute('href') || '', {
+        rel: domNode.getAttribute('rel'),
+        newTab: domNode.getAttribute('target') === '_blank',
       });
     }
   }
@@ -290,10 +257,9 @@ function convertAnchorElement(domNode: Node): DOMConversionOutput {
 
 export function $createLinkNode(
   url: string,
-  linkType: 'custom'|'internal',
   attributes?: LinkAttributes,
 ): LinkNode {
-  return new LinkNode(url, linkType, attributes);
+  return new LinkNode(url, attributes);
 }
 
 export function $isLinkNode(
@@ -302,11 +268,13 @@ export function $isLinkNode(
   return node instanceof LinkNode;
 }
 
-export type SerializedAutoLinkNode = Spread<{
-  type: 'autolink';
-  version: 1;
-},
-  SerializedLinkNode>;
+export type SerializedAutoLinkNode = Spread<
+  {
+    type: 'autolink';
+    version: 1;
+  },
+  SerializedLinkNode
+  >;
 
 // Custom node type to override `canInsertTextAfter` that will
 // allow typing within the link
@@ -318,19 +286,15 @@ export class AutoLinkNode extends LinkNode {
   static clone(node: AutoLinkNode): AutoLinkNode {
     return new AutoLinkNode(
       node.__url,
-      node.__linkType,
-      {
-        newTab: node.__newTab,
-        doc: node.__doc,
-      },
+      { rel: node.__rel, newTab: node.__newTab },
       node.__key,
     );
   }
 
   static importJSON(serializedNode: SerializedAutoLinkNode): AutoLinkNode {
-    const node = $createAutoLinkNode(serializedNode.url, serializedNode.linkType, {
+    const node = $createAutoLinkNode(serializedNode.url, {
+      rel: serializedNode.rel,
       newTab: serializedNode.newTab,
-      doc: serializedNode.doc,
     });
     node.setFormat(serializedNode.format);
     node.setIndent(serializedNode.indent);
@@ -352,12 +316,11 @@ export class AutoLinkNode extends LinkNode {
   }
 
   insertNewAfter(selection: RangeSelection): null | ElementNode {
-    const element = this.getParentOrThrow()
-      .insertNewAfter(selection);
+    const element = this.getParentOrThrow().insertNewAfter(selection);
     if ($isElementNode(element)) {
-      const linkNode = $createAutoLinkNode(this.__url, this.__linkType, {
+      const linkNode = $createAutoLinkNode(this.__url, {
+        rel: this.__rel,
         newTab: this.__newTab,
-        doc: this.__doc,
       });
       element.append(linkNode);
       return linkNode;
@@ -368,10 +331,9 @@ export class AutoLinkNode extends LinkNode {
 
 export function $createAutoLinkNode(
   url: string,
-  linkType: 'custom'|'internal',
   attributes?: LinkAttributes,
 ): AutoLinkNode {
-  return new AutoLinkNode(url, linkType, attributes);
+  return new AutoLinkNode(url, attributes);
 }
 
 export function $isAutoLinkNode(
@@ -380,28 +342,22 @@ export function $isAutoLinkNode(
   return node instanceof AutoLinkNode;
 }
 
-export const TOGGLE_LINK_COMMAND: LexicalCommand<string | ({ url: string, linkType: 'custom'|'internal' } & LinkAttributes) | PayloadLinkData | null> = createCommand('TOGGLE_LINK_COMMAND');
+export const TOGGLE_LINK_COMMAND: LexicalCommand<
+  string | ({url: string} & LinkAttributes) | null
+  > = createCommand('TOGGLE_LINK_COMMAND');
 
 export function toggleLink(
-  url: null | string,
-  attributes: LinkAttributes = {},
+  linkData: PayloadLinkData,
 ): void {
-  const {
-    newTab,
-    doc,
-  } = attributes;
+  const rel = 'noopener'; /* attributes.rel === undefined ? 'noopener' : attributes.rel; */
   const selection = $getSelection();
-
-  console.log('Ran toggleLink');
-
-  const linkType = 'custom';
 
   if (!$isRangeSelection(selection)) {
     return;
   }
   const nodes = selection.extract();
 
-  if (url === null) {
+  if (linkData === null) {
     // Remove LinkNodes
     nodes.forEach((node) => {
       const parent = node.getParent();
@@ -426,13 +382,12 @@ export function toggleLink(
         ? firstNode
         : $getLinkAncestor(firstNode);
       if (linkNode !== null) {
-        linkNode.setURL(url);
-        linkNode.setLinkType(linkType);
-        linkNode.setNewTab(newTab);
-        linkNode.setDoc(null);
-        /* if (rel !== undefined) {
+        linkNode.setURL(linkData.url);
+        linkNode.setNewTab(linkData.newTab);
+
+        if (rel !== null) {
           linkNode.setRel(rel);
-        } */
+        }
         return;
       }
     }
@@ -453,137 +408,18 @@ export function toggleLink(
 
       if ($isLinkNode(parent)) {
         linkNode = parent;
-        parent.setURL(url);
-        parent.setLinkType(linkType);
-        parent.setNewTab(newTab);
-        parent.setDoc(null);
-        /* if (rel !== undefined) {
-          parent.setRel(rel);
-        } */
-        return;
-      }
+        parent.setURL(linkData.url);
+        parent.setNewTab(linkData.newTab);
 
-      if (!parent.is(prevParent)) {
-        prevParent = parent;
-        linkNode = $createLinkNode(url, linkType, {
-          newTab,
-          doc,
-        });
-
-        if ($isLinkNode(parent)) {
-          if (node.getPreviousSibling() === null) {
-            parent.insertBefore(linkNode);
-          } else {
-            parent.insertAfter(linkNode);
-          }
-        } else {
-          node.insertBefore(linkNode);
-        }
-      }
-
-      if ($isLinkNode(node)) {
-        if (node.is(linkNode)) {
-          return;
-        }
-        if (linkNode !== null) {
-          const children = node.getChildren();
-
-          for (let i = 0; i < children.length; i += 1) {
-            linkNode.append(children[i]);
-          }
-        }
-
-        node.remove();
-        return;
-      }
-
-      if (linkNode !== null) {
-        linkNode.append(node);
-      }
-    });
-  }
-}
-
-export function toggleLinkDoc(
-  payloadLinkData: PayloadLinkData,
-): void {
-  const linkType = 'internal';
-
-  const selection = $getSelection();
-  console.log('Ran toggleLinkPayload');
-
-  if (!$isRangeSelection(selection)) {
-    return;
-  }
-  const nodes = selection.extract();
-
-  if (payloadLinkData.doc === null) {
-    // Remove LinkNodes
-    nodes.forEach((node) => {
-      const parent = node.getParent();
-
-      if ($isLinkNode(parent)) {
-        const children = parent.getChildren();
-
-        for (let i = 0; i < children.length; i += 1) {
-          parent.insertBefore(children[i]);
-        }
-
-        parent.remove();
-      }
-    });
-  } else {
-    // Add or merge LinkNodes
-    if (nodes.length === 1) {
-      const firstNode = nodes[0];
-      // if the first node is a LinkNode or if its
-      // parent is a LinkNode, we update the URL, target and rel.
-      const linkNode = $isLinkNode(firstNode)
-        ? firstNode
-        : $getLinkAncestor(firstNode);
-      if (linkNode !== null) {
-        linkNode.setURL(null);
-        linkNode.setDoc(payloadLinkData.doc);
-        linkNode.setLinkType(linkType);
-        linkNode.setNewTab(payloadLinkData.newTab);
-        /* if (rel !== undefined) {
+        if (rel !== null) {
           linkNode.setRel(rel);
-        } */
-        return;
-      }
-    }
-
-    let prevParent: ElementNode | LinkNode | null = null;
-    let linkNode: LinkNode | null = null;
-
-    nodes.forEach((node) => {
-      const parent = node.getParent();
-      if (
-        parent === linkNode
-        || parent === null
-        || ($isElementNode(node) && !node.isInline())
-      ) {
-        return;
-      }
-
-      if ($isLinkNode(parent)) {
-        linkNode = parent;
-        parent.setURL(null);
-        parent.setDoc(payloadLinkData.doc);
-        parent.setLinkType(linkType);
-        parent.setNewTab(payloadLinkData.newTab);
-        /* if (rel !== undefined) {
-          parent.setRel(rel);
-        } */
+        }
         return;
       }
 
       if (!parent.is(prevParent)) {
         prevParent = parent;
-        linkNode = $createLinkNode(payloadLinkData.url, linkType, {
-          newTab: payloadLinkData.newTab,
-          doc: payloadLinkData.doc,
-        });
+        linkNode = $createLinkNode(linkData.url, { rel, newTab: linkData.newTab });
 
         if ($isLinkNode(parent)) {
           if (node.getPreviousSibling() === null) {
@@ -632,8 +468,6 @@ function $getAncestor(
     parent !== null
     && (parent = parent.getParent()) !== null
     && !predicate(parent)
-  ) {
-
-  }
+  );
   return parent;
 }

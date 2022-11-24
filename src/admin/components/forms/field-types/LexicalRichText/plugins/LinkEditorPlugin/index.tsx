@@ -126,25 +126,30 @@ function LinkEditor({
       if ($isLinkNode(parent)) {
         data.text = parent.getTextContent();
         data.url = parent.getURL();
-        data.linkType = parent.getLinkType();
+        data.newTab = parent.isNewTab();
+        setLinkUrl(parent.getURL());
+        /* data.linkType = parent.getLinkType();
         data.newTab = parent.isNewTab();
         data.doc = parent.getDoc();
         if (parent.getLinkType() === 'custom') {
           setLinkUrl(parent.getURL());
         } else { // internal
           setLinkUrl(`relation to ${parent.getDoc().relationTo}: ${parent.getDoc().value}`);
-        }
+        } */
       } else if ($isLinkNode(node)) {
         data.text = node.getTextContent(); // ?
         data.url = node.getURL();
-        data.linkType = node.getLinkType();
+        data.newTab = node.isNewTab();
+        setLinkUrl(node.getURL());
+
+        /* data.linkType = node.getLinkType();
         data.newTab = node.isNewTab();
         data.doc = node.getDoc();
         if (node.getLinkType() === 'custom') {
           setLinkUrl(node.getURL());
         } else { // internal
           setLinkUrl(`relation to ${node.getDoc().relationTo}: ${node.getDoc().value}`);
-        }
+        } */
       } else {
         setLinkUrl('');
       }
