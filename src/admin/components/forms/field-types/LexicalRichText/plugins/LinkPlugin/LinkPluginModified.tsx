@@ -46,6 +46,11 @@ export type PayloadLinkData = {
 export type LinkAttributes = {
   rel?: null | string;
   newTab?: boolean;
+  doc?: {
+    value: string,
+    relationTo: string
+  }|null;
+  linkType?: 'custom'|'internal';
 };
 
 export type SerializedLinkNode = Spread<
@@ -66,6 +71,15 @@ export class LinkNode extends ElementNode {
   __newTab: boolean;
 
   /** @internal */
+  __doc: {
+    value: string,
+    relationTo: string
+  }|null;
+
+  /** @internal */
+  __linkType: 'custom'|'internal';
+
+  /** @internal */
   __rel: null | string;
 
   static getType(): string {
@@ -75,22 +89,26 @@ export class LinkNode extends ElementNode {
   static clone(node: LinkNode): LinkNode {
     return new LinkNode(
       node.__url,
-      { rel: node.__rel, newTab: node.__newTab },
+      { rel: node.__rel, newTab: node.__newTab, doc: node.__doc, linkType: node.__linkType },
       node.__key,
     );
   }
 
   constructor(url: string, attributes: LinkAttributes = {}, key?: NodeKey) {
     super(key);
-    const { newTab = false, rel = null } = attributes;
+    const { newTab = false, rel = null, doc = null, linkType = 'custom' } = attributes;
     this.__url = url;
     this.__newTab = newTab;
     this.__rel = rel;
+    this.__doc = doc;
+    this.__linkType = linkType;
   }
 
   createDOM(config: EditorConfig): HTMLAnchorElement {
     const element = document.createElement('a');
-    element.href = this.__url;
+    if (this.__linkType === 'custom') {
+      element.href = this.__url;
+    }
     if (this.__newTab) {
       element.target = '_blank';
     }
@@ -110,8 +128,11 @@ export class LinkNode extends ElementNode {
     const url = this.__url;
     const newTab = this.__newTab;
     const rel = this.__rel;
-    if (url !== prevNode.__url) {
+    if (url !== prevNode.__url && this.__linkType === 'custom') {
       anchor.href = url;
+    }
+    if (this.__linkType === 'internal' && prevNode.__linkType === 'custom') {
+      anchor.removeAttribute('href');
     }
 
     if (newTab !== prevNode.__newTab) {
@@ -147,6 +168,8 @@ export class LinkNode extends ElementNode {
     const node = $createLinkNode(serializedNode.url, {
       rel: serializedNode.rel,
       newTab: serializedNode.newTab,
+      linkType: serializedNode.linkType,
+      doc: serializedNode.doc,
     });
     node.setFormat(serializedNode.format);
     node.setIndent(serializedNode.indent);
@@ -161,6 +184,8 @@ export class LinkNode extends ElementNode {
       newTab: this.isNewTab(),
       type: 'link',
       url: this.getURL(),
+      linkType: this.getLinkType(),
+      doc: this.getDoc(),
       version: 1,
     };
   }
@@ -183,6 +208,24 @@ export class LinkNode extends ElementNode {
     writable.__newTab = newTab;
   }
 
+  getDoc(): { value: string, relationTo: string }|null {
+    return this.getLatest().__doc;
+  }
+
+  setDoc(doc: { value: string, relationTo: string }|null): void {
+    const writable = this.getWritable();
+    writable.__doc = doc;
+  }
+
+  getLinkType(): 'custom'|'internal' {
+    return this.getLatest().__linkType;
+  }
+
+  setLinkType(linkType: 'custom'|'internal'): void {
+    const writable = this.getWritable();
+    writable.__linkType = linkType;
+  }
+
   getRel(): null | string {
     return this.getLatest().__rel;
   }
@@ -198,6 +241,8 @@ export class LinkNode extends ElementNode {
       const linkNode = $createLinkNode(this.__url, {
         rel: this.__rel,
         newTab: this.__newTab,
+        linkType: this.__linkType,
+        doc: this.__doc,
       });
       element.append(linkNode);
       return linkNode;
@@ -249,6 +294,8 @@ function convertAnchorElement(domNode: Node): DOMConversionOutput {
       node = $createLinkNode(domNode.getAttribute('href') || '', {
         rel: domNode.getAttribute('rel'),
         newTab: domNode.getAttribute('target') === '_blank',
+        linkType: 'custom',
+        doc: null,
       });
     }
   }
@@ -286,7 +333,7 @@ export class AutoLinkNode extends LinkNode {
   static clone(node: AutoLinkNode): AutoLinkNode {
     return new AutoLinkNode(
       node.__url,
-      { rel: node.__rel, newTab: node.__newTab },
+      { rel: node.__rel, newTab: node.__newTab, linkType: node.__linkType, doc: node.__doc },
       node.__key,
     );
   }
@@ -295,6 +342,8 @@ export class AutoLinkNode extends LinkNode {
     const node = $createAutoLinkNode(serializedNode.url, {
       rel: serializedNode.rel,
       newTab: serializedNode.newTab,
+      linkType: serializedNode.linkType,
+      doc: serializedNode.doc,
     });
     node.setFormat(serializedNode.format);
     node.setIndent(serializedNode.indent);
@@ -321,6 +370,8 @@ export class AutoLinkNode extends LinkNode {
       const linkNode = $createAutoLinkNode(this.__url, {
         rel: this.__rel,
         newTab: this.__newTab,
+        linkType: this.__linkType,
+        doc: this.__doc,
       });
       element.append(linkNode);
       return linkNode;
@@ -384,6 +435,8 @@ export function toggleLink(
       if (linkNode !== null) {
         linkNode.setURL(linkData.url);
         linkNode.setNewTab(linkData.newTab);
+        linkNode.setLinkType(linkData.linkType);
+        linkNode.setDoc(linkData.doc);
 
         if (rel !== null) {
           linkNode.setRel(rel);
@@ -410,6 +463,8 @@ export function toggleLink(
         linkNode = parent;
         parent.setURL(linkData.url);
         parent.setNewTab(linkData.newTab);
+        parent.setLinkType(linkData.linkType);
+        parent.setDoc(linkData.doc);
 
         if (rel !== null) {
           linkNode.setRel(rel);
@@ -419,7 +474,7 @@ export function toggleLink(
 
       if (!parent.is(prevParent)) {
         prevParent = parent;
-        linkNode = $createLinkNode(linkData.url, { rel, newTab: linkData.newTab });
+        linkNode = $createLinkNode(linkData.url, { rel, newTab: linkData.newTab, linkType: linkData.linkType, doc: linkData.doc });
 
         if ($isLinkNode(parent)) {
           if (node.getPreviousSibling() === null) {
