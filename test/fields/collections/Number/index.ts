@@ -13,6 +13,18 @@ const NumberFields: CollectionConfig = {
       type: 'number',
     },
     {
+      name: 'formattedNumber',
+      type: 'number',
+      defaultValue: defaultNumber,
+      admin: {
+        formatOptions: {
+          style: 'unit',
+          unit: 'liter',
+          unitDisplay: 'long',
+        },
+      },
+    },
+    {
       name: 'min',
       type: 'number',
       min: 10,

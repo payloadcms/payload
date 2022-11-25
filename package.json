@@ -27,9 +27,7 @@
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "sideEffects": false,
-  "bin": {
-    "payload": "bin.js"
-  },
+  "bin": "bin.js",
   "scripts": {
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
     "build:tsc": "tsc --p tsconfig.admin.json && tsc --p tsconfig.server.json",

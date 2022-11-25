@@ -127,6 +127,7 @@ export type NumberField = FieldBase & {
     autoComplete?: string
     placeholder?: Record<string, string> | string
     step?: number
+    formatOptions?: Intl.NumberFormatOptions
   }
   min?: number
   max?: number

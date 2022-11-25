@@ -91,6 +91,7 @@ export const number = baseField.keys({
     placeholder: joi.string(),
     autoComplete: joi.string(),
     step: joi.number(),
+    formatOptions: joi.object(),
   }),
 });
 

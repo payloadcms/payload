@@ -9,7 +9,8 @@ export type Description = Record<string, string> | string | DescriptionFunction 
 export type Props = {
   description?: Description
   value?: unknown;
-  className?: string
+  className?: string;
+  formatOptions?: Intl.NumberFormatOptions
 }
 
 export function isComponent(description: Description): description is DescriptionComponent {

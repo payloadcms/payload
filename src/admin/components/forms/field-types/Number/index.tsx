@@ -29,6 +29,7 @@ const NumberField: React.FC<Props> = (props) => {
       placeholder,
       description,
       condition,
+      formatOptions,
     } = {},
   } = props;
 
@@ -104,6 +105,7 @@ const NumberField: React.FC<Props> = (props) => {
       <FieldDescription
         value={value}
         description={description}
+        formatOptions={formatOptions}
       />
     </div>
   );
