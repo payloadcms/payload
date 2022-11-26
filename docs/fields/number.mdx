@@ -48,6 +48,10 @@ Set this property to define a placeholder string for the field.
 
 Set this property to a string that will be used for browser autocomplete.
 
+**`formatOptions`**
+
+Set this property to format the number value in its description and its collection table view. The options are provided by JavaScript's [Intl.NumberFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat).
+
 ### Example
 
 `collections/ExampleCollection.ts`
@@ -58,11 +62,16 @@ const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
-      name: 'age', // required
+      name: 'volume', // required
       type: 'number', // required
       required: true,
       admin: {
         step: 1,
+        formatOptions: {
+          style: 'unit',
+          unit: 'liter',
+          unitDisplay: 'long',
+        },
       }
     }
   ]
