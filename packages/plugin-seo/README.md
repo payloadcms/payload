@@ -130,7 +130,7 @@ import {
   GenerateTitle,
   GenerateDescription
   GenerateURL
-} from '@payloadcms/plugin-seo/dist/types';
+} from '@payloadcms/plugin-seo/types';
 ```
 
 ## Development

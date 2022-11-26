@@ -1,4 +1,12 @@
-import { Field } from "payload/dist/fields/config/types";
+import { Field } from 'payload/dist/fields/config/types';
+
+export type GenerateTitle = <T = any>(args: { doc: T; locale?: string }) => string | Promise<string>
+export type GenerateDescription = <T = any>(args: {
+  doc: T
+  locale?: string
+}) => string | Promise<string>
+export type GenerateImage = <T = any>(args: { doc: T; locale?: string }) => string | Promise<string>
+export type GenerateURL = <T = any>(args: { doc: T; locale?: string }) => string | Promise<string>
 
 export type PluginConfig = {
   collections?: string[]
@@ -6,10 +14,10 @@ export type PluginConfig = {
   uploadsCollection?: string
   fields?: Partial<Field>[]
   tabbedUI?: boolean
-  generateTitle?: <T = any>(args: { doc: T, locale?: string }) => string | Promise<string>
-  generateDescription?: <T = any>(args: { doc: T, locale?: string }) => string | Promise<string>
-  generateImage?: <T = any>(args: { doc: T, locale?: string }) => string | Promise<string>
-  generateURL?: <T = any>(args: { doc: T, locale?: string }) => string | Promise<string>
+  generateTitle?: GenerateTitle
+  generateDescription?: GenerateDescription
+  generateImage?: GenerateImage
+  generateURL?: GenerateURL
 }
 
 export type Meta = {

@@ -31,6 +31,8 @@
     "typescript": "^4.5.5"
   },
   "files": [
-    "dist"
+    "dist",
+    "*.js",
+    "*.d.ts"
   ]
 }
