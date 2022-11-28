@@ -51,7 +51,7 @@ export type SubmitOptions = {
 
 export type DispatchFields = React.Dispatch<any>
 export type Submit = (options?: SubmitOptions, e?: React.FormEvent<HTMLFormElement>) => Promise<void>;
-export type ValidateForm = () => Promise<boolean>;
+export type ValidateForm = (fieldsToValidate?: any) => Promise<boolean>;
 export type CreateFormData = (overrides?: any) => FormData;
 export type GetFields = () => Fields;
 export type GetField = (path: string) => Field;

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
@@ -31,7 +31,8 @@ const Status: React.FC<Props> = () => {
     routes: { api },
   } = useConfig();
   const [processing, setProcessing] = useState(false);
-  const { reset: resetForm } = useForm();
+  const [canRestore, setCanRestore] = useState(false);
+  const { reset: resetForm, validateForm } = useForm();
   const locale = useLocale();
   const { t, i18n } = useTranslation('version');
 
@@ -114,13 +115,22 @@ const Status: React.FC<Props> = () => {
     }
   }, [collection, global, publishedDoc, serverURL, api, id, i18n, locale, resetForm, getVersions, t, toggleModal, revertModalSlug, unPublishModalSlug]);
 
+  useEffect(() => {
+    async function checkWasValid() {
+      const wasValid = await validateForm(publishedDoc);
+      setCanRestore(wasValid);
+    }
+
+    checkWasValid();
+  }, [publishedDoc, validateForm]);
+
   if (statusToRender) {
     return (
       <div className={baseClass}>
         <div className={`${baseClass}__value-wrap`}>
-          <span className={`${baseClass}__value`}>{statusToRender}</span>
           {statusToRender === 'Published' && (
             <React.Fragment>
+              <span className={`${baseClass}__value`}>{statusToRender}</span>
               &nbsp;&mdash;&nbsp;
               <Button
                 onClick={() => toggleModal(unPublishModalSlug)}
@@ -152,8 +162,9 @@ const Status: React.FC<Props> = () => {
               </Modal>
             </React.Fragment>
           )}
-          {statusToRender === 'Changed' && (
+          {canRestore && statusToRender === 'Changed' && (
             <React.Fragment>
+              <span className={`${baseClass}__value`}>{statusToRender}</span>
               &nbsp;&mdash;&nbsp;
               <Button
                 onClick={() => toggleModal(revertModalSlug)}

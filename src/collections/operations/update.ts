@@ -77,7 +77,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST);
   }
 
-  const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
+  const shouldSaveDraft = Boolean((draftArg || data._status === 'draft') && collectionConfig.versions.drafts);
 
   // /////////////////////////////////////
   // Access
@@ -155,9 +155,9 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     req,
   });
 
-  // // /////////////////////////////////////
-  // // beforeValidate - Collection
-  // // /////////////////////////////////////
+  // /////////////////////////////////////
+  // beforeValidate - Collection
+  // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
     await priorHook;
