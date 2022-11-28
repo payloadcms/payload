@@ -1,3 +1,4 @@
+import { PaginateOptions } from 'mongoose';
 import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
@@ -35,6 +36,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
     req,
     req: {
       locale,
+      session,
       payload,
     },
     overrideAccess,
@@ -98,7 +100,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
     locale,
   });
 
-  const optionsToExecute = {
+  const optionsToExecute: PaginateOptions = {
     page: page || 1,
     limit: limit || 10,
     sort: {
@@ -108,6 +110,10 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
     leanWithId: true,
     useEstimatedCount,
   };
+
+  if (session) {
+    optionsToExecute.options.session = session;
+  }
 
   const paginatedDocs = await VersionsModel.paginate(query, optionsToExecute);
 

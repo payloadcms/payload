@@ -2,6 +2,7 @@ import { Request } from 'express';
 import type { i18n as Ii18n, TFunction } from 'i18next';
 import DataLoader from 'dataloader';
 import { UploadedFile } from 'express-fileupload';
+import { ClientSession } from 'mongoose';
 import { Payload } from '../index';
 import { Collection } from '../collections/config/types';
 import { User } from '../auth/types';
@@ -11,6 +12,7 @@ import { TypeWithID } from '../globals/config/types';
 export declare type PayloadRequest<T = any> = Request & {
   payload: Payload;
   payloadDataLoader: DataLoader<string, TypeWithID>;
+  session: ClientSession
   locale?: string;
   fallbackLocale?: string;
   collection?: Collection;

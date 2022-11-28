@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status';
+import { SessionOption } from 'mongoose';
 import { PayloadRequest } from '../../express/types';
 import { Collection, CollectionModel } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -32,6 +33,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     req: {
       t,
       locale,
+      session,
       payload,
     },
     disableErrors,
@@ -81,7 +83,12 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
   if (!query.$and[0]._id) throw new NotFound(t);
 
-  let result = await VersionsModel.findOne(query, {}).lean();
+  const options: SessionOption = {};
+  if (session) {
+    options.session = session;
+  }
+
+  let result = await VersionsModel.findOne(query, {}, options).lean();
 
   if (!result) {
     if (!disableErrors) {

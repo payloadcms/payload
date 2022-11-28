@@ -1,3 +1,4 @@
+import { QueryOptions } from 'mongoose';
 import { Payload } from '..';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
@@ -16,6 +17,9 @@ type Args = {
 export const saveCollectionVersion = async ({
   payload,
   config,
+  req: {
+    session,
+  },
   req,
   id,
   docWithLocales,
@@ -25,6 +29,16 @@ export const saveCollectionVersion = async ({
   let version = docWithLocales;
 
   if (config.versions?.drafts) {
+    const options: QueryOptions = {
+      lean: true,
+      leanWithId: true,
+      sort: {
+        updatedAt: 'desc',
+      },
+    };
+    if (session) {
+      options.session = session;
+    }
     const latestVersion = await VersionModel.findOne({
       parent: {
         $eq: docWithLocales.id,
@@ -34,13 +48,7 @@ export const saveCollectionVersion = async ({
       },
     },
     {},
-    {
-      lean: true,
-      leanWithId: true,
-      sort: {
-        updatedAt: 'desc',
-      },
-    });
+    options);
 
     if (latestVersion) {
       // If the latest version is a draft, no need to re-save it
@@ -71,11 +79,19 @@ export const saveCollectionVersion = async ({
   let createdVersion;
 
   try {
-    createdVersion = await VersionModel.create({
-      parent: id,
-      version,
-      autosave: false,
-    });
+    if (session) {
+      [createdVersion] = await VersionModel.create([{
+        parent: id,
+        version,
+        autosave: false,
+      }], { session });
+    } else {
+      createdVersion = await VersionModel.create({
+        parent: id,
+        version,
+        autosave: false,
+      });
+    }
   } catch (err) {
     payload.logger.error(`There was an error while saving a version for the ${config.labels.singular} with ID ${id}.`);
     payload.logger.error(err);

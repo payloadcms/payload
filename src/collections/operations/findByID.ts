@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import memoize from 'micro-memoize';
+import { SessionOption } from 'mongoose';
 import { PayloadRequest } from '../../express/types';
 import { Collection, TypeWithID } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -50,6 +51,7 @@ async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Pr
     req: {
       t,
       locale,
+      session,
       payload,
     },
     disableErrors,
@@ -95,7 +97,11 @@ async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Pr
   if (!req.findByID) req.findByID = {};
 
   if (!req.findByID[collectionConfig.slug]) {
-    const nonMemoizedFindByID = async (q) => Model.findOne(q, {}).lean();
+    const options: SessionOption = {};
+    if (session) {
+      options.session = session;
+    }
+    const nonMemoizedFindByID = async (q) => Model.findOne(q, {}, options).lean();
     req.findByID[collectionConfig.slug] = memoize(nonMemoizedFindByID, {
       isPromise: true,
       maxSize: 100,

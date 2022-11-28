@@ -32,6 +32,7 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
     req,
     req: {
       locale,
+      session,
       payload,
       payload: {
         globals: {
@@ -82,7 +83,12 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  let global: any = await Model.findOne(query);
+  let global;
+  if (session) {
+    global = await Model.findOne(query).session(session);
+  } else {
+    global = await Model.findOne(query);
+  }
   let globalJSON: Record<string, unknown> = {};
 
   if (global) {
@@ -195,14 +201,26 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   } else {
     try {
       if (global) {
-        global = await Model.findOneAndUpdate(
-          { globalType: slug },
-          result,
-          { new: true },
-        );
+        if (session) {
+          global = await Model.findOneAndUpdate(
+            { globalType: slug },
+            result,
+            { new: true },
+          ).session(session);
+        } else {
+          global = await Model.findOneAndUpdate(
+            { globalType: slug },
+            result,
+            { new: true },
+          );
+        }
       } else {
         result.globalType = slug;
-        global = await Model.create(result);
+        if (session) {
+          [global] = await Model.create([result], { session });
+        } else {
+          global = await Model.create(result);
+        }
       }
     } catch (error) {
       cleanUpFailedVersion({

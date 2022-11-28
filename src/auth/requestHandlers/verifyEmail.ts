@@ -8,6 +8,7 @@ async function verifyEmailHandler(req: PayloadRequest, res: Response, next: Next
     await verifyEmail({
       collection: req.collection,
       token: req.params.token,
+      session: req.session,
     });
 
     return res.status(httpStatus.OK)

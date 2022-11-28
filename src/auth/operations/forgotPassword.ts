@@ -47,6 +47,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     expiration,
     req: {
       t,
+      session,
       payload: {
         config,
         sendEmail: email,
@@ -67,7 +68,13 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     resetPasswordToken?: string,
     resetPasswordExpiration?: number | Date,
   }
-  const user: UserDoc = await Model.findOne({ email: (data.email as string).toLowerCase() });
+  let user: UserDoc;
+
+  if (session) {
+    user = await Model.findOne({ email: (data.email as string).toLowerCase() }).session(session);
+  } else {
+    user = await Model.findOne({ email: (data.email as string).toLowerCase() });
+  }
 
   if (!user) return null;
 

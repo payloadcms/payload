@@ -59,6 +59,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     req: {
       t,
       locale,
+      session,
       payload,
       payload: {
         config,
@@ -108,7 +109,12 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  const doc = await Model.findOne(query) as UserDocument;
+  let doc: UserDocument;
+  if (session) {
+    doc = await Model.findOne(query).session(session);
+  } else {
+    doc = await Model.findOne(query);
+  }
 
   if (!doc && !hasWherePolicy) throw new NotFound(t);
   if (!doc && hasWherePolicy) throw new Forbidden(t);
@@ -260,11 +266,22 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     });
   } else {
     try {
-      result = await Model.findByIdAndUpdate(
-        { _id: id },
-        result,
-        { new: true },
-      );
+      if (session) {
+        result = await Model.findByIdAndUpdate(
+          { _id: id },
+          result,
+          {
+            new: true,
+            session,
+          },
+        );
+      } else {
+        result = await Model.findByIdAndUpdate(
+          { _id: id },
+          result,
+          { new: true },
+        );
+      }
     } catch (error) {
       cleanUpFailedVersion({
         payload,

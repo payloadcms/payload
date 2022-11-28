@@ -25,6 +25,7 @@ async function findOne<T extends TypeWithID = any>(args: Args): Promise<T> {
     locale,
     req,
     req: {
+      session,
       payload,
     },
     slug,
@@ -68,7 +69,12 @@ async function findOne<T extends TypeWithID = any>(args: Args): Promise<T> {
   // Perform database operation
   // /////////////////////////////////////
 
-  let doc = await Model.findOne(query).lean() as any;
+  let doc;
+  if (session) {
+    doc = await Model.findOne(query).session(session).lean() as any;
+  } else {
+    doc = await Model.findOne(query).lean() as any;
+  }
 
   if (!doc) {
     doc = {};

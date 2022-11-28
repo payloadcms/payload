@@ -1,3 +1,4 @@
+import { QueryOptions } from 'mongoose';
 import { Payload } from '..';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
@@ -15,6 +16,9 @@ type Args = {
 export const saveGlobalVersion = async ({
   payload,
   config,
+  req: {
+    session,
+  },
   req,
   docWithLocales,
 }: Args): Promise<void> => {
@@ -23,19 +27,23 @@ export const saveGlobalVersion = async ({
   let version = docWithLocales;
 
   if (config.versions?.drafts) {
+    const options: QueryOptions = {
+      lean: true,
+      leanWithId: true,
+      sort: {
+        updatedAt: 'desc',
+      },
+    };
+    if (session) {
+      options.session = session;
+    }
     const latestVersion = await VersionModel.findOne({
       updatedAt: {
         $gt: docWithLocales.updatedAt,
       },
     },
     {},
-    {
-      lean: true,
-      leanWithId: true,
-      sort: {
-        updatedAt: 'desc',
-      },
-    });
+    options);
 
     if (latestVersion) {
       // If the latest version is a draft, no need to re-save it
@@ -66,10 +74,17 @@ export const saveGlobalVersion = async ({
   let createdVersion;
 
   try {
-    createdVersion = await VersionModel.create({
-      version,
-      autosave: false,
-    });
+    if (session) {
+      [createdVersion] = await VersionModel.create([{
+        version,
+        autosave: false,
+      }], { session });
+    } else {
+      createdVersion = await VersionModel.create({
+        version,
+        autosave: false,
+      });
+    }
   } catch (err) {
     payload.logger.error(`There was an error while saving a version for the Global ${config.slug}.`);
     payload.logger.error(err);

@@ -10,6 +10,7 @@ function verifyEmailResolver(collection: Collection) {
     const options = {
       collection,
       token: args.token,
+      session: context.req.session,
       req: context.req,
       res: context.res,
       api: 'GraphQL',

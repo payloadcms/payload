@@ -24,6 +24,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     req,
     req: {
       t,
+      session,
       payload,
       payload: {
         globals: {
@@ -49,9 +50,16 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
   const VersionModel = payload.versions[globalConfig.slug];
 
-  let rawVersion = await VersionModel.findOne({
-    _id: id,
-  });
+  let rawVersion;
+  if (session) {
+    rawVersion = await VersionModel.findOne({
+      _id: id,
+    }).session(session);
+  } else {
+    rawVersion = await VersionModel.findOne({
+      _id: id,
+    });
+  }
 
   if (!rawVersion) {
     throw new NotFound(t);
@@ -77,14 +85,29 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
   let result = rawVersion.version;
 
   if (global) {
-    result = await Model.findOneAndUpdate(
-      { globalType: globalConfig.slug },
-      result,
-      { new: true },
-    );
+    if (session) {
+      result = await Model.findOneAndUpdate(
+        { globalType: globalConfig.slug },
+        result,
+        {
+          new: true,
+          session,
+        },
+      );
+    } else {
+      result = await Model.findOneAndUpdate(
+        { globalType: globalConfig.slug },
+        result,
+        { new: true },
+      );
+    }
   } else {
     result.globalType = globalConfig.slug;
-    result = await Model.create(result);
+    if (session) {
+      [result] = await Model.create([result], { session });
+    } else {
+      result = await Model.create(result);
+    }
   }
 
   result = result.toJSON({ virtuals: true });

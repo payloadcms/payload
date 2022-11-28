@@ -34,6 +34,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     req: {
       t,
       locale,
+      session,
       payload,
     },
     req,
@@ -49,9 +50,16 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   const VersionModel = payload.versions[collectionConfig.slug];
 
-  let rawVersion = await VersionModel.findOne({
-    _id: id,
-  });
+  let rawVersion;
+  if (session) {
+    rawVersion = await VersionModel.findOne({
+      _id: id,
+    }).session(session);
+  } else {
+    rawVersion = await VersionModel.findOne({
+      _id: id,
+    });
+  }
 
   if (!rawVersion) {
     throw new NotFound(t);
@@ -109,11 +117,23 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // Update
   // /////////////////////////////////////
 
-  let result = await Model.findByIdAndUpdate(
-    { _id: parentDocID },
-    rawVersion.version,
-    { new: true },
-  );
+  let result;
+  if (session) {
+    result = await Model.findByIdAndUpdate(
+      { _id: parentDocID },
+      rawVersion.version,
+      {
+        new: true,
+        session,
+      },
+    );
+  } else {
+    result = await Model.findByIdAndUpdate(
+      { _id: parentDocID },
+      rawVersion.version,
+      { new: true },
+    );
+  }
 
   result = result.toJSON({ virtuals: true });
 

@@ -1,3 +1,4 @@
+import { UserDocument } from '..';
 import { APIError } from '../../errors';
 import executeAccess from '../executeAccess';
 import { Collection } from '../../collections/config/types';
@@ -22,6 +23,9 @@ async function unlock(args: Args): Promise<boolean> {
       Model,
       config: collectionConfig,
     },
+    req: {
+      session,
+    },
     req,
     overrideAccess,
   } = args;
@@ -42,10 +46,17 @@ async function unlock(args: Args): Promise<boolean> {
   // Unlock
   // /////////////////////////////////////
 
-  const user = await Model.findOne({ email: data.email.toLowerCase() });
+  let user: UserDocument;
+  if (session) {
+    user = await Model.findOne({ email: data.email.toLowerCase() }).session(session);
+  } else {
+    user = await Model.findOne({ email: data.email.toLowerCase() });
+  }
 
   if (!user) return null;
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   await user.resetLoginAttempts();
 
   return true;

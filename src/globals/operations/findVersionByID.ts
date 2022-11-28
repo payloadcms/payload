@@ -28,6 +28,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     req,
     req: {
       t,
+      session,
       payload,
       locale,
     },
@@ -74,7 +75,12 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
   if (!query.$and[0]._id) throw new NotFound(t);
 
-  let result = await VersionsModel.findOne(query, {}).lean();
+  let result;
+  if (session) {
+    result = await VersionsModel.findOne(query, {}).session(session).lean();
+  } else {
+    result = await VersionsModel.findOne(query, {}).lean();
+  }
 
   if (!result) {
     if (!disableErrors) {

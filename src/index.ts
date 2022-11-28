@@ -1,6 +1,7 @@
 import { Express, Router } from 'express';
 import pino from 'pino';
 import { GraphQLError, GraphQLFormattedError, GraphQLSchema } from 'graphql';
+import type { Mongoose } from 'mongoose';
 import {
   TypeWithID,
   Collection,
@@ -81,6 +82,8 @@ export class Payload {
   secret: string;
 
   mongoURL: string | false;
+
+  mongoConnection: Mongoose['connection'];
 
   mongoMemoryServer: any
 

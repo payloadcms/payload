@@ -48,6 +48,7 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
     req: {
       t,
       locale,
+      session,
       payload: {
         config,
         preferences,
@@ -101,7 +102,12 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  const docToDelete = await Model.findOne(query);
+  let docToDelete;
+  if (req.session) {
+    docToDelete = await Model.findOne(query).session(session);
+  } else {
+    docToDelete = await Model.findOne(query);
+  }
 
   if (!docToDelete && !hasWhereAccess) throw new NotFound(t);
   if (!docToDelete && hasWhereAccess) throw new Forbidden(t);
@@ -145,7 +151,12 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
   // Delete document
   // /////////////////////////////////////
 
-  const doc = await Model.findOneAndDelete({ _id: id });
+  let doc;
+  if (req.session) {
+    doc = await Model.findOneAndDelete({ _id: id }, { session });
+  } else {
+    doc = await Model.findOneAndDelete({ _id: id });
+  }
 
   let result: Document = doc.toJSON({ virtuals: true });
 
@@ -160,9 +171,17 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
   // /////////////////////////////////////
 
   if (collectionConfig.auth) {
-    await preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug });
+    if (req.session) {
+      await preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug }, { session });
+    } else {
+      await preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug });
+    }
   }
-  await preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
+  if (req.session) {
+    await preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` }, { session });
+  } else {
+    await preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
+  }
 
   // /////////////////////////////////////
   // afterDelete - Collection

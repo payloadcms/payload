@@ -31,13 +31,19 @@ async function registerFirstUser(args: Arguments): Promise<Result> {
       },
     },
     req: {
+      session,
       payload,
     },
     req,
     data,
   } = args;
 
-  const count = await Model.countDocuments({});
+  let count;
+  if (session) {
+    count = await Model.countDocuments({}).session(session);
+  } else {
+    count = await Model.countDocuments({});
+  }
 
   if (count >= 1) throw new Forbidden(req.t);
 

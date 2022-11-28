@@ -195,7 +195,11 @@ async function create(incomingArgs: Arguments): Promise<Document> {
     }
   } else {
     try {
-      doc = await Model.create(resultWithLocales);
+      if (req.session) {
+        [doc] = (await Model.create([resultWithLocales], { session: req.session }));
+      } else {
+        doc = await Model.create(resultWithLocales);
+      }
     } catch (error) {
       // Handle uniqueness error from MongoDB
       throw error.code === 11000 && error.keyValue

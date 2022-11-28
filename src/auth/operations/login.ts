@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import jwt from 'jsonwebtoken';
 import { CookieOptions, Response } from 'express';
 import { AuthenticationError, LockedAuth } from '../../errors';
@@ -53,6 +54,7 @@ async function login<T>(incomingArgs: Arguments): Promise<Result & { user: T}> {
     },
     data,
     req: {
+      session,
       payload: {
         secret,
         config,
@@ -72,9 +74,14 @@ async function login<T>(incomingArgs: Arguments): Promise<Result & { user: T}> {
 
   const email = unsanitizedEmail ? (unsanitizedEmail as string).toLowerCase().trim() : null;
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore Improper typing in library, additional args should be optional
-  const userDoc = await Model.findByUsername(email);
+  let userDoc;
+  if (session) {
+    // @ts-ignore Improper typing in library, additional args should be optional
+    userDoc = await Model.findByUsername(email).session(session);
+  } else {
+    // @ts-ignore Improper typing in library, additional args should be optional
+    userDoc = await Model.findByUsername(email);
+  }
 
   if (!userDoc || (args.collection.config.auth.verify && userDoc._verified === false)) {
     throw new AuthenticationError(req.t);

@@ -35,6 +35,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
       config: collectionConfig,
     },
     req: {
+      session,
       payload: {
         config,
         secret,
@@ -49,10 +50,16 @@ async function resetPassword(args: Arguments): Promise<Result> {
   // Reset Password
   // /////////////////////////////////////
 
-  const user = await Model.findOne({
+  let user: UserDocument;
+  const filter = {
     resetPasswordToken: data.token,
     resetPasswordExpiration: { $gt: Date.now() },
-  }) as UserDocument;
+  };
+  if (session) {
+    user = await Model.findOne(filter).session(session);
+  } else {
+    user = await Model.findOne(filter);
+  }
 
   if (!user) throw new APIError('Token is either invalid or has expired.');
 

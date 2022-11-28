@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
 import express, { NextFunction, Response } from 'express';
 import crypto from 'crypto';
-import mongoose from 'mongoose';
 import { InitOptions } from './config/types';
 
 import authenticate from './express/middleware/authenticate';
@@ -130,11 +129,7 @@ export const init = (payload: Payload, options: InitOptions): void => {
 export const initAsync = async (payload: Payload, options: InitOptions): Promise<void> => {
   payload.logger = Logger('payload', options.loggerOptions);
   payload.mongoURL = options.mongoURL;
-
-  if (payload.mongoURL) {
-    mongoose.set('strictQuery', false);
-    payload.mongoMemoryServer = await connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
-  }
+  await connectMongoose(payload, options.mongoOptions);
 
   init(payload, options);
 
@@ -145,11 +140,7 @@ export const initAsync = async (payload: Payload, options: InitOptions): Promise
 export const initSync = (payload: Payload, options: InitOptions): void => {
   payload.logger = Logger('payload', options.loggerOptions);
   payload.mongoURL = options.mongoURL;
-
-  if (payload.mongoURL) {
-    mongoose.set('strictQuery', false);
-    connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
-  }
+  connectMongoose(payload, options.mongoOptions);
 
   init(payload, options);
 
