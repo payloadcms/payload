@@ -17,6 +17,7 @@ import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { code } from '../../../../../fields/validations';
 import { Props } from './types';
+import { useTheme } from '../../../utilities/Theme';
 
 import './index.scss';
 
@@ -63,12 +64,16 @@ const Code: React.FC<Props> = (props) => {
     condition,
   });
 
+
+  const { theme } = useTheme();
+
   const classes = [
     'field-type',
     'code',
     className,
     showError && 'error',
     readOnly && 'read-only',
+    theme && theme,
   ].filter(Boolean).join(' ');
 
   return (
