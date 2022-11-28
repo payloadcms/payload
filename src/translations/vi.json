@@ -218,6 +218,8 @@
     "moreInfo": "Hiển thị nhiều hơn",
     "selectCollectionToBrowse": "Chọn một Collection để tìm",
     "selectFile": "Chọn một file",
+    "dragAndDrop": "Kéo và thả một tập tin",
+    "copyAndPaste": "Sao chép và dán một tập tin",
     "sizes": "Các độ phân giải",
     "width": "Chiều rộng"
   },
