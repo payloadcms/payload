@@ -361,7 +361,7 @@ const BlocksField: React.FC<Props> = (props) => {
               })}
               {(rows.length < minRows || (required && rows.length === 0)) && (
                 <Banner type="error">
-                  {t('requiresAtLeast', {
+                  {t('validation:requiresAtLeast', {
                     count: minRows,
                     label: getTranslation(minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural, i18n),
                   })}
