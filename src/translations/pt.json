@@ -217,6 +217,8 @@
     "moreInfo": "Ver mais",
     "selectCollectionToBrowse": "Selecione uma Coleção para Navegar",
     "selectFile": "Selecione um arquivo",
+    "dragAndDrop": "Arraste e solte um arquivo",
+    "copyAndPaste": "Copie e cole um arquivo",
     "sizes": "Tamanhos",
     "width": "Largura"
   },

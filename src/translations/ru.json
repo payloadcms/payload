@@ -217,6 +217,8 @@
     "moreInfo": "Больше информации",
     "selectCollectionToBrowse": "Выберите Коллекцию для просмотра",
     "selectFile": "Выберите файл",
+    "dragAndDrop": "Перетащите файл",
+    "copyAndPaste": "Скопируйте и вставьте файл",
     "sizes": "Размеры",
     "width": "Ширина"
   },
