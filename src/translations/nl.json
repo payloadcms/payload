@@ -104,7 +104,7 @@
     "itemsAndMore": "{{items}} en {{count}} meer",
     "labelRelationship": "{{label}} relatie",
     "latitude": "Breedtegraad",
-    "linkedTo": "Gekoppeld aan aan <0>label</0>",
+    "linkedTo": "Gekoppeld aan aan <0>{{label}}</0>",
     "longitude": "Lengtegraad",
     "newLabel": "Nieuw(e) {{label}}",
     "passwordsDoNotMatch": "Wachtwoorden komen niet overeen.",

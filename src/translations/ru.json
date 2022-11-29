@@ -103,7 +103,7 @@
     "itemsAndMore": "{{items}} и ещё {{count}}",
     "labelRelationship": "{{label}} Отношения",
     "latitude": "Широта",
-    "linkedTo": "Связано с <0>label</0>",
+    "linkedTo": "Связано с <0>{{label}}</0>",
     "longitude": "Долгота",
     "newLabel": "Новый {{label}}",
     "passwordsDoNotMatch": "Пароли не совпадают.",

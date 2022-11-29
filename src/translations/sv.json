@@ -104,7 +104,7 @@
     "itemsAndMore": "{{items}} och {{count}} mer",
     "labelRelationship": "{{label}} Relation",
     "latitude": "Latitud",
-    "linkedTo": "Länkad till <0>etikett</0>",
+    "linkedTo": "Länkad till <0>{{label}}</0>",
     "longitude": "Longitud",
     "newLabel": "Ny {{label}}",
     "passwordsDoNotMatch": "Lösenorden matchar inte.",

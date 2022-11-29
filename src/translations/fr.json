@@ -104,7 +104,7 @@
     "itemsAndMore": "{{items}} et {{count}} de plus",
     "labelRelationship": "Relation de ou du {{label}} ",
     "latitude": "Latitude",
-    "linkedTo": "Lié à <0>l'étiquette</0>",
+    "linkedTo": "Lié à <0>{{label}}</0>",
     "longitude": "Longitude",
     "newLabel": "Nouveau ou nouvelle {{label}}",
     "passwordsDoNotMatch": "Les mots de passe ne correspondent pas.",

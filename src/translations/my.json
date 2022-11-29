@@ -103,7 +103,7 @@
     "itemsAndMore": "{{items}} နှင့် နောက်ထပ် {{count}} ခု",
     "labelRelationship": "{{label}} Relationship",
     "latitude": "vĩ độ",
-    "linkedTo": "<0>label</0> ချိတ်ဆက်ထားသည်။",
+    "linkedTo": "<0>{{label}}</0> ချိတ်ဆက်ထားသည်။",
     "longitude": "kinh độ",
     "newLabel": "{{label}} အသစ်",
     "passwordsDoNotMatch": "စကားဝှက်များနှင့် မကိုက်ညီပါ။",

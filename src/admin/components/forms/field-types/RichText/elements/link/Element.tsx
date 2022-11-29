@@ -17,6 +17,7 @@ import { Field } from '../../../../../../../fields/config/types';
 import reduceFieldsToValues from '../../../../Form/reduceFieldsToValues';
 import deepCopyObject from '../../../../../../../utilities/deepCopyObject';
 import Button from '../../../../../elements/Button';
+import { getTranslation } from '../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -31,7 +32,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
   const config = useConfig();
   const { user } = useAuth();
   const locale = useLocale();
-  const { t } = useTranslation('fields');
+  const { t, i18n } = useTranslation('fields');
   const { openModal, toggleModal } = useModal();
   const [renderModal, setRenderModal] = useState(false);
   const [renderPopup, setRenderPopup] = useState(false);
@@ -149,10 +150,9 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
             <div className={`${baseClass}__popup`}>
               {element.linkType === 'internal' && element.doc?.relationTo && element.doc?.value && (
                 <Trans
-                  i18nKey="linkedTo"
-                  values={{ label: config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels?.singular }}
+                  i18nKey="fields:linkedTo"
+                  values={{ label: getTranslation(config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels?.singular, i18n) }}
                 >
-                  linkedTo
                   <a
                     className={`${baseClass}__link-label`}
                     href={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}

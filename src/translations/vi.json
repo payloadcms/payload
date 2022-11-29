@@ -104,7 +104,7 @@
     "itemsAndMore": "{{items}} và {{count}} món nữa",
     "labelRelationship": "Mối quan hệ của {{label}} (Relationship)",
     "latitude": "Vĩ độ",
-    "linkedTo": "Được nối với <0>label</0>",
+    "linkedTo": "Được nối với <0>{{label}}</0>",
     "longitude": "Kinh độ",
     "newLabel": "Tạo {{label}} mới",
     "passwordsDoNotMatch": "Mật khẩu không trùng.",

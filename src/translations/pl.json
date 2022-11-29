@@ -103,7 +103,7 @@
     "itemsAndMore": "{{items}} i {{count}} więcej",
     "labelRelationship": "Relacja {{label}}",
     "latitude": "Szerokość",
-    "linkedTo": "Połączony z <0>etykietą</0>",
+    "linkedTo": "Połączony z <0>{{etykietą}}</0>",
     "longitude": "Długość geograficzna",
     "newLabel": "Nowy {{label}}",
     "passwordsDoNotMatch": "Hasła nie pasują",
