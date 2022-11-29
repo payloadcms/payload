@@ -1,2 +1,1 @@
-// eslint-disable-next-line import/named
-export { Props } from '../../dist/admin/components/forms/field-types/Email/types';
+export type { Props } from '../../dist/admin/components/forms/field-types/Email/types';
