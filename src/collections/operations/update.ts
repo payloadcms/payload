@@ -155,9 +155,9 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     req,
   });
 
-  // // /////////////////////////////////////
-  // // beforeValidate - Collection
-  // // /////////////////////////////////////
+  // /////////////////////////////////////
+  // beforeValidate - Collection
+  // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
     await priorHook;
@@ -205,7 +205,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     id,
     operation: 'update',
     req,
-    skipValidation: shouldSaveDraft,
+    skipValidation: shouldSaveDraft || data._status === 'draft',
   });
 
   // /////////////////////////////////////
