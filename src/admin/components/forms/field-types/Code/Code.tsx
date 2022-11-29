@@ -17,9 +17,10 @@ import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { code } from '../../../../../fields/validations';
 import { Props } from './types';
-import { useTheme } from '../../../utilities/Theme';
 
 import './index.scss';
+
+const baseClass = 'code-field';
 
 const Code: React.FC<Props> = (props) => {
   const {
@@ -65,8 +66,8 @@ const Code: React.FC<Props> = (props) => {
   });
 
   const classes = [
+    baseClass,
     'field-type',
-    'code',
     className,
     showError && 'error',
     readOnly && 'read-only',
@@ -90,7 +91,7 @@ const Code: React.FC<Props> = (props) => {
         required={required}
       />
       <Editor
-        className="input"
+        className={`${baseClass}__input`}
         id={`field-${path.replace(/\./gi, '__')}`}
         value={value as string || ''}
         onValueChange={readOnly ? () => null : setValue}
