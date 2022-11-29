@@ -64,16 +64,12 @@ const Code: React.FC<Props> = (props) => {
     condition,
   });
 
-
-  const { theme } = useTheme();
-
   const classes = [
     'field-type',
     'code',
     className,
     showError && 'error',
     readOnly && 'read-only',
-    theme && theme,
   ].filter(Boolean).join(' ');
 
   return (
@@ -94,14 +90,13 @@ const Code: React.FC<Props> = (props) => {
         required={required}
       />
       <Editor
+        className="input"
         id={`field-${path.replace(/\./gi, '__')}`}
         value={value as string || ''}
         onValueChange={readOnly ? () => null : setValue}
         highlight={highlighter}
         padding={25}
         style={{
-          backgroundColor: 'var(--theme-base-850)',
-          color: 'var(--theme-base-0)',
           fontFamily: '"Consolas", "Monaco", monospace',
           fontSize: 12,
           pointerEvents: readOnly ? 'none' : 'auto',

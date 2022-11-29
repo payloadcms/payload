@@ -4,6 +4,11 @@
   position: relative;
   margin-bottom: $baseline;
 
+  .input {
+    @include formInput();
+    height: unset;
+  }
+
   &.error {
     textarea {
       border: 1px solid var(--theme-error-500) !important;
@@ -66,7 +71,7 @@ pre[class*="language-"] {
   font-style: italic;
 }
 
-.dark {
+html[data-theme=dark] {
 
   :not(pre)>code[class*="language-"],
   pre[class*="language-"] {
@@ -158,7 +163,7 @@ pre[class*="language-"] {
   }
 }
 
-.light {
+html[data-theme=light] {
 
   .token.comment,
   .token.prolog,
