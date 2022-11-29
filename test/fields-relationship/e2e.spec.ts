@@ -185,7 +185,7 @@ describe('fields - relationship', () => {
     await page.goto(url.edit(docWithExistingRelations.id));
 
     // fill the first relation field
-    let field = page.locator('#field-relationship');
+    const field = page.locator('#field-relationship');
     await field.click({ delay: 100 });
     const options = page.locator('.rs__option');
     await options.nth(0).click();
@@ -309,14 +309,14 @@ describe('fields - relationship', () => {
       await page.locator('#field-relationHasMany + .pre-populate-field-ui button').click();
       await wait(300);
 
-      expect(await page.locator('#field-relationHasMany .rs__value-container > .rs__multi-value').count()).toEqual(15);
+      await expect(page.locator('#field-relationHasMany .rs__value-container > .rs__multi-value')).toHaveCount(15);
     });
 
     test('has many, many collections', async () => {
       await page.locator('#field-relationToManyHasMany + .pre-populate-field-ui button').click();
       await wait(300);
 
-      expect(await page.locator('#field-relationToManyHasMany .rs__value-container > .rs__multi-value').count()).toEqual(15);
+      await expect(page.locator('#field-relationToManyHasMany .rs__value-container > .rs__multi-value')).toHaveCount(15);
     });
   });
 });
