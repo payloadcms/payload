@@ -1,11 +1,11 @@
 import React, { useReducer, useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../utilities/Config';
-import { Props, Option, ValueWithRelation, GetResults } from './types';
+import { Props, ValueWithRelation, GetResults } from './types';
 import optionsReducer from './optionsReducer';
 import useDebounce from '../../../../../hooks/useDebounce';
 import ReactSelect from '../../../ReactSelect';
-import { Value } from '../../../ReactSelect/types';
+import { Option } from '../../../ReactSelect/types';
 import { PaginatedDocs } from '../../../../../../mongoose/types';
 
 import './index.scss';
@@ -201,7 +201,7 @@ const RelationshipField: React.FC<Props> = (props) => {
       if (hasMany) {
         const matchedOptions = findOptionsByValue();
 
-        (matchedOptions as Value[] || []).forEach((option, i) => {
+        (matchedOptions as Option[] || []).forEach((option, i) => {
           if (!option) {
             if (hasMultipleRelations) {
               addOptionByID(value[i].value, value[i].relationTo);
@@ -231,7 +231,7 @@ const RelationshipField: React.FC<Props> = (props) => {
     errorLoading && 'error-loading',
   ].filter(Boolean).join(' ');
 
-  const valueToRender = (findOptionsByValue() || value) as Value;
+  const valueToRender = (findOptionsByValue() || value) as Option;
 
   return (
     <div className={classes}>

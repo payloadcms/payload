@@ -12,14 +12,14 @@ import type {
   RelationTwo,
   RelationWithTitle,
 } from './config';
-import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationWithTitleSlug, slug } from './config';
+import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationUpdatedExternallySlug, relationWithTitleSlug, slug } from './collectionSlugs';
 import wait from '../../src/utilities/wait';
 
 const { beforeAll, beforeEach, describe } = test;
 
-let url: AdminUrlUtil;
 
 describe('fields - relationship', () => {
+  let url: AdminUrlUtil;
   let page: Page;
   let relationOneDoc: RelationOne;
   let anotherRelationOneDoc: RelationOne;
@@ -28,9 +28,11 @@ describe('fields - relationship', () => {
   let docWithExistingRelations: CollectionWithRelationships;
   let restrictedRelation: RelationRestricted;
   let relationWithTitle: RelationWithTitle;
+  let serverURL: string;
 
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(__dirname);
+    const { serverURL: serverURLFromConfig } = await initPayloadE2E(__dirname);
+    serverURL = serverURLFromConfig;
 
     url = new AdminUrlUtil(serverURL, slug);
 
@@ -110,10 +112,10 @@ describe('fields - relationship', () => {
 
     const options = page.locator('.rs__option');
 
-    await expect(options).toHaveCount(3); // None + two docs
+    await expect(options).toHaveCount(2); // two docs
 
     // Select a relationship
-    await options.nth(1).click();
+    await options.nth(0).click();
     await expect(field).toContainText(relationOneDoc.id);
 
     await saveDocAndAssert(page);
@@ -155,7 +157,7 @@ describe('fields - relationship', () => {
 
     const options = page.locator('.rs__option');
 
-    await expect(options).toHaveCount(4); // None + 3 docs
+    await expect(options).toHaveCount(3); // 3 docs
 
     // Add one relationship
     await options.locator(`text=${relationOneDoc.id}`).click();
@@ -177,6 +179,37 @@ describe('fields - relationship', () => {
     const field = page.locator('#field-relationship .rs__value-container');
 
     await expect(field).toHaveText(relationOneDoc.id);
+  });
+
+  test('should allow dynamic filterOptions', async () => {
+    await page.goto(url.edit(docWithExistingRelations.id));
+
+    // fill the first relation field
+    let field = page.locator('#field-relationship');
+    await field.click({ delay: 100 });
+    const options = page.locator('.rs__option');
+    await options.nth(0).click();
+    await expect(field).toContainText(relationOneDoc.id);
+
+    // then verify that the filtered field's options match
+    let filteredField = page.locator('#field-relationshipFiltered .react-select');
+    await filteredField.click({ delay: 100 });
+    const filteredOptions = filteredField.locator('.rs__option');
+    await expect(filteredOptions).toHaveCount(1); // one doc
+    await filteredOptions.nth(0).click();
+    await expect(filteredField).toContainText(relationOneDoc.id);
+
+    // change the first relation field
+    await field.click({ delay: 100 });
+    await options.nth(1).click();
+    await expect(field).toContainText(anotherRelationOneDoc.id);
+
+    // then verify that the filtered field's options match
+    filteredField = page.locator('#field-relationshipFiltered .react-select');
+    await filteredField.click({ delay: 100 });
+    await expect(filteredOptions).toHaveCount(2); // two options because the currently selected option is still there
+    await filteredOptions.nth(1).click();
+    await expect(filteredField).toContainText(anotherRelationOneDoc.id);
   });
 
   describe('existing relationships', () => {
@@ -204,7 +237,7 @@ describe('fields - relationship', () => {
       await field.click({ delay: 100 });
       const options = page.locator('.rs__option');
 
-      await expect(options).toHaveCount(2); // None + 1 Unitled ID
+      await expect(options).toHaveCount(1); // None + 1 Unitled ID
     });
 
     // test.todo('should paginate within the dropdown');
@@ -239,7 +272,7 @@ describe('fields - relationship', () => {
       await field.click({ delay: 100 });
       const options = page.locator('.rs__option');
 
-      await expect(options).toHaveCount(3); // None + 2 Doc
+      await expect(options).toHaveCount(2);
     });
 
     test('should show id on relation in list view', async () => {
@@ -261,6 +294,29 @@ describe('fields - relationship', () => {
       await wait(110);
       const relationship = page.locator('.row-1 .cell-relationshipWithTitle');
       await expect(relationship).toHaveText(relationWithTitle.name);
+    });
+  });
+
+  describe('externally update field', () => {
+    beforeAll(async () => {
+      url = new AdminUrlUtil(serverURL, relationUpdatedExternallySlug);
+      await page.goto(url.create);
+    });
+
+    test('has many, one collection', async () => {
+      await page.goto(url.create);
+
+      await page.locator('#field-relationHasMany + .pre-populate-field-ui button').click();
+      await wait(300);
+
+      expect(await page.locator('#field-relationHasMany .rs__value-container > .rs__multi-value').count()).toEqual(15);
+    });
+
+    test('has many, many collections', async () => {
+      await page.locator('#field-relationToManyHasMany + .pre-populate-field-ui button').click();
+      await wait(300);
+
+      expect(await page.locator('#field-relationToManyHasMany .rs__value-container > .rs__multi-value').count()).toEqual(15);
     });
   });
 });

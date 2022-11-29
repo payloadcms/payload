@@ -41,7 +41,6 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
 
     dispatchOptions({
       type: 'ADD',
-      hasMultipleRelations: Array.isArray(relationTo),
       collection: modalCollection,
       docs: [
         json.doc,

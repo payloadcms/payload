@@ -2,7 +2,7 @@
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
 import type { TFunction } from 'i18next';
-import { Operation, Where } from '../../types';
+import { Document, Operation, Where } from '../../types';
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
@@ -45,15 +45,15 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
 
 export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>) => boolean;
 
-export type FilterOptionsProps = {
+export type FilterOptionsProps<T = any> = {
   id: string | number,
   user: Partial<User>,
-  data: unknown,
+  data: T,
   siblingData: unknown,
   relationTo: string | string[],
 }
 
-export type FilterOptions = Where | ((options: FilterOptionsProps) => Where);
+export type FilterOptions<T = any> = Where | ((options: FilterOptionsProps<T>) => Where);
 
 type Admin = {
   position?: 'sidebar';
