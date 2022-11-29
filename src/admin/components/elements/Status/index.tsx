@@ -101,7 +101,7 @@ const Status: React.FC<Props> = () => {
       toast.success(json.message);
       getVersions();
     } else {
-      toast.error(t('unPublishingDocument'));
+      toast.error(t('error:unPublishingDocument'));
     }
 
     setProcessing(false);
