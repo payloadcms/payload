@@ -71,10 +71,10 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.fields = fields;
   contextRef.current.dispatchFields = dispatchFields;
 
-  const validateForm = useCallback(async (fieldsToValidate: any) => {
+  const validateForm = useCallback(async () => {
     const validatedFieldState = {};
     let isValid = true;
-    const data = fieldsToValidate || contextRef.current.getData();
+    const data = contextRef.current.getData();
 
     const validationPromises = Object.entries(contextRef.current.fields).map(async ([path, field]) => {
       const validatedField = {
@@ -108,7 +108,7 @@ const Form: React.FC<Props> = (props) => {
 
     await Promise.all(validationPromises);
 
-    if (!fieldsToValidate && !isDeepEqual(contextRef.current.fields, validatedFieldState)) {
+    if (!isDeepEqual(contextRef.current.fields, validatedFieldState)) {
       dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState });
     }
 
