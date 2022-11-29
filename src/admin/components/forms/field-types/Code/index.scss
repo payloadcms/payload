@@ -1,10 +1,10 @@
 @import '../../../../scss/styles.scss';
 
-.field-type.code {
+.code-field {
   position: relative;
   margin-bottom: $baseline;
 
-  .input {
+  &__input {
     @include formInput();
     height: unset;
   }
@@ -70,6 +70,8 @@ pre[class*="language-"] {
 .token.italic {
   font-style: italic;
 }
+
+// DARK
 
 html[data-theme=dark] {
 
@@ -162,6 +164,8 @@ html[data-theme=dark] {
     color: #fd971f;
   }
 }
+
+// LIGHT
 
 html[data-theme=light] {
 
