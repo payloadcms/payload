@@ -1,0 +1,32 @@
+@import '../../../scss/styles.scss';
+
+.doc-drawer {
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: base(2.5);
+  }
+
+  &__header-close {
+    svg {
+      width: base(2.5);
+      height: base(2.5);
+      position: relative;
+      top: base(-.5);
+      right: base(-.75);
+
+      .stroke {
+        stroke-width: .5px;
+      }
+    }
+  }
+
+  @include mid-break {
+    &__header-close {
+      svg {
+        top: base(-.75);
+      }
+    }
+  }
+}

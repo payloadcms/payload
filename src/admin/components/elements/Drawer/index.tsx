@@ -22,6 +22,7 @@ const formatDrawerSlug = ({
 
 export const DrawerToggler: React.FC<TogglerProps> = ({
   slug,
+  exactSlug,
   children,
 }) => {
   const { openModal } = useModal();
@@ -29,7 +30,7 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
 
   return (
     <button
-      onClick={() => openModal(formatDrawerSlug({ slug, depth: drawerDepth }))}
+      onClick={() => openModal(exactSlug ? slug : formatDrawerSlug({ slug, depth: drawerDepth }))}
       type="button"
     >
       {children}
@@ -39,13 +40,14 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
 
 export const Drawer: React.FC<Props> = ({
   slug,
+  exactSlug,
   children,
 }) => {
   const { toggleModal, isModalOpen } = useModal();
   const { breakpoints: { m: midBreak } } = useWindowInfo();
   const drawerDepth = useDrawerDepth();
 
-  const modalSlug = formatDrawerSlug({ slug, depth: drawerDepth });
+  const modalSlug = exactSlug ? slug : formatDrawerSlug({ slug, depth: drawerDepth });
   const isOpen = isModalOpen(modalSlug);
 
   return (
