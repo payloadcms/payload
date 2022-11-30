@@ -221,6 +221,18 @@ describe('Versions', () => {
         await payload.update({
           id: collectionLocalPostID,
           collection,
+          locale: 'en',
+          data: {
+            title: updatedTitle,
+          },
+          draft: true,
+        });
+
+        // second update to existing draft
+        await payload.update({
+          id: collectionLocalPostID,
+          collection,
+          locale: 'es',
           data: {
             title: updatedTitle,
           },
@@ -234,12 +246,14 @@ describe('Versions', () => {
 
         const draftPost = await payload.findByID({
           collection,
+          locale: 'all',
           id: collectionLocalPostID,
           draft: true,
         });
 
         expect(publishedPost.title).toBe(originalTitle);
-        expect(draftPost.title).toBe(updatedTitle);
+        expect(draftPost.title.en).toBe(updatedTitle);
+        expect(draftPost.title.es).toBe(updatedTitle);
       });
     });
   });
@@ -511,6 +525,16 @@ describe('Versions', () => {
 
         await payload.updateGlobal({
           slug: globalSlug,
+          locale: 'en',
+          data: {
+            title: updatedTitle,
+          },
+          draft: true,
+        });
+
+        await payload.updateGlobal({
+          slug: globalSlug,
+          locale: 'es',
           data: {
             title: updatedTitle,
           },
@@ -519,11 +543,13 @@ describe('Versions', () => {
 
         const updatedGlobal = await payload.findGlobal({
           slug: globalSlug,
+          locale: 'all',
           draft: true,
         });
 
         expect(publishedGlobal.title).toBe(originalTitle);
-        expect(updatedGlobal.title).toBe(updatedTitle);
+        expect(updatedGlobal.title.en).toBe(updatedTitle);
+        expect(updatedGlobal.title.es).toBe(updatedTitle);
       });
     });
   });

@@ -12,6 +12,7 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { PayloadRequest } from '../../express/types';
+import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion';
 
 type Args = {
   globalConfig: SanitizedGlobalConfig
@@ -82,12 +83,11 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  let global: any = await Model.findOne(query);
+  let global = await getLatestGlobalVersion({ payload, config: globalConfig, query });
   let globalJSON: Record<string, unknown> = {};
 
   if (global) {
-    globalJSON = global.toJSON({ virtuals: true });
-    const globalJSONString = JSON.stringify(globalJSON);
+    const globalJSONString = JSON.stringify(global);
     globalJSON = JSON.parse(globalJSONString);
 
     if (globalJSON._id) {
