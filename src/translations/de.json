@@ -233,7 +233,7 @@
     "requiresNoMoreThan": "Dieses Feld kann nicht mehr als {{count}} {{label}} enthalten.",
     "notValidDate": "\"{{value}}\" ist kein gültiges Datum.",
     "required": "Pflichtfeld",
-    "requiresAtLeast": "Dieses Feld muss mindestens {{minRows}} {{label}} enthalten.",
+    "requiresAtLeast": "Dieses Feld muss mindestens {{count}} {{label}} enthalten.",
     "requiresTwoNumbers": "Dieses Feld muss zwei Nummern enthalten.",
     "shorterThanMax": "Dieser Wert muss kürzer als die maximale Länge von {{maxLength}} sein.",
     "trueOrFalse": "Dieses Feld kann nur wahr oder falsch sein.",
