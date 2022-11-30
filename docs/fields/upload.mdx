@@ -63,3 +63,37 @@ const ExampleCollection: CollectionConfig = {
 }
 
 ```
+
+### Filtering relationship options
+
+Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both for validating input and filtering available relationships in the UI.
+
+The `filterOptions` property can either be a `Where` query directly, or a function that returns one. When using a function, it will be called with an argument object with the following properties:
+
+| Property      | Description  |
+| ------------- | -------------|
+| `relationTo`       | The `relationTo` to filter against (as defined on the field) |
+| `data`             | An object of the full collection or global document currently being edited |
+| `siblingData`      | An object of the document data limited to fields within the same parent to the field |
+| `id`               | The value of the collection `id`, will be `undefined` on create request |
+| `user`             | The currently authenticated user object |
+
+**Example:**
+
+```ts
+const relationshipField = {
+  name: 'image',
+  type: 'upload',
+  relationTo: 'media,
+  filterOptions: {
+    mimeType: { contains: 'image' },
+  },
+};
+```
+
+You can learn more about writing queries [here](/docs/queries/overview).
+
+<Banner type="warning">
+  <strong>Note:</strong><br/>
+  When a relationship field has both <strong>filterOptions</strong> and a custom <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong> unless you call the default relationship field validation function imported from <strong>payload/fields/validations</strong> in your validate function.
+</Banner>
