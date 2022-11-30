@@ -1,4 +1,9 @@
 export type Props = {
-  modalSlug: string
+  slug: string
+  children: React.ReactNode
+}
+
+export type TogglerProps = {
+  slug: string
   children: React.ReactNode
 }
