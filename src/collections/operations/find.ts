@@ -10,7 +10,6 @@ import { buildSortParam } from '../../mongoose/buildSortParam';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { findDocs } from './helpers/findDocs';
 
 export type Arguments = {
   collection: Collection
@@ -137,9 +136,9 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     locale,
   });
 
-  const paginatedDocs = await findDocs<T>(Model, query, {
+  const fallbackLimit = pagination ? 10 : 0;
+  const paginatedDocs = await Model.paginate(query, {
     page: page || 1,
-    limit: limit || 10,
     sort: {
       [sortProperty]: sortOrder,
     },
@@ -148,6 +147,10 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     useEstimatedCount,
     pagination,
     useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
+    options: {
+      // limit must be set here to avoid being ignored when paginate is false
+      limit: typeof limit === 'number' ? limit : fallbackLimit,
+    },
   });
 
   let result: PaginatedDocs<T> = {
