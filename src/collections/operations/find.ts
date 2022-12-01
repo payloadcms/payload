@@ -136,20 +136,22 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     locale,
   });
 
-  const fallbackLimit = pagination ? 10 : 0;
+  const usePagination = pagination && limit !== 0;
+  const limitToUse = limit ?? (usePagination ? 10 : 0);
   const paginatedDocs = await Model.paginate(query, {
     page: page || 1,
     sort: {
       [sortProperty]: sortOrder,
     },
+    limit: limitToUse,
     lean: true,
     leanWithId: true,
     useEstimatedCount,
-    pagination,
+    pagination: usePagination,
     useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
     options: {
-      // limit must be set here to avoid being ignored when paginate is false
-      limit: typeof limit === 'number' ? limit : fallbackLimit,
+      // limit must also be set here, it's ignored when pagination is false
+      limit: limitToUse,
     },
   });
 
