@@ -5,6 +5,7 @@ import { TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
 import find from '../operations/find';
 import { Where } from '../../types';
+import { isNumber } from '../../utilities/isNumber';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function findHandler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
@@ -24,9 +25,9 @@ export default async function findHandler<T extends TypeWithID = any>(req: Paylo
       collection: req.collection,
       where: req.query.where as Where, // This is a little shady
       page,
-      limit: Number(req.query.limit),
+      limit: isNumber(req.query.limit) ? Number(req.query.limit) : undefined,
       sort: req.query.sort as string,
-      depth: Number(req.query.depth),
+      depth: isNumber(req.query.depth) ? Number(req.query.depth) : undefined,
       draft: req.query.draft === 'true',
     });
 

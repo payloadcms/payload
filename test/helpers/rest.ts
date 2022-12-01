@@ -154,7 +154,11 @@ export class RESTClient {
     };
 
     const slug = args?.slug || this.defaultSlug;
-    const whereQuery = qs.stringify(args?.query ? { where: args.query } : {}, {
+    const whereQuery = qs.stringify({
+      ...(args?.query ? { where: args.query } : {}),
+      limit: args?.limit,
+      page: args?.page,
+    }, {
       addQueryPrefix: true,
     });
     const fetchURL = `${this.serverURL}/api/${slug}${whereQuery}`;

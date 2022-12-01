@@ -622,6 +622,40 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1);
         expect(result.docs).toEqual([post1]);
       });
+
+      describe('limit', () => {
+        beforeEach(async () => {
+          await mapAsync([...Array(50)], async (_, i) => createPost({ title: 'limit-test', number: i }));
+        });
+
+        it('should query a limited set of docs', async () => {
+          const { status, result } = await client.find<Post>({
+            limit: 15,
+            query: {
+              title: {
+                equals: 'limit-test',
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toHaveLength(15);
+        });
+
+        it('should query all docs when limit=0', async () => {
+          const { status, result } = await client.find<Post>({
+            limit: 0,
+            query: {
+              title: {
+                equals: 'limit-test',
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(50);
+        });
+      });
     });
   });
 });
