@@ -1,0 +1,20 @@
+@import '../../../../../scss/styles.scss';
+
+.multi-value-label {
+  display: flex;
+
+  &__drawer-toggler {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: base(0.25);
+
+    &:hover {
+      background-color: var(--theme-error-150);
+    }
+  }
+}

@@ -23,6 +23,7 @@ import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
 import { AddNewRelation } from './AddNew';
 import { findOptionsByValue } from './findOptionsByValue';
 import { GetFilterOptions } from './GetFilterOptions';
+import { MultiValueLabel } from './MultiValueLabel';
 
 import './index.scss';
 
@@ -368,6 +369,9 @@ const Relationship: React.FC<Props> = (props) => {
             isMulti={hasMany}
             isSortable={isSortable}
             isLoading={isLoading}
+            components={{
+              MultiValueLabel,
+            }}
             onMenuOpen={() => {
               if (!hasLoadedFirstPage) {
                 setIsLoading(true);

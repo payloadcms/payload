@@ -19,10 +19,12 @@ export type OptionGroup = {
   options: Option[]
 }
 
-export type Value = {
+export type ValueAsObject = {
   relationTo: string
   value: string | number
-} | string | number
+}
+
+export type Value = ValueAsObject | string | number
 
 type CLEAR = {
   type: 'CLEAR'
