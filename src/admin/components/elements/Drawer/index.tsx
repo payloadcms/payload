@@ -24,14 +24,22 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
   slug,
   exactSlug,
   children,
+  className,
+  onClick,
+  ...rest
 }) => {
   const { openModal } = useModal();
   const drawerDepth = useDrawerDepth();
 
   return (
     <button
-      onClick={() => openModal(exactSlug ? slug : formatDrawerSlug({ slug, depth: drawerDepth }))}
+      onClick={(e) => {
+        openModal(exactSlug ? slug : formatDrawerSlug({ slug, depth: drawerDepth }));
+        if (typeof onClick === 'function') onClick(e);
+      }}
       type="button"
+      className={className}
+      {...rest}
     >
       {children}
     </button>

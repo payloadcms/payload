@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { HTMLAttributes } from 'react';
 
 export type Props = {
   collection: string
@@ -7,8 +7,9 @@ export type Props = {
   customHeader?: React.ReactNode
 }
 
-export type TogglerProps = {
+export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
   collection: string
   id?: string
   children?: React.ReactNode
+  className?: string
 }
