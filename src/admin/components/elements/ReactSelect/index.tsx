@@ -1,6 +1,6 @@
 import React, { MouseEventHandler, useCallback } from 'react';
 import Select, {
-  components,
+  components as SelectComponents,
   MultiValueProps,
   Props as SelectProps,
 } from 'react-select';
@@ -14,14 +14,14 @@ import {
 } from 'react-sortable-hoc';
 import { useTranslation } from 'react-i18next';
 import { arrayMove } from '../../../../utilities/arrayMove';
-import { Props, Option } from './types';
+import { Props, Option as OptionType } from './types';
 import Chevron from '../../icons/Chevron';
 import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
 const SortableMultiValue = SortableElement(
-  (props: MultiValueProps<Option>) => {
+  (props: MultiValueProps<OptionType>) => {
     // this prevents the menu from being opened/closed when the user clicks
     // on a value to begin dragging it. ideally, detecting a click (instead of
     // a drag) would still focus the control and toggle the menu, but that
@@ -36,7 +36,7 @@ const SortableMultiValue = SortableElement(
     ].filter(Boolean).join(' ');
 
     return (
-      <components.MultiValue
+      <SelectComponents.MultiValue
         {...props}
         className={classes}
         innerProps={{ ...props.innerProps, onMouseDown }}
@@ -46,9 +46,9 @@ const SortableMultiValue = SortableElement(
 );
 
 
-const SortableMultiValueLabel = SortableHandle((props) => <components.MultiValueLabel {...props} />);
+const SortableMultiValueLabel = SortableHandle((props) => <SelectComponents.MultiValueLabel {...props} />);
 
-const SortableSelect = SortableContainer(Select) as React.ComponentClass<SelectProps<Option, true> & SortableContainerProps>;
+const SortableSelect = SortableContainer(Select) as React.ComponentClass<SelectProps<OptionType, true> & SortableContainerProps>;
 
 const ReactSelect: React.FC<Props> = (props) => {
   const { t, i18n } = useTranslation();
@@ -68,6 +68,7 @@ const ReactSelect: React.FC<Props> = (props) => {
     filterOption = undefined,
     isLoading,
     onMenuOpen,
+    components,
   } = props;
 
   const classes = [
@@ -84,7 +85,7 @@ const ReactSelect: React.FC<Props> = (props) => {
   }, []);
 
   const onSortEnd: SortEndHandler = useCallback(({ oldIndex, newIndex }) => {
-    onChange(arrayMove(value as Option[], oldIndex, newIndex));
+    onChange(arrayMove(value as OptionType[], oldIndex, newIndex));
   }, [onChange, value]);
 
   if (isMulti && isSortable) {
@@ -100,7 +101,7 @@ const ReactSelect: React.FC<Props> = (props) => {
         // react-select props:
         placeholder={getTranslation(placeholder, i18n)}
         {...props}
-        value={value as Option[]}
+        value={value as OptionType[]}
         onChange={onChange}
         disabled={disabled ? 'disabled' : undefined}
         className={classes}
@@ -111,14 +112,15 @@ const ReactSelect: React.FC<Props> = (props) => {
         isClearable={isClearable}
         isLoading={isLoading}
         onMenuOpen={onMenuOpen}
+        filterOption={filterOption}
         components={{
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore We're failing to provide a required index prop to SortableElement
           MultiValue: SortableMultiValue,
           MultiValueLabel: SortableMultiValueLabel,
           DropdownIndicator: Chevron,
+          ...components,
         }}
-        filterOption={filterOption}
       />
     );
   }
@@ -132,7 +134,6 @@ const ReactSelect: React.FC<Props> = (props) => {
       value={value}
       onChange={onChange}
       disabled={disabled ? 'disabled' : undefined}
-      components={{ DropdownIndicator: Chevron }}
       className={classes}
       classNamePrefix="rs"
       options={options}
@@ -140,6 +141,10 @@ const ReactSelect: React.FC<Props> = (props) => {
       isClearable={isClearable}
       filterOption={filterOption}
       onMenuOpen={onMenuOpen}
+      components={{
+        DropdownIndicator: Chevron,
+        ...components,
+      }}
     />
   );
 };
