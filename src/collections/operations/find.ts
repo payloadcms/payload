@@ -10,6 +10,7 @@ import { buildSortParam } from '../../mongoose/buildSortParam';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { findDocs } from './helpers/findDocs';
 
 export type Arguments = {
   collection: Collection
@@ -136,7 +137,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     locale,
   });
 
-  const optionsToExecute = {
+  const paginatedDocs = await findDocs<T>(Model, query, {
     page: page || 1,
     limit: limit || 10,
     sort: {
@@ -147,18 +148,16 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     useEstimatedCount,
     pagination,
     useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
-  };
+  });
 
-  const paginatedDocs = await Model.paginate(query, optionsToExecute);
-
-  let result = {
+  let result: PaginatedDocs<T> = {
     ...paginatedDocs,
     docs: paginatedDocs.docs.map((doc) => {
       const sanitizedDoc = JSON.parse(JSON.stringify(doc));
       sanitizedDoc.id = sanitizedDoc._id;
       return sanitizeInternalFields(sanitizedDoc);
     }),
-  } as PaginatedDocs<T>;
+  };
 
   // /////////////////////////////////////
   // Replace documents with drafts if available

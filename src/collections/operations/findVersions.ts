@@ -10,6 +10,7 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
+import { findDocs } from './helpers/findDocs';
 
 export type Arguments = {
   collection: Collection
@@ -98,7 +99,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
     locale,
   });
 
-  const optionsToExecute = {
+  const paginatedDocs = await findDocs<T>(VersionsModel, query, {
     page: page || 1,
     limit: limit || 10,
     sort: {
@@ -107,9 +108,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
     lean: true,
     leanWithId: true,
     useEstimatedCount,
-  };
-
-  const paginatedDocs = await VersionsModel.paginate(query, optionsToExecute);
+  });
 
   // /////////////////////////////////////
   // beforeRead - Collection

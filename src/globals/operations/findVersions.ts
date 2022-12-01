@@ -10,6 +10,7 @@ import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
+import { findDocs } from '../../collections/operations/helpers/findDocs';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -96,7 +97,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
     locale,
   });
 
-  const optionsToExecute = {
+  const paginatedDocs = await findDocs<T>(VersionsModel, query, {
     page: page || 1,
     limit: limit || 10,
     sort: {
@@ -105,9 +106,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
     lean: true,
     leanWithId: true,
     useEstimatedCount,
-  };
-
-  const paginatedDocs = await VersionsModel.paginate(query, optionsToExecute);
+  });
 
   // /////////////////////////////////////
   // afterRead - Fields
