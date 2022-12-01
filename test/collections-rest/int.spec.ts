@@ -639,7 +639,7 @@ describe('collections-rest', () => {
           });
 
           expect(status).toEqual(200);
-          expect(result.totalDocs).toEqual(15);
+          expect(result.docs).toHaveLength(15);
         });
 
         it('should query all docs when limit=0', async () => {

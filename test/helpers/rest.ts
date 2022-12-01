@@ -155,8 +155,9 @@ export class RESTClient {
 
     const slug = args?.slug || this.defaultSlug;
     const whereQuery = qs.stringify({
-      ...args,
       ...(args?.query ? { where: args.query } : {}),
+      limit: args?.limit,
+      page: args?.page,
     }, {
       addQueryPrefix: true,
     });
