@@ -100,7 +100,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
 
   const paginatedDocs = await VersionsModel.paginate(query, {
     page: page || 1,
-    limit: limit || 10,
+    limit: limit ?? 10,
     sort: {
       [sortProperty]: sortOrder,
     },
