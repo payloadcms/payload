@@ -1,0 +1,37 @@
+@import '../../../../scss/styles.scss';
+
+.single-value {
+  display: flex;
+  align-items: center;
+
+  .rs__single-value {
+    color: currentColor;
+    max-width: unset;
+    display: flex;
+    align-items: center;
+  }
+
+  &__drawer-toggler {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: base(0.25);
+
+    .icon {
+      width: base(0.75);
+      height: base(0.75);
+    }
+
+    &:hover {
+      background-color: var(--theme-error-150);
+    }
+  }
+
+  &__label {
+    flex-grow: 1;
+  }
+}

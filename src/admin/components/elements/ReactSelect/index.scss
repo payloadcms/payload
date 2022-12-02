@@ -9,16 +9,9 @@ div.react-select {
     flex-wrap: nowrap;
   }
 
-  .rs__indicators {
-    .arrow {
-      margin-left: base(.5);
-      transform: rotate(90deg);
-      width: base(.3);
-    }
-  }
-
   .rs__indicator {
     padding: 0px 4px;
+    cursor: pointer;
   }
 
   .rs__indicator-separator {
@@ -60,10 +53,6 @@ div.react-select {
     &--is-selected {
       background-color: var(--theme-elevation-300);
     }
-  }
-
-  .rs__single-value {
-    color: currentColor;
   }
 
   &--error {

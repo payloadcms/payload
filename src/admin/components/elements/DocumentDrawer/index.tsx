@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 import { Props, DocumentTogglerProps } from './types';
 import DefaultEdit from '../../views/collections/Edit/Default';
 import X from '../../icons/X';
@@ -41,10 +42,11 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   ...rest
 }) => {
   const drawerDepth = useDrawerDepth();
+  const drawerSlug = formatDocumentDrawerSlug({ collection, id, depth: drawerDepth, uuid });
 
   return (
     <DrawerToggler
-      slug={formatDocumentDrawerSlug({ collection, id, depth: drawerDepth, uuid })}
+      slug={drawerSlug}
       formatSlug={false}
       className={className}
       {...rest}
@@ -62,7 +64,7 @@ export const DocumentDrawer: React.FC<Props> = ({
   uuid,
 }) => {
   const { serverURL, routes: { api } } = useConfig();
-  const { toggleModal, isModalOpen } = useModal();
+  const { toggleModal, modalState, closeModal } = useModal();
   const locale = useLocale();
   const { permissions, user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
@@ -70,6 +72,7 @@ export const DocumentDrawer: React.FC<Props> = ({
   const drawerDepth = useDrawerDepth();
   const config = useConfig();
   const hasInitializedState = useRef(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [modalSlug] = useState<string>(() => formatDocumentDrawerSlug({
     collection,
     id,
@@ -107,11 +110,20 @@ export const DocumentDrawer: React.FC<Props> = ({
     hasInitializedState.current = true;
   }, [data, fields, id, user, locale, isLoadingDocument, t]);
 
+  useEffect(() => {
+    setIsOpen(Boolean(modalState[modalSlug]?.isOpen));
+  }, [modalState, modalSlug]);
+
+  useEffect(() => {
+    if (isOpen && isError) {
+      closeModal(modalSlug);
+      toast.error(data.errors[0].message);
+    }
+  }, [isError, t, isOpen, data, modalSlug, closeModal]);
+
   const modalAction = `${serverURL}${api}/${collection}?locale=${locale}&depth=0&fallback-locale=null`;
 
   if (isError) return null;
-
-  const isOpen = isModalOpen(modalSlug);
 
   if (isOpen) {
     // IMPORTANT: we must ensure that modals are not recursively rendered

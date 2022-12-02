@@ -21,6 +21,7 @@ import Chevron from '../../icons/Chevron';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { MultiValueLabel } from './MultiValueLabel';
 import { MultiValue } from './MultiValue';
+import { SingleValue } from './SingleValue';
 import { ValueContainer } from './ValueContainer';
 import './index.scss';
 
@@ -71,6 +72,7 @@ const SelectAdapter: React.FC<Props> = (props) => {
       }}
       components={{
         ValueContainer,
+        SingleValue,
         MultiValue,
         MultiValueLabel,
         DropdownIndicator: Chevron,

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useWindowInfo } from '@faceless-ui/window-info';
 import { Props, TogglerProps } from './types';
@@ -31,12 +31,14 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
   const { openModal } = useModal();
   const drawerDepth = useDrawerDepth();
 
+  const handleClick = useCallback((e) => {
+    openModal(formatSlug !== false ? formatDrawerSlug({ slug, depth: drawerDepth }) : slug);
+    if (typeof onClick === 'function') onClick(e);
+  }, [openModal, drawerDepth, slug, onClick, formatSlug]);
+
   return (
     <button
-      onClick={(e) => {
-        openModal(formatSlug !== false ? formatDrawerSlug({ slug, depth: drawerDepth }) : slug);
-        if (typeof onClick === 'function') onClick(e);
-      }}
+      onClick={handleClick}
       type="button"
       className={className}
       {...rest}
