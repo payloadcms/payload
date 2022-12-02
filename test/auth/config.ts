@@ -1,4 +1,5 @@
 import { buildConfig } from '../buildConfig';
+import { devUser } from '../credentials';
 
 export const slug = 'users';
 
@@ -33,8 +34,16 @@ export default buildConfig({
           saveToJWT: true,
           hasMany: true,
         },
-
       ],
     },
   ],
+  onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    });
+  },
 });

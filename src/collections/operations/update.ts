@@ -72,13 +72,15 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     autosave = false,
   } = args;
 
-  let { data } = args;
-
   if (!id) {
     throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST);
   }
 
+  let { data } = args;
+  const { password } = data;
   const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
+  const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft);
+  const lean = !shouldSavePassword;
 
   // /////////////////////////////////////
   // Access
@@ -109,12 +111,13 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  const doc = await getLatestCollectionVersion({ payload, collection, id, query });
+  const doc = await getLatestCollectionVersion({ payload, collection, id, query, lean });
 
   if (!doc && !hasWherePolicy) throw new NotFound(t);
   if (!doc && hasWherePolicy) throw new Forbidden(t);
 
-  const docWithLocales: Document = JSON.parse(JSON.stringify(doc));
+  let docWithLocales: Document = JSON.stringify(lean ? doc : doc.toJSON({ virtuals: true }));
+  docWithLocales = JSON.parse(docWithLocales);
 
   const originalDoc = await afterRead({
     depth: 0,
@@ -211,9 +214,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // Handle potential password update
   // /////////////////////////////////////
 
-  const { password } = data;
-
-  if (password && collectionConfig.auth && !shouldSaveDraft) {
+  if (shouldSavePassword) {
     await doc.setPassword(password as string);
     await doc.save();
     delete data.password;
