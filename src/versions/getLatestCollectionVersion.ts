@@ -7,6 +7,7 @@ type Args = {
   collection: Collection,
   query: Record<string, unknown>
   id: string | number
+  lean?: boolean
 }
 
 export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
@@ -17,6 +18,7 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   },
   query,
   id,
+  lean = true,
 }: Args): Promise<T> => {
   let version;
   if (config.versions?.drafts) {
@@ -24,10 +26,10 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       parent: id,
     }, {}, {
       sort: { updatedAt: 'desc' },
-      lean: true,
+      lean,
     });
   }
-  const collection = await Model.findOne(query).lean() as Document;
+  const collection = await Model.findOne(query, {}, { lean }) as Document;
   version = await version;
   if (!version || version.updatedAt < collection.updatedAt) {
     return collection;
