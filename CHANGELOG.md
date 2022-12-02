@@ -1,5 +1,12 @@
 
 
+## [1.2.3](https://github.com/payloadcms/payload/compare/v1.2.2...v1.2.3) (2022-12-02)
+
+
+### Bug Fixes
+
+* reset password regression ([#1574](https://github.com/payloadcms/payload/issues/1574)) ([396ea0b](https://github.com/payloadcms/payload/commit/396ea0bd53dc9e1ae1e348d6fe1eb3c36232b35b))
+
 ## [1.2.2](https://github.com/payloadcms/payload/compare/v1.2.1...v1.2.2) (2022-12-02)
 
 
