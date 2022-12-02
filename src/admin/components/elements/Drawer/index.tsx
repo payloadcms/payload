@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useWindowInfo } from '@faceless-ui/window-info';
 import { Props, TogglerProps } from './types';
@@ -22,7 +22,7 @@ const formatDrawerSlug = ({
 
 export const DrawerToggler: React.FC<TogglerProps> = ({
   slug,
-  exactSlug,
+  formatSlug,
   children,
   className,
   onClick,
@@ -34,7 +34,7 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
   return (
     <button
       onClick={(e) => {
-        openModal(exactSlug ? slug : formatDrawerSlug({ slug, depth: drawerDepth }));
+        openModal(formatSlug !== false ? formatDrawerSlug({ slug, depth: drawerDepth }) : slug);
         if (typeof onClick === 'function') onClick(e);
       }}
       type="button"
@@ -48,15 +48,18 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
 
 export const Drawer: React.FC<Props> = ({
   slug,
-  exactSlug,
+  formatSlug,
   children,
 }) => {
-  const { toggleModal, isModalOpen } = useModal();
+  const { toggleModal, modalState } = useModal();
   const { breakpoints: { m: midBreak } } = useWindowInfo();
   const drawerDepth = useDrawerDepth();
+  const [isOpen, setIsOpen] = useState(false);
+  const [modalSlug] = useState(() => (formatSlug !== false ? formatDrawerSlug({ slug, depth: drawerDepth }) : slug));
 
-  const modalSlug = exactSlug ? slug : formatDrawerSlug({ slug, depth: drawerDepth });
-  const isOpen = isModalOpen(modalSlug);
+  useEffect(() => {
+    setIsOpen(modalState[modalSlug].isOpen);
+  }, [modalSlug, modalState]);
 
   return (
     <Modal

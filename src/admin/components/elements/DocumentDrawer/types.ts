@@ -5,6 +5,7 @@ export type Props = {
   id?: string
   onSave?: (json: Record<string, unknown>) => void
   customHeader?: React.ReactNode
+  uuid?: string
 }
 
 export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
@@ -12,4 +13,5 @@ export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
   id?: string
   children?: React.ReactNode
   className?: string
+  uuid?: string
 }

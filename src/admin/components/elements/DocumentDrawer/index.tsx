@@ -20,29 +20,32 @@ import './index.scss';
 
 const baseClass = 'doc-drawer';
 
-const formatDrawerSlug = ({
+const formatDocumentDrawerSlug = ({
   collection,
   id,
   depth,
+  uuid,
 }: {
   collection: string,
   id: string,
   depth: number,
-}) => `doc-${collection}-${id}-lvl-${depth}`;
+  uuid?: string, // supply when creating a new document and no id is available
+}) => `doc-${collection}-lvl-${depth}-${id || uuid || '0'}`;
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   id,
   collection,
   children,
   className,
+  uuid,
   ...rest
 }) => {
   const drawerDepth = useDrawerDepth();
 
   return (
     <DrawerToggler
-      slug={formatDrawerSlug({ collection, id, depth: drawerDepth })}
-      exactSlug
+      slug={formatDocumentDrawerSlug({ collection, id, depth: drawerDepth, uuid })}
+      formatSlug={false}
       className={className}
       {...rest}
     >
@@ -56,17 +59,23 @@ export const DocumentDrawer: React.FC<Props> = ({
   id,
   onSave,
   customHeader,
+  uuid,
 }) => {
   const { serverURL, routes: { api } } = useConfig();
   const { toggleModal, isModalOpen } = useModal();
   const locale = useLocale();
   const { permissions, user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
-  const { t, i18n } = useTranslation('fields');
+  const { t, i18n } = useTranslation(['fields', 'general']);
   const drawerDepth = useDrawerDepth();
   const config = useConfig();
-  const [modalSlug] = useState<string>(() => formatDrawerSlug({ collection, id, depth: drawerDepth }));
   const hasInitializedState = useRef(false);
+  const [modalSlug] = useState<string>(() => formatDocumentDrawerSlug({
+    collection,
+    id,
+    depth: drawerDepth,
+    uuid,
+  }));
 
   const collectionConfig = config.collections.find((col) => col.slug === collection);
   const [fields] = useState(() => formatFields(collectionConfig, true));
@@ -82,7 +91,15 @@ export const DocumentDrawer: React.FC<Props> = ({
     }
 
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data, user, operation: id ? 'update' : 'create', id, locale, t });
+      const state = await buildStateFromSchema({
+        fieldSchema: fields,
+        data,
+        user,
+        operation: id ? 'update' : 'create',
+        id,
+        locale,
+        t,
+      });
       setInitialState(state);
     };
 
@@ -96,14 +113,14 @@ export const DocumentDrawer: React.FC<Props> = ({
 
   const isOpen = isModalOpen(modalSlug);
 
-  return (
-    <Drawer
-      slug={modalSlug}
-      exactSlug
-    >
-      {isOpen && (
-      // IMPORTANT: we must ensure that modals are not recursively rendered
-      // to do this, do not render the document until the modal is open
+  if (isOpen) {
+    // IMPORTANT: we must ensure that modals are not recursively rendered
+    // to do this, do not render the drawer until it is open
+    return (
+      <Drawer
+        slug={modalSlug}
+        formatSlug={false}
+      >
         <DocumentInfoProvider collection={collectionConfig}>
           <RenderCustomComponent
             DefaultComponent={DefaultEdit}
@@ -125,7 +142,7 @@ export const DocumentDrawer: React.FC<Props> = ({
               customHeader: (
                 <div className={`${baseClass}__header`}>
                   <h2>
-                    {!customHeader ? t(!id ? 'addNewLabel' : 'editLabel', { label: getTranslation(collectionConfig.labels.singular, i18n) }) : customHeader}
+                    {!customHeader ? t(!id ? 'fields:addNewLabel' : 'general:editLabel', { label: getTranslation(collectionConfig.labels.singular, i18n) }) : customHeader}
                   </h2>
                   <Button
                     buttonStyle="none"
@@ -139,9 +156,10 @@ export const DocumentDrawer: React.FC<Props> = ({
             }}
           />
         </DocumentInfoProvider>
-      )}
-    </Drawer>
-  );
+      </Drawer>
+    );
+  }
+  return null;
 };
 
 export type IDocumentDrawerContext = {

@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useId, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import Button from '../../../../elements/Button';
@@ -27,6 +27,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
   const editDepth = useEditDepth();
   const { t, i18n } = useTranslation('fields');
   const [showTooltip, setShowTooltip] = useState(false);
+  const uuid = useId();
 
   const modalSlug = `${path}-add-modal-depth-${editDepth}`;
 
@@ -86,22 +87,22 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
           <DocumentDrawerToggler
             className={`${baseClass}__add-button`}
             collection={relatedCollections[0].slug}
+            uuid={uuid}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           >
             {showTooltip && (
-            <Tooltip className={`${baseClass}__tooltip`}>
-              {t('addNewLabel', { label: relatedCollections[0].labels.singular })}
-            </Tooltip>
+              <Tooltip className={`${baseClass}__tooltip`}>
+                {t('addNewLabel', { label: relatedCollections[0].labels.singular })}
+              </Tooltip>
             )}
             <Plus />
           </DocumentDrawerToggler>
-          {relatedCollections[0] && (
-            <DocumentDrawer
-              collection={relatedCollections[0].slug}
-              onSave={onSave}
-            />
-          )}
+          <DocumentDrawer
+            collection={relatedCollections[0].slug}
+            uuid={uuid}
+            onSave={onSave}
+          />
         </Fragment>
       )}
       {relatedCollections.length > 1 && (
@@ -127,6 +128,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
                       <li key={relatedCollection.slug}>
                         <DocumentDrawerToggler
                           collection={relatedCollection.slug}
+                          uuid={uuid}
                           className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
                           onClick={() => {
                             closePopup();
@@ -144,12 +146,19 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
               </ul>
             )}
           />
-          {selectedCollection && (
-            <DocumentDrawer
-              collection={selectedCollection.slug}
-              onSave={onSave}
-            />
-          )}
+          {relatedCollections.map((relatedCollection, index) => {
+            if (permissions.collections[relatedCollection.slug].create.permission) {
+              return (
+                <DocumentDrawer
+                  key={index}
+                  collection={relatedCollection.slug}
+                  uuid={uuid}
+                  onSave={onSave}
+                />
+              );
+            }
+            return null;
+          })}
         </Fragment>
       )}
     </div>
