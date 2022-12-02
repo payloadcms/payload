@@ -25,7 +25,7 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 | **`filterOptions`**  | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options). |
 | **`hasMany`**        | Boolean when, if set to `true`, allows this field to have many relations instead of only one. |
 | **`maxDepth`**       | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth) |
-| **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type. |
+| **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language. |
 | **`unique`**         | Enforce that each entry in the Collection has a unique value for this field. |
 | **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
 | **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
