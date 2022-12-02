@@ -6,24 +6,7 @@ div.react-select {
     height: auto;
     padding-top: base(.25);
     padding-bottom: base(.25);
-  }
-
-  .rs__value-container {
-    padding: base(.25) 0;
-    min-height: base(1.5);
-
-    >* {
-      margin-top: 0;
-      margin-bottom: 0;
-      padding-top: 0;
-      padding-bottom: 0;
-    }
-
-    &--is-multi {
-      margin-left: - base(.25);
-      padding-top: 0;
-      padding-bottom: 0;
-    }
+    flex-wrap: nowrap;
   }
 
   .rs__indicators {
@@ -81,34 +64,6 @@ div.react-select {
 
   .rs__single-value {
     color: currentColor;
-  }
-
-  .rs__multi-value {
-    padding: 0;
-    background: transparent;
-    border: $style-stroke-width-s solid var(--theme-elevation-800);
-    line-height: calc(#{$baseline} - #{$style-stroke-width-s * 2});
-    margin: base(.25) base(.5) base(.25) 0;
-
-    &.draggable {
-      cursor: grab;
-    }
-  }
-
-  .rs__multi-value__label {
-    padding: 0 base(.125) 0 base(.25);
-    max-width: 150px;
-    color: currentColor;
-  }
-
-  .rs__multi-value__remove {
-    padding: 0 base(.125);
-    cursor: pointer;
-
-    &:hover {
-      color: var(--theme-elevation-800);
-      background: var(--theme-error-150);
-    }
   }
 
   &--error {

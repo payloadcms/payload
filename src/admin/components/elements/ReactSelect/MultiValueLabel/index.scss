@@ -1,4 +1,4 @@
-@import '../../../../../scss/styles.scss';
+@import '../../../../scss/styles.scss';
 
 .multi-value-label {
   display: flex;
@@ -13,8 +13,24 @@
     justify-content: center;
     margin-left: base(0.25);
 
+    .icon {
+      width: base(0.75);
+      height: base(0.75);
+    }
+
     &:hover {
       background-color: var(--theme-error-150);
+    }
+  }
+
+  &__label {
+    padding: 0 base(.125) 0 base(.25);
+    max-width: 150px;
+    color: currentColor;
+
+    > * {
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
   }
 }

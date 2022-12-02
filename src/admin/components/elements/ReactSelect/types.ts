@@ -1,3 +1,5 @@
+import { Ref } from 'react';
+
 export type Option = {
   [key: string]: unknown
   value: unknown
@@ -9,6 +11,7 @@ export type OptionGroup = {
 }
 
 export type Props = {
+  droppableRef?: Ref<HTMLElement>
   className?: string
   value?: Option | Option[],
   onChange?: (value: any) => void, // eslint-disable-line @typescript-eslint/no-explicit-any
