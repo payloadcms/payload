@@ -5,7 +5,7 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
-import { hasWhereAccessResult, UserDocument } from '../../auth/types';
+import { hasWhereAccessResult } from '../../auth/types';
 import { saveCollectionDraft } from '../../versions/drafts/saveCollectionDraft';
 import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
 import { uploadFiles } from '../../uploads/uploadFiles';
@@ -16,6 +16,7 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 
 export type Arguments = {
   collection: Collection
@@ -108,14 +109,12 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  const doc = await Model.findOne(query) as UserDocument;
+  const doc = await getLatestCollectionVersion({ payload, collection, id, query });
 
   if (!doc && !hasWherePolicy) throw new NotFound(t);
   if (!doc && hasWherePolicy) throw new Forbidden(t);
 
-  let docWithLocales: Document = doc.toJSON({ virtuals: true });
-  docWithLocales = JSON.stringify(docWithLocales);
-  docWithLocales = JSON.parse(docWithLocales);
+  const docWithLocales: Document = JSON.parse(JSON.stringify(doc));
 
   const originalDoc = await afterRead({
     depth: 0,
