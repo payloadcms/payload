@@ -44,8 +44,12 @@ export type GlobalPermission = {
 
 export type Permissions = {
   canAccessAdmin: boolean
-  collections: CollectionPermission[]
-  globals?: GlobalPermission[]
+  collections: {
+    [collectionSlug: string]: CollectionPermission
+  }
+  globals?: {
+    [globalSlug: string]: GlobalPermission
+  }
 }
 
 export type User = {
