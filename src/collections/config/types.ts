@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
-import { PaginateModel } from 'mongoose';
+import { Model, PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
 import { Access, GeneratePreviewURL, EntityDescription, Endpoint } from '../../config/types';
@@ -17,7 +17,7 @@ interface PassportLocalModel {
   authenticate: any
 }
 
-export interface CollectionModel extends PaginateModel<any>, PassportLocalModel {
+export interface CollectionModel extends Model<any>, PaginateModel<any>, PassportLocalModel {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
 }
 
