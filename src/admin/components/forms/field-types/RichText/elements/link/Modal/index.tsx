@@ -1,5 +1,6 @@
 import { Modal } from '@faceless-ui/modal';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { MinimalTemplate } from '../../../../../..';
 import Button from '../../../../../../elements/Button';
 import X from '../../../../../../icons/X';
@@ -20,6 +21,8 @@ export const EditModal: React.FC<Props> = ({
   fieldSchema,
   modalSlug,
 }) => {
+  const { t } = useTranslation('fields');
+
   return (
     <Modal
       slug={modalSlug}
@@ -27,7 +30,7 @@ export const EditModal: React.FC<Props> = ({
     >
       <MinimalTemplate className={`${baseClass}__template`}>
         <header className={`${baseClass}__header`}>
-          <h3>Edit Link</h3>
+          <h3>{t('editLink')}</h3>
           <Button
             buttonStyle="none"
             onClick={close}
@@ -46,7 +49,7 @@ export const EditModal: React.FC<Props> = ({
             forceRender
           />
           <FormSubmit>
-            Confirm
+            {t('general:submit')}
           </FormSubmit>
         </Form>
       </MinimalTemplate>
