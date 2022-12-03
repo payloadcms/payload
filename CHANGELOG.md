@@ -1,5 +1,12 @@
 
 
+## [1.2.4](https://github.com/payloadcms/payload/compare/v1.2.3...v1.2.4) (2022-12-03)
+
+
+### Bug Fixes
+
+* missing translation richText link modal ([#1573](https://github.com/payloadcms/payload/issues/1573)) ([2dcada1](https://github.com/payloadcms/payload/commit/2dcada199c21bee97eca88aa6bc8ba1bc2b45e7c))
+
 ## [1.2.3](https://github.com/payloadcms/payload/compare/v1.2.2...v1.2.3) (2022-12-02)
 
 
