@@ -101,6 +101,7 @@ const Auth: React.FC<Props> = (props) => {
       )}
       {(!changingPassword && !requirePassword) && (
         <Button
+          id="change-password"
           size="small"
           buttonStyle="secondary"
           onClick={() => handleChangePassword(true)}

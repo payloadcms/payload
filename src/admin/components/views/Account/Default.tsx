@@ -138,7 +138,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
                       data={data}
                     />
                     {hasSavePermission && (
-                    <FormSubmit>{t('general:save')}</FormSubmit>
+                    <FormSubmit buttonId="action-save">{t('general:save')}</FormSubmit>
                     )}
                   </div>
                   <div className={`${baseClass}__sidebar-fields`}>

@@ -1,5 +1,50 @@
 
 
+## [1.2.3](https://github.com/payloadcms/payload/compare/v1.2.2...v1.2.3) (2022-12-02)
+
+
+### Bug Fixes
+
+* reset password regression ([#1574](https://github.com/payloadcms/payload/issues/1574)) ([396ea0b](https://github.com/payloadcms/payload/commit/396ea0bd53dc9e1ae1e348d6fe1eb3c36232b35b))
+
+## [1.2.2](https://github.com/payloadcms/payload/compare/v1.2.1...v1.2.2) (2022-12-02)
+
+
+### Bug Fixes
+
+* adds contain operators for text/email/radio fields ([4c37af6](https://github.com/payloadcms/payload/commit/4c37af6f10dcfd77b5aec963bc5f84a178942143))
+* adjusts how limit is set, both in options and paginates limit ([a718010](https://github.com/payloadcms/payload/commit/a71801006cbc4b989d5057a5f04e8e8e0a6dbeed))
+* aligns mongoose PaginatedDocs type with actual lib type ([dce2081](https://github.com/payloadcms/payload/commit/dce208166337a8e47cc41301c9c5be0854199eaa))
+* allows for form controlled relationship fields to be populated ([e4435bb](https://github.com/payloadcms/payload/commit/e4435bb8bd13fd7122124fb6e171f4bd1cce819c))
+* allows for limit bypass on version find operations ([891f00d](https://github.com/payloadcms/payload/commit/891f00d05cd57d9387dd25be81daa3de99e315ed))
+* blockName grows in all browsers ([03c2ab5](https://github.com/payloadcms/payload/commit/03c2ab52a89817e94ec9a7b4339e807d995e04f6))
+* corrects skipValidation ([e6f1c6f](https://github.com/payloadcms/payload/commit/e6f1c6fc7bb56fe5a858b405c3bf799a46ac57f4))
+* dynamic relationship filterOptions ([99c1f41](https://github.com/payloadcms/payload/commit/99c1f41e306a11547965fd938fa5607787243003))
+* ensures enums cannot query on partial matches ([ec51929](https://github.com/payloadcms/payload/commit/ec51929b1af0b2c1138aa315d106b52f7e771779))
+* german translation optimizations ([#1485](https://github.com/payloadcms/payload/issues/1485)) ([e9d2163](https://github.com/payloadcms/payload/commit/e9d21636011ac084fa26ffbea199fc766fe19b25))
+* handle multiple locales in relationship population ([#1452](https://github.com/payloadcms/payload/issues/1452)) ([04c689c](https://github.com/payloadcms/payload/commit/04c689c5b04bc91020eb682b97721eba213836d2))
+* **i18n:** requiresAtLeast variable in de.json ([#1556](https://github.com/payloadcms/payload/issues/1556)) ([47fd0d9](https://github.com/payloadcms/payload/commit/47fd0d9ec4aa62335d505a0bfba0305355a318ca))
+* ignore validation when unpublishing, do not allow restore with invalid form state ([77ab542](https://github.com/payloadcms/payload/commit/77ab54243ab1857f4f430be4f8c4dc51e15f94ca))
+* indexSortableFields timestamp fields [#1506](https://github.com/payloadcms/payload/issues/1506) ([#1537](https://github.com/payloadcms/payload/issues/1537)) ([7aada3c](https://github.com/payloadcms/payload/commit/7aada3c746603b91bbb4fadf953f36e23fba5121))
+* infinite rerenders, accounts for hasMany false ([16d00e8](https://github.com/payloadcms/payload/commit/16d00e87c2f8b63e695e46ccbf279ad90621dc17))
+* moves relationship field useEffect into async reducer action ([54ef40a](https://github.com/payloadcms/payload/commit/54ef40a335905f7295f847c68762f7fe06bccc30))
+* moves sharp types from devDeps to deps ([b3d526b](https://github.com/payloadcms/payload/commit/b3d526b59a275a1f58a76322a588ba8a6370f26b))
+* reverts async reducer and resolves infinite effect ([a9da81f](https://github.com/payloadcms/payload/commit/a9da81f18cf9e6eba67187a3a2735b267949e0ae))
+* sanitize number query params before passing to find operation ([c8d1b9f](https://github.com/payloadcms/payload/commit/c8d1b9f88af62ad1ab927ca3d035fa4c031989f1))
+* translate select field option labels ([#1476](https://github.com/payloadcms/payload/issues/1476)) ([3a9dc9e](https://github.com/payloadcms/payload/commit/3a9dc9ef68374692c3314651bee6e1b00ae55f17))
+* update drafts includes latest version changes ([48989d0](https://github.com/payloadcms/payload/commit/48989d0f6ed086dc60dc94165a4e0ca8120f9b1a))
+* updates code field css ([3eebd66](https://github.com/payloadcms/payload/commit/3eebd6613f66f3cac38e00cfd94e80b2999cf791))
+* updates syntax colors for light theme ([dbfe7ca](https://github.com/payloadcms/payload/commit/dbfe7ca6e61e3a93baabc378f52835af9e53fd38))
+* uses baseClass in code field ([d03f0ae](https://github.com/payloadcms/payload/commit/d03f0aef8423597aceb36ddbbb1cc63033d0066d))
+
+
+### Features
+
+* decouples limit from pagination, allows for no limit query ([f7ce0c6](https://github.com/payloadcms/payload/commit/f7ce0c615d76035ee48ef32047613ab1415deb44))
+* improve typescript comments ([#1467](https://github.com/payloadcms/payload/issues/1467)) ([5bd8657](https://github.com/payloadcms/payload/commit/5bd86571cada5791003bbfa84183f5b300649533))
+* log email transport error messages ([#1469](https://github.com/payloadcms/payload/issues/1469)) ([a90a1a9](https://github.com/payloadcms/payload/commit/a90a1a9e19bb54eb6d88129b5e2cb6483e22db61))
+* removes theme provider and updates background for code fields ([1a6c9a3](https://github.com/payloadcms/payload/commit/1a6c9a3e181930a6f45027fecc5313e8d7228c71))
+
 ## [1.2.1](https://github.com/payloadcms/payload/compare/v1.2.0...v1.2.1) (2022-11-22)
 
 
