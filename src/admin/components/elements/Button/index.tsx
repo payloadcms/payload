@@ -53,7 +53,7 @@ const Button: React.FC<Props> = (props) => {
     className,
     id,
     type = 'button',
-    el,
+    el = 'button',
     to,
     url,
     children,
@@ -130,8 +130,10 @@ const Button: React.FC<Props> = (props) => {
       );
 
     default:
+      const Tag = el; // eslint-disable-line no-case-declarations
+
       return (
-        <button
+        <Tag
           type="submit"
           {...buttonProps}
         >
@@ -141,7 +143,7 @@ const Button: React.FC<Props> = (props) => {
           >
             {children}
           </ButtonContents>
-        </button>
+        </Tag>
       );
   }
 };
