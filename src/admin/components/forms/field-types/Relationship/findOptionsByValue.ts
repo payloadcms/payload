@@ -13,13 +13,15 @@ export const findOptionsByValue = ({ value, options }: Args): Option | Option[] 
         let matchedOption: Option;
 
         options.forEach((optGroup) => {
-          matchedOption = optGroup.options.find((option) => {
-            if (typeof val === 'object') {
-              return option.value === val.value && option.relationTo === val.relationTo;
-            }
+          if (!matchedOption) {
+            matchedOption = optGroup.options.find((option) => {
+              if (typeof val === 'object') {
+                return option.value === val.value && option.relationTo === val.relationTo;
+              }
 
-            return val === option.value;
-          });
+              return val === option.value;
+            });
+          }
         });
 
         return matchedOption;
@@ -29,13 +31,14 @@ export const findOptionsByValue = ({ value, options }: Args): Option | Option[] 
     let matchedOption: Option;
 
     options.forEach((optGroup) => {
-      matchedOption = optGroup.options.find((option) => {
-        if (typeof value === 'object') {
-          return option.value === value.value && option.relationTo === value.relationTo;
-        }
-
-        return value === option.value;
-      });
+      if (!matchedOption) {
+        matchedOption = optGroup.options.find((option) => {
+          if (typeof value === 'object') {
+            return option.value === value.value && option.relationTo === value.relationTo;
+          }
+          return value === option.value;
+        });
+      }
     });
 
     return matchedOption;
