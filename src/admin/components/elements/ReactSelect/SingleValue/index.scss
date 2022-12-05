@@ -26,6 +26,10 @@
       height: base(0.75);
     }
 
+    &:focus {
+      outline: none;
+    }
+
     &:hover {
       background-color: var(--theme-error-150);
     }

@@ -33,6 +33,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
                 uuid={uuid}
                 className={`${baseClass}__drawer-toggler`}
                 aria-label={`Edit ${label}`}
+                onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
               >
                 <Edit />
               </DocumentDrawerToggler>
