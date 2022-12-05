@@ -4,6 +4,7 @@ import { useDocumentDrawer } from '../../DocumentDrawer';
 import Edit from '../../../icons/Edit';
 import { Option } from '../../../forms/field-types/Relationship/types';
 import './index.scss';
+import { useDrawerDepth } from '../../Drawer';
 
 const baseClass = 'single-value';
 
@@ -17,7 +18,8 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
     children,
   } = props;
 
-  const { DocumentDrawer, DocumentDrawerToggler } = useDocumentDrawer();
+  const drawerDepth = useDrawerDepth();
+  const { DocumentDrawer, DocumentDrawerToggler, formatDocumentDrawerSlug } = useDocumentDrawer();
   const uuid = useId();
 
   return (
@@ -43,6 +45,13 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
       </div>
       {relationTo && (
         <DocumentDrawer
+          // use `key` to force the drawer to re-mount when the value changes
+          key={formatDocumentDrawerSlug({
+            collection: relationTo,
+            id: value.toString(),
+            depth: drawerDepth,
+            uuid,
+          })}
           collection={relationTo}
           id={value.toString()}
           uuid={uuid}

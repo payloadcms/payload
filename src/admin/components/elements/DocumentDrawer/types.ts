@@ -15,3 +15,14 @@ export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
   className?: string
   uuid?: string
 }
+
+export type IDocumentDrawerContext = {
+  DocumentDrawer: React.FC<Props>,
+  DocumentDrawerToggler: React.FC<DocumentTogglerProps>
+  formatDocumentDrawerSlug: (props: {
+    collection: string,
+    id: string,
+    depth: number,
+    uuid?: string,
+  }) => string,
+}

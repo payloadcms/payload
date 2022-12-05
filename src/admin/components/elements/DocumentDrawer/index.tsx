@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import { Props, DocumentTogglerProps } from './types';
+import { Props, DocumentTogglerProps, IDocumentDrawerContext } from './types';
 import DefaultEdit from '../../views/collections/Edit/Default';
 import X from '../../icons/X';
 import { Fields } from '../../forms/Form/types';
@@ -174,14 +174,10 @@ export const DocumentDrawer: React.FC<Props> = ({
   return null;
 };
 
-export type IDocumentDrawerContext = {
-  DocumentDrawer: React.FC<Props>,
-  DocumentDrawerToggler: React.FC<DocumentTogglerProps>
-}
-
 export const DocumentDrawerContext = createContext({
   DocumentDrawer,
   DocumentDrawerToggler,
+  formatDocumentDrawerSlug,
 });
 
 export const useDocumentDrawer = (): IDocumentDrawerContext => useContext(DocumentDrawerContext);
