@@ -6,6 +6,7 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import findVersions from '../operations/findVersions';
 import { Where } from '../../types';
+import { isNumber } from '../../utilities/isNumber';
 
 export default function findVersionsHandler(global: SanitizedGlobalConfig) {
   return async function handler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
@@ -25,9 +26,9 @@ export default function findVersionsHandler(global: SanitizedGlobalConfig) {
         globalConfig: global,
         where: req.query.where as Where,
         page,
-        limit: Number(req.query.limit),
+        limit: isNumber(req.query.limit) ? Number(req.query.limit) : undefined,
         sort: req.query.sort as string,
-        depth: Number(req.query.depth),
+        depth: isNumber(req.query.depth) ? Number(req.query.depth) : undefined,
       };
 
       const result = await findVersions(options);
