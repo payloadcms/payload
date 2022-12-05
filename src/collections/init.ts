@@ -48,7 +48,7 @@ export default function registerCollections(ctx: Payload): void {
 
           const updates: UpdateQuery<LoginSchema> = { $inc: { loginAttempts: 1 } };
           // Lock the account if at max attempts and not already locked
-          if (this.loginAttempts + 1 >= maxLoginAttempts && !this.isLocked) {
+          if (this.loginAttempts + 1 >= maxLoginAttempts) {
             updates.$set = { lockUntil: Date.now() + lockTime };
           }
           return this.updateOne(updates as UpdateAggregationStage, cb);
