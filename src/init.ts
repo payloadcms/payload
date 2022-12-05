@@ -29,6 +29,7 @@ import loadConfig from './config/load';
 import Logger from './utilities/logger';
 import { getDataLoader } from './collections/dataloader';
 import mountEndpoints from './express/mountEndpoints';
+import PreferencesModel from './preferences/model';
 
 export const init = (payload: Payload, options: InitOptions): void => {
   payload.logger.info('Starting Payload...');
@@ -71,6 +72,9 @@ export const init = (payload: Payload, options: InitOptions): void => {
   if (!payload.config.graphQL.disable) {
     registerSchema(payload);
   }
+
+  payload.preferences = { Model: PreferencesModel };
+
   // If not initializing locally, set up HTTP routing
   if (!payload.local) {
     options.express.use((req: PayloadRequest, res, next) => {

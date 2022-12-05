@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import login, { Result } from '../operations/login';
 
-export default async function loginHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<Result & { message: string}> | void> {
+export default async function loginHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<Result & { message: string }> | void> {
   try {
     const result = await login({
       req,
