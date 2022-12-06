@@ -2,7 +2,6 @@ import merge from 'deepmerge';
 import { isPlainObject } from 'is-plain-object';
 import { SanitizedCollectionConfig, CollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
-import toKebabCase from '../../utilities/toKebabCase';
 import baseAuthFields from '../../auth/baseFields/auth';
 import baseAPIKeyFields from '../../auth/baseFields/apiKey';
 import baseVerificationFields from '../../auth/baseFields/verification';
@@ -25,7 +24,6 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
     isMergeableObject: isPlainObject,
   });
 
-  sanitized.slug = toKebabCase(sanitized.slug);
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
 
   if (sanitized.versions) {
