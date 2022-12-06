@@ -9,6 +9,7 @@ import nl from './nl.json';
 import pl from './pl.json';
 import pt from './pt.json';
 import ru from './ru.json';
+import tr from './tr.json';
 import vi from './vi.json';
 import sv from './sv.json';
 
@@ -24,6 +25,7 @@ export default {
   pl,
   pt,
   ru,
+  tr,
   vi,
   sv,
 };
