@@ -1,7 +1,8 @@
+import { TFunction } from 'react-i18next';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { Field, fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../fields/config/types';
 
-const formatFields = (config: SanitizedCollectionConfig): Field[] => {
+const formatFields = (config: SanitizedCollectionConfig, t: TFunction): Field[] => {
   const hasID = config.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') > -1;
   let fields: Field[] = config.fields.reduce((formatted, field) => {
     if (!fieldIsPresentationalOnly(field) && (field.hidden === true || field?.admin?.disabled === true)) {
@@ -18,11 +19,11 @@ const formatFields = (config: SanitizedCollectionConfig): Field[] => {
     fields = fields.concat([
       {
         name: 'createdAt',
-        label: 'Created At',
+        label: t('general:createdAt'),
         type: 'date',
       }, {
         name: 'updatedAt',
-        label: 'Updated At',
+        label: t('general:updatedAt'),
         type: 'date',
       },
     ]);
@@ -32,7 +33,7 @@ const formatFields = (config: SanitizedCollectionConfig): Field[] => {
     fields = fields.concat([
       {
         name: 'filename',
-        label: 'Filename',
+        label: t('upload:fileName'),
         type: 'text',
       },
     ]);

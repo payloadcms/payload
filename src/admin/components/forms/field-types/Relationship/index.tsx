@@ -1,13 +1,12 @@
 import React, {
   useCallback, useEffect, useState, useReducer, useRef,
 } from 'react';
-import equal from 'deep-equal';
 import qs from 'qs';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
 import ReactSelect from '../../../elements/ReactSelect';
-import { Value } from '../../../elements/ReactSelect/types';
 import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -15,17 +14,15 @@ import FieldDescription from '../../FieldDescription';
 import { relationship } from '../../../../../fields/validations';
 import { Where } from '../../../../../types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
-import { useFormProcessing, useAllFormFields } from '../../Form/context';
+import { useFormProcessing } from '../../Form/context';
 import optionsReducer from './optionsReducer';
-import { Props, Option, ValueWithRelation, GetResults } from './types';
+import { Props, GetResults, Value, FilterOptionsResult } from './types';
 import { createRelationMap } from './createRelationMap';
 import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
-import { useDocumentInfo } from '../../../utilities/DocumentInfo';
-import { getFilterOptionsQuery } from '../getFilterOptionsQuery';
 import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
-import reduceFieldsToValues from '../../Form/reduceFieldsToValues';
-import getSiblingData from '../../Form/getSiblingData';
 import { AddNewRelation } from './AddNew';
+import { findOptionsByValue } from './findOptionsByValue';
+import { GetFilterOptions } from './GetFilterOptions';
 
 import './index.scss';
 
@@ -62,21 +59,22 @@ const Relationship: React.FC<Props> = (props) => {
     collections,
   } = useConfig();
 
-  const { id } = useDocumentInfo();
-  const { user, permissions } = useAuth();
-  const [fields] = useAllFormFields();
+  const { t, i18n } = useTranslation('fields');
+  const { permissions } = useAuth();
   const formProcessing = useFormProcessing();
   const hasMultipleRelations = Array.isArray(relationTo);
-  const [options, dispatchOptions] = useReducer(optionsReducer, required || hasMany ? [] : [{ value: null, label: 'None' }]);
+  const [options, dispatchOptions] = useReducer(optionsReducer, []);
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [errorLoading, setErrorLoading] = useState('');
-  const [optionFilters, setOptionFilters] = useState<{ [relation: string]: Where }>();
-  const [hasLoadedValueOptions, setHasLoadedValueOptions] = useState(false);
+  const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>();
   const [search, setSearch] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasLoadedFirstPage, setHasLoadedFirstPage] = useState(false);
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false);
   const firstRun = useRef(true);
-  const fieldsRef = useRef(fields);
+
+  const pathOrName = path || name;
 
   const memoizedValidate = useCallback((value, validationOptions) => {
     return validate(value, { ...validationOptions, required });
@@ -88,18 +86,11 @@ const Relationship: React.FC<Props> = (props) => {
     errorMessage,
     setValue,
     initialValue,
-  } = useField({
-    path: path || name,
+  } = useField<Value | Value[]>({
+    path: pathOrName,
     validate: memoizedValidate,
     condition,
   });
-
-  const getFormData = useCallback(() => {
-    return [
-      reduceFieldsToValues(fieldsRef.current, true),
-      getSiblingData(fieldsRef.current, path),
-    ];
-  }, [fieldsRef, path]);
 
   const getResults: GetResults = useCallback(async ({
     lastFullyLoadedRelation: lastFullyLoadedRelationArg,
@@ -107,6 +98,7 @@ const Relationship: React.FC<Props> = (props) => {
     search: searchArg,
     value: valueArg,
     sort,
+    onSuccess,
   }) => {
     if (!permissions) {
       return;
@@ -155,17 +147,22 @@ const Relationship: React.FC<Props> = (props) => {
             });
           }
 
-          if (optionFilters?.[relation]) {
-            query.where.and.push(optionFilters[relation]);
+          if (filterOptionsResult?.[relation]) {
+            query.where.and.push(filterOptionsResult[relation]);
           }
 
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, { credentials: 'include' });
+          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          });
 
           if (response.ok) {
             const data: PaginatedDocs<unknown> = await response.json();
             if (data.docs.length > 0) {
               resultsFetched += data.docs.length;
-              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort });
+              dispatchOptions({ type: 'ADD', docs: data.docs, collection, sort, i18n });
               setLastLoadedPage(data.page);
 
               if (!data.nextPage) {
@@ -181,12 +178,14 @@ const Relationship: React.FC<Props> = (props) => {
           } else if (response.status === 403) {
             setLastFullyLoadedRelation(relations.indexOf(relation));
             lastLoadedPageToUse = 1;
-            dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort, ids: relationMap[relation] });
+            dispatchOptions({ type: 'ADD', docs: [], collection, sort, ids: relationMap[relation], i18n });
           } else {
-            setErrorLoading('An error has occurred.');
+            setErrorLoading(t('error:unspecific'));
           }
         }
       }, Promise.resolve());
+
+      if (typeof onSuccess === 'function') onSuccess();
     }
   }, [
     permissions,
@@ -194,68 +193,12 @@ const Relationship: React.FC<Props> = (props) => {
     hasMany,
     errorLoading,
     collections,
-    optionFilters,
+    filterOptionsResult,
     serverURL,
     api,
-    hasMultipleRelations,
+    t,
+    i18n,
   ]);
-
-  const findOptionsByValue = useCallback((): Option | Option[] => {
-    if (value) {
-      if (hasMany) {
-        if (Array.isArray(value)) {
-          return value.map((val) => {
-            if (hasMultipleRelations) {
-              let matchedOption: Option;
-
-              options.forEach((opt) => {
-                if (opt.options) {
-                  opt.options.some((subOpt) => {
-                    if (subOpt?.value === val.value) {
-                      matchedOption = subOpt;
-                      return true;
-                    }
-
-                    return false;
-                  });
-                }
-              });
-
-              return matchedOption;
-            }
-
-            return options.find((opt) => opt.value === val);
-          });
-        }
-
-        return undefined;
-      }
-
-      if (hasMultipleRelations) {
-        let matchedOption: Option;
-
-        const valueWithRelation = value as ValueWithRelation;
-
-        options.forEach((opt) => {
-          if (opt?.options) {
-            opt.options.some((subOpt) => {
-              if (subOpt?.value === valueWithRelation.value) {
-                matchedOption = subOpt;
-                return true;
-              }
-              return false;
-            });
-          }
-        });
-
-        return matchedOption;
-      }
-
-      return options.find((opt) => opt.value === value);
-    }
-
-    return undefined;
-  }, [hasMany, hasMultipleRelations, value, options]);
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: unknown) => {
     getResults({ search: searchArg, value: valueArg, sort: true });
@@ -268,74 +211,64 @@ const Relationship: React.FC<Props> = (props) => {
     }
   }, [search, updateSearch]);
 
-  // ///////////////////////////
-  // Fetch value options when initialValue changes
-  // ///////////////////////////
+  // ///////////////////////////////////
+  // Ensure we have an option for each value
+  // ///////////////////////////////////
 
   useEffect(() => {
-    if (initialValue && !hasLoadedValueOptions) {
-      const relationMap = createRelationMap({
-        hasMany,
-        relationTo,
-        value: initialValue,
+    const relationMap = createRelationMap({
+      hasMany,
+      relationTo,
+      value,
+    });
+
+    Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
+      await priorRelation;
+
+      const idsToLoad = ids.filter((id) => {
+        return !options.find((optionGroup) => optionGroup?.options?.find((option) => option.value === id && option.relationTo === relation));
       });
 
-      Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
-        await priorRelation;
-
-        if (ids.length > 0) {
-          const query = {
-            where: {
-              id: {
-                in: ids,
-              },
+      if (idsToLoad.length > 0) {
+        const query = {
+          where: {
+            id: {
+              in: idsToLoad,
             },
-            depth: 0,
-            limit: ids.length,
-          };
+          },
+          depth: 0,
+          limit: idsToLoad.length,
+        };
 
-          if (!errorLoading) {
-            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, { credentials: 'include' });
-            const collection = collections.find((coll) => coll.slug === relation);
-            if (response.ok) {
-              const data = await response.json();
-              dispatchOptions({ type: 'ADD', docs: data.docs, hasMultipleRelations, collection, sort: true, ids });
-            } else if (response.status === 403) {
-              dispatchOptions({ type: 'ADD', docs: [], hasMultipleRelations, collection, sort: true, ids });
-            }
+        if (!errorLoading) {
+          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          });
+          const collection = collections.find((coll) => coll.slug === relation);
+          if (response.ok) {
+            const data = await response.json();
+            dispatchOptions({ type: 'ADD', docs: data.docs, collection, sort: true, ids: idsToLoad, i18n });
+          } else if (response.status === 403) {
+            dispatchOptions({ type: 'ADD', docs: [], collection, sort: true, ids: idsToLoad, i18n });
           }
         }
-      }, Promise.resolve());
-
-      setHasLoadedValueOptions(true);
-    }
-  }, [hasMany, hasMultipleRelations, relationTo, initialValue, hasLoadedValueOptions, errorLoading, collections, api, serverURL]);
-
-  useEffect(() => {
-    if (!filterOptions) return;
-
-    const [data, siblingData] = getFormData();
-
-    const newOptionFilters = getFilterOptionsQuery(filterOptions, {
-      id,
-      data,
-      relationTo,
-      siblingData,
-      user,
-    });
-    if (!equal(newOptionFilters, optionFilters)) {
-      setOptionFilters(newOptionFilters);
-    }
-  }, [relationTo, filterOptions, optionFilters, id, getFormData, path, user]);
-
-  useEffect(() => {
-    if (optionFilters || !filterOptions) {
-      setHasLoadedValueOptions(false);
-      getResults({
-        value: initialValue,
-      });
-    }
-  }, [initialValue, getResults, optionFilters, filterOptions]);
+      }
+    }, Promise.resolve());
+  }, [
+    options,
+    value,
+    hasMany,
+    errorLoading,
+    collections,
+    hasMultipleRelations,
+    serverURL,
+    api,
+    i18n,
+    relationTo,
+  ]);
 
   // Determine if we should switch to word boundary search
   useEffect(() => {
@@ -348,8 +281,7 @@ const Relationship: React.FC<Props> = (props) => {
     setEnableWordBoundarySearch(!isIdOnly);
   }, [relationTo, collections]);
 
-
-  // When relationTo changes, reset relationship options
+  // When relationTo or filterOptionsResult changes, reset component
   // Note - effect should not run on first run
   useEffect(() => {
     if (firstRun.current) {
@@ -358,8 +290,10 @@ const Relationship: React.FC<Props> = (props) => {
     }
 
     dispatchOptions({ type: 'CLEAR' });
-    setHasLoadedValueOptions(false);
-  }, [relationTo]);
+    setLastFullyLoadedRelation(-1);
+    setLastLoadedPage(1);
+    setHasLoadedFirstPage(false);
+  }, [relationTo, filterOptionsResult]);
 
   const classes = [
     'field-type',
@@ -370,12 +304,12 @@ const Relationship: React.FC<Props> = (props) => {
     readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');
 
-  const valueToRender = (findOptionsByValue() || value) as Value;
-  if (valueToRender?.value === 'null') valueToRender.value = null;
+  const valueToRender = findOptionsByValue({ value, options });
+  if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null;
 
   return (
     <div
-      id={`field-${(path || name).replace(/\./gi, '__')}`}
+      id={`field-${(pathOrName).replace(/\./gi, '__')}`}
       className={classes}
       style={{
         ...style,
@@ -387,17 +321,20 @@ const Relationship: React.FC<Props> = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={path}
+        htmlFor={pathOrName}
         label={label}
         required={required}
       />
+      <GetFilterOptions {...{ filterOptionsResult, setFilterOptionsResult, filterOptions, path: pathOrName, relationTo }} />
       {!errorLoading && (
         <div className={`${baseClass}__wrap`}>
           <ReactSelect
             isDisabled={readOnly}
             onInputChange={(newSearch) => handleInputChange(newSearch, value)}
             onChange={!readOnly ? (selected) => {
-              if (hasMany) {
+              if (selected === null) {
+                setValue(hasMany ? [] : null);
+              } else if (hasMany) {
                 setValue(selected ? selected.map((option) => {
                   if (hasMultipleRelations) {
                     return {
@@ -432,6 +369,19 @@ const Relationship: React.FC<Props> = (props) => {
             options={options}
             isMulti={hasMany}
             isSortable={isSortable}
+            isLoading={isLoading}
+            onMenuOpen={() => {
+              if (!hasLoadedFirstPage) {
+                setIsLoading(true);
+                getResults({
+                  value: initialValue,
+                  onSuccess: () => {
+                    setHasLoadedFirstPage(true);
+                    setIsLoading(false);
+                  },
+                });
+              }
+            }}
             filterOption={enableWordBoundarySearch ? (item, searchFilter) => {
               const r = wordBoundariesRegex(searchFilter || '');
               return r.test(item.label);
@@ -439,7 +389,7 @@ const Relationship: React.FC<Props> = (props) => {
           />
           {!readOnly && (
             <AddNewRelation
-              {...{ path, hasMany, relationTo, value, setValue, dispatchOptions }}
+              {...{ path: pathOrName, hasMany, relationTo, value, setValue, dispatchOptions }}
             />
           )}
         </div>

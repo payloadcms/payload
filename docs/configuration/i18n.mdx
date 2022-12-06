@@ -1,0 +1,100 @@
+---
+title: I18n
+label: I18n
+order: 40
+desc: Manage and customize internationalization support in your CMS editor experience
+keywords: internationalization, i18n, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Not only does Payload support managing localized content, it also has internationalization support so that admin users can work in their preferred language. Payload's i18n support is built on top of [i18next](https://www.i18next.com). It comes included by default and can be extended in your config.
+
+While Payload's built-in features come translated, you may want to also translate parts of your project's configuration too. This is possible in places like collections and globals labels and groups, field labels, descriptions and input placeholder text. The admin UI will display all the correct translations you provide based on the user's language.
+
+Here is an example of a simple collection supporting both English and Spanish editors:
+```ts
+const Articles: CollectionConfig = {
+  slug: 'articles',
+  labels: {
+    singular: {
+      en: 'Article', es: 'Artículo',
+    },
+    plural: {
+      en: 'Articles', es: 'Artículos',
+    },
+  },
+  admin: {
+    group: { en: 'Content', es: 'Contenido' },
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      label: {
+        en: 'Title', es: 'Título',
+      },
+      admin: {
+        placeholder: { en: 'Enter title', es: 'Introduce el título' }
+      }
+    },
+    {
+      name: 'type',
+      type: 'radio',
+      options: [{
+        value: 'news',
+        label: { en: 'News', es: 'Noticias' },
+      }, // etc...
+      ],
+    },
+  ],
+}
+```
+
+### Admin UI
+
+The Payload admin panel reads the language settings of a user's browser and display all text in that language, or will fall back to English if the user's language is not yet supported.
+After a user logs in, they can change their language selection in the `/account` view.
+
+<Banner>
+  <strong>Note:</strong><br/>
+  If there is a language that Payload does not yet support, we accept code <a href="https://github.com/payloadcms/payload/blob/master/contributing.md">contributions</a>.
+</Banner>
+
+### Node Express
+
+Payload's backend uses express middleware to set the language on incoming requests before they are handled. This allows backend validation to return error messages in the user's own language or system generated emails to be sent using the correct translation. You can make HTTP requests with the `accept-language` header and Payload will use that language.
+
+Anywhere in your Payload app that you have access to the `req` object, you can access i18next's extensive internationalization features assigned to `req.i18n`. To access text translations you can use `req.t('namespace:key')`.
+
+Read the i18next [API documentation](https://www.i18next.com/overview/api) to learn more.
+
+### Configuration Options
+
+In your Payload config, you can add translations and customize the settings in `i18n`. Payload will use your custom options and merge it with the default, allowing you to override the settings Payload provides.
+
+**Example Payload config extending i18n:**
+
+```ts
+import { buildConfig } from 'payload/config'
+
+export default buildConfig({
+  //...
+  i18n: {
+    fallbackLng: 'en', // default
+    debug: false, // default
+    resources: {
+      en: {
+        custom: { // namespace can be anything you want
+          key1: 'Translation with {{variable}}', // translation
+        },
+        // override existing translation keys
+        general: {
+          dashboard: 'Home',
+        },
+      },
+    },
+  },
+  //...
+});
+```
+
+See the i18next [configuration options](https://www.i18next.com/overview/configuration-options) to learn more.

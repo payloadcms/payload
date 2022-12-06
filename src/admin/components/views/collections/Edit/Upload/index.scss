@@ -10,6 +10,11 @@
     bottom: calc(100% - #{base(.5)});
   }
 
+  &__drag-label {
+    margin: 0;
+    text-transform: lowercase;
+  }
+
   &__upload {
     position: relative;
 
@@ -64,6 +69,8 @@
 
       .btn {
         margin: 0 auto;
+        width: 100%;
+        max-width: 200px;
       }
 
       .file-field__drag-label {

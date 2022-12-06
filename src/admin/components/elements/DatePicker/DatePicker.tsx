@@ -76,6 +76,7 @@ const DateTime: React.FC<Props> = (props) => {
       <div className={`${baseClass}__input-wrapper`}>
         <DatePicker
           {...dateTimePickerProps}
+          onChange={(val) => onChange(val as Date)}
           popperModifiers={{
             preventOverflow: {
               enabled: true,

@@ -49,7 +49,7 @@ export const generateFileData = async ({
     const { file } = req.files || {};
 
     if (throwOnMissingFile && !file) {
-      throw new MissingFile();
+      throw new MissingFile(req.t);
     }
 
     let staticPath = staticDir;
@@ -121,7 +121,7 @@ export const generateFileData = async ({
         }
       } catch (err) {
         console.error(err);
-        throw new FileUploadError();
+        throw new FileUploadError(req.t);
       }
 
       newData = {

@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { Props } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
@@ -16,12 +17,23 @@ import './index.scss';
 const baseClass = 'status';
 
 const Status: React.FC<Props> = () => {
-  const { publishedDoc, unpublishedVersions, collection, global, id, getVersions } = useDocumentInfo();
+  const {
+    publishedDoc,
+    unpublishedVersions,
+    collection,
+    global,
+    id,
+    getVersions,
+  } = useDocumentInfo();
   const { toggleModal } = useModal();
-  const { serverURL, routes: { api } } = useConfig();
+  const {
+    serverURL,
+    routes: { api },
+  } = useConfig();
   const [processing, setProcessing] = useState(false);
   const { reset: resetForm } = useForm();
   const locale = useLocale();
+  const { t, i18n } = useTranslation('version');
 
   const unPublishModalSlug = `confirm-un-publish-${id}`;
   const revertModalSlug = `confirm-revert-${id}`;
@@ -29,11 +41,11 @@ const Status: React.FC<Props> = () => {
   let statusToRender;
 
   if (unpublishedVersions?.docs?.length > 0 && publishedDoc) {
-    statusToRender = 'Changed';
+    statusToRender = 'changed';
   } else if (!publishedDoc) {
-    statusToRender = 'Draft';
+    statusToRender = 'draft';
   } else if (publishedDoc && unpublishedVersions?.docs?.length <= 1) {
-    statusToRender = 'Published';
+    statusToRender = 'published';
   }
 
   const performAction = useCallback(async (action: 'revert' | 'unpublish') => {
@@ -65,6 +77,7 @@ const Status: React.FC<Props> = () => {
     const res = await requests[method](url, {
       headers: {
         'Content-Type': 'application/json',
+        'Accept-Language': i18n.language,
       },
       body: JSON.stringify(body),
     });
@@ -88,7 +101,7 @@ const Status: React.FC<Props> = () => {
       toast.success(json.message);
       getVersions();
     } else {
-      toast.error('There was a problem while un-publishing this document.');
+      toast.error(t('error:unPublishingDocument'));
     }
 
     setProcessing(false);
@@ -99,14 +112,14 @@ const Status: React.FC<Props> = () => {
     if (action === 'unpublish') {
       toggleModal(unPublishModalSlug);
     }
-  }, [collection, global, publishedDoc, serverURL, api, id, locale, resetForm, getVersions, toggleModal, revertModalSlug, unPublishModalSlug]);
+  }, [collection, global, publishedDoc, serverURL, api, id, i18n, locale, resetForm, getVersions, t, toggleModal, revertModalSlug, unPublishModalSlug]);
 
   if (statusToRender) {
     return (
       <div className={baseClass}>
         <div className={`${baseClass}__value-wrap`}>
-          <span className={`${baseClass}__value`}>{statusToRender}</span>
-          {statusToRender === 'Published' && (
+          <span className={`${baseClass}__value`}>{t(statusToRender)}</span>
+          {statusToRender === 'published' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
@@ -114,32 +127,32 @@ const Status: React.FC<Props> = () => {
                 className={`${baseClass}__action`}
                 buttonStyle="none"
               >
-                Unpublish
+                {t('unpublish')}
               </Button>
               <Modal
                 slug={unPublishModalSlug}
                 className={`${baseClass}__modal`}
               >
                 <MinimalTemplate className={`${baseClass}__modal-template`}>
-                  <h1>Confirm unpublish</h1>
-                  <p>You are about to unpublish this document. Are you sure?</p>
+                  <h1>{t('confirmUnpublish')}</h1>
+                  <p>{t('aboutToUnpublish')}</p>
                   <Button
                     buttonStyle="secondary"
                     type="button"
                     onClick={processing ? undefined : () => toggleModal(unPublishModalSlug)}
                   >
-                    Cancel
+                    {t('general:cancel')}
                   </Button>
                   <Button
                     onClick={processing ? undefined : () => performAction('unpublish')}
                   >
-                    {processing ? 'Unpublishing...' : 'Confirm'}
+                    {t(processing ? 'unpublishing' : 'general:confirm')}
                   </Button>
                 </MinimalTemplate>
               </Modal>
             </React.Fragment>
           )}
-          {statusToRender === 'Changed' && (
+          {statusToRender === 'changed' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
@@ -147,26 +160,26 @@ const Status: React.FC<Props> = () => {
                 className={`${baseClass}__action`}
                 buttonStyle="none"
               >
-                Revert to published
+                {t('revertToPublished')}
               </Button>
               <Modal
                 slug={revertModalSlug}
                 className={`${baseClass}__modal`}
               >
                 <MinimalTemplate className={`${baseClass}__modal-template`}>
-                  <h1>Confirm revert to saved</h1>
-                  <p>You are about to revert this document&apos;s changes to its published state. Are you sure?</p>
+                  <h1>{t('confirmRevertToSaved')}</h1>
+                  <p>{t('aboutToRevertToPublished')}</p>
                   <Button
                     buttonStyle="secondary"
                     type="button"
                     onClick={processing ? undefined : () => toggleModal(revertModalSlug)}
                   >
-                    Cancel
+                    {t('general:published')}
                   </Button>
                   <Button
                     onClick={processing ? undefined : () => performAction('revert')}
                   >
-                    {processing ? 'Reverting...' : 'Confirm'}
+                    {t(processing ? 'reverting' : 'general:confirm')}
                   </Button>
                 </MinimalTemplate>
               </Modal>

@@ -12,14 +12,16 @@ import {
   SortEndHandler,
   SortableHandle,
 } from 'react-sortable-hoc';
+import { useTranslation } from 'react-i18next';
 import { arrayMove } from '../../../../utilities/arrayMove';
-import { Props, Value } from './types';
+import { Props, Option } from './types';
 import Chevron from '../../icons/Chevron';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
 const SortableMultiValue = SortableElement(
-  (props: MultiValueProps<Value>) => {
+  (props: MultiValueProps<Option>) => {
     // this prevents the menu from being opened/closed when the user clicks
     // on a value to begin dragging it. ideally, detecting a click (instead of
     // a drag) would still focus the control and toggle the menu, but that
@@ -46,9 +48,11 @@ const SortableMultiValue = SortableElement(
 
 const SortableMultiValueLabel = SortableHandle((props) => <components.MultiValueLabel {...props} />);
 
-const SortableSelect = SortableContainer(Select) as React.ComponentClass<SelectProps<Value, true> & SortableContainerProps>;
+const SortableSelect = SortableContainer(Select) as React.ComponentClass<SelectProps<Option, true> & SortableContainerProps>;
 
 const ReactSelect: React.FC<Props> = (props) => {
+  const { t, i18n } = useTranslation();
+
   const {
     className,
     showError = false,
@@ -56,12 +60,14 @@ const ReactSelect: React.FC<Props> = (props) => {
     onChange,
     value,
     disabled = false,
-    placeholder,
+    placeholder = t('general:selectValue'),
     isSearchable = true,
-    isClearable,
+    isClearable = true,
     isMulti,
     isSortable,
     filterOption = undefined,
+    isLoading,
+    onMenuOpen,
   } = props;
 
   const classes = [
@@ -78,7 +84,7 @@ const ReactSelect: React.FC<Props> = (props) => {
   }, []);
 
   const onSortEnd: SortEndHandler = useCallback(({ oldIndex, newIndex }) => {
-    onChange(arrayMove(value as Value[], oldIndex, newIndex));
+    onChange(arrayMove(value as Option[], oldIndex, newIndex));
   }, [onChange, value]);
 
   if (isMulti && isSortable) {
@@ -92,16 +98,19 @@ const ReactSelect: React.FC<Props> = (props) => {
         // small fix for https://github.com/clauderic/react-sortable-hoc/pull/352:
         getHelperDimensions={({ node }) => node.getBoundingClientRect()}
         // react-select props:
-        placeholder={placeholder}
+        placeholder={getTranslation(placeholder, i18n)}
         {...props}
-        value={value as Value[]}
+        value={value as Option[]}
         onChange={onChange}
         disabled={disabled ? 'disabled' : undefined}
         className={classes}
         classNamePrefix="rs"
+        captureMenuScroll
         options={options}
         isSearchable={isSearchable}
         isClearable={isClearable}
+        isLoading={isLoading}
+        onMenuOpen={onMenuOpen}
         components={{
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore We're failing to provide a required index prop to SortableElement
@@ -116,7 +125,9 @@ const ReactSelect: React.FC<Props> = (props) => {
 
   return (
     <Select
-      placeholder={placeholder}
+      isLoading={isLoading}
+      placeholder={getTranslation(placeholder, i18n)}
+      captureMenuScroll
       {...props}
       value={value}
       onChange={onChange}
@@ -128,6 +139,7 @@ const ReactSelect: React.FC<Props> = (props) => {
       isSearchable={isSearchable}
       isClearable={isClearable}
       filterOption={filterOption}
+      onMenuOpen={onMenuOpen}
     />
   );
 };

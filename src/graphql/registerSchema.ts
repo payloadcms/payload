@@ -39,7 +39,7 @@ export default function registerSchema(payload: Payload): void {
 
   payload.Query.fields.Access = {
     type: buildPoliciesType(payload),
-    resolve: accessResolver,
+    resolve: accessResolver(payload),
   };
 
   if (typeof payload.config.graphQL.queries === 'function') {

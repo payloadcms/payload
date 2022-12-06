@@ -14,7 +14,7 @@ keywords: row, fields, config, configuration, documentation, Content Management 
 
 | Option         | Description                                                               |
 | -------------- | ------------------------------------------------------------------------- |
-| **`label`** *  | A label to render within the header of the collapsible component.         |
+| **`label`** *  | A label to render within the header of the collapsible component. This can be a string, function or react component. Function/components receive `({ data, path })` as args. |
 | **`fields`** * | Array of field types to nest within this Collapsible.                     |
 | **`admin`**    | Admin-specific configuration. See below for [more detail](#admin-config). |
 
@@ -38,9 +38,14 @@ const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
-      label: 'Header of collapsible goes here',
+      label: ({ data }) => data?.title || 'Untitled',
       type: 'collapsible', // required
       fields: [ // required
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
         {
           name: 'someTextField',
           type: 'text',

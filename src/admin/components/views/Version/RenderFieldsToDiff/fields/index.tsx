@@ -3,6 +3,7 @@ import Nested from './Nested';
 import Iterable from './Iterable';
 import Relationship from './Relationship';
 import Tabs from './Tabs';
+import Select from './Select';
 
 export default {
   text: Text,
@@ -11,14 +12,14 @@ export default {
   email: Text,
   code: Text,
   checkbox: Text,
-  radio: Text,
+  radio: Select,
   row: Nested,
   collapsible: Nested,
   group: Nested,
   array: Iterable,
   blocks: Iterable,
   date: Text,
-  select: Text,
+  select: Select,
   richText: Text,
   relationship: Relationship,
   upload: Relationship,

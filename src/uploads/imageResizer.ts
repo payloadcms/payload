@@ -115,7 +115,7 @@ export default async function resizeAndSave({
 function createImageName(
   outputImage: OutputImage,
   bufferObject: { data: Buffer; info: sharp.OutputInfo },
-  extension: string
+  extension: string,
 ): string {
   return `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${extension}`;
 }

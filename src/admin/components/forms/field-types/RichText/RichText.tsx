@@ -3,6 +3,7 @@ import isHotkey from 'is-hotkey';
 import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
+import { useTranslation } from 'react-i18next';
 import { richText } from '../../../../../fields/validations';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
@@ -21,6 +22,7 @@ import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/type
 import listTypes from './elements/listTypes';
 import mergeCustomFunctions from './mergeCustomFunctions';
 import withEnterBreakOut from './plugins/withEnterBreakOut';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -65,6 +67,7 @@ const RichText: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
+  const { i18n } = useTranslation();
   const [loaded, setLoaded] = useState(false);
   const [enabledElements, setEnabledElements] = useState({});
   const [enabledLeaves, setEnabledLeaves] = useState({});
@@ -94,22 +97,27 @@ const RichText: React.FC<Props> = (props) => {
   }, [enabledElements, path, props]);
 
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
-    const matchedLeafName = Object.keys(enabledLeaves).find((leafName) => leaf[leafName]);
+    const matchedLeaves = Object.entries(enabledLeaves).filter(([leafName]) => leaf[leafName]);
 
-    if (enabledLeaves[matchedLeafName]?.Leaf) {
-      const { Leaf } = enabledLeaves[matchedLeafName];
+    if (matchedLeaves.length > 0) {
+      return matchedLeaves.reduce((result, [leafName], i) => {
+        if (enabledLeaves[leafName]?.Leaf) {
+          const Leaf = enabledLeaves[leafName]?.Leaf;
+          return (
+            <Leaf
+              key={i}
+              leaf={leaf}
+              path={path}
+              fieldProps={props}
+              editorRef={editorRef}
+            >
+              {result}
+            </Leaf>
+          );
+        }
 
-      return (
-        <Leaf
-          attributes={attributes}
-          leaf={leaf}
-          path={path}
-          fieldProps={props}
-          editorRef={editorRef}
-        >
-          {children}
-        </Leaf>
-      );
+        return result;
+      }, <span {...attributes}>{children}</span>);
     }
 
     return (
@@ -180,8 +188,8 @@ const RichText: React.FC<Props> = (props) => {
   useEffect(() => {
     function setClickableState(clickState: 'disabled' | 'enabled') {
       const selectors = 'button, a, [role="button"]';
-      const toolbarButtons: (HTMLButtonElement | HTMLAnchorElement)[] = toolbarRef.current.querySelectorAll(selectors);
-      const editorButtons: (HTMLButtonElement | HTMLAnchorElement)[] = editorRef.current.querySelectorAll(selectors);
+      const toolbarButtons: (HTMLButtonElement | HTMLAnchorElement)[] = toolbarRef.current?.querySelectorAll(selectors);
+      const editorButtons: (HTMLButtonElement | HTMLAnchorElement)[] = editorRef.current?.querySelectorAll(selectors);
 
       [...(toolbarButtons || []), ...(editorButtons || [])].forEach((child) => {
         const isButton = child.tagName === 'BUTTON';
@@ -303,7 +311,7 @@ const RichText: React.FC<Props> = (props) => {
                 className={`${baseClass}__input`}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}
-                placeholder={placeholder}
+                placeholder={getTranslation(placeholder, i18n)}
                 spellCheck
                 readOnly={readOnly}
                 onKeyDown={(event) => {

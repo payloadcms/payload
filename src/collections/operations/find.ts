@@ -136,29 +136,33 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     locale,
   });
 
-  const optionsToExecute = {
+  const usePagination = pagination && limit !== 0;
+  const limitToUse = limit ?? (usePagination ? 10 : 0);
+  const paginatedDocs = await Model.paginate(query, {
     page: page || 1,
-    limit: limit || 10,
     sort: {
       [sortProperty]: sortOrder,
     },
+    limit: limitToUse,
     lean: true,
     leanWithId: true,
     useEstimatedCount,
-    pagination,
+    pagination: usePagination,
     useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
-  };
+    options: {
+      // limit must also be set here, it's ignored when pagination is false
+      limit: limitToUse,
+    },
+  });
 
-  const paginatedDocs = await Model.paginate(query, optionsToExecute);
-
-  let result = {
+  let result: PaginatedDocs<T> = {
     ...paginatedDocs,
     docs: paginatedDocs.docs.map((doc) => {
       const sanitizedDoc = JSON.parse(JSON.stringify(doc));
       sanitizedDoc.id = sanitizedDoc._id;
       return sanitizeInternalFields(sanitizedDoc);
     }),
-  } as PaginatedDocs<T>;
+  };
 
   // /////////////////////////////////////
   // Replace documents with drafts if available

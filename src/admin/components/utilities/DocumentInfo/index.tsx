@@ -2,6 +2,7 @@ import React, {
   createContext, useCallback, useContext, useEffect, useState,
 } from 'react';
 import qs from 'qs';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../Config';
 import { PaginatedDocs } from '../../../../mongoose/types';
 import { ContextType, Props, Version } from './types';
@@ -21,6 +22,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 }) => {
   const { serverURL, routes: { api } } = useConfig();
   const { getPreference } = usePreferences();
+  const { i18n } = useTranslation();
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null);
   const [versions, setVersions] = useState<PaginatedDocs<Version>>(null);
   const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null);
@@ -112,14 +114,24 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
 
     if (shouldFetch) {
-      let publishedJSON = await fetch(publishedFetchURL, { credentials: 'include' }).then((res) => res.json());
+      let publishedJSON = await fetch(publishedFetchURL, {
+        credentials: 'include',
+        headers: {
+          'Accept-Language': i18n.language,
+        },
+      }).then((res) => res.json());
 
       if (collection) {
         publishedJSON = publishedJSON?.docs?.[0];
       }
 
       if (shouldFetchVersions) {
-        versionJSON = await fetch(`${versionFetchURL}?${qs.stringify(versionParams)}`, { credentials: 'include' }).then((res) => res.json());
+        versionJSON = await fetch(`${versionFetchURL}?${qs.stringify(versionParams)}`, {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        }).then((res) => res.json());
 
         if (publishedJSON?.updatedAt) {
           const newerVersionParams = {
@@ -138,7 +150,12 @@ export const DocumentInfoProvider: React.FC<Props> = ({
           };
 
           // Get any newer versions available
-          const newerVersionRes = await fetch(`${versionFetchURL}?${qs.stringify(newerVersionParams)}`, { credentials: 'include' });
+          const newerVersionRes = await fetch(`${versionFetchURL}?${qs.stringify(newerVersionParams)}`, {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          });
 
           if (newerVersionRes.status === 200) {
             unpublishedVersionJSON = await newerVersionRes.json();
@@ -150,7 +167,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       setVersions(versionJSON);
       setUnpublishedVersions(unpublishedVersionJSON);
     }
-  }, [global, collection, id, baseURL]);
+  }, [i18n, global, collection, id, baseURL]);
 
   useEffect(() => {
     getVersions();

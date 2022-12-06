@@ -1,7 +1,8 @@
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ReactEditor, useSlate } from 'slate-react';
 import { Transforms, Node, Editor } from 'slate';
 import { useModal } from '@faceless-ui/modal';
+import { Trans, useTranslation } from 'react-i18next';
 import { unwrapLink } from './utilities';
 import Popup from '../../../../../elements/Popup';
 import { EditModal } from './Modal';
@@ -16,6 +17,7 @@ import { Field } from '../../../../../../../fields/config/types';
 import reduceFieldsToValues from '../../../../Form/reduceFieldsToValues';
 import deepCopyObject from '../../../../../../../utilities/deepCopyObject';
 import Button from '../../../../../elements/Button';
+import { getTranslation } from '../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -30,6 +32,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
   const config = useConfig();
   const { user } = useAuth();
   const locale = useLocale();
+  const { t, i18n } = useTranslation('fields');
   const { openModal, toggleModal } = useModal();
   const [renderModal, setRenderModal] = useState(false);
   const [renderPopup, setRenderPopup] = useState(false);
@@ -77,12 +80,12 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
         fields: deepCopyObject(element.fields),
       };
 
-      const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'update', locale });
+      const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'update', locale, t });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [renderModal, element, fieldSchema, user, locale]);
+  }, [renderModal, element, fieldSchema, user, locale, t]);
 
   return (
     <span
@@ -146,17 +149,19 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
           render={() => (
             <div className={`${baseClass}__popup`}>
               {element.linkType === 'internal' && element.doc?.relationTo && element.doc?.value && (
-                <Fragment>
-                  Linked to&nbsp;
+                <Trans
+                  i18nKey="fields:linkedTo"
+                  values={{ label: getTranslation(config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels?.singular, i18n) }}
+                >
                   <a
                     className={`${baseClass}__link-label`}
                     href={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels?.singular}
+                    label
                   </a>
-                </Fragment>
+                </Trans>
               )}
               {(element.linkType === 'custom' || !element.linkType) && (
                 <a
@@ -179,7 +184,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
                   openModal(modalSlug);
                   setRenderModal(true);
                 }}
-                tooltip="Edit"
+                tooltip={t('general:edit')}
               />
               <Button
                 className={`${baseClass}__link-close`}
@@ -190,7 +195,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
                   e.preventDefault();
                   unwrapLink(editor);
                 }}
-                tooltip="Remove"
+                tooltip={t('general:remove')}
               />
             </div>
           )}

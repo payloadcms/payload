@@ -12,7 +12,7 @@ export default async function findOneHandler(req: PayloadRequest, res: Response,
       key: req.params.key,
     });
 
-    return res.status(httpStatus.OK).json(result || { message: 'No Preference Found', value: null });
+    return res.status(httpStatus.OK).json(result || { message: req.t('general:notFound'), value: null });
   } catch (error) {
     return next(error);
   }

@@ -17,6 +17,8 @@ export const saveGlobalDraft = async ({
 }: Args): Promise<void> => {
   const VersionsModel = payload.versions[config.slug];
 
+  const dataAsDraft = { ...data, _status: 'draft' };
+
   let existingAutosaveVersion;
 
   if (autosave) {
@@ -34,19 +36,19 @@ export const saveGlobalDraft = async ({
           _id: existingAutosaveVersion._id,
         },
         {
-          version: data,
+          version: dataAsDraft,
         },
         { new: true, lean: true },
       );
     // Otherwise, create a new one
     } else {
       result = await VersionsModel.create({
-        version: data,
+        version: dataAsDraft,
         autosave: Boolean(autosave),
       });
     }
   } catch (err) {
-    payload.logger.error(`There was an error while saving a draft for the Global ${config.label}.`);
+    payload.logger.error(`There was an error while saving a draft for the Global ${config.slug}.`);
     payload.logger.error(err);
   }
 
@@ -54,7 +56,7 @@ export const saveGlobalDraft = async ({
     enforceMaxVersions({
       payload: this,
       Model: VersionsModel,
-      entityLabel: config.label,
+      slug: config.slug,
       entityType: 'global',
       max: config.versions.max,
     });

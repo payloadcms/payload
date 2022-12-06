@@ -3,6 +3,7 @@ import TransformHooks from './collections/Transform';
 import Hooks, { hooksSlug } from './collections/Hook';
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks';
 import Relations from './collections/Relations';
+import Users, { seedHooksUsers } from './collections/Users';
 
 export default buildConfig({
   collections: [
@@ -10,8 +11,10 @@ export default buildConfig({
     Hooks,
     NestedAfterReadHooks,
     Relations,
+    Users,
   ],
   onInit: async (payload) => {
+    await seedHooksUsers(payload);
     await payload.create({
       collection: hooksSlug,
       data: {

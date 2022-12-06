@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../src/globals/config/types';
 const AutosaveGlobal: GlobalConfig = {
   slug: 'autosave-global',
   label: 'Autosave Global',
+  preview: () => 'https://payloadcms.com',
   versions: {
     max: 20,
     drafts: {

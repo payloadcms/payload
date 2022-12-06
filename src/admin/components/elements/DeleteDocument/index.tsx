@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { useHistory } from 'react-router-dom';
 import { Modal, useModal } from '@faceless-ui/modal';
+import { Trans, useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import Button from '../Button';
 import MinimalTemplate from '../../templates/Minimal';
@@ -9,6 +10,7 @@ import { useForm } from '../../forms/Form/context';
 import useTitle from '../../../hooks/useTitle';
 import { requests } from '../../../api';
 import { Props } from './types';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -35,14 +37,15 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const [deleting, setDeleting] = useState(false);
   const { toggleModal } = useModal();
   const history = useHistory();
+  const { t, i18n } = useTranslation('general');
   const title = useTitle(useAsTitle) || id;
   const titleToRender = titleFromProps || title;
 
   const modalSlug = `delete-${id}`;
 
   const addDefaultError = useCallback(() => {
-    toast.error(`There was an error while deleting ${title}. Please check your connection and try again.`);
-  }, [title]);
+    toast.error(t('error:deletingError', { title }));
+  }, [t, title]);
 
   const handleDelete = useCallback(() => {
     setDeleting(true);
@@ -50,13 +53,14 @@ const DeleteDocument: React.FC<Props> = (props) => {
     requests.delete(`${serverURL}${api}/${slug}/${id}`, {
       headers: {
         'Content-Type': 'application/json',
+        'Accept-Language': i18n.language,
       },
     }).then(async (res) => {
       try {
         const json = await res.json();
         if (res.status < 400) {
           toggleModal(modalSlug);
-          toast.success(`${singular} "${title}" successfully deleted.`);
+          toast.success(t('titleDeleted', { label: getTranslation(singular, i18n), title }));
           return history.push(`${admin}/collections/${slug}`);
         }
 
@@ -72,7 +76,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
         return addDefaultError();
       }
     });
-  }, [addDefaultError, toggleModal, modalSlug, history, id, singular, slug, title, admin, api, serverURL, setModified]);
+  }, [setModified, serverURL, api, slug, id, toggleModal, modalSlug, t, singular, i18n, title, history, admin, addDefaultError]);
 
   if (id) {
     return (
@@ -87,24 +91,25 @@ const DeleteDocument: React.FC<Props> = (props) => {
             toggleModal(modalSlug);
           }}
         >
-          Delete
+          {t('delete')}
         </button>
         <Modal
           slug={modalSlug}
           className={baseClass}
         >
           <MinimalTemplate className={`${baseClass}__template`}>
-            <h1>Confirm deletion</h1>
+            <h1>{t('confirmDeletion')}</h1>
             <p>
-              You are about to delete the
-              {' '}
-              {singular}
-              {' '}
-              &quot;
-              <strong>
-                {titleToRender}
-              </strong>
-              &quot;. Are you sure?
+              <Trans
+                i18nKey="aboutToDelete"
+                values={{ label: singular, title: titleToRender }}
+                t={t}
+              >
+                aboutToDelete
+                <strong>
+                  {titleToRender}
+                </strong>
+              </Trans>
             </p>
             <Button
               id="confirm-cancel"
@@ -112,13 +117,13 @@ const DeleteDocument: React.FC<Props> = (props) => {
               type="button"
               onClick={deleting ? undefined : () => toggleModal(modalSlug)}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               onClick={deleting ? undefined : handleDelete}
               id="confirm-delete"
             >
-              {deleting ? 'Deleting...' : 'Confirm'}
+              {deleting ? t('deleting') : t('confirm')}
             </Button>
           </MinimalTemplate>
         </Modal>

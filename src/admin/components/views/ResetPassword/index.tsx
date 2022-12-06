@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
+import { Trans, useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import MinimalTemplate from '../../templates/Minimal';
@@ -9,18 +10,20 @@ import ConfirmPassword from '../../forms/field-types/ConfirmPassword';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
+import HiddenInput from '../../forms/field-types/HiddenInput';
 
 
 import './index.scss';
-import HiddenInput from '../../forms/field-types/HiddenInput';
 
 const baseClass = 'reset-password';
 
 const ResetPassword: React.FC = () => {
-  const { admin: { user: userSlug }, serverURL, routes: { admin, api } } = useConfig();
-  const { token } = useParams<{token?: string}>();
+  const config = useConfig();
+  const { admin: { user: userSlug, logoutRoute }, serverURL, routes: { admin, api } } = config;
+  const { token } = useParams<{ token?: string }>();
   const history = useHistory();
   const { user, setToken } = useAuth();
+  const { t } = useTranslation('authentication');
 
   const onSuccess = (data) => {
     if (data.token) {
@@ -33,19 +36,20 @@ const ResetPassword: React.FC = () => {
     return (
       <MinimalTemplate className={baseClass}>
         <Meta
-          title="Reset Password"
-          description="Reset password"
-          keywords="Reset Password, Payload, CMS"
+          title={t('resetPassword')}
+          description={t('resetPassword')}
+          keywords={t('resetPassword')}
         />
 
         <div className={`${baseClass}__wrap`}>
-          <h1>Already logged in</h1>
+          <h1>{t('alreadyLoggedIn')}</h1>
           <p>
-            To log in with another user, you should
-            {' '}
-            <Link to={`${admin}/logout`}>log out</Link>
-            {' '}
-            first.
+            <Trans
+              i18nKey="loginWithAnotherUser"
+              t={t}
+            >
+              <Link to={`${admin}${logoutRoute}`}>log out</Link>
+            </Trans>
           </p>
           <br />
           <Button
@@ -53,7 +57,7 @@ const ResetPassword: React.FC = () => {
             buttonStyle="secondary"
             to={admin}
           >
-            Back to Dashboard
+            {t('general:backToDashboard')}
           </Button>
         </div>
       </MinimalTemplate>
@@ -63,7 +67,7 @@ const ResetPassword: React.FC = () => {
   return (
     <MinimalTemplate className={baseClass}>
       <div className={`${baseClass}__wrap`}>
-        <h1>Reset Password</h1>
+        <h1>{t('resetPassword')}</h1>
         <Form
           onSuccess={onSuccess}
           method="post"
@@ -71,7 +75,7 @@ const ResetPassword: React.FC = () => {
           redirect={admin}
         >
           <Password
-            label="New Password"
+            label={t('newPassword')}
             name="password"
             autoComplete="off"
             required
@@ -81,7 +85,7 @@ const ResetPassword: React.FC = () => {
             name="token"
             value={token}
           />
-          <FormSubmit>Reset Password</FormSubmit>
+          <FormSubmit>{t('resetPassword')}</FormSubmit>
         </Form>
       </div>
     </MinimalTemplate>

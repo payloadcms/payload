@@ -1,12 +1,14 @@
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
+import { useTranslation } from 'react-i18next';
 import { Props } from './types';
 import Chevron from '../../icons/Chevron';
 import Button from '../Button';
+import { useSearchParams } from '../../utilities/SearchParams';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
-import { useSearchParams } from '../../utilities/SearchParams';
 
 const baseClass = 'sort-column';
 
@@ -16,6 +18,7 @@ const SortColumn: React.FC<Props> = (props) => {
   } = props;
   const params = useSearchParams();
   const history = useHistory();
+  const { i18n } = useTranslation();
 
   const { sort } = params;
 
@@ -39,7 +42,7 @@ const SortColumn: React.FC<Props> = (props) => {
 
   return (
     <div className={baseClass}>
-      <span className={`${baseClass}__label`}>{label}</span>
+      <span className={`${baseClass}__label`}>{getTranslation(label, i18n)}</span>
       {!disable && (
         <span className={`${baseClass}__buttons`}>
           <Button

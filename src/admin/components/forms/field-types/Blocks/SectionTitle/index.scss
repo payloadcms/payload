@@ -24,7 +24,8 @@
     color: var(--theme-elevation-800);
     background-color: transparent;
     border: none;
-    width: auto;
+    width: 100%;
+    text-overflow: ellipsis;
     resize: none;
     appearance: none;
     position: absolute;

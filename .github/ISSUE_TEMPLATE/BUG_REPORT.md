@@ -8,27 +8,15 @@ labels: 'possible-bug'
 
 <!--- Provide a general summary of the issue in the Title above -->
 
-## Current Behavior
-
-<!--- Tell us what happens instead of the expected behavior -->
-
-## Expected Behavior
-
-<!--- Tell us what you expected happen -->
-
-## Possible Solution
-
-<!--- Optional. If familiar with the codebase, suggest a fix/reason for the bug. -->
-
 ## Steps to Reproduce
+
 <!--- Steps to reproduce this bug. Include any code, if relevant -->
 
 1.
 2.
 3.
-4.
 
-## Detailed Description
+## Other Details
 
-<!--- Provide any other additional details -->
 <!--- Payload version, browser, etc -->
+<!--- Possible solution if you're familiar with the code -->

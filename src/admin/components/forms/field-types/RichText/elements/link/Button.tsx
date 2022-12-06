@@ -2,6 +2,7 @@ import React, { Fragment, useState } from 'react';
 import { ReactEditor, useSlate } from 'slate-react';
 import { Transforms, Editor, Range } from 'slate';
 import { useModal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import ElementButton from '../Button';
 import { unwrapLink } from './utilities';
 import LinkIcon from '../../../../../icons/Link';
@@ -22,6 +23,7 @@ export const LinkButton = ({ fieldProps }) => {
 
   const modalSlug = `${baseModalSlug}-${fieldProps.path}`;
 
+  const { t } = useTranslation();
   const config = useConfig();
   const editor = useSlate();
   const { user } = useAuth();
@@ -71,7 +73,7 @@ export const LinkButton = ({ fieldProps }) => {
                 text: editor.selection ? Editor.string(editor, editor.selection) : '',
               };
 
-              const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'create', locale });
+              const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'create', locale, t });
               setInitialState(state);
             }
           }

@@ -11,7 +11,7 @@ import DateFields, { dateDoc } from './collections/Date';
 import RichTextFields, { richTextDoc } from './collections/RichText';
 import SelectFields, { selectsDoc } from './collections/Select';
 import TabsFields, { tabsDoc } from './collections/Tabs';
-import TextFields, { textDoc } from './collections/Text';
+import TextFields, { textDoc, textFieldsSlug } from './collections/Text';
 import PointFields, { pointDoc } from './collections/Point';
 import GroupFields, { groupDoc } from './collections/Group';
 import getFileByPath from '../../src/uploads/getFileByPath';
@@ -20,6 +20,7 @@ import IndexedFields from './collections/Indexed';
 import NumberFields, { numberDoc } from './collections/Number';
 import CodeFields, { codeDoc } from './collections/Code';
 import RelationshipFields from './collections/Relationship';
+import RadioFields, { radiosDoc } from './collections/Radio';
 
 export default buildConfig({
   admin: {
@@ -41,6 +42,7 @@ export default buildConfig({
     CollapsibleFields,
     ConditionalLogic,
     DateFields,
+    RadioFields,
     GroupFields,
     IndexedFields,
     NumberFields,
@@ -70,12 +72,13 @@ export default buildConfig({
     await payload.create({ collection: 'conditional-logic', data: conditionalLogicDoc });
     await payload.create({ collection: 'group-fields', data: groupDoc });
     await payload.create({ collection: 'select-fields', data: selectsDoc });
+    await payload.create({ collection: 'radio-fields', data: radiosDoc });
     await payload.create({ collection: 'tabs-fields', data: tabsDoc });
     await payload.create({ collection: 'point-fields', data: pointDoc });
     await payload.create({ collection: 'date-fields', data: dateDoc });
     await payload.create({ collection: 'code-fields', data: codeDoc });
 
-    const createdTextDoc = await payload.create({ collection: 'text-fields', data: textDoc });
+    const createdTextDoc = await payload.create({ collection: textFieldsSlug, data: textDoc });
 
     const uploadsDir = path.resolve(__dirname, './collections/Upload/uploads');
 

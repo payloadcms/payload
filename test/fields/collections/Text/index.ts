@@ -1,9 +1,10 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 
 export const defaultText = 'default-text';
+export const textFieldsSlug = 'text-fields';
 
 const TextFields: CollectionConfig = {
-  slug: 'text-fields',
+  slug: textFieldsSlug,
   admin: {
     useAsTitle: 'text',
   },
@@ -19,6 +20,24 @@ const TextFields: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'i18nText',
+      type: 'text',
+      label: {
+        en: 'Text en',
+        es: 'Text es',
+      },
+      admin: {
+        placeholder: {
+          en: 'en placeholder',
+          es: 'es placeholder',
+        },
+        description: {
+          en: 'en description',
+          es: 'es description',
+        },
+      },
+    },
+    {
       name: 'defaultFunction',
       type: 'text',
       defaultValue: () => (defaultText),
@@ -31,6 +50,12 @@ const TextFields: CollectionConfig = {
           resolve(defaultText);
         }, 1));
       },
+    },
+    {
+      label: 'Override the 40k text length default',
+      name: 'overrideLength',
+      type: 'text',
+      maxLength: 50000,
     },
   ],
 };

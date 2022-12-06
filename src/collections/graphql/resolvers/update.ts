@@ -5,12 +5,12 @@ import update from '../../operations/update';
 import { PayloadRequest } from '../../../express/types';
 
 export type Resolver = (_: unknown, args: {
-    id: string | number
-    data: Record<string, unknown>,
-    locale?: string
-    draft: boolean
-    autosave: boolean
-  },
+  id: string | number
+  data: Record<string, unknown>,
+  locale?: string
+  draft: boolean
+  autosave: boolean
+},
   context: {
     req: PayloadRequest,
     res: Response

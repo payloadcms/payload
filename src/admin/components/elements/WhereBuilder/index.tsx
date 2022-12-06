@@ -1,6 +1,7 @@
 import React, { useState, useReducer } from 'react';
 import queryString from 'qs';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Props } from './types';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import Button from '../Button';
@@ -11,15 +12,16 @@ import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 import { useSearchParams } from '../../utilities/SearchParams';
 import validateWhereQuery from './validateWhereQuery';
 import { Where } from '../../../../types';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
 const baseClass = 'where-builder';
 
-const reduceFields = (fields) => flattenTopLevelFields(fields).reduce((reduced, field) => {
+const reduceFields = (fields, i18n) => flattenTopLevelFields(fields).reduce((reduced, field) => {
   if (typeof fieldTypes[field.type] === 'object') {
     const formattedField = {
-      label: field.label,
+      label: getTranslation(field.label || field.name, i18n),
       value: field.name,
       ...fieldTypes[field.type],
       props: {
@@ -50,6 +52,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
 
   const history = useHistory();
   const params = useSearchParams();
+  const { t, i18n } = useTranslation('general');
 
   const [conditions, dispatchConditions] = useReducer(reducer, params.where, (whereFromSearch) => {
     if (modifySearchQuery && validateWhereQuery(whereFromSearch)) {
@@ -59,7 +62,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
     return [];
   });
 
-  const [reducedFields] = useState(() => reduceFields(collection.fields));
+  const [reducedFields] = useState(() => reduceFields(collection.fields, i18n));
 
   useThrottledEffect(() => {
     const currentParams = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 10 }) as { where: Where };
@@ -104,18 +107,14 @@ const WhereBuilder: React.FC<Props> = (props) => {
       {conditions.length > 0 && (
         <React.Fragment>
           <div className={`${baseClass}__label`}>
-            Filter
-            {' '}
-            {plural}
-            {' '}
-            where
+            {t('filterWhere', { label: getTranslation(plural, i18n) }) }
           </div>
           <ul className={`${baseClass}__or-filters`}>
             {conditions.map((or, orIndex) => (
               <li key={orIndex}>
                 {orIndex !== 0 && (
                   <div className={`${baseClass}__label`}>
-                    Or
+                    {t('or')}
                   </div>
                 )}
                 <ul className={`${baseClass}__and-filters`}>
@@ -123,7 +122,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
                     <li key={andIndex}>
                       {andIndex !== 0 && (
                         <div className={`${baseClass}__label`}>
-                          And
+                          {t('and')}
                         </div>
                       )}
                       <Condition
@@ -148,13 +147,13 @@ const WhereBuilder: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() => dispatchConditions({ type: 'add', field: reducedFields[0].value })}
           >
-            Or
+            {t('or')}
           </Button>
         </React.Fragment>
       )}
       {conditions.length === 0 && (
         <div className={`${baseClass}__no-filters`}>
-          <div className={`${baseClass}__label`}>No filters set</div>
+          <div className={`${baseClass}__label`}>{t('noFiltersSet')}</div>
           <Button
             className={`${baseClass}__add-first-filter`}
             icon="plus"
@@ -163,7 +162,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() => dispatchConditions({ type: 'add', field: reducedFields[0].value })}
           >
-            Add filter
+            {t('addFilter')}
           </Button>
         </div>
       )}

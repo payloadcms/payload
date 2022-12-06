@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
-import { FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
+import { useTranslation } from 'react-i18next';
+import { fieldAffectsData } from '../../../../fields/config/types';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
 import WhereBuilder from '../WhereBuilder';
@@ -8,8 +9,9 @@ import SortComplex from '../SortComplex';
 import Button from '../Button';
 import { Props } from './types';
 import { useSearchParams } from '../../utilities/SearchParams';
-
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery';
+import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -38,8 +40,9 @@ const ListControls: React.FC<Props> = (props) => {
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where);
 
   const [titleField] = useState(() => fields.find((field) => fieldAffectsData(field) && field.name === useAsTitle));
-  const [textFieldsToBeSearched] = useState(listSearchableFields ? () => fields.filter((field) => fieldAffectsData(field) && listSearchableFields.includes(field.name)) as FieldAffectingData[] : null);
+  const [textFieldsToBeSearched] = useState(getTextFieldsToBeSearched(listSearchableFields, fields));
   const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
+  const { t, i18n } = useTranslation('general');
 
   return (
     <div className={baseClass}>
@@ -48,7 +51,7 @@ const ListControls: React.FC<Props> = (props) => {
           fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
           handleChange={handleWhereChange}
           modifySearchQuery={modifySearchQuery}
-          fieldLabel={titleField && titleField.label ? titleField.label : undefined}
+          fieldLabel={(titleField && fieldAffectsData(titleField) && getTranslation(titleField.label || titleField.name, i18n)) ?? undefined}
           listSearchableFields={textFieldsToBeSearched}
         />
         <div className={`${baseClass}__buttons`}>
@@ -61,7 +64,7 @@ const ListControls: React.FC<Props> = (props) => {
                 icon="chevron"
                 iconStyle="none"
               >
-                Columns
+                {t('columns')}
               </Button>
             )}
             <Button
@@ -71,7 +74,7 @@ const ListControls: React.FC<Props> = (props) => {
               icon="chevron"
               iconStyle="none"
             >
-              Filters
+              {t('filters')}
             </Button>
             {enableSort && (
               <Button
@@ -81,7 +84,7 @@ const ListControls: React.FC<Props> = (props) => {
                 icon="chevron"
                 iconStyle="none"
               >
-                Sort
+                {t('sort')}
               </Button>
             )}
           </div>

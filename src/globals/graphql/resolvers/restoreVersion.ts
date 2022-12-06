@@ -21,6 +21,7 @@ export default function restoreVersionResolver(globalConfig: SanitizedGlobalConf
       id: args.id,
       globalConfig,
       req: context.req,
+      depth: 0,
     };
 
     const result = await restoreVersion(options);

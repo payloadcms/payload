@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
+import { useTranslation } from 'react-i18next';
 import Button from '../../../elements/Button';
 import Label from '../../Label';
 import Error from '../../Error';
@@ -12,6 +13,7 @@ import AddModal from './Add';
 import SelectExistingModal from './SelectExisting';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { useEditDepth, EditDepthContext } from '../../../utilities/EditDepth';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -60,6 +62,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   } = props;
 
   const { toggleModal, modalState } = useModal();
+  const { t, i18n } = useTranslation('fields');
   const editDepth = useEditDepth();
 
   const addModalSlug = `${path}-add-depth-${editDepth}`;
@@ -80,7 +83,12 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   useEffect(() => {
     if (typeof value === 'string' && value !== '') {
       const fetchFile = async () => {
-        const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`, { credentials: 'include' });
+        const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`, {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        });
         if (response.ok) {
           const json = await response.json();
           setFile(json);
@@ -99,6 +107,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     relationTo,
     api,
     serverURL,
+    i18n,
   ]);
 
   useEffect(() => {
@@ -144,9 +153,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
                   setModalToRender(addModalSlug);
                 }}
               >
-                Upload new
-                {' '}
-                {collection.labels.singular}
+                {t('uploadNewLabel', { label: getTranslation(collection.labels.singular, i18n) })}
               </Button>
               <Button
                 buttonStyle="secondary"
@@ -155,7 +162,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
                   setModalToRender(selectExistingModalSlug);
                 }}
               >
-                Choose from existing
+                {t('chooseFromExisting')}
               </Button>
             </div>
           )}

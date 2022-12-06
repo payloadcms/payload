@@ -18,6 +18,7 @@ export default {
   relationship,
   richText,
   select,
+  radio: select,
   textarea,
   upload: relationship,
 };

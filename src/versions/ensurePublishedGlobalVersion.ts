@@ -46,6 +46,7 @@ export const ensurePublishedGlobalVersion = async ({
         req,
         overrideAccess: true,
         showHiddenFields: true,
+        flattenLocales: false,
       });
 
       try {
@@ -62,7 +63,7 @@ export const ensurePublishedGlobalVersion = async ({
         enforceMaxVersions({
           payload: this,
           Model: VersionModel,
-          entityLabel: config.label,
+          slug: config.slug,
           entityType: 'global',
           max: config.versions.max,
         });

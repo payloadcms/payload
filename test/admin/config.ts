@@ -8,6 +8,7 @@ import CustomDefaultRoute from './components/views/CustomDefault';
 import BeforeLogin from './components/BeforeLogin';
 import AfterNavLinks from './components/AfterNavLinks';
 import { slug, globalSlug } from './shared';
+import Logout from './components/Logout';
 
 export interface Post {
   id: string;
@@ -38,12 +39,24 @@ export default buildConfig({
       beforeLogin: [
         BeforeLogin,
       ],
+      logout: {
+        Button: Logout,
+      },
       afterNavLinks: [
         AfterNavLinks,
       ],
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
+      },
+    },
+  },
+  i18n: {
+    resources: {
+      en: {
+        general: {
+          dashboard: 'Home',
+        },
       },
     },
   },
@@ -55,13 +68,28 @@ export default buildConfig({
     },
     {
       slug,
+      labels: {
+        singular: {
+          en: 'Post en',
+          es: 'Post es',
+        },
+        plural: {
+          en: 'Posts en',
+          es: 'Posts es',
+        },
+      },
       admin: {
+        description: { en: 'Description en', es: 'Description es' },
         listSearchableFields: ['title', 'description', 'number'],
-        group: 'One',
+        group: { en: 'One', es: 'Una' },
       },
       fields: [
         {
           name: 'title',
+          label: {
+            en: 'Title en',
+            es: 'Title es',
+          },
           type: 'text',
         },
         {
@@ -77,7 +105,7 @@ export default buildConfig({
     {
       slug: 'group-one-collection-ones',
       admin: {
-        group: 'One',
+        group: { en: 'One', es: 'Una' },
       },
       fields: [
         {
@@ -89,7 +117,7 @@ export default buildConfig({
     {
       slug: 'group-one-collection-twos',
       admin: {
-        group: 'One',
+        group: { en: 'One', es: 'Una' },
       },
       fields: [
         {
@@ -126,6 +154,10 @@ export default buildConfig({
   globals: [
     {
       slug: globalSlug,
+      label: {
+        en: 'Global en',
+        es: 'Global es',
+      },
       admin: {
         group: 'Group',
       },

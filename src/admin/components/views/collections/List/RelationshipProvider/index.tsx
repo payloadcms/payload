@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react';
 import querystring from 'qs';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../utilities/Config';
 import { TypeWithID } from '../../../../../../collections/config/types';
 import { reducer } from './reducer';
@@ -28,6 +29,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
   const [documents, dispatchDocuments] = useReducer(reducer, {});
   const debouncedDocuments = useDebounce(documents, 100);
   const config = useConfig();
+  const { i18n } = useTranslation();
   const {
     serverURL,
     routes: { api },
@@ -52,7 +54,12 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
         };
 
         const query = querystring.stringify(params, { addQueryPrefix: true });
-        const result = await fetch(`${url}${query}`, { credentials: 'include' });
+        const result = await fetch(`${url}${query}`, {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        });
         if (result.ok) {
           const json = await result.json();
           if (json.docs) {
@@ -63,7 +70,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
         }
       }
     });
-  }, [serverURL, api, debouncedDocuments]);
+  }, [i18n, serverURL, api, debouncedDocuments]);
 
   const getRelationships = useCallback(async (relationships: { relationTo: string, value: number | string }[]) => {
     dispatchDocuments({ type: 'REQUEST', docs: relationships });

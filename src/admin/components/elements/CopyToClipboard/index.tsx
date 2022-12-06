@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import Copy from '../../icons/Copy';
 import Tooltip from '../Tooltip';
 import { Props } from './types';
@@ -9,12 +10,13 @@ const baseClass = 'copy-to-clipboard';
 
 const CopyToClipboard: React.FC<Props> = ({
   value,
-  defaultMessage = 'copy',
-  successMessage = 'copied',
+  defaultMessage,
+  successMessage,
 }) => {
   const ref = useRef(null);
   const [copied, setCopied] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const { t } = useTranslation('general');
 
   useEffect(() => {
     if (copied && !hovered) {
@@ -49,8 +51,8 @@ const CopyToClipboard: React.FC<Props> = ({
       >
         <Copy />
         <Tooltip>
-          {copied && successMessage}
-          {!copied && defaultMessage}
+          {copied && (successMessage ?? t('copied'))}
+          {!copied && (defaultMessage ?? t('copy'))}
         </Tooltip>
         <textarea
           readOnly

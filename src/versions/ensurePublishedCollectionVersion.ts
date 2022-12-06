@@ -51,6 +51,7 @@ export const ensurePublishedCollectionVersion = async ({
         req,
         overrideAccess: true,
         showHiddenFields: true,
+        flattenLocales: false,
       });
 
       try {
@@ -60,7 +61,7 @@ export const ensurePublishedCollectionVersion = async ({
           autosave: false,
         });
       } catch (err) {
-        payload.logger.error(`There was an error while saving a version for the ${config.labels.singular} with ID ${id}.`);
+        payload.logger.error(`There was an error while saving a version for the ${config.slug} with ID ${id}.`);
         payload.logger.error(err);
       }
 
@@ -69,7 +70,7 @@ export const ensurePublishedCollectionVersion = async ({
           id,
           payload,
           Model: VersionModel,
-          entityLabel: config.labels.plural,
+          slug: config.slug,
           entityType: 'collection',
           max: config.versions.maxPerDoc,
         });

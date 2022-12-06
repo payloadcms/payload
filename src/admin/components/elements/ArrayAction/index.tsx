@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Popup from '../Popup';
 import More from '../../icons/More';
 import Chevron from '../../icons/Chevron';
@@ -19,6 +20,7 @@ export const ArrayAction: React.FC<Props> = ({
   duplicateRow,
   removeRow,
 }) => {
+  const { t } = useTranslation('general');
   return (
     <Popup
       horizontalAlign="center"
@@ -38,7 +40,7 @@ export const ArrayAction: React.FC<Props> = ({
                 }}
               >
                 <Chevron />
-                Move Up
+                {t('moveUp')}
               </button>
             )}
             {index < rowCount - 1 && (
@@ -51,7 +53,7 @@ export const ArrayAction: React.FC<Props> = ({
                 }}
               >
                 <Chevron />
-                Move Down
+                {t('moveDown')}
               </button>
             )}
             <button
@@ -63,7 +65,7 @@ export const ArrayAction: React.FC<Props> = ({
               }}
             >
               <Plus />
-              Add Below
+              {t('addBelow')}
             </button>
             <button
               className={`${baseClass}__action ${baseClass}__duplicate`}
@@ -74,7 +76,7 @@ export const ArrayAction: React.FC<Props> = ({
               }}
             >
               <Copy />
-              Duplicate
+              {t('duplicate')}
             </button>
             <button
               className={`${baseClass}__action ${baseClass}__remove`}
@@ -85,7 +87,7 @@ export const ArrayAction: React.FC<Props> = ({
               }}
             >
               <X />
-              Remove
+              {t('remove')}
             </button>
           </React.Fragment>
         );

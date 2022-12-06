@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import Eyebrow from '../../elements/Eyebrow';
 import { useStepNav } from '../../elements/StepNav';
@@ -11,29 +12,30 @@ const baseClass = 'not-found';
 const NotFound: React.FC = () => {
   const { setStepNav } = useStepNav();
   const { routes: { admin } } = useConfig();
+  const { t } = useTranslation('general');
 
   useEffect(() => {
     setStepNav([{
-      label: 'Not Found',
+      label: t('notFound'),
     }]);
-  }, [setStepNav]);
+  }, [setStepNav, t]);
 
   return (
     <div className={baseClass}>
       <Meta
-        title="Not Found"
-        description="Page not found"
-        keywords="404, Not found, Payload, CMS"
+        title={t('notFound')}
+        description={t('pageNotFound')}
+        keywords={`404 ${t('notFound')}`}
       />
       <Eyebrow />
       <Gutter className={`${baseClass}__wrap`}>
-        <h1>Nothing found</h1>
-        <p>Sorry&mdash;there is nothing to correspond with your request.</p>
+        <h1>{t('nothingFound')}</h1>
+        <p>{t('sorryNotFound')}</p>
         <Button
           el="link"
           to={`${admin}`}
         >
-          Back to Dashboard
+          {t('backToDashboard')}
         </Button>
       </Gutter>
     </div>

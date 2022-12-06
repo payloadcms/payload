@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import format from 'date-fns/format';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
@@ -16,7 +17,7 @@ import Restore from './Restore';
 import SelectLocales from './SelectLocales';
 import RenderFieldsToDiff from './RenderFieldsToDiff';
 import fieldComponents from './RenderFieldsToDiff/fields';
-
+import { getTranslation } from '../../../../utilities/getTranslation';
 import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
 import { FieldPermissions } from '../../../../auth';
 import { useLocale } from '../../utilities/Locale';
@@ -35,6 +36,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
   const { permissions } = useAuth();
   const locale = useLocale();
+  const { t, i18n } = useTranslation('version');
 
   let originalDocFetchURL: string;
   let versionFetchURL: string;
@@ -50,7 +52,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     originalDocFetchURL = `${serverURL}${api}/${slug}/${id}`;
     versionFetchURL = `${serverURL}${api}/${slug}/versions/${versionID}`;
     compareBaseURL = `${serverURL}${api}/${slug}/versions`;
-    entityLabel = collection.labels.singular;
+    entityLabel = getTranslation(collection.labels.singular, i18n);
     parentID = id;
     fields = collection.fields;
     fieldPermissions = permissions.collections[collection.slug].fields;
@@ -61,7 +63,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     originalDocFetchURL = `${serverURL}${api}/globals/${slug}`;
     versionFetchURL = `${serverURL}${api}/globals/${slug}/versions/${versionID}`;
     compareBaseURL = `${serverURL}${api}/globals/${slug}/versions`;
-    entityLabel = global.label;
+    entityLabel = getTranslation(global.label, i18n);
     fields = global.fields;
     fieldPermissions = permissions.globals[global.slug].fields;
   }
@@ -92,7 +94,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
               docLabel = mostRecentDoc[useAsTitle];
             }
           } else {
-            docLabel = '[Untitled]';
+            docLabel = `[${t('general:untitled')}]`;
           }
         } else {
           docLabel = mostRecentDoc.id;
@@ -102,7 +104,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
       nav = [
         {
           url: `${admin}/collections/${collection.slug}`,
-          label: collection.labels.plural,
+          label: getTranslation(collection.labels.plural, i18n),
         },
         {
           label: docLabel,
@@ -135,7 +137,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     }
 
     setStepNav(nav);
-  }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale]);
+  }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale, t, i18n]);
 
   let metaTitle: string;
   let metaDesc: string;
@@ -143,13 +145,13 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
   if (collection) {
     const useAsTitle = collection?.admin?.useAsTitle || 'id';
-    metaTitle = `Version - ${formattedCreatedAt} - ${doc[useAsTitle]} - ${entityLabel}`;
-    metaDesc = `Viewing version for the ${entityLabel} ${doc[useAsTitle]}`;
+    metaTitle = `${t('version')} - ${formattedCreatedAt} - ${doc[useAsTitle]} - ${entityLabel}`;
+    metaDesc = t('viewingVersion', { documentTitle: doc[useAsTitle], entityLabel });
   }
 
   if (global) {
-    metaTitle = `Version - ${formattedCreatedAt} - ${entityLabel}`;
-    metaDesc = `Viewing version for the global ${entityLabel}`;
+    metaTitle = `${t('version')} - ${formattedCreatedAt} - ${entityLabel}`;
+    metaDesc = t('viewingVersionGlobal', { entityLabel });
   }
 
   let comparison = compareDoc?.version;
@@ -171,9 +173,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
       <Eyebrow />
       <Gutter className={`${baseClass}__wrap`}>
         <div className={`${baseClass}__intro`}>
-          {doc?.autosave ? 'Autosaved version ' : 'Version'}
-          {' '}
-          created on:
+          {t('versionCreatedOn', { version: t(doc?.autosave ? 'autosavedVersion' : 'version') })}
         </div>
         <header className={`${baseClass}__header`}>
           <h2>

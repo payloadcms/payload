@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
-import { PaginateModel } from 'mongoose';
+import { Model, PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
 import { Access, GeneratePreviewURL, EntityDescription, Endpoint } from '../../config/types';
@@ -17,7 +17,7 @@ interface PassportLocalModel {
   authenticate: any
 }
 
-export interface CollectionModel extends PaginateModel<any>, PassportLocalModel {
+export interface CollectionModel extends Model<any>, PaginateModel<any>, PassportLocalModel {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
 }
 
@@ -112,13 +112,14 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
 
 export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
 
-export type BeforeLoginHook = (args: {
+export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
+  user: T
 }) => any;
 
 export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
-  doc: T;
+  user: T;
   token: string;
 }) => any;
 
@@ -172,7 +173,7 @@ export type CollectionAdminOptions = {
   /**
    * Place collections into a navigational group
    * */
-  group?: string;
+  group?: Record<string, string> | string;
   /**
    * Custom description for collection
    */
@@ -202,15 +203,32 @@ export type CollectionAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
+/** Manage all aspects of a data collection */
 export type CollectionConfig = {
   slug: string;
   /**
    * Label configuration
    */
   labels?: {
-    singular?: string;
-    plural?: string;
+    singular?: Record<string, string> | string;
+    plural?: Record<string, string> | string;
   };
+  /**
+   * GraphQL configuration
+   */
+  graphQL?: {
+    singularName?: string
+    pluralName?: string
+  }
+  /**
+   * Options used in typescript generation
+   */
+  typescript?: {
+    /**
+     * Typescript generation name given to the interface type
+     */
+    interface?: string
+  }
   fields: Field[];
   /**
    * Collection admin options
@@ -259,10 +277,22 @@ export type CollectionConfig = {
    */
   auth?: IncomingAuthType | boolean;
   /**
-   * Upload options
+   * Customize the handling of incoming file uploads
+   *
+   * @default false // disable uploads
    */
   upload?: IncomingUploadType | boolean;
+  /**
+   * Customize the handling of incoming file uploads
+   *
+   * @default false // disable versioning
+   */
   versions?: IncomingCollectionVersions | boolean;
+  /**
+   * Add `createdAt` and `updatedAt` fields
+   *
+   * @default true
+   */
   timestamps?: boolean
 };
 

@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../utilities/Auth';
 import { useFormProcessing, useFormSubmitted, useFormModified, useForm, useFormFields } from '../Form/context';
 import { Options, FieldType } from './types';
@@ -7,6 +8,11 @@ import { useOperation } from '../../utilities/OperationProvider';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import { UPDATE } from '../Form/types';
 
+/**
+ * Get and set the value of a form field.
+ *
+ * @see https://payloadcms.com/docs/admin/hooks#usefield
+ */
 const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const {
     path,
@@ -23,6 +29,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const operation = useOperation();
   const field = useFormFields(([fields]) => fields[path]);
   const dispatchField = useFormFields(([_, dispatch]) => dispatch);
+  const { t } = useTranslation();
 
   const { getData, getSiblingData, setModified } = useForm();
 
@@ -38,7 +45,11 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
     if (!modified && !disableModifyingForm) {
       if (typeof setModified === 'function') {
-        setModified(true);
+        // Update modified state after field value comes back
+        // to avoid cursor jump caused by state value / DOM mismatch
+        setTimeout(() => {
+          setModified(true);
+        }, 10);
       }
     }
 
@@ -88,6 +99,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
         data: getData(),
         siblingData: getSiblingData(path),
         operation,
+        t,
       };
 
       const validationResult = typeof validate === 'function' ? await validate(value, validateOptions) : true;
@@ -100,7 +112,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
         action.errorMessage = undefined;
       }
 
-      if (action.valid !== valid && typeof dispatchField === 'function') {
+      if (typeof dispatchField === 'function') {
         dispatchField(action);
       }
     };
@@ -118,7 +130,6 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     path,
     user,
     validate,
-    valid,
   ]);
 
   return result;

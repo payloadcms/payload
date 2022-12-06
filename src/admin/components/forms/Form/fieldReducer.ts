@@ -1,41 +1,9 @@
 import equal from 'deep-equal';
-import { unflatten, flatten } from 'flatley';
-import flattenFilters from './flattenFilters';
 import getSiblingData from './getSiblingData';
 import reduceFieldsToValues from './reduceFieldsToValues';
-import { FieldAction, Fields } from './types';
+import { Field, FieldAction, Fields } from './types';
 import deepCopyObject from '../../../../utilities/deepCopyObject';
-
-const unflattenRowsFromState = (state: Fields, path: string) => {
-  // Take a copy of state
-  const remainingFlattenedState = { ...state };
-
-  const rowsFromStateObject = {};
-
-  const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1);
-
-  // Loop over all keys from state
-  // If the key begins with the name of the parent field,
-  // Add value to rowsFromStateObject and delete it from remaining state
-  Object.keys(state).forEach((key) => {
-    if (key.indexOf(`${path}.`) === 0) {
-      if (!state[key].disableFormData) {
-        const name = key.replace(pathPrefixToRemove, '');
-        rowsFromStateObject[name] = state[key];
-        rowsFromStateObject[name].initialValue = rowsFromStateObject[name].value;
-      }
-
-      delete remainingFlattenedState[key];
-    }
-  });
-
-  const unflattenedRows = unflatten(rowsFromStateObject);
-
-  return {
-    unflattenedRows: unflattenedRows[path.replace(pathPrefixToRemove, '')] || [],
-    remainingFlattenedState,
-  };
-};
+import { flattenRows, separateRows } from './rows';
 
 function fieldReducer(state: Fields, action: FieldAction): Fields {
   switch (action.type) {
@@ -70,23 +38,27 @@ function fieldReducer(state: Fields, action: FieldAction): Fields {
 
     case 'REMOVE_ROW': {
       const { rowIndex, path } = action;
-      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, path);
+      const { remainingFields, rows } = separateRows(path, state);
 
-      unflattenedRows.splice(rowIndex, 1);
+      rows.splice(rowIndex, 1);
 
-      const flattenedRowState = unflattenedRows.length > 0 ? flatten({ [path]: unflattenedRows }, { filters: flattenFilters }) : {};
-
-      return {
-        ...remainingFlattenedState,
-        ...flattenedRowState,
+      const newState: Fields = {
+        ...remainingFields,
+        [path]: {
+          ...state[path],
+          value: rows.length,
+          disableFormData: rows.length > 0,
+        },
+        ...flattenRows(path, rows),
       };
+
+      return newState;
     }
 
     case 'ADD_ROW': {
       const {
         rowIndex, path, subFieldState, blockType,
       } = action;
-      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, path);
 
       if (blockType) {
         subFieldState.blockType = {
@@ -96,15 +68,18 @@ function fieldReducer(state: Fields, action: FieldAction): Fields {
         };
       }
 
-      // If there are subfields
-      if (Object.keys(subFieldState).length > 0) {
-        // Add new object containing subfield names to unflattenedRows array
-        unflattenedRows.splice(rowIndex + 1, 0, subFieldState);
-      }
+      const { remainingFields, rows } = separateRows(path, state);
+
+      rows.splice(rowIndex + 1, 0, subFieldState);
 
       const newState = {
-        ...remainingFlattenedState,
-        ...(flatten({ [path]: unflattenedRows }, { filters: flattenFilters })),
+        ...remainingFields,
+        [path]: {
+          ...state[path],
+          value: rows.length,
+          disableFormData: true,
+        },
+        ...flattenRows(path, rows),
       };
 
       return newState;
@@ -115,20 +90,25 @@ function fieldReducer(state: Fields, action: FieldAction): Fields {
         rowIndex, path,
       } = action;
 
-      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, path);
+      const { remainingFields, rows } = separateRows(path, state);
 
-      const duplicate = deepCopyObject(unflattenedRows[rowIndex]);
+      const duplicate = deepCopyObject(rows[rowIndex]);
       if (duplicate.id) delete duplicate.id;
 
       // If there are subfields
       if (Object.keys(duplicate).length > 0) {
         // Add new object containing subfield names to unflattenedRows array
-        unflattenedRows.splice(rowIndex + 1, 0, duplicate);
+        rows.splice(rowIndex + 1, 0, duplicate);
       }
 
       const newState = {
-        ...remainingFlattenedState,
-        ...(flatten({ [path]: unflattenedRows }, { filters: flattenFilters })),
+        ...remainingFields,
+        [path]: {
+          ...state[path],
+          value: rows.length,
+          disableFormData: true,
+        },
+        ...flattenRows(path, rows),
       };
 
       return newState;
@@ -136,18 +116,18 @@ function fieldReducer(state: Fields, action: FieldAction): Fields {
 
     case 'MOVE_ROW': {
       const { moveFromIndex, moveToIndex, path } = action;
-      const { unflattenedRows, remainingFlattenedState } = unflattenRowsFromState(state, path);
+      const { remainingFields, rows } = separateRows(path, state);
 
       // copy the row to move
-      const copyOfMovingRow = unflattenedRows[moveFromIndex];
+      const copyOfMovingRow = rows[moveFromIndex];
       // delete the row by index
-      unflattenedRows.splice(moveFromIndex, 1);
+      rows.splice(moveFromIndex, 1);
       // insert row copyOfMovingRow back in
-      unflattenedRows.splice(moveToIndex, 0, copyOfMovingRow);
+      rows.splice(moveToIndex, 0, copyOfMovingRow);
 
       const newState = {
-        ...remainingFlattenedState,
-        ...(flatten({ [path]: unflattenedRows }, { filters: flattenFilters })),
+        ...remainingFields,
+        ...flattenRows(path, rows),
       };
 
       return newState;
@@ -187,16 +167,16 @@ function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'UPDATE': {
-      const newField = {
-        value: action.value,
-        valid: action.valid,
-        errorMessage: action.errorMessage,
-        disableFormData: action.disableFormData,
-        initialValue: action.initialValue,
-        validate: action.validate,
-        condition: action.condition,
-        passesCondition: action.passesCondition,
-      };
+      const newField = Object.entries(action).reduce((field, [key, value]) => {
+        if (['value', 'valid', 'errorMessage', 'disableFormData', 'initialValue', 'validate', 'condition', 'passesCondition'].includes(key)) {
+          return {
+            ...field,
+            [key]: value,
+          };
+        }
+
+        return field;
+      }, state[action.path] || {} as Field);
 
       return {
         ...state,

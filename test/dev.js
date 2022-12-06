@@ -15,6 +15,11 @@ require('@babel/register')({
 
 const [testSuiteDir] = process.argv.slice(2);
 
+if (!testSuiteDir) {
+  console.error('ERROR: You must provide an argument for "testSuiteDir"');
+  process.exit(1);
+}
+
 const configPath = path.resolve(__dirname, testSuiteDir, 'config.ts');
 
 if (!fs.existsSync(configPath)) {

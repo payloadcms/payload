@@ -2,7 +2,6 @@ import url from 'url';
 import passportJwt, { StrategyOptions } from 'passport-jwt';
 import { Strategy as PassportStrategy } from 'passport-strategy';
 import { Payload } from '../..';
-import findByID from '../../collections/operations/findByID';
 import getExtractJWT from '../getExtractJWT';
 
 const JwtStrategy = passportJwt.Strategy;
@@ -25,11 +24,10 @@ export default ({ secret, config, collections }: Payload): PassportStrategy => {
       const parsedURL = url.parse(req.url);
       const isGraphQL = parsedURL.pathname === config.routes.graphQL;
 
-      const user = await findByID({
+      const user = await req.payload.findByID({
         id: token.id,
-        collection,
+        collection: token.collection,
         req,
-        overrideAccess: true,
         depth: isGraphQL ? 0 : collection.config.auth.depth,
       });
 

@@ -1,4 +1,5 @@
 import React, { Fragment, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../../utilities/Config';
 import { useAuth } from '../../../../../../../utilities/Auth';
 import { useFormFields } from '../../../../../../Form/context';
@@ -22,6 +23,7 @@ const createOptions = (collections, permissions) => collections.reduce((options,
 const RelationshipFields = () => {
   const { collections } = useConfig();
   const { permissions } = useAuth();
+  const { t } = useTranslation('fields');
 
   const [options, setOptions] = useState(() => createOptions(collections, permissions));
   const relationTo = useFormFields<string>(([fields]) => fields.relationTo?.value as string);
@@ -34,13 +36,13 @@ const RelationshipFields = () => {
     <Fragment>
       <Select
         required
-        label="Relation To"
+        label={t('relationTo')}
         name="relationTo"
         options={options}
       />
       {relationTo && (
         <Relationship
-          label="Related Document"
+          label={t('relatedDocument')}
           name="value"
           relationTo={relationTo}
           required

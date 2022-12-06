@@ -1,6 +1,6 @@
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
-import { LocalizedPost } from './payload-types';
+import { LocalizedPost, RelationshipLocalized } from './payload-types';
 import {
   defaultLocale,
   englishTitle,
@@ -21,7 +21,7 @@ export type LocalizedPostAllLocale = LocalizedPost & {
 
 export const slug = 'localized-posts';
 export const withLocalizedRelSlug = 'with-localized-relationship';
-
+export const relationshipLocalizedSlug = 'relationship-localized';
 export const withRequiredLocalizedFields = 'localized-required';
 
 const openAccess = {
@@ -134,6 +134,37 @@ export default buildConfig({
       ],
     },
     {
+      slug: relationshipLocalizedSlug,
+      fields: [
+        {
+          name: 'relationship',
+          type: 'relationship',
+          relationTo: slug,
+          localized: true,
+        },
+        {
+          name: 'relationshipHasMany',
+          type: 'relationship',
+          relationTo: slug,
+          hasMany: true,
+          localized: true,
+        },
+        {
+          name: 'relationMultiRelationTo',
+          type: 'relationship',
+          relationTo: [slug, 'dummy'],
+          localized: true,
+        },
+        {
+          name: 'relationMultiRelationToHasMany',
+          type: 'relationship',
+          relationTo: [slug, 'dummy'],
+          hasMany: true,
+          localized: true,
+        },
+      ],
+    },
+    {
       slug: 'dummy',
       access: openAccess,
       fields: [
@@ -210,13 +241,26 @@ export default buildConfig({
       },
     });
 
-    await payload.create({
+    await payload.create<RelationshipLocalized>({
       collection: withLocalizedRelSlug,
       data: {
-        localizedRelationship: localizedRelation.id,
+        relationship: localizedRelation.id,
         localizedRelationHasManyField: [localizedRelation.id, localizedRelation2.id],
         localizedRelationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
         localizedRelationMultiRelationToHasMany: [
+          { relationTo: slug, value: localizedRelation.id },
+          { relationTo: slug, value: localizedRelation2.id },
+        ],
+      },
+    });
+    await payload.create({
+      collection: relationshipLocalizedSlug,
+      locale: 'en',
+      data: {
+        relationship: localizedRelation.id,
+        relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
+        relationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
+        relationMultiRelationToHasMany: [
           { relationTo: slug, value: localizedRelation.id },
           { relationTo: slug, value: localizedRelation2.id },
         ],

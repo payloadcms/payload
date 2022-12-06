@@ -5,7 +5,7 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
-import { hasWhereAccessResult, UserDocument } from '../../auth/types';
+import { hasWhereAccessResult } from '../../auth/types';
 import { saveCollectionDraft } from '../../versions/drafts/saveCollectionDraft';
 import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
 import { uploadFiles } from '../../uploads/uploadFiles';
@@ -16,6 +16,7 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 
 export type Arguments = {
   collection: Collection
@@ -57,6 +58,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     id,
     req,
     req: {
+      t,
       locale,
       payload,
       payload: {
@@ -70,13 +72,15 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     autosave = false,
   } = args;
 
-  let { data } = args;
-
   if (!id) {
     throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST);
   }
 
+  let { data } = args;
+  const { password } = data;
   const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
+  const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft);
+  const lean = !shouldSavePassword;
 
   // /////////////////////////////////////
   // Access
@@ -107,13 +111,12 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  const doc = await Model.findOne(query) as UserDocument;
+  const doc = await getLatestCollectionVersion({ payload, collection, id, query, lean });
 
-  if (!doc && !hasWherePolicy) throw new NotFound();
-  if (!doc && hasWherePolicy) throw new Forbidden();
+  if (!doc && !hasWherePolicy) throw new NotFound(t);
+  if (!doc && hasWherePolicy) throw new Forbidden(t);
 
-  let docWithLocales: Document = doc.toJSON({ virtuals: true });
-  docWithLocales = JSON.stringify(docWithLocales);
+  let docWithLocales: Document = JSON.stringify(lean ? doc : doc.toJSON({ virtuals: true }));
   docWithLocales = JSON.parse(docWithLocales);
 
   const originalDoc = await afterRead({
@@ -154,9 +157,9 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     req,
   });
 
-  // // /////////////////////////////////////
-  // // beforeValidate - Collection
-  // // /////////////////////////////////////
+  // /////////////////////////////////////
+  // beforeValidate - Collection
+  // /////////////////////////////////////
 
   await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
     await priorHook;
@@ -174,7 +177,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // /////////////////////////////////////
 
   if (!collectionConfig.upload.disableLocalStorage) {
-    await uploadFiles(payload, filesToUpload);
+    await uploadFiles(payload, filesToUpload, t);
   }
 
   // /////////////////////////////////////
@@ -204,16 +207,14 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     id,
     operation: 'update',
     req,
-    skipValidation: shouldSaveDraft,
+    skipValidation: shouldSaveDraft || data._status === 'draft',
   });
 
   // /////////////////////////////////////
   // Handle potential password update
   // /////////////////////////////////////
 
-  const { password } = data;
-
-  if (password && collectionConfig.auth && !shouldSaveDraft) {
+  if (shouldSavePassword) {
     await doc.setPassword(password as string);
     await doc.save();
     delete data.password;
@@ -273,7 +274,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
       // Handle uniqueness error from MongoDB
       throw error.code === 11000 && error.keyValue
-        ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }])
+        ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }], t)
         : error;
     }
 

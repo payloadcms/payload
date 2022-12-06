@@ -12,6 +12,13 @@
  *  - navigate to versions
  *  - versions view accurately shows number of versions
  *  - compare
+ *    - iterable
+ *    - nested
+ *    - relationship
+ *    - select w/ i18n options (label: { en: 'example', ... })
+ *    - tabs
+ *    - text
+ *    - richtext
  *  - restore version
  *  - specify locales to show
  */

@@ -266,6 +266,24 @@ const MyComponent: React.FC = () => {
 };
 ```
 
+### useEditDepth
+
+Sends back how many editing levels "deep" the current component is. Edit depth is relevant while adding new documents / editing documents in modal windows and other cases.
+
+```tsx
+import { useEditDepth } from 'payload/components/utilities';
+
+const MyComponent: React.FC = () => {
+  // highlight-start
+  const editDepth = useEditDepth();
+  // highlight-end
+
+  return (
+    <span>My component is {editDepth} levels deep</span>
+  )
+}
+```
+
 ### usePreferences
 
 Returns methods to set and get user preferences. More info can be found [here](https://payloadcms.com/docs/admin/preferences).

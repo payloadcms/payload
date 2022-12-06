@@ -3,3 +3,8 @@ export const devUser = {
   password: 'test',
   roles: ['admin'],
 };
+export const regularUser = {
+  email: 'user@payloadcms.com',
+  password: 'test2',
+  roles: ['user'],
+};
