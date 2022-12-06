@@ -19,7 +19,13 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
   const relatedCollections = useRelatedCollections(relationTo);
   const { permissions } = useAuth();
   const [hasPermission, setHasPermission] = useState(false);
-  const [selectedCollection, setSelectedCollection] = useState<SanitizedCollectionConfig>();
+  const [selectedCollection, setSelectedCollection] = useState<SanitizedCollectionConfig>(() => {
+    if (relatedCollections.length === 1) {
+      return relatedCollections[0];
+    }
+
+    return undefined;
+  });
   const [popupOpen, setPopupOpen] = useState(false);
   const { t, i18n } = useTranslation('fields');
   const [showTooltip, setShowTooltip] = useState(false);
@@ -28,7 +34,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
     DocumentDrawerToggler,
     { toggleDrawer },
   ] = useDocumentDrawer({
-    collectionSlug: relatedCollections.length === 1 ? relatedCollections[0].slug : selectedCollection?.slug,
+    collectionSlug: selectedCollection?.slug,
   });
 
   const onSave = useCallback((json) => {

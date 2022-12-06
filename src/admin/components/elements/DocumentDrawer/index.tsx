@@ -125,13 +125,11 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
   }, [modalState, drawerSlug]);
 
   useEffect(() => {
-    if (isOpen && isError) {
+    if (isOpen && !isLoadingDocument && isError) {
       closeModal(drawerSlug);
       toast.error(data.errors?.[0].message || t('error:unspecific'));
     }
-  }, [isError, t, isOpen, data, drawerSlug, closeModal]);
-
-  const modalAction = `${serverURL}${api}/${collectionSlug}?locale=${locale}&depth=0&fallback-locale=null`;
+  }, [isError, t, isOpen, data, drawerSlug, closeModal, isLoadingDocument]);
 
   if (isError) return null;
 
@@ -157,7 +155,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
               onSave,
               initialState,
               hasSavePermission: true,
-              action: modalAction,
+              action: `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`,
               disableEyebrow: true,
               disableActions: true,
               me: true,
