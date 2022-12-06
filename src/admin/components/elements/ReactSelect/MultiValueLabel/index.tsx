@@ -1,4 +1,4 @@
-import React, { Fragment, useId } from 'react';
+import React, { Fragment } from 'react';
 import { components, MultiValueProps } from 'react-select';
 import { useDocumentDrawer } from '../../DocumentDrawer';
 import Edit from '../../../icons/Edit';
@@ -17,8 +17,10 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
     selectProps,
   } = props;
 
-  const { DocumentDrawer, DocumentDrawerToggler } = useDocumentDrawer();
-  const uuid = useId();
+  const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
+    id: value?.toString(),
+    collectionSlug: relationTo,
+  });
 
   return (
     <div className={baseClass}>
@@ -33,19 +35,12 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
       {relationTo && (
         <Fragment>
           <DocumentDrawerToggler
-            collection={relationTo}
-            id={value.toString()}
-            uuid={uuid}
             className={`${baseClass}__drawer-toggler`}
             aria-label={`Edit ${label}`}
           >
             <Edit />
           </DocumentDrawerToggler>
-          <DocumentDrawer
-            collection={relationTo}
-            id={value.toString()}
-            uuid={uuid}
-          />
+          <DocumentDrawer />
         </Fragment>
       )}
     </div>

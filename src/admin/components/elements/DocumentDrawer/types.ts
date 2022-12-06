@@ -1,28 +1,30 @@
 import React, { HTMLAttributes } from 'react';
 
-export type Props = {
-  collection: string
+export type DocumentDrawerProps = {
+  collectionSlug: string
   id?: string
   onSave?: (json: Record<string, unknown>) => void
   customHeader?: React.ReactNode
-  uuid?: string
+  drawerSlug?: string
 }
 
 export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
-  collection: string
-  id?: string
   children?: React.ReactNode
   className?: string
-  uuid?: string
+  drawerSlug?: string
+  key?: string
 }
 
-export type IDocumentDrawerContext = {
-  DocumentDrawer: React.FC<Props>,
-  DocumentDrawerToggler: React.FC<DocumentTogglerProps>
-  formatDocumentDrawerSlug: (props: {
-    collection: string,
-    id: string,
-    depth: number,
-    uuid?: string,
-  }) => string,
-}
+export type UseDocumentDrawer = (args: {
+  id?: string
+  collectionSlug: string
+}) => [
+  React.FC<Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>>, // drawer
+  React.FC<Omit<DocumentTogglerProps, 'collectionSlug' | 'id'>>, // toggler
+  {
+    drawerSlug: string,
+    drawerDepth: number
+    isDrawerOpen: boolean
+    toggleDrawer: () => void
+  }
+]
