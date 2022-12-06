@@ -1,4 +1,3 @@
-import { NextFunction } from 'express';
 import { CollectionPermission, GlobalPermission } from '../../auth';
 import type { PayloadRequest } from '../../express/types';
 import { getEntityPermissions } from '../../utilities/getEntityPermissions';
@@ -6,45 +5,36 @@ import { getEntityPermissions } from '../../utilities/getEntityPermissions';
 const allOperations = ['create', 'read', 'update', 'delete'];
 
 type Arguments = {
-  req: PayloadRequest, res: Response, next: NextFunction
+  req: PayloadRequest
 }
 
 export async function docAccess(args: Arguments): Promise<CollectionPermission | GlobalPermission> {
   const {
     req,
     req: {
-      payload: {
+      collection: {
         config,
       },
     },
   } = args;
 
-  let results = {} as CollectionPermission | GlobalPermission;
-  const promises = [];
+  const collectionOperations = [...allOperations];
 
-  config.collections.forEach((collection) => {
-    const collectionOperations = [...allOperations];
+  if (config.auth && (typeof config.auth.maxLoginAttempts !== 'undefined' && config.auth.maxLoginAttempts !== 0)) {
+    collectionOperations.push('unlock');
+  }
 
-    // if collection.slug === collection from req do this
+  if (config.versions) {
+    collectionOperations.push('readVersions');
+  }
 
-    if (collection.auth && (typeof collection.auth.maxLoginAttempts !== 'undefined' && collection.auth.maxLoginAttempts !== 0)) {
-      collectionOperations.push('unlock');
-    }
-
-    if (collection.versions) {
-      collectionOperations.push('readVersions');
-    }
-
-    const [collectionPolicy, collectionPromises] = getEntityPermissions<CollectionPermission>({
-      req,
-      entity: collection,
-      operations: collectionOperations,
-    });
-    results = collectionPolicy;
-    promises.push(collectionPromises);
+  const [collectionPolicy, promises] = getEntityPermissions<CollectionPermission>({
+    req,
+    entity: config,
+    operations: collectionOperations,
   });
 
   await Promise.all(promises);
 
-  return results;
+  return collectionPolicy;
 }
