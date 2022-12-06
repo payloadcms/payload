@@ -29,7 +29,7 @@ export const GetFilterOptions = ({
   const { user } = useAuth();
 
   useEffect(() => {
-    const data = reduceFieldsToValues(fields);
+    const data = reduceFieldsToValues(fields, true);
     const siblingData = getSiblingData(fields, path);
 
     const newFilterOptionsResult = getFilterOptionsQuery(filterOptions, {
