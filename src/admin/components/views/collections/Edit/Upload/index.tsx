@@ -184,13 +184,11 @@ const Upload: React.FC<Props> = (props) => {
                 >
                   {t('selectFile')}
                 </Button>
-                <div className={`${baseClass}__or-other-options-container`}>
-                  <p className={`${baseClass}__or-text`}>{t('general:or')}</p>
-                  <div className={`${baseClass}__other-options`}>
-                    <p>{t('dragAndDrop')}</p>
-                    <p>{t('copyAndPaste')}</p>
-                  </div>
-                </div>
+                <p className={`${baseClass}__drag-label`}>
+                  {t('general:or')}
+                  {' '}
+                  {t('dragAndDrop')}
+                </p>
               </div>
             </React.Fragment>
           )}

@@ -869,9 +869,6 @@
         "dragAndDrop": {
           "type": "string"
         },
-        "copyAndPaste": {
-          "type": "string"
-        },
         "sizes": {
           "type": "string"
         },
@@ -889,7 +886,6 @@
         "selectCollectionToBrowse",
         "selectFile",
         "dragAndDrop",
-        "copyAndPaste",
         "sizes",
         "width"
       ]

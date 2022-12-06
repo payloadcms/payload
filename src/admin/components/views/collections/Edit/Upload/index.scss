@@ -10,6 +10,11 @@
     bottom: calc(100% - #{base(.5)});
   }
 
+  &__drag-label {
+    margin: 0;
+    text-transform: lowercase;
+  }
+
   &__upload {
     position: relative;
 
@@ -28,17 +33,13 @@
     padding: base(2);
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
   }
 
   &__drop-zone {
     border: 1px dotted var(--theme-elevation-400);
-    justify-content: center;
-
 
     .btn {
-      margin: base(.25) base(.5);
-      width: 150px;
+      margin: 0 $baseline 0 0;
     }
   }
 
@@ -61,39 +62,6 @@
     }
   }
 
-  &__or-other-options-container {
-    display: flex;
-    align-items: center;
-    margin: base(.25) base(.5);
-
-    p {
-      margin: 0;
-    }
-  }
-
-  &__or-text {
-    margin: 0;
-    font-size: 16px;
-    text-transform: uppercase;
-  }
-
-  &__other-options {
-    display: flex;
-    flex-direction: column;
-    margin-left: base(1);
-    align-items: center;
-
-    :first-child {
-      border-bottom: 1px solid;
-    }
-
-    :last-child {
-      border-top: 1px solid;
-      position: relative;
-      top: -1px;
-    }
-  }
-
   @include mid-break {
     &__drop-zone {
       display: block;
@@ -105,7 +73,7 @@
         max-width: 200px;
       }
 
-      .file-field__or-other-options-container {
+      .file-field__drag-label {
         display: none;
       }
     }
