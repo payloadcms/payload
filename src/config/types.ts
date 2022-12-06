@@ -316,7 +316,6 @@ export type Config = {
         Icon?: React.ComponentType<any>;
         /** Replace the logo on the login page */
         Logo?: React.ComponentType<any>;
-        v;
       };
       /* Replace complete pages */
       views?: {
@@ -324,7 +323,6 @@ export type Config = {
         Account?: React.ComponentType<any>;
         /** Replace the admin homepage */
         Dashboard?: React.ComponentType<any>;
-        v;
       };
     };
     /**

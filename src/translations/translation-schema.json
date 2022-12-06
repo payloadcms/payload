@@ -368,6 +368,33 @@
         "blocks": {
           "type": "string"
         },
+        "chooseBetweenCustomTextOrDocument": {
+          "type": "string"
+        },
+        "chooseDocumentToLink":{
+          "type": "string"
+        },
+        "customURL": {
+          "type": "string"
+        },
+        "editLink":{
+          "type": "string"
+        },
+        "enterURL": {
+          "type": "string"
+        },
+        "internalLink":{
+          "type": "string"
+        },
+        "linkType": {
+          "type": "string"
+        },
+        "openInNewTab":{
+          "type": "string"
+        },
+        "textToDisplay": {
+          "type": "string"
+        },
         "addLabel": {
           "type": "string"
         },
@@ -450,6 +477,15 @@
       "required": [
         "block",
         "blocks",
+        "chooseBetweenCustomTextOrDocument",
+        "chooseDocumentToLink",
+        "customURL",
+        "editLink",
+        "enterURL",
+        "internalLink",
+        "linkType",
+        "openInNewTab",
+        "textToDisplay",
         "addLabel",
         "addNew",
         "addNewLabel",
@@ -866,6 +902,9 @@
         "selectFile": {
           "type": "string"
         },
+        "dragAndDrop": {
+          "type": "string"
+        },
         "sizes": {
           "type": "string"
         },
@@ -882,6 +921,7 @@
         "moreInfo",
         "selectCollectionToBrowse",
         "selectFile",
+        "dragAndDrop",
         "sizes",
         "width"
       ]

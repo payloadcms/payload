@@ -1,36 +1,48 @@
 import { Config } from '../../../../../../../../config/types';
 import { Field } from '../../../../../../../../fields/config/types';
+import { extractTranslations } from '../../../../../../../../translations/extractTranslations';
+
+const translations = extractTranslations([
+  'fields:textToDisplay',
+  'fields:linkType',
+  'fields:chooseBetweenCustomTextOrDocument',
+  'fields:customURL',
+  'fields:internalLink',
+  'fields:enterURL',
+  'fields:chooseDocumentToLink',
+  'fields:openInNewTab',
+]);
 
 export const getBaseFields = (config: Config): Field[] => [
   {
     name: 'text',
-    label: 'Text to display',
+    label: translations['fields:textToDisplay'],
     type: 'text',
     required: true,
   },
   {
     name: 'linkType',
-    label: 'Link Type',
+    label: translations['fields:linkType'],
     type: 'radio',
     required: true,
     admin: {
-      description: 'Choose between entering a custom text URL or linking to another document.',
+      description: translations['fields:chooseBetweenCustomTextOrDocument'],
     },
     defaultValue: 'custom',
     options: [
       {
-        label: 'Custom URL',
+        label: translations['fields:customURL'],
         value: 'custom',
       },
       {
-        label: 'Internal Link',
+        label: translations['fields:internalLink'],
         value: 'internal',
       },
     ],
   },
   {
     name: 'url',
-    label: 'Enter a URL',
+    label: translations['fields:enterURL'],
     type: 'text',
     required: true,
     admin: {
@@ -41,7 +53,7 @@ export const getBaseFields = (config: Config): Field[] => [
   },
   {
     name: 'doc',
-    label: 'Choose a document to link to',
+    label: translations['fields:chooseDocumentToLink'],
     type: 'relationship',
     required: true,
     relationTo: config.collections.map(({ slug }) => slug),
@@ -53,7 +65,7 @@ export const getBaseFields = (config: Config): Field[] => [
   },
   {
     name: 'newTab',
-    label: 'Open in new tab',
+    label: translations['fields:openInNewTab'],
     type: 'checkbox',
   },
 ];

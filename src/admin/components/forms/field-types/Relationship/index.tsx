@@ -74,6 +74,8 @@ const Relationship: React.FC<Props> = (props) => {
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false);
   const firstRun = useRef(true);
 
+  const pathOrName = path || name;
+
   const memoizedValidate = useCallback((value, validationOptions) => {
     return validate(value, { ...validationOptions, required });
   }, [validate, required]);
@@ -85,7 +87,7 @@ const Relationship: React.FC<Props> = (props) => {
     setValue,
     initialValue,
   } = useField<Value | Value[]>({
-    path: path || name,
+    path: pathOrName,
     validate: memoizedValidate,
     condition,
   });
@@ -307,7 +309,7 @@ const Relationship: React.FC<Props> = (props) => {
 
   return (
     <div
-      id={`field-${(path || name).replace(/\./gi, '__')}`}
+      id={`field-${(pathOrName).replace(/\./gi, '__')}`}
       className={classes}
       style={{
         ...style,
@@ -319,11 +321,11 @@ const Relationship: React.FC<Props> = (props) => {
         message={errorMessage}
       />
       <Label
-        htmlFor={path}
+        htmlFor={pathOrName}
         label={label}
         required={required}
       />
-      <GetFilterOptions {...{ filterOptionsResult, setFilterOptionsResult, filterOptions, path, relationTo }} />
+      <GetFilterOptions {...{ filterOptionsResult, setFilterOptionsResult, filterOptions, path: pathOrName, relationTo }} />
       {!errorLoading && (
         <div className={`${baseClass}__wrap`}>
           <ReactSelect
@@ -387,7 +389,7 @@ const Relationship: React.FC<Props> = (props) => {
           />
           {!readOnly && (
             <AddNewRelation
-              {...{ path, hasMany, relationTo, value, setValue, dispatchOptions }}
+              {...{ path: pathOrName, hasMany, relationTo, value, setValue, dispatchOptions }}
             />
           )}
         </div>

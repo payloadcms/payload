@@ -267,7 +267,7 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
       doc: global,
       previousDoc: originalDoc,
       req,
-    }) || result;
+    }) || global;
   }, Promise.resolve());
 
   // /////////////////////////////////////

@@ -41,11 +41,11 @@ const Status: React.FC<Props> = () => {
   let statusToRender;
 
   if (unpublishedVersions?.docs?.length > 0 && publishedDoc) {
-    statusToRender = t('changed');
+    statusToRender = 'changed';
   } else if (!publishedDoc) {
-    statusToRender = t('draft');
+    statusToRender = 'draft';
   } else if (publishedDoc && unpublishedVersions?.docs?.length <= 1) {
-    statusToRender = t('published');
+    statusToRender = 'published';
   }
 
   const performAction = useCallback(async (action: 'revert' | 'unpublish') => {
@@ -118,8 +118,8 @@ const Status: React.FC<Props> = () => {
     return (
       <div className={baseClass}>
         <div className={`${baseClass}__value-wrap`}>
-          <span className={`${baseClass}__value`}>{statusToRender}</span>
-          {statusToRender === 'Published' && (
+          <span className={`${baseClass}__value`}>{t(statusToRender)}</span>
+          {statusToRender === 'published' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
@@ -152,7 +152,7 @@ const Status: React.FC<Props> = () => {
               </Modal>
             </React.Fragment>
           )}
-          {statusToRender === 'Changed' && (
+          {statusToRender === 'changed' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
