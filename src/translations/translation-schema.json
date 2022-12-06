@@ -902,6 +902,9 @@
         "selectFile": {
           "type": "string"
         },
+        "dragAndDrop": {
+          "type": "string"
+        },
         "sizes": {
           "type": "string"
         },
@@ -918,6 +921,7 @@
         "moreInfo",
         "selectCollectionToBrowse",
         "selectFile",
+        "dragAndDrop",
         "sizes",
         "width"
       ]
