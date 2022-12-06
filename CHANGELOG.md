@@ -1,5 +1,20 @@
 
 
+## [1.2.5](https://github.com/payloadcms/payload/compare/v1.2.4...v1.2.5) (2022-12-06)
+
+
+### Bug Fixes
+
+* exits findOptionsByValue when matchedOption is found ([881c067](https://github.com/payloadcms/payload/commit/881c067c40d7477fa2a56d9c700feab49410e1c1))
+* mismatch language condition when rendering unpublish ([3ddd0ea](https://github.com/payloadcms/payload/commit/3ddd0ea3efbd4d673a943dbf63363c548ae5562c))
+* safely coerces limit and depth to number or undefined ([dd04d78](https://github.com/payloadcms/payload/commit/dd04d7842efe9228e98271a878fd68a814042f41))
+* uses pathOrName to pass to internal Relationship field components ([8874e87](https://github.com/payloadcms/payload/commit/8874e871d4a48d5d3fccb8233464437d8ea61ad4))
+
+
+### Features
+
+* add Turkish translations ([#1596](https://github.com/payloadcms/payload/issues/1596)) ([c8a6831](https://github.com/payloadcms/payload/commit/c8a683100f1ec663a2fdfd5c1ab82300d2618995))
+
 ## [1.2.4](https://github.com/payloadcms/payload/compare/v1.2.3...v1.2.4) (2022-12-03)
 
 
