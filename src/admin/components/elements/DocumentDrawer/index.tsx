@@ -8,7 +8,7 @@ import X from '../../icons/X';
 import { Fields } from '../../forms/Form/types';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import { getTranslation } from '../../../../utilities/getTranslation';
-import { Drawer, DrawerToggler, useDrawerDepth } from '../Drawer';
+import { Drawer, DrawerToggler } from '../Drawer';
 import Button from '../Button';
 import { useConfig } from '../../utilities/Config';
 import { useLocale } from '../../utilities/Locale';
@@ -21,6 +21,7 @@ import { useRelatedCollections } from '../../forms/field-types/Relationship/AddN
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import IDLabel from '../IDLabel';
 import './index.scss';
+import { useEditDepth } from '../../utilities/EditDepth';
 
 const baseClass = 'doc-drawer';
 
@@ -189,7 +190,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
 };
 
 export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => {
-  const drawerDepth = useDrawerDepth();
+  const drawerDepth = useEditDepth();
   const uuid = useId();
   const { modalState, toggleModal } = useModal();
   const [isOpen, setIsOpen] = useState(false);

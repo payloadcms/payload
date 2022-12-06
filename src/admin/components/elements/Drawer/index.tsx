@@ -1,14 +1,11 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useWindowInfo } from '@faceless-ui/window-info';
 import { Props, TogglerProps } from './types';
 import './index.scss';
+import { EditDepthContext, useEditDepth } from '../../utilities/EditDepth';
 
 const baseClass = 'drawer';
-
-export const DrawerDepthContext = createContext(0);
-
-export const useDrawerDepth = (): number => useContext(DrawerDepthContext);
 
 const zBase = 100;
 
@@ -29,7 +26,7 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
   ...rest
 }) => {
   const { openModal } = useModal();
-  const drawerDepth = useDrawerDepth();
+  const drawerDepth = useEditDepth();
 
   const handleClick = useCallback((e) => {
     openModal(formatSlug !== false ? formatDrawerSlug({ slug, depth: drawerDepth }) : slug);
@@ -55,7 +52,7 @@ export const Drawer: React.FC<Props> = ({
 }) => {
   const { toggleModal, modalState } = useModal();
   const { breakpoints: { m: midBreak } } = useWindowInfo();
-  const drawerDepth = useDrawerDepth();
+  const drawerDepth = useEditDepth();
   const [isOpen, setIsOpen] = useState(false);
   const [modalSlug] = useState(() => (formatSlug !== false ? formatDrawerSlug({ slug, depth: drawerDepth }) : slug));
 
@@ -91,23 +88,11 @@ export const Drawer: React.FC<Props> = ({
       </button>
       <div className={`${baseClass}__content`}>
         <div className={`${baseClass}__content-children`}>
-          <DrawerDepthContext.Provider value={drawerDepth + 1}>
+          <EditDepthContext.Provider value={drawerDepth + 1}>
             {children}
-          </DrawerDepthContext.Provider>
+          </EditDepthContext.Provider>
         </div>
       </div>
     </Modal>
   );
 };
-
-export type IDrawerContext = {
-  Drawer: React.FC<Props>,
-  DrawerToggler: React.FC<TogglerProps>
-}
-
-export const DrawerContext = createContext({
-  Drawer,
-  DrawerToggler,
-});
-
-export const useDrawer = (): IDrawerContext => useContext(DrawerContext);
