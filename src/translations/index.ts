@@ -5,6 +5,7 @@ import fr from './fr.json';
 import it from './it.json';
 import ja from './ja.json';
 import my from './my.json';
+import nb from './nb.json';
 import nl from './nl.json';
 import pl from './pl.json';
 import pt from './pt.json';
@@ -21,6 +22,7 @@ export default {
   it,
   ja,
   my,
+  nb,
   nl,
   pl,
   pt,
