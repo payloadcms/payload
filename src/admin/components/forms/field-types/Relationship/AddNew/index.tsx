@@ -18,7 +18,7 @@ const baseClass = 'relationship-add-new';
 export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, value, setValue, dispatchOptions }) => {
   const relatedCollections = useRelatedCollections(relationTo);
   const { permissions } = useAuth();
-  const [hasPermission, setHasPermission] = useState(false);
+  const [show, setShow] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<string>();
   const relatedToMany = relatedCollections.length > 1;
   const [collectionConfig, setCollectionConfig] = useState<SanitizedCollectionConfig>(() => (!relatedToMany ? relatedCollections[0] : undefined));
@@ -65,9 +65,9 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
   useEffect(() => {
     if (permissions) {
       if (relatedCollections.length === 1) {
-        setHasPermission(permissions.collections[relatedCollections[0].slug].create.permission);
+        setShow(permissions.collections[relatedCollections[0].slug].create.permission);
       } else {
-        setHasPermission(relatedCollections.some((collection) => permissions.collections[collection.slug].create.permission));
+        setShow(relatedCollections.some((collection) => permissions.collections[collection.slug].create.permission));
       }
     }
   }, [permissions, relatedCollections]);
@@ -93,75 +93,78 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
     }
   }, [isDrawerOpen, relatedToMany]);
 
-  return hasPermission ? (
-    <div
-      className={baseClass}
-      id={`${path}-add-new`}
-    >
-      {relatedCollections.length === 1 && (
-        <Fragment>
-          <DocumentDrawerToggler
-            className={`${baseClass}__add-button`}
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
-          >
-            {showTooltip && (
-              <Tooltip className={`${baseClass}__tooltip`}>
-                {t('addNewLabel', { label: relatedCollections[0].labels.singular })}
-              </Tooltip>
+  if (show) {
+    return (
+      <div
+        className={baseClass}
+        id={`${path}-add-new`}
+      >
+        {relatedCollections.length === 1 && (
+          <Fragment>
+            <DocumentDrawerToggler
+              className={`${baseClass}__add-button`}
+              onMouseEnter={() => setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+            >
+              {showTooltip && (
+                <Tooltip className={`${baseClass}__tooltip`}>
+                  {t('addNewLabel', { label: relatedCollections[0].labels.singular })}
+                </Tooltip>
+              )}
+              <Plus />
+            </DocumentDrawerToggler>
+            <DocumentDrawer onSave={onSave} />
+          </Fragment>
+        )}
+        {relatedCollections.length > 1 && (
+          <Fragment>
+            <Popup
+              buttonType="custom"
+              horizontalAlign="center"
+              onToggleOpen={onPopopToggle}
+              button={(
+                <Button
+                  className={`${baseClass}__add-button`}
+                  buttonStyle="none"
+                  tooltip={popupOpen ? undefined : t('addNew')}
+                >
+                  <Plus />
+                </Button>
             )}
-            <Plus />
-          </DocumentDrawerToggler>
-          <DocumentDrawer onSave={onSave} />
-        </Fragment>
-      )}
-      {relatedCollections.length > 1 && (
-        <Fragment>
-          <Popup
-            buttonType="custom"
-            horizontalAlign="center"
-            onToggleOpen={onPopopToggle}
-            button={(
-              <Button
-                className={`${baseClass}__add-button`}
-                buttonStyle="none"
-                tooltip={popupOpen ? undefined : t('addNew')}
-              >
-                <Plus />
-              </Button>
-          )}
-            render={({ close: closePopup }) => (
-              <ul className={`${baseClass}__relations`}>
-                {relatedCollections.map((relatedCollection) => {
-                  if (permissions.collections[relatedCollection.slug].create.permission) {
-                    return (
-                      <li key={relatedCollection.slug}>
-                        <button
-                          type="button"
-                          className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
-                          onClick={() => {
-                            closePopup();
-                            setSelectedCollection(relatedCollection.slug);
-                          }}
-                        >
-                          {getTranslation(relatedCollection.labels.singular, i18n)}
-                        </button>
-                      </li>
-                    );
-                  }
+              render={({ close: closePopup }) => (
+                <ul className={`${baseClass}__relations`}>
+                  {relatedCollections.map((relatedCollection) => {
+                    if (permissions.collections[relatedCollection.slug].create.permission) {
+                      return (
+                        <li key={relatedCollection.slug}>
+                          <button
+                            type="button"
+                            className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
+                            onClick={() => {
+                              closePopup();
+                              setSelectedCollection(relatedCollection.slug);
+                            }}
+                          >
+                            {getTranslation(relatedCollection.labels.singular, i18n)}
+                          </button>
+                        </li>
+                      );
+                    }
 
-                  return null;
-                })}
-              </ul>
-            )}
-          />
-          {collectionConfig && permissions.collections[collectionConfig.slug].create.permission && (
-            <DocumentDrawer
-              onSave={onSave}
+                    return null;
+                  })}
+                </ul>
+              )}
             />
-          )}
-        </Fragment>
-      )}
-    </div>
-  ) : null;
+            {collectionConfig && permissions.collections[collectionConfig.slug].create.permission && (
+              <DocumentDrawer
+                onSave={onSave}
+              />
+            )}
+          </Fragment>
+        )}
+      </div>
+    );
+  }
+  return null;
 };

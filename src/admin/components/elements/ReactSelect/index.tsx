@@ -23,6 +23,7 @@ import { MultiValueLabel } from './MultiValueLabel';
 import { MultiValue } from './MultiValue';
 import { SingleValue } from './SingleValue';
 import { ValueContainer } from './ValueContainer';
+import { ClearIndicator } from './ClearIndicator';
 import './index.scss';
 
 const SelectAdapter: React.FC<Props> = (props) => {
@@ -76,6 +77,7 @@ const SelectAdapter: React.FC<Props> = (props) => {
         MultiValue,
         MultiValueLabel,
         DropdownIndicator: Chevron,
+        ClearIndicator,
         ...components,
       }}
     />
