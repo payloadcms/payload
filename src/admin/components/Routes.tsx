@@ -13,6 +13,7 @@ import StayLoggedIn from './modals/StayLoggedIn';
 import Versions from './views/Versions';
 import Version from './views/Version';
 import { DocumentInfoProvider } from './utilities/DocumentInfo';
+import { useLocale } from './utilities/Locale';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -31,6 +32,7 @@ const Routes = () => {
   const [initialized, setInitialized] = useState(null);
   const { user, permissions, refreshCookie } = useAuth();
   const { i18n } = useTranslation();
+  const locale = useLocale();
 
   const canAccessAdmin = permissions?.canAccessAdmin;
 
@@ -218,7 +220,7 @@ const Routes = () => {
                                       if (permissions?.collections?.[collection.slug]?.read?.permission) {
                                         return (
                                           <DocumentInfoProvider
-                                            key={`${collection.slug}-edit-${id}`}
+                                            key={`${collection.slug}-edit-${id}-${locale}`}
                                             collection={collection}
                                             id={id}
                                           >
@@ -291,7 +293,10 @@ const Routes = () => {
                                     render={(routeProps) => {
                                       if (permissions?.globals?.[global.slug]?.read?.permission) {
                                         return (
-                                          <DocumentInfoProvider global={global}>
+                                          <DocumentInfoProvider
+                                            global={global}
+                                            key={`${global.slug}-${locale}`}
+                                          >
                                             <EditGlobal
                                               {...routeProps}
                                               global={global}
