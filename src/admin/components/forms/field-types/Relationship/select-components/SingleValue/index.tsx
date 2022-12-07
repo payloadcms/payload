@@ -1,8 +1,8 @@
 import React, { Fragment, useEffect } from 'react';
-import { components, SingleValueProps } from 'react-select';
-import { useDocumentDrawer } from '../../DocumentDrawer';
-import Edit from '../../../icons/Edit';
-import { Option } from '../../../forms/field-types/Relationship/types';
+import { components as SelectComponents, SingleValueProps } from 'react-select';
+import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer';
+import Edit from '../../../../../icons/Edit';
+import { Option } from '../../types';
 import './index.scss';
 
 const baseClass = 'single-value';
@@ -34,7 +34,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__label`}>
-        <components.SingleValue {...props}>
+        <SelectComponents.SingleValue {...props}>
           {children}
           {relationTo && (
             <Fragment>
@@ -47,7 +47,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
               </DocumentDrawerToggler>
             </Fragment>
           )}
-        </components.SingleValue>
+        </SelectComponents.SingleValue>
       </div>
       {relationTo && (
         <DocumentDrawer />

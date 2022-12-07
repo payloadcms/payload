@@ -21,7 +21,7 @@ import Chevron from '../../icons/Chevron';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { MultiValueLabel } from './MultiValueLabel';
 import { MultiValue } from './MultiValue';
-import { SingleValue } from './SingleValue';
+import { SingleValue } from '../../forms/field-types/Relationship/select-components/SingleValue';
 import { ValueContainer } from './ValueContainer';
 import { ClearIndicator } from './ClearIndicator';
 import { Control } from './Control';
@@ -48,8 +48,6 @@ const SelectAdapter: React.FC<Props> = (props) => {
     selectProps,
   } = props;
 
-  const [drawerIsOpen, setDrawerIsOpen] = React.useState(false);
-
   const classes = [
     className,
     'react-select',
@@ -74,8 +72,6 @@ const SelectAdapter: React.FC<Props> = (props) => {
       onMenuOpen={onMenuOpen}
       selectProps={{
         ...selectProps,
-        drawerIsOpen,
-        setDrawerIsOpen,
         droppableRef,
       }}
       components={{

@@ -37,6 +37,8 @@ export type Props = {
     [key: string]: React.FC<any>
   }
   selectProps?: {
+    disableMouseDown?: boolean
+    disableKeyDown?: boolean
     [key: string]: unknown
   }
 }

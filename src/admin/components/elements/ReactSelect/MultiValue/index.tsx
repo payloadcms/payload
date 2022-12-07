@@ -21,7 +21,7 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
     selectProps: {
       selectProps,
       selectProps: {
-        drawerIsOpen,
+        disableMouseDown,
       },
     },
   } = props;
@@ -44,8 +44,8 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
         ...innerProps,
         ref: setNodeRef,
         onMouseDown: (e) => {
-          if (!drawerIsOpen) {
-            // prevent the dropdown from opening when clicking on the drag handle but not when the drawer is open
+          if (!disableMouseDown) {
+            // we need to prevent the dropdown from opening when clicking on the drag handle, but not when a modal is open (i.e. the 'Relationship' field component)
             e.preventDefault();
             e.stopPropagation();
           }
@@ -58,7 +58,7 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
       }}
       selectProps={{
         ...selectProps,
-        // NOTE: pass the draggable props to the label to act as the draggable handle
+        // pass the draggable props through to the label so it alone acts as the draggable handle
         draggableProps: {
           ...attributes,
           ...listeners,

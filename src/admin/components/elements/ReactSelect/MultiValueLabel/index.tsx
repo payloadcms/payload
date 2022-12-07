@@ -1,7 +1,5 @@
-import React, { Fragment, useEffect } from 'react';
-import { components, MultiValueProps } from 'react-select';
-import { useDocumentDrawer } from '../../DocumentDrawer';
-import Edit from '../../../icons/Edit';
+import React from 'react';
+import { components as SelectComponents, MultiValueProps } from 'react-select';
 import { Option } from '../../../forms/field-types/Relationship/types';
 import './index.scss';
 
@@ -9,47 +7,21 @@ const baseClass = 'multi-value-label';
 
 export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   const {
-    data: {
-      value,
-      relationTo,
-      label,
-    },
     selectProps: {
-      setDrawerIsOpen,
       draggableProps,
     },
   } = props;
 
-  const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
-    id: value?.toString(),
-    collectionSlug: relationTo,
-  });
-
-  useEffect(() => {
-    if (typeof setDrawerIsOpen === 'function') setDrawerIsOpen(isDrawerOpen);
-  }, [isDrawerOpen, setDrawerIsOpen]);
-
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__label`}>
-        <components.MultiValueLabel
+        <SelectComponents.MultiValueLabel
           {...props}
           innerProps={{
             ...draggableProps || {},
           }}
         />
       </div>
-      {relationTo && (
-        <Fragment>
-          <DocumentDrawerToggler
-            className={`${baseClass}__drawer-toggler`}
-            aria-label={`Edit ${label}`}
-          >
-            <Edit />
-          </DocumentDrawerToggler>
-          <DocumentDrawer />
-        </Fragment>
-      )}
     </div>
   );
 };
