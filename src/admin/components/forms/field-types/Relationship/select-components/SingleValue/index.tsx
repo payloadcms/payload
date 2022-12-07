@@ -2,6 +2,7 @@ import React, { Fragment, useEffect } from 'react';
 import { components as SelectComponents, SingleValueProps } from 'react-select';
 import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer';
 import Edit from '../../../../../icons/Edit';
+import { useAuth } from '../../../../../utilities/Auth';
 import { Option } from '../../types';
 import './index.scss';
 
@@ -22,6 +23,9 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
     },
   } = props;
 
+  const { permissions } = useAuth();
+  const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission);
+
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
     id: value.toString(),
     collectionSlug: relationTo,
@@ -36,7 +40,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
       <div className={`${baseClass}__label`}>
         <SelectComponents.SingleValue {...props}>
           {children}
-          {relationTo && (
+          {relationTo && hasReadPermission && (
             <Fragment>
               <DocumentDrawerToggler
                 className={`${baseClass}__drawer-toggler`}
@@ -49,7 +53,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
           )}
         </SelectComponents.SingleValue>
       </div>
-      {relationTo && (
+      {relationTo && hasReadPermission && (
         <DocumentDrawer />
       )}
     </div>

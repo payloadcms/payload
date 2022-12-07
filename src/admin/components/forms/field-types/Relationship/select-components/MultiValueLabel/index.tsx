@@ -2,6 +2,7 @@ import React, { Fragment, useEffect } from 'react';
 import { components, MultiValueProps } from 'react-select';
 import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer';
 import Edit from '../../../../../icons/Edit';
+import { useAuth } from '../../../../../utilities/Auth';
 import { Option } from '../../types';
 import './index.scss';
 
@@ -19,6 +20,9 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
       draggableProps,
     },
   } = props;
+
+  const { permissions } = useAuth();
+  const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission);
 
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
     id: value?.toString(),
@@ -39,7 +43,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
           }}
         />
       </div>
-      {relationTo && (
+      {relationTo && hasReadPermission && (
         <Fragment>
           <DocumentDrawerToggler
             className={`${baseClass}__drawer-toggler`}
