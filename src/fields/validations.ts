@@ -24,7 +24,7 @@ import canUseDOM from '../utilities/canUseDOM';
 import { isValidID } from '../utilities/isValidID';
 import { getIDType } from '../utilities/getIDType';
 
-export const number: Validate<unknown, unknown, NumberField> = (value: string, { t, required, min, max }) => {
+export const number: Validate<unknown, unknown, NumberField> = (value: string, { t, required, min, max, integer }) => {
   const parsedValue = parseFloat(value);
 
   if ((value && typeof parsedValue !== 'number') || (required && Number.isNaN(parsedValue)) || (value && Number.isNaN(parsedValue))) {
@@ -37,6 +37,10 @@ export const number: Validate<unknown, unknown, NumberField> = (value: string, {
 
   if (typeof min === 'number' && parsedValue < min) {
     return t('validation:lessThanMin', { value, min });
+  }
+
+  if (integer && !Number.isInteger(value)) {
+    return t('validation:notAnInteger')
   }
 
   if (required && typeof parsedValue !== 'number') {

@@ -130,6 +130,7 @@ export type NumberField = FieldBase & {
   }
   min?: number
   max?: number
+  integer?: boolean
 }
 
 export type TextField = FieldBase & {

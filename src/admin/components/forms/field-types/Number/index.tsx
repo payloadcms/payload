@@ -20,6 +20,7 @@ const NumberField: React.FC<Props> = (props) => {
     label,
     max,
     min,
+    integer,
     admin: {
       readOnly,
       style,
@@ -56,6 +57,8 @@ const NumberField: React.FC<Props> = (props) => {
 
     if (Number.isNaN(val)) {
       setValue('');
+    } else if (integer && !Number.isInteger(val)) {
+      setValue(Math.round(val));
     } else {
       setValue(val);
     }

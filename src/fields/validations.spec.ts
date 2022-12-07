@@ -352,5 +352,10 @@ describe('Field Validations', () => {
       const result = number(val, { ...options, max: 1 });
       expect(result).toBe('validation:greaterThanMax');
     });
+    it('should validate integer', () => {
+      const val = 1.25;
+      const result = number(val, { ...options, integer: true });
+      expect(result).toBe('validation:notAnInteger');
+    });
   });
 });

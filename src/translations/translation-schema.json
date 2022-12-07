@@ -942,6 +942,9 @@
         "greaterThanMax": {
           "type": "string"
         },
+        "notAnInteger": {
+          "type": "string"
+        },
         "invalidInput": {
           "type": "string"
         },

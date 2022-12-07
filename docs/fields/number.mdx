@@ -18,6 +18,7 @@ keywords: number, fields, config, configuration, documentation, Content Manageme
 | **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language. |
 | **`min`**            | Minimum value accepted. Used in the default `validation` function. |
 | **`max`**            | Maximum value accepted. Used in the default `validation` function. |
+| **`integer`**        | Require the value to be an integer. |
 | **`unique`**         | Enforce that each entry in the Collection has a unique value for this field. |
 | **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
@@ -61,6 +62,7 @@ const ExampleCollection: CollectionConfig = {
       name: 'age', // required
       type: 'number', // required
       required: true,
+      integer: true,
       admin: {
         step: 1,
       }
