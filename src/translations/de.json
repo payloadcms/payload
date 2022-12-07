@@ -180,7 +180,7 @@
     "newPassword": "Neues Passwort",
     "noFiltersSet": "Keine Filter gesetzt",
     "noLabel": "<Kein {{label}}>",
-    "noResults": "Kein {{label}} gefunden. Entweder kein {{label}} existiert oder es gibt keine Übereinstimmung zu den von dir verwendeten Filtern.",
+    "noResults": "Keine {{label}} gefunden. Entweder es existieren keine {{label}} oder es gibt keine Übereinstimmung zu den von dir verwendeten Filtern.",
     "noValue": "Kein Wert",
     "none": "Kein",
     "notFound": "Nicht gefunden",
