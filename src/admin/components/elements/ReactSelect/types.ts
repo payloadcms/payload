@@ -36,4 +36,7 @@ export type Props = {
   components?: {
     [key: string]: React.FC<any>
   }
+  selectProps?: {
+    [key: string]: unknown
+  }
 }

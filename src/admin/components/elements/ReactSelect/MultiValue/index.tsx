@@ -1,4 +1,4 @@
-import React, { MouseEventHandler } from 'react';
+import React from 'react';
 import {
   MultiValueProps,
   components as SelectComponents,
@@ -18,17 +18,17 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
     data: {
       value,
     },
+    selectProps: {
+      selectProps,
+      selectProps: {
+        drawerIsOpen,
+      },
+    },
   } = props;
 
   const { attributes, listeners, setNodeRef, transform } = useSortable({
     id: value as string,
   });
-
-  const onMouseDown: MouseEventHandler<HTMLDivElement> = (e) => {
-    // prevent the dropdown from opening when clicking on the drag handle
-    e.preventDefault();
-    e.stopPropagation();
-  };
 
   const classes = [
     baseClass,
@@ -43,7 +43,13 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
       innerProps={{
         ...innerProps,
         ref: setNodeRef,
-        onMouseDown,
+        onMouseDown: (e) => {
+          if (!drawerIsOpen) {
+            // prevent the dropdown from opening when clicking on the drag handle but not when the drawer is open
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        },
         style: {
           ...transform ? {
             transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -51,6 +57,7 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
         },
       }}
       selectProps={{
+        ...selectProps,
         // NOTE: pass the draggable props to the label to act as the draggable handle
         draggableProps: {
           ...attributes,

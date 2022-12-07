@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { components, MultiValueProps } from 'react-select';
 import { useDocumentDrawer } from '../../DocumentDrawer';
 import Edit from '../../../icons/Edit';
@@ -14,13 +14,20 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
       relationTo,
       label,
     },
-    selectProps,
+    selectProps: {
+      setDrawerIsOpen,
+      draggableProps,
+    },
   } = props;
 
-  const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
+  const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
     id: value?.toString(),
     collectionSlug: relationTo,
   });
+
+  useEffect(() => {
+    if (typeof setDrawerIsOpen === 'function') setDrawerIsOpen(isDrawerOpen);
+  }, [isDrawerOpen, setDrawerIsOpen]);
 
   return (
     <div className={baseClass}>
@@ -28,7 +35,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
         <components.MultiValueLabel
           {...props}
           innerProps={{
-            ...selectProps?.draggableProps || {},
+            ...draggableProps || {},
           }}
         />
       </div>

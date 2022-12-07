@@ -62,6 +62,7 @@ export const Drawer: React.FC<Props> = ({
 
   return (
     <Modal
+      trapFocus={false}
       slug={modalSlug}
       className={[
         baseClass,

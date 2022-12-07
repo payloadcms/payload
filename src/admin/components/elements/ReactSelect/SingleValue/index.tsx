@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { components, SingleValueProps } from 'react-select';
 import { useDocumentDrawer } from '../../DocumentDrawer';
 import Edit from '../../../icons/Edit';
@@ -15,12 +15,21 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
       label,
     },
     children,
+    selectProps: {
+      selectProps: {
+        setDrawerIsOpen,
+      },
+    },
   } = props;
 
-  const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
+  const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
     id: value.toString(),
     collectionSlug: relationTo,
   });
+
+  useEffect(() => {
+    if (typeof setDrawerIsOpen === 'function') setDrawerIsOpen(isDrawerOpen);
+  }, [isDrawerOpen, setDrawerIsOpen]);
 
   return (
     <div className={baseClass}>

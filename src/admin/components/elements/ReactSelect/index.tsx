@@ -24,6 +24,7 @@ import { MultiValue } from './MultiValue';
 import { SingleValue } from './SingleValue';
 import { ValueContainer } from './ValueContainer';
 import { ClearIndicator } from './ClearIndicator';
+import { Control } from './Control';
 import './index.scss';
 
 const SelectAdapter: React.FC<Props> = (props) => {
@@ -44,7 +45,10 @@ const SelectAdapter: React.FC<Props> = (props) => {
     onMenuOpen,
     components,
     droppableRef,
+    selectProps,
   } = props;
+
+  const [drawerIsOpen, setDrawerIsOpen] = React.useState(false);
 
   const classes = [
     className,
@@ -69,6 +73,9 @@ const SelectAdapter: React.FC<Props> = (props) => {
       filterOption={filterOption}
       onMenuOpen={onMenuOpen}
       selectProps={{
+        ...selectProps,
+        drawerIsOpen,
+        setDrawerIsOpen,
         droppableRef,
       }}
       components={{
@@ -78,6 +85,7 @@ const SelectAdapter: React.FC<Props> = (props) => {
         MultiValueLabel,
         DropdownIndicator: Chevron,
         ClearIndicator,
+        Control,
         ...components,
       }}
     />
