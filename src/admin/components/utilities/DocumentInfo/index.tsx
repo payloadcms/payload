@@ -170,6 +170,14 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
   }, [i18n, global, collection, id, baseURL]);
 
+  const checkDocPermissions = React.useCallback(async () => {
+    const globalPath = `/globals/${slug}/access`;
+    const collectionPath = `/${slug}/access/${id}`;
+    const res = await fetch(`${serverURL}${api}${type === 'global' ? globalPath : collectionPath}`);
+    const json = await res.json();
+    setDocPermissions(json);
+  }, [serverURL, api, type, slug, id]);
+
   useEffect(() => {
     getVersions();
   }, [getVersions]);
@@ -183,16 +191,8 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   }, [getPreference, preferencesKey]);
 
   useEffect(() => {
-    async function checkDocPermissions() {
-      const globalPath = `/globals/${slug}/access`;
-      const collectionPath = `/${slug}/access/${id}`;
-      const res = await fetch(`${serverURL}${api}${type === 'global' ? globalPath : collectionPath}`);
-      const json = await res.json();
-      setDocPermissions(json);
-    }
-
     checkDocPermissions();
-  }, [serverURL, api, id, slug, type]);
+  }, [checkDocPermissions]);
 
   const value = {
     slug,
@@ -205,6 +205,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     getVersions,
     publishedDoc,
     id,
+    checkDocPermissions,
     docPermissions,
   };
 
