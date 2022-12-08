@@ -139,6 +139,7 @@ const RichText: React.FC<Props> = (props) => {
     showError,
     setValue,
     errorMessage,
+    initialValue,
   } = fieldType;
 
   const classes = [
@@ -203,6 +204,13 @@ const RichText: React.FC<Props> = (props) => {
       }
     };
   }, [loaded, readOnly]);
+
+  useEffect(() => {
+    const point = { path: [0, 0], offset: 0 };
+    editor.selection = { anchor: point, focus: point };
+    editor.history = { redos: [], undos: [] };
+    editor.children = initialValue;
+  }, [initialValue, editor]);
 
   if (!loaded) {
     return null;
