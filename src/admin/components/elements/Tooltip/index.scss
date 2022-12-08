@@ -1,6 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .tooltip {
+  opacity: 0;
 	background-color: var(--theme-elevation-800);
 	position: absolute;
 	z-index: 2;
@@ -13,6 +14,7 @@
 	font-weight: normal;
 	white-space: nowrap;
 	border-radius: 2px;
+  transition: opacity .2s ease-in-out;
 
 	span {
 		position: absolute;
@@ -24,4 +26,8 @@
 		border: 10px solid transparent;
 		border-top-color: var(--theme-elevation-800);
 	}
+
+  &--show {
+    opacity: 1;
+  }
 }

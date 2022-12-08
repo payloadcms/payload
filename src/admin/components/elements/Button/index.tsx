@@ -28,11 +28,12 @@ const ButtonContents = ({ children, icon, tooltip }) => {
     <span
       className={`${baseClass}__content`}
     >
-      {tooltip && (
-        <Tooltip className={`${baseClass}__tooltip`}>
-          {tooltip}
-        </Tooltip>
-      )}
+      <Tooltip
+        className={`${baseClass}__tooltip`}
+        show={tooltip}
+      >
+        {tooltip}
+      </Tooltip>
       {children && (
         <span className={`${baseClass}__label`}>
           {children}
