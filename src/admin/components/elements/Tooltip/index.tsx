@@ -8,7 +8,7 @@ const Tooltip: React.FC<Props> = (props) => {
     className,
     children,
     show: showFromProps = true,
-    delay,
+    delay = 350,
   } = props;
 
   const [show, setShow] = React.useState(showFromProps);
@@ -16,7 +16,7 @@ const Tooltip: React.FC<Props> = (props) => {
   useEffect(() => {
     let timerId: NodeJS.Timeout;
 
-    // do not use the delay on out
+    // do not use the delay on transition-out
     if (delay && showFromProps) {
       timerId = setTimeout(() => {
         setShow(showFromProps);
@@ -39,7 +39,6 @@ const Tooltip: React.FC<Props> = (props) => {
       ].filter(Boolean).join(' ')}
     >
       {children}
-      <span />
     </aside>
   );
 };

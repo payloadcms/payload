@@ -60,7 +60,6 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             <Tooltip
               className={`${baseClass}__tooltip`}
               show={showTooltip}
-              delay={350}
             >
               {t('editLabel', { label: '' })}
             </Tooltip>

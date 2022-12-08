@@ -1,4 +1,4 @@
-import React, { isValidElement } from 'react';
+import React, { Fragment, isValidElement } from 'react';
 import { Link } from 'react-router-dom';
 import { Props } from './types';
 
@@ -21,31 +21,31 @@ const icons = {
 
 const baseClass = 'btn';
 
-const ButtonContents = ({ children, icon, tooltip }) => {
+const ButtonContents = ({ children, icon, tooltip, showTooltip }) => {
   const BuiltInIcon = icons[icon];
 
   return (
-    <span
-      className={`${baseClass}__content`}
-    >
+    <Fragment>
       <Tooltip
         className={`${baseClass}__tooltip`}
-        show={tooltip}
+        show={showTooltip}
       >
         {tooltip}
       </Tooltip>
-      {children && (
-        <span className={`${baseClass}__label`}>
-          {children}
-        </span>
-      )}
-      {icon && (
-        <span className={`${baseClass}__icon`}>
-          {isValidElement(icon) && icon}
-          {BuiltInIcon && <BuiltInIcon />}
-        </span>
-      )}
-    </span>
+      <span className={`${baseClass}__content`}>
+        {children && (
+          <span className={`${baseClass}__label`}>
+            {children}
+          </span>
+        )}
+        {icon && (
+          <span className={`${baseClass}__icon`}>
+            {isValidElement(icon) && icon}
+            {BuiltInIcon && <BuiltInIcon />}
+          </span>
+        )}
+      </span>
+    </Fragment>
   );
 };
 
@@ -70,6 +70,8 @@ const Button: React.FC<Props> = (props) => {
     tooltip,
   } = props;
 
+  const [showTooltip, setShowTooltip] = React.useState(false);
+
   const classes = [
     baseClass,
     className && className,
@@ -85,6 +87,7 @@ const Button: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   function handleClick(event) {
+    setShowTooltip(false);
     if (type !== 'submit' && onClick) event.preventDefault();
     if (onClick) onClick(event);
   }
@@ -94,6 +97,8 @@ const Button: React.FC<Props> = (props) => {
     type,
     className: classes,
     disabled,
+    onMouseEnter: tooltip ? () => setShowTooltip(true) : undefined,
+    onMouseLeave: tooltip ? () => setShowTooltip(false) : undefined,
     onClick: !disabled ? handleClick : undefined,
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
@@ -109,6 +114,7 @@ const Button: React.FC<Props> = (props) => {
           <ButtonContents
             icon={icon}
             tooltip={tooltip}
+            showTooltip={showTooltip}
           >
             {children}
           </ButtonContents>
@@ -124,6 +130,7 @@ const Button: React.FC<Props> = (props) => {
           <ButtonContents
             icon={icon}
             tooltip={tooltip}
+            showTooltip={showTooltip}
           >
             {children}
           </ButtonContents>
@@ -141,6 +148,7 @@ const Button: React.FC<Props> = (props) => {
           <ButtonContents
             icon={icon}
             tooltip={tooltip}
+            showTooltip={showTooltip}
           >
             {children}
           </ButtonContents>

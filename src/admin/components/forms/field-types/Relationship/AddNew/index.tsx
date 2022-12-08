@@ -105,11 +105,11 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
               className={`${baseClass}__add-button`}
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
+              onClick={() => setShowTooltip(false)}
             >
               <Tooltip
                 className={`${baseClass}__tooltip`}
                 show={showTooltip}
-                delay={350}
               >
                 {t('addNewLabel', { label: relatedCollections[0].labels.singular })}
               </Tooltip>

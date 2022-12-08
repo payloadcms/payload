@@ -57,7 +57,6 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
                 <Tooltip
                   className={`${baseClass}__tooltip`}
                   show={showTooltip}
-                  delay={350}
                 >
                   {t('editLabel', { label: '' })}
                 </Tooltip>

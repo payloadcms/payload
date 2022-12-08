@@ -30,7 +30,6 @@ export const MultiValueRemove: React.FC<MultiValueRemoveProps<OptionType>> = (pr
       <Tooltip
         className={`${baseClass}__tooltip`}
         show={showTooltip}
-        delay={350}
       >
         {t('remove')}
       </Tooltip>
