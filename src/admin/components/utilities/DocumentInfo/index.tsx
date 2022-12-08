@@ -205,7 +205,6 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     getVersions,
     publishedDoc,
     id,
-    checkDocPermissions,
     docPermissions,
   };
 
