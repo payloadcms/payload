@@ -206,10 +206,12 @@ const RichText: React.FC<Props> = (props) => {
   }, [loaded, readOnly]);
 
   useEffect(() => {
-    const point = { path: [0, 0], offset: 0 };
-    editor.selection = { anchor: point, focus: point };
-    editor.history = { redos: [], undos: [] };
-    editor.children = initialValue;
+    if (Array.isArray(initialValue) && initialValue.length > 0) {
+      const point = { path: [0, 0], offset: 0 };
+      editor.selection = { anchor: point, focus: point };
+      editor.history = { redos: [], undos: [] };
+      editor.children = initialValue;
+    }
   }, [initialValue, editor]);
 
   if (!loaded) {
@@ -217,6 +219,7 @@ const RichText: React.FC<Props> = (props) => {
   }
 
   let valueToRender = value;
+
   if (typeof valueToRender === 'string') {
     try {
       const parsedJSON = JSON.parse(valueToRender);
