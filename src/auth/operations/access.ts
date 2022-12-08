@@ -1,7 +1,7 @@
 import type { PayloadRequest } from '../../express/types';
-import type { CollectionPermission, GlobalPermission, Permissions } from '../types';
+import type { Permissions } from '../types';
 import { adminInit as adminInitTelemetry } from '../../utilities/telemetry/events/adminInit';
-import { getEntityPermissions } from '../../utilities/getEntityPermissions';
+import { getEntityPolicies } from '../../utilities/getEntityPolicies';
 
 const allOperations = ['create', 'read', 'update', 'delete'];
 
@@ -46,7 +46,8 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
       collectionOperations.push('readVersions');
     }
 
-    const [collectionPolicy, collectionPromises] = getEntityPermissions<CollectionPermission>({
+    const [collectionPolicy, collectionPromises] = getEntityPolicies({
+      type: 'collection',
       req,
       entity: collection,
       operations: collectionOperations,
@@ -65,7 +66,8 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
       globalOperations.push('readVersions');
     }
 
-    const [globalPolicy, globalPromises] = getEntityPermissions<GlobalPermission>({
+    const [globalPolicy, globalPromises] = getEntityPolicies({
+      type: 'global',
       req,
       entity: global,
       operations: globalOperations,

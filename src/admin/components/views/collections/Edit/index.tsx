@@ -15,6 +15,7 @@ import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { Fields } from '../../../forms/Form/types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { EditDepthContext } from '../../../utilities/EditDepth';
+import { CollectionPermission } from '../../../../../auth';
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props;
@@ -40,8 +41,8 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation();
   const history = useHistory();
   const [initialState, setInitialState] = useState<Fields>();
-  const { permissions, user } = useAuth();
-  const { getVersions, preferencesKey } = useDocumentInfo();
+  const { permissions: allPermissions, user } = useAuth();
+  const { getVersions, preferencesKey, docPermissions } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { t } = useTranslation('general');
 
@@ -87,10 +88,11 @@ const EditView: React.FC<IndexProps> = (props) => {
     );
   }
 
-  const collectionPermissions = permissions?.collections?.[slug];
+  const collectionPermissions = allPermissions?.collections?.[slug];
+  const permissionsToUse = docPermissions || collectionPermissions;
   const apiURL = `${serverURL}${api}/${slug}/${id}${collection.versions.drafts ? '?draft=true' : ''}`;
   const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
-  const hasSavePermission = (isEditing && collectionPermissions?.update?.permission) || (!isEditing && collectionPermissions?.create?.permission);
+  const hasSavePermission = (isEditing && permissionsToUse?.update?.permission) || (!isEditing && (permissionsToUse as CollectionPermission)?.create?.permission);
 
   return (
     <EditDepthContext.Provider value={1}>
@@ -102,7 +104,7 @@ const EditView: React.FC<IndexProps> = (props) => {
           isLoading: !initialState,
           data: dataToRender,
           collection,
-          permissions: collectionPermissions,
+          permissions: permissionsToUse,
           isEditing,
           onSave,
           initialState,

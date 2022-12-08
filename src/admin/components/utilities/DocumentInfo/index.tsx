@@ -5,7 +5,7 @@ import qs from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../Config';
 import { PaginatedDocs } from '../../../../mongoose/types';
-import { ContextType, Props, Version } from './types';
+import { ContextType, DocumentPermissions, Props, Version } from './types';
 import { TypeWithID } from '../../../../globals/config/types';
 import { TypeWithTimestamps } from '../../../../collections/config/types';
 import { Where } from '../../../../types';
@@ -26,6 +26,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null);
   const [versions, setVersions] = useState<PaginatedDocs<Version>>(null);
   const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null);
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null);
 
   const baseURL = `${serverURL}${api}`;
   let slug;
@@ -181,6 +182,18 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     getDocPreferences();
   }, [getPreference, preferencesKey]);
 
+  useEffect(() => {
+    async function checkDocPermissions() {
+      const globalPath = `/globals/${slug}/access`;
+      const collectionPath = `/${slug}/access/${id}`;
+      const res = await fetch(`${serverURL}${api}${type === 'global' ? globalPath : collectionPath}`);
+      const json = await res.json();
+      setDocPermissions(json);
+    }
+
+    checkDocPermissions();
+  }, [serverURL, api, id, slug, type]);
+
   const value = {
     slug,
     type,
@@ -192,6 +205,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     getVersions,
     publishedDoc,
     id,
+    docPermissions,
   };
 
   return (
@@ -202,5 +216,3 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 };
 
 export const useDocumentInfo = (): ContextType => useContext(Context);
-
-export default Context;

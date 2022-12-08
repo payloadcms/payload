@@ -1,15 +1,17 @@
-import { CollectionPermission, GlobalPermission } from '../../auth';
+import { CollectionPermission } from '../../auth';
 import type { PayloadRequest } from '../../express/types';
-import { getEntityPermissions } from '../../utilities/getEntityPermissions';
+import { getEntityPolicies } from '../../utilities/getEntityPolicies';
 
 const allOperations = ['create', 'read', 'update', 'delete'];
 
 type Arguments = {
   req: PayloadRequest
+  id: string
 }
 
-export async function docAccess(args: Arguments): Promise<CollectionPermission | GlobalPermission> {
+export async function docAccess(args: Arguments): Promise<CollectionPermission> {
   const {
+    id,
     req,
     req: {
       collection: {
@@ -28,13 +30,15 @@ export async function docAccess(args: Arguments): Promise<CollectionPermission |
     collectionOperations.push('readVersions');
   }
 
-  const [collectionPolicy, promises] = getEntityPermissions<CollectionPermission>({
+  const [policy, promises] = getEntityPolicies({
+    type: 'collection',
     req,
     entity: config,
     operations: collectionOperations,
+    id,
   });
 
   await Promise.all(promises);
 
-  return collectionPolicy;
+  return policy;
 }
