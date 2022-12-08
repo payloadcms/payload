@@ -244,16 +244,15 @@ type SelectOptionsProps<T extends TypeWithID, P = any> = {
   data: T,
   collection: SanitizedCollectionConfig
   siblingData: Partial<P>
+  req: PayloadRequest
 }
-
-type KeysOfUnion<T> = T extends T ? keyof T: never;
 
 export type SelectFunction<T extends TypeWithID = any, P = any> = (
   options: SelectOptionsProps<T, P>
-) => Array<Exclude<KeysOfUnion<T>, 'id'>> | true;
+) => Array<string> | true;
 
 export type SelectOptions<T extends TypeWithID = any, P = any> =
-  | Array<Exclude<keyof T, 'id'>>
+  | Array<string>
   | SelectFunction<T, P>;
 
 export type UploadField = FieldBase & {

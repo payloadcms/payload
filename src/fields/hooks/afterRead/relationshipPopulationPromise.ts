@@ -1,5 +1,6 @@
 import { PayloadRequest } from '../../../express/types';
 import { RelationshipField, fieldSupportsMany, fieldHasMaxDepth, UploadField } from '../../config/types';
+import { deepPick } from '../../deepPick';
 
 type PopulateArgs = {
   depth: number
@@ -62,9 +63,11 @@ const populate = async ({
           data: relationshipValue,
           collection: relatedCollection.config,
           siblingData: dataToUpdate,
+          req,
         });
       if (fieldsOrTrue !== true) {
         // if fieldsOrTrue is true then we want to return the entire related document
+        relationshipValue = deepPick(relationshipValue, ['id', ...fieldsOrTrue]);
         const newRelationShipValue = {
           id: relationshipValue.id,
         };

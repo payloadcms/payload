@@ -2,6 +2,7 @@
 import { Collection } from '../../collections/config/types';
 import { RichTextField, Field } from '../config/types';
 import { PayloadRequest } from '../../express/types';
+import { deepPick } from '../deepPick';
 
 type Arguments = {
   data: unknown
@@ -49,18 +50,10 @@ export const populate = async ({
         data: doc,
         collection: collection.config,
         siblingData: dataRef,
+        req,
       });
       if (fieldsOrTrue !== true) {
-        // if fieldsOrTrue is true then we want to return the entire related document
-        const newDoc = {
-          id: doc.id,
-        };
-        fieldsOrTrue.forEach((fieldName) => {
-          if (doc[fieldName] !== undefined) {
-            newDoc[fieldName] = doc[fieldName];
-          }
-        });
-        dataRef[key] = newDoc;
+        dataRef[key] = deepPick(doc, ['id', ...fieldsOrTrue]);
       } else {
         dataRef[key] = doc;
       }
