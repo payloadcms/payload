@@ -1,12 +1,20 @@
 /* eslint-disable no-param-reassign */
 
-// this is a placeholder for a complex type
-type DeepPick<TObject, TPaths extends string> = Partial<TObject>;
+export type DeepPick<Type, Query> = {
+  [P in keyof Type]: Type extends Array<any>
+    ? DeepPick<Type[P], Query>
+    : P extends Query
+    ? Type[P]
+    : P extends string
+    ? Query extends `${P}.${infer SubQuery}`
+      ? DeepPick<Type[P], SubQuery>
+      : never
+    : never;
+};
 
-
-export function deepPick<T>(
+export function deepPick<T, U extends string>(
   obj: T,
-  paths: Array<string>,
+  paths: Array<U>,
 ): DeepPick<T, typeof paths[number]> {
   const result: any = {};
   paths.forEach((path) => {
@@ -31,13 +39,13 @@ function deepPickTo<T>(obj: T, path: Array<string>, result: any): boolean {
   }
   if (Array.isArray(value)) {
     let someFound = false;
-    const newArray = value.map((subObj) => {
-      const subResult = result[pathPart] || {};
+    const newArray = value.map((subObj, idx) => {
+      const subResult = result[pathPart]?.[idx] ?? {};
       if (deepPickTo(subObj, path.slice(1), subResult)) {
         someFound = true;
         return subResult;
       }
-      return {};
+      return result[pathPart]?.[idx] ?? {};
     });
 
     if (someFound) {
@@ -46,7 +54,7 @@ function deepPickTo<T>(obj: T, path: Array<string>, result: any): boolean {
     }
     return false;
   }
-  const subResult = result[pathPart] || {};
+  const subResult = result[pathPart] ?? {};
   if (deepPickTo(value, path.slice(1), subResult)) {
     result[pathPart] = subResult;
     return true;
