@@ -106,11 +106,13 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
             >
-              {showTooltip && (
-                <Tooltip className={`${baseClass}__tooltip`}>
-                  {t('addNewLabel', { label: relatedCollections[0].labels.singular })}
-                </Tooltip>
-              )}
+              <Tooltip
+                className={`${baseClass}__tooltip`}
+                show={showTooltip}
+                delay={350}
+              >
+                {t('addNewLabel', { label: relatedCollections[0].labels.singular })}
+              </Tooltip>
               <Plus />
             </DocumentDrawerToggler>
             <DocumentDrawer onSave={onSave} />

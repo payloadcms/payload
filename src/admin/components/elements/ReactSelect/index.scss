@@ -1,7 +1,7 @@
 @import '../../../scss/styles';
 
-div.react-select {
-  div.rs__control {
+.react-select {
+  .rs__control {
     @include formInput;
     height: auto;
     padding-top: base(.25);

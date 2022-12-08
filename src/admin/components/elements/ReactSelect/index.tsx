@@ -24,6 +24,7 @@ import { MultiValue } from './MultiValue';
 import { SingleValue } from '../../forms/field-types/Relationship/select-components/SingleValue';
 import { ValueContainer } from './ValueContainer';
 import { ClearIndicator } from './ClearIndicator';
+import { MultiValueRemove } from './MultiValueRemove';
 import { Control } from './Control';
 import './index.scss';
 
@@ -79,6 +80,7 @@ const SelectAdapter: React.FC<Props> = (props) => {
         SingleValue,
         MultiValue,
         MultiValueLabel,
+        MultiValueRemove,
         DropdownIndicator: Chevron,
         ClearIndicator,
         Control,

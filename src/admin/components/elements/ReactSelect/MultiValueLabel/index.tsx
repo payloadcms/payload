@@ -14,14 +14,13 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
 
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__label`}>
-        <SelectComponents.MultiValueLabel
-          {...props}
-          innerProps={{
-            ...draggableProps || {},
-          }}
-        />
-      </div>
+      <SelectComponents.MultiValueLabel
+        {...props}
+        innerProps={{
+          className: `${baseClass}__text`,
+          ...draggableProps || {},
+        }}
+      />
     </div>
   );
 };

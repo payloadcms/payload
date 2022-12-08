@@ -12,14 +12,4 @@
       cursor: grab;
     }
   }
-
-  .rs__multi-value__remove {
-    padding: 0 base(.125);
-    cursor: pointer;
-
-    &:hover {
-      color: var(--theme-elevation-800);
-      background: var(--theme-error-150);
-    }
-  }
 }

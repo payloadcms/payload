@@ -1,12 +1,14 @@
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { components, MultiValueProps } from 'react-select';
 import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer';
+import Tooltip from '../../../../../elements/Tooltip';
 import Edit from '../../../../../icons/Edit';
 import { useAuth } from '../../../../../utilities/Auth';
 import { Option } from '../../types';
 import './index.scss';
 
-const baseClass = 'multi-value-label';
+const baseClass = 'relationship--multi-value-label';
 
 export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   const {
@@ -22,6 +24,8 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   } = props;
 
   const { permissions } = useAuth();
+  const [showTooltip, setShowTooltip] = useState(false);
+  const { t } = useTranslation('general');
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission);
 
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
@@ -35,10 +39,11 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
 
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__label`}>
+      <div className={`${baseClass}__content`}>
         <components.MultiValueLabel
           {...props}
           innerProps={{
+            className: `${baseClass}__text`,
             ...draggableProps || {},
           }}
         />
@@ -48,7 +53,17 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
           <DocumentDrawerToggler
             className={`${baseClass}__drawer-toggler`}
             aria-label={`Edit ${label}`}
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+            onClick={() => setShowTooltip(false)}
           >
+            <Tooltip
+              className={`${baseClass}__tooltip`}
+              show={showTooltip}
+              delay={350}
+            >
+              {t('editLabel', { label: '' })}
+            </Tooltip>
             <Edit />
           </DocumentDrawerToggler>
           <DocumentDrawer />

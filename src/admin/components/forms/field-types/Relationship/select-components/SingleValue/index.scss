@@ -9,9 +9,11 @@
     max-width: unset;
     display: flex;
     align-items: center;
+    overflow: visible;
   }
 
   &__drawer-toggler {
+    position: relative;
     background: none;
     border: none;
     cursor: pointer;
