@@ -1,16 +1,22 @@
 /* eslint-disable no-param-reassign */
 
-export type DeepPick<Type, Query> = {
+type AllKeysOfType<T> = {
+  [P in keyof T]: T[P] extends never ? never : P
+}[keyof T]
+
+type RemoveNever<T> = Pick<T, AllKeysOfType<T>>
+
+export type DeepPick<Type, Query> = RemoveNever<{
   [P in keyof Type]: Type extends Array<any>
-    ? DeepPick<Type[P], Query>
+    ? RemoveNever<DeepPick<Type[P], Query>>
     : P extends Query
     ? Type[P]
     : P extends string
     ? Query extends `${P}.${infer SubQuery}`
-      ? DeepPick<Type[P], SubQuery>
+      ? RemoveNever<DeepPick<Type[P], SubQuery>>
       : never
-    : never;
-};
+    : never
+}>
 
 export function deepPick<T, U extends string>(
   obj: T,
