@@ -20,8 +20,13 @@ type ReturnType<T extends Args> = T['type'] extends 'global' ? [GlobalPermission
 export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
   const { req, entity, operations, id, type } = args;
   const isLoggedIn = !!(req.user);
-
-  const policies = {} as ReturnType<T>[0];
+  // ---- ---- ---- ---- ---- ---- ---- ---- ----
+  // `policies` and `promises` get mutated in
+  // the functions below, and return in the end
+  // ---- ---- ---- ---- ---- ---- ---- ---- ----
+  const policies = {
+    fields: {},
+  } as ReturnType<T>[0];
   const promises = [] as ReturnType<T>[1];
   let docBeingAccessed = null;
 
@@ -127,7 +132,7 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
 
   operations.forEach((operation) => {
     executeFieldPolicies({
-      policiesObj: policies,
+      policiesObj: policies.fields,
       fields: entity.fields,
       operation,
     });
