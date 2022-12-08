@@ -141,6 +141,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
       <Drawer
         slug={drawerSlug}
         formatSlug={false}
+        className={baseClass}
       >
         <DocumentInfoProvider collection={collectionConfig}>
           <RenderCustomComponent
@@ -152,7 +153,8 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
               id,
               collection: collectionConfig,
               permissions: permissions.collections[collectionConfig.slug],
-              isEditing: false,
+              isEditing: Boolean(id),
+              apiURL: id ? `${serverURL}${api}/${collectionSlug}/${id}` : null,
               onSave,
               initialState,
               hasSavePermission: true,
@@ -209,32 +211,38 @@ export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => 
     toggleModal(drawerSlug);
   }, [toggleModal, drawerSlug]);
 
-  return useMemo(() => {
-    return ([
-      (props) => {
-        return (
-          <DocumentDrawer
-            {...props}
-            collectionSlug={collectionSlug}
-            id={id}
-            drawerSlug={drawerSlug}
-            key={drawerSlug}
-          />
-        );
-      },
-      (props) => (
-        <DocumentDrawerToggler
-          {...props}
-          id={id}
-          drawerSlug={drawerSlug}
-        />
-      ),
-      {
-        drawerSlug,
-        drawerDepth,
-        isDrawerOpen: isOpen,
-        toggleDrawer,
-      },
-    ]);
-  }, [drawerDepth, id, drawerSlug, collectionSlug, isOpen, toggleDrawer]);
+  const MemoizedDrawer = useMemo(() => {
+    return ((props) => (
+      <DocumentDrawer
+        {...props}
+        collectionSlug={collectionSlug}
+        id={id}
+        drawerSlug={drawerSlug}
+        key={drawerSlug}
+      />
+    ));
+  }, [id, drawerSlug, collectionSlug]);
+
+  const MemoizedDrawerToggler = useMemo(() => {
+    return ((props) => (
+      <DocumentDrawerToggler
+        {...props}
+        id={id}
+        drawerSlug={drawerSlug}
+      />
+    ));
+  }, [id, drawerSlug]);
+
+  const MemoizedDrawerState = useMemo(() => ({
+    drawerSlug,
+    drawerDepth,
+    isDrawerOpen: isOpen,
+    toggleDrawer,
+  }), [drawerDepth, drawerSlug, isOpen, toggleDrawer]);
+
+  return [
+    MemoizedDrawer,
+    MemoizedDrawerToggler,
+    MemoizedDrawerState,
+  ];
 };
