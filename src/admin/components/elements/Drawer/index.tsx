@@ -49,6 +49,7 @@ export const Drawer: React.FC<Props> = ({
   slug,
   formatSlug,
   children,
+  className,
 }) => {
   const { toggleModal, modalState } = useModal();
   const { breakpoints: { m: midBreak } } = useWindowInfo();
@@ -65,6 +66,7 @@ export const Drawer: React.FC<Props> = ({
       trapFocus={false}
       slug={modalSlug}
       className={[
+        className,
         baseClass,
         isOpen && `${baseClass}--is-open`,
       ].filter(Boolean).join(' ')}
@@ -72,7 +74,7 @@ export const Drawer: React.FC<Props> = ({
         zIndex: zBase + drawerDepth,
       }}
     >
-      {drawerDepth === 0 && (
+      {drawerDepth === 1 && (
         <div className={`${baseClass}__blur-bg`} />
       )}
       <button

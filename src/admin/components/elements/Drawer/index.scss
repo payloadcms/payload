@@ -31,6 +31,8 @@
   &__content-children {
     position: relative;
     z-index: 1;
+    overflow: auto;
+    height: 100%;
   }
 
   &--is-open {

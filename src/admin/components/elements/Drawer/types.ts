@@ -4,6 +4,7 @@ export type Props = {
   slug: string
   formatSlug?: boolean
   children: React.ReactNode
+  className?: string
 }
 
 export type TogglerProps = HTMLAttributes<HTMLButtonElement> & {
