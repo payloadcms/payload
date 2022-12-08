@@ -435,5 +435,22 @@ describe('fields', () => {
 
       await expect(page.locator('.Toastify')).toContainText('successfully');
     });
+
+    test('should allow usage of siblingData in filterOptions', async () => {
+      await page.goto(url.create);
+
+      // open select menu
+      await page.dispatchEvent('#field-narrowRelationsBy .rs__control', 'mousedown');
+
+      // click text-fields option
+      await page.locator('#field-narrowRelationsBy .rs__option:has-text("text-fields")').click();
+
+      // select relationshipMany field that relies on siblingData field above
+      await page.dispatchEvent('#field-relationshipMany .rs__control', 'mousedown');
+
+      // ensure the label `array-fields` is not present
+      const listRelations = await page.locator('#field-relationshipMany .rs__group').count();
+      expect(listRelations).toEqual(1);
+    });
   });
 });
