@@ -25,27 +25,23 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
   const promises = [] as ReturnType<T>[1];
   let docBeingAccessed = null;
 
-  async function getDoc({ entityType, docSlug, docID, reqArg }) {
-    if (docSlug) {
-      if (entityType === 'collection' && docID) {
-        const foundCollectionDoc = await reqArg.payload.findByID({
+  async function getDoc() {
+    if (entity.slug) {
+      if (type === 'collection' && id) {
+        docBeingAccessed = await req.payload.findByID({
           overrideAccess: true,
-          collection: docSlug,
+          collection: entity.slug,
           id,
         });
-        docBeingAccessed = 'id' in foundCollectionDoc ? foundCollectionDoc : undefined;
-      } else if (entityType === 'global') {
-        const foundGlobalDoc = await reqArg.payload.findGlobal({
+      } else if (type === 'global') {
+        docBeingAccessed = await req.payload.findGlobal({
           overrideAccess: true,
-          slug: docSlug,
+          slug: entity.slug,
         });
-        docBeingAccessed = 'id' in foundGlobalDoc ? foundGlobalDoc : undefined;
       } else {
         docBeingAccessed = undefined;
       }
     }
-
-    return docBeingAccessed;
   }
 
   const createAccessPromise = async ({
@@ -55,20 +51,8 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
     disableWhere = false,
   }) => {
     const mutablePolicies = policiesObj;
-    // TODO: figure this out.
-    // if (docBeingAccessed === null) {
-    //   if (type === 'global') {
-    //     try {
-    //       const foundGlobalDoc = await req.payload.findGlobal({
-    //         overrideAccess: true,
-    //         slug: entity.slug,
-    //       });
-    //     } catch (e) {
-    //       console.log(e);
-    //     }
-    //   }
-    // }
-    const result = await access({ req, id });
+    await getDoc();
+    const result = await access({ req, id, doc: docBeingAccessed });
 
     if (typeof result === 'object' && !disableWhere) {
       mutablePolicies[operation] = {

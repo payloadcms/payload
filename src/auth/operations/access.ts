@@ -56,7 +56,7 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
       ...results.collections,
       [collection.slug]: collectionPolicy,
     };
-    promises.push(collectionPromises);
+    promises.push(...collectionPromises);
   });
 
   config.globals.forEach((global) => {
@@ -76,7 +76,7 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
       ...results.globals,
       [global.slug]: globalPolicy,
     };
-    promises.push(globalPromises);
+    promises.push(...globalPromises);
   });
 
   await Promise.all(promises);
