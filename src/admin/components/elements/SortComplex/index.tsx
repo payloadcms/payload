@@ -6,14 +6,12 @@ import { Props } from './types';
 import ReactSelect from '../ReactSelect';
 import sortableFieldTypes from '../../../../fields/sortableFieldTypes';
 import { useSearchParams } from '../../utilities/SearchParams';
-import { fieldAffectsData } from '../../../../fields/config/types';
+import { fieldAffectsData, OptionObject } from '../../../../fields/config/types';
 import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
 const baseClass = 'sort-complex';
-
-const sortOptions = [{ label: 'Ascending', value: '' }, { label: 'Descending', value: '-' }];
 
 const SortComplex: React.FC<Props> = (props) => {
   const {
@@ -25,6 +23,7 @@ const SortComplex: React.FC<Props> = (props) => {
   const history = useHistory();
   const params = useSearchParams();
   const { t, i18n } = useTranslation('general');
+  const [sortOptions, setSortOptions] = useState<OptionObject[]>();
 
   const [sortFields] = useState(() => collection.fields.reduce((fields, field) => {
     if (fieldAffectsData(field) && sortableFieldTypes.indexOf(field.type) > -1) {
@@ -55,6 +54,10 @@ const SortComplex: React.FC<Props> = (props) => {
       }
     }
   }, [history, params, sortField, sortOrder, modifySearchQuery, handleChange]);
+
+  useEffect(() => {
+    setSortOptions([{ label: t('ascending'), value: '' }, { label: t('descending'), value: '-' }]);
+  }, [i18n, t]);
 
   return (
     <div className={baseClass}>

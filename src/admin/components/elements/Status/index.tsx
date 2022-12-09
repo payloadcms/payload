@@ -174,7 +174,7 @@ const Status: React.FC<Props> = () => {
                     type="button"
                     onClick={processing ? undefined : () => toggleModal(revertModalSlug)}
                   >
-                    {t('general:published')}
+                    {t('general:cancel')}
                   </Button>
                   <Button
                     onClick={processing ? undefined : () => performAction('revert')}
