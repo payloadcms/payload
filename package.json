@@ -157,7 +157,7 @@
     "passport-local-mongoose": "^7.0.0",
     "path-browserify": "^1.0.1",
     "pino": "^6.4.1",
-    "pino-pretty": "^4.3.0",
+    "pino-pretty": "^9.1.1",
     "pluralize": "^8.0.0",
     "postcss": "^8.4.6",
     "postcss-loader": "^6.2.1",
