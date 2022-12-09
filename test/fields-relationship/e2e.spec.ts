@@ -131,15 +131,17 @@ describe('fields - relationship', () => {
 
     await expect(options).toHaveCount(2); // Two relationship options
 
+    const values = page.locator('#field-relationshipHasMany .relationship--multi-value-label__text');
+
     // Add one relationship
     await options.locator(`text=${relationOneDoc.id}`).click();
-    await expect(field).toContainText(relationOneDoc.id);
-    await expect(field).not.toContainText(anotherRelationOneDoc.id);
+    await expect(values).toHaveText([relationOneDoc.id]);
+    await expect(values).not.toHaveText([anotherRelationOneDoc.id]);
 
     // Add second relationship
     await field.click({ delay: 100 });
     await options.locator(`text=${anotherRelationOneDoc.id}`).click();
-    await expect(field).toContainText(anotherRelationOneDoc.id);
+    await expect(values).toHaveText([relationOneDoc.id, anotherRelationOneDoc.id]);
 
     // No options left
     await field.locator('.rs__input').click({ delay: 100 });
@@ -152,6 +154,7 @@ describe('fields - relationship', () => {
     await page.goto(url.create);
 
     const field = page.locator('#field-relationshipMultiple');
+    const value = page.locator('#field-relationshipMultiple .relationship--single-value__text');
 
     await field.click({ delay: 100 });
 
@@ -161,12 +164,12 @@ describe('fields - relationship', () => {
 
     // Add one relationship
     await options.locator(`text=${relationOneDoc.id}`).click();
-    await expect(field).toContainText(relationOneDoc.id);
+    await expect(value).toContainText(relationOneDoc.id);
 
     // Add relationship of different collection
     await field.click({ delay: 100 });
     await options.locator(`text=${relationTwoDoc.id}`).click();
-    await expect(field).toContainText(relationTwoDoc.id);
+    await expect(value).toContainText(relationTwoDoc.id);
 
     await saveDocAndAssert(page);
   });
@@ -176,7 +179,7 @@ describe('fields - relationship', () => {
 
     await page.locator('.btn.duplicate').first().click();
     await expect(page.locator('.Toastify')).toContainText('successfully');
-    const field = page.locator('#field-relationship .rs__value-container');
+    const field = page.locator('#field-relationship .relationship--single-value__text');
 
     await expect(field).toHaveText(relationOneDoc.id);
   });
@@ -308,7 +311,7 @@ describe('fields - relationship', () => {
     test('should show useAsTitle on relation', async () => {
       await page.goto(url.edit(docWithExistingRelations.id));
 
-      const field = page.locator('#field-relationshipWithTitle .react-select');
+      const field = page.locator('#field-relationshipWithTitle .relationship--single-value__text');
 
       // Check existing relationship for correct title
       await expect(field).toHaveText(relationWithTitle.name);

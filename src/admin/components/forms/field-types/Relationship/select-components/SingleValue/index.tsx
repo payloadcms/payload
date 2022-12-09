@@ -8,7 +8,7 @@ import { useAuth } from '../../../../../utilities/Auth';
 import { Option } from '../../types';
 import './index.scss';
 
-const baseClass = 'single-value';
+const baseClass = 'relationship--single-value';
 
 export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
   const {
@@ -43,7 +43,9 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
     <div className={baseClass}>
       <div className={`${baseClass}__label`}>
         <SelectComponents.SingleValue {...props}>
-          {children}
+          <div className={`${baseClass}__text`}>
+            {children}
+          </div>
           {relationTo && hasReadPermission && (
             <Fragment>
               <DocumentDrawerToggler
