@@ -375,10 +375,13 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         return option;
       }),
     };
-    const schemaToReturn = localizeSchema(field, baseSchema, config.localization);
 
     schema.add({
-      [field.name]: field.hasMany ? [schemaToReturn] : schemaToReturn,
+      [field.name]: localizeSchema(
+        field,
+        field.hasMany ? [baseSchema] : baseSchema,
+        config.localization,
+      ),
     });
   },
   blocks: (field: BlockField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
