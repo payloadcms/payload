@@ -386,10 +386,11 @@ describe('fields', () => {
 
       await textField.fill(textValue);
 
-      await page.locator('#relationship-add-modal-depth-1 #action-save').click();
+      await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click();
       await expect(page.locator('.Toastify')).toContainText('successfully');
+      await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
 
-      await expect(page.locator('#field-relationship .rs__single-value')).toContainText(textValue);
+      await expect(page.locator('#field-relationship .relationship--single-value__text')).toContainText(textValue);
 
       await page.locator('#action-save').click();
       await expect(page.locator('.Toastify')).toContainText('successfully');
@@ -402,30 +403,32 @@ describe('fields', () => {
       await page.locator('#relationToSelf-add-new .relationship-add-new__add-button').click();
 
       // Fill first modal's required relationship field
-      await page.locator('#relationToSelf-add-modal-depth-1 #field-relationship').click();
-      await page.locator('#relationToSelf-add-modal-depth-1 .rs__option:has-text("Seeded text document")').click();
+      await page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationship').click();
+      await page.locator('[id^=doc-drawer_relationship-fields_1_] .rs__option:has-text("Seeded text document")').click();
 
       // Open second modal
-      await page.locator('#relationToSelf-add-modal-depth-1 #relationToSelf-add-new button').click();
+      await page.locator('[id^=doc-drawer_relationship-fields_1_] #relationToSelf-add-new button').click();
 
       // Fill second modal's required relationship field
-      await page.locator('#relationToSelf-add-modal-depth-2 #field-relationship').click();
-      await page.locator('#relationToSelf-add-modal-depth-2 .rs__option:has-text("Seeded text document")').click();
+      await page.locator('[id^=doc-drawer_relationship-fields_2_] #field-relationship').click();
+      await page.locator('[id^=doc-drawer_relationship-fields_2_] .rs__option:has-text("Seeded text document")').click();
 
-      // Save second modal
-      await page.locator('#relationToSelf-add-modal-depth-2 #action-save').click();
-
-      // Assert that the first modal is still open
-      // and that the Relation to Self field now has a value in its input
-      await expect(page.locator('#relationToSelf-add-modal-depth-1 #field-relationToSelf .rs__single-value')).toBeVisible();
-
-      // Save first modal
-      await page.locator('#relationToSelf-add-modal-depth-1 #action-save').click();
-
+      // Save then close the second modal
+      await page.locator('[id^=doc-drawer_relationship-fields_2_] #action-save').click();
       await wait(200);
+      await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_2_]').click();
+
+      // Assert that the first modal is still open and the value matches
+      await expect(page.locator('[id^=doc-drawer_relationship-fields_1_]')).toBeVisible();
+      await expect(page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationToSelf .relationship--single-value__text')).toBeVisible(); // TODO: use '.toContainText('doc_id')' with the doc in the second modal
+
+      // Save then close the first modal
+      await page.locator('[id^=doc-drawer_relationship-fields_1_] #action-save').click();
+      await wait(200);
+      await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_1_]').click();
 
       // Expect the original field to have a value filled
-      await expect(page.locator('#field-relationToSelf .rs__single-value')).toBeVisible();
+      await expect(page.locator('#field-relationToSelf .relationship--single-value__text')).toBeVisible();
 
       // Fill the required field
       await page.locator('#field-relationship').click();

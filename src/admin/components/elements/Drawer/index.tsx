@@ -16,7 +16,7 @@ const formatDrawerSlug = ({
 }: {
   slug: string,
   depth: number,
-}) => `drawer-lvl${depth}-${slug}`;
+}) => `drawer_${depth}_${slug}`;
 
 export const DrawerToggler: React.FC<TogglerProps> = ({
   slug,
@@ -80,6 +80,7 @@ export const Drawer: React.FC<Props> = ({
       )}
       <button
         className={`${baseClass}__close`}
+        id={`close-drawer__${modalSlug}`}
         type="button"
         onClick={() => closeModal(modalSlug)}
         style={{
