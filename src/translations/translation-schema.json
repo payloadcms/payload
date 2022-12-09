@@ -371,25 +371,25 @@
         "chooseBetweenCustomTextOrDocument": {
           "type": "string"
         },
-        "chooseDocumentToLink":{
+        "chooseDocumentToLink": {
           "type": "string"
         },
         "customURL": {
           "type": "string"
         },
-        "editLink":{
+        "editLink": {
           "type": "string"
         },
         "enterURL": {
           "type": "string"
         },
-        "internalLink":{
+        "internalLink": {
           "type": "string"
         },
         "linkType": {
           "type": "string"
         },
-        "openInNewTab":{
+        "openInNewTab": {
           "type": "string"
         },
         "textToDisplay": {
@@ -548,6 +548,9 @@
         "changesNotSaved": {
           "type": "string"
         },
+        "close": {
+          "type": "string"
+        },
         "collections": {
           "type": "string"
         },
@@ -612,6 +615,9 @@
           "type": "string"
         },
         "duplicateWithoutSaving": {
+          "type": "string"
+        },
+        "edit": {
           "type": "string"
         },
         "editLabel": {
