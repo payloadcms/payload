@@ -12,7 +12,8 @@ export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
   children?: React.ReactNode
   className?: string
   drawerSlug?: string
-  key?: string
+  id?: string
+  collectionSlug: string
 }
 
 export type UseDocumentDrawer = (args: {

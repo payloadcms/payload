@@ -26,6 +26,7 @@ export const MultiValueRemove: React.FC<MultiValueRemoveProps<OptionType>> = (pr
         setShowTooltip(false);
         innerProps.onClick(e);
       }}
+      aria-label={t('remove')}
     >
       <Tooltip
         className={`${baseClass}__tooltip`}

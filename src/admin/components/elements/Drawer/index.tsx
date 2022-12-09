@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useWindowInfo } from '@faceless-ui/window-info';
+import { useTranslation } from 'react-i18next';
 import { Props, TogglerProps } from './types';
-import './index.scss';
 import { EditDepthContext, useEditDepth } from '../../utilities/EditDepth';
+import './index.scss';
 
 const baseClass = 'drawer';
 
@@ -51,7 +52,8 @@ export const Drawer: React.FC<Props> = ({
   children,
   className,
 }) => {
-  const { toggleModal, modalState } = useModal();
+  const { t } = useTranslation('general');
+  const { closeModal, modalState } = useModal();
   const { breakpoints: { m: midBreak } } = useWindowInfo();
   const drawerDepth = useEditDepth();
   const [isOpen, setIsOpen] = useState(false);
@@ -63,7 +65,6 @@ export const Drawer: React.FC<Props> = ({
 
   return (
     <Modal
-      trapFocus={false}
       slug={modalSlug}
       className={[
         className,
@@ -80,15 +81,12 @@ export const Drawer: React.FC<Props> = ({
       <button
         className={`${baseClass}__close`}
         type="button"
-        onClick={() => toggleModal(modalSlug)}
+        onClick={() => closeModal(modalSlug)}
         style={{
           width: `calc(${midBreak ? 'var(--gutter-h)' : 'var(--nav-width)'} + ${drawerDepth - 1} * 25px)`,
         }}
-      >
-        <span>
-          Close
-        </span>
-      </button>
+        aria-label={t('close')}
+      />
       <div className={`${baseClass}__content`}>
         <div className={`${baseClass}__content-children`}>
           <EditDepthContext.Provider value={drawerDepth + 1}>

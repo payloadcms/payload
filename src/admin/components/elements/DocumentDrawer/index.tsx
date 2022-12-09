@@ -18,28 +18,11 @@ import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import formatFields from '../../views/collections/Edit/formatFields';
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import IDLabel from '../IDLabel';
-import './index.scss';
 import { useEditDepth } from '../../utilities/EditDepth';
+import './index.scss';
 
 const baseClass = 'doc-drawer';
-
-const formatFieldsFromSchema = ({
-  collectionSlug,
-  collectionConfig,
-} : {
-  collectionSlug: string,
-  collectionConfig: SanitizedCollectionConfig,
-}) => {
-  if (collectionSlug) {
-    if (collectionConfig) {
-      return formatFields(collectionConfig, true);
-    }
-  }
-
-  return [];
-};
 
 const formatDocumentDrawerSlug = ({
   collectionSlug,
@@ -57,13 +40,19 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   children,
   className,
   drawerSlug,
+  id,
+  collectionSlug,
   ...rest
 }) => {
+  const { t, i18n } = useTranslation(['fields', 'general']);
+  const [collectionConfig] = useRelatedCollections(collectionSlug);
+
   return (
     <DrawerToggler
       slug={drawerSlug}
       formatSlug={false}
       className={className}
+      aria-label={t(!id ? 'fields:addNewLabel' : 'general:editLabel', { label: getTranslation(collectionConfig.labels.singular, i18n) })}
       {...rest}
     >
       {children}
@@ -88,10 +77,10 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [collectionConfig] = useRelatedCollections(collectionSlug);
 
-  const [fields, setFields] = useState(() => formatFieldsFromSchema({ collectionConfig, collectionSlug }));
+  const [fields, setFields] = useState(() => formatFields(collectionConfig, true));
 
   useEffect(() => {
-    setFields(formatFieldsFromSchema({ collectionConfig, collectionSlug }));
+    setFields(formatFields(collectionConfig, true));
   }, [collectionSlug, collectionConfig]);
 
   const [{ data, isLoading: isLoadingDocument, isError }] = usePayloadAPI(
@@ -173,6 +162,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
                       buttonStyle="none"
                       className={`${baseClass}__header-close`}
                       onClick={() => toggleModal(drawerSlug)}
+                      aria-label={t('general:close')}
                     >
                       <X />
                     </Button>
@@ -228,10 +218,11 @@ export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => 
       <DocumentDrawerToggler
         {...props}
         id={id}
+        collectionSlug={collectionSlug}
         drawerSlug={drawerSlug}
       />
     ));
-  }, [id, drawerSlug]);
+  }, [id, drawerSlug, collectionSlug]);
 
   const MemoizedDrawerState = useMemo(() => ({
     drawerSlug,
