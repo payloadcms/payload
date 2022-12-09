@@ -40,6 +40,28 @@ describe('Fields', () => {
     });
   });
 
+  describe('select', () => {
+    let doc;
+    beforeAll(async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        locale: 'en',
+        data: {
+          selectHasManyLocalized: ['one', 'two'],
+        },
+      });
+      doc = await payload.findByID({
+        collection: 'select-fields',
+        locale: 'all',
+        id,
+      });
+    });
+
+    it('creates with hasMany localized', () => {
+      expect(doc.selectHasManyLocalized.en).toEqual(['one', 'two']);
+    });
+  });
+
   describe('number', () => {
     let doc;
     beforeAll(async () => {

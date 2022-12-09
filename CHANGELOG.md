@@ -1,5 +1,43 @@
 
 
+# [1.3.0](https://github.com/payloadcms/payload/compare/v1.2.5...v1.3.0) (2022-12-09)
+
+
+### Bug Fixes
+
+* [#1547](https://github.com/payloadcms/payload/issues/1547), global afterChange hook not falling back to original global if nothing returned ([a72123d](https://github.com/payloadcms/payload/commit/a72123dd471e1032d832e409560bda9cf3058095))
+* [#1632](https://github.com/payloadcms/payload/issues/1632) graphQL non-nullable relationship and upload fields ([#1633](https://github.com/payloadcms/payload/issues/1633)) ([eff3f18](https://github.com/payloadcms/payload/commit/eff3f18e7c184e5f82325e960b4cbe84b6377d82))
+* change edit key to prevent richtext editor from crashing ([#1616](https://github.com/payloadcms/payload/issues/1616)) ([471d214](https://github.com/payloadcms/payload/commit/471d21410ac9ac852a8581a019dd6759f56cd8b2))
+* filterOptions function argument relationTo is an array ([#1627](https://github.com/payloadcms/payload/issues/1627)) ([11b1c0e](https://github.com/payloadcms/payload/commit/11b1c0efc66acd32de2efcaf65bad504d2e2eb45))
+* resets slate state when initialValue changes, fixes [#1600](https://github.com/payloadcms/payload/issues/1600), [#1546](https://github.com/payloadcms/payload/issues/1546) ([9558a22](https://github.com/payloadcms/payload/commit/9558a22ce6cdf9bc13215931b43bde0a7dd4bf50))
+* sanitizes global find query params ([512bc1e](https://github.com/payloadcms/payload/commit/512bc1ebe636841f1dee6ce49c1d97db1810c4bd))
+* Select with hasMany and localized ([#1636](https://github.com/payloadcms/payload/issues/1636)) ([756edb8](https://github.com/payloadcms/payload/commit/756edb858a1ca66c32e674770ddcdceae77bf349))
+* translation key in revert published modal ([#1628](https://github.com/payloadcms/payload/issues/1628)) ([b6c597a](https://github.com/payloadcms/payload/commit/b6c597ab5c4fcd879496db5373155df48c657e28))
+* unflattens fields in filterOptions callback ([acff46b](https://github.com/payloadcms/payload/commit/acff46b4a5b57f01fa0b14c1e9fd8330b4d787db))
+
+
+* feat!: no longer sanitize collection slugs to kebab case (#1607) ([ba2f2d6](https://github.com/payloadcms/payload/commit/ba2f2d6e9b66568b11632bacdd92cfdc8ddae300)), closes [#1607](https://github.com/payloadcms/payload/issues/1607)
+
+
+### Features
+
+* add Norwegian bokmål (nb) translation ([#1614](https://github.com/payloadcms/payload/issues/1614)) ([759f001](https://github.com/payloadcms/payload/commit/759f00168137ff1a0fd862796a5971a9ba0264cd))
+* add Thai translation ([#1630](https://github.com/payloadcms/payload/issues/1630)) ([7777d11](https://github.com/payloadcms/payload/commit/7777d11b9ed458a6c64efc8c9572edb898f6ceed))
+* upload support pasting file ([eb69b82](https://github.com/payloadcms/payload/commit/eb69b82adfb4e94c1ef36b219310c55afc7a1d4e))
+
+
+### BREAKING CHANGES
+
+* collection slugs are no longer automatically sanitized to be kebab case. This will only be an issue if your current slugs were in camel case. The upgrade path will be to change those slugs to the kebab case version that the slug was automatically being sanitized to on the backend.
+
+If you only use kebab case or single word slugs: no action needed.
+
+If you have existing slugs with camel case and populated data: you'll need to convert these to the kebab case version to match the previously sanitized value.
+
+ie. myOldSlug is your slug, you should convert it to my-old-slug.
+
+Any future slugs after updating will be used as-is.
+
 ## [1.2.5](https://github.com/payloadcms/payload/compare/v1.2.4...v1.2.5) (2022-12-06)
 
 

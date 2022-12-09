@@ -212,6 +212,50 @@ describe('fields - relationship', () => {
     await expect(filteredField).toContainText(anotherRelationOneDoc.id);
   });
 
+  test('should allow usage of relationTo in filterOptions', async () => {
+    const { id: include } = await payload.create<RelationOne>({
+      collection: relationOneSlug,
+      data: {
+        name: 'include',
+      },
+    });
+    const { id: exclude } = await payload.create<RelationOne>({
+      collection: relationOneSlug,
+      data: {
+        name: 'exclude',
+      },
+    });
+
+    await page.goto(url.create);
+
+    // select relationshipMany field that relies on siblingData field above
+    await page.locator('#field-relationshipManyFiltered .rs__control').click();
+
+    const options = await page.locator('#field-relationshipManyFiltered .rs__menu');
+    await expect(options).toContainText(include);
+    await expect(options).not.toContainText(exclude);
+  });
+
+  test('should allow usage of siblingData in filterOptions', async () => {
+    await payload.create<RelationOne>({
+      collection: relationWithTitleSlug,
+      data: {
+        name: 'exclude',
+      },
+    });
+
+    await page.goto(url.create);
+
+    // enter a filter for relationshipManyFiltered to use
+    await page.locator('#field-filter').fill('include');
+
+    // select relationshipMany field that relies on siblingData field above
+    await page.locator('#field-relationshipManyFiltered .rs__control').click();
+
+    const options = await page.locator('#field-relationshipManyFiltered .rs__menu');
+    await expect(options).not.toContainText('exclude');
+  });
+
   describe('existing relationships', () => {
     test('should highlight existing relationship', async () => {
       await page.goto(url.edit(docWithExistingRelations.id));

@@ -71,7 +71,6 @@ const RichText: React.FC<Props> = (props) => {
   const [loaded, setLoaded] = useState(false);
   const [enabledElements, setEnabledElements] = useState({});
   const [enabledLeaves, setEnabledLeaves] = useState({});
-  const [initialValueKey, setInitialValueKey] = useState('');
   const editorRef = useRef(null);
   const toolbarRef = useRef(null);
 
@@ -182,10 +181,6 @@ const RichText: React.FC<Props> = (props) => {
   }, [loaded, elements, leaves]);
 
   useEffect(() => {
-    setInitialValueKey(JSON.stringify(initialValue || ''));
-  }, [initialValue]);
-
-  useEffect(() => {
     function setClickableState(clickState: 'disabled' | 'enabled') {
       const selectors = 'button, a, [role="button"]';
       const toolbarButtons: (HTMLButtonElement | HTMLAnchorElement)[] = toolbarRef.current?.querySelectorAll(selectors);
@@ -210,11 +205,21 @@ const RichText: React.FC<Props> = (props) => {
     };
   }, [loaded, readOnly]);
 
+  useEffect(() => {
+    if (Array.isArray(initialValue) && initialValue.length > 0) {
+      const point = { path: [0, 0], offset: 0 };
+      editor.selection = { anchor: point, focus: point };
+      editor.history = { redos: [], undos: [] };
+      editor.children = initialValue;
+    }
+  }, [initialValue, editor]);
+
   if (!loaded) {
     return null;
   }
 
   let valueToRender = value;
+
   if (typeof valueToRender === 'string') {
     try {
       const parsedJSON = JSON.parse(valueToRender);
@@ -228,7 +233,6 @@ const RichText: React.FC<Props> = (props) => {
 
   return (
     <div
-      key={initialValueKey}
       className={classes}
       style={{
         ...style,

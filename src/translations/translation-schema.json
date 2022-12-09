@@ -533,6 +533,9 @@
         "and": {
           "type": "string"
         },
+        "ascending": {
+          "type": "string"
+        },
         "automatic": {
           "type": "string"
         },
@@ -789,6 +792,7 @@
         "addFilter",
         "adminTheme",
         "and",
+        "ascending",
         "automatic",
         "backToDashboard",
         "cancel",
