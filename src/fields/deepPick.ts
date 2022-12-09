@@ -31,7 +31,7 @@ export function deepPick<T, U extends string>(
 }
 
 function deepPickTo<T>(obj: T, path: Array<string>, result: any): boolean {
-  if (typeof result !== 'object') {
+  if (typeof result !== 'object' || typeof obj !== 'object') {
     return false;
   }
   const pathPart = path[0];
