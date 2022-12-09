@@ -91,6 +91,25 @@ export default buildConfig({
             });
           },
         },
+        {
+          type: 'relationship',
+          name: 'relationshipManyFiltered',
+          relationTo: [relationWithTitleSlug, relationOneSlug],
+          hasMany: true,
+          filterOptions: ({ relationTo, siblingData }: any) => {
+            if (relationTo === relationOneSlug) {
+              return { name: { equals: 'include' } };
+            }
+            if (siblingData.filter) {
+              return { name: { contains: siblingData.filter } };
+            }
+            return { and: [] };
+          },
+        },
+        {
+          type: 'text',
+          name: 'filter',
+        },
       ],
     },
     {

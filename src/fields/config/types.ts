@@ -50,7 +50,7 @@ export type FilterOptionsProps<T = any> = {
   user: Partial<User>,
   data: T,
   siblingData: unknown,
-  relationTo: string | string[],
+  relationTo: string,
 }
 
 export type FilterOptions<T = any> = Where | ((options: FilterOptionsProps<T>) => Where);
