@@ -149,7 +149,11 @@ function buildObjectType({
       // to itself. Therefore, we set the relationshipType equal to the blockType
       // that is currently being created.
 
-      const type = payload.collections[relationTo].graphQL.type || newlyCreatedBlockType;
+      const type = withNullableType(
+        field,
+        payload.collections[relationTo].graphQL.type || newlyCreatedBlockType,
+        forceNullable,
+      );
 
       const uploadArgs = {} as LocaleInputType;
 
@@ -312,7 +316,11 @@ function buildObjectType({
 
       const relationship = {
         args: relationshipArgs,
-        type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
+        type: withNullableType(
+          field,
+          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
+          forceNullable,
+        ),
         extensions: { complexity: 10 },
         async resolve(parent, args, context) {
           const value = parent[field.name];
