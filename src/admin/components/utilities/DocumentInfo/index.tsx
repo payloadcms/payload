@@ -5,7 +5,7 @@ import qs from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../Config';
 import { PaginatedDocs } from '../../../../mongoose/types';
-import { ContextType, DocumentPermissions, Props, Version } from './types';
+import { ContextType, DocumentPermissions, EntityType, Props, Version } from './types';
 import { TypeWithID } from '../../../../globals/config/types';
 import { TypeWithTimestamps } from '../../../../collections/config/types';
 import { Where } from '../../../../types';
@@ -29,14 +29,16 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null);
 
   const baseURL = `${serverURL}${api}`;
-  let slug;
-  let type;
-  let preferencesKey;
+  let slug: string;
+  let type: EntityType;
+  let preferencesKey: string;
+  let docAccessURL: string;
 
   if (global) {
     slug = global.slug;
     type = 'global';
     preferencesKey = `global-${slug}`;
+    docAccessURL = `/globals/${slug}/access`;
   }
 
   if (collection) {
@@ -45,6 +47,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
     if (id) {
       preferencesKey = `collection-${slug}-${id}`;
+      docAccessURL = `/${slug}/access/${id}`;
     }
   }
 
@@ -170,13 +173,13 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
   }, [i18n, global, collection, id, baseURL]);
 
-  const checkDocPermissions = React.useCallback(async () => {
-    const globalPath = `/globals/${slug}/access`;
-    const collectionPath = `/${slug}/access/${id}`;
-    const res = await fetch(`${serverURL}${api}${type === 'global' ? globalPath : collectionPath}`);
-    const json = await res.json();
-    setDocPermissions(json);
-  }, [serverURL, api, type, slug, id]);
+  const getDocPermissions = React.useCallback(async () => {
+    if (docAccessURL) {
+      const res = await fetch(`${serverURL}${api}${docAccessURL}`);
+      const json = await res.json();
+      setDocPermissions(json);
+    }
+  }, [serverURL, api, docAccessURL]);
 
   useEffect(() => {
     getVersions();
@@ -191,8 +194,8 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   }, [getPreference, preferencesKey]);
 
   useEffect(() => {
-    checkDocPermissions();
-  }, [checkDocPermissions]);
+    getDocPermissions();
+  }, [getDocPermissions]);
 
   const value = {
     slug,
@@ -205,6 +208,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     getVersions,
     publishedDoc,
     id,
+    getDocPermissions,
     docPermissions,
   };
 

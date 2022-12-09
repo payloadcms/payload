@@ -29,6 +29,7 @@ export type CollectionPermission = {
   read: Permission
   update: Permission
   delete: Permission
+  readVersions?: Permission
   fields: {
     [field: string]: FieldPermissions
   }
@@ -37,6 +38,7 @@ export type CollectionPermission = {
 export type GlobalPermission = {
   read: Permission
   update: Permission
+  readVersions?: Permission
   fields: {
     [field: string]: FieldPermissions
   }

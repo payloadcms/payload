@@ -24,19 +24,6 @@ const DraftGlobal: GlobalConfig = {
       type: 'text',
       required: true,
       localized: true,
-      access: {
-        update: (args) => {
-          if (args?.doc?.lockUpdate) {
-            return false;
-          }
-          return true;
-        },
-      },
-    },
-    {
-      name: 'lockUpdate',
-      type: 'checkbox',
-      defaultValue: false,
     },
   ],
 };

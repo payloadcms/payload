@@ -42,11 +42,12 @@ const EditView: React.FC<IndexProps> = (props) => {
   const history = useHistory();
   const [initialState, setInitialState] = useState<Fields>();
   const { permissions: allPermissions, user } = useAuth();
-  const { getVersions, preferencesKey, docPermissions } = useDocumentInfo();
+  const { getVersions, preferencesKey, getDocPermissions, docPermissions } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { t } = useTranslation('general');
 
   const onSave = useCallback(async (json: any) => {
+    getDocPermissions();
     getVersions();
     if (!isEditing) {
       setRedirect(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
@@ -54,7 +55,7 @@ const EditView: React.FC<IndexProps> = (props) => {
       const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc, user, id, operation: 'update', locale, t });
       setInitialState(state);
     }
-  }, [admin, collection, isEditing, getVersions, user, id, t, locale]);
+  }, [admin, collection, isEditing, getVersions, user, id, t, locale, getDocPermissions]);
 
   const [{ data, isLoading: isLoadingDocument, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),

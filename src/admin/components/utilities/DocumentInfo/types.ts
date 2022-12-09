@@ -9,10 +9,12 @@ export type Version = TypeWithVersion<any>
 
 export type DocumentPermissions = null | GlobalPermission | CollectionPermission
 
+export type EntityType = 'global' | 'collection'
+
 export type ContextType = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
-  type: 'global' | 'collection'
+  type: EntityType
   /** Slug of the collection or global */
   slug?: string
   id?: string | number
@@ -22,6 +24,7 @@ export type ContextType = {
   publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
   getVersions: () => Promise<void>
   docPermissions: DocumentPermissions
+  getDocPermissions: () => Promise<void>
 }
 
 export type Props = {

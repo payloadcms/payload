@@ -22,7 +22,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { setStepNav } = useStepNav();
   const { permissions, user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
-  const { getVersions, preferencesKey } = useDocumentInfo();
+  const { getVersions, preferencesKey, docPermissions, getDocPermissions } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { t } = useTranslation();
 
@@ -50,9 +50,10 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   const onSave = useCallback(async (json) => {
     getVersions();
+    getDocPermissions();
     const state = await buildStateFromSchema({ fieldSchema: fields, data: json.result, operation: 'update', user, locale, t });
     setInitialState(state);
-  }, [getVersions, fields, user, locale, t]);
+  }, [getVersions, fields, user, locale, t, getDocPermissions]);
 
   const [{ data }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
@@ -80,6 +81,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t]);
 
   const globalPermissions = permissions?.globals?.[slug];
+  const permissionsToUse = docPermissions || globalPermissions;
 
   return (
     <RenderCustomComponent
@@ -88,7 +90,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
       componentProps={{
         isLoading: !initialState,
         data: dataToRender,
-        permissions: globalPermissions,
+        permissions: permissionsToUse,
         initialState,
         global,
         onSave,

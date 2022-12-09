@@ -1,12 +1,16 @@
-import { tabHasName } from '../fields/config/types';
+import { Access } from '../../config';
+import { Operation, Where, Document } from '../../types';
+import { FieldAccess, tabHasName } from '../fields/config/types';
 import type { CollectionConfig } from '../collections/config/types';
 import type { GlobalConfig } from '../globals/config/types';
 import type { PayloadRequest } from '../express/types';
 import type { CollectionPermission, GlobalPermission } from '../auth/types';
+import { TypeWithID } from '../../dist/collections/config/types';
 
+type AllOperations = Operation | 'unlock' | 'readVersions'
 type Args = ({
   req: PayloadRequest
-  operations: string[]
+  operations: AllOperations[]
   id?: string
 } & ({
   type: 'collection'
@@ -16,6 +20,16 @@ type Args = ({
   entity: GlobalConfig
 }))
 type ReturnType<T extends Args> = T['type'] extends 'global' ? [GlobalPermission, Promise<void>[]] : [CollectionPermission, Promise<void>[]]
+
+type CreateAccessPromise = (args: {
+  accessLevel: 'entity' | 'field',
+  policiesObj: {
+    [key: string]: any
+  }
+  access: Access | FieldAccess,
+  operation: AllOperations,
+  disableWhere?: boolean,
+}) => Promise<void>
 
 export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
   const { req, entity, operations, id, type } = args;
@@ -28,40 +42,54 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
     fields: {},
   } as ReturnType<T>[0];
   const promises = [] as ReturnType<T>[1];
-  let docBeingAccessed = null;
+  let docBeingAccessed;
 
-  async function getDoc() {
+  async function getDoc(where?: Where): Promise<TypeWithID & Document> {
     if (entity.slug) {
       if (type === 'collection' && id) {
-        docBeingAccessed = await req.payload.findByID({
+        if (typeof where === 'object') {
+          const paginatedRes = await req.payload.find({
+            overrideAccess: true,
+            collection: entity.slug,
+            where,
+          });
+          if (paginatedRes?.docs.length > 0) return paginatedRes.docs[0];
+          return undefined;
+        }
+
+        return req.payload.findByID({
           overrideAccess: true,
           collection: entity.slug,
           id,
         });
-      } else if (type === 'global') {
-        docBeingAccessed = await req.payload.findGlobal({
+      } if (type === 'global') {
+        return req.payload.findGlobal({
           overrideAccess: true,
           slug: entity.slug,
         });
-      } else {
-        docBeingAccessed = undefined;
       }
     }
+
+    return undefined;
   }
 
-  const createAccessPromise = async ({
+  const createAccessPromise: CreateAccessPromise = async ({
     policiesObj,
     access,
     operation,
     disableWhere = false,
+    accessLevel,
   }) => {
     const mutablePolicies = policiesObj;
-    await getDoc();
+
+    if (accessLevel === 'field' && docBeingAccessed === undefined) {
+      docBeingAccessed = await getDoc();
+    }
     const result = await access({ req, id, doc: docBeingAccessed });
 
     if (typeof result === 'object' && !disableWhere) {
       mutablePolicies[operation] = {
-        permission: true,
+        permission: !!(await getDoc(result)) ?? true,
         where: result,
       };
     } else if (mutablePolicies[operation]?.permission !== false) {
@@ -88,6 +116,7 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
             access: field.access[operation],
             operation,
             disableWhere: true,
+            accessLevel: 'field',
           }));
         } else {
           mutablePolicies[field.name][operation] = {
@@ -142,6 +171,7 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
         policiesObj: policies,
         access: entity.access[operation],
         operation,
+        accessLevel: 'entity',
       }));
     } else {
       policies[operation] = {
