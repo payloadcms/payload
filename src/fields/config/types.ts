@@ -10,6 +10,7 @@ import { Description } from '../../admin/components/forms/FieldDescription/types
 import { User } from '../../auth';
 import { Payload } from '../..';
 import { RowLabel } from '../../admin/components/forms/RowLabel/types';
+import { DeepPickKeys } from '../deepPick';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
@@ -249,10 +250,10 @@ type SelectOptionsProps<T extends TypeWithID, P = any> = {
 
 export type SelectFunction<T extends TypeWithID = any, P = any> = (
   options: SelectOptionsProps<T, P>
-) => Array<string> | true;
+) => Array<DeepPickKeys<T>> | true;
 
 export type SelectOptions<T extends TypeWithID = any, P = any> =
-  | Array<string>
+  | Array<DeepPickKeys<T>>
   | SelectFunction<T, P>;
 
 export type UploadField = FieldBase & {

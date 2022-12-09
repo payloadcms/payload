@@ -1,30 +1,46 @@
 /* eslint-disable no-param-reassign */
 
 type AllKeysOfType<T> = {
-  [P in keyof T]: T[P] extends never ? never : P
-}[keyof T]
+  [P in keyof T]: T[P] extends never ? never : P;
+}[keyof T];
 
-type RemoveNever<T> = Pick<T, AllKeysOfType<T>>
+type RemoveNever<T> = Pick<T, AllKeysOfType<T>>;
 
-export type DeepPick<Type, Query> = RemoveNever<{
-  [P in keyof Type]: Type extends Array<any>
-    ? RemoveNever<DeepPick<Type[P], Query>>
-    : P extends Query
-    ? Type[P]
-    : P extends string
-    ? Query extends `${P}.${infer SubQuery}`
-      ? RemoveNever<DeepPick<Type[P], SubQuery>>
+type Primitive = string | number | boolean | null | undefined;
+export type DeepPickKeys<Type> = {
+  [Key in keyof Type]: Type extends Array<any>
+    ? DeepPickKeys<Type[Key]>
+    : Key extends string
+    ? Type[Key] extends Primitive
+      ? `${Key}`
+      : `${Key}` | `${Key}.${DeepPickKeys<Type[Key]>}`
+    : never;
+}[keyof Type];
+
+export type DeepPick<Type, Query extends DeepPickKeys<Type>> = RemoveNever<{
+  [Key in keyof Type]: Type extends Array<any>
+    ? Query extends DeepPickKeys<Type[Key]>
+      ? RemoveNever<DeepPick<Type[Key], Query>>
       : never
-    : never
-}>
+    : Key extends Query
+    ? Type[Key]
+    : Key extends string
+    ? Query extends `${Key}.${infer SubQuery}`
+      ? SubQuery extends DeepPickKeys<Type[Key]>
+        ? RemoveNever<DeepPick<Type[Key], SubQuery>>
+        : never
+      : never
+    : never;
+}>;
 
-export function deepPick<T, U extends string>(
+export function deepPick<T, U extends DeepPickKeys<T>>(
   obj: T,
   paths: Array<U>,
 ): DeepPick<T, typeof paths[number]> {
   const result: any = {};
   paths.forEach((path) => {
-    const pathParts = path.split('.');
+    // not sure why this is necessary, but it is
+    const pathParts = (path as string).split('.');
     deepPickTo(obj, pathParts, result);
   });
   return result;
