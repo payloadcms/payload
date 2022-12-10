@@ -1,13 +1,12 @@
-import { Access } from '../../config';
-import { Operation, Where, Document } from '../../types';
+import { Access } from '../config/types';
+import { AllOperations, Where, Document } from '../types';
 import { FieldAccess, tabHasName } from '../fields/config/types';
 import type { CollectionConfig } from '../collections/config/types';
 import type { GlobalConfig } from '../globals/config/types';
 import type { PayloadRequest } from '../express/types';
 import type { CollectionPermission, GlobalPermission } from '../auth/types';
-import { TypeWithID } from '../../dist/collections/config/types';
+import { TypeWithID } from '../collections/config/types';
 
-type AllOperations = Operation | 'unlock' | 'readVersions'
 type Args = ({
   req: PayloadRequest
   operations: AllOperations[]

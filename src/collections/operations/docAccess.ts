@@ -1,8 +1,9 @@
+import { AllOperations } from '../../types';
 import { CollectionPermission } from '../../auth';
 import type { PayloadRequest } from '../../express/types';
 import { getEntityPolicies } from '../../utilities/getEntityPolicies';
 
-const allOperations = ['create', 'read', 'update', 'delete'];
+const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete'];
 
 type Arguments = {
   req: PayloadRequest

@@ -225,7 +225,6 @@ export default buildConfig({
         {
           name: 'approvedTitle',
           type: 'text',
-          required: true,
           localized: true,
           access: {
             update: (args) => {

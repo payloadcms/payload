@@ -1,3 +1,4 @@
+import { AllOperations } from '../../types';
 import { GlobalPermission } from '../../auth';
 import type { PayloadRequest } from '../../express/types';
 import { getEntityPolicies } from '../../utilities/getEntityPolicies';
@@ -14,7 +15,7 @@ export async function docAccess(args: Arguments): Promise<GlobalPermission> {
     globalConfig,
   } = args;
 
-  const globalOperations = ['read', 'update'];
+  const globalOperations: AllOperations[] = ['read', 'update'];
 
   if (globalConfig.versions) {
     globalOperations.push('readVersions');

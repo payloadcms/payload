@@ -1,9 +1,10 @@
 import type { PayloadRequest } from '../../express/types';
 import type { Permissions } from '../types';
+import type { AllOperations } from '../../types';
 import { adminInit as adminInitTelemetry } from '../../utilities/telemetry/events/adminInit';
 import { getEntityPolicies } from '../../utilities/getEntityPolicies';
 
-const allOperations = ['create', 'read', 'update', 'delete'];
+const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete'];
 
 type Arguments = {
   req: PayloadRequest
@@ -60,7 +61,7 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
   });
 
   config.globals.forEach((global) => {
-    const globalOperations = ['read', 'update'];
+    const globalOperations: AllOperations[] = ['read', 'update'];
 
     if (global.versions) {
       globalOperations.push('readVersions');
