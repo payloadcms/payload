@@ -6,7 +6,7 @@ import { useConfig } from '../../../../src/admin/components/utilities/Config';
 import Chevron from '../../../../src/admin/components/icons/Chevron';
 
 // In your projects, you can import as follows:
-// import { Chevron } from 'payload/components/icons';
+// import { Chevron } from 'payload/components';
 
 
 const baseClass = 'after-nav-links';
