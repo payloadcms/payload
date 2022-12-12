@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import Chevron from '../../icons/Chevron';
 import { Context as ContextType } from './types';
 import { getTranslation } from '../../../../utilities/getTranslation';
+import { useConfig } from '../../utilities/Config';
 
 import './index.scss';
 
@@ -31,12 +32,14 @@ const StepNav: React.FC = () => {
   const { t, i18n } = useTranslation();
   const dashboardLabel = <span>{t('general:dashboard')}</span>;
   const { stepNav } = useStepNav();
+  const config = useConfig();
+  const { routes: { admin } } = config;
 
   return (
     <nav className="step-nav">
       {stepNav.length > 0
         ? (
-          <Link to="/admin">
+          <Link to={`${admin}`}>
             {dashboardLabel}
             <Chevron />
           </Link>
