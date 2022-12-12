@@ -79,7 +79,7 @@ export type GlobalConfig = {
   fields: Field[];
   admin?: {
     description?: string | (() => string);
-    group?: string;
+    group?: Record<string, string> | string;
     hideAPIURL?: boolean;
     components?: {
       views?: {
