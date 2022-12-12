@@ -39,7 +39,7 @@ const StepNav: React.FC = () => {
     <nav className="step-nav">
       {stepNav.length > 0
         ? (
-          <Link to={`${admin}`}>
+          <Link to={admin}>
             {dashboardLabel}
             <Chevron />
           </Link>
