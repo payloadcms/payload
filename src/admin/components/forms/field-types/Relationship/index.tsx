@@ -139,6 +139,7 @@ const Relationship: React.FC<Props> = (props) => {
             limit: maxResultsPerRequest,
             page: lastLoadedPageToUse,
             sort: fieldToSearch,
+            locale: i18n.language,
             depth: 0,
           };
 
