@@ -121,7 +121,7 @@
     "find-up": "4.1.0",
     "flatley": "^5.2.0",
     "fs-extra": "^10.0.0",
-    "graphql": "15.4.0",
+    "graphql": "^16.6.0",
     "graphql-playground-middleware-express": "^1.7.14",
     "graphql-query-complexity": "^0.7.0",
     "graphql-scalars": "^1.4.0",
