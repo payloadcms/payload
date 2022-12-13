@@ -367,6 +367,22 @@ describe('fields', () => {
     });
   });
 
+  describe('date', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'date-fields');
+    });
+
+    test('should display formatted date in list view if displayFormat option added to date field', async () => {
+      await page.goto(url.list);
+      const formattedDateCell = page.locator('.row-1 .cell-timeOnly');
+      await expect(formattedDateCell).toHaveText('12 Aug 2022');
+
+      const notFormattedDateCell = page.locator('.row-1 .cell-default');
+      await expect(notFormattedDateCell).toHaveText('August 12th 2022, 6:00 AM');
+    });
+  });
+
   describe('relationship', () => {
     let url: AdminUrlUtil;
 

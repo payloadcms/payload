@@ -19,6 +19,7 @@ const DateFields: CollectionConfig = {
       admin: {
         date: {
           pickerAppearance: 'timeOnly',
+          displayFormat: 'd MMM yyy',
         },
       },
     },
