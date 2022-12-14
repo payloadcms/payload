@@ -38,6 +38,9 @@ export interface PayloadMongooseDocument extends MongooseDocument {
 }
 
 export type Operation = 'create' | 'read' | 'update' | 'delete';
+export type VersionOperations = 'readVersions';
+export type AuthOperations = 'unlock';
+export type AllOperations = Operation | VersionOperations | AuthOperations;
 
 export function docHasTimestamps(doc: any): doc is TypeWithTimestamps {
   return doc?.createdAt && doc?.updatedAt;

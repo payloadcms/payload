@@ -16,11 +16,13 @@ import buildWhereInputType from '../../graphql/schema/buildWhereInputType';
 import { Field } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
 import { SanitizedGlobalConfig } from '../config/types';
+import { buildPolicyType } from '../../graphql/schema/buildPoliciesType';
+import { docAccessResolver } from './resolvers/docAccess';
 
 function initGlobalsGraphQL(payload: Payload): void {
   if (payload.config.globals) {
     Object.keys(payload.globals.config).forEach((slug) => {
-      const global = payload.globals.config[slug];
+      const global: SanitizedGlobalConfig = payload.globals.config[slug];
       const {
         fields,
         versions,
@@ -69,6 +71,16 @@ function initGlobalsGraphQL(payload: Payload): void {
           } : {}),
         },
         resolve: updateResolver(global),
+      };
+
+      payload.Query.fields[`docAccess${formattedName}`] = {
+        type: buildPolicyType({
+          typeSuffix: 'DocAccess',
+          entity: global,
+          type: 'global',
+          scope: 'docAccess',
+        }),
+        resolve: docAccessResolver(global),
       };
 
       if (global.versions) {
