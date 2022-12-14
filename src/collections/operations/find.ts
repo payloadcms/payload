@@ -7,9 +7,9 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { mergeDrafts } from '../../versions/drafts/mergeDrafts';
 
 export type Arguments = {
   collection: Collection
@@ -51,6 +51,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     depth,
     currentDepth,
     draft: draftsEnabled,
+    collection,
     collection: {
       Model,
       config: collectionConfig,
@@ -138,7 +139,8 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
 
   const usePagination = pagination && limit !== 0;
   const limitToUse = limit ?? (usePagination ? 10 : 0);
-  const paginatedDocs = await Model.paginate(query, {
+
+  const paginationOptions = {
     page: page || 1,
     sort: {
       [sortProperty]: sortOrder,
@@ -153,7 +155,9 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
       // limit must also be set here, it's ignored when pagination is false
       limit: limitToUse,
     },
-  });
+  };
+
+  const paginatedDocs = await Model.paginate(query, paginationOptions);
 
   let result: PaginatedDocs<T> = {
     ...paginatedDocs,
@@ -169,17 +173,15 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   // /////////////////////////////////////
 
   if (collectionConfig.versions?.drafts && draftsEnabled) {
-    result = {
-      ...result,
-      docs: await Promise.all(result.docs.map(async (doc) => replaceWithDraftIfAvailable({
-        accessResult,
-        payload,
-        entity: collectionConfig,
-        entityType: 'collection',
-        doc,
-        locale,
-      }))),
-    };
+    result = await mergeDrafts<T>({
+      accessResult,
+      collection,
+      locale,
+      originalQueryResult: result,
+      paginationOptions,
+      payload,
+      where,
+    });
   }
 
   // /////////////////////////////////////
