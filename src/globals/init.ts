@@ -28,6 +28,7 @@ export default function initGlobals(ctx: Payload): void {
           buildVersionGlobalFields(global),
           {
             disableUnique: true,
+            draftsEnabled: true,
             options: {
               timestamps: true,
             },
