@@ -372,6 +372,11 @@ import type {
 
 ### Selecting fields
 
+<Banner type="warning">
+  <strong>Note:</strong><br/>
+  The select property is ignored when using <strong>GraphQL</strong>.
+</Banner>
+
 By default, the entire related document is returned when querying for a relationship field.
 You can limit the fields returned by using the `select` property.
 The `select` property is a function that will be called with an argument object with the following properties:
@@ -381,6 +386,7 @@ The `select` property is a function that will be called with an argument object 
 | `data`        | An object of the full relationship value                                             |
 | `collection`  | The collection config of the related collection                                      |
 | `siblingData` | An object of the document data limited to fields within the same parent to the field |
+| `req`         | The Express `request` object containing the currently authenticated `user`           |
 
 and should return an array of field names to select or `true` to select all fields.
 
@@ -391,9 +397,13 @@ const fields = {
   type: 'rich-text',
   name: 'content',
   label: 'Content',
-  select: ({ data, collection, siblingData }) => {
-    // only select the title field from the related collection
-    return ['title'];
+  select: ({ data, collection, siblingData, req }) => {
+    if (collection.slug === 'posts' && data.type === 'related-post') {
+      // only select the title and slug field from the related collection
+      return ['title', 'slug'];
+    }
+    // select all fields
+    return true;
   },
 }
 ```

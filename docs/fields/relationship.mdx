@@ -101,6 +101,11 @@ You can learn more about writing queries [here](/docs/queries/overview).
 
 ### Selecting fields
 
+<Banner type="warning">
+  <strong>Note:</strong><br/>
+  The select property is ignored when using <strong>GraphQL</strong>.
+</Banner>
+
 By default, the entire related document is returned when querying for a relationship field.
 You can limit the fields returned by using the `select` property.
 This property can either be a function or an array of field names that will be selected.
@@ -111,6 +116,7 @@ The function will be called with an argument object with the following propertie
 | `data`        | An object of the full relationship value                                             |
 | `collection`  | The collection config of the related collection                                      |
 | `siblingData` | An object of the document data limited to fields within the same parent to the field |
+| `req`         | The Express `request` object containing the currently authenticated `user`           |
 
 and should return an array of field names to select or `true` to select all fields.
 
