@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useModal } from '@faceless-ui/modal';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../../../elements/Button';
 import { Props } from './types';
@@ -7,10 +6,10 @@ import { SanitizedCollectionConfig } from '../../../../../../collections/config/
 import Popup from '../../../../elements/Popup';
 import { useRelatedCollections } from './useRelatedCollections';
 import { useAuth } from '../../../../utilities/Auth';
-import { AddNewRelationModal } from './Modal';
-import { useEditDepth } from '../../../../utilities/EditDepth';
 import Plus from '../../../../icons/Plus';
 import { getTranslation } from '../../../../../../utilities/getTranslation';
+import Tooltip from '../../../../elements/Tooltip';
+import { useDocumentDrawer } from '../../../../elements/DocumentDrawer';
 
 import './index.scss';
 
@@ -18,30 +17,31 @@ const baseClass = 'relationship-add-new';
 
 export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, value, setValue, dispatchOptions }) => {
   const relatedCollections = useRelatedCollections(relationTo);
-  const { toggleModal, isModalOpen } = useModal();
   const { permissions } = useAuth();
-  const [hasPermission, setHasPermission] = useState(false);
-  const [modalCollection, setModalCollection] = useState<SanitizedCollectionConfig>();
+  const [show, setShow] = useState(false);
+  const [selectedCollection, setSelectedCollection] = useState<string>();
+  const relatedToMany = relatedCollections.length > 1;
+  const [collectionConfig, setCollectionConfig] = useState<SanitizedCollectionConfig>(() => (!relatedToMany ? relatedCollections[0] : undefined));
   const [popupOpen, setPopupOpen] = useState(false);
-  const editDepth = useEditDepth();
   const { t, i18n } = useTranslation('fields');
-
-  const modalSlug = `${path}-add-modal-depth-${editDepth}`;
-
-  const openModal = useCallback(async (collection: SanitizedCollectionConfig) => {
-    setModalCollection(collection);
-    toggleModal(modalSlug);
-  }, [toggleModal, modalSlug]);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [
+    DocumentDrawer,
+    DocumentDrawerToggler,
+    { toggleDrawer, isDrawerOpen },
+  ] = useDocumentDrawer({
+    collectionSlug: collectionConfig?.slug,
+  });
 
   const onSave = useCallback((json) => {
     const newValue = Array.isArray(relationTo) ? {
-      relationTo: modalCollection.slug,
+      relationTo: collectionConfig.slug,
       value: json.doc.id,
     } : json.doc.id;
 
     dispatchOptions({
       type: 'ADD',
-      collection: modalCollection,
+      collection: collectionConfig,
       docs: [
         json.doc,
       ],
@@ -55,9 +55,8 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
       setValue(newValue);
     }
 
-    setModalCollection(undefined);
-    toggleModal(modalSlug);
-  }, [relationTo, modalCollection, dispatchOptions, i18n, hasMany, toggleModal, modalSlug, setValue, value]);
+    setSelectedCollection(undefined);
+  }, [relationTo, collectionConfig, dispatchOptions, i18n, hasMany, setValue, value]);
 
   const onPopopToggle = useCallback((state) => {
     setPopupOpen(state);
@@ -66,76 +65,108 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
   useEffect(() => {
     if (permissions) {
       if (relatedCollections.length === 1) {
-        setHasPermission(permissions.collections[relatedCollections[0].slug].create.permission);
+        setShow(permissions.collections[relatedCollections[0].slug].create.permission);
       } else {
-        setHasPermission(relatedCollections.some((collection) => permissions.collections[collection.slug].create.permission));
+        setShow(relatedCollections.some((collection) => permissions.collections[collection.slug].create.permission));
       }
     }
   }, [permissions, relatedCollections]);
 
   useEffect(() => {
-    if (!isModalOpen(modalSlug)) {
-      setModalCollection(undefined);
+    if (relatedToMany && selectedCollection) {
+      setCollectionConfig(relatedCollections.find((collection) => collection.slug === selectedCollection));
     }
-  }, [isModalOpen, modalSlug]);
+  }, [selectedCollection, relatedToMany, relatedCollections]);
 
-  return hasPermission ? (
-    <div
-      className={baseClass}
-      id={`${path}-add-new`}
-    >
-      {relatedCollections.length === 1 && (
-        <Button
-          className={`${baseClass}__add-button`}
-          onClick={() => openModal(relatedCollections[0])}
-          buttonStyle="none"
-          tooltip={t('addNewLabel', { label: relatedCollections[0].labels.singular })}
-        >
-          <Plus />
-        </Button>
-      )}
-      {relatedCollections.length > 1 && (
-        <Popup
-          buttonType="custom"
-          horizontalAlign="center"
-          onToggleOpen={onPopopToggle}
-          button={(
-            <Button
+  useEffect(() => {
+    if (relatedToMany && collectionConfig) {
+      // the drawer must be rendered on the page before before opening it
+      // this is why 'selectedCollection' is different from 'collectionConfig'
+      toggleDrawer();
+      setSelectedCollection(undefined);
+    }
+  }, [toggleDrawer, relatedToMany, collectionConfig]);
+
+  useEffect(() => {
+    if (relatedToMany && !isDrawerOpen) {
+      setCollectionConfig(undefined);
+    }
+  }, [isDrawerOpen, relatedToMany]);
+
+  if (show) {
+    return (
+      <div
+        className={baseClass}
+        id={`${path}-add-new`}
+      >
+        {relatedCollections.length === 1 && (
+          <Fragment>
+            <DocumentDrawerToggler
               className={`${baseClass}__add-button`}
-              buttonStyle="none"
-              tooltip={popupOpen ? undefined : t('addNew')}
+              onMouseEnter={() => setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+              onClick={() => setShowTooltip(false)}
             >
+              <Tooltip
+                className={`${baseClass}__tooltip`}
+                show={showTooltip}
+              >
+                {t('addNewLabel', { label: relatedCollections[0].labels.singular })}
+              </Tooltip>
               <Plus />
-            </Button>
-          )}
-          render={({ close: closePopup }) => (
-            <ul className={`${baseClass}__relations`}>
-              {relatedCollections.map((relatedCollection) => {
-                if (permissions.collections[relatedCollection.slug].create.permission) {
-                  return (
-                    <li key={relatedCollection.slug}>
-                      <button
-                        className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
-                        type="button"
-                        onClick={() => { closePopup(); openModal(relatedCollection); }}
-                      >
-                        {getTranslation(relatedCollection.labels.singular, i18n)}
-                      </button>
-                    </li>
-                  );
-                }
+            </DocumentDrawerToggler>
+            <DocumentDrawer onSave={onSave} />
+          </Fragment>
+        )}
+        {relatedCollections.length > 1 && (
+          <Fragment>
+            <Popup
+              buttonType="custom"
+              horizontalAlign="center"
+              onToggleOpen={onPopopToggle}
+              button={(
+                <Button
+                  className={`${baseClass}__add-button`}
+                  buttonStyle="none"
+                  tooltip={popupOpen ? undefined : t('addNew')}
+                >
+                  <Plus />
+                </Button>
+            )}
+              render={({ close: closePopup }) => (
+                <ul className={`${baseClass}__relations`}>
+                  {relatedCollections.map((relatedCollection) => {
+                    if (permissions.collections[relatedCollection.slug].create.permission) {
+                      return (
+                        <li key={relatedCollection.slug}>
+                          <button
+                            type="button"
+                            className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
+                            onClick={() => {
+                              closePopup();
+                              setSelectedCollection(relatedCollection.slug);
+                            }}
+                          >
+                            {getTranslation(relatedCollection.labels.singular, i18n)}
+                          </button>
+                        </li>
+                      );
+                    }
 
-                return null;
-              })}
-            </ul>
-          )}
-        />
-      )}
-      {modalCollection && (
-        <AddNewRelationModal
-          {...{ onSave, modalSlug, modalCollection }}
-        />
-      )}
-    </div>
-  ) : null;
+                    return null;
+                  })}
+                </ul>
+              )}
+            />
+            {collectionConfig && permissions.collections[collectionConfig.slug].create.permission && (
+              <DocumentDrawer
+                onSave={onSave}
+              />
+            )}
+          </Fragment>
+        )}
+      </div>
+    );
+  }
+  return null;
 };
