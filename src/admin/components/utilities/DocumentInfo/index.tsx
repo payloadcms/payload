@@ -11,6 +11,7 @@ import { TypeWithTimestamps } from '../../../../collections/config/types';
 import { Where } from '../../../../types';
 import { DocumentPreferences } from '../../../../preferences/types';
 import { usePreferences } from '../Preferences';
+import { useAuth } from '../Auth';
 
 const Context = createContext({} as ContextType);
 
@@ -23,6 +24,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const { serverURL, routes: { api } } = useConfig();
   const { getPreference } = usePreferences();
   const { i18n } = useTranslation();
+  const { permissions } = useAuth();
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null);
   const [versions, setVersions] = useState<PaginatedDocs<Version>>(null);
   const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null);
@@ -31,23 +33,23 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const baseURL = `${serverURL}${api}`;
   let slug: string;
   let type: EntityType;
+  let pluralType: 'globals' | 'collections';
   let preferencesKey: string;
-  let docAccessURL: string;
 
   if (global) {
     slug = global.slug;
     type = 'global';
+    pluralType = 'globals';
     preferencesKey = `global-${slug}`;
-    docAccessURL = `/globals/${slug}/access`;
   }
 
   if (collection) {
     slug = collection.slug;
     type = 'collection';
+    pluralType = 'collections';
 
     if (id) {
       preferencesKey = `collection-${slug}-${id}`;
-      docAccessURL = `/${slug}/access/${id}`;
     }
   }
 
@@ -174,12 +176,23 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   }, [i18n, global, collection, id, baseURL]);
 
   const getDocPermissions = React.useCallback(async () => {
+    let docAccessURL: string;
+    if (pluralType === 'globals') {
+      docAccessURL = `/globals/${slug}/access`;
+    } else if (pluralType === 'collections' && id) {
+      docAccessURL = `/${slug}/access/${id}`;
+    }
+
     if (docAccessURL) {
       const res = await fetch(`${serverURL}${api}${docAccessURL}`);
       const json = await res.json();
       setDocPermissions(json);
+    } else {
+      // fallback to permissions from the collection
+      // (i.e. create has no id)
+      setDocPermissions(permissions[pluralType][slug]);
     }
-  }, [serverURL, api, docAccessURL]);
+  }, [serverURL, api, pluralType, slug, id, permissions]);
 
   useEffect(() => {
     getVersions();

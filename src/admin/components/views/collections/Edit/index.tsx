@@ -41,14 +41,14 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation();
   const history = useHistory();
   const [initialState, setInitialState] = useState<Fields>();
-  const { permissions: allPermissions, user } = useAuth();
+  const { user } = useAuth();
   const { getVersions, preferencesKey, getDocPermissions, docPermissions } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { t } = useTranslation('general');
 
   const onSave = useCallback(async (json: any) => {
-    getDocPermissions();
     getVersions();
+    getDocPermissions();
     if (!isEditing) {
       setRedirect(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
@@ -89,11 +89,9 @@ const EditView: React.FC<IndexProps> = (props) => {
     );
   }
 
-  const collectionPermissions = allPermissions?.collections?.[slug];
-  const permissionsToUse = docPermissions || collectionPermissions;
   const apiURL = `${serverURL}${api}/${slug}/${id}${collection.versions.drafts ? '?draft=true' : ''}`;
   const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
-  const hasSavePermission = (isEditing && permissionsToUse?.update?.permission) || (!isEditing && (permissionsToUse as CollectionPermission)?.create?.permission);
+  const hasSavePermission = (isEditing && docPermissions?.update?.permission) || (!isEditing && (docPermissions as CollectionPermission)?.create?.permission);
 
   return (
     <EditDepthContext.Provider value={1}>
@@ -102,10 +100,10 @@ const EditView: React.FC<IndexProps> = (props) => {
         CustomComponent={CustomEdit}
         componentProps={{
           id,
-          isLoading: !initialState,
+          isLoading: !initialState || !docPermissions,
           data: dataToRender,
           collection,
-          permissions: permissionsToUse,
+          permissions: docPermissions,
           isEditing,
           onSave,
           initialState,

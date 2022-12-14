@@ -6,7 +6,6 @@ import { initPayloadE2E } from '../helpers/configHelpers';
 import { login } from '../helpers';
 import { restrictedVersionsSlug, readOnlySlug, restrictedSlug, slug, docLevelAccessSlug } from './config';
 import type { ReadOnlyCollection, RestrictedVersion } from './payload-types';
-import wait from '../../src/utilities/wait';
 
 /**
  * TODO: Access Control

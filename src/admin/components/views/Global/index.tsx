@@ -20,7 +20,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{data?: Record<string, unknown>}>();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
-  const { permissions, user } = useAuth();
+  const { user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
   const { getVersions, preferencesKey, docPermissions, getDocPermissions } = useDocumentInfo();
   const { getPreference } = usePreferences();
@@ -80,17 +80,14 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     awaitInitialState();
   }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t]);
 
-  const globalPermissions = permissions?.globals?.[slug];
-  const permissionsToUse = docPermissions || globalPermissions;
-
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultGlobal}
       CustomComponent={CustomEdit}
       componentProps={{
-        isLoading: !initialState,
+        isLoading: !initialState || !docPermissions,
         data: dataToRender,
-        permissions: permissionsToUse,
+        permissions: docPermissions,
         initialState,
         global,
         onSave,
