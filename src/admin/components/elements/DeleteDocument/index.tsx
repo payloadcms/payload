@@ -102,7 +102,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
             <p>
               <Trans
                 i18nKey="aboutToDelete"
-                values={{ label: singular, title: titleToRender }}
+                values={{ label: getTranslation(singular, i18n), title: titleToRender }}
                 t={t}
               >
                 aboutToDelete

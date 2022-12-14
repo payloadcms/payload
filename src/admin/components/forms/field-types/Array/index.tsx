@@ -260,7 +260,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
             >
               {rows.length > 0 && rows.map((row, i) => {
                 const rowNumber = i + 1;
-                const fallbackLabel = `${labels.singular} ${String(rowNumber).padStart(2, '0')}`;
+                const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowNumber).padStart(2, '0')}`;
 
                 return (
                   <Draggable

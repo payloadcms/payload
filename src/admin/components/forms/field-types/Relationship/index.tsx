@@ -23,6 +23,8 @@ import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
 import { AddNewRelation } from './AddNew';
 import { findOptionsByValue } from './findOptionsByValue';
 import { GetFilterOptions } from './GetFilterOptions';
+import { SingleValue } from './select-components/SingleValue';
+import { MultiValueLabel } from './select-components/MultiValueLabel';
 
 import './index.scss';
 
@@ -73,7 +75,6 @@ const Relationship: React.FC<Props> = (props) => {
   const [hasLoadedFirstPage, setHasLoadedFirstPage] = useState(false);
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false);
   const firstRun = useRef(true);
-
   const pathOrName = path || name;
 
   const memoizedValidate = useCallback((value, validationOptions) => {
@@ -91,6 +92,8 @@ const Relationship: React.FC<Props> = (props) => {
     validate: memoizedValidate,
     condition,
   });
+
+  const [drawerIsOpen, setDrawerIsOpen] = useState(false);
 
   const getResults: GetResults = useCallback(async ({
     lastFullyLoadedRelation: lastFullyLoadedRelationArg,
@@ -370,6 +373,15 @@ const Relationship: React.FC<Props> = (props) => {
             isMulti={hasMany}
             isSortable={isSortable}
             isLoading={isLoading}
+            components={{
+              SingleValue,
+              MultiValueLabel,
+            }}
+            selectProps={{
+              disableMouseDown: drawerIsOpen,
+              disableKeyDown: drawerIsOpen,
+              setDrawerIsOpen,
+            }}
             onMenuOpen={() => {
               if (!hasLoadedFirstPage) {
                 setIsLoading(true);

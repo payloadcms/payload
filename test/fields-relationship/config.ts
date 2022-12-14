@@ -128,6 +128,7 @@ export default buildConfig({
       fields: baseRelationshipFields,
       access: {
         read: () => false,
+        create: () => false,
       },
     },
     {

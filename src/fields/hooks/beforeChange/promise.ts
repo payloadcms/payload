@@ -154,14 +154,6 @@ export const promise = async ({
   }
 
   switch (field.type) {
-    case 'select': {
-      if (siblingData[field.name] === null) {
-        siblingData[field.name] = undefined;
-      }
-
-      break;
-    }
-
     case 'point': {
       // Transform point data for storage
       if (Array.isArray(siblingData[field.name]) && siblingData[field.name][0] !== null && siblingData[field.name][1] !== null) {

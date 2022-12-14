@@ -2,13 +2,15 @@
 import { GraphQLJSONObject } from 'graphql-type-json';
 import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import formatName from '../utilities/formatName';
-import { SanitizedCollectionConfig } from '../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../globals/config/types';
+import { CollectionConfig, SanitizedCollectionConfig } from '../../collections/config/types';
+import { GlobalConfig, SanitizedGlobalConfig } from '../../globals/config/types';
 import { Field } from '../../fields/config/types';
 import { Payload } from '../..';
 import { toWords } from '../../utilities/formatLabels';
 
 type OperationType = 'create' | 'read' | 'update' | 'delete' | 'unlock' | 'readVersions';
+
+type AccessScopes = 'docAccess' | undefined
 
 type ObjectTypeFields = {
   [key in OperationType | 'fields']?: { type: GraphQLObjectType };
@@ -78,24 +80,31 @@ const buildFields = (label, fieldsToBuild) => fieldsToBuild.reduce((builtFields,
   return builtFields;
 }, {});
 
-const buildEntity = (name: string, entityFields: Field[], operations: OperationType[]) => {
-  const formattedName = toWords(name, true);
+type BuildEntityPolicy = {
+  name: string
+  entityFields: Field[]
+  operations: OperationType[]
+  scope: AccessScopes
+}
+export const buildEntityPolicy = (args: BuildEntityPolicy) => {
+  const { name, entityFields, operations, scope } = args;
 
+  const fieldsTypeName = toWords(`${name}-${scope || ''}-Fields`, true);
   const fields = {
     fields: {
       type: new GraphQLObjectType({
-        name: formatName(`${formattedName}Fields`),
-        fields: buildFields(`${formattedName}Fields`, entityFields),
+        name: fieldsTypeName,
+        fields: buildFields(fieldsTypeName, entityFields),
       }),
     },
   };
 
   operations.forEach((operation) => {
-    const capitalizedOperation = operation.charAt(0).toUpperCase() + operation.slice(1);
+    const operationTypeName = toWords(`${name}-${operation}-${scope || 'Access'}`, true);
 
     fields[operation] = {
       type: new GraphQLObjectType({
-        name: `${formattedName}${capitalizedOperation}Access`,
+        name: operationTypeName,
         fields: {
           permission: { type: new GraphQLNonNull(GraphQLBoolean) },
           where: { type: GraphQLJSONObject },
@@ -107,6 +116,66 @@ const buildEntity = (name: string, entityFields: Field[], operations: OperationT
   return fields;
 };
 
+type BuildPolicyType = {
+  typeSuffix?: string
+  scope?: AccessScopes
+} & ({
+  entity: CollectionConfig
+  type: 'collection'
+} | {
+  entity: GlobalConfig
+  type: 'global'
+})
+export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
+  const { typeSuffix, entity, type, scope } = args;
+  const { slug } = entity;
+
+  let operations = [];
+
+  if (type === 'collection') {
+    operations = ['create', 'read', 'update', 'delete'];
+
+    if (entity.auth && (typeof entity.auth === 'object' && typeof entity.auth.maxLoginAttempts !== 'undefined' && entity.auth.maxLoginAttempts !== 0)) {
+      operations.push('unlock');
+    }
+
+    if (entity.versions) {
+      operations.push('readVersions');
+    }
+
+    const collectionTypeName = formatName(`${slug}${typeSuffix || ''}`);
+
+    return new GraphQLObjectType({
+      name: collectionTypeName,
+      fields: buildEntityPolicy({
+        name: slug,
+        entityFields: entity.fields,
+        operations,
+        scope,
+      }),
+    });
+  }
+
+  // else create global type
+  operations = ['read', 'update'];
+
+  if (entity.versions) {
+    operations.push('readVersions');
+  }
+
+  const globalTypeName = formatName(`${global?.graphQL?.name || slug}${typeSuffix || ''}`);
+
+  return new GraphQLObjectType({
+    name: globalTypeName,
+    fields: buildEntityPolicy({
+      name: entity?.graphQL?.name || slug,
+      entityFields: entity.fields,
+      operations,
+      scope,
+    }),
+  });
+}
+
 export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
   const fields = {
     canAccessAdmin: {
@@ -115,36 +184,26 @@ export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
   };
 
   Object.values(payload.config.collections).forEach((collection: SanitizedCollectionConfig) => {
-    const collectionOperations: OperationType[] = ['create', 'read', 'update', 'delete'];
-
-    if (collection.auth && (typeof collection.auth.maxLoginAttempts !== 'undefined' && collection.auth.maxLoginAttempts !== 0)) {
-      collectionOperations.push('unlock');
-    }
-
-    if (collection.versions) {
-      collectionOperations.push('readVersions');
-    }
+    const collectionPolicyType = buildPolicyType({
+      typeSuffix: 'Access',
+      entity: collection,
+      type: 'collection',
+    });
 
     fields[formatName(collection.slug)] = {
-      type: new GraphQLObjectType({
-        name: formatName(`${collection.slug}Access`),
-        fields: buildEntity(collection.slug, collection.fields, collectionOperations),
-      }),
+      type: collectionPolicyType,
     };
   });
 
   Object.values(payload.config.globals).forEach((global: SanitizedGlobalConfig) => {
-    const globalOperations: OperationType[] = ['read', 'update'];
-
-    if (global.versions) {
-      globalOperations.push('readVersions');
-    }
+    const globalPolicyType = buildPolicyType({
+      typeSuffix: 'Access',
+      entity: global,
+      type: 'global',
+    });
 
     fields[formatName(global.slug)] = {
-      type: new GraphQLObjectType({
-        name: formatName(`${global?.graphQL?.name || global.slug}Access`),
-        fields: buildEntity(global?.graphQL?.name || global.slug, global.fields, globalOperations),
-      }),
+      type: globalPolicyType,
     };
   });
 

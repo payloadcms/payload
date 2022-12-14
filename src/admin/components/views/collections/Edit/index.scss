@@ -70,15 +70,18 @@
   }
 
   &__document-actions {
-    @include blur-bg;
     padding-right: $baseline;
     position: sticky;
     top: 0;
     z-index: var(--z-nav);
 
-    >* {
+    > * {
       position: relative;
       z-index: 1;
+    }
+
+    @include mid-break {
+      @include blur-bg;
     }
   }
 
