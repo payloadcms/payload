@@ -72,6 +72,7 @@ export default function registerCollections(ctx: Payload): void {
         buildVersionCollectionFields(collection),
         {
           disableUnique: true,
+          draftsEnabled: true,
           options: {
             timestamps: true,
           },
