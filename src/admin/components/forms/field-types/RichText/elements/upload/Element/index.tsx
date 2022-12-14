@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useReducer, useEffect } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
 import { ReactEditor, useSlateStatic, useFocused, useSelected } from 'slate-react';
@@ -10,8 +10,8 @@ import useThumbnail from '../../../../../../../hooks/useThumbnail';
 import Button from '../../../../../../elements/Button';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import { SwapUploadModal } from './SwapUploadModal';
-import { EditModal } from './EditModal';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
+import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
 
 import './index.scss';
 
@@ -21,27 +21,36 @@ const initialParams = {
   depth: 0,
 };
 
-const Element = ({ attributes, children, element, path, fieldProps }) => {
+const Element = ({ attributes, children, element, path }) => {
   const { relationTo, value } = element;
-  const { toggleModal } = useModal();
+  const { openModal, closeModal } = useModal();
   const { collections, serverURL, routes: { api } } = useConfig();
-  const [modalToRender, setModalToRender] = useState(undefined);
+  const [renderSwapModal, setRenderSwapModal] = useState(false);
   const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
   const { t, i18n } = useTranslation('fields');
+  const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
+
+  const [
+    DocumentDrawer,
+    DocumentDrawerToggler,
+  ] = useDocumentDrawer({
+    collectionSlug: relatedCollection.slug,
+    id: value?.id,
+  });
 
   const editor = useSlateStatic();
   const selected = useSelected();
   const focused = useFocused();
 
-  const modalSlug = `${path}-edit-upload-${modalToRender}`;
+  const modalSlug = `${path}-edit-data-swap`;
 
   // Get the referenced document
-  const [{ data: upload }] = usePayloadAPI(
+  const [{ data }, { setParams }] = usePayloadAPI(
     `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
     { initialParams },
   );
 
-  const thumbnailSRC = useThumbnail(relatedCollection, upload);
+  const thumbnailSRC = useThumbnail(relatedCollection, data);
 
   const removeUpload = useCallback(() => {
     const elementPath = ReactEditor.findPath(editor, element);
@@ -52,18 +61,29 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
     );
   }, [editor, element]);
 
-  const closeModal = useCallback(() => {
-    toggleModal(modalSlug);
-    setModalToRender(null);
-  }, [toggleModal, modalSlug]);
 
-  useEffect(() => {
-    if (modalToRender) {
-      toggleModal(modalSlug);
-    }
-  }, [modalToRender, toggleModal, modalSlug]);
+  const updateUpload = useCallback((json) => {
+    const { doc } = json;
 
-  const fieldSchema = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields;
+    const newNode = {
+      fields: doc,
+    };
+
+    const elementPath = ReactEditor.findPath(editor, element);
+
+    Transforms.setNodes(
+      editor,
+      newNode,
+      { at: elementPath },
+    );
+
+    setParams({
+      ...initialParams,
+      cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
+    });
+
+    dispatchCacheBust();
+  }, [editor, element, setParams, cacheBust]);
 
   return (
     <div
@@ -80,7 +100,7 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
             {thumbnailSRC ? (
               <img
                 src={thumbnailSRC}
-                alt={upload?.filename}
+                alt={data?.filename}
               />
             ) : (
               <FileGraphic />
@@ -91,18 +111,20 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
               {getTranslation(relatedCollection.labels.singular, i18n)}
             </div>
             <div className={`${baseClass}__actions`}>
-              {fieldSchema && (
-                <Button
-                  icon="edit"
-                  round
-                  buttonStyle="icon-label"
-                  className={`${baseClass}__actionButton`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setModalToRender('edit');
-                  }}
-                  tooltip={t('general:edit')}
-                />
+              {value?.id && (
+                <DocumentDrawerToggler className={`${baseClass}__toggler`}>
+                  <Button
+                    icon="edit"
+                    round
+                    buttonStyle="icon-label"
+                    el="div"
+                    className={`${baseClass}__actionButton`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                    }}
+                    tooltip={t('general:edit')}
+                  />
+                </DocumentDrawerToggler>
               )}
               <Button
                 icon="swap"
@@ -111,7 +133,8 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
                 className={`${baseClass}__actionButton`}
                 onClick={(e) => {
                   e.preventDefault();
-                  setModalToRender('swap');
+                  setRenderSwapModal(true);
+                  openModal(modalSlug);
                 }}
                 tooltip={t('swapUpload')}
               />
@@ -129,30 +152,26 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
             </div>
           </div>
         </div>
-
         <div className={`${baseClass}__bottomRow`}>
-          <strong>{upload?.filename}</strong>
+          <strong>
+            {data?.filename}
+          </strong>
         </div>
       </div>
       {children}
-
-      {modalToRender === 'swap' && (
+      {value?.id && (
+        <DocumentDrawer onSave={updateUpload} />
+      )}
+      {renderSwapModal && (
         <SwapUploadModal
           slug={modalSlug}
           element={element}
-          closeModal={closeModal}
+          closeModal={() => {
+            closeModal(modalSlug);
+            setRenderSwapModal(false);
+          }}
           setRelatedCollectionConfig={setRelatedCollection}
           relatedCollectionConfig={relatedCollection}
-        />
-      )}
-
-      {(modalToRender === 'edit' && fieldSchema) && (
-        <EditModal
-          slug={modalSlug}
-          closeModal={closeModal}
-          relatedCollectionConfig={relatedCollection}
-          fieldSchema={fieldSchema}
-          element={element}
         />
       )}
     </div>

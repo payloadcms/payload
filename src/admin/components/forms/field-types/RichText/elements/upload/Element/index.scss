@@ -76,6 +76,15 @@
     }
   }
 
+  &__toggler {
+    background: transparent;
+    border: none;
+    padding: 0;
+    &:focus {
+      outline: none;
+    }
+  }
+
   &__collectionLabel {
     overflow: hidden;
     text-overflow: ellipsis;

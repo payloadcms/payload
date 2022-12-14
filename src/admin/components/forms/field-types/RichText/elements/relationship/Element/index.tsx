@@ -95,9 +95,7 @@ const Element = (props) => {
       </div>
       <div className={`${baseClass}__actions`}>
         {value?.id && (
-          <DocumentDrawerToggler
-            className={`${baseClass}__toggler`}
-          >
+          <DocumentDrawerToggler className={`${baseClass}__toggler`}>
             <Button
               icon="edit"
               round
