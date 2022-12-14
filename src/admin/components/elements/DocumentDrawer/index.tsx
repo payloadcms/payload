@@ -33,8 +33,8 @@ const formatDocumentDrawerSlug = ({
   collectionSlug: string,
   id: string,
   depth: number,
-  uuid?: string, // supply when creating a new document and no id is available
-}) => `doc-drawer_${collectionSlug}_${depth}_${id || uuid || '0'}`;
+  uuid: string, // supply when creating a new document and no id is available
+}) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`;
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   children,
