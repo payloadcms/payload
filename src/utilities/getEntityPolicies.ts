@@ -43,28 +43,41 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
   const promises = [] as ReturnType<T>[1];
   let docBeingAccessed;
 
-  async function getDoc(where?: Where): Promise<TypeWithID & Document> {
+  async function getEntityDoc({ where }: { where?: Where } = {}): Promise<TypeWithID & Document> {
     if (entity.slug) {
+      if (type === 'global') {
+        return req.payload.findGlobal({
+          overrideAccess: true,
+          slug: entity.slug,
+        });
+      }
+
       if (type === 'collection' && id) {
         if (typeof where === 'object') {
           const paginatedRes = await req.payload.find({
             overrideAccess: true,
             collection: entity.slug,
-            where,
+            where: {
+              ...where,
+              and: [
+                ...where.and || [],
+                {
+                  id: {
+                    equals: id,
+                  },
+                },
+              ],
+            },
+            limit: 1,
           });
-          if (paginatedRes?.docs.length > 0) return paginatedRes.docs[0];
-          return undefined;
+
+          return paginatedRes?.docs?.[0] || undefined;
         }
 
         return req.payload.findByID({
           overrideAccess: true,
           collection: entity.slug,
           id,
-        });
-      } if (type === 'global') {
-        return req.payload.findGlobal({
-          overrideAccess: true,
-          slug: entity.slug,
         });
       }
     }
@@ -82,18 +95,18 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
     const mutablePolicies = policiesObj;
 
     if (accessLevel === 'field' && docBeingAccessed === undefined) {
-      docBeingAccessed = await getDoc();
+      docBeingAccessed = await getEntityDoc();
     }
-    const result = await access({ req, id, doc: docBeingAccessed });
+    const accessResult = await access({ req, id, doc: docBeingAccessed });
 
-    if (typeof result === 'object' && !disableWhere) {
+    if (typeof accessResult === 'object' && !disableWhere) {
       mutablePolicies[operation] = {
-        permission: !!(await getDoc(result)) ?? true,
-        where: result,
+        permission: !!(await getEntityDoc({ where: accessResult })),
+        where: accessResult,
       };
     } else if (mutablePolicies[operation]?.permission !== false) {
       mutablePolicies[operation] = {
-        permission: !!(result),
+        permission: !!(accessResult),
       };
     }
   };
