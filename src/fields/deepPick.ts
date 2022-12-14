@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable no-param-reassign */
 
 type AllKeysOfType<T> = {
@@ -6,16 +7,28 @@ type AllKeysOfType<T> = {
 
 type RemoveNever<T> = Pick<T, AllKeysOfType<T>>;
 
-type Primitive = string | number | boolean | null | undefined;
-export type DeepPickKeys<Type> = {
-  [Key in keyof Type]: Type extends Array<any>
-    ? DeepPickKeys<Type[Key]>
-    : Key extends string
-    ? Type[Key] extends Primitive
-      ? `${Key}`
-      : `${Key}` | `${Key}.${DeepPickKeys<Type[Key]>}`
-    : never;
-}[keyof Type];
+type Primitive =
+  | string
+  | number
+  | boolean
+  | String
+  | Number
+  | Boolean
+  | Date
+  | null
+  | undefined;
+
+export type DeepPickKeys<Type> = Type extends Array<unknown>
+  ? {
+      [Key in keyof Type]: DeepPickKeys<Type[Key]>;
+    }[number]
+  : {
+      [Key in keyof Type]: Key extends string
+        ? Type[Key] extends Primitive
+          ? `${Key}`
+          : `${Key}` | `${Key}.${DeepPickKeys<Type[Key]>}`
+        : never;
+    }[keyof Type];
 
 export type DeepPick<Type, Query extends DeepPickKeys<Type>> = RemoveNever<{
   [Key in keyof Type]: Type extends Array<any>
@@ -37,6 +50,7 @@ export function deepPick<T, U extends DeepPickKeys<T>>(
   obj: T,
   paths: Array<U>,
 ): DeepPick<T, typeof paths[number]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result: any = {};
   paths.forEach((path) => {
     // not sure why this is necessary, but it is
