@@ -78,6 +78,11 @@ const JSONField: React.FC<Props> = (props) => {
         defaultLanguage="json"
         value={typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
         onChange={readOnly ? () => null : (val) => setValue(val)}
+        options={{
+          minimap: {
+            enabled: false,
+          },
+        }}
       />
       <FieldDescription
         value={value}

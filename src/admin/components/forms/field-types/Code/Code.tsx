@@ -1,15 +1,6 @@
-import React, { useCallback, useState } from 'react';
-import Editor from 'react-simple-code-editor';
-import { highlight, languages } from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-css';
-import 'prismjs/components/prism-markup';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-json';
-import 'prismjs/components/prism-jsx';
-import 'prismjs/components/prism-typescript';
-import 'prismjs/components/prism-tsx';
-import 'prismjs/components/prism-yaml';
+import React, { useCallback } from 'react';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import Editor from '@monaco-editor/react';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
 import Label from '../../Label';
@@ -39,14 +30,6 @@ const Code: React.FC<Props> = (props) => {
     } = {},
     label,
   } = props;
-
-  const [highlighter] = useState(() => {
-    if (languages[language]) {
-      return (content) => highlight(content, languages[language]);
-    }
-
-    return (content) => content;
-  });
 
   const path = pathFromProps || name;
 
@@ -91,16 +74,14 @@ const Code: React.FC<Props> = (props) => {
         required={required}
       />
       <Editor
-        className={`${baseClass}__input`}
-        id={`field-${path.replace(/\./gi, '__')}`}
+        height="50vh" // for now, should update this to be dynamic
+        defaultLanguage={language}
         value={value as string || ''}
-        onValueChange={readOnly ? () => null : setValue}
-        highlight={highlighter}
-        padding={25}
-        style={{
-          fontFamily: '"Consolas", "Monaco", monospace',
-          fontSize: 12,
-          pointerEvents: readOnly ? 'none' : 'auto',
+        onChange={readOnly ? () => null : (val) => setValue(val)}
+        options={{
+          minimap: {
+            enabled: false,
+          },
         }}
       />
       <FieldDescription
