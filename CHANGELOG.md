@@ -6,24 +6,12 @@
 ### Bug Fixes
 
 * add i18n type to collection and globals admin.description ([#1675](https://github.com/payloadcms/payload/issues/1675)) ([049d560](https://github.com/payloadcms/payload/commit/049d560898fdf3fd9be40a4689eb1ef4170ef207))
-* add new relationship modal when related to many ([e2fce30](https://github.com/payloadcms/payload/commit/e2fce30964cb6cd5f046b83acb5e98d33f1b4333))
 * adds draftsEnabled to baseSchema for tabs / arrays / groups & allows for null enum ([80da898](https://github.com/payloadcms/payload/commit/80da898de8cfe068a0ad685803d8523fd9a10dcd))
 * adds draftsEnabled to versionSchema in collections / globals ([f0db5e0](https://github.com/payloadcms/payload/commit/f0db5e0170807944cfbed8495c813b7c28b05bb3))
-* collapsible children margin bottom ([#1673](https://github.com/payloadcms/payload/issues/1673)) ([64086e8](https://github.com/payloadcms/payload/commit/64086e8122e04965ca0ae8d254b99114208944bf))
-* drawer blur, scroll, and document sidebar ([a36ac20](https://github.com/payloadcms/payload/commit/a36ac209b2e267b154f71bb5947921a253291330))
-* ensures unique document drawer slugs ([a0b41eb](https://github.com/payloadcms/payload/commit/a0b41eb83b3e78a069ac91dd5c1bc0a92d8577f2))
+* collapsible margin bottom adjustment ([#1673](https://github.com/payloadcms/payload/issues/1673)) ([64086e8](https://github.com/payloadcms/payload/commit/64086e8122e04965ca0ae8d254b99114208944bf))
 * escapes react-select events when drawer is open ([f290cda](https://github.com/payloadcms/payload/commit/f290cda333aecab104d7cd195bcc7fab2059134d))
-* fields e2e tests ([92d2c4d](https://github.com/payloadcms/payload/commit/92d2c4d80500cece618d28526c6f16487e241952))
-* fields-relationship e2e tests ([c72f074](https://github.com/payloadcms/payload/commit/c72f074b777e127cdbe7a78ca727e98eec766312))
 * label translation in about to delete dialog ([#1667](https://github.com/payloadcms/payload/issues/1667)) ([d9c45f6](https://github.com/payloadcms/payload/commit/d9c45f62b19162a34bc317e997d9912213a3012b))
 * list view date field display format ([#1661](https://github.com/payloadcms/payload/issues/1661)) ([934b443](https://github.com/payloadcms/payload/commit/934b443b5b3b0f610767786f940175b9db0b2da7))
-* prevents duplicative DocumentDrawer ([6fab722](https://github.com/payloadcms/payload/commit/6fab722a2eb67b4fc02e7b7c6f7f0b36fe6c984d))
-* prevents react-select from opening on drawer toggle ([3c862ad](https://github.com/payloadcms/payload/commit/3c862add3c588424550817d45cb632c29cae99ab))
-* prevents recursive DocumentDrawer ([670e524](https://github.com/payloadcms/payload/commit/670e5243a9f3e6fe32c1dd7da9c57826e271620f))
-* relationship create and edit onSave handling ([49528dd](https://github.com/payloadcms/payload/commit/49528dd3c3c4f96c6d9ecb5b55b285e4e3205e27))
-* relationship drawer permissions ([39a956c](https://github.com/payloadcms/payload/commit/39a956cee35986c045904bce94699b6ee8f4119a))
-* remounts document drawer when single-value relationship changes ([d9eb1ea](https://github.com/payloadcms/payload/commit/d9eb1ea8013ab369672a786be6fd667fd2558466))
-* Remove template literal from link ([9d4dac8](https://github.com/payloadcms/payload/commit/9d4dac892efac7396d8aecfd562818d6a6745b1c))
 * removes case for select field that sets data to undefined if set to null ([b4f39d5](https://github.com/payloadcms/payload/commit/b4f39d5fd380190ee82a5bb967756d25e9c98e95))
 * Set 'Dashboard's link to config route ([#1652](https://github.com/payloadcms/payload/issues/1652)) ([940c1e8](https://github.com/payloadcms/payload/commit/940c1e84f5f091bf4b4ae0bd6628f077d9d0d6e9))
 * stringifies date in DateTime field for useAsTitle ([#1674](https://github.com/payloadcms/payload/issues/1674)) ([a1813ca](https://github.com/payloadcms/payload/commit/a1813ca4b32dfcd8ca3604f7f03b1ba316d740e2))
@@ -31,15 +19,9 @@
 
 ### Features
 
-* builds DocumentDrawer component ([2118927](https://github.com/payloadcms/payload/commit/2118927f4248a4969d88fad57bc0528991c23b7f))
-* builds Drawer component ([c6013c3](https://github.com/payloadcms/payload/commit/c6013c39043cc7bf9e8ff39551662c25e8d744c8))
+* inline relationships ([8d744c8](https://github.com/payloadcms/payload/commit/c6013c39043cc7bf9e8ff39551662c25e8d744c8))
 * custom button html element ([5592fb1](https://github.com/payloadcms/payload/commit/5592fb148dfa3058df577cfb7f5ed72ea25e1217))
 * further Tooltip improvements ([e101f92](https://github.com/payloadcms/payload/commit/e101f925cc71af4c3a1b5ce4ad552d9834d35bfd))
-* retrofits DocumentDrawer into relationship AddNew ([475f147](https://github.com/payloadcms/payload/commit/475f147f2cab64bf79ff019a1eae9e7f18690557))
-* retrofits DocumentDrawer into relationship multi-select ([dd21775](https://github.com/payloadcms/payload/commit/dd217750d7481f07b7487eecb4b7c643ec0d178d))
-* supports custom react-select components ([7a42e38](https://github.com/payloadcms/payload/commit/7a42e38cca87e34d90b1af369fcc8575c8622456))
-* supports tooltip show and delay ([00b3b76](https://github.com/payloadcms/payload/commit/00b3b768eb3e19eb87e7ef2f99454f8fddf41066))
-* wires DocumentDrawer into singular relationships ([811ade6](https://github.com/payloadcms/payload/commit/811ade60b40782d9ac25f8274ff573dbee1bfc14))
 
 # [1.3.0](https://github.com/payloadcms/payload/compare/v1.2.5...v1.3.0) (2022-12-09)
 
