@@ -5,13 +5,6 @@
     margin-right: base(1);
   }
 
-  &__modal {
-    @include blur-bg;
-    display: flex;
-    align-items: center;
-    height: 100%;
-  }
-
   &__modal-template {
     position: relative;
     z-index: 1;

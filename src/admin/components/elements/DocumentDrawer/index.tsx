@@ -123,62 +123,57 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
 
   if (isError) return null;
 
-  if (isOpen) {
-    // IMPORTANT: we must ensure that modals are not recursively rendered
-    // to do this, do not render the drawer until it is open
-    return (
-      <Drawer
-        slug={drawerSlug}
-        formatSlug={false}
-        className={baseClass}
-      >
-        <DocumentInfoProvider collection={collectionConfig}>
-          <RenderCustomComponent
-            DefaultComponent={DefaultEdit}
-            CustomComponent={collectionConfig.admin?.components?.views?.Edit}
-            componentProps={{
-              isLoading: !initialState,
-              data,
-              id,
-              collection: collectionConfig,
-              permissions: permissions.collections[collectionConfig.slug],
-              isEditing: Boolean(id),
-              apiURL: id ? `${serverURL}${api}/${collectionSlug}/${id}` : null,
-              onSave,
-              initialState,
-              hasSavePermission: true,
-              action: `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`,
-              disableEyebrow: true,
-              disableActions: true,
-              me: true,
-              disableLeaveWithoutSaving: true,
-              customHeader: (
-                <div className={`${baseClass}__header`}>
-                  <div className={`${baseClass}__header-content`}>
-                    <h2>
-                      {!customHeader ? t(!id ? 'fields:addNewLabel' : 'general:editLabel', { label: getTranslation(collectionConfig.labels.singular, i18n) }) : customHeader}
-                    </h2>
-                    <Button
-                      buttonStyle="none"
-                      className={`${baseClass}__header-close`}
-                      onClick={() => toggleModal(drawerSlug)}
-                      aria-label={t('general:close')}
-                    >
-                      <X />
-                    </Button>
-                  </div>
-                  {id && (
-                    <IDLabel id={id} />
-                  )}
+  return (
+    <Drawer
+      slug={drawerSlug}
+      formatSlug={false}
+      className={baseClass}
+    >
+      <DocumentInfoProvider collection={collectionConfig}>
+        <RenderCustomComponent
+          DefaultComponent={DefaultEdit}
+          CustomComponent={collectionConfig.admin?.components?.views?.Edit}
+          componentProps={{
+            isLoading: !initialState,
+            data,
+            id,
+            collection: collectionConfig,
+            permissions: permissions.collections[collectionConfig.slug],
+            isEditing: Boolean(id),
+            apiURL: id ? `${serverURL}${api}/${collectionSlug}/${id}` : null,
+            onSave,
+            initialState,
+            hasSavePermission: true,
+            action: `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`,
+            disableEyebrow: true,
+            disableActions: true,
+            me: true,
+            disableLeaveWithoutSaving: true,
+            customHeader: (
+              <div className={`${baseClass}__header`}>
+                <div className={`${baseClass}__header-content`}>
+                  <h2>
+                    {!customHeader ? t(!id ? 'fields:addNewLabel' : 'general:editLabel', { label: getTranslation(collectionConfig.labels.singular, i18n) }) : customHeader}
+                  </h2>
+                  <Button
+                    buttonStyle="none"
+                    className={`${baseClass}__header-close`}
+                    onClick={() => toggleModal(drawerSlug)}
+                    aria-label={t('general:close')}
+                  >
+                    <X />
+                  </Button>
                 </div>
-              ),
-            }}
-          />
-        </DocumentInfoProvider>
-      </Drawer>
-    );
-  }
-  return null;
+                {id && (
+                <IDLabel id={id} />
+                )}
+              </div>
+            ),
+          }}
+        />
+      </DocumentInfoProvider>
+    </Drawer>
+  );
 };
 
 export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => {

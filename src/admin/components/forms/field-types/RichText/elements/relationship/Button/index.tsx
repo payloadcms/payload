@@ -1,5 +1,5 @@
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
-import { Modal, useModal } from '@faceless-ui/modal';
+import React, { Fragment, useCallback, useId, useState } from 'react';
+import { useModal } from '@faceless-ui/modal';
 import { ReactEditor, useSlate } from 'slate-react';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../utilities/Config';
@@ -13,7 +13,8 @@ import X from '../../../../../../icons/X';
 import Fields from './Fields';
 import { requests } from '../../../../../../../api';
 import { injectVoidElement } from '../../injectVoid';
-
+import { Drawer, formatDrawerSlug } from '../../../../../../elements/Drawer';
+import { useEditDepth } from '../../../../../../utilities/EditDepth';
 import './index.scss';
 
 const initialFormData = {};
@@ -38,14 +39,18 @@ const insertRelationship = (editor, { value, relationTo }) => {
 };
 
 const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
-  const { toggleModal } = useModal();
+  const { openModal, closeModal } = useModal();
   const editor = useSlate();
   const { serverURL, routes: { api }, collections } = useConfig();
-  const [renderModal, setRenderModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const { t, i18n } = useTranslation('fields');
   const [hasEnabledCollections] = useState(() => collections.find(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship));
-  const modalSlug = `${path}-add-relationship`;
+  const editDepth = useEditDepth();
+  const uuid = useId();
+  const drawerSlug = formatDrawerSlug({
+    slug: `${path}-add-relationship-${uuid}`,
+    depth: editDepth,
+  });
 
   const handleAddRelationship = useCallback(async (_, { relationTo, value }) => {
     setLoading(true);
@@ -58,16 +63,9 @@ const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
     const json = await res.json();
 
     insertRelationship(editor, { value: { id: json.id }, relationTo });
-    toggleModal(modalSlug);
-    setRenderModal(false);
+    closeModal(drawerSlug);
     setLoading(false);
-  }, [i18n.language, editor, toggleModal, modalSlug, api, serverURL]);
-
-  useEffect(() => {
-    if (renderModal) {
-      toggleModal(modalSlug);
-    }
-  }, [renderModal, toggleModal, modalSlug]);
+  }, [i18n.language, editor, closeModal, drawerSlug, api, serverURL]);
 
   if (!hasEnabledCollections) return null;
 
@@ -76,41 +74,40 @@ const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
       <ElementButton
         className={baseClass}
         format="relationship"
-        onClick={() => setRenderModal(true)}
+        onClick={() => openModal(drawerSlug)}
+        tooltip={t('addRelationship')}
       >
         <RelationshipIcon />
       </ElementButton>
-      {renderModal && (
-        <Modal
-          slug={modalSlug}
-          className={`${baseClass}__modal`}
-        >
-          <MinimalTemplate className={`${baseClass}__modal-template`}>
-            <header className={`${baseClass}__header`}>
-              <h3>{t('addRelationship')}</h3>
-              <Button
-                buttonStyle="none"
-                onClick={() => {
-                  toggleModal(modalSlug);
-                  setRenderModal(false);
-                }}
-              >
-                <X />
-              </Button>
-            </header>
-            <Form
-              onSubmit={handleAddRelationship}
-              initialData={initialFormData}
-              disabled={loading}
+      <Drawer
+        slug={drawerSlug}
+        formatSlug={false}
+        className={`${baseClass}__modal`}
+      >
+        <MinimalTemplate className={`${baseClass}__modal-template`}>
+          <header className={`${baseClass}__header`}>
+            <h3>{t('addRelationship')}</h3>
+            <Button
+              buttonStyle="none"
+              onClick={() => {
+                openModal(drawerSlug);
+              }}
             >
-              <Fields />
-              <Submit>
-                {t('addRelationship')}
-              </Submit>
-            </Form>
-          </MinimalTemplate>
-        </Modal>
-      )}
+              <X />
+            </Button>
+          </header>
+          <Form
+            onSubmit={handleAddRelationship}
+            initialData={initialFormData}
+            disabled={loading}
+          >
+            <Fields />
+            <Submit>
+              {t('addRelationship')}
+            </Submit>
+          </Form>
+        </MinimalTemplate>
+      </Drawer>
     </Fragment>
   );
 };

@@ -1,18 +1,23 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useSlate } from 'slate-react';
 import isElementActive from './isActive';
 import toggleElement from './toggle';
 import { ButtonProps } from './types';
 
 import '../buttons.scss';
+import Tooltip from '../../../../elements/Tooltip';
 
 export const baseClass = 'rich-text__button';
 
-const ElementButton: React.FC<ButtonProps> = ({ format, children, onClick, className }) => {
+const ElementButton: React.FC<ButtonProps> = (props) => {
+  const { format, children, onClick, className, tooltip } = props;
+
   const editor = useSlate();
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const defaultOnClick = useCallback((event) => {
     event.preventDefault();
+    setShowTooltip(false);
     toggleElement(editor, format);
   }, [editor, format]);
 
@@ -25,7 +30,14 @@ const ElementButton: React.FC<ButtonProps> = ({ format, children, onClick, class
         isElementActive(editor, format) && `${baseClass}__button--active`,
       ].filter(Boolean).join(' ')}
       onClick={onClick || defaultOnClick}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
     >
+      {tooltip && (
+        <Tooltip show={showTooltip}>
+          {tooltip}
+        </Tooltip>
+      )}
       {children}
     </button>
   );

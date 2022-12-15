@@ -3,4 +3,5 @@ export type ButtonProps = {
   onClick?: (e: React.MouseEvent) => void
   className?: string
   children?: React.ReactNode
+  tooltip?: string
 }
