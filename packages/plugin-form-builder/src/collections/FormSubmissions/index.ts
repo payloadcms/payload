@@ -6,7 +6,7 @@ import createCharge from './hooks/createCharge';
 // all settings can be overridden by the config
 export const generateSubmissionCollection = (formConfig: PluginConfig): CollectionConfig => {
   const newConfig: CollectionConfig = {
-    slug: formConfig?.formSubmissionOverrides?.slug || 'formSubmissions',
+    slug: formConfig?.formSubmissionOverrides?.slug || 'form-submissions',
     access: {
       create: () => true,
       update: () => false,
