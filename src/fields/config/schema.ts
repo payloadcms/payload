@@ -237,7 +237,6 @@ export const group = baseField.keys({
   ),
   admin: baseAdminFields.keys({
     hideGutter: joi.boolean().default(true),
-    description: joi.string(),
   }),
 });
 
