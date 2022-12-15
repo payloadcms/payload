@@ -1,5 +1,12 @@
 
 
+## [1.3.2](https://github.com/payloadcms/payload/compare/v1.3.1...v1.3.2) (2022-12-15)
+
+
+### Bug Fixes
+
+* safely handles rich text deselection ([420eef4](https://github.com/payloadcms/payload/commit/420eef4d91d6c5810b4e9dbda1e87e9f0e6d8dba))
+
 ## [1.3.1](https://github.com/payloadcms/payload/compare/v1.3.0...v1.3.1) (2022-12-15)
 
 
