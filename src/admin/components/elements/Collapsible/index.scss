@@ -15,6 +15,10 @@
     position: relative;
   }
 
+  &--nested {
+    margin-bottom: $baseline !important;
+  }
+
   &--hovered {
     >.collapsible__toggle-wrap>.collapsible__drag {
       opacity: 1;
@@ -102,7 +106,7 @@
     background-color: var(--theme-elevation-0);
     border-bottom-left-radius: $style-radius-s;
     border-bottom-right-radius: $style-radius-s;
-    padding: $baseline;
+    padding: $baseline $baseline 0 $baseline;
   }
 
   @include small-break {
