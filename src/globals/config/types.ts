@@ -3,7 +3,7 @@ import { Model, Document } from 'mongoose';
 import { DeepRequired } from 'ts-essentials';
 import { GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { PayloadRequest } from '../../express/types';
-import { Access, Endpoint, GeneratePreviewURL } from '../../config/types';
+import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types';
 
@@ -78,7 +78,7 @@ export type GlobalConfig = {
   }
   fields: Field[];
   admin?: {
-    description?: string | (() => string);
+    description?: EntityDescription;
     group?: Record<string, string> | string;
     hideAPIURL?: boolean;
     components?: {

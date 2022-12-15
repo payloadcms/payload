@@ -545,5 +545,6 @@ export type SanitizedConfig = Omit<
 
 export type EntityDescription =
   | string
+  | Record<string, string>
   | (() => string)
   | React.ComponentType<any>;
