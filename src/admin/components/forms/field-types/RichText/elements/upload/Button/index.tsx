@@ -1,5 +1,5 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { Modal, useModal } from '@faceless-ui/modal';
+import React, { Fragment, useEffect, useId, useState } from 'react';
+import { useModal } from '@faceless-ui/modal';
 import { ReactEditor, useSlate } from 'slate-react';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../utilities/Config';
@@ -12,18 +12,17 @@ import ReactSelect from '../../../../../../elements/ReactSelect';
 import Paginator from '../../../../../../elements/Paginator';
 import formatFields from '../../../../../../views/collections/List/formatFields';
 import Label from '../../../../../Label';
-import MinimalTemplate from '../../../../../../templates/Minimal';
 import Button from '../../../../../../elements/Button';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import PerPage from '../../../../../../elements/PerPage';
 import { injectVoidElement } from '../../injectVoid';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
-
+import { Drawer, formatDrawerSlug } from '../../../../../../elements/Drawer';
+import { useEditDepth } from '../../../../../../utilities/EditDepth';
+import { Gutter } from '../../../../../../elements/Gutter';
 import './index.scss';
-import '../addSwapModals.scss';
 
 const baseClass = 'upload-rich-text-button';
-const baseModalClass = 'rich-text-upload-modal';
 
 const insertUpload = (editor, { value, relationTo }) => {
   const text = { text: ' ' };
@@ -44,11 +43,10 @@ const insertUpload = (editor, { value, relationTo }) => {
 
 const UploadButton: React.FC<{ path: string }> = ({ path }) => {
   const { t, i18n } = useTranslation('upload');
-  const { toggleModal, isModalOpen } = useModal();
+  const { openModal, closeModal, isModalOpen } = useModal();
   const editor = useSlate();
   const { serverURL, routes: { api }, collections } = useConfig();
   const [availableCollections] = useState(() => collections.filter(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
-  const [renderModal, setRenderModal] = useState(false);
   const [modalCollectionOption, setModalCollectionOption] = useState<{ label: string, value: string }>(() => {
     const firstAvailableCollection = collections.find(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship));
     if (firstAvailableCollection) {
@@ -63,12 +61,16 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
   const [sort, setSort] = useState(null);
   const [where, setWhere] = useState(null);
   const [page, setPage] = useState(null);
-
-  const modalSlug = `${path}-add-upload`;
+  const editDepth = useEditDepth();
+  const uuid = useId();
+  const drawerSlug = formatDrawerSlug({
+    slug: `${path}-add-upload-${uuid}`,
+    depth: editDepth,
+  });
   const moreThanOneAvailableCollection = availableCollections.length > 1;
-  const isOpen = isModalOpen(modalSlug);
 
   // If modal is open, get active page of upload gallery
+  const isOpen = isModalOpen(drawerSlug);
   const apiURL = isOpen ? `${serverURL}${api}/${modalCollection.slug}` : null;
   const [{ data }, { setParams }] = usePayloadAPI(apiURL, {});
 
@@ -77,12 +79,6 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
       setFields(formatFields(modalCollection, t));
     }
   }, [modalCollection, t]);
-
-  useEffect(() => {
-    if (renderModal) {
-      toggleModal(modalSlug);
-    }
-  }, [renderModal, toggleModal, modalSlug]);
 
   useEffect(() => {
     const params: {
@@ -115,105 +111,101 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
       <ElementButton
         className={baseClass}
         format="upload"
-        onClick={() => setRenderModal(true)}
+        onClick={() => openModal(drawerSlug)}
+        tooltip={t('fields:addLabel', { label: getTranslation(modalCollection.labels.singular, i18n) })}
       >
         <UploadIcon />
       </ElementButton>
-      {renderModal && (
-        <Modal
-          className={baseModalClass}
-          slug={modalSlug}
-        >
-          {isOpen && (
-            <MinimalTemplate width="wide">
-              <header className={`${baseModalClass}__header`}>
-                <h1>
-                  {t('fields:addLabel', { label: getTranslation(modalCollection.labels.singular, i18n) })}
-                </h1>
-                <Button
-                  icon="x"
-                  round
-                  buttonStyle="icon-label"
-                  iconStyle="with-border"
-                  onClick={() => {
-                    toggleModal(modalSlug);
-                    setRenderModal(false);
-                  }}
-                />
-              </header>
-              {moreThanOneAvailableCollection && (
-                <div className={`${baseModalClass}__select-collection-wrap`}>
-                  <Label label={t('selectCollectionToBrowse')} />
-                  <ReactSelect
-                    className={`${baseClass}__select-collection`}
-                    value={modalCollectionOption}
-                    onChange={setModalCollectionOption}
-                    options={availableCollections.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
-                  />
-                </div>
-              )}
-              <ListControls
-                collection={{
-                  ...modalCollection,
-                  fields,
-                }}
-                enableColumns={false}
-                enableSort
-                modifySearchQuery={false}
-                handleSortChange={setSort}
-                handleWhereChange={setWhere}
+      <Drawer
+        className={`${baseClass}__modal`}
+        slug={drawerSlug}
+        formatSlug={false}
+      >
+        <Gutter className={`${baseClass}__modal-gutter`}>
+          <header className={`${baseClass}__modal-header`}>
+            <h1>
+              {t('fields:addLabel', { label: getTranslation(modalCollection.labels.singular, i18n) })}
+            </h1>
+            <Button
+              icon="x"
+              round
+              buttonStyle="icon-label"
+              iconStyle="with-border"
+              onClick={() => {
+                closeModal(drawerSlug);
+              }}
+            />
+          </header>
+          {moreThanOneAvailableCollection && (
+            <div className={`${baseClass}__select-collection-wrap`}>
+              <Label label={t('selectCollectionToBrowse')} />
+              <ReactSelect
+                className={`${baseClass}__select-collection`}
+                value={modalCollectionOption}
+                onChange={setModalCollectionOption}
+                options={availableCollections.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
               />
-              <UploadGallery
-                docs={data?.docs}
-                collection={modalCollection}
-                onCardClick={(doc) => {
-                  insertUpload(editor, {
-                    value: {
-                      id: doc.id,
-                    },
-                    relationTo: modalCollection.slug,
-                  });
-                  setRenderModal(false);
-                  toggleModal(modalSlug);
-                }}
-              />
-              <div className={`${baseModalClass}__page-controls`}>
-                <Paginator
-                  limit={data.limit}
-                  totalPages={data.totalPages}
-                  page={data.page}
-                  hasPrevPage={data.hasPrevPage}
-                  hasNextPage={data.hasNextPage}
-                  prevPage={data.prevPage}
-                  nextPage={data.nextPage}
-                  numberOfNeighbors={1}
-                  onChange={setPage}
-                  disableHistoryChange
-                />
-                {data?.totalDocs > 0 && (
-                  <Fragment>
-                    <div className={`${baseModalClass}__page-info`}>
-                      {data.page}
-                      -
-                      {data.totalPages > 1 ? data.limit : data.totalDocs}
-                      {' '}
-                      {t('general:of')}
-                      {' '}
-                      {data.totalDocs}
-                    </div>
-                    <PerPage
-                      limits={modalCollection?.admin?.pagination?.limits}
-                      limit={limit}
-                      modifySearchParams={false}
-                      handleChange={setLimit}
-                    />
-                  </Fragment>
-                )}
-              </div>
-            </MinimalTemplate>
+            </div>
           )}
-        </Modal>
-      )}
+          <ListControls
+            collection={{
+              ...modalCollection,
+              fields,
+            }}
+            enableColumns={false}
+            enableSort
+            modifySearchQuery={false}
+            handleSortChange={setSort}
+            handleWhereChange={setWhere}
+          />
+          <UploadGallery
+            docs={data?.docs}
+            collection={modalCollection}
+            onCardClick={(doc) => {
+              insertUpload(editor, {
+                value: {
+                  id: doc.id,
+                },
+                relationTo: modalCollection.slug,
+              });
+              closeModal(drawerSlug);
+            }}
+          />
+          <div className={`${baseClass}__page-controls`}>
+            <Paginator
+              limit={data.limit}
+              totalPages={data.totalPages}
+              page={data.page}
+              hasPrevPage={data.hasPrevPage}
+              hasNextPage={data.hasNextPage}
+              prevPage={data.prevPage}
+              nextPage={data.nextPage}
+              numberOfNeighbors={1}
+              onChange={setPage}
+              disableHistoryChange
+            />
+            {data?.totalDocs > 0 && (
+              <Fragment>
+                <div className={`${baseClass}__page-info`}>
+                  {data.page}
+                  -
+                  {data.totalPages > 1 ? data.limit : data.totalDocs}
+                  {' '}
+                  {t('general:of')}
+                  {' '}
+                  {data.totalDocs}
+                </div>
+                <PerPage
+                  limits={modalCollection?.admin?.pagination?.limits}
+                  limit={limit}
+                  modifySearchParams={false}
+                  handleChange={setLimit}
+                />
+              </Fragment>
+            )}
+          </div>
+        </Gutter>
+      </Drawer>
     </Fragment>
   );
 };
