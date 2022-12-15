@@ -3,6 +3,7 @@ import blocks from './Blocks';
 import checkbox from './Checkbox';
 import code from './Code';
 import date from './Date';
+import json from './JSON';
 import relationship from './Relationship';
 import richText from './Richtext';
 import select from './Select';
@@ -15,6 +16,7 @@ export default {
   code,
   checkbox,
   date,
+  json,
   relationship,
   richText,
   select,

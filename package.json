@@ -96,6 +96,7 @@
     "@faceless-ui/modal": "^2.0.1",
     "@faceless-ui/scroll-info": "^1.2.3",
     "@faceless-ui/window-info": "^2.0.2",
+    "@monaco-editor/react": "^4.4.6",
     "@types/is-plain-object": "^2.0.4",
     "@types/sharp": "^0.26.1",
     "babel-jest": "^26.3.0",
