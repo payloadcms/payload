@@ -38,7 +38,7 @@ const Upload: React.FC<Props> = (props) => {
 
   const collection = collections.find((coll) => coll.slug === relationTo);
 
-  const memoizedValidate = useCallback(async (value, options) => {
+  const memoizedValidate = useCallback((value, options) => {
     return validate(value, { ...options, required });
   }, [validate, required]);
 
