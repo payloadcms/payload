@@ -101,7 +101,7 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
 
     if (typeof accessResult === 'object' && !disableWhere) {
       mutablePolicies[operation] = {
-        permission: id ? !!(await getEntityDoc({ where: accessResult })) : true,
+        permission: (id || type === 'global') ? !!(await getEntityDoc({ where: accessResult })) : true,
         where: accessResult,
       };
     } else if (mutablePolicies[operation]?.permission !== false) {
