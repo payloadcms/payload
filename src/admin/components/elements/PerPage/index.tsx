@@ -13,7 +13,7 @@ const baseClass = 'per-page';
 
 const defaultLimits = defaults.admin.pagination.limits;
 
-type Props = {
+export type Props = {
   limits: number[]
   limit: number
   handleChange?: (limit: number) => void

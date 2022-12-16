@@ -39,6 +39,7 @@ const Pagination: React.FC<Props> = (props) => {
   // uses react router to set the current page
   const updatePage = (page) => {
     if (!disableHistoryChange) {
+      console.log('wtf??');
       const newParams = {
         ...params,
       };

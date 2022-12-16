@@ -1,6 +1,8 @@
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
 import { Column } from '../../../elements/Table/types';
+import { Props as ListControlsProps } from '../../../elements/ListControls/types';
+import { Props as PerPageProps } from '../../../elements/PerPage';
 
 export type Props = {
   collection: SanitizedCollectionConfig
@@ -14,6 +16,13 @@ export type Props = {
   hasCreatePermission: boolean
   setLimit: (limit: number) => void
   limit: number
+  disableEyebrow?: boolean
+  modifySearchParams?: boolean
+  onCardClick?: (doc: any) => void
+  disableCardLink?: boolean
+  handleSortChange?: ListControlsProps['handleSortChange']
+  handleWhereChange?: ListControlsProps['handleWhereChange']
+  handlePageChange?: PerPageProps['handleChange']
 }
 
 export type ListIndexProps = {
