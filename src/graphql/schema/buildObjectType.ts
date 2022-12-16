@@ -30,6 +30,7 @@ import {
   EmailField,
   TextareaField,
   CodeField,
+  JSONField,
   DateField,
   PointField,
   CheckboxField,
@@ -103,6 +104,10 @@ function buildObjectType({
     code: (objectTypeConfig: ObjectTypeConfig, field: CodeField) => ({
       ...objectTypeConfig,
       [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
+    }),
+    json: (objectTypeConfig: ObjectTypeConfig, field: JSONField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, GraphQLJSON, forceNullable) },
     }),
     date: (objectTypeConfig: ObjectTypeConfig, field: DateField) => ({
       ...objectTypeConfig,

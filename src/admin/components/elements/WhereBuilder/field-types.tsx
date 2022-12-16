@@ -84,6 +84,10 @@ const fieldTypeConditions = {
     component: 'Text',
     operators: [...base, like, contains],
   },
+  json: {
+    component: 'Text',
+    operators: [...base, like, contains],
+  },
   richText: {
     component: 'Text',
     operators: [...base, like, contains],

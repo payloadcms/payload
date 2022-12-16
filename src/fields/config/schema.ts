@@ -136,6 +136,15 @@ export const code = baseField.keys({
   }),
 });
 
+export const json = baseField.keys({
+  type: joi.string().valid('json').required(),
+  name: joi.string().required(),
+  defaultValue: joi.alternatives().try(
+    joi.array(),
+    joi.object(),
+  ),
+});
+
 export const select = baseField.keys({
   type: joi.string().valid('select').required(),
   name: joi.string().required(),
@@ -447,6 +456,7 @@ const fieldSchema = joi.alternatives()
     textarea,
     email,
     code,
+    json,
     select,
     group,
     array,

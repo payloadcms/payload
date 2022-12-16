@@ -16,7 +16,7 @@ import { GraphQLJSON } from 'graphql-type-json';
 import withNullableType from './withNullableType';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
-import { ArrayField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField, TabsField, CheckboxField, BlockField, tabHasName } from '../../fields/config/types';
+import { ArrayField, CodeField, JSONField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField, TabsField, CheckboxField, BlockField, tabHasName } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
 import { Payload } from '../../index';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
@@ -65,6 +65,10 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
     code: (inputObjectTypeConfig: InputObjectTypeConfig, field: CodeField) => ({
       ...inputObjectTypeConfig,
       [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
+    }),
+    json: (inputObjectTypeConfig: InputObjectTypeConfig, field: JSONField) => ({
+      ...inputObjectTypeConfig,
+      [field.name]: { type: withNullableType(field, GraphQLJSON, forceNullable) },
     }),
     date: (inputObjectTypeConfig: InputObjectTypeConfig, field: DateField) => ({
       ...inputObjectTypeConfig,

@@ -259,6 +259,11 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
   type: 'code';
 }
 
+export type JSONField = Omit<FieldBase, 'admin'> & {
+  admin?: Admin
+  type: 'json';
+}
+
 export type SelectField = FieldBase & {
   type: 'select'
   options: Option[]
@@ -399,6 +404,7 @@ export type Field =
   | SelectField
   | UploadField
   | CodeField
+  | JSONField
   | PointField
   | RowField
   | CollapsibleField
@@ -421,6 +427,7 @@ export type FieldAffectingData =
   | SelectField
   | UploadField
   | CodeField
+  | JSONField
   | PointField
   | TabAsField
 
@@ -440,6 +447,7 @@ export type NonPresentationalField =
   | SelectField
   | UploadField
   | CodeField
+  | JSONField
   | PointField
   | RowField
   | TabsField
@@ -467,7 +475,7 @@ export type FieldWithMaxDepth =
   | RelationshipField
 
 export function fieldHasSubFields(field: Field): field is FieldWithSubFields {
-  return (field.type === 'group' || field.type === 'array' || field.type === 'row' || field.type === 'collapsible');
+  return (field.type === 'group' || field.type === 'array' || field.type === 'row' || field.type === 'collapsible' || field.type === 'relationship');
 }
 
 export function fieldIsArrayType(field: Field): field is ArrayField {

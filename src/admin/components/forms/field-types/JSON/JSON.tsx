@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Editor from '@monaco-editor/react';
@@ -6,25 +7,24 @@ import withCondition from '../../withCondition';
 import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
-import { code } from '../../../../../fields/validations';
+import { json } from '../../../../../fields/validations';
 import { Props } from './types';
 
 import './index.scss';
 
-const baseClass = 'code-field';
+const baseClass = 'json-field';
 
-const Code: React.FC<Props> = (props) => {
+const JSONField: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,
     name,
     required,
-    validate = code,
+    validate = json,
     admin: {
       readOnly,
       style,
       className,
       width,
-      language,
       description,
       condition,
     } = {},
@@ -42,7 +42,7 @@ const Code: React.FC<Props> = (props) => {
     showError,
     setValue,
     errorMessage,
-  } = useField({
+  } = useField<string>({
     path,
     validate: memoizedValidate,
     condition,
@@ -74,9 +74,9 @@ const Code: React.FC<Props> = (props) => {
         required={required}
       />
       <Editor
-        height="50vh" // for now, should update this to be dynamic
-        defaultLanguage={language}
-        value={value as string || ''}
+        height="50vh"
+        defaultLanguage="json"
+        value={typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
         onChange={readOnly ? () => null : (val) => setValue(val)}
         options={{
           minimap: {
@@ -92,4 +92,4 @@ const Code: React.FC<Props> = (props) => {
   );
 };
 
-export default withCondition(Code);
+export default withCondition(JSONField);

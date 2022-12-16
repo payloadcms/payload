@@ -19,6 +19,7 @@ import Uploads, { uploadsDoc } from './collections/Upload';
 import IndexedFields from './collections/Indexed';
 import NumberFields, { numberDoc } from './collections/Number';
 import CodeFields, { codeDoc } from './collections/Code';
+import JSONFields, { jsonDoc } from './collections/JSON';
 import RelationshipFields from './collections/Relationship';
 import RadioFields, { radiosDoc } from './collections/Radio';
 
@@ -45,6 +46,7 @@ export default buildConfig({
     RadioFields,
     GroupFields,
     IndexedFields,
+    JSONFields,
     NumberFields,
     PointFields,
     RelationshipFields,
@@ -77,6 +79,7 @@ export default buildConfig({
     await payload.create({ collection: 'point-fields', data: pointDoc });
     await payload.create({ collection: 'date-fields', data: dateDoc });
     await payload.create({ collection: 'code-fields', data: codeDoc });
+    await payload.create({ collection: 'json-fields', data: jsonDoc });
 
     const createdTextDoc = await payload.create({ collection: textFieldsSlug, data: textDoc });
 
