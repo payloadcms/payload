@@ -1,5 +1,4 @@
-
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Editor from '@monaco-editor/react';
 import useField from '../../useField';
@@ -9,6 +8,7 @@ import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { json } from '../../../../../fields/validations';
 import { Props } from './types';
+import useThrottledEffect from '../../../../hooks/useThrottledEffect';
 
 import './index.scss';
 
@@ -39,6 +39,7 @@ const JSONField: React.FC<Props> = (props) => {
 
   const {
     value,
+    initialValue,
     showError,
     setValue,
     errorMessage,
@@ -47,6 +48,16 @@ const JSONField: React.FC<Props> = (props) => {
     validate: memoizedValidate,
     condition,
   });
+
+  const [stringValue, setStringValue] = useState<string>();
+
+  useThrottledEffect(() => {
+    setValue(JSON.parse(stringValue));
+  }, 200, [setValue, stringValue]);
+
+  useEffect(() => {
+    setStringValue(JSON.stringify(initialValue, null, 2));
+  }, [initialValue]);
 
   const classes = [
     baseClass,
@@ -76,9 +87,11 @@ const JSONField: React.FC<Props> = (props) => {
       <Editor
         height="50vh"
         defaultLanguage="json"
-        value={typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
-        onChange={readOnly ? () => null : (val) => setValue(val)}
+        value={stringValue}
+        onChange={readOnly ? () => null : (val) => setStringValue(val)}
         options={{
+          tabSize: 2,
+          detectIndentation: true,
           minimap: {
             enabled: false,
           },

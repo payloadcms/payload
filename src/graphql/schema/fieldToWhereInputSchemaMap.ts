@@ -13,6 +13,7 @@ import {
   CheckboxField,
   CodeField, CollapsibleField, DateField,
   EmailField, fieldAffectsData, fieldHasSubFields, GroupField,
+  JSONField,
   NumberField, optionIsObject, PointField,
   RadioField, RelationshipField,
   RichTextField, RowField, SelectField,
@@ -72,6 +73,17 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
     };
   },
   richText: (field: RichTextField) => {
+    const type = GraphQLJSON;
+    return {
+      type: withOperators(
+        field,
+        type,
+        parentName,
+        [...operators.equality, ...operators.partial],
+      ),
+    };
+  },
+  json: (field: JSONField) => {
     const type = GraphQLJSON;
     return {
       type: withOperators(

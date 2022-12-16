@@ -475,7 +475,7 @@ export type FieldWithMaxDepth =
   | RelationshipField
 
 export function fieldHasSubFields(field: Field): field is FieldWithSubFields {
-  return (field.type === 'group' || field.type === 'array' || field.type === 'row' || field.type === 'collapsible' || field.type === 'relationship');
+  return (field.type === 'group' || field.type === 'array' || field.type === 'row' || field.type === 'collapsible');
 }
 
 export function fieldIsArrayType(field: Field): field is ArrayField {
