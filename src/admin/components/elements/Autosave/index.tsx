@@ -102,9 +102,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
                 'Content-Type': 'application/json',
                 'Accept-Language': i18n.language,
               },
-              body: JSON.stringify({
-                _payload: JSON.stringify(body),
-              }),
+              body: JSON.stringify(body),
             });
 
             setSaving(false);
