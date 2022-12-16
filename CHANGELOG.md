@@ -1,5 +1,13 @@
 
 
+## [1.3.3](https://github.com/payloadcms/payload/compare/v1.3.2...v1.3.3) (2022-12-16)
+
+
+### Bug Fixes
+
+* allow translation in group admin.description ([#1680](https://github.com/payloadcms/payload/issues/1680)) ([91e33ad](https://github.com/payloadcms/payload/commit/91e33ad1ee04750425112602fcfddcf329f934e8))
+* ensures select field avoids circular dependencies ([f715146](https://github.com/payloadcms/payload/commit/f715146aa35a6f3a8f5d7d4e066c71fb26027472))
+
 ## [1.3.2](https://github.com/payloadcms/payload/compare/v1.3.1...v1.3.2) (2022-12-15)
 
 
