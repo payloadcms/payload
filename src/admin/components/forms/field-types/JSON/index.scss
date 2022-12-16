@@ -4,6 +4,12 @@
   position: relative;
   margin-bottom: $baseline;
 
+  &__editor {
+    @include formInput;
+    height: auto;
+    padding: 0;
+  }
+
   &.error {
     textarea {
       border: 1px solid var(--theme-error-500) !important;

@@ -134,17 +134,14 @@ export const code: Validate<unknown, unknown, CodeField> = (value: string, { t, 
 };
 
 export const json: Validate<unknown, unknown, JSONField> = (value: string, {
-  t, required,
+  t, required, jsonError,
 }) => {
   if (required && !value) {
     return t('validation:required');
   }
 
-  try {
-    const incomingJSON = typeof value === 'object' ? JSON.stringify(value) : value;
-    const validJSON = JSON.parse(incomingJSON);
-  } catch (err) {
-    return `Invalid JSON: ${err}`;
+  if (jsonError !== undefined) {
+    return t('validation:invalidInput');
   }
 
   return true;

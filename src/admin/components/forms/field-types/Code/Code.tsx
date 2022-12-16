@@ -1,13 +1,15 @@
 import React, { useCallback } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Editor from '@monaco-editor/react';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import Label from '../../Label';
+
+import { code } from '../../../../../fields/validations';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
-import { code } from '../../../../../fields/validations';
+import Label from '../../Label';
 import { Props } from './types';
+import useField from '../../useField';
+import { useTheme } from '../../../utilities/Theme';
+import withCondition from '../../withCondition';
 
 import './index.scss';
 
@@ -31,6 +33,7 @@ const Code: React.FC<Props> = (props) => {
     label,
   } = props;
 
+  const { theme } = useTheme();
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value, options) => {
@@ -74,14 +77,21 @@ const Code: React.FC<Props> = (props) => {
         required={required}
       />
       <Editor
-        height="50vh" // for now, should update this to be dynamic
+        className={`${baseClass}__editor`}
+        height="35vh"
         defaultLanguage={language}
         value={value as string || ''}
         onChange={readOnly ? () => null : (val) => setValue(val)}
         options={{
+          detectIndentation: true,
           minimap: {
             enabled: false,
           },
+          readOnly: Boolean(readOnly),
+          scrollBeyondLastLine: false,
+          tabSize: 2,
+          theme: theme === 'dark' ? 'vs-dark' : 'vs',
+          wordWrap: 'on',
         }}
       />
       <FieldDescription
