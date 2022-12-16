@@ -9,7 +9,6 @@ import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { mergeDrafts } from '../../versions/drafts/mergeDrafts';
 
 export type Arguments = {
   collection: Collection
@@ -51,7 +50,6 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     depth,
     currentDepth,
     draft: draftsEnabled,
-    collection,
     collection: {
       Model,
       config: collectionConfig,
@@ -140,6 +138,8 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   const usePagination = pagination && limit !== 0;
   const limitToUse = limit ?? (usePagination ? 10 : 0);
 
+  let result: PaginatedDocs<T>;
+
   const paginationOptions = {
     page: page || 1,
     sort: {
@@ -157,32 +157,80 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     },
   };
 
-  const paginatedDocs = await Model.paginate(query, paginationOptions);
+  if (collectionConfig.versions?.drafts && draftsEnabled) {
+    const aggregate = Model.aggregate([
+      {
+        $addFields: { id: { $toString: '$_id' } },
+      },
+      {
+        $lookup: {
+          from: `_${collectionConfig.slug}_versions`,
+          as: 'docs',
+          let: {
+            id: { $toString: '$_id' },
+            updatedAt: '$updatedAt',
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$parent', '$$id'] },
+                    { $gt: ['$updatedAt', '$$updatedAt'] },
+                  ],
+                },
+              },
+            },
+            { $sort: { updatedAt: -1 } },
+            { $limit: 1 },
+          ],
+        },
+      },
 
-  let result: PaginatedDocs<T> = {
-    ...paginatedDocs,
-    docs: paginatedDocs.docs.map((doc) => {
+      // WHEN docs.length > 0
+      {
+        $project: {
+          doc: { $arrayElemAt: ['$docs', 0] },
+        },
+      },
+      {
+        $addFields: {
+          createdAt: '$doc.createdAt',
+          updatedAt: '$doc.updatedAt',
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: ['$doc.version', '$$ROOT'],
+          },
+        },
+      },
+      // End "when"
+      {
+        $project: {
+          docs: 0,
+          doc: 0,
+        },
+      },
+      {
+        $match: query,
+      },
+    ]);
+
+    result = await Model.aggregatePaginate(aggregate, paginationOptions);
+  } else {
+    result = await Model.paginate(query, paginationOptions);
+  }
+
+  result = {
+    ...result,
+    docs: result.docs.map((doc) => {
       const sanitizedDoc = JSON.parse(JSON.stringify(doc));
       sanitizedDoc.id = sanitizedDoc._id;
       return sanitizeInternalFields(sanitizedDoc);
     }),
   };
-
-  // /////////////////////////////////////
-  // Replace documents with drafts if available
-  // /////////////////////////////////////
-
-  if (collectionConfig.versions?.drafts && draftsEnabled) {
-    result = await mergeDrafts<T>({
-      accessResult,
-      collection,
-      locale,
-      originalQueryResult: result,
-      paginationOptions,
-      payload,
-      where,
-    });
-  }
 
   // /////////////////////////////////////
   // beforeRead - Collection
