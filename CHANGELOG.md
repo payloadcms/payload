@@ -1,5 +1,15 @@
 
 
+## [1.3.4](https://github.com/payloadcms/payload/compare/v1.3.3...v1.3.4) (2022-12-16)
+
+
+### Bug Fixes
+
+* async validate out of order ([e913fbe](https://github.com/payloadcms/payload/commit/e913fbe4ea4f9abf7eeb29db3b03e1afe4649d50))
+* autosave with nested localized fields ([4202fc2](https://github.com/payloadcms/payload/commit/4202fc29337763f8fd90ec4beaf0d34e39a916bc))
+* doc access should not run where query on collections without id ([016beb6](https://github.com/payloadcms/payload/commit/016beb6eec96857fe913888a1d9c4994dbd94e7e))
+* run docAccess also when checking global ([b8c0482](https://github.com/payloadcms/payload/commit/b8c0482cdae6d372f81823ee4541717131d9dac4))
+
 ## [1.3.3](https://github.com/payloadcms/payload/compare/v1.3.2...v1.3.3) (2022-12-16)
 
 
