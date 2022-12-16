@@ -179,7 +179,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
 export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => {
   const drawerDepth = useEditDepth();
   const uuid = useId();
-  const { modalState, toggleModal } = useModal();
+  const { modalState, toggleModal, closeModal } = useModal();
   const [isOpen, setIsOpen] = useState(false);
   const drawerSlug = formatDocumentDrawerSlug({
     collectionSlug,
@@ -195,6 +195,10 @@ export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => 
   const toggleDrawer = useCallback(() => {
     toggleModal(drawerSlug);
   }, [toggleModal, drawerSlug]);
+
+  const closeDrawer = useCallback(() => {
+    closeModal(drawerSlug);
+  }, [closeModal, drawerSlug]);
 
   const MemoizedDrawer = useMemo(() => {
     return ((props) => (
@@ -224,7 +228,8 @@ export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => 
     drawerDepth,
     isDrawerOpen: isOpen,
     toggleDrawer,
-  }), [drawerDepth, drawerSlug, isOpen, toggleDrawer]);
+    closeDrawer,
+  }), [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer]);
 
   return [
     MemoizedDrawer,

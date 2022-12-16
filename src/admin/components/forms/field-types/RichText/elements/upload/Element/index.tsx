@@ -1,5 +1,4 @@
-import React, { useState, useCallback, useReducer, useEffect } from 'react';
-import { useModal } from '@faceless-ui/modal';
+import React, { useCallback, useReducer, useState } from 'react';
 import { Transforms } from 'slate';
 import { ReactEditor, useSlateStatic, useFocused, useSelected } from 'slate-react';
 import { useTranslation } from 'react-i18next';
@@ -8,10 +7,10 @@ import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
 import FileGraphic from '../../../../../../graphics/File';
 import useThumbnail from '../../../../../../../hooks/useThumbnail';
 import Button from '../../../../../../elements/Button';
-import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
-import { SwapUploadModal } from './SwapUploadModal';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
+import { useUploadsDrawer } from '../../../../../../elements/UploadsDrawer';
+import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 
 import './index.scss';
 
@@ -23,16 +22,22 @@ const initialParams = {
 
 const Element = ({ attributes, children, element, path }) => {
   const { relationTo, value } = element;
-  const { openModal, closeModal } = useModal();
   const { collections, serverURL, routes: { api } } = useConfig();
-  const [renderSwapModal, setRenderSwapModal] = useState(false);
-  const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
   const { t, i18n } = useTranslation('fields');
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
+  const [relatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
+
+  const [
+    UploadsDrawer,
+    UploadsDrawerToggler,
+  ] = useUploadsDrawer();
 
   const [
     DocumentDrawer,
     DocumentDrawerToggler,
+    {
+      closeDrawer,
+    },
   ] = useDocumentDrawer({
     collectionSlug: relatedCollection.slug,
     id: value?.id,
@@ -41,8 +46,6 @@ const Element = ({ attributes, children, element, path }) => {
   const editor = useSlateStatic();
   const selected = useSelected();
   const focused = useFocused();
-
-  const modalSlug = `${path}-edit-data-swap`;
 
   // Get the referenced document
   const [{ data }, { setParams }] = usePayloadAPI(
@@ -85,6 +88,27 @@ const Element = ({ attributes, children, element, path }) => {
     dispatchCacheBust();
   }, [editor, element, setParams, cacheBust]);
 
+  const swapUpload = React.useCallback(({ doc, collectionConfig }) => {
+    const newNode = {
+      type: 'upload',
+      value: { id: doc.id },
+      relationTo: collectionConfig.slug,
+      children: [
+        { text: ' ' },
+      ],
+    };
+
+    const elementPath = ReactEditor.findPath(editor, element);
+
+    Transforms.setNodes(
+      editor,
+      newNode,
+      { at: elementPath },
+    );
+
+    closeDrawer();
+  }, [closeDrawer, editor, element]);
+
   return (
     <div
       className={[
@@ -126,18 +150,19 @@ const Element = ({ attributes, children, element, path }) => {
                   />
                 </DocumentDrawerToggler>
               )}
-              <Button
-                icon="swap"
-                round
-                buttonStyle="icon-label"
-                className={`${baseClass}__actionButton`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setRenderSwapModal(true);
-                  openModal(modalSlug);
-                }}
-                tooltip={t('swapUpload')}
-              />
+              <UploadsDrawerToggler>
+                <Button
+                  icon="swap"
+                  round
+                  buttonStyle="icon-label"
+                  className={`${baseClass}__actionButton`}
+                  onClick={() => {
+                    // do nothing
+                  }}
+                  el="div"
+                  tooltip={t('swapUpload')}
+                />
+              </UploadsDrawerToggler>
               <Button
                 icon="x"
                 round
@@ -162,18 +187,7 @@ const Element = ({ attributes, children, element, path }) => {
       {value?.id && (
         <DocumentDrawer onSave={updateUpload} />
       )}
-      {renderSwapModal && (
-        <SwapUploadModal
-          slug={modalSlug}
-          element={element}
-          closeModal={() => {
-            closeModal(modalSlug);
-            setRenderSwapModal(false);
-          }}
-          setRelatedCollectionConfig={setRelatedCollection}
-          relatedCollectionConfig={relatedCollection}
-        />
-      )}
+      <UploadsDrawer onSave={swapUpload} />
     </div>
   );
 };
