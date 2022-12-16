@@ -90,7 +90,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
 
         if (url) {
           const body = {
-            ...reduceFieldsToValues(fieldRef.current),
+            ...reduceFieldsToValues(fieldRef.current, true),
             _status: 'draft',
           };
 
@@ -102,7 +102,9 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
                 'Content-Type': 'application/json',
                 'Accept-Language': i18n.language,
               },
-              body: JSON.stringify(body),
+              body: JSON.stringify({
+                _payload: JSON.stringify(body),
+              }),
             });
 
             setSaving(false);
