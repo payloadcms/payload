@@ -1,16 +1,23 @@
-import React, { useCallback, useState } from 'react';
+import React, { ElementType, useCallback, useState } from 'react';
 import { useSlate } from 'slate-react';
 import isElementActive from './isActive';
 import toggleElement from './toggle';
 import { ButtonProps } from './types';
+import Tooltip from '../../../../elements/Tooltip';
 
 import '../buttons.scss';
-import Tooltip from '../../../../elements/Tooltip';
 
 export const baseClass = 'rich-text__button';
 
 const ElementButton: React.FC<ButtonProps> = (props) => {
-  const { format, children, onClick, className, tooltip } = props;
+  const {
+    format,
+    children,
+    onClick,
+    className,
+    tooltip,
+    el = 'button',
+  } = props;
 
   const editor = useSlate();
   const [showTooltip, setShowTooltip] = useState(false);
@@ -21,9 +28,11 @@ const ElementButton: React.FC<ButtonProps> = (props) => {
     toggleElement(editor, format);
   }, [editor, format]);
 
+  const Tag: ElementType = el;
+
   return (
-    <button
-      type="button"
+    <Tag
+      {...el === 'button' && { type: 'button' }}
       className={[
         baseClass,
         className,
@@ -39,7 +48,7 @@ const ElementButton: React.FC<ButtonProps> = (props) => {
         </Tooltip>
       )}
       {children}
-    </button>
+    </Tag>
   );
 };
 

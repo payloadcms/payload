@@ -1,0 +1,12 @@
+@import '../../../scss/styles.scss';
+
+.uploads-drawer {
+  padding-top: base(3);
+  padding-bottom: base(3);
+
+  &__toggler {
+    background: transparent;
+    border: 0;
+    padding: 0;
+  }
+}
