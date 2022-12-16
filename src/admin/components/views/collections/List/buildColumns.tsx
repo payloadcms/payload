@@ -7,6 +7,8 @@ import { Column } from '../../../elements/Table/types';
 import { fieldIsPresentationalOnly } from '../../../../../fields/config/types';
 import flattenFields from '../../../../../utilities/flattenTopLevelFields';
 import { Props as CellProps } from './Cell/types';
+import SelectAll from './SelectAll';
+import SelectRow from './SelectRow';
 
 const buildColumns = ({
   collection,
@@ -80,7 +82,19 @@ const buildColumns = ({
     }
 
     return cols;
-  }, []);
+  }, [{
+    accessor: '_select',
+    components: {
+      Heading: (
+        <SelectAll />
+      ),
+      renderCell: (rowData) => (
+        <SelectRow
+          id={rowData.id}
+        />
+      ),
+    },
+  }]);
 };
 
 export default buildColumns;
