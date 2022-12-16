@@ -1,5 +1,6 @@
 import React from 'react';
 import i18n from 'i18next';
+import { loader } from '@monaco-editor/react';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 import deepmerge from 'deepmerge';
@@ -17,7 +18,7 @@ export const I18n: React.FC = () => {
     .use(LanguageDetector)
     .use(initReactI18next)
     .init(deepmerge(defaultOptions, config.i18n || {}));
-
+  loader.config({ 'vs/nls': { availableLanguages: { '*': i18n.language } } });
   return null;
 };
 
