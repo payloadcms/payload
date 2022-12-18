@@ -80,7 +80,8 @@
     background: transparent;
     border: none;
     padding: 0;
-    &:focus {
+    &:focus,
+    &:focus-within {
       outline: none;
     }
   }

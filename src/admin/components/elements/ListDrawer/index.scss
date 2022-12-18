@@ -1,6 +1,6 @@
 @import '../../../scss/styles.scss';
 
-.uploads-drawer {
+.list-drawer {
   padding-top: base(3);
   padding-bottom: base(3);
 
@@ -28,13 +28,14 @@
     border: 0;
     padding: 0;
     cursor: pointer;
+    &:focus,
+    &:focus-within {
+      outline: none;
+    }
   }
 
-  &__pill {
-    div {
-      margin: 0;
-      // margin-top: base(0.25);
-    }
+  .pill {
+    pointer-events: none;
   }
 
   &__header-close {

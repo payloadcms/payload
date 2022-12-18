@@ -9,7 +9,7 @@ import useThumbnail from '../../../../../../../hooks/useThumbnail';
 import Button from '../../../../../../elements/Button';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
-import { useUploadsDrawer } from '../../../../../../elements/UploadsDrawer';
+import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 
 import './index.scss';
@@ -32,9 +32,11 @@ const Element: React.FC<{
   const [relatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
 
   const [
-    UploadsDrawer,
-    UploadsDrawerToggler,
-  ] = useUploadsDrawer();
+    ListDrawer,
+    ListDrawerToggler,
+  ] = useListDrawer({
+    uploads: true,
+  });
 
   const [
     DocumentDrawer,
@@ -154,7 +156,7 @@ const Element: React.FC<{
                   />
                 </DocumentDrawerToggler>
               )}
-              <UploadsDrawerToggler>
+              <ListDrawerToggler>
                 <Button
                   icon="swap"
                   round
@@ -166,7 +168,7 @@ const Element: React.FC<{
                   el="div"
                   tooltip={t('swapUpload')}
                 />
-              </UploadsDrawerToggler>
+              </ListDrawerToggler>
               <Button
                 icon="x"
                 round
@@ -191,7 +193,7 @@ const Element: React.FC<{
       {value?.id && (
         <DocumentDrawer onSave={updateUpload} />
       )}
-      <UploadsDrawer onSave={swapUpload} />
+      <ListDrawer onSave={swapUpload} />
     </div>
   );
 };

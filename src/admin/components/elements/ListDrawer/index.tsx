@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
-import { UploadDrawerProps, UploadTogglerProps, UseUploadDrawer } from './types';
+import { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { Drawer, DrawerToggler } from '../Drawer';
 import { useConfig } from '../../utilities/Config';
@@ -12,7 +12,6 @@ import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import { useEditDepth } from '../../utilities/EditDepth';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import DefaultList from '../../views/collections/List/Default';
-import { Gutter } from '../Gutter';
 import Label from '../../forms/Label';
 import ReactSelect from '../ReactSelect';
 import { useDocumentDrawer } from '../DocumentDrawer';
@@ -22,17 +21,17 @@ import ViewDescription from '../ViewDescription';
 
 import './index.scss';
 
-const baseClass = 'uploads-drawer';
+const baseClass = 'list-drawer';
 
-const formatUploadsDrawerSlug = ({
+const formatListDrawerSlug = ({
   depth,
   uuid,
 }: {
   depth: number,
   uuid: string, // supply when creating a new document and no id is available
-}) => `uploads-drawer_${depth}_${uuid}`;
+}) => `list-drawer_${depth}_${uuid}`;
 
-export const UploadsDrawerToggler: React.FC<UploadTogglerProps> = ({
+export const ListDrawerToggler: React.FC<ListTogglerProps> = ({
   children,
   className,
   drawerSlug,
@@ -53,10 +52,22 @@ export const UploadsDrawerToggler: React.FC<UploadTogglerProps> = ({
   );
 };
 
-export const UploadsDrawer: React.FC<UploadDrawerProps> = ({
+const shouldIncludeCollection = ({
+  coll: {
+    admin: { enableRichTextRelationship },
+    upload,
+    slug,
+  },
+  uploads,
+  collectionSlugs,
+}) => (enableRichTextRelationship && ((uploads && Boolean(upload)) || collectionSlugs?.includes(slug)));
+
+export const ListDrawer: React.FC<ListDrawerProps> = ({
   drawerSlug,
   onSave,
   customHeader,
+  collectionSlugs,
+  uploads,
 }) => {
   const { t, i18n } = useTranslation(['upload', 'general']);
   const { permissions } = useAuth();
@@ -66,8 +77,11 @@ export const UploadsDrawer: React.FC<UploadDrawerProps> = ({
   const [page, setPage] = useState(1);
   const [where, setWhere] = useState(null);
   const { serverURL, routes: { api }, collections } = useConfig();
-  const [enabledUploadCollectionConfigs] = useState(() => collections.filter(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
-  const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<SanitizedCollectionConfig>(() => collections.find(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
+
+  const [enabledCollectionConfigs] = useState(() => collections.filter((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs })));
+
+  const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs })));
+
   const [selectedOption, setSelectedOption] = useState<{ label: string, value: string }>(() => (selectedCollectionConfig ? { label: getTranslation(selectedCollectionConfig.labels.singular, i18n), value: selectedCollectionConfig.slug } : undefined));
 
   const [
@@ -90,7 +104,7 @@ export const UploadsDrawer: React.FC<UploadDrawerProps> = ({
   const isOpen = isModalOpen(drawerSlug);
   const apiURL = isOpen ? `${serverURL}${api}/${selectedCollectionConfig.slug}` : null;
   const [{ data, isError }, { setParams }] = usePayloadAPI(apiURL, {});
-  const moreThanOneAvailableCollection = enabledUploadCollectionConfigs.length > 1;
+  const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1;
 
   useEffect(() => {
     const params: {
@@ -163,7 +177,7 @@ export const UploadsDrawer: React.FC<UploadDrawerProps> = ({
                       className={`${baseClass}__select-collection`}
                       value={selectedOption}
                       onChange={setSelectedOption}
-                      options={enabledUploadCollectionConfigs.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
+                      options={enabledCollectionConfigs.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
                     />
                   </div>
                 )}
@@ -202,12 +216,12 @@ export const UploadsDrawer: React.FC<UploadDrawerProps> = ({
   );
 };
 
-export const useUploadsDrawer: UseUploadDrawer = () => {
+export const useListDrawer: UseListDrawer = ({ collectionSlugs, uploads }) => {
   const drawerDepth = useEditDepth();
   const uuid = useId();
   const { modalState, toggleModal } = useModal();
   const [isOpen, setIsOpen] = useState(false);
-  const drawerSlug = formatUploadsDrawerSlug({
+  const drawerSlug = formatListDrawerSlug({
     depth: drawerDepth,
     uuid,
   });
@@ -222,17 +236,19 @@ export const useUploadsDrawer: UseUploadDrawer = () => {
 
   const MemoizedDrawer = useMemo(() => {
     return ((props) => (
-      <UploadsDrawer
+      <ListDrawer
         {...props}
         drawerSlug={drawerSlug}
+        collectionSlugs={collectionSlugs}
+        uploads={uploads}
         key={drawerSlug}
       />
     ));
-  }, [drawerSlug]);
+  }, [drawerSlug, collectionSlugs, uploads]);
 
   const MemoizedDrawerToggler = useMemo(() => {
     return ((props) => (
-      <UploadsDrawerToggler
+      <ListDrawerToggler
         {...props}
         drawerSlug={drawerSlug}
       />

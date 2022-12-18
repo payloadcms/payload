@@ -31,6 +31,10 @@
     border: 0;
     padding: 0;
     cursor: pointer;
+    &:focus,
+    &:focus-within {
+      outline: none;
+    }
   }
 
   @include mid-break {

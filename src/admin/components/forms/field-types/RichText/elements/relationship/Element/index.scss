@@ -53,7 +53,9 @@
     background: transparent;
     border: none;
     padding: 0;
-    &:focus {
+    cursor: pointer;
+    &:focus,
+    &:focus-within {
       outline: none;
     }
   }

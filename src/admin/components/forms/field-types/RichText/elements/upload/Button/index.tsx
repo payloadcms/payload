@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ReactEditor, useSlate } from 'slate-react';
 import ElementButton from '../../Button';
 import UploadIcon from '../../../../../../icons/Upload';
-import { useUploadsDrawer } from '../../../../../../elements/UploadsDrawer';
+import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { injectVoidElement } from '../../injectVoid';
 
 const insertUpload = (editor, { value, relationTo }) => {
@@ -28,13 +28,15 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
   const editor = useSlate();
 
   const [
-    UploadsDrawer,
-    UploadsDrawerToggler,
-  ] = useUploadsDrawer();
+    ListDrawer,
+    ListDrawerToggler,
+  ] = useListDrawer({
+    uploads: true,
+  });
 
   return (
     <Fragment>
-      <UploadsDrawerToggler>
+      <ListDrawerToggler>
         <ElementButton
           format="upload"
           tooltip={t('fields:addUpload')}
@@ -45,8 +47,8 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
         >
           <UploadIcon />
         </ElementButton>
-      </UploadsDrawerToggler>
-      <UploadsDrawer
+      </ListDrawerToggler>
+      <ListDrawer
         onSave={({ doc, collectionConfig }) => {
           insertUpload(editor, {
             value: {
