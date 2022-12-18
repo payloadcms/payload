@@ -150,7 +150,7 @@ const Element: React.FC<{
                     onClick={(e) => {
                       e.preventDefault();
                     }}
-                    tooltip={t('general:edit')}
+                    tooltip={t('general:editLabel', { label: relatedCollection.labels.singular })}
                   />
                 </DocumentDrawerToggler>
               )}

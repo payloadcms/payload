@@ -109,10 +109,21 @@ const Element: React.FC<{
               onClick={(e) => {
                 e.preventDefault();
               }}
-              tooltip={t('general:edit')}
+              tooltip={t('general:editLabel', { label: relatedCollection.labels.singular })}
             />
           </DocumentDrawerToggler>
         )}
+        <Button
+          icon="swap"
+          round
+          buttonStyle="icon-label"
+          className={`${baseClass}__actionButton`}
+          onClick={() => {
+            // do nothing
+          }}
+          el="div"
+          tooltip={t('swapRelationship')}
+        />
         <Button
           icon="x"
           round
@@ -122,7 +133,7 @@ const Element: React.FC<{
             e.preventDefault();
             removeRelationship();
           }}
-          tooltip={t('general:remove')}
+          tooltip={t('fields:removeRelationship')}
         />
       </div>
       {value?.id && (

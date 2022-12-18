@@ -37,7 +37,7 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
       <UploadsDrawerToggler>
         <ElementButton
           format="upload"
-          tooltip={t('fields:addLabel', { label: '' })}
+          tooltip={t('fields:addUpload')}
           el="div"
           onClick={() => {
             // do nothing

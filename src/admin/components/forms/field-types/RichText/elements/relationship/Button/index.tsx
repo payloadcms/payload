@@ -86,7 +86,9 @@ const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
       >
         <MinimalTemplate className={`${baseClass}__modal-template`}>
           <header className={`${baseClass}__header`}>
-            <h3>{t('addRelationship')}</h3>
+            <h3>
+              {t('addRelationship')}
+            </h3>
             <Button
               buttonStyle="none"
               onClick={() => {
