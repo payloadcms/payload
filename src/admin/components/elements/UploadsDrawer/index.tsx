@@ -15,6 +15,10 @@ import DefaultList from '../../views/collections/List/Default';
 import { Gutter } from '../Gutter';
 import Label from '../../forms/Label';
 import ReactSelect from '../ReactSelect';
+import { useDocumentDrawer } from '../DocumentDrawer';
+import Pill from '../Pill';
+import X from '../../icons/X';
+import ViewDescription from '../ViewDescription';
 
 import './index.scss';
 
@@ -66,6 +70,13 @@ export const UploadsDrawer: React.FC<UploadDrawerProps> = ({
   const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<SanitizedCollectionConfig>(() => collections.find(({ admin: { enableRichTextRelationship }, upload }) => (Boolean(upload) && enableRichTextRelationship)));
   const [selectedOption, setSelectedOption] = useState<{ label: string, value: string }>(() => (selectedCollectionConfig ? { label: getTranslation(selectedCollectionConfig.labels.singular, i18n), value: selectedCollectionConfig.slug } : undefined));
 
+  const [
+    DocumentDrawer,
+    DocumentDrawerToggler,
+  ] = useDocumentDrawer({
+    collectionSlug: selectedCollectionConfig.slug,
+  });
+
   useEffect(() => {
     if (selectedOption) {
       setSelectedCollectionConfig(collections.find(({ slug }) => selectedOption.value === slug));
@@ -107,26 +118,57 @@ export const UploadsDrawer: React.FC<UploadDrawerProps> = ({
       formatSlug={false}
       className={baseClass}
     >
-      <Gutter>
-        {moreThanOneAvailableCollection && (
-          <div className={`${baseClass}__select-collection-wrap`}>
-            <Label label={t('selectCollectionToBrowse')} />
-            <ReactSelect
-              className={`${baseClass}__select-collection`}
-              value={selectedOption}
-              onChange={setSelectedOption}
-              options={enabledUploadCollectionConfigs.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
-            />
-          </div>
-        )}
-      </Gutter>
       <DocumentInfoProvider collection={selectedCollectionConfig}>
         <RenderCustomComponent
           DefaultComponent={DefaultList}
-          CustomComponent={selectedCollectionConfig.admin?.components?.views?.List}
+          CustomComponent={selectedCollectionConfig?.admin?.components?.views?.List}
           componentProps={{
             collection: selectedCollectionConfig,
-            customHeader,
+            customHeader: (
+              <header className={`${baseClass}__header`}>
+                <div className={`${baseClass}__header-wrap`}>
+                  <div className={`${baseClass}__header-content`}>
+                    <h1>
+                      {!customHeader ? getTranslation(selectedCollectionConfig?.labels?.plural, i18n) : customHeader}
+                    </h1>
+                    {hasCreatePermission && (
+                      <DocumentDrawerToggler
+                        className={`${baseClass}__create-new-button`}
+                      >
+                        <Pill>
+                          {t('general:createNew')}
+                        </Pill>
+                      </DocumentDrawerToggler>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeModal(drawerSlug);
+                    }}
+                    className={`${baseClass}__header-close`}
+                  >
+                    <X />
+                  </button>
+                </div>
+                {selectedCollectionConfig?.admin?.description && (
+                  <div className={`${baseClass}__sub-header`}>
+                    <ViewDescription description={selectedCollectionConfig.admin.description} />
+                  </div>
+                )}
+                {moreThanOneAvailableCollection && (
+                  <div className={`${baseClass}__select-collection-wrap`}>
+                    <Label label={t('selectCollectionToBrowse')} />
+                    <ReactSelect
+                      className={`${baseClass}__select-collection`}
+                      value={selectedOption}
+                      onChange={setSelectedOption}
+                      options={enabledUploadCollectionConfigs.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
+                    />
+                  </div>
+                )}
+              </header>
+            ),
             data,
             limit,
             setLimit,
@@ -155,6 +197,7 @@ export const UploadsDrawer: React.FC<UploadDrawerProps> = ({
           }}
         />
       </DocumentInfoProvider>
+      <DocumentDrawer />
     </Drawer>
   );
 };

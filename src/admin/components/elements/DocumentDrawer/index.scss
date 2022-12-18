@@ -26,6 +26,13 @@
     }
   }
 
+  &__toggler {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+
   @include mid-break {
     &__header-close {
       svg {

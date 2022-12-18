@@ -49,6 +49,7 @@ const DefaultList: React.FC<Props> = (props) => {
     handleSortChange,
     handleWhereChange,
     handlePageChange,
+    customHeader,
   } = props;
 
   const { routes: { admin } } = useConfig();
@@ -65,16 +66,23 @@ const DefaultList: React.FC<Props> = (props) => {
       )}
       <Gutter className={`${baseClass}__wrap`}>
         <header className={`${baseClass}__header`}>
-          <h1>{getTranslation(pluralLabel, i18n)}</h1>
-          {hasCreatePermission && (
-            <Pill to={newDocumentURL}>
-              {t('createNew')}
-            </Pill>
-          )}
-          {description && (
-            <div className={`${baseClass}__sub-header`}>
-              <ViewDescription description={description} />
-            </div>
+          {customHeader && customHeader}
+          {!customHeader && (
+            <Fragment>
+              <h1>
+                {getTranslation(pluralLabel, i18n)}
+              </h1>
+              {hasCreatePermission && (
+                <Pill to={newDocumentURL}>
+                  {t('createNew')}
+                </Pill>
+              )}
+              {description && (
+                <div className={`${baseClass}__sub-header`}>
+                  <ViewDescription description={description} />
+                </div>
+              )}
+            </Fragment>
           )}
         </header>
         <ListControls

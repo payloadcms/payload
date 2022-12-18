@@ -23,6 +23,8 @@ export type Props = {
   handleSortChange?: ListControlsProps['handleSortChange']
   handleWhereChange?: ListControlsProps['handleWhereChange']
   handlePageChange?: PerPageProps['handleChange']
+  onCreateNewClick?: () => void
+  customHeader?: React.ReactNode
 }
 
 export type ListIndexProps = {

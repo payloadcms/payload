@@ -35,7 +35,6 @@
   &__relation-button {
     @extend %btn-reset;
     cursor: pointer;
-    @extend %btn-reset;
     display: block;
     padding: base(.125) 0;
     text-align: center;

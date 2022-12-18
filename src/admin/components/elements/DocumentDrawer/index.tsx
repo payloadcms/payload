@@ -51,7 +51,10 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
     <DrawerToggler
       slug={drawerSlug}
       formatSlug={false}
-      className={className}
+      className={[
+        className,
+        `${baseClass}__toggler`,
+      ].filter(Boolean).join(' ')}
       aria-label={t(!id ? 'fields:addNewLabel' : 'general:editLabel', { label: getTranslation(collectionConfig.labels.singular, i18n) })}
       {...rest}
     >
@@ -179,7 +182,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
 export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => {
   const drawerDepth = useEditDepth();
   const uuid = useId();
-  const { modalState, toggleModal, closeModal } = useModal();
+  const { modalState, toggleModal, closeModal, openModal } = useModal();
   const [isOpen, setIsOpen] = useState(false);
   const drawerSlug = formatDocumentDrawerSlug({
     collectionSlug,
@@ -199,6 +202,10 @@ export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => 
   const closeDrawer = useCallback(() => {
     closeModal(drawerSlug);
   }, [closeModal, drawerSlug]);
+
+  const openDrawer = useCallback(() => {
+    openModal(drawerSlug);
+  }, [openModal, drawerSlug]);
 
   const MemoizedDrawer = useMemo(() => {
     return ((props) => (
@@ -229,7 +236,8 @@ export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => 
     isDrawerOpen: isOpen,
     toggleDrawer,
     closeDrawer,
-  }), [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer]);
+    openDrawer,
+  }), [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer, openDrawer]);
 
   return [
     MemoizedDrawer,

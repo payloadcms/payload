@@ -4,9 +4,55 @@
   padding-top: base(3);
   padding-bottom: base(3);
 
+  &__select-collection-wrap {
+    margin-top: base(1);
+  }
+
+  &__header {
+    width: 100%;
+  }
+
+  &__header-wrap {
+    display: flex;
+  }
+
+  &__header-content {
+    display: flex;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    align-items: flex-start;
+  }
+
   &__toggler {
     background: transparent;
     border: 0;
     padding: 0;
+    cursor: pointer;
+  }
+
+  &__pill {
+    div {
+      margin: 0;
+      // margin-top: base(0.25);
+    }
+  }
+
+  &__header-close {
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+    cursor: pointer;
+
+    svg {
+      width: base(2.5);
+      height: base(2.5);
+      position: relative;
+      top: base(-.5);
+      right: base(-.75);
+
+      .stroke {
+        stroke-width: .5px;
+      }
+    }
   }
 }

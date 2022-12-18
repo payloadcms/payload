@@ -28,5 +28,6 @@ export type UseDocumentDrawer = (args: {
     isDrawerOpen: boolean
     toggleDrawer: () => void
     closeDrawer: () => void
+    openDrawer: () => void
   }
 ]

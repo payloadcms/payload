@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { HTMLAttributes, useCallback, useReducer, useState } from 'react';
 import { Transforms } from 'slate';
 import { ReactEditor, useSlateStatic, useFocused, useSelected } from 'slate-react';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +20,11 @@ const initialParams = {
   depth: 0,
 };
 
-const Element = ({ attributes, children, element, path }) => {
+const Element: React.FC<{
+  attributes: HTMLAttributes<HTMLDivElement>
+  children: React.ReactNode
+  element: any
+}> = ({ attributes, children, element }) => {
   const { relationTo, value } = element;
   const { collections, serverURL, routes: { api } } = useConfig();
   const { t, i18n } = useTranslation('fields');
