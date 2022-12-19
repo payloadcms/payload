@@ -7,10 +7,8 @@ export type FileSize = {
   filename: string;
   filesize: number;
   mimeType: string;
-  name: string;
   width: number;
   height: number;
-  crop: string;
 }
 
 export type FileSizes = {

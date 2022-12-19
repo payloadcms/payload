@@ -7,6 +7,7 @@ import { RESTClient } from '../helpers/rest';
 import config, { mediaSlug, relationSlug } from './config';
 import payload from '../../src';
 import getFileByPath from '../../src/uploads/getFileByPath';
+import type { Media } from './payload-types';
 
 const stat = promisify(fs.stat);
 
@@ -76,7 +77,7 @@ describe('Collections - Uploads', () => {
       expect(await fileExists(path.join(__dirname, './media', doc.sizes.icon.filename))).toBe(true);
 
       // Check api response
-      expect(doc.sizes.tablet.filename).toBeUndefined();
+      expect(doc.sizes.tablet.filename).toBeNull();
       expect(doc.sizes.icon.filename).toBeDefined();
     });
 
@@ -157,6 +158,28 @@ describe('Collections - Uploads', () => {
     // Check that previously existing files weren't affected
     expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(true);
     expect(await fileExists(path.join(__dirname, './media', mediaDoc.sizes.icon.filename))).toBe(true);
+  });
+
+  it('should remove extra sizes on update', async () => {
+    const filePath = path.resolve(__dirname, './image.png');
+    const file = await getFileByPath(filePath);
+    const small = await getFileByPath(path.resolve(__dirname, './small.png'));
+
+    const { id } = await payload.create<Media>({
+      collection: mediaSlug,
+      data: {},
+      file,
+    });
+
+    const doc = await payload.update<Media>({
+      collection: mediaSlug,
+      id,
+      data: {},
+      file: small,
+    });
+
+    expect(doc.sizes.icon).toBeDefined();
+    expect(doc.sizes.tablet.width).toBeNull();
   });
 
   it('should allow update removing a relationship', async () => {
