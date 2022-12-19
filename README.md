@@ -1,9 +1,15 @@
 <br />
 <br />
 
-<h1 align="center"><img style="width: 350px;" src="https://cms.payloadcms.com/media/payload-github-logo.png" alt="Payload github logo" /></h1>
+<h1 align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cms.payloadcms.com/media/payload-github-logo-white.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://cms.payloadcms.com/media/payload-github-logo.png">
+  <img alt="Payload CMS Logo" src="https://cms.payloadcms.com/media/payload-github-logo.png">
+</picture>
+</h1>
 
-<h2 align="center">The most powerful TypeScript CMS</h2>
+<h2 align="center" style="padding-bottom: 24px !important;">The most powerful TypeScript CMS</h2>
 <p align="center">Code-first Headless CMS that bridges the gap between CMS and application framework</p>
 
 <h3 align="center">
