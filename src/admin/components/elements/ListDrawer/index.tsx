@@ -236,10 +236,17 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
     }));
   }, [selectedCollectionConfig, t, onSelect]);
 
-  const onCreateNew = useCallback(() => {
+  const onCreateNew = useCallback(({ doc }) => {
+    if (typeof onSelect === 'function') {
+      onSelect({
+        docID: doc.id,
+        collectionConfig: selectedCollectionConfig,
+      });
+    }
     dispatchCacheBust();
     closeModal(documentDrawerSlug);
-  }, [closeModal, documentDrawerSlug]);
+    closeModal(drawerSlug);
+  }, [closeModal, documentDrawerSlug, drawerSlug, onSelect, selectedCollectionConfig]);
 
   if (!selectedCollectionConfig || isError) {
     return null;
