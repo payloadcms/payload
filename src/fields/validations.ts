@@ -342,9 +342,12 @@ export const select: Validate<unknown, unknown, SelectField> = (value, { t, opti
 };
 
 export const radio: Validate<unknown, unknown, RadioField> = (value, { t, options, required }) => {
-  const stringValue = String(value);
-  if ((typeof value !== 'undefined' || !required) && (options.find((option) => String(typeof option !== 'string' && option?.value) === stringValue))) return true;
-  return t('validation:required');
+  if (value) {
+    const valueMatchesOption = options.some((option) => (option === value || (typeof option !== 'string' && option.value === value)));
+    return valueMatchesOption || t('validation:invalidSelection');
+  }
+
+  return required ? t('validation:required') : true;
 };
 
 export const blocks: Validate<unknown, unknown, BlockField> = (value, { t, maxRows, minRows, required }) => {
