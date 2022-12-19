@@ -263,7 +263,10 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
           DefaultComponent={DefaultList}
           CustomComponent={selectedCollectionConfig?.admin?.components?.views?.List}
           componentProps={{
-            collection: selectedCollectionConfig,
+            collection: {
+              ...selectedCollectionConfig,
+              fields,
+            },
             customHeader: (
               <header className={`${baseClass}__header`}>
                 <div className={`${baseClass}__header-wrap`}>
@@ -310,15 +313,14 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
               </header>
             ),
             data,
-            limit,
+            limit: limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit,
             setLimit,
             tableColumns,
             setColumns: setActiveColumns,
             setSort,
             newDocumentURL: null,
             hasCreatePermission,
-            columnNames: [],
-            setListControls: () => undefined,
+            columnNames: activeColumnNames,
             disableEyebrow: true,
             modifySearchParams: false,
             onCardClick: (doc) => {
