@@ -1,14 +1,8 @@
 @import '../../../scss/styles.scss';
 
 .list-drawer {
-  padding-top: base(3);
-  padding-bottom: base(3);
-
-  &__select-collection-wrap {
-    margin-top: base(1);
-  }
-
   &__header {
+    margin-top: base(2.5);
     width: 100%;
   }
 
@@ -28,6 +22,7 @@
     border: 0;
     padding: 0;
     cursor: pointer;
+
     &:focus,
     &:focus-within {
       outline: none;
@@ -55,5 +50,17 @@
         stroke-width: .5px;
       }
     }
+  }
+
+  &__select-collection-wrap {
+    margin-top: base(1);
+  }
+
+  &__first-cell {
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
   }
 }

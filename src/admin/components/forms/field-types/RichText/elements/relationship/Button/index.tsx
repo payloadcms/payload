@@ -1,23 +1,13 @@
-import React, { Fragment, useCallback, useId, useState } from 'react';
-import { useModal } from '@faceless-ui/modal';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { ReactEditor, useSlate } from 'slate-react';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../utilities/Config';
 import ElementButton from '../../Button';
 import RelationshipIcon from '../../../../../../icons/Relationship';
-import Form from '../../../../../Form';
-import MinimalTemplate from '../../../../../../templates/Minimal';
-import Button from '../../../../../../elements/Button';
-import Submit from '../../../../../Submit';
-import X from '../../../../../../icons/X';
-import Fields from './Fields';
-import { requests } from '../../../../../../../api';
 import { injectVoidElement } from '../../injectVoid';
-import { Drawer, formatDrawerSlug } from '../../../../../../elements/Drawer';
-import { useEditDepth } from '../../../../../../utilities/EditDepth';
-import './index.scss';
+import { useListDrawer } from '../../../../../../elements/ListDrawer';
 
-const initialFormData = {};
+import './index.scss';
 
 const baseClass = 'relationship-rich-text-button';
 
@@ -38,78 +28,58 @@ const insertRelationship = (editor, { value, relationTo }) => {
   ReactEditor.focus(editor);
 };
 
-const RelationshipButton: React.FC<{ path: string }> = ({ path }) => {
-  const { openModal, closeModal } = useModal();
+const RelationshipButton: React.FC<{ path: string }> = () => {
+  const { collections } = useConfig();
+  const { t } = useTranslation('fields');
   const editor = useSlate();
-  const { serverURL, routes: { api }, collections } = useConfig();
-  const [loading, setLoading] = useState(false);
-  const { t, i18n } = useTranslation('fields');
-  const [hasEnabledCollections] = useState(() => collections.find(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship));
-  const editDepth = useEditDepth();
-  const uuid = useId();
-  const drawerSlug = formatDrawerSlug({
-    slug: `${path}-add-relationship-${uuid}`,
-    depth: editDepth,
+  const [enabledCollectionSlugs] = useState(() => collections.filter(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship).map(({ slug }) => slug));
+  const [selectedCollectionSlug, setSelectedCollectionSlug] = useState(() => enabledCollectionSlugs[0]);
+
+  const [
+    ListDrawer,
+    ListDrawerToggler,
+    {
+      closeDrawer,
+      // isDrawerOpen,
+    },
+  ] = useListDrawer({
+    collectionSlugs: enabledCollectionSlugs,
+    selectedCollection: selectedCollectionSlug,
   });
 
-  const handleAddRelationship = useCallback(async (_, { relationTo, value }) => {
-    setLoading(true);
-
-    const res = await requests.get(`${serverURL}${api}/${relationTo}/${value}?depth=0`, {
-      headers: {
-        'Accept-Language': i18n.language,
+  const onSelect = useCallback(({ docID, collectionConfig }) => {
+    insertRelationship(editor, {
+      value: {
+        id: docID,
       },
+      relationTo: collectionConfig.slug,
     });
-    const json = await res.json();
+    closeDrawer();
+  }, [editor, closeDrawer]);
 
-    insertRelationship(editor, { value: { id: json.id }, relationTo });
-    closeModal(drawerSlug);
-    setLoading(false);
-  }, [i18n.language, editor, closeModal, drawerSlug, api, serverURL]);
+  // useEffect(() => {
+  //   // always reset back to first option
+  //   setSelectedCollectionSlug(enabledCollectionSlugs[0]);
+  // }, [isDrawerOpen, enabledCollectionSlugs]);
 
-  if (!hasEnabledCollections) return null;
+  if (!enabledCollectionSlugs || enabledCollectionSlugs.length === 0) return null;
 
   return (
     <Fragment>
-      <ElementButton
-        className={baseClass}
-        format="relationship"
-        onClick={() => openModal(drawerSlug)}
-        tooltip={t('addRelationship')}
-      >
-        <RelationshipIcon />
-      </ElementButton>
-      <Drawer
-        slug={drawerSlug}
-        formatSlug={false}
-        className={`${baseClass}__modal`}
-      >
-        <MinimalTemplate className={`${baseClass}__modal-template`}>
-          <header className={`${baseClass}__header`}>
-            <h3>
-              {t('addRelationship')}
-            </h3>
-            <Button
-              buttonStyle="none"
-              onClick={() => {
-                openModal(drawerSlug);
-              }}
-            >
-              <X />
-            </Button>
-          </header>
-          <Form
-            onSubmit={handleAddRelationship}
-            initialData={initialFormData}
-            disabled={loading}
-          >
-            <Fields />
-            <Submit>
-              {t('addRelationship')}
-            </Submit>
-          </Form>
-        </MinimalTemplate>
-      </Drawer>
+      <ListDrawerToggler>
+        <ElementButton
+          className={baseClass}
+          format="relationship"
+          tooltip={t('addRelationship')}
+          el="div"
+          onClick={() => {
+            // do nothing
+          }}
+        >
+          <RelationshipIcon />
+        </ElementButton>
+      </ListDrawerToggler>
+      <ListDrawer onSelect={onSelect} />
     </Fragment>
   );
 };

@@ -29,13 +29,17 @@ const Element: React.FC<{
   const { collections, serverURL, routes: { api } } = useConfig();
   const { t, i18n } = useTranslation('fields');
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
-  const [relatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
+  const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
 
   const [
     ListDrawer,
     ListDrawerToggler,
+    {
+      closeDrawer: closeListDrawer,
+    },
   ] = useListDrawer({
     uploads: true,
+    selectedCollection: relatedCollection.slug,
   });
 
   const [
@@ -86,18 +90,21 @@ const Element: React.FC<{
       { at: elementPath },
     );
 
+    // setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug));
+
     setParams({
       ...initialParams,
       cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
     });
 
     dispatchCacheBust();
-  }, [editor, element, setParams, cacheBust]);
+    closeDrawer();
+  }, [editor, element, setParams, cacheBust, closeDrawer]);
 
-  const swapUpload = React.useCallback(({ doc, collectionConfig }) => {
+  const swapUpload = React.useCallback(({ docID, collectionConfig }) => {
     const newNode = {
       type: 'upload',
-      value: { id: doc.id },
+      value: { id: docID },
       relationTo: collectionConfig.slug,
       children: [
         { text: ' ' },
@@ -106,14 +113,17 @@ const Element: React.FC<{
 
     const elementPath = ReactEditor.findPath(editor, element);
 
+    setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug));
+
     Transforms.setNodes(
       editor,
       newNode,
       { at: elementPath },
     );
 
-    closeDrawer();
-  }, [closeDrawer, editor, element]);
+    dispatchCacheBust();
+    closeListDrawer();
+  }, [closeListDrawer, editor, element, collections]);
 
   return (
     <div
@@ -193,7 +203,7 @@ const Element: React.FC<{
       {value?.id && (
         <DocumentDrawer onSave={updateUpload} />
       )}
-      <ListDrawer onSave={swapUpload} />
+      <ListDrawer onSelect={swapUpload} />
     </div>
   );
 };

@@ -6,6 +6,7 @@ import { useConfig } from '../../../../../../utilities/Config';
 import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
 import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
 import Button from '../../../../../../elements/Button';
+import { useListDrawer } from '../../../../../../elements/ListDrawer';
 
 import './index.scss';
 
@@ -23,25 +24,39 @@ const Element: React.FC<{
   const { attributes, children, element } = props;
   const { relationTo, value } = element;
   const { collections, serverURL, routes: { api } } = useConfig();
-  const [relatedCollection] = useState(() => collections.find((coll) => coll.slug === relationTo));
+  const [enabledCollectionSlugs] = useState(() => collections.filter(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship).map(({ slug }) => slug));
+  const [relatedCollection, setRelatedCollection] = useState(() => collections.find((coll) => coll.slug === relationTo));
   const selected = useSelected();
   const focused = useFocused();
   const { t } = useTranslation(['fields', 'general']);
   const editor = useSlateStatic();
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
+  const [{ data }, { setParams }] = usePayloadAPI(
+    `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
+    { initialParams },
+  );
 
   const [
     DocumentDrawer,
     DocumentDrawerToggler,
+    {
+      closeDrawer,
+    },
   ] = useDocumentDrawer({
     collectionSlug: relatedCollection.slug,
     id: value?.id,
   });
 
-  const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
-    { initialParams },
-  );
+  const [
+    ListDrawer,
+    ListDrawerToggler,
+    {
+      closeDrawer: closeListDrawer,
+    },
+  ] = useListDrawer({
+    collectionSlugs: enabledCollectionSlugs,
+    selectedCollection: relatedCollection.slug,
+  });
 
   const removeRelationship = useCallback(() => {
     const elementPath = ReactEditor.findPath(editor, element);
@@ -52,23 +67,19 @@ const Element: React.FC<{
     );
   }, [editor, element]);
 
-  const updateRelationship = React.useCallback((json) => {
-    const { doc } = json;
-
-    const newNode = {
-      type: 'relationship',
-      value: { id: doc.id },
-      relationTo: relatedCollection.slug,
-      children: [
-        { text: ' ' },
-      ],
-    };
-
+  const updateRelationship = React.useCallback(({ doc }) => {
     const elementPath = ReactEditor.findPath(editor, element);
 
     Transforms.setNodes(
       editor,
-      newNode,
+      {
+        type: 'relationship',
+        value: { id: doc.id },
+        relationTo: relatedCollection.slug,
+        children: [
+          { text: ' ' },
+        ],
+      },
       { at: elementPath },
     );
 
@@ -77,8 +88,36 @@ const Element: React.FC<{
       cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
     });
 
+    closeDrawer();
     dispatchCacheBust();
-  }, [editor, element, relatedCollection, cacheBust, setParams]);
+  }, [editor, element, relatedCollection, cacheBust, setParams, closeDrawer]);
+
+  const swapRelationship = React.useCallback(({ docID, collectionConfig }) => {
+    const elementPath = ReactEditor.findPath(editor, element);
+
+    Transforms.setNodes(
+      editor,
+      {
+        type: 'relationship',
+        value: { id: docID },
+        relationTo: collectionConfig.slug,
+        children: [
+          { text: ' ' },
+        ],
+      },
+      { at: elementPath },
+    );
+
+    setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug));
+
+    setParams({
+      ...initialParams,
+      cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
+    });
+
+    closeListDrawer();
+    dispatchCacheBust();
+  }, [closeListDrawer, editor, element, cacheBust, setParams, collections]);
 
   return (
     <div
@@ -113,17 +152,19 @@ const Element: React.FC<{
             />
           </DocumentDrawerToggler>
         )}
-        <Button
-          icon="swap"
-          round
-          buttonStyle="icon-label"
-          className={`${baseClass}__actionButton`}
-          onClick={() => {
+        <ListDrawerToggler>
+          <Button
+            icon="swap"
+            round
+            buttonStyle="icon-label"
+            className={`${baseClass}__actionButton`}
+            onClick={() => {
             // do nothing
-          }}
-          el="div"
-          tooltip={t('swapRelationship')}
-        />
+            }}
+            el="div"
+            tooltip={t('swapRelationship')}
+          />
+        </ListDrawerToggler>
         <Button
           icon="x"
           round
@@ -139,6 +180,7 @@ const Element: React.FC<{
       {value?.id && (
         <DocumentDrawer onSave={updateRelationship} />
       )}
+      <ListDrawer onSelect={swapRelationship} />
       {children}
     </div>
   );

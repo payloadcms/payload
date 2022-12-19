@@ -2,6 +2,7 @@
 
 .doc-drawer {
   &__header {
+    margin-top: base(2.5);
     margin-bottom: base(1);
   }
 
@@ -9,7 +10,6 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-top: base(2.5);
   }
 
   &__header-close {

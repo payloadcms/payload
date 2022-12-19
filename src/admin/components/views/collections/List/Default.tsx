@@ -122,7 +122,7 @@ const DefaultList: React.FC<Props> = (props) => {
             <p>
               {t('noResults', { label: getTranslation(pluralLabel, i18n) })}
             </p>
-            {hasCreatePermission && (
+            {hasCreatePermission && newDocumentURL && (
               <Button
                 el="link"
                 to={newDocumentURL}

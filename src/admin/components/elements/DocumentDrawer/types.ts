@@ -3,7 +3,10 @@ import React, { HTMLAttributes } from 'react';
 export type DocumentDrawerProps = {
   collectionSlug: string
   id?: string
-  onSave?: (json: Record<string, unknown>) => void
+  onSave?: (json: {
+    doc: Record<string, any>
+    message: string
+  }) => void
   customHeader?: React.ReactNode
   drawerSlug?: string
 }

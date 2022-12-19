@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useReducer, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types';
@@ -18,10 +18,40 @@ import { useDocumentDrawer } from '../DocumentDrawer';
 import Pill from '../Pill';
 import X from '../../icons/X';
 import ViewDescription from '../ViewDescription';
+import { Column } from '../Table/types';
+import getInitialColumnState from '../../views/collections/List/getInitialColumns';
+import buildListColumns from '../../views/collections/List/buildColumns';
+import formatFields from '../../views/collections/List/formatFields';
+import { ListPreferences } from '../../views/collections/List/types';
+import { usePreferences } from '../../utilities/Preferences';
+import { Field } from '../../../../fields/config/types';
 
 import './index.scss';
 
 const baseClass = 'list-drawer';
+
+const buildColumns = ({
+  collectionConfig,
+  columns,
+  onSelect,
+  t,
+}) => buildListColumns({
+  collection: collectionConfig,
+  columns,
+  t,
+  cellProps: [{
+    link: false,
+    onClick: ({ collection, rowData }) => {
+      if (typeof onSelect === 'function') {
+        onSelect({
+          docID: rowData.id,
+          collectionConfig: collection,
+        });
+      }
+    },
+    className: `${baseClass}__first-cell`,
+  }],
+});
 
 const formatListDrawerSlug = ({
   depth,
@@ -64,29 +94,76 @@ const shouldIncludeCollection = ({
 
 export const ListDrawer: React.FC<ListDrawerProps> = ({
   drawerSlug,
-  onSave,
+  onSelect,
   customHeader,
   collectionSlugs,
   uploads,
+  selectedCollection,
 }) => {
   const { t, i18n } = useTranslation(['upload', 'general']);
   const { permissions } = useAuth();
+  const { getPreference, setPreference } = usePreferences();
   const { isModalOpen, closeModal } = useModal();
   const [limit, setLimit] = useState<number>();
   const [sort, setSort] = useState(null);
   const [page, setPage] = useState(1);
   const [where, setWhere] = useState(null);
   const { serverURL, routes: { api }, collections } = useConfig();
-
   const [enabledCollectionConfigs] = useState(() => collections.filter((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs })));
+  const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<SanitizedCollectionConfig>(() => {
+    let initialSelection: SanitizedCollectionConfig;
+    if (selectedCollection) {
+      // if passed a selection, find it and check if it's enabled
+      const foundSelection = collections.find(({ slug }) => slug === selectedCollection);
+      if (foundSelection && shouldIncludeCollection({ coll: foundSelection, uploads, collectionSlugs })) {
+        initialSelection = foundSelection;
+      }
+    } else {
+      // return the first one that is enabled
+      initialSelection = collections.find((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs }));
+    }
+    return initialSelection;
+  });
 
-  const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs })));
+  // allow external control of selected collection, same as the initial state logic above
+  useEffect(() => {
+    let newSelection: SanitizedCollectionConfig;
+    if (selectedCollection) {
+      // if passed a selection, find it and check if it's enabled
+      const foundSelection = collections.find(({ slug }) => slug === selectedCollection);
+      if (foundSelection && shouldIncludeCollection({ coll: foundSelection, uploads, collectionSlugs })) {
+        newSelection = foundSelection;
+      }
+    } else {
+      // return the first one that is enabled
+      newSelection = collections.find((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs }));
+    }
+    setSelectedCollectionConfig(newSelection);
+  }, [selectedCollection, collectionSlugs, uploads, collections]);
 
   const [selectedOption, setSelectedOption] = useState<{ label: string, value: string }>(() => (selectedCollectionConfig ? { label: getTranslation(selectedCollectionConfig.labels.singular, i18n), value: selectedCollectionConfig.slug } : undefined));
+  const [fields] = useState<Field[]>(() => formatFields(selectedCollectionConfig, t));
+  const [tableColumns, setTableColumns] = useState<Column[]>(() => {
+    const initialColumns = getInitialColumnState(fields, selectedCollectionConfig.admin.useAsTitle, selectedCollectionConfig.admin.defaultColumns);
+    return buildColumns({
+      collectionConfig: selectedCollectionConfig,
+      columns: initialColumns,
+      t,
+      onSelect,
+    });
+  });
 
+  const activeColumnNames = tableColumns.map(({ accessor }) => accessor);
+  const stringifiedActiveColumns = JSON.stringify(activeColumnNames);
+  const preferenceKey = `${selectedCollectionConfig.slug}-list`;
+
+  // this is the 'create new' drawer
   const [
     DocumentDrawer,
     DocumentDrawerToggler,
+    {
+      drawerSlug: documentDrawerSlug,
+    },
   ] = useDocumentDrawer({
     collectionSlug: selectedCollectionConfig.slug,
   });
@@ -103,6 +180,7 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
   // If modal is open, get active page of upload gallery
   const isOpen = isModalOpen(drawerSlug);
   const apiURL = isOpen ? `${serverURL}${api}/${selectedCollectionConfig.slug}` : null;
+  const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0); // used to force a re-fetch even when apiURL is unchanged
   const [{ data, isError }, { setParams }] = usePayloadAPI(apiURL, {});
   const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1;
 
@@ -112,15 +190,57 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
       sort?: string
       where?: unknown
       limit?: number
+      cacheBust?: number
     } = {};
 
     if (page) params.page = page;
     if (where) params.where = where;
     if (sort) params.sort = sort;
     if (limit) params.limit = limit;
+    if (cacheBust) params.cacheBust = cacheBust;
 
     setParams(params);
-  }, [setParams, page, sort, where, limit]);
+  }, [setParams, page, sort, where, limit, cacheBust]);
+
+  useEffect(() => {
+    const syncColumnsFromPrefs = async () => {
+      const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
+      if (currentPreferences?.columns) {
+        setTableColumns(buildColumns({
+          collectionConfig: selectedCollectionConfig,
+          columns: currentPreferences?.columns,
+          t,
+          onSelect,
+        }));
+      }
+    };
+
+    syncColumnsFromPrefs();
+  }, [selectedCollectionConfig, t, getPreference, preferenceKey, onSelect]);
+
+  useEffect(() => {
+    const newPreferences = {
+      limit,
+      sort,
+      columns: JSON.parse(stringifiedActiveColumns),
+    };
+
+    setPreference(preferenceKey, newPreferences);
+  }, [sort, limit, stringifiedActiveColumns, setPreference, preferenceKey]);
+
+  const setActiveColumns = useCallback((columns: string[]) => {
+    setTableColumns(buildColumns({
+      collectionConfig: selectedCollectionConfig,
+      columns,
+      t,
+      onSelect,
+    }));
+  }, [selectedCollectionConfig, t, onSelect]);
+
+  const onCreateNew = useCallback(() => {
+    dispatchCacheBust();
+    closeModal(documentDrawerSlug);
+  }, [closeModal, documentDrawerSlug]);
 
   if (!selectedCollectionConfig || isError) {
     return null;
@@ -176,7 +296,7 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
                     <ReactSelect
                       className={`${baseClass}__select-collection`}
                       value={selectedOption}
-                      onChange={setSelectedOption}
+                      onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
                       options={enabledCollectionConfigs.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
                     />
                   </div>
@@ -186,8 +306,8 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
             data,
             limit,
             setLimit,
-            tableColumns: [],
-            setColumns: () => undefined,
+            tableColumns,
+            setColumns: setActiveColumns,
             setSort,
             newDocumentURL: null,
             hasCreatePermission,
@@ -196,9 +316,9 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
             disableEyebrow: true,
             modifySearchParams: false,
             onCardClick: (doc) => {
-              if (typeof onSave === 'function') {
-                onSave({
-                  doc,
+              if (typeof onSelect === 'function') {
+                onSelect({
+                  docID: doc.id,
                   collectionConfig: selectedCollectionConfig,
                 });
               }
@@ -211,15 +331,17 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
           }}
         />
       </DocumentInfoProvider>
-      <DocumentDrawer />
+      <DocumentDrawer
+        onSave={onCreateNew}
+      />
     </Drawer>
   );
 };
 
-export const useListDrawer: UseListDrawer = ({ collectionSlugs, uploads }) => {
+export const useListDrawer: UseListDrawer = ({ collectionSlugs, uploads, selectedCollection }) => {
   const drawerDepth = useEditDepth();
   const uuid = useId();
-  const { modalState, toggleModal } = useModal();
+  const { modalState, toggleModal, closeModal } = useModal();
   const [isOpen, setIsOpen] = useState(false);
   const drawerSlug = formatListDrawerSlug({
     depth: drawerDepth,
@@ -234,6 +356,10 @@ export const useListDrawer: UseListDrawer = ({ collectionSlugs, uploads }) => {
     toggleModal(drawerSlug);
   }, [toggleModal, drawerSlug]);
 
+  const closeDrawer = useCallback(() => {
+    closeModal(drawerSlug);
+  }, [drawerSlug, closeModal]);
+
   const MemoizedDrawer = useMemo(() => {
     return ((props) => (
       <ListDrawer
@@ -241,10 +367,12 @@ export const useListDrawer: UseListDrawer = ({ collectionSlugs, uploads }) => {
         drawerSlug={drawerSlug}
         collectionSlugs={collectionSlugs}
         uploads={uploads}
+        closeDrawer={closeDrawer}
         key={drawerSlug}
+        selectedCollection={selectedCollection}
       />
     ));
-  }, [drawerSlug, collectionSlugs, uploads]);
+  }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection]);
 
   const MemoizedDrawerToggler = useMemo(() => {
     return ((props) => (
@@ -260,7 +388,8 @@ export const useListDrawer: UseListDrawer = ({ collectionSlugs, uploads }) => {
     drawerDepth,
     isDrawerOpen: isOpen,
     toggleDrawer,
-  }), [drawerDepth, drawerSlug, isOpen, toggleDrawer]);
+    closeDrawer,
+  }), [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer]);
 
   return [
     MemoizedDrawer,

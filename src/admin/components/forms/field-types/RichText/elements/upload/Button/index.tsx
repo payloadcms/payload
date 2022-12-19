@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactEditor, useSlate } from 'slate-react';
 import ElementButton from '../../Button';
@@ -23,16 +23,31 @@ const insertUpload = (editor, { value, relationTo }) => {
   ReactEditor.focus(editor);
 };
 
-const UploadButton: React.FC<{ path: string }> = ({ path }) => {
+const UploadButton: React.FC<{
+  path: string
+}> = () => {
   const { t } = useTranslation(['upload', 'general']);
   const editor = useSlate();
 
   const [
     ListDrawer,
     ListDrawerToggler,
+    {
+      closeDrawer,
+    },
   ] = useListDrawer({
     uploads: true,
   });
+
+  const onSelect = useCallback(({ docID, collectionConfig }) => {
+    insertUpload(editor, {
+      value: {
+        id: docID,
+      },
+      relationTo: collectionConfig.slug,
+    });
+    closeDrawer();
+  }, [editor, closeDrawer]);
 
   return (
     <Fragment>
@@ -48,16 +63,7 @@ const UploadButton: React.FC<{ path: string }> = ({ path }) => {
           <UploadIcon />
         </ElementButton>
       </ListDrawerToggler>
-      <ListDrawer
-        onSave={({ doc, collectionConfig }) => {
-          insertUpload(editor, {
-            value: {
-              id: doc.id,
-            },
-            relationTo: collectionConfig.slug,
-          });
-        }}
-      />
+      <ListDrawer onSelect={onSelect} />
     </Fragment>
   );
 };

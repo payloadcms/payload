@@ -2,14 +2,15 @@ import React, { HTMLAttributes } from 'react';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 
 export type ListDrawerProps = {
-  onSave?: (args: {
-    doc: Record<string, unknown>
+  onSelect?: (args: {
+    docID: string
     collectionConfig: SanitizedCollectionConfig
   }) => void
   customHeader?: React.ReactNode
   drawerSlug?: string
   collectionSlugs?: string[]
   uploads?: boolean
+  selectedCollection?: string
 }
 
 export type ListTogglerProps = HTMLAttributes<HTMLButtonElement> & {
@@ -20,6 +21,7 @@ export type ListTogglerProps = HTMLAttributes<HTMLButtonElement> & {
 
 export type UseListDrawer = (args: {
   collectionSlugs?: string[]
+  selectedCollection?: string
   uploads?: boolean // finds all collections with upload: true
 }) => [
   React.FC<Omit<ListDrawerProps, 'collectionSlug' | 'id'>>, // drawer
@@ -29,5 +31,6 @@ export type UseListDrawer = (args: {
     drawerDepth: number
     isDrawerOpen: boolean
     toggleDrawer: () => void
+    closeDrawer: () => void
   }
 ]
