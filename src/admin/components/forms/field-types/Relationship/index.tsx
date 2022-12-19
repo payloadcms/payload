@@ -241,6 +241,7 @@ const Relationship: React.FC<Props> = (props) => {
             },
           },
           depth: 0,
+          locale: i18n.language,
           limit: idsToLoad.length,
         };
 
