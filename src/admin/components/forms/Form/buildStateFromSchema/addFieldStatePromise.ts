@@ -105,11 +105,16 @@ export const addFieldStatePromise = async ({
         await Promise.all(promises);
 
         // Add values to field state
-        fieldState.value = arrayValue.length;
-        fieldState.initialValue = arrayValue.length;
+        if (valueWithDefault === null) {
+          fieldState.value = null;
+          fieldState.initialValue = null;
+        } else {
+          fieldState.value = arrayValue.length;
+          fieldState.initialValue = arrayValue.length;
 
-        if (arrayValue.length > 0) {
-          fieldState.disableFormData = true;
+          if (arrayValue.length > 0) {
+            fieldState.disableFormData = true;
+          }
         }
 
         // Add field to state
@@ -163,11 +168,16 @@ export const addFieldStatePromise = async ({
         await Promise.all(promises);
 
         // Add values to field state
-        fieldState.value = blocksValue.length;
-        fieldState.initialValue = blocksValue.length;
+        if (typeof valueWithDefault === null) {
+          fieldState.value = null;
+          fieldState.initialValue = null;
+        } else {
+          fieldState.value = blocksValue.length;
+          fieldState.initialValue = blocksValue.length;
 
-        if (blocksValue.length > 0) {
-          fieldState.disableFormData = true;
+          if (blocksValue.length > 0) {
+            fieldState.disableFormData = true;
+          }
         }
 
         // Add field to state

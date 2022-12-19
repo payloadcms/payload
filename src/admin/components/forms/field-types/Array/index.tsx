@@ -24,9 +24,38 @@ import { ArrayAction } from '../../../elements/ArrayAction';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
 import { RowLabel } from '../../RowLabel';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import Checkbox from '../Checkbox';
+
+type Props2 = {
+  path: string
+  fieldValue: unknown
+}
+const NullifyField:React.FC<Props2> = ({ path, fieldValue }) => {
+  const { dispatchFields, setModified } = useForm();
+
+  // TODO: only allow this for non-default locales
+
+  // TODO(pending design): abstract checkbox into input component for reuse
+
+  return (
+    <Checkbox
+      onChange={(checked) => {
+        dispatchFields({
+          type: 'UPDATE',
+          path,
+          value: checked ? null : (fieldValue || []),
+        });
+        setModified(true);
+      }}
+      defaultValue={fieldValue === null}
+      label="Remove field in translation"
+      name={`${path}-nullify-field`}
+    />
+  );
+};
 
 const baseClass = 'array-field';
 
@@ -252,109 +281,121 @@ const ArrayFieldType: React.FC<Props> = (props) => {
             description={description}
           />
         </header>
-        <Droppable droppableId="array-drop">
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-            >
-              {rows.length > 0 && rows.map((row, i) => {
-                const rowNumber = i + 1;
-                const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowNumber).padStart(2, '0')}`;
 
-                return (
-                  <Draggable
-                    key={row.id}
-                    draggableId={row.id}
-                    index={i}
-                    isDragDisabled={readOnly}
-                  >
-                    {(providedDrag) => (
-                      <div
-                        id={`${path}-row-${i}`}
-                        ref={providedDrag.innerRef}
-                        {...providedDrag.draggableProps}
+        <NullifyField
+          path={path}
+          fieldValue={value}
+        />
+
+        {value !== null && (
+          <React.Fragment>
+            <Droppable droppableId="array-drop">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                >
+                  {rows.length > 0 && rows.map((row, i) => {
+                    const rowNumber = i + 1;
+                    const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowNumber).padStart(2, '0')}`;
+
+                    return (
+                      <Draggable
+                        key={row.id}
+                        draggableId={row.id}
+                        index={i}
+                        isDragDisabled={readOnly}
                       >
-                        <Collapsible
-                          collapsed={row.collapsed}
-                          onToggle={(collapsed) => setCollapse(row.id, collapsed)}
-                          className={`${baseClass}__row`}
-                          key={row.id}
-                          dragHandleProps={providedDrag.dragHandleProps}
-                          header={(
-                            <RowLabel
-                              path={`${path}.${i}`}
-                              label={CustomRowLabel || fallbackLabel}
-                              rowNumber={rowNumber}
-                            />
-                          )}
-                          actions={!readOnly ? (
-                            <ArrayAction
-                              rowCount={rows.length}
-                              duplicateRow={duplicateRow}
-                              addRow={addRow}
-                              moveRow={moveRow}
-                              removeRow={removeRow}
-                              index={i}
-                            />
-                          ) : undefined}
-                        >
-                          <HiddenInput
-                            name={`${path}.${i}.id`}
-                            value={row.id}
-                          />
-                          <RenderFields
-                            className={`${baseClass}__fields`}
-                            forceRender
-                            readOnly={readOnly}
-                            fieldTypes={fieldTypes}
-                            permissions={permissions?.fields}
-                            indexPath={indexPath}
-                            fieldSchema={fields.map((field) => ({
-                              ...field,
-                              path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,
-                            }))}
-                          />
+                        {(providedDrag) => (
+                          <div
+                            id={`${path}-row-${i}`}
+                            ref={providedDrag.innerRef}
+                            {...providedDrag.draggableProps}
+                          >
+                            <Collapsible
+                              collapsed={row.collapsed}
+                              onToggle={(collapsed) => setCollapse(row.id, collapsed)}
+                              className={`${baseClass}__row`}
+                              key={row.id}
+                              dragHandleProps={providedDrag.dragHandleProps}
+                              header={(
+                                <RowLabel
+                                  path={`${path}.${i}`}
+                                  label={CustomRowLabel || fallbackLabel}
+                                  rowNumber={rowNumber}
+                                />
+                              )}
+                              actions={!readOnly ? (
+                                <ArrayAction
+                                  rowCount={rows.length}
+                                  duplicateRow={duplicateRow}
+                                  addRow={addRow}
+                                  moveRow={moveRow}
+                                  removeRow={removeRow}
+                                  index={i}
+                                />
+                              ) : undefined}
+                            >
+                              <HiddenInput
+                                name={`${path}.${i}.id`}
+                                value={row.id}
+                              />
+                              <RenderFields
+                                className={`${baseClass}__fields`}
+                                forceRender
+                                readOnly={readOnly}
+                                fieldTypes={fieldTypes}
+                                permissions={permissions?.fields}
+                                indexPath={indexPath}
+                                fieldSchema={fields.map((field) => ({
+                                  ...field,
+                                  path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,
+                                }))}
+                              />
 
-                        </Collapsible>
-                      </div>
-                    )}
-                  </Draggable>
-                );
-              })}
-              {(rows.length < minRows || (required && rows.length === 0)) && (
-                <Banner type="error">
-                  {t('validation:requiresAtLeast', {
-                    count: minRows,
-                    label: getTranslation(minRows
-                      ? labels.plural
-                      : labels.singular,
-                    i18n) || t(minRows > 1 ? 'general:row' : 'general:rows'),
+                            </Collapsible>
+                          </div>
+                        )}
+                      </Draggable>
+                    );
                   })}
-                </Banner>
+                  {(rows.length < minRows || (required && rows.length === 0)) && (
+                  <Banner type="error">
+                    {t('validation:requiresAtLeast', {
+                      count: minRows,
+                      label: getTranslation(minRows
+                        ? labels.plural
+                        : labels.singular,
+                      i18n) || t(minRows > 1 ? 'general:row' : 'general:rows'),
+                    })}
+                  </Banner>
+                  )}
+                  {(rows.length === 0 && readOnly) && (
+                  <Banner>
+                    {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
+                  </Banner>
+                  )}
+                  {provided.placeholder}
+                </div>
               )}
-              {(rows.length === 0 && readOnly) && (
-                <Banner>
-                  {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
-                </Banner>
-              )}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-        {(!readOnly && !hasMaxRows) && (
-          <div className={`${baseClass}__add-button-wrap`}>
-            <Button
-              onClick={() => addRow(value as number)}
-              buttonStyle="icon-label"
-              icon="plus"
-              iconStyle="with-border"
-              iconPosition="left"
-            >
-              {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
-            </Button>
-          </div>
+            </Droppable>
+
+            {(!readOnly && !hasMaxRows) && (
+              <div className={`${baseClass}__add-button-wrap`}>
+                <Button
+                  onClick={() => addRow(value as number)}
+                  buttonStyle="icon-label"
+                  icon="plus"
+                  iconStyle="with-border"
+                  iconPosition="left"
+                >
+                  {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
+                </Button>
+              </div>
+            )}
+          </React.Fragment>
         )}
+
       </div>
     </DragDropContext>
   );

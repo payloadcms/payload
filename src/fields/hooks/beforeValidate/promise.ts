@@ -131,8 +131,12 @@ export const promise = async ({
       case 'array':
       case 'blocks': {
         // Handle cases of arrays being intentionally set to 0
-        if (siblingData[field.name] === '0' || siblingData[field.name] === 0 || siblingData[field.name] === null) {
+        if (siblingData[field.name] === '0' || siblingData[field.name] === 0) {
           siblingData[field.name] = [];
+        }
+
+        if (siblingData[field.name] === null) {
+          siblingData[field.name] = null;
         }
 
         break;
