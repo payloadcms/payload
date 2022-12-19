@@ -1,4 +1,4 @@
-import { Where } from '../../types';
+import { docHasTimestamps, Where } from '../../types';
 import { SanitizedGlobalConfig, TypeWithID } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -12,7 +12,6 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { PayloadRequest } from '../../express/types';
-import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion';
 
 type Args = {
   globalConfig: SanitizedGlobalConfig
@@ -83,7 +82,31 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  let global = await getLatestGlobalVersion({ payload, config: globalConfig, query });
+  let version;
+  let global;
+
+  if (globalConfig.versions?.drafts) {
+    version = payload.versions[globalConfig.slug].findOne({}, {}, {
+      sort: {
+        updatedAt: 'desc',
+      },
+      lean: true,
+    });
+  }
+
+  const existingGlobal = await payload.globals.Model.findOne(query).lean();
+  version = await version;
+
+  if (!version || (existingGlobal && docHasTimestamps(existingGlobal) && version.updatedAt < existingGlobal.updatedAt)) {
+    global = existingGlobal;
+  } else {
+    global = {
+      ...version.version,
+      updatedAt: version.updatedAt,
+      createdAt: version.createdAt,
+    };
+  }
+
   let globalJSON: Record<string, unknown> = {};
 
   if (global) {
@@ -194,7 +217,7 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
     });
   } else {
     try {
-      if (global) {
+      if (existingGlobal) {
         global = await Model.findOneAndUpdate(
           { globalType: slug },
           result,
