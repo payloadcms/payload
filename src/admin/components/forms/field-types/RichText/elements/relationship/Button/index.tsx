@@ -34,13 +34,12 @@ const RelationshipButton: React.FC<{ path: string }> = () => {
   const editor = useSlate();
   const [enabledCollectionSlugs] = useState(() => collections.filter(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship).map(({ slug }) => slug));
   const [selectedCollectionSlug, setSelectedCollectionSlug] = useState(() => enabledCollectionSlugs[0]);
-
   const [
     ListDrawer,
     ListDrawerToggler,
     {
       closeDrawer,
-      // isDrawerOpen,
+      isDrawerOpen,
     },
   ] = useListDrawer({
     collectionSlugs: enabledCollectionSlugs,
@@ -57,10 +56,11 @@ const RelationshipButton: React.FC<{ path: string }> = () => {
     closeDrawer();
   }, [editor, closeDrawer]);
 
-  // useEffect(() => {
-  //   // always reset back to first option
-  //   setSelectedCollectionSlug(enabledCollectionSlugs[0]);
-  // }, [isDrawerOpen, enabledCollectionSlugs]);
+  useEffect(() => {
+    // always reset back to first option
+    // TODO: this is not working, see the ListDrawer component
+    setSelectedCollectionSlug(enabledCollectionSlugs[0]);
+  }, [isDrawerOpen, enabledCollectionSlugs]);
 
   if (!enabledCollectionSlugs || enabledCollectionSlugs.length === 0) return null;
 

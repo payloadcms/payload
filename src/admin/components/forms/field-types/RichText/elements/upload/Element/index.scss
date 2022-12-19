@@ -51,7 +51,7 @@
     flex-grow: 1;
     display: flex;
     align-items: center;
-    padding: base(.75) base(1);
+    padding: base(.75);
     justify-content: space-between;
     max-width: calc(100% - #{base(3.25)});
   }
@@ -60,9 +60,10 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    margin-left: base(0.5);
 
     & > *:not(:last-child) {
-      margin-right: base(.5);
+      margin-right: base(.25);
     }
   }
 

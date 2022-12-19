@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 import Pill from '../Pill';
@@ -6,7 +6,7 @@ import Plus from '../../icons/Plus';
 import X from '../../icons/X';
 import { Props } from './types';
 import { getTranslation } from '../../../../utilities/getTranslation';
-
+import { useEditDepth } from '../../utilities/EditDepth';
 import './index.scss';
 
 const baseClass = 'column-selector';
@@ -20,6 +20,8 @@ const ColumnSelector: React.FC<Props> = (props) => {
 
   const [fields] = useState(() => flattenTopLevelFields(collection.fields, true));
   const { i18n } = useTranslation();
+  const uuid = useId();
+  const editDepth = useEditDepth();
 
   return (
     <div className={baseClass}>
@@ -38,7 +40,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
               setColumns(newState);
             }}
             alignIcon="left"
-            key={field.name || i}
+            key={`${field.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             icon={isEnabled ? <X /> : <Plus />}
             className={[
               `${baseClass}__column`,

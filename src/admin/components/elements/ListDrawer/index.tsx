@@ -125,6 +125,18 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
     return initialSelection;
   });
 
+  const [selectedOption, setSelectedOption] = useState<{ label: string, value: string }>(() => (selectedCollectionConfig ? { label: getTranslation(selectedCollectionConfig.labels.singular, i18n), value: selectedCollectionConfig.slug } : undefined));
+  const [fields] = useState<Field[]>(() => formatFields(selectedCollectionConfig, t));
+  const [tableColumns, setTableColumns] = useState<Column[]>(() => {
+    const initialColumns = getInitialColumnState(fields, selectedCollectionConfig.admin.useAsTitle, selectedCollectionConfig.admin.defaultColumns);
+    return buildColumns({
+      collectionConfig: selectedCollectionConfig,
+      columns: initialColumns,
+      t,
+      onSelect,
+    });
+  });
+
   // allow external control of selected collection, same as the initial state logic above
   useEffect(() => {
     let newSelection: SanitizedCollectionConfig;
@@ -139,19 +151,7 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
       newSelection = collections.find((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs }));
     }
     setSelectedCollectionConfig(newSelection);
-  }, [selectedCollection, collectionSlugs, uploads, collections]);
-
-  const [selectedOption, setSelectedOption] = useState<{ label: string, value: string }>(() => (selectedCollectionConfig ? { label: getTranslation(selectedCollectionConfig.labels.singular, i18n), value: selectedCollectionConfig.slug } : undefined));
-  const [fields] = useState<Field[]>(() => formatFields(selectedCollectionConfig, t));
-  const [tableColumns, setTableColumns] = useState<Column[]>(() => {
-    const initialColumns = getInitialColumnState(fields, selectedCollectionConfig.admin.useAsTitle, selectedCollectionConfig.admin.defaultColumns);
-    return buildColumns({
-      collectionConfig: selectedCollectionConfig,
-      columns: initialColumns,
-      t,
-      onSelect,
-    });
-  });
+  }, [selectedCollection, collectionSlugs, uploads, collections, onSelect, t]);
 
   const activeColumnNames = tableColumns.map(({ accessor }) => accessor);
   const stringifiedActiveColumns = JSON.stringify(activeColumnNames);
@@ -205,18 +205,17 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
   useEffect(() => {
     const syncColumnsFromPrefs = async () => {
       const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
-      if (currentPreferences?.columns) {
-        setTableColumns(buildColumns({
-          collectionConfig: selectedCollectionConfig,
-          columns: currentPreferences?.columns,
-          t,
-          onSelect,
-        }));
-      }
+      const initialColumns = getInitialColumnState(fields, selectedCollectionConfig.admin.useAsTitle, selectedCollectionConfig.admin.defaultColumns);
+      setTableColumns(buildColumns({
+        collectionConfig: selectedCollectionConfig,
+        columns: currentPreferences?.columns || initialColumns,
+        t,
+        onSelect,
+      }));
     };
 
     syncColumnsFromPrefs();
-  }, [selectedCollectionConfig, t, getPreference, preferenceKey, onSelect]);
+  }, [selectedCollectionConfig, t, getPreference, preferenceKey, onSelect, fields]);
 
   useEffect(() => {
     const newPreferences = {
