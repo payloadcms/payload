@@ -42,6 +42,7 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   drawerSlug,
   id,
   collectionSlug,
+  disabled,
   ...rest
 }) => {
   const { t, i18n } = useTranslation(['fields', 'general']);
@@ -55,6 +56,7 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
         className,
         `${baseClass}__toggler`,
       ].filter(Boolean).join(' ')}
+      disabled={disabled}
       aria-label={t(!id ? 'fields:addNewLabel' : 'general:editLabel', { label: getTranslation(collectionConfig.labels.singular, i18n) })}
       {...rest}
     >

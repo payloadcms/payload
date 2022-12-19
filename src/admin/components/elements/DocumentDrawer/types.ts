@@ -17,6 +17,7 @@ export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
   drawerSlug?: string
   id?: string
   collectionSlug: string
+  disabled?: boolean
 }
 
 export type UseDocumentDrawer = (args: {

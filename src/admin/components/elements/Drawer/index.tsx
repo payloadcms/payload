@@ -24,6 +24,7 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
   children,
   className,
   onClick,
+  disabled,
   ...rest
 }) => {
   const { openModal } = useModal();
@@ -39,6 +40,7 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
       onClick={handleClick}
       type="button"
       className={className}
+      disabled={disabled}
       {...rest}
     >
       {children}

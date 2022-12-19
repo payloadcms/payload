@@ -54,9 +54,14 @@
     border: none;
     padding: 0;
     cursor: pointer;
+
     &:focus,
     &:focus-within {
       outline: none;
+    }
+
+    &:disabled {
+      pointer-events: none;
     }
   }
 
@@ -80,6 +85,11 @@
 
     line {
       stroke-width: $style-stroke-width-m;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      pointer-events: none;
     }
   }
 }

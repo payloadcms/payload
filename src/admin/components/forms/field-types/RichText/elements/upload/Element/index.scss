@@ -75,6 +75,11 @@
     line {
       stroke-width: $style-stroke-width-m;
     }
+
+    &:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
   }
 
   &__toggler {

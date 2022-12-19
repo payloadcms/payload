@@ -7,6 +7,7 @@ import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
 import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
 import Button from '../../../../../../elements/Button';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
+import { Props as RichTextProps } from '../../../types';
 
 import './index.scss';
 
@@ -20,8 +21,14 @@ const Element: React.FC<{
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
   element: any
+  fieldProps: RichTextProps
 }> = (props) => {
-  const { attributes, children, element } = props;
+  const {
+    attributes,
+    children,
+    element,
+    fieldProps,
+  } = props;
   const { relationTo, value } = element;
   const { collections, serverURL, routes: { api } } = useConfig();
   const [enabledCollectionSlugs] = useState(() => collections.filter(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship).map(({ slug }) => slug));
@@ -138,7 +145,10 @@ const Element: React.FC<{
       </div>
       <div className={`${baseClass}__actions`}>
         {value?.id && (
-          <DocumentDrawerToggler className={`${baseClass}__toggler`}>
+          <DocumentDrawerToggler
+            className={`${baseClass}__toggler`}
+            disabled={fieldProps?.admin?.readOnly}
+          >
             <Button
               icon="edit"
               round
@@ -149,10 +159,11 @@ const Element: React.FC<{
                 e.preventDefault();
               }}
               tooltip={t('general:editLabel', { label: relatedCollection.labels.singular })}
+              disabled={fieldProps?.admin?.readOnly}
             />
           </DocumentDrawerToggler>
         )}
-        <ListDrawerToggler>
+        <ListDrawerToggler disabled={fieldProps?.admin?.readOnly}>
           <Button
             icon="swap"
             round
@@ -163,6 +174,7 @@ const Element: React.FC<{
             }}
             el="div"
             tooltip={t('swapRelationship')}
+            disabled={fieldProps?.admin?.readOnly}
           />
         </ListDrawerToggler>
         <Button
@@ -175,6 +187,7 @@ const Element: React.FC<{
             removeRelationship();
           }}
           tooltip={t('fields:removeRelationship')}
+          disabled={fieldProps?.admin?.readOnly}
         />
       </div>
       {value?.id && (

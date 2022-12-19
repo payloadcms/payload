@@ -17,6 +17,7 @@ export type ListTogglerProps = HTMLAttributes<HTMLButtonElement> & {
   children?: React.ReactNode
   className?: string
   drawerSlug?: string
+  disabled?: boolean
 }
 
 export type UseListDrawer = (args: {

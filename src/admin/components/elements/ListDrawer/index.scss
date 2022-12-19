@@ -31,6 +31,10 @@
     &:focus-within {
       outline: none;
     }
+
+    &:disabled {
+      pointer-events: none;
+    }
   }
 
   &__header-close {

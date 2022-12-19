@@ -11,6 +11,7 @@ import { getTranslation } from '../../../../../../../../utilities/getTranslation
 import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
+import { Props as RichTextProps } from '../../../types';
 
 import './index.scss';
 
@@ -24,8 +25,14 @@ const Element: React.FC<{
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
   element: any
+  fieldProps: RichTextProps
 }> = ({ attributes, children, element }) => {
-  const { relationTo, value } = element;
+  const {
+    relationTo,
+    value,
+    fieldProps,
+  } = element;
+
   const { collections, serverURL, routes: { api } } = useConfig();
   const { t, i18n } = useTranslation('fields');
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
@@ -163,6 +170,7 @@ const Element: React.FC<{
                       e.preventDefault();
                     }}
                     tooltip={t('general:editLabel', { label: relatedCollection.labels.singular })}
+                    disabled={fieldProps?.admin?.readOnly}
                   />
                 </DocumentDrawerToggler>
               )}
@@ -177,6 +185,7 @@ const Element: React.FC<{
                   }}
                   el="div"
                   tooltip={t('swapUpload')}
+                  disabled={fieldProps?.admin?.readOnly}
                 />
               </ListDrawerToggler>
               <Button
@@ -189,6 +198,7 @@ const Element: React.FC<{
                   removeUpload();
                 }}
                 tooltip={t('removeUpload')}
+                disabled={fieldProps?.admin?.readOnly}
               />
             </div>
           </div>
