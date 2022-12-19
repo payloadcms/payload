@@ -10,7 +10,7 @@ const buildModel = (config: SanitizedConfig): GlobalModel | null => {
 
     globalsSchema.plugin(buildQueryPlugin);
 
-    const Globals = mongoose.model('globals', globalsSchema) as GlobalModel;
+    const Globals = mongoose.model('globals', globalsSchema) as unknown as GlobalModel;
 
     Object.values(config.globals).forEach((globalConfig) => {
       const globalSchema = buildSchema(config, globalConfig.fields, { global: true });

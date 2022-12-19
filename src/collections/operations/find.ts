@@ -9,6 +9,7 @@ import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { buildDraftMergeAggregate } from '../../versions/drafts/buildDraftMergeAggregate';
 
 export type Arguments = {
   collection: Collection
@@ -158,65 +159,10 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   };
 
   if (collectionConfig.versions?.drafts && draftsEnabled) {
-    const aggregate = Model.aggregate([
-      {
-        $addFields: { id: { $toString: '$_id' } },
-      },
-      {
-        $lookup: {
-          from: `_${collectionConfig.slug}_versions`,
-          as: 'docs',
-          let: {
-            id: { $toString: '$_id' },
-            updatedAt: '$updatedAt',
-          },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$parent', '$$id'] },
-                    { $gt: ['$updatedAt', '$$updatedAt'] },
-                  ],
-                },
-              },
-            },
-            { $sort: { updatedAt: -1 } },
-            { $limit: 1 },
-          ],
-        },
-      },
-
-      // WHEN docs.length > 0
-      {
-        $project: {
-          doc: { $arrayElemAt: ['$docs', 0] },
-        },
-      },
-      {
-        $addFields: {
-          createdAt: '$doc.createdAt',
-          updatedAt: '$doc.updatedAt',
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: ['$doc.version', '$$ROOT'],
-          },
-        },
-      },
-      // End "when"
-      {
-        $project: {
-          docs: 0,
-          doc: 0,
-        },
-      },
-      {
-        $match: query,
-      },
-    ]);
+    const aggregate = Model.aggregate(buildDraftMergeAggregate({
+      config: collectionConfig,
+      query,
+    }));
 
     result = await Model.aggregatePaginate(aggregate, paginationOptions);
   } else {
