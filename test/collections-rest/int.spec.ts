@@ -373,6 +373,31 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1);
       });
 
+
+      describe('like - special characters', () => {
+        const specialCharacters = '~!@#$%^&*()_+-+[]{}|;:"<>,.?/})';
+
+        it.each(specialCharacters.split(''))('like - special characters - %s', async (character) => {
+          const post1 = await createPost({
+            title: specialCharacters,
+          });
+
+          const query = {
+            query: {
+              title: {
+                like: character,
+              },
+            },
+          };
+
+          const { status, result } = await client.find<Post>(query);
+
+          expect(status).toEqual(200);
+          expect(result.docs).toEqual([post1]);
+          expect(result.totalDocs).toEqual(1);
+        });
+      });
+
       it('like - cyrillic characters', async () => {
         const post1 = await createPost({ title: 'Тест' });
 
