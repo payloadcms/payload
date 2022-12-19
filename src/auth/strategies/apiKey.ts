@@ -8,7 +8,7 @@ export default (payload: Payload, { Model, config }): PassportAPIKey => {
   const { secret } = payload;
   const opts = {
     header: 'Authorization',
-    prefix: `${config.labels.singular} API-Key `,
+    prefix: `${config.slug} API-Key `,
   };
 
   return new PassportAPIKey(opts, true, async (apiKey, done, req) => {

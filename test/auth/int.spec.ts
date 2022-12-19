@@ -96,6 +96,31 @@ describe('Auth', () => {
         expect(data.user.email).toBeDefined();
       });
 
+
+      it('should allow authentication with an API key with useAPIKey', async () => {
+        const apiKey = '0123456789ABCDEFGH';
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: 'dev@example.com',
+            password: 'test',
+            apiKey,
+          },
+        });
+        const response = await fetch(`${apiUrl}/${slug}/me`, {
+          headers: {
+            ...headers,
+            Authorization: `${slug} API-Key ${user.apiKey}`,
+          },
+        });
+
+        const data = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(data.user.email).toBeDefined();
+        expect(data.user.apiKey).toStrictEqual(apiKey);
+      });
+
       it('should refresh a token and reset its expiration', async () => {
         const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
           method: 'post',
