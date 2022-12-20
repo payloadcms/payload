@@ -100,6 +100,7 @@ const indent = {
               ],
               {
                 at: previousNodePath,
+                select: true,
               },
             );
           }

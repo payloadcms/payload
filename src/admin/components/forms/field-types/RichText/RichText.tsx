@@ -17,7 +17,7 @@ import enablePlugins from './enablePlugins';
 import defaultValue from '../../../../../fields/richText/defaultValue';
 import FieldDescription from '../../FieldDescription';
 import withHTML from './plugins/withHTML';
-import { Props } from './types';
+import { ElementNode, TextNode, Props } from './types';
 import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/types';
 import listTypes from './elements/listTypes';
 import mergeCustomFunctions from './mergeCustomFunctions';
@@ -30,15 +30,12 @@ const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
 
 const baseClass = 'rich-text';
-type CustomText = { text: string;[x: string]: unknown }
-
-type CustomElement = { type?: string; children: (CustomText | CustomElement)[] }
 
 declare module 'slate' {
   interface CustomTypes {
     Editor: BaseEditor & ReactEditor & HistoryEditor
-    Element: CustomElement
-    Text: CustomText
+    Element: ElementNode
+    Text: TextNode
   }
 }
 
