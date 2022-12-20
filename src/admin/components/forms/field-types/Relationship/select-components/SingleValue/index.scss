@@ -10,6 +10,13 @@
     display: flex;
     align-items: center;
     overflow: visible;
+    width: 100%;
+    flex-shrink: 1;
+  }
+
+  &__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &__drawer-toggler {
