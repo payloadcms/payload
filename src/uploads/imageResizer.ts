@@ -52,10 +52,21 @@ export default async function resizeAndSave({
 }: Args): Promise<Result> {
   const { imageSizes } = config.upload;
   const sizesToSave: FileToSave[] = [];
+  const sizeData = {};
 
-  const sizes = imageSizes
-    .filter((desiredSize) => needsResize(desiredSize, dimensions))
+  const promises = imageSizes
     .map(async (desiredSize) => {
+      if (!needsResize(desiredSize, dimensions)) {
+        sizeData[desiredSize.name] = {
+          url: null,
+          width: null,
+          height: null,
+          filename: null,
+          filesize: null,
+          mimeType: null,
+        };
+        return;
+      }
       let resized = sharp(file).resize(desiredSize);
 
       if (desiredSize.formatOptions) {
@@ -83,8 +94,7 @@ export default async function resizeAndSave({
         buffer: bufferObject.data,
       });
 
-      return {
-        name: desiredSize.name,
+      sizeData[desiredSize.name] = {
         width: bufferObject.info.width,
         height: bufferObject.info.height,
         filename: imageNameWithDimensions,
@@ -93,22 +103,10 @@ export default async function resizeAndSave({
       };
     });
 
-  const savedSizes = await Promise.all(sizes);
+  await Promise.all(promises);
 
   return {
-    sizeData: savedSizes.reduce(
-      (results, size) => ({
-        ...results,
-        [size.name]: {
-          width: size.width,
-          height: size.height,
-          filename: size.filename,
-          mimeType: size.mimeType,
-          filesize: size.filesize,
-        },
-      }),
-      {},
-    ),
+    sizeData,
     sizesToSave,
   };
 }

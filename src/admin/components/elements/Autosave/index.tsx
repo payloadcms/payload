@@ -90,7 +90,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
 
         if (url) {
           const body = {
-            ...reduceFieldsToValues(fieldRef.current),
+            ...reduceFieldsToValues(fieldRef.current, true),
             _status: 'draft',
           };
 

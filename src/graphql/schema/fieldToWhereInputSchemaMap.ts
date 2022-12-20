@@ -144,7 +144,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
     };
   },
   point: (field: PointField) => {
-    const type = GraphQLList(GraphQLFloat);
+    const type = new GraphQLList(GraphQLFloat);
     return {
       type: withOperators(
         field,

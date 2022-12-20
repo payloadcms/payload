@@ -19,9 +19,9 @@ import {
 import { Props } from './types';
 import Chevron from '../../icons/Chevron';
 import { getTranslation } from '../../../../utilities/getTranslation';
+import { SingleValue } from './SingleValue';
 import { MultiValueLabel } from './MultiValueLabel';
 import { MultiValue } from './MultiValue';
-import { SingleValue } from '../../forms/field-types/Relationship/select-components/SingleValue';
 import { ValueContainer } from './ValueContainer';
 import { ClearIndicator } from './ClearIndicator';
 import { MultiValueRemove } from './MultiValueRemove';

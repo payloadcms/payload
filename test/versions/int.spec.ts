@@ -258,6 +258,101 @@ describe('Versions', () => {
     });
   });
 
+  describe('Querying', () => {
+    const originalTitle = 'original title';
+    const updatedTitle1 = 'new title 1';
+    const updatedTitle2 = 'new title 2';
+    let firstDraft;
+
+    beforeAll(async () => {
+      // This will be created in the `draft-posts` collection
+      firstDraft = await payload.create({
+        collection: 'draft-posts',
+        data: {
+          title: originalTitle,
+          description: 'my description',
+          radio: 'test',
+        },
+      });
+
+      // This will be created in the `_draft-posts_versions` collection
+      await payload.update({
+        collection: 'draft-posts',
+        id: firstDraft.id,
+        draft: true,
+        data: {
+          title: updatedTitle1,
+        },
+      });
+
+      // This will be created in the `_draft-posts_versions` collection
+      // and will be the newest draft, able to be queried on
+      await payload.update({
+        collection: 'draft-posts',
+        id: firstDraft.id,
+        draft: true,
+        data: {
+          title: updatedTitle2,
+        },
+      });
+    });
+
+    it('should allow querying a draft doc from main collection', async () => {
+      const findResults = await payload.find({
+        collection: 'draft-posts',
+        where: {
+          title: {
+            equals: originalTitle,
+          },
+        },
+      });
+
+      expect(findResults.docs[0].title).toStrictEqual(originalTitle);
+    });
+
+    it('should not be able to query an old draft version with draft=true', async () => {
+      const draftFindResults = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+        where: {
+          title: {
+            equals: updatedTitle1,
+          },
+        },
+      });
+
+      expect(draftFindResults.docs).toHaveLength(0);
+    });
+
+    it('should be able to query the newest draft version with draft=true', async () => {
+      const draftFindResults = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+        where: {
+          title: {
+            equals: updatedTitle2,
+          },
+        },
+      });
+
+      expect(draftFindResults.docs[0].title).toStrictEqual(updatedTitle2);
+    });
+
+    it('should not be able to query old drafts that don\'t match with draft=true', async () => {
+      const draftFindResults = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+        where: {
+          title: {
+            equals: originalTitle,
+          },
+        },
+      });
+
+      expect(draftFindResults.docs).toHaveLength(0);
+    });
+  });
+
   describe('Collections - GraphQL', () => {
     describe('Create', () => {
       it('should allow a new doc to be created with draft status', async () => {

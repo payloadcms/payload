@@ -84,7 +84,7 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
     }),
     point: (inputObjectTypeConfig: InputObjectTypeConfig, field: PointField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLList(GraphQLFloat), forceNullable) },
+      [field.name]: { type: withNullableType(field, new GraphQLList(GraphQLFloat), forceNullable) },
     }),
     checkbox: (inputObjectTypeConfig: InputObjectTypeConfig, field: CheckboxField) => ({
       ...inputObjectTypeConfig,

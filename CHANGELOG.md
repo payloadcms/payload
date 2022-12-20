@@ -1,5 +1,23 @@
 
 
+## [1.3.4](https://github.com/payloadcms/payload/compare/v1.3.3...v1.3.4) (2022-12-16)
+
+
+### Bug Fixes
+
+* async validate out of order ([e913fbe](https://github.com/payloadcms/payload/commit/e913fbe4ea4f9abf7eeb29db3b03e1afe4649d50))
+* autosave with nested localized fields ([4202fc2](https://github.com/payloadcms/payload/commit/4202fc29337763f8fd90ec4beaf0d34e39a916bc))
+* doc access should not run where query on collections without id ([016beb6](https://github.com/payloadcms/payload/commit/016beb6eec96857fe913888a1d9c4994dbd94e7e))
+* run docAccess also when checking global ([b8c0482](https://github.com/payloadcms/payload/commit/b8c0482cdae6d372f81823ee4541717131d9dac4))
+
+## [1.3.3](https://github.com/payloadcms/payload/compare/v1.3.2...v1.3.3) (2022-12-16)
+
+
+### Bug Fixes
+
+* allow translation in group admin.description ([#1680](https://github.com/payloadcms/payload/issues/1680)) ([91e33ad](https://github.com/payloadcms/payload/commit/91e33ad1ee04750425112602fcfddcf329f934e8))
+* ensures select field avoids circular dependencies ([f715146](https://github.com/payloadcms/payload/commit/f715146aa35a6f3a8f5d7d4e066c71fb26027472))
+
 ## [1.3.2](https://github.com/payloadcms/payload/compare/v1.3.1...v1.3.2) (2022-12-15)
 
 
