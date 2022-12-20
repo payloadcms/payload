@@ -52,12 +52,57 @@ const indent = {
         const isCurrentlyUL = isElementActive(editor, 'ul');
 
         if (isCurrentlyOL || isCurrentlyUL) {
-          Transforms.wrapNodes(editor, {
-            type: 'li',
-            children: [],
-          });
-          Transforms.wrapNodes(editor, { type: isCurrentlyOL ? 'ol' : 'ul', children: [{ text: ' ' }] });
-          Transforms.setNodes(editor, { type: 'li' });
+          let hasText = false;
+
+          if (editor.selection) {
+            const leafNode = Editor.leaf(editor, editor.selection.focus);
+            if (leafNode) {
+              const [leaf] = leafNode;
+              hasText = leaf.text.length > 0;
+            }
+          }
+
+          if (hasText) {
+            Transforms.wrapNodes(editor, {
+              type: 'li',
+              children: [],
+            });
+            Transforms.wrapNodes(editor, { type: isCurrentlyOL ? 'ol' : 'ul', children: [{ text: ' ' }] });
+            Transforms.setNodes(editor, { type: 'li' });
+          } else {
+            const [previousNode, previousNodePath] = Editor.previous(editor, {
+              at: editor.selection.focus,
+            });
+
+            Transforms.removeNodes(editor);
+
+            Transforms.insertNodes(
+              editor,
+              [
+                {
+                  children: [
+                    previousNode,
+                  ],
+                },
+                {
+                  type: isCurrentlyOL ? 'ol' : 'ul',
+                  children: [
+                    {
+                      type: 'li',
+                      children: [
+                        {
+                          text: '',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+              {
+                at: previousNodePath,
+              },
+            );
+          }
         } else {
           Transforms.wrapNodes(editor, { type: indentType, children: [] });
         }

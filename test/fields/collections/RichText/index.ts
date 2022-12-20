@@ -3,7 +3,15 @@ import { loremIpsum } from './loremIpsum';
 
 const RichTextFields: CollectionConfig = {
   slug: 'rich-text-fields',
+  admin: {
+    useAsTitle: 'title',
+  },
   fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
     {
       name: 'selectHasMany',
       hasMany: true,
@@ -257,7 +265,82 @@ function generateRichText() {
   ];
 }
 
+export const richTextBulletsDoc = {
+  title: 'Bullets and Indentation',
+  richText: [
+    {
+      type: 'ul',
+      children: [
+        {
+          children: [
+            {
+              text: 'Normal bullet',
+            },
+          ],
+          type: 'li',
+        },
+        {
+          type: 'li',
+          children: [
+            {
+              type: 'ul',
+              children: [
+                {
+                  type: 'li',
+                  children: [
+                    {
+                      text: 'I am the old style of sub-bullet',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'li',
+          children: [
+            {
+              text: 'Another normal bullet',
+            },
+          ],
+        },
+        {
+          type: 'li',
+          children: [
+            {
+              text: 'This text precedes a nested list',
+            },
+            {
+              type: 'ul',
+              children: [
+                {
+                  type: 'li',
+                  children: [
+                    {
+                      text: 'I am a sub-bullet',
+                    },
+                  ],
+                },
+                {
+                  type: 'li',
+                  children: [
+                    {
+                      text: 'And I am another sub-bullet',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
 export const richTextDoc = {
+  title: 'Rich Text',
   selectHasMany: ['one', 'five'],
   richText: generateRichText(),
   richTextReadOnly: generateRichText(),

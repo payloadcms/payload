@@ -32,7 +32,7 @@ const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethr
 const baseClass = 'rich-text';
 type CustomText = { text: string;[x: string]: unknown }
 
-type CustomElement = { type?: string; children: CustomText[] }
+type CustomElement = { type?: string; children: (CustomText | CustomElement)[] }
 
 declare module 'slate' {
   interface CustomTypes {
@@ -349,13 +349,13 @@ const RichText: React.FC<Props> = (props) => {
 
                     if (SlateElement.isElement(selectedElement) && selectedElement.type === 'li') {
                       const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
-                      if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === 1) {
+                      if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === 0) {
                         Transforms.unwrapNodes(editor, {
                           match: (n) => SlateElement.isElement(n) && listTypes.includes(n.type),
                           split: true,
                         });
 
-                        Transforms.setNodes(editor, {});
+                        Transforms.setNodes(editor, { type: undefined });
                       }
                     } else if (editor.isVoid(selectedElement)) {
                       Transforms.removeNodes(editor);
@@ -374,6 +374,12 @@ const RichText: React.FC<Props> = (props) => {
             </div>
           </div>
         </Slate>
+        <pre>
+          {JSON.stringify(editor.selection)}
+        </pre>
+        <pre>
+          {JSON.stringify(value, null, 2)}
+        </pre>
         <FieldDescription
           value={value}
           description={description}
