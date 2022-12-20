@@ -18,7 +18,7 @@ function initCollectionsGraphQL(payload: Payload): void {
     name: 'Preference',
     fields: {
       key: {
-        type: GraphQLNonNull(GraphQLString),
+        type: new GraphQLNonNull(GraphQLString),
       },
       value: { type: valueType },
       createdAt: { type: new GraphQLNonNull(DateTimeResolver) },

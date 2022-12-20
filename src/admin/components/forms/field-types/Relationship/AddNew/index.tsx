@@ -111,7 +111,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
                 className={`${baseClass}__tooltip`}
                 show={showTooltip}
               >
-                {t('addNewLabel', { label: relatedCollections[0].labels.singular })}
+                {t('addNewLabel', { label: getTranslation(relatedCollections[0].labels.singular, i18n) })}
               </Tooltip>
               <Plus />
             </DocumentDrawerToggler>

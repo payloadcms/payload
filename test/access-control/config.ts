@@ -10,6 +10,7 @@ export const restrictedSlug = 'restricted';
 export const restrictedVersionsSlug = 'restricted-versions';
 export const siblingDataSlug = 'sibling-data';
 export const relyOnRequestHeadersSlug = 'rely-on-request-headers';
+export const docLevelAccessSlug = 'doc-level-access';
 
 const openAccess = {
   create: () => true,
@@ -32,7 +33,7 @@ const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
 
 export default buildConfig({
   admin: {
-    user: 'users'
+    user: 'users',
   },
   collections: [
     {
@@ -45,7 +46,7 @@ export default buildConfig({
           setTimeout(resolve, 50, true); // set to 'true' or 'false' here to simulate the response
         }),
       },
-      fields: []
+      fields: [],
     },
     {
       slug,
@@ -192,6 +193,52 @@ export default buildConfig({
         {
           name: 'name',
           type: 'text',
+        },
+      ],
+    },
+    {
+      slug: docLevelAccessSlug,
+      labels: {
+        singular: 'Doc Level Access',
+        plural: 'Doc Level Access',
+      },
+      access: {
+        delete: () => ({
+          and: [
+            {
+              approvedForRemoval: {
+                equals: true,
+              },
+            },
+          ],
+        }),
+      },
+      fields: [
+        {
+          name: 'approvedForRemoval',
+          type: 'checkbox',
+          defaultValue: false,
+          admin: {
+            position: 'sidebar',
+          },
+        },
+        {
+          name: 'approvedTitle',
+          type: 'text',
+          localized: true,
+          access: {
+            update: (args) => {
+              if (args?.doc?.lockTitle) {
+                return false;
+              }
+              return true;
+            },
+          },
+        },
+        {
+          name: 'lockTitle',
+          type: 'checkbox',
+          defaultValue: false,
         },
       ],
     },

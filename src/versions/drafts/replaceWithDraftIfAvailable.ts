@@ -27,8 +27,6 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 }: Arguments<T>): Promise<T> => {
   const VersionModel = payload.versions[entity.slug] as CollectionModel;
 
-  let useEstimatedCount = false;
-
   const queryToBuild: { where: Where } = {
     where: {
       and: [
@@ -62,13 +60,10 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     queryToBuild.where.and.push(versionAccessResult);
   }
 
-  const constraints = flattenWhereConstraints(queryToBuild);
-  useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   const query = await VersionModel.buildQuery(queryToBuild, locale);
 
   let draft = await VersionModel.findOne(query, {}, {
     lean: true,
-    useEstimatedCount,
     sort: { updatedAt: 'desc' },
   });
 

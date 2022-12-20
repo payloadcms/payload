@@ -7,9 +7,9 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { buildDraftMergeAggregate } from '../../versions/drafts/buildDraftMergeAggregate';
 
 export type Arguments = {
   collection: Collection
@@ -138,7 +138,10 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
 
   const usePagination = pagination && limit !== 0;
   const limitToUse = limit ?? (usePagination ? 10 : 0);
-  const paginatedDocs = await Model.paginate(query, {
+
+  let result: PaginatedDocs<T>;
+
+  const paginationOptions = {
     page: page || 1,
     sort: {
       [sortProperty]: sortOrder,
@@ -153,34 +156,27 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
       // limit must also be set here, it's ignored when pagination is false
       limit: limitToUse,
     },
-  });
+  };
 
-  let result: PaginatedDocs<T> = {
-    ...paginatedDocs,
-    docs: paginatedDocs.docs.map((doc) => {
+  if (collectionConfig.versions?.drafts && draftsEnabled) {
+    const aggregate = Model.aggregate(buildDraftMergeAggregate({
+      config: collectionConfig,
+      query,
+    }));
+
+    result = await Model.aggregatePaginate(aggregate, paginationOptions);
+  } else {
+    result = await Model.paginate(query, paginationOptions);
+  }
+
+  result = {
+    ...result,
+    docs: result.docs.map((doc) => {
       const sanitizedDoc = JSON.parse(JSON.stringify(doc));
       sanitizedDoc.id = sanitizedDoc._id;
       return sanitizeInternalFields(sanitizedDoc);
     }),
   };
-
-  // /////////////////////////////////////
-  // Replace documents with drafts if available
-  // /////////////////////////////////////
-
-  if (collectionConfig.versions?.drafts && draftsEnabled) {
-    result = {
-      ...result,
-      docs: await Promise.all(result.docs.map(async (doc) => replaceWithDraftIfAvailable({
-        accessResult,
-        payload,
-        entity: collectionConfig,
-        entityType: 'collection',
-        doc,
-        locale,
-      }))),
-    };
-  }
 
   // /////////////////////////////////////
   // beforeRead - Collection

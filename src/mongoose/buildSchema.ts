@@ -308,6 +308,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
                 id: false,
               },
               disableUnique: buildSchemaOptions.disableUnique,
+              draftsEnabled: buildSchemaOptions.draftsEnabled,
             },
           ),
         };
@@ -336,6 +337,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           options: { _id: false, id: false },
           allowIDField: true,
           disableUnique: buildSchemaOptions.disableUnique,
+          draftsEnabled: buildSchemaOptions.draftsEnabled,
         },
       )],
     };
@@ -358,6 +360,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
             id: false,
           },
           disableUnique: buildSchemaOptions.disableUnique,
+          draftsEnabled: buildSchemaOptions.draftsEnabled,
         },
       ),
     };
@@ -375,6 +378,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         return option;
       }),
     };
+
+    if (buildSchemaOptions.draftsEnabled || !field.required) {
+      baseSchema.enum.push(null);
+    }
 
     schema.add({
       [field.name]: localizeSchema(

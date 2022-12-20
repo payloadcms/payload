@@ -8,6 +8,7 @@ import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
 import Button from '../../../../../../elements/Button';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { Props as RichTextProps } from '../../../types';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -35,7 +36,7 @@ const Element: React.FC<{
   const [relatedCollection, setRelatedCollection] = useState(() => collections.find((coll) => coll.slug === relationTo));
   const selected = useSelected();
   const focused = useFocused();
-  const { t } = useTranslation(['fields', 'general']);
+  const { t, i18n } = useTranslation(['fields', 'general']);
   const editor = useSlateStatic();
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
   const [{ data }, { setParams }] = usePayloadAPI(
@@ -137,7 +138,7 @@ const Element: React.FC<{
     >
       <div className={`${baseClass}__wrap`}>
         <p className={`${baseClass}__label`}>
-          {t('labelRelationship', { label: relatedCollection.labels.singular })}
+          {t('labelRelationship', { label: getTranslation(relatedCollection.labels.singular, i18n) })}
         </p>
         <p className={`${baseClass}__title`}>
           {data[relatedCollection?.admin?.useAsTitle || 'id']}

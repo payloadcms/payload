@@ -10,7 +10,7 @@ async function handleTransport(transport: Transporter, email: EmailTransport, lo
     await transport.verify();
   } catch (err) {
     logger.error(
-      `There is an error with the email configuration you have provided. ${err.message}`,
+      `There is an error with the email configuration you have provided. ${err}`,
     );
   }
 

@@ -27,10 +27,9 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
   } = args;
 
   if (fieldSchema) {
-    const fieldPromises = [];
     const state: Fields = {};
 
-    iterateFields({
+    await iterateFields({
       state,
       fields: fieldSchema,
       id,
@@ -38,14 +37,11 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
       operation,
       path: '',
       user,
-      fieldPromises,
       data: fullData,
       fullData,
       parentPassesCondition: true,
       t,
     });
-
-    await Promise.all(fieldPromises);
 
     return state;
   }

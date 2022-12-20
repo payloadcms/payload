@@ -5,7 +5,7 @@ export const defaultText = 'default-text';
 const DateFields: CollectionConfig = {
   slug: 'date-fields',
   admin: {
-    useAsTitle: 'date',
+    useAsTitle: 'default',
   },
   fields: [
     {

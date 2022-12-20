@@ -1,5 +1,53 @@
 
 
+## [1.3.4](https://github.com/payloadcms/payload/compare/v1.3.3...v1.3.4) (2022-12-16)
+
+
+### Bug Fixes
+
+* async validate out of order ([e913fbe](https://github.com/payloadcms/payload/commit/e913fbe4ea4f9abf7eeb29db3b03e1afe4649d50))
+* autosave with nested localized fields ([4202fc2](https://github.com/payloadcms/payload/commit/4202fc29337763f8fd90ec4beaf0d34e39a916bc))
+* doc access should not run where query on collections without id ([016beb6](https://github.com/payloadcms/payload/commit/016beb6eec96857fe913888a1d9c4994dbd94e7e))
+* run docAccess also when checking global ([b8c0482](https://github.com/payloadcms/payload/commit/b8c0482cdae6d372f81823ee4541717131d9dac4))
+
+## [1.3.3](https://github.com/payloadcms/payload/compare/v1.3.2...v1.3.3) (2022-12-16)
+
+
+### Bug Fixes
+
+* allow translation in group admin.description ([#1680](https://github.com/payloadcms/payload/issues/1680)) ([91e33ad](https://github.com/payloadcms/payload/commit/91e33ad1ee04750425112602fcfddcf329f934e8))
+* ensures select field avoids circular dependencies ([f715146](https://github.com/payloadcms/payload/commit/f715146aa35a6f3a8f5d7d4e066c71fb26027472))
+
+## [1.3.2](https://github.com/payloadcms/payload/compare/v1.3.1...v1.3.2) (2022-12-15)
+
+
+### Bug Fixes
+
+* safely handles rich text deselection ([420eef4](https://github.com/payloadcms/payload/commit/420eef4d91d6c5810b4e9dbda1e87e9f0e6d8dba))
+
+## [1.3.1](https://github.com/payloadcms/payload/compare/v1.3.0...v1.3.1) (2022-12-15)
+
+
+### Bug Fixes
+
+* add i18n type to collection and globals admin.description ([#1675](https://github.com/payloadcms/payload/issues/1675)) ([049d560](https://github.com/payloadcms/payload/commit/049d560898fdf3fd9be40a4689eb1ef4170ef207))
+* adds draftsEnabled to baseSchema for tabs / arrays / groups & allows for null enum ([80da898](https://github.com/payloadcms/payload/commit/80da898de8cfe068a0ad685803d8523fd9a10dcd))
+* adds draftsEnabled to versionSchema in collections / globals ([f0db5e0](https://github.com/payloadcms/payload/commit/f0db5e0170807944cfbed8495c813b7c28b05bb3))
+* collapsible margin bottom adjustment ([#1673](https://github.com/payloadcms/payload/issues/1673)) ([64086e8](https://github.com/payloadcms/payload/commit/64086e8122e04965ca0ae8d254b99114208944bf))
+* escapes react-select events when drawer is open ([f290cda](https://github.com/payloadcms/payload/commit/f290cda333aecab104d7cd195bcc7fab2059134d))
+* label translation in about to delete dialog ([#1667](https://github.com/payloadcms/payload/issues/1667)) ([d9c45f6](https://github.com/payloadcms/payload/commit/d9c45f62b19162a34bc317e997d9912213a3012b))
+* list view date field display format ([#1661](https://github.com/payloadcms/payload/issues/1661)) ([934b443](https://github.com/payloadcms/payload/commit/934b443b5b3b0f610767786f940175b9db0b2da7))
+* removes case for select field that sets data to undefined if set to null ([b4f39d5](https://github.com/payloadcms/payload/commit/b4f39d5fd380190ee82a5bb967756d25e9c98e95))
+* Set 'Dashboard's link to config route ([#1652](https://github.com/payloadcms/payload/issues/1652)) ([940c1e8](https://github.com/payloadcms/payload/commit/940c1e84f5f091bf4b4ae0bd6628f077d9d0d6e9))
+* stringifies date in DateTime field for useAsTitle ([#1674](https://github.com/payloadcms/payload/issues/1674)) ([a1813ca](https://github.com/payloadcms/payload/commit/a1813ca4b32dfcd8ca3604f7f03b1ba316d740e2))
+
+
+### Features
+
+* inline relationships ([8d744c8](https://github.com/payloadcms/payload/commit/c6013c39043cc7bf9e8ff39551662c25e8d744c8))
+* custom button html element ([5592fb1](https://github.com/payloadcms/payload/commit/5592fb148dfa3058df577cfb7f5ed72ea25e1217))
+* further Tooltip improvements ([e101f92](https://github.com/payloadcms/payload/commit/e101f925cc71af4c3a1b5ce4ad552d9834d35bfd))
+
 # [1.3.0](https://github.com/payloadcms/payload/compare/v1.2.5...v1.3.0) (2022-12-09)
 
 

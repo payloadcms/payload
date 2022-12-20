@@ -206,9 +206,10 @@ const RichText: React.FC<Props> = (props) => {
   }, [loaded, readOnly]);
 
   useEffect(() => {
+    // If there is a change to the initial value, we need to reset Slate
+    // to the new initial value, and clear selection
     if (Array.isArray(initialValue) && initialValue.length > 0) {
-      const point = { path: [0, 0], offset: 0 };
-      editor.selection = { anchor: point, focus: point };
+      if (editor.selection) ReactEditor.deselect(editor);
       editor.history = { redos: [], undos: [] };
       editor.children = initialValue;
     }
