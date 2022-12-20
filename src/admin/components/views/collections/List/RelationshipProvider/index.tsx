@@ -50,6 +50,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
         const params = {
           depth: 0,
           'where[id][in]': idsToLoad,
+          locale: i18n.language,
           limit: 250,
         };
 
