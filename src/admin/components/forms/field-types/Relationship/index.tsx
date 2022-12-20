@@ -25,6 +25,7 @@ import { findOptionsByValue } from './findOptionsByValue';
 import { GetFilterOptions } from './GetFilterOptions';
 import { SingleValue } from './select-components/SingleValue';
 import { MultiValueLabel } from './select-components/MultiValueLabel';
+import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
 
 import './index.scss';
 
@@ -300,6 +301,10 @@ const Relationship: React.FC<Props> = (props) => {
     setHasLoadedFirstPage(false);
   }, [relationTo, filterOptionsResult]);
 
+  const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
+    dispatchOptions({ type: 'UPDATE', doc: args.doc, collection: args.collectionConfig, i18n });
+  }, [i18n]);
+
   const classes = [
     'field-type',
     baseClass,
@@ -383,6 +388,7 @@ const Relationship: React.FC<Props> = (props) => {
               disableMouseDown: drawerIsOpen,
               disableKeyDown: drawerIsOpen,
               setDrawerIsOpen,
+              onSave,
             }}
             onMenuOpen={() => {
               if (!hasLoadedFirstPage) {

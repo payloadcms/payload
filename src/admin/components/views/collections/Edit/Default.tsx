@@ -94,11 +94,13 @@ const DefaultEditView: React.FC<Props> = (props) => {
             disabled={!hasSavePermission}
             initialState={initialState}
           >
-            <SetStepNav
-              collection={collection}
-              isEditing={isEditing}
-              id={data.id}
-            />
+            {!disableEyebrow && (
+              <SetStepNav
+                collection={collection}
+                isEditing={isEditing}
+                id={data.id}
+              />
+            )}
             <div className={`${baseClass}__main`}>
               <Meta
                 title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(collection.labels.singular, i18n)}`}

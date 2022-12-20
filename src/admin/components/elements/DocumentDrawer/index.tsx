@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useReducer, useRef, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -20,6 +20,7 @@ import formatFields from '../../views/collections/Edit/formatFields';
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections';
 import IDLabel from '../IDLabel';
 import { useEditDepth } from '../../utilities/EditDepth';
+
 import './index.scss';
 
 const baseClass = 'doc-drawer';
@@ -64,7 +65,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
   collectionSlug,
   id,
   drawerSlug,
-  onSave,
+  onSave: onSaveFromProps,
   customHeader,
 }) => {
   const { serverURL, routes: { api } } = useConfig();
@@ -83,7 +84,8 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
     setFields(formatFields(collectionConfig, true));
   }, [collectionSlug, collectionConfig]);
 
-  const [{ data, isLoading: isLoadingDocument, isError }] = usePayloadAPI(
+  const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0); // used to rerun the API call even though the URL hasn't changed
+  const [{ data, isLoading: isLoadingDocument, isError }, { setParams }] = usePayloadAPI(
     (id ? `${serverURL}${api}/${collectionSlug}/${id}` : null),
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
   );
@@ -120,6 +122,17 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
       toast.error(data.errors?.[0].message || t('error:unspecific'));
     }
   }, [isError, t, isOpen, data, drawerSlug, closeModal, isLoadingDocument]);
+
+  const onSave = useCallback((args: { doc: any, message: string }) => {
+    setParams({ 'fallback-locale': 'null', depth: 0, draft: 'true', cacheBust });
+    dispatchCacheBust();
+    if (typeof onSaveFromProps === 'function') {
+      onSaveFromProps({
+        ...args,
+        collectionConfig,
+      });
+    }
+  }, [onSaveFromProps, cacheBust, setParams, collectionConfig]);
 
   if (isError) return null;
 

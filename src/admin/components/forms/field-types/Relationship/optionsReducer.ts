@@ -29,6 +29,22 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
       return [];
     }
 
+    case 'UPDATE': {
+      const { collection, doc, i18n } = action;
+      const relation = collection.slug;
+      const newOptions = [...state];
+      const labelKey = collection.admin.useAsTitle || 'id';
+      const foundOptionGroup = newOptions.find((optionGroup) => optionGroup.label === collection.labels.plural);
+      const foundOption = foundOptionGroup?.options?.find((option) => option.value === doc.id);
+
+      if (foundOption) {
+        foundOption.label = doc[labelKey] || `${i18n.t('general:untitled')} - ID: ${doc.id}`;
+        foundOption.relationTo = relation;
+      }
+
+      return newOptions;
+    }
+
     case 'ADD': {
       const { collection, docs, sort, ids = [], i18n } = action;
       const relation = collection.slug;
