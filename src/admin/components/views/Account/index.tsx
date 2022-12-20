@@ -20,7 +20,7 @@ const AccountView: React.FC = () => {
   const { setStepNav } = useStepNav();
   const { user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
-  const { id, preferencesKey, docPermissions, slug } = useDocumentInfo();
+  const { id, preferencesKey, docPermissions, getDocPermissions, slug } = useDocumentInfo();
   const { getPreference } = usePreferences();
 
   const {
@@ -58,6 +58,12 @@ const AccountView: React.FC = () => {
   const apiURL = `${serverURL}${api}/${slug}/${data?.id}`;
 
   const action = `${serverURL}${api}/${slug}/${data?.id}?locale=${locale}&depth=0`;
+
+  const onSave = React.useCallback(async (json: any) => {
+    getDocPermissions();
+    const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc, user, id, operation: 'update', locale, t });
+    setInitialState(state);
+  }, [collection, user, id, t, locale, getDocPermissions]);
 
   useEffect(() => {
     const nav = [{
@@ -98,6 +104,7 @@ const AccountView: React.FC = () => {
         initialState,
         apiURL,
         isLoading: !initialState || !docPermissions,
+        onSave,
       }}
     />
   );
