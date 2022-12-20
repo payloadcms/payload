@@ -1,4 +1,4 @@
-import React, { useId, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 import Pill from '../Pill';
@@ -18,7 +18,12 @@ const ColumnSelector: React.FC<Props> = (props) => {
     setColumns,
   } = props;
 
-  const [fields] = useState(() => flattenTopLevelFields(collection.fields, true));
+  const [fields, setFields] = useState(() => flattenTopLevelFields(collection.fields, true));
+
+  useEffect(() => {
+    setFields(flattenTopLevelFields(collection.fields, true));
+  }, [collection.fields]);
+
   const { i18n } = useTranslation();
   const uuid = useId();
   const editDepth = useEditDepth();

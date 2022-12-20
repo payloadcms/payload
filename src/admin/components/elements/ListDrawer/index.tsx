@@ -128,7 +128,7 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
   });
 
   const [selectedOption, setSelectedOption] = useState<{ label: string, value: string }>(() => (selectedCollectionConfig ? { label: getTranslation(selectedCollectionConfig.labels.singular, i18n), value: selectedCollectionConfig.slug } : undefined));
-  const [fields] = useState<Field[]>(() => formatFields(selectedCollectionConfig, t));
+  const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig, t));
   const [tableColumns, setTableColumns] = useState<Column[]>(() => {
     const initialColumns = getInitialColumnState(fields, selectedCollectionConfig.admin.useAsTitle, selectedCollectionConfig.admin.defaultColumns);
     return buildColumns({
@@ -207,7 +207,9 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
   useEffect(() => {
     const syncColumnsFromPrefs = async () => {
       const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
-      const initialColumns = getInitialColumnState(fields, selectedCollectionConfig.admin.useAsTitle, selectedCollectionConfig.admin.defaultColumns);
+      const newFields = formatFields(selectedCollectionConfig, t);
+      setFields(newFields);
+      const initialColumns = getInitialColumnState(newFields, selectedCollectionConfig.admin.useAsTitle, selectedCollectionConfig.admin.defaultColumns);
       setTableColumns(buildColumns({
         collectionConfig: selectedCollectionConfig,
         columns: currentPreferences?.columns || initialColumns,
@@ -217,7 +219,7 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
     };
 
     syncColumnsFromPrefs();
-  }, [selectedCollectionConfig, t, getPreference, preferenceKey, onSelect, fields]);
+  }, [t, getPreference, preferenceKey, onSelect, selectedCollectionConfig]);
 
   useEffect(() => {
     const newPreferences = {
