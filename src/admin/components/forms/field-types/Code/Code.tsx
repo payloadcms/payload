@@ -31,6 +31,7 @@ const Code: React.FC<Props> = (props) => {
       condition,
     } = {},
     label,
+    editorOptions,
   } = props;
 
   const { theme } = useTheme();
@@ -92,6 +93,7 @@ const Code: React.FC<Props> = (props) => {
           tabSize: 2,
           theme: theme === 'dark' ? 'vs-dark' : 'vs',
           wordWrap: 'on',
+          ...editorOptions,
         }}
       />
       <FieldDescription

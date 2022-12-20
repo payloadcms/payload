@@ -31,6 +31,7 @@ const JSONField: React.FC<Props> = (props) => {
       condition,
     } = {},
     label,
+    editorOptions,
   } = props;
 
   const { theme } = useTheme();
@@ -98,17 +99,20 @@ const JSONField: React.FC<Props> = (props) => {
         defaultLanguage="json"
         value={stringValue}
         onChange={readOnly ? () => null : (val) => setStringValue(val)}
-        options={{
-          detectIndentation: true,
-          minimap: {
-            enabled: false,
-          },
-          readOnly: Boolean(readOnly),
-          scrollBeyondLastLine: false,
-          tabSize: 2,
-          theme: theme === 'dark' ? 'vs-dark' : 'vs',
-          wordWrap: 'on',
-        }}
+        options={
+          {
+            detectIndentation: true,
+            minimap: {
+              enabled: false,
+            },
+            readOnly: Boolean(readOnly),
+            scrollBeyondLastLine: false,
+            tabSize: 2,
+            theme: theme === 'dark' ? 'vs-dark' : 'vs',
+            wordWrap: 'on',
+            ...editorOptions,
+          }
+        }
       />
       <FieldDescription
         value={value}

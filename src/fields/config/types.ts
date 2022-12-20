@@ -257,11 +257,13 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
   minLength?: number
   maxLength?: number
   type: 'code';
+  editorOptions?: any;
 }
 
 export type JSONField = Omit<FieldBase, 'admin'> & {
   admin?: Admin
   type: 'json';
+  editorOptions?: any;
 }
 
 export type SelectField = FieldBase & {

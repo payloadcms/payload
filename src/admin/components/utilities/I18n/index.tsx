@@ -1,5 +1,6 @@
 import React from 'react';
 import i18n from 'i18next';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { loader } from '@monaco-editor/react';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
@@ -18,7 +19,7 @@ export const I18n: React.FC = () => {
     .use(LanguageDetector)
     .use(initReactI18next)
     .init(deepmerge(defaultOptions, config.i18n || {}));
-  loader.config({ 'vs/nls': { availableLanguages: { '*': i18n.language } } });
+  loader.config({ 'vs/nls': { availableLanguages: { '*': i18n.language === 'en' ? '' : i18n.language } } });
   return null;
 };
 
