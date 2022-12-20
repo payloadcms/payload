@@ -188,7 +188,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       const json = await res.json();
       setDocPermissions(json);
     } else {
-      // fallback to permissions from the collection
+      // fallback to permissions from the entity type
       // (i.e. create has no id)
       setDocPermissions(permissions[pluralType][slug]);
     }
