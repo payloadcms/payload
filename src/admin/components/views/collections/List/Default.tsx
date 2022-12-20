@@ -49,6 +49,7 @@ const DefaultList: React.FC<Props> = (props) => {
     handleSortChange,
     handleWhereChange,
     handlePageChange,
+    handlePerPageChange,
     customHeader,
   } = props;
 
@@ -143,6 +144,7 @@ const DefaultList: React.FC<Props> = (props) => {
             nextPage={data.nextPage}
             numberOfNeighbors={1}
             disableHistoryChange={!modifySearchParams}
+            onChange={handlePageChange}
           />
           {data?.totalDocs > 0 && (
             <Fragment>
@@ -159,7 +161,7 @@ const DefaultList: React.FC<Props> = (props) => {
                 limits={collection?.admin?.pagination?.limits}
                 limit={limit}
                 modifySearchParams={modifySearchParams}
-                handleChange={handlePageChange}
+                handleChange={handlePerPageChange}
               />
             </Fragment>
           )}

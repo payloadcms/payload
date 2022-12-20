@@ -340,6 +340,7 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
             handleSortChange: setSort,
             handleWhereChange: setWhere,
             handlePageChange: setPage,
+            handlePerPageChange: setLimit,
           }}
         />
       </DocumentInfoProvider>

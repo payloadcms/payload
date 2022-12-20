@@ -3,6 +3,7 @@ import { PaginatedDocs } from '../../../../../mongoose/types';
 import { Column } from '../../../elements/Table/types';
 import { Props as ListControlsProps } from '../../../elements/ListControls/types';
 import { Props as PerPageProps } from '../../../elements/PerPage';
+import { Props as PaginatorProps } from '../../../elements/Paginator/types';
 
 export type Props = {
   collection: SanitizedCollectionConfig
@@ -22,7 +23,8 @@ export type Props = {
   disableCardLink?: boolean
   handleSortChange?: ListControlsProps['handleSortChange']
   handleWhereChange?: ListControlsProps['handleWhereChange']
-  handlePageChange?: PerPageProps['handleChange']
+  handlePageChange?: PaginatorProps['onChange']
+  handlePerPageChange?: PerPageProps['handleChange']
   onCreateNewClick?: () => void
   customHeader?: React.ReactNode
 }
