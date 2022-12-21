@@ -64,4 +64,16 @@ export async function writeCommonFiles(
       : { installCmd: 'npm install', devCmd: 'npm run dev' },
   )
   await fse.writeFile(path.resolve(projectDir, 'docker-compose.yml'), dockerCompose)
+
+  // Dockerfile
+  const dockerfileTemplate = await fse.readFile(
+    path.resolve(commonFilesDir, 'Dockerfile.template'),
+    'utf8',
+  )
+  const dockerfile = handlebars.compile(dockerfileTemplate)(
+    packageManager === 'yarn'
+      ? { installCmd: 'yarn install', buildCmd: 'yarn build' }
+      : { installCmd: 'npm install', buildCmd: 'npm run build' },
+  )
+  await fse.writeFile(path.resolve(projectDir, 'Dockerfile'), dockerfile)
 }
