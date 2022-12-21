@@ -93,6 +93,7 @@
     "block": "block",
     "blocks": "block",
     "addLabel": "Lägg till {{label}}",
+    "addLink": "Lägg till Länk",
     "addNew": "Lägg till ny",
     "addNewLabel": "Lägg till ny {{label}}",
     "addRelationship": "Lägg till Relation",

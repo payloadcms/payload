@@ -93,6 +93,7 @@
     "block": "block",
     "blocks": "blocks",
     "addLabel": "Thêm: {{label}}",
+    "addLink": "Thêm liên kết",
     "addNew": "Thêm mới",
     "addNewLabel": "Thêm mới: {{label}}",
     "addRelationship": "Thêm mối quan hệ (relationship)",

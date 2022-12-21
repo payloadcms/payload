@@ -102,6 +102,7 @@
     "block": "blok",
     "blocks": "blok",
     "addLabel": "{{label}} ekle",
+    "addLink": "Link Ekle",
     "addNew": "Yeni",
     "addNewLabel": "Yeni {{label}}",
     "addRelationship": "İlişki Ekle",

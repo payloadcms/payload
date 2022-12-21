@@ -92,6 +92,7 @@
   "fields": {
     "addLabel": "เพิ่ม {{label}}",
     "addNew": "เพิ่ม",
+    "addLink": "เพิ่มลิงค์",
     "addNewLabel": "เพิ่ม {{label}} ใหม่",
     "addRelationship": "เพิ่มความสัมพันธ์",
     "addUpload": "เพิ่มการอัปโหลด",

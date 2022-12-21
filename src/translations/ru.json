@@ -91,6 +91,7 @@
   },
   "fields": {
     "addLabel": "Добавить {{label}}",
+    "addLink": "Добавить ссылку",
     "addNew": "Добавить новый",
     "addNewLabel": "Добавить {{label}}",
     "addRelationship": "Добавить Отношения",

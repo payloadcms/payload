@@ -92,6 +92,7 @@
     "block": "bloco",
     "blocks": "blocos",
     "addLabel": "Adicionar {{label}}",
+    "addLink": "Adicionar Link",
     "addNew": "Adicionar novo",
     "addNewLabel": "Adicionar novo {{label}}",
     "addRelationship": "Adicionar Relação",

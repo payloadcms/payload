@@ -91,6 +91,7 @@
   },
   "fields": {
     "addLabel": "Legg til {{label}}",
+    "addLink": "Legg til Lenke",
     "addNew": "Legg til ny",
     "addNewLabel": "Legg til ny {{label}}",
     "addRelationship": "Legg til Relasjon",
