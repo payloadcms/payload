@@ -167,22 +167,28 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
           )}
           {(!file || missingFile) && (
             <div className={`${baseClass}__wrap`}>
-              <DocumentDrawerToggler>
-                <Button
-                  buttonStyle="secondary"
-                  el="div"
+              <div className={`${baseClass}__buttons`}>
+                <DocumentDrawerToggler
+                  className={`${baseClass}__toggler`}
                 >
-                  {t('uploadNewLabel', { label: getTranslation(collection.labels.singular, i18n) })}
-                </Button>
-              </DocumentDrawerToggler>
-              <ListDrawerToggler>
-                <Button
-                  buttonStyle="secondary"
-                  el="div"
+                  <Button
+                    buttonStyle="secondary"
+                    el="div"
+                  >
+                    {t('uploadNewLabel', { label: getTranslation(collection.labels.singular, i18n) })}
+                  </Button>
+                </DocumentDrawerToggler>
+                <ListDrawerToggler
+                  className={`${baseClass}__toggler`}
                 >
-                  {t('chooseFromExisting')}
-                </Button>
-              </ListDrawerToggler>
+                  <Button
+                    buttonStyle="secondary"
+                    el="div"
+                  >
+                    {t('chooseFromExisting')}
+                  </Button>
+                </ListDrawerToggler>
+              </div>
             </div>
           )}
           <FieldDescription
