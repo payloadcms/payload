@@ -134,7 +134,7 @@ DigitalOcean provides extremely helpful documentation that can walk you through 
 This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `MONGODB_URI` if needed.
 
 ```dockerfile
-FROM node:18.8-alpine as base
+FROM node:18-alpine as base
 
 FROM base as builder
 
