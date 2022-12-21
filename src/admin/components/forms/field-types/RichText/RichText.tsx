@@ -23,6 +23,7 @@ import listTypes from './elements/listTypes';
 import mergeCustomFunctions from './mergeCustomFunctions';
 import withEnterBreakOut from './plugins/withEnterBreakOut';
 import { getTranslation } from '../../../../../utilities/getTranslation';
+import { useEditDepth } from '../../../utilities/EditDepth';
 
 import './index.scss';
 
@@ -73,6 +74,9 @@ const RichText: React.FC<Props> = (props) => {
   const [enabledLeaves, setEnabledLeaves] = useState({});
   const editorRef = useRef(null);
   const toolbarRef = useRef(null);
+
+  const drawerDepth = useEditDepth();
+  const drawerIsOpen = drawerDepth > 1;
 
   const renderElement = useCallback(({ attributes, children, element }) => {
     const matchedElement = enabledElements[element?.type];
@@ -261,7 +265,10 @@ const RichText: React.FC<Props> = (props) => {
         >
           <div className={`${baseClass}__wrapper`}>
             <div
-              className={`${baseClass}__toolbar`}
+              className={[
+                `${baseClass}__toolbar`,
+                drawerIsOpen && `${baseClass}__drawerIsOpen`,
+              ].filter(Boolean).join(' ')}
               ref={toolbarRef}
             >
               <div className={`${baseClass}__toolbar-wrap`}>
