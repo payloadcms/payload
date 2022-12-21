@@ -160,6 +160,7 @@ const Upload: React.FC<Props> = (props) => {
                 iconStyle="with-border"
                 onClick={() => {
                   setValue(null);
+                  inputRef.current.value = null;
                 }}
               />
             </div>
