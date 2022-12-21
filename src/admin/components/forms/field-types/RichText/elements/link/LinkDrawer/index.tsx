@@ -1,6 +1,6 @@
-import { Modal } from '@faceless-ui/modal';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Drawer } from '../../../../../../elements/Drawer';
 import { MinimalTemplate } from '../../../../../..';
 import Button from '../../../../../../elements/Button';
 import X from '../../../../../../icons/X';
@@ -14,18 +14,19 @@ import './index.scss';
 
 const baseClass = 'rich-text-link-edit-modal';
 
-export const EditModal: React.FC<Props> = ({
-  close,
+export const LinkDrawer: React.FC<Props> = ({
+  handleClose,
   handleModalSubmit,
   initialState,
   fieldSchema,
-  modalSlug,
+  drawerSlug,
 }) => {
   const { t } = useTranslation('fields');
 
   return (
-    <Modal
-      slug={modalSlug}
+    <Drawer
+      slug={drawerSlug}
+      formatSlug={false}
       className={baseClass}
     >
       <MinimalTemplate className={`${baseClass}__template`}>
@@ -33,7 +34,7 @@ export const EditModal: React.FC<Props> = ({
           <h3>{t('editLink')}</h3>
           <Button
             buttonStyle="none"
-            onClick={close}
+            onClick={handleClose}
           >
             <X />
           </Button>
@@ -53,6 +54,6 @@ export const EditModal: React.FC<Props> = ({
           </FormSubmit>
         </Form>
       </MinimalTemplate>
-    </Modal>
+    </Drawer>
   );
 };

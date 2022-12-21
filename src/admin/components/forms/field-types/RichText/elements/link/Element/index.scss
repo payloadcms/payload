@@ -1,4 +1,4 @@
-@import '../../../../../../scss/styles.scss';
+@import '../../../../../../../scss/styles.scss';
 
 .rich-text-link {
   position: relative;
@@ -10,7 +10,6 @@
     right: 0;
     bottom: 0;
     left: 0;
-
 
     .popup__scroll,
     .popup__wrap {
@@ -52,17 +51,18 @@
   }
 }
 
-.rich-text-link__button {
-  @extend %btn-reset;
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  color: inherit;
-  letter-spacing: inherit;
-  line-height: inherit;
+.rich-text-link__popup-toggler {
   position: relative;
+  border: 0;
+  background-color: transparent;
+  padding: 0;
   text-decoration: underline;
   cursor: text;
+
+  &:focus,
+  &:focus-within {
+    outline: none;
+  }
 
   &--open {
     z-index: var(--z-popup);

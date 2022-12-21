@@ -1,31 +1,73 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { HTMLAttributes, useCallback, useEffect, useId, useState } from 'react';
 import { ReactEditor, useSlate } from 'slate-react';
 import { Transforms, Node, Editor } from 'slate';
 import { useModal } from '@faceless-ui/modal';
 import { Trans, useTranslation } from 'react-i18next';
-import { unwrapLink } from './utilities';
-import Popup from '../../../../../elements/Popup';
-import { EditModal } from './Modal';
-import { modalSlug as baseModalSlug } from './shared';
-import { Fields } from '../../../../Form/types';
-import buildStateFromSchema from '../../../../Form/buildStateFromSchema';
-import { useAuth } from '../../../../../utilities/Auth';
-import { useLocale } from '../../../../../utilities/Locale';
-import { useConfig } from '../../../../../utilities/Config';
-import { getBaseFields } from './Modal/baseFields';
-import { Field } from '../../../../../../../fields/config/types';
-import reduceFieldsToValues from '../../../../Form/reduceFieldsToValues';
-import deepCopyObject from '../../../../../../../utilities/deepCopyObject';
-import Button from '../../../../../elements/Button';
-import { getTranslation } from '../../../../../../../utilities/getTranslation';
-
+import { unwrapLink } from '../utilities';
+import Popup from '../../../../../../elements/Popup';
+import { LinkDrawer } from '../LinkDrawer';
+import { Fields } from '../../../../../Form/types';
+import buildStateFromSchema from '../../../../../Form/buildStateFromSchema';
+import { useAuth } from '../../../../../../utilities/Auth';
+import { useLocale } from '../../../../../../utilities/Locale';
+import { useConfig } from '../../../../../../utilities/Config';
+import { getBaseFields } from '../LinkDrawer/baseFields';
+import { Field } from '../../../../../../../../fields/config/types';
+import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues';
+import deepCopyObject from '../../../../../../../../utilities/deepCopyObject';
+import Button from '../../../../../../elements/Button';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
+import { useEditDepth } from '../../../../../../utilities/EditDepth';
+import { formatDrawerSlug } from '../../../../../../elements/Drawer';
+import { Props as RichTextFieldProps } from '../../../types';
 import './index.scss';
 
 const baseClass = 'rich-text-link';
 
-// TODO: Multiple modal windows stacked go boom (rip). Edit Upload in fields -> rich text
+const insertChange = (editor, fields, customFieldSchema) => {
+  const data = reduceFieldsToValues(fields, true);
 
-export const LinkElement = ({ attributes, children, element, editorRef, fieldProps }) => {
+  const [, parentPath] = Editor.above(editor);
+
+  const newNode: Record<string, unknown> = {
+    newTab: data.newTab,
+    url: data.url,
+    linkType: data.linkType,
+    doc: data.doc,
+  };
+
+  if (customFieldSchema) {
+    newNode.fields = data.fields;
+  }
+
+  Transforms.setNodes(
+    editor,
+    newNode,
+    { at: parentPath },
+  );
+
+  Transforms.delete(editor, { at: editor.selection.focus.path, unit: 'block' });
+  Transforms.move(editor, { distance: 1, unit: 'offset' });
+  Transforms.insertText(editor, String(data.text), { at: editor.selection.focus.path });
+
+  ReactEditor.focus(editor);
+};
+
+export const LinkElement: React.FC<{
+  attributes: HTMLAttributes<HTMLDivElement>
+  children: React.ReactNode
+  element: any
+  fieldProps: RichTextFieldProps
+  editorRef: React.RefObject<HTMLDivElement>
+}> = (props) => {
+  const {
+    attributes,
+    children,
+    element,
+    editorRef,
+    fieldProps,
+  } = props;
+
   const customFieldSchema = fieldProps?.admin?.link?.fields;
 
   const editor = useSlate();
@@ -33,7 +75,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
   const { user } = useAuth();
   const locale = useLocale();
   const { t, i18n } = useTranslation('fields');
-  const { openModal, toggleModal } = useModal();
+  const { openModal, toggleModal, closeModal } = useModal();
   const [renderModal, setRenderModal] = useState(false);
   const [renderPopup, setRenderPopup] = useState(false);
   const [initialState, setInitialState] = useState<Fields>({});
@@ -61,7 +103,13 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
     return fields;
   });
 
-  const modalSlug = `${baseModalSlug}-${fieldProps.path}`;
+  const uuid = useId();
+  const editDepth = useEditDepth();
+
+  const drawerSlug = formatDrawerSlug({
+    slug: `rich-text-link-${uuid}`,
+    depth: editDepth,
+  });
 
   const handleTogglePopup = useCallback((render) => {
     if (!render) {
@@ -97,43 +145,16 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
         contentEditable={false}
       >
         {renderModal && (
-          <EditModal
-            modalSlug={modalSlug}
+          <LinkDrawer
+            drawerSlug={drawerSlug}
             fieldSchema={fieldSchema}
-            close={() => {
-              toggleModal(modalSlug);
+            handleClose={() => {
+              toggleModal(drawerSlug);
               setRenderModal(false);
             }}
             handleModalSubmit={(fields) => {
-              toggleModal(modalSlug);
-              setRenderModal(false);
-
-              const data = reduceFieldsToValues(fields, true);
-
-              const [, parentPath] = Editor.above(editor);
-
-              const newNode: Record<string, unknown> = {
-                newTab: data.newTab,
-                url: data.url,
-                linkType: data.linkType,
-                doc: data.doc,
-              };
-
-              if (customFieldSchema) {
-                newNode.fields = data.fields;
-              }
-
-              Transforms.setNodes(
-                editor,
-                newNode,
-                { at: parentPath },
-              );
-
-              Transforms.delete(editor, { at: editor.selection.focus.path, unit: 'block' });
-              Transforms.move(editor, { distance: 1, unit: 'offset' });
-              Transforms.insertText(editor, String(data.text), { at: editor.selection.focus.path });
-
-              ReactEditor.focus(editor);
+              insertChange(editor, fields, customFieldSchema);
+              closeModal(drawerSlug);
             }}
             initialState={initialState}
           />
@@ -181,7 +202,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
                 onClick={(e) => {
                   e.preventDefault();
                   setRenderPopup(false);
-                  openModal(modalSlug);
+                  openModal(drawerSlug);
                   setRenderModal(true);
                 }}
                 tooltip={t('general:edit')}
@@ -205,7 +226,7 @@ export const LinkElement = ({ attributes, children, element, editorRef, fieldPro
         tabIndex={0}
         role="button"
         className={[
-          `${baseClass}__button`,
+          `${baseClass}__popup-toggler`,
         ].filter(Boolean).join(' ')}
         onKeyDown={(e) => { if (e.key === 'Enter') setRenderPopup(true); }}
         onClick={() => setRenderPopup(true)}

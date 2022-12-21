@@ -33,5 +33,6 @@ export type UseListDrawer = (args: {
     isDrawerOpen: boolean
     toggleDrawer: () => void
     closeDrawer: () => void
+    openDrawer: () => void
   }
 ]

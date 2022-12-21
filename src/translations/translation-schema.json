@@ -398,6 +398,9 @@
         "addLabel": {
           "type": "string"
         },
+        "addLink":{
+          "type": "string"
+        },
         "addNew": {
           "type": "string"
         },

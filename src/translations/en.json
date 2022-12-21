@@ -91,6 +91,7 @@
   },
   "fields": {
     "addLabel": "Add {{label}}",
+    "addLink": "Add Link",
     "addNew": "Add new",
     "addNewLabel": "Add new {{label}}",
     "addRelationship": "Add Relationship",

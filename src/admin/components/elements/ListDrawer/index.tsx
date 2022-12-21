@@ -354,7 +354,7 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
 export const useListDrawer: UseListDrawer = ({ collectionSlugs, uploads, selectedCollection }) => {
   const drawerDepth = useEditDepth();
   const uuid = useId();
-  const { modalState, toggleModal, closeModal } = useModal();
+  const { modalState, toggleModal, closeModal, openModal } = useModal();
   const [isOpen, setIsOpen] = useState(false);
   const drawerSlug = formatListDrawerSlug({
     depth: drawerDepth,
@@ -372,6 +372,10 @@ export const useListDrawer: UseListDrawer = ({ collectionSlugs, uploads, selecte
   const closeDrawer = useCallback(() => {
     closeModal(drawerSlug);
   }, [drawerSlug, closeModal]);
+
+  const openDrawer = useCallback(() => {
+    openModal(drawerSlug);
+  }, [drawerSlug, openModal]);
 
   const MemoizedDrawer = useMemo(() => {
     return ((props) => (
@@ -402,7 +406,8 @@ export const useListDrawer: UseListDrawer = ({ collectionSlugs, uploads, selecte
     isDrawerOpen: isOpen,
     toggleDrawer,
     closeDrawer,
-  }), [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer]);
+    openDrawer,
+  }), [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer, openDrawer]);
 
   return [
     MemoizedDrawer,
