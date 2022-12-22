@@ -264,6 +264,7 @@ export type JSONField = Omit<FieldBase, 'admin'> & {
   admin?: Admin
   type: 'json';
   editorOptions?: any;
+  jsonError?: string;
 }
 
 export type SelectField = FieldBase & {
