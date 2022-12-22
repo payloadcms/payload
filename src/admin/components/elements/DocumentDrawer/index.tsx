@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useReducer, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -74,7 +74,6 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
   const { permissions, user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
   const { t, i18n } = useTranslation(['fields', 'general']);
-  const hasInitializedState = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [collectionConfig] = useRelatedCollections(collectionSlug);
 
@@ -91,7 +90,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
   );
 
   useEffect(() => {
-    if (isLoadingDocument || hasInitializedState.current === true) {
+    if (isLoadingDocument) {
       return;
     }
 
@@ -109,7 +108,6 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
     };
 
     awaitInitialState();
-    hasInitializedState.current = true;
   }, [data, fields, id, user, locale, isLoadingDocument, t]);
 
   useEffect(() => {
@@ -123,7 +121,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
     }
   }, [isError, t, isOpen, data, drawerSlug, closeModal, isLoadingDocument]);
 
-  const onSave = useCallback((args: { doc: any, message: string }) => {
+  const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
     setParams({ 'fallback-locale': 'null', depth: 0, draft: 'true', cacheBust });
     dispatchCacheBust();
     if (typeof onSaveFromProps === 'function') {
