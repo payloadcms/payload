@@ -85,6 +85,8 @@
     padding: 0;
     cursor: pointer;
     text-decoration: underline;
+    text-align: left;
+    white-space: nowrap;
   }
 
   @include mid-break {
