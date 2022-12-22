@@ -1,6 +1,6 @@
-import { Editor, Node, NodeEntry } from 'slate';
+import { Editor, Node, NodeEntry, NodeMatch } from 'slate';
 
-export const getCommonBlock = (editor: Editor): NodeEntry<Node> => {
+export const getCommonBlock = (editor: Editor, match?: NodeMatch<Node>): NodeEntry<Node> => {
   const range = Editor.unhangRange(editor, editor.selection, { voids: true });
 
   const [common, path] = Node.common(
@@ -14,6 +14,6 @@ export const getCommonBlock = (editor: Editor): NodeEntry<Node> => {
   }
   return Editor.above(editor, {
     at: path,
-    match: (n) => Editor.isBlock(editor, n) || Editor.isEditor(n),
+    match: match || ((n) => Editor.isBlock(editor, n) || Editor.isEditor(n)),
   });
 };

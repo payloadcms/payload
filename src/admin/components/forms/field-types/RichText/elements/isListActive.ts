@@ -12,7 +12,7 @@ const isListActive = (editor: Editor, format: string): boolean => {
       return !Editor.isEditor(node)
         && Element.isElement(node)
         && node.type === format
-        && path.length >= topmostSelectedNodePath.length - 1;
+        && path.length >= topmostSelectedNodePath.length - 2;
     },
   }));
 

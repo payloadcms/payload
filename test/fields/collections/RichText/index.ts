@@ -334,7 +334,11 @@ export const richTextBulletsDoc = {
           type: 'li',
           children: [
             {
-              text: 'This text precedes a nested list',
+              children: [
+                {
+                  text: 'This text precedes a nested list',
+                },
+              ],
             },
             {
               type: 'ul',

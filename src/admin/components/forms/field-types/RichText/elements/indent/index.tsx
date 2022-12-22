@@ -5,6 +5,9 @@ import IndentLeft from '../../../../../icons/IndentLeft';
 import IndentRight from '../../../../../icons/IndentRight';
 import { baseClass } from '../Button';
 import isElementActive from '../isActive';
+import listTypes from '../listTypes';
+import { getCommonBlock } from '../getCommonBlock';
+import Edit from '../../../../../icons/Edit';
 
 const indentType = 'indent';
 
@@ -24,30 +27,67 @@ const indent = {
       e.preventDefault();
 
       if (dir === 'left') {
-        // Transforms.unwrapNodes(editor, {
-        //   match: (n) => Element.isElement(n) && [indentType, ...listTypes].includes(n.type),
-        //   split: true,
-        //   mode: 'lowest',
-        // });
+        if (isElementActive(editor, 'li')) {
+          const [, listPath] = getCommonBlock(editor, (n) => Element.isElement(n) && listTypes.includes(n.type));
 
-        // if (isElementActive(editor, 'li')) {
-        //   const [, parentLocation] = Editor.parent(editor, editor.selection);
-        //   const [, parentDepth] = parentLocation;
+          const matchedParentList = Editor.above(editor, {
+            at: listPath,
+            match: (n) => !Editor.isEditor(n) && Editor.isBlock(editor, n),
+          });
 
-        //   if (parentDepth > 0 || parentDepth === 0) {
-        //     Transforms.unwrapNodes(editor, {
-        //       match: (n) => Element.isElement(n) && n.type === 'li',
-        //       split: true,
-        //       mode: 'lowest',
-        //     });
-        //   } else {
-        //     Transforms.unsetNodes(editor, ['type']);
-        //   }
-        // }
+          if (matchedParentList) {
+            const [parentListItem, parentListItemPath] = matchedParentList;
 
-        const [previousNode, previousNodePath] = Editor.parent(editor, editor.selection, { depth: 4 });
+            if (parentListItem.children.length > 1) {
+              console.log('we have more than one child');
+            } else {
+              Transforms.unwrapNodes(editor, {
+                at: parentListItemPath,
+                match: (node, path) => {
+                  return Element.isElement(node)
+                    && node.type === 'li'
+                    && path.length === parentListItemPath.length;
+                },
+              });
 
-        console.log({ previousNode, previousNodePath });
+              Transforms.unwrapNodes(editor, {
+                match: (n) => Element.isElement(n) && listTypes.includes(n.type),
+              });
+            }
+          } else {
+            // Remove type for any nodes that have more than one child
+            Transforms.setNodes(editor, { type: undefined }, {
+              at: listPath,
+              match: (node, path) => {
+                const matches = !Editor.isEditor(node)
+                  && Element.isElement(node)
+                  && node.children.length === 1
+                  && node.type === 'li'
+                  && path.length === listPath.length + 1;
+
+                return matches;
+              },
+            });
+
+            // For nodes that have more than one child, unwrap it instead
+            Transforms.unwrapNodes(editor, {
+              at: listPath,
+              match: (node, path) => {
+                const matches = !Editor.isEditor(node)
+                  && Element.isElement(node)
+                  && node.children.length > 1
+                  && node.type === 'li'
+                  && path.length === listPath.length + 1;
+
+                return matches;
+              },
+            });
+
+            Transforms.unwrapNodes(editor, {
+              match: (n) => Element.isElement(n) && listTypes.includes(n.type),
+            });
+          }
+        }
       }
 
       if (dir === 'right') {
@@ -100,6 +140,7 @@ const indent = {
               },
             );
           } else {
+            // Otherwise, just wrap the node in a list / li
             Transforms.wrapNodes(
               editor,
               {

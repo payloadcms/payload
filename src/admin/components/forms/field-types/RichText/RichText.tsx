@@ -4,6 +4,7 @@ import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEdit
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { useTranslation } from 'react-i18next';
+import e from 'express';
 import { richText } from '../../../../../fields/validations';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
@@ -347,9 +348,11 @@ const RichText: React.FC<Props> = (props) => {
                     if (SlateElement.isElement(selectedElement) && selectedElement.type === 'li') {
                       const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
                       if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === 0) {
+                        event.preventDefault();
                         Transforms.unwrapNodes(editor, {
                           match: (n) => SlateElement.isElement(n) && listTypes.includes(n.type),
                           split: true,
+                          mode: 'lowest',
                         });
 
                         Transforms.setNodes(editor, { type: undefined });
