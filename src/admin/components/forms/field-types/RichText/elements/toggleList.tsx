@@ -1,29 +1,40 @@
-import { Element, Transforms } from 'slate';
+import { Editor, Element, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
-import isElementActive from './isActive';
+import isListActive from './isListActive';
 import listTypes from './listTypes';
 
-const toggleList = (editor, format) => {
-  const isActive = isElementActive(editor, format);
-  const isList = listTypes.includes(format);
+const toggleList = (editor: Editor, format: string): void => {
+  let currentListFormat: string;
 
-  let type = format;
+  if (isListActive(editor, 'ol')) currentListFormat = 'ol';
+  if (isListActive(editor, 'ul')) currentListFormat = 'ul';
 
-  if (isActive) {
-    type = undefined;
-  } else if (isList) {
-    type = 'li';
-  }
+  // If the format is currently active,
+  // unwrap the list and set li type to undefined
+  if (currentListFormat === format) {
+    Transforms.unwrapNodes(editor, {
+      match: (n) => Element.isElement(n) && listTypes.includes(n.type),
+      mode: 'lowest',
+    });
 
-  Transforms.unwrapNodes(editor, {
-    match: (n) => Element.isElement(n) && listTypes.includes(n.type as string),
-    split: true,
-    mode: 'lowest',
-  });
+    Transforms.setNodes(editor, { type: undefined });
 
-  Transforms.setNodes(editor, { type });
-
-  if (!isActive && isList) {
+    // Otherwise, if a list is active and we are changing it,
+    // change it
+  } else if (currentListFormat !== format) {
+    Transforms.setNodes(
+      editor,
+      {
+        type: format,
+      },
+      {
+        match: (node) => Element.isElement(node) && listTypes.includes(node.type),
+        mode: 'lowest',
+      },
+    );
+    // Otherwise we can assume that we should just activate the list
+  } else {
+    Transforms.setNodes(editor, { type: 'li' });
     const block = { type: format, children: [] };
     Transforms.wrapNodes(editor, block);
   }

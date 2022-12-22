@@ -1,23 +1,22 @@
-import { Ancestor, Editor, Element, NodeEntry } from 'slate';
+import { Editor, Element } from 'slate';
+import { getCommonBlock } from './getCommonBlock';
 
 const isListActive = (editor: Editor, format: string): boolean => {
-  let parentLI: NodeEntry<Ancestor>;
+  if (!editor.selection) return false;
+  const [, topmostSelectedNodePath] = getCommonBlock(editor);
 
-  try {
-    parentLI = Editor.parent(editor, editor.selection);
-  } catch (e) {
-    // swallow error, Slate
-  }
+  const [match] = Array.from(Editor.nodes(editor, {
+    at: topmostSelectedNodePath,
+    mode: 'lowest',
+    match: (node, path) => {
+      return !Editor.isEditor(node)
+        && Element.isElement(node)
+        && node.type === format
+        && path.length >= topmostSelectedNodePath.length - 1;
+    },
+  }));
 
-  if (parentLI?.[1]?.length > 0) {
-    const ancestor = Editor.above(editor, {
-      at: parentLI[1],
-    });
-
-    return Element.isElement(ancestor[0]) && ancestor[0].type === format;
-  }
-
-  return false;
+  return !!match;
 };
 
 export default isListActive;

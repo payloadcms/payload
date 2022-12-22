@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
 import { useSlate } from 'slate-react';
-import isListActive from './isListActive';
 import toggleList from './toggleList';
 import { ButtonProps } from './types';
 
 import '../buttons.scss';
+import isListActive from './isListActive';
 
 export const baseClass = 'rich-text__button';
 

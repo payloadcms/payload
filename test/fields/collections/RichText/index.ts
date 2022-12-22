@@ -272,6 +272,31 @@ export const richTextBulletsDoc = {
       type: 'ul',
       children: [
         {
+          type: 'li',
+          children: [
+            {
+              children: [
+                {
+                  text: 'I am semantically connected to my sub-bullets',
+                },
+              ],
+            },
+            {
+              type: 'ul',
+              children: [
+                {
+                  type: 'li',
+                  children: [
+                    {
+                      text: 'I am sub-bullets that are semantically connected to the parent bullet',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
           children: [
             {
               text: 'Normal bullet',
