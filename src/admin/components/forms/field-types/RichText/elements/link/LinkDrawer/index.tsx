@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Drawer } from '../../../../../../elements/Drawer';
-import { MinimalTemplate } from '../../../../../..';
 import Button from '../../../../../../elements/Button';
 import X from '../../../../../../icons/X';
 import Form from '../../../../../Form';
@@ -11,6 +10,7 @@ import fieldTypes from '../../../..';
 import RenderFields from '../../../../../RenderFields';
 
 import './index.scss';
+import { Gutter } from '../../../../../../elements/Gutter';
 
 const baseClass = 'rich-text-link-edit-modal';
 
@@ -29,10 +29,13 @@ export const LinkDrawer: React.FC<Props> = ({
       formatSlug={false}
       className={baseClass}
     >
-      <MinimalTemplate className={`${baseClass}__template`}>
+      <Gutter className={`${baseClass}__template`}>
         <header className={`${baseClass}__header`}>
-          <h3>{t('editLink')}</h3>
+          <h2 className={`${baseClass}__header-text`}>
+            {t('editLink')}
+          </h2>
           <Button
+            className={`${baseClass}__header-close`}
             buttonStyle="none"
             onClick={handleClose}
           >
@@ -53,7 +56,7 @@ export const LinkDrawer: React.FC<Props> = ({
             {t('general:submit')}
           </FormSubmit>
         </Form>
-      </MinimalTemplate>
+      </Gutter>
     </Drawer>
   );
 };

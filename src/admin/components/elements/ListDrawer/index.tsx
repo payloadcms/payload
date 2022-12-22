@@ -275,9 +275,9 @@ export const ListDrawer: React.FC<ListDrawerProps> = ({
               <header className={`${baseClass}__header`}>
                 <div className={`${baseClass}__header-wrap`}>
                   <div className={`${baseClass}__header-content`}>
-                    <h1>
+                    <h2 className={`${baseClass}__header-text`}>
                       {!customHeader ? getTranslation(selectedCollectionConfig?.labels?.plural, i18n) : customHeader}
-                    </h1>
+                    </h2>
                     {hasCreatePermission && (
                       <DocumentDrawerToggler
                         className={`${baseClass}__create-new-button`}

@@ -157,7 +157,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
             customHeader: (
               <div className={`${baseClass}__header`}>
                 <div className={`${baseClass}__header-content`}>
-                  <h2>
+                  <h2 className={`${baseClass}__header-text`}>
                     {!customHeader ? t(!id ? 'fields:addNewLabel' : 'general:editLabel', { label: getTranslation(collectionConfig.labels.singular, i18n) }) : customHeader}
                   </h2>
                   <Button
