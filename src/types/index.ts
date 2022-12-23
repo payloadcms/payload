@@ -16,7 +16,8 @@ export type Operator =
   | 'less_than'
   | 'less_than_equal'
   | 'like'
-  | 'near';
+  | 'near'
+  | 'every';
 
 export type WhereField = {
   [key in Operator]?: unknown;
