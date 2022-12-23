@@ -143,7 +143,7 @@ const DefaultList: React.FC<Props> = (props) => {
             prevPage={data.prevPage}
             nextPage={data.nextPage}
             numberOfNeighbors={1}
-            disableHistoryChange={!modifySearchParams}
+            disableHistoryChange={modifySearchParams === false}
             onChange={handlePageChange}
           />
           {data?.totalDocs > 0 && (
