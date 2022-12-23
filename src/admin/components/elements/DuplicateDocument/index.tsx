@@ -47,6 +47,9 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
       });
       let data = await response.json();
 
+      if ('createdAt' in data) delete data.createdAt;
+      if ('updatedAt' in data) delete data.updatedAt;
+
       if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
         data = await collection.admin.hooks.beforeDuplicate({
           data,

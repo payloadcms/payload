@@ -55,6 +55,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
     disableLeaveWithoutSaving,
     customHeader,
     id,
+    updatedAt,
   } = props;
 
   const {
@@ -264,10 +265,10 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         )}
                         {timestamps && (
                           <React.Fragment>
-                            {data.updatedAt && (
+                            {updatedAt && (
                               <li>
                                 <div className={`${baseClass}__label`}>{t('lastModified')}</div>
-                                <div>{format(new Date(data.updatedAt), dateFormat)}</div>
+                                <div>{format(new Date(updatedAt), dateFormat)}</div>
                               </li>
                             )}
                             {(publishedDoc?.createdAt || data?.createdAt) && (
