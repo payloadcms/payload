@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -83,8 +83,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
     setFields(formatFields(collectionConfig, true));
   }, [collectionSlug, collectionConfig]);
 
-  const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0); // used to rerun the API call even though the URL hasn't changed
-  const [{ data, isLoading: isLoadingDocument, isError }, { setParams }] = usePayloadAPI(
+  const [{ data, isLoading: isLoadingDocument, isError }] = usePayloadAPI(
     (id ? `${serverURL}${api}/${collectionSlug}/${id}` : null),
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
   );
@@ -122,15 +121,13 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
   }, [isError, t, isOpen, data, drawerSlug, closeModal, isLoadingDocument]);
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
-    setParams({ 'fallback-locale': 'null', depth: 0, draft: 'true', cacheBust });
-    dispatchCacheBust();
     if (typeof onSaveFromProps === 'function') {
       onSaveFromProps({
         ...args,
         collectionConfig,
       });
     }
-  }, [onSaveFromProps, cacheBust, setParams, collectionConfig]);
+  }, [collectionConfig, onSaveFromProps]);
 
   if (isError) return null;
 
