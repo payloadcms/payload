@@ -1,5 +1,43 @@
 
 
+# [1.4.0](https://github.com/payloadcms/payload/compare/v1.3.4...v1.4.0) (2022-12-23)
+
+
+### Bug Fixes
+
+* [#1611](https://github.com/payloadcms/payload/issues/1611), unable to query draft versions with draft=true ([44b31a9](https://github.com/payloadcms/payload/commit/44b31a9e585aad515557b749bf05253139a17bd9))
+* [#1656](https://github.com/payloadcms/payload/issues/1656) remove size data ([389ee26](https://github.com/payloadcms/payload/commit/389ee261d4ebae0b773bca375ed8a74685506aa0))
+* [#1698](https://github.com/payloadcms/payload/issues/1698) - globals and autosave not working ([915f1e2](https://github.com/payloadcms/payload/commit/915f1e2b3a0c9618d5699a0ee6f5e74c6f4038ee))
+* [#1738](https://github.com/payloadcms/payload/issues/1738) save image dimensions to svg uploads ([2de435f](https://github.com/payloadcms/payload/commit/2de435f43a2e75391a655e91a0cda251da776bcb))
+* [#1747](https://github.com/payloadcms/payload/issues/1747), rich text in arrays improperly updating initialValue when moving rows ([d417e50](https://github.com/payloadcms/payload/commit/d417e50d52fc0824fb5aaedd3e1208c3e1468bdd))
+* [#1748](https://github.com/payloadcms/payload/issues/1748), bails out of autosave if doc is published while autosaving ([95e9300](https://github.com/payloadcms/payload/commit/95e9300d109c9bfd377d5b5efbb68ddca306bbec))
+* [#1752](https://github.com/payloadcms/payload/issues/1752), removes label from row field type ([ff3ab18](https://github.com/payloadcms/payload/commit/ff3ab18d1690e50473be2d77897fb9de48361413))
+* [#551](https://github.com/payloadcms/payload/issues/551) - rich text nested list structure ([542ea8e](https://github.com/payloadcms/payload/commit/542ea8eb81a6e608c7368882da9692d656f1d36b))
+* allows cleared file to be reselected ([35abe81](https://github.com/payloadcms/payload/commit/35abe811c1534ba4f7e926edd3a2978ee67b181e))
+* get relationships in locale of i18n language setting ([#1648](https://github.com/payloadcms/payload/issues/1648)) ([60bb265](https://github.com/payloadcms/payload/commit/60bb2652f0aa63747513e771173362985123519c))
+* missing file after reselect in upload component ([6bc1758](https://github.com/payloadcms/payload/commit/6bc1758dc0cad3f52ce332e71134ee527e17fff0))
+* prevents special characters breaking relationship field search ([#1710](https://github.com/payloadcms/payload/issues/1710)) ([9af4c1d](https://github.com/payloadcms/payload/commit/9af4c1dde7f4a68dc629738dff4fc314626cabb8))
+* refreshes document drawer on save ([9567328](https://github.com/payloadcms/payload/commit/9567328d28709c5721b33e5bd61c9535568ffffd))
+* removes update and created at fields when duplicating, ensures updatedAt data is reactive ([bd4ed5b](https://github.com/payloadcms/payload/commit/bd4ed5b99b5026544c910592c3bff6040e2058bc))
+* safely clears sort [#1736](https://github.com/payloadcms/payload/issues/1736) ([341c163](https://github.com/payloadcms/payload/commit/341c163b36c330df76a6eb5146fccc80059eb9d7))
+* simplifies radio validation ([0dfed3b](https://github.com/payloadcms/payload/commit/0dfed3b30a15829f9454332a4cbd7d9ce1fddea3))
+* translated tab classnames ([238bada](https://github.com/payloadcms/payload/commit/238badabb4f38e691608219c54a541993d9f3010))
+* updates relationship label on drawer save and prevents stepnav update ([59de4f7](https://github.com/payloadcms/payload/commit/59de4f7e82dc4f08240b13d48054589b561688fa))
+* updates richtext toolbar position if inside a drawer ([468b0d2](https://github.com/payloadcms/payload/commit/468b0d2a55616993f10eac7d1709620d114ad7d6))
+* use the slug for authentication header API Key ([5b70ebd](https://github.com/payloadcms/payload/commit/5b70ebd119b557cff66e97e3554af730657b4071))
+
+
+### Features
+
+* add Czech translation ([#1705](https://github.com/payloadcms/payload/issues/1705)) ([0be4285](https://github.com/payloadcms/payload/commit/0be428530512c3babdfe39be259dd165bb66b5f4))
+* adds doc permissions to account view ([8d643fb](https://github.com/payloadcms/payload/commit/8d643fb29d3604b78f6cb46582720dde2a46affb))
+* **graphql:** upgrade to graphql 16 ([57f5f5e](https://github.com/payloadcms/payload/commit/57f5f5ec439b5aee1d46bff0bf31aac6148f16b2))
+
+
+### BREAKING CHANGES
+
+* replaced the useAPIKey authentication header format to use the collection slug instead of the collection label. Previous: `${collection.labels.singular} API-Key ${apiKey}`, updated: `${collection.slug} API-Key ${apiKey}`
+
 ## [1.3.4](https://github.com/payloadcms/payload/compare/v1.3.3...v1.3.4) (2022-12-16)
 
 
