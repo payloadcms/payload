@@ -65,18 +65,26 @@ const indent = {
                 },
               });
 
-              // Lift the nested lis
-              Transforms.liftNodes(editor, {
-                at: parentListItemPath,
-                match: (node, path) => {
-                  const matches = !Editor.isEditor(node)
-                    && Element.isElement(node)
-                    && path.length === parentListItemPath.length + 1
-                    && node.type === 'li';
+              // Parent list item path has changed at this point
+              // so we need to re-fetch the parent node
+              const [newParentNode] = Editor.node(editor, parentListItemPath);
 
-                  return matches;
-                },
-              });
+              // If the parent node is an li,
+              // lift all li nodes within
+              if (Element.isElement(newParentNode) && newParentNode.type === 'li') {
+                // Lift the nested lis
+                Transforms.liftNodes(editor, {
+                  at: parentListItemPath,
+                  match: (node, path) => {
+                    const matches = !Editor.isEditor(node)
+                      && Element.isElement(node)
+                      && path.length === parentListItemPath.length + 1
+                      && node.type === 'li';
+
+                    return matches;
+                  },
+                });
+              }
             } else {
               Transforms.unwrapNodes(editor, {
                 at: parentListItemPath,
@@ -94,6 +102,12 @@ const indent = {
           } else {
             unwrapList(editor, listPath);
           }
+        } else {
+          Transforms.unwrapNodes(editor, {
+            match: (n) => Element.isElement(n) && n.type === indentType,
+            split: true,
+            mode: 'lowest',
+          });
         }
       }
 
