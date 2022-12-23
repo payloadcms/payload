@@ -70,7 +70,7 @@ export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operato
     }
   }
 
-  if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
+  if (['all', 'not_in', 'in', 'every_in', 'every_not_in'].includes(operator) && typeof formattedValue === 'string') {
     formattedValue = createArrayFromCommaDelineated(formattedValue);
   }
 

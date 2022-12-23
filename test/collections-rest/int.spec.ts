@@ -648,24 +648,26 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual([post1]);
       });
 
-      describe('every', () => {
-        it('select hasMany', async () => {
+      describe('every - select', () => {
+        let post1: Post;
+        let post2: Post;
+        let post3: Post;
+        let post4: Post;
+
+        beforeEach(async () => {
+          post1 = await createPost({ title: 'post1', multiSelect: ['option1', 'option2'] });
+          post2 = await createPost({ title: 'post2', multiSelect: ['option1'] });
+          post3 = await createPost({ title: 'post3', multiSelect: ['option3'] });
+          post4 = await createPost({ title: 'post4', multiSelect: ['option1', 'option2', 'option3'] });
+        });
+
+        it('every_in', async () => {
           const filterOptions = ['option1', 'option2'];
-
-          // should be included
-          const post1 = await createPost({ title: 'post1', multiSelect: ['option1', 'option2'] });
-          const post2 = await createPost({ title: 'post2', multiSelect: ['option1'] });
-
-          // should not be included
-          await createPost({ title: 'post3', multiSelect: ['option3'] });
-          await createPost({ title: 'post4', multiSelect: ['option1', 'option2', 'option3'] });
 
           const { status, result } = await client.find<Post>({
             query: {
               multiSelect: {
-                every: {
-                  in: filterOptions,
-                },
+                every_in: filterOptions,
               },
             },
           });
@@ -676,9 +678,54 @@ describe('collections-rest', () => {
           expect(result.docs.find((post) => post.id === post2.id)).toBeDefined();
         });
 
-        it.todo('array');
+        it('every_not_in', async () => {
+          const filterOptions = ['option2'];
 
-        it.todo('relationship hasMany');
+          const { status, result } = await client.find<Post>({
+            query: {
+              multiSelect: {
+                every_not_in: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(2);
+          expect(result.docs.find((post) => post.id === post2.id)).toBeDefined();
+          expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
+        });
+
+        it('every_equals', async () => {
+          const filterOptions = 'option1';
+
+          const { status, result } = await client.find<Post>({
+            query: {
+              multiSelect: {
+                every_equals: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(1);
+          expect(result.docs.find((post) => post.id === post2.id)).toBeDefined();
+        });
+
+        it('every_not_equals', async () => {
+          const filterOptions = 'option1';
+
+          const { status, result } = await client.find<Post>({
+            query: {
+              multiSelect: {
+                every_not_equals: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(1);
+          expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
+        });
       });
 
       describe('limit', () => {
