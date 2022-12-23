@@ -113,7 +113,7 @@ const EditView: React.FC<IndexProps> = (props) => {
           hasSavePermission,
           apiURL,
           action,
-          updatedAt,
+          updatedAt: updatedAt || dataToRender?.updatedAt,
         }}
       />
     </EditDepthContext.Provider>
