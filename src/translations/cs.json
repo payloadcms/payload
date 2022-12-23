@@ -91,6 +91,7 @@
   },
   "fields": {
     "addLabel": "Přidat {{label}}",
+    "addLink": "Přidat Odkaz",
     "addNew": "Přidat nový",
     "addNewLabel": "Přidat nový {{label}}",
     "addRelationship": "Přidat vztah",

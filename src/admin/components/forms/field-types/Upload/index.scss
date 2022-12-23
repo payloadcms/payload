@@ -5,26 +5,38 @@
   margin-bottom: $baseline;
 
   &__wrap {
-    display: flex;
-    padding: base(1.5) base(1.5) $baseline;
     background: var(--theme-elevation-50);
+    padding: base(1);
+  }
+
+  &__buttons {
+    margin: base(-0.25);
+    width: calc(100% + #{base(0.5)});
     flex-wrap: wrap;
+    display: flex;
+    align-items: center;
 
     .btn {
-      margin: 0 $baseline base(.5) 0;
-      min-width: base(7);
+      margin: 0
     }
+  }
+
+  &__toggler {
+    margin: base(0.25);
+    min-width: base(7);
   }
 
   @include mid-break {
     &__wrap {
-      display: block;
-      padding: $baseline $baseline base(.5);
+      padding: base(0.75);
+    }
 
-      .btn {
-        width: 100%;
-        min-width: initial;
-      }
+    &__buttons {
+      display: block;
+    }
+
+    &__toggler {
+      width: calc(100% - #{base(0.5)});
     }
   }
 }

@@ -1,7 +1,18 @@
-@import '../../../scss/styles.scss';
+@import '../../../../../../../scss/styles.scss';
 
-.doc-drawer {
+.rich-text-link-edit-modal {
+  &__template {
+    position: relative;
+    z-index: 1;
+    padding-top: base(1);
+    padding-bottom: base(2);
+  }
+
   &__header {
+    width: 100%;
+    margin-bottom: $baseline;
+    display: flex;
+    justify-content: space-between;
     margin-top: base(2.5);
     margin-bottom: base(1);
 
@@ -10,31 +21,8 @@
     }
   }
 
-  &__header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: base(1);
-  }
-
   &__header-text {
     margin: 0;
-  }
-
-  &__toggler {
-    background: transparent;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-
-    &:focus,
-    &:focus-within {
-      outline: none;
-    }
-
-    &:disabled {
-      pointer-events: none;
-    }
   }
 
   &__header-close {

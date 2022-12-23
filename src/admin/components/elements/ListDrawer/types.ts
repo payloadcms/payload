@@ -1,33 +1,32 @@
 import React, { HTMLAttributes } from 'react';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 
-export type DocumentDrawerProps = {
-  collectionSlug: string
-  id?: string
-  onSave?: (json: {
-    doc: Record<string, any>
-    message: string
+export type ListDrawerProps = {
+  onSelect?: (args: {
+    docID: string
     collectionConfig: SanitizedCollectionConfig
   }) => void
   customHeader?: React.ReactNode
   drawerSlug?: string
+  collectionSlugs?: string[]
+  uploads?: boolean
+  selectedCollection?: string
 }
 
-export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
+export type ListTogglerProps = HTMLAttributes<HTMLButtonElement> & {
   children?: React.ReactNode
   className?: string
   drawerSlug?: string
-  id?: string
-  collectionSlug: string
   disabled?: boolean
 }
 
-export type UseDocumentDrawer = (args: {
-  id?: string
-  collectionSlug: string
+export type UseListDrawer = (args: {
+  collectionSlugs?: string[]
+  selectedCollection?: string
+  uploads?: boolean // finds all collections with upload: true
 }) => [
-  React.FC<Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>>, // drawer
-  React.FC<Omit<DocumentTogglerProps, 'collectionSlug' | 'id'>>, // toggler
+  React.FC<Omit<ListDrawerProps, 'collectionSlug' | 'id'>>, // drawer
+  React.FC<Omit<ListTogglerProps, 'collectionSlug' | 'id'>>, // toggler
   {
     drawerSlug: string,
     drawerDepth: number

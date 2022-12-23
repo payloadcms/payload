@@ -145,7 +145,9 @@ const WhereBuilder: React.FC<Props> = (props) => {
             buttonStyle="icon-label"
             iconPosition="left"
             iconStyle="with-border"
-            onClick={() => dispatchConditions({ type: 'add', field: reducedFields[0].value })}
+            onClick={() => {
+              if (reducedFields.length > 0) dispatchConditions({ type: 'add', field: reducedFields[0].value });
+            }}
           >
             {t('or')}
           </Button>
@@ -160,7 +162,9 @@ const WhereBuilder: React.FC<Props> = (props) => {
             buttonStyle="icon-label"
             iconPosition="left"
             iconStyle="with-border"
-            onClick={() => dispatchConditions({ type: 'add', field: reducedFields[0].value })}
+            onClick={() => {
+              if (reducedFields.length > 0) dispatchConditions({ type: 'add', field: reducedFields[0].value });
+            }}
           >
             {t('addFilter')}
           </Button>

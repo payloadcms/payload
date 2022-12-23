@@ -10,7 +10,8 @@
     height: 100%;
   }
 
-  &__add-button {
+  &__add-button,
+  &__add-button.doc-drawer__toggler {
     @include formInput;
     position: relative;
     height: 100%;
@@ -35,7 +36,6 @@
   &__relation-button {
     @extend %btn-reset;
     cursor: pointer;
-    @extend %btn-reset;
     display: block;
     padding: base(.125) 0;
     text-align: center;
