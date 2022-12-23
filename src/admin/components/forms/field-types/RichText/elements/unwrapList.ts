@@ -1,15 +1,18 @@
 import { Path, Transforms, Editor, Element } from 'slate';
+import { areAllChildrenElements } from './areAllChildrenElements';
 import listTypes from './listTypes';
 
 export const unwrapList = (editor: Editor, atPath: Path): void => {
-  // Remove type for any nodes that have only one child -
+  // Remove type for any nodes that have text children -
   // this means that the node should remain
   Transforms.setNodes(editor, { type: undefined }, {
     at: atPath,
     match: (node, path) => {
+      const childrenAreAllElements = areAllChildrenElements(node);
+
       const matches = !Editor.isEditor(node)
         && Element.isElement(node)
-        && node.children.length === 1
+        && !childrenAreAllElements
         && node.type === 'li'
         && path.length === atPath.length + 1;
 
@@ -17,14 +20,16 @@ export const unwrapList = (editor: Editor, atPath: Path): void => {
     },
   });
 
-  // For nodes that have more than one child, unwrap it instead
+  // For nodes have all element children, unwrap it instead
   // because the li is a duplicative wrapper
   Transforms.unwrapNodes(editor, {
     at: atPath,
     match: (node, path) => {
+      const childrenAreAllElements = areAllChildrenElements(node);
+
       const matches = !Editor.isEditor(node)
         && Element.isElement(node)
-        && node.children.length > 1
+        && childrenAreAllElements
         && node.type === 'li'
         && path.length === atPath.length + 1;
 
