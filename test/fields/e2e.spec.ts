@@ -296,10 +296,11 @@ describe('fields', () => {
       test('should create new url link', async () => {
         await navigateToRichTextFields();
 
-        // Open link popup
+        // Open link drawer
         await page.locator('.rich-text__toolbar button:not([disabled]) .link').click();
 
-        const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+        // find the drawer
+        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
 
         // Fill values and click Confirm

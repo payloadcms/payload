@@ -12,4 +12,5 @@ export type TogglerProps = HTMLAttributes<HTMLButtonElement> & {
   formatSlug?: boolean
   children: React.ReactNode
   className?: string
+  disabled?: boolean
 }

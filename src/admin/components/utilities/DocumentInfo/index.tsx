@@ -199,11 +199,13 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   }, [getVersions]);
 
   useEffect(() => {
-    const getDocPreferences = async () => {
-      await getPreference<DocumentPreferences>(preferencesKey);
-    };
+    if (preferencesKey) {
+      const getDocPreferences = async () => {
+        await getPreference<DocumentPreferences>(preferencesKey);
+      };
 
-    getDocPreferences();
+      getDocPreferences();
+    }
   }, [getPreference, preferencesKey]);
 
   useEffect(() => {

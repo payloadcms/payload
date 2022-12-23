@@ -10,7 +10,6 @@ import { getTranslation } from '../../../../../../utilities/getTranslation';
 const DefaultCell: React.FC<Props> = (props) => {
   const {
     field,
-    colIndex,
     collection: {
       slug,
     },
@@ -18,6 +17,9 @@ const DefaultCell: React.FC<Props> = (props) => {
     rowData: {
       id,
     } = {},
+    link = true,
+    onClick,
+    className,
   } = props;
 
   const { routes: { admin } } = useConfig();
@@ -27,11 +29,24 @@ const DefaultCell: React.FC<Props> = (props) => {
 
   const wrapElementProps: {
     to?: string
-  } = {};
+    onClick?: () => void
+    type?: 'button'
+    className?: string
+  } = {
+    className,
+  };
 
-  if (colIndex === 0) {
+  if (link) {
     WrapElement = Link;
     wrapElementProps.to = `${admin}/collections/${slug}/${id}`;
+  }
+
+  if (typeof onClick === 'function') {
+    WrapElement = 'button';
+    wrapElementProps.type = 'button';
+    wrapElementProps.onClick = () => {
+      onClick(props);
+    };
   }
 
   const CellComponent = cellData && cellComponents[field.type];
@@ -71,6 +86,9 @@ const Cell: React.FC<Props> = (props) => {
         } = {},
       } = {},
     },
+    link,
+    onClick,
+    className,
   } = props;
 
   return (
@@ -81,6 +99,9 @@ const Cell: React.FC<Props> = (props) => {
         cellData,
         collection,
         field,
+        link,
+        onClick,
+        className,
       }}
       CustomComponent={CustomCell}
       DefaultComponent={DefaultCell}

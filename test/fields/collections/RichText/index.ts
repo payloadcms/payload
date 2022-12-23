@@ -51,6 +51,20 @@ const RichTextFields: CollectionConfig = {
       type: 'richText',
       required: true,
       admin: {
+        elements: [
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6',
+          'ul',
+          'ol',
+          'indent',
+          'link',
+          'relationship',
+          'upload',
+        ],
         link: {
           fields: [
             {

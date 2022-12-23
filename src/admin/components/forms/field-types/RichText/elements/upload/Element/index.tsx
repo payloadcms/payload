@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useModal } from '@faceless-ui/modal';
+import React, { HTMLAttributes, useCallback, useReducer, useState } from 'react';
 import { Transforms } from 'slate';
 import { ReactEditor, useSlateStatic, useFocused, useSelected } from 'slate-react';
 import { useTranslation } from 'react-i18next';
@@ -8,10 +7,11 @@ import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
 import FileGraphic from '../../../../../../graphics/File';
 import useThumbnail from '../../../../../../../hooks/useThumbnail';
 import Button from '../../../../../../elements/Button';
-import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
-import { SwapUploadModal } from './SwapUploadModal';
-import { EditModal } from './EditModal';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
+import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
+import { useListDrawer } from '../../../../../../elements/ListDrawer';
+import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
+import { Props as RichTextProps } from '../../../types';
 
 import './index.scss';
 
@@ -21,27 +21,56 @@ const initialParams = {
   depth: 0,
 };
 
-const Element = ({ attributes, children, element, path, fieldProps }) => {
-  const { relationTo, value } = element;
-  const { toggleModal } = useModal();
+const Element: React.FC<{
+  attributes: HTMLAttributes<HTMLDivElement>
+  children: React.ReactNode
+  element: any
+  fieldProps: RichTextProps
+}> = ({ attributes, children, element }) => {
+  const {
+    relationTo,
+    value,
+    fieldProps,
+  } = element;
+
   const { collections, serverURL, routes: { api } } = useConfig();
-  const [modalToRender, setModalToRender] = useState(undefined);
-  const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
   const { t, i18n } = useTranslation('fields');
+  const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
+  const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
+
+  const [
+    ListDrawer,
+    ListDrawerToggler,
+    {
+      closeDrawer: closeListDrawer,
+    },
+  ] = useListDrawer({
+    uploads: true,
+    selectedCollection: relatedCollection.slug,
+  });
+
+  const [
+    DocumentDrawer,
+    DocumentDrawerToggler,
+    {
+      closeDrawer,
+    },
+  ] = useDocumentDrawer({
+    collectionSlug: relatedCollection.slug,
+    id: value?.id,
+  });
 
   const editor = useSlateStatic();
   const selected = useSelected();
   const focused = useFocused();
 
-  const modalSlug = `${path}-edit-upload-${modalToRender}`;
-
   // Get the referenced document
-  const [{ data: upload }] = usePayloadAPI(
+  const [{ data }, { setParams }] = usePayloadAPI(
     `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
     { initialParams },
   );
 
-  const thumbnailSRC = useThumbnail(relatedCollection, upload);
+  const thumbnailSRC = useThumbnail(relatedCollection, data);
 
   const removeUpload = useCallback(() => {
     const elementPath = ReactEditor.findPath(editor, element);
@@ -52,18 +81,56 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
     );
   }, [editor, element]);
 
-  const closeModal = useCallback(() => {
-    toggleModal(modalSlug);
-    setModalToRender(null);
-  }, [toggleModal, modalSlug]);
 
-  useEffect(() => {
-    if (modalToRender) {
-      toggleModal(modalSlug);
-    }
-  }, [modalToRender, toggleModal, modalSlug]);
+  const updateUpload = useCallback((json) => {
+    const { doc } = json;
 
-  const fieldSchema = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields;
+    const newNode = {
+      fields: doc,
+    };
+
+    const elementPath = ReactEditor.findPath(editor, element);
+
+    Transforms.setNodes(
+      editor,
+      newNode,
+      { at: elementPath },
+    );
+
+    // setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug));
+
+    setParams({
+      ...initialParams,
+      cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
+    });
+
+    dispatchCacheBust();
+    closeDrawer();
+  }, [editor, element, setParams, cacheBust, closeDrawer]);
+
+  const swapUpload = React.useCallback(({ docID, collectionConfig }) => {
+    const newNode = {
+      type: 'upload',
+      value: { id: docID },
+      relationTo: collectionConfig.slug,
+      children: [
+        { text: ' ' },
+      ],
+    };
+
+    const elementPath = ReactEditor.findPath(editor, element);
+
+    setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug));
+
+    Transforms.setNodes(
+      editor,
+      newNode,
+      { at: elementPath },
+    );
+
+    dispatchCacheBust();
+    closeListDrawer();
+  }, [closeListDrawer, editor, element, collections]);
 
   return (
     <div
@@ -80,7 +147,7 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
             {thumbnailSRC ? (
               <img
                 src={thumbnailSRC}
-                alt={upload?.filename}
+                alt={data?.filename}
               />
             ) : (
               <FileGraphic />
@@ -91,30 +158,36 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
               {getTranslation(relatedCollection.labels.singular, i18n)}
             </div>
             <div className={`${baseClass}__actions`}>
-              {fieldSchema && (
+              {value?.id && (
+                <DocumentDrawerToggler className={`${baseClass}__toggler`}>
+                  <Button
+                    icon="edit"
+                    round
+                    buttonStyle="icon-label"
+                    el="div"
+                    className={`${baseClass}__actionButton`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                    }}
+                    tooltip={t('general:editLabel', { label: relatedCollection.labels.singular })}
+                    disabled={fieldProps?.admin?.readOnly}
+                  />
+                </DocumentDrawerToggler>
+              )}
+              <ListDrawerToggler>
                 <Button
-                  icon="edit"
+                  icon="swap"
                   round
                   buttonStyle="icon-label"
                   className={`${baseClass}__actionButton`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setModalToRender('edit');
+                  onClick={() => {
+                    // do nothing
                   }}
-                  tooltip={t('general:edit')}
+                  el="div"
+                  tooltip={t('swapUpload')}
+                  disabled={fieldProps?.admin?.readOnly}
                 />
-              )}
-              <Button
-                icon="swap"
-                round
-                buttonStyle="icon-label"
-                className={`${baseClass}__actionButton`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setModalToRender('swap');
-                }}
-                tooltip={t('swapUpload')}
-              />
+              </ListDrawerToggler>
               <Button
                 icon="x"
                 round
@@ -125,36 +198,22 @@ const Element = ({ attributes, children, element, path, fieldProps }) => {
                   removeUpload();
                 }}
                 tooltip={t('removeUpload')}
+                disabled={fieldProps?.admin?.readOnly}
               />
             </div>
           </div>
         </div>
-
         <div className={`${baseClass}__bottomRow`}>
-          <strong>{upload?.filename}</strong>
+          <strong>
+            {data?.filename}
+          </strong>
         </div>
       </div>
       {children}
-
-      {modalToRender === 'swap' && (
-        <SwapUploadModal
-          slug={modalSlug}
-          element={element}
-          closeModal={closeModal}
-          setRelatedCollectionConfig={setRelatedCollection}
-          relatedCollectionConfig={relatedCollection}
-        />
+      {value?.id && (
+        <DocumentDrawer onSave={updateUpload} />
       )}
-
-      {(modalToRender === 'edit' && fieldSchema) && (
-        <EditModal
-          slug={modalSlug}
-          closeModal={closeModal}
-          relatedCollectionConfig={relatedCollection}
-          fieldSchema={fieldSchema}
-          element={element}
-        />
-      )}
+      <ListDrawer onSelect={swapUpload} />
     </div>
   );
 };

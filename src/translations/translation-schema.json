@@ -398,6 +398,9 @@
         "addLabel": {
           "type": "string"
         },
+        "addLink":{
+          "type": "string"
+        },
         "addNew": {
           "type": "string"
         },
@@ -405,6 +408,9 @@
           "type": "string"
         },
         "addRelationship": {
+          "type": "string"
+        },
+        "addUpload": {
           "type": "string"
         },
         "blockType": {
@@ -449,6 +455,9 @@
         "relationTo": {
           "type": "string"
         },
+        "removeRelationship": {
+          "type": "string"
+        },
         "removeUpload": {
           "type": "string"
         },
@@ -462,6 +471,9 @@
           "type": "string"
         },
         "showAll": {
+          "type": "string"
+        },
+        "swapRelationship": {
           "type": "string"
         },
         "swapUpload": {

@@ -21,6 +21,7 @@ import NumberFields, { numberDoc } from './collections/Number';
 import CodeFields, { codeDoc } from './collections/Code';
 import RelationshipFields from './collections/Relationship';
 import RadioFields, { radiosDoc } from './collections/Radio';
+import Uploads2 from './collections/Upload2';
 
 export default buildConfig({
   admin: {
@@ -53,6 +54,7 @@ export default buildConfig({
     TabsFields,
     TextFields,
     Uploads,
+    Uploads2,
   ],
   localization: {
     defaultLocale: 'en',

@@ -1,20 +1,35 @@
 @import '../../../scss/styles.scss';
 
-.doc-drawer {
+.list-drawer {
   &__header {
     margin-top: base(2.5);
-    margin-bottom: base(1);
+    width: 100%;
 
     @include mid-break {
       margin-top: base(1.5);
     }
   }
 
+  &__header-wrap {
+    display: flex;
+  }
+
   &__header-content {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    flex-grow: 1;
     align-items: flex-start;
-    margin-bottom: base(1);
+
+    .pill {
+      pointer-events: none;
+      margin: 0;
+      margin-top: base(0.25);
+      margin-left: base(0.5);
+
+      @include mid-break {
+        margin-top: 0;
+      }
+    }
   }
 
   &__header-text {
@@ -57,6 +72,26 @@
         stroke-width: 2px;
         vector-effect: non-scaling-stroke;
       }
+    }
+  }
+
+  &__select-collection-wrap {
+    margin-top: base(1);
+  }
+
+  &__first-cell {
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  @include mid-break {
+    .collection-list__header {
+      margin-bottom: base(0.5);
     }
   }
 }
