@@ -374,12 +374,6 @@ const RichText: React.FC<Props> = (props) => {
             </div>
           </div>
         </Slate>
-        <pre>
-          {JSON.stringify(editor.selection)}
-        </pre>
-        <pre>
-          {JSON.stringify(value, null, 2)}
-        </pre>
         <FieldDescription
           value={value}
           description={description}
