@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -24,7 +24,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   collectionSlug,
   id,
   drawerSlug,
-  onSave,
+  onSave: onSaveFromProps,
   customHeader,
 }) => {
   const { serverURL, routes: { api } } = useConfig();
@@ -49,7 +49,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   );
 
   useEffect(() => {
-    if (isLoadingDocument || hasInitializedState.current === true) {
+    if (isLoadingDocument) {
       return;
     }
 
@@ -80,6 +80,15 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       toast.error(data.errors?.[0].message || t('error:unspecific'));
     }
   }, [isError, t, isOpen, data, drawerSlug, closeModal, isLoadingDocument]);
+
+  const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
+    if (typeof onSaveFromProps === 'function') {
+      onSaveFromProps({
+        ...args,
+        collectionConfig,
+      });
+    }
+  }, [collectionConfig, onSaveFromProps]);
 
   if (isError) return null;
 
