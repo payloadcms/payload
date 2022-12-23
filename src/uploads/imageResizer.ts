@@ -5,13 +5,14 @@ import sharp from 'sharp';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { PayloadRequest } from '../express/types';
 import fileExists from './fileExists';
-import { ProbedImageSize } from './getImageSize';
 import { FileSizes, FileToSave, ImageSize } from './types';
+
+type Dimensions = { width?: number, height?: number }
 
 type Args = {
   req: PayloadRequest
   file: Buffer
-  dimensions: ProbedImageSize
+  dimensions: Dimensions
   staticPath: string
   config: SanitizedCollectionConfig
   savedFilename: string
@@ -118,7 +119,7 @@ function createImageName(
   return `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${extension}`;
 }
 
-function needsResize(desiredSize: ImageSize, dimensions: ProbedImageSize): boolean {
+function needsResize(desiredSize: ImageSize, dimensions: Dimensions): boolean {
   return (typeof desiredSize.width === 'number' && desiredSize.width <= dimensions.width)
     || (typeof desiredSize.height === 'number' && desiredSize.height <= dimensions.height);
 }
