@@ -1,4 +1,5 @@
 import { Editor, Element } from 'slate';
+import { nodeIsTextNode } from '../types';
 
 export const isLastSelectedElementEmpty = (editor: Editor): boolean => {
   const currentlySelectedNodes = Array.from(Editor.nodes(editor, {
@@ -10,5 +11,6 @@ export const isLastSelectedElementEmpty = (editor: Editor): boolean => {
 
   return lastSelectedNode && Element.isElement(lastSelectedNode[0])
     && (!lastSelectedNode[0].type || lastSelectedNode[0].type === 'p')
+    && nodeIsTextNode(lastSelectedNode[0].children?.[0])
     && lastSelectedNode[0].children?.[0].text === '';
 };

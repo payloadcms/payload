@@ -289,7 +289,7 @@ describe('fields', () => {
     async function navigateToRichTextFields() {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields');
       await page.goto(url.list);
-      await page.locator('.row-1 .cell-id').click();
+      await page.locator('.row-1 .cell-title a').click();
     }
 
     describe('toolbar', () => {
