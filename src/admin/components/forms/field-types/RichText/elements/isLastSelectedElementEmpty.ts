@@ -2,6 +2,8 @@ import { Editor, Element } from 'slate';
 import { nodeIsTextNode } from '../types';
 
 export const isLastSelectedElementEmpty = (editor: Editor): boolean => {
+  if (!editor.selection) return false;
+
   const currentlySelectedNodes = Array.from(Editor.nodes(editor, {
     at: Editor.unhangRange(editor, editor.selection),
     match: (n) => !Editor.isEditor(n) && Element.isElement(n) && (!n.type || n.type === 'p'),
