@@ -7,7 +7,7 @@ import { baseClass } from '../Button';
 import isElementActive from '../isActive';
 import listTypes from '../listTypes';
 import { getCommonBlock } from '../getCommonBlock';
-import Edit from '../../../../../icons/Edit';
+import { unwrapList } from '../unwrapList';
 
 const indentType = 'indent';
 
@@ -39,7 +39,44 @@ const indent = {
             const [parentListItem, parentListItemPath] = matchedParentList;
 
             if (parentListItem.children.length > 1) {
-              console.log('we have more than one child');
+              // Remove nested list
+              Transforms.unwrapNodes(editor, {
+                at: parentListItemPath,
+                match: (node, path) => {
+                  const matches = !Editor.isEditor(node)
+                    && Element.isElement(node)
+                    && listTypes.includes(node.type)
+                    && path.length === parentListItemPath.length + 1;
+
+                  return matches;
+                },
+              });
+
+              // Set li type on any children that don't have a type
+              Transforms.setNodes(editor, { type: 'li' }, {
+                at: parentListItemPath,
+                match: (node, path) => {
+                  const matches = !Editor.isEditor(node)
+                    && Element.isElement(node)
+                    && node.type !== 'li'
+                    && path.length === parentListItemPath.length + 1;
+
+                  return matches;
+                },
+              });
+
+              // Lift the nested lis
+              Transforms.liftNodes(editor, {
+                at: parentListItemPath,
+                match: (node, path) => {
+                  const matches = !Editor.isEditor(node)
+                    && Element.isElement(node)
+                    && path.length === parentListItemPath.length + 1
+                    && node.type === 'li';
+
+                  return matches;
+                },
+              });
             } else {
               Transforms.unwrapNodes(editor, {
                 at: parentListItemPath,
@@ -55,37 +92,7 @@ const indent = {
               });
             }
           } else {
-            // Remove type for any nodes that have more than one child
-            Transforms.setNodes(editor, { type: undefined }, {
-              at: listPath,
-              match: (node, path) => {
-                const matches = !Editor.isEditor(node)
-                  && Element.isElement(node)
-                  && node.children.length === 1
-                  && node.type === 'li'
-                  && path.length === listPath.length + 1;
-
-                return matches;
-              },
-            });
-
-            // For nodes that have more than one child, unwrap it instead
-            Transforms.unwrapNodes(editor, {
-              at: listPath,
-              match: (node, path) => {
-                const matches = !Editor.isEditor(node)
-                  && Element.isElement(node)
-                  && node.children.length > 1
-                  && node.type === 'li'
-                  && path.length === listPath.length + 1;
-
-                return matches;
-              },
-            });
-
-            Transforms.unwrapNodes(editor, {
-              match: (n) => Element.isElement(n) && listTypes.includes(n.type),
-            });
+            unwrapList(editor, listPath);
           }
         }
       }

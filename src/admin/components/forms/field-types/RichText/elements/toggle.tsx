@@ -15,10 +15,14 @@ const toggleElement = (editor: Editor, format: string): void => {
 
   if (!isActive && isWithinLI) {
     const block = { type: 'li', children: [] };
-    Transforms.wrapNodes(editor, block);
+    Transforms.wrapNodes(editor, block, {
+      at: Editor.unhangRange(editor, editor.selection),
+    });
   }
 
-  Transforms.setNodes(editor, { type });
+  Transforms.setNodes(editor, { type }, {
+    at: Editor.unhangRange(editor, editor.selection),
+  });
 
   ReactEditor.focus(editor);
 };

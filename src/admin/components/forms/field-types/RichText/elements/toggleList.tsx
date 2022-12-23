@@ -3,6 +3,7 @@ import { ReactEditor } from 'slate-react';
 import { getCommonBlock } from './getCommonBlock';
 import isListActive from './isListActive';
 import listTypes from './listTypes';
+import { unwrapList } from './unwrapList';
 
 const toggleList = (editor: Editor, format: string): void => {
   let currentListFormat: string;
@@ -30,39 +31,7 @@ const toggleList = (editor: Editor, format: string): void => {
       // and unwrap the parent list itself
       const [, listPath] = getCommonBlock(editor, (n) => Element.isElement(n) && n.type === format);
 
-      // Remove type for any nodes that have more than one child
-      Transforms.setNodes(editor, { type: undefined }, {
-        at: listPath,
-        match: (node, path) => {
-          const matches = !Editor.isEditor(node)
-            && Element.isElement(node)
-            && node.children.length === 1
-            && node.type === 'li'
-            && path.length === listPath.length + 1;
-
-          return matches;
-        },
-      });
-
-      // For nodes that have more than one child, unwrap it instead
-      Transforms.unwrapNodes(editor, {
-        at: listPath,
-        match: (node, path) => {
-          const matches = !Editor.isEditor(node)
-            && Element.isElement(node)
-            && node.children.length > 1
-            && node.type === 'li'
-            && path.length === listPath.length + 1;
-
-          return matches;
-        },
-      });
-
-      // Finally, unwrap the UL itself
-      Transforms.unwrapNodes(editor, {
-        match: (n) => Element.isElement(n) && n.type === format,
-        mode: 'lowest',
-      });
+      unwrapList(editor, listPath);
     }
 
     // Otherwise, if a list is active and we are changing it,
