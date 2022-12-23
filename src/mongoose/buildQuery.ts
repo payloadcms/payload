@@ -2,14 +2,13 @@
 /* eslint-disable no-restricted-syntax */
 import deepmerge from 'deepmerge';
 import mongoose, { FilterQuery } from 'mongoose';
-import { inverseOperatorMap, operatorMap } from './operatorMap';
+import { operatorMap } from './operatorMap';
 import { combineMerge } from '../utilities/combineMerge';
 import { CollectionModel } from '../collections/config/types';
 import { getSchemaTypeOptions } from './getSchemaTypeOptions';
 import { sanitizeQueryValue } from './sanitizeFormattedValue';
 
-const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near', 'every'];
-const validInverseOperator = ['greater_than_equal', 'less_than_equal', 'less_than', 'greater_than', 'in', 'not_in', 'not_equals', 'equals'];
+const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near', 'every_in', 'every_not_in', 'every_equals', 'every_not_equals'];
 
 const subQueryOptions = {
   limit: 50,
@@ -71,8 +70,10 @@ class ParamParser {
           this.query.sort = this.rawParams[key];
         }
       }
+
       return this.query;
     }
+
     return {};
   }
 
@@ -301,27 +302,21 @@ class ParamParser {
           query = {
             $or: [
               {
-                [path]: {
-                  [operatorKey]: formattedValue,
-                },
+                [path]: ParamParser.buildOperatorStructure(operatorKey, formattedValue),
               },
             ],
           };
 
           if (typeof formattedValue === 'number' || (typeof formattedValue === 'string' && mongoose.Types.ObjectId.isValid(formattedValue))) {
             query.$or.push({
-              [path]: {
-                [operatorKey]: formattedValue.toString(),
-              },
+              [path]: ParamParser.buildOperatorStructure(operatorKey, formattedValue.toString()),
             });
           }
 
           if (typeof formattedValue === 'string') {
             if (!Number.isNaN(formattedValue)) {
               query.$or.push({
-                [path]: {
-                  [operatorKey]: parseFloat(formattedValue),
-                },
+                [path]: ParamParser.buildOperatorStructure(operatorKey, parseFloat(formattedValue)),
               });
             }
           }
@@ -343,42 +338,30 @@ class ParamParser {
           };
         }
 
-        if (operator === 'every') {
-          let output = {};
-
-          for (const subOperator of Object.keys(val)) {
-            if (validInverseOperator.includes(subOperator)) {
-              const inverseSubOperator = inverseOperatorMap[subOperator];
-              const searchParam = await this.buildSearchParam(this.model.schema, incomingPath, val[subOperator], inverseSubOperator);
-
-              if (searchParam?.value && searchParam?.path) {
-                output = {
-                  ...output,
-                  ...(searchParam.value as object),
-                };
-              }
-            }
-          }
-
-          return {
-            path,
-            value: {
-              $not: {
-                $elemMatch: output,
-              },
-            },
-          };
-        }
-
         return {
           path,
-          value: { [operatorKey]: formattedValue },
+          value: ParamParser.buildOperatorStructure(operatorKey, formattedValue),
         };
       }
     }
     return undefined;
   }
+
+  // converts a string or array of operator keys into a nested object
+  private static buildOperatorStructure(operatorKey: string | string[], formattedValue: unknown) {
+    // if operator key is array, nest each operator key under the previous one
+    if (Array.isArray(operatorKey)) {
+      if (operatorKey.length === 1) return ParamParser.buildOperatorStructure(operatorKey[0], formattedValue);
+      const [firstOperatorKey, ...restOperatorKeys] = operatorKey;
+      return {
+        [firstOperatorKey]: this.buildOperatorStructure(restOperatorKeys, formattedValue),
+      };
+    }
+
+    return { [operatorKey]: formattedValue };
+  }
 }
+
 // This plugin asynchronously builds a list of Mongoose query constraints
 // which can then be used in subsequent Mongoose queries.
 function buildQueryPlugin(schema) {
