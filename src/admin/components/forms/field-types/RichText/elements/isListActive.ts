@@ -3,7 +3,9 @@ import { getCommonBlock } from './getCommonBlock';
 
 const isListActive = (editor: Editor, format: string): boolean => {
   if (!editor.selection) return false;
-  const [, topmostSelectedNodePath] = getCommonBlock(editor);
+  const [topmostSelectedNode, topmostSelectedNodePath] = getCommonBlock(editor);
+
+  if (Editor.isEditor(topmostSelectedNode)) return false;
 
   const [match] = Array.from(Editor.nodes(editor, {
     at: topmostSelectedNodePath,

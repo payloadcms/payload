@@ -12,6 +12,7 @@ export const getCommonBlock = (editor: Editor, match?: NodeMatch<Node>): NodeEnt
   if (Editor.isBlock(editor, common) || Editor.isEditor(common)) {
     return [common, path];
   }
+
   return Editor.above(editor, {
     at: path,
     match: match || ((n) => Editor.isBlock(editor, n) || Editor.isEditor(n)),

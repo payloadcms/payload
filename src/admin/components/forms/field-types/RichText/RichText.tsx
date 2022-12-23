@@ -4,7 +4,6 @@ import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEdit
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { useTranslation } from 'react-i18next';
-import e from 'express';
 import { richText } from '../../../../../fields/validations';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
