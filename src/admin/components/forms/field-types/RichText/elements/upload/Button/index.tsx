@@ -6,6 +6,10 @@ import UploadIcon from '../../../../../../icons/Upload';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { injectVoidElement } from '../../injectVoid';
 
+import './index.scss';
+
+const baseClass = 'upload-rich-text-button';
+
 const insertUpload = (editor, { value, relationTo }) => {
   const text = { text: ' ' };
 
@@ -53,6 +57,7 @@ const UploadButton: React.FC<{
     <Fragment>
       <ListDrawerToggler>
         <ElementButton
+          className={baseClass}
           format="upload"
           tooltip={t('fields:addUpload')}
           el="div"
