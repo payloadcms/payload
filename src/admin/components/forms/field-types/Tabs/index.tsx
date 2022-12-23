@@ -45,7 +45,7 @@ const TabsField: React.FC<Props> = (props) => {
       setActiveTabIndex(initialIndex || 0);
     };
     getInitialPref();
-  }, [path, indexPath]);
+  }, [path, indexPath, getPreference, preferencesKey, tabsPrefKey]);
 
   const handleTabChange = useCallback(async (incomingTabIndex: number) => {
     setActiveTabIndex(incomingTabIndex);
@@ -72,7 +72,7 @@ const TabsField: React.FC<Props> = (props) => {
         },
       },
     });
-  }, [indexPath, preferencesKey, getPreference, setPreference, path]);
+  }, [preferencesKey, getPreference, setPreference, path, tabsPrefKey]);
 
   const activeTabConfig = tabs[activeTabIndex];
 
@@ -107,10 +107,11 @@ const TabsField: React.FC<Props> = (props) => {
         </div>
         <div className={`${baseClass}__content-wrap`}>
           {activeTabConfig && (
-            <div className={[
-              `${baseClass}__tab`,
-              `${baseClass}__tab-${toKebabCase(getTranslation(activeTabConfig.label, i18n))}`,
-            ].join(' ')}
+            <div
+              className={[
+                `${baseClass}__tab`,
+                activeTabConfig.label && `${baseClass}__tab-${toKebabCase(getTranslation(activeTabConfig.label, i18n))}`,
+              ].filter(Boolean).join(' ')}
             >
               <FieldDescription
                 className={`${baseClass}__description`}
