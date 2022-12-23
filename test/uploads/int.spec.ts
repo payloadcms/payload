@@ -26,7 +26,7 @@ describe('Collections - Uploads', () => {
 
   describe('REST', () => {
     describe('create', () => {
-      it('creates from form data', async () => {
+      it('creates from form data given a png', async () => {
         const formData = new FormData();
         formData.append('file', fs.createReadStream(path.join(__dirname, './image.png')));
 
@@ -55,6 +55,29 @@ describe('Collections - Uploads', () => {
         expect(doc.sizes).toHaveProperty('tablet');
         expect(doc.sizes).toHaveProperty('mobile');
         expect(doc.sizes).toHaveProperty('icon');
+      });
+
+      it('creates from form data given an svg', async () => {
+        const formData = new FormData();
+        formData.append('file', fs.createReadStream(path.join(__dirname, './image.svg')));
+
+        const { status, doc } = await client.create({
+          file: true,
+          data: formData,
+          auth: true,
+          headers: {},
+        });
+
+        expect(status).toBe(201);
+
+        // Check for files
+        expect(await fileExists(path.join(__dirname, './media', doc.filename))).toBe(true);
+
+        // Check api response
+        expect(doc.mimeType).toEqual('image/svg+xml');
+        expect(doc.sizes.maintainedAspectRatio.url).toBeUndefined();
+        expect(doc.width).toBeDefined();
+        expect(doc.height).toBeDefined();
       });
     });
 
