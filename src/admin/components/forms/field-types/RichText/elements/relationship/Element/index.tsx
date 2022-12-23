@@ -159,7 +159,7 @@ const Element: React.FC<{
               onClick={(e) => {
                 e.preventDefault();
               }}
-              tooltip={t('general:editLabel', { label: relatedCollection.labels.singular })}
+              tooltip={t('general:editLabel', { label: getTranslation(relatedCollection.labels.singular, i18n) })}
               disabled={fieldProps?.admin?.readOnly}
             />
           </DocumentDrawerToggler>
