@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -20,6 +20,7 @@ import formatFields from '../../views/collections/Edit/formatFields';
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections';
 import IDLabel from '../IDLabel';
 import { useEditDepth } from '../../utilities/EditDepth';
+
 import './index.scss';
 
 const baseClass = 'doc-drawer';
@@ -64,7 +65,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
   collectionSlug,
   id,
   drawerSlug,
-  onSave,
+  onSave: onSaveFromProps,
   customHeader,
 }) => {
   const { serverURL, routes: { api } } = useConfig();
@@ -73,7 +74,6 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
   const { permissions, user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
   const { t, i18n } = useTranslation(['fields', 'general']);
-  const hasInitializedState = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [collectionConfig] = useRelatedCollections(collectionSlug);
 
@@ -89,7 +89,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
   );
 
   useEffect(() => {
-    if (isLoadingDocument || hasInitializedState.current === true) {
+    if (isLoadingDocument) {
       return;
     }
 
@@ -107,7 +107,6 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
     };
 
     awaitInitialState();
-    hasInitializedState.current = true;
   }, [data, fields, id, user, locale, isLoadingDocument, t]);
 
   useEffect(() => {
@@ -120,6 +119,15 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = ({
       toast.error(data.errors?.[0].message || t('error:unspecific'));
     }
   }, [isError, t, isOpen, data, drawerSlug, closeModal, isLoadingDocument]);
+
+  const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
+    if (typeof onSaveFromProps === 'function') {
+      onSaveFromProps({
+        ...args,
+        collectionConfig,
+      });
+    }
+  }, [collectionConfig, onSaveFromProps]);
 
   if (isError) return null;
 

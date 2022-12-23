@@ -1,9 +1,14 @@
 import React, { HTMLAttributes } from 'react';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 
 export type DocumentDrawerProps = {
   collectionSlug: string
   id?: string
-  onSave?: (json: Record<string, unknown>) => void
+  onSave?: (args: {
+    doc: Record<string, any>
+    collectionConfig: SanitizedCollectionConfig
+    message: string,
+  }) => void
   customHeader?: React.ReactNode
   drawerSlug?: string
 }
