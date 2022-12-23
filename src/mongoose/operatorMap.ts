@@ -10,4 +10,16 @@ export const operatorMap = {
   exists: '$exists',
   equals: '$eq',
   near: '$near',
+  every: 'NOT FALSEY', // just place holder value so not falsey
+};
+
+export const inverseOperatorMap = {
+  greater_than_equal: 'less_than',
+  less_than_equal: 'greater_than',
+  less_than: 'greater_than_equal',
+  greater_than: 'less_than_equal',
+  in: 'not_in',
+  not_in: 'in',
+  not_equals: 'equals',
+  equals: 'not_equals',
 };

@@ -648,6 +648,39 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual([post1]);
       });
 
+      describe('every', () => {
+        it('select hasMany', async () => {
+          const filterOptions = ['option1', 'option2'];
+
+          // should be included
+          const post1 = await createPost({ title: 'post1', multiSelect: ['option1', 'option2'] });
+          const post2 = await createPost({ title: 'post2', multiSelect: ['option1'] });
+
+          // should not be included
+          await createPost({ title: 'post3', multiSelect: ['option3'] });
+          await createPost({ title: 'post4', multiSelect: ['option1', 'option2', 'option3'] });
+
+          const { status, result } = await client.find<Post>({
+            query: {
+              multiSelect: {
+                every: {
+                  in: filterOptions,
+                },
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(2);
+          expect(result.docs.find((post) => post.id === post1.id)).toBeDefined();
+          expect(result.docs.find((post) => post.id === post2.id)).toBeDefined();
+        });
+
+        it.todo('array');
+
+        it.todo('relationship hasMany');
+      });
+
       describe('limit', () => {
         beforeEach(async () => {
           await mapAsync([...Array(50)], async (_, i) => createPost({ title: 'limit-test', number: i }));

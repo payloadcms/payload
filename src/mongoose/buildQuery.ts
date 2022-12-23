@@ -2,13 +2,14 @@
 /* eslint-disable no-restricted-syntax */
 import deepmerge from 'deepmerge';
 import mongoose, { FilterQuery } from 'mongoose';
+import { inverseOperatorMap, operatorMap } from './operatorMap';
 import { combineMerge } from '../utilities/combineMerge';
 import { CollectionModel } from '../collections/config/types';
 import { getSchemaTypeOptions } from './getSchemaTypeOptions';
-import { operatorMap } from './operatorMap';
 import { sanitizeQueryValue } from './sanitizeFormattedValue';
 
-const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
+const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near', 'every'];
+const validInverseOperator = ['greater_than_equal', 'less_than_equal', 'less_than', 'greater_than', 'in', 'not_in', 'not_equals', 'equals'];
 
 const subQueryOptions = {
   limit: 50,
@@ -339,6 +340,33 @@ class ParamParser {
           return {
             path,
             value: formattedValue,
+          };
+        }
+
+        if (operator === 'every') {
+          let output = {};
+
+          for (const subOperator of Object.keys(val)) {
+            if (validInverseOperator.includes(subOperator)) {
+              const inverseSubOperator = inverseOperatorMap[subOperator];
+              const searchParam = await this.buildSearchParam(this.model.schema, incomingPath, val[subOperator], inverseSubOperator);
+
+              if (searchParam?.value && searchParam?.path) {
+                output = {
+                  ...output,
+                  ...(searchParam.value as object),
+                };
+              }
+            }
+          }
+
+          return {
+            path,
+            value: {
+              $not: {
+                $elemMatch: output,
+              },
+            },
           };
         }
 
