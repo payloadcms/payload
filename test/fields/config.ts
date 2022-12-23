@@ -99,8 +99,8 @@ export default buildConfig({
     richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdUploadDoc.id };
     richTextDocWithRelationship.richTextReadOnly[richTextUploadIndex].value = { id: createdUploadDoc.id };
 
-    await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship });
     await payload.create({ collection: 'rich-text-fields', data: richTextBulletsDoc });
+    await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship });
 
     await payload.create({ collection: 'number-fields', data: numberDoc });
 
