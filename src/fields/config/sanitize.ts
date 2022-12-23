@@ -15,7 +15,7 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
     if (!field.type) throw new MissingFieldType(field);
 
     // assert that field names do not contain forbidden characters
-    if ('name' in field && field.name && field.name.includes('.')) {
+    if (fieldAffectsData(field) && field.name.includes('.')) {
       throw new InvalidFieldName(field, field.name);
     }
 

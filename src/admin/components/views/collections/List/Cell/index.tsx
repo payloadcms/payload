@@ -39,7 +39,7 @@ const DefaultCell: React.FC<Props> = (props) => {
   if (!CellComponent) {
     return (
       <WrapElement {...wrapElementProps}>
-        {(cellData === '' || typeof cellData === 'undefined') && t('noLabel', { label: getTranslation(typeof field.label === 'function' ? 'data' : field.label || 'data', i18n) })}
+        {((cellData === '' || typeof cellData === 'undefined') && 'label' in field) && t('noLabel', { label: getTranslation(typeof field.label === 'function' ? 'data' : field.label || 'data', i18n) })}
         {typeof cellData === 'string' && cellData}
         {typeof cellData === 'number' && cellData}
         {typeof cellData === 'object' && JSON.stringify(cellData)}
