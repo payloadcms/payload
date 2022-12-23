@@ -150,9 +150,17 @@
     }
   }
 
+  &__drawerIsOpen {
+    top: base(1);
+  }
+
   @include mid-break {
     &__toolbar {
       top: base(3);
+    }
+
+    &__drawerIsOpen {
+      top: base(1);
     }
   }
 }

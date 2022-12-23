@@ -43,21 +43,21 @@ To enable API keys on a collection, set the `useAPIKey` auth option to `true`. F
   is compromised, your API keys will not be.
 </Banner>
 
-##### Authenticating via API Key
+#### Authenticating via API Key
 
-To utilize your API key while interacting with the REST or GraphQL API, add the `Authorization` header.
+To authenticate REST or GraphQL API requests using an API key, set the `Authorization` header. The header is case-sensitive and needs the slug of the `auth.useAPIKey` enabled collection, then " API-Key ", followed by the `apiKey` that has been assigned. Payload's built-in middleware will then assign the user document to `req.user` and handle requests with the proper access control.
 
 **For example, using Fetch:**
 
 ```ts
+import User from '../collections/User';
+
 const response = await fetch("http://localhost:3000/api/pages", {
   headers: {
-    Authorization: `${collection.labels.singular} API-Key ${YOUR_API_KEY}`,
+    Authorization: `${User.slug} API-Key ${YOUR_API_KEY}`,
   },
 });
 ```
-
-Note: The label portion of the header is case-sensitive and will likely have a capitalized first character unless the label has been customized.
 
 ### Forgot Password
 

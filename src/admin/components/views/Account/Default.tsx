@@ -37,6 +37,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
     initialState,
     isLoading,
     action,
+    onSave,
   } = props;
 
   const {
@@ -72,6 +73,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
             className={`${baseClass}__form`}
             method="patch"
             action={action}
+            onSuccess={onSave}
             initialState={initialState}
             disabled={!hasSavePermission}
           >

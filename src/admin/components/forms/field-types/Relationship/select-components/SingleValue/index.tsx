@@ -21,6 +21,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
     selectProps: {
       selectProps: {
         setDrawerIsOpen,
+        onSave,
       },
     },
   } = props;
@@ -69,7 +70,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
         </SelectComponents.SingleValue>
       </div>
       {relationTo && hasReadPermission && (
-        <DocumentDrawer />
+        <DocumentDrawer onSave={onSave} />
       )}
     </div>
   );

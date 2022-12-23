@@ -128,3 +128,77 @@ DigitalOcean provides extremely helpful documentation that can walk you through 
 1. [Install and secure MongoDB](https://www.digitalocean.com/community/tutorials/how-to-install-mongodb-on-ubuntu-20-04)
 1. [Create a new MongoDB and user](https://medium.com/@mhagemann/how-to-add-a-new-user-to-a-mongodb-database-d896776b5362)
 1. [Set up Node for production](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-20-04)
+
+## Docker
+
+This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `MONGODB_URI` if needed.
+
+```dockerfile
+FROM node:18-alpine as base
+
+FROM base as builder
+
+WORKDIR /home/node
+COPY package*.json ./
+
+COPY . .
+RUN yarn install
+RUN yarn build
+
+FROM base as runtime
+
+ENV NODE_ENV=production
+
+WORKDIR /home/node
+COPY package*.json  ./
+
+RUN yarn install --production
+COPY --from=builder /home/node/dist ./dist
+COPY --from=builder /home/node/build ./build
+
+EXPOSE 3000
+
+CMD ["node", "dist/server.js"]
+```
+
+## Docker Compose
+
+Here is an example of a docker-compose.yml file that can be used for development
+
+```yml
+version: '3'
+
+services:
+
+  payload:
+    image: node:18-alpine
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/home/node/app
+      - node_modules:/home/node/app/node_modules
+    working_dir: /home/node/app/
+    command: sh -c "yarn install && yarn dev"
+    depends_on:
+      - mongo
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/payload
+      PORT: 3000
+      NODE_ENV: development
+      PAYLOAD_SECRET: TESTING
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    command:
+      - --storageEngine=wiredTiger
+    volumes:
+      - data:/data/db
+    logging:
+      driver: none
+
+volumes:
+  data:
+  node_modules:
+```
