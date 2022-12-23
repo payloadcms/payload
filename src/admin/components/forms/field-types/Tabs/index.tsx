@@ -42,13 +42,13 @@ const TabsField: React.FC<Props> = (props) => {
     const getInitialPref = async () => {
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey);
       const initialIndex = path ? existingPreferences?.fields?.[path]?.tabIndex : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex;
-      setActiveTabIndex(initialIndex || 0)
-    }
+      setActiveTabIndex(initialIndex || 0);
+    };
     getInitialPref();
-  }, [path, indexPath])
+  }, [path, indexPath]);
 
   const handleTabChange = useCallback(async (incomingTabIndex: number) => {
-    setActiveTabIndex(incomingTabIndex)
+    setActiveTabIndex(incomingTabIndex);
 
     const existingPreferences: DocumentPreferences = await getPreference(preferencesKey);
 
@@ -68,11 +68,11 @@ const TabsField: React.FC<Props> = (props) => {
           [tabsPrefKey]: {
             ...existingPreferences?.fields?.[tabsPrefKey],
             tabIndex: incomingTabIndex,
-          }
+          },
         },
-      }
+      },
     });
-  }, [indexPath, preferencesKey, getPreference, setPreference, path])
+  }, [indexPath, preferencesKey, getPreference, setPreference, path]);
 
   const activeTabConfig = tabs[activeTabIndex];
 
@@ -109,7 +109,7 @@ const TabsField: React.FC<Props> = (props) => {
           {activeTabConfig && (
             <div className={[
               `${baseClass}__tab`,
-              `${baseClass}__tab-${toKebabCase(activeTabConfig.label)}`,
+              `${baseClass}__tab-${toKebabCase(getTranslation(activeTabConfig.label, i18n))}`,
             ].join(' ')}
             >
               <FieldDescription
