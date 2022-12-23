@@ -104,6 +104,14 @@ export const promise = async ({
         valueToValidate = siblingData[field.name];
       }
 
+      if (field.type === 'json' && typeof siblingData[field.name] === 'string') {
+        try {
+          JSON.parse(siblingData[field.name] as string);
+        } catch (e) {
+          field.jsonError = e;
+        }
+      }
+
       const validationResult = await field.validate(valueToValidate, {
         ...field,
         data: merge(doc, data, { arrayMerge: (_, source) => source }),
