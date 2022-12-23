@@ -98,7 +98,7 @@ export const LinkButton: React.FC<{
       <ElementButton
         format="link"
         tooltip={t('fields:addLink')}
-        el="div"
+        className="link"
         onClick={() => {
           if (isElementActive(editor, 'link')) {
             unwrapLink(editor);
