@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import isHotkey from 'is-hotkey';
-import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor } from 'slate';
+import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor, BaseOperation } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { useTranslation } from 'react-i18next';
@@ -169,6 +169,25 @@ const RichText: React.FC<Props> = (props) => {
     return CreatedEditor;
   }, [elements, leaves]);
 
+  // All slate changes fire the onChange event
+  // including selection changes
+  // so we will filter the set_selection operations out
+  // and only fire setValue when onChange is because of value
+  const handleChange = useCallback((val: unknown) => {
+    const ops = editor.operations.filter((o: BaseOperation) => {
+      if (o) {
+        return o.type !== 'set_selection';
+      }
+      return false;
+    });
+
+    if (ops && Array.isArray(ops) && ops.length > 0) {
+      if (!readOnly && val !== defaultValue && val !== value) {
+        setValue(val);
+      }
+    }
+  }, [editor.operations, readOnly, setValue, value]);
+
   useEffect(() => {
     if (!loaded) {
       const mergedElements = mergeCustomFunctions(elements, elementTypes);
@@ -254,11 +273,7 @@ const RichText: React.FC<Props> = (props) => {
         <Slate
           editor={editor}
           value={valueToRender as any[]}
-          onChange={(val) => {
-            if (!readOnly && val !== defaultValue && val !== value) {
-              setValue(val);
-            }
-          }}
+          onChange={handleChange}
         >
           <div className={`${baseClass}__wrapper`}>
             <div
