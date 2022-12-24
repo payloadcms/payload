@@ -652,19 +652,19 @@ describe('collections-rest', () => {
         let post1: Post;
         let post2: Post;
         let post3: Post;
-        let post4: Post;
 
         beforeEach(async () => {
           post1 = await createPost({ title: 'post1', multiSelect: ['option1', 'option2'] });
           post2 = await createPost({ title: 'post2', multiSelect: ['option1'] });
           post3 = await createPost({ title: 'post3', multiSelect: ['option3'] });
-          post4 = await createPost({ title: 'post4', multiSelect: ['option1', 'option2', 'option3'] });
+          await createPost({ title: 'post4', multiSelect: ['option1', 'option2', 'option3'] });
         });
 
         it('every_in', async () => {
           const filterOptions = ['option1', 'option2'];
 
           const { status, result } = await client.find<Post>({
+            slug: 'posts',
             query: {
               multiSelect: {
                 every_in: filterOptions,
@@ -682,6 +682,7 @@ describe('collections-rest', () => {
           const filterOptions = ['option2'];
 
           const { status, result } = await client.find<Post>({
+            slug: 'posts',
             query: {
               multiSelect: {
                 every_not_in: filterOptions,
@@ -699,6 +700,7 @@ describe('collections-rest', () => {
           const filterOptions = 'option1';
 
           const { status, result } = await client.find<Post>({
+            slug: 'posts',
             query: {
               multiSelect: {
                 every_equals: filterOptions,
@@ -715,6 +717,7 @@ describe('collections-rest', () => {
           const filterOptions = 'option1';
 
           const { status, result } = await client.find<Post>({
+            slug: 'posts',
             query: {
               multiSelect: {
                 every_not_equals: filterOptions,
@@ -725,6 +728,100 @@ describe('collections-rest', () => {
           expect(status).toEqual(200);
           expect(result.totalDocs).toEqual(1);
           expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
+        });
+      });
+
+      describe('every - relationship', () => {
+        let post2: Post;
+        let post3: Post;
+        let post4: Post;
+        let rel1: Relation;
+        let rel2: Relation;
+        let rel3: Relation;
+
+        beforeEach(async () => {
+          rel1 = (await client.create<Relation>({ slug: 'relation', data: { name: 'rel1' } })).doc;
+          rel2 = (await client.create<Relation>({ slug: 'relation', data: { name: 'rel2' } })).doc;
+          rel3 = (await client.create<Relation>({ slug: 'relation', data: { name: 'rel3' } })).doc;
+
+          await createPost({ title: 'post1', relationHasManyField: [rel1.id, rel2.id, rel3.id] });
+          post2 = await createPost({ title: 'post2', relationHasManyField: [rel1.id, rel2.id] });
+          post3 = await createPost({ title: 'post3', relationHasManyField: [rel1.id] });
+          post4 = await createPost({ title: 'post4', relationHasManyField: [] });
+        });
+
+        it('every_in', async () => {
+          const filterOptions = [rel1.id, rel2.id];
+
+          const { status, result } = await client.find<Post>({
+            slug: 'posts',
+            query: {
+              relationHasManyField: {
+                every_in: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(3);
+          expect(result.docs.find((post) => post.id === post2.id)).toBeDefined();
+          expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
+          expect(result.docs.find((post) => post.id === post4.id)).toBeDefined();
+        });
+
+        it('every_not_in', async () => {
+          const filterOptions = [rel2.id];
+
+          const { status, result } = await client.find<Post>({
+            slug: 'posts',
+            query: {
+              relationHasManyField: {
+                every_not_in: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(2);
+          expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
+          expect(result.docs.find((post) => post.id === post4.id)).toBeDefined();
+        });
+
+        it('every_equals', async () => {
+          const filterOptions = rel1.id;
+
+          const { status, result } = await client.find<Post>({
+            slug: 'posts',
+            query: {
+              relationHasManyField: {
+                every_equals: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(2);
+          expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
+          expect(result.docs.find((post) => post.id === post4.id)).toBeDefined();
+        });
+
+        it('every_not_equals', async () => {
+          const filterOptions = rel3.id;
+
+          const { status, result } = await client.find<Post>({
+            slug: 'posts',
+            query: {
+              relationHasManyField: {
+                every_not_equals: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(3);
+          expect(result.docs.find((post) => post.id === post2.id)).toBeDefined();
+          expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
+          expect(result.docs.find((post) => post.id === post4.id)).toBeDefined();
         });
       });
 

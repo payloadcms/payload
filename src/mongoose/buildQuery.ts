@@ -9,6 +9,7 @@ import { getSchemaTypeOptions } from './getSchemaTypeOptions';
 import { sanitizeQueryValue } from './sanitizeFormattedValue';
 
 const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near', 'every_in', 'every_not_in', 'every_equals', 'every_not_equals'];
+const negativeEveryOperators = ['every_not_in', 'every_not_equals'];
 
 const subQueryOptions = {
   limit: 50,
@@ -299,8 +300,10 @@ class ParamParser {
         if (schemaOptions && (schemaOptions.ref || schemaOptions.refPath)) {
           overrideQuery = true;
 
+          const logicalOperator = (negativeEveryOperators.includes(operator)) ? '$and' : '$or';
+
           query = {
-            $or: [
+            [logicalOperator]: [
               {
                 [path]: ParamParser.buildOperatorStructure(operatorKey, formattedValue),
               },
@@ -308,14 +311,14 @@ class ParamParser {
           };
 
           if (typeof formattedValue === 'number' || (typeof formattedValue === 'string' && mongoose.Types.ObjectId.isValid(formattedValue))) {
-            query.$or.push({
+            query[logicalOperator].push({
               [path]: ParamParser.buildOperatorStructure(operatorKey, formattedValue.toString()),
             });
           }
 
           if (typeof formattedValue === 'string') {
             if (!Number.isNaN(formattedValue)) {
-              query.$or.push({
+              query[logicalOperator].push({
                 [path]: ParamParser.buildOperatorStructure(operatorKey, parseFloat(formattedValue)),
               });
             }
