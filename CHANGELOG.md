@@ -1,5 +1,12 @@
 
 
+## [1.4.1](https://github.com/payloadcms/payload/compare/v1.4.0...v1.4.1) (2022-12-24)
+
+
+### Bug Fixes
+
+* [#1761](https://github.com/payloadcms/payload/issues/1761), avoids rich text modifying form due to selection change ([9f4ce8d](https://github.com/payloadcms/payload/commit/9f4ce8d756742a6e1b2644ea49d0778774aae457))
+
 # [1.4.0](https://github.com/payloadcms/payload/compare/v1.3.4...v1.4.0) (2022-12-23)
 
 
