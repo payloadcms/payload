@@ -89,7 +89,7 @@ const DateTime: React.FC<Props> = (props) => {
           placeholder={getTranslation(placeholder, i18n)}
           readOnly={readOnly}
           onChange={(incomingDate) => {
-            if (!readOnly) setValue(incomingDate.toISOString());
+            if (!readOnly) setValue(incomingDate?.toISOString() || null);
           }}
           value={value as Date}
         />
