@@ -18,7 +18,7 @@ export async function getDatabaseConnection(
           ? `payload-${getRandomDigitSuffix()}`
           : slugify(projectName)
       }`,
-      validate: (value: string) => value.length,
+      validate: (value: string) => !!value.length,
     },
     {
       onCancel: () => {

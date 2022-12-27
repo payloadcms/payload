@@ -10,7 +10,7 @@ export async function parseProjectName(args: CliArgs): Promise<string> {
       type: 'text',
       name: 'value',
       message: 'Project name?',
-      validate: (value: string) => value.length,
+      validate: (value: string) => !!value.length,
     },
     {
       onCancel: () => {

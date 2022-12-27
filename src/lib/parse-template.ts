@@ -25,7 +25,7 @@ export async function parseTemplate(
       choices: filteredTemplates.map(p => {
         return { title: p, value: `${language}-${p}` }
       }),
-      validate: (value: string) => value.length,
+      validate: (value: string) => !!value.length,
     },
     {
       onCancel: () => {

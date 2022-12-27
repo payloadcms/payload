@@ -19,7 +19,7 @@ export async function parseLanguage(args: CliArgs): Promise<string> {
           value: 'ts',
         },
       ],
-      validate: (value: string) => value.length,
+      validate: (value: string) => !!value.length,
     },
     {
       onCancel: () => {
