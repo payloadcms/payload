@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "esnext",
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "react",
+    "declaration": true,
+    "outDir": "../../dist",
+    "rootDir": "../",
+    "noEmit": false,
+    "strict": false,
+    "moduleResolution": "node",
+    "paths": {
+      "payload/config": [
+        "../config/types.ts"
+      ],
+      "payload/auth": [
+        "../src/auth/types.ts"
+      ],
+      "payload/types": [
+        "../types/index.ts"
+      ]
+    },
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "src/admin"
+  ],
+  "exclude": [
+    "**/*.spec.js",
+    "node_modules"
+  ]
+}

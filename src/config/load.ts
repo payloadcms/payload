@@ -1,51 +1,53 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 import path from 'path';
+import esbuild from 'esbuild';
 import pino from 'pino';
 import Logger from '../utilities/logger';
 import { SanitizedConfig } from './types';
 import findConfig from './find';
 import validate from './validate';
-import babelConfig from '../babel.config';
+import { builtConfigPath } from './getBuiltConfigPath';
 
-const removedExtensions = ['.scss', '.css', '.svg', '.png', '.jpg', '.eot', '.ttf', '.woff', '.woff2'];
+const clientFiles = ['.scss', '.css', '.svg', '.png', '.jpg', '.eot', '.ttf', '.woff', '.woff2'];
 
 const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
   const localLogger = logger ?? Logger();
-  const configPath = findConfig();
 
-  removedExtensions.forEach((ext) => {
-    require.extensions[ext] = () => null;
-  });
+  const rawConfigPath = findConfig();
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require('@babel/register')({
-    ...babelConfig,
-    extensions: ['.ts', '.tsx', '.js', '.jsx'],
-    env: {
-      development: {
-        sourceMaps: 'inline',
-        retainLines: true,
-      },
-    },
-    ignore: [
-      /node_modules[\\/](?!.pnpm[\\/].*[\\/]node_modules[\\/])(?!payload[\\/]dist[\\/]admin|payload[\\/]components).*/,
-    ],
-  });
+  if (process.env.NODE_ENV !== 'production') {
+    esbuild.buildSync({
+      bundle: true,
+      platform: 'node',
+      outfile: builtConfigPath,
+      entryPoints: [rawConfigPath],
+      target: 'es2015',
+      packages: 'external',
+      loader: clientFiles.reduce((loaders, ext) => ({
+        ...loaders,
+        [ext]: 'empty',
+      }), {}),
+    });
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let config = require(configPath);
+  let config = require(builtConfigPath);
 
   if (config.default) config = config.default;
 
-  const validatedConfig = validate(config, localLogger);
+  let validatedConfig = config;
+
+  if (process.env.NODE_ENV !== 'production') {
+    validatedConfig = validate(config, localLogger);
+  }
 
   return {
     ...validatedConfig,
     paths: {
-      ...(validatedConfig.paths || {}),
-      configDir: path.dirname(configPath),
-      config: configPath,
+      configDir: path.dirname(builtConfigPath),
+      config: builtConfigPath,
+      rawConfig: rawConfigPath,
     },
   };
 };

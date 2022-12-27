@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable global-require */
-
 import webpack from 'webpack';
 import getWebpackProdConfig from '../webpack/getProdConfig';
 import findConfig from '../config/find';
@@ -11,13 +10,8 @@ const configPath = findConfig();
 export const build = (): void => {
   try {
     const config = loadConfig();
-    const webpackProdConfig = getWebpackProdConfig({
-      ...config,
-      paths: {
-        ...(config.paths || {}),
-        config: configPath,
-      },
-    });
+
+    const webpackProdConfig = getWebpackProdConfig(config);
 
     webpack(webpackProdConfig, (err, stats) => { // Stats Object
       if (err || stats.hasErrors()) {

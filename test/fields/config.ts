@@ -31,7 +31,7 @@ export default buildConfig({
         ...config.resolve,
         alias: {
           ...config?.resolve?.alias,
-          fs: path.resolve(__dirname, './mocks/emptyModule.js'),
+          fs: path.resolve(process.cwd(), './test/fields/mocks/emptyModule.js'),
         },
       },
     }),

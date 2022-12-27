@@ -2,7 +2,7 @@ import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack, { Configuration } from 'webpack';
 import { SanitizedConfig } from '../config/types';
-import babelConfig from '../babel.config';
+import adminTSConfig from './tsconfig.admin.json';
 
 const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js');
 const mockDotENVPath = path.resolve(__dirname, './mocks/dotENV.js');
@@ -20,11 +20,15 @@ export default (config: SanitizedConfig): Configuration => ({
     rules: [
       {
         test: /\.(t|j)sx?$/,
-        exclude: /node_modules[\\/](?!(@payloadcms[\\/]payload)[\\/]).*/,
+        exclude: /node_modules/,
         use: [
           {
-            loader: require.resolve('babel-loader'),
-            options: babelConfig,
+            loader: require.resolve('esbuild-loader'),
+            options: {
+              loader: 'tsx',
+              target: 'es2015',
+              tsconfigRaw: adminTSConfig,
+            },
           },
         ],
       },
@@ -47,7 +51,7 @@ export default (config: SanitizedConfig): Configuration => ({
     },
     modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
     alias: {
-      'payload-config': config.paths.config,
+      'payload-config': config.paths.rawConfig,
       payload$: mockModulePath,
       'payload-user-css': config.admin.css,
       dotenv: mockDotENVPath,

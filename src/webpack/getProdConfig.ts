@@ -1,6 +1,5 @@
-import TerserJSPlugin from 'terser-webpack-plugin';
+import { ESBuildMinifyPlugin } from 'esbuild-loader';
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
-import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import path from 'path';
 import { Configuration } from 'webpack';
@@ -21,7 +20,7 @@ export default (payloadConfig: SanitizedConfig): Configuration => {
     mode: 'production',
     stats: 'errors-only',
     optimization: {
-      minimizer: [new TerserJSPlugin({}), new CssMinimizerPlugin()],
+      minimizer: [new ESBuildMinifyPlugin({ target: 'es2015', css: true })],
       splitChunks: {
         cacheGroups: {
           styles: {
