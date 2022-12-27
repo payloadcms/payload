@@ -26,6 +26,7 @@ export async function writeCommonFiles(
     'utf8',
   )
   const packageJson = handlebars.compile(packageJsonTemplate)({
+    projectName: path.basename(projectDir),
     templateName: template.name,
   })
   await fse.writeFile(path.resolve(projectDir, 'package.json'), packageJson)

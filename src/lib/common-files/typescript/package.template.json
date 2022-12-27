@@ -1,5 +1,5 @@
 {
-  "name": "payload-template-{{templateName}}",
+  "name": "{{projectName}}",
   "description": "Payload project created from {{templateName}} template",
   "version": "1.0.0",
   "main": "dist/server.js",

@@ -43,8 +43,9 @@ describe('createProject', () => {
 
       expect(packageJson.dependencies.payload).toBe(expectedPayloadVersion)
 
-      // Check package name comtains template name
-      expect(packageJson.name).toContain('ts-todo')
+      // Check package name and description
+      expect(packageJson.name).toEqual(path.basename(projectDir))
+      expect(packageJson.description).toContain('ts-todo')
 
       // Check all common files are create
       assertProjectFileExists('.npmrc')
