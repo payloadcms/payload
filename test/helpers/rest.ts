@@ -52,6 +52,14 @@ type UpdateArgs<T = any> = {
   auth?: boolean;
   query?: any;
 };
+
+type UpdateManyArgs<T = any> = {
+  slug?: string;
+  data: Partial<T>;
+  auth?: boolean;
+  query: any;
+};
+
 type DeleteArgs = {
   slug?: string;
   id: string;
@@ -72,6 +80,12 @@ type UpdateGlobalArgs<T = any> = {
 type DocResponse<T> = {
   status: number;
   doc: T;
+  errors?: { name: string, message: string, data: any }[]
+};
+
+type DocsResponse<T> = {
+  status: number;
+  docs: T[];
   errors?: { name: string, message: string, data: any }[]
 };
 
@@ -182,6 +196,26 @@ export class RESTClient {
     const { status } = response;
     const json = await response.json();
     return { status, doc: json.doc, errors: json.errors };
+  }
+
+  async updateMany<T = any>(args: UpdateManyArgs<T>): Promise<DocsResponse<T>> {
+    const { slug, data, query } = args;
+    const formattedQs = qs.stringify({
+      ...(query ? { where: query } : {}),
+    }, {
+      addQueryPrefix: true,
+    });
+    if (args?.auth) {
+      headers.Authorization = `JWT ${this.token}`;
+    }
+    const response = await fetch(`${this.serverURL}/api/${slug || this.defaultSlug}${formattedQs}`, {
+      body: JSON.stringify(data),
+      headers,
+      method: 'PATCH',
+    });
+    const { status } = response;
+    const json = await response.json();
+    return { status, docs: json.docs, errors: json.errors };
   }
 
   async findByID<T = any>(args: FindByIDArgs): Promise<DocResponse<T>> {

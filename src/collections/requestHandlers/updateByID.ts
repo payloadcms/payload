@@ -1,24 +1,29 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
-import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import formatSuccessResponse from '../../express/responses/formatSuccess';
-import update from '../operations/update';
+import updateByID from '../operations/updateByID';
 
 export type UpdateResult = {
   message: string
   doc: Document
 };
 
-export default async function updateHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<UpdateResult> | void> {
+export async function deprecatedUpdate(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<UpdateResult> | void> {
+  req.payload.logger.warn('The PUT method is deprecated and will no longer be supported in a future release. Please use the PATCH method for update requests.');
+
+  return updateByIDHandler(req, res, next);
+}
+
+export default async function updateByIDHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<UpdateResult> | void> {
   try {
     const draft = req.query.draft === 'true';
     const autosave = req.query.autosave === 'true';
 
-    const result = await update({
+    const doc = await updateByID({
       req,
       collection: req.collection,
-      where: req.query.where as Where,
+      id: req.params.id,
       data: req.body,
       depth: parseInt(String(req.query.depth), 10),
       draft,
@@ -32,7 +37,7 @@ export default async function updateHandler(req: PayloadRequest, res: Response, 
 
     return res.status(httpStatus.OK).json({
       ...formatSuccessResponse(message, 'message'),
-      docs: result,
+      doc,
     });
   } catch (error) {
     return next(error);

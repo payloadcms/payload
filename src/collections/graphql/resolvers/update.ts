@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { Response } from 'express';
 import { Collection } from '../../config/types';
-import update from '../../operations/update';
+import updateByID from '../../operations/updateByID';
 import { PayloadRequest } from '../../../express/types';
 
 export type Resolver = (_: unknown, args: {
@@ -32,7 +32,7 @@ export default function updateResolver(collection: Collection): Resolver {
       autosave: args.autosave,
     };
 
-    const result = await update(options);
+    const result = await updateByID(options);
 
     return result;
   }

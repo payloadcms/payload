@@ -208,7 +208,7 @@ export class Payload {
    * @param options
    * @returns Updated document
    */
-  update = async <T = any>(options: UpdateOptions<T>): Promise<T> => {
+  update = async <T = any>(options: UpdateOptions<T>): Promise<T | T[]> => {
     const { update } = localOperations;
     return update<T>(this, options);
   }

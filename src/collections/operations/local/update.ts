@@ -1,5 +1,5 @@
 import { Payload } from '../../..';
-import { Document } from '../../../types';
+import { Document, Where } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import update from '../update';
 import { PayloadRequest } from '../../../express/types';
@@ -7,10 +7,10 @@ import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
+import updateByID from '../updateByID';
 
-export type Options<T> = {
+type BaseOptions<T> = {
   collection: string
-  id: string | number
   data: Partial<T>
   depth?: number
   locale?: string
@@ -25,14 +25,23 @@ export type Options<T> = {
   autosave?: boolean
 }
 
-export default async function updateLocal<T = any>(payload: Payload, options: Options<T>): Promise<T> {
+type ByIDOptions<T> = BaseOptions<T> & {
+  id: string | number
+}
+
+type ManyOptions<T> = BaseOptions<T> & {
+  where: Where
+}
+
+export type Options<T> = ByIDOptions<T> | ManyOptions<T>
+
+export default async function updateLocal<T = any>(payload: Payload, options: Options<T>): Promise<T | T[]> {
   const {
     collection: collectionSlug,
     depth,
     locale = null,
     fallbackLocale = null,
     data,
-    id,
     user,
     overrideAccess = true,
     showHiddenFields,
@@ -72,7 +81,6 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
     data,
     collection,
     overrideAccess,
-    id,
     showHiddenFields,
     overwriteExistingFiles,
     draft,
@@ -81,5 +89,8 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
     req,
   };
 
-  return update(args);
+  if ('id' in options) {
+    return updateByID({ ...args, id: options.id });
+  }
+  return update({ ...args, where: options.where });
 }

@@ -16,7 +16,8 @@ import findVersionByID from './requestHandlers/findVersionByID';
 import restoreVersion from './requestHandlers/restoreVersion';
 import deleteHandler from './requestHandlers/delete';
 import findByID from './requestHandlers/findByID';
-import update, { deprecatedUpdate } from './requestHandlers/update';
+import update from './requestHandlers/update';
+import updateByID, { deprecatedUpdate } from './requestHandlers/updateByID';
 import logoutHandler from '../auth/requestHandlers/logout';
 import docAccessRequestHandler from './requestHandlers/docAccess';
 
@@ -131,9 +132,14 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
       handler: deprecatedUpdate,
     },
     {
-      path: '/:id',
+      path: '/',
       method: 'patch',
       handler: update,
+    },
+    {
+      path: '/:id',
+      method: 'patch',
+      handler: updateByID,
     },
     {
       path: '/:id',

@@ -62,6 +62,23 @@ describe('collections-rest', () => {
       expect(updated.description).toEqual(description); // Check was not modified
     });
 
+    it('should bulk update', async () => {
+      await mapAsync([...Array(11)], async (_, i) => {
+        await createPost({ description: `desc ${i}` });
+      });
+
+      const description = 'updated';
+      const { status, docs } = await client.updateMany<Post>({
+        query: { title: { eq: 'title' } },
+        data: { description },
+      });
+
+      expect(status).toEqual(200);
+      expect(docs[0].title).toEqual('title'); // Check was not modified
+      expect(docs[0].description).toEqual(description);
+      expect(docs.pop().description).toEqual(description);
+    });
+
     describe('Custom ID', () => {
       describe('string', () => {
         it('should create', async () => {
