@@ -288,6 +288,20 @@ describe('collections-graphql', () => {
         });
       });
 
+      describe('every - select', () => {
+        it.todo('every_in');
+        it.todo('every_not_in');
+        it.todo('every_contains');
+        it.todo('every_not_contains');
+      });
+
+      describe('every - relationship', () => {
+        it.todo('every_in');
+        it.todo('every_not_in');
+        it.todo('every_contains');
+        it.todo('every_not_contains');
+      });
+
       it('or', async () => {
         const query = `query {
         Posts(
