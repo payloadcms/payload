@@ -3,7 +3,7 @@ import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
 import config from './config';
 import payload from '../../src';
-import type { Post } from './payload-types';
+import type { Post, Relation } from './payload-types';
 
 const slug = config.collections[0]?.slug;
 const title = 'title';
@@ -293,12 +293,23 @@ describe('collections-graphql', () => {
         let post4: Post;
         let post5: Post;
         let post6: Post;
+        let post7: Post;
 
-        beforeEach(async () => {
+        beforeAll(async () => {
           post3 = await createPost({ title: 'post3', multiSelect: ['option1', 'option2'] });
           post4 = await createPost({ title: 'post4', multiSelect: ['option1'] });
           post5 = await createPost({ title: 'post5', multiSelect: ['option3'] });
           post6 = await createPost({ title: 'post6', multiSelect: ['option1', 'option2', 'option3'] });
+          post7 = await createPost({ title: 'post7', multiSelect: [] });
+        });
+
+        afterAll(async () => {
+          await Promise.all([
+            deletePost(post3.id),
+            deletePost(post4.id),
+            deletePost(post5.id),
+            deletePost(post6.id),
+          ]);
         });
 
         it('every_in', async () => {
@@ -318,18 +329,185 @@ describe('collections-graphql', () => {
           expect(docs).toContainEqual(expect.objectContaining({ id: post4.id }));
           expect(docs).not.toContainEqual(expect.objectContaining({ id: post5.id }));
           expect(docs).not.toContainEqual(expect.objectContaining({ id: post6.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post7.id }));
         });
 
-        it.todo('every_not_in');
-        it.todo('every_contains');
-        it.todo('every_not_contains');
+        it('every_not_in', async () => {
+          const query = `query {
+          Posts(where:{multiSelect: {every_not_in:[option1, option2]}}) {
+            docs {
+              id
+              title
+            }
+          }
+        }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Posts;
+
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post3.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post4.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post5.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post6.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post7.id }));
+        });
+
+        it('every_equals', async () => {
+          const query = `query {
+          Posts(where:{multiSelect: {every_equals:option1}}) {
+            docs {
+              id
+              title
+            }
+          }
+        }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Posts;
+
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post3.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post4.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post5.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post6.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post7.id }));
+        });
+
+        it('every_not_equals', async () => {
+          const query = `query {
+          Posts(where:{multiSelect: {every_not_equals:option1}}) {
+            docs {
+              id
+              title
+            }
+          }
+        }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Posts;
+
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post3.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post4.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post5.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post6.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post7.id }));
+        });
       });
 
       describe('every - relationship', () => {
-        it.todo('every_in');
-        it.todo('every_not_in');
-        it.todo('every_contains');
-        it.todo('every_not_contains');
+        let post3: Post;
+        let post4: Post;
+        let post5: Post;
+        let post6: Post;
+        let post7: Post;
+
+        let rel1: Relation;
+        let rel2: Relation;
+        let rel3: Relation;
+
+        beforeAll(async () => {
+          rel1 = await createRelation({ name: 'rel1' });
+          rel2 = await createRelation({ name: 'rel2' });
+          rel3 = await createRelation({ name: 'rel3' });
+
+          post3 = await createPost({ title: 'post3', relationHasManyField: [rel1.id, rel2.id] });
+          post4 = await createPost({ title: 'post4', relationHasManyField: [rel1.id] });
+          post5 = await createPost({ title: 'post5', relationHasManyField: [rel3.id] });
+          post6 = await createPost({ title: 'post6', relationHasManyField: [rel1.id, rel2.id, rel3.id] });
+          post7 = await createPost({ title: 'post7', relationHasManyField: [] });
+        });
+
+        afterAll(async () => {
+          await Promise.all([
+            deletePost(post3.id),
+            deletePost(post4.id),
+            deletePost(post5.id),
+            deletePost(post6.id),
+            deletePost(post7.id),
+            deleteRelation(rel1.id),
+            deleteRelation(rel2.id),
+            deleteRelation(rel3.id),
+          ]);
+        });
+
+        it('every_in', async () => {
+          const query = `query {
+          Posts(where: {relationHasManyField: {every_in: ["${rel1.id}", "${rel2.id}"]}}) {
+            docs {
+              id
+              title
+            }
+          }
+        }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Posts;
+
+          expect(docs).toContainEqual(expect.objectContaining({ id: post3.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post4.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post5.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post6.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post7.id }));
+        });
+
+        it('every_not_in', async () => {
+          const query = `query {
+          Posts(where: {relationHasManyField: {every_not_in: ["${rel1.id}", "${rel2.id}"]}}) {
+            docs {
+              id
+              title
+            }
+          }
+        }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Posts;
+
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post3.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post4.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post5.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post6.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post7.id }));
+        });
+
+        it('every_equals', async () => {
+          const query = `query {
+          Posts(where: {relationHasManyField: {every_equals:"${rel1.id}"}}) {
+            docs {
+              id
+              title
+            }
+          }
+        }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Posts;
+
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post3.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post4.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post5.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post6.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post7.id }));
+        });
+
+        it('every_not_equals', async () => {
+          const query = `query {
+          Posts(where: {relationHasManyField: {every_not_equals:"${rel1.id}"}}) {
+            docs {
+              id
+              title
+            }
+          }
+        }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Posts;
+
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post3.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post4.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post5.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post6.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post7.id }));
+        });
       });
 
       it('or', async () => {
@@ -403,4 +581,20 @@ async function createPost(overrides?: Partial<Post>) {
     data: { title: 'title', ...overrides },
   });
   return doc;
+}
+
+async function deletePost(id: string) {
+  await payload.delete({ collection: slug, id });
+}
+
+async function createRelation(overrides?: Partial<Relation>) {
+  const doc = await payload.create<Relation>({
+    collection: 'relation',
+    data: { name: 'name', ...overrides },
+  });
+  return doc;
+}
+
+async function deleteRelation(id: string) {
+  await payload.delete({ collection: 'relation', id });
 }
