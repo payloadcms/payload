@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "esnext"
+    "module": "commonjs"
   },
   "include": [
     "src/admin"

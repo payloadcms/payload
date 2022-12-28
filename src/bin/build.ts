@@ -26,7 +26,9 @@ export const build = async (): Promise<void> => {
       loader: clientFiles.reduce((loaders, ext) => ({
         ...loaders,
         [ext]: 'empty',
-      }), {}),
+      }), {
+        '.js': 'jsx',
+      }),
     });
 
     // eslint-disable-next-line import/no-dynamic-require
