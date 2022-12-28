@@ -289,7 +289,37 @@ describe('collections-graphql', () => {
       });
 
       describe('every - select', () => {
-        it.todo('every_in');
+        let post3: Post;
+        let post4: Post;
+        let post5: Post;
+        let post6: Post;
+
+        beforeEach(async () => {
+          post3 = await createPost({ title: 'post3', multiSelect: ['option1', 'option2'] });
+          post4 = await createPost({ title: 'post4', multiSelect: ['option1'] });
+          post5 = await createPost({ title: 'post5', multiSelect: ['option3'] });
+          post6 = await createPost({ title: 'post6', multiSelect: ['option1', 'option2', 'option3'] });
+        });
+
+        it('every_in', async () => {
+          const query = `query {
+          Posts(where:{multiSelect: {every_in:[option1, option2]}}) {
+            docs {
+              id
+              title
+            }
+          }
+        }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Posts;
+
+          expect(docs).toContainEqual(expect.objectContaining({ id: post3.id }));
+          expect(docs).toContainEqual(expect.objectContaining({ id: post4.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post5.id }));
+          expect(docs).not.toContainEqual(expect.objectContaining({ id: post6.id }));
+        });
+
         it.todo('every_not_in');
         it.todo('every_contains');
         it.todo('every_not_contains');
