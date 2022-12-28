@@ -674,8 +674,8 @@ describe('collections-rest', () => {
 
           expect(status).toEqual(200);
           expect(result.totalDocs).toEqual(2);
-          expect(result.docs.find((post) => post.id === post1.id)).toBeDefined();
-          expect(result.docs.find((post) => post.id === post2.id)).toBeDefined();
+          expect(result.docs).toContainEqual(post1);
+          expect(result.docs).toContainEqual(post2);
         });
 
         it('every_not_in', async () => {
@@ -692,8 +692,8 @@ describe('collections-rest', () => {
 
           expect(status).toEqual(200);
           expect(result.totalDocs).toEqual(2);
-          expect(result.docs.find((post) => post.id === post2.id)).toBeDefined();
-          expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
+          expect(result.docs).toContainEqual(post2);
+          expect(result.docs).toContainEqual(post3);
         });
 
         it('every_equals', async () => {
@@ -710,7 +710,7 @@ describe('collections-rest', () => {
 
           expect(status).toEqual(200);
           expect(result.totalDocs).toEqual(1);
-          expect(result.docs.find((post) => post.id === post2.id)).toBeDefined();
+          expect(result.docs).toContainEqual(post2);
         });
 
         it('every_not_equals', async () => {
@@ -727,7 +727,7 @@ describe('collections-rest', () => {
 
           expect(status).toEqual(200);
           expect(result.totalDocs).toEqual(1);
-          expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
+          expect(result.docs).toContainEqual(post3);
         });
       });
 
@@ -740,9 +740,9 @@ describe('collections-rest', () => {
         let rel3: Relation;
 
         beforeEach(async () => {
-          rel1 = (await client.create<Relation>({ slug: 'relation', data: { name: 'rel1' } })).doc;
-          rel2 = (await client.create<Relation>({ slug: 'relation', data: { name: 'rel2' } })).doc;
-          rel3 = (await client.create<Relation>({ slug: 'relation', data: { name: 'rel3' } })).doc;
+          rel1 = await createRelation({ name: 're1' });
+          rel2 = await createRelation({ name: 're2' });
+          rel3 = await createRelation({ name: 're3' });
 
           await createPost({ title: 'post1', relationHasManyField: [rel1.id, rel2.id, rel3.id] });
           post2 = await createPost({ title: 'post2', relationHasManyField: [rel1.id, rel2.id] });
@@ -764,9 +764,9 @@ describe('collections-rest', () => {
 
           expect(status).toEqual(200);
           expect(result.totalDocs).toEqual(3);
-          expect(result.docs.find((post) => post.id === post2.id)).toBeDefined();
-          expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
-          expect(result.docs.find((post) => post.id === post4.id)).toBeDefined();
+          expect(result.docs).toContainEqual(post2);
+          expect(result.docs).toContainEqual(post3);
+          expect(result.docs).toContainEqual(post4);
         });
 
         it('every_not_in', async () => {
@@ -783,8 +783,8 @@ describe('collections-rest', () => {
 
           expect(status).toEqual(200);
           expect(result.totalDocs).toEqual(2);
-          expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
-          expect(result.docs.find((post) => post.id === post4.id)).toBeDefined();
+          expect(result.docs).toContainEqual(post3);
+          expect(result.docs).toContainEqual(post4);
         });
 
         it('every_equals', async () => {
@@ -801,8 +801,8 @@ describe('collections-rest', () => {
 
           expect(status).toEqual(200);
           expect(result.totalDocs).toEqual(2);
-          expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
-          expect(result.docs.find((post) => post.id === post4.id)).toBeDefined();
+          expect(result.docs).toContainEqual(post3);
+          expect(result.docs).toContainEqual(post4);
         });
 
         it('every_not_equals', async () => {
@@ -819,9 +819,9 @@ describe('collections-rest', () => {
 
           expect(status).toEqual(200);
           expect(result.totalDocs).toEqual(3);
-          expect(result.docs.find((post) => post.id === post2.id)).toBeDefined();
-          expect(result.docs.find((post) => post.id === post3.id)).toBeDefined();
-          expect(result.docs.find((post) => post.id === post4.id)).toBeDefined();
+          expect(result.docs).toContainEqual(post2);
+          expect(result.docs).toContainEqual(post3);
+          expect(result.docs).toContainEqual(post4);
         });
       });
 
@@ -864,6 +864,11 @@ describe('collections-rest', () => {
 
 async function createPost(overrides?: Partial<Post>) {
   const { doc } = await client.create<Post>({ data: { title: 'title', ...overrides } });
+  return doc;
+}
+
+async function createRelation(overrides?: Partial<Relation>) {
+  const { doc } = await client.create<Relation>({ slug: 'relation', data: { name: 'name', ...overrides } });
   return doc;
 }
 
