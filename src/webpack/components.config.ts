@@ -26,11 +26,17 @@ export default {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.(t|j)sx?$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-        },
+        use: [
+          {
+            loader: require.resolve('esbuild-loader'),
+            options: {
+              loader: 'tsx',
+              target: 'es2015',
+            },
+          },
+        ],
       },
       {
         oneOf: [

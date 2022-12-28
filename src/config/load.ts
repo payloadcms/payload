@@ -1,7 +1,7 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 import path from 'path';
-import esbuild from 'esbuild';
+import { register } from 'esbuild-register/dist/node';
 import pino from 'pino';
 import Logger from '../utilities/logger';
 import { SanitizedConfig } from './types';
@@ -9,30 +9,22 @@ import findConfig from './find';
 import validate from './validate';
 import { builtConfigPath } from './getBuiltConfigPath';
 
-const clientFiles = ['.scss', '.css', '.svg', '.png', '.jpg', '.eot', '.ttf', '.woff', '.woff2'];
-
 const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
   const localLogger = logger ?? Logger();
 
   const rawConfigPath = findConfig();
+  let configPath = builtConfigPath;
 
   if (process.env.NODE_ENV !== 'production') {
-    esbuild.buildSync({
-      bundle: true,
+    register({
       platform: 'node',
-      outfile: builtConfigPath,
-      entryPoints: [rawConfigPath],
-      target: 'es2015',
-      packages: 'external',
-      loader: clientFiles.reduce((loaders, ext) => ({
-        ...loaders,
-        [ext]: 'empty',
-      }), {}),
     });
+
+    configPath = rawConfigPath;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let config = require(builtConfigPath);
+  let config = require(configPath);
 
   if (config.default) config = config.default;
 

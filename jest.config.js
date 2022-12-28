@@ -5,6 +5,9 @@ module.exports = {
     '**/src/**/*.spec.ts',
     '**/test/**/*int.spec.ts',
   ],
+  transform: {
+    '^.+\\.(t|j)sx?$': ['@swc/jest'],
+  },
   globalSetup: './test/jest.setup.ts',
   testTimeout: 90000,
   moduleNameMapper: {

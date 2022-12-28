@@ -8,7 +8,7 @@ export const mediaSlug = 'media';
 
 export const relationSlug = 'relation';
 
-const mockModulePath = path.resolve(process.cwd(), './test/uploads/mocks/mockFSModule.js');
+const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js');
 
 export default buildConfig({
   admin: {

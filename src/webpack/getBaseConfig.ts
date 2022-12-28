@@ -2,7 +2,6 @@ import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack, { Configuration } from 'webpack';
 import { SanitizedConfig } from '../config/types';
-import adminTSConfig from './tsconfig.admin.json';
 
 const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js');
 const mockDotENVPath = path.resolve(__dirname, './mocks/dotENV.js');
@@ -27,7 +26,6 @@ export default (config: SanitizedConfig): Configuration => ({
             options: {
               loader: 'tsx',
               target: 'es2015',
-              tsconfigRaw: adminTSConfig,
             },
           },
         ],
