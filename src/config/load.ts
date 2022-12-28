@@ -1,7 +1,8 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
+// eslint-disable-next-line import/no-extraneous-dependencies
+import swcRegister from '@swc/register';
 import path from 'path';
-import { register } from 'esbuild-register/dist/node';
 import pino from 'pino';
 import Logger from '../utilities/logger';
 import { SanitizedConfig } from './types';
@@ -16,12 +17,14 @@ const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
   const rawConfigPath = findConfig();
   let configPath = builtConfigPath;
 
-  let unregister: () => void;
-
   if (process.env.NODE_ENV !== 'production') {
-    ({ unregister } = register({
-      platform: 'node',
-    }));
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    swcRegister({
+      module: {
+        type: 'commonjs',
+      },
+    });
 
     clientFiles.forEach((ext) => {
       require.extensions[ext] = () => null;
@@ -32,8 +35,6 @@ const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   let config = require(configPath);
-
-  if (unregister) unregister();
 
   if (config.default) config = config.default;
 

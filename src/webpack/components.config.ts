@@ -30,11 +30,7 @@ export default {
         exclude: /node_modules/,
         use: [
           {
-            loader: require.resolve('esbuild-loader'),
-            options: {
-              loader: 'tsx',
-              target: 'es2015',
-            },
+            loader: require.resolve('swc-loader'),
           },
         ],
       },
