@@ -13,6 +13,10 @@ const rawConfigPath = findConfig();
 
 export const build = async (): Promise<void> => {
   try {
+    clientFiles.forEach((ext) => {
+      require.extensions[ext] = () => null;
+    });
+
     await esbuild.build({
       bundle: true,
       platform: 'node',

@@ -23,12 +23,12 @@ const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
       platform: 'node',
     }));
 
-    clientFiles.forEach((ext) => {
-      require.extensions[ext] = () => null;
-    });
-
     configPath = rawConfigPath;
   }
+
+  clientFiles.forEach((ext) => {
+    require.extensions[ext] = () => null;
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   let config = require(configPath);
