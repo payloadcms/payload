@@ -277,3 +277,4 @@ export class Payload {
 const payload = new Payload();
 
 export default payload;
+module.exports = payload;
