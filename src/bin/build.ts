@@ -7,8 +7,8 @@ import getWebpackProdConfig from '../webpack/getProdConfig';
 import findConfig from '../config/find';
 import { dirnamePlugin } from '../config/dirnamePlugin';
 import { builtConfigPath } from '../config/getBuiltConfigPath';
+import { clientFiles } from '../config/clientFiles';
 
-const clientFiles = ['.scss', '.css', '.svg', '.png', '.jpg', '.eot', '.ttf', '.woff', '.woff2'];
 const rawConfigPath = findConfig();
 
 export const build = async (): Promise<void> => {

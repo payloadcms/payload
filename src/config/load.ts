@@ -8,6 +8,7 @@ import { SanitizedConfig } from './types';
 import findConfig from './find';
 import validate from './validate';
 import { builtConfigPath } from './getBuiltConfigPath';
+import { clientFiles } from './clientFiles';
 
 const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
   const localLogger = logger ?? Logger();
@@ -15,9 +16,15 @@ const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
   const rawConfigPath = findConfig();
   let configPath = builtConfigPath;
 
+  let unregister: () => void;
+
   if (process.env.NODE_ENV !== 'production') {
-    register({
+    ({ unregister } = register({
       platform: 'node',
+    }));
+
+    clientFiles.forEach((ext) => {
+      require.extensions[ext] = () => null;
     });
 
     configPath = rawConfigPath;
@@ -25,6 +32,8 @@ const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   let config = require(configPath);
+
+  if (unregister) unregister();
 
   if (config.default) config = config.default;
 
