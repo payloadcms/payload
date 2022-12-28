@@ -147,7 +147,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
       field,
       GraphQLString,
       parentName,
-      [...operators.equality, ...operators.contains],
+      [...operators.equality, ...operators.contains, ...operators.element_contains, ...operators.element_equality],
     );
 
     if (Array.isArray(field.relationTo)) {
@@ -216,7 +216,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         }, {}),
       }),
       parentName,
-      [...operators.equality, ...operators.contains],
+      [...operators.equality, ...operators.contains, ...operators.element_contains, ...operators.element_equality],
     ),
   }),
   array: (field: ArrayField) => recursivelyBuildNestedPaths(parentName, field),
