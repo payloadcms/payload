@@ -18,6 +18,12 @@ const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   swcRegister({
+    jsc: {
+      parser: {
+        syntax: 'typescript',
+        tsx: true,
+      },
+    },
     module: {
       type: 'commonjs',
     },

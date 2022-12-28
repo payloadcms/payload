@@ -27,7 +27,7 @@ export default (config: SanitizedConfig): Configuration => ({
               jsc: {
                 parser: {
                   syntax: 'typescript',
-                  jsx: true,
+                  tsx: true,
                 },
               },
             },
