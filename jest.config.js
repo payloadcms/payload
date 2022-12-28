@@ -6,7 +6,16 @@ module.exports = {
     '**/test/**/*int.spec.ts',
   ],
   transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest'],
+    '^.+\\.(t|j)sx?$': [
+      'esbuild-jest',
+      {
+        sourcemap: true,
+        loaders: {
+          '.ts': 'tsx',
+          '.tsx': 'tsx',
+        },
+      },
+    ],
   },
   globalSetup: './test/jest.setup.ts',
   testTimeout: 90000,

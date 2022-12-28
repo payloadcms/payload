@@ -4,7 +4,16 @@ module.exports = {
   testRegex: '(/src/admin/.*\\.(test|spec))\\.[jt]sx?$',
   setupFilesAfterEnv: ['<rootDir>/test/componentsSetup.js'],
   transform: {
-    '^.+\\.(ts|tsx)?$': 'esbuild-jest',
+    '^.+\\.(t|j)sx?$': [
+      'esbuild-jest',
+      {
+        sourcemap: true,
+        loaders: {
+          '.ts': 'tsx',
+          '.tsx': 'tsx',
+        },
+      },
+    ],
   },
   testPathIgnorePatterns: [
     'node_modules',

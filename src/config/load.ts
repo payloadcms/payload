@@ -37,8 +37,8 @@ const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
   return {
     ...validatedConfig,
     paths: {
-      configDir: path.dirname(builtConfigPath),
-      config: builtConfigPath,
+      configDir: path.dirname(rawConfigPath),
+      config: configPath,
       rawConfig: rawConfigPath,
     },
   };
