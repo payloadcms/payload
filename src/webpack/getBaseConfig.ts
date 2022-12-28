@@ -23,6 +23,14 @@ export default (config: SanitizedConfig): Configuration => ({
         use: [
           {
             loader: require.resolve('swc-loader'),
+            options: {
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  jsx: true,
+                },
+              },
+            },
           },
         ],
       },

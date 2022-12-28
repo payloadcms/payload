@@ -1,52 +1,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable global-require */
-import path from 'path';
-import { bundle } from '@swc/core';
 import webpack from 'webpack';
 import getWebpackProdConfig from '../webpack/getProdConfig';
 import findConfig from '../config/find';
-import { builtConfigPath } from '../config/getBuiltConfigPath';
 import loadConfig from '../config/load';
 
 const rawConfigPath = findConfig();
 
 export const build = async (): Promise<void> => {
   try {
-    // await bundle({
-    //   target: 'node',
-    //   entry: {
-    //     config: rawConfigPath,
-    //   },
-    //   output: {
-    //     name: 'config',
-    //     path: builtConfigPath,
-    //   },
-    //   options: {
-    //     isModule: false,
-    //   },
-    //   module: {
-    //     type: 'commonjs',
-    //   },
-    //   externalModules: [
-    //     'node_modules/*',
-    //     // avoid scss / etc here
-    //   ],
-    // });
-
-    // // eslint-disable-next-line import/no-dynamic-require
-    // let incomingConfig = require(builtConfigPath);
-
-    // if (incomingConfig.default) incomingConfig = incomingConfig.default;
-
-    // const config = {
-    //   ...incomingConfig,
-    //   paths: {
-    //     configDir: path.dirname(builtConfigPath),
-    //     config: builtConfigPath,
-    //     rawConfig: rawConfigPath,
-    //   },
-    // };
-
     const config = loadConfig();
 
     const webpackProdConfig = getWebpackProdConfig(config);
