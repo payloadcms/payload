@@ -67,6 +67,10 @@ The above example demonstrates a simple query but you can get much more complex.
 | `not_in`             | The value must NOT be within the provided comma-delimited list of values. |
 | `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`). |
 | `near`               | For distance related to a [point field](/docs/fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`. |
+| 'every_in            | Every element of the value must be found within the provided comma-delimited list of values. |
+| 'every_not_in        | Every element of the value must NOT be within the provided comma-delimited list of values. |
+| 'every_equals        | Every element of the value must be exactly equal. |
+| 'every_not_equals    | The query will return all documents where the Every element of the value is not equal. |
 
 <Banner type="success">
   <strong>Tip</strong>:<br/>
