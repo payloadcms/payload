@@ -25,17 +25,22 @@ type BaseOptions<T> = {
   autosave?: boolean
 }
 
-type ByIDOptions<T> = BaseOptions<T> & {
+export type ByIDOptions<T> = BaseOptions<T> & {
   id: string | number
+  where?: never
 }
 
-type ManyOptions<T> = BaseOptions<T> & {
+export type ManyOptions<T> = BaseOptions<T> & {
   where: Where
+  id?: never
 }
 
 export type Options<T> = ByIDOptions<T> | ManyOptions<T>
 
-export default async function updateLocal<T = any>(payload: Payload, options: Options<T>): Promise<T | T[]> {
+async function updateLocal<T = any>(payload: Payload, options: ByIDOptions<T>): Promise<T>;
+async function updateLocal<T = any>(payload: Payload, options: ManyOptions<T>): Promise<T[]>;
+async function updateLocal<T = any>(payload: Payload, options: Options<T>): Promise<T | T[]>;
+async function updateLocal<T = any>(payload: Payload, options: Options<T>): Promise<T | T[]> {
   const {
     collection: collectionSlug,
     depth,
@@ -94,3 +99,5 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
   }
   return update({ ...args, where: options.where });
 }
+
+export default updateLocal;

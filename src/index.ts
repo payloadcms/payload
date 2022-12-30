@@ -26,7 +26,6 @@ import { Preferences } from './preferences/types';
 import { Options as CreateOptions } from './collections/operations/local/create';
 import { Options as FindOptions } from './collections/operations/local/find';
 import { Options as FindByIDOptions } from './collections/operations/local/findByID';
-import { Options as UpdateOptions } from './collections/operations/local/update';
 import { Options as DeleteOptions } from './collections/operations/local/delete';
 import { Options as FindVersionsOptions } from './collections/operations/local/findVersions';
 import { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID';
@@ -208,10 +207,7 @@ export class Payload {
    * @param options
    * @returns Updated document
    */
-  update = async <T = any>(options: UpdateOptions<T>): Promise<T | T[]> => {
-    const { update } = localOperations;
-    return update<T>(this, options);
-  }
+  update = localOperations.update
 
   delete = async <T extends TypeWithID = any>(options: DeleteOptions): Promise<T> => {
     const { localDelete } = localOperations;
