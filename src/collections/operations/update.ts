@@ -107,14 +107,14 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   let accessResult: AccessResult;
 
   if (!overrideAccess) {
-    accessResult = await executeAccess({ req }, collectionConfig.access.read);
+    accessResult = await executeAccess({ req }, collectionConfig.access.update);
 
     if (hasWhereAccessResult(accessResult)) {
       queryToBuild.where.and.push(accessResult);
     }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = Model.buildQuery(queryToBuild, locale);
 
   // /////////////////////////////////////
   // Retrieve documents

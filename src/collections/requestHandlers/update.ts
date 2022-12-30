@@ -15,7 +15,7 @@ export default async function updateHandler(req: PayloadRequest, res: Response, 
     const draft = req.query.draft === 'true';
     const autosave = req.query.autosave === 'true';
 
-    const result = await update({
+    const docs = await update({
       req,
       collection: req.collection,
       where: req.query.where as Where,
@@ -32,7 +32,7 @@ export default async function updateHandler(req: PayloadRequest, res: Response, 
 
     return res.status(httpStatus.OK).json({
       ...formatSuccessResponse(message, 'message'),
-      docs: result,
+      docs,
     });
   } catch (error) {
     return next(error);

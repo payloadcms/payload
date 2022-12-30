@@ -20,6 +20,7 @@ import update from './requestHandlers/update';
 import updateByID, { deprecatedUpdate } from './requestHandlers/updateByID';
 import logoutHandler from '../auth/requestHandlers/logout';
 import docAccessRequestHandler from './requestHandlers/docAccess';
+import deleteByID from './requestHandlers/deleteByID';
 
 const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
   let { endpoints } = collection;
@@ -148,6 +149,11 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
     },
     {
       path: '/:id',
+      method: 'delete',
+      handler: deleteByID,
+    },
+    {
+      path: '/',
       method: 'delete',
       handler: deleteHandler,
     },

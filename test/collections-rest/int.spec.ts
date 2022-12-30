@@ -79,6 +79,21 @@ describe('collections-rest', () => {
       expect(docs.pop().description).toEqual(description);
     });
 
+    it('should bulk delete', async () => {
+      const count = 11;
+      await mapAsync([...Array(count)], async (_, i) => {
+        await createPost({ description: `desc ${i}` });
+      });
+
+      const { status, docs } = await client.deleteMany<Post>({
+        query: { title: { eq: 'title' } },
+      });
+
+      expect(status).toEqual(200);
+      expect(docs[0].title).toEqual('title'); // Check was not modified
+      expect(docs).toHaveLength(count);
+    });
+
     describe('Custom ID', () => {
       describe('string', () => {
         it('should create', async () => {

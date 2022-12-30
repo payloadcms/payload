@@ -66,6 +66,12 @@ type DeleteArgs = {
   auth?: boolean;
 };
 
+type DeleteManyArgs = {
+  slug?: string;
+  auth?: boolean;
+  query: any;
+};
+
 type FindGlobalArgs<T = any> = {
   slug?: string;
   auth?: boolean;
@@ -212,6 +218,25 @@ export class RESTClient {
       body: JSON.stringify(data),
       headers,
       method: 'PATCH',
+    });
+    const { status } = response;
+    const json = await response.json();
+    return { status, docs: json.docs, errors: json.errors };
+  }
+
+  async deleteMany<T = any>(args: DeleteManyArgs): Promise<DocsResponse<T>> {
+    const { slug, query } = args;
+    const formattedQs = qs.stringify({
+      ...(query ? { where: query } : {}),
+    }, {
+      addQueryPrefix: true,
+    });
+    if (args?.auth) {
+      headers.Authorization = `JWT ${this.token}`;
+    }
+    const response = await fetch(`${this.serverURL}/api/${slug || this.defaultSlug}${formattedQs}`, {
+      headers,
+      method: 'DELETE',
     });
     const { status } = response;
     const json = await response.json();

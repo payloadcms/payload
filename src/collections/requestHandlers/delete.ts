@@ -1,8 +1,7 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
-import { NotFound } from '../../errors';
-import { Document } from '../../types';
+import { Document, Where } from '../../types';
 import deleteOperation from '../operations/delete';
 
 export type DeleteResult = {
@@ -12,18 +11,16 @@ export type DeleteResult = {
 
 export default async function deleteHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<DeleteResult> | void> {
   try {
-    const doc = await deleteOperation({
+    const docs = await deleteOperation({
       req,
       collection: req.collection,
-      id: req.params.id,
+      where: req.query.where as Where,
       depth: parseInt(String(req.query.depth), 10),
     });
 
-    if (!doc) {
-      return res.status(httpStatus.NOT_FOUND).json(new NotFound(req.t));
-    }
-
-    return res.status(httpStatus.OK).send(doc);
+    return res.status(httpStatus.OK).json({
+      docs,
+    });
   } catch (error) {
     return next(error);
   }

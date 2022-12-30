@@ -37,9 +37,9 @@ export type ManyOptions<T> = BaseOptions<T> & {
 
 export type Options<T> = ByIDOptions<T> | ManyOptions<T>
 
-async function updateLocal<T = any>(payload: Payload, options: ByIDOptions<T>): Promise<T>;
-async function updateLocal<T = any>(payload: Payload, options: ManyOptions<T>): Promise<T[]>;
-async function updateLocal<T = any>(payload: Payload, options: Options<T>): Promise<T | T[]>;
+async function updateLocal<T = any>(payload: Payload, options: ByIDOptions<T>): Promise<T>
+async function updateLocal<T = any>(payload: Payload, options: ManyOptions<T>): Promise<T[]>
+async function updateLocal<T = any>(payload: Payload, options: Options<T>): Promise<T | T[]>
 async function updateLocal<T = any>(payload: Payload, options: Options<T>): Promise<T | T[]> {
   const {
     collection: collectionSlug,
@@ -55,6 +55,8 @@ async function updateLocal<T = any>(payload: Payload, options: Options<T>): Prom
     overwriteExistingFiles = false,
     draft,
     autosave,
+    id,
+    where,
   } = options;
 
   const collection = payload.collections[collectionSlug];
@@ -92,12 +94,14 @@ async function updateLocal<T = any>(payload: Payload, options: Options<T>): Prom
     autosave,
     payload,
     req,
+    id,
+    where,
   };
 
-  if ('id' in options) {
-    return updateByID({ ...args, id: options.id });
+  if (options.id) {
+    return updateByID(args);
   }
-  return update({ ...args, where: options.where });
+  return update(args);
 }
 
 export default updateLocal;

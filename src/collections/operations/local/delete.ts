@@ -1,15 +1,16 @@
 import { TypeWithID } from '../../config/types';
-import { Document } from '../../../types';
+import { Document, Where } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import { Payload } from '../../../index';
 import deleteOperation from '../delete';
+import deleteByID from '../deleteByID';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
 
-export type Options = {
+export type BaseOptions = {
   collection: string
-  id: string
+
   depth?: number
   locale?: string
   fallbackLocale?: string
@@ -18,11 +19,27 @@ export type Options = {
   showHiddenFields?: boolean
 }
 
-export default async function deleteLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<T> {
+export type ByIDOptions = BaseOptions & {
+  id: string
+  where?: never
+}
+
+export type ManyOptions = BaseOptions & {
+  where: Where
+  id?: never
+}
+
+export type Options = ByIDOptions | ManyOptions
+
+async function deleteLocal<T extends TypeWithID = any>(payload: Payload, options: ByIDOptions): Promise<T>
+async function deleteLocal<T extends TypeWithID = any>(payload: Payload, options: ManyOptions): Promise<T[]>
+async function deleteLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<T | T[]>
+async function deleteLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<T | T[]> {
   const {
     collection: collectionSlug,
     depth,
     id,
+    where,
     locale = null,
     fallbackLocale = null,
     user,
@@ -50,12 +67,20 @@ export default async function deleteLocal<T extends TypeWithID = any>(payload: P
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
-  return deleteOperation({
+  const args = {
     depth,
     id,
+    where,
     collection,
     overrideAccess,
     showHiddenFields,
     req,
-  });
+  };
+
+  if (options.id) {
+    return deleteByID(args);
+  }
+  return deleteOperation(args);
 }
+
+export default deleteLocal;

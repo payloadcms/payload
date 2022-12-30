@@ -209,10 +209,7 @@ export class Payload {
    */
   update = localOperations.update
 
-  delete = async <T extends TypeWithID = any>(options: DeleteOptions): Promise<T> => {
-    const { localDelete } = localOperations;
-    return localDelete<T>(this, options);
-  }
+  delete = localOperations.delete
 
   /**
    * @description Find versions with criteria

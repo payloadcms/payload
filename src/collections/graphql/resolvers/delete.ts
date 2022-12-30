@@ -2,7 +2,7 @@
 import { Response } from 'express';
 import { PayloadRequest } from '../../../express/types';
 import { Collection } from '../../config/types';
-import deleteOperation from '../../operations/delete';
+import deleteByID from '../../operations/deleteByID';
 
 export type Resolver = (
   _: unknown,
@@ -28,7 +28,7 @@ export default function getDeleteResolver(collection: Collection): Resolver {
       depth: 0,
     };
 
-    const result = await deleteOperation(options);
+    const result = await deleteByID(options);
 
     return result;
   }

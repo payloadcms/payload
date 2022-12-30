@@ -1,9 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 
+import httpStatus from 'http-status';
+import { AccessResult } from '../../config/types';
 import { PayloadRequest } from '../../express/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { NotFound, Forbidden, ErrorDeletingFile } from '../../errors';
+import { ErrorDeletingFile, APIError } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { BeforeOperationHook, Collection } from '../config/types';
 import { Document, Where } from '../../types';
@@ -15,7 +17,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 export type Arguments = {
   depth?: number
   collection: Collection
-  id: string
+  where: Where
   req: PayloadRequest
   overrideAccess?: boolean
   showHiddenFields?: boolean
@@ -43,7 +45,7 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
       Model,
       config: collectionConfig,
     },
-    id,
+    where,
     req,
     req: {
       t,
@@ -57,155 +59,181 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
     showHiddenFields,
   } = args;
 
+  if (!where) {
+    throw new APIError('Missing \'where\' query of documents to delete.', httpStatus.BAD_REQUEST);
+  }
+
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
 
-  const accessResults = !overrideAccess ? await executeAccess({ req, id }, collectionConfig.access.delete) : true;
-  const hasWhereAccess = hasWhereAccessResult(accessResults);
-
-  // /////////////////////////////////////
-  // beforeDelete - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeDelete.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    return hook({
-      req,
-      id,
-    });
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // Retrieve document
-  // /////////////////////////////////////
-
-  const queryToBuild: {
-    where: Where
-  } = {
+  const queryToBuild: { where?: Where } = {
     where: {
-      and: [
-        {
-          id: {
-            equals: id,
-          },
-        },
-      ],
+      and: [],
     },
   };
 
-  if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
+  if (where) {
+    queryToBuild.where = {
+      and: [],
+      ...where,
+    };
+
+    if (Array.isArray(where.AND)) {
+      queryToBuild.where.and = [
+        ...queryToBuild.where.and,
+        ...where.AND,
+      ];
+    }
+  }
+
+  let accessResult: AccessResult;
+
+  if (!overrideAccess) {
+    accessResult = await executeAccess({ req }, collectionConfig.access.delete);
+
+    if (hasWhereAccessResult(accessResult)) {
+      queryToBuild.where.and.push(accessResult);
+    }
   }
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  const docToDelete = await Model.findOne(query);
-
-  if (!docToDelete && !hasWhereAccess) throw new NotFound(t);
-  if (!docToDelete && hasWhereAccess) throw new Forbidden(t);
-
-  const resultToDelete = docToDelete.toJSON({ virtuals: true });
-
   // /////////////////////////////////////
-  // Delete any associated files
+  // Retrieve documents
   // /////////////////////////////////////
 
-  if (collectionConfig.upload) {
-    const { staticDir } = collectionConfig.upload;
+  const docs = await Model.find(query, {}, { lean: true });
 
-    const staticPath = path.resolve(config.paths.configDir, staticDir);
+  /* eslint-disable no-param-reassign */
+  const promises = docs.map(async (doc) => {
+    let result;
 
-    const fileToDelete = `${staticPath}/${resultToDelete.filename}`;
+    // custom id type reset
+    doc.id = doc._id;
+    doc = JSON.stringify(doc);
+    doc = JSON.parse(doc);
+    doc = sanitizeInternalFields(doc);
 
-    if (await fileExists(fileToDelete)) {
-      fs.unlink(fileToDelete, (err) => {
-        if (err) {
-          throw new ErrorDeletingFile(t);
-        }
+    const { id } = doc;
+
+    // /////////////////////////////////////
+    // beforeDelete - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.beforeDelete.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      return hook({
+        req,
+        id,
       });
-    }
+    }, Promise.resolve());
 
-    if (resultToDelete.sizes) {
-      Object.values(resultToDelete.sizes).forEach(async (size: FileData) => {
-        const sizeToDelete = `${staticPath}/${size.filename}`;
-        if (await fileExists(sizeToDelete)) {
-          fs.unlink(sizeToDelete, (err) => {
-            if (err) {
-              throw new ErrorDeletingFile(t);
+
+    // /////////////////////////////////////
+    // Delete any associated files
+    // /////////////////////////////////////
+
+    if (collectionConfig.upload) {
+      const { staticDir } = collectionConfig.upload;
+
+      const staticPath = path.resolve(config.paths.configDir, staticDir);
+
+      const fileToDelete = `${staticPath}/${doc.filename}`;
+
+      if (await fileExists(fileToDelete)) {
+        fs.unlink(fileToDelete, (err) => {
+          if (err) {
+            throw new ErrorDeletingFile(t);
+          }
+        });
+      }
+
+      if (doc.sizes) {
+        Object.values(doc.sizes)
+          .forEach(async (size: FileData) => {
+            const sizeToDelete = `${staticPath}/${size.filename}`;
+            if (await fileExists(sizeToDelete)) {
+              fs.unlink(sizeToDelete, (err) => {
+                if (err) {
+                  throw new ErrorDeletingFile(t);
+                }
+              });
             }
           });
-        }
-      });
+      }
     }
-  }
 
-  // /////////////////////////////////////
-  // Delete document
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // Delete document
+    // /////////////////////////////////////
 
-  const doc = await Model.findOneAndDelete({ _id: id });
+    await Model.deleteOne({ _id: id }, { lean: true });
 
-  let result: Document = doc.toJSON({ virtuals: true });
+    // /////////////////////////////////////
+    // afterDelete - Collection
+    // /////////////////////////////////////
 
-  // custom id type reset
-  result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
-  result = sanitizeInternalFields(result);
+    await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      result = await hook({
+        req,
+        id,
+        doc,
+      }) || doc;
+    }, Promise.resolve());
+
+
+    // /////////////////////////////////////
+    // afterRead - Fields
+    // /////////////////////////////////////
+
+    result = await afterRead({
+      depth,
+      doc: result || doc,
+      entityConfig: collectionConfig,
+      overrideAccess,
+      req,
+      showHiddenFields,
+    });
+
+    // /////////////////////////////////////
+    // afterRead - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      result = await hook({
+        req,
+        doc: result || doc,
+      }) || result;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // 8. Return results
+    // /////////////////////////////////////
+
+    return result;
+  });
+
+  await Promise.all(promises);
 
   // /////////////////////////////////////
   // Delete Preferences
   // /////////////////////////////////////
 
   if (collectionConfig.auth) {
-    await preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug });
+    preferences.Model.deleteMany({
+      user: { in: docs.map(({ id }) => id) },
+      userCollection: collectionConfig.slug,
+    });
   }
-  await preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
+  preferences.Model.deleteMany({ key: { in: docs.map(({ id }) => `collection-${collectionConfig.slug}-${id}`) } });
 
-  // /////////////////////////////////////
-  // afterDelete - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result = await hook({ req, id, doc: result }) || result;
-  }, Promise.resolve());
-
-
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
-
-  result = await afterRead({
-    depth,
-    doc: result,
-    entityConfig: collectionConfig,
-    overrideAccess,
-    req,
-    showHiddenFields,
-  });
-
-  // /////////////////////////////////////
-  // afterRead - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result = await hook({
-      req,
-      doc: result,
-    }) || result;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // 8. Return results
-  // /////////////////////////////////////
-
-  return result;
+  return Promise.all(promises);
 }
 
 export default deleteOperation;
