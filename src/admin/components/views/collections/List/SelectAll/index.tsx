@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelection } from '../SelectionProvider';
 import Check from '../../../../icons/Check';
-import More from '../../../../icons/More';
+import Line from '../../../../icons/Line';
 
 import './index.scss';
 
@@ -19,11 +19,11 @@ const SelectAll: React.FC = () => {
     >
       <button
         type="button"
-        onClick={() => toggleAll(null)}
+        onClick={() => toggleAll()}
       >
         <span className={`${baseClass}__input`}>
           { selectAll === null ? (
-            <More />
+            <Line />
           ) : (
             <Check />
           )}

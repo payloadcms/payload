@@ -24,12 +24,12 @@ export const SelectionProvider: React.FC<Props> = ({ children, ids = [] }) => {
   const contextRef = useRef({} as SelectionContext);
 
   const [selected, setSelected] = useState<SelectionContext['selected']>({});
-  const [selectAll, setSelectAll] = useState(false);
+  const [selectAll, setSelectAll] = useState<boolean | null>(false);
 
   const toggleAll = useCallback(() => {
     const rows = {};
     ids.forEach((id) => {
-      rows[id] = !selectAll;
+      rows[id] = !selectAll && selectAll !== null;
     });
     setSelected(rows);
   }, [ids, selectAll]);
@@ -65,8 +65,8 @@ export const SelectionProvider: React.FC<Props> = ({ children, ids = [] }) => {
       ids.forEach((id) => {
         rows[id] = false;
       });
+      setSelected(rows);
     }
-    setSelected(rows);
   }, [ids]);
 
   contextRef.current = {
