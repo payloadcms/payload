@@ -64,6 +64,10 @@ One of the most powerful parts about Payload is its ability for you to define fi
 
 In addition to being able to define access control on a document-level, you can define extremely granular permissions on a field by field level. For more information about field-level access control, [click here](/docs/access-control/overview#fields).
 
+### Field names
+
+Some fields use their `name` property as a unique identifier to store and retrieve from the database. `__v`, `salt`, and `hash` are all reserved field names which are sanitized from Payload's config and cannot be used.
+
 ### Validation
 
 Field validation is enforced automatically based on the field type and other properties such as `required` or `min` and `max` value constraints on certain field types. This default behavior can be replaced by providing your own validate function for any field. It will be used on both the frontend and the backend, so it should not rely on any Node-specific packages. The validation function can be either synchronous or asynchronous and expects to return either `true` or a string error message to display in both API responses and within the Admin panel.
