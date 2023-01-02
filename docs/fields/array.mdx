@@ -23,7 +23,7 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
 
 | Option           | Description                                                                                                                                                                                                                                                                       |
 | ---------------- |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`name`** *         | To be used as the property name when stored and retrieved from the database.                                                                                                                                                                                                      |
+| **`name`** *         | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                            |
 | **`label`**          | Text used as the heading in the Admin panel or an object with keys for each language. Auto-generated from name if not defined.                                                                                                                                                    |
 | **`fields`** *       | Array of field types to correspond to each row of the Array.                                                                                                                                                                                                                      |
 | **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                                                                                                      |
@@ -46,7 +46,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 | Option                 | Description                     |
 | ---------------------- | ------------------------------- |
 | **`initCollapsed`**    | Set the initial collapsed state |
-| **`components.RowLabel`**  | Function or React component to be rendered as the label on the array row. Recieves `({ data, index, path })` as args |
+| **`components.RowLabel`**  | Function or React component to be rendered as the label on the array row. Receives `({ data, index, path })` as args |
 
 
 ### Example
