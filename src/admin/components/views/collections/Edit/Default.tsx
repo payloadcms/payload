@@ -189,7 +189,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
                     {(preview && (!collection.versions?.drafts || collection.versions?.drafts?.autosave)) && (
                       <PreviewButton
                         generatePreviewURL={preview}
-                        data={data}
                       />
                     )}
                     {hasSavePermission && (
@@ -212,7 +211,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
                     {(isEditing && preview && (collection.versions?.drafts && !collection.versions?.drafts?.autosave)) && (
                       <PreviewButton
                         generatePreviewURL={preview}
-                        data={data}
                       />
                     )}
                     {collection.versions?.drafts && (
