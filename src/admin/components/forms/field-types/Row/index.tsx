@@ -2,7 +2,7 @@ import React from 'react';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
-import { getFieldPath } from '../getFieldPath';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 
 import './index.scss';
 
@@ -34,7 +34,7 @@ const Row: React.FC<Props> = (props) => {
       indexPath={indexPath}
       fieldSchema={fields.map((field) => ({
         ...field,
-        path: getFieldPath(path, field),
+        path: createNestedFieldPath(path, field),
       }))}
     />
   );
