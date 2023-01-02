@@ -7,10 +7,13 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    right: base(.5);
+    left: base(.5);
   }
 
   &__input {
     @include formInput;
+    padding-left: base(2);
+    background-color: unset;
+    border: none;
   }
 }

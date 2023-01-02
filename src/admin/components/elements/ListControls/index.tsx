@@ -12,6 +12,9 @@ import { useSearchParams } from '../../utilities/SearchParams';
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery';
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched';
 import { getTranslation } from '../../../../utilities/getTranslation';
+import Pill from '../Pill';
+import Chevron from '../../icons/Chevron';
+import DeleteManyDocuments from '../DeleteManyDocuments';
 
 import './index.scss';
 
@@ -27,6 +30,7 @@ const ListControls: React.FC<Props> = (props) => {
     handleSortChange,
     handleWhereChange,
     modifySearchQuery = true,
+    resetParams,
     collection: {
       fields,
       admin: {
@@ -56,26 +60,28 @@ const ListControls: React.FC<Props> = (props) => {
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
+            <DeleteManyDocuments
+              collection={collection}
+              resetParams={resetParams}
+            />
             {enableColumns && (
-              <Button
-                className={`${baseClass}__toggle-columns`}
-                buttonStyle={visibleDrawer === 'columns' ? undefined : 'secondary'}
+              <Pill
+                pillStyle="dark"
+                className={`${baseClass}__toggle-columns ${visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''}`}
                 onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
-                icon="chevron"
-                iconStyle="none"
+                icon={<Chevron />}
               >
                 {t('columns')}
-              </Button>
+              </Pill>
             )}
-            <Button
-              className={`${baseClass}__toggle-where`}
-              buttonStyle={visibleDrawer === 'where' ? undefined : 'secondary'}
+            <Pill
+              pillStyle="dark"
+              className={`${baseClass}__toggle-columns ${visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''}`}
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-              icon="chevron"
-              iconStyle="none"
+              icon={<Chevron />}
             >
               {t('filters')}
-            </Button>
+            </Pill>
             {enableSort && (
               <Button
                 className={`${baseClass}__toggle-sort`}

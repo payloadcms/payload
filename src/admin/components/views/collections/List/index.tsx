@@ -1,3 +1,4 @@
+import { v4 as uuid } from 'uuid';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
@@ -10,7 +11,7 @@ import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import { useStepNav } from '../../../elements/StepNav';
 import formatFields from './formatFields';
 import buildColumns from './buildColumns';
-import { ListIndexProps, ListPreferences } from './types';
+import { Props, ListIndexProps, ListPreferences } from './types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { useSearchParams } from '../../../utilities/SearchParams';
 import { Column } from '../../../elements/Table/types';
@@ -59,7 +60,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const collectionPermissions = permissions?.collections?.[slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
   const newDocumentURL = `${admin}/collections/${slug}/create`;
-  const [{ data }, { setParams: setFetchParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } });
+  const [{ data }, { setParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } });
 
   const activeColumnNames = tableColumns.map(({ accessor }) => accessor);
   const stringifiedActiveColumns = JSON.stringify(activeColumnNames);
@@ -76,27 +77,31 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   // Set up Payload REST API query params
   // /////////////////////////////////////
 
-  useEffect(() => {
-    const params = {
+  const resetParams = useCallback<Props['resetParams']>((overrides = {}) => {
+    const params: Record<string, unknown> = {
       depth: 0,
       draft: 'true',
-      page: undefined,
-      sort: undefined,
-      where: undefined,
+      page: overrides?.page,
+      sort: overrides?.sort,
+      where: overrides?.where,
       limit,
     };
 
     if (page) params.page = page;
     if (sort) params.sort = sort;
     if (where) params.where = where;
+    params.invoke = uuid();
 
+    setParams(params);
+  }, [limit, page, setParams, sort, where]);
+
+  useEffect(() => {
     // Performance enhancement
     // Setting the Fetch URL this way
     // prevents a double-fetch
     setFetchURL(`${serverURL}${api}/${slug}`);
-
-    setFetchParams(params);
-  }, [setFetchParams, page, sort, where, collection, getPreference, limit, serverURL, api, slug]);
+    resetParams();
+  }, [api, resetParams, serverURL, slug]);
 
   // /////////////////////////////////////
   // Fetch preferences on first load
@@ -159,6 +164,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         columnNames: activeColumnNames,
         setColumns: setActiveColumns,
         limit: limit || defaultLimit,
+        resetParams,
       }}
     />
   );

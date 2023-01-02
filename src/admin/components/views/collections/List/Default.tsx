@@ -52,6 +52,7 @@ const DefaultList: React.FC<Props> = (props) => {
     handlePageChange,
     handlePerPageChange,
     customHeader,
+    resetParams,
   } = props;
 
   const { routes: { admin } } = useConfig();
@@ -64,7 +65,7 @@ const DefaultList: React.FC<Props> = (props) => {
         title={getTranslation(collection.labels.plural, i18n)}
       />
       <SelectionProvider
-        ids={data.docs?.map(({ id }) => id)}
+        docs={data.docs}
       >
         {!disableEyebrow && (
           <Eyebrow />
@@ -99,6 +100,7 @@ const DefaultList: React.FC<Props> = (props) => {
             modifySearchQuery={modifySearchParams}
             handleSortChange={handleSortChange}
             handleWhereChange={handleWhereChange}
+            resetParams={resetParams}
           />
           {(data.docs && data.docs.length > 0) && (
             <React.Fragment>

@@ -71,7 +71,7 @@ const buildColumns = ({
                   collection={collection}
                   rowData={rowData}
                   cellData={cellData}
-                  link={colIndex === 0}
+                  link={colIndex === 1}
                   {...cellProps?.[colIndex] || {}}
                 />
               );

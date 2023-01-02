@@ -18,9 +18,9 @@ const Context = createContext({} as SelectionContext);
 
 type Props = {
   children: React.ReactNode
-  ids: (string | number)[]
+  docs: any[]
 }
-export const SelectionProvider: React.FC<Props> = ({ children, ids = [] }) => {
+export const SelectionProvider: React.FC<Props> = ({ children, docs = [] }) => {
   const contextRef = useRef({} as SelectionContext);
 
   const [selected, setSelected] = useState<SelectionContext['selected']>({});
@@ -28,11 +28,11 @@ export const SelectionProvider: React.FC<Props> = ({ children, ids = [] }) => {
 
   const toggleAll = useCallback(() => {
     const rows = {};
-    ids.forEach((id) => {
+    docs.forEach(({ id }) => {
       rows[id] = !selectAll && selectAll !== null;
     });
     setSelected(rows);
-  }, [ids, selectAll]);
+  }, [docs, selectAll]);
 
   const setSelection = useCallback((id) => {
     const newSelected = {
@@ -57,17 +57,17 @@ export const SelectionProvider: React.FC<Props> = ({ children, ids = [] }) => {
     } else {
       setSelectAll(false);
     }
-  }, [ids, selected]);
+  }, [docs, selected]);
 
   useEffect(() => {
     const rows = {};
-    if (ids.length) {
-      ids.forEach((id) => {
+    if (docs.length) {
+      docs.forEach(({ id }) => {
         rows[id] = false;
       });
       setSelected(rows);
     }
-  }, [ids]);
+  }, [docs]);
 
   contextRef.current = {
     selectAll,

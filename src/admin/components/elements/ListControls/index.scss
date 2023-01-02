@@ -5,6 +5,8 @@
 
   &__wrap {
     display: flex;
+    align-items: center;
+    background-color: var(--theme-elevation-100);
   }
 
   .search-filter {
@@ -21,24 +23,17 @@
 
   &__buttons-wrap {
     display: flex;
-    margin-left: - base(.5);
-    margin-right: - base(.5);
-    width: calc(100% + #{base(1)});
+    align-items: center;
+    margin-right: base(.5);
 
-    .btn {
-      margin: 0 base(.5);
+    .btn, .pill {
+      margin-left: base(.5);
     }
   }
 
-  &__toggle-columns,
-  &__toggle-where,
-  &__toggle-sort {
-    min-width: 140px;
-
-    &.btn--style-primary {
-      svg {
-        transform: rotate(180deg);
-      }
+  &__buttons-active {
+    svg {
+      transform: rotate(180deg);
     }
   }
 

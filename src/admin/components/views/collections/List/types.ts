@@ -1,3 +1,4 @@
+import qs from 'qs';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
 import { Column } from '../../../elements/Table/types';
@@ -14,6 +15,7 @@ export type Props = {
   tableColumns: Column[]
   columnNames: string[]
   setColumns: (columns: string[]) => void
+  resetParams: (overrides?: { page?: string, sort?: string, where?: qs.ParsedQs }) => void
   hasCreatePermission: boolean
   setLimit: (limit: number) => void
   limit: number
@@ -23,6 +25,7 @@ export type Props = {
   disableCardLink?: boolean
   handleSortChange?: ListControlsProps['handleSortChange']
   handleWhereChange?: ListControlsProps['handleWhereChange']
+  handleDelete?: () => void
   handlePageChange?: PaginatorProps['onChange']
   handlePerPageChange?: PerPageProps['handleChange']
   onCreateNewClick?: () => void
