@@ -6,16 +6,16 @@ desc: Set up your Global config for your needs by defining fields, adding slugs 
 keywords: globals, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Global configs are in many ways similar to [Collections](/docs/configuration/collections). The big difference is that Collections will potentially contain *many* documents, while a Global is a "one-off". Globals are perfect for things like header nav, site-wide banner alerts, app-wide localized strings, and other "global" data that your site or app might rely on.
+Global configs are in many ways similar to [Collections](/docs/configuration/collections). The big difference is that Collections will potentially contain _many_ documents, while a Global is a "one-off". Globals are perfect for things like header nav, site-wide banner alerts, app-wide localized strings, and other "global" data that your site or app might rely on.
 
 As with Collection configs, it's often best practice to write your Globals in separate files and then import them into the main Payload config.
 
 ## Options
 
 | Option             | Description                                                                                                                                                                                                          |
-|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`slug`** *       | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                                          |
-| **`fields`** *     | Array of field types that will determine the structure and functionality of the data stored within this Global. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`slug`** \*      | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                                          |
+| **`fields`** \*    | Array of field types that will determine the structure and functionality of the data stored within this Global. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
 | **`label`**        | Text for the name in the Admin panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                                              |
 | **`description`**  | Text or React component to display below the Global header to give editors more information.                                                                                                                         |
 | **`admin`**        | Admin-specific configuration. See below for [more detail](/docs/configuration/globals#admin-options).                                                                                                                |
@@ -24,33 +24,33 @@ As with Collection configs, it's often best practice to write your Globals in se
 | **`versions`**     | Set to true to enable default options, or configure with object properties. [More](/docs/versions/overview#globals-config)                                                                                           |
 | **`endpoints`**    | Add custom routes to the REST API. [More](/docs/rest-api/overview#custom-endpoints)                                                                                                                                  |
 | **`graphQL.name`** | Text used in schema generation. Auto-generated from slug if not defined.                                                                                                                                             |
-| **`typescript`** | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                  |
+| **`typescript`**   | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                  |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
 #### Simple Global example
 
 ```ts
-import { GlobalConfig } from 'payload/types';
+import { GlobalConfig } from "payload/types";
 
 const Nav: GlobalConfig = {
-	slug: 'nav',
-	fields: [
-		{
-			name: 'items',
-			type: 'array',
-			required: true,
-			maxRows: 8,
-			fields: [
-				{
-					name: 'page',
-					type: 'relationship',
-					relationTo: 'pages', // "pages" is the slug of an existing collection
-					required: true,
-				}
-			]
-		},
-	]
+  slug: "nav",
+  fields: [
+    {
+      name: "items",
+      type: "array",
+      required: true,
+      maxRows: 8,
+      fields: [
+        {
+          name: "page",
+          type: "relationship",
+          relationTo: "pages", // "pages" is the slug of an existing collection
+          required: true,
+        },
+      ],
+    },
+  ],
 };
 
 export default Nav;
@@ -64,9 +64,47 @@ You can find an [example Global config](https://github.com/payloadcms/public-dem
 
 You can customize the way that the Admin panel behaves on a Global-by-Global basis by defining the `admin` property on a Global's config.
 
-| Option                       | Description  |
-| ---------------------------- | -------------|
-| `components`                 | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals) |
+| Option       | Description                                                                                                             |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `components` | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals)                 |
+| `preview`    | Function to generate a preview URL within the Admin panel for this global that can point to your app. [More](#preview). |
+
+### Preview
+
+Global `admin` options can accept a `preview` function that will be used to generate a link pointing to the frontend of your app to preview data.
+
+If the function is specified, a Preview button will automatically appear in the corresponding global's Edit view. Clicking the Preview button will link to the URL that is generated by the function.
+
+**The preview function accepts two arguments:**
+
+1. The document being edited
+1. An `options` object, containing `locale` and `token` properties. The `token` is the currently logged-in user's JWT.
+
+**Example global with preview function:**
+
+```ts
+import { GlobalConfig } from "payload/types";
+
+const MyGlobal: CollectionConfig = {
+  slug: "my-global",
+  fields: [
+    {
+      name: "slug",
+      type: "text",
+      required: true,
+    },
+  ],
+  admin: {
+    preview: (doc, { locale }) => {
+      if (doc?.slug) {
+        return `https://bigbird.com/preview/${doc.slug}?locale=${locale}`;
+      }
+
+      return null;
+    },
+  },
+};
+```
 
 ### Access control
 
@@ -85,14 +123,14 @@ Globals support all field types that Payload has to offer—including simple fie
 You can import global types as follows:
 
 ```ts
-import { GlobalConfig } from 'payload/types';
+import { GlobalConfig } from "payload/types";
 
 // This is the type used for incoming global configs.
 // Only the bare minimum properties are marked as required.
 ```
 
 ```ts
-import { SanitizedGlobalConfig } from 'payload/types';
+import { SanitizedGlobalConfig } from "payload/types";
 
 // This is the type used after an incoming global config is fully sanitized.
 // Generally, this is only used internally by Payload.
