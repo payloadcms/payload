@@ -28,6 +28,7 @@ export async function writeCommonFiles(
   const packageJson = handlebars.compile(packageJsonTemplate)({
     projectName: path.basename(projectDir),
     templateName: template.name,
+    runCommand: packageManager === 'yarn' ? 'yarn' : 'npm run',
   })
   await fse.writeFile(path.resolve(projectDir, 'package.json'), packageJson)
 
