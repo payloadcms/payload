@@ -21,8 +21,6 @@ This field uses the `monaco-react` editor syntax highlighting.
 | **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language. |
 | **`unique`**         | Enforce that each entry in the Collection has a unique value for this field. |
 | **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
-| **`minLength`**      | Used by the default validation function to ensure values are of a minimum character length. |
-| **`maxLength`**      | Used by the default validation function to ensure values are of a maximum character length. |
 | **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
 | **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
 | **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
@@ -31,15 +29,9 @@ This field uses the `monaco-react` editor syntax highlighting.
 | **`defaultValue`**   | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values) |
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
-| **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
 
 *\* An asterisk denotes that a property is required.*
-
-### Admin config
-
-In addition to the default [field admin config](/docs/fields/overview#admin-config), the JSON field type also allows for the customization of a `language` property.
-
-The [monaco-react](https://github.com/suren-atoyan/monaco-react) editor supports all of the languages supported by the [monaco-editor](https://github.com/microsoft/monaco-editor). The `language` property can be set to any of the languages listed [here](https://github.com/microsoft/monaco-editor/tree/main/src/basic-languages).
 
 ### Example
 
@@ -51,12 +43,9 @@ const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
-      name: 'trackingCode', // required
-      type: 'code', // required
+      name: 'customerJSON', // required
+      type: 'json', // required
       required: true,
-      admin: {
-        language: 'javascript'
-      }
     }
   ]
 };
