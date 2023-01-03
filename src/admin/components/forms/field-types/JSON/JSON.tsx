@@ -1,8 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { code } from '../../../../../fields/validations';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
+import { json } from '../../../../../fields/validations';
 import Label from '../../Label';
 import { Props } from './types';
 import useField from '../../useField';
@@ -11,25 +11,19 @@ import CodeEditor from '../../../elements/CodeEditor';
 
 import './index.scss';
 
-const prismToMonacoLanguageMap = {
-  js: 'javascript',
-  ts: 'typescript',
-};
+const baseClass = 'json-field';
 
-const baseClass = 'code-field';
-
-const Code: React.FC<Props> = (props) => {
+const JSONField: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,
     name,
     required,
-    validate = code,
+    validate = json,
     admin: {
       readOnly,
       style,
       className,
       width,
-      language,
       description,
       condition,
     } = {},
@@ -38,21 +32,40 @@ const Code: React.FC<Props> = (props) => {
   } = props;
 
   const path = pathFromProps || name;
+  const [stringValue, setStringValue] = useState<string>();
+  const [jsonError, setJsonError] = useState<string>();
 
   const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, required });
-  }, [validate, required]);
+    return validate(value, { ...options, required, jsonError });
+  }, [validate, required, jsonError]);
 
   const {
     value,
+    initialValue,
     showError,
     setValue,
     errorMessage,
-  } = useField({
+  } = useField<string>({
     path,
     validate: memoizedValidate,
     condition,
   });
+
+  const handleChange = useCallback((val) => {
+    if (readOnly) return;
+    setStringValue(val);
+
+    try {
+      setValue(JSON.parse(val.trim() || '{}'));
+      setJsonError(undefined);
+    } catch (e) {
+      setJsonError(e);
+    }
+  }, [readOnly, setValue, setStringValue]);
+
+  useEffect(() => {
+    setStringValue(JSON.stringify(initialValue, null, 2));
+  }, [initialValue]);
 
   const classes = [
     baseClass,
@@ -81,9 +94,9 @@ const Code: React.FC<Props> = (props) => {
       />
       <CodeEditor
         options={editorOptions}
-        defaultLanguage={prismToMonacoLanguageMap[language] || language}
-        value={value as string || ''}
-        onChange={readOnly ? () => null : (val) => setValue(val)}
+        defaultLanguage="json"
+        value={stringValue}
+        onChange={handleChange}
         readOnly={readOnly}
       />
       <FieldDescription
@@ -94,4 +107,4 @@ const Code: React.FC<Props> = (props) => {
   );
 };
 
-export default withCondition(Code);
+export default withCondition(JSONField);

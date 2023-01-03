@@ -9,6 +9,7 @@ import { pointFieldsSlug } from './collections/Point';
 import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
+import { jsonDoc } from './collections/JSON';
 
 const { beforeAll, describe } = test;
 
@@ -61,6 +62,31 @@ describe('fields', () => {
       await page.goto(url.create);
       const description = page.locator('.field-description-i18nText');
       await expect(description).toHaveText('en description');
+    });
+  });
+
+  describe('json', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'json-fields');
+    });
+
+    test('should display field in list view', async () => {
+      await page.goto(url.list);
+      const jsonCell = page.locator('.row-1 .cell-json');
+      await expect(jsonCell)
+        .toHaveText(JSON.stringify(jsonDoc.json));
+    });
+
+    test('should create', async () => {
+      const input = '{"foo": "bar"}';
+
+      await page.goto(url.create);
+      const json = page.locator('.json-field .inputarea');
+      await json.fill(input);
+
+      await saveDocAndAssert(page);
+      await expect(page.locator('.json-field')).toContainText('"foo": "bar"');
     });
   });
 

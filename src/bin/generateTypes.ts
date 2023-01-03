@@ -74,6 +74,11 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
             break;
           }
 
+          case 'json': {
+            fieldSchema = { type: 'object' };
+            break;
+          }
+
           case 'richText': {
             fieldSchema = {
               type: 'array',

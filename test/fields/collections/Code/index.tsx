@@ -8,14 +8,14 @@ const Code: CollectionConfig = {
       name: 'javascript',
       type: 'code',
       admin: {
-        language: 'js',
+        language: 'javascript',
       },
     },
     {
       name: 'typescript',
       type: 'code',
       admin: {
-        language: 'ts',
+        language: 'typescript',
       },
     },
     {

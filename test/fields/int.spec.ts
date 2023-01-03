@@ -505,6 +505,29 @@ describe('Fields', () => {
     });
   });
 
+  describe('json', () => {
+    it('should save json data', async () => {
+      const json = { foo: 'bar' };
+      const doc = await payload.create({
+        collection: 'json-fields',
+        data: {
+          json,
+        },
+      });
+
+      expect(doc.json).toStrictEqual({ foo: 'bar' });
+    });
+
+    it('should validate json', async () => {
+      await expect(async () => payload.create({
+        collection: 'json-fields',
+        data: {
+          json: '{ bad input: true }',
+        },
+      })).rejects.toThrow('The following field is invalid: json');
+    });
+  });
+
   describe('richText', () => {
     it('should allow querying on rich text content', async () => {
       const emptyRichTextQuery = await payload.find({

@@ -1,4 +1,5 @@
 import code from './Code';
+import json from './JSON';
 import email from './Email';
 import hidden from './HiddenInput';
 import text from './Text';
@@ -26,6 +27,7 @@ import ui from './UI';
 
 export type FieldTypes = {
   code: React.ComponentType<any>
+  json: React.ComponentType<any>
   email: React.ComponentType<any>
   hidden: React.ComponentType<any>
   text: React.ComponentType<any>
@@ -52,6 +54,7 @@ export type FieldTypes = {
 
 const fieldTypes: FieldTypes = {
   code,
+  json,
   email,
   hidden,
   text,

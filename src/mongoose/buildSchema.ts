@@ -18,6 +18,7 @@ import {
   fieldAffectsData, fieldIsLocalized,
   fieldIsPresentationalOnly,
   GroupField,
+  JSONField,
   NonPresentationalField,
   NumberField,
   PointField,
@@ -144,6 +145,13 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   },
   code: (field: CodeField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
+
+    schema.add({
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
+    });
+  },
+  json: (field: JSONField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Schema.Types.Mixed };
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
