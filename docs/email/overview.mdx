@@ -13,7 +13,7 @@ email to work or you want customers to get an order confirmation email, you're a
 [NodeMailer](https://nodemailer.com) for email and won't get in your way for those already familiar.
 
 For email to send from your Payload server, some configuration is required. The settings you provide will be set
-in the `email` property object of your payload init call. Payload will make use of the transport that you have configured for it for things like reset password or verifying new user accounts and email send methods are available to you as well on your payload instance.
+in the `email` property object of your payload initAsync call. Payload will make use of the transport that you have configured for it for things like reset password or verifying new user accounts and email send methods are available to you as well on your payload instance.
 
 ### Configuration
 
@@ -68,7 +68,7 @@ payload.initAsync({
 
 ### Use an email service
 
-Many third party mail providers are available and offer benefits beyond basic SMTP. As an example your payload init could look this if you wanted to use SendGrid.com though the same approach would work for any other [NodeMailer transports](https://nodemailer.com/transports/) shown here or provided by another third party.
+Many third party mail providers are available and offer benefits beyond basic SMTP. As an example your payload initAsync could look this if you wanted to use SendGrid.com though the same approach would work for any other [NodeMailer transports](https://nodemailer.com/transports/) shown here or provided by another third party.
 
 ```js
 const nodemailerSendgrid = require('nodemailer-sendgrid');
@@ -90,7 +90,7 @@ payload.initAsync({
 ```
 
 ### Use a custom NodeMailer transport
-To take full control of the mail transport you may wish to use `nodemailer.createTransport()` on your server and provide it to Payload init.
+To take full control of the mail transport you may wish to use `nodemailer.createTransport()` on your server and provide it to Payload initAsync.
 
 ```js
 const payload = require('payload');
