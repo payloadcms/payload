@@ -14,7 +14,6 @@ const JSON: CollectionConfig = {
     {
       name: 'json',
       type: 'json',
-      // maxLength: 100,
     },
   ],
 };

@@ -6,7 +6,6 @@ import { json } from '../../../../../fields/validations';
 import Label from '../../Label';
 import { Props } from './types';
 import useField from '../../useField';
-import useThrottledEffect from '../../../../hooks/useThrottledEffect';
 import withCondition from '../../withCondition';
 import CodeEditor from '../../../elements/CodeEditor';
 
@@ -52,14 +51,17 @@ const JSONField: React.FC<Props> = (props) => {
     condition,
   });
 
-  useThrottledEffect(() => {
+  const handleChange = useCallback((val) => {
+    if (readOnly) return;
+    setStringValue(val);
+
     try {
-      setValue(JSON.parse(stringValue));
+      setValue(JSON.parse(val.trim() || '{}'));
       setJsonError(undefined);
     } catch (e) {
       setJsonError(e);
     }
-  }, 0, [setValue, stringValue]);
+  }, [readOnly, setValue, setStringValue]);
 
   useEffect(() => {
     setStringValue(JSON.stringify(initialValue, null, 2));
@@ -94,7 +96,7 @@ const JSONField: React.FC<Props> = (props) => {
         options={editorOptions}
         defaultLanguage="json"
         value={stringValue}
-        onChange={readOnly ? () => null : (val) => setStringValue(val)}
+        onChange={handleChange}
         readOnly={readOnly}
       />
       <FieldDescription

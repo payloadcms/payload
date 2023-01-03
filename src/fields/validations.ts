@@ -133,7 +133,7 @@ export const code: Validate<unknown, unknown, CodeField> = (value: string, { t, 
   return true;
 };
 
-export const json: Validate<unknown, unknown, JSONField> = (value: string, {
+export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }> = (value: string, {
   t, required, jsonError,
 }) => {
   if (required && !value) {
