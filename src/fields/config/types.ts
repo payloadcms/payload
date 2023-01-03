@@ -2,7 +2,8 @@
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
 import type { TFunction } from 'i18next';
-import { Document, Operation, Where } from '../../types';
+import type { EditorProps } from '@monaco-editor/react';
+import { Operation, Where } from '../../types';
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
@@ -257,13 +258,13 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
   minLength?: number
   maxLength?: number
   type: 'code';
-  editorOptions?: any;
+  editorOptions?: EditorProps['options'];
 }
 
 export type JSONField = Omit<FieldBase, 'admin'> & {
   admin?: Admin
   type: 'json';
-  editorOptions?: any;
+  editorOptions?: EditorProps['options'];
   jsonError?: string;
 }
 

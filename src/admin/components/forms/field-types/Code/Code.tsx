@@ -1,6 +1,4 @@
 import React, { useCallback } from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import Editor from '@monaco-editor/react';
 
 import { code } from '../../../../../fields/validations';
 import Error from '../../Error';
@@ -8,10 +6,15 @@ import FieldDescription from '../../FieldDescription';
 import Label from '../../Label';
 import { Props } from './types';
 import useField from '../../useField';
-import { useTheme } from '../../../utilities/Theme';
 import withCondition from '../../withCondition';
+import CodeEditor from '../../../elements/CodeEditor';
 
 import './index.scss';
+
+const prismToMonacoLanguageMap = {
+  js: 'javascript',
+  ts: 'typescript',
+};
 
 const baseClass = 'code-field';
 
@@ -34,7 +37,6 @@ const Code: React.FC<Props> = (props) => {
     editorOptions,
   } = props;
 
-  const { theme } = useTheme();
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value, options) => {
@@ -77,24 +79,12 @@ const Code: React.FC<Props> = (props) => {
         label={label}
         required={required}
       />
-      <Editor
-        className={`${baseClass}__editor`}
-        height="35vh"
-        defaultLanguage={language}
+      <CodeEditor
+        options={editorOptions}
+        defaultLanguage={prismToMonacoLanguageMap[language] || language}
         value={value as string || ''}
         onChange={readOnly ? () => null : (val) => setValue(val)}
-        options={{
-          detectIndentation: true,
-          minimap: {
-            enabled: false,
-          },
-          readOnly: Boolean(readOnly),
-          scrollBeyondLastLine: false,
-          tabSize: 2,
-          theme: theme === 'dark' ? 'vs-dark' : 'vs',
-          wordWrap: 'on',
-          ...editorOptions,
-        }}
+        readOnly={readOnly}
       />
       <FieldDescription
         value={value}

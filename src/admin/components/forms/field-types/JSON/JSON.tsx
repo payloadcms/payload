@@ -1,6 +1,4 @@
 import React, { useCallback, useEffect, useState } from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import Editor from '@monaco-editor/react';
 
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
@@ -9,8 +7,8 @@ import Label from '../../Label';
 import { Props } from './types';
 import useField from '../../useField';
 import useThrottledEffect from '../../../../hooks/useThrottledEffect';
-import { useTheme } from '../../../utilities/Theme';
 import withCondition from '../../withCondition';
+import CodeEditor from '../../../elements/CodeEditor';
 
 import './index.scss';
 
@@ -34,7 +32,6 @@ const JSONField: React.FC<Props> = (props) => {
     editorOptions,
   } = props;
 
-  const { theme } = useTheme();
   const path = pathFromProps || name;
   const [stringValue, setStringValue] = useState<string>();
   const [jsonError, setJsonError] = useState<string>();
@@ -93,26 +90,12 @@ const JSONField: React.FC<Props> = (props) => {
         label={label}
         required={required}
       />
-      <Editor
-        className={`${baseClass}__editor`}
-        height="35vh"
+      <CodeEditor
+        options={editorOptions}
         defaultLanguage="json"
         value={stringValue}
         onChange={readOnly ? () => null : (val) => setStringValue(val)}
-        options={
-          {
-            detectIndentation: true,
-            minimap: {
-              enabled: false,
-            },
-            readOnly: Boolean(readOnly),
-            scrollBeyondLastLine: false,
-            tabSize: 2,
-            theme: theme === 'dark' ? 'vs-dark' : 'vs',
-            wordWrap: 'on',
-            ...editorOptions,
-          }
-        }
+        readOnly={readOnly}
       />
       <FieldDescription
         value={value}
