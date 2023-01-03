@@ -51,7 +51,7 @@
     flex-grow: 1;
     display: flex;
     align-items: center;
-    padding: base(.75) base(1);
+    padding: base(.75);
     justify-content: space-between;
     max-width: calc(100% - #{base(3.25)});
   }
@@ -60,19 +60,35 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    margin-left: base(0.5);
+
+    & > *:not(:last-child) {
+      margin-right: base(.25);
+    }
   }
 
   &__actionButton {
     margin: 0;
-    margin-right: base(.5);
     border-radius: 0;
+    flex-shrink: 0;
 
     line {
       stroke-width: $style-stroke-width-m;
     }
 
-    &:last-child {
-      margin-right: 0;
+    &:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }
+
+  &__toggler {
+    background: transparent;
+    border: none;
+    padding: 0;
+    &:focus,
+    &:focus-within {
+      outline: none;
     }
   }
 

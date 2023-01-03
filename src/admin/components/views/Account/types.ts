@@ -11,4 +11,5 @@ export type Props = {
   initialState: Fields
   isLoading: boolean
   action: string
+  onSave?: () => void
 }

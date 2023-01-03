@@ -42,6 +42,15 @@ const DefaultList: React.FC<Props> = (props) => {
     columnNames,
     setColumns,
     hasCreatePermission,
+    disableEyebrow,
+    modifySearchParams,
+    disableCardLink,
+    onCardClick,
+    handleSortChange,
+    handleWhereChange,
+    handlePageChange,
+    handlePerPageChange,
+    customHeader,
   } = props;
 
   const { routes: { admin } } = useConfig();
@@ -53,19 +62,28 @@ const DefaultList: React.FC<Props> = (props) => {
       <Meta
         title={getTranslation(collection.labels.plural, i18n)}
       />
-      <Eyebrow />
+      {!disableEyebrow && (
+        <Eyebrow />
+      )}
       <Gutter className={`${baseClass}__wrap`}>
         <header className={`${baseClass}__header`}>
-          <h1>{getTranslation(pluralLabel, i18n)}</h1>
-          {hasCreatePermission && (
-            <Pill to={newDocumentURL}>
-              {t('createNew')}
-            </Pill>
-          )}
-          {description && (
-            <div className={`${baseClass}__sub-header`}>
-              <ViewDescription description={description} />
-            </div>
+          {customHeader && customHeader}
+          {!customHeader && (
+            <Fragment>
+              <h1>
+                {getTranslation(pluralLabel, i18n)}
+              </h1>
+              {hasCreatePermission && (
+                <Pill to={newDocumentURL}>
+                  {t('createNew')}
+                </Pill>
+              )}
+              {description && (
+                <div className={`${baseClass}__sub-header`}>
+                  <ViewDescription description={description} />
+                </div>
+              )}
+            </Fragment>
           )}
         </header>
         <ListControls
@@ -74,22 +92,28 @@ const DefaultList: React.FC<Props> = (props) => {
           setColumns={setColumns}
           enableColumns={Boolean(!upload)}
           enableSort={Boolean(upload)}
+          modifySearchQuery={modifySearchParams}
+          handleSortChange={handleSortChange}
+          handleWhereChange={handleWhereChange}
         />
         {(data.docs && data.docs.length > 0) && (
           <React.Fragment>
             {!upload && (
-            <RelationshipProvider>
-              <Table
-                data={data.docs}
-                columns={tableColumns}
-              />
-            </RelationshipProvider>
+              <RelationshipProvider>
+                <Table
+                  data={data.docs}
+                  columns={tableColumns}
+                />
+              </RelationshipProvider>
             )}
             {upload && (
               <UploadGallery
                 docs={data.docs}
                 collection={collection}
-                onCardClick={(doc) => history.push(`${admin}/collections/${slug}/${doc.id}`)}
+                onCardClick={(doc) => {
+                  if (typeof onCardClick === 'function') onCardClick(doc);
+                  if (!disableCardLink) history.push(`${admin}/collections/${slug}/${doc.id}`);
+                }}
               />
             )}
           </React.Fragment>
@@ -99,7 +123,7 @@ const DefaultList: React.FC<Props> = (props) => {
             <p>
               {t('noResults', { label: getTranslation(pluralLabel, i18n) })}
             </p>
-            {hasCreatePermission && (
+            {hasCreatePermission && newDocumentURL && (
               <Button
                 el="link"
                 to={newDocumentURL}
@@ -119,6 +143,8 @@ const DefaultList: React.FC<Props> = (props) => {
             prevPage={data.prevPage}
             nextPage={data.nextPage}
             numberOfNeighbors={1}
+            disableHistoryChange={modifySearchParams === false}
+            onChange={handlePageChange}
           />
           {data?.totalDocs > 0 && (
             <Fragment>
@@ -134,6 +160,8 @@ const DefaultList: React.FC<Props> = (props) => {
               <PerPage
                 limits={collection?.admin?.pagination?.limits}
                 limit={limit}
+                modifySearchParams={modifySearchParams}
+                handleChange={handlePerPageChange}
               />
             </Fragment>
           )}

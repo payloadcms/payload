@@ -10,14 +10,17 @@
     display: flex;
     align-items: center;
     overflow: visible;
+    width: 100%;
+    flex-shrink: 1;
+  }
+
+  &__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &__drawer-toggler {
     position: relative;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;

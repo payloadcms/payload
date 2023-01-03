@@ -17,4 +17,5 @@ export type Props = {
   initialState: Fields
   isLoading: boolean
   autosaveEnabled: boolean
+  updatedAt: string
 }

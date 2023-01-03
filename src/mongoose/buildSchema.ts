@@ -257,7 +257,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
           return {
             ...locales,
-            [locale]: field.hasMany ? [localeSchema] : localeSchema,
+            [locale]: field.hasMany ? { type: [localeSchema], default: undefined } : localeSchema,
           };
         }, {}),
         localized: true,
@@ -270,7 +270,12 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       };
       schemaToReturn.relationTo = { type: String, enum: field.relationTo };
 
-      if (field.hasMany) schemaToReturn = [schemaToReturn];
+      if (field.hasMany) {
+        schemaToReturn = {
+          type: [schemaToReturn],
+          default: undefined,
+        };
+      }
     } else {
       schemaToReturn = {
         ...formatBaseSchema(field, buildSchemaOptions),
@@ -278,7 +283,12 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         ref: field.relationTo,
       };
 
-      if (field.hasMany) schemaToReturn = [schemaToReturn];
+      if (field.hasMany) {
+        schemaToReturn = {
+          type: [schemaToReturn],
+          default: undefined,
+        };
+      }
     }
 
     schema.add({

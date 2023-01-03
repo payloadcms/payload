@@ -1,32 +1,28 @@
-import { Element, Transforms } from 'slate';
+import { Editor, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import isElementActive from './isActive';
-import listTypes from './listTypes';
+import { isWithinListItem } from './isWithinListItem';
 
-const toggleElement = (editor, format) => {
+const toggleElement = (editor: Editor, format: string): void => {
   const isActive = isElementActive(editor, format);
-  const isList = listTypes.includes(format);
-
   let type = format;
+
+  const isWithinLI = isWithinListItem(editor);
 
   if (isActive) {
     type = undefined;
-  } else if (isList) {
-    type = 'li';
   }
 
-  Transforms.unwrapNodes(editor, {
-    match: (n) => Element.isElement(n) && listTypes.includes(n.type as string),
-    split: true,
-    mode: 'lowest',
+  if (!isActive && isWithinLI) {
+    const block = { type: 'li', children: [] };
+    Transforms.wrapNodes(editor, block, {
+      at: Editor.unhangRange(editor, editor.selection),
+    });
+  }
+
+  Transforms.setNodes(editor, { type }, {
+    at: Editor.unhangRange(editor, editor.selection),
   });
-
-  Transforms.setNodes(editor, { type });
-
-  if (!isActive && isList) {
-    const block = { type: format, children: [] };
-    Transforms.wrapNodes(editor, block);
-  }
 
   ReactEditor.focus(editor);
 };

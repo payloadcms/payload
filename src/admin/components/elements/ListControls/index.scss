@@ -23,17 +23,17 @@
     display: flex;
     margin-left: - base(.5);
     margin-right: - base(.5);
-    width: calc(100% + #{$baseline});
+    width: calc(100% + #{base(1)});
+
+    .btn {
+      margin: 0 base(.5);
+    }
   }
 
   &__toggle-columns,
   &__toggle-where,
   &__toggle-sort {
     min-width: 140px;
-
-    &.btn {
-      margin: 0 base(.5);
-    }
 
     &.btn--style-primary {
       svg {
@@ -51,6 +51,16 @@
   @include mid-break {
     &__buttons {
       margin-left: base(.5);
+    }
+
+    &__buttons-wrap {
+      margin-left: - base(.25);
+      margin-right: - base(.25);
+      width: calc(100% + #{base(0.5)});
+
+      .btn {
+        margin: 0 base(.25);
+      }
     }
   }
 

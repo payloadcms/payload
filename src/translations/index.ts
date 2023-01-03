@@ -15,6 +15,7 @@ import tr from './tr.json';
 import vi from './vi.json';
 import sv from './sv.json';
 import th from './th.json';
+import ua from './ua.json';
 
 export default {
   cs,
@@ -34,4 +35,5 @@ export default {
   vi,
   sv,
   th,
+  ua,
 };

@@ -3,9 +3,9 @@
 .rich-text-relationship {
   @extend %body;
   @include shadow-sm;
-  padding: base(.5);
+  padding: base(.75);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   background: var(--theme-input-bg);
   border: 1px solid var(--theme-elevation-100);
   max-width: base(15);
@@ -19,20 +19,77 @@
     margin: base(.625) 0;
   }
 
-  svg {
-    width: base(1.25);
-    height: base(1.25);
-    margin-right: base(.5);
+  &__label {
+    margin-bottom: base(0.25);
   }
 
-  h5 {
+  &__title {
+    margin: 0;
+  }
+
+  &__label,
+  &__title {
     white-space: nowrap;
     text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 1 !important;
+  }
+
+  &__title {
+    font-weight: bold;
+  }
+
+  &__wrap {
+    flex-grow: 1;
     overflow: hidden;
   }
 
   &--selected {
     box-shadow: $focus-box-shadow;
     outline: none;
+  }
+
+  &__toggler {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+
+    &:focus,
+    &:focus-within {
+      outline: none;
+    }
+
+    &:disabled {
+      pointer-events: none;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: base(0.5);
+
+    & > *:not(:last-child) {
+      margin-right: base(.25);
+    }
+  }
+
+  &__actionButton {
+    margin: 0;
+    border-radius: 0;
+    flex-shrink: 0;
+    width: base(1);
+    height: base(1);
+
+    line {
+      stroke-width: $style-stroke-width-m;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
   }
 }

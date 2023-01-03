@@ -315,17 +315,18 @@ describe('fields', () => {
     async function navigateToRichTextFields() {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields');
       await page.goto(url.list);
-      await page.locator('.row-1 .cell-id').click();
+      await page.locator('.row-1 .cell-title a').click();
     }
 
     describe('toolbar', () => {
       test('should create new url link', async () => {
         await navigateToRichTextFields();
 
-        // Open link popup
+        // Open link drawer
         await page.locator('.rich-text__toolbar button:not([disabled]) .link').click();
 
-        const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+        // find the drawer
+        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
 
         // Fill values and click Confirm
@@ -397,6 +398,18 @@ describe('fields', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, 'date-fields');
+    });
+
+    test('should clear date', async () => {
+      await page.goto(url.create);
+      const dateField = page.locator('#field-default input');
+      await expect(dateField).toBeVisible();
+      await dateField.fill('2021-08-01');
+      await expect(dateField).toHaveValue('2021-08-01');
+      const clearButton = page.locator('#field-default .date-time-picker__clear-button');
+      await expect(clearButton).toBeVisible();
+      await clearButton.click();
+      await expect(dateField).toHaveValue('');
     });
 
     test('should display formatted date in list view if displayFormat option added to date field', async () => {

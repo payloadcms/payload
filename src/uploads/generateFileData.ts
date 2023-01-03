@@ -12,6 +12,7 @@ import getSafeFileName from './getSafeFilename';
 import resizeAndSave from './imageResizer';
 import { FileData, FileToSave } from './types';
 import canResizeImage from './canResizeImage';
+import isImage from './isImage';
 
 type Args = {
   config: SanitizedConfig,
@@ -67,7 +68,12 @@ export const generateFileData = async ({
         const shouldResize = canResizeImage(file.mimetype);
         let fsSafeName: string;
         let resized: Sharp | undefined;
-        let dimensions: ProbedImageSize;
+        let dimensions;
+        let fileBuffer;
+        let bufferInfo;
+        let ext;
+        let mime;
+
         if (shouldResize) {
           if (resizeOptions) {
             resized = sharp(file.data)
@@ -76,33 +82,45 @@ export const generateFileData = async ({
           if (formatOptions) {
             resized = (resized ?? sharp(file.data)).toFormat(formatOptions.format, formatOptions.options);
           }
+        }
+
+        if (isImage(file.mimetype)) {
           dimensions = await getImageSize(file);
           fileData.width = dimensions.width;
           fileData.height = dimensions.height;
         }
 
-        const fileBuffer = resized ? (await resized.toBuffer()) : file.data;
-        const bufferInfo = await fromBuffer(fileBuffer);
-        let mime = bufferInfo?.mime ?? file.mimetype;
-        const ext = resized ? bufferInfo.ext : file.name.split('.').pop();
-        const fileSize = fileBuffer.length;
+        if (resized) {
+          fileBuffer = await resized.toBuffer({ resolveWithObject: true });
+          bufferInfo = await fromBuffer(fileBuffer.data);
+
+          mime = bufferInfo.mime;
+          ext = bufferInfo.ext;
+          fileData.width = fileBuffer.info.width;
+          fileData.height = fileBuffer.info.height;
+          fileData.filesize = fileBuffer.data.length;
+        } else {
+          mime = file.mimetype;
+          fileData.filesize = file.size;
+          ext = file.name.split('.').pop();
+        }
+
+        if (mime === 'application/xml' && ext === 'svg') mime = 'image/svg+xml';
+        fileData.mimeType = mime;
+
         const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
         fsSafeName = `${baseFilename}.${ext}`;
 
-        if (mime === 'application/xml' && ext === 'svg') mime = 'image/svg+xml';
-
         if (!overwriteExistingFiles) {
-          fsSafeName = await getSafeFileName(Model, staticPath, fsSafeName);
+          fsSafeName = await getSafeFileName(Model, staticPath, `${baseFilename}.${ext}`);
         }
+
+        fileData.filename = fsSafeName;
 
         filesToSave.push({
           path: `${staticPath}/${fsSafeName}`,
-          buffer: fileBuffer,
+          buffer: fileBuffer?.data || file.data,
         });
-
-        fileData.filename = fsSafeName || (!overwriteExistingFiles ? await getSafeFileName(Model, staticPath, file.name) : file.name);
-        fileData.filesize = fileSize || file.size;
-        fileData.mimeType = mime || (await fromBuffer(file.data)).mime;
 
         if (Array.isArray(imageSizes) && shouldResize) {
           req.payloadUploadSizes = {};

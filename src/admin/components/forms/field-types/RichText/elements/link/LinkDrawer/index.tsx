@@ -1,7 +1,6 @@
-import { Modal } from '@faceless-ui/modal';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MinimalTemplate } from '../../../../../..';
+import { Drawer } from '../../../../../../elements/Drawer';
 import Button from '../../../../../../elements/Button';
 import X from '../../../../../../icons/X';
 import Form from '../../../../../Form';
@@ -11,29 +10,34 @@ import fieldTypes from '../../../..';
 import RenderFields from '../../../../../RenderFields';
 
 import './index.scss';
+import { Gutter } from '../../../../../../elements/Gutter';
 
 const baseClass = 'rich-text-link-edit-modal';
 
-export const EditModal: React.FC<Props> = ({
-  close,
+export const LinkDrawer: React.FC<Props> = ({
+  handleClose,
   handleModalSubmit,
   initialState,
   fieldSchema,
-  modalSlug,
+  drawerSlug,
 }) => {
   const { t } = useTranslation('fields');
 
   return (
-    <Modal
-      slug={modalSlug}
+    <Drawer
+      slug={drawerSlug}
+      formatSlug={false}
       className={baseClass}
     >
-      <MinimalTemplate className={`${baseClass}__template`}>
+      <Gutter className={`${baseClass}__template`}>
         <header className={`${baseClass}__header`}>
-          <h3>{t('editLink')}</h3>
+          <h2 className={`${baseClass}__header-text`}>
+            {t('editLink')}
+          </h2>
           <Button
+            className={`${baseClass}__header-close`}
             buttonStyle="none"
-            onClick={close}
+            onClick={handleClose}
           >
             <X />
           </Button>
@@ -52,7 +56,7 @@ export const EditModal: React.FC<Props> = ({
             {t('general:submit')}
           </FormSubmit>
         </Form>
-      </MinimalTemplate>
-    </Modal>
+      </Gutter>
+    </Drawer>
   );
 };

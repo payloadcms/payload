@@ -183,7 +183,7 @@ export type GroupField = FieldBase & {
 
 export type RowAdmin = Omit<Admin, 'description'>;
 
-export type RowField = Omit<FieldBase, 'admin' | 'name'> & {
+export type RowField = Omit<FieldBase, 'admin' | 'name' | 'label'> & {
   admin?: RowAdmin;
   type: 'row';
   fields: Field[];
