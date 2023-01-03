@@ -23,7 +23,7 @@ in the `email` property object of your payload init call. Payload will make use 
 1. **Recommended**: Set the `transportOptions` and Payload will do the set up for you.
 1. **Advanced**: The `transport` object can be assigned a nodemailer transport object set up in your server scripts and given for Payload to use.
 
-The following options are configurable in the `email` property object as part of the options object when calling payload.init().
+The following options are configurable in the `email` property object as part of the options object when calling payload.initAsync().
 
 | Option                       | Description  |
 | ---------------------------- | -------------|
@@ -41,7 +41,7 @@ Simple Mail Transfer Protocol, also known as SMTP can be passed in using the `tr
 
 **Example email part using SMTP:**
 ```js
-payload.init({
+payload.initAsync({
   email: {
     transportOptions: {
       host: process.env.SMTP_HOST,
@@ -76,7 +76,7 @@ const payload = require('payload');
 
 const sendGridAPIKey = process.env.SENDGRID_API_KEY;
 
-payload.init({
+payload.initAsync({
   ...sendGridAPIKey ? {
     email: {
       transportOptions: nodemailerSendgrid({
@@ -105,7 +105,7 @@ const transport = await nodemailer.createTransport({
   },
 });
 
-payload.init({
+payload.initAsync({
   email: {
     fromName: 'Admin',
     fromAddress: 'admin@example.com',
@@ -124,7 +124,7 @@ By default, Payload uses a mock implementation that only sends mail to the [ethe
 To see ethereal credentials, add `logMockCredentials: true` to the email options. This will cause them to be logged to console on startup.
 
 ```js
-payload.init({
+payload.initAsync({
   email: {
     fromName: 'Admin',
     fromAddress: 'admin@example.com',

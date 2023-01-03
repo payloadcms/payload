@@ -118,13 +118,18 @@ export class Payload {
   errorIndex: number;
 
   /**
-   * @description Initializes Payload
-   * @param options
+   * @deprecated use initAsync instead
+   *
+   * This method can lead to errors when the config is too large
    */
   init(options: InitOptions): void {
     initSync(this, options);
   }
 
+  /**
+   * @description Initializes Payload
+   * @param options
+   */
   async initAsync(options: InitOptions): Promise<void> {
     await initAsync(this, options);
   }

@@ -142,15 +142,13 @@ export const initSync = (payload: Payload, options: InitOptions): void => {
   payload.logger = Logger('payload', options.loggerOptions);
   payload.mongoURL = options.mongoURL;
 
-  let promise = Promise.resolve();
   if (payload.mongoURL) {
     mongoose.set('strictQuery', false);
-    promise = connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
+    connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
   }
-  promise.then(() => {
-    init(payload, options);
 
-    if (typeof options.onInit === 'function') options.onInit(payload);
-    if (typeof payload.config.onInit === 'function') payload.config.onInit(payload);
-  });
+  init(payload, options);
+
+  if (typeof options.onInit === 'function') options.onInit(payload);
+  if (typeof payload.config.onInit === 'function') payload.config.onInit(payload);
 };

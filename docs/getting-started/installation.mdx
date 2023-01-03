@@ -76,7 +76,7 @@ const payload = require('payload');
 
 const app = express();
 
-payload.init({
+payload.initAsync({
   secret: 'SECRET_KEY',
   mongoURL: 'mongodb://localhost/payload',
   express: app,
@@ -88,7 +88,7 @@ app.listen(3000, async () => {
 
 ```
 
-Here is a list of all properties available to pass through `payload.init`:
+Here is a list of all properties available to pass through `payload.initAsync`:
 
 ##### `express`
 
