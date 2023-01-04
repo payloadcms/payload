@@ -15,12 +15,10 @@ import { defaultNumber, numberDoc } from './collections/Number';
 let client;
 
 describe('Fields', () => {
-  beforeAll(async (done) => {
+  beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
     await client.login();
-
-    done();
   });
 
   describe('text', () => {

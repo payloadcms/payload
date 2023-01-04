@@ -26,7 +26,7 @@ let globalGraphQLVersionID;
 const globalGraphQLOriginalTitle = 'updated global title';
 
 describe('Versions', () => {
-  beforeAll(async (done) => {
+  beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
 
@@ -43,8 +43,6 @@ describe('Versions', () => {
     const response = await request(graphQLURL, login);
     token = response.loginUser.token;
     graphQLClient = new GraphQLClient(graphQLURL, { headers: { Authorization: `JWT ${token}` } });
-
-    done();
   });
 
   describe('Collections - Local', () => {
@@ -381,7 +379,7 @@ describe('Versions', () => {
     describe('Read', () => {
       const updatedTitle = 'updated title';
 
-      beforeAll(async (done) => {
+      beforeAll(async () => {
         // modify the post to create a new version
         // language=graphQL
         const update = `mutation {
@@ -403,7 +401,6 @@ describe('Versions', () => {
         const response = await graphQLClient.request(query);
 
         collectionGraphQLVersionID = response.versionsAutosavePosts.docs[0].id;
-        done();
       });
 
       it('should allow read of versions by version id', async () => {
@@ -651,7 +648,7 @@ describe('Versions', () => {
 
   describe('Globals - GraphQL', () => {
     describe('Read', () => {
-      beforeAll(async (done) => {
+      beforeAll(async () => {
         // language=graphql
         const update = `mutation {
           updateAutosaveGlobal(draft: true, data: {
@@ -678,7 +675,6 @@ describe('Versions', () => {
         const response = await graphQLClient.request(query);
 
         globalGraphQLVersionID = response.versionsAutosaveGlobal.docs[0].id;
-        done();
       });
 
       it('should allow read of versions by version id', async () => {

@@ -16,12 +16,10 @@ require('isomorphic-fetch');
 let client;
 
 describe('Collections - Uploads', () => {
-  beforeAll(async (done) => {
+  beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     client = new RESTClient(config, { serverURL, defaultSlug: mediaSlug });
     await client.login();
-
-    done();
   });
 
   describe('REST', () => {
