@@ -1,19 +1,7 @@
 const path = require('path');
 const fs = require('fs');
-const babelConfig = require('../babel.config');
 
-require('@babel/register')({
-  ...babelConfig,
-  extensions: ['.ts', '.tsx', '.js', '.jsx'],
-  env: {
-    development: {
-      sourceMaps: 'inline',
-      retainLines: true,
-    },
-  },
-});
-
-const { generateTypes } = require('../src/bin/generateTypes');
+const { generateTypes } = require('../dist/bin/generateTypes');
 
 const [testConfigDir] = process.argv.slice(2);
 

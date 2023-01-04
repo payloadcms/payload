@@ -3,6 +3,9 @@ module.exports = {
   testTimeout: 15000,
   testRegex: '(/src/admin/.*\\.(test|spec))\\.[jt]sx?$',
   setupFilesAfterEnv: ['<rootDir>/test/componentsSetup.js'],
+  transform: {
+    '^.+\\.(t|j)sx?$': ['@swc/jest'],
+  },
   testPathIgnorePatterns: [
     'node_modules',
     'dist',

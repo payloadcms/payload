@@ -1,11 +1,12 @@
-import TerserJSPlugin from 'terser-webpack-plugin';
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
-import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import path from 'path';
 import { Configuration } from 'webpack';
 import { SanitizedConfig } from '../config/types';
 import getBaseConfig from './getBaseConfig';
+
+// eslint-disable-next-line import/no-extraneous-dependencies, @typescript-eslint/no-var-requires
+const SwcMinifyWebpackPlugin = require('swc-minify-webpack-plugin');
 
 export default (payloadConfig: SanitizedConfig): Configuration => {
   const baseConfig = getBaseConfig(payloadConfig) as any;
@@ -21,7 +22,7 @@ export default (payloadConfig: SanitizedConfig): Configuration => {
     mode: 'production',
     stats: 'errors-only',
     optimization: {
-      minimizer: [new TerserJSPlugin({}), new CssMinimizerPlugin()],
+      minimizer: [new SwcMinifyWebpackPlugin()],
       splitChunks: {
         cacheGroups: {
           styles: {

@@ -1,23 +1,17 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable global-require */
-
 import webpack from 'webpack';
 import getWebpackProdConfig from '../webpack/getProdConfig';
 import findConfig from '../config/find';
 import loadConfig from '../config/load';
 
-const configPath = findConfig();
+const rawConfigPath = findConfig();
 
-export const build = (): void => {
+export const build = async (): Promise<void> => {
   try {
     const config = loadConfig();
-    const webpackProdConfig = getWebpackProdConfig({
-      ...config,
-      paths: {
-        ...(config.paths || {}),
-        config: configPath,
-      },
-    });
+
+    const webpackProdConfig = getWebpackProdConfig(config);
 
     webpack(webpackProdConfig, (err, stats) => { // Stats Object
       if (err || stats.hasErrors()) {
@@ -35,7 +29,7 @@ export const build = (): void => {
     });
   } catch (err) {
     console.error(err);
-    throw new Error(`Error: can't find the configuration file located at ${configPath}.`);
+    throw new Error(`Error: can't find the configuration file located at ${rawConfigPath}.`);
   }
 };
 

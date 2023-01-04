@@ -1,17 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const babelConfig = require('../babel.config');
-
-require('@babel/register')({
-  ...babelConfig,
-  extensions: ['.ts', '.tsx', '.js', '.jsx'],
-  env: {
-    development: {
-      sourceMaps: 'inline',
-      retainLines: true,
-    },
-  },
-});
+const { register } = require('esbuild-register/dist/node');
 
 const [testSuiteDir] = process.argv.slice(2);
 
@@ -28,6 +17,11 @@ if (!fs.existsSync(configPath)) {
 }
 
 process.env.PAYLOAD_CONFIG_PATH = configPath;
+
 process.env.PAYLOAD_DROP_DATABASE = 'true';
+
+register({
+  platform: 'node',
+});
 
 require('./devServer');

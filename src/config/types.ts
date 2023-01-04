@@ -165,15 +165,15 @@ export type Endpoint = {
   path: string;
   /** HTTP method (or "all") */
   method:
-    | 'get'
-    | 'head'
-    | 'post'
-    | 'put'
-    | 'patch'
-    | 'delete'
-    | 'connect'
-    | 'options'
-    | string;
+  | 'get'
+  | 'head'
+  | 'post'
+  | 'put'
+  | 'patch'
+  | 'delete'
+  | 'connect'
+  | 'options'
+  | string;
   /**
    * Middleware that will be called when the path/method matches
    *
@@ -285,9 +285,9 @@ export type Config = {
        * Add custom components after the collection overview
        */
       afterDashboard?: React.ComponentType<any>[];
-       /**
-       * Add custom components before the email/password field
-       */
+      /**
+      * Add custom components before the email/password field
+      */
       beforeLogin?: React.ComponentType<any>[];
       /**
        * Add custom components after the email/password field
@@ -540,7 +540,11 @@ export type SanitizedConfig = Omit<
 > & {
   collections: SanitizedCollectionConfig[];
   globals: SanitizedGlobalConfig[];
-  paths: { [key: string]: string };
+  paths: {
+    configDir: string
+    config: string
+    rawConfig: string
+  };
 };
 
 export type EntityDescription =

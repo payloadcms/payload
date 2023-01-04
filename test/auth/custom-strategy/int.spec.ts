@@ -7,7 +7,7 @@ require('isomorphic-fetch');
 
 let apiUrl;
 
-const [ code, secret, name ] = [ 'test', 'strategy', 'Tester' ];
+const [code, secret, name] = ['test', 'strategy', 'Tester'];
 
 const headers = {
   'Content-Type': 'application/json',
@@ -31,7 +31,7 @@ describe('AuthStrategies', () => {
         body: JSON.stringify({
           code,
           secret,
-          name
+          name,
         }),
         headers,
         method: 'post',
@@ -43,15 +43,14 @@ describe('AuthStrategies', () => {
         headers: {
           ...headers,
           code,
-          secret
+          secret,
         },
       });
 
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.user.name).toBe(name)
+      expect(data.user.name).toBe(name);
     });
-
   });
 });
