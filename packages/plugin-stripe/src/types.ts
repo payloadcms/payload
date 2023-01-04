@@ -2,9 +2,9 @@ import { Payload } from "payload";
 import { Config as PayloadConfig } from "payload/config";
 import Stripe from "stripe";
 
-export type StripeWebhookHandler = (args: {
+export type StripeWebhookHandler<T = any> = (args: {
   payload: Payload,
-  event: any,
+  event: T,
   stripe: Stripe,
   config: PayloadConfig
   stripeConfig?: StripeConfig
