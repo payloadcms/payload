@@ -212,8 +212,10 @@ import {
   FormSubmission,
   FieldsConfig,
   BeforePayment,
+  BeforeEmail,
   HandlePayment,
-} from "@payloadcms/plugin-form-builder/dist/types";
+  ...
+} from "@payloadcms/plugin-form-builder/types";
 ```
 
 ## Development
