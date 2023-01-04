@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { register } = require('esbuild-register/dist/node');
+const swcRegister = require('@swc/register');
 
 const [testSuiteDir] = process.argv.slice(2);
 
@@ -20,8 +20,16 @@ process.env.PAYLOAD_CONFIG_PATH = configPath;
 
 process.env.PAYLOAD_DROP_DATABASE = 'true';
 
-register({
-  platform: 'node',
+swcRegister({
+  jsc: {
+    parser: {
+      syntax: 'typescript',
+      tsx: true,
+    },
+  },
+  module: {
+    type: 'commonjs',
+  },
 });
 
 require('./devServer');
