@@ -47,7 +47,8 @@ export default config;
 ### Options
 
 - `fields`
-  An object of field types to allow your admin editors to build forms with. Pass either a boolean value or a partial [Payload Block](https://payloadcms.com/docs/fields/blocks#block-configs) to override default settings. See [Fields](#fields) for more details.
+
+  An object of field types to allow your admin editors to build forms with. To override default settings pass either a boolean value or a partial [Payload Block](https://payloadcms.com/docs/fields/blocks#block-configs) keyed to the block slug. See [Fields](#fields) for more details.
 
   ```js
   fields: {
@@ -111,13 +112,20 @@ export default config;
 
   Override anything on the form collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections). Your overrides will be merged into the default `forms` collection.
 
-  ```js
+  ```ts
   formOverrides: {
-    slug: "contact-forms";
+    slug: "contact-forms",
+    fields: [
+      {
+        name: "custom-field",
+        type: "text"
+      }
+    ]
   }
   ```
 
 - `formSubmissionOverrides`
+
   By default, this plugin relies on [Payload access control](https://payloadcms.com/docs/access-control/collections) to restrict the `update` and `read` operations. This is because anyone should be able to create a form submission, even from a public-facing website - but no one should be able to update a submission one it has been created, or read a submission unless they have permission.
 
   You can override access control and anything else on the form submission collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections). Your overrides will be merged into the default `formSubmissions` collection.
@@ -130,7 +138,7 @@ export default config;
 
 ## Fields
 
-Each form field is defined as a [Payload Block](https://payloadcms.com/docs/fields/blocks) with the following subfields:
+Each field represents a form input. To override default settings pass either a boolean value or a partial [Payload Block](https://payloadcms.com/docs/fields/blocks) keyed to the block's slug.
 
 - Text
   - `name`: string
@@ -246,7 +254,7 @@ To actively develop or debug this plugin you can either work directly within the
 
    You might also need to alias these modules in your Webpack config. To do this, open your project's Payload config and add the following:
 
-   ```js
+   ```ts
    import { buildConfig } from "payload/config";
 
    export default buildConfig({

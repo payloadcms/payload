@@ -65,9 +65,9 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
   const config: CollectionConfig = {
     slug: formConfig?.formOverrides?.slug || 'forms',
     admin: {
-      ...formConfig?.formOverrides?.admin || {},
       useAsTitle: 'title',
       enableRichTextRelationship: false,
+      ...formConfig?.formOverrides?.admin || {},
     },
     access: {
       read: () => true,
@@ -87,6 +87,10 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
           if (fieldConfig !== false) {
             let block = fields[fieldKey];
 
+            if (block === undefined && typeof fieldConfig === 'object') {
+              return fieldConfig
+            }
+
             if (typeof block === 'object' && typeof fieldConfig === 'object') {
               return merge<FieldConfig>(block, fieldConfig, {
                 arrayMerge: (_, sourceArray) => sourceArray
@@ -94,7 +98,7 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
             }
 
             if (typeof block === 'function') {
-              return block(fieldConfig as FieldConfig);
+              return block(fieldConfig);
             }
 
             return block;

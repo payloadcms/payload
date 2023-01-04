@@ -576,5 +576,5 @@ export default {
   state: State,
   payment: Payment
 } as {
-  [key: string]: Block | ((fieldConfig: FieldConfig) => Block)
+  [key: string]: Block | ((fieldConfig?: boolean | FieldConfig) => Block)
 };
