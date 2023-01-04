@@ -32,9 +32,9 @@ const Code: React.FC<Props> = (props) => {
       language,
       description,
       condition,
+      editorOptions,
     } = {},
     label,
-    editorOptions,
   } = props;
 
   const path = pathFromProps || name;
