@@ -34,7 +34,9 @@
     "typescript": "^4.5.5"
   },
   "files": [
-    "dist"
+    "dist",
+    "types.js",
+    "types.d.ts"
   ],
   "dependencies": {
     "deepmerge": "^4.2.2",
