@@ -1,12 +1,12 @@
 import { buildConfig } from 'payload/config';
 import path from 'path';
 // import seo from '../../dist';
-import seo from '../../src';
-import Users from './collections/Users';
-import Pages from './collections/Pages';
-import Media from './collections/Media';
-import HomePage from './globals/Settings';
-import Posts from './collections/Posts';
+import seo from '../../src'
+import Users from './collections/Users'
+import Pages from './collections/Pages'
+import Media from './collections/Media'
+import HomePage from './globals/Settings'
+import Posts from './collections/Posts'
 
 export default buildConfig({
   serverURL: 'http://localhost:3000',
