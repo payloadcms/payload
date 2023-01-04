@@ -1,6 +1,7 @@
 module.exports = {
   verbose: true,
   testTimeout: 15000,
+  testEnvironment: 'jsdom',
   testRegex: '(/src/admin/.*\\.(test|spec))\\.[jt]sx?$',
   setupFilesAfterEnv: ['<rootDir>/test/componentsSetup.js'],
   transform: {
