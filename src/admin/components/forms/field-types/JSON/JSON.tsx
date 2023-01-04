@@ -26,9 +26,9 @@ const JSONField: React.FC<Props> = (props) => {
       width,
       description,
       condition,
+      editorOptions,
     } = {},
     label,
-    editorOptions,
   } = props;
 
   const path = pathFromProps || name;

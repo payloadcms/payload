@@ -251,6 +251,7 @@ export type UploadField = FieldBase & {
 
 type CodeAdmin = Admin & {
   language?: string;
+  editorOptions?: EditorProps['options'];
 }
 
 export type CodeField = Omit<FieldBase, 'admin'> & {
@@ -258,13 +259,15 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
   minLength?: number
   maxLength?: number
   type: 'code';
+}
+
+type JSONAdmin = Admin & {
   editorOptions?: EditorProps['options'];
 }
 
 export type JSONField = Omit<FieldBase, 'admin'> & {
-  admin?: Admin
+  admin?: JSONAdmin
   type: 'json';
-  editorOptions?: EditorProps['options'];
 }
 
 export type SelectField = FieldBase & {
