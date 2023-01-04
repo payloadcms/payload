@@ -1,5 +1,6 @@
 import { SanitizedStripeConfig, StripeWebhookHandler } from '../types';
 import { deepen } from '../utilities/deepen';
+import { v4 as uuid } from 'uuid';
 
 type HandleCreatedOrUpdated = (args: Parameters<StripeWebhookHandler>[0] & {
   syncConfig: SanitizedStripeConfig['sync'][0]
@@ -123,12 +124,15 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
         try {
           if (logs) payload.logger.info(`- Creating new '${collectionSlug}' document in Payload with Stripe ID: '${stripeID}'.`);
 
+          // generate a strong, unique password for the new user
+          const password: string = uuid();
+
           await payload.create({
             collection: collectionSlug,
             data: {
               ...syncedData,
-              password: 'password', // TODO: figure this out, can Payload auto-generate?
-              passwordConfirm: 'password', // TODO: figure this out, can Payload auto-generate?
+              password,
+              passwordConfirm: password,
             },
             disableVerificationEmail: isAuthCollection ? true : undefined,
           });
