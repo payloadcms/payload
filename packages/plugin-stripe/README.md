@@ -261,7 +261,7 @@ import {
   StripeConfig,
   StripeWebhookHandler.
   StripeProxy
-} from '@payloadcms/plugin-stripe/dist/types';
+} from '@payloadcms/plugin-stripe/types';
 ```
 
 ### Development
