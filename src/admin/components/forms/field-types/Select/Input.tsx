@@ -65,15 +65,15 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
     valueToRender = value.map((val) => {
       const matchingOption = options.find((option) => option.value === val);
       return {
-        label: getTranslation(matchingOption.label, i18n),
-        value: matchingOption.value,
+        label: matchingOption ? getTranslation(matchingOption.label, i18n) : val,
+        value: matchingOption?.value ?? val,
       };
     });
   } else if (value) {
     const matchingOption = options.find((option) => option.value === value);
     valueToRender = {
-      label: getTranslation(matchingOption.label, i18n),
-      value: matchingOption.value,
+      label: matchingOption ? getTranslation(matchingOption.label, i18n) : value,
+      value: matchingOption?.value ?? value,
     };
   }
 

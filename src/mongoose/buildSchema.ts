@@ -18,6 +18,7 @@ import {
   fieldAffectsData, fieldIsLocalized,
   fieldIsPresentationalOnly,
   GroupField,
+  JSONField,
   NonPresentationalField,
   NumberField,
   PointField,
@@ -149,6 +150,13 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
   },
+  json: (field: JSONField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Schema.Types.Mixed };
+
+    schema.add({
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
+    });
+  },
   point: (field: PointField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema: SchemaTypeOptions<unknown> = {
       type: {
@@ -249,7 +257,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
           return {
             ...locales,
-            [locale]: field.hasMany ? [localeSchema] : localeSchema,
+            [locale]: field.hasMany ? { type: [localeSchema], default: undefined } : localeSchema,
           };
         }, {}),
         localized: true,
@@ -262,7 +270,12 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       };
       schemaToReturn.relationTo = { type: String, enum: field.relationTo };
 
-      if (field.hasMany) schemaToReturn = [schemaToReturn];
+      if (field.hasMany) {
+        schemaToReturn = {
+          type: [schemaToReturn],
+          default: undefined,
+        };
+      }
     } else {
       schemaToReturn = {
         ...formatBaseSchema(field, buildSchemaOptions),
@@ -270,7 +283,12 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         ref: field.relationTo,
       };
 
-      if (field.hasMany) schemaToReturn = [schemaToReturn];
+      if (field.hasMany) {
+        schemaToReturn = {
+          type: [schemaToReturn],
+          default: undefined,
+        };
+      }
     }
 
     schema.add({

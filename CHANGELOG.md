@@ -1,5 +1,21 @@
 
 
+## [1.4.2](https://github.com/payloadcms/payload/compare/v1.4.1...v1.4.2) (2023-01-03)
+
+
+### Bug Fixes
+
+* [#1775](https://github.com/payloadcms/payload/issues/1775) - siblingData for unnamed fields within array rows improperly formatted ([d6fcd19](https://github.com/payloadcms/payload/commit/d6fcd19bd1eaf2942c2eaa31f0de4770ca10ff06))
+* [#1786](https://github.com/payloadcms/payload/issues/1786), relationship with hasMany no longer sets empty array as default value ([ecfb363](https://github.com/payloadcms/payload/commit/ecfb36316961ef0eb9dd1ba1dc95ba98f95223f8))
+* error clearing date field ([883daf7](https://github.com/payloadcms/payload/commit/883daf7b469c03fae67c16292af6aded662c0bd0))
+* select field crash on missing value option ([ec9196e](https://github.com/payloadcms/payload/commit/ec9196e33ca01e6a15097943b4be6dee6ea5202f))
+
+
+### Features
+
+* add Ukrainian translation ([#1767](https://github.com/payloadcms/payload/issues/1767)) ([49fa5cb](https://github.com/payloadcms/payload/commit/49fa5cb23a0bb57348d8cd7ec0b7805d651fda2d))
+* preview now exposes most recent draft data ([54dadbe](https://github.com/payloadcms/payload/commit/54dadbeae5b195405a7cfb480fd38b2eeb684938))
+
 ## [1.4.1](https://github.com/payloadcms/payload/compare/v1.4.0...v1.4.1) (2022-12-24)
 
 

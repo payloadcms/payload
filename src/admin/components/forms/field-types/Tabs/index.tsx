@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
-import { fieldAffectsData, tabHasName } from '../../../../../fields/config/types';
+import { tabHasName } from '../../../../../fields/config/types';
 import FieldDescription from '../../FieldDescription';
 import toKebabCase from '../../../../../utilities/toKebabCase';
 import { useCollapsible } from '../../../elements/Collapsible/provider';
@@ -12,6 +12,7 @@ import { getTranslation } from '../../../../../utilities/getTranslation';
 import { usePreferences } from '../../../utilities/Preferences';
 import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 
 import './index.scss';
 
@@ -123,10 +124,17 @@ const TabsField: React.FC<Props> = (props) => {
                 readOnly={readOnly}
                 permissions={tabHasName(activeTabConfig) ? permissions[activeTabConfig.name].fields : permissions}
                 fieldTypes={fieldTypes}
-                fieldSchema={activeTabConfig.fields.map((field) => ({
-                  ...field,
-                  path: `${path ? `${path}.` : ''}${tabHasName(activeTabConfig) ? `${activeTabConfig.name}.` : ''}${fieldAffectsData(field) ? field.name : ''}`,
-                }))}
+                fieldSchema={activeTabConfig.fields.map((field) => {
+                  const pathSegments = [];
+
+                  if (path) pathSegments.push(path);
+                  if (tabHasName(activeTabConfig)) pathSegments.push(activeTabConfig.name);
+
+                  return {
+                    ...field,
+                    path: createNestedFieldPath(pathSegments.join('.'), field),
+                  };
+                })}
                 indexPath={indexPath}
               />
             </div>

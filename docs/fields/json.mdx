@@ -1,0 +1,60 @@
+---
+title: JSON Field
+label: JSON
+order: 50
+desc: The JSON field type will store any string in the Database. Learn how to use JSON fields, see examples and options.
+
+keywords: json, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+<Banner >
+  The JSON field type saves actual JSON in the database, which differs from the Code field that saves the value as a string in the database.
+</Banner>
+
+This field uses the `monaco-react` editor syntax highlighting.
+
+### Config
+
+| Option           | Description |
+| ---------------- | ----------- |
+| **`name`** *         | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names) |
+| **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language. |
+| **`unique`**         | Enforce that each entry in the Collection has a unique value for this field. |
+| **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
+| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
+| **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
+| **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
+| **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |
+| **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel. |
+| **`defaultValue`**   | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values) |
+| **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
+| **`required`**       | Require this field to have a value. |
+| **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+
+_\* An asterisk denotes that a property is required._
+
+### Admin Config
+
+In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following properties:
+
+| Option                 | Description                                                                                                                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`editorOptions`**    | Options that can be passed to the monaco editor, [view the full list](https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.IDiffEditorConstructionOptions.html).  |
+
+### Example
+
+`collections/ExampleCollection.ts
+```ts
+import { CollectionConfig } from 'payload/types';
+
+const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'customerJSON', // required
+      type: 'json', // required
+      required: true,
+    }
+  ]
+};
+```

@@ -44,7 +44,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const modalSlug = `delete-${id}`;
 
   const addDefaultError = useCallback(() => {
-    toast.error(t('error:deletingError', { title }));
+    toast.error(t('error:deletingTitle', { title }));
   }, [t, title]);
 
   const handleDelete = useCallback(() => {

@@ -9,6 +9,7 @@ import { pointFieldsSlug } from './collections/Point';
 import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
+import { jsonDoc } from './collections/JSON';
 
 const { beforeAll, describe } = test;
 
@@ -61,6 +62,31 @@ describe('fields', () => {
       await page.goto(url.create);
       const description = page.locator('.field-description-i18nText');
       await expect(description).toHaveText('en description');
+    });
+  });
+
+  describe('json', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'json-fields');
+    });
+
+    test('should display field in list view', async () => {
+      await page.goto(url.list);
+      const jsonCell = page.locator('.row-1 .cell-json');
+      await expect(jsonCell)
+        .toHaveText(JSON.stringify(jsonDoc.json));
+    });
+
+    test('should create', async () => {
+      const input = '{"foo": "bar"}';
+
+      await page.goto(url.create);
+      const json = page.locator('.json-field .inputarea');
+      await json.fill(input);
+
+      await saveDocAndAssert(page);
+      await expect(page.locator('.json-field')).toContainText('"foo": "bar"');
     });
   });
 
@@ -372,6 +398,18 @@ describe('fields', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, 'date-fields');
+    });
+
+    test('should clear date', async () => {
+      await page.goto(url.create);
+      const dateField = page.locator('#field-default input');
+      await expect(dateField).toBeVisible();
+      await dateField.fill('2021-08-01');
+      await expect(dateField).toHaveValue('2021-08-01');
+      const clearButton = page.locator('#field-default .date-time-picker__clear-button');
+      await expect(clearButton).toBeVisible();
+      await clearButton.click();
+      await expect(dateField).toHaveValue('');
     });
 
     test('should display formatted date in list view if displayFormat option added to date field', async () => {

@@ -182,7 +182,7 @@ export interface BlockField {
     text?: string;
     id?: string;
     blockName?: string;
-    blockType: 'i18n-text';
+    blockType: 'text';
   }[];
   createdAt: string;
   updatedAt: string;
@@ -313,6 +313,18 @@ export interface IndexedField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "json-fields".
+ */
+export interface JsonField {
+  id: string;
+  json?: {
+    [k: string]: unknown;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "number-fields".
  */
 export interface NumberField {
@@ -394,6 +406,7 @@ export interface TextField {
  */
 export interface RichTextField {
   id: string;
+  title: string;
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[];
   richText: {
     [k: string]: unknown;
@@ -413,6 +426,9 @@ export interface SelectField {
   select?: 'one' | 'two' | 'three';
   selectReadOnly?: 'one' | 'two' | 'three';
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[];
+  selectHasManyLocalized?: ('one' | 'two')[];
+  selectI18n?: 'one' | 'two' | 'three';
+  simple?: 'One' | 'Two' | 'Three';
   createdAt: string;
   updatedAt: string;
 }
@@ -513,6 +529,23 @@ export interface Upload {
   id: string;
   text?: string;
   media?: string | Upload;
+  url?: string;
+  filename?: string;
+  mimeType?: string;
+  filesize?: number;
+  width?: number;
+  height?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads2".
+ */
+export interface Uploads2 {
+  id: string;
+  text?: string;
+  media?: string | Uploads2;
   url?: string;
   filename?: string;
   mimeType?: string;
