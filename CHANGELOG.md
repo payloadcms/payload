@@ -1,5 +1,12 @@
 
 
+## [1.5.2](https://github.com/payloadcms/payload/compare/v1.5.1...v1.5.2) (2023-01-04)
+
+
+### Bug Fixes
+
+* ignores admin and components from swc ([7d27431](https://github.com/payloadcms/payload/commit/7d274313129c44618ebd8d1fd7a176694ee40476))
+
 ## [1.5.1](https://github.com/payloadcms/payload/compare/v1.5.0...v1.5.1) (2023-01-04)
 
 
