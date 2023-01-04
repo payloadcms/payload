@@ -1,5 +1,21 @@
 
 
+# [1.5.0](https://github.com/payloadcms/payload/compare/v1.4.2...v1.5.0) (2023-01-04)
+
+
+### Bug Fixes
+
+* json field type ([73b8ba3](https://github.com/payloadcms/payload/commit/73b8ba3d4a86385cd0a80efcdc19e4972d16b0b7))
+
+
+### Features
+
+* adds initial json field ([28d9f90](https://github.com/payloadcms/payload/commit/28d9f9009cc479b0e5da5c5b4fb85eb29b055309))
+* fixes json editor errors and misc styling ([efe4f6d](https://github.com/payloadcms/payload/commit/efe4f6d861a99337cfd35592557d3e8f16ff924a))
+* swc register ([#1779](https://github.com/payloadcms/payload/issues/1779)) ([c11bcd1](https://github.com/payloadcms/payload/commit/c11bcd1416b19e48569218d9011d013ad77306ce))
+* updates code field editor ([4d6eba8](https://github.com/payloadcms/payload/commit/4d6eba8d21d19eac63df02d56d27b0a17006d042))
+* wires up i18n with monaco editor ([07b2cca](https://github.com/payloadcms/payload/commit/07b2ccad61a619478f6613fa65f4f630222639d4))
+
 ## [1.4.2](https://github.com/payloadcms/payload/compare/v1.4.1...v1.4.2) (2023-01-03)
 
 
