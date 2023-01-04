@@ -32,7 +32,7 @@
   },
   "files": [
     "dist",
-    "*.js",
-    "*.d.ts"
+    "types.js",
+    "types.d.ts"
   ]
 }
