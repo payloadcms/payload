@@ -4,6 +4,21 @@ import path from 'path';
 import formBuilderPlugin from '../../src';
 import { Users } from './collections/Users';
 import { Pages } from './collections/Pages';
+import { Block } from 'payload/types';
+
+const colorField: Block = {
+  slug: 'color',
+  labels: {
+    singular: 'Color',
+    plural: 'Colors',
+  },
+  fields: [
+    {
+      name: 'value',
+      type: 'text',
+    }
+  ]
+}
 
 export default buildConfig({
   serverURL: 'http://localhost:3000',
@@ -37,8 +52,17 @@ export default buildConfig({
       redirectRelationships: [
         'pages'
       ],
+      formOverrides: {
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          }
+        ]
+      },
       fields: {
         payment: true,
+        colorField,
         // payment: {
         //     paymentProcessor: {
         //       options: [

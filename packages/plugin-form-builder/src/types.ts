@@ -32,6 +32,7 @@ export type FieldsConfig = {
   number?: boolean | FieldConfig
   message?: boolean | FieldConfig
   payment?: boolean | FieldConfig
+  [key: string]: boolean | FieldConfig | undefined
 }
 
 export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[] | Promise<FormattedEmail[]>;
