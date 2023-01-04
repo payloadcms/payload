@@ -1,5 +1,5 @@
 import { CollectionConfig } from 'payload/types';
-import { LinkToDoc } from '../ui';
+import { LinkToDoc } from '../../../src/ui/LinkToDoc';
 
 const Customers: CollectionConfig = {
   slug: 'customers',
@@ -36,10 +36,11 @@ const Customers: CollectionConfig = {
             components: {
               Field: (args) => LinkToDoc({
                 ...args,
+                isTestKey: process.env.PAYLOAD_PUBLIC_IS_STRIPE_TEST_KEY === 'true',
                 stripeResourceType: 'subscriptions',
-                nameOfIDField: 'stripeSubscriptionID'
-              }),
-            }
+                nameOfIDField: `${args.path}.stripeSubscriptionID`
+              })
+            },
           }
         },
         {

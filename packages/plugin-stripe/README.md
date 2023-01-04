@@ -175,14 +175,14 @@ const config = buildConfig({
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
       webhooks: {
         "customer.subscription.updated": ({ event, stripe, stripeConfig }) => {
-          // DO SOMETHING
+          // do something...
         },
       },
       // NOTE: you can also catch all Stripe webhook events and handle the event types yourself
       // webhooks: (event, stripe, stripeConfig) => {
       //   switch (event.type): {
       //     case 'customer.subscription.updated': {
-      //       // DO SOMETHING
+      //       // do something...
       //       break;
       //     }
       //     default: {
@@ -215,7 +215,7 @@ export const MyFunction = async () => {
       email: data.email,
     });
 
-    // DO SOMETHING
+    // do something...
   } catch (error) {
     console.error(error.message);
   }
@@ -240,7 +240,7 @@ export const MyFunction = async () => {
     });
 
     if (customer.status === 200) {
-      // DO SOMETHING
+      // do something...
     }
 
     if (customer.status >= 400) {
@@ -259,8 +259,9 @@ All types can be directly imported:
 ```js
 import {
   StripeConfig,
-  StripeWebhookHandler.
-  StripeProxy
+  StripeWebhookHandler,
+  StripeProxy,
+  ...
 } from '@payloadcms/plugin-stripe/types';
 ```
 

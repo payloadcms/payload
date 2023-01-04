@@ -28,6 +28,7 @@ export type SyncConfig = {
 
 export type StripeConfig = {
   stripeSecretKey: string
+  isTestKey?: boolean
   stripeWebhooksEndpointSecret?: string
   webhooks?: StripeWebhookHandler | StripeWebhookHandlers
   sync?: SyncConfig[]

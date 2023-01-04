@@ -7,7 +7,7 @@ import { extendWebpackConfig } from './extendWebpackConfig';
 import { createNewInStripe } from './hooks/createNewInStripe';
 import { syncExistingWithStripe } from './hooks/syncExistingWithStripe';
 import { deleteFromStripe } from './hooks/deleteFromStripe';
-import { LinkToDoc } from './ui';
+import { LinkToDoc } from './ui/LinkToDoc';
 
 const stripePlugin = (incomingStripeConfig: StripeConfig) => (config: Config): Config => {
   const { collections } = config;
@@ -18,7 +18,9 @@ const stripePlugin = (incomingStripeConfig: StripeConfig) => (config: Config): C
     sync: incomingStripeConfig?.sync || []
   }
 
-  const isTestKey = stripeConfig.stripeSecretKey?.startsWith('sk_test_');
+  // NOTE: env variables are never passed to the client, and bc we use theme in the admin panel
+  // so unfortunately we must set the 'isTestKey' property on the config instead of using the following code:
+  // const isTestKey = stripeConfig.stripeSecretKey?.startsWith('sk_test_');
 
   return ({
     ...config,
@@ -124,8 +126,9 @@ const stripePlugin = (incomingStripeConfig: StripeConfig) => (config: Config): C
                 components: {
                   Field: (args) => LinkToDoc({
                     ...args,
-                    isTestKey,
+                    isTestKey: stripeConfig.isTestKey,
                     stripeResourceType: syncConfig.stripeResourceType,
+                    nameOfIDField: 'stripeID',
                   })
                 },
               },
