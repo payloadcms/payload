@@ -139,10 +139,15 @@ export class RESTClient {
     }
 
     const slug = args.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}`, options);
-    const { status } = response;
-    const { doc } = await response.json();
-    return { status, doc };
+    try {
+      const response = await fetch(`${this.serverURL}/api/${slug}`, options);
+      const { status } = response;
+      const { doc } = await response.json();
+      return { status, doc };
+    } catch (err) {
+      console.error(err);
+      return { status: 500 };
+    }
   }
 
   async find<T = any>(args?: FindArgs): Promise<QueryResponse<T>> {
