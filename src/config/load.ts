@@ -25,6 +25,9 @@ const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
         tsx: true,
       },
     },
+    ignore: [
+      /node_modules[\\/](?!.pnpm[\\/].*[\\/]node_modules[\\/])(?!payload[\\/]dist[\\/]admin|payload[\\/]components).*/,
+    ],
     module: {
       type: 'commonjs',
     },
