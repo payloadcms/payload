@@ -17,6 +17,15 @@ export interface AutosaveGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-global".
+ */
+export interface DraftGlobal {
+  id: string;
+  title: string;
+  _status?: 'draft' | 'published';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-posts".
  */
 export interface AutosavePost {
@@ -35,6 +44,8 @@ export interface DraftPost {
   id: string;
   title: string;
   description: string;
+  radio?: 'test';
+  select?: ('test1' | 'test2')[];
   _status?: 'draft' | 'published';
   createdAt: string;
   updatedAt: string;
