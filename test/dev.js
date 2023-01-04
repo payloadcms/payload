@@ -21,6 +21,7 @@ process.env.PAYLOAD_CONFIG_PATH = configPath;
 process.env.PAYLOAD_DROP_DATABASE = 'true';
 
 swcRegister({
+  sourceMaps: true,
   jsc: {
     parser: {
       syntax: 'typescript',

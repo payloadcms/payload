@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import qs from 'qs';
+import fetch from 'node-fetch';
 import type { Config } from '../../src/config/types';
 import type { PaginatedDocs } from '../../src/mongoose/types';
 import type { Where } from '../../src/types';
 import { devUser } from '../credentials';
-
-require('isomorphic-fetch');
 
 type Args = {
   serverURL: string;
