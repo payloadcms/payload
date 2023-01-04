@@ -1,5 +1,12 @@
 
 
+## [1.5.1](https://github.com/payloadcms/payload/compare/v1.5.0...v1.5.1) (2023-01-04)
+
+
+### Bug Fixes
+
+* reverts components directory back to ts ([1bbf099](https://github.com/payloadcms/payload/commit/1bbf099fe052e767512e111f8f2b778c1b9c59d9))
+
 # [1.5.0](https://github.com/payloadcms/payload/compare/v1.4.2...v1.5.0) (2023-01-04)
 
 
