@@ -89,18 +89,19 @@ export type GlobalConfig = {
   }
 }
 
-export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions' | 'graphQL'> {
+export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions'> {
   fields: Field[]
   versions: SanitizedGlobalVersions
-  graphQL?: {
-    name?: string
-    type: GraphQLObjectType
-    mutationInputType: GraphQLNonNull<any>
-    versionType?: GraphQLObjectType
-  }
 }
 
 export type Globals = {
   Model: GlobalModel
   config: SanitizedGlobalConfig[]
+  graphQL?: {
+    [slug: string]: {
+      type: GraphQLObjectType
+      mutationInputType: GraphQLNonNull<any>
+      versionType?: GraphQLObjectType
+    }
+  }
 }
