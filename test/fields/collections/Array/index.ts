@@ -10,6 +10,10 @@ export const arrayFieldsSlug = 'array-fields';
 
 const ArrayFields: CollectionConfig = {
   slug: arrayFieldsSlug,
+  labels: {
+    singular: 'Activity Page',
+    plural: 'Activity Pages',
+  },
   fields: [
     {
       name: 'items',
