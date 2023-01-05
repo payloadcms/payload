@@ -32,7 +32,6 @@ const CodeEditor: React.FC<Props> = (props) => {
           readOnly: Boolean(readOnly),
           scrollBeyondLastLine: false,
           tabSize: 2,
-          theme: theme === 'dark' ? 'vs-dark' : 'vs',
           wordWrap: 'on',
           ...options,
         }
