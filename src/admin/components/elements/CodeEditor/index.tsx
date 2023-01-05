@@ -22,6 +22,7 @@ const CodeEditor: React.FC<Props> = (props) => {
     <Editor
       height="35vh"
       className={classes}
+      theme={theme === 'dark' ? 'vs-dark' : 'vs'}
       options={
         {
           detectIndentation: true,
