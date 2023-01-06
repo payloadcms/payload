@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import express, { NextFunction, Response } from 'express';
 import crypto from 'crypto';
+import path from 'path';
 import mongoose from 'mongoose';
 import { InitOptions } from './config/types';
 
@@ -30,6 +31,7 @@ import Logger from './utilities/logger';
 import { getDataLoader } from './collections/dataloader';
 import mountEndpoints from './express/mountEndpoints';
 import PreferencesModel from './preferences/model';
+import findConfig from './config/find';
 
 export const init = (payload: Payload, options: InitOptions): void => {
   payload.logger.info('Starting Payload...');
@@ -52,7 +54,21 @@ export const init = (payload: Payload, options: InitOptions): void => {
 
   payload.local = options.local;
 
-  payload.config = loadConfig(payload.logger);
+  if (options.config) {
+    payload.config = options.config;
+    const configPath = findConfig();
+
+    payload.config = {
+      ...options.config,
+      paths: {
+        configDir: path.dirname(configPath),
+        config: configPath,
+        rawConfig: configPath,
+      },
+    };
+  } else {
+    payload.config = loadConfig(payload.logger);
+  }
 
   // If not initializing locally, scaffold router
   if (!payload.local) {
