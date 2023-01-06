@@ -39,8 +39,6 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
     collectionSlug: relationTo,
   });
 
-  console.log('Children: ', children);
-
   useEffect(() => {
     if (typeof setDrawerIsOpen === 'function') setDrawerIsOpen(isDrawerOpen);
   }, [isDrawerOpen, setDrawerIsOpen]);
