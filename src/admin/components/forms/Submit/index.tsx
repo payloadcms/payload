@@ -1,5 +1,6 @@
 import React from 'react';
 import { useForm, useFormProcessing } from '../Form/context';
+import useHotkey from '../../../hooks/useHotkey';
 import Button from '../../elements/Button';
 import { Props } from '../../elements/Button/types';
 
@@ -10,7 +11,16 @@ const baseClass = 'form-submit';
 const FormSubmit: React.FC<Props> = (props) => {
   const { children, buttonId: id, disabled: disabledFromProps, type = 'submit' } = props;
   const processing = useFormProcessing();
-  const { disabled } = useForm();
+  const { disabled, submit } = useForm();
+  const canSave = !(disabledFromProps || processing || disabled)
+
+  // Hotkeys
+  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true }, (e) => {
+    e.preventDefault();
+    if (canSave) {
+      submit({}, e)
+    }
+  });
 
   return (
     <div className={baseClass}>
@@ -18,7 +28,7 @@ const FormSubmit: React.FC<Props> = (props) => {
         {...props}
         id={id}
         type={type}
-        disabled={disabledFromProps || processing || disabled ? true : undefined}
+        disabled={canSave ? undefined : true}
       >
         {children}
       </Button>

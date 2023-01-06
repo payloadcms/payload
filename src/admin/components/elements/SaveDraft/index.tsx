@@ -5,6 +5,7 @@ import FormSubmit from '../../forms/Submit';
 import { useForm, useFormModified } from '../../forms/Form/context';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useLocale } from '../../utilities/Locale';
+import useHotkey from '../../../hooks/useHotkey';
 
 import './index.scss';
 
@@ -43,6 +44,14 @@ const SaveDraft: React.FC = () => {
       },
     });
   }, [submit, collection, global, serverURL, api, locale, id]);
+
+  // Hotkeys
+  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true }, (e) => {
+    e.preventDefault();
+    if (canSaveDraft) {
+      saveDraft();
+    }
+  });
 
   return (
     <FormSubmit
