@@ -85,7 +85,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
               className={`${baseClass}__tooltip`}
               show={showOpenTooltip}
             >
-              {t('open')}
+              {t('fields:openInNewTab')}
             </Tooltip>
             <Open />
           </a>

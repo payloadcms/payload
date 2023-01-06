@@ -84,7 +84,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
                   className={`${baseClass}__tooltip`}
                   show={showOpenTooltip}
                 >
-                  {t('open')}
+                  {t('fields:openInNewTab')}
                 </Tooltip>
                 <Open />
               </a>
