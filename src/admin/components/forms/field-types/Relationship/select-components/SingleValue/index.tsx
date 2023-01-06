@@ -47,26 +47,27 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
     <div className={baseClass}>
       <div className={`${baseClass}__label`}>
         <SelectComponents.SingleValue {...props}>
-          <div className={`${baseClass}__text`}>
-            <a
-              href={`/admin/collections/${relationTo}/${value}`}
-              target="_blank"
-              onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-              onMouseEnter={() => setShowOpenTooltip(true)}
-              onMouseLeave={() => setShowOpenTooltip(false)}
-              onClick={() => setShowOpenTooltip(false)}
-              style={{ pointerEvents: 'all' }}
-              rel="noreferrer"
+          <a
+            href={`/admin/collections/${relationTo}/${value}`}
+            target="_blank"
+            onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
+            onMouseEnter={() => setShowOpenTooltip(true)}
+            onMouseLeave={() => setShowOpenTooltip(false)}
+            onClick={() => setShowOpenTooltip(false)}
+            style={{ pointerEvents: 'all', position: 'relative' }}
+            rel="noreferrer"
+          >
+            <Tooltip
+              className={`${baseClass}__tooltip`}
+              show={showOpenTooltip}
             >
-              <Tooltip
-                className={`${baseClass}__tooltip`}
-                show={showOpenTooltip}
-              >
-                {t('fields:openInNewTab')}
-              </Tooltip>
+              {t('fields:openInNewTab')}
+            </Tooltip>
+            <div className={`${baseClass}__text`}>
               {children}
-            </a>
-          </div>
+            </div>
+          </a>
+
           {relationTo && hasReadPermission && (
             <Fragment>
               <DocumentDrawerToggler
