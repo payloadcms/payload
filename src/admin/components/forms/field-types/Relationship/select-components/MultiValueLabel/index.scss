@@ -37,25 +37,4 @@
       background-color: var(--theme-elevation-100);
     }
   }
-
-  &__open-link {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: base(0.25);
-
-    .icon {
-      width: base(0.5);
-      height: base(0.5);
-    }
-
-    &:focus {
-      outline: none;
-    }
-
-    &:hover {
-      background-color: var(--theme-elevation-100);
-    }
-  }
 }
