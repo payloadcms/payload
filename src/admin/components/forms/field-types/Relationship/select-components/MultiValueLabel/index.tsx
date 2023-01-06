@@ -7,7 +7,7 @@ import Edit from '../../../../../icons/Edit';
 import { useAuth } from '../../../../../utilities/Auth';
 import { Option } from '../../types';
 import './index.scss';
-import Open from '../../../../../icons/Open';
+import Drag from '../../../../../icons/Drag';
 
 const baseClass = 'relationship--multi-value-label';
 
@@ -50,10 +50,30 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             className: `${baseClass}__text`,
             ...draggableProps || {},
           }}
-        />
+        >
+          <Drag />
+        </components.MultiValueLabel>
       </div>
       {relationTo && hasReadPermission && (
         <Fragment>
+          <a
+            href={`/admin/collections/${relationTo}/${value}`}
+            target="_blank"
+            onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
+            onMouseEnter={() => setShowOpenTooltip(true)}
+            onMouseLeave={() => setShowOpenTooltip(false)}
+            onClick={() => setShowOpenTooltip(false)}
+            style={{ pointerEvents: 'all' }}
+            rel="noreferrer"
+          >
+            <Tooltip
+              className={`${baseClass}__tooltip`}
+              show={showOpenTooltip}
+            >
+              {t('fields:openInNewTab')}
+            </Tooltip>
+            {label}
+          </a>
           <DocumentDrawerToggler
             className={`${baseClass}__drawer-toggler`}
             style={{ pointerEvents: 'all' }}
@@ -70,25 +90,6 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             </Tooltip>
             <Edit />
           </DocumentDrawerToggler>
-          <a
-            href={`/admin/collections/${relationTo}/${value}`}
-            target="_blank"
-            onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-            onMouseEnter={() => setShowOpenTooltip(true)}
-            onMouseLeave={() => setShowOpenTooltip(false)}
-            onClick={() => setShowOpenTooltip(false)}
-            className={`${baseClass}__open-link`}
-            style={{ pointerEvents: 'all' }}
-            rel="noreferrer"
-          >
-            <Tooltip
-              className={`${baseClass}__tooltip`}
-              show={showOpenTooltip}
-            >
-              {t('fields:openInNewTab')}
-            </Tooltip>
-            <Open />
-          </a>
           <DocumentDrawer onSave={onSave} />
         </Fragment>
       )}

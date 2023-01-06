@@ -4,7 +4,7 @@ import { components as SelectComponents, SingleValueProps } from 'react-select';
 import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer';
 import Tooltip from '../../../../../elements/Tooltip';
 import Edit from '../../../../../icons/Edit';
-import Open from '../../../../../icons/Open';
+import Drag from '../../../../../icons/Drag';
 import { useAuth } from '../../../../../utilities/Auth';
 import { Option } from '../../types';
 import './index.scss';
@@ -39,6 +39,8 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
     collectionSlug: relationTo,
   });
 
+  console.log('Children: ', children);
+
   useEffect(() => {
     if (typeof setDrawerIsOpen === 'function') setDrawerIsOpen(isDrawerOpen);
   }, [isDrawerOpen, setDrawerIsOpen]);
@@ -48,7 +50,24 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
       <div className={`${baseClass}__label`}>
         <SelectComponents.SingleValue {...props}>
           <div className={`${baseClass}__text`}>
-            {children}
+            <a
+              href={`/admin/collections/${relationTo}/${value}`}
+              target="_blank"
+              onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
+              onMouseEnter={() => setShowOpenTooltip(true)}
+              onMouseLeave={() => setShowOpenTooltip(false)}
+              onClick={() => setShowOpenTooltip(false)}
+              style={{ pointerEvents: 'all' }}
+              rel="noreferrer"
+            >
+              <Tooltip
+                className={`${baseClass}__tooltip`}
+                show={showOpenTooltip}
+              >
+                {t('fields:openInNewTab')}
+              </Tooltip>
+              {children}
+            </a>
           </div>
           {relationTo && hasReadPermission && (
             <Fragment>
@@ -69,25 +88,6 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
                 </Tooltip>
                 <Edit />
               </DocumentDrawerToggler>
-              <a
-                href={`/admin/collections/${relationTo}/${value}`}
-                target="_blank"
-                onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-                onMouseEnter={() => setShowOpenTooltip(true)}
-                onMouseLeave={() => setShowOpenTooltip(false)}
-                onClick={() => setShowOpenTooltip(false)}
-                className={`${baseClass}__open-link`}
-                style={{ pointerEvents: 'all' }}
-                rel="noreferrer"
-              >
-                <Tooltip
-                  className={`${baseClass}__tooltip`}
-                  show={showOpenTooltip}
-                >
-                  {t('fields:openInNewTab')}
-                </Tooltip>
-                <Open />
-              </a>
             </Fragment>
           )}
         </SelectComponents.SingleValue>
