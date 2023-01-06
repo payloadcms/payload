@@ -63,7 +63,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             onMouseEnter={() => setShowOpenTooltip(true)}
             onMouseLeave={() => setShowOpenTooltip(false)}
             onClick={() => setShowOpenTooltip(false)}
-            style={{ pointerEvents: 'all' }}
+            style={{ pointerEvents: 'all', position: 'relative' }}
             rel="noreferrer"
           >
             <Tooltip
