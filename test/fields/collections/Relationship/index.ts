@@ -12,13 +12,6 @@ const RelationshipFields: CollectionConfig = {
       required: true,
     },
     {
-      name: 'multiple relationships',
-      type: 'relationship',
-      relationTo: ['text-fields', 'array-fields'],
-      hasMany: true,
-      required: true,
-    },
-    {
       name: 'relationToSelf',
       type: 'relationship',
       relationTo: relationshipFieldsSlug,
