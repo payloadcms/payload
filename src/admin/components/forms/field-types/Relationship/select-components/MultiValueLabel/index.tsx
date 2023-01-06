@@ -7,6 +7,7 @@ import Edit from '../../../../../icons/Edit';
 import { useAuth } from '../../../../../utilities/Auth';
 import { Option } from '../../types';
 import './index.scss';
+import Open from '../../../../../icons/Open';
 
 const baseClass = 'relationship--multi-value-label';
 
@@ -25,7 +26,9 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   } = props;
 
   const { permissions } = useAuth();
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [showEditTooltip, setShowEditTooltip] = useState(false);
+  const [showOpenTooltip, setShowOpenTooltip] = useState(false);
+
   const { t } = useTranslation('general');
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission);
 
@@ -54,18 +57,36 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
           <DocumentDrawerToggler
             className={`${baseClass}__drawer-toggler`}
             aria-label={`Edit ${label}`}
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
-            onClick={() => setShowTooltip(false)}
+            onMouseEnter={() => setShowEditTooltip(true)}
+            onMouseLeave={() => setShowEditTooltip(false)}
+            onClick={() => setShowEditTooltip(false)}
           >
             <Tooltip
               className={`${baseClass}__tooltip`}
-              show={showTooltip}
+              show={showEditTooltip}
             >
               {t('editLabel', { label: '' })}
             </Tooltip>
             <Edit />
           </DocumentDrawerToggler>
+          <a
+            href={`/admin/collections/${relationTo}/${value}`}
+            target="_blank"
+            onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
+            onMouseEnter={() => setShowOpenTooltip(true)}
+            onMouseLeave={() => setShowOpenTooltip(false)}
+            onClick={() => setShowOpenTooltip(false)}
+            className={`${baseClass}__open-link`}
+            rel="noreferrer"
+          >
+            <Tooltip
+              className={`${baseClass}__tooltip`}
+              show={showOpenTooltip}
+            >
+              {t('open')}
+            </Tooltip>
+            <Open />
+          </a>
           <DocumentDrawer onSave={onSave} />
         </Fragment>
       )}

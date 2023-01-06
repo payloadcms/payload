@@ -4,6 +4,7 @@ import { components as SelectComponents, SingleValueProps } from 'react-select';
 import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer';
 import Tooltip from '../../../../../elements/Tooltip';
 import Edit from '../../../../../icons/Edit';
+import Open from '../../../../../icons/Open';
 import { useAuth } from '../../../../../utilities/Auth';
 import { Option } from '../../types';
 import './index.scss';
@@ -26,7 +27,9 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
     },
   } = props;
 
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [showEditTooltip, setShowEditTooltip] = useState(false);
+  const [showOpenTooltip, setShowOpenTooltip] = useState(false);
+
   const { t } = useTranslation('general');
   const { permissions } = useAuth();
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission);
@@ -53,18 +56,36 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
                 className={`${baseClass}__drawer-toggler`}
                 aria-label={t('editLabel', { label })}
                 onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
-                onClick={() => setShowTooltip(false)}
+                onMouseEnter={() => setShowEditTooltip(true)}
+                onMouseLeave={() => setShowEditTooltip(false)}
+                onClick={() => setShowEditTooltip(false)}
               >
                 <Tooltip
                   className={`${baseClass}__tooltip`}
-                  show={showTooltip}
+                  show={showEditTooltip}
                 >
                   {t('edit')}
                 </Tooltip>
                 <Edit />
               </DocumentDrawerToggler>
+              <a
+                href={`/admin/collections/${relationTo}/${value}`}
+                target="_blank"
+                onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
+                onMouseEnter={() => setShowOpenTooltip(true)}
+                onMouseLeave={() => setShowOpenTooltip(false)}
+                onClick={() => setShowOpenTooltip(false)}
+                className={`${baseClass}__open-link`}
+                rel="noreferrer"
+              >
+                <Tooltip
+                  className={`${baseClass}__tooltip`}
+                  show={showOpenTooltip}
+                >
+                  {t('open')}
+                </Tooltip>
+                <Open />
+              </a>
             </Fragment>
           )}
         </SelectComponents.SingleValue>
