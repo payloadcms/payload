@@ -4,7 +4,6 @@ import { components as SelectComponents, SingleValueProps } from 'react-select';
 import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer';
 import Tooltip from '../../../../../elements/Tooltip';
 import Edit from '../../../../../icons/Edit';
-import Drag from '../../../../../icons/Drag';
 import { useAuth } from '../../../../../utilities/Auth';
 import { Option } from '../../types';
 import './index.scss';
