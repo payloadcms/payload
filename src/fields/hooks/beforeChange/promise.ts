@@ -50,7 +50,10 @@ export const promise = async ({
   skipValidation,
 }: Args): Promise<void> => {
   const passesCondition = (field.admin?.condition) ? field.admin.condition(data, siblingData) : true;
-  const skipValidationFromHere = skipValidation || !passesCondition;
+  let skipValidationFromHere = skipValidation || !passesCondition;
+
+  const defaultLocale = req.payload.config?.localization ? req.payload.config.localization?.defaultLocale : 'en';
+  const operationLocale = req.locale || defaultLocale;
 
   if (fieldAffectsData(field)) {
     if (typeof siblingData[field.name] === 'undefined') {
@@ -70,6 +73,17 @@ export const promise = async ({
           locale: req.locale,
           user: req.user,
         });
+      }
+    }
+
+    if (siblingData[field.name] === null) {
+      if (field.localized && ['array', 'blocks'].includes(field.type)) {
+        if (operationLocale !== defaultLocale) {
+          // localized fields set to null and not the default locale, should be set to undefined
+          // this way fallback locale can be used
+          siblingData[field.name] = undefined;
+          skipValidationFromHere = true;
+        }
       }
     }
 
@@ -95,13 +109,11 @@ export const promise = async ({
 
     // Validate
     if (!skipValidationFromHere && field.validate) {
-      let valueToValidate;
+      let valueToValidate = siblingData[field.name];
 
       if (['array', 'blocks'].includes(field.type)) {
         const rows = siblingData[field.name];
         valueToValidate = Array.isArray(rows) ? rows.length : 0;
-      } else {
-        valueToValidate = siblingData[field.name];
       }
 
       const validationResult = await field.validate(valueToValidate, {
@@ -127,21 +139,20 @@ export const promise = async ({
     if (field.localized) {
       mergeLocaleActions.push(() => {
         if (req.payload.config.localization) {
-          const localeData = req.payload.config.localization.locales.reduce((locales, localeID) => {
-            let valueToSet = siblingData[field.name];
+          const localeData = req.payload.config.localization.locales.reduce((localizedValues, locale) => {
+            const fieldValue = locale === req.locale
+              ? siblingData[field.name]
+              : siblingDocWithLocales?.[field.name]?.[locale];
 
-            if (localeID !== req.locale) {
-              valueToSet = siblingDocWithLocales?.[field.name]?.[localeID];
-            }
-
-            if (typeof valueToSet !== 'undefined') {
+            // update locale value if it's not undefined
+            if (typeof fieldValue !== 'undefined') {
               return {
-                ...locales,
-                [localeID]: valueToSet,
+                ...localizedValues,
+                [locale]: fieldValue,
               };
             }
 
-            return locales;
+            return localizedValues;
           }, {});
 
           // If there are locales with data, set the data
@@ -221,7 +232,6 @@ export const promise = async ({
         await Promise.all(promises);
       }
 
-
       break;
     }
 
@@ -255,7 +265,6 @@ export const promise = async ({
 
         await Promise.all(promises);
       }
-
 
       break;
     }

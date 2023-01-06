@@ -276,13 +276,13 @@ describe('Fields', () => {
       });
     });
 
-    it('should return empty array for arrays when no data present', async () => {
+    it('should return undefined arrays when no data present', async () => {
       const document = await payload.create<ArrayField>({
         collection: arrayFieldsSlug,
         data: arrayDoc,
       });
 
-      expect(document.potentiallyEmptyArray).toEqual([]);
+      expect(document.potentiallyEmptyArray).toBeUndefined();
     });
 
     it('should create with ids and nested ids', async () => {
