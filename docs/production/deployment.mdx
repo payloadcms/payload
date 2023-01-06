@@ -22,7 +22,7 @@ Payload features a suite of security features that you can rely on to strengthen
 
 ##### The Secret Key
 
-When you initialize Payload, you provide it with a `secret` property. This property should be impossible to guess and extremely difficult for brute-force attacks to crack. Make sure your Production `secret` is a long, complex string. It's often best practice to store it in an `env` file which is not checked into your Git repository, using `dotenv` to supply it to your `payload.initAsync` call.
+When you initialize Payload, you provide it with a `secret` property. This property should be impossible to guess and extremely difficult for brute-force attacks to crack. Make sure your Production `secret` is a long, complex string. It's often best practice to store it in an `env` file which is not checked into your Git repository, using `dotenv` to supply it to your `payload.init` call.
 
 ##### Double-check and thoroughly test all Access Control
 

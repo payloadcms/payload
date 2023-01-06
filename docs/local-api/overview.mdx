@@ -25,7 +25,7 @@ You can gain access to the currently running `payload` object via two ways:
 
 ##### Importing it
 
-You can import or require `payload` into your own files after it's been initialized, but you need to make sure that your `import` / `require` statements come **after** you call `payload.initAsync()`—otherwise Payload won't have been initialized yet. That might be obvious. To us, it's usually not.
+You can import or require `payload` into your own files after it's been initialized, but you need to make sure that your `import` / `require` statements come **after** you call `payload.init()`—otherwise Payload won't have been initialized yet. That might be obvious. To us, it's usually not.
 
 Example:
 ```js

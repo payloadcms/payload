@@ -13,7 +13,7 @@ email to work or you want customers to get an order confirmation email, you're a
 [NodeMailer](https://nodemailer.com) for email and won't get in your way for those already familiar.
 
 For email to send from your Payload server, some configuration is required. The settings you provide will be set
-in the `email` property object of your payload initAsync call. Payload will make use of the transport that you have configured for it for things like reset password or verifying new user accounts and email send methods are available to you as well on your payload instance.
+in the `email` property object of your payload init call. Payload will make use of the transport that you have configured for it for things like reset password or verifying new user accounts and email send methods are available to you as well on your payload instance.
 
 ### Configuration
 
@@ -23,7 +23,7 @@ in the `email` property object of your payload initAsync call. Payload will make
 1. **Recommended**: Set the `transportOptions` and Payload will do the set up for you.
 1. **Advanced**: The `transport` object can be assigned a nodemailer transport object set up in your server scripts and given for Payload to use.
 
-The following options are configurable in the `email` property object as part of the options object when calling payload.initAsync().
+The following options are configurable in the `email` property object as part of the options object when calling payload.init().
 
 | Option                       | Description  |
 | ---------------------------- | -------------|
@@ -41,7 +41,7 @@ Simple Mail Transfer Protocol, also known as SMTP can be passed in using the `tr
 
 **Example email part using SMTP:**
 ```js
-payload.initAsync({
+payload.init({
   email: {
     transportOptions: {
       host: process.env.SMTP_HOST,
@@ -68,7 +68,7 @@ payload.initAsync({
 
 ### Use an email service
 
-Many third party mail providers are available and offer benefits beyond basic SMTP. As an example your payload initAsync could look this if you wanted to use SendGrid.com though the same approach would work for any other [NodeMailer transports](https://nodemailer.com/transports/) shown here or provided by another third party.
+Many third party mail providers are available and offer benefits beyond basic SMTP. As an example your payload init could look this if you wanted to use SendGrid.com though the same approach would work for any other [NodeMailer transports](https://nodemailer.com/transports/) shown here or provided by another third party.
 
 ```js
 const nodemailerSendgrid = require('nodemailer-sendgrid');
@@ -76,7 +76,7 @@ const payload = require('payload');
 
 const sendGridAPIKey = process.env.SENDGRID_API_KEY;
 
-payload.initAsync({
+payload.init({
   ...sendGridAPIKey ? {
     email: {
       transportOptions: nodemailerSendgrid({
@@ -90,7 +90,7 @@ payload.initAsync({
 ```
 
 ### Use a custom NodeMailer transport
-To take full control of the mail transport you may wish to use `nodemailer.createTransport()` on your server and provide it to Payload initAsync.
+To take full control of the mail transport you may wish to use `nodemailer.createTransport()` on your server and provide it to Payload init.
 
 ```js
 const payload = require('payload');
@@ -105,7 +105,7 @@ const transport = await nodemailer.createTransport({
   },
 });
 
-payload.initAsync({
+payload.init({
   email: {
     fromName: 'Admin',
     fromAddress: 'admin@example.com',
@@ -124,7 +124,7 @@ By default, Payload uses a mock implementation that only sends mail to the [ethe
 To see ethereal credentials, add `logMockCredentials: true` to the email options. This will cause them to be logged to console on startup.
 
 ```js
-payload.initAsync({
+payload.init({
   email: {
     fromName: 'Admin',
     fromAddress: 'admin@example.com',
