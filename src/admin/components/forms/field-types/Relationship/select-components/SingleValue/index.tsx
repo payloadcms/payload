@@ -54,6 +54,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
             <Fragment>
               <DocumentDrawerToggler
                 className={`${baseClass}__drawer-toggler`}
+                style={{ pointerEvents: 'all' }}
                 aria-label={t('editLabel', { label })}
                 onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
                 onMouseEnter={() => setShowEditTooltip(true)}
@@ -76,6 +77,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
                 onMouseLeave={() => setShowOpenTooltip(false)}
                 onClick={() => setShowOpenTooltip(false)}
                 className={`${baseClass}__open-link`}
+                style={{ pointerEvents: 'all' }}
                 rel="noreferrer"
               >
                 <Tooltip

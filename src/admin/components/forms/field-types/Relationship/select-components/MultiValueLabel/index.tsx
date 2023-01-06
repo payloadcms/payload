@@ -56,6 +56,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
         <Fragment>
           <DocumentDrawerToggler
             className={`${baseClass}__drawer-toggler`}
+            style={{ pointerEvents: 'all' }}
             aria-label={`Edit ${label}`}
             onMouseEnter={() => setShowEditTooltip(true)}
             onMouseLeave={() => setShowEditTooltip(false)}
@@ -77,6 +78,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             onMouseLeave={() => setShowOpenTooltip(false)}
             onClick={() => setShowOpenTooltip(false)}
             className={`${baseClass}__open-link`}
+            style={{ pointerEvents: 'all' }}
             rel="noreferrer"
           >
             <Tooltip
