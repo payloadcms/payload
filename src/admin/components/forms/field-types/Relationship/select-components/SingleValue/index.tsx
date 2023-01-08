@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { components as SelectComponents, SingleValueProps } from 'react-select';
 import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer';
 import Tooltip from '../../../../../elements/Tooltip';
@@ -26,8 +27,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
     },
   } = props;
 
-  const [showEditTooltip, setShowEditTooltip] = useState(false);
-  const [showOpenTooltip, setShowOpenTooltip] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const { t } = useTranslation('general');
   const { permissions } = useAuth();
@@ -46,27 +46,13 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
     <div className={baseClass}>
       <div className={`${baseClass}__label`}>
         <SelectComponents.SingleValue {...props}>
-          <a
-            href={`/admin/collections/${relationTo}/${value}`}
-            target="_blank"
+          <Link
+            to={`/admin/collections/${relationTo}/${value}`}
+            className={`${baseClass}__link`}
             onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-            onMouseEnter={() => setShowOpenTooltip(true)}
-            onMouseLeave={() => setShowOpenTooltip(false)}
-            onClick={() => setShowOpenTooltip(false)}
-            style={{ pointerEvents: 'all', position: 'relative' }}
-            rel="noreferrer"
           >
-            <Tooltip
-              className={`${baseClass}__tooltip`}
-              show={showOpenTooltip}
-            >
-              {t('fields:openInNewTab')}
-            </Tooltip>
-            <div className={`${baseClass}__text`}>
-              {children}
-            </div>
-          </a>
-
+            {children}
+          </Link>
           {relationTo && hasReadPermission && (
             <Fragment>
               <DocumentDrawerToggler
@@ -74,13 +60,13 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
                 style={{ pointerEvents: 'all' }}
                 aria-label={t('editLabel', { label })}
                 onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-                onMouseEnter={() => setShowEditTooltip(true)}
-                onMouseLeave={() => setShowEditTooltip(false)}
-                onClick={() => setShowEditTooltip(false)}
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+                onClick={() => setShowTooltip(false)}
               >
                 <Tooltip
                   className={`${baseClass}__tooltip`}
-                  show={showEditTooltip}
+                  show={showTooltip}
                 >
                   {t('edit')}
                 </Tooltip>

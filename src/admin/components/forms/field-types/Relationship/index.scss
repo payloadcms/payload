@@ -3,6 +3,12 @@
 .field-type.relationship {
   position: relative;
   margin-bottom: $baseline;
+
+  .rs__multi-value {
+    cursor: default;
+    display: flex;
+    align-items: center;
+  }
 }
 
 .relationship {

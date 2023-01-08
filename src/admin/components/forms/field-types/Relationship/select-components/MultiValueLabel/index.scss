@@ -2,31 +2,44 @@
 
 .relationship--multi-value-label {
   display: flex;
+  cursor: default;
+
+  &__drag-handle {
+    line-height: 1;
+    cursor: grab;
+
+    svg {
+      height: 20px;
+      width: 20px;
+      position: relative;
+      top: 0.5px; // fix alignment
+    }
+  }
 
   &__content {
     @extend %small;
     padding: 0;
+    padding-right: base(0.125);
     max-width: 150px;
     color: currentColor;
     display: flex;
     align-items: center;
   }
 
-  &__text {
+  &__label {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    width: 22px;
-    margin-left: -4px;
-    margin-bottom: -3px;
+    position: relative;
+    top: -1px; // fix alignment
   }
 
   &__drawer-toggler {
+    pointer-events: all; // ensure this is clickable even when the field is read-only
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: base(0.25);
 
     .icon {
       width: base(0.75);

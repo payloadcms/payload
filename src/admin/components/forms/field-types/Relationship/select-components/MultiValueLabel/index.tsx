@@ -8,6 +8,7 @@ import { useAuth } from '../../../../../utilities/Auth';
 import { Option } from '../../types';
 import './index.scss';
 import Drag from '../../../../../icons/Drag';
+import { Link } from 'react-router-dom';
 
 const baseClass = 'relationship--multi-value-label';
 
@@ -27,7 +28,6 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
 
   const { permissions } = useAuth();
   const [showEditTooltip, setShowEditTooltip] = useState(false);
-  const [showOpenTooltip, setShowOpenTooltip] = useState(false);
 
   const { t } = useTranslation('general');
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission);
@@ -41,42 +41,31 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
     if (typeof setDrawerIsOpen === 'function') setDrawerIsOpen(isDrawerOpen);
   }, [isDrawerOpen, setDrawerIsOpen]);
 
+  console.log(showEditTooltip)
+
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__content`}>
+      <div className={`${baseClass}__drag-handle`}>
         <components.MultiValueLabel
           {...props}
-          innerProps={{
-            className: `${baseClass}__text`,
-            ...draggableProps || {},
-          }}
+          innerProps={draggableProps}
         >
           <Drag />
         </components.MultiValueLabel>
       </div>
       {relationTo && hasReadPermission && (
         <Fragment>
-          <a
-            href={`/admin/collections/${relationTo}/${value}`}
-            target="_blank"
-            onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-            onMouseEnter={() => setShowOpenTooltip(true)}
-            onMouseLeave={() => setShowOpenTooltip(false)}
-            onClick={() => setShowOpenTooltip(false)}
-            style={{ pointerEvents: 'all', position: 'relative' }}
-            rel="noreferrer"
-          >
-            <Tooltip
-              className={`${baseClass}__tooltip`}
-              show={showOpenTooltip}
+          <div className={`${baseClass}__content`}>
+            <Link
+              to={`/admin/collections/${relationTo}/${value}`}
+              style={{ pointerEvents: 'all', position: 'relative' }}
+              className={`${baseClass}__label`}
             >
-              {t('fields:openInNewTab')}
-            </Tooltip>
-            {label}
-          </a>
+              {label}
+            </Link>
+          </div>
           <DocumentDrawerToggler
             className={`${baseClass}__drawer-toggler`}
-            style={{ pointerEvents: 'all' }}
             aria-label={`Edit ${label}`}
             onMouseEnter={() => setShowEditTooltip(true)}
             onMouseLeave={() => setShowEditTooltip(false)}
@@ -86,7 +75,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
               className={`${baseClass}__tooltip`}
               show={showEditTooltip}
             >
-              {t('editLabel', { label: '' })}
+              {t('edit')}
             </Tooltip>
             <Edit />
           </DocumentDrawerToggler>

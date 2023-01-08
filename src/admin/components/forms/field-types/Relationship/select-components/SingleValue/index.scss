@@ -14,7 +14,8 @@
     flex-shrink: 1;
   }
 
-  &__text {
+  &__link {
+    pointer-events: all; // ensure this is clickable even when the field is read-only
     overflow: hidden;
     text-overflow: ellipsis;
   }
