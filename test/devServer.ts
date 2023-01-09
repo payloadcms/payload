@@ -5,7 +5,7 @@ import payload from '../src';
 
 const expressApp = express();
 const init = async () => {
-  await payload.initAsync({
+  await payload.init({
     secret: uuid(),
     mongoURL: process.env.MONGO_URL || 'mongodb://localhost/payload',
     express: expressApp,

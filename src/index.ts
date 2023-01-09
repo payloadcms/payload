@@ -44,7 +44,7 @@ import { Result as ResetPasswordResult } from './auth/operations/resetPassword';
 import { Result as LoginResult } from './auth/operations/login';
 import { Options as FindGlobalOptions } from './globals/operations/local/findOne';
 import { Options as UpdateGlobalOptions } from './globals/operations/local/update';
-import { initSync, initAsync } from './init';
+import { initAsync } from './init';
 
 require('isomorphic-fetch');
 
@@ -121,11 +121,7 @@ export class Payload {
    * @description Initializes Payload
    * @param options
    */
-  init(options: InitOptions): void {
-    initSync(this, options);
-  }
-
-  async initAsync(options: InitOptions): Promise<void> {
+  async init(options: InitOptions): Promise<void> {
     await initAsync(this, options);
   }
 

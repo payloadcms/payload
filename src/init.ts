@@ -161,18 +161,3 @@ export const initAsync = async (payload: Payload, options: InitOptions): Promise
   if (typeof options.onInit === 'function') await options.onInit(payload);
   if (typeof payload.config.onInit === 'function') await payload.config.onInit(payload);
 };
-
-export const initSync = (payload: Payload, options: InitOptions): void => {
-  payload.logger = Logger('payload', options.loggerOptions);
-  payload.mongoURL = options.mongoURL;
-
-  if (payload.mongoURL) {
-    mongoose.set('strictQuery', false);
-    connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
-  }
-
-  init(payload, options);
-
-  if (typeof options.onInit === 'function') options.onInit(payload);
-  if (typeof payload.config.onInit === 'function') payload.config.onInit(payload);
-};
