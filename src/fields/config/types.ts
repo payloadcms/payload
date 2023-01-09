@@ -2,7 +2,8 @@
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
 import type { TFunction } from 'i18next';
-import { Document, Operation, Where } from '../../types';
+import type { EditorProps } from '@monaco-editor/react';
+import { Operation, Where } from '../../types';
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
@@ -183,7 +184,7 @@ export type GroupField = FieldBase & {
 
 export type RowAdmin = Omit<Admin, 'description'>;
 
-export type RowField = Omit<FieldBase, 'admin' | 'name'> & {
+export type RowField = Omit<FieldBase, 'admin' | 'name' | 'label'> & {
   admin?: RowAdmin;
   type: 'row';
   fields: Field[];
@@ -250,6 +251,7 @@ export type UploadField = FieldBase & {
 
 type CodeAdmin = Admin & {
   language?: string;
+  editorOptions?: EditorProps['options'];
 }
 
 export type CodeField = Omit<FieldBase, 'admin'> & {
@@ -257,6 +259,15 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
   minLength?: number
   maxLength?: number
   type: 'code';
+}
+
+type JSONAdmin = Admin & {
+  editorOptions?: EditorProps['options'];
+}
+
+export type JSONField = Omit<FieldBase, 'admin'> & {
+  admin?: JSONAdmin
+  type: 'json';
 }
 
 export type SelectField = FieldBase & {
@@ -399,6 +410,7 @@ export type Field =
   | SelectField
   | UploadField
   | CodeField
+  | JSONField
   | PointField
   | RowField
   | CollapsibleField
@@ -421,6 +433,7 @@ export type FieldAffectingData =
   | SelectField
   | UploadField
   | CodeField
+  | JSONField
   | PointField
   | TabAsField
 
@@ -440,6 +453,7 @@ export type NonPresentationalField =
   | SelectField
   | UploadField
   | CodeField
+  | JSONField
   | PointField
   | RowField
   | TabsField

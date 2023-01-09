@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import { useSlate } from 'slate-react';
-import isListActive from './isListActive';
-import toggleElement from './toggle';
+import toggleList from './toggleList';
 import { ButtonProps } from './types';
+import isListActive from './isListActive';
 
 import '../buttons.scss';
 
@@ -13,7 +13,7 @@ const ListButton: React.FC<ButtonProps> = ({ format, children, onClick, classNam
 
   const defaultOnClick = useCallback((event) => {
     event.preventDefault();
-    toggleElement(editor, format);
+    toggleList(editor, format);
   }, [editor, format]);
 
   return (

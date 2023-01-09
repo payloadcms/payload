@@ -6,6 +6,7 @@ import {
   CodeField,
   DateField,
   EmailField,
+  JSONField,
   NumberField,
   PointField,
   RadioField,
@@ -127,6 +128,20 @@ export const textarea: Validate<unknown, unknown, TextareaField> = (value: strin
 export const code: Validate<unknown, unknown, CodeField> = (value: string, { t, required }) => {
   if (required && value === undefined) {
     return t('validation:required');
+  }
+
+  return true;
+};
+
+export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }> = (value: string, {
+  t, required, jsonError,
+}) => {
+  if (required && !value) {
+    return t('validation:required');
+  }
+
+  if (jsonError !== undefined) {
+    return t('validation:invalidInput');
   }
 
   return true;
@@ -401,4 +416,5 @@ export default {
   radio,
   blocks,
   point,
+  json,
 };

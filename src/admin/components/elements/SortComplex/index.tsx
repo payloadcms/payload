@@ -36,7 +36,8 @@ const SortComplex: React.FC<Props> = (props) => {
   }, []));
 
   const [sortField, setSortField] = useState(sortFields[0]);
-  const [sortOrder, setSortOrder] = useState({ label: t('descending'), value: '-' });
+  const [initialSort] = useState(() => ({ label: t('descending'), value: '-' }));
+  const [sortOrder, setSortOrder] = useState(initialSort);
 
   useEffect(() => {
     if (sortField?.value) {
@@ -80,7 +81,9 @@ const SortComplex: React.FC<Props> = (props) => {
             <ReactSelect
               value={sortOrder}
               options={sortOptions}
-              onChange={setSortOrder}
+              onChange={(incomingSort) => {
+                setSortOrder(incomingSort || initialSort);
+              }}
             />
           </div>
         </div>

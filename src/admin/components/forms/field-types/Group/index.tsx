@@ -4,11 +4,11 @@ import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
-import { fieldAffectsData } from '../../../../../fields/config/types';
 import { useCollapsible } from '../../../elements/Collapsible/provider';
 import { GroupProvider, useGroup } from './provider';
 import { useTabs } from '../Tabs/provider';
 import { getTranslation } from '../../../../../utilities/getTranslation';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 
 import './index.scss';
 
@@ -60,16 +60,16 @@ const Group: React.FC<Props> = (props) => {
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
           {(label || description) && (
-          <header className={`${baseClass}__header`}>
-            {label && (
-              <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
-            )}
-            <FieldDescription
-              className={`field-description-${path.replace(/\./gi, '__')}`}
-              value={null}
-              description={description}
-            />
-          </header>
+            <header className={`${baseClass}__header`}>
+              {label && (
+                <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
+              )}
+              <FieldDescription
+                className={`field-description-${path.replace(/\./gi, '__')}`}
+                value={null}
+                description={description}
+              />
+            </header>
           )}
           <RenderFields
             permissions={permissions?.fields}
@@ -78,7 +78,7 @@ const Group: React.FC<Props> = (props) => {
             indexPath={indexPath}
             fieldSchema={fields.map((subField) => ({
               ...subField,
-              path: `${path}${fieldAffectsData(subField) ? `.${subField.name}` : ''}`,
+              path: createNestedFieldPath(path, subField),
             }))}
           />
         </div>

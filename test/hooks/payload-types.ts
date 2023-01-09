@@ -77,10 +77,11 @@ export interface Relation {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "hooks-users".
  */
-export interface User {
+export interface HooksUser {
   id: string;
+  roles: ('admin' | 'user')[];
   email?: string;
   resetPasswordToken?: string;
   resetPasswordExpiration?: string;

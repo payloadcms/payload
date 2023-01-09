@@ -10,13 +10,13 @@ const baseClass = 'drawer';
 
 const zBase = 100;
 
-const formatDrawerSlug = ({
+export const formatDrawerSlug = ({
   slug,
   depth,
 }: {
   slug: string,
   depth: number,
-}) => `drawer_${depth}_${slug}`;
+}): string => `drawer_${depth}_${slug}`;
 
 export const DrawerToggler: React.FC<TogglerProps> = ({
   slug,
@@ -24,6 +24,7 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
   children,
   className,
   onClick,
+  disabled,
   ...rest
 }) => {
   const { openModal } = useModal();
@@ -39,6 +40,7 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
       onClick={handleClick}
       type="button"
       className={className}
+      disabled={disabled}
       {...rest}
     >
       {children}
@@ -57,44 +59,55 @@ export const Drawer: React.FC<Props> = ({
   const { breakpoints: { m: midBreak } } = useWindowInfo();
   const drawerDepth = useEditDepth();
   const [isOpen, setIsOpen] = useState(false);
+  const [animateIn, setAnimateIn] = useState(false);
   const [modalSlug] = useState(() => (formatSlug !== false ? formatDrawerSlug({ slug, depth: drawerDepth }) : slug));
 
   useEffect(() => {
-    setIsOpen(modalState[modalSlug].isOpen);
+    setIsOpen(modalState[modalSlug]?.isOpen);
   }, [modalSlug, modalState]);
 
-  return (
-    <Modal
-      slug={modalSlug}
-      className={[
-        className,
-        baseClass,
-        isOpen && `${baseClass}--is-open`,
-      ].filter(Boolean).join(' ')}
-      style={{
-        zIndex: zBase + drawerDepth,
-      }}
-    >
-      {drawerDepth === 1 && (
-        <div className={`${baseClass}__blur-bg`} />
-      )}
-      <button
-        className={`${baseClass}__close`}
-        id={`close-drawer__${modalSlug}`}
-        type="button"
-        onClick={() => closeModal(modalSlug)}
+  useEffect(() => {
+    setAnimateIn(isOpen);
+  }, [isOpen]);
+
+  if (isOpen) {
+    // IMPORTANT: do not render the drawer until it is explicitly open, this is to avoid large html trees especially when nesting drawers
+
+    return (
+      <Modal
+        slug={modalSlug}
+        className={[
+          className,
+          baseClass,
+          animateIn && `${baseClass}--is-open`,
+        ].filter(Boolean).join(' ')}
         style={{
-          width: `calc(${midBreak ? 'var(--gutter-h)' : 'var(--nav-width)'} + ${drawerDepth - 1} * 25px)`,
+          zIndex: zBase + drawerDepth,
         }}
-        aria-label={t('close')}
-      />
-      <div className={`${baseClass}__content`}>
-        <div className={`${baseClass}__content-children`}>
-          <EditDepthContext.Provider value={drawerDepth + 1}>
-            {children}
-          </EditDepthContext.Provider>
+      >
+        {drawerDepth === 1 && (
+          <div className={`${baseClass}__blur-bg`} />
+        )}
+        <button
+          className={`${baseClass}__close`}
+          id={`close-drawer__${modalSlug}`}
+          type="button"
+          onClick={() => closeModal(modalSlug)}
+          style={{
+            width: `calc(${midBreak ? 'var(--gutter-h)' : 'var(--nav-width)'} + ${drawerDepth - 1} * 25px)`,
+          }}
+          aria-label={t('close')}
+        />
+        <div className={`${baseClass}__content`}>
+          <div className={`${baseClass}__content-children`}>
+            <EditDepthContext.Provider value={drawerDepth + 1}>
+              {children}
+            </EditDepthContext.Provider>
+          </div>
         </div>
-      </div>
-    </Modal>
-  );
+      </Modal>
+    );
+  }
+
+  return null;
 };

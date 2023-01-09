@@ -15,12 +15,10 @@ import { defaultNumber, numberDoc } from './collections/Number';
 let client;
 
 describe('Fields', () => {
-  beforeAll(async (done) => {
+  beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
     await client.login();
-
-    done();
   });
 
   describe('text', () => {
@@ -502,6 +500,29 @@ describe('Fields', () => {
       });
 
       expect(blockFieldsFail.docs).toHaveLength(0);
+    });
+  });
+
+  describe('json', () => {
+    it('should save json data', async () => {
+      const json = { foo: 'bar' };
+      const doc = await payload.create({
+        collection: 'json-fields',
+        data: {
+          json,
+        },
+      });
+
+      expect(doc.json).toStrictEqual({ foo: 'bar' });
+    });
+
+    it('should validate json', async () => {
+      await expect(async () => payload.create({
+        collection: 'json-fields',
+        data: {
+          json: '{ bad input: true }',
+        },
+      })).rejects.toThrow('The following field is invalid: json');
     });
   });
 

@@ -1,6 +1,6 @@
 import sanitizeFields from './sanitize';
 import { MissingFieldType, InvalidFieldRelationship, InvalidFieldName } from '../../errors';
-import { ArrayField, Block, BlockField, CheckboxField, Field, TextField } from './types';
+import { ArrayField, Block, BlockField, CheckboxField, Field, NumberField, TextField } from './types';
 
 describe('sanitizeFields', () => {
   it('should throw on missing type field', () => {
@@ -143,7 +143,7 @@ describe('sanitizeFields', () => {
       expect(sanitizedField.label).toStrictEqual('Special Block');
       expect(sanitizedField.type).toStrictEqual('blocks');
       expect(sanitizedField.labels).toMatchObject({ singular: 'Special Block', plural: 'Special Blocks' });
-      expect(sanitizedField.blocks[0].fields[0].label).toStrictEqual('Test Number');
+      expect((sanitizedField.blocks[0].fields[0] as NumberField).label).toStrictEqual('Test Number');
     });
   });
 

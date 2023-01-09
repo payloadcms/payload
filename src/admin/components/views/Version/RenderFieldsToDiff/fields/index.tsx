@@ -11,6 +11,7 @@ export default {
   number: Text,
   email: Text,
   code: Text,
+  json: Text,
   checkbox: Text,
   radio: Select,
   row: Nested,

@@ -53,7 +53,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const [fields] = useState<Field[]>(() => formatFields(collection, t));
   const [tableColumns, setTableColumns] = useState<Column[]>(() => {
     const initialColumns = getInitialColumns(fields, useAsTitle, defaultColumns);
-    return buildColumns(collection, initialColumns, t);
+    return buildColumns({ collection, columns: initialColumns, t });
   });
 
   const collectionPermissions = permissions?.collections?.[slug];
@@ -106,7 +106,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     (async () => {
       const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
       if (currentPreferences?.columns) {
-        setTableColumns(buildColumns(collection, currentPreferences?.columns, t));
+        setTableColumns(buildColumns({ collection, columns: currentPreferences?.columns, t }));
       }
 
       const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 0 });
@@ -143,7 +143,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   }, [sort, limit, stringifiedActiveColumns, preferenceKey, setPreference]);
 
   const setActiveColumns = useCallback((columns: string[]) => {
-    setTableColumns(buildColumns(collection, columns, t));
+    setTableColumns(buildColumns({ collection, columns, t }));
   }, [collection, t]);
 
   return (

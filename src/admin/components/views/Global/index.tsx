@@ -22,6 +22,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { setStepNav } = useStepNav();
   const { user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
+  const [updatedAt, setUpdatedAt] = useState<string>();
   const { getVersions, preferencesKey, docPermissions, getDocPermissions } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { t } = useTranslation();
@@ -51,6 +52,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const onSave = useCallback(async (json) => {
     getVersions();
     getDocPermissions();
+    setUpdatedAt(json?.result?.updatedAt);
     const state = await buildStateFromSchema({ fieldSchema: fields, data: json.result, operation: 'update', user, locale, t });
     setInitialState(state);
   }, [getVersions, fields, user, locale, t, getDocPermissions]);
@@ -93,6 +95,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
         onSave,
         apiURL: `${serverURL}${api}/globals/${slug}${global.versions?.drafts ? '?draft=true' : ''}`,
         action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
+        updatedAt: updatedAt || dataToRender?.updatedAt,
       }}
     />
   );

@@ -28,6 +28,13 @@ type CLEAR = {
   type: 'CLEAR'
 }
 
+type UPDATE = {
+  type: 'UPDATE'
+  doc: any
+  collection: SanitizedCollectionConfig
+  i18n: typeof i18n
+}
+
 type ADD = {
   type: 'ADD'
   docs: any[]
@@ -37,7 +44,7 @@ type ADD = {
   i18n: typeof i18n
 }
 
-export type Action = CLEAR | ADD
+export type Action = CLEAR | ADD | UPDATE
 
 export type ValueWithRelation = {
   relationTo: string

@@ -106,14 +106,25 @@ export const promise = async ({
     // Validate
     if (!skipValidationFromHere && field.validate) {
       let valueToValidate = siblingData[field.name];
+      let jsonError;
 
       if (['array', 'blocks'].includes(field.type)) {
         const rows = siblingData[field.name];
         valueToValidate = Array.isArray(rows) ? rows.length : 0;
       }
 
+
+      if (field.type === 'json' && typeof siblingData[field.name] === 'string') {
+        try {
+          JSON.parse(siblingData[field.name] as string);
+        } catch (e) {
+          jsonError = e;
+        }
+      }
+
       const validationResult = await field.validate(valueToValidate, {
         ...field,
+        jsonError,
         data: merge(doc, data, { arrayMerge: (_, source) => source }),
         siblingData: merge(siblingDoc, siblingData, { arrayMerge: (_, source) => source }),
         id,

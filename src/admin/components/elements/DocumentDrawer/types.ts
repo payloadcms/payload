@@ -1,9 +1,14 @@
 import React, { HTMLAttributes } from 'react';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 
 export type DocumentDrawerProps = {
   collectionSlug: string
   id?: string
-  onSave?: (json: Record<string, unknown>) => void
+  onSave?: (json: {
+    doc: Record<string, any>
+    message: string
+    collectionConfig: SanitizedCollectionConfig
+  }) => void
   customHeader?: React.ReactNode
   drawerSlug?: string
 }
@@ -14,6 +19,7 @@ export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
   drawerSlug?: string
   id?: string
   collectionSlug: string
+  disabled?: boolean
 }
 
 export type UseDocumentDrawer = (args: {
@@ -27,5 +33,7 @@ export type UseDocumentDrawer = (args: {
     drawerDepth: number
     isDrawerOpen: boolean
     toggleDrawer: () => void
+    closeDrawer: () => void
+    openDrawer: () => void
   }
 ]

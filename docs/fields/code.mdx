@@ -11,13 +11,13 @@ keywords: code, fields, config, configuration, documentation, Content Management
   The Code field type saves a string in the database, but provides the Admin panel with a code editor styled interface.
 </Banner>
 
-This field uses `prismjs` for syntax highlighting and `react-simple-code-editor` for the editor itself.
+This field uses the `monaco-react` editor syntax highlighting.
 
 ### Config
 
 | Option           | Description |
 | ---------------- | ----------- |
-| **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
+| **`name`** *         | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names) |
 | **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language. |
 | **`unique`**         | Enforce that each entry in the Collection has a unique value for this field. |
 | **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
@@ -33,25 +33,16 @@ This field uses `prismjs` for syntax highlighting and `react-simple-code-editor`
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
-### Admin config
+### Admin Config
 
-In addition to the default [field admin config](/docs/fields/overview#admin-config), the Code field type also allows for the customization of a `language` property.
+In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following properties:
 
-The following `prismjs` plugins are imported, enabling the `language` property to accept the following values:
-
-| Plugin                       | Language |
-| ---------------------------- | ----------- |
-| **`prism-css`**              | `css` |
-| **`prism-clike`**            | `clike` |
-| **`prism-markup`**           | `markup`, `html`, `xml`, `svg`, `mathml`, `ssml`, `atom`, `rss` |
-| **`prism-javascript`**       | `javascript`, `js` |
-| **`prism-json`**             | `json` |
-| **`prism-jsx`**              | `jsx` |
-| **`prism-typescript`**       | `typescript`, `ts` |
-| **`prism-tsx`**              | `tsx` |
-| **`prism-yaml`**             | `yaml`, `yml` |
+| Option                 | Description                                                                                                                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`language`**         | This property can be set to any language listed [here](https://github.com/microsoft/monaco-editor/tree/main/src/basic-languages).                                           |
+| **`editorOptions`**    | Options that can be passed to the monaco editor, [view the full list](https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.IDiffEditorConstructionOptions.html).  |
 
 ### Example
 
@@ -67,7 +58,7 @@ const ExampleCollection: CollectionConfig = {
       type: 'code', // required
       required: true,
       admin: {
-        language: 'js'
+        language: 'javascript'
       }
     }
   ]

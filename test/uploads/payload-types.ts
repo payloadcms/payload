@@ -37,6 +37,14 @@ export interface Media {
       filesize?: number;
       filename?: string;
     };
+    differentFormatFromMainImage: {
+      url?: string;
+      width?: number;
+      height?: number;
+      mimeType?: string;
+      filesize?: number;
+      filename?: string;
+    };
     tablet: {
       url?: string;
       width?: number;

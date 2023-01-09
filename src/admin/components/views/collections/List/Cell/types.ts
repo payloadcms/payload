@@ -9,4 +9,7 @@ export type Props = {
   rowData: {
     [path: string]: unknown
   }
+  link?: boolean
+  onClick?: (Props) => void
+  className?: string
 }

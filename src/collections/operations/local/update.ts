@@ -4,6 +4,7 @@ import getFileByPath from '../../../uploads/getFileByPath';
 import update from '../update';
 import { PayloadRequest } from '../../../express/types';
 import { getDataLoader } from '../../dataloader';
+import { File } from '../../../uploads/types';
 import i18nInit from '../../../translations/init';
 
 export type Options<T> = {

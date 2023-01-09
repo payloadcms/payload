@@ -8,7 +8,7 @@ import BlockFields, { blocksDoc } from './collections/Blocks';
 import CollapsibleFields, { collapsibleDoc } from './collections/Collapsible';
 import ConditionalLogic, { conditionalLogicDoc } from './collections/ConditionalLogic';
 import DateFields, { dateDoc } from './collections/Date';
-import RichTextFields, { richTextDoc } from './collections/RichText';
+import RichTextFields, { richTextBulletsDoc, richTextDoc } from './collections/RichText';
 import SelectFields, { selectsDoc } from './collections/Select';
 import TabsFields, { tabsDoc } from './collections/Tabs';
 import TextFields, { textDoc, textFieldsSlug } from './collections/Text';
@@ -19,8 +19,10 @@ import Uploads, { uploadsDoc } from './collections/Upload';
 import IndexedFields from './collections/Indexed';
 import NumberFields, { numberDoc } from './collections/Number';
 import CodeFields, { codeDoc } from './collections/Code';
+import JSONFields, { jsonDoc } from './collections/JSON';
 import RelationshipFields from './collections/Relationship';
 import RadioFields, { radiosDoc } from './collections/Radio';
+import Uploads2 from './collections/Upload2';
 
 export default buildConfig({
   admin: {
@@ -45,6 +47,7 @@ export default buildConfig({
     RadioFields,
     GroupFields,
     IndexedFields,
+    JSONFields,
     NumberFields,
     PointFields,
     RelationshipFields,
@@ -53,6 +56,7 @@ export default buildConfig({
     TabsFields,
     TextFields,
     Uploads,
+    Uploads2,
   ],
   localization: {
     defaultLocale: 'en',
@@ -78,6 +82,7 @@ export default buildConfig({
     await payload.create({ collection: 'point-fields', data: pointDoc });
     await payload.create({ collection: 'date-fields', data: dateDoc });
     await payload.create({ collection: 'code-fields', data: codeDoc });
+    await payload.create({ collection: 'json-fields', data: jsonDoc });
 
     const createdTextDoc = await payload.create({ collection: textFieldsSlug, data: textDoc });
 
@@ -100,6 +105,7 @@ export default buildConfig({
     richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdUploadDoc.id };
     richTextDocWithRelationship.richTextReadOnly[richTextUploadIndex].value = { id: createdUploadDoc.id };
 
+    await payload.create({ collection: 'rich-text-fields', data: richTextBulletsDoc });
     await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship });
 
     await payload.create({ collection: 'number-fields', data: numberDoc });

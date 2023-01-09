@@ -1,0 +1,120 @@
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import { useModal } from '@faceless-ui/modal';
+import { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types';
+import { Drawer, DrawerToggler } from '../Drawer';
+import { useEditDepth } from '../../utilities/EditDepth';
+import { ListDrawerContent } from './DrawerContent';
+
+import './index.scss';
+
+export const baseClass = 'list-drawer';
+
+const formatListDrawerSlug = ({
+  depth,
+  uuid,
+}: {
+  depth: number,
+  uuid: string, // supply when creating a new document and no id is available
+}) => `list-drawer_${depth}_${uuid}`;
+
+export const ListDrawerToggler: React.FC<ListTogglerProps> = ({
+  children,
+  className,
+  drawerSlug,
+  disabled,
+  ...rest
+}) => {
+  return (
+    <DrawerToggler
+      slug={drawerSlug}
+      formatSlug={false}
+      className={[
+        className,
+        `${baseClass}__toggler`,
+      ].filter(Boolean).join(' ')}
+      disabled={disabled}
+      {...rest}
+    >
+      {children}
+    </DrawerToggler>
+  );
+};
+
+export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
+  const { drawerSlug } = props;
+
+  return (
+    <Drawer
+      slug={drawerSlug}
+      formatSlug={false}
+      className={baseClass}
+    >
+      <ListDrawerContent {...props} />
+    </Drawer>
+  );
+};
+
+export const useListDrawer: UseListDrawer = ({ collectionSlugs, uploads, selectedCollection }) => {
+  const drawerDepth = useEditDepth();
+  const uuid = useId();
+  const { modalState, toggleModal, closeModal, openModal } = useModal();
+  const [isOpen, setIsOpen] = useState(false);
+  const drawerSlug = formatListDrawerSlug({
+    depth: drawerDepth,
+    uuid,
+  });
+
+  useEffect(() => {
+    setIsOpen(Boolean(modalState[drawerSlug]?.isOpen));
+  }, [modalState, drawerSlug]);
+
+  const toggleDrawer = useCallback(() => {
+    toggleModal(drawerSlug);
+  }, [toggleModal, drawerSlug]);
+
+  const closeDrawer = useCallback(() => {
+    closeModal(drawerSlug);
+  }, [drawerSlug, closeModal]);
+
+  const openDrawer = useCallback(() => {
+    openModal(drawerSlug);
+  }, [drawerSlug, openModal]);
+
+  const MemoizedDrawer = useMemo(() => {
+    return ((props) => (
+      <ListDrawer
+        {...props}
+        drawerSlug={drawerSlug}
+        collectionSlugs={collectionSlugs}
+        uploads={uploads}
+        closeDrawer={closeDrawer}
+        key={drawerSlug}
+        selectedCollection={selectedCollection}
+      />
+    ));
+  }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection]);
+
+  const MemoizedDrawerToggler = useMemo(() => {
+    return ((props) => (
+      <ListDrawerToggler
+        {...props}
+        drawerSlug={drawerSlug}
+      />
+    ));
+  }, [drawerSlug]);
+
+  const MemoizedDrawerState = useMemo(() => ({
+    drawerSlug,
+    drawerDepth,
+    isDrawerOpen: isOpen,
+    toggleDrawer,
+    closeDrawer,
+    openDrawer,
+  }), [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer, openDrawer]);
+
+  return [
+    MemoizedDrawer,
+    MemoizedDrawerToggler,
+    MemoizedDrawerState,
+  ];
+};

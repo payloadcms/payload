@@ -35,7 +35,6 @@ const flattenFields = (fields: Field[], keepPresentationalFields?: boolean): (Fi
         }, []),
       ];
     }
-
     return fieldsToUse;
   }, []);
 };

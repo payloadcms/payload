@@ -9,7 +9,7 @@
   transform: none;
   background-color: var(--theme-error-500);
 
-  &:after {
+  &::after {
     border-top-color: var(--theme-error-500);
   }
 }

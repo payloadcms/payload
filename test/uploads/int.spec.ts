@@ -7,6 +7,7 @@ import { RESTClient } from '../helpers/rest';
 import config, { mediaSlug, relationSlug } from './config';
 import payload from '../../src';
 import getFileByPath from '../../src/uploads/getFileByPath';
+import type { Media } from './payload-types';
 
 const stat = promisify(fs.stat);
 
@@ -15,17 +16,15 @@ require('isomorphic-fetch');
 let client;
 
 describe('Collections - Uploads', () => {
-  beforeAll(async (done) => {
+  beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     client = new RESTClient(config, { serverURL, defaultSlug: mediaSlug });
     await client.login();
-
-    done();
   });
 
   describe('REST', () => {
     describe('create', () => {
-      it('creates from form data', async () => {
+      it('creates from form data given a png', async () => {
         const formData = new FormData();
         formData.append('file', fs.createReadStream(path.join(__dirname, './image.png')));
 
@@ -55,6 +54,29 @@ describe('Collections - Uploads', () => {
         expect(doc.sizes).toHaveProperty('mobile');
         expect(doc.sizes).toHaveProperty('icon');
       });
+
+      it('creates from form data given an svg', async () => {
+        const formData = new FormData();
+        formData.append('file', fs.createReadStream(path.join(__dirname, './image.svg')));
+
+        const { status, doc } = await client.create({
+          file: true,
+          data: formData,
+          auth: true,
+          headers: {},
+        });
+
+        expect(status).toBe(201);
+
+        // Check for files
+        expect(await fileExists(path.join(__dirname, './media', doc.filename))).toBe(true);
+
+        // Check api response
+        expect(doc.mimeType).toEqual('image/svg+xml');
+        expect(doc.sizes.maintainedAspectRatio.url).toBeUndefined();
+        expect(doc.width).toBeDefined();
+        expect(doc.height).toBeDefined();
+      });
     });
 
     it('creates images that do not require all sizes', async () => {
@@ -76,7 +98,7 @@ describe('Collections - Uploads', () => {
       expect(await fileExists(path.join(__dirname, './media', doc.sizes.icon.filename))).toBe(true);
 
       // Check api response
-      expect(doc.sizes.tablet.filename).toBeUndefined();
+      expect(doc.sizes.tablet.filename).toBeNull();
       expect(doc.sizes.icon.filename).toBeDefined();
     });
 
@@ -157,6 +179,28 @@ describe('Collections - Uploads', () => {
     // Check that previously existing files weren't affected
     expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(true);
     expect(await fileExists(path.join(__dirname, './media', mediaDoc.sizes.icon.filename))).toBe(true);
+  });
+
+  it('should remove extra sizes on update', async () => {
+    const filePath = path.resolve(__dirname, './image.png');
+    const file = await getFileByPath(filePath);
+    const small = await getFileByPath(path.resolve(__dirname, './small.png'));
+
+    const { id } = await payload.create<Media>({
+      collection: mediaSlug,
+      data: {},
+      file,
+    });
+
+    const doc = await payload.update<Media>({
+      collection: mediaSlug,
+      id,
+      data: {},
+      file: small,
+    });
+
+    expect(doc.sizes.icon).toBeDefined();
+    expect(doc.sizes.tablet.width).toBeNull();
   });
 
   it('should allow update removing a relationship', async () => {

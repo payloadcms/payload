@@ -34,7 +34,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
   const { t, i18n } = useTranslation('general');
 
   const {
-    global, data, onSave, permissions, action, apiURL, initialState, isLoading,
+    global, data, onSave, permissions, action, apiURL, initialState, isLoading, updatedAt,
   } = props;
 
   const {
@@ -102,7 +102,6 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                     {(preview && (!global.versions?.drafts || global.versions?.drafts?.autosave)) && (
                       <PreviewButton
                         generatePreviewURL={preview}
-                        data={data}
                       />
                     )}
                     {hasSavePermission && (
@@ -125,7 +124,6 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                     {(preview && (global.versions?.drafts && !global.versions?.drafts?.autosave)) && (
                       <PreviewButton
                         generatePreviewURL={preview}
-                        data={data}
                       />
                     )}
                     {global.versions?.drafts && (
@@ -170,10 +168,10 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                         </a>
                       </li>
                     )}
-                    {data.updatedAt && (
+                    {updatedAt && (
                       <li>
                         <div className={`${baseClass}__label`}>{t('lastModified')}</div>
-                        <div>{format(new Date(data.updatedAt as string), dateFormat)}</div>
+                        <div>{format(new Date(updatedAt as string), dateFormat)}</div>
                       </li>
                     )}
                   </ul>

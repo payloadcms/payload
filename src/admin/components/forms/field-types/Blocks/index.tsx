@@ -23,7 +23,6 @@ import { useOperation } from '../../../utilities/OperationProvider';
 import { Collapsible } from '../../../elements/Collapsible';
 import { ArrayAction } from '../../../elements/ArrayAction';
 import RenderFields from '../../RenderFields';
-import { fieldAffectsData } from '../../../../../fields/config/types';
 import SectionTitle from './SectionTitle';
 import Pill from '../../../elements/Pill';
 import { scrollToID } from '../../../../utilities/scrollToID';
@@ -31,6 +30,7 @@ import HiddenInput from '../HiddenInput';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { NullifyField } from '../../NullifyField';
 import { useConfig } from '../../../utilities/Config';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 
 import './index.scss';
 
@@ -361,7 +361,7 @@ const BlocksField: React.FC<Props> = (props) => {
                               permissions={permissions?.fields}
                               fieldSchema={blockToRender.fields.map((field) => ({
                                 ...field,
-                                path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,
+                                path: createNestedFieldPath(`${path}.${i}`, field),
                               }))}
                               indexPath={indexPath}
                             />

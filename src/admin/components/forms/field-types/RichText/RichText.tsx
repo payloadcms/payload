@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import isHotkey from 'is-hotkey';
-import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor } from 'slate';
+import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor, BaseOperation } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { useTranslation } from 'react-i18next';
@@ -17,12 +17,13 @@ import enablePlugins from './enablePlugins';
 import defaultValue from '../../../../../fields/richText/defaultValue';
 import FieldDescription from '../../FieldDescription';
 import withHTML from './plugins/withHTML';
-import { Props } from './types';
+import { ElementNode, TextNode, Props } from './types';
 import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/types';
 import listTypes from './elements/listTypes';
 import mergeCustomFunctions from './mergeCustomFunctions';
 import withEnterBreakOut from './plugins/withEnterBreakOut';
 import { getTranslation } from '../../../../../utilities/getTranslation';
+import { useEditDepth } from '../../../utilities/EditDepth';
 
 import './index.scss';
 
@@ -30,15 +31,12 @@ const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
 
 const baseClass = 'rich-text';
-type CustomText = { text: string;[x: string]: unknown }
-
-type CustomElement = { type?: string; children: CustomText[] }
 
 declare module 'slate' {
   interface CustomTypes {
     Editor: BaseEditor & ReactEditor & HistoryEditor
-    Element: CustomElement
-    Text: CustomText
+    Element: ElementNode
+    Text: TextNode
   }
 }
 
@@ -73,6 +71,9 @@ const RichText: React.FC<Props> = (props) => {
   const [enabledLeaves, setEnabledLeaves] = useState({});
   const editorRef = useRef(null);
   const toolbarRef = useRef(null);
+
+  const drawerDepth = useEditDepth();
+  const drawerIsOpen = drawerDepth > 1;
 
   const renderElement = useCallback(({ attributes, children, element }) => {
     const matchedElement = enabledElements[element?.type];
@@ -168,6 +169,25 @@ const RichText: React.FC<Props> = (props) => {
     return CreatedEditor;
   }, [elements, leaves]);
 
+  // All slate changes fire the onChange event
+  // including selection changes
+  // so we will filter the set_selection operations out
+  // and only fire setValue when onChange is because of value
+  const handleChange = useCallback((val: unknown) => {
+    const ops = editor.operations.filter((o: BaseOperation) => {
+      if (o) {
+        return o.type !== 'set_selection';
+      }
+      return false;
+    });
+
+    if (ops && Array.isArray(ops) && ops.length > 0) {
+      if (!readOnly && val !== defaultValue && val !== value) {
+        setValue(val);
+      }
+    }
+  }, [editor.operations, readOnly, setValue, value]);
+
   useEffect(() => {
     if (!loaded) {
       const mergedElements = mergeCustomFunctions(elements, elementTypes);
@@ -206,12 +226,12 @@ const RichText: React.FC<Props> = (props) => {
   }, [loaded, readOnly]);
 
   useEffect(() => {
-    // If there is a change to the initial value, we need to reset Slate
-    // to the new initial value, and clear selection
+    // If there is a change to the initial value, we need to reset Slate history
+    // and clear selection because the old selection may no longer be valid
+    // as returned JSON may be modified in hooks and have a different shape
     if (Array.isArray(initialValue) && initialValue.length > 0) {
       if (editor.selection) ReactEditor.deselect(editor);
       editor.history = { redos: [], undos: [] };
-      editor.children = initialValue;
     }
   }, [initialValue, editor]);
 
@@ -253,15 +273,14 @@ const RichText: React.FC<Props> = (props) => {
         <Slate
           editor={editor}
           value={valueToRender as any[]}
-          onChange={(val) => {
-            if (!readOnly && val !== defaultValue && val !== value) {
-              setValue(val);
-            }
-          }}
+          onChange={handleChange}
         >
           <div className={`${baseClass}__wrapper`}>
             <div
-              className={`${baseClass}__toolbar`}
+              className={[
+                `${baseClass}__toolbar`,
+                drawerIsOpen && `${baseClass}__drawerIsOpen`,
+              ].filter(Boolean).join(' ')}
               ref={toolbarRef}
             >
               <div className={`${baseClass}__toolbar-wrap`}>
@@ -349,13 +368,15 @@ const RichText: React.FC<Props> = (props) => {
 
                     if (SlateElement.isElement(selectedElement) && selectedElement.type === 'li') {
                       const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
-                      if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === 1) {
+                      if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === 0) {
+                        event.preventDefault();
                         Transforms.unwrapNodes(editor, {
                           match: (n) => SlateElement.isElement(n) && listTypes.includes(n.type),
                           split: true,
+                          mode: 'lowest',
                         });
 
-                        Transforms.setNodes(editor, {});
+                        Transforms.setNodes(editor, { type: undefined });
                       }
                     } else if (editor.isVoid(selectedElement)) {
                       Transforms.removeNodes(editor);

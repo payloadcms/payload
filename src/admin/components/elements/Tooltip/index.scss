@@ -38,4 +38,8 @@ $caretSize: 6;
     transition: opacity .2s ease-in-out;
     cursor: default;
   }
+
+  @include mid-break {
+    display: none;
+  }
 }

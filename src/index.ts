@@ -248,7 +248,7 @@ export class Payload {
     return restoreVersion(this, options);
   }
 
-  login = async <T extends TypeWithID = any>(options: LoginOptions): Promise<LoginResult & { user: T}> => {
+  login = async <T extends TypeWithID = any>(options: LoginOptions): Promise<LoginResult & { user: T }> => {
     const { login } = localOperations.auth;
     return login(this, options);
   }
