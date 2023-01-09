@@ -65,6 +65,27 @@ export default buildConfig({
       ],
     },
     {
+      slug: 'arrays',
+      fields: [
+        {
+          type: 'text',
+          name: 'requiredText',
+          localized: true,
+        },
+        {
+          type: 'array',
+          name: 'arrayFields',
+          localized: true,
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
       slug: withRequiredLocalizedFields,
       fields: [
         {
