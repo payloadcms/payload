@@ -100,7 +100,7 @@ export const promise = async ({
               }
             });
           }
-          if (field.type === 'relationship' && field.hasMany !== true && valueIsValueWithRelation(value)) {
+          if (field.type === 'relationship' && field.hasMany !== true && value && valueIsValueWithRelation(value)) {
             const relatedCollection = req.payload.config.collections.find((collection) => collection.slug === value.relationTo);
             const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
             if (relationshipIDField?.type === 'number') {
