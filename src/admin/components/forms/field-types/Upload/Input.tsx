@@ -14,10 +14,10 @@ import { useListDrawer } from '../../../elements/ListDrawer';
 import Button from '../../../elements/Button';
 import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
 import { ListDrawerProps } from '../../../elements/ListDrawer/types';
-
-import './index.scss';
 import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
 import { FilterOptionsResult } from '../Relationship/types';
+
+import './index.scss';
 
 const baseClass = 'upload';
 

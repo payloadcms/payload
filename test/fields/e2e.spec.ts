@@ -541,7 +541,7 @@ describe('fields', () => {
 
     test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {
       await page.locator('.field-type.upload .upload__toggler.list-drawer__toggler').click();
-
+      await wait(200);
       const jpgImages = await page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]');
       expect(await jpgImages.count()).toEqual(0);
     });

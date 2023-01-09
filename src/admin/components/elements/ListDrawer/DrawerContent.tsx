@@ -167,14 +167,13 @@ const DrawerContent: React.FC<ListDrawerProps & {
 
     if (page) params.page = page;
 
-    if (where) {
-      params.where = {
-        ...where || {},
-        ...filterOptions?.[selectedCollectionConfig.slug] ? {
-          ...filterOptions[selectedCollectionConfig.slug],
-        } : {},
-      };
-    }
+    params.where = {
+      ...where ? { ...where } : {},
+      ...filterOptions?.[selectedCollectionConfig.slug] ? {
+        ...filterOptions[selectedCollectionConfig.slug],
+      } : {},
+    };
+
     if (sort) params.sort = sort;
     if (limit) params.limit = limit;
     if (cacheBust) params.cacheBust = cacheBust;
