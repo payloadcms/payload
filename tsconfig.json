@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2019",
+    "sourceMap": true,
     "module": "commonjs",
     "allowJs": true, /* Allow javascript files to be compiled. */
     "checkJs": false, /* Report errors in .js files. */

@@ -1,5 +1,6 @@
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
+import { GlobalArray } from './Array';
 import { LocalizedPost, RelationshipLocalized } from './payload-types';
 import {
   defaultLocale,
@@ -175,6 +176,24 @@ export default buildConfig({
       ],
     },
   ],
+  globals: [
+    {
+      slug: 'global-array',
+      fields: [
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ],
+    },
+  ],
   onInit: async (payload) => {
     const collection = slug;
 
@@ -264,6 +283,31 @@ export default buildConfig({
           { relationTo: slug, value: localizedRelation.id },
           { relationTo: slug, value: localizedRelation2.id },
         ],
+      },
+    });
+
+    const globalArray = await payload.updateGlobal({
+      slug: 'global-array',
+      data: {
+        array: [
+          {
+            text: 'test en 1',
+          },
+          {
+            text: 'test en 2',
+          },
+        ],
+      },
+    });
+
+    await payload.updateGlobal({
+      slug: 'global-array',
+      locale: 'es',
+      data: {
+        array: globalArray.array.map((row, i) => ({
+          ...row,
+          text: `test es ${i + 1}`,
+        })),
       },
     });
   },
