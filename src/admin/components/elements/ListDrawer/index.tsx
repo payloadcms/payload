@@ -54,7 +54,12 @@ export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
   );
 };
 
-export const useListDrawer: UseListDrawer = ({ collectionSlugs, uploads, selectedCollection }) => {
+export const useListDrawer: UseListDrawer = ({
+  collectionSlugs,
+  uploads,
+  selectedCollection,
+  filterOptions,
+}) => {
   const drawerDepth = useEditDepth();
   const uuid = useId();
   const { modalState, toggleModal, closeModal, openModal } = useModal();
@@ -90,9 +95,10 @@ export const useListDrawer: UseListDrawer = ({ collectionSlugs, uploads, selecte
         closeDrawer={closeDrawer}
         key={drawerSlug}
         selectedCollection={selectedCollection}
+        filterOptions={filterOptions}
       />
     ));
-  }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection]);
+  }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection, filterOptions]);
 
   const MemoizedDrawerToggler = useMemo(() => {
     return ((props) => (

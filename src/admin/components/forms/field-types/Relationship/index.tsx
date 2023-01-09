@@ -22,7 +22,7 @@ import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
 import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
 import { AddNewRelation } from './AddNew';
 import { findOptionsByValue } from './findOptionsByValue';
-import { GetFilterOptions } from './GetFilterOptions';
+import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
 import { SingleValue } from './select-components/SingleValue';
 import { MultiValueLabel } from './select-components/MultiValueLabel';
 import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';

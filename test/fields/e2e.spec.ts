@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import path from 'path';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
@@ -10,7 +11,6 @@ import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
 import { jsonDoc } from './collections/JSON';
-import path from 'path';
 
 const { beforeAll, describe } = test;
 
@@ -513,7 +513,7 @@ describe('fields', () => {
       await expect(page.locator('.Toastify')).toContainText('successfully');
     });
 
-      // test that the image renders
+    // test that the image renders
     test('should render uploaded image', async () => {
       await expect(page.locator('.file-field .file-details img')).toHaveAttribute('src', '/uploads/payload-1.jpg');
     });
@@ -537,6 +537,13 @@ describe('fields', () => {
 
     test('should clear selected upload', async () => {
       await page.locator('.field-type.upload .file-details__remove').click();
+    });
+
+    test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {
+      await page.locator('.field-type.upload .upload__toggler.list-drawer__toggler').click();
+
+      const jpgImages = await page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]');
+      expect(await jpgImages.count()).toEqual(0);
     });
   });
 });
