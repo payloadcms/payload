@@ -169,6 +169,7 @@
     "email": "E-mail",
     "emailAddress": "E-mailová adresa",
     "enterAValue": "Zadejte hodnotu",
+    "fallbackToDefaultLocale": "Zpětné přepnutí do výchozího locale",
     "filter": "Filtr",
     "filterWhere": "Filtrovat {{label}} kde",
     "filters": "Filtry",

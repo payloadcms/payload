@@ -171,6 +171,7 @@
     "email": "E-post",
     "emailAddress": "E-postadresse",
     "enterAValue": "Skriv inn en verdi",
+    "fallbackToDefaultLocale": "Tilbakestilling til standard lokalitet",
     "filter": "Filtrer",
     "filterWhere": "Filtrer {{label}} der",
     "filters": "Filter",

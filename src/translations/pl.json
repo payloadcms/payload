@@ -161,6 +161,7 @@
     "email": "Email",
     "emailAddress": "Adres email",
     "enterAValue": "Wpisz wartość",
+    "fallbackToDefaultLocale": "Powrót do domyślnego locale",
     "filter": "Filtr",
     "filterWhere": "Filtruj gdzie",
     "filters": "Filtry",

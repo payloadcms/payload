@@ -161,6 +161,7 @@
     "email": "メールアドレス",
     "emailAddress": "メールアドレス",
     "enterAValue": "値を入力",
+    "fallbackToDefaultLocale": "デフォルトロケールへのフォールバック",
     "filter": "絞り込み",
     "filterWhere": "{{label}} の絞り込み",
     "filters": "絞り込み",

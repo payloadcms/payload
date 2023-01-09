@@ -161,6 +161,7 @@
     "email": "Correo electrónico",
     "emailAddress": "Dirección de Correo Electrónico",
     "enterAValue": "Introduce un valor",
+    "fallbackToDefaultLocale": "Volver a la configuración regional por defecto",
     "filter": "Filtro",
     "filterWhere": "Filtrar {{label}} donde",
     "filters": "Filtros",

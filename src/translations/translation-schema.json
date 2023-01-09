@@ -398,7 +398,7 @@
         "addLabel": {
           "type": "string"
         },
-        "addLink":{
+        "addLink": {
           "type": "string"
         },
         "addNew": {
@@ -645,6 +645,9 @@
           "type": "string"
         },
         "enterAValue": {
+          "type": "string"
+        },
+        "fallbackToDefaultLocale": {
           "type": "string"
         },
         "filter": {

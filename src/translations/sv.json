@@ -162,6 +162,7 @@
     "email": "E-post",
     "emailAddress": "E-postadress",
     "enterAValue": "Ange ett värde",
+    "fallbackToDefaultLocale": "Återgång till standardlokalspråk",
     "filter": "Filter",
     "filterWhere": "Filtrera {{label}} där",
     "filters": "Filter",

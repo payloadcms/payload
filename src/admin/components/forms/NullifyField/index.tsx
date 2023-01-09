@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckboxInput } from '../field-types/Checkbox/Input';
 import { Banner } from '../../elements/Banner';
 import { useLocale } from '../../utilities/Locale';
@@ -15,6 +16,7 @@ export const NullifyField: React.FC<NullifyFieldProps> = ({ path, fieldValue }) 
   const { localization } = useConfig();
   const [checked, setChecked] = React.useState<boolean>(typeof fieldValue !== 'number');
   const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
+  const { t } = useTranslation('general');
 
   const onChange = () => {
     const useFallback = !checked;
@@ -49,7 +51,7 @@ export const NullifyField: React.FC<NullifyFieldProps> = ({ path, fieldValue }) 
       <CheckboxInput
         id={`field-${path.replace(/\./gi, '__')}`}
         onToggle={onChange}
-        label="Fallback to default locale"
+        label={t('fallbackToDefaultLocale')}
         checked={checked}
       />
     </Banner>

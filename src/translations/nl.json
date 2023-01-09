@@ -162,6 +162,7 @@
     "email": "E-mail",
     "emailAddress": "E-maildres",
     "enterAValue": "Waarde invoeren",
+    "fallbackToDefaultLocale": "Terugval naar standaardtaal",
     "filter": "Filter",
     "filterWhere": "Filter {{label}} waar",
     "filters": "Filters",
