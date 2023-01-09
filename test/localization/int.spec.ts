@@ -7,6 +7,7 @@ import type {
   WithLocalizedRelationship,
   LocalizedRequired,
   RelationshipLocalized,
+  GlobalArray,
 } from './payload-types';
 import type { LocalizedPostAllLocale } from './config';
 import config, { relationshipLocalizedSlug, slug, withLocalizedRelSlug, withRequiredLocalizedFields } from './config';
@@ -474,6 +475,27 @@ describe('Localization', () => {
 
         expect(result4.docs[0].id).toEqual(withRelationship.id);
       });
+    });
+  });
+
+  describe('Localized - arrays with nested localized fields', () => {
+    it('should allow moving rows and retain existing row locale data', async () => {
+      const globalArray = await payload.findGlobal<GlobalArray>({
+        slug: 'global-array',
+      });
+
+      const reversedArrayRows = [...globalArray.array].reverse();
+
+      const updatedGlobal = await payload.updateGlobal({
+        slug: 'global-array',
+        locale: 'all',
+        data: {
+          array: reversedArrayRows,
+        },
+      });
+
+      expect(updatedGlobal.array[0].text.en).toStrictEqual('test en 2');
+      expect(updatedGlobal.array[0].text.es).toStrictEqual('test es 2');
     });
   });
 

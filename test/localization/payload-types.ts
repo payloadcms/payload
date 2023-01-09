@@ -8,6 +8,17 @@
 export interface Config {}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-array".
+ */
+export interface GlobalArray {
+  id: string;
+  array: {
+    text?: string;
+    id?: string;
+  }[];
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
