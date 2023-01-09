@@ -39,7 +39,7 @@
         "--nolazy"
       ],
       "args": [
-        "localization"
+        "fields"
       ]
     },
   ]
