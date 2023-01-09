@@ -25,37 +25,11 @@ import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
 import { RowLabel } from '../../RowLabel';
 import { getTranslation } from '../../../../../utilities/getTranslation';
+import { useConfig } from '../../../utilities/Config';
+import { NullifyField } from '../../NullifyField';
 
 import './index.scss';
-import Checkbox from '../Checkbox';
 
-type Props2 = {
-  path: string
-  fieldValue: unknown
-}
-const NullifyField:React.FC<Props2> = ({ path, fieldValue }) => {
-  const { dispatchFields, setModified } = useForm();
-
-  // TODO: only allow this for non-default locales
-
-  // TODO(pending design): abstract checkbox into input component for reuse
-
-  return (
-    <Checkbox
-      onChange={(checked) => {
-        dispatchFields({
-          type: 'UPDATE',
-          path,
-          value: checked ? null : (fieldValue || []),
-        });
-        setModified(true);
-      }}
-      defaultValue={fieldValue === null}
-      label="Remove field in translation"
-      name={`${path}-nullify-field`}
-    />
-  );
-};
 
 const baseClass = 'array-field';
 
@@ -98,6 +72,15 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const locale = useLocale();
   const operation = useOperation();
   const { t, i18n } = useTranslation('fields');
+  const { localization } = useConfig();
+
+  const checkSkipValidation = useCallback((value) => {
+    const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
+    const isEditingDefaultLocale = locale === defaultLocale;
+
+    if (value === null && !isEditingDefaultLocale) return true;
+    return false;
+  }, [locale, localization]);
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
   const getLabels = (p: Props) => {
@@ -111,14 +94,15 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const { dispatchFields, setModified } = formContext;
 
   const memoizedValidate = useCallback((value, options) => {
+    if (checkSkipValidation(value)) return true;
     return validate(value, { ...options, minRows, maxRows, required });
-  }, [maxRows, minRows, required, validate]);
+  }, [maxRows, minRows, required, validate, checkSkipValidation]);
 
   const {
     showError,
     errorMessage,
     value,
-  } = useField({
+  } = useField<number>({
     path,
     validate: memoizedValidate,
     condition,
@@ -287,113 +271,113 @@ const ArrayFieldType: React.FC<Props> = (props) => {
           fieldValue={value}
         />
 
-        {value !== null && (
-          <React.Fragment>
-            <Droppable droppableId="array-drop">
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                >
-                  {rows.length > 0 && rows.map((row, i) => {
-                    const rowNumber = i + 1;
-                    const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowNumber).padStart(2, '0')}`;
+        <Droppable droppableId="array-drop">
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              {rows.length > 0 && rows.map((row, i) => {
+                const rowNumber = i + 1;
+                const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowNumber).padStart(2, '0')}`;
 
-                    return (
-                      <Draggable
-                        key={row.id}
-                        draggableId={row.id}
-                        index={i}
-                        isDragDisabled={readOnly}
+                return (
+                  <Draggable
+                    key={row.id}
+                    draggableId={row.id}
+                    index={i}
+                    isDragDisabled={readOnly}
+                  >
+                    {(providedDrag) => (
+                      <div
+                        id={`${path}-row-${i}`}
+                        ref={providedDrag.innerRef}
+                        {...providedDrag.draggableProps}
                       >
-                        {(providedDrag) => (
-                          <div
-                            id={`${path}-row-${i}`}
-                            ref={providedDrag.innerRef}
-                            {...providedDrag.draggableProps}
-                          >
-                            <Collapsible
-                              collapsed={row.collapsed}
-                              onToggle={(collapsed) => setCollapse(row.id, collapsed)}
-                              className={`${baseClass}__row`}
-                              key={row.id}
-                              dragHandleProps={providedDrag.dragHandleProps}
-                              header={(
-                                <RowLabel
-                                  path={`${path}.${i}`}
-                                  label={CustomRowLabel || fallbackLabel}
-                                  rowNumber={rowNumber}
-                                />
-                              )}
-                              actions={!readOnly ? (
-                                <ArrayAction
-                                  rowCount={rows.length}
-                                  duplicateRow={duplicateRow}
-                                  addRow={addRow}
-                                  moveRow={moveRow}
-                                  removeRow={removeRow}
-                                  index={i}
-                                />
-                              ) : undefined}
-                            >
-                              <HiddenInput
-                                name={`${path}.${i}.id`}
-                                value={row.id}
-                              />
-                              <RenderFields
-                                className={`${baseClass}__fields`}
-                                forceRender
-                                readOnly={readOnly}
-                                fieldTypes={fieldTypes}
-                                permissions={permissions?.fields}
-                                indexPath={indexPath}
-                                fieldSchema={fields.map((field) => ({
-                                  ...field,
-                                  path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,
-                                }))}
-                              />
+                        <Collapsible
+                          collapsed={row.collapsed}
+                          onToggle={(collapsed) => setCollapse(row.id, collapsed)}
+                          className={`${baseClass}__row`}
+                          key={row.id}
+                          dragHandleProps={providedDrag.dragHandleProps}
+                          header={(
+                            <RowLabel
+                              path={`${path}.${i}`}
+                              label={CustomRowLabel || fallbackLabel}
+                              rowNumber={rowNumber}
+                            />
+                          )}
+                          actions={!readOnly ? (
+                            <ArrayAction
+                              rowCount={rows.length}
+                              duplicateRow={duplicateRow}
+                              addRow={addRow}
+                              moveRow={moveRow}
+                              removeRow={removeRow}
+                              index={i}
+                            />
+                          ) : undefined}
+                        >
+                          <HiddenInput
+                            name={`${path}.${i}.id`}
+                            value={row.id}
+                          />
+                          <RenderFields
+                            className={`${baseClass}__fields`}
+                            forceRender
+                            readOnly={readOnly}
+                            fieldTypes={fieldTypes}
+                            permissions={permissions?.fields}
+                            indexPath={indexPath}
+                            fieldSchema={fields.map((field) => ({
+                              ...field,
+                              path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,
+                            }))}
+                          />
 
-                            </Collapsible>
-                          </div>
-                        )}
-                      </Draggable>
-                    );
-                  })}
+                        </Collapsible>
+                      </div>
+                    )}
+                  </Draggable>
+                );
+              })}
+              {checkSkipValidation(value) && (
+                <React.Fragment>
                   {(rows.length < minRows || (required && rows.length === 0)) && (
-                  <Banner type="error">
-                    {t('validation:requiresAtLeast', {
-                      count: minRows,
-                      label: getTranslation(minRows
-                        ? labels.plural
-                        : labels.singular,
-                      i18n) || t(minRows > 1 ? 'general:row' : 'general:rows'),
-                    })}
-                  </Banner>
+                    <Banner type="error">
+                      {t('validation:requiresAtLeast', {
+                        count: minRows,
+                        label: getTranslation(minRows
+                          ? labels.plural
+                          : labels.singular,
+                        i18n) || t(minRows > 1 ? 'general:row' : 'general:rows'),
+                      })}
+                    </Banner>
                   )}
                   {(rows.length === 0 && readOnly) && (
-                  <Banner>
-                    {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
-                  </Banner>
+                    <Banner>
+                      {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
+                    </Banner>
                   )}
-                  {provided.placeholder}
-                </div>
+                </React.Fragment>
               )}
-            </Droppable>
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
 
-            {(!readOnly && !hasMaxRows) && (
-              <div className={`${baseClass}__add-button-wrap`}>
-                <Button
-                  onClick={() => addRow(value as number)}
-                  buttonStyle="icon-label"
-                  icon="plus"
-                  iconStyle="with-border"
-                  iconPosition="left"
-                >
-                  {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
-                </Button>
-              </div>
-            )}
-          </React.Fragment>
+        {(!readOnly && !hasMaxRows) && (
+          <div className={`${baseClass}__add-button-wrap`}>
+            <Button
+              onClick={() => addRow(value as number)}
+              buttonStyle="icon-label"
+              icon="plus"
+              iconStyle="with-border"
+              iconPosition="left"
+            >
+              {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
+            </Button>
+          </div>
         )}
 
       </div>

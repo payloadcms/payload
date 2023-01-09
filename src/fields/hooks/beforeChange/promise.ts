@@ -76,14 +76,10 @@ export const promise = async ({
       }
     }
 
-    if (siblingData[field.name] === null) {
-      if (field.localized && ['array', 'blocks'].includes(field.type)) {
-        if (operationLocale !== defaultLocale) {
-          // localized fields set to null and not the default locale, should be set to undefined
-          // this way fallback locale can be used
-          siblingData[field.name] = undefined;
-          skipValidationFromHere = true;
-        }
+    // skip validation if the field is localized and the incoming data is null
+    if (field.localized && operationLocale !== defaultLocale) {
+      if (['array', 'blocks'].includes(field.type) && siblingData[field.name] === null) {
+        skipValidationFromHere = true;
       }
     }
 

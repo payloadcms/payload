@@ -166,9 +166,8 @@ export const addFieldStatePromise = async ({
           }
         });
         await Promise.all(promises);
-
         // Add values to field state
-        if (typeof valueWithDefault === null) {
+        if (valueWithDefault === null) {
           fieldState.value = null;
           fieldState.initialValue = null;
         } else {

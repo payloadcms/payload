@@ -135,10 +135,6 @@ export const promise = async ({
           siblingData[field.name] = [];
         }
 
-        if (siblingData[field.name] === null) {
-          siblingData[field.name] = null;
-        }
-
         break;
       }
 

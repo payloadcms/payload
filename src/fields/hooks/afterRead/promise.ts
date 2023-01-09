@@ -55,6 +55,7 @@ export const promise = async ({
   if (hasLocalizedValue) {
     let localizedValue = siblingDoc[field.name][req.locale];
     if (typeof localizedValue === 'undefined' && req.fallbackLocale) localizedValue = siblingDoc[field.name][req.fallbackLocale];
+    if (localizedValue === null && (field.type === 'array' || field.type === 'blocks')) localizedValue = siblingDoc[field.name][req.fallbackLocale];
     if (typeof localizedValue === 'undefined' && (field.type === 'group' || field.type === 'tab')) localizedValue = {};
     if (typeof localizedValue === 'undefined') localizedValue = null;
     siblingDoc[field.name] = localizedValue;
