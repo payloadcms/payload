@@ -68,15 +68,6 @@ const populate = async ({
       if (fieldsOrTrue !== true) {
         // if fieldsOrTrue is true then we want to return the entire related document
         relationshipValue = deepPick(relationshipValue, ['id', ...fieldsOrTrue]);
-        const newRelationShipValue = {
-          id: relationshipValue.id,
-        };
-        fieldsOrTrue.forEach((fieldName) => {
-          if (relationshipValue[fieldName] !== undefined) {
-            newRelationShipValue[fieldName] = relationshipValue[fieldName];
-          }
-        });
-        relationshipValue = newRelationShipValue;
       }
     }
 
