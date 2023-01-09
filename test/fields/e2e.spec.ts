@@ -10,6 +10,7 @@ import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
 import { jsonDoc } from './collections/JSON';
+import path from 'path';
 
 const { beforeAll, describe } = test;
 
@@ -492,6 +493,50 @@ describe('fields', () => {
       await page.locator('#action-save').click();
 
       await expect(page.locator('.Toastify')).toContainText('successfully');
+    });
+  });
+
+  describe('upload', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'uploads');
+    });
+
+    test('should upload files', async () => {
+      await page.goto(url.create);
+
+      // create a jpg upload
+      await page.locator('.file-field__upload input[type="file"]').setInputFiles(path.resolve(__dirname, './collections/Upload/payload.jpg'));
+      await expect(page.locator('.file-field .file-field__filename')).toContainText('payload.jpg');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+    });
+
+      // test that the image renders
+    test('should render uploaded image', async () => {
+      await expect(page.locator('.file-field .file-details img')).toHaveAttribute('src', '/uploads/payload-1.jpg');
+    });
+
+    test('should upload using the document drawer', async () => {
+      // Open the media drawer and create a png upload
+      await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click();
+      await page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]').setInputFiles(path.resolve(__dirname, './uploads/payload.png'));
+      await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      // Assert that the media field has the png upload
+      await expect(page.locator('.field-type.upload .file-details .file-meta__url a')).toHaveAttribute('href', '/uploads/payload-1.png');
+      await expect(page.locator('.field-type.upload .file-details .file-meta__url a')).toContainText('payload-1.png');
+      await expect(page.locator('.field-type.upload .file-details img')).toHaveAttribute('src', '/uploads/payload-1.png');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+    });
+
+    test('should clear selected upload', async () => {
+      await page.locator('.field-type.upload .file-details__remove').click();
     });
   });
 });
