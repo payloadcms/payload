@@ -297,7 +297,7 @@ export type ValueWithRelation = {
 }
 
 export function valueIsValueWithRelation(value: unknown): value is ValueWithRelation {
-  return typeof value === 'object' && 'relationTo' in value && 'value' in value;
+  return value !== null && typeof value === 'object' && 'relationTo' in value && 'value' in value;
 }
 
 export type RelationshipValue = (string | number)
