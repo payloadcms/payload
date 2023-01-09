@@ -9,7 +9,7 @@
   transform: none;
   background-color: var(--theme-error-500);
 
-  span {
+  &:after {
     border-top-color: var(--theme-error-500);
   }
 }
