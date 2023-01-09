@@ -21,7 +21,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     type: 'text',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
@@ -31,7 +31,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     type: 'text',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
@@ -41,7 +41,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     type: 'number',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
@@ -51,7 +51,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     type: 'number',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
@@ -61,7 +61,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     type: 'number',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
@@ -73,7 +73,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     unique: true,
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
@@ -110,14 +110,14 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
         label: labels['upload:Sizes'],
         type: 'group',
         admin: {
-          disabled: true,
+          hidden: true,
         },
         fields: uploadOptions.imageSizes.map((size) => ({
           label: size.name,
           name: size.name,
           type: 'group',
           admin: {
-            disabled: true,
+            hidden: true,
           },
           fields: [
             {
