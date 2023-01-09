@@ -58,13 +58,16 @@ const shouldIncludeCollection = ({
   collectionSlugs,
 }) => (enableRichTextRelationship && ((uploads && Boolean(upload)) || collectionSlugs?.includes(slug)));
 
-export const ListDrawerContent: React.FC<ListDrawerProps> = ({
+const DrawerContent: React.FC<ListDrawerProps & {
+  enabledCollectionConfigs: SanitizedCollectionConfig[]
+}> = ({
   drawerSlug,
   onSelect,
   customHeader,
   collectionSlugs,
   uploads,
   selectedCollection,
+  enabledCollectionConfigs
 }) => {
   const { t, i18n } = useTranslation(['upload', 'general']);
   const { permissions } = useAuth();
@@ -75,7 +78,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [page, setPage] = useState(1);
   const [where, setWhere] = useState(null);
   const { serverURL, routes: { api }, collections } = useConfig();
-  const [enabledCollectionConfigs] = useState(() => collections.filter((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs })));
+
   const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<SanitizedCollectionConfig>(() => {
     let initialSelection: SanitizedCollectionConfig;
     if (selectedCollection) {
@@ -92,7 +95,9 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   });
 
   const [selectedOption, setSelectedOption] = useState<{ label: string, value: string }>(() => (selectedCollectionConfig ? { label: getTranslation(selectedCollectionConfig.labels.singular, i18n), value: selectedCollectionConfig.slug } : undefined));
+
   const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig, t));
+
   const [tableColumns, setTableColumns] = useState<Column[]>(() => {
     const initialColumns = getInitialColumnState(fields, selectedCollectionConfig.admin.useAsTitle, selectedCollectionConfig.admin.defaultColumns);
     return buildColumns({
@@ -308,3 +313,25 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     </Fragment>
   );
 };
+
+export const ListDrawerContent: React.FC<ListDrawerProps> = (props) => {
+  const {
+    collectionSlugs,
+    uploads,
+  } = props;
+
+  const { collections } = useConfig();
+
+  const [enabledCollectionConfigs] = useState(() => collections.filter((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs })));
+
+  if (enabledCollectionConfigs.length === 0){
+    return null;
+  }
+
+  return (
+    <DrawerContent
+      {...props}
+      enabledCollectionConfigs={enabledCollectionConfigs}
+    />
+  )
+}

@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import express, { NextFunction, Response } from 'express';
 import crypto from 'crypto';
+import path from 'path';
 import mongoose from 'mongoose';
 import { InitOptions } from './config/types';
 
@@ -30,8 +31,17 @@ import Logger from './utilities/logger';
 import { getDataLoader } from './collections/dataloader';
 import mountEndpoints from './express/mountEndpoints';
 import PreferencesModel from './preferences/model';
+import findConfig from './config/find';
 
-export const init = (payload: Payload, options: InitOptions): void => {
+export const initPayload = async (payload: Payload, options: InitOptions): Promise<void> => {
+  payload.logger = Logger('payload', options.loggerOptions);
+  payload.mongoURL = options.mongoURL;
+
+  if (payload.mongoURL) {
+    mongoose.set('strictQuery', false);
+    payload.mongoMemoryServer = await connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
+  }
+
   payload.logger.info('Starting Payload...');
   if (!options.secret) {
     throw new Error(
@@ -52,7 +62,21 @@ export const init = (payload: Payload, options: InitOptions): void => {
 
   payload.local = options.local;
 
-  payload.config = loadConfig(payload.logger);
+  if (options.config) {
+    payload.config = options.config;
+    const configPath = findConfig();
+
+    payload.config = {
+      ...options.config,
+      paths: {
+        configDir: path.dirname(configPath),
+        config: configPath,
+        rawConfig: configPath,
+      },
+    };
+  } else {
+    payload.config = loadConfig(payload.logger);
+  }
 
   // If not initializing locally, scaffold router
   if (!payload.local) {
@@ -129,34 +153,7 @@ export const init = (payload: Payload, options: InitOptions): void => {
   }
 
   serverInitTelemetry(payload);
-};
-
-export const initAsync = async (payload: Payload, options: InitOptions): Promise<void> => {
-  payload.logger = Logger('payload', options.loggerOptions);
-  payload.mongoURL = options.mongoURL;
-
-  if (payload.mongoURL) {
-    mongoose.set('strictQuery', false);
-    payload.mongoMemoryServer = await connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
-  }
-
-  init(payload, options);
 
   if (typeof options.onInit === 'function') await options.onInit(payload);
   if (typeof payload.config.onInit === 'function') await payload.config.onInit(payload);
-};
-
-export const initSync = (payload: Payload, options: InitOptions): void => {
-  payload.logger = Logger('payload', options.loggerOptions);
-  payload.mongoURL = options.mongoURL;
-
-  if (payload.mongoURL) {
-    mongoose.set('strictQuery', false);
-    connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
-  }
-
-  init(payload, options);
-
-  if (typeof options.onInit === 'function') options.onInit(payload);
-  if (typeof payload.config.onInit === 'function') payload.config.onInit(payload);
 };

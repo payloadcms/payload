@@ -282,6 +282,17 @@ export interface GroupField {
   potentiallyEmptyGroup: {
     text?: string;
   };
+  groupInRow: {
+    field?: string;
+    secondField?: string;
+    thirdField?: string;
+  };
+  secondGroupInRow: {
+    field?: string;
+    nestedGroup: {
+      nestedField?: string;
+    };
+  };
   createdAt: string;
   updatedAt: string;
 }

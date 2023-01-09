@@ -29,6 +29,12 @@
     border-bottom: 0;
   }
 
+  &--within-row {
+    margin: 0;
+    border-top: 0;
+    border-bottom: 0;
+  }
+
   &--within-tab:first-child {
     margin-top: 0;
     border-top: 0;
@@ -80,4 +86,8 @@
 
 .group-field--within-collapsible+.group-field--within-collapsible {
   margin-top: base(-1);
+}
+
+.group-field--within-row+.group-field--within-row {
+  margin-top: 0;
 }

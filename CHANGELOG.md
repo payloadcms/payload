@@ -1,5 +1,19 @@
 
 
+## [1.5.4](https://github.com/payloadcms/payload/compare/v1.5.3...v1.5.4) (2023-01-06)
+
+
+### Features
+
+* allows init to accept a pre-built config ([84e00bf](https://github.com/payloadcms/payload/commit/84e00bf7b3dfc1c23367765eec60bec45b81617b))
+
+## [1.5.3](https://github.com/payloadcms/payload/compare/v1.5.2...v1.5.3) (2023-01-05)
+
+
+### Bug Fixes
+
+* theme flicker on code editor ([6567454](https://github.com/payloadcms/payload/commit/6567454ae4e4808303da9b80d26633bc77e1445d))
+
 ## [1.5.2](https://github.com/payloadcms/payload/compare/v1.5.1...v1.5.2) (2023-01-04)
 
 

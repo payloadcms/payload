@@ -230,8 +230,8 @@ export const promise = async ({
             path: `${path}${field.name}.${i}.`,
             req,
             siblingData: row,
-            siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]?.[i]),
-            siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]?.[i]),
+            siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
+            siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
             skipValidation: skipValidationFromHere,
           }));
         });
@@ -263,8 +263,8 @@ export const promise = async ({
               path: `${path}${field.name}.${i}.`,
               req,
               siblingData: row,
-              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]?.[i]),
-              siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]?.[i]),
+              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
+              siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
               skipValidation: skipValidationFromHere,
             }));
           }
