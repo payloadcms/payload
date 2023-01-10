@@ -172,6 +172,7 @@
     "email": "Email",
     "emailAddress": "Email Address",
     "enterAValue": "Enter a value",
+    "fallbackToDefaultLocale": "Fallback to default locale",
     "filter": "Filter",
     "filterWhere": "Filter {{label}} where",
     "filters": "Filters",

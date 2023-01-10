@@ -22,7 +22,7 @@ export default async function deleteLocal<T extends TypeWithID = any>(payload: P
     collection: collectionSlug,
     depth,
     id,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
+    locale = null,
     fallbackLocale = null,
     user,
     overrideAccess = true,
@@ -30,12 +30,13 @@ export default async function deleteLocal<T extends TypeWithID = any>(payload: P
   } = options;
 
   const collection = payload.collections[collectionSlug];
+  const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   const req = {
     user,
     payloadAPI: 'local',
-    locale,
-    fallbackLocale,
+    locale: locale ?? defaultLocale,
+    fallbackLocale: fallbackLocale ?? defaultLocale,
     payload,
     i18n: i18n(payload.config.i18n),
   } as PayloadRequest;

@@ -28,7 +28,7 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
     page,
     limit,
     where,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
+    locale = null,
     fallbackLocale = null,
     user,
     overrideAccess = true,
@@ -37,13 +37,14 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
   } = options;
 
   const collection = payload.collections[collectionSlug];
+  const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   const i18n = i18nInit(payload.config.i18n);
   const req = {
     user,
     payloadAPI: 'local',
-    locale,
-    fallbackLocale,
+    locale: locale ?? defaultLocale,
+    fallbackLocale: fallbackLocale ?? defaultLocale,
     payload,
     i18n,
   } as PayloadRequest;

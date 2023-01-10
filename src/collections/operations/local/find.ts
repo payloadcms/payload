@@ -35,7 +35,7 @@ export default async function findLocal<T extends TypeWithID = any>(payload: Pay
     page,
     limit,
     where,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
+    locale = null,
     fallbackLocale = null,
     user,
     overrideAccess = true,
@@ -48,10 +48,11 @@ export default async function findLocal<T extends TypeWithID = any>(payload: Pay
   } = options;
 
   const collection = payload.collections[collectionSlug];
+  const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   req.payloadAPI = 'local';
-  req.locale = locale || req?.locale || (payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null);
-  req.fallbackLocale = fallbackLocale || req?.fallbackLocale || null;
+  req.locale = locale ?? req?.locale ?? defaultLocale;
+  req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
   req.i18n = i18n(payload.config.i18n);
   req.payload = payload;
 

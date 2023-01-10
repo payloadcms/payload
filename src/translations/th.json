@@ -172,6 +172,7 @@
     "email": "อีเมล",
     "emailAddress": "อีเมล",
     "enterAValue": "ระบุค่า",
+    "fallbackToDefaultLocale": "สำรองไปยังตำแหน่งที่ตั้งเริ่มต้น",
     "filter": "กรอง",
     "filterWhere": "กรอง {{label}} เฉพาะ",
     "filters": "กรอง",

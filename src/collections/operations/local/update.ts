@@ -28,7 +28,7 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
   const {
     collection: collectionSlug,
     depth,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
+    locale = null,
     fallbackLocale = null,
     data,
     id,
@@ -44,12 +44,13 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
 
   const collection = payload.collections[collectionSlug];
   const i18n = i18nInit(payload.config.i18n);
+  const defaultLocale = payload.config.localization ? payload.config.localization?.defaultLocale : null;
 
   const req = {
     user,
     payloadAPI: 'local',
-    locale,
-    fallbackLocale,
+    locale: locale ?? defaultLocale,
+    fallbackLocale: fallbackLocale ?? defaultLocale,
     payload,
     i18n,
     files: {

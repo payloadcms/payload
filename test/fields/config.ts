@@ -61,6 +61,7 @@ export default buildConfig({
   localization: {
     defaultLocale: 'en',
     locales: ['en', 'es'],
+    fallback: true,
   },
   onInit: async (payload) => {
     await payload.create({

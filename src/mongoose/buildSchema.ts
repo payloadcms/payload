@@ -348,6 +348,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   array: (field: ArrayField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
+      default: undefined,
       type: [buildSchema(
         config,
         field.fields,
@@ -410,7 +411,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     });
   },
   blocks: (field: BlockField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
-    const fieldSchema = [new Schema({}, { _id: false, discriminatorKey: 'blockType' })];
+    const fieldSchema = {
+      default: undefined,
+      type: [new Schema({}, { _id: false, discriminatorKey: 'blockType' })],
+    };
 
     schema.add({
       [field.name]: localizeSchema(field, fieldSchema, config.localization),

@@ -170,6 +170,7 @@
     "email": "E-Mail",
     "emailAddress": "E-Mail-Adresse",
     "enterAValue": "Gib einen Wert ein",
+    "fallbackToDefaultLocale": "Rückgriff auf das Standardgebietsschema",
     "filter": "Filter",
     "filterWhere": "Filter {{label}} wo",
     "filters": "Filter",

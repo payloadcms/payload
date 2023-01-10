@@ -171,6 +171,7 @@
     "email": "Email",
     "emailAddress": "Email",
     "enterAValue": "Введите значение",
+    "fallbackToDefaultLocale": "Возврат к локали по умолчанию",
     "filter": "Фильтр",
     "filterWhere": "Где фильтровать",
     "filters": "Фильтры",

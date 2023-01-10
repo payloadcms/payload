@@ -162,6 +162,7 @@
     "email": "E-mail",
     "emailAddress": "Adresse e-mail",
     "enterAValue": "Entrez une valeur",
+    "fallbackToDefaultLocale": "Retour à la locale par défaut",
     "filter": "Filtrer",
     "filterWhere": "Filtrer {{label}} où",
     "filters": "Filtres",

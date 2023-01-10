@@ -6,7 +6,7 @@ import './index.scss';
 
 const baseClass = 'banner';
 
-const Banner: React.FC<Props> = ({
+export const Banner: React.FC<Props> = ({
   children,
   className,
   to,

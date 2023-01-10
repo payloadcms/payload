@@ -28,6 +28,8 @@ import Pill from '../../../elements/Pill';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
 import { getTranslation } from '../../../../../utilities/getTranslation';
+import { NullifyField } from '../../NullifyField';
+import { useConfig } from '../../../utilities/Config';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 
 import './index.scss';
@@ -74,11 +76,20 @@ const BlocksField: React.FC<Props> = (props) => {
   const operation = useOperation();
   const { dispatchFields, setModified } = formContext;
   const [selectorIndexOpen, setSelectorIndexOpen] = useState<number>();
+  const { localization } = useConfig();
+
+  const checkSkipValidation = useCallback((value) => {
+    const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
+    const isEditingDefaultLocale = locale === defaultLocale;
+
+    if (value === null && !isEditingDefaultLocale) return true;
+    return false;
+  }, [locale, localization]);
 
   const memoizedValidate = useCallback((value, options) => {
+    if (checkSkipValidation(value)) return true;
     return validate(value, { ...options, minRows, maxRows, required });
-  }, [maxRows, minRows, required, validate]);
-
+  }, [maxRows, minRows, required, validate, checkSkipValidation]);
 
   const {
     showError,
@@ -252,6 +263,11 @@ const BlocksField: React.FC<Props> = (props) => {
           />
         </header>
 
+        <NullifyField
+          path={path}
+          fieldValue={value}
+        />
+
         <Droppable
           droppableId="blocks-drop"
           isDropDisabled={readOnly}
@@ -359,18 +375,23 @@ const BlocksField: React.FC<Props> = (props) => {
 
                 return null;
               })}
-              {(rows.length < minRows || (required && rows.length === 0)) && (
-                <Banner type="error">
-                  {t('validation:requiresAtLeast', {
-                    count: minRows,
-                    label: getTranslation(minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural, i18n),
-                  })}
-                </Banner>
-              )}
-              {(rows.length === 0 && readOnly) && (
-                <Banner>
-                  {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
-                </Banner>
+
+              {!checkSkipValidation(value) && (
+                <React.Fragment>
+                  {(rows.length < minRows || (required && rows.length === 0)) && (
+                    <Banner type="error">
+                      {t('validation:requiresAtLeast', {
+                        count: minRows,
+                        label: getTranslation(minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural, i18n),
+                      })}
+                    </Banner>
+                  )}
+                  {(rows.length === 0 && readOnly) && (
+                    <Banner>
+                      {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
+                    </Banner>
+                  )}
+                </React.Fragment>
               )}
               {provided.placeholder}
             </div>
