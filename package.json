@@ -37,7 +37,7 @@
     "build": "yarn copyfiles && yarn build:tsc && yarn build:components",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"yarn build:tsc\"",
     "dev": "nodemon",
-    "dev:generate-types": "node ./test/generateTypes.js",
+    "dev:generate-types": "ts-node ./test/generateTypes.js",
     "pretest": "yarn build",
     "test": "yarn test:int && yarn test:components && yarn test:e2e",
     "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
@@ -191,9 +191,10 @@
     "webpack-hot-middleware": "^2.25.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.23.1",
+    "@playwright/test": "^1.29.2",
     "@release-it/conventional-changelog": "^5.1.1",
     "@swc/jest": "^0.2.24",
+    "@swc/register": "^0.1.10",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^13.0.1",
     "@trbl/eslint-config": "^1.2.4",
