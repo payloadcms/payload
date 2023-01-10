@@ -24,8 +24,8 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
     collection: collectionSlug,
     depth,
     id,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
-    fallbackLocale = null,
+    locale,
+    fallbackLocale,
     overrideAccess = true,
     disableErrors = false,
     showHiddenFields,
@@ -33,10 +33,11 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
   } = options;
 
   const collection = payload.collections[collectionSlug];
+  const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   req.payloadAPI = 'local';
-  req.locale = locale || req?.locale || this?.config?.localization?.defaultLocale;
-  req.fallbackLocale = fallbackLocale || req?.fallbackLocale || null;
+  req.locale = locale ?? req?.locale ?? defaultLocale;
+  req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
   req.i18n = i18n(payload.config.i18n);
   req.payload = payload;
 

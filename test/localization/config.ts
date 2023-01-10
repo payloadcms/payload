@@ -1,6 +1,6 @@
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
-import { GlobalArray } from './Array';
+import { ArrayCollection } from './collections/Array';
 import { LocalizedPost, RelationshipLocalized } from './payload-types';
 import {
   defaultLocale,
@@ -36,6 +36,7 @@ export default buildConfig({
   localization: {
     locales: [defaultLocale, spanishLocale],
     defaultLocale,
+    fallback: true,
   },
   collections: [
     {
@@ -65,27 +66,7 @@ export default buildConfig({
         },
       ],
     },
-    {
-      slug: 'arrays',
-      fields: [
-        {
-          type: 'text',
-          name: 'requiredText',
-          localized: true,
-        },
-        {
-          type: 'array',
-          name: 'arrayFields',
-          localized: true,
-          fields: [
-            {
-              name: 'text',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-    },
+    ArrayCollection,
     {
       slug: withRequiredLocalizedFields,
       fields: [

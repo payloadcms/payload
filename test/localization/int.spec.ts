@@ -22,8 +22,9 @@ import {
   spanishTitle,
 } from './shared';
 import type { Where } from '../../src/types';
+import { arrayCollectionSlug } from './collections/Array';
 
-const collection = config.collections[1]?.slug;
+const collection = slug;
 
 let serverURL;
 
@@ -199,6 +200,7 @@ describe('Localization', () => {
       });
     });
   });
+
   describe('Localized Relationship', () => {
     let localizedRelation: LocalizedPost;
     let localizedRelation2: LocalizedPost;
@@ -648,6 +650,73 @@ describe('Localization', () => {
       expect(updateResult.title).toStrictEqual(spanishTitle);
       expect(result.title[defaultLocale]).toStrictEqual(englishTitle);
       expect(result.title[spanishLocale]).toStrictEqual(spanishTitle);
+    });
+  });
+
+  describe('Localized - Arrays', () => {
+    let docID;
+
+    beforeAll(async () => {
+      const englishDoc = await payload.create({
+        collection: arrayCollectionSlug,
+        data: {
+          items: [
+            {
+              text: englishTitle,
+            },
+          ],
+        },
+      });
+
+      docID = englishDoc.id;
+    });
+
+    it('should use default locale as fallback', async () => {
+      const spanishDoc = await payload.findByID({
+        locale: spanishLocale,
+        collection: arrayCollectionSlug,
+        id: docID,
+      });
+
+      expect(spanishDoc.items[0].text).toStrictEqual(englishTitle);
+    });
+
+    it('should use empty array as value', async () => {
+      const updatedSpanishDoc = await payload.update({
+        collection: arrayCollectionSlug,
+        locale: spanishLocale,
+        id: docID,
+        data: {
+          items: [],
+        },
+      });
+
+      expect(updatedSpanishDoc.items).toStrictEqual([]);
+    });
+
+    it('should use fallback value if setting null', async () => {
+      await payload.update({
+        collection: arrayCollectionSlug,
+        locale: spanishLocale,
+        id: docID,
+        data: {
+          items: [],
+        },
+      });
+
+      const updatedSpanishDoc = await payload.update({
+        collection: arrayCollectionSlug,
+        locale: spanishLocale,
+        id: docID,
+        data: {
+          items: null,
+        },
+      });
+
+      // should return the value of the fallback locale
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      expect(updatedSpanishDoc.items[0].text).toStrictEqual(englishTitle);
     });
   });
 });
