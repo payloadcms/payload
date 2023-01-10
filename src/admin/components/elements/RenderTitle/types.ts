@@ -1,8 +1,9 @@
 export type Props = {
-  useAsTitle?: string,
+  useAsTitle?: string
   data?: {
-    id?: string,
-  },
-  title?: string,
-  fallback?: string,
+    id?: string
+  }
+  title?: string
+  fallback?: string
+  collection?: string
 }

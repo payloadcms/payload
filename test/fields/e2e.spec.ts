@@ -400,25 +400,31 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, 'date-fields');
     });
 
-    test('should clear date', async () => {
-      await page.goto(url.create);
-      const dateField = page.locator('#field-default input');
-      await expect(dateField).toBeVisible();
-      await dateField.fill('2021-08-01');
-      await expect(dateField).toHaveValue('2021-08-01');
-      const clearButton = page.locator('#field-default .date-time-picker__clear-button');
-      await expect(clearButton).toBeVisible();
-      await clearButton.click();
-      await expect(dateField).toHaveValue('');
-    });
-
-    test('should display formatted date in list view if displayFormat option added to date field', async () => {
+    test('should display formatted date in list view table cell', async () => {
       await page.goto(url.list);
       const formattedDateCell = page.locator('.row-1 .cell-timeOnly');
       await expect(formattedDateCell).toContainText(' Aug ');
 
       const notFormattedDateCell = page.locator('.row-1 .cell-default');
       await expect(notFormattedDateCell).toContainText('August');
+    });
+
+    test('should display formatted date in useAsTitle', async () => {
+      await page.goto(url.list);
+      await page.locator('.row-1 .cell-default a').click();
+      await expect(page.locator('.collection-edit__header .render-title')).toContainText('August');
+    });
+
+    test('should clear date', async () => {
+      await page.goto(url.create);
+      const dateField = await page.locator('#field-default input');
+      await expect(dateField).toBeVisible();
+      await dateField.fill('2021-08-01');
+      await expect(dateField).toHaveValue('2021-08-01');
+      const clearButton = await page.locator('#field-default .date-time-picker__clear-button');
+      await expect(clearButton).toBeVisible();
+      await clearButton.click();
+      await expect(dateField).toHaveValue('');
     });
   });
 

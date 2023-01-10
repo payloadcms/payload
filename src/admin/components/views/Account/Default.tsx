@@ -90,7 +90,12 @@ const DefaultAccount: React.FC<Props> = (props) => {
               <div className={`${baseClass}__edit`}>
                 <Gutter className={`${baseClass}__header`}>
                   <h1>
-                    <RenderTitle {...{ data, useAsTitle, fallback: `[${t('general:untitled')}]` }} />
+                    <RenderTitle
+                      data={data}
+                      collection={collection.slug}
+                      useAsTitle={useAsTitle}
+                      fallback={`[${t('general:untitled')}]`}
+                    />
                   </h1>
                   <Auth
                     useAPIKey={auth.useAPIKey}
