@@ -44,7 +44,7 @@ export const mergeDrafts = async <T extends TypeWithID>({
 }: Args): Promise<PaginatedDocs<T>> => {
   // Query the main collection for any IDs that match the query
   // Create object "map" for performant lookup
-  const mainCollectionMatchMap = await collection.Model.find(query, { updatedAt: 1 }, { limit: paginationOptions.limit })
+  const mainCollectionMatchMap = await collection.Model.find(query, { updatedAt: 1 }, { limit: paginationOptions.limit, sort: paginationOptions.sort })
     .lean().then((res) => res.reduce((map, { _id, updatedAt }) => {
       const newMap = map;
       newMap[_id] = updatedAt;
