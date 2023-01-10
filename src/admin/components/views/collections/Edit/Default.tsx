@@ -119,7 +119,12 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   {customHeader && customHeader}
                   {!customHeader && (
                     <h1>
-                      <RenderTitle {...{ data, useAsTitle, fallback: `[${t('untitled')}]` }} />
+                      <RenderTitle
+                        data={data}
+                        collection={collection.slug}
+                        useAsTitle={useAsTitle}
+                        fallback={`[${t('untitled')}]`}
+                      />
                     </h1>
                   )}
                 </header>
