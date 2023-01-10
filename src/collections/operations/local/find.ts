@@ -35,7 +35,7 @@ export default async function findLocal<T extends TypeWithID = any>(payload: Pay
     page,
     limit,
     where,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
+    locale = null,
     fallbackLocale = null,
     user,
     overrideAccess = true,

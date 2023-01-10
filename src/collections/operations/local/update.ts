@@ -28,8 +28,8 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
   const {
     collection: collectionSlug,
     depth,
-    locale,
-    fallbackLocale,
+    locale = null,
+    fallbackLocale = null,
     data,
     id,
     user,
