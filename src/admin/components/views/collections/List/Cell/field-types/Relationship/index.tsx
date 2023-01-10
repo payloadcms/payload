@@ -54,9 +54,9 @@ const RelationshipCell = (props) => {
         const relatedCollection = collections.find(({ slug }) => slug === relationTo);
         return (
           <React.Fragment key={i}>
-            { document === false && `${t('untitled')} - ID: ${value}`}
-            { document === null && t('loading')}
-            { document && (
+            {document === false && `${t('untitled')} - ID: ${value}`}
+            {document === null && `${t('loading')}...`}
+            {document && (
               document[relatedCollection.admin.useAsTitle] ? document[relatedCollection.admin.useAsTitle] : `${t('untitled')} - ID: ${value}`
             )}
             {values.length > i + 1 && ', '}
@@ -67,7 +67,7 @@ const RelationshipCell = (props) => {
         Array.isArray(cellData) && cellData.length > totalToShow
         && t('fields:itemsAndMore', { items: '', count: cellData.length - totalToShow })
       }
-      { values.length === 0 && t('noLabel', { label: getTranslation(field.label, i18n) })}
+      {values.length === 0 && t('noLabel', { label: getTranslation(field.label, i18n) })}
     </div>
   );
 };
