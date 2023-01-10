@@ -44,7 +44,7 @@ export const mergeDrafts = async <T extends TypeWithID>({
 }: Args): Promise<PaginatedDocs<T>> => {
   // Query the main collection for any IDs that match the query
   // Create object "map" for performant lookup
-  const mainCollectionMatchMap = await collection.Model.find(query, { updatedAt: 1 }, { limit: paginationOptions.limit })
+  const mainCollectionMatchMap = await collection.Model.find(query, { updatedAt: 1 }, { limit: paginationOptions.limit, sort: paginationOptions.sort })
     .lean().then((res) => res.reduce((map, { _id, updatedAt }) => {
       const newMap = map;
       newMap[_id] = updatedAt;
@@ -83,7 +83,15 @@ export const mergeDrafts = async <T extends TypeWithID>({
   // This means that the newer version's parent should appear in the main query.
   // To do so, add the version's parent ID into an explicit `includedIDs` array
   const versionCollectionMatchMap = await VersionModel.aggregate<AggregateVersion<T>>([
-    { $sort: { updatedAt: -1 } },
+    {
+      $sort: Object.entries(paginationOptions.sort).reduce((sort, [key, order]) => {
+        return {
+          ...sort,
+          [key]: order === 'asc' ? 1 : -1,
+        };
+      }, {}),
+    },
+    { $match: versionQuery },
     {
       $group: {
         _id: '$parent',
@@ -93,7 +101,6 @@ export const mergeDrafts = async <T extends TypeWithID>({
         createdAt: { $first: '$createdAt' },
       },
     },
-    { $match: versionQuery },
     { $limit: paginationOptions.limit },
   ]).then((res) => res.reduce<VersionCollectionMatchMap<T>>((map, { _id, updatedAt, createdAt, version }) => {
     const newMap = map;
