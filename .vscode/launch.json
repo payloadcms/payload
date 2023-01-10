@@ -28,16 +28,7 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "env": {
-        "BABEL_ENV": "development"
-      },
       "program": "${workspaceFolder}/test/dev.js",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "runtimeArgs": [
-        "--nolazy"
-      ],
       "args": [
         "fields"
       ]

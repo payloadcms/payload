@@ -1,6 +1,4 @@
 import paginate from 'mongoose-paginate-v2';
-import aggregatePaginate from 'mongoose-aggregate-paginate-v2';
-
 import { Schema } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
 import buildQueryPlugin from '../mongoose/buildQuery';
@@ -25,10 +23,6 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
 
   schema.plugin(paginate, { useEstimatedCount: true })
     .plugin(buildQueryPlugin);
-
-  if (collection.versions?.drafts) {
-    schema.plugin(aggregatePaginate);
-  }
 
   return schema;
 };
