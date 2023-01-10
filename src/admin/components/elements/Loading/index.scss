@@ -1,0 +1,90 @@
+@import '../../../scss/styles';
+
+.fullscreen-loader {
+  height: 100%;
+  width: 100%;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  &__bars {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    gap: 7px;
+    align-items: center;
+  }
+
+  &__bar {
+    width: 2px;
+    background-color: white;
+    height: 15px;
+
+    &:nth-child(1) {
+      transform: translateY(0);
+      animation: bar-odd 1s infinite;
+    }
+
+    &:nth-child(2) {
+      transform: translateY(-2px);
+      animation: bar-even 1s infinite;
+    }
+
+    &:nth-child(3) {
+      transform: translateY(0);
+      animation: bar-odd 1s infinite;
+    }
+
+    &:nth-child(4) {
+      transform: translateY(-2px);
+      animation: bar-even 1s infinite;
+    }
+
+    &:nth-child(5) {
+      transform: translateY(0);
+      animation: bar-odd 1s infinite;
+    }
+  }
+
+  // css animation to move lines up and down
+  @keyframes bar-even {
+    0% {
+      transform: translateY(2px);
+    }
+
+    50% {
+      transform: translateY(-2px);
+    }
+
+    100% {
+      transform: translateY(2px);
+    }
+  }
+
+  // css animation to move lines up and down
+  @keyframes bar-odd {
+    0% {
+      transform: translateY(-2px);
+    }
+
+    50% {
+      transform: translateY(2px);
+    }
+
+    100% {
+      transform: translateY(-2px);
+    }
+  }
+
+  &__text {
+    margin-top: base(.75);
+    text-transform: uppercase;
+    font-family: var(--font-body);
+    font-size: base(.75);
+    letter-spacing: 3px;
+  }
+}

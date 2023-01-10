@@ -8,7 +8,7 @@ import { useConfig } from './utilities/Config';
 import List from './views/collections/List';
 import DefaultTemplate from './templates/Default';
 import { requests } from '../api';
-import Loading from './elements/Loading';
+import Loading, { FullscreenLoader } from './elements/Loading';
 import StayLoggedIn from './modals/StayLoggedIn';
 import Versions from './views/Versions';
 import Version from './views/Version';
@@ -73,7 +73,7 @@ const Routes = () => {
   }, [i18n.language, routes, userCollection]);
 
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<FullscreenLoader />}>
       <Route
         path={routes.admin}
         render={({ match }) => {
@@ -92,7 +92,7 @@ const Routes = () => {
 
           if (initialized === true) {
             if (typeof user === 'undefined' || (user && typeof canAccessAdmin === 'undefined')) {
-              return <Loading />;
+              return <FullscreenLoader />;
             }
 
             return (
