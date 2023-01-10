@@ -1,5 +1,6 @@
 import React, { HTMLAttributes } from 'react';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import { FilterOptionsResult } from '../../forms/field-types/Relationship/types';
 
 export type ListDrawerProps = {
   onSelect?: (args: {
@@ -11,6 +12,7 @@ export type ListDrawerProps = {
   collectionSlugs?: string[]
   uploads?: boolean
   selectedCollection?: string
+  filterOptions?: FilterOptionsResult
 }
 
 export type ListTogglerProps = HTMLAttributes<HTMLButtonElement> & {
@@ -24,6 +26,7 @@ export type UseListDrawer = (args: {
   collectionSlugs?: string[]
   selectedCollection?: string
   uploads?: boolean // finds all collections with upload: true
+  filterOptions?: FilterOptionsResult
 }) => [
   React.FC<Omit<ListDrawerProps, 'collectionSlug' | 'id'>>, // drawer
   React.FC<Omit<ListTogglerProps, 'collectionSlug' | 'id'>>, // toggler

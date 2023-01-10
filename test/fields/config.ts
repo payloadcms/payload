@@ -89,10 +89,20 @@ export default buildConfig({
 
     if (fs.existsSync(uploadsDir)) fs.readdirSync(uploadsDir).forEach((f) => fs.rmSync(`${uploadsDir}/${f}`));
 
-    const filePath = path.resolve(__dirname, './collections/Upload/payload.jpg');
-    const file = await getFileByPath(filePath);
+    const pngPath = path.resolve(__dirname, './uploads/payload.png');
+    const pngFile = await getFileByPath(pngPath);
+    const createdPNGDoc = await payload.create({ collection: 'uploads', data: {}, file: pngFile });
 
-    const createdUploadDoc = await payload.create({ collection: 'uploads', data: uploadsDoc, file });
+    const jpgPath = path.resolve(__dirname, './collections/Upload/payload.jpg');
+    const jpgFile = await getFileByPath(jpgPath);
+    const createdJPGDoc = await payload.create({
+      collection: 'uploads',
+      data: {
+        ...uploadsDoc,
+        media: createdPNGDoc.id,
+      },
+      file: jpgFile
+     });
 
     const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace('{{ARRAY_DOC_ID}}', createdArrayDoc.id));
     const richTextDocWithRelationship = { ...richTextDocWithRelId };
@@ -101,8 +111,8 @@ export default buildConfig({
     richTextDocWithRelationship.richText[richTextRelationshipIndex].value = { id: createdTextDoc.id };
 
     const richTextUploadIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'upload');
-    richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdUploadDoc.id };
-    richTextDocWithRelationship.richTextReadOnly[richTextUploadIndex].value = { id: createdUploadDoc.id };
+    richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdJPGDoc.id };
+    richTextDocWithRelationship.richTextReadOnly[richTextUploadIndex].value = { id: createdJPGDoc.id };
 
     await payload.create({ collection: 'rich-text-fields', data: richTextBulletsDoc });
     await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship });

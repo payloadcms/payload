@@ -67,7 +67,8 @@ const DrawerContent: React.FC<ListDrawerProps & {
   collectionSlugs,
   uploads,
   selectedCollection,
-  enabledCollectionConfigs
+  enabledCollectionConfigs,
+  filterOptions,
 }) => {
   const { t, i18n } = useTranslation(['upload', 'general']);
   const { permissions } = useAuth();
@@ -165,13 +166,20 @@ const DrawerContent: React.FC<ListDrawerProps & {
     } = {};
 
     if (page) params.page = page;
-    if (where) params.where = where;
+
+    params.where = {
+      ...where ? { ...where } : {},
+      ...filterOptions?.[selectedCollectionConfig.slug] ? {
+        ...filterOptions[selectedCollectionConfig.slug],
+      } : {},
+    };
+
     if (sort) params.sort = sort;
     if (limit) params.limit = limit;
     if (cacheBust) params.cacheBust = cacheBust;
 
     setParams(params);
-  }, [setParams, page, sort, where, limit, cacheBust]);
+  }, [setParams, page, sort, where, limit, cacheBust, filterOptions, selectedCollectionConfig]);
 
   useEffect(() => {
     const syncColumnsFromPrefs = async () => {
@@ -324,7 +332,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = (props) => {
 
   const [enabledCollectionConfigs] = useState(() => collections.filter((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs })));
 
-  if (enabledCollectionConfigs.length === 0){
+  if (enabledCollectionConfigs.length === 0) {
     return null;
   }
 
@@ -333,5 +341,5 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = (props) => {
       {...props}
       enabledCollectionConfigs={enabledCollectionConfigs}
     />
-  )
-}
+  );
+};
