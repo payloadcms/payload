@@ -42,7 +42,7 @@ export const mergeDrafts = async <T extends TypeWithID>({
   query,
   where: incomingWhere,
 }: Args): Promise<PaginatedDocs<T>> => {
-  // Query the main collection, non-paginated, for any IDs that match the query
+  // Query the main collection for any IDs that match the query
   // Create object "map" for performant lookup
   const mainCollectionMatchMap = await collection.Model.find(query, { updatedAt: 1 }, { limit: paginationOptions.limit })
     .lean().then((res) => res.reduce((map, { _id, updatedAt }) => {
