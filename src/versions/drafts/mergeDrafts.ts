@@ -42,18 +42,14 @@ export const mergeDrafts = async <T extends TypeWithID>({
   query,
   where: incomingWhere,
 }: Args): Promise<PaginatedDocs<T>> => {
-  console.log('---------STARTING---------');
   // Query the main collection, non-paginated, for any IDs that match the query
-  const mainCollectionFind = await collection.Model.find(query, { updatedAt: 1 }, { limit: paginationOptions.limit }).lean();
-
   // Create object "map" for performant lookup
-  const mainCollectionMatchMap = mainCollectionFind.reduce((map, { _id, updatedAt }) => {
-    const newMap = map;
-    newMap[_id] = updatedAt;
-    return newMap;
-  }, {});
-
-  console.log({ mainCollectionMatchMap });
+  const mainCollectionMatchMap = await collection.Model.find(query, { updatedAt: 1 }, { limit: paginationOptions.limit })
+    .lean().then((res) => res.reduce((map, { _id, updatedAt }) => {
+      const newMap = map;
+      newMap[_id] = updatedAt;
+      return newMap;
+    }, {}));
 
   // Query the versions collection with a version-specific query
   const VersionModel = payload.versions[collection.config.slug] as CollectionModel;
@@ -80,8 +76,13 @@ export const mergeDrafts = async <T extends TypeWithID>({
   }
 
   const versionQuery = await VersionModel.buildQuery(versionQueryToBuild, locale);
+  const includedParentIDs: (string | number)[] = [];
 
-  const versionCollectionQuery = await VersionModel.aggregate<AggregateVersion<T>>([
+  // Create version "map" for performant lookup
+  // and in the same loop, check if there are matched versions without a matched parent
+  // This means that the newer version's parent should appear in the main query.
+  // To do so, add the version's parent ID into an explicit `includedIDs` array
+  const versionCollectionMatchMap = await VersionModel.aggregate<AggregateVersion<T>>([
     { $sort: { updatedAt: -1 } },
     {
       $group: {
@@ -94,63 +95,44 @@ export const mergeDrafts = async <T extends TypeWithID>({
     },
     { $match: versionQuery },
     { $limit: paginationOptions.limit },
-  ]);
-
-  const includedParentIDs: (string | number)[] = [];
-
-  // Create object "map" for performant lookup
-  // and in the same loop, check if there are matched versions without a matched parent
-  // This means that the newer version's parent should appear in the main query.
-  // To do so, add the version's parent ID into an explicit `includedIDs` array
-
-  const versionCollectionMatchMap = versionCollectionQuery.reduce<VersionCollectionMatchMap<T>>((map, { _id, updatedAt, createdAt, version }) => {
+  ]).then((res) => res.reduce<VersionCollectionMatchMap<T>>((map, { _id, updatedAt, createdAt, version }) => {
     const newMap = map;
     newMap[_id] = { version, updatedAt, createdAt };
 
     const matchedParent = mainCollectionMatchMap[_id];
     if (!matchedParent) includedParentIDs.push(_id);
     return newMap;
-  }, {});
-
-  console.log({ versionCollectionMatchMap });
-  console.log({ includedParentIDs });
+  }, {}));
 
   // Now we need to explicitly exclude any parent matches that have newer versions
   // which did NOT appear in the versions query
-
-  const parentsWithoutNewerVersions = await Promise.all(Object.entries(mainCollectionMatchMap).map(async ([parentDocID, parentDocUpdatedAt]) => {
+  const excludedParentIDs = await Promise.all(Object.entries(mainCollectionMatchMap).map(async ([parentDocID, parentDocUpdatedAt]) => {
     // If there is a matched version, and it's newer, this parent should remain
     if (versionCollectionMatchMap[parentDocID] && versionCollectionMatchMap[parentDocID].updatedAt > parentDocUpdatedAt) {
       return null;
     }
 
     // Otherwise, we need to check if there are newer versions present
-    // that did not get returned from the versions query. If there are,
-    // this says that the newest version does not match the incoming query,
-    // and the parent ID should be excluded
+    // that did not get returned from the versions query
     const versionsQuery = await VersionModel.find({
       updatedAt: {
         $gt: parentDocUpdatedAt,
       },
     }, {}, { limit: 1 }).lean();
 
+    // If there are,
+    // this says that the newest version does not match the incoming query,
+    // and the parent ID should be excluded
     if (versionsQuery.length > 0) {
       return parentDocID;
     }
 
     return null;
-  }));
-
-  console.log({ parentsWithoutNewerVersions });
-
-  const excludedParentIDs = parentsWithoutNewerVersions.filter((result) => Boolean(result));
-
-  console.log({ excludedParentIDs });
+  })).then((res) => res.filter((result) => Boolean(result)));
 
   // Run a final query against the main collection,
-  // passing in the ids to exclude and include
-  // so that they appear correctly
-  // in paginated results, properly paginated
+  // passing in any ids to exclude and include
+  // so that they appear properly paginated
   const finalQueryToBuild: { where: Where } = {
     where: {
       and: [],
@@ -182,8 +164,6 @@ export const mergeDrafts = async <T extends TypeWithID>({
       },
     });
   }
-
-  console.log({ finalPayloadQuery: JSON.stringify(finalQueryToBuild, null, 2) });
 
   const finalQuery = await collection.Model.buildQuery(finalQueryToBuild, locale);
 
