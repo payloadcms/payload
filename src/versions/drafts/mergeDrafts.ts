@@ -91,7 +91,6 @@ export const mergeDrafts = async <T extends TypeWithID>({
         };
       }, {}),
     },
-    { $match: versionQuery },
     {
       $group: {
         _id: '$parent',
@@ -101,6 +100,7 @@ export const mergeDrafts = async <T extends TypeWithID>({
         createdAt: { $first: '$createdAt' },
       },
     },
+    { $match: versionQuery },
     { $limit: paginationOptions.limit },
   ]).then((res) => res.reduce<VersionCollectionMatchMap<T>>((map, { _id, updatedAt, createdAt, version }) => {
     const newMap = map;
