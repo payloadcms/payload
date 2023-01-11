@@ -82,6 +82,7 @@ export default buildConfig({
         description: { en: 'Description en', es: 'Description es' },
         listSearchableFields: ['title', 'description', 'number'],
         group: { en: 'One', es: 'Una' },
+        useAsTitle: 'title',
       },
       fields: [
         {
