@@ -179,15 +179,11 @@ export const mergeDrafts = async <T extends TypeWithID>({
   result = {
     ...result,
     docs: await Promise.all(result.docs.map(async (doc) => {
-      let sanitizedDoc = JSON.parse(JSON.stringify(doc));
-      sanitizedDoc.id = sanitizedDoc._id;
-      sanitizedDoc = sanitizeInternalFields(sanitizedDoc);
+      const matchedVersion = versionCollectionMatchMap[doc.id];
 
-      const matchedVersion = versionCollectionMatchMap[sanitizedDoc.id];
-
-      if (matchedVersion) {
+      if (matchedVersion && matchedVersion.updatedAt > doc.updatedAt) {
         return {
-          ...sanitizedDoc,
+          ...doc,
           ...matchedVersion.version,
           createdAt: matchedVersion.createdAt,
           updatedAt: matchedVersion.updatedAt,
@@ -199,7 +195,7 @@ export const mergeDrafts = async <T extends TypeWithID>({
         payload,
         entity: collection.config,
         entityType: 'collection',
-        doc: sanitizedDoc,
+        doc,
         locale,
       });
     })),
