@@ -2,7 +2,7 @@ import { TypeWithID } from '../../config/types';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import findByID from '../findByID';
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 

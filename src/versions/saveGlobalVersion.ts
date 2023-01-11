@@ -1,4 +1,4 @@
-import { Payload } from '..';
+import { Payload } from '../payload';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
 import { SanitizedGlobalConfig } from '../globals/config/types';
@@ -28,14 +28,14 @@ export const saveGlobalVersion = async ({
         $gt: docWithLocales.updatedAt,
       },
     },
-    {},
-    {
-      lean: true,
-      leanWithId: true,
-      sort: {
-        updatedAt: 'desc',
-      },
-    });
+      {},
+      {
+        lean: true,
+        leanWithId: true,
+        sort: {
+          updatedAt: 'desc',
+        },
+      });
 
     if (latestVersion) {
       // If the latest version is a draft, no need to re-save it

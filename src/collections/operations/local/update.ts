@@ -1,4 +1,4 @@
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import update from '../update';

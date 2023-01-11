@@ -1,5 +1,5 @@
 import { PayloadRequest } from '../../../express/types';
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import unlock from '../unlock';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';

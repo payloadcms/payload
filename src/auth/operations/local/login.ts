@@ -2,7 +2,7 @@ import { Response } from 'express';
 import login, { Result } from '../login';
 import { PayloadRequest } from '../../../express/types';
 import { TypeWithID } from '../../../collections/config/types';
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 
@@ -21,7 +21,7 @@ export type Options = {
   showHiddenFields?: boolean
 }
 
-async function localLogin<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<Result & { user: T}> {
+async function localLogin<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<Result & { user: T }> {
   const {
     collection: collectionSlug,
     req = {} as PayloadRequest,

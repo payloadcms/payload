@@ -23,62 +23,64 @@ import { Payload, getPayload } from './payload';
 export const initHTTP = async <T>(options: InitOptions): Promise<Payload<T>> => {
   const payload = await getPayload<T>(options);
 
-  payload.router = express.Router();
-  payload.router.use(...expressMiddleware(payload));
-  initAuth(payload);
+  if (!options.local) {
+    payload.router = express.Router();
+    payload.router.use(...expressMiddleware(payload));
+    initAuth(payload);
 
-  initCollectionsHTTP(payload);
-  initGlobalsHTTP(payload);
+    initCollectionsHTTP(payload);
+    initGlobalsHTTP(payload);
 
-  options.express.use((req: PayloadRequest, res, next) => {
-    req.payload = payload;
-    next();
-  });
+    options.express.use((req: PayloadRequest, res, next) => {
+      req.payload = payload;
+      next();
+    });
 
-  options.express.use((req: PayloadRequest, res: Response, next: NextFunction): void => {
-    req.payloadDataLoader = getDataLoader(req);
-    return next();
-  });
+    options.express.use((req: PayloadRequest, res: Response, next: NextFunction): void => {
+      req.payloadDataLoader = getDataLoader(req);
+      return next();
+    });
 
-  payload.express = options.express;
+    payload.express = options.express;
 
-  if (payload.config.rateLimit.trustProxy) {
-    payload.express.set('trust proxy', 1);
+    if (payload.config.rateLimit.trustProxy) {
+      payload.express.set('trust proxy', 1);
+    }
+
+    initAdmin(payload);
+    initPreferences(payload);
+
+    payload.router.get('/access', access);
+
+    if (!payload.config.graphQL.disable) {
+      payload.router.use(
+        payload.config.routes.graphQL,
+        (req, res, next): void => {
+          if (req.method === 'OPTIONS') {
+            res.sendStatus(204);
+          } else {
+            next();
+          }
+        },
+        identifyAPI('GraphQL'),
+        (req: PayloadRequest, res: Response) => graphQLHandler(req, res)(req, res),
+      );
+      initGraphQLPlayground(payload);
+    }
+
+    mountEndpoints(options.express, payload.router, payload.config.endpoints);
+
+    // Bind router to API
+    payload.express.use(payload.config.routes.api, payload.router);
+
+    // Enable static routes for all collections permitting upload
+    initStatic(payload);
+
+    payload.errorHandler = errorHandler(payload.config, payload.logger);
+    payload.router.use(payload.errorHandler);
+
+    payload.authenticate = authenticate(payload.config);
   }
-
-  initAdmin(payload);
-  initPreferences(payload);
-
-  payload.router.get('/access', access);
-
-  if (!payload.config.graphQL.disable) {
-    payload.router.use(
-      payload.config.routes.graphQL,
-      (req, res, next): void => {
-        if (req.method === 'OPTIONS') {
-          res.sendStatus(204);
-        } else {
-          next();
-        }
-      },
-      identifyAPI('GraphQL'),
-      (req: PayloadRequest, res: Response) => graphQLHandler(req, res)(req, res),
-    );
-    initGraphQLPlayground(payload);
-  }
-
-  mountEndpoints(options.express, payload.router, payload.config.endpoints);
-
-  // Bind router to API
-  payload.express.use(payload.config.routes.api, payload.router);
-
-  // Enable static routes for all collections permitting upload
-  initStatic(payload);
-
-  payload.errorHandler = errorHandler(payload.config, payload.logger);
-  payload.router.use(payload.errorHandler);
-
-  payload.authenticate = authenticate(payload.config);
 
   return payload;
 };

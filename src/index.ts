@@ -2,12 +2,21 @@ import {
   InitOptions,
 } from './config/types';
 import { initHTTP } from './initHTTP';
-import { Payload, getPayload } from './payload';
+import { Payload } from './payload';
+
+export { getPayload } from './payload';
 
 require('isomorphic-fetch');
 
-export const init = async <T = any>(options: InitOptions): Promise<Payload<T>> => {
-  return initHTTP<T>(options);
-};
+export class PayloadHTTP extends Payload {
+  async init<T = any>(options: InitOptions): Promise<Payload<T>> {
+    const payload = await initHTTP<T>(options);
+    Object.assign(this, payload);
+    return payload;
+  }
+}
 
-export default getPayload;
+const payload = new PayloadHTTP();
+
+export default payload;
+module.exports = payload;

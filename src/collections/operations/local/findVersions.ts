@@ -1,4 +1,4 @@
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { Document, Where } from '../../../types';
 import { PaginatedDocs } from '../../../mongoose/types';
 import { TypeWithVersion } from '../../../versions/types';

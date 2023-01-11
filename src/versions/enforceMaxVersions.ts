@@ -1,4 +1,4 @@
-import { Payload } from '..';
+import { Payload } from '../payload';
 import { CollectionModel } from '../collections/config/types';
 
 type Args = {

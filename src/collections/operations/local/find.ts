@@ -1,7 +1,7 @@
 import { TypeWithID } from '../../config/types';
 import { PaginatedDocs } from '../../../mongoose/types';
 import { Document, Where } from '../../../types';
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { PayloadRequest } from '../../../express/types';
 import find from '../find';
 import { getDataLoader } from '../../dataloader';

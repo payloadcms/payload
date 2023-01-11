@@ -1,4 +1,4 @@
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { enforceMaxVersions } from '../enforceMaxVersions';
 import { PayloadRequest } from '../../express/types';
@@ -46,7 +46,7 @@ export const saveCollectionDraft = async ({
         },
         { new: true, lean: true },
       );
-    // Otherwise, create a new one
+      // Otherwise, create a new one
     } else {
       result = await VersionsModel.create({
         parent: id,

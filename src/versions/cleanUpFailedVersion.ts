@@ -1,4 +1,4 @@
-import { Payload } from '..';
+import { Payload } from '../payload';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 import { TypeWithVersion } from './types';

@@ -1,4 +1,4 @@
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import { docHasTimestamps, Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth';
 import { AccessResult } from '../../config/types';

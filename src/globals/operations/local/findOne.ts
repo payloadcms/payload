@@ -1,4 +1,4 @@
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';

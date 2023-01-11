@@ -1,4 +1,4 @@
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import { TypeWithID } from '../../config/types';

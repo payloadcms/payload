@@ -1,7 +1,7 @@
 import PassportAPIKey from 'passport-headerapikey';
 import crypto from 'crypto';
 import { PayloadRequest } from '../../express/types';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import find from '../../collections/operations/find';
 
 export default (payload: Payload, { Model, config }): PassportAPIKey => {

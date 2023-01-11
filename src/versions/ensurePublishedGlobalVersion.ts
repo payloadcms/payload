@@ -1,4 +1,4 @@
-import { Payload } from '..';
+import { Payload } from '../payload';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
 import { SanitizedGlobalConfig } from '../globals/config/types';
@@ -29,14 +29,14 @@ export const ensurePublishedGlobalVersion = async ({
         $gt: docWithLocales.updatedAt,
       },
     },
-    {},
-    {
-      lean: true,
-      leanWithId: true,
-      sort: {
-        updatedAt: 'desc',
-      },
-    });
+      {},
+      {
+        lean: true,
+        leanWithId: true,
+        sort: {
+          updatedAt: 'desc',
+        },
+      });
 
     if (moreRecentDrafts?.length === 0) {
       const version = await afterRead({

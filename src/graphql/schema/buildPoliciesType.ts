@@ -5,7 +5,7 @@ import formatName from '../utilities/formatName';
 import { CollectionConfig, SanitizedCollectionConfig } from '../../collections/config/types';
 import { GlobalConfig, SanitizedGlobalConfig } from '../../globals/config/types';
 import { Field } from '../../fields/config/types';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import { toWords } from '../../utilities/formatLabels';
 
 type OperationType = 'create' | 'read' | 'update' | 'delete' | 'unlock' | 'readVersions';

@@ -1,4 +1,4 @@
-import { Payload } from '..';
+import { Payload } from '../payload';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
@@ -33,14 +33,14 @@ export const saveCollectionVersion = async ({
         $gt: docWithLocales.updatedAt,
       },
     },
-    {},
-    {
-      lean: true,
-      leanWithId: true,
-      sort: {
-        updatedAt: 'desc',
-      },
-    });
+      {},
+      {
+        lean: true,
+        leanWithId: true,
+        sort: {
+          updatedAt: 'desc',
+        },
+      });
 
     if (latestVersion) {
       // If the latest version is a draft, no need to re-save it

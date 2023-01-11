@@ -1,4 +1,4 @@
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import { enforceMaxVersions } from '../enforceMaxVersions';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
 
@@ -40,7 +40,7 @@ export const saveGlobalDraft = async ({
         },
         { new: true, lean: true },
       );
-    // Otherwise, create a new one
+      // Otherwise, create a new one
     } else {
       result = await VersionsModel.create({
         version: dataAsDraft,

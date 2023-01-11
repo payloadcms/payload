@@ -1,4 +1,4 @@
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import resetPassword, { Result } from '../resetPassword';
 import { PayloadRequest } from '../../../express/types';
 import { getDataLoader } from '../../../collections/dataloader';

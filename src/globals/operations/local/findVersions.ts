@@ -1,7 +1,7 @@
 import { Document, Where } from '../../../types';
 import { PaginatedDocs } from '../../../mongoose/types';
 import { TypeWithVersion } from '../../../versions/types';
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { PayloadRequest } from '../../../express/types';
 import findVersions from '../findVersions';
 import { getDataLoader } from '../../../collections/dataloader';

@@ -1,7 +1,7 @@
 import { TypeWithID } from '../../config/types';
 import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
-import { Payload } from '../../../index';
+import { Payload } from '../../../payload';
 import deleteOperation from '../delete';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';

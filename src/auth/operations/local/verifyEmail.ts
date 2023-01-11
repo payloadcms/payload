@@ -1,4 +1,4 @@
-import { Payload } from '../../../index';
+import { Payload } from '../../../payload';
 import verifyEmail from '../verifyEmail';
 
 export type Options = {

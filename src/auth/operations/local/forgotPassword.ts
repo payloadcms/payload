@@ -1,6 +1,6 @@
 import { PayloadRequest } from '../../../express/types';
 import forgotPassword, { Result } from '../forgotPassword';
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 
