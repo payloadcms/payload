@@ -40,7 +40,7 @@ export async function initPayloadTest(options: Options): Promise<{ serverURL: st
     initOptions.express = express();
   }
 
-  await payload.init(initOptions);
+  await payload.initAsync(initOptions);
 
   if (initOptions.express) {
     initOptions.express.listen(port);
