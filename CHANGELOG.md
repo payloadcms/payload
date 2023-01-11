@@ -1,5 +1,12 @@
 
 
+## [1.5.6](https://github.com/payloadcms/payload/compare/v1.5.5...v1.5.6) (2023-01-11)
+
+
+### Bug Fixes
+
+* ensures that find with draft=true returns ids with drafts ([3f30b2f](https://github.com/payloadcms/payload/commit/3f30b2f4894258d67e9a9a79e2213f9d5f69f856))
+
 ## [1.5.5](https://github.com/payloadcms/payload/compare/v1.5.4...v1.5.5) (2023-01-11)
 
 
