@@ -1,11 +1,10 @@
 import express from 'express';
-
-import { Payload } from '../index';
 import findOne from './requestHandlers/findOne';
 import update from './requestHandlers/update';
 import deleteHandler from './requestHandlers/delete';
+import { PayloadHTTP } from '..';
 
-export default function initPreferences(ctx: Payload): void {
+export default function initPreferences(ctx: PayloadHTTP): void {
   if (!ctx.local) {
     const router = express.Router();
     router

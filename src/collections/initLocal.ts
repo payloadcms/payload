@@ -1,21 +1,15 @@
 import mongoose, { UpdateAggregationStage, UpdateQuery } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import express from 'express';
-import passport from 'passport';
 import passportLocalMongoose from 'passport-local-mongoose';
 import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
 import buildQueryPlugin from '../mongoose/buildQuery';
-import apiKeyStrategy from '../auth/strategies/apiKey';
 import buildCollectionSchema from './buildSchema';
 import buildSchema from '../mongoose/buildSchema';
-import bindCollectionMiddleware from './bindCollection';
 import { CollectionModel, SanitizedCollectionConfig } from './config/types';
-import { Payload } from '../index';
+import { Payload } from '../payload';
 import { getVersionsModelName } from '../versions/getVersionsModelName';
-import mountEndpoints from '../express/mountEndpoints';
-import buildEndpoints from './buildEndpoints';
 
-export default function registerCollections(ctx: Payload): void {
+export default function initCollectionsLocal(ctx: Payload): void {
   ctx.config.collections = ctx.config.collections.map((collection: SanitizedCollectionConfig) => {
     const formattedCollection = collection;
 
@@ -90,34 +84,6 @@ export default function registerCollections(ctx: Payload): void {
       Model: mongoose.model(formattedCollection.slug, schema) as CollectionModel,
       config: formattedCollection,
     };
-
-    // If not local, open routes
-    if (!ctx.local) {
-      const router = express.Router();
-      const { slug } = collection;
-
-      router.all('*', bindCollectionMiddleware(ctx.collections[formattedCollection.slug]));
-
-      if (collection.auth) {
-        const AuthCollection = ctx.collections[formattedCollection.slug];
-
-        if (collection.auth.useAPIKey) {
-          passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(ctx, AuthCollection));
-        }
-
-        if (Array.isArray(collection.auth.strategies)) {
-          collection.auth.strategies.forEach(({ name, strategy }, index) => {
-            const passportStrategy = typeof strategy === 'object' ? strategy : strategy(ctx);
-            passport.use(`${AuthCollection.config.slug}-${name ?? index}`, passportStrategy);
-          });
-        }
-      }
-
-      const endpoints = buildEndpoints(collection);
-      mountEndpoints(ctx.express, router, endpoints);
-
-      ctx.router.use(`/${slug}`, router);
-    }
 
     return formattedCollection;
   });

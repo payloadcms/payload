@@ -1,12 +1,12 @@
 
 import express from 'express';
 import { v4 as uuid } from 'uuid';
-import payload from '../src';
+import { init as initPayload } from '../src';
 
 const expressApp = express();
 
-const init = async () => {
-  await payload.initAsync({
+const startDev = async () => {
+  const payload = await initPayload({
     secret: uuid(),
     mongoURL: process.env.MONGO_URL || 'mongodb://localhost/payload',
     express: expressApp,
@@ -35,4 +35,4 @@ const init = async () => {
   });
 };
 
-init();
+startDev();
