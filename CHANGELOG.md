@@ -1,5 +1,27 @@
 
 
+## [1.5.5](https://github.com/payloadcms/payload/compare/v1.5.4...v1.5.5) (2023-01-11)
+
+
+### Bug Fixes
+
+* [#1808](https://github.com/payloadcms/payload/issues/1808), arrays and blocks now save localized nested field data upon reordering rows ([ee54c14](https://github.com/payloadcms/payload/commit/ee54c1481cdb8d6669864f20584fa6ef072c9097))
+* bug when clearing relationship field without hasMany: true ([#1829](https://github.com/payloadcms/payload/issues/1829)) ([ed7cfff](https://github.com/payloadcms/payload/commit/ed7cfff45c262206495580509a77adb72a646ddb))
+* ensures upload file data is available for conditions ([d40e136](https://github.com/payloadcms/payload/commit/d40e1369472f212b5f85bfc72fac01dc708aa507))
+* fix miss typo in Thai translation ([25e5ab7](https://github.com/payloadcms/payload/commit/25e5ab7ceebfb36960b6969db543a2b4ae7127d2))
+* formats date when useAsTitle ([086117d](https://github.com/payloadcms/payload/commit/086117d7039b2b68ab2789b57cac97e2735819cf))
+* prevents uploads drawer from crashing when no uploads are enabled ([84e1417](https://github.com/payloadcms/payload/commit/84e1417b711e0823753f0b9174c145e40b68e0be))
+* rte link element initial state [#1848](https://github.com/payloadcms/payload/issues/1848) ([1cde647](https://github.com/payloadcms/payload/commit/1cde647a2a86df21312229b8beec0a6b75df22c3))
+* updatesmargin for group field within a row ([1c3a257](https://github.com/payloadcms/payload/commit/1c3a257244e322c04164f6630772a40baf256da7))
+* upload field filterOptions ([9483ccb](https://github.com/payloadcms/payload/commit/9483ccb1208a91c1376ac4bd5186037f909aa45d))
+* wrong translation and punctuation spacing ([bf1242a](https://github.com/payloadcms/payload/commit/bf1242aafa3fa7e72e81af10284f4ddade28c4a0))
+
+
+### Features
+
+* adds translations for fallbackToDefaultLocale ([c247f31](https://github.com/payloadcms/payload/commit/c247f3130cf03d1dc12d456886b04db028161800))
+* ensures compatibility with azure cosmos and aws documentdb ([73af283](https://github.com/payloadcms/payload/commit/73af283e1c24befc2797e2bc9766a22d26e3c288))
+
 ## [1.5.4](https://github.com/payloadcms/payload/compare/v1.5.3...v1.5.4) (2023-01-06)
 
 
