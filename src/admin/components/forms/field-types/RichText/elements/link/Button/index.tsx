@@ -1,7 +1,7 @@
 import React, { Fragment, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactEditor, useSlate } from 'slate-react';
-import { Transforms, Range } from 'slate';
+import { Transforms, Range, Editor } from 'slate';
 import { useModal } from '@faceless-ui/modal';
 import ElementButton from '../../Button';
 import LinkIcon from '../../../../../../icons/Link';
@@ -15,6 +15,10 @@ import { getBaseFields } from '../LinkDrawer/baseFields';
 import { LinkDrawer } from '../LinkDrawer';
 import { Field } from '../../../../../../../../fields/config/types';
 import { Props as RichTextFieldProps } from '../../../types';
+import buildStateFromSchema from '../../../../../Form/buildStateFromSchema';
+import { useAuth } from '../../../../../../utilities/Auth';
+import { Fields } from '../../../../../Form/types';
+import { useLocale } from '../../../../../../utilities/Locale';
 
 const insertLink = (editor, fields) => {
   const isCollapsed = editor.selection && Range.isCollapsed(editor.selection);
@@ -56,6 +60,9 @@ export const LinkButton: React.FC<{
   fieldProps: RichTextFieldProps
 }> = ({ fieldProps }) => {
   const customFieldSchema = fieldProps?.admin?.link?.fields;
+  const { user } = useAuth();
+  const locale = useLocale();
+  const [initialState, setInitialState] = useState<Fields>({});
 
   const { t } = useTranslation(['upload', 'general']);
   const editor = useSlate();
@@ -99,11 +106,22 @@ export const LinkButton: React.FC<{
         format="link"
         tooltip={t('fields:addLink')}
         className="link"
-        onClick={() => {
+        onClick={async () => {
           if (isElementActive(editor, 'link')) {
             unwrapLink(editor);
           } else {
             openModal(drawerSlug);
+
+            const isCollapsed = editor.selection && Range.isCollapsed(editor.selection);
+
+            if (!isCollapsed) {
+              const data = {
+                text: editor.selection ? Editor.string(editor, editor.selection) : '',
+              };
+
+              const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'create', locale, t });
+              setInitialState(state);
+            }
           }
         }}
       >
@@ -115,6 +133,7 @@ export const LinkButton: React.FC<{
           insertLink(editor, fields);
           closeModal(drawerSlug);
         }}
+        initialState={initialState}
         fieldSchema={fieldSchema}
         handleClose={() => {
           closeModal(drawerSlug);
