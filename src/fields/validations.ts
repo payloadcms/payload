@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongoose';
 import defaultRichTextValue from './richText/defaultValue';
 import {
   ArrayField,
@@ -19,6 +20,7 @@ import {
   UploadField,
   Validate,
   fieldAffectsData,
+  valueIsValueWithRelation,
 } from './config/types';
 import { TypeWithID } from '../collections/config/types';
 import canUseDOM from '../utilities/canUseDOM';
@@ -185,7 +187,7 @@ export const date: Validate<unknown, unknown, DateField> = (value, { t, required
 const validateFilterOptions: Validate = async (value, { t, filterOptions, id, user, data, siblingData, relationTo, payload }) => {
   if (!canUseDOM && typeof filterOptions !== 'undefined' && value) {
     const options: {
-      [collection: string]: (string | number)[]
+      [collection: string]: (string | number | ObjectId)[]
     } = {};
 
     const collections = typeof relationTo === 'string' ? [relationTo] : relationTo;
@@ -200,14 +202,12 @@ const validateFilterOptions: Validate = async (value, { t, filterOptions, id, us
         relationTo: collection,
       }) : filterOptions;
 
-      const valueIDs: (string | number)[] = [];
+      const valueIDs: (string | number | ObjectId)[] = [];
 
       values.forEach((val) => {
-        if (typeof val === 'object' && val?.value) {
+        if (valueIsValueWithRelation(val)) {
           valueIDs.push(val.value);
-        }
-
-        if (typeof val === 'string' || typeof val === 'number') {
+        } else {
           valueIDs.push(val);
         }
       });
@@ -228,20 +228,17 @@ const validateFilterOptions: Validate = async (value, { t, filterOptions, id, us
 
     const invalidRelationships = values.filter((val) => {
       let collection: string;
-      let requestedID: string | number;
+      let requestedID: string | number | ObjectId;
 
-      if (typeof relationTo === 'string') {
-        collection = relationTo;
-
-        if (typeof val === 'string' || typeof val === 'number') {
-          requestedID = val;
-        }
-      }
-
-      if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
-        collection = val.relationTo;
+      if (valueIsValueWithRelation(val)) {
         requestedID = val.value;
+        collection = val.relationTo;
+      } else if (typeof relationTo === 'string') {
+        collection = relationTo;
+        requestedID = val;
       }
+
+      if (typeof requestedID === 'object') requestedID = String(requestedID);
 
       return options[collection].indexOf(requestedID) === -1;
     });
@@ -285,24 +282,20 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
 
     const invalidRelationships = values.filter((val) => {
       let collection: string;
-      let requestedID: string | number;
+      let requestedID: string | number | ObjectId;
 
-      if (typeof options.relationTo === 'string') {
-        collection = options.relationTo;
-
-        // custom id
-        if (typeof val === 'string' || typeof val === 'number') {
-          requestedID = val;
-        }
-      }
-
-      if (Array.isArray(options.relationTo) && typeof val === 'object' && val?.relationTo) {
-        collection = val.relationTo;
+      if (valueIsValueWithRelation(val)) {
         requestedID = val.value;
+        collection = val.relationTo;
+      } else if (typeof options.relationTo === 'string') {
+        collection = options.relationTo;
+        requestedID = val;
       }
 
-      const idField = options.payload.collections[collection].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+      const idField = options.payload.collections[collection]?.config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+
       let type;
+
       if (idField) {
         type = idField.type === 'number' ? 'number' : 'text';
       } else {

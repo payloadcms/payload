@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import deepmerge from 'deepmerge';
+import { isPlainObject } from 'is-plain-object';
 import mongoose, { FilterQuery } from 'mongoose';
 import { combineMerge } from '../utilities/combineMerge';
 import { CollectionModel } from '../collections/config/types';
@@ -103,7 +104,7 @@ class ParamParser {
                   [searchParam.path]: searchParam.value,
                 };
               } else if (typeof searchParam?.value === 'object') {
-                result = deepmerge(result, searchParam.value, { arrayMerge: combineMerge });
+                result = deepmerge(result, searchParam.value, { arrayMerge: combineMerge, isMergeableObject: isPlainObject });
               }
             }
           }
@@ -255,7 +256,11 @@ class ParamParser {
 
             const result = await SubModel.find(subQuery, subQueryOptions);
 
-            const $in = result.map((doc) => doc._id.toString());
+            const $in = result.reduce((ids, doc) => {
+              ids.push(doc._id.toString());
+              ids.push(doc._id);
+              return ids;
+            }, []);
 
             if (collectionPathsToSearch.length === 1) return { path, value: { $in } };
 
@@ -307,22 +312,26 @@ class ParamParser {
             ],
           };
 
-          if (typeof formattedValue === 'number' || (typeof formattedValue === 'string' && mongoose.Types.ObjectId.isValid(formattedValue))) {
+          if (typeof formattedValue === 'string' && mongoose.Types.ObjectId.isValid(formattedValue)) {
             query.$or.push({
               [path]: {
                 [operatorKey]: formattedValue.toString(),
               },
             });
+
+            query.$or.push({
+              [path]: {
+                [operatorKey]: new mongoose.Types.ObjectId(formattedValue),
+              },
+            });
           }
 
-          if (typeof formattedValue === 'string') {
-            if (!Number.isNaN(formattedValue)) {
-              query.$or.push({
-                [path]: {
-                  [operatorKey]: parseFloat(formattedValue),
-                },
-              });
-            }
+          if (typeof formattedValue === 'string' && !Number.isNaN(formattedValue)) {
+            query.$or.push({
+              [path]: {
+                [operatorKey]: parseFloat(formattedValue),
+              },
+            });
           }
         }
 

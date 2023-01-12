@@ -1,3 +1,5 @@
+import { isPlainObject } from 'is-plain-object';
+
 const deepCopyObject = (inObject) => {
   if (inObject instanceof Date) return inObject;
 
@@ -5,17 +7,22 @@ const deepCopyObject = (inObject) => {
     return inObject; // Return the value if inObject is not an object
   }
 
-  // Create an array or object to hold the values
-  const outObject = Array.isArray(inObject) ? [] : {};
+  const isArray = Array.isArray(inObject);
 
-  Object.keys(inObject).forEach((key) => {
-    const value = inObject[key];
+  if (isPlainObject(inObject) || isArray) {
+    // Create an array or object to hold the values
+    const outObject = isArray ? [] : {};
 
-    // Recursively (deep) copy for nested objects, including arrays
-    outObject[key] = (typeof value === 'object' && value !== null) ? deepCopyObject(value) : value;
-  });
+    Object.keys(inObject).forEach((key) => {
+      const value = inObject[key];
 
-  return outObject;
+      // Recursively (deep) copy for nested objects, including arrays
+      outObject[key] = (typeof value === 'object' && value !== null) ? deepCopyObject(value) : value;
+    });
+
+    return outObject;
+  }
+  return inObject;
 };
 
 export default deepCopyObject;

@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import mongoose from 'mongoose';
 import { PayloadRequest } from '../../../express/types';
 import { Field, fieldAffectsData, TabAsField, tabHasName, valueIsValueWithRelation } from '../../config/types';
 import { traverseFields } from './traverseFields';
@@ -98,6 +99,10 @@ export const promise = async ({
               if (relationshipIDField?.type === 'number') {
                 siblingData[field.name][i] = { ...relatedDoc, value: parseFloat(relatedDoc.value as string) };
               }
+
+              if (!relationshipIDField && typeof relatedDoc.value === 'string') {
+                siblingData[field.name][i] = { ...relatedDoc, value: new mongoose.Types.ObjectId(relatedDoc.value) };
+              }
             });
           }
           if (field.type === 'relationship' && field.hasMany !== true && valueIsValueWithRelation(value)) {
@@ -105,6 +110,10 @@ export const promise = async ({
             const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
             if (relationshipIDField?.type === 'number') {
               siblingData[field.name] = { ...value, value: parseFloat(value.value as string) };
+            }
+
+            if (!relationshipIDField && typeof value.value === 'string') {
+              siblingData[field.name] = { ...value, value: new mongoose.Types.ObjectId(value.value) };
             }
           }
         } else {
@@ -115,6 +124,10 @@ export const promise = async ({
               if (relationshipIDField?.type === 'number') {
                 siblingData[field.name][i] = parseFloat(relatedDoc as string);
               }
+
+              if (!relationshipIDField && typeof relatedDoc === 'string') {
+                siblingData[field.name][i] = new mongoose.Types.ObjectId(relatedDoc);
+              }
             });
           }
           if (field.type === 'relationship' && field.hasMany !== true && value) {
@@ -122,6 +135,10 @@ export const promise = async ({
             const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
             if (relationshipIDField?.type === 'number') {
               siblingData[field.name] = parseFloat(value as string);
+            }
+
+            if (!relationshipIDField && typeof value === 'string') {
+              siblingData[field.name] = new mongoose.Types.ObjectId(value);
             }
           }
         }

@@ -3,6 +3,7 @@ import { CSSProperties } from 'react';
 import { Editor } from 'slate';
 import type { TFunction } from 'i18next';
 import type { EditorProps } from '@monaco-editor/react';
+import { ObjectId } from 'mongoose';
 import { Operation, Where } from '../../types';
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
@@ -293,15 +294,15 @@ export type RelationshipField = FieldBase & {
 
 export type ValueWithRelation = {
   relationTo: string
-  value: string | number
+  value: string | number | ObjectId
 }
 
 export function valueIsValueWithRelation(value: unknown): value is ValueWithRelation {
   return value !== null && typeof value === 'object' && 'relationTo' in value && 'value' in value;
 }
 
-export type RelationshipValue = (string | number)
-  | (string | number)[]
+export type RelationshipValue = (string | number | ObjectId)
+  | (string | number | ObjectId)[]
   | ValueWithRelation
   | ValueWithRelation[]
 
