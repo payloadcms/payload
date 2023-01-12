@@ -20,11 +20,19 @@ const ColumnSelector: React.FC<Props> = (props) => {
     setColumns,
   } = props;
 
-  const [fields, setFields] = useState(() => flattenTopLevelFields(collection.fields, true));
+  const sortedFlatFields = useCallback(() => {
+    const _fields = flattenTopLevelFields(collection.fields, true);
+    return [
+      ...columns.map((column) => _fields.find((f) => f.name === column)),
+      ..._fields.filter((f) => !columns.find((c) => c === f.name)),
+    ];
+  }, [columns, collection.fields]);
+
+  const [fields, setFields] = useState(() => sortedFlatFields());
 
   useEffect(() => {
-    setFields(flattenTopLevelFields(collection.fields, true));
-  }, [collection.fields]);
+    setFields(sortedFlatFields());
+  }, [sortedFlatFields]);
 
   const { i18n } = useTranslation();
   const uuid = useId();
