@@ -167,7 +167,7 @@ export const mergeDrafts = async <T extends TypeWithID>({
   }
 
   if (excludedParentIDs.length > 0) {
-    finalQueryToBuild.where.and[0].or.push({
+    finalQueryToBuild.where.and.push({
       id: {
         not_in: excludedParentIDs,
       },
