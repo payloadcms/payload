@@ -16,6 +16,7 @@ import { Fields } from '../../../forms/Form/types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { EditDepthContext } from '../../../utilities/EditDepth';
 import { CollectionPermission } from '../../../../../auth';
+import { useFullscreenLoader } from '../../../utilities/FullscreenLoaderProvider';
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props;
@@ -46,6 +47,9 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { getVersions, preferencesKey, getDocPermissions, docPermissions } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { t } = useTranslation('general');
+  const { setShowLoader } = useFullscreenLoader();
+
+  const isLoading = !initialState || !docPermissions;
 
   const onSave = useCallback(async (json: any) => {
     getVersions();
@@ -59,7 +63,7 @@ const EditView: React.FC<IndexProps> = (props) => {
     }
   }, [admin, collection, isEditing, getVersions, user, id, t, locale, getDocPermissions]);
 
-  const [{ data, isLoading: isLoadingDocument, isError }] = usePayloadAPI(
+  const [{ data, isLoading: isLoadingData, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
   );
@@ -67,9 +71,8 @@ const EditView: React.FC<IndexProps> = (props) => {
   const dataToRender = (locationState as Record<string, unknown>)?.data || data;
 
   useEffect(() => {
-    if (isLoadingDocument) {
-      return;
-    }
+    if (isLoadingData) return;
+
     const awaitInitialState = async () => {
       setUpdatedAt(dataToRender?.updatedAt);
       const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: isEditing ? 'update' : 'create', id, locale, t });
@@ -78,13 +81,17 @@ const EditView: React.FC<IndexProps> = (props) => {
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, isEditing, id, user, locale, isLoadingDocument, preferencesKey, getPreference, t]);
+  }, [dataToRender, fields, isEditing, id, user, locale, isLoadingData, preferencesKey, getPreference, t]);
 
   useEffect(() => {
     if (redirect) {
       history.push(redirect);
     }
   }, [history, redirect]);
+
+  useEffect(() => {
+    setShowLoader(isLoading);
+  }, [isLoading, setShowLoader]);
 
   if (isError) {
     return (
@@ -103,7 +110,7 @@ const EditView: React.FC<IndexProps> = (props) => {
         CustomComponent={CustomEdit}
         componentProps={{
           id,
-          isLoading: !initialState || !docPermissions,
+          isLoading,
           data: dataToRender,
           collection,
           permissions: docPermissions,

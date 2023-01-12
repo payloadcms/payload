@@ -5,9 +5,7 @@ import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
-
 import { useLocale } from '../../utilities/Locale';
-
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultGlobal from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
@@ -15,9 +13,10 @@ import { IndexProps } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { Fields } from '../../forms/Form/types';
 import { usePreferences } from '../../utilities/Preferences';
+import { useFullscreenLoader } from '../../utilities/FullscreenLoaderProvider';
 
 const GlobalView: React.FC<IndexProps> = (props) => {
-  const { state: locationState } = useLocation<{data?: Record<string, unknown>}>();
+  const { state: locationState } = useLocation<{ data?: Record<string, unknown> }>();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
   const { user } = useAuth();
@@ -26,6 +25,9 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { getVersions, preferencesKey, docPermissions, getDocPermissions } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { t } = useTranslation();
+  const { setShowLoader } = useFullscreenLoader();
+
+  const isLoading = !initialState || !docPermissions;
 
   const {
     serverURL,
@@ -57,7 +59,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     setInitialState(state);
   }, [getVersions, fields, user, locale, t, getDocPermissions]);
 
-  const [{ data }] = usePayloadAPI(
+  const [{ data, isLoading: isLoadingData }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
   );
@@ -73,6 +75,8 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   }, [setStepNav, label]);
 
   useEffect(() => {
+    if (isLoadingData) return;
+
     const awaitInitialState = async () => {
       const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: 'update', locale, t });
       await getPreference(preferencesKey);
@@ -80,14 +84,18 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t]);
+  }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t, isLoadingData]);
+
+  useEffect(() => {
+    setShowLoader(isLoading);
+  }, [isLoading, setShowLoader]);
 
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultGlobal}
       CustomComponent={CustomEdit}
       componentProps={{
-        isLoading: !initialState || !docPermissions,
+        isLoading,
         data: dataToRender,
         permissions: docPermissions,
         initialState,

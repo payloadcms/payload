@@ -18,6 +18,7 @@ import Routes from './components/Routes';
 import { StepNavProvider } from './components/elements/StepNav';
 import { ThemeProvider } from './components/utilities/Theme';
 import { I18n } from './components/utilities/I18n';
+import { FullscreenLoaderProvider } from './components/utilities/FullscreenLoaderProvider';
 
 import './scss/app.scss';
 
@@ -45,9 +46,11 @@ const Index = () => (
                     <SearchParamsProvider>
                       <LocaleProvider>
                         <StepNavProvider>
-                          <CustomProvider>
-                            <Routes />
-                          </CustomProvider>
+                          <FullscreenLoaderProvider>
+                            <CustomProvider>
+                              <Routes />
+                            </CustomProvider>
+                          </FullscreenLoaderProvider>
                         </StepNavProvider>
                       </LocaleProvider>
                     </SearchParamsProvider>

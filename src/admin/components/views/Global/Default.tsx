@@ -14,7 +14,6 @@ import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 import VersionsCount from '../../elements/VersionsCount';
 import { Props } from './types';
 import ViewDescription from '../../elements/ViewDescription';
-import Loading from '../../elements/Loading';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import SaveDraft from '../../elements/SaveDraft';
 import Publish from '../../elements/Publish';
@@ -52,9 +51,6 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
 
   return (
     <div className={baseClass}>
-      {isLoading && (
-        <Loading />
-      )}
       {!isLoading && (
         <OperationContext.Provider value="update">
           <Form

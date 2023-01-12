@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
-
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import { useLocale } from '../../utilities/Locale';
 import DefaultAccount from './Default';
@@ -13,6 +12,7 @@ import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { Fields } from '../../forms/Form/types';
 import { usePreferences } from '../../utilities/Preferences';
+import { useFullscreenLoader } from '../../utilities/FullscreenLoaderProvider';
 
 const AccountView: React.FC = () => {
   const { state: locationState } = useLocation<{ data: unknown }>();
@@ -22,6 +22,7 @@ const AccountView: React.FC = () => {
   const [initialState, setInitialState] = useState<Fields>();
   const { id, preferencesKey, docPermissions, getDocPermissions, slug } = useDocumentInfo();
   const { getPreference } = usePreferences();
+  const { setShowLoader } = useFullscreenLoader();
 
   const {
     serverURL,
@@ -39,11 +40,12 @@ const AccountView: React.FC = () => {
   } = useConfig();
   const { t } = useTranslation('authentication');
 
+  const isLoading = !initialState || !docPermissions;
   const collection = collections.find((coll) => coll.slug === slug);
 
   const { fields } = collection;
 
-  const [{ data }] = usePayloadAPI(
+  const [{ data, isLoading: isLoadingData }] = usePayloadAPI(
     `${serverURL}${api}/${slug}/${id}`,
     {
       initialParams: {
@@ -74,6 +76,8 @@ const AccountView: React.FC = () => {
   }, [setStepNav, t]);
 
   useEffect(() => {
+    if (isLoadingData) return;
+
     const awaitInitialState = async () => {
       const state = await buildStateFromSchema({
         fieldSchema: fields,
@@ -89,7 +93,11 @@ const AccountView: React.FC = () => {
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, t]);
+  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, t, isLoadingData]);
+
+  useEffect(() => {
+    setShowLoader(isLoading);
+  }, [isLoading, setShowLoader]);
 
   return (
     <RenderCustomComponent
@@ -103,7 +111,7 @@ const AccountView: React.FC = () => {
         hasSavePermission,
         initialState,
         apiURL,
-        isLoading: !initialState || !docPermissions,
+        isLoading,
         onSave,
       }}
     />

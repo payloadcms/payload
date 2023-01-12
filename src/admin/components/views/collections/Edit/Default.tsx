@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import Eyebrow from '../../../elements/Eyebrow';
 import Form from '../../../forms/Form';
-import Loading from '../../../elements/Loading';
 import PreviewButton from '../../../elements/PreviewButton';
 import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
@@ -82,9 +81,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
 
   return (
     <div className={classes}>
-      {isLoading && (
-        <Loading />
-      )}
       {!isLoading && (
         <OperationContext.Provider value={operation}>
           <Form

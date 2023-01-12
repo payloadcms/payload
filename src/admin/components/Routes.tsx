@@ -8,12 +8,13 @@ import { useConfig } from './utilities/Config';
 import List from './views/collections/List';
 import DefaultTemplate from './templates/Default';
 import { requests } from '../api';
-import Loading, { FullscreenLoader } from './elements/Loading';
 import StayLoggedIn from './modals/StayLoggedIn';
 import Versions from './views/Versions';
 import Version from './views/Version';
 import { DocumentInfoProvider } from './utilities/DocumentInfo';
 import { useLocale } from './utilities/Locale';
+import { useFullscreenLoader } from './utilities/FullscreenLoaderProvider';
+import { ForceFullscreenLoader } from './elements/Loading';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -32,6 +33,7 @@ const Routes = () => {
   const [initialized, setInitialized] = useState(null);
   const { user, permissions, refreshCookie } = useAuth();
   const { i18n } = useTranslation();
+  const { setShowLoader } = useFullscreenLoader();
   const locale = useLocale();
 
   const canAccessAdmin = permissions?.canAccessAdmin;
@@ -51,7 +53,7 @@ const Routes = () => {
     globals,
   } = config;
 
-
+  const isLoadingUser = Boolean(typeof user === 'undefined' || (user && typeof canAccessAdmin === 'undefined'));
   const userCollection = collections.find(({ slug }) => slug === userSlug);
 
   useEffect(() => {
@@ -72,8 +74,12 @@ const Routes = () => {
     }
   }, [i18n.language, routes, userCollection]);
 
+  React.useEffect(() => {
+    setShowLoader(isLoadingUser);
+  }, [isLoadingUser, setShowLoader]);
+
   return (
-    <Suspense fallback={<FullscreenLoader />}>
+    <Suspense fallback={<ForceFullscreenLoader />}>
       <Route
         path={routes.admin}
         render={({ match }) => {
@@ -90,11 +96,7 @@ const Routes = () => {
             );
           }
 
-          if (initialized === true) {
-            if (typeof user === 'undefined' || (user && typeof canAccessAdmin === 'undefined')) {
-              return <FullscreenLoader />;
-            }
-
+          if (initialized === true && !isLoadingUser) {
             return (
               <Switch>
                 {Array.isArray(customRoutes) && customRoutes.map(({ path, Component, strict, exact, sensitive }) => (
@@ -365,7 +367,10 @@ const Routes = () => {
                         return <Unauthorized />;
                       }
 
-                      return <Loading />;
+                      return (
+                        // user without admin panel access
+                        <div />
+                      );
                     }
 
                     return <Redirect to={`${match.url}/login`} />;

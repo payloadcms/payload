@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import Eyebrow from '../../elements/Eyebrow';
-import Loading from '../../elements/Loading';
 import { useStepNav } from '../../elements/StepNav';
 import { StepNavItem } from '../../elements/StepNav/types';
 import Meta from '../../utilities/Meta';
@@ -22,6 +21,7 @@ import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 import { shouldIncrementVersionCount } from '../../../../versions/shouldIncrementVersionCount';
 import { Gutter } from '../../elements/Gutter';
 import { getTranslation } from '../../../../utilities/getTranslation';
+import { useFullscreenLoader } from '../../utilities/FullscreenLoaderProvider';
 
 import './index.scss';
 
@@ -35,6 +35,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   const [tableColumns] = useState(() => getColumns(collection, global, t));
   const [fetchURL, setFetchURL] = useState('');
   const { page, sort, limit } = useSearchParams();
+  const { setShowLoader } = useFullscreenLoader();
 
   let docURL: string;
   let entityLabel: string;
@@ -60,7 +61,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
 
   const useAsTitle = collection?.admin?.useAsTitle || 'id';
   const [{ data: doc }] = usePayloadAPI(docURL, { initialParams: { draft: 'true' } });
-  const [{ data: versionsData, isLoading: isLoadingVersions }, { setParams }] = usePayloadAPI(fetchURL);
+  const [{ data: versionsData, isLoading: isLoadingData }, { setParams }] = usePayloadAPI(fetchURL);
 
   useEffect(() => {
     let nav: StepNavItem[] = [];
@@ -146,6 +147,10 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     setParams(params);
   }, [setParams, page, sort, limit, serverURL, api, id, global, collection]);
 
+  useEffect(() => {
+    setShowLoader(isLoadingData);
+  }, [isLoadingData, setShowLoader]);
+
   let useIDLabel = doc[useAsTitle] === doc?.id;
   let heading: string;
   let metaDesc: string;
@@ -187,9 +192,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
             </h1>
           )}
         </header>
-        {isLoadingVersions && (
-          <Loading />
-        )}
+
         {showParentDoc && (
           <Banner
             type={docStatus === 'published' ? 'success' : undefined}
@@ -228,22 +231,22 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
                 numberOfNeighbors={1}
               />
               {versionsData?.totalDocs > 0 && (
-              <React.Fragment>
-                <div className={`${baseClass}__page-info`}>
-                  {(versionsData.page * versionsData.limit) - (versionsData.limit - 1)}
-                  -
-                  {versionsData.totalPages > 1 && versionsData.totalPages !== versionsData.page ? (versionsData.limit * versionsData.page) : versionsData.totalDocs}
-                  {' '}
-                  {t('of')}
-                  {' '}
-                  {versionsData.totalDocs}
-                </div>
-                <PerPage
-                  limits={collection?.admin?.pagination?.limits}
-                  limit={limit ? Number(limit) : 10}
-                />
-              </React.Fragment>
-          )}
+                <React.Fragment>
+                  <div className={`${baseClass}__page-info`}>
+                    {(versionsData.page * versionsData.limit) - (versionsData.limit - 1)}
+                    -
+                    {versionsData.totalPages > 1 && versionsData.totalPages !== versionsData.page ? (versionsData.limit * versionsData.page) : versionsData.totalDocs}
+                    {' '}
+                    {t('of')}
+                    {' '}
+                    {versionsData.totalDocs}
+                  </div>
+                  <PerPage
+                    limits={collection?.admin?.pagination?.limits}
+                    limit={limit ? Number(limit) : 10}
+                  />
+                </React.Fragment>
+              )}
             </div>
           </React.Fragment>
         )}

@@ -6,7 +6,6 @@ import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import Eyebrow from '../../elements/Eyebrow';
-import Loading from '../../elements/Loading';
 import { useStepNav } from '../../elements/StepNav';
 import { StepNavItem } from '../../elements/StepNav/types';
 import Meta from '../../utilities/Meta';
@@ -22,6 +21,7 @@ import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/
 import { FieldPermissions } from '../../../../auth';
 import { useLocale } from '../../utilities/Locale';
 import { Gutter } from '../../elements/Gutter';
+import { useFullscreenLoader } from '../../utilities/FullscreenLoaderProvider';
 
 import './index.scss';
 
@@ -37,6 +37,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const { permissions } = useAuth();
   const locale = useLocale();
   const { t, i18n } = useTranslation('version');
+  const { setShowLoader } = useFullscreenLoader();
 
   let originalDocFetchURL: string;
   let versionFetchURL: string;
@@ -70,7 +71,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
   const compareFetchURL = compareValue?.value === 'mostRecent' || compareValue?.value === 'published' ? originalDocFetchURL : `${compareBaseURL}/${compareValue.value}`;
 
-  const [{ data: doc, isLoading }] = usePayloadAPI(versionFetchURL, { initialParams: { locale: '*', depth: 1 } });
+  const [{ data: doc, isLoading: isLoadingData }] = usePayloadAPI(versionFetchURL, { initialParams: { locale: '*', depth: 1 } });
   const [{ data: publishedDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { locale: '*', depth: 1 } });
   const [{ data: mostRecentDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { locale: '*', depth: 1, draft: true } });
   const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL, { initialParams: { locale: '*', depth: 1, draft: 'true' } });
@@ -139,6 +140,10 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     setStepNav(nav);
   }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale, t, i18n]);
 
+  useEffect(() => {
+    setShowLoader(isLoadingData);
+  }, [isLoadingData, setShowLoader]);
+
   let metaTitle: string;
   let metaDesc: string;
   const formattedCreatedAt = doc?.createdAt ? format(new Date(doc.createdAt), dateFormat) : '';
@@ -205,9 +210,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
             />
           )}
         </div>
-        {isLoading && (
-          <Loading />
-        )}
+
         {doc?.version && (
           <RenderFieldsToDiff
             locales={locales ? locales.map(({ value }) => value) : []}

@@ -14,7 +14,6 @@ import RenderTitle from '../../elements/RenderTitle';
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 import Meta from '../../utilities/Meta';
 import Auth from '../collections/Edit/Auth';
-import Loading from '../../elements/Loading';
 import { Props } from './types';
 import { OperationContext } from '../../utilities/OperationProvider';
 import { ToggleTheme } from './ToggleTheme';
@@ -64,9 +63,6 @@ const DefaultAccount: React.FC<Props> = (props) => {
 
   return (
     <div className={classes}>
-      {isLoading && (
-        <Loading />
-      )}
       {!isLoading && (
         <OperationContext.Provider value="update">
           <Form
