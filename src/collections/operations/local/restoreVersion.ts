@@ -5,6 +5,7 @@ import { TypeWithVersion } from '../../../versions/types';
 import { getDataLoader } from '../../dataloader';
 import restoreVersion from '../restoreVersion';
 import i18nInit from '../../../translations/init';
+import { APIError } from '../../../errors';
 
 export type Options = {
   collection: string
@@ -30,6 +31,11 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
   } = options;
 
   const collection = payload.collections[collectionSlug];
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+  }
+
   const i18n = i18nInit(payload.config.i18n);
   const req = {
     user,

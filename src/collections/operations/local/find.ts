@@ -6,6 +6,7 @@ import { PayloadRequest } from '../../../express/types';
 import find from '../find';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
+import { APIError } from '../../../errors';
 
 export type Options = {
   collection: string
@@ -49,6 +50,10 @@ export default async function findLocal<T extends TypeWithID = any>(payload: Pay
 
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+  }
 
   req.payloadAPI = 'local';
   req.locale = locale ?? req?.locale ?? defaultLocale;
