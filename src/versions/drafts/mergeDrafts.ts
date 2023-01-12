@@ -99,6 +99,28 @@ export const mergeDrafts = async <T extends TypeWithID>({
         createdAt: { $first: '$createdAt' },
       },
     },
+    {
+      $addFields: {
+        id: {
+          $toObjectId: '$_id',
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: collection.config.slug,
+        localField: 'id',
+        foreignField: '_id',
+        as: 'parent',
+      },
+    },
+    {
+      $match: {
+        parent: {
+          $size: 1,
+        },
+      },
+    },
     { $match: versionQuery },
     { $limit: paginationOptions.limit },
   ]).then((res) => res.reduce<VersionCollectionMatchMap<T>>((map, { _id, updatedAt, createdAt, version }) => {
