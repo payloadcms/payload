@@ -1,3 +1,4 @@
+import { BaseConfig } from '../../../config/types';
 import { TypeWithID } from '../../config/types';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
@@ -6,8 +7,8 @@ import { Payload } from '../../../payload';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 
-export type Options = {
-  collection: string
+export type Options<Config extends BaseConfig = any> = {
+  collection: keyof Config['collections']
   id: string
   depth?: number
   currentDepth?: number

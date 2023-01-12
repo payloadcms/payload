@@ -20,6 +20,15 @@ import { PayloadRequest } from '../express/types';
 import { Where } from '../types';
 import { User } from '../auth/types';
 
+export interface BaseConfig {
+  collections: {
+    [slug: string]: Record<string, unknown>
+  }
+  globals: {
+    [slug: string]: Record<string, unknown>
+  }
+}
+
 type Email = {
   fromName: string;
   fromAddress: string;

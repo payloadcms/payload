@@ -4,6 +4,7 @@ import { GraphQLError, GraphQLFormattedError, GraphQLSchema } from 'graphql';
 import crypto from 'crypto';
 import path from 'path';
 import mongoose from 'mongoose';
+import { ValueOf } from 'ts-essentials';
 import {
   TypeWithID,
   Collection,
@@ -13,6 +14,7 @@ import {
   SanitizedConfig,
   EmailOptions,
   InitOptions,
+  BaseConfig,
 } from './config/types';
 import { TypeWithVersion } from './versions/types';
 import { PaginatedDocs } from './mongoose/types';
@@ -64,7 +66,7 @@ import findConfig from './config/find';
 /**
  * @description Payload
  */
-export class Payload<C = any> {
+export class Payload<Config extends BaseConfig = any> {
   config: SanitizedConfig;
 
   collections: {
@@ -270,9 +272,9 @@ export class Payload<C = any> {
    * @param options
    * @returns document with specified ID
    */
-  findByID = async <T extends TypeWithID = any>(options: FindByIDOptions): Promise<T> => {
+  findByID = async (options: FindByIDOptions<Config>): Promise<Config['collections'][ValueOf<typeof options['collection']>]> => {
     const { findByID } = localOperations;
-    return findByID<T>(this, options);
+    return findByID(this, options);
   }
 
   /**

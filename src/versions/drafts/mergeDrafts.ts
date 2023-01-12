@@ -51,6 +51,8 @@ export const mergeDrafts = async <T extends TypeWithID>({
       return newMap;
     }, {}));
 
+  console.log({ mainCollectionMatchMap });
+
   // Query the versions collection with a version-specific query
   const VersionModel = payload.versions[collection.config.slug] as CollectionModel;
 
@@ -100,6 +102,28 @@ export const mergeDrafts = async <T extends TypeWithID>({
         createdAt: { $first: '$createdAt' },
       },
     },
+    {
+      $addFields: {
+        id: {
+          $toObjectId: '$_id',
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: collection.config.slug,
+        localField: 'id',
+        foreignField: '_id',
+        as: 'parent',
+      },
+    },
+    {
+      $match: {
+        parent: {
+          $size: 1,
+        },
+      },
+    },
     { $match: versionQuery },
     { $limit: paginationOptions.limit },
   ]).then((res) => res.reduce<VersionCollectionMatchMap<T>>((map, { _id, updatedAt, createdAt, version }) => {
@@ -110,6 +134,9 @@ export const mergeDrafts = async <T extends TypeWithID>({
     if (!matchedParent) includedParentIDs.push(_id);
     return newMap;
   }, {}));
+
+  console.log({ versionCollectionMatchMap });
+  console.log({ includedParentIDs });
 
   // Now we need to explicitly exclude any parent matches that have newer versions
   // which did NOT appear in the versions query
@@ -124,6 +151,9 @@ export const mergeDrafts = async <T extends TypeWithID>({
     const versionsQuery = await VersionModel.find({
       updatedAt: {
         $gt: parentDocUpdatedAt,
+      },
+      parent: {
+        $eq: parentDocID,
       },
     }, {}, { limit: 1 }).lean();
 
@@ -171,6 +201,8 @@ export const mergeDrafts = async <T extends TypeWithID>({
       },
     });
   }
+
+  console.log({ finalQueryToBuild: JSON.stringify(finalQueryToBuild) });
 
   const finalQuery = await collection.Model.buildQuery(finalQueryToBuild, locale);
 
