@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useId, useState } from 'react';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import { useTranslation } from 'react-i18next';
 import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 import Pill from '../Pill';
@@ -31,7 +31,6 @@ const ColumnSelector: React.FC<Props> = (props) => {
   const editDepth = useEditDepth();
 
   const moveColumn = useCallback((moveFromIndex: number, moveToIndex: number) => {
-    console.log(moveFromIndex, moveToIndex);
     const newState = [...fields];
     const element = fields[moveFromIndex];
     newState.splice(moveFromIndex, 1);
@@ -40,7 +39,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
     setColumns(newState.filter((field) => columns.find((column) => column === field.name)).map((field) => field.name));
   }, [columns, fields, setColumns, setFields]);
 
-  const onDragEnd = useCallback((result) => {
+  const onDragEnd = useCallback((result: DropResult) => {
     if (!result.destination) return;
     const sourceIndex = result.source.index;
     const destinationIndex = result.destination.index;
@@ -84,14 +83,13 @@ const ColumnSelector: React.FC<Props> = (props) => {
                       </span>
                       <Pill
                         onClick={() => {
-                          let newState = [...columns];
                           if (isEnabled) {
-                            newState = newState.filter((remainingColumn) => remainingColumn !== field.name);
+                            setColumns(columns.filter((remainingColumn) => remainingColumn !== field.name));
                           } else {
-                            newState.unshift(field.name);
+                            setColumns(fields
+                              .filter((f) => columns.find((column) => column === f.name) || f.name === field.name)
+                              .map((f) => f.name));
                           }
-
-                          setColumns(newState);
                         }}
                         alignIcon="left"
                         key={`${field.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
