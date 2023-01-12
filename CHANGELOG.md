@@ -1,5 +1,12 @@
 
 
+## [1.5.8](https://github.com/payloadcms/payload/compare/v1.5.7...v1.5.8) (2023-01-12)
+
+
+### Features
+
+* throws descriptive error when collection or global slug not found ([b847d85](https://github.com/payloadcms/payload/commit/b847d85e60032b47a8eacc2c9426fdd373dff879))
+
 ## [1.5.7](https://github.com/payloadcms/payload/compare/v1.5.6...v1.5.7) (2023-01-12)
 
 
