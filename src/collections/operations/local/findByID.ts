@@ -5,6 +5,7 @@ import findByID from '../findByID';
 import { Payload } from '../../..';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
+import { APIError } from '../../../errors';
 
 export type Options = {
   collection: string
@@ -40,6 +41,10 @@ export default async function findByIDLocal<T extends TypeWithID = any>(payload:
 
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+  }
 
   req.payloadAPI = 'local';
   req.locale = locale ?? req?.locale ?? defaultLocale;

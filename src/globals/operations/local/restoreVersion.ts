@@ -5,6 +5,7 @@ import { Document } from '../../../types';
 import { TypeWithVersion } from '../../../versions/types';
 import restoreVersion from '../restoreVersion';
 import i18nInit from '../../../translations/init';
+import { APIError } from '../../../errors';
 
 export type Options = {
   slug: string
@@ -31,6 +32,10 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
   const i18n = i18nInit(payload.config.i18n);
+
+  if (!globalConfig) {
+    throw new APIError(`The global with slug ${globalSlug} can't be found.`);
+  }
 
   const req = {
     user,
