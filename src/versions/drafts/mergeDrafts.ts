@@ -5,7 +5,6 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { Collection, CollectionModel, TypeWithID } from '../../collections/config/types';
 import { hasWhereAccessResult } from '../../auth';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import replaceWithDraftIfAvailable from './replaceWithDraftIfAvailable';
 
 type AggregateVersion<T> = {
@@ -124,6 +123,9 @@ export const mergeDrafts = async <T extends TypeWithID>({
     const versionsQuery = await VersionModel.find({
       updatedAt: {
         $gt: parentDocUpdatedAt,
+      },
+      parent: {
+        $eq: parentDocID,
       },
     }, {}, { limit: 1 }).lean();
 
