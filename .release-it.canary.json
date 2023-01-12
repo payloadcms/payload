@@ -1,5 +1,5 @@
 {
-  "preReleaseId": "beta",
+  "preReleaseId": "canary",
   "git": {
     "requireCleanWorkingDir": false,
     "commit": false,
@@ -11,7 +11,7 @@
   },
   "npm": {
     "skipChecks": true,
-    "tag": "beta"
+    "tag": "canary"
   },
   "hooks": {
     "before:init": ["yarn", "yarn clean", "yarn test"]
