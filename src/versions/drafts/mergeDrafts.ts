@@ -154,8 +154,8 @@ export const mergeDrafts = async <T extends TypeWithID>({
     finalQueryToBuild.where.and.push(accessResult);
   }
 
-  if (where) {
-    finalQueryToBuild.where.and[0].or.push(where);
+  if (incomingWhere) {
+    finalQueryToBuild.where.and[0].or.push(incomingWhere);
   }
 
   if (includedParentIDs.length > 0) {
