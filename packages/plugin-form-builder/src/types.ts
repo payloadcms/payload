@@ -157,6 +157,7 @@ export type Email = {
   emailTo: string
   emailFrom: string
   emailFromName?: string
+  cc?: string
   bcc?: string
   replyTo?: string
   replyToName?: string
@@ -166,6 +167,8 @@ export type Email = {
 
 export type FormattedEmail = {
   to: string
+  cc?: string
+  bcc?: string
   from: string
   subject: string
   html: string

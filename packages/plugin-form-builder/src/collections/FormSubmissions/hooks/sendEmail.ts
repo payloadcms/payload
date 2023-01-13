@@ -45,6 +45,8 @@ const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig) => {
               message,
               subject,
               emailTo,
+              cc: emailCC,
+              bcc: emailBCC,
               emailFrom,
               emailFromName,
               replyTo: emailReplyTo,
@@ -52,13 +54,17 @@ const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig) => {
             } = email;
 
             const to = replaceDoubleCurlys(emailTo, submissionData);
+            const cc = emailCC ? replaceDoubleCurlys(emailCC, submissionData) : '';
+            const bcc = emailBCC ? replaceDoubleCurlys(emailBCC, submissionData) : '';
             const from = replaceDoubleCurlys(emailFromName ? `"${emailFromName}" ` + emailFrom : emailFrom, submissionData);
-            const replyTo = replaceDoubleCurlys(replyToName ? `"${replyToName}" ` + emailReplyTo :  emailReplyTo || emailFrom, submissionData);
+            const replyTo = replaceDoubleCurlys(replyToName ? `"${replyToName}" ` + emailReplyTo : emailReplyTo || emailFrom, submissionData);
 
             if (to && from) {
               return ({
                 to,
                 from,
+                cc,
+                bcc,
                 replyTo,
                 subject: replaceDoubleCurlys(subject, submissionData),
                 html: `<div>${serialize(message, submissionData)}</div>`
@@ -72,7 +78,6 @@ const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig) => {
           if (typeof beforeEmail === 'function') {
             emailsToSend = await beforeEmail(formattedEmails);
           }
-
           const log = emailsToSend.map(({ html, ...rest }) => ({ ...rest }))
 
           await Promise.all(

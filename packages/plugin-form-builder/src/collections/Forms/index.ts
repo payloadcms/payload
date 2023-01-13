@@ -155,8 +155,16 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
                 label: 'Email To',
                 required: true,
                 admin: {
-                  width: '50%',
+                  width: '100%',
                   placeholder: 'Email Sender <sender@email.com>'
+                },
+              },
+              {
+                type: 'text',
+                name: 'cc',
+                label: 'CC',
+                admin: {
+                  width: '50%',
                 },
               },
               {
