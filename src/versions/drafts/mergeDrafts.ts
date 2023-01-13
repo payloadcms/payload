@@ -100,16 +100,9 @@ export const mergeDrafts = async <T extends TypeWithID>({
       },
     },
     {
-      $addFields: {
-        id: {
-          $toObjectId: '$_id',
-        },
-      },
-    },
-    {
       $lookup: {
         from: collection.config.slug,
-        localField: 'id',
+        localField: '_id',
         foreignField: '_id',
         as: 'parent',
       },

@@ -1,9 +1,11 @@
+import mongoose from 'mongoose';
 import { Payload } from '..';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import { afterRead } from '../fields/hooks/afterRead';
+import { fieldAffectsData } from '../fields/config/types';
 
 type Args = {
   payload: Payload
@@ -24,17 +26,18 @@ export const saveCollectionVersion = async ({
 
   let version = docWithLocales;
 
+  const customIDField = config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+  const parentID = customIDField ? id : new mongoose.Types.ObjectId(id);
+
   if (config.versions?.drafts) {
     const latestVersion = await VersionModel.findOne({
       parent: {
-        $eq: docWithLocales.id,
+        $eq: parentID,
       },
       updatedAt: {
         $gt: docWithLocales.updatedAt,
       },
-    },
-    {},
-    {
+    }, {}, {
       lean: true,
       leanWithId: true,
       sort: {
@@ -72,7 +75,7 @@ export const saveCollectionVersion = async ({
 
   try {
     createdVersion = await VersionModel.create({
-      parent: id,
+      parent: parentID,
       version,
       autosave: false,
     });
@@ -83,7 +86,7 @@ export const saveCollectionVersion = async ({
 
   if (config.versions.maxPerDoc) {
     enforceMaxVersions({
-      id,
+      id: parentID,
       payload,
       Model: VersionModel,
       slug: config.slug,

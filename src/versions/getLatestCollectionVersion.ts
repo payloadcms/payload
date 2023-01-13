@@ -1,6 +1,8 @@
+import mongoose from 'mongoose';
 import { Document } from '../types';
 import { Payload } from '..';
 import { Collection, TypeWithID } from '../collections/config/types';
+import { fieldAffectsData } from '../fields/config/types';
 
 type Args = {
   payload: Payload
@@ -20,10 +22,14 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   id,
   lean = true,
 }: Args): Promise<T> => {
+  const customIDField = config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+  const parentID = customIDField ? id : new mongoose.Types.ObjectId(id);
+
   let version;
+
   if (config.versions?.drafts) {
     version = payload.versions[config.slug].findOne({
-      parent: id,
+      parent: parentID,
     }, {}, {
       sort: { updatedAt: 'desc' },
       lean,

@@ -1,7 +1,9 @@
+import mongoose from 'mongoose';
 import { Payload } from '../..';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { enforceMaxVersions } from '../enforceMaxVersions';
 import { PayloadRequest } from '../../express/types';
+import { fieldAffectsData } from '../../fields/config/types';
 
 type Args = {
   payload: Payload
@@ -25,9 +27,12 @@ export const saveCollectionDraft = async ({
 
   let existingAutosaveVersion;
 
+  const customIDField = config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+  const parentID = customIDField ? id : new mongoose.Types.ObjectId(id);
+
   if (autosave) {
     existingAutosaveVersion = await VersionsModel.findOne({
-      parent: id,
+      parent: parentID,
     }, {}, { sort: { updatedAt: 'desc' } });
   }
 
@@ -46,10 +51,10 @@ export const saveCollectionDraft = async ({
         },
         { new: true, lean: true },
       );
-    // Otherwise, create a new one
+      // Otherwise, create a new one
     } else {
       result = await VersionsModel.create({
-        parent: id,
+        parent: parentID,
         version: dataAsDraft,
         autosave: Boolean(autosave),
       });
@@ -61,7 +66,7 @@ export const saveCollectionDraft = async ({
 
   if (config.versions.maxPerDoc) {
     enforceMaxVersions({
-      id,
+      id: parentID,
       payload,
       Model: VersionsModel,
       slug: config.slug,

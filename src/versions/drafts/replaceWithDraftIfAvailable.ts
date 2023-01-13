@@ -1,12 +1,13 @@
+import mongoose from 'mongoose';
 import { Payload } from '../..';
 import { docHasTimestamps, Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth';
 import { AccessResult } from '../../config/types';
 import { CollectionModel, SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types';
-import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
+import { fieldAffectsData } from '../../fields/config/types';
 
 type Arguments<T> = {
   payload: Payload
@@ -40,9 +41,12 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   };
 
   if (entityType === 'collection') {
+    const customIDField = entity.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+    const parentID = customIDField ? doc.id : new mongoose.Types.ObjectId(doc.id);
+
     queryToBuild.where.and.push({
       parent: {
-        equals: doc.id,
+        equals: parentID,
       },
     });
   }

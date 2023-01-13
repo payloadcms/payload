@@ -1,8 +1,10 @@
+import mongoose, { ObjectId } from 'mongoose';
 import { Payload } from '..';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
 import { afterRead } from '../fields/hooks/afterRead';
+import { fieldAffectsData } from '../fields/config/types';
 
 type Args = {
   payload: Payload
@@ -26,16 +28,24 @@ export const ensurePublishedCollectionVersion = async ({
   if (docWithLocales?._status === 'published') {
     const VersionModel = payload.versions[config.slug];
 
+    const customIDField = config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+
+    let parentID: string | number | mongoose.Types.ObjectId;
+
+    if (customIDField) {
+      parentID = docWithLocales.id;
+    } else {
+      parentID = new mongoose.Types.ObjectId(docWithLocales.id);
+    }
+
     const moreRecentDrafts = await VersionModel.find({
       parent: {
-        $eq: docWithLocales.id,
+        $eq: parentID,
       },
       updatedAt: {
         $gt: docWithLocales.updatedAt,
       },
-    },
-    {},
-    {
+    }, {}, {
       lean: true,
       leanWithId: true,
       sort: {
@@ -56,7 +66,7 @@ export const ensurePublishedCollectionVersion = async ({
 
       try {
         await VersionModel.create({
-          parent: id,
+          parent: parentID,
           version,
           autosave: false,
         });
@@ -67,7 +77,7 @@ export const ensurePublishedCollectionVersion = async ({
 
       if (config.versions.maxPerDoc) {
         enforceMaxVersions({
-          id,
+          id: parentID,
           payload,
           Model: VersionModel,
           slug: config.slug,

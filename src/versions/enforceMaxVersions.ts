@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Payload } from '..';
 import { CollectionModel } from '../collections/config/types';
 
@@ -7,7 +8,7 @@ type Args = {
   max: number
   slug: string
   entityType: 'global' | 'collection'
-  id?: string | number
+  id?: string | number | mongoose.Types.ObjectId
 }
 
 export const enforceMaxVersions = async ({
@@ -19,7 +20,7 @@ export const enforceMaxVersions = async ({
   id,
 }: Args): Promise<void> => {
   try {
-    const query: { parent?: string | number } = {};
+    const query: { parent?: string | number | mongoose.Types.ObjectId } = {};
 
     if (id) query.parent = id;
 

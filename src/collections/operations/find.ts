@@ -9,7 +9,8 @@ import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { mergeDrafts } from '../../versions/drafts/mergeDrafts';
+import { buildDraftMergeAggregate } from '../../versions/drafts/buildDraftMergeAggregate';
+// import { mergeDrafts } from '../../versions/drafts/mergeDrafts';
 
 export type Arguments = {
   collection: Collection
@@ -160,15 +161,22 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   };
 
   if (collectionConfig.versions?.drafts && draftsEnabled) {
-    result = await mergeDrafts({
-      accessResult,
-      collection,
-      locale,
-      paginationOptions,
-      payload,
+    // result = await mergeDrafts({
+    //   accessResult,
+    //   collection,
+    //   locale,
+    //   paginationOptions,
+    //   payload,
+    //   query,
+    //   where,
+    // });
+
+    const aggregate = Model.aggregate(buildDraftMergeAggregate({
+      config: collectionConfig,
       query,
-      where,
-    });
+    }));
+
+    result = await Model.aggregatePaginate(aggregate, paginationOptions);
   } else {
     result = await Model.paginate(query, paginationOptions);
   }
