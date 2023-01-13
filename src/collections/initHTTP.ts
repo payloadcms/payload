@@ -5,9 +5,9 @@ import bindCollectionMiddleware from './bindCollection';
 import { SanitizedCollectionConfig } from './config/types';
 import mountEndpoints from '../express/mountEndpoints';
 import buildEndpoints from './buildEndpoints';
-import { PayloadHTTP } from '..';
+import { Payload } from '../payload';
 
-export default function initCollectionsHTTP(ctx: PayloadHTTP): void {
+export default function initCollectionsHTTP(ctx: Payload): void {
   ctx.config.collections = ctx.config.collections.map((collection: SanitizedCollectionConfig) => {
     const formattedCollection = collection;
 

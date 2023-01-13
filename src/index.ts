@@ -1,4 +1,5 @@
 import {
+  BaseConfig,
   InitOptions,
 } from './config/types';
 import { initHTTP } from './initHTTP';
@@ -9,7 +10,7 @@ export { getPayload } from './payload';
 require('isomorphic-fetch');
 
 export class PayloadHTTP extends Payload {
-  async init<T = any>(options: InitOptions): Promise<Payload<T>> {
+  async init<T extends BaseConfig = any>(options: InitOptions): Promise<Payload<T>> {
     const payload = await initHTTP<T>(options);
     Object.assign(this, payload);
     return payload;

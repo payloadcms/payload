@@ -19,7 +19,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 
-export type Arguments<T extends Record<string, unknown>> = {
+export type Arguments<T extends { [field: string]: unknown }> = {
   collection: Collection
   req: PayloadRequest
   id: string | number
@@ -150,7 +150,7 @@ async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  data = await beforeValidate({
+  data = await beforeValidate<Config['collections'][Slug]>({
     data,
     doc: originalDoc,
     entityConfig: collectionConfig,
@@ -202,7 +202,7 @@ async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  let result = await beforeChange({
+  let result = await beforeChange<Config['collections'][Slug]>({
     data,
     doc: originalDoc,
     docWithLocales,
@@ -218,7 +218,7 @@ async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['
   // /////////////////////////////////////
 
   if (shouldSavePassword) {
-    await doc.setPassword(password as string);
+    await doc.setPassword(password);
     await doc.save();
     delete data.password;
     delete result.password;
@@ -253,7 +253,7 @@ async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['
       id,
     });
 
-    result = await saveCollectionDraft({
+    result = await saveCollectionDraft<Config['collections'][Slug]>({
       payload,
       config: collectionConfig,
       req,
@@ -283,12 +283,9 @@ async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['
 
     const resultString = JSON.stringify(result);
     result = JSON.parse(resultString);
-
-    // custom id type reset
-    result.id = result._id;
   }
 
-  result = sanitizeInternalFields(result);
+  result = sanitizeInternalFields<Config['collections'][Slug]>(result);
 
   // /////////////////////////////////////
   // afterRead - Fields
@@ -320,7 +317,7 @@ async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['
   // afterChange - Fields
   // /////////////////////////////////////
 
-  result = await afterChange({
+  result = await afterChange<Config['collections'][Slug]>({
     data,
     doc: result,
     previousDoc: originalDoc,

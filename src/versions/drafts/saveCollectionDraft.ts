@@ -3,22 +3,22 @@ import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { enforceMaxVersions } from '../enforceMaxVersions';
 import { PayloadRequest } from '../../express/types';
 
-type Args = {
+type Args<T> = {
   payload: Payload
   config?: SanitizedCollectionConfig
   req: PayloadRequest
-  data: any
+  data: T
   id: string | number
   autosave: boolean
 }
 
-export const saveCollectionDraft = async ({
+export const saveCollectionDraft = async <T extends Record<string, unknown>>({
   payload,
   config,
   id,
   data,
   autosave,
-}: Args): Promise<Record<string, unknown>> => {
+}: Args<T>): Promise<T> => {
   const VersionsModel = payload.versions[config.slug];
 
   const dataAsDraft = { ...data, _status: 'draft' };

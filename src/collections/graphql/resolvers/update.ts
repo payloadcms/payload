@@ -3,10 +3,11 @@ import { Response } from 'express';
 import { Collection } from '../../config/types';
 import update from '../../operations/update';
 import { PayloadRequest } from '../../../express/types';
+import { BaseConfig } from '../../../config/types';
 
-export type Resolver = (_: unknown, args: {
+export type Resolver<Config extends BaseConfig, Slug extends keyof BaseConfig['collections']> = (_: unknown, args: {
   id: string | number
-  data: Record<string, unknown>,
+  data: Config['collections'][Slug]
   locale?: string
   draft: boolean
   autosave: boolean
@@ -15,9 +16,11 @@ export type Resolver = (_: unknown, args: {
     req: PayloadRequest,
     res: Response
   }
-) => Promise<Document>
+) => Promise<Config['collections'][Slug]>
 
-export default function updateResolver(collection: Collection): Resolver {
+export default function updateResolver<Config extends BaseConfig, Slug extends keyof BaseConfig['collections']>(
+  collection: Collection,
+): Resolver<Config, Slug> {
   async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
@@ -32,7 +35,7 @@ export default function updateResolver(collection: Collection): Resolver {
       autosave: args.autosave,
     };
 
-    const result = await update(options);
+    const result = await update<Config, Slug>(options);
 
     return result;
   }

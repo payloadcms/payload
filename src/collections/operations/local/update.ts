@@ -25,7 +25,10 @@ export type Options<Config extends BaseConfig, Slug extends keyof BaseConfig['co
   autosave?: boolean
 }
 
-export default async function updateLocal<Config extends BaseConfig, Slug extends keyof BaseConfig['collections']>(payload: Payload<BaseConfig>, options: Options<Config, Slug>): Promise<Config['collections'][Slug]> {
+export default async function updateLocal<Config extends BaseConfig, Slug extends keyof BaseConfig['collections']>(
+  payload: Payload<BaseConfig>,
+  options: Options<Config, Slug>,
+): Promise<Config['collections'][Slug]> {
   const {
     collection: collectionSlug,
     depth,

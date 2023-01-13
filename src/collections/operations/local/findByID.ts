@@ -21,7 +21,6 @@ export type Options<T extends keyof BaseConfig['collections']> = {
   draft?: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function findByIDLocal<T extends keyof BaseConfig['collections']>(payload: Payload<BaseConfig>, options: Options<T>): Promise<BaseConfig['collections'][T]> {
   const {
     collection: collectionSlug,
@@ -52,7 +51,7 @@ export default async function findByIDLocal<T extends keyof BaseConfig['collecti
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
-  return findByID<T>({
+  return findByID<BaseConfig['collections'][T]>({
     depth,
     currentDepth,
     id,

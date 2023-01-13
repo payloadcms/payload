@@ -2,9 +2,9 @@ import express from 'express';
 import mountEndpoints from '../express/mountEndpoints';
 import buildEndpoints from './buildEndpoints';
 import { SanitizedGlobalConfig } from './config/types';
-import { PayloadHTTP } from '..';
+import { Payload } from '../payload';
 
-export default function initGlobals(ctx: PayloadHTTP): void {
+export default function initGlobals(ctx: Payload): void {
   if (ctx.config.globals) {
     ctx.config.globals.forEach((global: SanitizedGlobalConfig) => {
       const router = express.Router();

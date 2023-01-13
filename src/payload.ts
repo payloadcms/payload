@@ -4,7 +4,6 @@ import { GraphQLError, GraphQLFormattedError, GraphQLSchema } from 'graphql';
 import crypto from 'crypto';
 import path from 'path';
 import mongoose from 'mongoose';
-import { ValueOf } from 'ts-essentials';
 import {
   TypeWithID,
   Collection,
@@ -140,7 +139,7 @@ export class Payload<Config extends BaseConfig = any> {
    * @description Initializes Payload
    * @param options
    */
-  async init(options: InitOptions): Promise<Payload<C>> {
+  async init(options: InitOptions): Promise<Payload<Config>> {
     this.logger = Logger('payload', options.loggerOptions);
     this.mongoURL = options.mongoURL;
 
