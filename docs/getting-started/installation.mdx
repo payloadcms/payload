@@ -66,7 +66,7 @@ app.listen(3000, async () => {
 });
 ```
 
-This server doesn't do anything just yet. But, after you have this in place, we can initialize Payload via its `init()` method, which accepts a small set of arguments to tell it how to operate. For a full list of `init` arguments, please consult the [main configuration](/docs/configuration/overview) docs.
+This server doesn't do anything just yet. But, after you have this in place, we can initialize Payload via its `init()` method, which accepts a small set of arguments to tell it how to operate. For a full list of `init` arguments, please consult the [main configuration](/docs/configuration/overview#init) docs.
 
 To initialize Payload, update your `server.js` file to reflect the following code:
 
@@ -80,12 +80,11 @@ payload.init({
   secret: 'SECRET_KEY',
   mongoURL: 'mongodb://localhost/payload',
   express: app,
-  onInit: () => {
-    app.listen(3000, async () => {
-      console.log('Express is now listening for incoming connections on port 3000.')
-    });
-  }
 })
+
+app.listen(3000, async () => {
+	console.log('Express is now listening for incoming connections on port 3000.')
+});
 
 ```
 

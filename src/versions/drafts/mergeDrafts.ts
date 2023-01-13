@@ -5,7 +5,6 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { Collection, CollectionModel, TypeWithID } from '../../collections/config/types';
 import { hasWhereAccessResult } from '../../auth';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import replaceWithDraftIfAvailable from './replaceWithDraftIfAvailable';
 
 type AggregateVersion<T> = {
@@ -100,6 +99,28 @@ export const mergeDrafts = async <T extends TypeWithID>({
         createdAt: { $first: '$createdAt' },
       },
     },
+    {
+      $addFields: {
+        id: {
+          $toObjectId: '$_id',
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: collection.config.slug,
+        localField: 'id',
+        foreignField: '_id',
+        as: 'parent',
+      },
+    },
+    {
+      $match: {
+        parent: {
+          $size: 1,
+        },
+      },
+    },
     { $match: versionQuery },
     { $limit: paginationOptions.limit },
   ]).then((res) => res.reduce<VersionCollectionMatchMap<T>>((map, { _id, updatedAt, createdAt, version }) => {
@@ -124,6 +145,9 @@ export const mergeDrafts = async <T extends TypeWithID>({
     const versionsQuery = await VersionModel.find({
       updatedAt: {
         $gt: parentDocUpdatedAt,
+      },
+      parent: {
+        $eq: parentDocID,
       },
     }, {}, { limit: 1 }).lean();
 
@@ -152,8 +176,8 @@ export const mergeDrafts = async <T extends TypeWithID>({
     finalQueryToBuild.where.and.push(accessResult);
   }
 
-  if (where) {
-    finalQueryToBuild.where.and[0].or.push(where);
+  if (incomingWhere) {
+    finalQueryToBuild.where.and[0].or.push(incomingWhere);
   }
 
   if (includedParentIDs.length > 0) {
@@ -165,7 +189,7 @@ export const mergeDrafts = async <T extends TypeWithID>({
   }
 
   if (excludedParentIDs.length > 0) {
-    finalQueryToBuild.where.and[0].or.push({
+    finalQueryToBuild.where.and.push({
       id: {
         not_in: excludedParentIDs,
       },
@@ -179,15 +203,11 @@ export const mergeDrafts = async <T extends TypeWithID>({
   result = {
     ...result,
     docs: await Promise.all(result.docs.map(async (doc) => {
-      let sanitizedDoc = JSON.parse(JSON.stringify(doc));
-      sanitizedDoc.id = sanitizedDoc._id;
-      sanitizedDoc = sanitizeInternalFields(sanitizedDoc);
+      const matchedVersion = versionCollectionMatchMap[doc.id];
 
-      const matchedVersion = versionCollectionMatchMap[sanitizedDoc.id];
-
-      if (matchedVersion) {
+      if (matchedVersion && matchedVersion.updatedAt > doc.updatedAt) {
         return {
-          ...sanitizedDoc,
+          ...doc,
           ...matchedVersion.version,
           createdAt: matchedVersion.createdAt,
           updatedAt: matchedVersion.updatedAt,
@@ -199,7 +219,7 @@ export const mergeDrafts = async <T extends TypeWithID>({
         payload,
         entity: collection.config,
         entityType: 'collection',
-        doc: sanitizedDoc,
+        doc,
         locale,
       });
     })),

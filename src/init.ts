@@ -33,15 +33,7 @@ import mountEndpoints from './express/mountEndpoints';
 import PreferencesModel from './preferences/model';
 import findConfig from './config/find';
 
-export const initPayload = async (payload: Payload, options: InitOptions): Promise<void> => {
-  payload.logger = Logger('payload', options.loggerOptions);
-  payload.mongoURL = options.mongoURL;
-
-  if (payload.mongoURL) {
-    mongoose.set('strictQuery', false);
-    payload.mongoMemoryServer = await connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
-  }
-
+export const init = (payload: Payload, options: InitOptions): void => {
   payload.logger.info('Starting Payload...');
   if (!options.secret) {
     throw new Error(
@@ -153,7 +145,34 @@ export const initPayload = async (payload: Payload, options: InitOptions): Promi
   }
 
   serverInitTelemetry(payload);
+};
+
+export const initAsync = async (payload: Payload, options: InitOptions): Promise<void> => {
+  payload.logger = Logger('payload', options.loggerOptions);
+  payload.mongoURL = options.mongoURL;
+
+  if (payload.mongoURL) {
+    mongoose.set('strictQuery', false);
+    payload.mongoMemoryServer = await connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
+  }
+
+  init(payload, options);
 
   if (typeof options.onInit === 'function') await options.onInit(payload);
   if (typeof payload.config.onInit === 'function') await payload.config.onInit(payload);
+};
+
+export const initSync = (payload: Payload, options: InitOptions): void => {
+  payload.logger = Logger('payload', options.loggerOptions);
+  payload.mongoURL = options.mongoURL;
+
+  if (payload.mongoURL) {
+    mongoose.set('strictQuery', false);
+    connectMongoose(payload.mongoURL, options.mongoOptions, payload.logger);
+  }
+
+  init(payload, options);
+
+  if (typeof options.onInit === 'function') options.onInit(payload);
+  if (typeof payload.config.onInit === 'function') payload.config.onInit(payload);
 };

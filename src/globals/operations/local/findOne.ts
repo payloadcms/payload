@@ -5,6 +5,7 @@ import { Document } from '../../../types';
 import { TypeWithID } from '../../config/types';
 import findOne from '../findOne';
 import i18nInit from '../../../translations/init';
+import { APIError } from '../../../errors';
 
 export type Options = {
   slug: string
@@ -31,6 +32,11 @@ export default async function findOneLocal<T extends TypeWithID = any>(payload: 
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
   const i18n = i18nInit(payload.config.i18n);
+
+
+  if (!globalConfig) {
+    throw new APIError(`The global with slug ${globalSlug} can't be found.`);
+  }
 
   const req = {
     user,

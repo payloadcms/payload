@@ -364,12 +364,16 @@ describe('fields', () => {
         await expect(popup).toBeVisible();
         await expect(popup.locator('a')).toHaveAttribute('href', 'https://payloadcms.com');
 
-        // Open link edit modal
+        // Open the drawer
         await popup.locator('.rich-text-link__link-edit').click();
-        const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+        const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
 
-        // Close link edit modal
+        // Check the drawer values
+        const textField = await editLinkModal.locator('#field-text');
+        await expect(textField).toHaveValue('render links');
+
+        // Close the drawer
         await editLinkModal.locator('button[type="submit"]').click();
         await expect(editLinkModal).not.toBeVisible();
       });
@@ -383,14 +387,35 @@ describe('fields', () => {
         await expect(popup).toBeVisible();
         await expect(popup.locator('a')).toHaveAttribute('href', /\/admin\/collections\/array-fields\/.*/);
 
-        // Open link edit modal
+        // Open the drawer
         await popup.locator('.rich-text-link__link-edit').click();
-        const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+        const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
 
-        // Close link edit modal
+        // Check the drawer values
+        const textField = await editLinkModal.locator('#field-text');
+        await expect(textField).toHaveValue('link to relationships');
+
+        // Close the drawer
         await editLinkModal.locator('button[type="submit"]').click();
         await expect(editLinkModal).not.toBeVisible();
+      });
+
+      test('should populate new links', async () => {
+        navigateToRichTextFields();
+
+        // Highlight existing text
+        const headingElement = await page.locator('#field-richText h1 >> text="Hello, I\'m a rich text field."');
+        await headingElement.selectText();
+
+        // click the toolbar link button
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').click();
+
+        // find the drawer and confirm the values
+        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        await expect(editLinkModal).toBeVisible();
+        const textField = await editLinkModal.locator('#field-text');
+        await expect(textField).toHaveValue('Hello, I\'m a rich text field.');
       });
     });
   });
