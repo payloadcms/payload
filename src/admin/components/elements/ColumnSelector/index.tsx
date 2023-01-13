@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useId, useState } from 'react';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import { useTranslation } from 'react-i18next';
@@ -10,8 +11,17 @@ import { Props } from './types';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { useEditDepth } from '../../utilities/EditDepth';
 import './index.scss';
+import { Field } from '../../../../fields/config/types';
 
 const baseClass = 'column-selector';
+
+const sortedFlatFields = (fields: Field[], columns: string[]) => {
+  const _fields = flattenTopLevelFields(fields, true);
+  return [
+    ...columns.map((column) => _fields.find((f) => f.name === column)),
+    ..._fields.filter((f) => !columns.find((c) => c === f.name)),
+  ];
+};
 
 const ColumnSelector: React.FC<Props> = (props) => {
   const {
@@ -20,19 +30,11 @@ const ColumnSelector: React.FC<Props> = (props) => {
     setColumns,
   } = props;
 
-  const sortedFlatFields = useCallback(() => {
-    const _fields = flattenTopLevelFields(collection.fields, true);
-    return [
-      ...columns.map((column) => _fields.find((f) => f.name === column)),
-      ..._fields.filter((f) => !columns.find((c) => c === f.name)),
-    ];
-  }, [columns, collection.fields]);
-
-  const [fields, setFields] = useState(() => sortedFlatFields());
+  const [fields, setFields] = useState(() => sortedFlatFields(collection.fields, columns));
 
   useEffect(() => {
-    setFields(sortedFlatFields());
-  }, [sortedFlatFields]);
+    setFields(sortedFlatFields(collection.fields, columns));
+  }, [collection.fields]);
 
   const { i18n } = useTranslation();
   const uuid = useId();
