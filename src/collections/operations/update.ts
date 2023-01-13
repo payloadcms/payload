@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+import { BaseConfig } from '../../config/types';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -18,11 +19,11 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 
-export type Arguments = {
+export type Arguments<T extends Record<string, unknown>> = {
   collection: Collection
   req: PayloadRequest
   id: string | number
-  data: Record<string, unknown>
+  data: T
   depth?: number
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
@@ -32,7 +33,9 @@ export type Arguments = {
   autosave?: boolean
 }
 
-async function update(incomingArgs: Arguments): Promise<Document> {
+async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['collections']>(
+  incomingArgs: Arguments<Config['collections'][Slug]>,
+): Promise<Config['collections'][Slug]> {
   let args = incomingArgs;
 
   // /////////////////////////////////////

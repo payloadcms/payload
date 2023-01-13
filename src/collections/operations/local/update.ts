@@ -6,11 +6,12 @@ import { PayloadRequest } from '../../../express/types';
 import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18nInit from '../../../translations/init';
+import { BaseConfig } from '../../../config/types';
 
-export type Options<T> = {
-  collection: string
+export type Options<Config extends BaseConfig, Slug extends keyof BaseConfig['collections']> = {
+  collection: Slug
   id: string | number
-  data: Partial<T>
+  data: Config['collections'][Slug]
   depth?: number
   locale?: string
   fallbackLocale?: string
@@ -24,7 +25,7 @@ export type Options<T> = {
   autosave?: boolean
 }
 
-export default async function updateLocal<T = any>(payload: Payload, options: Options<T>): Promise<T> {
+export default async function updateLocal<Config extends BaseConfig, Slug extends keyof BaseConfig['collections']>(payload: Payload<BaseConfig>, options: Options<Config, Slug>): Promise<Config['collections'][Slug]> {
   const {
     collection: collectionSlug,
     depth,
@@ -75,5 +76,5 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
     req,
   };
 
-  return update(args);
+  return update<Config, Slug>(args);
 }

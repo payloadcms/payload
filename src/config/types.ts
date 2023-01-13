@@ -22,10 +22,10 @@ import { User } from '../auth/types';
 
 export interface BaseConfig {
   collections: {
-    [slug: string]: Record<string, unknown>
+    [slug: string | number | symbol]: Record<string, unknown>
   }
   globals: {
-    [slug: string]: Record<string, unknown>
+    [slug: string | number | symbol]: Record<string, unknown>
   }
 }
 
@@ -109,7 +109,7 @@ export type InitOptions = {
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
-  onInit?: (payload: Payload) => Promise<void> | void;
+  onInit?: <C extends BaseConfig = any>(payload: Payload<C>) => Promise<void> | void;
 
   /**
    * Specify options for the built-in Pino logger that Payload uses for internal logging.
@@ -541,7 +541,7 @@ export type Config = {
   /** Send anonymous telemetry data about general usage. */
   telemetry?: boolean;
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
-  onInit?: (payload: Payload) => Promise<void> | void;
+  onInit?: <C extends BaseConfig = any>(payload: Payload<C>) => Promise<void> | void;
 };
 
 export type SanitizedConfig = Omit<

@@ -70,7 +70,7 @@ export class Payload<Config extends BaseConfig = any> {
   config: SanitizedConfig;
 
   collections: {
-    [slug: string]: Collection;
+    [slug: string | number | symbol]: Collection;
   } = {}
 
   versions: {
@@ -272,9 +272,10 @@ export class Payload<Config extends BaseConfig = any> {
    * @param options
    * @returns document with specified ID
    */
-  findByID = async (options: FindByIDOptions<Config>): Promise<Config['collections'][ValueOf<typeof options['collection']>]> => {
+
+  findByID = async <T extends keyof Config['collections']>(options: FindByIDOptions<T>): Promise<Config['collections'][T]> => {
     const { findByID } = localOperations;
-    return findByID(this, options);
+    return findByID<T>(this, options);
   }
 
   /**
@@ -282,9 +283,9 @@ export class Payload<Config extends BaseConfig = any> {
    * @param options
    * @returns Updated document
    */
-  update = async <T = any>(options: UpdateOptions<T>): Promise<T> => {
+  update = async <T extends keyof Config['collections']>(options: UpdateOptions<Config, T>): Promise<Config['collections'][T]> => {
     const { update } = localOperations;
-    return update<T>(this, options);
+    return update<Config, T>(this, options);
   }
 
   delete = async <T extends TypeWithID = any>(options: DeleteOptions): Promise<T> => {
@@ -355,7 +356,7 @@ if (!cached) {
   cached = global.payload = { payload: null, promise: null };
 }
 
-export const getPayload = async <T>(options: InitOptions): Promise<Payload<T>> => {
+export const getPayload = async <T extends BaseConfig>(options: InitOptions): Promise<Payload<T>> => {
   if (cached.payload) {
     return cached.payload;
   }
