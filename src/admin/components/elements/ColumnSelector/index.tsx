@@ -66,7 +66,6 @@ const ColumnSelector: React.FC<Props> = (props) => {
         {(provided) => (
           <div
             className={baseClass}
-            style={{ display: 'flex' }}
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
@@ -83,6 +82,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
                     <div
                       id={`col-${i}`}
                       ref={providedDrag.innerRef}
+                      className={`${baseClass}__column_container`}
                       {...providedDrag.draggableProps}
                     >
                       <span
