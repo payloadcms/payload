@@ -161,13 +161,9 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
 
   if (collectionConfig.versions?.drafts && draftsEnabled) {
     result = await mergeDrafts({
-      accessResult,
       collection,
-      locale,
       paginationOptions,
-      payload,
       query,
-      where,
     });
   } else {
     result = await Model.paginate(query, paginationOptions);

@@ -1,18 +1,10 @@
-import { AccessResult } from '../../config/types';
-import { Where } from '../../types';
-import { Payload } from '../..';
 import { PaginatedDocs } from '../../mongoose/types';
 import { Collection } from '../../collections/config/types';
-import { hasWhereAccessResult } from '../../auth';
 
 type Args = {
-  accessResult: AccessResult;
   collection: Collection;
-  locale: string;
   paginationOptions: any;
-  payload: Payload;
   query: Record<string, unknown>;
-  where: Where;
 };
 
 // This function makes it possible to filter documents by their newest
@@ -24,31 +16,10 @@ type Args = {
 // versions. This means that the pagination is done on the newest version
 // of each document.
 async function findNewest({
-  accessResult,
   collection,
-  locale,
   paginationOptions,
   query,
-  where: incomingWhere,
 }: Args): Promise<PaginatedDocs> {
-  const finalQueryToBuild: { where: Where } = {
-    where: {
-      and: [{ or: [] }],
-    },
-  };
-  if (hasWhereAccessResult(accessResult)) {
-    finalQueryToBuild.where.and.push(accessResult);
-  }
-  if (incomingWhere) {
-    finalQueryToBuild.where.and[0].or.push(incomingWhere);
-  }
-  // await seems to be needed -> wrong type
-  const finalQuery = await collection.Model.buildQuery(
-    finalQueryToBuild,
-    locale,
-  );
-  const project = query && Object.keys(query).length > 0 ? query : undefined;
-
   const page = paginationOptions.page ?? 1;
   const limit = paginationOptions.limit ?? 10;
   const skip = (page - 1) * limit;
@@ -64,19 +35,28 @@ async function findNewest({
         // TODO: query from somewhere
         from: `_${collection.config.slug}_versions`,
         as: '_versions',
-        // join _id on parent
-        localField: '_id',
-        foreignField: 'parent',
+        // with mongo > 5.0 this can be shortened to
+        // localField: '_id',
+        // foreignField: 'parent',
         let: {
-          // define updatedAt to be used in the pipeline
+          // define id and updatedAt to be used in the pipeline
+          id: '$_id',
           updatedAt: '$updatedAt',
         },
         pipeline: [
           {
             $match: {
               $expr: {
-                // only match versions that are newer than the document
-                $gt: ['$updatedAt', '$$updatedAt'],
+                $and: [
+                  {
+                    // only match versions that are newer than the document
+                    $gt: ['$updatedAt', '$$updatedAt'],
+                  },
+                  {
+                    //  join _id on parent
+                    $eq: ['$parent', '$$id'],
+                  },
+                ],
               },
             },
           },
@@ -119,8 +99,8 @@ async function findNewest({
                 // and use the updatedAt of the version
                 {
                   _id: '$_id',
-                  updatedAt: '$_version.updatedAt',
                   createdAt: '$createdAt',
+                  updatedAt: '$_version.updatedAt',
                 },
               ],
             },
@@ -138,7 +118,7 @@ async function findNewest({
     },
     // filter before counting the total number of documents
     {
-      $match: finalQuery,
+      $match: query,
     },
     // sort before counting the total number of documents
     {
@@ -167,15 +147,13 @@ async function findNewest({
           {
             $limit: limit,
           },
-          // select fields by project
-          ...(project ? [{ $project: project }] : []),
         ],
-        totalDocs: [
+        count: [
           {
             // counts all filtered documents, but only the newest version
             // as we already replaced the document with the newest version
             // in the previous step
-            $count: 'count',
+            $count: 'totalDocs',
           },
         ],
       },
@@ -184,10 +162,11 @@ async function findNewest({
 
   const [
     {
-      totalDocs: [{ count: totalDocs }],
+      count,
       docs,
     },
   ] = results;
+  const totalDocs = count?.totalDocs ?? 0;
   // create the other pagination fields from totalDocs, limit and page
   const pagingCounter = Math.ceil(totalDocs / limit);
   const totalPages = pagingCounter;
