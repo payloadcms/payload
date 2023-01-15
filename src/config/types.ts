@@ -174,7 +174,6 @@ export type Endpoint = {
   | 'delete'
   | 'connect'
   | 'options'
-  | string;
   /**
    * Middleware that will be called when the path/method matches
    *
