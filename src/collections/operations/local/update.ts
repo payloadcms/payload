@@ -1,3 +1,4 @@
+import { Config as SchemaConfig } from 'payload/generated-types';
 import { Payload } from '../../../payload';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
@@ -6,12 +7,11 @@ import { PayloadRequest } from '../../../express/types';
 import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18nInit from '../../../translations/init';
-import { BaseConfig } from '../../../config/types';
 
-export type Options<Config extends BaseConfig, Slug extends keyof BaseConfig['collections']> = {
-  collection: Slug
+export type Options<TSlug extends keyof SchemaConfig['collections']> = {
+  collection: TSlug
   id: string | number
-  data: Config['collections'][Slug]
+  data: SchemaConfig['collections'][TSlug]
   depth?: number
   locale?: string
   fallbackLocale?: string
@@ -25,10 +25,10 @@ export type Options<Config extends BaseConfig, Slug extends keyof BaseConfig['co
   autosave?: boolean
 }
 
-export default async function updateLocal<Config extends BaseConfig, Slug extends keyof BaseConfig['collections']>(
-  payload: Payload<BaseConfig>,
-  options: Options<Config, Slug>,
-): Promise<Config['collections'][Slug]> {
+export default async function updateLocal<TSlug extends keyof SchemaConfig['collections']>(
+  payload: Payload,
+  options: Options<TSlug>,
+): Promise<SchemaConfig['collections'][TSlug]> {
   const {
     collection: collectionSlug,
     depth,
@@ -79,5 +79,5 @@ export default async function updateLocal<Config extends BaseConfig, Slug extend
     req,
   };
 
-  return update<Config, Slug>(args);
+  return update<TSlug>(args);
 }

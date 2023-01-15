@@ -1,13 +1,13 @@
 /* eslint-disable no-param-reassign */
 import { Response } from 'express';
+import { Config as SchemaConfig } from 'payload/generated-types';
 import { Collection } from '../../config/types';
 import update from '../../operations/update';
 import { PayloadRequest } from '../../../express/types';
-import { BaseConfig } from '../../../config/types';
 
-export type Resolver<Config extends BaseConfig, Slug extends keyof BaseConfig['collections']> = (_: unknown, args: {
+export type Resolver<TSlug extends keyof SchemaConfig['collections']> = (_: unknown, args: {
   id: string | number
-  data: Config['collections'][Slug]
+  data: SchemaConfig['collections'][TSlug]
   locale?: string
   draft: boolean
   autosave: boolean
@@ -16,11 +16,11 @@ export type Resolver<Config extends BaseConfig, Slug extends keyof BaseConfig['c
     req: PayloadRequest,
     res: Response
   }
-) => Promise<Config['collections'][Slug]>
+) => Promise<SchemaConfig['collections'][TSlug]>
 
-export default function updateResolver<Config extends BaseConfig, Slug extends keyof BaseConfig['collections']>(
+export default function updateResolver<TSlug extends keyof SchemaConfig['collections']>(
   collection: Collection,
-): Resolver<Config, Slug> {
+): Resolver<TSlug> {
   async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
@@ -35,7 +35,7 @@ export default function updateResolver<Config extends BaseConfig, Slug extends k
       autosave: args.autosave,
     };
 
-    const result = await update<Config, Slug>(options);
+    const result = await update<TSlug>(options);
 
     return result;
   }

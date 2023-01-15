@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import express, { NextFunction, Response } from 'express';
-import { BaseConfig, InitOptions } from './config/types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { InitOptions } from './config/types';
 
 import authenticate from './express/middleware/authenticate';
 import expressMiddleware from './express/middleware';
@@ -20,8 +21,8 @@ import { getDataLoader } from './collections/dataloader';
 import mountEndpoints from './express/mountEndpoints';
 import { Payload, getPayload } from './payload';
 
-export const initHTTP = async <T extends BaseConfig>(options: InitOptions): Promise<Payload<T>> => {
-  const payload = await getPayload<T>(options);
+export const initHTTP = async (options: InitOptions): Promise<Payload> => {
+  const payload = await getPayload(options);
 
   if (!options.local) {
     payload.router = express.Router();

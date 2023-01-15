@@ -1,4 +1,4 @@
-import { BaseConfig } from '../../../config/types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import findByID from '../findByID';
@@ -6,7 +6,7 @@ import { Payload } from '../../../payload';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 
-export type Options<T extends keyof BaseConfig['collections']> = {
+export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
   id: string
   depth?: number
@@ -21,7 +21,7 @@ export type Options<T extends keyof BaseConfig['collections']> = {
   draft?: boolean
 }
 
-export default async function findByIDLocal<T extends keyof BaseConfig['collections']>(payload: Payload<BaseConfig>, options: Options<T>): Promise<BaseConfig['collections'][T]> {
+export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<T>): Promise<GeneratedTypes['collections'][T]> {
   const {
     collection: collectionSlug,
     depth,
@@ -51,7 +51,7 @@ export default async function findByIDLocal<T extends keyof BaseConfig['collecti
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
-  return findByID<BaseConfig['collections'][T]>({
+  return findByID<GeneratedTypes['collections'][T]>({
     depth,
     currentDepth,
     id,

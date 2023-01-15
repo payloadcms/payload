@@ -4,6 +4,7 @@ import { GraphQLError, GraphQLFormattedError, GraphQLSchema } from 'graphql';
 import crypto from 'crypto';
 import path from 'path';
 import mongoose from 'mongoose';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import {
   TypeWithID,
   Collection,
@@ -13,7 +14,6 @@ import {
   SanitizedConfig,
   EmailOptions,
   InitOptions,
-  BaseConfig,
 } from './config/types';
 import { TypeWithVersion } from './versions/types';
 import { PaginatedDocs } from './mongoose/types';
@@ -65,7 +65,7 @@ import findConfig from './config/find';
 /**
  * @description Payload
  */
-export class Payload<Config extends BaseConfig = any> {
+export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   config: SanitizedConfig;
 
   collections: {
@@ -139,7 +139,7 @@ export class Payload<Config extends BaseConfig = any> {
    * @description Initializes Payload
    * @param options
    */
-  async init(options: InitOptions): Promise<Payload<Config>> {
+  async init(options: InitOptions): Promise<Payload> {
     this.logger = Logger('payload', options.loggerOptions);
     this.mongoURL = options.mongoURL;
 
@@ -272,7 +272,7 @@ export class Payload<Config extends BaseConfig = any> {
    * @returns document with specified ID
    */
 
-  findByID = async <T extends keyof Config['collections']>(options: FindByIDOptions<T>): Promise<Config['collections'][T]> => {
+  findByID = async <T extends keyof TGeneratedTypes['collections']>(options: FindByIDOptions<T>): Promise<TGeneratedTypes['collections'][T]> => {
     const { findByID } = localOperations;
     return findByID<T>(this, options);
   }
@@ -282,9 +282,9 @@ export class Payload<Config extends BaseConfig = any> {
    * @param options
    * @returns Updated document
    */
-  update = async <T extends keyof Config['collections']>(options: UpdateOptions<Config, T>): Promise<Config['collections'][T]> => {
+  update = async <T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>): Promise<TGeneratedTypes['collections'][T]> => {
     const { update } = localOperations;
-    return update<Config, T>(this, options);
+    return update<T>(this, options);
   }
 
   delete = async <T extends TypeWithID = any>(options: DeleteOptions): Promise<T> => {
@@ -348,20 +348,22 @@ export class Payload<Config extends BaseConfig = any> {
   }
 }
 
-let cached = global.payload;
+export type Payload = BasePayload<GeneratedTypes>
+
+let cached = global._payload;
 
 if (!cached) {
   // eslint-disable-next-line no-multi-assign
-  cached = global.payload = { payload: null, promise: null };
+  cached = global._payload = { payload: null, promise: null };
 }
 
-export const getPayload = async <T extends BaseConfig>(options: InitOptions): Promise<Payload<T>> => {
+export const getPayload = async (options: InitOptions): Promise<Payload> => {
   if (cached.payload) {
     return cached.payload;
   }
 
   if (!cached.promise) {
-    cached.promise = new Payload<T>().init(options);
+    cached.promise = new BasePayload<GeneratedTypes>().init(options);
   }
 
   try {

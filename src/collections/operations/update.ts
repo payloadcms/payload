@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { BaseConfig } from '../../config/types';
+import { Config as SchemaConfig } from 'payload/generated-types';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -19,7 +19,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 
-export type Arguments<T extends { [field: string]: unknown }> = {
+export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
   req: PayloadRequest
   id: string | number
@@ -33,9 +33,9 @@ export type Arguments<T extends { [field: string]: unknown }> = {
   autosave?: boolean
 }
 
-async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['collections']>(
-  incomingArgs: Arguments<Config['collections'][Slug]>,
-): Promise<Config['collections'][Slug]> {
+async function update<TSlug extends keyof SchemaConfig['collections']>(
+  incomingArgs: Arguments<SchemaConfig['collections'][TSlug]>,
+): Promise<SchemaConfig['collections'][TSlug]> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -150,7 +150,7 @@ async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  data = await beforeValidate<Config['collections'][Slug]>({
+  data = await beforeValidate<SchemaConfig['collections'][TSlug]>({
     data,
     doc: originalDoc,
     entityConfig: collectionConfig,
@@ -202,7 +202,7 @@ async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  let result = await beforeChange<Config['collections'][Slug]>({
+  let result = await beforeChange<SchemaConfig['collections'][TSlug]>({
     data,
     doc: originalDoc,
     docWithLocales,
@@ -253,7 +253,7 @@ async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['
       id,
     });
 
-    result = await saveCollectionDraft<Config['collections'][Slug]>({
+    result = await saveCollectionDraft<SchemaConfig['collections'][TSlug]>({
       payload,
       config: collectionConfig,
       req,
@@ -285,7 +285,7 @@ async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['
     result = JSON.parse(resultString);
   }
 
-  result = sanitizeInternalFields<Config['collections'][Slug]>(result);
+  result = sanitizeInternalFields<SchemaConfig['collections'][TSlug]>(result);
 
   // /////////////////////////////////////
   // afterRead - Fields
@@ -317,7 +317,7 @@ async function update<Config extends BaseConfig, Slug extends keyof BaseConfig['
   // afterChange - Fields
   // /////////////////////////////////////
 
-  result = await afterChange<Config['collections'][Slug]>({
+  result = await afterChange<SchemaConfig['collections'][TSlug]>({
     data,
     doc: result,
     previousDoc: originalDoc,

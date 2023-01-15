@@ -1,17 +1,17 @@
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import {
-  BaseConfig,
   InitOptions,
 } from './config/types';
 import { initHTTP } from './initHTTP';
-import { Payload } from './payload';
+import { Payload, BasePayload } from './payload';
 
 export { getPayload } from './payload';
 
 require('isomorphic-fetch');
 
-export class PayloadHTTP extends Payload {
-  async init<T extends BaseConfig = any>(options: InitOptions): Promise<Payload<T>> {
-    const payload = await initHTTP<T>(options);
+export class PayloadHTTP extends BasePayload<GeneratedTypes> {
+  async init(options: InitOptions): Promise<Payload> {
+    const payload = await initHTTP(options);
     Object.assign(this, payload);
     return payload;
   }
