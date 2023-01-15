@@ -1,5 +1,12 @@
 
 
+## [1.5.9](https://github.com/payloadcms/payload/compare/v1.5.8...v1.5.9) (2023-01-15)
+
+
+### Bug Fixes
+
+* [#1877](https://github.com/payloadcms/payload/issues/1877), [#1867](https://github.com/payloadcms/payload/issues/1867) - mimeTypes and imageSizes no longer cause error in admin ui ([b06ca70](https://github.com/payloadcms/payload/commit/b06ca700be36cc3a945f81e3fa23ebb53d06ca23))
+
 ## [1.5.8](https://github.com/payloadcms/payload/compare/v1.5.7...v1.5.8) (2023-01-12)
 
 
