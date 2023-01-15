@@ -397,11 +397,14 @@ export type Config = {
     api?: string;
     /** Defaults to /admin */
     admin?: string;
+    /** Defaults to /openapi.json */
+    openapi?: string;
     /** Defaults to /graphql  */
     graphQL?: string;
     /** Defaults to /playground */
     graphQLPlayground?: string;
   };
+  openapi?: { version: '3.0' | '3.1' };
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
     /** Filename to write the generated types to */

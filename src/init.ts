@@ -11,6 +11,7 @@ import expressMiddleware from './express/middleware';
 import initAdmin from './express/admin';
 import initAuth from './auth/init';
 import access from './auth/requestHandlers/access';
+import openapi from './openapi/requestHandlers/openapi';
 import initCollections from './collections/init';
 import initPreferences from './preferences/init';
 import initGlobals from './globals/init';
@@ -113,6 +114,7 @@ export const init = (payload: Payload, options: InitOptions): void => {
     initPreferences(payload);
 
     payload.router.get('/access', access);
+    payload.router.get(payload.config.routes.openapi, openapi);
 
     if (!payload.config.graphQL.disable) {
       payload.router.use(

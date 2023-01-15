@@ -37,9 +37,11 @@ export default joi.object({
   routes: joi.object({
     admin: joi.string(),
     api: joi.string(),
+    openapi: joi.string(),
     graphQL: joi.string(),
     graphQLPlayground: joi.string(),
   }),
+  openapi: joi.object({ version: joi.string().valid('3.0', '3.1') }),
   typescript: joi.object({
     outputFile: joi.string(),
   }),

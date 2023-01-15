@@ -37,9 +37,11 @@ export const defaults: Config = {
   routes: {
     admin: '/admin',
     api: '/api',
+    openapi: '/openapi.json',
     graphQL: '/graphql',
     graphQLPlayground: '/graphql-playground',
   },
+  openapi: { version: '3.0' },
   rateLimit: {
     window: 15 * 60 * 100, // 15min default,
     max: 500,
