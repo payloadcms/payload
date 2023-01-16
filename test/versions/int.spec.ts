@@ -47,7 +47,7 @@ describe('Versions', () => {
 
   describe('Collections - Local', () => {
     describe('Create', () => {
-      it('should allow a new version to be created', async () => {
+      it('should allow a new version to be created and updated', async () => {
         const autosavePost = await payload.create({
           collection,
           data: {
@@ -56,9 +56,9 @@ describe('Versions', () => {
           },
         });
 
-        const updatedTitle = 'Here is an updated post title in EN';
-
         collectionLocalPostID = autosavePost.id;
+
+        const updatedTitle = 'Here is an updated post title in EN';
 
         const updatedPost: {
           title: string
@@ -71,14 +71,14 @@ describe('Versions', () => {
           },
         });
 
+        expect(updatedPost.title).toBe(updatedTitle);
+        expect(updatedPost._status).toStrictEqual('draft');
+
         const versions = await payload.findVersions({
           collection,
         });
 
         collectionLocalVersionID = versions.docs[0].id;
-
-        expect(updatedPost.title).toBe(updatedTitle);
-        expect(updatedPost._status).toStrictEqual('draft');
 
         expect(collectionLocalVersionID).toBeDefined();
       });
@@ -99,6 +99,7 @@ describe('Versions', () => {
             description: 'description 2',
           },
         });
+
         const finalDescription = 'final description';
 
         const secondUpdate = await payload.update({
@@ -187,20 +188,21 @@ describe('Versions', () => {
           collection,
         });
 
-        const restore = await payload.restoreVersion({
+        // restore to latest version
+        const restoredVersion = await payload.restoreVersion({
           collection,
           id: versions.docs[1].id,
         });
 
-        expect(restore.title).toBeDefined();
+        expect(restoredVersion.title).toBeDefined();
 
-        const restoredPost = await payload.findByID({
+        const latestDraft = await payload.findByID({
           collection,
           id: collectionLocalPostID,
           draft: true,
         });
 
-        expect(restoredPost.title).toBe(versions.docs[1].version.title);
+        expect(latestDraft.title).toBe(versions.docs[1].version.title);
       });
     });
 

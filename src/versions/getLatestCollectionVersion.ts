@@ -1,6 +1,7 @@
 import { Document } from '../types';
 import { Payload } from '../payload';
 import { Collection, TypeWithID } from '../collections/config/types';
+import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 type Args = {
   payload: Payload
@@ -29,13 +30,16 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       lean,
     });
   }
-  const collection = await Model.findOne(query, {}, { lean }) as Document;
+  let collection = await Model.findOne(query, {}, { lean }) as Document;
   version = await version;
   if (!version || version.updatedAt < collection.updatedAt) {
+    collection.id = collection._id;
+    collection = sanitizeInternalFields(collection);
     return collection;
   }
   return {
     ...version.version,
+    id,
     updatedAt: version.updatedAt,
     createdAt: version.createdAt,
   };
