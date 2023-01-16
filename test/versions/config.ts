@@ -4,11 +4,13 @@ import DraftPosts from './collections/Drafts';
 import AutosaveGlobal from './globals/Autosave';
 import { devUser } from '../credentials';
 import DraftGlobal from './globals/Draft';
+import VersionPosts from './collections/Versions';
 
 export default buildConfig({
   collections: [
     AutosavePosts,
     DraftPosts,
+    VersionPosts,
   ],
   globals: [
     AutosaveGlobal,

@@ -44,7 +44,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   modifiedRef.current = modified;
 
   const createCollectionDoc = useCallback(async () => {
-    const res = await fetch(`${serverURL}${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&draft=true`, {
+    const res = await fetch(`${serverURL}${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&draft=true&autosave=true`, {
       method: 'POST',
       credentials: 'include',
       headers: {

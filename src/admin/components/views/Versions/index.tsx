@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import format from 'date-fns/format';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
@@ -16,10 +15,6 @@ import Table from '../../elements/Table';
 import Paginator from '../../elements/Paginator';
 import PerPage from '../../elements/PerPage';
 import { useSearchParams } from '../../utilities/SearchParams';
-import { Banner, Pill } from '../..';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../../../globals/config/types';
-import { shouldIncrementVersionCount } from '../../../../versions/shouldIncrementVersionCount';
 import { Gutter } from '../../elements/Gutter';
 import { getTranslation } from '../../../../utilities/getTranslation';
 
@@ -28,7 +23,7 @@ import './index.scss';
 const baseClass = 'versions';
 
 const Versions: React.FC<Props> = ({ collection, global }) => {
-  const { serverURL, routes: { admin, api }, admin: { dateFormat } } = useConfig();
+  const { serverURL, routes: { admin, api } } = useConfig();
   const { setStepNav } = useStepNav();
   const { params: { id } } = useRouteMatch<{ id: string }>();
   const { t, i18n } = useTranslation('version');
@@ -39,14 +34,12 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   let docURL: string;
   let entityLabel: string;
   let slug: string;
-  let entity: SanitizedCollectionConfig | SanitizedGlobalConfig;
   let editURL: string;
 
   if (collection) {
     ({ slug } = collection);
     docURL = `${serverURL}${api}/${slug}/${id}`;
     entityLabel = getTranslation(collection.labels.singular, i18n);
-    entity = collection;
     editURL = `${admin}/collections/${collection.slug}/${id}`;
   }
 
@@ -54,7 +47,6 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     ({ slug } = global);
     docURL = `${serverURL}${api}/globals/${slug}`;
     entityLabel = getTranslation(global.label, i18n);
-    entity = global;
     editURL = `${admin}/globals/${global.slug}`;
   }
 
@@ -164,10 +156,6 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     useIDLabel = false;
   }
 
-  const docStatus = doc?._status;
-  const docUpdatedAt = doc?.updatedAt;
-  const showParentDoc = versionsData?.page === 1 && shouldIncrementVersionCount({ entity, docStatus, versions: versionsData });
-
   return (
     <div className={baseClass}>
       <Meta
@@ -190,26 +178,6 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
         {isLoadingVersions && (
           <Loading />
         )}
-        {showParentDoc && (
-          <Banner
-            type={docStatus === 'published' ? 'success' : undefined}
-            className={`${baseClass}__parent-doc`}
-          >
-            {t('currentDocumentStatus', { docStatus })}
-            -
-            {' '}
-            {format(new Date(docUpdatedAt), dateFormat)}
-            <div className={`${baseClass}__parent-doc-pills`}>
-              &nbsp;&nbsp;
-              <Pill
-                pillStyle="white"
-                to={editURL}
-              >
-                {t('general:edit')}
-              </Pill>
-            </div>
-          </Banner>
-        )}
         {versionsData?.totalDocs > 0 && (
           <React.Fragment>
             <Table
@@ -228,22 +196,22 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
                 numberOfNeighbors={1}
               />
               {versionsData?.totalDocs > 0 && (
-              <React.Fragment>
-                <div className={`${baseClass}__page-info`}>
-                  {(versionsData.page * versionsData.limit) - (versionsData.limit - 1)}
-                  -
-                  {versionsData.totalPages > 1 && versionsData.totalPages !== versionsData.page ? (versionsData.limit * versionsData.page) : versionsData.totalDocs}
-                  {' '}
-                  {t('of')}
-                  {' '}
-                  {versionsData.totalDocs}
-                </div>
-                <PerPage
-                  limits={collection?.admin?.pagination?.limits}
-                  limit={limit ? Number(limit) : 10}
-                />
-              </React.Fragment>
-          )}
+                <React.Fragment>
+                  <div className={`${baseClass}__page-info`}>
+                    {(versionsData.page * versionsData.limit) - (versionsData.limit - 1)}
+                    -
+                    {versionsData.totalPages > 1 && versionsData.totalPages !== versionsData.page ? (versionsData.limit * versionsData.page) : versionsData.totalDocs}
+                    {' '}
+                    {t('of')}
+                    {' '}
+                    {versionsData.totalDocs}
+                  </div>
+                  <PerPage
+                    limits={collection?.admin?.pagination?.limits}
+                    limit={limit ? Number(limit) : 10}
+                  />
+                </React.Fragment>
+              )}
             </div>
           </React.Fragment>
         )}

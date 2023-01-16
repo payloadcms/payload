@@ -6,11 +6,8 @@ import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult } from '../../auth/types';
-import { saveCollectionDraft } from '../../versions/drafts/saveCollectionDraft';
 import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
 import { uploadFiles } from '../../uploads/uploadFiles';
-import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
-import { ensurePublishedCollectionVersion } from '../../versions/ensurePublishedCollectionVersion';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
@@ -222,43 +219,10 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   }
 
   // /////////////////////////////////////
-  // Create version from existing doc
-  // /////////////////////////////////////
-
-  let createdVersion;
-
-  if (collectionConfig.versions && !shouldSaveDraft) {
-    createdVersion = await saveCollectionVersion({
-      payload,
-      config: collectionConfig,
-      req,
-      docWithLocales,
-      id,
-    });
-  }
-
-  // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
-  if (shouldSaveDraft) {
-    await ensurePublishedCollectionVersion({
-      payload,
-      config: collectionConfig,
-      req,
-      docWithLocales,
-      id,
-    });
-
-    result = await saveCollectionDraft({
-      payload,
-      config: collectionConfig,
-      req,
-      data: result,
-      id,
-      autosave,
-    });
-  } else {
+  if (!shouldSaveDraft) {
     try {
       result = await Model.findByIdAndUpdate(
         { _id: id },
@@ -266,12 +230,6 @@ async function update(incomingArgs: Arguments): Promise<Document> {
         { new: true },
       );
     } catch (error) {
-      cleanUpFailedVersion({
-        payload,
-        entityConfig: collectionConfig,
-        version: createdVersion,
-      });
-
       // Handle uniqueness error from MongoDB
       throw error.code === 11000 && error.keyValue
         ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }], t)
@@ -283,6 +241,17 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
     // custom id type reset
     result.id = result._id;
+  }
+
+  if (collectionConfig.versions) {
+    result = await saveCollectionVersion({
+      payload,
+      config: collectionConfig,
+      req,
+      docWithLocales: result,
+      id,
+      autosave,
+    });
   }
 
   result = sanitizeInternalFields(result);

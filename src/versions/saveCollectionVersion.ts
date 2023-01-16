@@ -3,7 +3,6 @@ import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
-import { afterRead } from '../fields/hooks/afterRead';
 
 type Args = {
   payload: Payload
@@ -11,71 +10,49 @@ type Args = {
   req: PayloadRequest
   docWithLocales: any
   id: string | number
+  autosave?: boolean
 }
 
 export const saveCollectionVersion = async ({
   payload,
   config,
-  req,
   id,
   docWithLocales,
-}: Args): Promise<void> => {
+  autosave,
+}: Args): Promise<Record<string, unknown>> => {
   const VersionModel = payload.versions[config.slug];
 
-  let version = docWithLocales;
+  let result = { ...docWithLocales };
 
-  if (config.versions?.drafts) {
-    const latestVersion = await VersionModel.findOne({
-      parent: {
-        $eq: docWithLocales.id,
-      },
-      updatedAt: {
-        $gt: docWithLocales.updatedAt,
-      },
-    },
-    {},
-    {
-      lean: true,
-      leanWithId: true,
-      sort: {
-        updatedAt: 'desc',
-      },
-    });
+  if (result._id) delete result._id;
 
-    if (latestVersion) {
-      // If the latest version is a draft, no need to re-save it
-      // Example: when "promoting" a draft to published, the draft already exists.
-      // Instead, return null
-      if (latestVersion?.version?._status === 'draft') {
-        return null;
-      }
+  let existingAutosaveVersion;
 
-      version = latestVersion.version;
-      version = JSON.parse(JSON.stringify(version));
-      version = sanitizeInternalFields(version);
-    }
+  if (autosave) {
+    existingAutosaveVersion = await VersionModel.findOne({
+      parent: id,
+    }, {}, { sort: { updatedAt: 'desc' } });
   }
 
-  version = await afterRead({
-    depth: 0,
-    doc: version,
-    entityConfig: config,
-    req,
-    overrideAccess: true,
-    showHiddenFields: true,
-    flattenLocales: false,
-  });
-
-  if (version._id) delete version._id;
-
-  let createdVersion;
-
   try {
-    createdVersion = await VersionModel.create({
-      parent: id,
-      version,
-      autosave: false,
-    });
+    if (autosave && existingAutosaveVersion?.autosave === true) {
+      result = await VersionModel.findByIdAndUpdate(
+        {
+          _id: existingAutosaveVersion._id,
+        },
+        {
+          version: result,
+        },
+        { new: true, lean: true },
+      );
+      // Otherwise, create a new one
+    } else {
+      result = await VersionModel.create({
+        parent: id,
+        version: docWithLocales,
+        autosave: Boolean(autosave),
+      });
+    }
   } catch (err) {
     payload.logger.error(`There was an error while saving a version for the ${config.labels.singular} with ID ${id}.`);
     payload.logger.error(err);
@@ -92,10 +69,10 @@ export const saveCollectionVersion = async ({
     });
   }
 
-  if (createdVersion) {
-    createdVersion = JSON.parse(JSON.stringify(createdVersion));
-    createdVersion = sanitizeInternalFields(createdVersion);
-  }
+  result = result.version;
+  result = JSON.parse(JSON.stringify(result));
+  result = sanitizeInternalFields(result);
+  result.id = id;
 
-  return createdVersion;
+  return result;
 };

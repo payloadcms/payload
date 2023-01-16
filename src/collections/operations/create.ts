@@ -16,6 +16,7 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
+import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
 
 export type Arguments = {
   collection: Collection
@@ -27,6 +28,7 @@ export type Arguments = {
   data: Record<string, unknown>
   overwriteExistingFiles?: boolean
   draft?: boolean
+  autosave?: boolean
 }
 
 async function create(incomingArgs: Arguments): Promise<Document> {
@@ -65,6 +67,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
     showHiddenFields,
     overwriteExistingFiles = false,
     draft = false,
+    autosave = false,
   } = args;
 
   let { data } = args;
@@ -212,6 +215,21 @@ async function create(incomingArgs: Arguments): Promise<Document> {
   result = JSON.stringify(result);
   result = JSON.parse(result);
   result = sanitizeInternalFields(result);
+
+  // /////////////////////////////////////
+  // Create version
+  // /////////////////////////////////////
+
+  if (collectionConfig.versions) {
+    await saveCollectionVersion({
+      payload,
+      config: collectionConfig,
+      req,
+      id: result.id,
+      docWithLocales: result,
+      autosave,
+    });
+  }
 
   // /////////////////////////////////////
   // Send verification email if applicable
