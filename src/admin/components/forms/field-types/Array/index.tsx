@@ -44,6 +44,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     minRows,
     permissions,
     indexPath,
+    localized = false,
     admin: {
       readOnly,
       description,
@@ -265,10 +266,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
           />
         </header>
 
-        <NullifyField
-          path={path}
-          fieldValue={value}
-        />
+        {localized
+          && (
+            <NullifyField
+              path={path}
+              fieldValue={value}
+            />
+          )}
 
         <Droppable droppableId="array-drop">
           {(provided) => (

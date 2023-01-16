@@ -54,6 +54,7 @@ const BlocksField: React.FC<Props> = (props) => {
     validate = blocksValidator,
     permissions,
     indexPath,
+    localized = false,
     admin: {
       readOnly,
       description,
@@ -263,10 +264,13 @@ const BlocksField: React.FC<Props> = (props) => {
           />
         </header>
 
-        <NullifyField
-          path={path}
-          fieldValue={value}
-        />
+        {localized
+          && (
+            <NullifyField
+              path={path}
+              fieldValue={value}
+            />
+          )}
 
         <Droppable
           droppableId="blocks-drop"
