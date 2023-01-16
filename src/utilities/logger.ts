@@ -3,10 +3,14 @@ import memoize from 'micro-memoize';
 
 export type PayloadLogger = pino.Logger;
 
-const defaultLoggerOptions = {
-  prettyPrint: {
-    ignore: 'pid,hostname',
-    translateTime: 'HH:MM:ss',
+const defaultLoggerOptions: pino.LoggerOptions = {
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+      ignore: 'pid,hostname',
+      translateTime: 'HH:MM:ss',
+    },
   },
 };
 
