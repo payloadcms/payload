@@ -4,7 +4,6 @@ import commandExists from 'command-exists'
 import { createProject } from './lib/create-project'
 import { getDatabaseConnection } from './lib/get-db-connection'
 import { generateSecret } from './lib/generate-secret'
-import { parseLanguage } from './lib/parse-language'
 import { parseProjectName } from './lib/parse-project-name'
 import { parseTemplate } from './lib/parse-template'
 import { getValidTemplates, validateTemplate } from './lib/templates'
@@ -55,9 +54,8 @@ export class Main {
 
       console.log(welcomeMessage)
       const projectName = await parseProjectName(this.args)
-      const language = await parseLanguage(this.args)
       const validTemplates = await getValidTemplates()
-      const template = await parseTemplate(this.args, validTemplates, language)
+      const template = await parseTemplate(this.args, validTemplates)
       const databaseUri = await getDatabaseConnection(this.args, projectName)
       const payloadSecret = await generateSecret()
       const projectDir =

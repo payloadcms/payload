@@ -31,5 +31,4 @@ export interface GitTemplate extends Template {
 interface Template {
   name: string
   type: 'static' | 'starter'
-  language: 'typescript' | 'javascript'
 }

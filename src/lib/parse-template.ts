@@ -4,7 +4,6 @@ import type { CliArgs, ProjectTemplate } from '../types'
 export async function parseTemplate(
   args: CliArgs,
   validTemplates: ProjectTemplate[],
-  language: string,
 ): Promise<ProjectTemplate> {
   if (args['--template']) {
     const templateName = args['--template']
@@ -13,9 +12,7 @@ export async function parseTemplate(
     return template
   }
 
-  const filteredTemplates = validTemplates
-    .filter(d => d.name.startsWith(language))
-    .map(t => t.name.replace(`${language}-`, ''))
+  const filteredTemplates = validTemplates.map(t => t.name)
 
   const response = await prompts(
     {
@@ -23,7 +20,7 @@ export async function parseTemplate(
       name: 'value',
       message: 'Choose project template',
       choices: filteredTemplates.map(p => {
-        return { title: p, value: `${language}-${p}` }
+        return { title: p, value: p }
       }),
       validate: (value: string) => !!value.length,
     },
@@ -34,7 +31,6 @@ export async function parseTemplate(
     },
   )
 
-  // const template = `${language}-${response.value}`
   const template = validTemplates.find(t => t.name === response.value)
   if (!template) throw new Error('Template is undefined')
 

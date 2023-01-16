@@ -21,7 +21,6 @@ export async function getValidTemplates(): Promise<ProjectTemplate[]> {
     return {
       name,
       type: 'static',
-      language: name.startsWith('js-') ? 'javascript' : 'typescript',
     }
   })
   return templates

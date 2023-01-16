@@ -31,10 +31,10 @@ describe('createProject', () => {
 
     it('creates static project', async () => {
       const expectedPayloadVersion = await getLatestPayloadVersion()
+      const templateName = 'todo'
       const template: ProjectTemplate = {
-        name: 'ts-todo',
+        name: templateName,
         type: 'static',
-        language: 'typescript',
       }
       await createProject(args, projectDir, template, packageManager)
 
@@ -45,7 +45,7 @@ describe('createProject', () => {
 
       // Check package name and description
       expect(packageJson.name).toEqual(path.basename(projectDir))
-      expect(packageJson.description).toContain('ts-todo')
+      expect(packageJson.description).toContain(templateName)
 
       // Check all common files are create
       assertProjectFileExists('.npmrc')

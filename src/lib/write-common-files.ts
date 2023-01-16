@@ -22,7 +22,7 @@ export async function writeCommonFiles(
 
   // package.json
   const packageJsonTemplate = await fse.readFile(
-    path.resolve(commonFilesDir, template.language, 'package.template.json'),
+    path.resolve(commonFilesDir, 'package.template.json'),
     'utf8',
   )
   const packageJson = handlebars.compile(packageJsonTemplate)({
@@ -33,7 +33,7 @@ export async function writeCommonFiles(
   await fse.writeFile(path.resolve(projectDir, 'package.json'), packageJson)
 
   // nodemon.json
-  const nodemon = path.resolve(commonFilesDir, template.language, 'nodemon.json')
+  const nodemon = path.resolve(commonFilesDir, 'nodemon.json')
   const nodemonDest = path.resolve(projectDir, 'nodemon.json')
   await fse.copy(nodemon, nodemonDest)
 
@@ -49,11 +49,9 @@ export async function writeCommonFiles(
   await fse.writeFile(path.resolve(projectDir, 'README.md'), readme)
 
   // tsconfig.json
-  if (template.language === 'typescript') {
-    const tsconfig = path.resolve(commonFilesDir, template.language, 'tsconfig.json')
-    const tsconfigDest = path.resolve(projectDir, 'tsconfig.json')
-    await fse.copy(tsconfig, tsconfigDest)
-  }
+  const tsconfig = path.resolve(commonFilesDir, 'tsconfig.json')
+  const tsconfigDest = path.resolve(projectDir, 'tsconfig.json')
+  await fse.copy(tsconfig, tsconfigDest)
 
   // docker-compose.yml
   const dockerComposeTemplate = await fse.readFile(
