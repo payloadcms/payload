@@ -152,13 +152,13 @@ describe('admin', () => {
     });
 
     test('should delete existing', async () => {
-      const { id } = await createPost();
+      const { id, ...post } = await createPost();
 
       await page.goto(url.edit(id));
       await page.locator('#action-delete').click();
       await page.locator('#confirm-delete').click();
 
-      await expect(page.locator(`text=Post en "${id}" successfully deleted.`)).toBeVisible();
+      await expect(page.locator(`text=Post en "${post.title}" successfully deleted.`)).toBeVisible();
       expect(page.url()).toContain(url.list);
     });
 
