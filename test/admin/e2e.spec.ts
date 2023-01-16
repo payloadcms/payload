@@ -245,6 +245,12 @@ describe('admin', () => {
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns);
       });
 
+      test('useAsTitle cell is a link', async () => {
+        const { id } = await createPost();
+        const itemTitle = page.locator(`${tableRowLocator} td.cell-title a`);
+        await expect(itemTitle).toHaveAttribute('href', `/admin/collections/posts/${id}`);
+      });
+
       test('filter rows', async () => {
         const { id } = await createPost({ title: 'post1' });
         await createPost({ title: 'post2' });
@@ -276,6 +282,28 @@ describe('admin', () => {
         await page.locator('.condition__actions-remove').click();
         await wait(1000);
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
+      });
+
+      test('drag columns', async () => {
+        await createPost();
+        await page.locator('.list-controls__toggle-columns').click();
+        await page.waitForSelector('.column-selector');
+
+        const descriptionDrag = page.locator('#col-description .column-selector__column');
+        const idDrag = page.locator('#col-id .column-selector__drag');
+
+        const descriptionBound = await descriptionDrag.boundingBox();
+        const idBound = await idDrag.boundingBox();
+
+        if (!idBound || !descriptionBound) return;
+
+        await page.mouse.move(idBound.x + 2, idBound.y + 2, { steps: 10 });
+        await page.mouse.down();
+        await page.mouse.move(descriptionBound.x - 2, descriptionBound.y - 2, { steps: 10 });
+        await page.mouse.up();
+
+        await wait(200);
+        await expect(page.locator('table >> thead >> tr >> th:first-child')).toHaveText('Number', { timeout: 500 });
       });
     });
 

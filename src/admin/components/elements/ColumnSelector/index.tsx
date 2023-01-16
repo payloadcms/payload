@@ -80,7 +80,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
                 >
                   {(providedDrag) => (
                     <div
-                      id={`col-${i}`}
+                      id={`col-${field.name}`}
                       ref={providedDrag.innerRef}
                       className={`${baseClass}__column_container`}
                       {...providedDrag.draggableProps}
