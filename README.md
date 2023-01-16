@@ -15,7 +15,7 @@ CLI for easily starting new Payload project
       --name my-payload-app              Set project name
       --template template_name           Choose specific template
 
-        Available templates: js-blank, js-blog, js-todo, ts-blank, ts-blog, ts-todo
+        Available templates: blank, blog, todo
 
       --use-npm                          Use npm to install dependencies
       --no-deps                          Do not install any dependencies
