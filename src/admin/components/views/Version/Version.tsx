@@ -21,7 +21,7 @@ import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/
 import { FieldPermissions } from '../../../../auth';
 import { useLocale } from '../../utilities/Locale';
 import { Gutter } from '../../elements/Gutter';
-import { useFullscreenLoader } from '../../utilities/FullscreenLoaderProvider';
+import { useLoadingOverlay } from '../../utilities/LoadingOverlay';
 
 import './index.scss';
 
@@ -37,7 +37,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const { permissions } = useAuth();
   const locale = useLocale();
   const { t, i18n } = useTranslation('version');
-  const { setShowLoader } = useFullscreenLoader();
+  const { toggleLoadingOverlay } = useLoadingOverlay();
 
   let originalDocFetchURL: string;
   let versionFetchURL: string;
@@ -141,8 +141,11 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale, t, i18n]);
 
   useEffect(() => {
-    setShowLoader(isLoadingData);
-  }, [isLoadingData, setShowLoader]);
+    toggleLoadingOverlay({
+      key: 'version',
+      isLoading: isLoadingData,
+    });
+  }, [isLoadingData, toggleLoadingOverlay]);
 
   let metaTitle: string;
   let metaDesc: string;

@@ -1,10 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useFullscreenLoader } from '../../utilities/FullscreenLoaderProvider';
+import { useLoadingOverlay } from '../../utilities/LoadingOverlay';
 
 import './index.scss';
 
-const Loading: React.FC = () => {
+export const Loading: React.FC = () => {
   const baseClass = 'loading';
   const { t } = useTranslation('general');
 
@@ -18,18 +18,53 @@ const Loading: React.FC = () => {
   );
 };
 
-export const ForceFullscreenLoader: React.FC = () => {
-  const { setShowLoader } = useFullscreenLoader();
+const baseClass = 'fullscreen-loader';
+
+type Props = {
+  show?: boolean;
+  loadingText?: string;
+  overlayType?: string
+}
+export const FullscreenLoader: React.FC<Props> = ({ loadingText, show = true, overlayType }) => {
+  const { t } = useTranslation('general');
+
+  return (
+    <div
+      className={[
+        baseClass,
+        show ? `${baseClass}--entering` : `${baseClass}--exiting`,
+        overlayType ? `${baseClass}--${overlayType}` : '',
+      ].filter(Boolean).join(' ')}
+    >
+      <div className={`${baseClass}__bars`}>
+        <div className={`${baseClass}__bar`} />
+        <div className={`${baseClass}__bar`} />
+        <div className={`${baseClass}__bar`} />
+        <div className={`${baseClass}__bar`} />
+        <div className={`${baseClass}__bar`} />
+      </div>
+
+      <span className={`${baseClass}__text`}>{loadingText || t('loading')}</span>
+    </div>
+  );
+};
+
+export const SuspenseLoader: React.FC = () => {
+  const { toggleLoadingOverlay } = useLoadingOverlay();
 
   React.useEffect(() => {
-    setShowLoader(true);
+    toggleLoadingOverlay({
+      key: 'suspense',
+      isLoading: true,
+    });
 
     return () => {
-      setShowLoader(false);
+      toggleLoadingOverlay({
+        key: 'suspense',
+        isLoading: false,
+      });
     };
-  }, [setShowLoader]);
+  }, [toggleLoadingOverlay]);
 
   return null;
 };
-
-export default Loading;

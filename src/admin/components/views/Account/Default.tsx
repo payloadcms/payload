@@ -21,6 +21,7 @@ import { Gutter } from '../../elements/Gutter';
 import ReactSelect from '../../elements/ReactSelect';
 import Label from '../../forms/Label';
 import type { Translation } from '../../../../translations/type';
+import { useLoadingOverlay } from '../../utilities/LoadingOverlay';
 
 import './index.scss';
 
@@ -52,10 +53,19 @@ const DefaultAccount: React.FC<Props> = (props) => {
 
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { t, i18n } = useTranslation('authentication');
+  const { toggleLoadingOverlay } = useLoadingOverlay();
 
   const languageOptions = Object.entries(i18n.options.resources).map(([language, resource]) => (
     { label: (resource as Translation).general.thisLanguage, value: language }
   ));
+
+  React.useEffect(() => {
+    toggleLoadingOverlay({
+      key: 'account',
+      type: 'withoutNav',
+      isLoading,
+    });
+  }, [isLoading, toggleLoadingOverlay]);
 
   const classes = [
     baseClass,

@@ -13,8 +13,8 @@ import Versions from './views/Versions';
 import Version from './views/Version';
 import { DocumentInfoProvider } from './utilities/DocumentInfo';
 import { useLocale } from './utilities/Locale';
-import { useFullscreenLoader } from './utilities/FullscreenLoaderProvider';
-import { ForceFullscreenLoader } from './elements/Loading';
+import { useLoadingOverlay } from './utilities/LoadingOverlay';
+import { FullscreenLoader } from './elements/Loading';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -33,7 +33,7 @@ const Routes = () => {
   const [initialized, setInitialized] = useState(null);
   const { user, permissions, refreshCookie } = useAuth();
   const { i18n } = useTranslation();
-  const { setShowLoader } = useFullscreenLoader();
+  const { toggleLoadingOverlay } = useLoadingOverlay();
   const locale = useLocale();
 
   const canAccessAdmin = permissions?.canAccessAdmin;
@@ -74,12 +74,9 @@ const Routes = () => {
     }
   }, [i18n.language, routes, userCollection]);
 
-  React.useEffect(() => {
-    setShowLoader(isLoadingUser);
-  }, [isLoadingUser, setShowLoader]);
-
   return (
-    <Suspense fallback={<ForceFullscreenLoader />}>
+    <Suspense fallback={<FullscreenLoader />}>
+      <FullscreenLoader show={isLoadingUser} />
       <Route
         path={routes.admin}
         render={({ match }) => {

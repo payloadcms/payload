@@ -12,7 +12,6 @@ import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { Fields } from '../../forms/Form/types';
 import { usePreferences } from '../../utilities/Preferences';
-import { useFullscreenLoader } from '../../utilities/FullscreenLoaderProvider';
 
 const AccountView: React.FC = () => {
   const { state: locationState } = useLocation<{ data: unknown }>();
@@ -22,7 +21,6 @@ const AccountView: React.FC = () => {
   const [initialState, setInitialState] = useState<Fields>();
   const { id, preferencesKey, docPermissions, getDocPermissions, slug } = useDocumentInfo();
   const { getPreference } = usePreferences();
-  const { setShowLoader } = useFullscreenLoader();
 
   const {
     serverURL,
@@ -40,7 +38,6 @@ const AccountView: React.FC = () => {
   } = useConfig();
   const { t } = useTranslation('authentication');
 
-  const isLoading = !initialState || !docPermissions;
   const collection = collections.find((coll) => coll.slug === slug);
 
   const { fields } = collection;
@@ -76,8 +73,6 @@ const AccountView: React.FC = () => {
   }, [setStepNav, t]);
 
   useEffect(() => {
-    if (isLoadingData) return;
-
     const awaitInitialState = async () => {
       const state = await buildStateFromSchema({
         fieldSchema: fields,
@@ -93,11 +88,9 @@ const AccountView: React.FC = () => {
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, t, isLoadingData]);
+  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, t]);
 
-  useEffect(() => {
-    setShowLoader(isLoading);
-  }, [isLoading, setShowLoader]);
+  const isLoading = !initialState || !docPermissions || isLoadingData;
 
   return (
     <RenderCustomComponent

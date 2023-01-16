@@ -1,21 +1,19 @@
 import * as React from 'react';
 
-type Result = [boolean, React.Dispatch<React.SetStateAction<boolean>>];
-export const useDelay = (delay: number, run = true): Result => {
+type Result = [boolean, () => void];
+export const useDelay = (delay: number): Result => {
   const [hasDelayed, setHasDelayed] = React.useState(false);
 
-  React.useEffect(() => {
-    let delayTimeout: NodeJS.Timeout;
-    if (run) {
-      delayTimeout = setTimeout(() => {
-        setHasDelayed(true);
-      }, delay);
-    }
+  const triggerDelay = React.useCallback(() => {
+    setHasDelayed(false);
+    const delayTimeout = setTimeout(() => {
+      setHasDelayed(true);
+    }, delay);
 
     return () => {
       clearTimeout(delayTimeout);
     };
-  }, [delay, run]);
+  }, [delay]);
 
-  return [hasDelayed, setHasDelayed];
+  return [hasDelayed, triggerDelay];
 };

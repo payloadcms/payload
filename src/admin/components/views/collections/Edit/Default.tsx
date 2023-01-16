@@ -28,6 +28,7 @@ import { OperationContext } from '../../../utilities/OperationProvider';
 import { Gutter } from '../../../elements/Gutter';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { SetStepNav } from './SetStepNav';
+import { useLoadingOverlay } from '../../../utilities/LoadingOverlay';
 
 import './index.scss';
 
@@ -57,6 +58,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
     updatedAt,
   } = props;
 
+  const { toggleLoadingOverlay } = useLoadingOverlay();
+
   const {
     slug,
     fields,
@@ -79,6 +82,14 @@ const DefaultEditView: React.FC<Props> = (props) => {
 
   const operation = isEditing ? 'update' : 'create';
 
+  React.useEffect(() => {
+    toggleLoadingOverlay({
+      key: 'collection-edit',
+      type: 'withoutNav',
+      isLoading,
+    });
+  }, [isLoading, toggleLoadingOverlay]);
+
   return (
     <div className={classes}>
       {!isLoading && (
@@ -95,7 +106,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
               <SetStepNav
                 collection={collection}
                 isEditing={isEditing}
-                id={data.id}
+                id={data?.id}
               />
             )}
             <div className={`${baseClass}__main`}>

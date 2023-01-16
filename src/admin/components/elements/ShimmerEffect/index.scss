@@ -1,0 +1,26 @@
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+
+  &__shimmer {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(130deg,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(#1A1A1A, .5) 35%,
+        rgba(#252525, 1) 50%,
+        rgba(#1A1A1A, .5) 65%,
+        rgba(0, 0, 0, 0) 100%);
+    animation: shimmer 3s infinite;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}

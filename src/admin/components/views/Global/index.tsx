@@ -13,7 +13,6 @@ import { IndexProps } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { Fields } from '../../forms/Form/types';
 import { usePreferences } from '../../utilities/Preferences';
-import { useFullscreenLoader } from '../../utilities/FullscreenLoaderProvider';
 
 const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{ data?: Record<string, unknown> }>();
@@ -25,9 +24,6 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { getVersions, preferencesKey, docPermissions, getDocPermissions } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { t } = useTranslation();
-  const { setShowLoader } = useFullscreenLoader();
-
-  const isLoading = !initialState || !docPermissions;
 
   const {
     serverURL,
@@ -75,8 +71,6 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   }, [setStepNav, label]);
 
   useEffect(() => {
-    if (isLoadingData) return;
-
     const awaitInitialState = async () => {
       const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: 'update', locale, t });
       await getPreference(preferencesKey);
@@ -84,11 +78,9 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     };
 
     awaitInitialState();
-  }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t, isLoadingData]);
+  }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t]);
 
-  useEffect(() => {
-    setShowLoader(isLoading);
-  }, [isLoading, setShowLoader]);
+  const isLoading = !initialState || !docPermissions || isLoadingData;
 
   return (
     <RenderCustomComponent

@@ -11,7 +11,7 @@ import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-import { useFullscreenLoader } from '../../utilities/FullscreenLoaderProvider';
+import { useLoadingOverlay } from '../../utilities/LoadingOverlay';
 
 import './index.scss';
 
@@ -21,7 +21,7 @@ const Login: React.FC = () => {
   const history = useHistory();
   const { t } = useTranslation('authentication');
   const { user, setToken } = useAuth();
-  const { setShowLoader } = useFullscreenLoader();
+  const { toggleLoadingOverlay } = useLoadingOverlay();
   const config = useConfig();
   const {
     admin: {
@@ -43,8 +43,11 @@ const Login: React.FC = () => {
   const collection = collections.find(({ slug }) => slug === userSlug);
 
   const onSuccess = (data) => {
-    setShowLoader(false);
     if (data.token) {
+      toggleLoadingOverlay({
+        key: 'login',
+        isLoading: false,
+      });
       setToken(data.token);
       history.push(admin);
     }
@@ -97,7 +100,12 @@ const Login: React.FC = () => {
               disableSuccessStatus
               waitForAutocomplete
               disableNativeFormSubmission={false}
-              onSubmit={() => setShowLoader(true)}
+              onSubmit={() => {
+                toggleLoadingOverlay({
+                  key: 'login',
+                  isLoading: true,
+                });
+              }}
               onSuccess={onSuccess}
               method="post"
               action={`${serverURL}${api}/${userSlug}/login`}

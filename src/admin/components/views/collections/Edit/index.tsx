@@ -16,7 +16,6 @@ import { Fields } from '../../../forms/Form/types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { EditDepthContext } from '../../../utilities/EditDepth';
 import { CollectionPermission } from '../../../../../auth';
-import { useFullscreenLoader } from '../../../utilities/FullscreenLoaderProvider';
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props;
@@ -47,9 +46,6 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { getVersions, preferencesKey, getDocPermissions, docPermissions } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { t } = useTranslation('general');
-  const { setShowLoader } = useFullscreenLoader();
-
-  const isLoading = !initialState || !docPermissions;
 
   const onSave = useCallback(async (json: any) => {
     getVersions();
@@ -71,8 +67,6 @@ const EditView: React.FC<IndexProps> = (props) => {
   const dataToRender = (locationState as Record<string, unknown>)?.data || data;
 
   useEffect(() => {
-    if (isLoadingData) return;
-
     const awaitInitialState = async () => {
       setUpdatedAt(dataToRender?.updatedAt);
       const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: isEditing ? 'update' : 'create', id, locale, t });
@@ -89,10 +83,6 @@ const EditView: React.FC<IndexProps> = (props) => {
     }
   }, [history, redirect]);
 
-  useEffect(() => {
-    setShowLoader(isLoading);
-  }, [isLoading, setShowLoader]);
-
   if (isError) {
     return (
       <Redirect to={`${admin}/not-found`} />
@@ -102,6 +92,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const apiURL = `${serverURL}${api}/${slug}/${id}${collection.versions.drafts ? '?draft=true' : ''}`;
   const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
   const hasSavePermission = (isEditing && docPermissions?.update?.permission) || (!isEditing && (docPermissions as CollectionPermission)?.create?.permission);
+  const isLoading = !initialState || !docPermissions || isLoadingData;
 
   return (
     <EditDepthContext.Provider value={1}>

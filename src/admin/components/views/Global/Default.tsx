@@ -22,6 +22,7 @@ import Autosave from '../../elements/Autosave';
 import { OperationContext } from '../../utilities/OperationProvider';
 import { Gutter } from '../../elements/Gutter';
 import { getTranslation } from '../../../../utilities/getTranslation';
+import { useLoadingOverlay } from '../../utilities/LoadingOverlay';
 
 import './index.scss';
 
@@ -31,6 +32,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
   const { admin: { dateFormat } } = useConfig();
   const { publishedDoc } = useDocumentInfo();
   const { t, i18n } = useTranslation('general');
+  const { toggleLoadingOverlay } = useLoadingOverlay();
 
   const {
     global, data, onSave, permissions, action, apiURL, initialState, isLoading, updatedAt,
@@ -48,6 +50,14 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
   } = global;
 
   const hasSavePermission = permissions?.update?.permission;
+
+  React.useEffect(() => {
+    toggleLoadingOverlay({
+      key: 'global-edit',
+      type: 'withoutNav',
+      isLoading,
+    });
+  }, [toggleLoadingOverlay, isLoading]);
 
   return (
     <div className={baseClass}>
