@@ -46,18 +46,44 @@ export const promise = async ({
     delete siblingDoc[field.name];
   }
 
-  const hasLocalizedValue = flattenLocales
+  const requestingLocalizedValue = flattenLocales
     && fieldAffectsData(field)
     && (typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null)
     && field.localized
     && req.locale !== 'all';
 
-  if (hasLocalizedValue) {
+  if (requestingLocalizedValue) {
     let localizedValue = siblingDoc[field.name][req.locale];
-    if (typeof localizedValue === 'undefined' && req.fallbackLocale) localizedValue = siblingDoc[field.name][req.fallbackLocale];
-    if (localizedValue === null && (field.type === 'array' || field.type === 'blocks')) localizedValue = siblingDoc[field.name][req.fallbackLocale];
-    if (typeof localizedValue === 'undefined' && (field.type === 'group' || field.type === 'tab')) localizedValue = {};
-    if (typeof localizedValue === 'undefined') localizedValue = null;
+    const fallbackEnabled = req.payload.config.localization && req.payload.config.localization?.fallback;
+    const fallbackValue = req.fallbackLocale ? siblingDoc[field.name][req.fallbackLocale] : null;
+    const localizedValueIsEmpty = typeof localizedValue === 'undefined' || localizedValue === null;
+
+    // Sanitize localized field data
+    // fallback if enabled, else set default values
+    switch (field.type) {
+      case 'tab':
+      case 'group':
+        if (fallbackEnabled && localizedValueIsEmpty) {
+          localizedValue = fallbackValue || {};
+        } else {
+          localizedValue = {};
+        }
+        break;
+
+      case 'text':
+      case 'textarea':
+        if (fallbackEnabled && (localizedValueIsEmpty || localizedValue.trim() === '')) {
+          localizedValue = fallbackValue || '';
+        }
+        break;
+
+      default:
+        if (fallbackEnabled && localizedValueIsEmpty) {
+          localizedValue = fallbackValue;
+        }
+        break;
+    }
+
     siblingDoc[field.name] = localizedValue;
   }
 
