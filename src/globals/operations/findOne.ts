@@ -5,7 +5,7 @@ import { AccessResult } from '../../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { SanitizedGlobalConfig, TypeWithID } from '../config/types';
+import { SanitizedGlobalConfig } from '../config/types';
 import { PayloadRequest } from '../../express/types';
 
 type Args = {
@@ -19,7 +19,7 @@ type Args = {
   overrideAccess?: boolean
 }
 
-async function findOne<T extends TypeWithID = any>(args: Args): Promise<T> {
+async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T> {
   const {
     globalConfig,
     locale,

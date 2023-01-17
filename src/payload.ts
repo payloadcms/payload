@@ -226,9 +226,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     return find<T>(this, options);
   }
 
-  findGlobal = async <T extends GlobalTypeWithID = any>(options: FindGlobalOptions): Promise<T> => {
+  findGlobal = async <T extends keyof TGeneratedTypes['globals']>(
+    options: FindGlobalOptions<T>,
+  ): Promise<TGeneratedTypes['globals'][T]> => {
     const { findOne } = localGlobalOperations;
-    return findOne(this, options);
+    return findOne<T>(this, options);
   }
 
   updateGlobal = async <T extends GlobalTypeWithID = any>(options: UpdateGlobalOptions): Promise<T> => {
