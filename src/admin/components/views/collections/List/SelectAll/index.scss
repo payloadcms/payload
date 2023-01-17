@@ -26,19 +26,5 @@
     position: relative;
     width: $baseline;
     height: $baseline;
-
-    svg {
-      opacity: 0;
-    }
-  }
-
-  &--checked {
-    button {
-      .select-all__input {
-        svg {
-          opacity: 1;
-        }
-      }
-    }
   }
 }

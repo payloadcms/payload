@@ -11,21 +11,17 @@ const SelectAll: React.FC = () => {
   const { selectAll, toggleAll } = useSelection();
 
   return (
-    <div
-      className={[
-        baseClass,
-        selectAll !== false && `${baseClass}--checked`,
-      ].filter(Boolean).join(' ')}
-    >
+    <div className={baseClass}>
       <button
         type="button"
         onClick={() => toggleAll()}
       >
         <span className={`${baseClass}__input`}>
-          { selectAll === null ? (
-            <Line />
-          ) : (
+          { selectAll && (
             <Check />
+          )}
+          { selectAll === null && (
+            <Line />
           )}
         </span>
       </button>

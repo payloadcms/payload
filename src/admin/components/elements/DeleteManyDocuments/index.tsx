@@ -11,19 +11,22 @@ import { Props } from './types';
 import { useSelection } from '../../views/collections/List/SelectionProvider';
 
 import './index.scss';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 const baseClass = 'delete-documents';
 
 const DeleteManyDocuments: React.FC<Props> = (props) => {
   const {
-    buttonId,
     resetParams,
     collection: {
       slug,
+      labels: {
+        plural,
+      },
     } = {},
   } = props;
 
-  const { serverURL, routes: { api, admin } } = useConfig();
+  const { serverURL, routes: { api } } = useConfig();
   const [deleting, setDeleting] = useState(false);
   const { toggleModal } = useModal();
   const { t, i18n } = useTranslation('general');
@@ -56,9 +59,8 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
         const json = await res.json();
         toggleModal(modalSlug);
         if (res.status < 400) {
-          // toast.success(t('titleDeleted', { label: getTranslation(plural, i18n), title }));
-          toast.success('Deleted');
-          resetParams({ page: 1 });
+          toast.success(t('deletedSuccessfully'));
+          resetParams({ page: selectAll ? 1 : undefined });
           return null;
         }
 
@@ -72,7 +74,7 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
         return addDefaultError();
       }
     });
-  }, [addDefaultError, api, i18n.language, modalSlug, resetParams, selected, serverURL, slug, toggleModal]);
+  }, [addDefaultError, api, i18n.language, modalSlug, resetParams, selectAll, selected, serverURL, slug, t, toggleModal]);
 
   if (selectAll === false) {
     return null;
@@ -80,9 +82,8 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
 
   return (
     <React.Fragment>
-      <button
+      <Button
         type="button"
-        id={buttonId}
         className={`${baseClass}__toggle`}
         onClick={(e) => {
           e.preventDefault();
@@ -91,13 +92,16 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
         }}
       >
         {t('delete')}
-      </button>
+      </Button>
       <Modal
         slug={modalSlug}
         className={baseClass}
       >
         <MinimalTemplate className={`${baseClass}__template`}>
           <h1>{t('confirmDeletion')}</h1>
+          <p>
+            {t('aboutToDeleteCount', { label: getTranslation(plural, i18n), count: Object.keys(selected).filter((id) => selected[id]).length })}
+          </p>
           <Button
             id="confirm-cancel"
             buttonStyle="secondary"

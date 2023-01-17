@@ -2,9 +2,9 @@ import React from 'react';
 
 import './index.scss';
 
-const Plus: React.FC = () => (
+const Line: React.FC = () => (
   <svg
-    className="icon icon--plus"
+    className="icon icon--line"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 25 25"
   >
@@ -18,4 +18,4 @@ const Plus: React.FC = () => (
   </svg>
 );
 
-export default Plus;
+export default Line;

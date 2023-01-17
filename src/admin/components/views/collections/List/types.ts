@@ -1,4 +1,4 @@
-import qs from 'qs';
+import { Where } from '../../../../../types';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
 import { Column } from '../../../elements/Table/types';
@@ -15,7 +15,7 @@ export type Props = {
   tableColumns: Column[]
   columnNames: string[]
   setColumns: (columns: string[]) => void
-  resetParams: (overrides?: { page?: string, sort?: string, where?: qs.ParsedQs }) => void
+  resetParams: (overrides?: { page?: number, sort?: string, where?: Where }) => void
   hasCreatePermission: boolean
   setLimit: (limit: number) => void
   limit: number

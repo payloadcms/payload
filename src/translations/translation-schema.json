@@ -533,6 +533,15 @@
         "aboutToDelete": {
           "type": "string"
         },
+        "aboutToDeleteCount_many": {
+          "type": "string"
+        },
+        "aboutToDeleteCount_one": {
+          "type": "string"
+        },
+        "aboutToDeleteCount_other": {
+          "type": "string"
+        },
         "addBelow": {
           "type": "string"
         },
@@ -809,6 +818,9 @@
       },
       "required": [
         "aboutToDelete",
+        "aboutToDeleteCount_many",
+        "aboutToDeleteCount_one",
+        "aboutToDeleteCount_other",
         "addBelow",
         "addFilter",
         "adminTheme",

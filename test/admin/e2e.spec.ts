@@ -279,6 +279,39 @@ describe('admin', () => {
       });
     });
 
+    describe('multi-select', () => {
+      beforeAll(async () => {
+        await createPost();
+        await createPost();
+        await createPost();
+      });
+
+      test('should select multiple rows', async () => {
+        const selectAll = page.locator('.select-all');
+        await page.locator('.row-1 .select-row button').click();
+
+        const indeterminateSelectAll = selectAll.locator('.icon--line');
+        expect(indeterminateSelectAll).toBeDefined();
+
+        await selectAll.locator('button').click();
+        const emptySelectAll = selectAll.locator('.icon');
+        await expect(emptySelectAll).toHaveCount(0);
+
+        await selectAll.locator('button').click();
+        const checkSelectAll = selectAll.locator('.icon .icon--check');
+        expect(checkSelectAll).toBeDefined();
+      });
+
+      test('should delete many', async () => {
+        await page.locator('.row-1 .select-row button').click();
+        await page.locator('.row-2 .select-row button').click();
+
+        await page.locator('.delete-documents__toggle').click();
+        await page.locator('#confirm-delete').click();
+        await expect(await page.locator('.select-row')).toHaveCount(1);
+      });
+    });
+
     describe('pagination', () => {
       beforeAll(async () => {
         await mapAsync([...Array(11)], async () => {

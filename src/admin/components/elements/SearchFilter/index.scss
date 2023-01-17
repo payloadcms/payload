@@ -13,7 +13,7 @@
   &__input {
     @include formInput;
     padding-left: base(2);
-    background-color: unset;
+    background-color: var(--theme-elevation-50);
     border: none;
   }
 }

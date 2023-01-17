@@ -17,7 +17,7 @@ import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { AccessResult } from '../../config/types';
-import { buildDraftMergeAggregate } from '../../versions/drafts/buildDraftMergeAggregate';
+import { mergeDrafts } from '../../versions/drafts/mergeDrafts';
 
 export type Arguments = {
   collection: Collection
@@ -123,10 +123,15 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   let docs;
 
   if (collectionConfig.versions?.drafts && draftArg) {
-    docs = Model.aggregate(buildDraftMergeAggregate({
-      config: collectionConfig,
+    docs = await mergeDrafts({
+      accessResult,
+      collection,
+      locale,
+      paginationOptions: { limit: 0, sort: 'createdAt' },
+      payload,
       query,
-    }));
+      where,
+    });
   } else {
     docs = await Model.find(query, {}, { lean: true });
   }

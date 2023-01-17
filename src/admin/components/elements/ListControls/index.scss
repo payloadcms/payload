@@ -6,7 +6,7 @@
   &__wrap {
     display: flex;
     align-items: center;
-    background-color: var(--theme-elevation-100);
+    background-color: var(--theme-elevation-50);
   }
 
   .search-filter {
@@ -27,7 +27,18 @@
     margin-right: base(.5);
 
     .btn, .pill {
-      margin-left: base(.5);
+      margin: 0 0 0 base(.5);
+    }
+
+    .btn {
+      background-color: var(--theme-elevation-100);
+      cursor: pointer;
+      padding: 0 base(.25);
+      border-radius: $style-radius-s;
+
+      &:hover {
+        background-color: var(--theme-elevation-200);
+      }
     }
   }
 
