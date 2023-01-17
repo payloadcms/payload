@@ -205,7 +205,7 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   // /////////////////////////////////////
 
   if (globalConfig.versions) {
-    await saveVersion({
+    global = await saveVersion({
       payload,
       global: globalConfig,
       req,

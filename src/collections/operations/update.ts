@@ -246,7 +246,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
   // /////////////////////////////////////
 
   if (collectionConfig.versions) {
-    await saveVersion({
+    result = await saveVersion({
       payload,
       collection: collectionConfig,
       req,

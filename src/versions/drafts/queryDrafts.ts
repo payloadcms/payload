@@ -50,6 +50,12 @@ export const queryDrafts = async <T extends TypeWithID>({
 
   const versionQuery = await VersionModel.buildQuery(versionQueryToBuild, locale);
 
+  // TODO
+  // 1. Before group, we could potentially run $match to reduce matches
+  // 2. Then before group, need to sort by updatedAt so first versions are newest versions
+  // 3. Finally can group
+  // 4. Then need to sort on user-defined sort again, if it differs from default
+
   const aggregate = VersionModel.aggregate<AggregateVersion<T>>([
     {
       $sort: Object.entries(paginationOptions.sort).reduce((sort, [key, order]) => {

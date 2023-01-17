@@ -4,6 +4,7 @@ import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
 import { SanitizedGlobalConfig } from '../globals/config/types';
+import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 type Args = {
   payload: Payload
@@ -26,7 +27,7 @@ export const saveVersion = async ({
   autosave,
   draft,
   createdAt,
-}: Args): Promise<void> => {
+}: Args): Promise<Record<string, unknown>> => {
   let entityConfig;
   let entityType: 'global' | 'collection';
 
@@ -54,6 +55,8 @@ export const saveVersion = async ({
     existingAutosaveVersion = await VersionModel.findOne(query, {}, { sort: { updatedAt: 'desc' } });
   }
 
+  let result;
+
   try {
     if (autosave && existingAutosaveVersion?.autosave === true) {
       const data: Record<string, unknown> = {
@@ -62,7 +65,7 @@ export const saveVersion = async ({
 
       if (createdAt) data.updatedAt = createdAt;
 
-      await VersionModel.findByIdAndUpdate(
+      result = await VersionModel.findByIdAndUpdate(
         {
           _id: existingAutosaveVersion._id,
         },
@@ -79,7 +82,7 @@ export const saveVersion = async ({
       if (createdAt) data.createdAt = createdAt;
       if (collection) data.parent = id;
 
-      await VersionModel.create(data);
+      result = await VersionModel.create(data);
     }
   } catch (err) {
     let errorMessage: string;
@@ -105,4 +108,11 @@ export const saveVersion = async ({
       max,
     });
   }
+
+  result = result.version;
+  result = JSON.parse(JSON.stringify(result));
+  result = sanitizeInternalFields(result);
+  result.id = id;
+
+  return result;
 };
