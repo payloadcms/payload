@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../express/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound, Forbidden, ErrorDeletingFile } from '../../errors';
@@ -21,7 +22,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
+async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']>(
+  incomingArgs: Arguments,
+): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs;
 
   // /////////////////////////////////////

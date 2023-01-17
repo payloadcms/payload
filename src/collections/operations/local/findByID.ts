@@ -21,7 +21,10 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   draft?: boolean
 }
 
-export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<T>): Promise<GeneratedTypes['collections'][T]> {
+export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<GeneratedTypes['collections'][T]> {
   const {
     collection: collectionSlug,
     depth,

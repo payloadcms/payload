@@ -287,7 +287,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     return update<T>(this, options);
   }
 
-  delete = async <T extends TypeWithID = any>(options: DeleteOptions): Promise<T> => {
+  delete = async <T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>): Promise<TGeneratedTypes['collections'][T]> => {
     const { localDelete } = localOperations;
     return localDelete<T>(this, options);
   }
