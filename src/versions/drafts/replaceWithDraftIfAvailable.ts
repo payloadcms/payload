@@ -3,7 +3,6 @@ import { docHasTimestamps, Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth';
 import { AccessResult } from '../../config/types';
 import { CollectionModel, SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types';
-import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
 import { SanitizedGlobalConfig } from '../../globals/config/types';

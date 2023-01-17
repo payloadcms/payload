@@ -11,6 +11,7 @@ type Args = {
   docWithLocales: any
   id: string | number
   autosave?: boolean
+  draft?: boolean
 }
 
 export const saveCollectionVersion = async ({
@@ -19,10 +20,13 @@ export const saveCollectionVersion = async ({
   id,
   docWithLocales,
   autosave,
+  draft,
 }: Args): Promise<Record<string, unknown>> => {
   const VersionModel = payload.versions[config.slug];
 
   let result = { ...docWithLocales };
+
+  if (draft) result._status = 'draft';
 
   if (result._id) delete result._id;
 
@@ -49,7 +53,7 @@ export const saveCollectionVersion = async ({
     } else {
       result = await VersionModel.create({
         parent: id,
-        version: docWithLocales,
+        version: result,
         autosave: Boolean(autosave),
       });
     }

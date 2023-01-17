@@ -159,7 +159,7 @@ describe('Versions', () => {
           locale: 'all',
         });
 
-        expect(versions.docs[0].version.title.en).toStrictEqual(englishTitle);
+        expect(versions.docs[0].version.title.en).toStrictEqual(newEnglishTitle);
         expect(versions.docs[0].version.title.es).toStrictEqual(spanishTitle);
       });
     });
@@ -184,7 +184,7 @@ describe('Versions', () => {
 
         const restore = await payload.restoreVersion({
           collection,
-          id: versions.docs[0].id,
+          id: versions.docs[1].id,
         });
 
         expect(restore.title).toBeDefined();
@@ -195,7 +195,7 @@ describe('Versions', () => {
           draft: true,
         });
 
-        expect(restoredPost.title).toBe(restore.title);
+        expect(restoredPost.title).toBe(versions.docs[1].version.title);
       });
     });
 
@@ -226,13 +226,15 @@ describe('Versions', () => {
           draft: true,
         });
 
+        const spanishTitle = 'es title';
+
         // second update to existing draft
         await payload.update({
           id: collectionLocalPostID,
           collection,
           locale: 'es',
           data: {
-            title: updatedTitle,
+            title: spanishTitle,
           },
           draft: true,
         });
@@ -251,7 +253,7 @@ describe('Versions', () => {
 
         expect(publishedPost.title).toBe(originalTitle);
         expect(draftPost.title.en).toBe(updatedTitle);
-        expect(draftPost.title.es).toBe(updatedTitle);
+        expect(draftPost.title.es).toBe(spanishTitle);
       });
     });
   });
@@ -423,7 +425,7 @@ describe('Versions', () => {
 
         expect(data.id).toBeDefined();
         expect(data.parent.id).toStrictEqual(collectionGraphQLPostID);
-        expect(data.version.title).toStrictEqual(collectionGraphQLOriginalTitle);
+        expect(data.version.title).toStrictEqual(updatedTitle);
       });
 
       it('should allow read of versions by querying version content', async () => {

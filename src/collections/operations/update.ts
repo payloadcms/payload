@@ -251,6 +251,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
       docWithLocales: result,
       id,
       autosave,
+      draft: shouldSaveDraft,
     });
   }
 

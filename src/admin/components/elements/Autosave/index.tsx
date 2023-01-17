@@ -95,13 +95,13 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
         }
 
         if (url) {
-          const body = {
-            ...reduceFieldsToValues(fieldRef.current, true),
-            _status: 'draft',
-          };
-
           setTimeout(async () => {
             if (modifiedRef.current) {
+              const body = {
+                ...reduceFieldsToValues(fieldRef.current, true),
+                _status: 'draft',
+              };
+
               const res = await fetch(url, {
                 method,
                 credentials: 'include',
