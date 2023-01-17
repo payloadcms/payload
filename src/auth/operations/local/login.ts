@@ -5,6 +5,7 @@ import { TypeWithID } from '../../../collections/config/types';
 import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
+import { APIError } from '../../../errors';
 
 export type Options = {
   collection: string
@@ -35,6 +36,10 @@ async function localLogin<T extends TypeWithID = any>(payload: Payload, options:
   } = options;
 
   const collection = payload.collections[collectionSlug];
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+  }
 
   req.payloadAPI = 'local';
   req.payload = payload;

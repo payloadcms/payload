@@ -7,11 +7,8 @@ import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult } from '../../auth/types';
-import { saveCollectionDraft } from '../../versions/drafts/saveCollectionDraft';
-import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
+import { saveVersion } from '../../versions/saveVersion';
 import { uploadFiles } from '../../uploads/uploadFiles';
-import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
-import { ensurePublishedCollectionVersion } from '../../versions/ensurePublishedCollectionVersion';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
@@ -225,43 +222,10 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   // /////////////////////////////////////
-  // Create version from existing doc
-  // /////////////////////////////////////
-
-  let createdVersion;
-
-  if (collectionConfig.versions && !shouldSaveDraft) {
-    createdVersion = await saveCollectionVersion({
-      payload,
-      config: collectionConfig,
-      req,
-      docWithLocales,
-      id,
-    });
-  }
-
-  // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
-  if (shouldSaveDraft) {
-    await ensurePublishedCollectionVersion({
-      payload,
-      config: collectionConfig,
-      req,
-      docWithLocales,
-      id,
-    });
-
-    result = await saveCollectionDraft<GeneratedTypes['collections'][TSlug]>({
-      payload,
-      config: collectionConfig,
-      req,
-      data: result,
-      id,
-      autosave,
-    });
-  } else {
+  if (!shouldSaveDraft) {
     try {
       result = await Model.findByIdAndUpdate(
         { _id: id },
@@ -269,23 +233,33 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         { new: true },
       );
     } catch (error) {
-      cleanUpFailedVersion({
-        payload,
-        entityConfig: collectionConfig,
-        version: createdVersion,
-      });
-
       // Handle uniqueness error from MongoDB
       throw error.code === 11000 && error.keyValue
         ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }], t)
         : error;
     }
-
-    const resultString = JSON.stringify(result);
-    result = JSON.parse(resultString);
   }
 
-  result = sanitizeInternalFields<GeneratedTypes['collections'][TSlug]>(result);
+  result = JSON.parse(JSON.stringify(result));
+  result.id = result._id as string | number;
+  result = sanitizeInternalFields(result);
+
+  // /////////////////////////////////////
+  // Create version
+  // /////////////////////////////////////
+
+  if (collectionConfig.versions) {
+    result = await saveVersion({
+      payload,
+      collection: collectionConfig,
+      req,
+      docWithLocales: result,
+      id,
+      autosave,
+      draft: shouldSaveDraft,
+      createdAt: originalDoc.createdAt,
+    });
+  }
 
   // /////////////////////////////////////
   // afterRead - Fields

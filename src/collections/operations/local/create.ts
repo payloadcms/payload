@@ -8,6 +8,7 @@ import create from '../create';
 import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18n from '../../../translations/init';
+import { APIError } from '../../../errors';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
@@ -49,6 +50,10 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
 
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+  }
 
   req.payloadAPI = 'local';
   req.locale = locale ?? req?.locale ?? defaultLocale;

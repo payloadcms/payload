@@ -5,6 +5,7 @@ import { Payload } from '../../../payload';
 import deleteOperation from '../delete';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
+import { APIError } from '../../../errors';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -34,6 +35,11 @@ export default async function deleteLocal<TSlug extends keyof GeneratedTypes['co
 
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
+
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+  }
 
   const req = {
     user,

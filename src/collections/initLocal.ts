@@ -1,6 +1,7 @@
 import mongoose, { UpdateAggregationStage, UpdateQuery } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 import passportLocalMongoose from 'passport-local-mongoose';
+import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
 import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
 import buildQueryPlugin from '../mongoose/buildQuery';
 import buildCollectionSchema from './buildSchema';
@@ -68,13 +69,17 @@ export default function initCollectionsLocal(ctx: Payload): void {
           disableUnique: true,
           draftsEnabled: true,
           options: {
-            timestamps: true,
+            timestamps: false,
           },
         },
       );
 
       versionSchema.plugin(paginate, { useEstimatedCount: true })
         .plugin(buildQueryPlugin);
+
+      if (collection.versions?.drafts) {
+        versionSchema.plugin(mongooseAggregatePaginate);
+      }
 
       ctx.versions[collection.slug] = mongoose.model(versionModelName, versionSchema) as CollectionModel;
     }

@@ -3,6 +3,7 @@ import resetPassword, { Result } from '../resetPassword';
 import { PayloadRequest } from '../../../express/types';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
+import { APIError } from '../../../errors';
 
 export type Options = {
   collection: string
@@ -23,6 +24,10 @@ async function localResetPassword(payload: Payload, options: Options): Promise<R
   } = options;
 
   const collection = payload.collections[collectionSlug];
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+  }
 
   req.payload = payload;
   req.payloadAPI = 'local';

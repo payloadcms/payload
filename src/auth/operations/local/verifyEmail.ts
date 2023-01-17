@@ -1,3 +1,4 @@
+import { APIError } from '../../../errors';
 import { Payload } from '../../../payload';
 import verifyEmail from '../verifyEmail';
 
@@ -13,6 +14,10 @@ async function localVerifyEmail(payload: Payload, options: Options): Promise<boo
   } = options;
 
   const collection = payload.collections[collectionSlug];
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+  }
 
   return verifyEmail({
     token,

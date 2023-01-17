@@ -7,6 +7,7 @@ import { PayloadRequest } from '../../../express/types';
 import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18nInit from '../../../translations/init';
+import { APIError } from '../../../errors';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
@@ -47,6 +48,11 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['co
   } = options;
 
   const collection = payload.collections[collectionSlug];
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+  }
+
   const i18n = i18nInit(payload.config.i18n);
   const defaultLocale = payload.config.localization ? payload.config.localization?.defaultLocale : null;
 

@@ -1,5 +1,27 @@
 
 
+## [1.5.9](https://github.com/payloadcms/payload/compare/v1.5.8...v1.5.9) (2023-01-15)
+
+
+### Bug Fixes
+
+* [#1877](https://github.com/payloadcms/payload/issues/1877), [#1867](https://github.com/payloadcms/payload/issues/1867) - mimeTypes and imageSizes no longer cause error in admin ui ([b06ca70](https://github.com/payloadcms/payload/commit/b06ca700be36cc3a945f81e3fa23ebb53d06ca23))
+
+## [1.5.8](https://github.com/payloadcms/payload/compare/v1.5.7...v1.5.8) (2023-01-12)
+
+
+### Features
+
+* throws descriptive error when collection or global slug not found ([b847d85](https://github.com/payloadcms/payload/commit/b847d85e60032b47a8eacc2c9426fdd373dff879))
+
+## [1.5.7](https://github.com/payloadcms/payload/compare/v1.5.6...v1.5.7) (2023-01-12)
+
+
+### Bug Fixes
+
+* ensures find with draft=true does not improperly exclude draft ids ([69026c5](https://github.com/payloadcms/payload/commit/69026c577914ba029f2c45423d9f621b605a3ca0))
+* ensures querying with drafts works on both published and non-published posts ([f018fc0](https://github.com/payloadcms/payload/commit/f018fc04b02f70d0e6ea545d5eb36ea860206964))
+
 ## [1.5.6](https://github.com/payloadcms/payload/compare/v1.5.5...v1.5.6) (2023-01-11)
 
 

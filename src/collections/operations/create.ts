@@ -16,6 +16,7 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
+import { saveVersion } from '../../versions/saveVersion';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -27,6 +28,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   data: Omit<T, 'id'>
   overwriteExistingFiles?: boolean
   draft?: boolean
+  autosave?: boolean
 }
 
 async function create<TSlug extends keyof GeneratedTypes['collections']>(
@@ -67,6 +69,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     showHiddenFields,
     overwriteExistingFiles = false,
     draft = false,
+    autosave = false,
   } = args;
 
   let { data } = args;
@@ -214,6 +217,23 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
   result = JSON.stringify(result);
   result = JSON.parse(result);
   result = sanitizeInternalFields(result);
+
+  // /////////////////////////////////////
+  // Create version
+  // /////////////////////////////////////
+
+  if (collectionConfig.versions) {
+    await saveVersion({
+      payload,
+      collection: collectionConfig,
+      req,
+      id: result.id,
+      docWithLocales: result,
+      autosave,
+      createdAt: result.createdAt,
+      onCreate: true,
+    });
+  }
 
   // /////////////////////////////////////
   // Send verification email if applicable
