@@ -27,7 +27,7 @@ const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
         method: 'post',
         handler: restoreVersion(global),
       },
-    ]);
+    ] as Endpoint[]);
   }
 
   endpoints.push(...[
@@ -46,7 +46,7 @@ const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
       method: 'post',
       handler: update(global),
     },
-  ]);
+  ] as Endpoint[]);
 
   return endpoints;
 };
