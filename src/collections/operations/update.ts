@@ -6,7 +6,7 @@ import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult } from '../../auth/types';
-import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
+import { saveVersion } from '../../versions/saveVersion';
 import { uploadFiles } from '../../uploads/uploadFiles';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
@@ -241,12 +241,13 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
     // custom id type reset
     result.id = result._id;
+    result = sanitizeInternalFields(result);
   }
 
   if (collectionConfig.versions) {
-    result = await saveCollectionVersion({
+    result = await saveVersion({
       payload,
-      config: collectionConfig,
+      collection: collectionConfig,
       req,
       docWithLocales: result,
       id,
@@ -255,7 +256,6 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     });
   }
 
-  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // afterRead - Fields

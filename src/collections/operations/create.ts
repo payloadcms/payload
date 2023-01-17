@@ -16,7 +16,7 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
-import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
+import { saveVersion } from '../../versions/saveVersion';
 
 export type Arguments = {
   collection: Collection
@@ -221,9 +221,9 @@ async function create(incomingArgs: Arguments): Promise<Document> {
   // /////////////////////////////////////
 
   if (collectionConfig.versions) {
-    await saveCollectionVersion({
+    await saveVersion({
       payload,
-      config: collectionConfig,
+      collection: collectionConfig,
       req,
       id: result.id,
       docWithLocales: result,
