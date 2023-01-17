@@ -3,7 +3,6 @@ import { Payload } from '..';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
 import { PayloadRequest } from '../express/types';
-import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 
 type Args = {
@@ -25,10 +24,19 @@ export const saveVersion = async ({
   docWithLocales,
   autosave,
   draft,
-}: Args): Promise<Record<string, unknown>> => {
+}: Args): Promise<void> => {
   let entityConfig;
-  if (collection) entityConfig = collection;
-  if (global) entityConfig = global;
+  let entityType: 'global' | 'collection';
+
+  if (collection) {
+    entityConfig = collection;
+    entityType = 'collection';
+  }
+
+  if (global) {
+    entityConfig = global;
+    entityType = 'global';
+  }
 
   const VersionModel = payload.versions[entityConfig.slug];
 
@@ -44,11 +52,9 @@ export const saveVersion = async ({
     existingAutosaveVersion = await VersionModel.findOne(query, {}, { sort: { updatedAt: 'desc' } });
   }
 
-  let result;
-
   try {
     if (autosave && existingAutosaveVersion?.autosave === true) {
-      result = await VersionModel.findByIdAndUpdate(
+      await VersionModel.findByIdAndUpdate(
         {
           _id: existingAutosaveVersion._id,
         },
@@ -66,7 +72,7 @@ export const saveVersion = async ({
 
       if (collection) data.parent = id;
 
-      result = await VersionModel.create(data);
+      await VersionModel.create(data);
     }
   } catch (err) {
     let errorMessage: string;
@@ -77,21 +83,19 @@ export const saveVersion = async ({
     payload.logger.error(err);
   }
 
+  let max: number;
+
+  if (collection && typeof collection.versions.maxPerDoc === 'number') max = collection.versions.maxPerDoc;
+  if (global && typeof global.versions.max === 'number') max = global.versions.max;
+
   if (collection && collection.versions.maxPerDoc) {
     enforceMaxVersions({
       id,
       payload,
       Model: VersionModel,
       slug: entityConfig.slug,
-      entityType: 'collection',
-      max: collection.versions.maxPerDoc,
+      entityType,
+      max,
     });
   }
-
-  result = result.version;
-  result = JSON.parse(JSON.stringify(result));
-  result = sanitizeInternalFields(result);
-  result.id = id;
-
-  return result;
 };

@@ -235,17 +235,18 @@ async function update(incomingArgs: Arguments): Promise<Document> {
         ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }], t)
         : error;
     }
-
-    const resultString = JSON.stringify(result);
-    result = JSON.parse(resultString);
-
-    // custom id type reset
-    result.id = result._id;
-    result = sanitizeInternalFields(result);
   }
 
+  result = JSON.parse(JSON.stringify(result));
+  result.id = result._id;
+  result = sanitizeInternalFields(result);
+
+  // /////////////////////////////////////
+  // Create version
+  // /////////////////////////////////////
+
   if (collectionConfig.versions) {
-    result = await saveVersion({
+    await saveVersion({
       payload,
       collection: collectionConfig,
       req,
@@ -255,7 +256,6 @@ async function update(incomingArgs: Arguments): Promise<Document> {
       draft: shouldSaveDraft,
     });
   }
-
 
   // /////////////////////////////////////
   // afterRead - Fields
