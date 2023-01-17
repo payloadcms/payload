@@ -211,9 +211,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns created document
    */
-  create = async <T = any>(options: CreateOptions<T>): Promise<T> => {
+  create = async <T extends keyof TGeneratedTypes['collections']>(options: CreateOptions<T>): Promise<TGeneratedTypes['collections'][T]> => {
     const { create } = localOperations;
-    return create(this, options);
+    return create<T>(this, options);
   }
 
   /**
@@ -221,9 +221,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns documents satisfying query
    */
-  find = async <T extends TypeWithID = any>(options: FindOptions): Promise<PaginatedDocs<T>> => {
+  find = async <T extends keyof TGeneratedTypes['collections']>(options: FindOptions<T>): Promise<PaginatedDocs<TGeneratedTypes['collections'][T]>> => {
     const { find } = localOperations;
-    return find(this, options);
+    return find<T>(this, options);
   }
 
   findGlobal = async <T extends GlobalTypeWithID = any>(options: FindGlobalOptions): Promise<T> => {

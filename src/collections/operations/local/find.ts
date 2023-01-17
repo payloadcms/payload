@@ -1,4 +1,4 @@
-import { TypeWithID } from '../../config/types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PaginatedDocs } from '../../../mongoose/types';
 import { Document, Where } from '../../../types';
 import { Payload } from '../../../payload';
@@ -7,8 +7,8 @@ import find from '../find';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 
-export type Options = {
-  collection: string
+export type Options<T extends keyof GeneratedTypes['collections']> = {
+  collection: T
   depth?: number
   currentDepth?: number
   page?: number
@@ -27,7 +27,10 @@ export type Options = {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default async function findLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<PaginatedDocs<T>> {
+export default async function findLocal<T extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<PaginatedDocs<GeneratedTypes['collections'][T]>> {
   const {
     collection: collectionSlug,
     depth,
@@ -61,7 +64,7 @@ export default async function findLocal<T extends TypeWithID = any>(payload: Pay
 
   if (typeof user !== 'undefined') req.user = user;
 
-  return find({
+  return find<GeneratedTypes['collections'][T]>({
     depth,
     currentDepth,
     sort,

@@ -1,3 +1,4 @@
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../../../payload';
 import { PayloadRequest } from '../../../express/types';
@@ -8,9 +9,9 @@ import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18n from '../../../translations/init';
 
-export type Options<T> = {
-  collection: string
-  data: Record<string, unknown>
+export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
+  collection: TSlug
+  data: GeneratedTypes['collections'][TSlug]
   depth?: number
   locale?: string
   fallbackLocale?: string
@@ -25,7 +26,10 @@ export type Options<T> = {
   draft?: boolean
 }
 
-export default async function createLocal<T = any>(payload: Payload, options: Options<T>): Promise<T> {
+export default async function createLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<TSlug>,
+): Promise<GeneratedTypes['collections'][TSlug]> {
   const {
     collection: collectionSlug,
     depth,
@@ -60,7 +64,7 @@ export default async function createLocal<T = any>(payload: Payload, options: Op
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
-  return create({
+  return create<TSlug>({
     depth,
     data,
     collection,

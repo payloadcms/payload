@@ -23,7 +23,9 @@ export type Arguments = {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function findByID<T extends Record<string, unknown>>(incomingArgs: Arguments): Promise<T> {
+async function findByID<T extends Record<string, unknown>>(
+  incomingArgs: Arguments,
+): Promise<T> {
   let args = incomingArgs;
 
   // /////////////////////////////////////

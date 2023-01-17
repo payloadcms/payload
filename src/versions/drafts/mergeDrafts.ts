@@ -2,10 +2,9 @@ import { AccessResult } from '../../config/types';
 import { Where } from '../../types';
 import { Payload } from '../../payload';
 import { PaginatedDocs } from '../../mongoose/types';
-import { Collection, CollectionModel, TypeWithID } from '../../collections/config/types';
+import { Collection, CollectionModel } from '../../collections/config/types';
 import { hasWhereAccessResult } from '../../auth';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import replaceWithDraftIfAvailable from './replaceWithDraftIfAvailable';
 
 type AggregateVersion<T> = {
@@ -33,7 +32,7 @@ type Args = {
   where: Where
 }
 
-export const mergeDrafts = async <T extends TypeWithID>({
+export const mergeDrafts = async <T extends Record<string, unknown>>({
   accessResult,
   collection,
   locale,
@@ -50,8 +49,6 @@ export const mergeDrafts = async <T extends TypeWithID>({
       newMap[_id] = updatedAt;
       return newMap;
     }, {}));
-
-  console.log({ mainCollectionMatchMap });
 
   // Query the versions collection with a version-specific query
   const VersionModel = payload.versions[collection.config.slug] as CollectionModel;
@@ -135,9 +132,6 @@ export const mergeDrafts = async <T extends TypeWithID>({
     return newMap;
   }, {}));
 
-  console.log({ versionCollectionMatchMap });
-  console.log({ includedParentIDs });
-
   // Now we need to explicitly exclude any parent matches that have newer versions
   // which did NOT appear in the versions query
   const excludedParentIDs = await Promise.all(Object.entries(mainCollectionMatchMap).map(async ([parentDocID, parentDocUpdatedAt]) => {
@@ -201,8 +195,6 @@ export const mergeDrafts = async <T extends TypeWithID>({
       },
     });
   }
-
-  console.log({ finalQueryToBuild: JSON.stringify(finalQueryToBuild) });
 
   const finalQuery = await collection.Model.buildQuery(finalQueryToBuild, locale);
 

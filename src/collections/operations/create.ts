@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
@@ -17,19 +17,21 @@ import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 
-export type Arguments = {
+export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
   req: PayloadRequest
   depth?: number
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  data: Record<string, unknown>
+  data: T
   overwriteExistingFiles?: boolean
   draft?: boolean
 }
 
-async function create(incomingArgs: Arguments): Promise<Document> {
+async function create<TSlug extends keyof GeneratedTypes['collections']>(
+  incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
+): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -159,7 +161,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  const resultWithLocales = await beforeChange({
+  const resultWithLocales = await beforeChange<Record<string, unknown>>({
     data,
     doc: {},
     docWithLocales: {},
