@@ -256,6 +256,61 @@ describe('Versions', () => {
         expect(draftPost.title.es).toBe(spanishTitle);
       });
     });
+
+    describe('Draft Count', () => {
+      it('creates proper number of drafts', async () => {
+        const originalDraft = await payload.create({
+          collection: 'draft-posts',
+          draft: true,
+          data: {
+            title: 'A',
+            description: 'A',
+            _status: 'draft',
+          },
+        });
+
+        await payload.update({
+          collection: 'draft-posts',
+          id: originalDraft.id,
+          draft: true,
+          data: {
+            title: 'B',
+            description: 'B',
+            _status: 'draft',
+          },
+        });
+
+        await payload.update({
+          collection: 'draft-posts',
+          id: originalDraft.id,
+          draft: true,
+          data: {
+            title: 'C',
+            description: 'C',
+            _status: 'draft',
+          },
+        });
+
+        const mostRecentDraft = await payload.findByID({
+          collection: 'draft-posts',
+          id: originalDraft.id,
+          draft: true,
+        });
+
+        expect(mostRecentDraft.title).toStrictEqual('C');
+
+        const versions = await payload.findVersions({
+          collection: 'draft-posts',
+          where: {
+            parent: {
+              equals: originalDraft.id,
+            },
+          },
+        });
+
+        expect(versions.docs).toHaveLength(3);
+      });
+    });
   });
 
   describe('Querying', () => {
