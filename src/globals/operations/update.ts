@@ -212,6 +212,7 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
       docWithLocales: result,
       autosave,
       draft: shouldSaveDraft,
+      createdAt: global.createdAt,
     });
   }
 

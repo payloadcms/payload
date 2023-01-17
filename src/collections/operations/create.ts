@@ -228,6 +228,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
       id: result.id,
       docWithLocales: result,
       autosave,
+      createdAt: result.createdAt,
     });
   }
 

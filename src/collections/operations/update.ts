@@ -254,6 +254,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
       id,
       autosave,
       draft: shouldSaveDraft,
+      createdAt: result.createdAt as string,
     });
   }
 

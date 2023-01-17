@@ -3,6 +3,7 @@ import paginate from 'mongoose-paginate-v2';
 import express from 'express';
 import passport from 'passport';
 import passportLocalMongoose from 'passport-local-mongoose';
+import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
 import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
 import buildQueryPlugin from '../mongoose/buildQuery';
 import apiKeyStrategy from '../auth/strategies/apiKey';
@@ -81,6 +82,10 @@ export default function registerCollections(ctx: Payload): void {
 
       versionSchema.plugin(paginate, { useEstimatedCount: true })
         .plugin(buildQueryPlugin);
+
+      if (collection.versions?.drafts) {
+        versionSchema.plugin(mongooseAggregatePaginate);
+      }
 
       ctx.versions[collection.slug] = mongoose.model(versionModelName, versionSchema) as CollectionModel;
     }
