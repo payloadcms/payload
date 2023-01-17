@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLoadingOverlay } from '../../utilities/LoadingOverlay';
+import type { LoadingOverlayTypes } from '../../utilities/LoadingOverlay/types';
 
 import './index.scss';
 
@@ -49,22 +50,29 @@ export const FullscreenLoader: React.FC<Props> = ({ loadingText, show = true, ov
   );
 };
 
-export const SuspenseLoader: React.FC = () => {
+type UseLoadingOverlayToggleT = {
+  show: boolean;
+  name: string;
+  type?: LoadingOverlayTypes,
+}
+export const FullscreenLoaderToggle: React.FC<UseLoadingOverlayToggleT> = ({ name: key, show, type = 'fullscreen' }) => {
   const { toggleLoadingOverlay } = useLoadingOverlay();
 
   React.useEffect(() => {
     toggleLoadingOverlay({
-      key: 'suspense',
-      isLoading: true,
+      key,
+      isLoading: show,
+      type,
     });
 
     return () => {
       toggleLoadingOverlay({
-        key: 'suspense',
+        key,
         isLoading: false,
+        type,
       });
     };
-  }, [toggleLoadingOverlay]);
+  }, [show, toggleLoadingOverlay, key, type]);
 
   return null;
 };

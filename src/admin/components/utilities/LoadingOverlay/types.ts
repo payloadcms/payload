@@ -19,7 +19,7 @@ type Remove = {
   type: 'remove'
   payload: {
     key: string
-    type?: never
+    type: LoadingOverlayTypes
     loadingText?: never
   }
 }

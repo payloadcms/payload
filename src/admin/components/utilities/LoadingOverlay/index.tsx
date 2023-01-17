@@ -36,6 +36,7 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
         type: 'remove',
         payload: {
           key,
+          type,
         },
       });
     }

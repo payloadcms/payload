@@ -21,7 +21,7 @@ import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 import { shouldIncrementVersionCount } from '../../../../versions/shouldIncrementVersionCount';
 import { Gutter } from '../../elements/Gutter';
 import { getTranslation } from '../../../../utilities/getTranslation';
-import { useLoadingOverlay } from '../../utilities/LoadingOverlay';
+import { FullscreenLoaderToggle } from '../../elements/Loading';
 
 import './index.scss';
 
@@ -35,7 +35,6 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   const [tableColumns] = useState(() => getColumns(collection, global, t));
   const [fetchURL, setFetchURL] = useState('');
   const { page, sort, limit } = useSearchParams();
-  const { toggleLoadingOverlay } = useLoadingOverlay();
 
   let docURL: string;
   let entityLabel: string;
@@ -147,13 +146,6 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     setParams(params);
   }, [setParams, page, sort, limit, serverURL, api, id, global, collection]);
 
-  useEffect(() => {
-    toggleLoadingOverlay({
-      key: 'versions',
-      isLoading: isLoadingData,
-    });
-  }, [isLoadingData, toggleLoadingOverlay]);
-
   let useIDLabel = doc[useAsTitle] === doc?.id;
   let heading: string;
   let metaDesc: string;
@@ -177,89 +169,96 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   const showParentDoc = versionsData?.page === 1 && shouldIncrementVersionCount({ entity, docStatus, versions: versionsData });
 
   return (
-    <div className={baseClass}>
-      <Meta
-        title={metaTitle}
-        description={metaDesc}
+    <React.Fragment>
+      <FullscreenLoaderToggle
+        show={isLoadingData}
+        name="versions"
       />
-      <Eyebrow />
-      <Gutter className={`${baseClass}__wrap`}>
-        <header className={`${baseClass}__header`}>
-          <div className={`${baseClass}__intro`}>{t('showingVersionsFor')}</div>
-          {useIDLabel && (
-            <IDLabel id={doc?.id} />
-          )}
-          {!useIDLabel && (
-            <h1>
-              {heading}
-            </h1>
-          )}
-        </header>
 
-        {showParentDoc && (
-          <Banner
-            type={docStatus === 'published' ? 'success' : undefined}
-            className={`${baseClass}__parent-doc`}
-          >
-            {t('currentDocumentStatus', { docStatus })}
-            -
-            {' '}
-            {format(new Date(docUpdatedAt), dateFormat)}
-            <div className={`${baseClass}__parent-doc-pills`}>
-              &nbsp;&nbsp;
-              <Pill
-                pillStyle="white"
-                to={editURL}
-              >
-                {t('general:edit')}
-              </Pill>
-            </div>
-          </Banner>
-        )}
-        {versionsData?.totalDocs > 0 && (
-          <React.Fragment>
-            <Table
-              data={versionsData?.docs}
-              columns={tableColumns}
-            />
-            <div className={`${baseClass}__page-controls`}>
-              <Paginator
-                limit={versionsData.limit}
-                totalPages={versionsData.totalPages}
-                page={versionsData.page}
-                hasPrevPage={versionsData.hasPrevPage}
-                hasNextPage={versionsData.hasNextPage}
-                prevPage={versionsData.prevPage}
-                nextPage={versionsData.nextPage}
-                numberOfNeighbors={1}
+      <div className={baseClass}>
+        <Meta
+          title={metaTitle}
+          description={metaDesc}
+        />
+        <Eyebrow />
+        <Gutter className={`${baseClass}__wrap`}>
+          <header className={`${baseClass}__header`}>
+            <div className={`${baseClass}__intro`}>{t('showingVersionsFor')}</div>
+            {useIDLabel && (
+              <IDLabel id={doc?.id} />
+            )}
+            {!useIDLabel && (
+              <h1>
+                {heading}
+              </h1>
+            )}
+          </header>
+
+          {showParentDoc && (
+            <Banner
+              type={docStatus === 'published' ? 'success' : undefined}
+              className={`${baseClass}__parent-doc`}
+            >
+              {t('currentDocumentStatus', { docStatus })}
+              -
+              {' '}
+              {format(new Date(docUpdatedAt), dateFormat)}
+              <div className={`${baseClass}__parent-doc-pills`}>
+                &nbsp;&nbsp;
+                <Pill
+                  pillStyle="white"
+                  to={editURL}
+                >
+                  {t('general:edit')}
+                </Pill>
+              </div>
+            </Banner>
+          )}
+          {versionsData?.totalDocs > 0 && (
+            <React.Fragment>
+              <Table
+                data={versionsData?.docs}
+                columns={tableColumns}
               />
-              {versionsData?.totalDocs > 0 && (
-                <React.Fragment>
-                  <div className={`${baseClass}__page-info`}>
-                    {(versionsData.page * versionsData.limit) - (versionsData.limit - 1)}
-                    -
-                    {versionsData.totalPages > 1 && versionsData.totalPages !== versionsData.page ? (versionsData.limit * versionsData.page) : versionsData.totalDocs}
-                    {' '}
-                    {t('of')}
-                    {' '}
-                    {versionsData.totalDocs}
-                  </div>
-                  <PerPage
-                    limits={collection?.admin?.pagination?.limits}
-                    limit={limit ? Number(limit) : 10}
-                  />
-                </React.Fragment>
-              )}
+              <div className={`${baseClass}__page-controls`}>
+                <Paginator
+                  limit={versionsData.limit}
+                  totalPages={versionsData.totalPages}
+                  page={versionsData.page}
+                  hasPrevPage={versionsData.hasPrevPage}
+                  hasNextPage={versionsData.hasNextPage}
+                  prevPage={versionsData.prevPage}
+                  nextPage={versionsData.nextPage}
+                  numberOfNeighbors={1}
+                />
+                {versionsData?.totalDocs > 0 && (
+                  <React.Fragment>
+                    <div className={`${baseClass}__page-info`}>
+                      {(versionsData.page * versionsData.limit) - (versionsData.limit - 1)}
+                      -
+                      {versionsData.totalPages > 1 && versionsData.totalPages !== versionsData.page ? (versionsData.limit * versionsData.page) : versionsData.totalDocs}
+                      {' '}
+                      {t('of')}
+                      {' '}
+                      {versionsData.totalDocs}
+                    </div>
+                    <PerPage
+                      limits={collection?.admin?.pagination?.limits}
+                      limit={limit ? Number(limit) : 10}
+                    />
+                  </React.Fragment>
+                )}
+              </div>
+            </React.Fragment>
+          )}
+          {versionsData?.totalDocs === 0 && (
+            <div className={`${baseClass}__no-versions`}>
+              {t('noFurtherVersionsFound')}
             </div>
-          </React.Fragment>
-        )}
-        {versionsData?.totalDocs === 0 && (
-          <div className={`${baseClass}__no-versions`}>
-            {t('noFurtherVersionsFound')}
-          </div>
-        )}
-      </Gutter>
-    </div>
+          )}
+        </Gutter>
+      </div>
+    </React.Fragment>
   );
 };
 

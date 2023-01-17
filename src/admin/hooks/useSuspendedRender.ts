@@ -23,7 +23,7 @@ type useTimeoutRender = (props: TimeoutRenderProps) => {
   /** Call this function to trigger the timeout delay before rendering. */
   triggerRenderTimeout: () => void;
 };
-export const useTimeoutRender: useTimeoutRender = ({ show, timeout = 500, appearTime = 1250, exitTimeout = 500 }) => {
+export const useTimeoutRender: useTimeoutRender = ({ show, timeout = 1000, appearTime = 1250, exitTimeout = 500 }) => {
   const [hasDelayed, triggerDelay] = useDelay(timeout);
   const [isMounted, setIsMounted] = React.useState(false);
   const [isUnmounting, setIsUnmounting] = React.useState(false);

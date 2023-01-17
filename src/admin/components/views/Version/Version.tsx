@@ -21,7 +21,7 @@ import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/
 import { FieldPermissions } from '../../../../auth';
 import { useLocale } from '../../utilities/Locale';
 import { Gutter } from '../../elements/Gutter';
-import { useLoadingOverlay } from '../../utilities/LoadingOverlay';
+import { FullscreenLoaderToggle } from '../../elements/Loading';
 
 import './index.scss';
 
@@ -37,7 +37,6 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const { permissions } = useAuth();
   const locale = useLocale();
   const { t, i18n } = useTranslation('version');
-  const { toggleLoadingOverlay } = useLoadingOverlay();
 
   let originalDocFetchURL: string;
   let versionFetchURL: string;
@@ -140,13 +139,6 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     setStepNav(nav);
   }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale, t, i18n]);
 
-  useEffect(() => {
-    toggleLoadingOverlay({
-      key: 'version',
-      isLoading: isLoadingData,
-    });
-  }, [isLoadingData, toggleLoadingOverlay]);
-
   let metaTitle: string;
   let metaDesc: string;
   const formattedCreatedAt = doc?.createdAt ? format(new Date(doc.createdAt), dateFormat) : '';
@@ -173,59 +165,66 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   }
 
   return (
-    <div className={baseClass}>
-      <Meta
-        title={metaTitle}
-        description={metaDesc}
+    <React.Fragment>
+      <FullscreenLoaderToggle
+        show={isLoadingData}
+        name="version"
       />
-      <Eyebrow />
-      <Gutter className={`${baseClass}__wrap`}>
-        <div className={`${baseClass}__intro`}>
-          {t('versionCreatedOn', { version: t(doc?.autosave ? 'autosavedVersion' : 'version') })}
-        </div>
-        <header className={`${baseClass}__header`}>
-          <h2>
-            {formattedCreatedAt}
-          </h2>
-          <Restore
-            className={`${baseClass}__restore`}
-            collection={collection}
-            global={global}
-            originalDocID={id}
-            versionID={versionID}
-            versionDate={formattedCreatedAt}
-          />
-        </header>
-        <div className={`${baseClass}__controls`}>
-          <CompareVersion
-            publishedDoc={publishedDoc}
-            versionID={versionID}
-            baseURL={compareBaseURL}
-            parentID={parentID}
-            value={compareValue}
-            onChange={setCompareValue}
-          />
-          {localization && (
-            <SelectLocales
-              onChange={setLocales}
-              options={localeOptions}
-              value={locales}
+
+      <div className={baseClass}>
+        <Meta
+          title={metaTitle}
+          description={metaDesc}
+        />
+        <Eyebrow />
+        <Gutter className={`${baseClass}__wrap`}>
+          <div className={`${baseClass}__intro`}>
+            {t('versionCreatedOn', { version: t(doc?.autosave ? 'autosavedVersion' : 'version') })}
+          </div>
+          <header className={`${baseClass}__header`}>
+            <h2>
+              {formattedCreatedAt}
+            </h2>
+            <Restore
+              className={`${baseClass}__restore`}
+              collection={collection}
+              global={global}
+              originalDocID={id}
+              versionID={versionID}
+              versionDate={formattedCreatedAt}
+            />
+          </header>
+          <div className={`${baseClass}__controls`}>
+            <CompareVersion
+              publishedDoc={publishedDoc}
+              versionID={versionID}
+              baseURL={compareBaseURL}
+              parentID={parentID}
+              value={compareValue}
+              onChange={setCompareValue}
+            />
+            {localization && (
+              <SelectLocales
+                onChange={setLocales}
+                options={localeOptions}
+                value={locales}
+              />
+            )}
+          </div>
+
+          {doc?.version && (
+            <RenderFieldsToDiff
+              locales={locales ? locales.map(({ value }) => value) : []}
+              fields={fields}
+              fieldComponents={fieldComponents}
+              fieldPermissions={fieldPermissions}
+              version={doc?.version}
+              comparison={comparison}
             />
           )}
-        </div>
-
-        {doc?.version && (
-          <RenderFieldsToDiff
-            locales={locales ? locales.map(({ value }) => value) : []}
-            fields={fields}
-            fieldComponents={fieldComponents}
-            fieldPermissions={fieldPermissions}
-            version={doc?.version}
-            comparison={comparison}
-          />
-        )}
-      </Gutter>
-    </div>
+        </Gutter>
+      </div>
+    </React.Fragment>
   );
 };
 

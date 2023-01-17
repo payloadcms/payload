@@ -14,6 +14,8 @@
   flex-direction: column;
   pointer-events: none;
   z-index: calc(var(--z-status) + 1);
+  transition-property: left, width;
+  transition: 250ms ease-in-out;
 
   &.fullscreen-loader--entering {
     opacity: 1;
