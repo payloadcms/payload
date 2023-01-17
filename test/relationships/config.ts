@@ -45,6 +45,9 @@ export default buildConfig({
     {
       slug,
       access: openAccess,
+      admin: {
+        useAsTitle: 'relationField',
+      },
       fields: [
         {
           name: 'title',
@@ -62,7 +65,7 @@ export default buildConfig({
         {
           name: 'relationField',
           type: 'relationship',
-          relationTo: relationSlug,
+          relationTo: [relationSlug],
         },
         // Relationship w/ default access
         {

@@ -296,9 +296,14 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
         }
       }
 
-      if (Array.isArray(options.relationTo) && typeof val === 'object' && val?.relationTo) {
-        collection = val.relationTo;
-        requestedID = val.value;
+      if (Array.isArray(options.relationTo)) {
+        if (typeof val === 'object' && val?.relationTo) {
+          collection = val.relationTo;
+          requestedID = val.value;
+        } else {
+          [collection] = options.relationTo;
+          requestedID = val;
+        }
       }
 
       const idField = options.payload.collections[collection].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
