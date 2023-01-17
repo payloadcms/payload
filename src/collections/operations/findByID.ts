@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import memoize from 'micro-memoize';
 import { PayloadRequest } from '../../express/types';
-import { Collection } from '../config/types';
+import { Collection, TypeWithID } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
@@ -22,8 +22,7 @@ export type Arguments = {
   draft?: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function findByID<T extends Record<string, unknown>>(
+async function findByID<T extends TypeWithID>(
   incomingArgs: Arguments,
 ): Promise<T> {
   let args = incomingArgs;

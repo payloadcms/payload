@@ -1,4 +1,4 @@
-import { Config as SchemaConfig } from 'payload/generated-types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Payload } from '../../../payload';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
@@ -8,10 +8,10 @@ import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18nInit from '../../../translations/init';
 
-export type Options<TSlug extends keyof SchemaConfig['collections']> = {
+export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
   id: string | number
-  data: SchemaConfig['collections'][TSlug]
+  data: Omit<GeneratedTypes['collections'][TSlug], 'id'>
   depth?: number
   locale?: string
   fallbackLocale?: string
@@ -25,10 +25,10 @@ export type Options<TSlug extends keyof SchemaConfig['collections']> = {
   autosave?: boolean
 }
 
-export default async function updateLocal<TSlug extends keyof SchemaConfig['collections']>(
+export default async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<SchemaConfig['collections'][TSlug]> {
+): Promise<GeneratedTypes['collections'][TSlug]> {
   const {
     collection: collectionSlug,
     depth,

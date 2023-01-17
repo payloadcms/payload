@@ -11,7 +11,7 @@ import i18n from '../../../translations/init';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
-  data: GeneratedTypes['collections'][TSlug]
+  data: Omit<GeneratedTypes['collections'][TSlug], 'id'>
   depth?: number
   locale?: string
   fallbackLocale?: string

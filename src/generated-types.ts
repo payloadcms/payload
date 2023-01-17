@@ -2,11 +2,14 @@
 // It will not be used.
 // Instead, configure a path within your `tsconfig.json`'s `compilerOptions.paths` to point to your generated types.
 
+import { TypeWithID } from './collections/config/types';
+import { TypeWithID as GlobalTypeWithID } from './globals/config/types';
+
 export type Config = {
   collections: {
-    [slug: string | number | symbol]: Record<string, unknown>
+    [slug: string | number | symbol]: TypeWithID
   }
   globals: {
-    [slug: string | number | symbol]: Record<string, unknown>
+    [slug: string | number | symbol]: GlobalTypeWithID
   }
 }

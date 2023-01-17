@@ -24,7 +24,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  data: T
+  data: Omit<T, 'id'>
   overwriteExistingFiles?: boolean
   draft?: boolean
 }

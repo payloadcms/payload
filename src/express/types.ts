@@ -3,10 +3,9 @@ import type { i18n as Ii18n, TFunction } from 'i18next';
 import DataLoader from 'dataloader';
 import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../payload';
-import { Collection } from '../collections/config/types';
+import { Collection, TypeWithID } from '../collections/config/types';
 import { User } from '../auth/types';
 import { Document } from '../types';
-import { TypeWithID } from '../globals/config/types';
 
 /** Express request with some Payload related context added */
 export declare type PayloadRequest<U = any> = Request & {

@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { Config as SchemaConfig } from 'payload/generated-types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -23,7 +23,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   collection: Collection
   req: PayloadRequest
   id: string | number
-  data: T
+  data: Omit<T, 'id'>
   depth?: number
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
@@ -33,9 +33,9 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   autosave?: boolean
 }
 
-async function update<TSlug extends keyof SchemaConfig['collections']>(
-  incomingArgs: Arguments<SchemaConfig['collections'][TSlug]>,
-): Promise<SchemaConfig['collections'][TSlug]> {
+async function update<TSlug extends keyof GeneratedTypes['collections']>(
+  incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
+): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -150,7 +150,7 @@ async function update<TSlug extends keyof SchemaConfig['collections']>(
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  data = await beforeValidate<SchemaConfig['collections'][TSlug]>({
+  data = await beforeValidate<GeneratedTypes['collections'][TSlug]>({
     data,
     doc: originalDoc,
     entityConfig: collectionConfig,
@@ -202,7 +202,7 @@ async function update<TSlug extends keyof SchemaConfig['collections']>(
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  let result = await beforeChange<SchemaConfig['collections'][TSlug]>({
+  let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
     data,
     doc: originalDoc,
     docWithLocales,
@@ -253,7 +253,7 @@ async function update<TSlug extends keyof SchemaConfig['collections']>(
       id,
     });
 
-    result = await saveCollectionDraft<SchemaConfig['collections'][TSlug]>({
+    result = await saveCollectionDraft<GeneratedTypes['collections'][TSlug]>({
       payload,
       config: collectionConfig,
       req,
@@ -285,7 +285,7 @@ async function update<TSlug extends keyof SchemaConfig['collections']>(
     result = JSON.parse(resultString);
   }
 
-  result = sanitizeInternalFields<SchemaConfig['collections'][TSlug]>(result);
+  result = sanitizeInternalFields<GeneratedTypes['collections'][TSlug]>(result);
 
   // /////////////////////////////////////
   // afterRead - Fields
@@ -317,7 +317,7 @@ async function update<TSlug extends keyof SchemaConfig['collections']>(
   // afterChange - Fields
   // /////////////////////////////////////
 
-  result = await afterChange<SchemaConfig['collections'][TSlug]>({
+  result = await afterChange<GeneratedTypes['collections'][TSlug]>({
     data,
     doc: result,
     previousDoc: originalDoc,
