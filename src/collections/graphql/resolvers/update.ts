@@ -1,13 +1,13 @@
 /* eslint-disable no-param-reassign */
 import { Response } from 'express';
-import { Config as SchemaConfig } from 'payload/generated-types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Collection } from '../../config/types';
 import update from '../../operations/update';
 import { PayloadRequest } from '../../../express/types';
 
-export type Resolver<TSlug extends keyof SchemaConfig['collections']> = (_: unknown, args: {
+export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (_: unknown, args: {
   id: string | number
-  data: SchemaConfig['collections'][TSlug]
+  data: GeneratedTypes['collections'][TSlug]
   locale?: string
   draft: boolean
   autosave: boolean
@@ -16,9 +16,9 @@ export type Resolver<TSlug extends keyof SchemaConfig['collections']> = (_: unkn
     req: PayloadRequest,
     res: Response
   }
-) => Promise<SchemaConfig['collections'][TSlug]>
+) => Promise<GeneratedTypes['collections'][TSlug]>
 
-export default function updateResolver<TSlug extends keyof SchemaConfig['collections']>(
+export default function updateResolver<TSlug extends keyof GeneratedTypes['collections']>(
   collection: Collection,
 ): Resolver<TSlug> {
   async function resolver(_, args, context) {

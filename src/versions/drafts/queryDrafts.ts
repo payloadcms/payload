@@ -1,6 +1,6 @@
 import { AccessResult } from '../../config/types';
 import { Where } from '../../types';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import { PaginatedDocs } from '../../mongoose/types';
 import { Collection, CollectionModel, TypeWithID } from '../../collections/config/types';
 import { hasWhereAccessResult } from '../../auth';

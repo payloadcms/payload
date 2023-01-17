@@ -33,7 +33,7 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
   const collection = payload.collections[collectionSlug];
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
   const i18n = i18nInit(payload.config.i18n);

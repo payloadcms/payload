@@ -38,7 +38,7 @@ export default async function deleteLocal<TSlug extends keyof GeneratedTypes['co
 
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
   const req = {

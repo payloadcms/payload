@@ -1,5 +1,6 @@
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { docHasTimestamps, Where } from '../../types';
-import { SanitizedGlobalConfig, TypeWithID } from '../config/types';
+import { SanitizedGlobalConfig } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
 import { hasWhereAccessResult } from '../../auth';
 import { beforeChange } from '../../fields/hooks/beforeChange';
@@ -10,19 +11,21 @@ import { PayloadRequest } from '../../express/types';
 import { saveVersion } from '../../versions/saveVersion';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
-type Args = {
+type Args<T extends { [field: string | number | symbol]: unknown }> = {
   globalConfig: SanitizedGlobalConfig
-  slug: string
+  slug: string | number | symbol
   req: PayloadRequest
   depth?: number
   overrideAccess?: boolean
   showHiddenFields?: boolean
   draft?: boolean
   autosave?: boolean
-  data: Record<string, unknown>
+  data: Omit<T, 'id'>
 }
 
-async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
+async function update<TSlug extends keyof GeneratedTypes['globals']>(
+  args: Args<GeneratedTypes['globals'][TSlug]>,
+): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
     globalConfig,
     slug,

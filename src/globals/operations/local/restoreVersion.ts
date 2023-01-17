@@ -34,7 +34,7 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
   const i18n = i18nInit(payload.config.i18n);
 
   if (!globalConfig) {
-    throw new APIError(`The global with slug ${globalSlug} can't be found.`);
+    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);
   }
 
   const req = {

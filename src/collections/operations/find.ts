@@ -2,7 +2,7 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Collection } from '../config/types';
+import { Collection, TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
@@ -28,7 +28,7 @@ export type Arguments = {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function find<T extends Record<string, unknown>>(
+async function find<T extends TypeWithID>(
   incomingArgs: Arguments,
 ): Promise<PaginatedDocs<T>> {
   let args = incomingArgs;
@@ -162,7 +162,7 @@ async function find<T extends Record<string, unknown>>(
   };
 
   if (collectionConfig.versions?.drafts && draftsEnabled) {
-    result = await queryDrafts({
+    result = await queryDrafts<T>({
       accessResult,
       collection,
       locale,

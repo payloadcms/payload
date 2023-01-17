@@ -38,7 +38,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
 
 
   if (!globalConfig) {
-    throw new APIError(`The global with slug ${globalSlug} can't be found.`);
+    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);
   }
 
   const req = {

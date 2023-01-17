@@ -27,7 +27,6 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   req?: PayloadRequest
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function findLocal<T extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<T>,
@@ -55,7 +54,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
   req.payloadAPI = 'local';
