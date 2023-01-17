@@ -75,7 +75,7 @@ export default function registerCollections(ctx: Payload): void {
           disableUnique: true,
           draftsEnabled: true,
           options: {
-            timestamps: true,
+            timestamps: false,
           },
         },
       );

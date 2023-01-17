@@ -30,7 +30,7 @@ export default function initGlobals(ctx: Payload): void {
             disableUnique: true,
             draftsEnabled: true,
             options: {
-              timestamps: true,
+              timestamps: false,
             },
           },
         );

@@ -157,6 +157,11 @@ describe('Versions', () => {
         const versions = await payload.findVersions({
           collection,
           locale: 'all',
+          where: {
+            parent: {
+              equals: collectionLocalPostID,
+            },
+          },
         });
 
         expect(versions.docs[0].version.title.en).toStrictEqual(newEnglishTitle);

@@ -15,7 +15,8 @@ type Args = {
   id?: string | number
   autosave?: boolean
   draft?: boolean
-  createdAt?: string
+  createdAt: string
+  onCreate?: boolean
 }
 
 export const saveVersion = async ({
@@ -27,6 +28,7 @@ export const saveVersion = async ({
   autosave,
   draft,
   createdAt,
+  onCreate = false,
 }: Args): Promise<Record<string, unknown>> => {
   let entityConfig;
   let entityType: 'global' | 'collection';
@@ -56,11 +58,14 @@ export const saveVersion = async ({
   }
 
   let result;
+  const now = new Date().toISOString();
 
   try {
     if (autosave && existingAutosaveVersion?.autosave === true) {
       const data: Record<string, unknown> = {
         version: versionData,
+        createdAt,
+        updatedAt: now,
       };
 
       if (createdAt) data.updatedAt = createdAt;
@@ -77,9 +82,10 @@ export const saveVersion = async ({
       const data: Record<string, unknown> = {
         version: versionData,
         autosave: Boolean(autosave),
+        updatedAt: onCreate ? createdAt : now,
+        createdAt: createdAt || now,
       };
 
-      if (createdAt) data.createdAt = createdAt;
       if (collection) data.parent = id;
 
       result = await VersionModel.create(data);
