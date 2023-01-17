@@ -1,3 +1,4 @@
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import { PayloadRequest } from '../../../express/types';
@@ -7,8 +8,8 @@ import findVersionByID from '../findVersionByID';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
 
-export type Options = {
-  slug: string
+export type Options<T extends keyof GeneratedTypes['globals']> = {
+  slug: T
   id: string
   depth?: number
   locale?: string
@@ -19,7 +20,10 @@ export type Options = {
   disableErrors?: boolean
 }
 
-export default async function findVersionByIDLocal<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<T> {
+export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['globals']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<TypeWithVersion<GeneratedTypes['globals'][T]>> {
   const {
     slug: globalSlug,
     depth,

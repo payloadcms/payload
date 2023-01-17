@@ -230,56 +230,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     return find<T>(this, options);
   }
 
-  findGlobal = async <T extends keyof TGeneratedTypes['globals']>(
-    options: FindGlobalOptions<T>,
-  ): Promise<TGeneratedTypes['globals'][T]> => {
-    const { findOne } = localGlobalOperations;
-    return findOne<T>(this, options);
-  }
-
-  updateGlobal = async <T extends keyof TGeneratedTypes['globals']>(
-    options: UpdateGlobalOptions<T>,
-  ): Promise<TGeneratedTypes['globals'][T]> => {
-    const { update } = localGlobalOperations;
-    return update<T>(this, options);
-  }
-
-  /**
-   * @description Find global versions with criteria
-   * @param options
-   * @returns versions satisfying query
-   */
-  findGlobalVersions = async <T extends keyof TGeneratedTypes['globals']>(
-    options: FindGlobalVersionsOptions<T>,
-  ): Promise<PaginatedDocs<TypeWithVersion<TGeneratedTypes['globals'][T]>>> => {
-    const { findVersions } = localGlobalOperations;
-    return findVersions<T>(this, options);
-  }
-
-  /**
-   * @description Find global version by ID
-   * @param options
-   * @returns global version with specified ID
-   */
-  findGlobalVersionByID = async <T extends TypeWithVersion<T> = any>(
-    options: FindGlobalVersionByIDOptions,
-  ): Promise<T> => {
-    const { findVersionByID } = localGlobalOperations;
-    return findVersionByID(this, options);
-  }
-
-  /**
-   * @description Restore global version by ID
-   * @param options
-   * @returns version with specified ID
-   */
-  restoreGlobalVersion = async <T extends TypeWithVersion<T> = any>(
-    options: RestoreGlobalVersionOptions,
-  ): Promise<T> => {
-    const { restoreVersion } = localGlobalOperations;
-    return restoreVersion(this, options);
-  }
-
   /**
    * @description Find document by ID
    * @param options
@@ -317,7 +267,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns versions satisfying query
    */
-  findVersions = async <T extends TypeWithVersion<T> = any>(options: FindVersionsOptions): Promise<PaginatedDocs<T>> => {
+  findVersions = async <T extends keyof TGeneratedTypes['collections']>(
+    options: FindVersionsOptions<T>,
+  ): Promise<PaginatedDocs<TypeWithVersion<TGeneratedTypes['collections'][T]>>> => {
     const { findVersions } = localOperations;
     return findVersions<T>(this, options);
   }
@@ -327,9 +279,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns version with specified ID
    */
-  findVersionByID = async <T extends TypeWithVersion<T> = any>(options: FindVersionByIDOptions): Promise<T> => {
+  findVersionByID = async <T extends keyof TGeneratedTypes['collections']>(
+    options: FindVersionByIDOptions<T>,
+  ): Promise<TypeWithVersion<TGeneratedTypes['collections'][T]>> => {
     const { findVersionByID } = localOperations;
-    return findVersionByID(this, options);
+    return findVersionByID<T>(this, options);
   }
 
   /**
@@ -337,34 +291,96 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns version with specified ID
    */
-  restoreVersion = async <T extends TypeWithVersion<T> = any>(options: RestoreVersionOptions): Promise<T> => {
+  restoreVersion = async <T extends keyof TGeneratedTypes['collections']>(
+    options: RestoreVersionOptions<T>,
+  ): Promise<TGeneratedTypes['collections'][T]> => {
     const { restoreVersion } = localOperations;
-    return restoreVersion(this, options);
+    return restoreVersion<T>(this, options);
   }
 
-  login = async <T extends TypeWithID = any>(options: LoginOptions): Promise<LoginResult & { user: T }> => {
+  login = async <T extends keyof TGeneratedTypes['collections']>(
+    options: LoginOptions<T>,
+  ): Promise<LoginResult & { user: TGeneratedTypes['collections'][T] }> => {
     const { login } = localOperations.auth;
-    return login(this, options);
+    return login<T>(this, options);
   }
 
-  forgotPassword = async (options: ForgotPasswordOptions): Promise<ForgotPasswordResult> => {
+  forgotPassword = async <T extends keyof TGeneratedTypes['collections']>(
+    options: ForgotPasswordOptions<T>,
+  ): Promise<ForgotPasswordResult> => {
     const { forgotPassword } = localOperations.auth;
-    return forgotPassword(this, options);
+    return forgotPassword<T>(this, options);
   }
 
-  resetPassword = async (options: ResetPasswordOptions): Promise<ResetPasswordResult> => {
+  resetPassword = async <T extends keyof TGeneratedTypes['collections']>(
+    options: ResetPasswordOptions<T>,
+  ): Promise<ResetPasswordResult> => {
     const { resetPassword } = localOperations.auth;
-    return resetPassword(this, options);
+    return resetPassword<T>(this, options);
   }
 
-  unlock = async (options: UnlockOptions): Promise<boolean> => {
+  unlock = async <T extends keyof TGeneratedTypes['collections']>(
+    options: UnlockOptions<T>,
+  ): Promise<boolean> => {
     const { unlock } = localOperations.auth;
     return unlock(this, options);
   }
 
-  verifyEmail = async (options: VerifyEmailOptions): Promise<boolean> => {
+  verifyEmail = async <T extends keyof TGeneratedTypes['collections']>(
+    options: VerifyEmailOptions<T>,
+  ): Promise<boolean> => {
     const { verifyEmail } = localOperations.auth;
     return verifyEmail(this, options);
+  }
+
+  findGlobal = async <T extends keyof TGeneratedTypes['globals']>(
+    options: FindGlobalOptions<T>,
+  ): Promise<TGeneratedTypes['globals'][T]> => {
+    const { findOne } = localGlobalOperations;
+    return findOne<T>(this, options);
+  }
+
+  updateGlobal = async <T extends keyof TGeneratedTypes['globals']>(
+    options: UpdateGlobalOptions<T>,
+  ): Promise<TGeneratedTypes['globals'][T]> => {
+    const { update } = localGlobalOperations;
+    return update<T>(this, options);
+  }
+
+  /**
+   * @description Find global versions with criteria
+   * @param options
+   * @returns versions satisfying query
+   */
+  findGlobalVersions = async <T extends keyof TGeneratedTypes['globals']>(
+    options: FindGlobalVersionsOptions<T>,
+  ): Promise<PaginatedDocs<TypeWithVersion<TGeneratedTypes['globals'][T]>>> => {
+    const { findVersions } = localGlobalOperations;
+    return findVersions<T>(this, options);
+  }
+
+  /**
+   * @description Find global version by ID
+   * @param options
+   * @returns global version with specified ID
+   */
+  findGlobalVersionByID = async <T extends keyof TGeneratedTypes['globals']>(
+    options: FindGlobalVersionByIDOptions<T>,
+  ): Promise<TypeWithVersion<TGeneratedTypes['globals'][T]>> => {
+    const { findVersionByID } = localGlobalOperations;
+    return findVersionByID<T>(this, options);
+  }
+
+  /**
+   * @description Restore global version by ID
+   * @param options
+   * @returns version with specified ID
+   */
+  restoreGlobalVersion = async <T extends keyof TGeneratedTypes['globals']>(
+    options: RestoreGlobalVersionOptions<T>,
+  ): Promise<TGeneratedTypes['globals'][T]> => {
+    const { restoreVersion } = localGlobalOperations;
+    return restoreVersion<T>(this, options);
   }
 }
 
