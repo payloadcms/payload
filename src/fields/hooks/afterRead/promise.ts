@@ -46,49 +46,49 @@ export const promise = async ({
     delete siblingDoc[field.name];
   }
 
-  const requestingLocalizedValue = flattenLocales
+  const shouldHoistLocalizedValue = flattenLocales
     && fieldAffectsData(field)
     && (typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null)
     && field.localized
     && req.locale !== 'all';
 
-  if (requestingLocalizedValue) {
-    let localizedValue = siblingDoc[field.name][req.locale];
-    const fallbackEnabled = req.payload.config.localization && req.payload.config.localization?.fallback;
-    const fallbackValue = req.fallbackLocale ? siblingDoc[field.name][req.fallbackLocale] : null;
-    const localizedValueIsEmpty = typeof localizedValue === 'undefined' || localizedValue === null;
+  if (shouldHoistLocalizedValue) {
+    // replace actual value with localized value before sanitizing
+    // { [locale]: fields } -> fields
+    const { locale } = req;
+    const value = siblingDoc[field.name][locale];
+    const fallbackLocale = req.payload.config.localization && req.payload.config.localization?.fallback && req.fallbackLocale;
 
-    // Sanitize localized field data
-    // fallback if enabled, else set default values
-    switch (field.type) {
-      case 'tab':
-      case 'group':
-        if (fallbackEnabled && localizedValueIsEmpty) {
-          localizedValue = fallbackValue || {};
-        } else {
-          localizedValue = {};
-        }
-        break;
+    let hoistedValue = value;
 
-      case 'text':
-      case 'textarea':
-        if (fallbackEnabled && (localizedValueIsEmpty || localizedValue.trim() === '')) {
-          localizedValue = fallbackValue || '';
-        }
-        break;
+    if (fallbackLocale && fallbackLocale !== locale) {
+      const fallbackValue = siblingDoc[field.name][fallbackLocale];
+      const isNullOrUndefined = typeof value === 'undefined' || value === null;
 
-      default:
-        if (fallbackEnabled && localizedValueIsEmpty) {
-          localizedValue = fallbackValue;
+      switch (field.type) {
+        case 'text':
+        case 'textarea': {
+          if (value === '' || isNullOrUndefined) {
+            hoistedValue = fallbackValue;
+          }
+          break;
         }
-        break;
+
+        default: {
+          if (isNullOrUndefined) {
+            hoistedValue = fallbackValue;
+          }
+          break;
+        }
+      }
     }
 
-    siblingDoc[field.name] = localizedValue;
+    siblingDoc[field.name] = hoistedValue;
   }
 
-  // Sanitize outgoing data
+  // Sanitize outgoing field data
   switch (field.type) {
+    case 'tab':
     case 'group': {
       // Fill groups with empty objects so fields with hooks within groups can populate
       // themselves virtually as necessary
