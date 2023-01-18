@@ -1,7 +1,21 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import minimist from 'minimist';
+import swcRegister from '@swc/register';
 import { generateTypes } from './generateTypes';
 import { generateGraphQLSchema } from './generateGraphQLSchema';
+
+swcRegister({
+  sourceMaps: 'inline',
+  jsc: {
+    parser: {
+      syntax: 'typescript',
+      tsx: true,
+    },
+  },
+  module: {
+    type: 'commonjs',
+  },
+});
 
 const { build } = require('./build');
 
