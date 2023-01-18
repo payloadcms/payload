@@ -194,6 +194,7 @@
     "@playwright/test": "^1.29.2",
     "@release-it/conventional-changelog": "^5.1.1",
     "@swc/jest": "^0.2.24",
+    "@swc/register": "^0.1.10",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^13.0.1",
     "@trbl/eslint-config": "^1.2.4",

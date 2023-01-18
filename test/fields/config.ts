@@ -23,8 +23,6 @@ import JSONFields, { jsonDoc } from './collections/JSON';
 import RelationshipFields from './collections/Relationship';
 import RadioFields, { radiosDoc } from './collections/Radio';
 import Uploads2 from './collections/Upload2';
-import { Payload } from '../../src/payload';
-import { Config } from './payload-types';
 
 export default buildConfig({
   admin: {
@@ -65,7 +63,7 @@ export default buildConfig({
     locales: ['en', 'es'],
     fallback: true,
   },
-  onInit: async (payload: Payload<Config>) => {
+  onInit: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -130,16 +128,5 @@ export default buildConfig({
     blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText;
 
     await payload.create({ collection: 'block-fields', data: blocksDocWithRichText });
-
-    const arrayField = await payload.findByID({
-      collection: 'array-fields',
-      id: 'test',
-    });
-
-    const updatedArray = await payload.update({
-      collection: 'array-fields',
-      data: arrayField,
-      id: 'test',
-    });
   },
 });

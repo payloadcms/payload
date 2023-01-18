@@ -6,7 +6,6 @@ import path from 'path';
 import mongoose from 'mongoose';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import {
-  TypeWithID,
   Collection,
   CollectionModel,
 } from './collections/config/types';

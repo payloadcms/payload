@@ -100,7 +100,7 @@ export type InitOptions = {
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
-  onInit?: (payload: Payload) => Promise<void> | void;
+  onInit?: (payload: Payload) => Promise<Payload>;
 
   /**
    * Specify options for the built-in Pino logger that Payload uses for internal logging.
