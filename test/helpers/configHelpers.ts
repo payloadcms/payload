@@ -41,6 +41,8 @@ export async function initPayloadTest(options: Options): Promise<{ serverURL: st
     initOptions.express = express();
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - bad @swc/register types
   swcRegister({
     sourceMaps: 'inline',
     jsc: {
