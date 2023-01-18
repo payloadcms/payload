@@ -1,5 +1,21 @@
 
 
+## [1.5.10-canary.0](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.10-canary.0) (2023-01-18)
+
+
+### Bug Fixes
+
+* bump pino and pino-pretty to accommodate yarn 2 ([773fb57](https://github.com/payloadcms/payload/commit/773fb57c71f89d5157847ee4907c1472874f9a61))
+* updated nl i18n typos ([cc7257e](https://github.com/payloadcms/payload/commit/cc7257efd529580b1eb7b6c01df9f7420838c345))
+
+
+### Features
+
+* allows versions to be deleted alongside of main document deletion ([a5c76d4](https://github.com/payloadcms/payload/commit/a5c76d4bd544190511e34820c1145ef26d85dc53))
+* isolates local api to local-only functions, converts it to ts generic for stronger typing ([d3d367c](https://github.com/payloadcms/payload/commit/d3d367c635f72b7353ad9a6ff9ecad6a5f56dd08))
+* requires ts-node to start a project for any config that uses ts or jsx ([f1c342e](https://github.com/payloadcms/payload/commit/f1c342e05eb84254c9d84a425b4f0da1249fcef3))
+* simplifies versions logic ([8cfa550](https://github.com/payloadcms/payload/commit/8cfa5509540225100237e6f569eb9eb1a7d5448e))
+
 ## [1.5.9](https://github.com/payloadcms/payload/compare/v1.5.8...v1.5.9) (2023-01-15)
 
 
