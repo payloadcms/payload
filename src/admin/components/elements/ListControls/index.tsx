@@ -76,7 +76,7 @@ const ListControls: React.FC<Props> = (props) => {
             )}
             <Pill
               pillStyle="dark"
-              className={`${baseClass}__toggle-columns ${visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''}`}
+              className={`${baseClass}__toggle-where ${visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''}`}
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
               icon={<Chevron />}
             >

@@ -230,6 +230,7 @@ describe('admin', () => {
       test('toggle columns', async () => {
         const columnCountLocator = 'table >> thead >> tr >> th';
         await createPost();
+        await console.log(page.locator('.list-controls__toggle-columns'));
         await page.locator('.list-controls__toggle-columns').click();
         await wait(1000); // Wait for column toggle UI, should probably use waitForSelector
 
@@ -268,8 +269,7 @@ describe('admin', () => {
         await wait(1000);
 
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
-        const firstId = await page.locator(tableRowLocator).first().locator('td').first()
-          .innerText();
+        const firstId = await page.locator(tableRowLocator).first().locator('.cell-id').innerText();
         expect(firstId).toEqual(id);
 
         // Remove filter
@@ -280,10 +280,10 @@ describe('admin', () => {
     });
 
     describe('multi-select', () => {
-      beforeAll(async () => {
-        await createPost();
-        await createPost();
-        await createPost();
+      beforeEach(async () => {
+        await mapAsync([...Array(3)], async () => {
+          await createPost();
+        });
       });
 
       test('should select multiple rows', async () => {
@@ -303,7 +303,14 @@ describe('admin', () => {
       });
 
       test('should delete many', async () => {
+        // delete should not appear without selection
+        await expect(page.locator('#confirm-delete')).toHaveCount(0);
+        // select one row
         await page.locator('.row-1 .select-row button').click();
+
+        // delete button should be present
+        await expect(page.locator('#confirm-delete')).toHaveCount(1);
+
         await page.locator('.row-2 .select-row button').click();
 
         await page.locator('.delete-documents__toggle').click();
