@@ -26,7 +26,7 @@ If you are not using TypeScript, this will be a breaking change. There are many 
 
 For instructions regarding how to migrate to TS, [review the PR here](https://github.com/payloadcms/payload/pull/1847).
 
-#### Payload `init` is now always async, and `payload.initAsync` has been removed
+#### ✋ Payload `init` is now always async, and `payload.initAsync` has been removed
 
 We are pulling off a bandaid here and enforcing that `payload.init` is now asynchronous across the board. This will help prevent issues in the future and allow us to do more advanced things within `init` down the road. But this will be a breaking change if your project uses `payload.init` right now.
 
@@ -78,7 +78,7 @@ start();
 
 Notice that all we've done is wrapped the `payload.init` and `app.listen` calls with a `start` function that is asynchronous.
 
-#### All Local API methods are no longer typed as generics, and instead will infer types for you automatically
+#### ✋ All Local API methods are no longer typed as generics, and instead will infer types for you automatically
 
 Before this release, the Local API methods were configured as generics. For example, here is an example of the `findByID` method prior to this release:
 
@@ -119,7 +119,7 @@ But there's one more thing to do before Payload can automatically type your Loca
 
 Then go regenerate your types. We've extended the `payload generate:types` method a bit to be more complete. Upon regenerating types, you'll see a new `Config` export at the top of the file which contains a key - value pair of all your collection and global types, which Payload will automatically import.
 
-#### Versions may need to be migrated
+#### ✋ Versions may need to be migrated
 
 This release includes a substantial simplification / optimization of how Versions work within Payload. They are now significantly more performant and easier to understand behind-the-scenes. We've removed ~600 lines of code and have ensured that Payload can be compatible with all flavors of Mongo - including versions earlier than 4.0, Azure Cosmos MongoDB, AWS' DocumentDB and more.
 
@@ -210,7 +210,7 @@ Make sure your environment variables match the script's values above and then ru
 
 This migration script will ensure that there is at least one corresponding version for each of your draft-enabled documents. It won't modify or delete any of your existing documents at all.
 
-### Example of a properly migrated project
+### 👀 Example of a properly migrated project
 
 For an example of how everything works with this update, go ahead and run `npx create-payload-app`. We've updated `create-payload-app` to reflect all the necessary changes here and you can use a new project to compare / contrast what you have in your current project with what Payload needs now in this release.
 
