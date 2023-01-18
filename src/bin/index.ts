@@ -4,6 +4,8 @@ import swcRegister from '@swc/register';
 import { generateTypes } from './generateTypes';
 import { generateGraphQLSchema } from './generateGraphQLSchema';
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - bad @swc/register types
 swcRegister({
   sourceMaps: 'inline',
   jsc: {
