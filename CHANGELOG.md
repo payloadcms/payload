@@ -111,7 +111,7 @@ But there's one more thing to do before Payload can automatically type your Loca
     "paths": {
       // Tell TS where to find your generated types
       // This is the default location below
-      "payload/generated-types": ["./src/generated-types.ts"]
+      "payload/generated-types": ["./src/payload-types.ts"]
     }
   }
 }
