@@ -27,7 +27,7 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
     },
     fields: [
       {
-        name: 'form',
+        name: formConfig?.formOverrides?.slug || 'form',
         type: 'relationship',
         relationTo: 'forms',
         required: true,
