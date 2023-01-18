@@ -12,6 +12,7 @@ import { hasWhereAccessResult } from '../../auth/types';
 import { FileData } from '../../uploads/types';
 import fileExists from '../../uploads/fileExists';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 
 export type Arguments = {
   depth?: number
@@ -51,6 +52,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     req: {
       t,
       locale,
+      payload,
       payload: {
         config,
         preferences,
@@ -168,6 +170,18 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   await preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
 
   // /////////////////////////////////////
+  // Delete versions
+  // /////////////////////////////////////
+
+  if (!collectionConfig.versions.retainDeleted) {
+    deleteCollectionVersions({
+      payload,
+      id,
+      slug: collectionConfig.slug,
+    });
+  }
+
+  // /////////////////////////////////////
   // afterDelete - Collection
   // /////////////////////////////////////
 
@@ -176,7 +190,6 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
     result = await hook({ req, id, doc: result }) || result;
   }, Promise.resolve());
-
 
   // /////////////////////////////////////
   // afterRead - Fields
