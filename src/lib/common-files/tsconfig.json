@@ -12,7 +12,12 @@
     "skipLibCheck": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "jsx": "react"
+    "jsx": "react",
+    "paths": {
+      "payload/generated-types": [
+        "./src/payload-types.ts",
+      ],
+    }
   },
   "include": [
     "src"
@@ -23,6 +28,7 @@
     "build",
   ],
   "ts-node": {
-    "transpileOnly": true
+    "transpileOnly": true,
+    "swc": true,
   }
 }
