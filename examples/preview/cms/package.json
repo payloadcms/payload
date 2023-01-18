@@ -1,6 +1,6 @@
 {
-  "name": "learn-with-jason-CMS",
-  "description": "The CMS that corresponds with the Payload Learn with Jason episode",
+  "name": "preview-example-cms",
+  "description": "The CMS is used to demonstrate the preview feature.",
   "version": "1.0.0",
   "main": "dist/server.js",
   "license": "MIT",

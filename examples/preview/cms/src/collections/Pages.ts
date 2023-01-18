@@ -1,8 +1,6 @@
 import { CollectionConfig } from 'payload/types';
 import { publishedOnly } from '../access/publishedOnly';
-import { CallToAction } from '../blocks/CallToAction';
 import { Content } from '../blocks/Content';
-import { MediaBlock } from '../blocks/Media';
 import { hero } from '../fields/hero';
 import { slugField } from '../fields/slug';
 
@@ -31,7 +29,7 @@ export const Pages: CollectionConfig = {
           label: 'Hero',
           fields: [
             hero,
-          ]
+          ],
         },
         {
           label: 'Content',
@@ -41,15 +39,13 @@ export const Pages: CollectionConfig = {
               type: 'blocks',
               required: true,
               blocks: [
-                CallToAction,
                 Content,
-                MediaBlock,
-              ]
-            }
-          ]
-        }
-      ]
+              ],
+            },
+          ],
+        },
+      ],
     },
     slugField(),
-  ]
-}
+  ],
+};
