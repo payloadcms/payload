@@ -1,6 +1,6 @@
 import { ModalToggler } from '@faceless-ui/modal';
 import Link from 'next/link';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { useGlobals } from '../../providers/Globals';
 import { Gutter } from '../Gutter';
 import { MenuIcon } from '../icons/Menu';
@@ -37,19 +37,24 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
 export const Header: React.FC = () => {
   const { mainMenu: { navItems } } = useGlobals();
 
-  return (
-    <>
-      <HeaderBar>
-        <nav className={classes.nav}>
-          {navItems.map(({ link }, i) => {
-            return (
-              <CMSLink key={i} {...link} />
-            )
-          })}
-        </nav>
-      </HeaderBar>
+  const hasNavItems = navItems && Array.isArray(navItems) && navItems.length > 0;
 
-      <MobileMenuModal navItems={navItems} />
-    </>
+  return (
+    <Fragment>
+      <HeaderBar>
+        {hasNavItems && (
+          <nav className={classes.nav}>
+            {navItems.map(({ link }, i) => {
+              return (
+                <CMSLink key={i} {...link} />
+              )
+            })}
+          </nav>
+        )}
+      </HeaderBar>
+      {hasNavItems && (
+        <MobileMenuModal navItems={navItems} />
+      )}
+    </Fragment>
   )
 }

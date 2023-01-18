@@ -1,12 +1,10 @@
 import App, { AppContext, AppProps } from 'next/app';
-import { GridProvider } from '@faceless-ui/css-grid';
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal';
 import React from 'react';
 import { Header } from '../components/Header';
 import { GlobalsProvider } from '../providers/Globals';
 import { CloseModalOnRouteChange } from '../components/CloseModalOnRouteChange';
 import { MainMenu } from "../payload-types";
-import cssVariables from '../cssVariables';
 
 import '../css/app.scss';
 
@@ -38,36 +36,16 @@ const PayloadApp = (appProps: AppProps & {
   return (
     <React.Fragment>
       <GlobalsProvider {...globals}>
-        <GridProvider
-          breakpoints={{
-            s: cssVariables.breakpoints.s,
-            m: cssVariables.breakpoints.m,
-            l: cssVariables.breakpoints.l,
-          }}
-          colGap={{
-            s: '24px',
-            m: '48px',
-            l: '48px',
-            xl: '72px',
-          }}
-          cols={{
-            s: 4,
-            m: 4,
-            l: 12,
-            xl: 12,
-          }}
+        <ModalProvider
+          classPrefix="form"
+          transTime={0}
+          zIndex="var(--modal-z-index)"
         >
-          <ModalProvider
-            classPrefix="form"
-            transTime={0}
-            zIndex="var(--modal-z-index)"
-          >
-            <CloseModalOnRouteChange />
-            <Header />
-            <Component {...pageProps} />
-            <ModalContainer />
-          </ModalProvider>
-        </GridProvider>
+          <CloseModalOnRouteChange />
+          <Header />
+          <Component {...pageProps} />
+          <ModalContainer />
+        </ModalProvider>
       </GlobalsProvider>
     </React.Fragment>
   )

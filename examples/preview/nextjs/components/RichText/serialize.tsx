@@ -1,8 +1,6 @@
 import React, { Fragment } from 'react';
 import escapeHTML from 'escape-html';
 import { Text } from 'slate';
-import { Label } from '../Label';
-import { LargeBody } from '../LargeBody';
 
 // eslint-disable-next-line no-use-before-define
 type Children = Leaf[]
@@ -149,25 +147,6 @@ const serialize = (children: Children): React.ReactElement[] => children.map((no
           {serialize(node.children)}
         </a>
       );
-
-    case 'label':
-      return (
-        <Label
-          key={i}
-        >
-          {serialize(node.children)}
-        </Label>
-      );
-
-    case 'large-body': {
-      return (
-        <LargeBody
-          key={i}
-        >
-          {serialize(node.children)}
-        </LargeBody>
-      );
-    }
 
     default:
       return (

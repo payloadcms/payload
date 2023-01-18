@@ -33,7 +33,6 @@ const Blocks: React.FC<{
             return (
               <VerticalPadding
                 key={index}
-                top='small'
               >
                 {/*@ts-ignore*/}
                 <Block
