@@ -2,7 +2,7 @@ import React, {
   createContext, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTimeoutRender } from '../../../hooks/useSuspendedRender';
+import { useDelayedRender } from '../../../hooks/useDelayedRender';
 import { reducer, defaultLoadingOverlayState } from './reducer';
 import { FullscreenLoader } from '../../elements/Loading';
 import type { LoadingOverlayContext, ToggleLoadingOverlay } from './types';
@@ -10,6 +10,7 @@ import type { LoadingOverlayContext, ToggleLoadingOverlay } from './types';
 const initialContext: LoadingOverlayContext = {
   toggleLoadingOverlay: undefined,
   setLoadingOverlayText: undefined,
+  isOnScreen: false,
 };
 
 const Context = createContext(initialContext);
@@ -19,7 +20,7 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
 
   const [loadingOverlayText, setLoadingOverlayText] = useState<string>(t('loading'));
   const [overlays, dispatchOverlay] = React.useReducer(reducer, defaultLoadingOverlayState);
-  const { isMounted, isUnmounting, triggerRenderTimeout: suspendDisplay } = useTimeoutRender({ show: overlays.isLoading });
+  const { isMounted, isUnmounting, triggerRenderTimeout: suspendDisplay } = useDelayedRender({ show: overlays.isLoading });
 
   const toggleLoadingOverlay = React.useCallback<ToggleLoadingOverlay>(({ type, key, isLoading }) => {
     if (isLoading) {
@@ -47,6 +48,7 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
       value={{
         setLoadingOverlayText,
         toggleLoadingOverlay,
+        isOnScreen: isMounted,
       }}
     >
       {isMounted && (

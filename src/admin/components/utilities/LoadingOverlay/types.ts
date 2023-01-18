@@ -44,4 +44,5 @@ export type ReducerState = {
 export type LoadingOverlayContext = {
   toggleLoadingOverlay: ToggleLoadingOverlay
   setLoadingOverlayText?: (text: string) => void
+  isOnScreen: boolean
 }

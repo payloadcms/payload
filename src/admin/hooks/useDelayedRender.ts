@@ -1,21 +1,21 @@
 import * as React from 'react';
 import { useDelay } from './useDelay';
 
-type TimeoutRenderProps = {
+type DelayedRenderProps = {
   /** `true` starts the mount process.
    * `false` starts the unmount process.
    * */
   show: boolean;
   /** Time in ms to wait before "mounting" the component. */
-  timeout?: number;
-  /** Time in ms the `appear` phase of the animation. (enter transition time + appear time) */
-  appearTime?: number;
-  /** Time in ms the `exit` phase of the animation. */
-  exitTimeout?: number;
-  /** Time in ms to wait before actually unmounting the component. */
-  unmountTimeout?: number;
+  delayBeforeShow?: number;
+  /** Time in ms for the "enter" phase of the transition, after delay completes. */
+  inTimeout?: number;
+  /** Min time in ms for the "entered" phase of the transition. */
+  minShowTime?: number;
+  /** Time in ms for the exit phase of the transition. */
+  outTimeout?: number;
 };
-type useTimeoutRender = (props: TimeoutRenderProps) => {
+type useDelayedRenderT = (props: DelayedRenderProps) => {
   /** `true` if the component has mounted after the timeout. */
   isMounted: boolean;
   /** `true` if the component is unmounting. */
@@ -23,8 +23,9 @@ type useTimeoutRender = (props: TimeoutRenderProps) => {
   /** Call this function to trigger the timeout delay before rendering. */
   triggerRenderTimeout: () => void;
 };
-export const useTimeoutRender: useTimeoutRender = ({ show, timeout = 1000, appearTime = 1250, exitTimeout = 500 }) => {
-  const [hasDelayed, triggerDelay] = useDelay(timeout);
+export const useDelayedRender: useDelayedRenderT = ({ show, delayBeforeShow = 1000, inTimeout = 500, minShowTime = 500, outTimeout = 500 }) => {
+  const totalMountTime = inTimeout + minShowTime + outTimeout;
+  const { hasDelayed, triggerDelay } = useDelay(delayBeforeShow);
   const [isMounted, setIsMounted] = React.useState(false);
   const [isUnmounting, setIsUnmounting] = React.useState(false);
   const onMountTimestampRef = React.useRef(0);
@@ -35,8 +36,8 @@ export const useTimeoutRender: useTimeoutRender = ({ show, timeout = 1000, appea
     unmountTimeoutRef.current = setTimeout(() => {
       setIsMounted(false);
       setIsUnmounting(false);
-    }, exitTimeout);
-  }, [setIsUnmounting, exitTimeout]);
+    }, outTimeout);
+  }, [setIsUnmounting, outTimeout]);
 
   React.useEffect(() => {
     const shouldMount = hasDelayed && !isMounted && show;
@@ -47,11 +48,11 @@ export const useTimeoutRender: useTimeoutRender = ({ show, timeout = 1000, appea
       setIsMounted(true);
     } else if (shouldUnmount) {
       const totalTimeMounted = Date.now() - onMountTimestampRef.current;
-      const timeoutExtension = (appearTime + exitTimeout) - totalTimeMounted;
+      const remainingTime = totalMountTime - totalTimeMounted;
       clearTimeout(unmountTimeoutRef.current);
-      unmountTimeoutRef.current = setTimeout(unmount, Math.max(0, timeoutExtension));
+      unmountTimeoutRef.current = setTimeout(unmount, Math.max(0, remainingTime));
     }
-  }, [isMounted, show, unmount, appearTime, exitTimeout, hasDelayed]);
+  }, [isMounted, show, unmount, totalMountTime, hasDelayed]);
 
   return {
     isMounted,

@@ -1,7 +1,10 @@
 import * as React from 'react';
 
-type Result = [boolean, () => void];
-export const useDelay = (delay: number): Result => {
+type Result = {
+  hasDelayed: boolean;
+  triggerDelay: () => void;
+};
+export const useDelay = (delay: number, triggerOnMount = false): Result => {
   const [hasDelayed, setHasDelayed] = React.useState(false);
   const triggerTimeoutRef = React.useRef<NodeJS.Timeout>();
 
@@ -17,5 +20,14 @@ export const useDelay = (delay: number): Result => {
     };
   }, [delay]);
 
-  return [hasDelayed, triggerDelay];
+  React.useEffect(() => {
+    if (triggerOnMount) {
+      triggerDelay();
+    }
+  }, [triggerDelay, triggerOnMount]);
+
+  return {
+    hasDelayed,
+    triggerDelay,
+  };
 };
