@@ -20,11 +20,18 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
 
   const [loadingOverlayText, setLoadingOverlayText] = useState<string>(t('loading'));
   const [overlays, dispatchOverlay] = React.useReducer(reducer, defaultLoadingOverlayState);
-  const { isMounted, isUnmounting, triggerRenderTimeout: suspendDisplay } = useDelayedRender({ show: overlays.isLoading });
+
+  const {
+    isMounted,
+    isUnmounting,
+    triggerDelayedRender,
+  } = useDelayedRender({
+    show: overlays.isLoading,
+  });
 
   const toggleLoadingOverlay = React.useCallback<ToggleLoadingOverlay>(({ type, key, isLoading }) => {
     if (isLoading) {
-      suspendDisplay();
+      triggerDelayedRender();
       dispatchOverlay({
         type: 'add',
         payload: {
@@ -41,7 +48,7 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
         },
       });
     }
-  }, [suspendDisplay]);
+  }, [triggerDelayedRender]);
 
   return (
     <Context.Provider

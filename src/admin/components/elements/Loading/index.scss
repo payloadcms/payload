@@ -40,7 +40,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--theme-bg);
+    background-color: var(--theme-elevation-50);
     opacity: .85;
     z-index: -1;
   }
@@ -54,7 +54,7 @@
 
   &__bar {
     width: 2px;
-    background-color: white;
+    background-color: var(--theme-elevation-1000);
     height: 15px;
 
     &:nth-child(1) {

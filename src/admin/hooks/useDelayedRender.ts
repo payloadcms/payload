@@ -21,7 +21,7 @@ type useDelayedRenderT = (props: DelayedRenderProps) => {
   /** `true` if the component is unmounting. */
   isUnmounting: boolean;
   /** Call this function to trigger the timeout delay before rendering. */
-  triggerRenderTimeout: () => void;
+  triggerDelayedRender: () => void;
 };
 export const useDelayedRender: useDelayedRenderT = ({ show, delayBeforeShow = 1000, inTimeout = 500, minShowTime = 500, outTimeout = 500 }) => {
   const totalMountTime = inTimeout + minShowTime + outTimeout;
@@ -57,6 +57,6 @@ export const useDelayedRender: useDelayedRenderT = ({ show, delayBeforeShow = 10
   return {
     isMounted,
     isUnmounting,
-    triggerRenderTimeout: triggerDelay,
+    triggerDelayedRender: triggerDelay,
   };
 };

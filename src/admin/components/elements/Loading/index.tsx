@@ -19,7 +19,6 @@ export const Loading: React.FC = () => {
   );
 };
 
-const baseClass = 'fullscreen-loader';
 
 type Props = {
   show?: boolean;
@@ -27,6 +26,7 @@ type Props = {
   overlayType?: string
 }
 export const FullscreenLoader: React.FC<Props> = ({ loadingText, show = true, overlayType }) => {
+  const baseClass = 'fullscreen-loader';
   const { t } = useTranslation('general');
 
   return (
@@ -49,6 +49,7 @@ export const FullscreenLoader: React.FC<Props> = ({ loadingText, show = true, ov
     </div>
   );
 };
+
 
 type UseLoadingOverlayToggleT = {
   show: boolean;

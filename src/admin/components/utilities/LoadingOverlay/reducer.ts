@@ -6,8 +6,7 @@ export const defaultLoadingOverlayState = {
   loaders: [],
 };
 
-// react reducer return type
-export const reducer = (state: State, action: Action) => {
+export const reducer = (state: State, action: Action): State => {
   const loadersCopy = [...state.loaders];
   const { type = 'fullscreen', key = 'user' } = action.payload;
 

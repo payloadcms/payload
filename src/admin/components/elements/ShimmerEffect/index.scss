@@ -1,26 +1,28 @@
 .shimmer-effect {
   position: relative;
   overflow: hidden;
+  background-color: var(--theme-elevation-50);
 
-  &__shimmer {
+  &__shine {
     position: absolute;
-    height: 100%;
+    scale: 2;
     width: 100%;
-    top: 0;
-    left: 0;
+    height: 100%;
     transform: translateX(-100%);
-    background: linear-gradient(130deg,
-        rgba(0, 0, 0, 0) 0%,
-        rgba(#1A1A1A, .5) 35%,
-        rgba(#252525, 1) 50%,
-        rgba(#1A1A1A, .5) 65%,
-        rgba(0, 0, 0, 0) 100%);
-    animation: shimmer 3s infinite;
+    animation: shimmer 2.5s infinite;
+    opacity: .75;
+    background: linear-gradient(100deg,
+        var(--theme-elevation-50) 0%,
+        var(--theme-elevation-50) 15%,
+        var(--theme-elevation-100) 45%,
+        var(--theme-elevation-100) 55%,
+        var(--theme-elevation-50) 85%,
+        var(--theme-elevation-50) 100%)
   }
 }
 
 @keyframes shimmer {
   100% {
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
   }
 }
