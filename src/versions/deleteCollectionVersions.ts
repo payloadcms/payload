@@ -1,4 +1,4 @@
-import { Payload } from '..';
+import { Payload } from '../payload';
 
 type Args = {
   payload: Payload
