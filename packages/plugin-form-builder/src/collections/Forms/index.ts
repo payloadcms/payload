@@ -156,7 +156,7 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
                 required: true,
                 admin: {
                   width: '100%',
-                  placeholder: 'Email Sender <sender@email.com>'
+                  placeholder: '"Email Sender" <sender@email.com>'
                 },
               },
               {
@@ -186,36 +186,16 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
                 label: 'Reply To',
                 admin: {
                   width: '50%',
+                  placeholder: '"Reply To" <reply-to@email.com>',
                 },
               },
-              {
-                type: 'text',
-                name: 'replyToName',
-                label: 'Reply To Name',
-                admin: {
-                  width: '50%',
-                },
-              },
-            ],
-          },
-          {
-            type: 'row',
-            fields: [
               {
                 type: 'text',
                 name: 'emailFrom',
                 label: 'Email From',
                 admin: {
                   width: '50%',
-                  placeholder: 'Email Recipient <{{email}}>',
-                },
-              },
-              {
-                type: 'text',
-                name: 'emailFromName',
-                label: 'Email From Name',
-                admin: {
-                  width: '50%',
+                  placeholder: '"Email From" <email-from@email.com>',
                 },
               },
             ],
