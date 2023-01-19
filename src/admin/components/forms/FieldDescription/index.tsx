@@ -34,19 +34,6 @@ const FieldDescription: React.FC<Props> = (props) => {
     );
   }
 
-  if (formatOptions) {
-    return (
-      <div
-        className={[
-          baseClass,
-          className,
-        ].filter(Boolean).join(' ')}
-      >
-        {new Intl.NumberFormat(i18n.language, formatOptions).format(value as number)}
-      </div>
-    );
-  }
-
   return null;
 };
 

@@ -13,4 +13,19 @@
       background-color: var(--theme-error-200);
     }
   }
+
+  .number__wrap {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .number__formatted {
+    @include formInput;
+    width: auto;
+    display: flex;
+    align-items: center;
+    margin-left: -1px;
+    padding: 0 base(.5);
+    white-space: nowrap;
+  }
 }

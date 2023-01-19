@@ -87,21 +87,28 @@ const NumberField: React.FC<Props> = (props) => {
         label={label}
         required={required}
       />
-      <input
-        id={`field-${path.replace(/\./gi, '__')}`}
-        value={typeof value === 'number' ? value : ''}
-        onChange={handleChange}
-        disabled={readOnly}
-        placeholder={getTranslation(placeholder, i18n)}
-        type="number"
-        name={path}
-        step={step}
-        onWheel={(e) => {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          e.target.blur();
-        }}
-      />
+      <div className="number__wrap">
+        <input
+          id={`field-${path.replace(/\./gi, '__')}`}
+          value={typeof value === 'number' ? value : ''}
+          onChange={handleChange}
+          disabled={readOnly}
+          placeholder={getTranslation(placeholder, i18n)}
+          type="number"
+          name={path}
+          step={step}
+          onWheel={(e) => {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            e.target.blur();
+          }}
+        />
+        {formatOptions && (
+          <div className="number__formatted">
+            {new Intl.NumberFormat(i18n.language, formatOptions).format(value as number)}
+          </div>
+        )}
+      </div>
       <FieldDescription
         value={value}
         description={description}

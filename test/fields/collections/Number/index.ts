@@ -17,6 +17,7 @@ const NumberFields: CollectionConfig = {
       type: 'number',
       defaultValue: defaultNumber,
       admin: {
+        description: ({ value }) => value,
         formatOptions: {
           style: 'unit',
           unit: 'liter',
