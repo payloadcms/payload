@@ -13,6 +13,10 @@ export class PayloadHTTP extends BasePayload<GeneratedTypes> {
   async init(options: InitOptions): Promise<Payload> {
     const payload = await initHTTP(options);
     Object.assign(this, payload);
+
+    if (typeof options.onInit === 'function') await options.onInit(this);
+    if (typeof this.config.onInit === 'function') await this.config.onInit(this);
+
     return payload;
   }
 }
