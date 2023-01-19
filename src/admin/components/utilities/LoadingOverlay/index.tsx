@@ -15,7 +15,6 @@ const Context = createContext(initialContext);
 export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { t } = useTranslation('general');
   const fallbackText = t('loading');
-
   const [overlays, dispatchOverlay] = React.useReducer(reducer, defaultLoadingOverlayState);
 
   const {

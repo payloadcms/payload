@@ -1,5 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { getTranslation } from '../../../../utilities/getTranslation';
+import { useFormProcessing } from '../../forms/Form/context';
 import { useLoadingOverlay } from '../../utilities/LoadingOverlay';
 import type { LoadingOverlayTypes } from '../../utilities/LoadingOverlay/types';
 
@@ -64,4 +66,31 @@ export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleT> = ({ name:
   }, [show, toggleLoadingOverlay, key, type, loadingText]);
 
   return null;
+};
+
+
+type FormLoadingOverlayToggleT = {
+  name: string;
+  type?: LoadingOverlayTypes;
+  action: 'loading' | 'create' | 'update';
+  loadingSuffix?: string;
+}
+export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleT> = ({ name, action, type = 'withoutNav', loadingSuffix }) => {
+  const isProcessing = useFormProcessing();
+  const { t, i18n } = useTranslation('general');
+
+  const labels = {
+    create: t('creating'),
+    update: t('updating'),
+    loading: t('loading'),
+  };
+
+  return (
+    <LoadingOverlayToggle
+      name={name}
+      show={action === 'loading' || isProcessing}
+      type={type}
+      loadingText={`${labels[action]} ${loadingSuffix ? getTranslation(loadingSuffix, i18n) : ''}`.trim()}
+    />
+  );
 };

@@ -22,7 +22,7 @@ import Autosave from '../../elements/Autosave';
 import { OperationContext } from '../../utilities/OperationProvider';
 import { Gutter } from '../../elements/Gutter';
 import { getTranslation } from '../../../../utilities/getTranslation';
-import { LoadingOverlayToggle } from '../../elements/Loading';
+import { FormLoadingOverlayToggle } from '../../elements/Loading';
 
 import './index.scss';
 
@@ -51,24 +51,24 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
   const hasSavePermission = permissions?.update?.permission;
 
   return (
-    <React.Fragment>
-      <LoadingOverlayToggle
-        show={isLoading}
-        name="global-edit"
-        type="withoutNav"
-      />
+    <div className={baseClass}>
+      <OperationContext.Provider value="update">
+        <Form
+          className={`${baseClass}__form`}
+          method="post"
+          action={action}
+          onSuccess={onSave}
+          disabled={!hasSavePermission}
+          initialState={initialState}
+        >
+          <FormLoadingOverlayToggle
+            action="update"
+            name={`global-edit--${label}`}
+            loadingSuffix={getTranslation(label, i18n)}
+          />
 
-      <div className={baseClass}>
-        {!isLoading && (
-          <OperationContext.Provider value="update">
-            <Form
-              className={`${baseClass}__form`}
-              method="post"
-              action={action}
-              onSuccess={onSave}
-              disabled={!hasSavePermission}
-              initialState={initialState}
-            >
+          {!isLoading && (
+            <React.Fragment>
               <div className={`${baseClass}__main`}>
                 <Meta
                   title={getTranslation(label, i18n)}
@@ -182,11 +182,11 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                   </div>
                 </div>
               </div>
-            </Form>
-          </OperationContext.Provider>
-        )}
-      </div>
-    </React.Fragment>
+            </React.Fragment>
+          )}
+        </Form>
+      </OperationContext.Provider>
+    </div>
   );
 };
 
