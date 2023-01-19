@@ -54,7 +54,6 @@ const BlocksField: React.FC<Props> = (props) => {
     validate = blocksValidator,
     permissions,
     indexPath,
-    localized = false,
     admin: {
       readOnly,
       description,
@@ -82,8 +81,9 @@ const BlocksField: React.FC<Props> = (props) => {
   const checkSkipValidation = useCallback((value) => {
     const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
     const isEditingDefaultLocale = locale === defaultLocale;
+    const fallbackEnabled = (localization && localization.fallback);
 
-    if (value === null && !isEditingDefaultLocale) return true;
+    if (value === null && !isEditingDefaultLocale && fallbackEnabled) return true;
     return false;
   }, [locale, localization]);
 
@@ -264,13 +264,10 @@ const BlocksField: React.FC<Props> = (props) => {
           />
         </header>
 
-        {localized
-          && (
-            <NullifyField
-              path={path}
-              fieldValue={value}
-            />
-          )}
+        <NullifyField
+          path={path}
+          fieldValue={value}
+        />
 
         <Droppable
           droppableId="blocks-drop"

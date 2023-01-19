@@ -30,7 +30,7 @@ export const NullifyField: React.FC<NullifyFieldProps> = ({ path, fieldValue }) 
     setChecked(useFallback);
   };
 
-  if (currentLocale === defaultLocale) {
+  if (currentLocale === defaultLocale || (localization && !localization.fallback)) {
     // hide when editing default locale
     return null;
   }
