@@ -30,11 +30,10 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       lean,
     });
   }
-  let collection = await Model.findOne(query, {}, { lean }) as Document;
+  const collection = await Model.findOne(query, {}, { lean }) as Document;
   version = await version;
   if (!version || version.updatedAt < collection.updatedAt) {
     collection.id = collection._id;
-    collection = sanitizeInternalFields(collection);
     return collection;
   }
   return {
