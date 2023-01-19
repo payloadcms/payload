@@ -3,10 +3,10 @@ export type PaginatedDocs<T = any> = {
   totalDocs: number
   limit: number
   totalPages: number
-  page: number
+  page?: number
   pagingCounter: number
   hasPrevPage: boolean
   hasNextPage: boolean
-  prevPage: number | null
-  nextPage: number | null
+  prevPage?: number | null | undefined
+  nextPage?: number | null | undefined
 }

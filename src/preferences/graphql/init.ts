@@ -9,7 +9,7 @@ import { DateTimeResolver } from 'graphql-scalars';
 import findOne from '../operations/findOne';
 import update from '../operations/update';
 import deleteOperation from '../operations/delete';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 
 function initCollectionsGraphQL(payload: Payload): void {
   const valueType = GraphQLJSON;
@@ -18,7 +18,7 @@ function initCollectionsGraphQL(payload: Payload): void {
     name: 'Preference',
     fields: {
       key: {
-        type: GraphQLNonNull(GraphQLString),
+        type: new GraphQLNonNull(GraphQLString),
       },
       value: { type: valueType },
       createdAt: { type: new GraphQLNonNull(DateTimeResolver) },

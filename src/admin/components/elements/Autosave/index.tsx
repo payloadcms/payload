@@ -31,14 +31,20 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   const [lastSaved, setLastSaved] = useState<number>();
   const debouncedFields = useDebounce(fields, interval);
   const fieldRef = useRef(fields);
+  const modifiedRef = useRef(modified);
 
   // Store fields in ref so the autosave func
   // can always retrieve the most to date copies
   // after the timeout has executed
   fieldRef.current = fields;
 
+  // Store modified in ref so the autosave func
+  // can bail out if modified becomes false while
+  // timing out during autosave
+  modifiedRef.current = modified;
+
   const createCollectionDoc = useCallback(async () => {
-    const res = await fetch(`${serverURL}${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&draft=true`, {
+    const res = await fetch(`${serverURL}${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&draft=true&autosave=true`, {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -89,35 +95,37 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
         }
 
         if (url) {
-          const body = {
-            ...reduceFieldsToValues(fieldRef.current),
-            _status: 'draft',
-          };
-
           setTimeout(async () => {
-            const res = await fetch(url, {
-              method,
-              credentials: 'include',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept-Language': i18n.language,
-              },
-              body: JSON.stringify(body),
-            });
+            if (modifiedRef.current) {
+              const body = {
+                ...reduceFieldsToValues(fieldRef.current, true),
+                _status: 'draft',
+              };
+
+              const res = await fetch(url, {
+                method,
+                credentials: 'include',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept-Language': i18n.language,
+                },
+                body: JSON.stringify(body),
+              });
+
+              if (res.status === 200) {
+                setLastSaved(new Date().getTime());
+                getVersions();
+              }
+            }
 
             setSaving(false);
-
-            if (res.status === 200) {
-              setLastSaved(new Date().getTime());
-              getVersions();
-            }
           }, 1000);
         }
       }
     };
 
     autosave();
-  }, [i18n, debouncedFields, modified, serverURL, api, collection, global, id, getVersions, locale]);
+  }, [i18n, debouncedFields, modified, serverURL, api, collection, global, id, getVersions, locale, modifiedRef]);
 
   useEffect(() => {
     if (versions?.docs?.[0]) {

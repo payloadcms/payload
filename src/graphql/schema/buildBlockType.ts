@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import { Block } from '../../fields/config/types';
 import buildObjectType from './buildObjectType';
 import { toWords } from '../../utilities/formatLabels';

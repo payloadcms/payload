@@ -6,7 +6,7 @@ import FieldDescription from '../../FieldDescription';
 import { OptionObject, SelectField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
 import ReactSelect from '../../../elements/ReactSelect';
-import { Value as ReactSelectValue } from '../../../elements/ReactSelect/types';
+import { Option } from '../../../elements/ReactSelect/types';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
@@ -19,7 +19,7 @@ export type SelectInputProps = Omit<SelectField, 'type' | 'value' | 'options'> &
   required?: boolean
   value?: string | string[]
   description?: Description
-  onChange?: (value: ReactSelectValue) => void
+  onChange?: (value: Option) => void
   style?: React.CSSProperties
   className?: string
   width?: string
@@ -65,15 +65,15 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
     valueToRender = value.map((val) => {
       const matchingOption = options.find((option) => option.value === val);
       return {
-        label: getTranslation(matchingOption.label, i18n),
-        value: matchingOption.value,
+        label: matchingOption ? getTranslation(matchingOption.label, i18n) : val,
+        value: matchingOption?.value ?? val,
       };
     });
   } else if (value) {
     const matchingOption = options.find((option) => option.value === value);
     valueToRender = {
-      label: getTranslation(matchingOption.label, i18n),
-      value: matchingOption.value,
+      label: matchingOption ? getTranslation(matchingOption.label, i18n) : value,
+      value: matchingOption?.value ?? value,
     };
   }
 
@@ -97,7 +97,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
       />
       <ReactSelect
         onChange={onChange}
-        value={valueToRender as ReactSelectValue}
+        value={valueToRender as Option}
         showError={showError}
         isDisabled={readOnly}
         options={options.map((option) => ({ ...option, label: getTranslation(option.label, i18n) }))}

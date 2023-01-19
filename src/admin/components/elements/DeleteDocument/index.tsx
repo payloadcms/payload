@@ -21,6 +21,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
     title: titleFromProps,
     id,
     buttonId,
+    collection,
     collection: {
       admin: {
         useAsTitle,
@@ -38,13 +39,13 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const { toggleModal } = useModal();
   const history = useHistory();
   const { t, i18n } = useTranslation('general');
-  const title = useTitle(useAsTitle) || id;
+  const title = useTitle(useAsTitle, collection.slug) || id;
   const titleToRender = titleFromProps || title;
 
   const modalSlug = `delete-${id}`;
 
   const addDefaultError = useCallback(() => {
-    toast.error(t('error:deletingError', { title }));
+    toast.error(t('error:deletingTitle', { title }));
   }, [t, title]);
 
   const handleDelete = useCallback(() => {
@@ -102,7 +103,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
             <p>
               <Trans
                 i18nKey="aboutToDelete"
-                values={{ label: singular, title: titleToRender }}
+                values={{ label: getTranslation(singular, i18n), title: titleToRender }}
                 t={t}
               >
                 aboutToDelete

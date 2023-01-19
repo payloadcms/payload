@@ -16,7 +16,7 @@ export interface Post {
   description?: string;
   number?: number;
   relationField?: string | Relation;
-  relationHasManyField?: (string | Relation)[];
+  relationHasManyField?: string[] | Relation[];
   relationMultiRelationTo?:
     | {
         value: string | Relation;
@@ -26,16 +26,27 @@ export interface Post {
         value: string | Dummy;
         relationTo: 'dummy';
       };
-  relationMultiRelationToHasMany?: (
-    | {
-        value: string | Relation;
-        relationTo: 'relation';
-      }
-    | {
-        value: string | Dummy;
-        relationTo: 'dummy';
-      }
-  )[];
+  relationMultiRelationToHasMany?:
+    | (
+        | {
+            value: string;
+            relationTo: 'relation';
+          }
+        | {
+            value: string;
+            relationTo: 'dummy';
+          }
+      )[]
+    | (
+        | {
+            value: Relation;
+            relationTo: 'relation';
+          }
+        | {
+            value: Dummy;
+            relationTo: 'dummy';
+          }
+      )[];
   createdAt: string;
   updatedAt: string;
 }

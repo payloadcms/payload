@@ -18,6 +18,7 @@ import {
   fieldAffectsData, fieldIsLocalized,
   fieldIsPresentationalOnly,
   GroupField,
+  JSONField,
   NonPresentationalField,
   NumberField,
   PointField,
@@ -149,6 +150,13 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       [field.name]: localizeSchema(field, baseSchema, config.localization),
     });
   },
+  json: (field: JSONField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Schema.Types.Mixed };
+
+    schema.add({
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
+    });
+  },
   point: (field: PointField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema: SchemaTypeOptions<unknown> = {
       type: {
@@ -249,7 +257,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
           return {
             ...locales,
-            [locale]: field.hasMany ? [localeSchema] : localeSchema,
+            [locale]: field.hasMany ? { type: [localeSchema], default: undefined } : localeSchema,
           };
         }, {}),
         localized: true,
@@ -262,7 +270,12 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       };
       schemaToReturn.relationTo = { type: String, enum: field.relationTo };
 
-      if (field.hasMany) schemaToReturn = [schemaToReturn];
+      if (field.hasMany) {
+        schemaToReturn = {
+          type: [schemaToReturn],
+          default: undefined,
+        };
+      }
     } else {
       schemaToReturn = {
         ...formatBaseSchema(field, buildSchemaOptions),
@@ -270,7 +283,12 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         ref: field.relationTo,
       };
 
-      if (field.hasMany) schemaToReturn = [schemaToReturn];
+      if (field.hasMany) {
+        schemaToReturn = {
+          type: [schemaToReturn],
+          default: undefined,
+        };
+      }
     }
 
     schema.add({
@@ -308,6 +326,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
                 id: false,
               },
               disableUnique: buildSchemaOptions.disableUnique,
+              draftsEnabled: buildSchemaOptions.draftsEnabled,
             },
           ),
         };
@@ -329,6 +348,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   array: (field: ArrayField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
+      default: undefined,
       type: [buildSchema(
         config,
         field.fields,
@@ -336,6 +356,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           options: { _id: false, id: false },
           allowIDField: true,
           disableUnique: buildSchemaOptions.disableUnique,
+          draftsEnabled: buildSchemaOptions.draftsEnabled,
         },
       )],
     };
@@ -358,6 +379,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
             id: false,
           },
           disableUnique: buildSchemaOptions.disableUnique,
+          draftsEnabled: buildSchemaOptions.draftsEnabled,
         },
       ),
     };
@@ -375,14 +397,24 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         return option;
       }),
     };
-    const schemaToReturn = localizeSchema(field, baseSchema, config.localization);
+
+    if (buildSchemaOptions.draftsEnabled || !field.required) {
+      baseSchema.enum.push(null);
+    }
 
     schema.add({
-      [field.name]: field.hasMany ? [schemaToReturn] : schemaToReturn,
+      [field.name]: localizeSchema(
+        field,
+        field.hasMany ? [baseSchema] : baseSchema,
+        config.localization,
+      ),
     });
   },
   blocks: (field: BlockField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
-    const fieldSchema = [new Schema({}, { _id: false, discriminatorKey: 'blockType' })];
+    const fieldSchema = {
+      default: undefined,
+      type: [new Schema({}, { _id: false, discriminatorKey: 'blockType' })],
+    };
 
     schema.add({
       [field.name]: localizeSchema(field, fieldSchema, config.localization),

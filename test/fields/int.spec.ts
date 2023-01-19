@@ -15,12 +15,10 @@ import { defaultNumber, numberDoc } from './collections/Number';
 let client;
 
 describe('Fields', () => {
-  beforeAll(async (done) => {
+  beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
     await client.login();
-
-    done();
   });
 
   describe('text', () => {
@@ -37,6 +35,28 @@ describe('Fields', () => {
       expect(doc.text).toEqual(text);
       expect(doc.defaultFunction).toEqual(defaultText);
       expect(doc.defaultAsync).toEqual(defaultText);
+    });
+  });
+
+  describe('select', () => {
+    let doc;
+    beforeAll(async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        locale: 'en',
+        data: {
+          selectHasManyLocalized: ['one', 'two'],
+        },
+      });
+      doc = await payload.findByID({
+        collection: 'select-fields',
+        locale: 'all',
+        id,
+      });
+    });
+
+    it('creates with hasMany localized', () => {
+      expect(doc.selectHasManyLocalized.en).toEqual(['one', 'two']);
     });
   });
 
@@ -254,13 +274,13 @@ describe('Fields', () => {
       });
     });
 
-    it('should return empty array for arrays when no data present', async () => {
+    it('should return undefined arrays when no data present', async () => {
       const document = await payload.create<ArrayField>({
         collection: arrayFieldsSlug,
         data: arrayDoc,
       });
 
-      expect(document.potentiallyEmptyArray).toEqual([]);
+      expect(document.potentiallyEmptyArray).toBeUndefined();
     });
 
     it('should create with ids and nested ids', async () => {
@@ -480,6 +500,29 @@ describe('Fields', () => {
       });
 
       expect(blockFieldsFail.docs).toHaveLength(0);
+    });
+  });
+
+  describe('json', () => {
+    it('should save json data', async () => {
+      const json = { foo: 'bar' };
+      const doc = await payload.create({
+        collection: 'json-fields',
+        data: {
+          json,
+        },
+      });
+
+      expect(doc.json).toStrictEqual({ foo: 'bar' });
+    });
+
+    it('should validate json', async () => {
+      await expect(async () => payload.create({
+        collection: 'json-fields',
+        data: {
+          json: '{ bad input: true }',
+        },
+      })).rejects.toThrow('The following field is invalid: json');
     });
   });
 

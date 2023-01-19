@@ -53,13 +53,13 @@ export default buildConfig({
                 type: GraphQL.GraphQLFloat,
               },
             },
-            args: {
-              argNameHere: {
-                type: new GraphQL.GraphQLNonNull(GraphQLString),
-              }
-            },
-            resolve: myCustomQueryResolver,
-          })
+          }),
+          args: {
+            argNameHere: {
+              type: new GraphQL.GraphQLNonNull(GraphQLString),
+            }
+          },
+          resolve: myCustomQueryResolver,
         }
       }
     }

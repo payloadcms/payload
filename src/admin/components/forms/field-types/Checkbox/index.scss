@@ -14,6 +14,46 @@
   &__error-wrap {
     position: relative;
   }
+}
+
+
+.custom-checkbox {
+  label {
+    padding-bottom: 0;
+  }
+
+  input {
+    // hidden HTML checkbox
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+  }
+
+  &__input {
+    // visible checkbox
+    @include formInput;
+    padding: 0;
+    line-height: 0;
+    position: relative;
+    width: $baseline;
+    height: $baseline;
+    margin-right: base(.5);
+
+    svg {
+      opacity: 0;
+    }
+  }
+
+  &--read-only {
+    .custom-checkbox__input {
+      background-color: var(--theme-elevation-100);
+    }
+
+    label {
+      color: var(--theme-elevation-400);
+    }
+  }
 
   button {
     @extend %btn-reset;
@@ -33,45 +73,13 @@
     }
   }
 
-  &__input {
-    @include formInput;
-    padding: 0;
-    line-height: 0;
-    position: relative;
-    width: $baseline;
-    height: $baseline;
-    margin-right: base(.5);
-
-    svg {
-      opacity: 0;
-    }
-  }
-
-  input {
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-  }
-
   &--checked {
     button {
-      .checkbox__input {
+      .custom-checkbox__input {
         svg {
           opacity: 1;
         }
       }
-    }
-  }
-
-  &--read-only {
-
-    .checkbox__label {
-      color: var(--theme-elevation-400);
-    }
-
-    .checkbox__input {
-      background-color: var(--theme-elevation-100);
     }
   }
 }

@@ -13,6 +13,7 @@ import {
   CheckboxField,
   CodeField, CollapsibleField, DateField,
   EmailField, fieldAffectsData, fieldHasSubFields, GroupField,
+  JSONField,
   NumberField, optionIsObject, PointField,
   RadioField, RelationshipField,
   RichTextField, RowField, SelectField,
@@ -45,7 +46,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         field,
         type,
         parentName,
-        [...operators.equality, 'like', 'contains'],
+        [...operators.equality, ...operators.partial, ...operators.contains],
       ),
     };
   },
@@ -56,7 +57,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         field,
         type,
         parentName,
-        [...operators.equality, 'like', 'contains'],
+        [...operators.equality, ...operators.partial, ...operators.contains],
       ),
     };
   },
@@ -67,7 +68,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         field,
         type,
         parentName,
-        [...operators.equality, 'like', 'contains'],
+        [...operators.equality, ...operators.partial],
       ),
     };
   },
@@ -78,7 +79,18 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         field,
         type,
         parentName,
-        [...operators.equality, 'like', 'contains'],
+        [...operators.equality, ...operators.partial],
+      ),
+    };
+  },
+  json: (field: JSONField) => {
+    const type = GraphQLJSON;
+    return {
+      type: withOperators(
+        field,
+        type,
+        parentName,
+        [...operators.equality, ...operators.partial],
       ),
     };
   },
@@ -89,7 +101,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         field,
         type,
         parentName,
-        [...operators.equality, 'like', 'contains'],
+        [...operators.equality, ...operators.partial],
       ),
     };
   },
@@ -117,7 +129,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
         }, {}),
       }),
       parentName,
-      [...operators.equality, 'like', 'contains'],
+      [...operators.equality, ...operators.contains],
     ),
   }),
   date: (field: DateField) => {
@@ -132,7 +144,7 @@ const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
     };
   },
   point: (field: PointField) => {
-    const type = GraphQLList(GraphQLFloat);
+    const type = new GraphQLList(GraphQLFloat);
     return {
       type: withOperators(
         field,

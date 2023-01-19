@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
-import { PaginateModel } from 'mongoose';
+import { Model, PaginateModel, AggregatePaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
 import { Access, GeneratePreviewURL, EntityDescription, Endpoint } from '../../config/types';
@@ -17,7 +17,7 @@ interface PassportLocalModel {
   authenticate: any
 }
 
-export interface CollectionModel extends PaginateModel<any>, PassportLocalModel {
+export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
 }
 
@@ -203,6 +203,7 @@ export type CollectionAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
+/** Manage all aspects of a data collection */
 export type CollectionConfig = {
   slug: string;
   /**
@@ -276,10 +277,22 @@ export type CollectionConfig = {
    */
   auth?: IncomingAuthType | boolean;
   /**
-   * Upload options
+   * Customize the handling of incoming file uploads
+   *
+   * @default false // disable uploads
    */
   upload?: IncomingUploadType | boolean;
+  /**
+   * Customize the handling of incoming file uploads
+   *
+   * @default false // disable versioning
+   */
   versions?: IncomingCollectionVersions | boolean;
+  /**
+   * Add `createdAt` and `updatedAt` fields
+   *
+   * @default true
+   */
   timestamps?: boolean
 };
 
@@ -310,10 +323,12 @@ export type AuthCollection = {
 
 export type TypeWithID = {
   id: string | number
+  [key: string]: unknown
 }
 
 export type TypeWithTimestamps = {
   id: string | number
   createdAt: string
   updatedAt: string
+  [key: string]: unknown
 }

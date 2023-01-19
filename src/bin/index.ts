@@ -1,12 +1,22 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import minimist from 'minimist';
+import swcRegister from '@swc/register';
 import { generateTypes } from './generateTypes';
 import { generateGraphQLSchema } from './generateGraphQLSchema';
-import babelConfig from '../babel.config';
 
-require('@babel/register')({
-  ...babelConfig,
-  extensions: ['.ts', '.tsx', '.js', '.jsx'],
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - bad @swc/register types
+swcRegister({
+  sourceMaps: 'inline',
+  jsc: {
+    parser: {
+      syntax: 'typescript',
+      tsx: true,
+    },
+  },
+  module: {
+    type: 'commonjs',
+  },
 });
 
 const { build } = require('./build');

@@ -8,11 +8,30 @@
 export interface Config {}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  email?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpiration?: string;
+  loginAttempts?: number;
+  lockUntil?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
   id: string;
   restrictedField?: string;
+  group: {
+    restrictedGroupText?: string;
+  };
+  restrictedRowText?: string;
+  restrictedCollapsibleText?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -72,15 +91,13 @@ export interface RelyOnRequestHeader {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "doc-level-access".
  */
-export interface User {
+export interface DocLevelAccess {
   id: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
+  approvedForRemoval?: boolean;
+  approvedTitle?: string;
+  lockTitle?: boolean;
   createdAt: string;
   updatedAt: string;
 }

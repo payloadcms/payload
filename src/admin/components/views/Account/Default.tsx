@@ -37,6 +37,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
     initialState,
     isLoading,
     action,
+    onSave,
   } = props;
 
   const {
@@ -72,6 +73,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
             className={`${baseClass}__form`}
             method="patch"
             action={action}
+            onSuccess={onSave}
             initialState={initialState}
             disabled={!hasSavePermission}
           >
@@ -83,12 +85,17 @@ const DefaultAccount: React.FC<Props> = (props) => {
               />
               <Eyebrow />
               {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && (
-              <LeaveWithoutSaving />
+                <LeaveWithoutSaving />
               )}
               <div className={`${baseClass}__edit`}>
                 <Gutter className={`${baseClass}__header`}>
                   <h1>
-                    <RenderTitle {...{ data, useAsTitle, fallback: `[${t('general:untitled')}]` }} />
+                    <RenderTitle
+                      data={data}
+                      collection={collection.slug}
+                      useAsTitle={useAsTitle}
+                      fallback={`[${t('general:untitled')}]`}
+                    />
                   </h1>
                   <Auth
                     useAPIKey={auth.useAPIKey}
@@ -127,18 +134,17 @@ const DefaultAccount: React.FC<Props> = (props) => {
                 <div className={`${baseClass}__sidebar-sticky-wrap`}>
                   <ul className={`${baseClass}__collection-actions`}>
                     {(permissions?.create?.permission) && (
-                    <React.Fragment>
-                      <li><Link to={`${admin}/collections/${slug}/create`}>{t('general:createNew')}</Link></li>
-                    </React.Fragment>
+                      <React.Fragment>
+                        <li><Link to={`${admin}/collections/${slug}/create`}>{t('general:createNew')}</Link></li>
+                      </React.Fragment>
                     )}
                   </ul>
                   <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
                     <PreviewButton
                       generatePreviewURL={preview}
-                      data={data}
                     />
                     {hasSavePermission && (
-                    <FormSubmit>{t('general:save')}</FormSubmit>
+                      <FormSubmit buttonId="action-save">{t('general:save')}</FormSubmit>
                     )}
                   </div>
                   <div className={`${baseClass}__sidebar-fields`}>
@@ -170,20 +176,20 @@ const DefaultAccount: React.FC<Props> = (props) => {
                       <div>{data?.id}</div>
                     </li>
                     {timestamps && (
-                    <React.Fragment>
-                      {data.updatedAt && (
-                      <li>
-                        <div className={`${baseClass}__label`}>{t('general:lastModified')}</div>
-                        <div>{format(new Date(data.updatedAt), dateFormat)}</div>
-                      </li>
-                      )}
-                      {data.createdAt && (
-                      <li>
-                        <div className={`${baseClass}__label`}>{t('general:created')}</div>
-                        <div>{format(new Date(data.createdAt), dateFormat)}</div>
-                      </li>
-                      )}
-                    </React.Fragment>
+                      <React.Fragment>
+                        {data.updatedAt && (
+                          <li>
+                            <div className={`${baseClass}__label`}>{t('general:lastModified')}</div>
+                            <div>{format(new Date(data.updatedAt), dateFormat)}</div>
+                          </li>
+                        )}
+                        {data.createdAt && (
+                          <li>
+                            <div className={`${baseClass}__label`}>{t('general:created')}</div>
+                            <div>{format(new Date(data.createdAt), dateFormat)}</div>
+                          </li>
+                        )}
+                      </React.Fragment>
                     )}
 
                   </ul>

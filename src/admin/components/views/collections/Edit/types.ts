@@ -24,4 +24,5 @@ export type Props = IndexProps & {
   disableActions?: boolean
   disableLeaveWithoutSaving?: boolean
   customHeader?: React.ReactNode
+  updatedAt?: string
 }

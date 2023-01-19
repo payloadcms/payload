@@ -67,6 +67,49 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'groupInRow',
+          type: 'group',
+          fields: [
+            {
+              name: 'field',
+              type: 'text',
+            },
+            {
+              name: 'secondField',
+              type: 'text',
+            },
+            {
+              name: 'thirdField',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'secondGroupInRow',
+          type: 'group',
+          fields: [
+            {
+              name: 'field',
+              type: 'text',
+            },
+            {
+              name: 'nestedGroup',
+              type: 'group',
+              fields: [
+                {
+                  name: 'nestedField',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 };
 

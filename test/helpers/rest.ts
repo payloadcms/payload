@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import qs from 'qs';
+import fetch from 'node-fetch';
 import type { Config } from '../../src/config/types';
 import type { PaginatedDocs } from '../../src/mongoose/types';
 import type { Where } from '../../src/types';
 import { devUser } from '../credentials';
-
-require('isomorphic-fetch');
 
 type Args = {
   serverURL: string;
@@ -154,7 +153,11 @@ export class RESTClient {
     };
 
     const slug = args?.slug || this.defaultSlug;
-    const whereQuery = qs.stringify(args?.query ? { where: args.query } : {}, {
+    const whereQuery = qs.stringify({
+      ...(args?.query ? { where: args.query } : {}),
+      limit: args?.limit,
+      page: args?.page,
+    }, {
       addQueryPrefix: true,
     });
     const fetchURL = `${this.serverURL}/api/${slug}${whereQuery}`;

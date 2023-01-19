@@ -6,6 +6,7 @@ import {
   CodeField,
   DateField,
   EmailField,
+  JSONField,
   NumberField,
   PointField,
   RadioField,
@@ -132,6 +133,20 @@ export const code: Validate<unknown, unknown, CodeField> = (value: string, { t, 
   return true;
 };
 
+export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }> = (value: string, {
+  t, required, jsonError,
+}) => {
+  if (required && !value) {
+    return t('validation:required');
+  }
+
+  if (jsonError !== undefined) {
+    return t('validation:invalidInput');
+  }
+
+  return true;
+};
+
 export const richText: Validate<unknown, unknown, RichTextField> = (value, { t, required }) => {
   if (required) {
     const stringifiedDefaultValue = JSON.stringify(defaultRichTextValue);
@@ -197,7 +212,7 @@ const validateFilterOptions: Validate = async (value, { t, filterOptions, id, us
         }
       });
 
-      const result = await payload.find<TypeWithID>({
+      const result = await payload.find({
         collection,
         depth: 0,
         where: {
@@ -342,9 +357,12 @@ export const select: Validate<unknown, unknown, SelectField> = (value, { t, opti
 };
 
 export const radio: Validate<unknown, unknown, RadioField> = (value, { t, options, required }) => {
-  const stringValue = String(value);
-  if ((typeof value !== 'undefined' || !required) && (options.find((option) => String(typeof option !== 'string' && option?.value) === stringValue))) return true;
-  return t('validation:required');
+  if (value) {
+    const valueMatchesOption = options.some((option) => (option === value || (typeof option !== 'string' && option.value === value)));
+    return valueMatchesOption || t('validation:invalidSelection');
+  }
+
+  return required ? t('validation:required') : true;
 };
 
 export const blocks: Validate<unknown, unknown, BlockField> = (value, { t, maxRows, minRows, required }) => {
@@ -398,4 +416,5 @@ export default {
   radio,
   blocks,
   point,
+  json,
 };

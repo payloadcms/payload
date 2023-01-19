@@ -4,7 +4,7 @@ import APIError from './APIError';
 
 class FileUploadError extends APIError {
   constructor(t?: TFunction) {
-    super(t ? t('problemUploadingFile') : 'There was a problem while uploading the file.', httpStatus.BAD_REQUEST);
+    super(t ? t('error:problemUploadingFile') : 'There was a problem while uploading the file.', httpStatus.BAD_REQUEST);
   }
 }
 

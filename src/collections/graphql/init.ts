@@ -28,13 +28,15 @@ import resetPassword from '../../auth/graphql/resolvers/resetPassword';
 import verifyEmail from '../../auth/graphql/resolvers/verifyEmail';
 import unlock from '../../auth/graphql/resolvers/unlock';
 import refresh from '../../auth/graphql/resolvers/refresh';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import { Field, fieldAffectsData } from '../../fields/config/types';
 import buildObjectType, { ObjectTypeConfig } from '../../graphql/schema/buildObjectType';
 import buildWhereInputType from '../../graphql/schema/buildWhereInputType';
 import getDeleteResolver from './resolvers/delete';
 import { toWords, formatNames } from '../../utilities/formatLabels';
 import { Collection, SanitizedCollectionConfig } from '../config/types';
+import { buildPolicyType } from '../../graphql/schema/buildPoliciesType';
+import { docAccessResolver } from './resolvers/docAccess';
 
 function initCollectionsGraphQL(payload: Payload): void {
   Object.keys(payload.collections).forEach((slug) => {
@@ -179,6 +181,19 @@ function initCollectionsGraphQL(payload: Payload): void {
         sort: { type: GraphQLString },
       },
       resolve: findResolver(collection),
+    };
+
+    payload.Query.fields[`docAccess${singularName}`] = {
+      type: buildPolicyType({
+        typeSuffix: 'DocAccess',
+        entity: collection.config,
+        type: 'collection',
+        scope: 'docAccess',
+      }),
+      args: {
+        id: { type: new GraphQLNonNull(idType) },
+      },
+      resolve: docAccessResolver(),
     };
 
     payload.Mutation.fields[`create${singularName}`] = {

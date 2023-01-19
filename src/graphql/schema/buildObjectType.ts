@@ -30,6 +30,7 @@ import {
   EmailField,
   TextareaField,
   CodeField,
+  JSONField,
   DateField,
   PointField,
   CheckboxField,
@@ -45,7 +46,7 @@ import withNullableType from './withNullableType';
 import { toWords } from '../../utilities/formatLabels';
 import createRichTextRelationshipPromise from '../../fields/richText/richTextRelationshipPromise';
 import formatOptions from '../utilities/formatOptions';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import buildWhereInputType from './buildWhereInputType';
 import buildBlockType from './buildBlockType';
 import isFieldNullable from './isFieldNullable';
@@ -104,6 +105,10 @@ function buildObjectType({
       ...objectTypeConfig,
       [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
     }),
+    json: (objectTypeConfig: ObjectTypeConfig, field: JSONField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, GraphQLJSON, forceNullable) },
+    }),
     date: (objectTypeConfig: ObjectTypeConfig, field: DateField) => ({
       ...objectTypeConfig,
       [field.name]: { type: withNullableType(field, DateTimeResolver, forceNullable) },
@@ -149,7 +154,11 @@ function buildObjectType({
       // to itself. Therefore, we set the relationshipType equal to the blockType
       // that is currently being created.
 
-      const type = payload.collections[relationTo].graphQL.type || newlyCreatedBlockType;
+      const type = withNullableType(
+        field,
+        payload.collections[relationTo].graphQL.type || newlyCreatedBlockType,
+        forceNullable,
+      );
 
       const uploadArgs = {} as LocaleInputType;
 
@@ -312,7 +321,11 @@ function buildObjectType({
 
       const relationship = {
         args: relationshipArgs,
-        type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
+        type: withNullableType(
+          field,
+          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
+          forceNullable,
+        ),
         extensions: { complexity: 10 },
         async resolve(parent, args, context) {
           const value = parent[field.name];

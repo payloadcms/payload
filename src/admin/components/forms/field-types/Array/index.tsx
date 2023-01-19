@@ -17,16 +17,18 @@ import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { useOperation } from '../../../utilities/OperationProvider';
 import { Collapsible } from '../../../elements/Collapsible';
 import RenderFields from '../../RenderFields';
-import { fieldAffectsData } from '../../../../../fields/config/types';
 import { Props } from './types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { ArrayAction } from '../../../elements/ArrayAction';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
 import { RowLabel } from '../../RowLabel';
+import { getTranslation } from '../../../../../utilities/getTranslation';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
+import { useConfig } from '../../../utilities/Config';
+import { NullifyLocaleField } from '../../NullifyField';
 
 import './index.scss';
-import { getTranslation } from '../../../../../utilities/getTranslation';
 
 const baseClass = 'array-field';
 
@@ -69,6 +71,16 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const locale = useLocale();
   const operation = useOperation();
   const { t, i18n } = useTranslation('fields');
+  const { localization } = useConfig();
+
+  const checkSkipValidation = useCallback((value) => {
+    const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
+    const isEditingDefaultLocale = locale === defaultLocale;
+    const fallbackEnabled = (localization && localization.fallback);
+
+    if (value === null && !isEditingDefaultLocale && fallbackEnabled) return true;
+    return false;
+  }, [locale, localization]);
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
   const getLabels = (p: Props) => {
@@ -82,14 +94,15 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const { dispatchFields, setModified } = formContext;
 
   const memoizedValidate = useCallback((value, options) => {
+    if (checkSkipValidation(value)) return true;
     return validate(value, { ...options, minRows, maxRows, required });
-  }, [maxRows, minRows, required, validate]);
+  }, [maxRows, minRows, required, validate, checkSkipValidation]);
 
   const {
     showError,
     errorMessage,
     value,
-  } = useField({
+  } = useField<number>({
     path,
     validate: memoizedValidate,
     condition,
@@ -252,6 +265,12 @@ const ArrayFieldType: React.FC<Props> = (props) => {
             description={description}
           />
         </header>
+
+        <NullifyLocaleField
+          path={path}
+          fieldValue={value}
+        />
+
         <Droppable droppableId="array-drop">
           {(provided) => (
             <div
@@ -260,7 +279,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
             >
               {rows.length > 0 && rows.map((row, i) => {
                 const rowNumber = i + 1;
-                const fallbackLabel = `${labels.singular} ${String(rowNumber).padStart(2, '0')}`;
+                const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowNumber).padStart(2, '0')}`;
 
                 return (
                   <Draggable
@@ -312,7 +331,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                             indexPath={indexPath}
                             fieldSchema={fields.map((field) => ({
                               ...field,
-                              path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,
+                              path: createNestedFieldPath(`${path}.${i}`, field),
                             }))}
                           />
 
@@ -322,26 +341,28 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   </Draggable>
                 );
               })}
-              {(rows.length < minRows || (required && rows.length === 0)) && (
-                <Banner type="error">
-                  {t('validation:requiresAtLeast', {
-                    count: minRows,
-                    label: getTranslation(minRows
-                      ? labels.plural
-                      : labels.singular,
-                    i18n) || t(minRows > 1 ? 'general:row' : 'general:rows'),
-                  })}
-                </Banner>
-              )}
-              {(rows.length === 0 && readOnly) && (
-                <Banner>
-                  {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
-                </Banner>
+              {!checkSkipValidation(value) && (
+                <React.Fragment>
+                  {(rows.length < minRows || (required && rows.length === 0)) && (
+                    <Banner type="error">
+                      {t('validation:requiresAtLeast', {
+                        count: minRows,
+                        label: getTranslation(minRows ? labels.plural : labels.singular, i18n) || t(minRows > 1 ? 'general:row' : 'general:rows'),
+                      })}
+                    </Banner>
+                  )}
+                  {(rows.length === 0 && readOnly) && (
+                    <Banner>
+                      {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
+                    </Banner>
+                  )}
+                </React.Fragment>
               )}
               {provided.placeholder}
             </div>
           )}
         </Droppable>
+
         {(!readOnly && !hasMaxRows) && (
           <div className={`${baseClass}__add-button-wrap`}>
             <Button
@@ -355,6 +376,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
             </Button>
           </div>
         )}
+
       </div>
     </DragDropContext>
   );

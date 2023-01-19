@@ -1,0 +1,87 @@
+@import '../../../scss/styles.scss';
+
+.drawer {
+  display: flex;
+  overflow: hidden;
+  position: fixed;
+  height: 100vh;
+
+  &__blur-bg {
+    @include blur-bg();
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    opacity: 0;
+    transition: all 300ms ease-out;
+  }
+
+  &__content {
+    @include blur-bg();
+    opacity: 0;
+    transform: translateX(#{base(4)});
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    transition: all 300ms ease-out;
+    overflow: hidden;
+  }
+
+  &__content-children {
+    position: relative;
+    z-index: 1;
+    overflow: auto;
+    height: 100%;
+  }
+
+  &--is-open {
+    .drawer__content,
+    .drawer__blur-bg,
+    .drawer__close {
+      opacity: 1;
+    }
+
+    .drawer__close {
+      transition: opacity 300ms ease-in-out;
+      transition-delay: 100ms;
+    }
+
+    .drawer__content {
+      transform: translateX(0);
+    }
+  }
+
+  &__close {
+    @extend %btn-reset;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+    text-indent: -9999px;
+    background: rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    opacity: 0;
+    will-change: opacity;
+    transition: none;
+    transition-delay: 0ms;
+
+    &:active,
+    &:focus {
+      outline: 0;
+    }
+  }
+
+
+  @include mid-break {
+    &__close {
+      width: base(1);
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .drawer__close {
+    background: rgba(0, 0, 0, 0.2);
+  }
+}

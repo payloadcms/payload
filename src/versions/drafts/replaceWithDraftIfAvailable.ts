@@ -1,9 +1,8 @@
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import { docHasTimestamps, Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth';
 import { AccessResult } from '../../config/types';
 import { CollectionModel, SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types';
-import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
@@ -26,8 +25,6 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   accessResult,
 }: Arguments<T>): Promise<T> => {
   const VersionModel = payload.versions[entity.slug] as CollectionModel;
-
-  let useEstimatedCount = false;
 
   const queryToBuild: { where: Where } = {
     where: {
@@ -62,13 +59,10 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     queryToBuild.where.and.push(versionAccessResult);
   }
 
-  const constraints = flattenWhereConstraints(queryToBuild);
-  useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   const query = await VersionModel.buildQuery(queryToBuild, locale);
 
   let draft = await VersionModel.findOne(query, {}, {
     lean: true,
-    useEstimatedCount,
     sort: { updatedAt: 'desc' },
   });
 

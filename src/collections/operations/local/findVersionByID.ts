@@ -1,13 +1,15 @@
-import { Payload } from '../../..';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { Payload } from '../../../payload';
 import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import { TypeWithVersion } from '../../../versions/types';
 import findVersionByID from '../findVersionByID';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
+import { APIError } from '../../../errors';
 
-export type Options = {
-  collection: string
+export type Options<T extends keyof GeneratedTypes['collections']> = {
+  collection: T
   id: string
   depth?: number
   locale?: string
@@ -19,12 +21,15 @@ export type Options = {
   req?: PayloadRequest
 }
 
-export default async function findVersionByIDLocal<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<T> {
+export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<TypeWithVersion<GeneratedTypes['collections'][T]>> {
   const {
     collection: collectionSlug,
     depth,
     id,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
+    locale = null,
     fallbackLocale = null,
     overrideAccess = true,
     disableErrors = false,
@@ -33,10 +38,15 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
   } = options;
 
   const collection = payload.collections[collectionSlug];
+  const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+  }
 
   req.payloadAPI = 'local';
-  req.locale = locale || req?.locale || this?.config?.localization?.defaultLocale;
-  req.fallbackLocale = fallbackLocale || req?.fallbackLocale || null;
+  req.locale = locale ?? req?.locale ?? defaultLocale;
+  req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
   req.i18n = i18n(payload.config.i18n);
   req.payload = payload;
 

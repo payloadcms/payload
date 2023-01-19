@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import path from 'path';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
@@ -9,7 +10,7 @@ import { pointFieldsSlug } from './collections/Point';
 import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
-import { relationshipFieldsSlug } from './collections/Relationship';
+import { jsonDoc } from './collections/JSON';
 
 const { beforeAll, describe } = test;
 
@@ -62,6 +63,31 @@ describe('fields', () => {
       await page.goto(url.create);
       const description = page.locator('.field-description-i18nText');
       await expect(description).toHaveText('en description');
+    });
+  });
+
+  describe('json', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'json-fields');
+    });
+
+    test('should display field in list view', async () => {
+      await page.goto(url.list);
+      const jsonCell = page.locator('.row-1 .cell-json');
+      await expect(jsonCell)
+        .toHaveText(JSON.stringify(jsonDoc.json));
+    });
+
+    test('should create', async () => {
+      const input = '{"foo": "bar"}';
+
+      await page.goto(url.create);
+      const json = page.locator('.json-field .inputarea');
+      await json.fill(input);
+
+      await saveDocAndAssert(page);
+      await expect(page.locator('.json-field')).toContainText('"foo": "bar"');
     });
   });
 
@@ -166,7 +192,7 @@ describe('fields', () => {
     });
   });
 
-  describe('fields - collapsible', () => {
+  describe('collapsible', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, collapsibleFieldsSlug);
@@ -215,7 +241,7 @@ describe('fields', () => {
     });
   });
 
-  describe('fields - array', () => {
+  describe('array', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, arrayFieldsSlug);
@@ -258,7 +284,7 @@ describe('fields', () => {
     });
   });
 
-  describe('fields - tabs', () => {
+  describe('tabs', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, tabsSlug);
@@ -314,21 +340,22 @@ describe('fields', () => {
     });
   });
 
-  describe('fields - richText', () => {
+  describe('richText', () => {
     async function navigateToRichTextFields() {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields');
       await page.goto(url.list);
-      await page.locator('.row-1 .cell-id').click();
+      await page.locator('.row-1 .cell-title a').click();
     }
 
     describe('toolbar', () => {
       test('should create new url link', async () => {
         await navigateToRichTextFields();
 
-        // Open link popup
+        // Open link drawer
         await page.locator('.rich-text__toolbar button:not([disabled]) .link').click();
 
-        const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+        // find the drawer
+        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
 
         // Fill values and click Confirm
@@ -365,12 +392,16 @@ describe('fields', () => {
         await expect(popup).toBeVisible();
         await expect(popup.locator('a')).toHaveAttribute('href', 'https://payloadcms.com');
 
-        // Open link edit modal
+        // Open the drawer
         await popup.locator('.rich-text-link__link-edit').click();
-        const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+        const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
 
-        // Close link edit modal
+        // Check the drawer values
+        const textField = await editLinkModal.locator('#field-text');
+        await expect(textField).toHaveValue('render links');
+
+        // Close the drawer
         await editLinkModal.locator('button[type="submit"]').click();
         await expect(editLinkModal).not.toBeVisible();
       });
@@ -384,85 +415,194 @@ describe('fields', () => {
         await expect(popup).toBeVisible();
         await expect(popup.locator('a')).toHaveAttribute('href', /\/admin\/collections\/array-fields\/.*/);
 
-        // Open link edit modal
+        // Open the drawer
         await popup.locator('.rich-text-link__link-edit').click();
-        const editLinkModal = page.locator('.rich-text-link-edit-modal__template');
+        const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
 
-        // Close link edit modal
+        // Check the drawer values
+        const textField = await editLinkModal.locator('#field-text');
+        await expect(textField).toHaveValue('link to relationships');
+
+        // Close the drawer
         await editLinkModal.locator('button[type="submit"]').click();
         await expect(editLinkModal).not.toBeVisible();
       });
+
+      test('should populate new links', async () => {
+        navigateToRichTextFields();
+
+        // Highlight existing text
+        const headingElement = await page.locator('#field-richText h1 >> text="Hello, I\'m a rich text field."');
+        await headingElement.selectText();
+
+        // click the toolbar link button
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').click();
+
+        // find the drawer and confirm the values
+        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        await expect(editLinkModal).toBeVisible();
+        const textField = await editLinkModal.locator('#field-text');
+        await expect(textField).toHaveValue('Hello, I\'m a rich text field.');
+      });
+    });
+  });
+
+  describe('date', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'date-fields');
     });
 
-    describe('relationship', () => {
-      let url: AdminUrlUtil;
+    test('should display formatted date in list view table cell', async () => {
+      await page.goto(url.list);
+      const formattedDateCell = page.locator('.row-1 .cell-timeOnly');
+      await expect(formattedDateCell).toContainText(' Aug ');
 
-      beforeAll(() => {
-        url = new AdminUrlUtil(serverURL, relationshipFieldsSlug);
-      });
+      const notFormattedDateCell = page.locator('.row-1 .cell-default');
+      await expect(notFormattedDateCell).toContainText('August');
+    });
 
-      test('should create inline relationship within field with many relations', async () => {
-        await page.goto(url.create);
+    test('should display formatted date in useAsTitle', async () => {
+      await page.goto(url.list);
+      await page.locator('.row-1 .cell-default a').click();
+      await expect(page.locator('.collection-edit__header .render-title')).toContainText('August');
+    });
 
-        const button = page.locator('#relationship-add-new .relationship-add-new__add-button');
-        await button.click();
-        await page.locator('.relationship-add-new__relation-button--text-fields').click();
+    test('should clear date', async () => {
+      await page.goto(url.create);
+      const dateField = await page.locator('#field-default input');
+      await expect(dateField).toBeVisible();
+      await dateField.fill('2021-08-01');
+      await expect(dateField).toHaveValue('2021-08-01');
+      const clearButton = await page.locator('#field-default .date-time-picker__clear-button');
+      await expect(clearButton).toBeVisible();
+      await clearButton.click();
+      await expect(dateField).toHaveValue('');
+    });
+  });
 
-        const textField = page.locator('#field-text');
-        const textValue = 'hello';
+  describe('relationship', () => {
+    let url: AdminUrlUtil;
 
-        await textField.fill(textValue);
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'relationship-fields');
+    });
 
-        await page.locator('#relationship-add-modal-depth-1 #action-save').click();
-        await expect(page.locator('.Toastify')).toContainText('successfully');
+    test('should create inline relationship within field with many relations', async () => {
+      await page.goto(url.create);
 
-        await expect(page.locator('#field-relationship .rs__single-value')).toContainText(textValue);
+      const button = page.locator('#relationship-add-new .relationship-add-new__add-button');
+      await button.click();
+      await page.locator('#field-relationship .relationship-add-new__relation-button--text-fields').click();
 
-        await page.locator('#action-save').click();
-        await expect(page.locator('.Toastify')).toContainText('successfully');
-      });
+      const textField = page.locator('#field-text');
+      const textValue = 'hello';
 
-      test('should create nested inline relationships', async () => {
-        await page.goto(url.create);
+      await textField.fill(textValue);
 
-        // Open first modal
-        await page.locator('#relationToSelf-add-new .relationship-add-new__add-button').click();
+      await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click();
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+      await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
 
-        // Fill first modal's required relationship field
-        await page.locator('#relationToSelf-add-modal-depth-1 #field-relationship').click();
-        await page.locator('#relationToSelf-add-modal-depth-1 .rs__option:has-text("Seeded text document")').click();
+      await expect(page.locator('#field-relationship .relationship--single-value__text')).toContainText(textValue);
 
-        // Open second modal
-        await page.locator('#relationToSelf-add-modal-depth-1 #relationToSelf-add-new button').click();
+      await page.locator('#action-save').click();
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+    });
 
-        // Fill second modal's required relationship field
-        await page.locator('#relationToSelf-add-modal-depth-2 #field-relationship').click();
-        await page.locator('#relationToSelf-add-modal-depth-2 .rs__option:has-text("Seeded text document")').click();
+    test('should create nested inline relationships', async () => {
+      await page.goto(url.create);
 
-        // Save second modal
-        await page.locator('#relationToSelf-add-modal-depth-2 #action-save').click();
+      // Open first modal
+      await page.locator('#relationToSelf-add-new .relationship-add-new__add-button').click();
 
-        // Assert that the first modal is still open
-        // and that the Relation to Self field now has a value in its input
-        await expect(page.locator('#relationToSelf-add-modal-depth-1 #field-relationToSelf .rs__single-value')).toBeVisible();
+      // Fill first modal's required relationship field
+      await page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationship').click();
+      await page.locator('[id^=doc-drawer_relationship-fields_1_] .rs__option:has-text("Seeded text document")').click();
 
-        // Save first modal
-        await page.locator('#relationToSelf-add-modal-depth-1 #action-save').click();
+      // Open second modal
+      await page.locator('[id^=doc-drawer_relationship-fields_1_] #relationToSelf-add-new button').click();
 
-        await wait(200);
+      // Fill second modal's required relationship field
+      await page.locator('[id^=doc-drawer_relationship-fields_2_] #field-relationship').click();
+      await page.locator('[id^=doc-drawer_relationship-fields_2_] .rs__option:has-text("Seeded text document")').click();
 
-        // Expect the original field to have a value filled
-        await expect(page.locator('#field-relationToSelf .rs__single-value')).toBeVisible();
+      // Save then close the second modal
+      await page.locator('[id^=doc-drawer_relationship-fields_2_] #action-save').click();
+      await wait(200);
+      await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_2_]').click();
 
-        // Fill the required field
-        await page.locator('#field-relationship').click();
-        await page.locator('.rs__option:has-text("Seeded text document")').click();
+      // Assert that the first modal is still open and the value matches
+      await expect(page.locator('[id^=doc-drawer_relationship-fields_1_]')).toBeVisible();
+      await expect(page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationToSelf .relationship--single-value__text')).toBeVisible(); // TODO: use '.toContainText('doc_id')' with the doc in the second modal
 
-        await page.locator('#action-save').click();
+      // Save then close the first modal
+      await page.locator('[id^=doc-drawer_relationship-fields_1_] #action-save').click();
+      await wait(200);
+      await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_1_]').click();
 
-        await expect(page.locator('.Toastify')).toContainText('successfully');
-      });
+      // Expect the original field to have a value filled
+      await expect(page.locator('#field-relationToSelf .relationship--single-value__text')).toBeVisible();
+
+      // Fill the required field
+      await page.locator('#field-relationship').click();
+      await page.locator('.rs__option:has-text("Seeded text document")').click();
+
+      await page.locator('#action-save').click();
+
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+    });
+  });
+
+  describe('upload', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'uploads');
+    });
+
+    test('should upload files', async () => {
+      await page.goto(url.create);
+
+      // create a jpg upload
+      await page.locator('.file-field__upload input[type="file"]').setInputFiles(path.resolve(__dirname, './collections/Upload/payload.jpg'));
+      await expect(page.locator('.file-field .file-field__filename')).toContainText('payload.jpg');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+    });
+
+    // test that the image renders
+    test('should render uploaded image', async () => {
+      await expect(page.locator('.file-field .file-details img')).toHaveAttribute('src', '/uploads/payload-1.jpg');
+    });
+
+    test('should upload using the document drawer', async () => {
+      // Open the media drawer and create a png upload
+      await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click();
+      await page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]').setInputFiles(path.resolve(__dirname, './uploads/payload.png'));
+      await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      // Assert that the media field has the png upload
+      await expect(page.locator('.field-type.upload .file-details .file-meta__url a')).toHaveAttribute('href', '/uploads/payload-1.png');
+      await expect(page.locator('.field-type.upload .file-details .file-meta__url a')).toContainText('payload-1.png');
+      await expect(page.locator('.field-type.upload .file-details img')).toHaveAttribute('src', '/uploads/payload-1.png');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+    });
+
+    test('should clear selected upload', async () => {
+      await page.locator('.field-type.upload .file-details__remove').click();
+    });
+
+    test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {
+      await page.locator('.field-type.upload .upload__toggler.list-drawer__toggler').click();
+      await wait(200);
+      const jpgImages = await page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]');
+      expect(await jpgImages.count()).toEqual(0);
     });
   });
 });

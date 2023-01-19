@@ -23,12 +23,14 @@ import { useOperation } from '../../../utilities/OperationProvider';
 import { Collapsible } from '../../../elements/Collapsible';
 import { ArrayAction } from '../../../elements/ArrayAction';
 import RenderFields from '../../RenderFields';
-import { fieldAffectsData } from '../../../../../fields/config/types';
 import SectionTitle from './SectionTitle';
 import Pill from '../../../elements/Pill';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
 import { getTranslation } from '../../../../../utilities/getTranslation';
+import { NullifyLocaleField } from '../../NullifyField';
+import { useConfig } from '../../../utilities/Config';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 
 import './index.scss';
 
@@ -74,11 +76,21 @@ const BlocksField: React.FC<Props> = (props) => {
   const operation = useOperation();
   const { dispatchFields, setModified } = formContext;
   const [selectorIndexOpen, setSelectorIndexOpen] = useState<number>();
+  const { localization } = useConfig();
+
+  const checkSkipValidation = useCallback((value) => {
+    const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
+    const isEditingDefaultLocale = locale === defaultLocale;
+    const fallbackEnabled = (localization && localization.fallback);
+
+    if (value === null && !isEditingDefaultLocale && fallbackEnabled) return true;
+    return false;
+  }, [locale, localization]);
 
   const memoizedValidate = useCallback((value, options) => {
+    if (checkSkipValidation(value)) return true;
     return validate(value, { ...options, minRows, maxRows, required });
-  }, [maxRows, minRows, required, validate]);
-
+  }, [maxRows, minRows, required, validate, checkSkipValidation]);
 
   const {
     showError,
@@ -252,6 +264,11 @@ const BlocksField: React.FC<Props> = (props) => {
           />
         </header>
 
+        <NullifyLocaleField
+          path={path}
+          fieldValue={value}
+        />
+
         <Droppable
           droppableId="blocks-drop"
           isDropDisabled={readOnly}
@@ -345,7 +362,7 @@ const BlocksField: React.FC<Props> = (props) => {
                               permissions={permissions?.fields}
                               fieldSchema={blockToRender.fields.map((field) => ({
                                 ...field,
-                                path: `${path}.${i}${fieldAffectsData(field) ? `.${field.name}` : ''}`,
+                                path: createNestedFieldPath(`${path}.${i}`, field),
                               }))}
                               indexPath={indexPath}
                             />
@@ -359,18 +376,23 @@ const BlocksField: React.FC<Props> = (props) => {
 
                 return null;
               })}
-              {(rows.length < minRows || (required && rows.length === 0)) && (
-                <Banner type="error">
-                  {t('requiresAtLeast', {
-                    count: minRows,
-                    label: getTranslation(minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural, i18n),
-                  })}
-                </Banner>
-              )}
-              {(rows.length === 0 && readOnly) && (
-                <Banner>
-                  {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
-                </Banner>
+
+              {!checkSkipValidation(value) && (
+                <React.Fragment>
+                  {(rows.length < minRows || (required && rows.length === 0)) && (
+                    <Banner type="error">
+                      {t('validation:requiresAtLeast', {
+                        count: minRows,
+                        label: getTranslation(minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural, i18n),
+                      })}
+                    </Banner>
+                  )}
+                  {(rows.length === 0 && readOnly) && (
+                    <Banner>
+                      {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
+                    </Banner>
+                  )}
+                </React.Fragment>
               )}
               {provided.placeholder}
             </div>

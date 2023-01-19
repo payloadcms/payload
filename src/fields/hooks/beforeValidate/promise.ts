@@ -3,9 +3,9 @@ import { PayloadRequest } from '../../../express/types';
 import { Field, fieldAffectsData, TabAsField, tabHasName, valueIsValueWithRelation } from '../../config/types';
 import { traverseFields } from './traverseFields';
 
-type Args = {
-  data: Record<string, unknown>
-  doc: Record<string, unknown>
+type Args<T> = {
+  data: T
+  doc: T
   field: Field | TabAsField
   id?: string | number
   operation: 'create' | 'update'
@@ -20,7 +20,7 @@ type Args = {
 // - Execute field hooks
 // - Execute field access control
 
-export const promise = async ({
+export const promise = async <T>({
   data,
   doc,
   field,
@@ -30,7 +30,7 @@ export const promise = async ({
   req,
   siblingData,
   siblingDoc,
-}: Args): Promise<void> => {
+}: Args<T>): Promise<void> => {
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
       if (field.type === 'number' && typeof siblingData[field.name] === 'string') {
@@ -131,7 +131,7 @@ export const promise = async ({
       case 'array':
       case 'blocks': {
         // Handle cases of arrays being intentionally set to 0
-        if (siblingData[field.name] === '0' || siblingData[field.name] === 0 || siblingData[field.name] === null) {
+        if (siblingData[field.name] === '0' || siblingData[field.name] === 0) {
           siblingData[field.name] = [];
         }
 

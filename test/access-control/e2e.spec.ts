@@ -4,7 +4,7 @@ import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login } from '../helpers';
-import { restrictedVersionsSlug, readOnlySlug, restrictedSlug, slug } from './config';
+import { restrictedVersionsSlug, readOnlySlug, restrictedSlug, slug, docLevelAccessSlug } from './config';
 import type { ReadOnlyCollection, RestrictedVersion } from './payload-types';
 
 /**
@@ -17,16 +17,17 @@ import type { ReadOnlyCollection, RestrictedVersion } from './payload-types';
  */
 
 const { beforeAll, describe } = test;
-
 describe('access control', () => {
   let page: Page;
   let url: AdminUrlUtil;
   let restrictedUrl: AdminUrlUtil;
   let readOnlyUrl: AdminUrlUtil;
   let restrictedVersionsUrl: AdminUrlUtil;
+  let serverURL: string;
 
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(__dirname);
+    const config = await initPayloadE2E(__dirname);
+    serverURL = config.serverURL;
 
     url = new AdminUrlUtil(serverURL, slug);
     restrictedUrl = new AdminUrlUtil(serverURL, restrictedSlug);
@@ -174,11 +175,51 @@ describe('access control', () => {
       await expect(page.locator('.versions-count')).not.toBeVisible();
     });
   });
+
+  describe('doc level access', () => {
+    let existingDoc: ReadOnlyCollection;
+    let docLevelAccessURL;
+
+    beforeAll(async () => {
+      docLevelAccessURL = new AdminUrlUtil(serverURL, docLevelAccessSlug);
+
+      existingDoc = await payload.create<any>({
+        collection: docLevelAccessSlug,
+        data: {
+          approvedTitle: 'Title',
+          lockTitle: true,
+          approvedForRemoval: false,
+        },
+      });
+    });
+
+    test('disable field based on document data', async () => {
+      await page.goto(docLevelAccessURL.edit(existingDoc.id));
+
+      // validate that the text input is disabled because the field is "locked"
+      const isDisabled = await page.locator('#field-approvedTitle').isDisabled();
+      expect(isDisabled).toBe(true);
+    });
+
+    test('disable operation based on document data', async () => {
+      await page.goto(docLevelAccessURL.edit(existingDoc.id));
+
+      // validate that the delete action is not displayed
+      const duplicateAction = page.locator('.collection-edit__collection-actions >> li').last();
+      await expect(duplicateAction).toContainText('Duplicate');
+
+      await page.locator('#field-approvedForRemoval + button').click();
+      await page.locator('#action-save').click();
+
+      const deleteAction = page.locator('.collection-edit__collection-actions >> li').last();
+      await expect(deleteAction).toContainText('Delete');
+    });
+  });
 });
 
 async function createDoc(data: any): Promise<{ id: string }> {
   return payload.create({
-    collection: slug,
+    collection: docLevelAccessSlug,
     data,
   });
 }

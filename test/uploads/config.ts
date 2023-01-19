@@ -39,6 +39,7 @@ export default buildConfig({
       upload: {
         staticURL: '/media',
         staticDir: './media',
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg', 'image/svg+xml'],
         resizeOptions: {
           width: 1280,
           height: 720,

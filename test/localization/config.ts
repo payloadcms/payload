@@ -1,6 +1,7 @@
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
-import { LocalizedPost } from './payload-types';
+import { ArrayCollection } from './collections/Array';
+import { LocalizedPost, RelationshipLocalized } from './payload-types';
 import {
   defaultLocale,
   englishTitle,
@@ -21,7 +22,7 @@ export type LocalizedPostAllLocale = LocalizedPost & {
 
 export const slug = 'localized-posts';
 export const withLocalizedRelSlug = 'with-localized-relationship';
-
+export const relationshipLocalizedSlug = 'relationship-localized';
 export const withRequiredLocalizedFields = 'localized-required';
 
 const openAccess = {
@@ -35,6 +36,7 @@ export default buildConfig({
   localization: {
     locales: [defaultLocale, spanishLocale],
     defaultLocale,
+    fallback: true,
   },
   collections: [
     {
@@ -64,6 +66,7 @@ export default buildConfig({
         },
       ],
     },
+    ArrayCollection,
     {
       slug: withRequiredLocalizedFields,
       fields: [
@@ -134,12 +137,61 @@ export default buildConfig({
       ],
     },
     {
+      slug: relationshipLocalizedSlug,
+      fields: [
+        {
+          name: 'relationship',
+          type: 'relationship',
+          relationTo: slug,
+          localized: true,
+        },
+        {
+          name: 'relationshipHasMany',
+          type: 'relationship',
+          relationTo: slug,
+          hasMany: true,
+          localized: true,
+        },
+        {
+          name: 'relationMultiRelationTo',
+          type: 'relationship',
+          relationTo: [slug, 'dummy'],
+          localized: true,
+        },
+        {
+          name: 'relationMultiRelationToHasMany',
+          type: 'relationship',
+          relationTo: [slug, 'dummy'],
+          hasMany: true,
+          localized: true,
+        },
+      ],
+    },
+    {
       slug: 'dummy',
       access: openAccess,
       fields: [
         {
           name: 'name',
           type: 'text',
+        },
+      ],
+    },
+  ],
+  globals: [
+    {
+      slug: 'global-array',
+      fields: [
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+              localized: true,
+            },
+          ],
         },
       ],
     },
@@ -210,16 +262,54 @@ export default buildConfig({
       },
     });
 
-    await payload.create({
+    await payload.create<RelationshipLocalized>({
       collection: withLocalizedRelSlug,
       data: {
-        localizedRelationship: localizedRelation.id,
+        relationship: localizedRelation.id,
         localizedRelationHasManyField: [localizedRelation.id, localizedRelation2.id],
         localizedRelationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
         localizedRelationMultiRelationToHasMany: [
           { relationTo: slug, value: localizedRelation.id },
           { relationTo: slug, value: localizedRelation2.id },
         ],
+      },
+    });
+    await payload.create({
+      collection: relationshipLocalizedSlug,
+      locale: 'en',
+      data: {
+        relationship: localizedRelation.id,
+        relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
+        relationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
+        relationMultiRelationToHasMany: [
+          { relationTo: slug, value: localizedRelation.id },
+          { relationTo: slug, value: localizedRelation2.id },
+        ],
+      },
+    });
+
+    const globalArray = await payload.updateGlobal({
+      slug: 'global-array',
+      data: {
+        array: [
+          {
+            text: 'test en 1',
+          },
+          {
+            text: 'test en 2',
+          },
+        ],
+      },
+    });
+
+    await payload.updateGlobal({
+      slug: 'global-array',
+      locale: 'es',
+      data: {
+        array: globalArray.array.map((row, i) => ({
+          ...row,
+          text: `test es ${i + 1}`,
+        })),
       },
     });
   },

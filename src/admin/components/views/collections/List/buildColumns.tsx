@@ -6,8 +6,19 @@ import { SanitizedCollectionConfig } from '../../../../../collections/config/typ
 import { Column } from '../../../elements/Table/types';
 import { fieldIsPresentationalOnly } from '../../../../../fields/config/types';
 import flattenFields from '../../../../../utilities/flattenTopLevelFields';
+import { Props as CellProps } from './Cell/types';
 
-const buildColumns = (collection: SanitizedCollectionConfig, columns: string[], t: TFunction): Column[] => {
+const buildColumns = ({
+  collection,
+  columns,
+  t,
+  cellProps,
+}: {
+  collection: SanitizedCollectionConfig,
+  columns: string[],
+  t: TFunction,
+  cellProps?: Partial<CellProps>[]
+}): Column[] => {
   const flattenedFields = flattenFields([
     ...collection.fields,
     {
@@ -49,16 +60,20 @@ const buildColumns = (collection: SanitizedCollectionConfig, columns: string[], 
                 disable={(field.disableSort || fieldIsPresentationalOnly(field)) || undefined}
               />
             ),
-            renderCell: (rowData, cellData) => (
-              <Cell
-                key={JSON.stringify(cellData)}
-                field={field}
-                colIndex={colIndex}
-                collection={collection}
-                rowData={rowData}
-                cellData={cellData}
-              />
-            ),
+            renderCell: (rowData, cellData) => {
+              return (
+                <Cell
+                  key={JSON.stringify(cellData)}
+                  field={field}
+                  colIndex={colIndex}
+                  collection={collection}
+                  rowData={rowData}
+                  cellData={cellData}
+                  link={colIndex === 0}
+                  {...cellProps?.[colIndex] || {}}
+                />
+              );
+            },
           },
         },
       ];

@@ -55,6 +55,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
     disableLeaveWithoutSaving,
     customHeader,
     id,
+    updatedAt,
   } = props;
 
   const {
@@ -94,11 +95,13 @@ const DefaultEditView: React.FC<Props> = (props) => {
             disabled={!hasSavePermission}
             initialState={initialState}
           >
-            <SetStepNav
-              collection={collection}
-              isEditing={isEditing}
-              id={data.id}
-            />
+            {!disableEyebrow && (
+              <SetStepNav
+                collection={collection}
+                isEditing={isEditing}
+                id={data.id}
+              />
+            )}
             <div className={`${baseClass}__main`}>
               <Meta
                 title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(collection.labels.singular, i18n)}`}
@@ -116,7 +119,12 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   {customHeader && customHeader}
                   {!customHeader && (
                     <h1>
-                      <RenderTitle {...{ data, useAsTitle, fallback: `[${t('untitled')}]` }} />
+                      <RenderTitle
+                        data={data}
+                        collection={collection.slug}
+                        useAsTitle={useAsTitle}
+                        fallback={`[${t('untitled')}]`}
+                      />
                     </h1>
                   )}
                 </header>
@@ -186,7 +194,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
                     {(preview && (!collection.versions?.drafts || collection.versions?.drafts?.autosave)) && (
                       <PreviewButton
                         generatePreviewURL={preview}
-                        data={data}
                       />
                     )}
                     {hasSavePermission && (
@@ -209,7 +216,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
                     {(isEditing && preview && (collection.versions?.drafts && !collection.versions?.drafts?.autosave)) && (
                       <PreviewButton
                         generatePreviewURL={preview}
-                        data={data}
                       />
                     )}
                     {collection.versions?.drafts && (
@@ -262,10 +268,10 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         )}
                         {timestamps && (
                           <React.Fragment>
-                            {data.updatedAt && (
+                            {updatedAt && (
                               <li>
                                 <div className={`${baseClass}__label`}>{t('lastModified')}</div>
-                                <div>{format(new Date(data.updatedAt), dateFormat)}</div>
+                                <div>{format(new Date(updatedAt), dateFormat)}</div>
                               </li>
                             )}
                             {(publishedDoc?.createdAt || data?.createdAt) && (

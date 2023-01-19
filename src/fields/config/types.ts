@@ -2,13 +2,14 @@
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
 import type { TFunction } from 'i18next';
+import type { EditorProps } from '@monaco-editor/react';
 import { Operation, Where } from '../../types';
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import { RowLabel } from '../../admin/components/forms/RowLabel/types';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
@@ -45,15 +46,15 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
 
 export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>) => boolean;
 
-export type FilterOptionsProps = {
+export type FilterOptionsProps<T = any> = {
   id: string | number,
   user: Partial<User>,
-  data: unknown,
+  data: T,
   siblingData: unknown,
-  relationTo: string | string[],
+  relationTo: string,
 }
 
-export type FilterOptions = Where | ((options: FilterOptionsProps) => Where);
+export type FilterOptions<T = any> = Where | ((options: FilterOptionsProps<T>) => Where);
 
 type Admin = {
   position?: 'sidebar';
@@ -170,6 +171,7 @@ export type DateField = FieldBase & {
   admin?: Admin & {
     placeholder?: Record<string, string> | string
     date?: ConditionalDateProps
+    displayFormat?: string
   }
 }
 
@@ -183,7 +185,7 @@ export type GroupField = FieldBase & {
 
 export type RowAdmin = Omit<Admin, 'description'>;
 
-export type RowField = Omit<FieldBase, 'admin' | 'name'> & {
+export type RowField = Omit<FieldBase, 'admin' | 'name' | 'label'> & {
   admin?: RowAdmin;
   type: 'row';
   fields: Field[];
@@ -250,6 +252,7 @@ export type UploadField = FieldBase & {
 
 type CodeAdmin = Admin & {
   language?: string;
+  editorOptions?: EditorProps['options'];
 }
 
 export type CodeField = Omit<FieldBase, 'admin'> & {
@@ -257,6 +260,15 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
   minLength?: number
   maxLength?: number
   type: 'code';
+}
+
+type JSONAdmin = Admin & {
+  editorOptions?: EditorProps['options'];
+}
+
+export type JSONField = Omit<FieldBase, 'admin'> & {
+  admin?: JSONAdmin
+  type: 'json';
 }
 
 export type SelectField = FieldBase & {
@@ -286,7 +298,7 @@ export type ValueWithRelation = {
 }
 
 export function valueIsValueWithRelation(value: unknown): value is ValueWithRelation {
-  return typeof value === 'object' && 'relationTo' in value && 'value' in value;
+  return value !== null && typeof value === 'object' && 'relationTo' in value && 'value' in value;
 }
 
 export type RelationshipValue = (string | number)
@@ -399,6 +411,7 @@ export type Field =
   | SelectField
   | UploadField
   | CodeField
+  | JSONField
   | PointField
   | RowField
   | CollapsibleField
@@ -421,6 +434,7 @@ export type FieldAffectingData =
   | SelectField
   | UploadField
   | CodeField
+  | JSONField
   | PointField
   | TabAsField
 
@@ -440,6 +454,7 @@ export type NonPresentationalField =
   | SelectField
   | UploadField
   | CodeField
+  | JSONField
   | PointField
   | RowField
   | TabsField

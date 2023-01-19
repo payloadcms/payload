@@ -23,7 +23,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<PaginatedDocs<T>> {
+async function findVersions<T extends TypeWithVersion<T>>(
+  args: Arguments,
+): Promise<PaginatedDocs<T>> {
   const {
     where,
     page,
@@ -98,18 +100,16 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
     locale,
   });
 
-  const optionsToExecute = {
+  const paginatedDocs = await VersionsModel.paginate(query, {
     page: page || 1,
-    limit: limit || 10,
+    limit: limit ?? 10,
     sort: {
       [sortProperty]: sortOrder,
     },
     lean: true,
     leanWithId: true,
     useEstimatedCount,
-  };
-
-  const paginatedDocs = await VersionsModel.paginate(query, optionsToExecute);
+  });
 
   // /////////////////////////////////////
   // beforeRead - Collection

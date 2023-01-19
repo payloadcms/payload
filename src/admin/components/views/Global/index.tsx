@@ -20,9 +20,10 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{data?: Record<string, unknown>}>();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
-  const { permissions, user } = useAuth();
+  const { user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
-  const { getVersions, preferencesKey } = useDocumentInfo();
+  const [updatedAt, setUpdatedAt] = useState<string>();
+  const { getVersions, preferencesKey, docPermissions, getDocPermissions } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { t } = useTranslation();
 
@@ -50,9 +51,11 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   const onSave = useCallback(async (json) => {
     getVersions();
+    getDocPermissions();
+    setUpdatedAt(json?.result?.updatedAt);
     const state = await buildStateFromSchema({ fieldSchema: fields, data: json.result, operation: 'update', user, locale, t });
     setInitialState(state);
-  }, [getVersions, fields, user, locale, t]);
+  }, [getVersions, fields, user, locale, t, getDocPermissions]);
 
   const [{ data }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
@@ -79,21 +82,20 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     awaitInitialState();
   }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t]);
 
-  const globalPermissions = permissions?.globals?.[slug];
-
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultGlobal}
       CustomComponent={CustomEdit}
       componentProps={{
-        isLoading: !initialState,
+        isLoading: !initialState || !docPermissions,
         data: dataToRender,
-        permissions: globalPermissions,
+        permissions: docPermissions,
         initialState,
         global,
         onSave,
         apiURL: `${serverURL}${api}/globals/${slug}${global.versions?.drafts ? '?draft=true' : ''}`,
         action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
+        updatedAt: updatedAt || dataToRender?.updatedAt,
       }}
     />
   );

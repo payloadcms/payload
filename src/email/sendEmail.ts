@@ -1,7 +1,7 @@
-import { Message } from './types';
+import { SendMailOptions } from 'nodemailer';
 import logger from '../utilities/logger';
 
-export default async function sendEmail(message: Message): Promise<unknown> {
+export default async function sendEmail(message: SendMailOptions): Promise<unknown> {
   let result;
   try {
     const email = await this.email;

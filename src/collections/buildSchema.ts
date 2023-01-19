@@ -16,6 +16,11 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
     },
   );
 
+  if (config.indexSortableFields && collection.timestamps !== false) {
+    schema.index({ updatedAt: 1 });
+    schema.index({ createdAt: 1 });
+  }
+
   schema.plugin(paginate, { useEstimatedCount: true })
     .plugin(buildQueryPlugin);
 

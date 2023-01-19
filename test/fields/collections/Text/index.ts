@@ -1,9 +1,10 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 
 export const defaultText = 'default-text';
+export const textFieldsSlug = 'text-fields';
 
 const TextFields: CollectionConfig = {
-  slug: 'text-fields',
+  slug: textFieldsSlug,
   admin: {
     useAsTitle: 'text',
   },

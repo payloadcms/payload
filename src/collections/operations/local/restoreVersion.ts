@@ -1,13 +1,14 @@
-import { Payload } from '../../..';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { Payload } from '../../../payload';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
-import { TypeWithVersion } from '../../../versions/types';
 import { getDataLoader } from '../../dataloader';
 import restoreVersion from '../restoreVersion';
 import i18nInit from '../../../translations/init';
+import { APIError } from '../../../errors';
 
-export type Options = {
-  collection: string
+export type Options<T extends keyof GeneratedTypes['collections']> = {
+  collection: T
   id: string
   depth?: number
   locale?: string
@@ -17,7 +18,10 @@ export type Options = {
   showHiddenFields?: boolean
 }
 
-export default async function restoreVersionLocal<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<T> {
+export default async function restoreVersionLocal<T extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<GeneratedTypes['collections'][T]> {
   const {
     collection: collectionSlug,
     depth,
@@ -30,6 +34,11 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
   } = options;
 
   const collection = payload.collections[collectionSlug];
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+  }
+
   const i18n = i18nInit(payload.config.i18n);
   const req = {
     user,

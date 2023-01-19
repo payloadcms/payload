@@ -10,6 +10,7 @@ type PopulateArgs = {
   data: Record<string, unknown>
   field: RelationshipField | UploadField
   index?: number
+  key?: string
   showHiddenFields: boolean
 }
 
@@ -22,6 +23,7 @@ const populate = async ({
   data,
   field,
   index,
+  key,
   showHiddenFields,
 }: PopulateArgs) => {
   const dataToUpdate = dataReference;
@@ -33,7 +35,7 @@ const populate = async ({
     let relationshipValue;
     const shouldPopulate = depth && currentDepth <= depth;
 
-    if (typeof id !== 'string' && typeof id !== 'number' && typeof id?.toString === 'function') {
+    if (typeof id !== 'string' && typeof id !== 'number' && typeof id?.toString === 'function' && typeof id !== 'object') {
       id = id.toString();
     }
 
@@ -55,11 +57,17 @@ const populate = async ({
       relationshipValue = id;
     }
 
-    if (typeof index === 'number') {
+    if (typeof index === 'number' && typeof key === 'string') {
       if (Array.isArray(field.relationTo)) {
-        dataToUpdate[field.name][index].value = relationshipValue;
+        dataToUpdate[field.name][key][index].value = relationshipValue;
       } else {
-        dataToUpdate[field.name][index] = relationshipValue;
+        dataToUpdate[field.name][key][index] = relationshipValue;
+      }
+    } else if (typeof index === 'number' || typeof key === 'string') {
+      if (Array.isArray(field.relationTo)) {
+        dataToUpdate[field.name][index ?? key].value = relationshipValue;
+      } else {
+        dataToUpdate[field.name][index ?? key] = relationshipValue;
       }
     } else if (Array.isArray(field.relationTo)) {
       dataToUpdate[field.name].value = relationshipValue;
@@ -90,27 +98,67 @@ const relationshipPopulationPromise = async ({
 }: PromiseArgs): Promise<void> => {
   const resultingDoc = siblingDoc;
   const populateDepth = fieldHasMaxDepth(field) && field.maxDepth < depth ? field.maxDepth : depth;
+  const rowPromises = [];
 
-  if (fieldSupportsMany(field) && field.hasMany && Array.isArray(siblingDoc[field.name])) {
-    const rowPromises = [];
-
-    siblingDoc[field.name].forEach((relatedDoc, index) => {
-      const rowPromise = async () => {
-        if (relatedDoc) {
-          await populate({
-            depth: populateDepth,
-            currentDepth,
-            req,
-            overrideAccess,
-            data: relatedDoc,
-            dataReference: resultingDoc,
-            field,
-            index,
-            showHiddenFields,
+  if (fieldSupportsMany(field) && field.hasMany) {
+    if (req.locale === 'all' && typeof siblingDoc[field.name] === 'object') {
+      Object.keys(siblingDoc[field.name]).forEach((key) => {
+        if (Array.isArray(siblingDoc[field.name][key])) {
+          siblingDoc[field.name][key].forEach((relatedDoc, index) => {
+            const rowPromise = async () => {
+              await populate({
+                depth: populateDepth,
+                currentDepth,
+                req,
+                overrideAccess,
+                data: siblingDoc[field.name][key][index],
+                dataReference: resultingDoc,
+                field,
+                index,
+                key,
+                showHiddenFields,
+              });
+            };
+            rowPromises.push(rowPromise());
           });
         }
-      };
+      });
+    } else if (Array.isArray(siblingDoc[field.name])) {
+      siblingDoc[field.name].forEach((relatedDoc, index) => {
+        const rowPromise = async () => {
+          if (relatedDoc) {
+            await populate({
+              depth: populateDepth,
+              currentDepth,
+              req,
+              overrideAccess,
+              data: relatedDoc,
+              dataReference: resultingDoc,
+              field,
+              index,
+              showHiddenFields,
+            });
+          }
+        };
 
+        rowPromises.push(rowPromise());
+      });
+    }
+  } else if (typeof siblingDoc[field.name] === 'object' && req.locale === 'all') {
+    Object.keys(siblingDoc[field.name]).forEach((key) => {
+      const rowPromise = async () => {
+        await populate({
+          depth: populateDepth,
+          currentDepth,
+          req,
+          overrideAccess,
+          data: siblingDoc[field.name][key],
+          dataReference: resultingDoc,
+          field,
+          key,
+          showHiddenFields,
+        });
+      };
       rowPromises.push(rowPromise());
     });
 
@@ -127,6 +175,7 @@ const relationshipPopulationPromise = async ({
       showHiddenFields,
     });
   }
+  await Promise.all(rowPromises);
 };
 
 export default relationshipPopulationPromise;

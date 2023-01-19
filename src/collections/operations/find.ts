@@ -7,9 +7,9 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { queryDrafts } from '../../versions/drafts/queryDrafts';
 
 export type Arguments = {
   collection: Collection
@@ -28,7 +28,9 @@ export type Arguments = {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<PaginatedDocs<T>> {
+async function find<T extends TypeWithID>(
+  incomingArgs: Arguments,
+): Promise<PaginatedDocs<T>> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -51,6 +53,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     depth,
     currentDepth,
     draft: draftsEnabled,
+    collection,
     collection: {
       Model,
       config: collectionConfig,
@@ -136,47 +139,49 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     locale,
   });
 
-  const optionsToExecute = {
+  const usePagination = pagination && limit !== 0;
+  const limitToUse = limit ?? (usePagination ? 10 : 0);
+
+  let result: PaginatedDocs<T>;
+
+  const paginationOptions = {
     page: page || 1,
-    limit: limit || 10,
     sort: {
       [sortProperty]: sortOrder,
     },
+    limit: limitToUse,
     lean: true,
     leanWithId: true,
     useEstimatedCount,
-    pagination,
+    pagination: usePagination,
     useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
+    options: {
+      // limit must also be set here, it's ignored when pagination is false
+      limit: limitToUse,
+    },
   };
 
-  const paginatedDocs = await Model.paginate(query, optionsToExecute);
+  if (collectionConfig.versions?.drafts && draftsEnabled) {
+    result = await queryDrafts<T>({
+      accessResult,
+      collection,
+      locale,
+      paginationOptions,
+      payload,
+      where,
+    });
+  } else {
+    result = await Model.paginate(query, paginationOptions);
+  }
 
-  let result = {
-    ...paginatedDocs,
-    docs: paginatedDocs.docs.map((doc) => {
+  result = {
+    ...result,
+    docs: result.docs.map((doc) => {
       const sanitizedDoc = JSON.parse(JSON.stringify(doc));
       sanitizedDoc.id = sanitizedDoc._id;
       return sanitizeInternalFields(sanitizedDoc);
     }),
-  } as PaginatedDocs<T>;
-
-  // /////////////////////////////////////
-  // Replace documents with drafts if available
-  // /////////////////////////////////////
-
-  if (collectionConfig.versions?.drafts && draftsEnabled) {
-    result = {
-      ...result,
-      docs: await Promise.all(result.docs.map(async (doc) => replaceWithDraftIfAvailable({
-        accessResult,
-        payload,
-        entity: collectionConfig,
-        entityType: 'collection',
-        doc,
-        locale,
-      }))),
-    };
-  }
+  };
 
   // /////////////////////////////////////
   // beforeRead - Collection

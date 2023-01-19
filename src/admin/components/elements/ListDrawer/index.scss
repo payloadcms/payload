@@ -1,0 +1,97 @@
+@import '../../../scss/styles.scss';
+
+.list-drawer {
+  &__header {
+    margin-top: base(2.5);
+    width: 100%;
+
+    @include mid-break {
+      margin-top: base(1.5);
+    }
+  }
+
+  &__header-wrap {
+    display: flex;
+  }
+
+  &__header-content {
+    display: flex;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    align-items: flex-start;
+
+    .pill {
+      pointer-events: none;
+      margin: 0;
+      margin-top: base(0.25);
+      margin-left: base(0.5);
+
+      @include mid-break {
+        margin-top: 0;
+      }
+    }
+  }
+
+  &__header-text {
+    margin: 0;
+  }
+
+  &__toggler {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+
+    &:focus,
+    &:focus-within {
+      outline: none;
+    }
+
+    &:disabled {
+      pointer-events: none;
+    }
+  }
+
+  &__header-close {
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+    cursor: pointer;
+    overflow: hidden;
+    width: base(1);
+    height: base(1);
+
+    svg {
+      width: base(2.75);
+      height: base(2.75);
+      position: relative;
+      left: base(-.825);
+      top: base(-.825);
+
+      .stroke {
+        stroke-width: 2px;
+        vector-effect: non-scaling-stroke;
+      }
+    }
+  }
+
+  &__select-collection-wrap {
+    margin-top: base(1);
+  }
+
+  &__first-cell {
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  @include mid-break {
+    .collection-list__header {
+      margin-bottom: base(0.5);
+    }
+  }
+}
