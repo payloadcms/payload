@@ -1,11 +1,11 @@
 import React, { Suspense, lazy } from 'react';
-import Loading from '../Loading';
+import { ShimmerEffect } from '../ShimmerEffect';
 import { Props } from './types';
 
 const DatePicker = lazy(() => import('./DatePicker'));
 
 const DatePickerField: React.FC<Props> = (props) => (
-  <Suspense fallback={<Loading />}>
+  <Suspense fallback={<ShimmerEffect height={50} />}>
     <DatePicker {...props} />
   </Suspense>
 );

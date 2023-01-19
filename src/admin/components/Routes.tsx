@@ -8,12 +8,12 @@ import { useConfig } from './utilities/Config';
 import List from './views/collections/List';
 import DefaultTemplate from './templates/Default';
 import { requests } from '../api';
-import Loading from './elements/Loading';
 import StayLoggedIn from './modals/StayLoggedIn';
 import Versions from './views/Versions';
 import Version from './views/Version';
 import { DocumentInfoProvider } from './utilities/DocumentInfo';
 import { useLocale } from './utilities/Locale';
+import { LoadingOverlayToggle } from './elements/Loading';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -51,7 +51,7 @@ const Routes = () => {
     globals,
   } = config;
 
-
+  const isLoadingUser = Boolean(typeof user === 'undefined' || (user && typeof canAccessAdmin === 'undefined'));
   const userCollection = collections.find(({ slug }) => slug === userSlug);
 
   useEffect(() => {
@@ -73,7 +73,17 @@ const Routes = () => {
   }, [i18n.language, routes, userCollection]);
 
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={(
+      <LoadingOverlayToggle
+        show
+        name="route-suspense"
+      />
+    )}
+    >
+      <LoadingOverlayToggle
+        name="route-loader"
+        show={isLoadingUser}
+      />
       <Route
         path={routes.admin}
         render={({ match }) => {
@@ -90,11 +100,7 @@ const Routes = () => {
             );
           }
 
-          if (initialized === true) {
-            if (typeof user === 'undefined' || (user && typeof canAccessAdmin === 'undefined')) {
-              return <Loading />;
-            }
-
+          if (initialized === true && !isLoadingUser) {
             return (
               <Switch>
                 {Array.isArray(customRoutes) && customRoutes.map(({ path, Component, strict, exact, sensitive }) => (
@@ -365,7 +371,10 @@ const Routes = () => {
                         return <Unauthorized />;
                       }
 
-                      return <Loading />;
+                      return (
+                        // user without admin panel access
+                        <div />
+                      );
                     }
 
                     return <Redirect to={`${match.url}/login`} />;

@@ -172,7 +172,7 @@
     "leaveAnyway": "Toch weggaan",
     "leaveWithoutSaving": "Verlaten zonder op te slaan",
     "light": "Licht",
-    "loading": "Laden...",
+    "loading": "Laden",
     "locales": "Landinstellingen",
     "moveDown": "Verplaats naar beneden",
     "moveUp": "Verplaats naar boven",
@@ -212,6 +212,8 @@
     "untitled": "Zonder titel",
     "updatedAt": "Aangepast op",
     "updatedSuccessfully": "Succesvol aangepast.",
+    "updating": "Bijwerken",
+    "uploading": "Uploaden",
     "user": "Gebruiker",
     "users": "Gebruikers",
     "welcome": "Welkom"
