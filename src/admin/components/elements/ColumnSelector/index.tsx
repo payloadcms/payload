@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useId, useState } from 'react';
-import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import { useTranslation } from 'react-i18next';
 import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 import Pill from '../Pill';
@@ -12,6 +11,8 @@ import { getTranslation } from '../../../../utilities/getTranslation';
 import { useEditDepth } from '../../utilities/EditDepth';
 import './index.scss';
 import { Field } from '../../../../fields/config/types';
+import DraggableSortable from '../DraggableSortable';
+import DraggableSortableItem from '../DraggableSortable/DraggableSortableItem';
 
 const baseClass = 'column-selector';
 
@@ -49,78 +50,66 @@ const ColumnSelector: React.FC<Props> = (props) => {
     setColumns(newState.filter((field) => columns.find((column) => column === field.name)).map((field) => field.name));
   }, [columns, fields, setColumns, setFields]);
 
-  const onDragEnd = useCallback((result: DropResult) => {
-    if (!result.destination) return;
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-    moveColumn(sourceIndex, destinationIndex);
-  }, [moveColumn]);
+  if (!fields) { return null; }
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable
-        droppableId="columns-drop"
-        isDropDisabled={false}
-        direction="horizontal"
-      >
-        {(provided) => (
-          <div
-            className={baseClass}
-            ref={provided.innerRef}
-            {...provided.droppableProps}
+    <DraggableSortable
+      className={baseClass}
+      ids={fields.map((field) => field.name)}
+      onDragEnd={({ moveFromIndex, moveToIndex }) => {
+        moveColumn(moveFromIndex, moveToIndex);
+      }}
+    >
+      {fields.map((field, i) => {
+        const isEnabled = columns.find((column) => column === field.name);
+        return (
+          <DraggableSortableItem
+            id={field.name}
+            key={field.name}
           >
-            {fields && fields.map((field, i) => {
-              const isEnabled = columns.find((column) => column === field.name);
-              return (
-                <Draggable
-                  key={field.name}
-                  draggableId={field.name}
-                  index={i}
-                  isDragDisabled={false}
+            {({ setNodeRef, transform, attributes, listeners }) => (
+              <div
+                id={`col-${field.name}`}
+                ref={setNodeRef}
+                className={`${baseClass}__column_container`}
+                style={{
+                  transform,
+                }}
+              >
+                <span
+                  className={`${baseClass}__drag`}
+                  {...listeners}
+                  {...attributes}
                 >
-                  {(providedDrag) => (
-                    <div
-                      id={`col-${field.name}`}
-                      ref={providedDrag.innerRef}
-                      className={`${baseClass}__column_container`}
-                      {...providedDrag.draggableProps}
-                    >
-                      <span
-                        className={`${baseClass}__drag`}
-                        {...providedDrag.dragHandleProps}
-                      >
-                        <DragHandle />
-                      </span>
-                      <Pill
-                        onClick={() => {
-                          if (isEnabled) {
-                            setColumns(columns.filter((remainingColumn) => remainingColumn !== field.name));
-                          } else {
-                            setColumns(fields
-                              .filter((f) => columns.find((column) => column === f.name) || f.name === field.name)
-                              .map((f) => f.name));
-                          }
-                        }}
-                        alignIcon="left"
-                        key={`${field.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
-                        icon={isEnabled ? <X /> : <Plus />}
-                        className={[
-                          `${baseClass}__column`,
-                          isEnabled && `${baseClass}__column--active`,
-                        ].filter(Boolean).join(' ')}
-                      >
-                        {getTranslation(field.label || field.name, i18n)}
-                      </Pill>
-                    </div>
-                  )}
-                </Draggable>
-              );
-            })}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+                  <DragHandle />
+                </span>
+                <Pill
+                  onClick={() => {
+                    if (isEnabled) {
+                      setColumns(columns.filter((remainingColumn) => remainingColumn !== field.name));
+                    } else {
+                      setColumns(fields
+                        .filter((f) => columns.find((column) => column === f.name) || f.name === field.name)
+                        .map((f) => f.name));
+                    }
+                  }}
+                  alignIcon="left"
+                  key={`${field.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+                  icon={isEnabled ? <X /> : <Plus />}
+                  className={[
+                    `${baseClass}__column`,
+                    isEnabled && `${baseClass}__column--active`,
+                  ].filter(Boolean).join(' ')}
+                >
+                  {getTranslation(field.label || field.name, i18n)}
+                </Pill>
+              </div>
+            )}
+          </DraggableSortableItem>
+        );
+      })}
+      ;
+    </DraggableSortable>
   );
 };
 
