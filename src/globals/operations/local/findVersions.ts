@@ -1,15 +1,16 @@
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Document, Where } from '../../../types';
 import { PaginatedDocs } from '../../../mongoose/types';
-import { TypeWithVersion } from '../../../versions/types';
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { PayloadRequest } from '../../../express/types';
 import findVersions from '../findVersions';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { TypeWithVersion } from '../../../versions/types';
 
-export type Options = {
-  slug: string
+export type Options<T extends keyof GeneratedTypes['globals']> = {
+  slug: T
   depth?: number
   page?: number
   limit?: number
@@ -22,7 +23,10 @@ export type Options = {
   where?: Where
 }
 
-export default async function findVersionsLocal<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<PaginatedDocs<T>> {
+export default async function findVersionsLocal<T extends keyof GeneratedTypes['globals']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['globals'][T]>>> {
   const {
     slug: globalSlug,
     depth,
@@ -41,7 +45,7 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
   const i18n = i18nInit(payload.config.i18n);
 
   if (!globalConfig) {
-    throw new APIError(`The global with slug ${globalSlug} can't be found.`);
+    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);
   }
 
   const req = {

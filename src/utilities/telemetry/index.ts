@@ -3,7 +3,7 @@ import Conf from 'conf';
 import { randomBytes } from 'crypto';
 import findUp from 'find-up';
 import fs from 'fs';
-import { Payload } from '../../index';
+import { Payload } from '../../payload';
 import { ServerInitEvent } from './events/serverInit';
 import { AdminInitEvent } from './events/adminInit';
 import { oneWayHash } from './oneWayHash';
@@ -28,7 +28,7 @@ type Args = {
   event: TelemetryEvent
 }
 
-export const sendEvent = async ({ payload, event } : Args): Promise<void> => {
+export const sendEvent = async ({ payload, event }: Args): Promise<void> => {
   if (payload.config.telemetry !== false) {
     try {
       const packageJSON = await getPackageJSON();
@@ -49,7 +49,7 @@ export const sendEvent = async ({ payload, event } : Args): Promise<void> => {
         body: JSON.stringify({ ...baseEvent, ...event }),
       });
     } catch (_) {
-    // Eat any errors in sending telemetry event
+      // Eat any errors in sending telemetry event
     }
   }
 };

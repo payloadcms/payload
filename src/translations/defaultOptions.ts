@@ -6,4 +6,7 @@ export const defaultOptions: InitOptions = {
   debug: false,
   supportedLngs: Object.keys(translations),
   resources: translations,
+  interpolation: {
+    escapeValue: false,
+  },
 };

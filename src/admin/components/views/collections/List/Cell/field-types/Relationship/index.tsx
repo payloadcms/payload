@@ -52,13 +52,13 @@ const RelationshipCell = (props) => {
       {values.map(({ relationTo, value }, i) => {
         const document = documents[relationTo][value];
         const relatedCollection = collections.find(({ slug }) => slug === relationTo);
+        const label = document?.[relatedCollection.admin.useAsTitle] ? document[relatedCollection.admin.useAsTitle] : `${t('untitled')} - ID: ${value}`;
+
         return (
           <React.Fragment key={i}>
-            { document === false && `${t('untitled')} - ID: ${value}`}
-            { document === null && t('loading')}
-            { document && (
-              document[relatedCollection.admin.useAsTitle] ? document[relatedCollection.admin.useAsTitle] : `${t('untitled')} - ID: ${value}`
-            )}
+            {document === false && `${t('untitled')} - ID: ${value}`}
+            {document === null && t('loading')}
+            {document && label}
             {values.length > i + 1 && ', '}
           </React.Fragment>
         );
@@ -67,7 +67,7 @@ const RelationshipCell = (props) => {
         Array.isArray(cellData) && cellData.length > totalToShow
         && t('fields:itemsAndMore', { items: '', count: cellData.length - totalToShow })
       }
-      { values.length === 0 && t('noLabel', { label: getTranslation(field.label, i18n) })}
+      {values.length === 0 && t('noLabel', { label: getTranslation(field.label, i18n) })}
     </div>
   );
 };

@@ -1,15 +1,15 @@
-import { TypeWithID } from '../../config/types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PaginatedDocs } from '../../../mongoose/types';
 import { Document, Where } from '../../../types';
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { PayloadRequest } from '../../../express/types';
 import find from '../find';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
 
-export type Options = {
-  collection: string
+export type Options<T extends keyof GeneratedTypes['collections']> = {
+  collection: T
   depth?: number
   currentDepth?: number
   page?: number
@@ -27,8 +27,10 @@ export type Options = {
   req?: PayloadRequest
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default async function findLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<PaginatedDocs<T>> {
+export default async function findLocal<T extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<PaginatedDocs<GeneratedTypes['collections'][T]>> {
   const {
     collection: collectionSlug,
     depth,
@@ -52,7 +54,7 @@ export default async function findLocal<T extends TypeWithID = any>(payload: Pay
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
   req.payloadAPI = 'local';
@@ -66,7 +68,7 @@ export default async function findLocal<T extends TypeWithID = any>(payload: Pay
 
   if (typeof user !== 'undefined') req.user = user;
 
-  return find({
+  return find<GeneratedTypes['collections'][T]>({
     depth,
     currentDepth,
     sort,

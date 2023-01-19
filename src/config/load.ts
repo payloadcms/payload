@@ -1,7 +1,6 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 // eslint-disable-next-line import/no-extraneous-dependencies
-import swcRegister from '@swc/register';
 import path from 'path';
 import pino from 'pino';
 import Logger from '../utilities/logger';
@@ -14,24 +13,6 @@ const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
   const localLogger = logger ?? Logger();
 
   const configPath = findConfig();
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  swcRegister({
-    sourceMaps: 'inline',
-    jsc: {
-      parser: {
-        syntax: 'typescript',
-        tsx: true,
-      },
-    },
-    ignore: [
-      /node_modules[\\/](?!.pnpm[\\/].*[\\/]node_modules[\\/])(?!payload[\\/]dist[\\/]admin|payload[\\/]components).*/,
-    ],
-    module: {
-      type: 'commonjs',
-    },
-  });
 
   clientFiles.forEach((ext) => {
     require.extensions[ext] = () => null;
