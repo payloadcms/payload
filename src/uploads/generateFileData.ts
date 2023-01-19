@@ -14,21 +14,21 @@ import { FileData, FileToSave } from './types';
 import canResizeImage from './canResizeImage';
 import isImage from './isImage';
 
-type Args = {
+type Args<T> = {
   config: SanitizedConfig,
   collection: Collection
   throwOnMissingFile?: boolean
   req: PayloadRequest
-  data: Record<string, unknown>
+  data: T
   overwriteExistingFiles?: boolean
 }
 
-type Result = Promise<{
-  data: Record<string, unknown>
+type Result<T> = Promise<{
+  data: T
   files: FileToSave[]
 }>
 
-export const generateFileData = async ({
+export const generateFileData = async <T>({
   config,
   collection: {
     config: collectionConfig,
@@ -38,7 +38,7 @@ export const generateFileData = async ({
   data,
   throwOnMissingFile,
   overwriteExistingFiles,
-}: Args): Result => {
+}: Args<T>): Result<T> => {
   let newData = data;
   const filesToSave: FileToSave[] = [];
 

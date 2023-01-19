@@ -1,18 +1,14 @@
-import express from 'express';
 import mongoose from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 import buildQueryPlugin from '../mongoose/buildQuery';
 import buildModel from './buildModel';
-import { Payload } from '../index';
+import { Payload } from '../payload';
 import { getVersionsModelName } from '../versions/getVersionsModelName';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 import buildSchema from '../mongoose/buildSchema';
 import { CollectionModel } from '../collections/config/types';
-import mountEndpoints from '../express/mountEndpoints';
-import buildEndpoints from './buildEndpoints';
-import { SanitizedGlobalConfig } from './config/types';
 
-export default function initGlobals(ctx: Payload): void {
+export default function initGlobalsLocal(ctx: Payload): void {
   if (ctx.config.globals) {
     ctx.globals = {
       Model: buildModel(ctx.config),
@@ -30,7 +26,7 @@ export default function initGlobals(ctx: Payload): void {
             disableUnique: true,
             draftsEnabled: true,
             options: {
-              timestamps: true,
+              timestamps: false,
             },
           },
         );
@@ -41,18 +37,5 @@ export default function initGlobals(ctx: Payload): void {
         ctx.versions[global.slug] = mongoose.model(versionModelName, versionSchema) as CollectionModel;
       }
     });
-
-    // If not local, open routes
-    if (!ctx.local) {
-      ctx.config.globals.forEach((global: SanitizedGlobalConfig) => {
-        const router = express.Router();
-        const { slug } = global;
-
-        const endpoints = buildEndpoints(global);
-        mountEndpoints(ctx.express, router, endpoints);
-
-        ctx.router.use(`/globals/${slug}`, router);
-      });
-    }
   }
 }

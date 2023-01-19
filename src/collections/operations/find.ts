@@ -9,7 +9,7 @@ import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { mergeDrafts } from '../../versions/drafts/mergeDrafts';
+import { queryDrafts } from '../../versions/drafts/queryDrafts';
 
 export type Arguments = {
   collection: Collection
@@ -28,7 +28,9 @@ export type Arguments = {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<PaginatedDocs<T>> {
+async function find<T extends TypeWithID>(
+  incomingArgs: Arguments,
+): Promise<PaginatedDocs<T>> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -160,13 +162,12 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   };
 
   if (collectionConfig.versions?.drafts && draftsEnabled) {
-    result = await mergeDrafts({
+    result = await queryDrafts<T>({
       accessResult,
       collection,
       locale,
       paginationOptions,
       payload,
-      query,
       where,
     });
   } else {

@@ -9,7 +9,7 @@ import { DateTimeResolver } from 'graphql-scalars';
 import findOne from '../operations/findOne';
 import update from '../operations/update';
 import deleteOperation from '../operations/delete';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 
 function initCollectionsGraphQL(payload: Payload): void {
   const valueType = GraphQLJSON;

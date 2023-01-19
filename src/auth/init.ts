@@ -1,6 +1,6 @@
 import passport from 'passport';
 import AnonymousStrategy from 'passport-anonymous';
-import { Payload } from '../index';
+import { Payload } from '../payload';
 import jwtStrategy from './strategies/jwt';
 
 function initAuth(ctx: Payload): void {

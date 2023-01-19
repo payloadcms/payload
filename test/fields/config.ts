@@ -102,8 +102,8 @@ export default buildConfig({
         ...uploadsDoc,
         media: createdPNGDoc.id,
       },
-      file: jpgFile
-     });
+      file: jpgFile,
+    });
 
     const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace('{{ARRAY_DOC_ID}}', createdArrayDoc.id));
     const richTextDocWithRelationship = { ...richTextDocWithRelId };

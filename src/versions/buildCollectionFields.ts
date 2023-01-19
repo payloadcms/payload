@@ -14,6 +14,20 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
       type: 'group',
       fields: collection.fields,
     },
+    {
+      name: 'createdAt',
+      type: 'date',
+      admin: {
+        disabled: true,
+      },
+    },
+    {
+      name: 'updatedAt',
+      type: 'date',
+      admin: {
+        disabled: true,
+      },
+    },
   ];
 
   if (collection?.versions?.drafts && collection?.versions?.drafts?.autosave) {

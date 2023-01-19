@@ -18,7 +18,7 @@ import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
 import { ArrayField, CodeField, JSONField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField, TabsField, CheckboxField, BlockField, tabHasName } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
-import { Payload } from '../../index';
+import { Payload } from '../../payload';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { groupOrTabHasRequiredSubfield } from '../../utilities/groupOrTabHasRequiredSubfield';
 

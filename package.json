@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "1.5.9",
+  "version": "1.5.12-canary.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "engines": {
@@ -37,7 +37,7 @@
     "build": "yarn copyfiles && yarn build:tsc && yarn build:components",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"yarn build:tsc\"",
     "dev": "nodemon",
-    "dev:generate-types": "node ./test/generateTypes.js",
+    "dev:generate-types": "ts-node -T ./test/generateTypes.ts",
     "pretest": "yarn build",
     "test": "yarn test:int && yarn test:components && yarn test:e2e",
     "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
@@ -51,7 +51,7 @@
     "release:patch": "release-it patch",
     "release:minor": "release-it minor",
     "release:major": "release-it major",
-    "release:beta": "release-it prepatch --config .release-it.beta.json",
+    "release:canary": "release-it prepatch --config .release-it.canary.json",
     "fix": "eslint \"src/**/*.ts\" --fix",
     "lint": "eslint \"src/**/*.ts\""
   },
@@ -134,6 +134,7 @@
     "minimist": "^1.2.0",
     "mkdirp": "^1.0.4",
     "mongoose": "6.5.0",
+    "mongoose-aggregate-paginate-v2": "^1.0.6",
     "mongoose-paginate-v2": "^1.6.1",
     "nodemailer": "^6.4.2",
     "object-to-formdata": "^4.1.0",
@@ -191,7 +192,7 @@
     "webpack-hot-middleware": "^2.25.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.23.1",
+    "@playwright/test": "^1.29.2",
     "@release-it/conventional-changelog": "^5.1.1",
     "@swc/jest": "^0.2.24",
     "@testing-library/jest-dom": "^5.11.4",

@@ -15,6 +15,9 @@
     "strict": false, /* Enable all strict type-checking options. */
     "moduleResolution": "node", /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
     "paths": {
+      "payload/generated-types": [
+        "./src/generated-types.ts",
+      ],
       "payload/config": [
         "./src/config/types.ts"
       ],
@@ -29,6 +32,9 @@
     "resolveJsonModule": true,
     "skipLibCheck": true, /* Skip type checking of declaration files. */
     "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
+  },
+  "ts-node": {
+    "swc": true,
   },
   "include": [
     "src/"
