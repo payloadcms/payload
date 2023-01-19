@@ -1,4 +1,4 @@
-## [1.5.12-canary.0](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.12-canary.0) (2023-01-18)
+## [1.5.13-canary.0](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.13-canary.0) (2023-01-19)
 
 ### 🐛 Bug Fixes
 
@@ -7,6 +7,12 @@
 - fixes [#1905](https://github.com/payloadcms/payload/issues/1905)
 - fixes [#1885](https://github.com/payloadcms/payload/issues/1885)
 - fixes [#1869](https://github.com/payloadcms/payload/issues/1869)
+- versions error on cosmos db ([338c4e2](https://github.com/payloadcms/payload/commit/338c4e2fb1f7fa4877b14b6a7adfdd80b08996d3))
+- hides fallback locale checkbox when field localization is set to false ([#1893](https://github.com/payloadcms/payload/issues/1893)) ([0623039](https://github.com/payloadcms/payload/commit/06230398d7251240e45e843f1a4d70e6e7f547e7))
+- [#1870](https://github.com/payloadcms/payload/issues/1870) and [#1859](https://github.com/payloadcms/payload/issues/1859) ([c0ac155](https://github.com/payloadcms/payload/commit/c0ac155a719aa69e1d0e2da97659c56d024325db))
+- bump pino and pino-pretty to accommodate yarn 2 ([773fb57](https://github.com/payloadcms/payload/commit/773fb57c71f89d5157847ee4907c1472874f9a61))
+- creates backup of latest version after restoring draft [#1873](https://github.com/payloadcms/payload/issues/1873) ([bd4da37](https://github.com/payloadcms/payload/commit/bd4da37f237d7bd33583d21b4ed8b910dd7d71cb))
+- disables escapeValue for i18n ([#1886](https://github.com/payloadcms/payload/issues/1886)) ([eec4b3a](https://github.com/payloadcms/payload/commit/eec4b3ace5a3c9bbea168f2c87de1243414042aa))
 
 ### ✨ Features
 
