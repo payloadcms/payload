@@ -181,7 +181,7 @@
     "leaveAnyway": "Forlat likevel",
     "leaveWithoutSaving": "Forlat uten å lagre",
     "light": "Lys",
-    "loading": "Laster...",
+    "loading": "Laster",
     "locales": "Språk",
     "moveDown": "Flytt ned",
     "moveUp": "Flytt opp",
@@ -221,6 +221,8 @@
     "untitled": "Uten tittel",
     "updatedAt": "Oppdatert",
     "updatedSuccessfully": "Oppdatert.",
+    "updating": "Oppdatering",
+    "uploading": "Opplasting",
     "user": "Bruker",
     "users": "Brukere",
     "welcome": "Velkommen"

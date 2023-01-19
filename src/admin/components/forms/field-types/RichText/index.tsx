@@ -1,11 +1,11 @@
 import React, { Suspense, lazy } from 'react';
-import Loading from '../../../elements/Loading';
+import { ShimmerEffect } from '../../../elements/ShimmerEffect';
 import { Props } from './types';
 
 const RichText = lazy(() => import('./RichText'));
 
 const RichTextField: React.FC<Props> = (props) => (
-  <Suspense fallback={<Loading />}>
+  <Suspense fallback={<ShimmerEffect height="35vh" />}>
     <RichText {...props} />
   </Suspense>
 );
