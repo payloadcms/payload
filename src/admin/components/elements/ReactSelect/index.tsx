@@ -89,6 +89,7 @@ const SortableSelect: React.FC<Props> = (props) => {
   return (
     <DraggableSortable
       ids={ids}
+      className="react-select-container"
       onDragEnd={({ moveFromIndex, moveToIndex }) => {
         let sorted = value;
         if (value && Array.isArray(value)) {
