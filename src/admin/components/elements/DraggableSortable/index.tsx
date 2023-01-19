@@ -17,7 +17,14 @@ import React, { useCallback, useId } from 'react';
 
 import { Props } from './types';
 
-const DraggableSortable: React.FC<Props> = ({ onDragEnd, ids, className, children }) => {
+const DraggableSortable: React.FC<Props> = (props) => {
+  const {
+    onDragEnd,
+    ids,
+    className,
+    children,
+  } = props;
+
   const id = useId();
 
   const { setNodeRef } = useDroppable({

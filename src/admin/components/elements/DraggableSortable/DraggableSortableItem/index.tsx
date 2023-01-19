@@ -4,7 +4,13 @@ import { useSortable } from '@dnd-kit/sortable';
 
 import { Props } from './types';
 
-export const DraggableSortableItem: React.FC<Props> = ({ id, disabled, children }) => {
+export const DraggableSortableItem: React.FC<Props> = (props) => {
+  const {
+    id,
+    disabled,
+    children,
+  } = props;
+
   const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({
     id,
     disabled,
