@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 import express, { NextFunction, Response } from 'express';
-import { Config as GeneratedTypes } from 'payload/generated-types';
 import { InitOptions } from './config/types';
 
 import authenticate from './express/middleware/authenticate';
