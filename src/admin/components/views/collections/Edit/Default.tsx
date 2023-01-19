@@ -89,7 +89,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
         show={isLoading}
         name="collection-edit"
         type="withoutNav"
-        loadingText={`${isLoading ? t('loading') : `${isEditing ? 'Updating' : t('creating')}`} ${getTranslation(singular, i18n)}`}
+        loadingText={`${isLoading ? t('loading') : `${isEditing ? t('updating') : t('creating')}`} ${getTranslation(singular, i18n)}`}
       />
 
       <div className={classes}>

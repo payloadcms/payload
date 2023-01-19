@@ -138,7 +138,7 @@ const Upload: React.FC<Props> = (props) => {
       <LoadingOverlayToggle
         show={isProcessing}
         name={`${collection}-upload-file`}
-        loadingText={`${isEditing ? 'Uploading' : t('creating')} ${getTranslation(collection.labels.singular, i18n)}`}
+        loadingText={`${isEditing ? t('uploading') : t('creating')} ${getTranslation(collection.labels.singular, i18n)}`}
       />
 
       <div className={classes}>

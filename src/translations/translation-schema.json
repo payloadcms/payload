@@ -797,6 +797,12 @@
         "updatedSuccessfully": {
           "type": "string"
         },
+        "updating": {
+          "type": "string"
+        },
+        "uploading": {
+          "type": "string"
+        },
         "user": {
           "type": "string"
         },
