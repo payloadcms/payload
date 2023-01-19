@@ -3,7 +3,7 @@ import passport from 'passport';
 import path from 'path';
 import getExecuteStaticAccess from '../auth/getExecuteStaticAccess';
 import authenticate from './middleware/authenticate';
-import { Payload } from '../index';
+import { Payload } from '../payload';
 import corsHeaders from './middleware/corsHeaders';
 
 function initStatic(ctx: Payload): void {

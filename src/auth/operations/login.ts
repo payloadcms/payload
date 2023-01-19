@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { CookieOptions, Response } from 'express';
 import { AuthenticationError, LockedAuth } from '../../errors';
 import { PayloadRequest } from '../../express/types';
@@ -17,9 +18,9 @@ export type Result = {
   exp?: number,
 }
 
-export type Arguments = {
+export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection,
-  data: {
+  data: Omit<T, 'id'> & {
     email: string
     password: string
   }
@@ -30,7 +31,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function login<T>(incomingArgs: Arguments): Promise<Result & { user: T}> {
+async function login<TSlug extends keyof GeneratedTypes['collections']>(
+  incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
+): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   let args = incomingArgs;
 
   // /////////////////////////////////////

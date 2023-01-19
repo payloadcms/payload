@@ -1,5 +1,5 @@
 import { Document } from '../types';
-import { Payload } from '..';
+import { Payload } from '../payload';
 import { Collection, TypeWithID } from '../collections/config/types';
 
 type Args = {

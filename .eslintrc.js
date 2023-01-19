@@ -57,6 +57,7 @@ module.exports = {
           {
             ignore: [
               'payload-config',
+              'payload/generated-types',
             ],
           },
         ],

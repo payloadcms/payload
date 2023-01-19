@@ -6,10 +6,10 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
-import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
+import { TypeWithVersion } from '../../versions/types';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -23,7 +23,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<PaginatedDocs<T>> {
+async function findVersions<T extends TypeWithVersion<T>>(
+  args: Arguments,
+): Promise<PaginatedDocs<T>> {
   const {
     where,
     page,

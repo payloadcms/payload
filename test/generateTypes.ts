@@ -1,7 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-
-const { generateTypes } = require('../dist/bin/generateTypes');
+import path from 'path';
+import fs from 'fs';
+import { generateTypes } from '../src/bin/generateTypes';
 
 const [testConfigDir] = process.argv.slice(2);
 

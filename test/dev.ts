@@ -1,12 +1,31 @@
-
+import fs from 'fs';
+import path from 'path';
 import express from 'express';
 import { v4 as uuid } from 'uuid';
 import payload from '../src';
 
+const [testSuiteDir] = process.argv.slice(2);
+
+if (!testSuiteDir) {
+  console.error('ERROR: You must provide an argument for "testSuiteDir"');
+  process.exit(1);
+}
+
+const configPath = path.resolve(__dirname, testSuiteDir, 'config.ts');
+
+if (!fs.existsSync(configPath)) {
+  console.error('ERROR: You must pass a valid directory under test/ that contains a config.ts');
+  process.exit(1);
+}
+
+process.env.PAYLOAD_CONFIG_PATH = configPath;
+
+process.env.PAYLOAD_DROP_DATABASE = 'true';
+
 const expressApp = express();
 
-const init = async () => {
-  await payload.initAsync({
+const startDev = async () => {
+  await payload.init({
     secret: uuid(),
     mongoURL: process.env.MONGO_URL || 'mongodb://localhost/payload',
     express: expressApp,
@@ -35,4 +54,4 @@ const init = async () => {
   });
 };
 
-init();
+startDev();

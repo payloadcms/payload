@@ -1,4 +1,4 @@
-import { Payload } from '..';
+import { Payload } from '../payload';
 import { PayloadRequest } from '../express/types';
 import { SanitizedConfig, EmailOptions } from '../config/types';
 import { Collection } from '../collections/config/types';

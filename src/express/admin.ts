@@ -3,7 +3,7 @@ import compression from 'compression';
 import history from 'connect-history-api-fallback';
 import path from 'path';
 import initWebpack from '../webpack/init';
-import { Payload } from '../index';
+import { Payload } from '../payload';
 
 const router = express.Router();
 
