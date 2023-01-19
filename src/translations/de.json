@@ -180,7 +180,7 @@
     "leaveAnyway": "Trotzdem verlassen",
     "leaveWithoutSaving": "Ohne speichern verlassen",
     "light": "Hell",
-    "loading": "Lädt...",
+    "loading": "Lädt",
     "locales": "Sprachumgebungen",
     "moveDown": "Nach unten bewegen",
     "moveUp": "Nach oben bewegen",
@@ -220,6 +220,8 @@
     "untitled": "ohne Titel",
     "updatedAt": "Aktualisiert am",
     "updatedSuccessfully": "Erfolgreich aktualisiert.",
+    "updating": "Aktualisierung",
+    "uploading": "Hochladen",
     "user": "Benutzer",
     "users": "Benutzer",
     "welcome": "Willkommen"
