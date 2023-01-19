@@ -54,7 +54,7 @@
 
   &__bar {
     width: 2px;
-    background-color: var(--theme-elevation-1000);
+    background-color: currentColor;
     height: 15px;
 
     &:nth-child(1) {
