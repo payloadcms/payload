@@ -28,7 +28,7 @@ import Pill from '../../../elements/Pill';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
 import { getTranslation } from '../../../../../utilities/getTranslation';
-import { NullifyField } from '../../NullifyField';
+import { NullifyLocaleField } from '../../NullifyField';
 import { useConfig } from '../../../utilities/Config';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 
@@ -264,7 +264,7 @@ const BlocksField: React.FC<Props> = (props) => {
           />
         </header>
 
-        <NullifyField
+        <NullifyLocaleField
           path={path}
           fieldValue={value}
         />
