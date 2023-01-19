@@ -21,7 +21,7 @@ import mountEndpoints from './express/mountEndpoints';
 import { Payload, getPayload } from './payload';
 
 export const initHTTP = async (options: InitOptions): Promise<Payload> => {
-  options.local = false;
+  if (typeof options.local === 'undefined') options.local = false;
   const payload = await getPayload(options);
 
   if (!options.local) {
