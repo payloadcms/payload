@@ -171,7 +171,7 @@
     "leaveAnyway": "Sair mesmo assim",
     "leaveWithoutSaving": "Sair sem salvar",
     "light": "Claro",
-    "loading": "Carregando",
+    "loading": "Carregando...",
     "locales": "Localizações",
     "moveDown": "Mover para Baixo",
     "moveUp": "Mover para Cima",
@@ -211,8 +211,6 @@
     "untitled": "Sem título",
     "updatedAt": "Atualizado Em",
     "updatedSuccessfully": "Atualizado com sucesso.",
-    "updating": "Atualizando",
-    "uploading": "Fazendo upload",
     "user": "usuário",
     "users": "usuários",
     "welcome": "Boas vindas"

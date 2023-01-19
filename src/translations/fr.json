@@ -172,7 +172,7 @@
     "leaveAnyway": "Quitter quand même",
     "leaveWithoutSaving": "Quitter sans sauvegarder",
     "light": "Lumière ou Jour",
-    "loading": "Chargement en cours",
+    "loading": "Chargement en cours...",
     "locales": "Paramètres régionaux",
     "moveDown": "Déplacer vers le bas",
     "moveUp": "Déplacer vers le haut",
@@ -212,8 +212,6 @@
     "untitled": "Sans titre",
     "updatedAt": "Modifié le",
     "updatedSuccessfully": "Mis à jour avec succés.",
-    "updating": "Mise à jour",
-    "uploading": "Téléchargement",
     "user": "Utilisateur",
     "users": "Utilisateurs",
     "welcome": "Bienvenu(e)"

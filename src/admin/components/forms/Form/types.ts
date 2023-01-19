@@ -28,6 +28,7 @@ export type Props = {
   disabled?: boolean
   onSubmit?: (fields: Fields, data: Data) => void
   method?: 'get' | 'patch' | 'delete' | 'post'
+  action?: string
   handleResponse?: (res: Response) => void
   onSuccess?: (json: unknown) => void
   className?: string
@@ -39,15 +40,7 @@ export type Props = {
   log?: boolean
   validationOperation?: 'create' | 'update'
   children?: React.ReactNode
-} & (
-    {
-      action: string
-      disableNativeFormSubmission?: boolean
-    } | {
-      action?: string
-      disableNativeFormSubmission?: never
-    }
-  )
+}
 
 export type SubmitOptions = {
   action?: string

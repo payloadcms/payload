@@ -171,7 +171,7 @@
     "leaveAnyway": "すぐに画面を離れる",
     "leaveWithoutSaving": "内容が保存されていません",
     "light": "ライトモード",
-    "loading": "ローディング中",
+    "loading": "ローディング中...",
     "locales": "ロケール",
     "moveDown": "下へ移動",
     "moveUp": "上へ移動",
@@ -211,8 +211,6 @@
     "untitled": "Untitled",
     "updatedAt": "更新日",
     "updatedSuccessfully": "更新成功。",
-    "updating": "更新中",
-    "uploading": "アップロード中",
     "user": "ユーザー",
     "users": "ユーザー",
     "welcome": "ようこそ"

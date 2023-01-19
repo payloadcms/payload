@@ -172,7 +172,7 @@
     "leaveAnyway": "Lämna ändå",
     "leaveWithoutSaving": "Lämna utan att spara",
     "light": "Ljus",
-    "loading": "Läser in",
+    "loading": "Läser in...",
     "locales": "Språk",
     "moveDown": "Flytta Ner",
     "moveUp": "Flytta Upp",
@@ -212,8 +212,6 @@
     "untitled": "Namnlös",
     "updatedAt": "Uppdaterades Vid",
     "updatedSuccessfully": "Uppdaterades framgångsrikt.",
-    "updating": "Uppdatering",
-    "uploading": "Uppladdning",
     "user": "Användare",
     "users": "Användare",
     "welcome": "Välkommen"

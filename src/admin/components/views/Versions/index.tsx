@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import Eyebrow from '../../elements/Eyebrow';
-import { LoadingOverlayToggle } from '../../elements/Loading';
+import Loading from '../../elements/Loading';
 import { useStepNav } from '../../elements/StepNav';
 import { StepNavItem } from '../../elements/StepNav/types';
 import Meta from '../../utilities/Meta';
@@ -157,75 +157,71 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   }
 
   return (
-    <React.Fragment>
-      <LoadingOverlayToggle
-        show={isLoadingVersions}
-        name="versions"
+    <div className={baseClass}>
+      <Meta
+        title={metaTitle}
+        description={metaDesc}
       />
-      <div className={baseClass}>
-        <Meta
-          title={metaTitle}
-          description={metaDesc}
-        />
-        <Eyebrow />
-        <Gutter className={`${baseClass}__wrap`}>
-          <header className={`${baseClass}__header`}>
-            <div className={`${baseClass}__intro`}>{t('showingVersionsFor')}</div>
-            {useIDLabel && (
-              <IDLabel id={doc?.id} />
-            )}
-            {!useIDLabel && (
-              <h1>
-                {heading}
-              </h1>
-            )}
-          </header>
-
-          {versionsData?.totalDocs > 0 && (
-            <React.Fragment>
-              <Table
-                data={versionsData?.docs}
-                columns={tableColumns}
+      <Eyebrow />
+      <Gutter className={`${baseClass}__wrap`}>
+        <header className={`${baseClass}__header`}>
+          <div className={`${baseClass}__intro`}>{t('showingVersionsFor')}</div>
+          {useIDLabel && (
+            <IDLabel id={doc?.id} />
+          )}
+          {!useIDLabel && (
+            <h1>
+              {heading}
+            </h1>
+          )}
+        </header>
+        {isLoadingVersions && (
+          <Loading />
+        )}
+        {versionsData?.totalDocs > 0 && (
+          <React.Fragment>
+            <Table
+              data={versionsData?.docs}
+              columns={tableColumns}
+            />
+            <div className={`${baseClass}__page-controls`}>
+              <Paginator
+                limit={versionsData.limit}
+                totalPages={versionsData.totalPages}
+                page={versionsData.page}
+                hasPrevPage={versionsData.hasPrevPage}
+                hasNextPage={versionsData.hasNextPage}
+                prevPage={versionsData.prevPage}
+                nextPage={versionsData.nextPage}
+                numberOfNeighbors={1}
               />
-              <div className={`${baseClass}__page-controls`}>
-                <Paginator
-                  limit={versionsData.limit}
-                  totalPages={versionsData.totalPages}
-                  page={versionsData.page}
-                  hasPrevPage={versionsData.hasPrevPage}
-                  hasNextPage={versionsData.hasNextPage}
-                  prevPage={versionsData.prevPage}
-                  nextPage={versionsData.nextPage}
-                  numberOfNeighbors={1}
-                />
-                {versionsData?.totalDocs > 0 && (
-                  <React.Fragment>
-                    <div className={`${baseClass}__page-info`}>
-                      {(versionsData.page * versionsData.limit) - (versionsData.limit - 1)}
-                      -
-                      {versionsData.totalPages > 1 && versionsData.totalPages !== versionsData.page ? (versionsData.limit * versionsData.page) : versionsData.totalDocs}
-                      {' '}
-                      {t('of')}
-                      {' '}
-                      {versionsData.totalDocs}
-                    </div>
-                    <PerPage
-                      limits={collection?.admin?.pagination?.limits}
-                      limit={limit ? Number(limit) : 10}
-                    />
-                  </React.Fragment>
-                )}
-              </div>
-            </React.Fragment>
-          )}
-          {versionsData?.totalDocs === 0 && (
-            <div className={`${baseClass}__no-versions`}>
-              {t('noFurtherVersionsFound')}
+              {versionsData?.totalDocs > 0 && (
+                <React.Fragment>
+                  <div className={`${baseClass}__page-info`}>
+                    {(versionsData.page * versionsData.limit) - (versionsData.limit - 1)}
+                    -
+                    {versionsData.totalPages > 1 && versionsData.totalPages !== versionsData.page ? (versionsData.limit * versionsData.page) : versionsData.totalDocs}
+                    {' '}
+                    {t('of')}
+                    {' '}
+                    {versionsData.totalDocs}
+                  </div>
+                  <PerPage
+                    limits={collection?.admin?.pagination?.limits}
+                    limit={limit ? Number(limit) : 10}
+                  />
+                </React.Fragment>
+              )}
             </div>
-          )}
-        </Gutter>
-      </div>
-    </React.Fragment>
+          </React.Fragment>
+        )}
+        {versionsData?.totalDocs === 0 && (
+          <div className={`${baseClass}__no-versions`}>
+            {t('noFurtherVersionsFound')}
+          </div>
+        )}
+      </Gutter>
+    </div>
   );
 };
 

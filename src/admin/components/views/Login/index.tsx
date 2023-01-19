@@ -11,7 +11,6 @@ import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-import { useLoadingOverlay } from '../../utilities/LoadingOverlay';
 
 import './index.scss';
 
@@ -21,7 +20,6 @@ const Login: React.FC = () => {
   const history = useHistory();
   const { t } = useTranslation('authentication');
   const { user, setToken } = useAuth();
-  const { toggleLoadingOverlay } = useLoadingOverlay();
   const config = useConfig();
   const {
     admin: {
@@ -30,6 +28,7 @@ const Login: React.FC = () => {
       components: {
         beforeLogin,
         afterLogin,
+        logout
       } = {},
     },
     serverURL,
@@ -44,95 +43,81 @@ const Login: React.FC = () => {
 
   const onSuccess = (data) => {
     if (data.token) {
-      toggleLoadingOverlay({
-        key: 'login',
-        isLoading: false,
-      });
       setToken(data.token);
       history.push(admin);
     }
   };
 
-  return (
-    <React.Fragment>
-      {user ? (
-        // Logout
-        <MinimalTemplate className={baseClass}>
-          <Meta
-            title={t('login')}
-            description={t('loginUser')}
-            keywords={t('login')}
-          />
-          <div className={`${baseClass}__wrap`}>
-            <h1>{t('alreadyLoggedIn')}</h1>
-            <p>
-              <Trans
-                i18nKey="loggedIn"
-                t={t}
-              >
-                <Link to={`${admin}${logoutRoute}`}>{t('logOut')}</Link>
-              </Trans>
-            </p>
-            <br />
-            <Button
-              el="link"
-              buttonStyle="secondary"
-              to={admin}
+  if (user) {
+    return (
+      <MinimalTemplate className={baseClass}>
+        <Meta
+          title={t('login')}
+          description={t('loginUser')}
+          keywords={t('login')}
+        />
+        <div className={`${baseClass}__wrap`}>
+          <h1>{t('alreadyLoggedIn')}</h1>
+          <p>
+            <Trans
+              i18nKey="loggedIn"
+              t={t}
             >
-              {t('general:backToDashboard')}
-            </Button>
-          </div>
-        </MinimalTemplate>
-      ) : (
-        // Login
-        <MinimalTemplate className={baseClass}>
-          <Meta
-            title={t('login')}
-            description={t('loginUser')}
-            keywords={t('login')}
-          />
-          <div className={`${baseClass}__brand`}>
-            <Logo />
-          </div>
-          {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
-          {!collection.auth.disableLocalStrategy && (
-            <Form
-              disableSuccessStatus
-              waitForAutocomplete
-              disableNativeFormSubmission={false}
-              onSubmit={() => {
-                toggleLoadingOverlay({
-                  key: 'login',
-                  isLoading: true,
-                });
-              }}
-              onSuccess={onSuccess}
-              method="post"
-              action={`${serverURL}${api}/${userSlug}/login`}
-            >
-              <Email
-                label={t('general:email')}
-                name="email"
-                admin={{ autoComplete: 'email' }}
-                required
-              />
-              <Password
-                label={t('general:password')}
-                name="password"
-                autoComplete="off"
-                required
-              />
-              <Link to={`${admin}/forgot`}>
-                {t('forgotPasswordQuestion')}
-              </Link>
-              <FormSubmit>{t('login')}</FormSubmit>
-            </Form>
-          )}
-          {Array.isArray(afterLogin) && afterLogin.map((Component, i) => <Component key={i} />)}
-        </MinimalTemplate>
+              <Link to={`${admin}${logoutRoute}`}>{t('logOut')}</Link>
+            </Trans>
+          </p>
+          <br />
+          <Button
+            el="link"
+            buttonStyle="secondary"
+            to={admin}
+          >
+            {t('general:backToDashboard')}
+          </Button>
+        </div>
+      </MinimalTemplate>
+    );
+  }
 
+  return (
+    <MinimalTemplate className={baseClass}>
+      <Meta
+        title={t('login')}
+        description={t('loginUser')}
+        keywords={t('login')}
+      />
+      <div className={`${baseClass}__brand`}>
+        <Logo />
+      </div>
+      {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
+      {!collection.auth.disableLocalStrategy && (
+        <Form
+          disableSuccessStatus
+          waitForAutocomplete
+          onSuccess={onSuccess}
+          method="post"
+          action={`${serverURL}${api}/${userSlug}/login`}
+        >
+          <Email
+            label={t('general:email')}
+            name="email"
+            admin={{ autoComplete: 'email' }}
+            required
+          />
+          <Password
+            label={t('general:password')}
+            name="password"
+            autoComplete="off"
+            required
+          />
+          <Link to={`${admin}/forgot`}>
+            {t('forgotPasswordQuestion')}
+          </Link>
+          <FormSubmit>{t('login')}</FormSubmit>
+        </Form>
       )}
-    </React.Fragment>
+      {Array.isArray(afterLogin) && afterLogin.map((Component, i) => <Component key={i} />)}
+    </MinimalTemplate>
   );
 };
 
