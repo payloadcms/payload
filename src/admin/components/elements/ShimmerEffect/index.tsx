@@ -4,11 +4,11 @@ import { useDelay } from '../../../hooks/useDelay';
 import './index.scss';
 
 type ShimmerEffectT = {
-  shimmerDelay?: number | string;
+  animationDelay?: string;
   height?: number | string;
   width?: number | string;
 }
-export const ShimmerEffect: React.FC<ShimmerEffectT> = ({ shimmerDelay = 0, height = '60px', width = '100%' }) => {
+export const ShimmerEffect: React.FC<ShimmerEffectT> = ({ animationDelay = '0ms', height = '60px', width = '100%' }) => {
   return (
     <div
       className="shimmer-effect"
@@ -20,7 +20,7 @@ export const ShimmerEffect: React.FC<ShimmerEffectT> = ({ shimmerDelay = 0, heig
       <div
         className="shimmer-effect__shine"
         style={{
-          animationDelay: `calc(${typeof shimmerDelay === 'number' ? `${shimmerDelay}ms` : shimmerDelay} + 500ms)`,
+          animationDelay,
         }}
       />
     </div>
@@ -52,7 +52,7 @@ export const StaggeredShimmers: React.FC<StaggeredShimmersT> = ({ count, classNa
           className={shimmerItemClassName}
         >
           <ShimmerEffect
-            shimmerDelay={`calc(${i} * ${shimmerDelayToPass})`}
+            animationDelay={`calc(${i} * ${shimmerDelayToPass})`}
             height={height}
             width={width}
           />
