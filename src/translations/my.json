@@ -171,7 +171,7 @@
     "leaveAnyway": "ဘာဖြစ်ဖြစ် ထွက်မည်။",
     "leaveWithoutSaving": "မသိမ်းဘဲ ထွက်မည်။",
     "light": "အလင်း",
-    "loading": "ဖွင့်နေသည်",
+    "loading": "ဖွင့်နေသည်...",
     "locales": "Locales",
     "moveDown": "Move Down",
     "moveUp": "Move Up",
@@ -211,8 +211,6 @@
     "untitled": "ခေါင်းစဥ်မဲ့",
     "updatedAt": "ပြင်ဆင်ခဲ့သည့်အချိန်",
     "updatedSuccessfully": "အပ်ဒိတ်လုပ်ပြီးပါပြီ။",
-    "updating": "ပြင်ဆင်ရန်",
-    "uploading": "တင်ပေးနေသည်",
     "user": "အသုံးပြုသူ",
     "users": "အသုံးပြုသူများ",
     "welcome": "ကြိုဆိုပါတယ်။"

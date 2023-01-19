@@ -11,11 +11,11 @@ import nl from './nl.json';
 import pl from './pl.json';
 import pt from './pt.json';
 import ru from './ru.json';
+import tr from './tr.json';
+import vi from './vi.json';
 import sv from './sv.json';
 import th from './th.json';
-import tr from './tr.json';
 import ua from './ua.json';
-import vi from './vi.json';
 
 export default {
   cs,
@@ -31,9 +31,9 @@ export default {
   pl,
   pt,
   ru,
+  tr,
+  vi,
   sv,
   th,
-  tr,
   ua,
-  vi,
 };

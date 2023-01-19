@@ -182,7 +182,7 @@
     "leaveAnyway": "ออกจากหน้านี้",
     "leaveWithoutSaving": "ออกโดยไม่บันทึก",
     "light": "สว่าง",
-    "loading": "กำลังโหลด",
+    "loading": "กำลังโหลด...",
     "locales": "ภาษา",
     "moveDown": "ขยับขึ้น",
     "moveUp": "ขยับลง",
@@ -222,8 +222,6 @@
     "untitled": "ไม่มีชื่อ",
     "updatedAt": "แก้ไขเมื่อ",
     "updatedSuccessfully": "แก้ไขสำเร็จ",
-    "updating": "กำลังอัปเดต",
-    "uploading": "กำลังอัปโหลด",
     "user": "ผู้ใช้",
     "users": "ผู้ใช้",
     "welcome": "ยินดีต้อนรับ"

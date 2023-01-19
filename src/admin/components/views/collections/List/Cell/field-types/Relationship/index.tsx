@@ -57,7 +57,7 @@ const RelationshipCell = (props) => {
         return (
           <React.Fragment key={i}>
             {document === false && `${t('untitled')} - ID: ${value}`}
-            {document === null && `${t('loading')}...`}
+            {document === null && t('loading')}
             {document && label}
             {values.length > i + 1 && ', '}
           </React.Fragment>

@@ -55,34 +55,6 @@
     margin-left: auto;
   }
 
-  &__shimmer {
-    margin-top: base(1.75);
-  }
-
-  &__shimmer--rows {
-    >div {
-      margin-top: 8px;
-    }
-  }
-
-  &__shimmer--uploads {
-    // match upload cards
-    margin: base(2) -#{base(.5)};
-    width: calc(100% + #{$baseline});
-    display: flex;
-    flex-wrap: wrap;
-
-    >div {
-      min-width: 0;
-      width: calc(16.66%);
-
-      >div {
-        margin: base(.5);
-        padding-bottom: 110%;
-      }
-    }
-  }
-
   @include mid-break {
     &__wrap {
       padding-top: 0;
@@ -110,20 +82,6 @@
     .paginator {
       width: 100%;
       margin-bottom: $baseline;
-    }
-
-    &__shimmer--uploads {
-      >div {
-        width: 33.33%;
-      }
-    }
-  }
-
-  @include small-break {
-    &__shimmer--uploads {
-      >div {
-        width: 50%;
-      }
     }
   }
 }
