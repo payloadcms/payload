@@ -1,11 +1,13 @@
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../../express/types';
 import forgotPassword, { Result } from '../forgotPassword';
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
+import { APIError } from '../../../errors';
 
-export type Options = {
-  collection: string
+export type Options<T extends keyof GeneratedTypes['collections']> = {
+  collection: T
   data: {
     email: string
   }
@@ -14,7 +16,10 @@ export type Options = {
   req?: PayloadRequest
 }
 
-async function localForgotPassword(payload: Payload, options: Options): Promise<Result> {
+async function localForgotPassword<T extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<Result> {
   const {
     collection: collectionSlug,
     data,
@@ -24,6 +29,10 @@ async function localForgotPassword(payload: Payload, options: Options): Promise<
   } = options;
 
   const collection = payload.collections[collectionSlug];
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+  }
 
   req.payloadAPI = 'local';
   req.i18n = i18n(payload.config.i18n);

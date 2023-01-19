@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
-
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import { useLocale } from '../../utilities/Locale';
 import DefaultAccount from './Default';
@@ -43,7 +42,7 @@ const AccountView: React.FC = () => {
 
   const { fields } = collection;
 
-  const [{ data }] = usePayloadAPI(
+  const [{ data, isLoading: isLoadingData }] = usePayloadAPI(
     `${serverURL}${api}/${slug}/${id}`,
     {
       initialParams: {
@@ -91,6 +90,8 @@ const AccountView: React.FC = () => {
     awaitInitialState();
   }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, t]);
 
+  const isLoading = !initialState || !docPermissions || isLoadingData;
+
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultAccount}
@@ -103,7 +104,7 @@ const AccountView: React.FC = () => {
         hasSavePermission,
         initialState,
         apiURL,
-        isLoading: !initialState || !docPermissions,
+        isLoading,
         onSave,
       }}
     />

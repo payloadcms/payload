@@ -323,10 +323,12 @@ export type AuthCollection = {
 
 export type TypeWithID = {
   id: string | number
+  [key: string]: unknown
 }
 
 export type TypeWithTimestamps = {
   id: string | number
   createdAt: string
   updatedAt: string
+  [key: string]: unknown
 }

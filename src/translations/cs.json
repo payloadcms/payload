@@ -179,7 +179,7 @@
     "leaveAnyway": "Přesto odejít",
     "leaveWithoutSaving": "Odejít bez uložení",
     "light": "Světlé",
-    "loading": "Načítání...",
+    "loading": "Načítání",
     "locales": "Lokality",
     "moveDown": "Posunout dolů",
     "moveUp": "Posunout nahoru",
@@ -219,6 +219,8 @@
     "untitled": "Bez názvu",
     "updatedAt": "Aktualizováno v",
     "updatedSuccessfully": "Úspěšně aktualizováno.",
+    "updating": "Aktualizace",
+    "uploading": "Nahrávání",
     "user": "Uživatel",
     "users": "Uživatelé",
     "welcome": "Vítejte"

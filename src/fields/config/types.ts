@@ -9,7 +9,7 @@ import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import { RowLabel } from '../../admin/components/forms/RowLabel/types';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../express/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound, Forbidden, ErrorDeletingFile } from '../../errors';
@@ -11,6 +12,7 @@ import { hasWhereAccessResult } from '../../auth/types';
 import { FileData } from '../../uploads/types';
 import fileExists from '../../uploads/fileExists';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 
 export type Arguments = {
   depth?: number
@@ -21,7 +23,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
+async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']>(
+  incomingArgs: Arguments,
+): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -48,6 +52,7 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
     req: {
       t,
       locale,
+      payload,
       payload: {
         config,
         preferences,
@@ -165,6 +170,18 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
   await preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
 
   // /////////////////////////////////////
+  // Delete versions
+  // /////////////////////////////////////
+
+  if (!collectionConfig.versions.retainDeleted) {
+    deleteCollectionVersions({
+      payload,
+      id,
+      slug: collectionConfig.slug,
+    });
+  }
+
+  // /////////////////////////////////////
   // afterDelete - Collection
   // /////////////////////////////////////
 
@@ -173,7 +190,6 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
 
     result = await hook({ req, id, doc: result }) || result;
   }, Promise.resolve());
-
 
   // /////////////////////////////////////
   // afterRead - Fields

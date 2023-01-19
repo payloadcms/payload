@@ -191,7 +191,7 @@ export const addFieldStatePromise = async ({
           id,
           operation,
           fields: field.fields,
-          data: data?.[field.name],
+          data: data?.[field.name] || {},
           fullData,
           parentPassesCondition: passesCondition,
           path: `${path}${field.name}.`,

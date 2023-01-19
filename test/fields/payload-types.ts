@@ -5,11 +5,31 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
-export interface Config {}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "array-fields".
- */
+export interface Config {
+  collections: {
+    'array-fields': ArrayField;
+    'block-fields': BlockField;
+    'code-fields': CodeField;
+    'collapsible-fields': CollapsibleField;
+    'conditional-logic': ConditionalLogic;
+    'date-fields': DateField;
+    'radio-fields': RadioField;
+    'group-fields': GroupField;
+    'indexed-fields': IndexedField;
+    'json-fields': JsonField;
+    'number-fields': NumberField;
+    'point-fields': PointField;
+    'relationship-fields': RelationshipField;
+    'rich-text-fields': RichTextField;
+    'select-fields': SelectField;
+    'tabs-fields': TabsField;
+    'text-fields': TextField;
+    uploads: Upload;
+    uploads2: Uploads2;
+    users: User;
+  };
+  globals: {};
+}
 export interface ArrayField {
   id: string;
   items: {
@@ -43,10 +63,6 @@ export interface ArrayField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block-fields".
- */
 export interface BlockField {
   id: string;
   blocks: (
@@ -187,10 +203,6 @@ export interface BlockField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "code-fields".
- */
 export interface CodeField {
   id: string;
   javascript?: string;
@@ -201,10 +213,6 @@ export interface CodeField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collapsible-fields".
- */
 export interface CollapsibleField {
   id: string;
   text: string;
@@ -225,10 +233,6 @@ export interface CollapsibleField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "conditional-logic".
- */
 export interface ConditionalLogic {
   id: string;
   text: string;
@@ -237,10 +241,6 @@ export interface ConditionalLogic {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "date-fields".
- */
 export interface DateField {
   id: string;
   default: string;
@@ -251,20 +251,12 @@ export interface DateField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "radio-fields".
- */
 export interface RadioField {
   id: string;
   radio?: 'one' | 'two' | 'three';
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "group-fields".
- */
 export interface GroupField {
   id: string;
   group: {
@@ -296,10 +288,6 @@ export interface GroupField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "indexed-fields".
- */
 export interface IndexedField {
   id: string;
   text: string;
@@ -322,10 +310,6 @@ export interface IndexedField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "json-fields".
- */
 export interface JsonField {
   id: string;
   json?: {
@@ -334,10 +318,6 @@ export interface JsonField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "number-fields".
- */
 export interface NumberField {
   id: string;
   number?: number;
@@ -351,10 +331,6 @@ export interface NumberField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "point-fields".
- */
 export interface PointField {
   id: string;
   /**
@@ -377,10 +353,6 @@ export interface PointField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationship-fields".
- */
 export interface RelationshipField {
   id: string;
   relationship:
@@ -396,10 +368,6 @@ export interface RelationshipField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "text-fields".
- */
 export interface TextField {
   id: string;
   text: string;
@@ -411,10 +379,6 @@ export interface TextField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "rich-text-fields".
- */
 export interface RichTextField {
   id: string;
   title: string;
@@ -428,10 +392,6 @@ export interface RichTextField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "select-fields".
- */
 export interface SelectField {
   id: string;
   select?: 'one' | 'two' | 'three';
@@ -443,10 +403,6 @@ export interface SelectField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tabs-fields".
- */
 export interface TabsField {
   id: string;
   array: {
@@ -532,10 +488,6 @@ export interface TabsField {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploads".
- */
 export interface Upload {
   id: string;
   text?: string;
@@ -549,10 +501,6 @@ export interface Upload {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploads2".
- */
 export interface Uploads2 {
   id: string;
   text?: string;
@@ -566,10 +514,6 @@ export interface Uploads2 {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
 export interface User {
   id: string;
   email?: string;

@@ -1,13 +1,14 @@
-import { Payload } from '../../..';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
-import { TypeWithID } from '../../config/types';
 import findOne from '../findOne';
 import i18nInit from '../../../translations/init';
+import { APIError } from '../../../errors';
 
-export type Options = {
-  slug: string
+export type Options<T extends keyof GeneratedTypes['globals']> = {
+  slug: T
   depth?: number
   locale?: string
   fallbackLocale?: string
@@ -17,7 +18,10 @@ export type Options = {
   draft?: boolean
 }
 
-export default async function findOneLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<T> {
+export default async function findOneLocal<T extends keyof GeneratedTypes['globals']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<GeneratedTypes['globals'][T]> {
   const {
     slug: globalSlug,
     depth,
@@ -32,6 +36,11 @@ export default async function findOneLocal<T extends TypeWithID = any>(payload: 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
   const i18n = i18nInit(payload.config.i18n);
 
+
+  if (!globalConfig) {
+    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);
+  }
+
   const req = {
     user,
     payloadAPI: 'local',
@@ -45,7 +54,7 @@ export default async function findOneLocal<T extends TypeWithID = any>(payload: 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findOne({
-    slug: globalSlug,
+    slug: globalSlug as string,
     depth,
     globalConfig,
     overrideAccess,

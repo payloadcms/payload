@@ -1,12 +1,13 @@
-import { Payload } from '../../..';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
-import { TypeWithVersion } from '../../../versions/types';
 import restoreVersion from '../restoreVersion';
 import i18nInit from '../../../translations/init';
+import { APIError } from '../../../errors';
 
-export type Options = {
+export type Options<T extends keyof GeneratedTypes['globals']> = {
   slug: string
   id: string
   depth?: number
@@ -17,7 +18,10 @@ export type Options = {
   showHiddenFields?: boolean
 }
 
-export default async function restoreVersionLocal<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<T> {
+export default async function restoreVersionLocal<T extends keyof GeneratedTypes['globals']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<GeneratedTypes['globals'][T]> {
   const {
     slug: globalSlug,
     depth,
@@ -31,6 +35,10 @@ export default async function restoreVersionLocal<T extends TypeWithVersion<T> =
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
   const i18n = i18nInit(payload.config.i18n);
+
+  if (!globalConfig) {
+    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);
+  }
 
   const req = {
     user,
