@@ -65,20 +65,22 @@ export const promise = async ({
       const fallbackValue = siblingDoc[field.name][fallbackLocale];
       const isNullOrUndefined = typeof value === 'undefined' || value === null;
 
-      switch (field.type) {
-        case 'text':
-        case 'textarea': {
-          if (value === '' || isNullOrUndefined) {
-            hoistedValue = fallbackValue;
+      if (fallbackValue) {
+        switch (field.type) {
+          case 'text':
+          case 'textarea': {
+            if (value === '' || isNullOrUndefined) {
+              hoistedValue = fallbackValue;
+            }
+            break;
           }
-          break;
-        }
 
-        default: {
-          if (isNullOrUndefined) {
-            hoistedValue = fallbackValue;
+          default: {
+            if (isNullOrUndefined) {
+              hoistedValue = fallbackValue;
+            }
+            break;
           }
-          break;
         }
       }
     }
@@ -86,9 +88,8 @@ export const promise = async ({
     siblingDoc[field.name] = hoistedValue;
   }
 
-  // Sanitize outgoing field data
+  // Sanitize outgoing field value
   switch (field.type) {
-    case 'tab':
     case 'group': {
       // Fill groups with empty objects so fields with hooks within groups can populate
       // themselves virtually as necessary
@@ -100,7 +101,7 @@ export const promise = async ({
     }
     case 'tabs': {
       field.tabs.forEach((tab) => {
-        if (tabHasName(tab) && typeof siblingDoc[tab.name] === 'undefined') {
+        if (tabHasName(tab) && (typeof siblingDoc[tab.name] === 'undefined' || siblingDoc[tab.name] === null)) {
           siblingDoc[tab.name] = {};
         }
       });
