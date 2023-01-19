@@ -182,7 +182,7 @@
     "leaveAnyway": "Leave anyway",
     "leaveWithoutSaving": "Leave without saving",
     "light": "Light",
-    "loading": "Loading...",
+    "loading": "Loading",
     "locales": "Locales",
     "moveDown": "Move Down",
     "moveUp": "Move Up",
@@ -222,6 +222,8 @@
     "untitled": "Untitled",
     "updatedAt": "Updated At",
     "updatedSuccessfully": "Updated successfully.",
+    "updating": "Updating",
+    "uploading": "Uploading",
     "user": "User",
     "users": "Users",
     "welcome": "Welcome"
