@@ -23,7 +23,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<PaginatedDocs<T>> {
+async function findVersions<T extends TypeWithVersion<T>>(
+  args: Arguments,
+): Promise<PaginatedDocs<T>> {
   const {
     where,
     page,

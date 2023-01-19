@@ -8,6 +8,20 @@ export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[]
       type: 'group',
       fields: global.fields,
     },
+    {
+      name: 'createdAt',
+      type: 'date',
+      admin: {
+        disabled: true,
+      },
+    },
+    {
+      name: 'updatedAt',
+      type: 'date',
+      admin: {
+        disabled: true,
+      },
+    },
   ];
 
   if (global?.versions?.drafts && global?.versions?.drafts?.autosave) {

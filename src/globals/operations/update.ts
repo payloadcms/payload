@@ -1,31 +1,31 @@
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { docHasTimestamps, Where } from '../../types';
-import { SanitizedGlobalConfig, TypeWithID } from '../config/types';
+import { SanitizedGlobalConfig } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { saveGlobalVersion } from '../../versions/saveGlobalVersion';
-import { saveGlobalDraft } from '../../versions/drafts/saveGlobalDraft';
-import { ensurePublishedGlobalVersion } from '../../versions/ensurePublishedGlobalVersion';
-import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
 import { hasWhereAccessResult } from '../../auth';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { PayloadRequest } from '../../express/types';
+import { saveVersion } from '../../versions/saveVersion';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
-type Args = {
+type Args<T extends { [field: string | number | symbol]: unknown }> = {
   globalConfig: SanitizedGlobalConfig
-  slug: string
+  slug: string | number | symbol
   req: PayloadRequest
   depth?: number
   overrideAccess?: boolean
   showHiddenFields?: boolean
   draft?: boolean
   autosave?: boolean
-  data: Record<string, unknown>
+  data: Omit<T, 'id'>
 }
 
-async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
+async function update<TSlug extends keyof GeneratedTypes['globals']>(
+  args: Args<GeneratedTypes['globals'][TSlug]>,
+): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
     globalConfig,
     slug,
@@ -183,62 +183,41 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   });
 
   // /////////////////////////////////////
-  // Create version from existing doc
-  // /////////////////////////////////////
-
-  let createdVersion;
-
-  if (globalConfig.versions && !shouldSaveDraft) {
-    createdVersion = await saveGlobalVersion({
-      payload,
-      config: globalConfig,
-      req,
-      docWithLocales: result,
-    });
-  }
-
-  // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
-  if (shouldSaveDraft) {
-    await ensurePublishedGlobalVersion({
-      payload,
-      config: globalConfig,
-      req,
-      docWithLocales: result,
-    });
-
-    global = await saveGlobalDraft({
-      payload,
-      config: globalConfig,
-      data: result,
-      autosave,
-    });
-  } else {
-    try {
-      if (existingGlobal) {
-        global = await Model.findOneAndUpdate(
-          { globalType: slug },
-          result,
-          { new: true },
-        );
-      } else {
-        result.globalType = slug;
-        global = await Model.create(result);
-      }
-    } catch (error) {
-      cleanUpFailedVersion({
-        payload,
-        entityConfig: globalConfig,
-        version: createdVersion,
-      });
+  if (!shouldSaveDraft) {
+    if (existingGlobal) {
+      global = await Model.findOneAndUpdate(
+        { globalType: slug },
+        result,
+        { new: true },
+      );
+    } else {
+      result.globalType = slug;
+      global = await Model.create(result);
     }
   }
 
   global = JSON.stringify(global);
   global = JSON.parse(global);
   global = sanitizeInternalFields(global);
+
+  // /////////////////////////////////////
+  // Create version
+  // /////////////////////////////////////
+
+  if (globalConfig.versions) {
+    global = await saveVersion({
+      payload,
+      global: globalConfig,
+      req,
+      docWithLocales: result,
+      autosave,
+      draft: shouldSaveDraft,
+      createdAt: global.createdAt,
+    });
+  }
 
   // /////////////////////////////////////
   // afterRead - Fields

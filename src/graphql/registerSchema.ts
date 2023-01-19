@@ -2,7 +2,7 @@
 import * as GraphQL from 'graphql';
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import queryComplexity, { fieldExtensionsEstimator, simpleEstimator } from 'graphql-query-complexity';
-import { Payload } from '..';
+import { Payload } from '../payload';
 import buildLocaleInputType from './schema/buildLocaleInputType';
 import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType';
 import initCollections from '../collections/graphql/init';
