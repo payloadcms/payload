@@ -17,6 +17,7 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
     {
       name: 'createdAt',
       type: 'date',
+      index: true,
       admin: {
         disabled: true,
       },
@@ -24,6 +25,7 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
     {
       name: 'updatedAt',
       type: 'date',
+      index: true,
       admin: {
         disabled: true,
       },
