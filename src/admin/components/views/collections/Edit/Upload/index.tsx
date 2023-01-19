@@ -7,6 +7,9 @@ import Button from '../../../../elements/Button';
 import FileDetails from '../../../../elements/FileDetails';
 import Error from '../../../../forms/Error';
 import { Props, Data } from './types';
+import { useFormProcessing } from '../../../../forms/Form/context';
+import { LoadingOverlayToggle } from '../../../../elements/Loading';
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -32,11 +35,13 @@ const Upload: React.FC<Props> = (props) => {
   const [dragging, setDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
   const [replacingFile, setReplacingFile] = useState(false);
-  const { t } = useTranslation('upload');
+  const { t, i18n } = useTranslation('upload');
+  const isProcessing = useFormProcessing();
 
   const {
     data = {} as Data,
     collection,
+    isEditing,
   } = props;
 
   const { filename } = data;
@@ -129,79 +134,87 @@ const Upload: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={classes}>
-      <Error
-        showError={showError}
-        message={errorMessage}
+    <React.Fragment>
+      <LoadingOverlayToggle
+        show={isProcessing}
+        name={`${collection}-upload-file`}
+        loadingText={`${isEditing ? 'Uploading' : t('creating')} ${getTranslation(collection.labels.singular, i18n)}`}
       />
-      {(filename && !replacingFile) && (
-        <FileDetails
-          doc={data}
-          collection={collection}
-          handleRemove={() => {
-            setReplacingFile(true);
-            setValue(null);
-          }}
+
+      <div className={classes}>
+        <Error
+          showError={showError}
+          message={errorMessage}
         />
-      )}
-      {(!filename || replacingFile) && (
-        <div className={`${baseClass}__upload`}>
-          {value && (
-            <div className={`${baseClass}__file-selected`}>
-              <span
-                className={`${baseClass}__filename`}
-              >
-                {value.name}
-              </span>
-              <Button
-                icon="x"
-                round
-                buttonStyle="icon-label"
-                iconStyle="with-border"
-                onClick={() => {
-                  setValue(null);
-                  inputRef.current.value = null;
-                }}
-              />
-            </div>
-          )}
-          {!value && (
-            <React.Fragment>
-              <div
-                className={`${baseClass}__drop-zone`}
-                ref={dropRef}
-                onPaste={(e) => {
-                  if (e?.clipboardData?.files.length) {
-                    const fileObject = e.clipboardData.files[0];
-                    if (fileObject) setValue(fileObject);
-                  }
-                }}
-              >
-                <Button
-                  size="small"
-                  buttonStyle="secondary"
-                  onClick={() => setSelectingFile(true)}
-                  className={`${baseClass}__file-button`}
-                >
-                  {t('selectFile')}
-                </Button>
-                <p className={`${baseClass}__drag-label`}>
-                  {t('general:or')}
-                  {' '}
-                  {t('dragAndDrop')}
-                </p>
-              </div>
-            </React.Fragment>
-          )}
-          <input
-            ref={inputRef}
-            type="file"
-            accept={collection?.upload?.mimeTypes?.join(',')}
-            onChange={handleInputChange}
+        {(filename && !replacingFile) && (
+          <FileDetails
+            doc={data}
+            collection={collection}
+            handleRemove={() => {
+              setReplacingFile(true);
+              setValue(null);
+            }}
           />
-        </div>
-      )}
-    </div>
+        )}
+        {(!filename || replacingFile) && (
+          <div className={`${baseClass}__upload`}>
+            {value && (
+              <div className={`${baseClass}__file-selected`}>
+                <span
+                  className={`${baseClass}__filename`}
+                >
+                  {value.name}
+                </span>
+                <Button
+                  icon="x"
+                  round
+                  buttonStyle="icon-label"
+                  iconStyle="with-border"
+                  onClick={() => {
+                    setValue(null);
+                    inputRef.current.value = null;
+                  }}
+                />
+              </div>
+            )}
+            {!value && (
+              <React.Fragment>
+                <div
+                  className={`${baseClass}__drop-zone`}
+                  ref={dropRef}
+                  onPaste={(e) => {
+                    if (e?.clipboardData?.files.length) {
+                      const fileObject = e.clipboardData.files[0];
+                      if (fileObject) setValue(fileObject);
+                    }
+                  }}
+                >
+                  <Button
+                    size="small"
+                    buttonStyle="secondary"
+                    onClick={() => setSelectingFile(true)}
+                    className={`${baseClass}__file-button`}
+                  >
+                    {t('selectFile')}
+                  </Button>
+                  <p className={`${baseClass}__drag-label`}>
+                    {t('general:or')}
+                    {' '}
+                    {t('dragAndDrop')}
+                  </p>
+                </div>
+              </React.Fragment>
+            )}
+            <input
+              ref={inputRef}
+              type="file"
+              accept={collection?.upload?.mimeTypes?.join(',')}
+              onChange={handleInputChange}
+            />
+          </div>
+        )}
+      </div>
+    </React.Fragment>
   );
 };
 

@@ -28,7 +28,7 @@ import { OperationContext } from '../../../utilities/OperationProvider';
 import { Gutter } from '../../../elements/Gutter';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { SetStepNav } from './SetStepNav';
-import { FullscreenLoaderToggle } from '../../../elements/Loading';
+import { LoadingOverlayToggle } from '../../../elements/Loading';
 
 import './index.scss';
 
@@ -61,6 +61,9 @@ const DefaultEditView: React.FC<Props> = (props) => {
   const {
     slug,
     fields,
+    labels: {
+      singular,
+    },
     admin: {
       useAsTitle,
       disableDuplicate,
@@ -82,10 +85,11 @@ const DefaultEditView: React.FC<Props> = (props) => {
 
   return (
     <React.Fragment>
-      <FullscreenLoaderToggle
+      <LoadingOverlayToggle
         show={isLoading}
         name="collection-edit"
         type="withoutNav"
+        loadingText={`${isLoading ? t('loading') : `${isEditing ? 'Updating' : t('creating')}`} ${getTranslation(singular, i18n)}`}
       />
 
       <div className={classes}>

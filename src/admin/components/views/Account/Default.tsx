@@ -21,7 +21,7 @@ import { Gutter } from '../../elements/Gutter';
 import ReactSelect from '../../elements/ReactSelect';
 import Label from '../../forms/Label';
 import type { Translation } from '../../../../translations/type';
-import { FullscreenLoaderToggle } from '../../elements/Loading';
+import { LoadingOverlayToggle } from '../../elements/Loading';
 
 import './index.scss';
 
@@ -64,7 +64,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
 
   return (
     <React.Fragment>
-      <FullscreenLoaderToggle
+      <LoadingOverlayToggle
         name="account"
         show={isLoading}
         type="withoutNav"

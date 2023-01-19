@@ -22,7 +22,7 @@ import Autosave from '../../elements/Autosave';
 import { OperationContext } from '../../utilities/OperationProvider';
 import { Gutter } from '../../elements/Gutter';
 import { getTranslation } from '../../../../utilities/getTranslation';
-import { FullscreenLoaderToggle } from '../../elements/Loading';
+import { LoadingOverlayToggle } from '../../elements/Loading';
 
 import './index.scss';
 
@@ -52,7 +52,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
 
   return (
     <React.Fragment>
-      <FullscreenLoaderToggle
+      <LoadingOverlayToggle
         show={isLoading}
         name="global-edit"
         type="withoutNav"

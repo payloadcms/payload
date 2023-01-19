@@ -38,7 +38,7 @@ type StaggeredShimmersT = {
 }
 export const StaggeredShimmers: React.FC<StaggeredShimmersT> = ({ count, className, shimmerItemClassName, width, height, shimmerDelay = 25, renderDelay = 500 }) => {
   const shimmerDelayToPass = typeof shimmerDelay === 'number' ? `${shimmerDelay}ms` : shimmerDelay;
-  const { hasDelayed } = useDelay(renderDelay, true);
+  const [hasDelayed] = useDelay(renderDelay, true);
 
   if (!hasDelayed) return null;
 

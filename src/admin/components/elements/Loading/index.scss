@@ -1,6 +1,6 @@
 @import '../../../scss/styles';
 
-.fullscreen-loader {
+.loading-overlay {
   isolation: isolate;
   height: 100%;
   width: 100%;
@@ -17,18 +17,18 @@
   transition-property: left, width;
   transition: 250ms ease-in-out;
 
-  &.fullscreen-loader--entering {
+  &.loading-overlay--entering {
     opacity: 1;
     animation: 500ms fade-in ease-in-out;
     pointer-events: all;
   }
 
-  &.fullscreen-loader--exiting {
+  &.loading-overlay--exiting {
     opacity: 0;
     animation: 500ms fade-out ease-in-out;
   }
 
-  &.fullscreen-loader--withoutNav {
+  &.loading-overlay--withoutNav {
     left: var(--nav-width);
     width: calc(100% - var(--nav-width));
   }
@@ -40,7 +40,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--theme-elevation-50);
+    background-color: var(--theme-elevation-0);
     opacity: .85;
     z-index: -1;
   }

@@ -11,4 +11,5 @@ export type Props = {
   collection: SanitizedCollectionConfig
   adminThumbnail?: string
   mimeTypes?: string[];
+  isEditing?: boolean
 }

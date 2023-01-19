@@ -5,28 +5,14 @@ import type { LoadingOverlayTypes } from '../../utilities/LoadingOverlay/types';
 
 import './index.scss';
 
-export const Loading: React.FC = () => {
-  const baseClass = 'loading';
-  const { t } = useTranslation('general');
-
-  return (
-    <div className={baseClass}>
-      <span className={`${baseClass}__text`}>
-        {t('loading')}
-        ...
-      </span>
-    </div>
-  );
-};
-
+const baseClass = 'loading-overlay';
 
 type Props = {
   show?: boolean;
   loadingText?: string;
   overlayType?: string
 }
-export const FullscreenLoader: React.FC<Props> = ({ loadingText, show = true, overlayType }) => {
-  const baseClass = 'fullscreen-loader';
+export const LoadingOverlay: React.FC<Props> = ({ loadingText, show = true, overlayType }) => {
   const { t } = useTranslation('general');
 
   return (
@@ -55,8 +41,9 @@ type UseLoadingOverlayToggleT = {
   show: boolean;
   name: string;
   type?: LoadingOverlayTypes,
+  loadingText?: string;
 }
-export const FullscreenLoaderToggle: React.FC<UseLoadingOverlayToggleT> = ({ name: key, show, type = 'fullscreen' }) => {
+export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleT> = ({ name: key, show, type = 'fullscreen', loadingText }) => {
   const { toggleLoadingOverlay } = useLoadingOverlay();
 
   React.useEffect(() => {
@@ -64,6 +51,7 @@ export const FullscreenLoaderToggle: React.FC<UseLoadingOverlayToggleT> = ({ nam
       key,
       isLoading: show,
       type,
+      loadingText: loadingText || undefined,
     });
 
     return () => {
@@ -73,7 +61,7 @@ export const FullscreenLoaderToggle: React.FC<UseLoadingOverlayToggleT> = ({ nam
         type,
       });
     };
-  }, [show, toggleLoadingOverlay, key, type]);
+  }, [show, toggleLoadingOverlay, key, type, loadingText]);
 
   return null;
 };

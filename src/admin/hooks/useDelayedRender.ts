@@ -25,7 +25,7 @@ type useDelayedRenderT = (props: DelayedRenderProps) => {
 };
 export const useDelayedRender: useDelayedRenderT = ({ show, delayBeforeShow = 1000, inTimeout = 500, minShowTime = 500, outTimeout = 500 }) => {
   const totalMountTime = inTimeout + minShowTime + outTimeout;
-  const { hasDelayed, triggerDelay } = useDelay(delayBeforeShow);
+  const [hasDelayed, triggerDelay] = useDelay(delayBeforeShow);
   const [isMounted, setIsMounted] = React.useState(false);
   const [isUnmounting, setIsUnmounting] = React.useState(false);
   const onMountTimestampRef = React.useRef(0);

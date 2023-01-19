@@ -21,7 +21,7 @@ import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 import { shouldIncrementVersionCount } from '../../../../versions/shouldIncrementVersionCount';
 import { Gutter } from '../../elements/Gutter';
 import { getTranslation } from '../../../../utilities/getTranslation';
-import { FullscreenLoaderToggle } from '../../elements/Loading';
+import { LoadingOverlayToggle } from '../../elements/Loading';
 
 import './index.scss';
 
@@ -170,7 +170,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
 
   return (
     <React.Fragment>
-      <FullscreenLoaderToggle
+      <LoadingOverlayToggle
         show={isLoadingData}
         name="versions"
       />

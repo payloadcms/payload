@@ -21,7 +21,6 @@ import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/
 import { FieldPermissions } from '../../../../auth';
 import { useLocale } from '../../utilities/Locale';
 import { Gutter } from '../../elements/Gutter';
-import { FullscreenLoaderToggle } from '../../elements/Loading';
 
 import './index.scss';
 
@@ -166,11 +165,6 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
   return (
     <React.Fragment>
-      <FullscreenLoaderToggle
-        show={isLoadingData}
-        name="version"
-      />
-
       <div className={baseClass}>
         <Meta
           title={metaTitle}

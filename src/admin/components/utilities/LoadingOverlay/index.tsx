@@ -1,15 +1,12 @@
-import React, {
-  createContext, useState,
-} from 'react';
+import React, { createContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDelayedRender } from '../../../hooks/useDelayedRender';
 import { reducer, defaultLoadingOverlayState } from './reducer';
-import { FullscreenLoader } from '../../elements/Loading';
+import { LoadingOverlay } from '../../elements/Loading';
 import type { LoadingOverlayContext, ToggleLoadingOverlay } from './types';
 
 const initialContext: LoadingOverlayContext = {
   toggleLoadingOverlay: undefined,
-  setLoadingOverlayText: undefined,
   isOnScreen: false,
 };
 
@@ -17,8 +14,8 @@ const Context = createContext(initialContext);
 
 export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { t } = useTranslation('general');
+  const fallbackText = t('loading');
 
-  const [loadingOverlayText, setLoadingOverlayText] = useState<string>(t('loading'));
   const [overlays, dispatchOverlay] = React.useReducer(reducer, defaultLoadingOverlayState);
 
   const {
@@ -29,7 +26,7 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
     show: overlays.isLoading,
   });
 
-  const toggleLoadingOverlay = React.useCallback<ToggleLoadingOverlay>(({ type, key, isLoading }) => {
+  const toggleLoadingOverlay = React.useCallback<ToggleLoadingOverlay>(({ type, key, isLoading, loadingText = fallbackText }) => {
     if (isLoading) {
       triggerDelayedRender();
       dispatchOverlay({
@@ -37,6 +34,7 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
         payload: {
           type,
           key,
+          loadingText,
         },
       });
     } else {
@@ -48,20 +46,19 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
         },
       });
     }
-  }, [triggerDelayedRender]);
+  }, [triggerDelayedRender, fallbackText]);
 
   return (
     <Context.Provider
       value={{
-        setLoadingOverlayText,
         toggleLoadingOverlay,
         isOnScreen: isMounted,
       }}
     >
       {isMounted && (
-        <FullscreenLoader
+        <LoadingOverlay
           show={!isUnmounting}
-          loadingText={loadingOverlayText}
+          loadingText={overlays.loadingText || fallbackText}
           overlayType={overlays.overlayType}
         />
       )}

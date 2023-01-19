@@ -13,7 +13,7 @@ import Versions from './views/Versions';
 import Version from './views/Version';
 import { DocumentInfoProvider } from './utilities/DocumentInfo';
 import { useLocale } from './utilities/Locale';
-import { FullscreenLoaderToggle } from './elements/Loading';
+import { LoadingOverlayToggle } from './elements/Loading';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -74,13 +74,13 @@ const Routes = () => {
 
   return (
     <Suspense fallback={(
-      <FullscreenLoaderToggle
+      <LoadingOverlayToggle
         show
         name="route-suspense"
       />
     )}
     >
-      <FullscreenLoaderToggle
+      <LoadingOverlayToggle
         name="route-loader"
         show={isLoadingUser}
       />
