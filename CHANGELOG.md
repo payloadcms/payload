@@ -1,4 +1,4 @@
-## [1.5.13-canary.0](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.13-canary.0) (2023-01-19)
+## [1.5.14-canary.0](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.14-canary.0) (2023-01-20)
 
 ### 🐛 Bug Fixes
 
