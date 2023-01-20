@@ -4,5 +4,5 @@ export type Props = {
   addRow: (i: number, block: string) => void
   addRowIndex: number
   block: Block
-  close: () => void
+  onClick?: () => void
 }

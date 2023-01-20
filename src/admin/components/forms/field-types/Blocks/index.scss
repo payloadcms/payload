@@ -62,7 +62,11 @@
     position: relative;
   }
 
-  &__add-button-wrap {
+  &__drawer-toggler {
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+    border: none;
 
     .btn {
       color: var(--theme-elevation-400);
