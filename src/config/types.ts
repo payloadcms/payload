@@ -9,7 +9,7 @@ import { ConnectOptions } from 'mongoose';
 import React from 'react';
 import { LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
-import { Payload } from '..';
+import { Payload } from '../payload';
 import {
   AfterErrorHook,
   CollectionConfig,

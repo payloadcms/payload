@@ -172,7 +172,7 @@
     "leaveAnyway": "Esci comunque",
     "leaveWithoutSaving": "Esci senza salvare",
     "light": "Chiaro",
-    "loading": "Caricamento...",
+    "loading": "Caricamento",
     "locales": "Localizzazioni",
     "moveDown": "Sposta sotto",
     "moveUp": "Sposta sopra",
@@ -212,6 +212,8 @@
     "untitled": "Senza titolo",
     "updatedAt": "Aggiornato il",
     "updatedSuccessfully": "Aggiornato con successo.",
+    "updating": "Aggiornamento",
+    "uploading": "Caricamento",
     "user": "Utente",
     "users": "Utenti",
     "welcome": "Benvenuto"

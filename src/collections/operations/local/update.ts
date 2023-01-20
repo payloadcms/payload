@@ -1,4 +1,5 @@
-import { Payload } from '../../..';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { Payload } from '../../../payload';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import update from '../update';
@@ -8,10 +9,10 @@ import { File } from '../../../uploads/types';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
 
-export type Options<T> = {
-  collection: string
+export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
+  collection: TSlug
   id: string | number
-  data: Partial<T>
+  data: Omit<GeneratedTypes['collections'][TSlug], 'id'>
   depth?: number
   locale?: string
   fallbackLocale?: string
@@ -25,7 +26,10 @@ export type Options<T> = {
   autosave?: boolean
 }
 
-export default async function updateLocal<T = any>(payload: Payload, options: Options<T>): Promise<T> {
+export default async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<TSlug>,
+): Promise<GeneratedTypes['collections'][TSlug]> {
   const {
     collection: collectionSlug,
     depth,
@@ -46,7 +50,7 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
   const collection = payload.collections[collectionSlug];
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
   const i18n = i18nInit(payload.config.i18n);
@@ -81,5 +85,5 @@ export default async function updateLocal<T = any>(payload: Payload, options: Op
     req,
   };
 
-  return update(args);
+  return update<TSlug>(args);
 }

@@ -26,7 +26,7 @@ import { RowLabel } from '../../RowLabel';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 import { useConfig } from '../../../utilities/Config';
-import { NullifyField } from '../../NullifyField';
+import { NullifyLocaleField } from '../../NullifyField';
 
 import './index.scss';
 
@@ -76,8 +76,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const checkSkipValidation = useCallback((value) => {
     const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
     const isEditingDefaultLocale = locale === defaultLocale;
+    const fallbackEnabled = (localization && localization.fallback);
 
-    if (value === null && !isEditingDefaultLocale) return true;
+    if (value === null && !isEditingDefaultLocale && fallbackEnabled) return true;
     return false;
   }, [locale, localization]);
 
@@ -265,7 +266,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
           />
         </header>
 
-        <NullifyField
+        <NullifyLocaleField
           path={path}
           fieldValue={value}
         />

@@ -1,12 +1,12 @@
 import { Response } from 'express';
-import { Document } from '../../types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Forbidden } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { Collection, TypeWithID } from '../../collections/config/types';
 
 export type Arguments = {
   collection: Collection
-  data: {
+  data: Omit<TypeWithID, 'id'> & {
     email: string
     password: string
   }
@@ -14,12 +14,14 @@ export type Arguments = {
   res: Response
 }
 
-export type Result = {
+export type Result<T> = {
   message: string,
-  user: Document
+  user: T
 }
 
-async function registerFirstUser(args: Arguments): Promise<Result> {
+async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections']>(
+  args: Arguments,
+): Promise<Result<GeneratedTypes['collections'][TSlug]>> {
   const {
     collection: {
       Model,
@@ -45,9 +47,9 @@ async function registerFirstUser(args: Arguments): Promise<Result> {
   // Register first user
   // /////////////////////////////////////
 
-  const result = await payload.create<TypeWithID>({
+  const result = await payload.create<TSlug>({
     req,
-    collection: slug,
+    collection: slug as TSlug,
     data,
     overrideAccess: true,
   });

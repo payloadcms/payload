@@ -5,31 +5,15 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Jest Tests",
-      "type": "node",
-      "request": "launch",
-      "runtimeArgs": [
-        "--inspect-brk",
-        "${workspaceRoot}/node_modules/.bin/jest",
-        "--runInBand"
-      ],
-      "env": {
-        "PAYLOAD_CONFIG_PATH": "demo/payload.config.ts"
-      },
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/babel-node",
-      "port": 9229,
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
-    },
-    {
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceFolder}/test/dev.js",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
       "args": [
+        "${workspaceFolder}/test/dev.ts",
         "fields"
       ]
     },
