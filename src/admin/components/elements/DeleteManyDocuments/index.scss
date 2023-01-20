@@ -11,10 +11,6 @@
     position: relative;
   }
 
-  &__toggle {
-    @extend %btn-reset;
-  }
-
   .btn {
     margin-right: $baseline;
   }

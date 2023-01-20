@@ -3,15 +3,18 @@ import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import queryString from 'qs';
+import { useHistory } from 'react-router-dom';
+import { Where } from '../../../../types';
 import { useConfig } from '../../utilities/Config';
 import Button from '../Button';
 import MinimalTemplate from '../../templates/Minimal';
 import { requests } from '../../../api';
 import { Props } from './types';
-import { useSelection } from '../../views/collections/List/SelectionProvider';
+import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider';
+import { getTranslation } from '../../../../utilities/getTranslation';
+import Pill from '../Pill';
 
 import './index.scss';
-import { getTranslation } from '../../../../utilities/getTranslation';
 
 const baseClass = 'delete-documents';
 
@@ -27,10 +30,11 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
   } = props;
 
   const { serverURL, routes: { api } } = useConfig();
+  const history = useHistory();
   const [deleting, setDeleting] = useState(false);
   const { toggleModal } = useModal();
   const { t, i18n } = useTranslation('general');
-  const { selected, selectAll } = useSelection();
+  const { selected, selectAll, count } = useSelection();
 
   const modalSlug = `delete-${slug}`;
 
@@ -41,12 +45,21 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
   const handleDelete = useCallback(() => {
     setDeleting(true);
 
-    const params = queryString.stringify({
-      where: {
+    let where: Where;
+    if (selectAll === SelectAllStatus.AllAvailable) {
+      const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true }).where as Where;
+      where = params || {
+        id: { not_equals: '' },
+      };
+    } else {
+      where = {
         id: {
           in: Object.keys(selected).filter((id) => selected[id]).map((id) => id),
         },
-      },
+      };
+    }
+    const params = queryString.stringify({
+      where,
     }, { addQueryPrefix: true });
 
     requests.delete(`${serverURL}${api}/${slug}${params}`, {
@@ -74,25 +87,23 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
         return addDefaultError();
       }
     });
-  }, [addDefaultError, api, i18n.language, modalSlug, resetParams, selectAll, selected, serverURL, slug, t, toggleModal]);
+  }, [addDefaultError, api, history, i18n.language, modalSlug, resetParams, selectAll, selected, serverURL, slug, t, toggleModal]);
 
-  if (selectAll === false) {
+  if (selectAll === SelectAllStatus.None) {
     return null;
   }
 
   return (
     <React.Fragment>
-      <Button
-        type="button"
+      <Pill
         className={`${baseClass}__toggle`}
-        onClick={(e) => {
-          e.preventDefault();
+        onClick={() => {
           setDeleting(false);
           toggleModal(modalSlug);
         }}
       >
         {t('delete')}
-      </Button>
+      </Pill>
       <Modal
         slug={modalSlug}
         className={baseClass}
@@ -100,7 +111,7 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
         <MinimalTemplate className={`${baseClass}__template`}>
           <h1>{t('confirmDeletion')}</h1>
           <p>
-            {t('aboutToDeleteCount', { label: getTranslation(plural, i18n), count: Object.keys(selected).filter((id) => selected[id]).length })}
+            {t('aboutToDeleteCount', { label: getTranslation(plural, i18n), count })}
           </p>
           <Button
             id="confirm-cancel"

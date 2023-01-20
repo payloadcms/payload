@@ -6,12 +6,22 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useHistory } from 'react-router-dom';
+
+export enum SelectAllStatus {
+  AllAvailable = 'allAvailable',
+  AllInPage = 'allInPage',
+  Some = 'some',
+  None = 'none',
+}
 
 type SelectionContext = {
   selected: Record<string | number, boolean>
   setSelection: (id: string | number) => void
-  selectAll: boolean | null
-  toggleAll: () => void
+  selectAll: SelectAllStatus
+  toggleAll: (allAvailable?: boolean) => void
+  totalDocs: number
+  count: number
 }
 
 const Context = createContext({} as SelectionContext);
@@ -19,30 +29,52 @@ const Context = createContext({} as SelectionContext);
 type Props = {
   children: React.ReactNode
   docs: any[]
+  totalDocs: number
 }
-export const SelectionProvider: React.FC<Props> = ({ children, docs = [] }) => {
+export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs }) => {
   const contextRef = useRef({} as SelectionContext);
 
+  const history = useHistory();
   const [selected, setSelected] = useState<SelectionContext['selected']>({});
-  const [selectAll, setSelectAll] = useState<boolean | null>(false);
+  const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None);
+  const [count, setCount] = useState(0);
 
-  const toggleAll = useCallback(() => {
+  const toggleAll = useCallback((allAvailable = false) => {
     const rows = {};
-    docs.forEach(({ id }) => {
-      rows[id] = !selectAll && selectAll !== null;
-    });
+    if (allAvailable) {
+      setSelectAll(SelectAllStatus.AllAvailable);
+      docs.forEach(({ id }) => {
+        rows[id] = true;
+      });
+    } else if (selectAll === SelectAllStatus.AllAvailable || selectAll === SelectAllStatus.AllInPage) {
+      setSelectAll(SelectAllStatus.None);
+      docs.forEach(({ id }) => {
+        rows[id] = false;
+      });
+    } else {
+      docs.forEach(({ id }) => {
+        rows[id] = selectAll !== SelectAllStatus.Some;
+      });
+    }
     setSelected(rows);
   }, [docs, selectAll]);
 
   const setSelection = useCallback((id) => {
+    const isSelected = !selected[id];
     const newSelected = {
       ...selected,
-      [id]: !selected[id],
+      [id]: isSelected,
     };
+    if (!isSelected) {
+      setSelectAll(SelectAllStatus.Some);
+    }
     setSelected(newSelected);
   }, [selected]);
 
   useEffect(() => {
+    if (selectAll === SelectAllStatus.AllAvailable) {
+      return;
+    }
     let some = false;
     let all = true;
     Object.values(selected).forEach((val) => {
@@ -51,13 +83,13 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [] }) => {
     });
 
     if (all) {
-      setSelectAll(true);
+      setSelectAll(SelectAllStatus.AllInPage);
     } else if (some) {
-      setSelectAll(null);
+      setSelectAll(SelectAllStatus.Some);
     } else {
-      setSelectAll(false);
+      setSelectAll(SelectAllStatus.None);
     }
-  }, [docs, selected]);
+  }, [docs, selectAll, selected]);
 
   useEffect(() => {
     const rows = {};
@@ -67,13 +99,21 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [] }) => {
       });
       setSelected(rows);
     }
-  }, [docs]);
+    setSelectAll(SelectAllStatus.None);
+  }, [docs, history]);
+
+  useEffect(() => {
+    const newCount = selectAll === SelectAllStatus.AllAvailable ? totalDocs : Object.keys(selected).filter((id) => selected[id]).length;
+    setCount(newCount);
+  }, [selectAll, selected, totalDocs]);
 
   contextRef.current = {
     selectAll,
     toggleAll,
     selected,
     setSelection,
+    totalDocs,
+    count,
   };
 
   return (

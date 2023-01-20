@@ -39,7 +39,9 @@ const ColumnSelector: React.FC<Props> = (props) => {
               if (isEnabled) {
                 newState = newState.filter((remainingColumn) => remainingColumn !== field.name);
               } else {
+                newState = newState.filter((col) => col !== '_select');
                 newState.unshift(field.name);
+                newState.unshift('_select');
               }
 
               setColumns(newState);

@@ -40,7 +40,7 @@ const buildColumns = ({
     },
   ], true);
 
-  return (columns || []).reduce((cols, col, colIndex) => {
+  return columns.reduce((cols, col, colIndex) => {
     let field = null;
 
     flattenedFields.forEach((fieldToCheck) => {

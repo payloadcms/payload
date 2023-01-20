@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { useTranslation } from 'react-i18next';
+import { useWindowInfo } from '@faceless-ui/window-info';
 import { fieldAffectsData } from '../../../../fields/config/types';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
@@ -47,6 +48,7 @@ const ListControls: React.FC<Props> = (props) => {
   const [textFieldsToBeSearched] = useState(getTextFieldsToBeSearched(listSearchableFields, fields));
   const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
   const { t, i18n } = useTranslation('general');
+  const { breakpoints: { s: smallBreak } } = useWindowInfo();
 
   return (
     <div className={baseClass}>
@@ -60,10 +62,12 @@ const ListControls: React.FC<Props> = (props) => {
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
-            <DeleteManyDocuments
-              collection={collection}
-              resetParams={resetParams}
-            />
+            { !smallBreak && (
+              <DeleteManyDocuments
+                collection={collection}
+                resetParams={resetParams}
+              />
+            )}
             {enableColumns && (
               <Pill
                 pillStyle="dark"

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelection } from '../SelectionProvider';
+import { SelectAllStatus, useSelection } from '../SelectionProvider';
 import Check from '../../../../icons/Check';
 import Line from '../../../../icons/Line';
 
@@ -17,10 +17,10 @@ const SelectAll: React.FC = () => {
         onClick={() => toggleAll()}
       >
         <span className={`${baseClass}__input`}>
-          { selectAll && (
+          { (selectAll === SelectAllStatus.AllInPage || selectAll === SelectAllStatus.AllAvailable) && (
             <Check />
           )}
-          { selectAll === null && (
+          { selectAll === SelectAllStatus.Some && (
             <Line />
           )}
         </span>

@@ -761,7 +761,13 @@
         "searchBy": {
           "type": "string"
         },
+        "selectAll": {
+          "type": "string"
+        },
         "selectValue": {
+          "type": "string"
+        },
+        "selectedCount": {
           "type": "string"
         },
         "sorryNotFound": {
@@ -891,7 +897,9 @@
         "save",
         "saving",
         "searchBy",
+        "selectAll",
         "selectValue",
+        "selectedCount",
         "sorryNotFound",
         "sort",
         "stayOnThisPage",

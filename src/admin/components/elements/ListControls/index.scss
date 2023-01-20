@@ -54,25 +54,10 @@
     margin-top: base(1);
   }
 
-  @include mid-break {
-    &__buttons {
-      margin-left: base(.5);
-    }
-
-    &__buttons-wrap {
-      margin-left: - base(.25);
-      margin-right: - base(.25);
-      width: calc(100% + #{base(0.5)});
-
-      .btn {
-        margin: 0 base(.25);
-      }
-    }
-  }
-
   @include small-break {
     &__wrap {
       flex-wrap: wrap;
+      background-color: unset;
     }
 
     .search-filter {
@@ -80,11 +65,23 @@
       width: 100%;
     }
 
-    &__buttons {
-      margin: 0;
+    &__buttons-wrap {
+      margin-left: - base(.25);
+      margin-right: - base(.25);
+      width: calc(100% + #{base(0.5)});
+
+      .pill {
+        margin: 0 base(.25);
+        padding: base(.5) base(1);
+
+        svg {
+          margin-left: auto;
+        }
+      }
     }
 
     &__buttons {
+      margin: 0;
       width: 100%;
     }
 

@@ -1,11 +1,13 @@
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useWindowInfo } from '@faceless-ui/window-info';
 import { useConfig } from '../../../utilities/Config';
 import UploadGallery from '../../../elements/UploadGallery';
 import Eyebrow from '../../../elements/Eyebrow';
 import Paginator from '../../../elements/Paginator';
 import ListControls from '../../../elements/ListControls';
+import ListSelection from '../../../elements/ListSelection';
 import Pill from '../../../elements/Pill';
 import Button from '../../../elements/Button';
 import Table from '../../../elements/Table';
@@ -17,6 +19,7 @@ import { Gutter } from '../../../elements/Gutter';
 import { RelationshipProvider } from './RelationshipProvider';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { SelectionProvider } from './SelectionProvider';
+import DeleteManyDocuments from '../../../elements/DeleteManyDocuments';
 
 import './index.scss';
 
@@ -57,6 +60,7 @@ const DefaultList: React.FC<Props> = (props) => {
 
   const { routes: { admin } } = useConfig();
   const history = useHistory();
+  const { breakpoints: { s: smallBreak } } = useWindowInfo();
   const { t, i18n } = useTranslation('general');
 
   return (
@@ -66,6 +70,7 @@ const DefaultList: React.FC<Props> = (props) => {
       />
       <SelectionProvider
         docs={data.docs}
+        totalDocs={data.totalDocs}
       >
         {!disableEyebrow && (
           <Eyebrow />
@@ -82,6 +87,11 @@ const DefaultList: React.FC<Props> = (props) => {
                   <Pill to={newDocumentURL}>
                     {t('createNew')}
                   </Pill>
+                )}
+                {!smallBreak && (
+                  <ListSelection
+                    label={getTranslation(collection.labels.plural, i18n)}
+                  />
                 )}
                 {description && (
                   <div className={`${baseClass}__sub-header`}>
@@ -169,6 +179,19 @@ const DefaultList: React.FC<Props> = (props) => {
                   modifySearchParams={modifySearchParams}
                   handleChange={handlePerPageChange}
                 />
+                <div className={`${baseClass}__list-selection`}>
+                  {smallBreak && (
+                    <Fragment>
+                      <ListSelection
+                        label={getTranslation(collection.labels.plural, i18n)}
+                      />
+                      <DeleteManyDocuments
+                        collection={collection}
+                        resetParams={resetParams}
+                      />
+                    </Fragment>
+                  )}
+                </div>
               </Fragment>
             )}
           </div>
