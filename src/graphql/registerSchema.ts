@@ -79,7 +79,7 @@ export default function registerSchema(payload: Payload): void {
     if (result.errors) {
       payload.errorIndex = 0;
       const afterErrorHook = typeof payload.config.hooks.afterError === 'function' ? payload.config.hooks.afterError : null;
-      payload.errorResponses = await errorHandler(info, payload.config.debug, afterErrorHook);
+      payload.errorResponses = await errorHandler(payload, info, payload.config.debug, afterErrorHook);
     }
     return null;
   };

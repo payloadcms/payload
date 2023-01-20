@@ -24,7 +24,7 @@ import Pill from '../../../elements/Pill';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
 import { getTranslation } from '../../../../../utilities/getTranslation';
-import { NullifyField } from '../../NullifyField';
+import { NullifyLocaleField } from '../../NullifyField';
 import { useConfig } from '../../../utilities/Config';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 import { DrawerToggler } from '../../../elements/Drawer';
@@ -85,8 +85,9 @@ const BlocksField: React.FC<Props> = (props) => {
   const checkSkipValidation = useCallback((value) => {
     const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
     const isEditingDefaultLocale = locale === defaultLocale;
+    const fallbackEnabled = (localization && localization.fallback);
 
-    if (value === null && !isEditingDefaultLocale) return true;
+    if (value === null && !isEditingDefaultLocale && fallbackEnabled) return true;
     return false;
   }, [locale, localization]);
 
@@ -260,7 +261,7 @@ const BlocksField: React.FC<Props> = (props) => {
             description={description}
           />
         </header>
-        <NullifyField
+        <NullifyLocaleField
           path={path}
           fieldValue={value}
         />
