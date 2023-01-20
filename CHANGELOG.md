@@ -206,7 +206,7 @@ const ensureAtLeastOneVersion = async () => {
                   createdAt: doc.createdAt,
                 });
               } catch (e) {
-                console.error(`Unable to create version corresponding with collection ${slug} document ID ${doc.id}`, e.errors);
+                console.error(`Unable to create version corresponding with collection ${slug} document ID ${doc.id}`, e?.errors || e);
               }
 
               console.log(
