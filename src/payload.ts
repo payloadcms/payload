@@ -56,7 +56,6 @@ import buildEmail from './email/build';
 import sendEmail from './email/sendEmail';
 
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit';
-import loadConfig from './config/load';
 import Logger from './utilities/logger';
 import PreferencesModel from './preferences/model';
 import findConfig from './config/find';
@@ -180,6 +179,8 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
         },
       };
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
+      const loadConfig = require('./config/load').default;
       this.config = loadConfig(this.logger);
     }
 

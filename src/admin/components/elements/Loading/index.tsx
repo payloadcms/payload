@@ -13,8 +13,9 @@ type Props = {
   show?: boolean;
   loadingText?: string;
   overlayType?: string
+  animationDuration?: string;
 }
-export const LoadingOverlay: React.FC<Props> = ({ loadingText, show = true, overlayType }) => {
+export const LoadingOverlay: React.FC<Props> = ({ loadingText, show = true, overlayType, animationDuration }) => {
   const { t } = useTranslation('general');
 
   return (
@@ -24,6 +25,9 @@ export const LoadingOverlay: React.FC<Props> = ({ loadingText, show = true, over
         show ? `${baseClass}--entering` : `${baseClass}--exiting`,
         overlayType ? `${baseClass}--${overlayType}` : '',
       ].filter(Boolean).join(' ')}
+      style={{
+        animationDuration: animationDuration || '500ms',
+      }}
     >
       <div className={`${baseClass}__bars`}>
         <div className={`${baseClass}__bar`} />

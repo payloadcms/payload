@@ -98,6 +98,28 @@ describe('Localization', () => {
       expect(localized.title.es).toEqual(spanishTitle);
     });
 
+    it('should fallback to english translation when empty', async () => {
+      const updated = await payload.update<LocalizedPost>({
+        collection,
+        id: post1.id,
+        locale: spanishLocale,
+        data: {
+          title: '',
+        },
+      });
+
+      expect(updated.title).toEqual(englishTitle);
+
+      const localizedFallback = await payload.findByID<LocalizedPostAllLocale>({
+        collection,
+        id: post1.id,
+        locale: 'all',
+      });
+
+      expect(localizedFallback.title.en).toEqual(englishTitle);
+      expect(localizedFallback.title.es).toEqual('');
+    });
+
     describe('querying', () => {
       let localizedPost: LocalizedPost;
       beforeEach(async () => {

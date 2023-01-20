@@ -14,8 +14,10 @@ export class PayloadHTTP extends BasePayload<GeneratedTypes> {
     const payload = await initHTTP(options);
     Object.assign(this, payload);
 
-    if (typeof options.onInit === 'function') await options.onInit(this);
-    if (typeof this.config.onInit === 'function') await this.config.onInit(this);
+    if (!options.local) {
+      if (typeof options.onInit === 'function') await options.onInit(this);
+      if (typeof this.config.onInit === 'function') await this.config.onInit(this);
+    }
 
     return payload;
   }
