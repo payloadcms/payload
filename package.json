@@ -51,7 +51,8 @@
     "release:patch": "release-it patch",
     "release:minor": "release-it minor",
     "release:major": "release-it major",
-    "release:canary": "release-it prepatch --config .release-it.canary.json",
+    "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
+    "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
     "fix": "eslint \"src/**/*.ts\" --fix",
     "lint": "eslint \"src/**/*.ts\""
   },
