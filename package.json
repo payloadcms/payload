@@ -151,7 +151,6 @@
     "postcss": "^8.4.21",
     "postcss-loader": "^6.2.1",
     "postcss-preset-env": "^7.8.3",
-    "prismjs": "^1.29.0",
     "probe-image-size": "^6.0.0",
     "process": "^0.11.10",
     "qs": "^6.11.0",
@@ -167,7 +166,6 @@
     "react-router-dom": "^5.3.4",
     "react-router-navigation-prompt": "^1.9.6",
     "react-select": "^3.2.0",
-    "react-simple-code-editor": "^0.13.1",
     "react-toastify": "^8.2.0",
     "sanitize-filename": "^1.6.3",
     "sass": "^1.57.1",
@@ -284,7 +282,6 @@
     "serve-static": "^1.15.0",
     "shelljs": "^0.8.5",
     "slash": "^3.0.0",
-    "start-server-and-test": "^1.15.2",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.4"
   },
