@@ -5,7 +5,7 @@ import { compile } from 'json-schema-to-typescript';
 import Logger from '../utilities/logger';
 import { SanitizedConfig } from '../config/types';
 import loadConfig from '../config/load';
-import { entityToJsonSchema, generateEntityObject } from '../utilities/entityToJSONSchema';
+import { entityToJSONSchema, generateEntityObject } from '../utilities/entityToJSONSchema';
 
 function configToJsonSchema(config: SanitizedConfig): JSONSchema4 {
   return {
@@ -21,11 +21,11 @@ function configToJsonSchema(config: SanitizedConfig): JSONSchema4 {
       [
         ...config.globals.map((global) => [
           global.slug,
-          entityToJsonSchema(config, global),
+          entityToJSONSchema(config, global),
         ]),
         ...config.collections.map((collection) => [
           collection.slug,
-          entityToJsonSchema(config, collection),
+          entityToJSONSchema(config, collection),
         ]),
       ],
     ),
