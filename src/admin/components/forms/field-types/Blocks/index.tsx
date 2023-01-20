@@ -30,10 +30,10 @@ import { getTranslation } from '../../../../../utilities/getTranslation';
 import { NullifyLocaleField } from '../../NullifyField';
 import { useConfig } from '../../../utilities/Config';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
-
-import './index.scss';
 import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
+
+import './index.scss';
 
 const baseClass = 'blocks-field';
 

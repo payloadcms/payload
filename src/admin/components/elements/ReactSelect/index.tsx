@@ -14,8 +14,9 @@ import { ValueContainer } from './ValueContainer';
 import { ClearIndicator } from './ClearIndicator';
 import { MultiValueRemove } from './MultiValueRemove';
 import { Control } from './Control';
-import './index.scss';
 import DraggableSortable from '../DraggableSortable';
+
+import './index.scss';
 
 const SelectAdapter: React.FC<Props> = (props) => {
   const { t, i18n } = useTranslation();

@@ -26,10 +26,10 @@ import { getTranslation } from '../../../../../utilities/getTranslation';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 import { useConfig } from '../../../utilities/Config';
 import { NullifyLocaleField } from '../../NullifyField';
-
-import './index.scss';
 import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
+
+import './index.scss';
 
 const baseClass = 'array-field';
 

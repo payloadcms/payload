@@ -9,10 +9,11 @@ import DragHandle from '../../icons/Drag';
 import { Props } from './types';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { useEditDepth } from '../../utilities/EditDepth';
-import './index.scss';
 import { Field } from '../../../../fields/config/types';
 import DraggableSortable from '../DraggableSortable';
 import DraggableSortableItem from '../DraggableSortable/DraggableSortableItem';
+
+import './index.scss';
 
 const baseClass = 'column-selector';
 
