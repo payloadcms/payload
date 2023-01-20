@@ -24,7 +24,7 @@
 
 ### 🚨 BREAKING CHANGES
 
-#### Payload now no longer transpiles your config for you
+#### ✋ Payload now no longer transpiles your config for you
 
 This release removes the need to use `@swc/register` to automatically transpile Payload configs, which dramatically improves Payload initialization speeds and simplifies the core Payload logic significantly. More info in the PR [here](https://github.com/payloadcms/payload/pull/1847).
 
