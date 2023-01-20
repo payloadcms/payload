@@ -5,12 +5,12 @@ import { reducer, defaultLoadingOverlayState } from './reducer';
 import { LoadingOverlay } from '../../elements/Loading';
 import type { LoadingOverlayContext, ToggleLoadingOverlay } from './types';
 
-const initialContext: LoadingOverlayContext = {
+const animatedDuration = 250;
+
+const Context = createContext({
   toggleLoadingOverlay: undefined,
   isOnScreen: false,
-};
-
-const Context = createContext(initialContext);
+});
 
 export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { t } = useTranslation('general');
@@ -23,6 +23,10 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
     triggerDelayedRender,
   } = useDelayedRender({
     show: overlays.isLoading,
+    delayBeforeShow: 1000,
+    inTimeout: animatedDuration,
+    outTimeout: animatedDuration,
+    minShowTime: 500,
   });
 
   const toggleLoadingOverlay = React.useCallback<ToggleLoadingOverlay>(({ type, key, isLoading, loadingText = fallbackText }) => {
@@ -59,6 +63,7 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
           show={!isUnmounting}
           loadingText={overlays.loadingText || fallbackText}
           overlayType={overlays.overlayType}
+          animationDuration={`${animatedDuration}ms`}
         />
       )}
       {children}

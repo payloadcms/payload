@@ -7,13 +7,13 @@ type DelayedRenderProps = {
    * */
   show: boolean;
   /** Time in ms to wait before "mounting" the component. */
-  delayBeforeShow?: number;
+  delayBeforeShow: number;
   /** Time in ms for the "enter" phase of the transition, after delay completes. */
-  inTimeout?: number;
+  inTimeout: number;
   /** Min time in ms for the "entered" phase of the transition. */
-  minShowTime?: number;
+  minShowTime: number;
   /** Time in ms for the exit phase of the transition. */
-  outTimeout?: number;
+  outTimeout: number;
 };
 type useDelayedRenderT = (props: DelayedRenderProps) => {
   /** `true` if the component has mounted after the timeout. */
@@ -23,7 +23,7 @@ type useDelayedRenderT = (props: DelayedRenderProps) => {
   /** Call this function to trigger the timeout delay before rendering. */
   triggerDelayedRender: () => void;
 };
-export const useDelayedRender: useDelayedRenderT = ({ show, delayBeforeShow = 1000, inTimeout = 500, minShowTime = 500, outTimeout = 500 }) => {
+export const useDelayedRender: useDelayedRenderT = ({ show, delayBeforeShow, inTimeout, minShowTime, outTimeout }) => {
   const totalMountTime = inTimeout + minShowTime + outTimeout;
   const [hasDelayed, triggerDelay] = useDelay(delayBeforeShow);
   const [isMounted, setIsMounted] = React.useState(false);

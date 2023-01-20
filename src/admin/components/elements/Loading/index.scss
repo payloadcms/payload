@@ -15,17 +15,17 @@
   pointer-events: none;
   z-index: calc(var(--z-status) + 1);
   transition-property: left, width;
-  transition: 250ms ease-in-out;
+  transition: 250ms ease;
 
   &.loading-overlay--entering {
     opacity: 1;
-    animation: 500ms fade-in ease-in-out;
+    animation: fade-in ease;
     pointer-events: all;
   }
 
   &.loading-overlay--exiting {
     opacity: 0;
-    animation: 500ms fade-out ease-in-out;
+    animation: fade-out ease;
   }
 
   &.loading-overlay--withoutNav {
@@ -87,7 +87,7 @@
     margin-top: base(.75);
     text-transform: uppercase;
     font-family: var(--font-body);
-    font-size: base(.75);
+    font-size: base(.65);
     letter-spacing: 3px;
   }
 }
