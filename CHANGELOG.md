@@ -24,7 +24,7 @@
 
 ### 🚨 BREAKING CHANGES
 
-#### Payload now no longer transpiles your config for you
+#### ✋ Payload now no longer transpiles your config for you
 
 This release removes the need to use `@swc/register` to automatically transpile Payload configs, which dramatically improves Payload initialization speeds and simplifies the core Payload logic significantly. More info in the PR [here](https://github.com/payloadcms/payload/pull/1847).
 
@@ -125,6 +125,16 @@ But there's one more thing to do before Payload can automatically type your Loca
 
 Then go regenerate your types. We've extended the `payload generate:types` method a bit to be more complete. Upon regenerating types, you'll see a new `Config` export at the top of the file which contains a key - value pair of all your collection and global types, which Payload will automatically import.
 
+#### ✋ JSX support must be defined in `tsconfig.json`
+
+If not already defined, add the following to your `compilerOptions`:
+
+```ts
+  "compilerOptions": {
+    "jsx": "react"
+  }
+```
+
 #### ✋ Versions may need to be migrated
 
 This release includes a substantial simplification / optimization of how Versions work within Payload. They are now significantly more performant and easier to understand behind-the-scenes. We've removed ~600 lines of code and have ensured that Payload can be compatible with all flavors of Mongo - including versions earlier than 4.0, Azure Cosmos MongoDB, AWS' DocumentDB and more.
@@ -141,9 +151,9 @@ If you think the above bullets apply to you, then you can run a simple migration
 
 To migrate, create this file within the root of your Payload project:
 
-**migrateVersions.js**
+**migrateVersions.ts**
 
-```js
+```ts
 const payload = require("payload");
 
 require("dotenv").config();
@@ -157,7 +167,7 @@ const ensureAtLeastOneVersion = async () => {
   // Initialize Payload
   // IMPORTANT: make sure your ENV variables are filled properly here
   // as the below variable names are just for reference.
-  await payload.initAsync({
+  await payload.init({
     secret: PAYLOAD_SECRET_KEY,
     mongoURL: MONGO_URL,
     local: true,
@@ -187,16 +197,20 @@ const ensureAtLeastOneVersion = async () => {
             // If there are no corresponding versions,
             // we need to create one
             if (versions.length === 0) {
-              await VersionsModel.create({
-                parent: doc.id,
-                version: doc,
-                autosave: Boolean(versions?.drafts?.autosave),
-                updatedAt: doc.updatedAt,
-                createdAt: doc.createdAt,
-              });
+              try {
+                await VersionsModel.create({
+                  parent: doc.id,
+                  version: doc,
+                  autosave: Boolean(versions?.drafts?.autosave),
+                  updatedAt: doc.updatedAt,
+                  createdAt: doc.createdAt,
+                });
+              } catch (e) {
+                console.error(`Unable to create version corresponding with collection ${slug} document ID ${doc.id}`, e?.errors || e);
+              }
 
               console.log(
-                `Created version corresponding with ${collection.slug} document ID ${doc.id}`
+                `Created version corresponding with ${slug} document ID ${doc.id}`
               );
             }
           })
@@ -212,7 +226,7 @@ const ensureAtLeastOneVersion = async () => {
 ensureAtLeastOneVersion();
 ```
 
-Make sure your environment variables match the script's values above and then run `node migrateVersions.js` in your terminal.
+Make sure your environment variables match the script's values above and then run `ts-node -T migrateVersions.ts` in your terminal.
 
 This migration script will ensure that there is at least one corresponding version for each of your draft-enabled documents. It won't modify or delete any of your existing documents at all.
 

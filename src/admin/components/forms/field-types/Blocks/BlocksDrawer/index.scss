@@ -1,0 +1,10 @@
+@import '../../../../../scss/styles.scss';
+
+.blocks-drawer {
+  margin-top: base(2.5);
+  width: 100%;
+
+  @include mid-break {
+    margin-top: base(1.5);
+  }
+}

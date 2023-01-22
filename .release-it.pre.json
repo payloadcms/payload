@@ -1,5 +1,4 @@
 {
-  "preReleaseId": "canary",
   "git": {
     "requireCleanWorkingDir": false,
     "commit": false,
