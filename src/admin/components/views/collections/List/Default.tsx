@@ -175,6 +175,7 @@ const DefaultList: React.FC<Props> = (props) => {
                 limit={limit}
                 modifySearchParams={modifySearchParams}
                 handleChange={handlePerPageChange}
+                resetPage={data.totalDocs <= data.pagingCounter}
               />
             </Fragment>
           )}
