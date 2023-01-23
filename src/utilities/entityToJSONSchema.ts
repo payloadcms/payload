@@ -5,7 +5,6 @@ import { fieldAffectsData, Field, Option, FieldAffectingData, tabHasName } from 
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 import deepCopyObject from './deepCopyObject';
-import { groupOrTabHasRequiredSubfield } from './groupOrTabHasRequiredSubfield';
 import { toWords } from './formatLabels';
 import { SanitizedConfig } from '../config/types';
 
@@ -310,8 +309,7 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
           case 'tabs': {
             field.tabs.forEach((tab) => {
               if (tabHasName(tab)) {
-                const hasRequiredSubfields = groupOrTabHasRequiredSubfield(tab);
-                if (hasRequiredSubfields) requiredTopLevelProps.push(tab.name);
+                if (tab.required) requiredTopLevelProps.push(tab.name);
 
                 topLevelProps.push([
                   tab.name,
