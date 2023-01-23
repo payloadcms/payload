@@ -45,6 +45,33 @@ export interface GlobalModel extends Model<Document> {
   buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
 }
 
+export type GlobalAdminOptions = {
+  /**
+   * Place globals into a navigational group
+   * */
+  group?: Record<string, string> | string;
+  /**
+   * Custom description for collection
+   */
+  description?: EntityDescription;
+  /**
+   * Hide the API URL within the Edit view
+   */
+  hideAPIURL?: boolean
+  /**
+   * Custom admin components
+   */
+  components?: {
+    views?: {
+      Edit?: React.ComponentType<any>
+    }
+  };
+  /**
+   * Function to generate custom preview URL
+   */
+  preview?: GeneratePreviewURL
+}
+
 export type GlobalConfig = {
   slug: string
   label?: Record<string, string> | string
@@ -60,7 +87,6 @@ export type GlobalConfig = {
      */
     interface?: string
   }
-  preview?: GeneratePreviewURL
   versions?: IncomingGlobalVersions | boolean
   hooks?: {
     beforeValidate?: BeforeValidateHook[]
@@ -77,16 +103,7 @@ export type GlobalConfig = {
     update?: Access;
   }
   fields: Field[];
-  admin?: {
-    description?: EntityDescription;
-    group?: Record<string, string> | string;
-    hideAPIURL?: boolean;
-    components?: {
-      views?: {
-        Edit?: React.ComponentType<any>
-      }
-    }
-  }
+  admin?: GlobalAdminOptions
 }
 
 export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions'> {

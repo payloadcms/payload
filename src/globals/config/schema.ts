@@ -23,6 +23,7 @@ const globalSchema = joi.object().keys({
         Edit: componentSchema,
       }),
     }),
+    preview: joi.func(),
   }),
   typescript: joi.object().keys({
     interface: joi.string(),
