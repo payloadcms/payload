@@ -102,7 +102,7 @@ describe('fields', () => {
       await expect(page.locator('.cell-formattedNumber')).toHaveText('5 liters');
     });
 
-    test('should pass formatted number to description', async () => {
+    test('should pass admin language to description', async () => {
       await page.goto(url.create);
       const field = page.locator('#field-formattedNumber');
       await field.fill('10');
