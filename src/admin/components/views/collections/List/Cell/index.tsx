@@ -12,9 +12,6 @@ const DefaultCell: React.FC<Props> = (props) => {
     field,
     collection: {
       slug,
-      admin: {
-        useAsTitle,
-      },
     },
     cellData,
     rowData: {
@@ -39,7 +36,7 @@ const DefaultCell: React.FC<Props> = (props) => {
     className,
   };
 
-  if (link || (useAsTitle && 'name' in field && useAsTitle === field.name)) {
+  if (link) {
     WrapElement = Link;
     wrapElementProps.to = `${admin}/collections/${slug}/${id}`;
   }

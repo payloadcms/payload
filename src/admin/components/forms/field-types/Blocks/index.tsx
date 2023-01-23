@@ -30,10 +30,10 @@ import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
 import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug';
 import Button from '../../../elements/Button';
-
-import './index.scss';
 import { RowActions } from './RowActions';
 import { DrawerToggler } from '../../../elements/Drawer';
+
+import './index.scss';
 
 const baseClass = 'blocks-field';
 
