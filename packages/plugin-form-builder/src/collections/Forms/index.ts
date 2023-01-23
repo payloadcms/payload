@@ -155,7 +155,6 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
                 type: 'text',
                 name: 'emailTo',
                 label: 'Email To',
-                required: true,
                 admin: {
                   width: '100%',
                   placeholder: '"Email Sender" <sender@email.com>'
