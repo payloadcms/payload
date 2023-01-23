@@ -1,18 +1,17 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import { DraggableAttributes } from '@dnd-kit/core';
+
+import React from 'react';
+import { UseDraggableArguments } from '@dnd-kit/core';
 // eslint-disable-next-line import/no-unresolved
 import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+import { UseDraggableSortableReturn } from '../useDraggableSortable/types';
 
-export type DragHandleProps = {
-  attributes: DraggableAttributes & { style: { cursor: 'grab' | 'grabbing' } },
-  listeners: SyntheticListenerMap,
+export type DragHandleProps = UseDraggableArguments & {
+  attributes: UseDraggableArguments['attributes']
+  listeners: SyntheticListenerMap
 }
 
-export type Props = {
-  id: string,
-  disabled?: boolean,
-  children: (_: {
-    setNodeRef: (node: HTMLElement) => void,
-    transform: string,
-  } & DragHandleProps) => React.ReactElement<HTMLElement>
+export type ChildFunction = (args: UseDraggableSortableReturn) => React.ReactNode;
+
+export type Props = UseDraggableArguments & {
+  children: ChildFunction
 }

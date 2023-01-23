@@ -292,7 +292,11 @@ const BlocksField: React.FC<Props> = (props) => {
                       onToggle={(collapsed) => setCollapse(row.id, collapsed)}
                       className={`${baseClass}__row`}
                       key={row.id}
-                      dragHandleProps={{ attributes, listeners }}
+                      dragHandleProps={{
+                        id: row.id,
+                        attributes,
+                        listeners,
+                      }}
                       header={(
                         <div className={`${baseClass}__block-header`}>
                           <span className={`${baseClass}__block-number`}>

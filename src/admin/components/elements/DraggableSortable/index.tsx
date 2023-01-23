@@ -1,4 +1,5 @@
-/* eslint-disable import/no-extraneous-dependencies */
+import React, { useCallback, useId } from 'react';
+import { SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import {
   DragEndEvent,
   useDroppable,
@@ -9,11 +10,6 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
-import React, { useCallback, useId } from 'react';
 
 import { Props } from './types';
 
@@ -38,21 +34,23 @@ const DraggableSortable: React.FC<Props> = (props) => {
     }),
   );
 
-  const _onDragEnd = useCallback((event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!active || !over) return;
 
-    onDragEnd({
-      event,
-      moveFromIndex: ids.findIndex((_id) => _id === active.id),
-      moveToIndex: ids.findIndex((_id) => _id === over.id),
-    });
+    if (typeof onDragEnd === 'function') {
+      onDragEnd({
+        event,
+        moveFromIndex: ids.findIndex((_id) => _id === active.id),
+        moveToIndex: ids.findIndex((_id) => _id === over.id),
+      });
+    }
   }, [onDragEnd, ids]);
 
   return (
     <DndContext
-      onDragEnd={_onDragEnd}
+      onDragEnd={handleDragEnd}
       sensors={sensors}
       collisionDetection={closestCenter}
     >

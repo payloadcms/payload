@@ -1,9 +1,7 @@
-import React, { useCallback, useId } from 'react';
+import React from 'react';
 import Select from 'react-select';
 import { useTranslation } from 'react-i18next';
-/* eslint-disable import/no-extraneous-dependencies */
 import { arrayMove } from '@dnd-kit/sortable';
-
 import { Props } from './types';
 import Chevron from '../../icons/Chevron';
 import { getTranslation } from '../../../../utilities/getTranslation';
@@ -99,9 +97,7 @@ const SortableSelect: React.FC<Props> = (props) => {
         onChange(sorted);
       }}
     >
-      <SelectAdapter
-        {...props}
-      />
+      <SelectAdapter {...props} />
     </DraggableSortable>
   );
 };

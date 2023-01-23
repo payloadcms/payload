@@ -97,7 +97,6 @@ const DefaultList: React.FC<Props> = (props) => {
           handleSortChange={handleSortChange}
           handleWhereChange={handleWhereChange}
         />
-
         {!data.docs && (
           <StaggeredShimmers
             className={[
@@ -108,7 +107,6 @@ const DefaultList: React.FC<Props> = (props) => {
             width={upload ? 'unset' : '100%'}
           />
         )}
-
         {(data.docs && data.docs.length > 0) && (
           <React.Fragment>
             {!upload && (

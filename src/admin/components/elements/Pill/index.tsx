@@ -1,20 +1,58 @@
-import React from 'react';
+import React, { ElementType } from 'react';
 import { Link } from 'react-router-dom';
 import { Props, RenderedTypeProps } from './types';
+import DragIcon from '../../icons/Drag';
+import { useDraggableSortable, UseDraggableSortableReturn } from '../DraggableSortable/useDraggableSortable';
 
 import './index.scss';
 
 const baseClass = 'pill';
 
-const Pill: React.FC<Props> = ({
-  children,
-  className,
-  to,
-  icon,
-  alignIcon = 'right',
-  onClick,
-  pillStyle = 'light',
-}) => {
+const PillDragAction: React.FC<Partial<UseDraggableSortableReturn>> = (props) => {
+  const {
+    listeners,
+    attributes,
+  } = props;
+
+  return (
+    <span
+      className={`${baseClass}__drag`}
+      {...listeners}
+      {...attributes}
+      role="button"
+      tabIndex={0}
+      onClick={(e) => {
+        // we need to prevent the pill from being clicked while dragging
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onKeyDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+    >
+      <DragIcon />
+    </span>
+  );
+};
+
+const Pill: React.FC<Props> = (props) => {
+  const {
+    id,
+    className,
+    to,
+    icon,
+    alignIcon = 'right',
+    onClick,
+    pillStyle = 'light',
+    draggable,
+    children,
+  } = props;
+
+  const { attributes, listeners, transform, setNodeRef } = useDraggableSortable({
+    id,
+  });
+
   const classes = [
     baseClass,
     `${baseClass}--style-${pillStyle}`,
@@ -23,32 +61,47 @@ const Pill: React.FC<Props> = ({
     (to || onClick) && `${baseClass}--has-action`,
     icon && `${baseClass}--has-icon`,
     icon && `${baseClass}--align-icon-${alignIcon}`,
+    draggable && `${baseClass}--draggable`,
   ].filter(Boolean).join(' ');
 
-  let RenderedType: string | React.FC<RenderedTypeProps> = 'div';
+  let Element: ElementType | React.FC<RenderedTypeProps> = 'div';
 
-  if (onClick && !to) RenderedType = 'button';
-  if (to) RenderedType = Link;
+  if (onClick && !to) Element = 'button';
+  if (to) Element = Link;
 
   return (
-    <RenderedType
+    <div
       className={classes}
-      onClick={onClick}
-      type={RenderedType === 'button' ? 'button' : undefined}
-      to={to || undefined}
+      style={{
+        transform: draggable ? transform : undefined,
+      }}
+      ref={setNodeRef}
     >
-      {(icon && alignIcon === 'left') && (
-        <React.Fragment>
-          {icon}
-        </React.Fragment>
+      {draggable && (
+        <PillDragAction
+          attributes={attributes}
+          listeners={listeners}
+        />
       )}
-      {children}
-      {(icon && alignIcon === 'right') && (
-        <React.Fragment>
-          {icon}
-        </React.Fragment>
-      )}
-    </RenderedType>
+      <Element
+        className={`${baseClass}__content`}
+        onClick={onClick}
+        type={Element === 'button' ? 'button' : undefined}
+        to={to || undefined}
+      >
+        {(icon && alignIcon === 'left') && (
+          <React.Fragment>
+            {icon}
+          </React.Fragment>
+        )}
+        {children}
+        {(icon && alignIcon === 'right') && (
+          <React.Fragment>
+            {icon}
+          </React.Fragment>
+        )}
+      </Element>
+    </div>
   );
 };
 
