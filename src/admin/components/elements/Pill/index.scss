@@ -7,50 +7,27 @@
   background: var(--theme-elevation-150);
   color: var(--theme-elevation-800);
   border-radius: $style-radius-s;
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 0;
+  padding: 0 base(.25);
+  align-items: center;
 
-  &__content {
-    cursor: default;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: flex;
-    border: 0;
-    padding: 0 base(.25);
-    background: transparent;
-    align-items: center;
-
-    &:active,
-    &:focus {
-      outline: none;
-    }
+  &:active,
+  &:focus {
+    outline: none;
   }
 
   &--draggable {
     transition: transform 150ms linear;
-
-    .pill__content {
-      padding-left: 0;
-    }
-  }
-
-  &__drag {
-    border-right: 1px solid var(--theme-elevation-200);
-
-    &:focus {
-      outline: none;
-    }
-
-    svg {
-      position: relative;
-      top: 0.5px;
-    }
+    padding-left: 0;
   }
 
   &--has-action {
-    .pill__content {
-      cursor: pointer;
-      text-decoration: none;
-    }
+    cursor: pointer;
+    text-decoration: none;
   }
 
   &--has-icon {
@@ -60,15 +37,11 @@
   }
 
   &--align-icon-left {
-    &:not(.pill--draggable).pill__content {
-      padding-left: base(.125);
-    }
+    padding-left: 0;
   }
 
   &--align-icon-right {
-    .pill__content {
-      padding-right: base(.125);
-    }
+    padding-right: 0;
   }
 
   &--style-white {
