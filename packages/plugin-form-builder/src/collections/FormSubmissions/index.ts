@@ -27,9 +27,9 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
     },
     fields: [
       {
-        name: formConfig?.formOverrides?.slug || 'form',
+        name: 'form',
         type: 'relationship',
-        relationTo: 'forms',
+        relationTo: formConfig?.formOverrides?.slug || 'forms',
         required: true,
         admin: {
           readOnly: true
