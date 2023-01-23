@@ -259,7 +259,7 @@ As shown above, you can simply provide a string that will show by the field, but
       type: 'text',
       maxLength: 20,
       admin: {
-        description: ({ value }) =>
+        description: ({ value, language }) =>
           (`${typeof value === 'string' ? 20 - value.length : '20'} characters left`)
       }
     }

@@ -1,8 +1,8 @@
 import React from 'react';
 
-export type DescriptionFunction = (value?: unknown) => string
+export type DescriptionFunction = (args: { value: unknown, language: string }) => string
 
-export type DescriptionComponent = React.ComponentType<{ value: unknown }>
+export type DescriptionComponent = React.ComponentType<{ value: unknown, language: string }>
 
 export type Description = Record<string, string> | string | DescriptionFunction | DescriptionComponent
 

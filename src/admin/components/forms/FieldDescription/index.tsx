@@ -18,7 +18,12 @@ const FieldDescription: React.FC<Props> = (props) => {
 
   if (isComponent(description)) {
     const Description = description;
-    return <Description value={formatOptions ? new Intl.NumberFormat(i18n.language, formatOptions).format(value as number) : value} />;
+    return (
+      <Description
+        value={formatOptions}
+        language={i18n.language}
+      />
+    );
   }
 
   if (description) {
@@ -29,7 +34,10 @@ const FieldDescription: React.FC<Props> = (props) => {
           className,
         ].filter(Boolean).join(' ')}
       >
-        {typeof description === 'function' ? description({ value: formatOptions ? new Intl.NumberFormat(i18n.language, formatOptions).format(value as number) : value }) : getTranslation(description, i18n)}
+        {typeof description === 'function' ? description({
+          value,
+          language: i18n.language,
+        }) : getTranslation(description, i18n)}
       </div>
     );
   }
