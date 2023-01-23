@@ -53,6 +53,10 @@ export default buildConfig({
         'pages'
       ],
       formOverrides: {
+        // labels: {
+        //   singular: 'Contact Form',
+        //   plural: 'Contact Forms'
+        // },
         fields: [
           {
             name: 'name',

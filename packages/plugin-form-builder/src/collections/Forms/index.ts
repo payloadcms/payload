@@ -63,6 +63,7 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
   }
 
   const config: CollectionConfig = {
+    ...formConfig?.formOverrides || {},
     slug: formConfig?.formOverrides?.slug || 'forms',
     admin: {
       useAsTitle: 'title',
