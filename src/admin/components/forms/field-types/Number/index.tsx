@@ -103,9 +103,9 @@ const NumberField: React.FC<Props> = (props) => {
             e.target.blur();
           }}
         />
-        {formatOptions && (
+        {formatOptions && typeof value === 'number' && (
           <div className="number__formatted">
-            {new Intl.NumberFormat(i18n.language, formatOptions).format(value as number)}
+            {new Intl.NumberFormat(i18n.language, formatOptions).format(value)}
           </div>
         )}
       </div>
