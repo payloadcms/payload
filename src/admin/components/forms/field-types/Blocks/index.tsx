@@ -1,26 +1,22 @@
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
-
+import React, { Fragment, useCallback, useEffect, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../utilities/Auth';
 import { usePreferences } from '../../../utilities/Preferences';
 import { useLocale } from '../../../utilities/Locale';
 import withCondition from '../../withCondition';
-import Button from '../../../elements/Button';
 import reducer, { Row } from '../rowReducer';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { useForm } from '../../Form/context';
 import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import Error from '../../Error';
 import useField from '../../useField';
-import Popup from '../../../elements/Popup';
-import BlockSelector from './BlockSelector';
+import { BlocksDrawer } from './BlocksDrawer';
 import { blocks as blocksValidator } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
 import { useOperation } from '../../../utilities/OperationProvider';
 import { Collapsible } from '../../../elements/Collapsible';
-import { ArrayAction } from '../../../elements/ArrayAction';
 import RenderFields from '../../RenderFields';
 import SectionTitle from './SectionTitle';
 import Pill from '../../../elements/Pill';
@@ -32,22 +28,24 @@ import { useConfig } from '../../../utilities/Config';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
+import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug';
+import Button from '../../../elements/Button';
 
 import './index.scss';
+import { RowActions } from './RowActions';
+import { DrawerToggler } from '../../../elements/Drawer';
 
 const baseClass = 'blocks-field';
 
 const BlocksField: React.FC<Props> = (props) => {
   const { t, i18n } = useTranslation('fields');
+
   const {
     label,
     name,
     path: pathFromProps,
     blocks,
-    labels = {
-      singular: t('block'),
-      plural: t('blocks'),
-    },
+    labels: labelsFromProps,
     fieldTypes,
     maxRows,
     minRows,
@@ -76,8 +74,14 @@ const BlocksField: React.FC<Props> = (props) => {
   const locale = useLocale();
   const operation = useOperation();
   const { dispatchFields, setModified } = formContext;
-  const [selectorIndexOpen, setSelectorIndexOpen] = useState<number>();
   const { localization } = useConfig();
+  const drawerSlug = useDrawerSlug('blocks-drawer');
+
+  const labels = {
+    singular: t('block'),
+    plural: t('blocks'),
+    ...labelsFromProps,
+  };
 
   const checkSkipValidation = useCallback((value) => {
     const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
@@ -103,12 +107,6 @@ const BlocksField: React.FC<Props> = (props) => {
     condition,
     disableFormData: rows?.length > 0,
   });
-
-  const onAddPopupToggle = useCallback((open) => {
-    if (!open) {
-      setSelectorIndexOpen(undefined);
-    }
-  }, []);
 
   const addRow = useCallback(async (rowIndex: number, blockType: string) => {
     const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
@@ -315,32 +313,17 @@ const BlocksField: React.FC<Props> = (props) => {
                         </div>
                       )}
                       actions={!readOnly ? (
-                        <React.Fragment>
-                          <Popup
-                            key={`${blockType}-${i}`}
-                            forceOpen={selectorIndexOpen === i}
-                            onToggleOpen={onAddPopupToggle}
-                            buttonType="none"
-                            size="large"
-                            horizontalAlign="right"
-                            render={({ close }) => (
-                              <BlockSelector
-                                blocks={blocks}
-                                addRow={addRow}
-                                addRowIndex={i}
-                                close={close}
-                              />
-                            )}
-                          />
-                          <ArrayAction
-                            rowCount={rows.length}
-                            duplicateRow={() => duplicateRow(i, blockType)}
-                            addRow={() => setSelectorIndexOpen(i)}
-                            moveRow={moveRow}
-                            removeRow={removeRow}
-                            index={i}
-                          />
-                        </React.Fragment>
+                        <RowActions
+                          addRow={addRow}
+                          removeRow={removeRow}
+                          duplicateRow={duplicateRow}
+                          moveRow={moveRow}
+                          rows={rows}
+                          blockType={blockType}
+                          blocks={blocks}
+                          labels={labels}
+                          rowIndex={i}
+                        />
                       ) : undefined}
                     >
                       <HiddenInput
@@ -369,7 +352,6 @@ const BlocksField: React.FC<Props> = (props) => {
 
           return null;
         })}
-
         {!checkSkipValidation(value) && (
           <React.Fragment>
             {(rows.length < minRows || (required && rows.length === 0)) && (
@@ -388,33 +370,30 @@ const BlocksField: React.FC<Props> = (props) => {
           </React.Fragment>
         )}
       </DraggableSortable>
-
       {(!readOnly && !hasMaxRows) && (
-        <div className={`${baseClass}__add-button-wrap`}>
-          <Popup
-            buttonType="custom"
-            size="large"
-            horizontalAlign="left"
-            button={(
-              <Button
-                buttonStyle="icon-label"
-                icon="plus"
-                iconPosition="left"
-                iconStyle="with-border"
-              >
-                {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
-              </Button>
-            )}
-            render={({ close }) => (
-              <BlockSelector
-                blocks={blocks}
-                addRow={addRow}
-                addRowIndex={value}
-                close={close}
-              />
-            )}
+        <Fragment>
+          <DrawerToggler
+            slug={drawerSlug}
+            className={`${baseClass}__drawer-toggler`}
+          >
+            <Button
+              el="span"
+              icon="plus"
+              buttonStyle="icon-label"
+              iconPosition="left"
+              iconStyle="with-border"
+            >
+              {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
+            </Button>
+          </DrawerToggler>
+          <BlocksDrawer
+            drawerSlug={drawerSlug}
+            blocks={blocks}
+            addRow={addRow}
+            addRowIndex={value}
+            labels={labels}
           />
-        </div>
+        </Fragment>
       )}
     </div>
   );
