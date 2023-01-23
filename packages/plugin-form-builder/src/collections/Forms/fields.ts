@@ -14,6 +14,7 @@ const label: Field = {
   name: 'label',
   label: 'Label',
   type: 'text',
+  localized: true,
 };
 
 const required: Field = {
@@ -64,6 +65,7 @@ const Select: Block = {
         {
           name: 'defaultValue',
           label: 'Default Value',
+          localized: true,
           type: 'text',
           admin: {
             width: '50%',
@@ -88,6 +90,7 @@ const Select: Block = {
               label: 'Label',
               type: 'text',
               required: true,
+              localized: true,
               admin: {
                 width: '50%',
               },
@@ -146,6 +149,7 @@ const Text: Block = {
           name: 'defaultValue',
           label: 'Default Value',
           type: 'text',
+          localized: true,
           admin: {
             width: '50%',
           },
@@ -192,6 +196,7 @@ const TextArea: Block = {
         {
           name: 'defaultValue',
           label: 'Default Value',
+          localized: true,
           type: 'text',
           admin: {
             width: '50%',
@@ -560,6 +565,7 @@ const Message: Block = {
     {
       name: 'message',
       type: 'richText',
+      localized: true,
     },
   ],
 };

@@ -110,6 +110,7 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
       {
         name: 'submitButtonLabel',
         type: 'text',
+        localized: true,
       },
       {
         name: 'confirmationType',
@@ -133,6 +134,7 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
       {
         name: 'confirmationMessage',
         type: 'richText',
+        localized: true,
         required: true,
         admin: {
           condition: (_, siblingData) => siblingData?.confirmationType === 'message',
@@ -206,11 +208,13 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
             label: 'Subject',
             defaultValue: 'You\'ve received a new message.',
             required: true,
+            localized: true,
           },
           {
             type: 'richText',
             name: 'message',
             label: 'Message',
+            localized: true,
             admin: {
               description: 'Enter the message that should be sent in this email.',
             },
