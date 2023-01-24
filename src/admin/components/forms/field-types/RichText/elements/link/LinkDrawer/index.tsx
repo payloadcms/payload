@@ -26,7 +26,6 @@ export const LinkDrawer: React.FC<Props> = ({
   return (
     <Drawer
       slug={drawerSlug}
-      formatSlug={false}
       className={baseClass}
     >
       <Gutter className={`${baseClass}__template`}>

@@ -1,8 +1,9 @@
+import { Config as SchemaConfig } from 'payload/generated-types';
 import { PayloadRequest } from '../../../express/types';
 import { Collection } from '../../config/types';
 import findByID from '../../operations/findByID';
 
-export type Resolver = (_: unknown, args: {
+export type Resolver<T> = (_: unknown, args: {
   locale?: string
   draft: boolean
   id: string
@@ -12,9 +13,9 @@ export type Resolver = (_: unknown, args: {
     req: PayloadRequest,
     res: Response
   }
-) => Promise<Document>
+) => Promise<T>
 
-export default function findByIDResolver(collection: Collection): Resolver {
+export default function findByIDResolver<T extends keyof SchemaConfig['collections']>(collection: Collection): Resolver<SchemaConfig['collections'][T]> {
   return async function resolver(_, args, context) {
     const { req } = context;
     if (args.locale) req.locale = args.locale;

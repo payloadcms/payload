@@ -172,7 +172,7 @@
     "leaveAnyway": "Tiếp tục thoát",
     "leaveWithoutSaving": "Không lưu dữ liệu và thoát",
     "light": "Nền sáng",
-    "loading": "Đang tải...",
+    "loading": "Đang tải",
     "locales": "Mã khu vực",
     "moveDown": "Di chuyển xuống",
     "moveUp": "Di chuyển lên",
@@ -212,6 +212,8 @@
     "untitled": "Không tiêu đề",
     "updatedAt": "Được cập nhật vào lúc",
     "updatedSuccessfully": "Cập nhật thành công.",
+    "updating": "Đang cập nhật",
+    "uploading": "Đang tải lên",
     "user": "Người dùng",
     "users": "Những người dùng",
     "welcome": "Xin chào"

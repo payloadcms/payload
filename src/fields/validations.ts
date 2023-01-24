@@ -212,7 +212,7 @@ const validateFilterOptions: Validate = async (value, { t, filterOptions, id, us
         }
       });
 
-      const result = await payload.find<TypeWithID>({
+      const result = await payload.find({
         collection,
         depth: 0,
         where: {

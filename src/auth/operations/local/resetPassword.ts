@@ -1,12 +1,13 @@
-import { Payload } from '../../..';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { Payload } from '../../../payload';
 import resetPassword, { Result } from '../resetPassword';
 import { PayloadRequest } from '../../../express/types';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
 
-export type Options = {
-  collection: string
+export type Options<T extends keyof GeneratedTypes['collections']> = {
+  collection: T
   data: {
     token: string
     password: string
@@ -15,7 +16,10 @@ export type Options = {
   req?: PayloadRequest
 }
 
-async function localResetPassword(payload: Payload, options: Options): Promise<Result> {
+async function localResetPassword<T extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<Result> {
   const {
     collection: collectionSlug,
     data,
@@ -26,7 +30,7 @@ async function localResetPassword(payload: Payload, options: Options): Promise<R
   const collection = payload.collections[collectionSlug];
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
   req.payload = payload;

@@ -54,6 +54,7 @@ export type IncomingUploadType = {
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
   handlers?: any[]
   resizeOptions?: ResizeOptions
+  /** Options for original upload file only. For sizes, set each formatOptions individually. */
   formatOptions?: ImageUploadFormatOptions
 }
 

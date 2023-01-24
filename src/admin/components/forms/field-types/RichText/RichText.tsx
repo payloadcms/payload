@@ -47,6 +47,7 @@ const RichText: React.FC<Props> = (props) => {
     required,
     validate = richText,
     label,
+    defaultValue: defaultValueFromProps,
     admin,
     admin: {
       readOnly,
@@ -250,7 +251,7 @@ const RichText: React.FC<Props> = (props) => {
     }
   }
 
-  if (!valueToRender) valueToRender = defaultValue;
+  if (!valueToRender) valueToRender = defaultValueFromProps || defaultValue;
 
   return (
     <div

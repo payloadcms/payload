@@ -9,7 +9,7 @@ import rateLimit from 'express-rate-limit';
 import localizationMiddleware from '../../localization/middleware';
 import authenticate from './authenticate';
 import identifyAPI from './identifyAPI';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import { PayloadRequest } from '../types';
 import corsHeaders from './corsHeaders';
 import convertPayload from './convertPayload';

@@ -5,9 +5,7 @@ import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
-
 import { useLocale } from '../../utilities/Locale';
-
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultGlobal from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
@@ -17,7 +15,7 @@ import { Fields } from '../../forms/Form/types';
 import { usePreferences } from '../../utilities/Preferences';
 
 const GlobalView: React.FC<IndexProps> = (props) => {
-  const { state: locationState } = useLocation<{data?: Record<string, unknown>}>();
+  const { state: locationState } = useLocation<{ data?: Record<string, unknown> }>();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
   const { user } = useAuth();
@@ -57,7 +55,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     setInitialState(state);
   }, [getVersions, fields, user, locale, t, getDocPermissions]);
 
-  const [{ data }] = usePayloadAPI(
+  const [{ data, isLoading: isLoadingData }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
   );
@@ -82,12 +80,14 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     awaitInitialState();
   }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t]);
 
+  const isLoading = !initialState || !docPermissions || isLoadingData;
+
   return (
     <RenderCustomComponent
       DefaultComponent={DefaultGlobal}
       CustomComponent={CustomEdit}
       componentProps={{
-        isLoading: !initialState || !docPermissions,
+        isLoading,
         data: dataToRender,
         permissions: docPermissions,
         initialState,
