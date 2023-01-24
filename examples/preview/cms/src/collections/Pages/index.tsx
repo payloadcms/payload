@@ -1,20 +1,27 @@
 import { CollectionConfig } from 'payload/types';
-import { publishedOnly } from '../access/publishedOnly';
-import { Content } from '../blocks/Content';
-import { hero } from '../fields/hero';
-import { slugField } from '../fields/slug';
+import { Content } from '../../blocks/Content';
+import { hero } from '../../fields/hero';
+import { slugField } from '../../fields/slug';
+import { formatAppURL } from './formatAppURL';
+import { revalidatePage } from './hooks/revalidatePage';
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'updatedAt'],
+    preview: ({ breadcrumbs }) => `${process.env.PAYLOAD_PUBLIC_SITE_URL}/api/preview?url=${formatAppURL(breadcrumbs)}`,
   },
   versions: {
     drafts: true,
   },
   access: {
-    read: publishedOnly,
+    read: () => true,
+  },
+  hooks: {
+    afterChange: [
+      revalidatePage,
+    ],
   },
   fields: [
     {

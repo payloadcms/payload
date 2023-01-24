@@ -53,5 +53,11 @@ export const home = {
     }
   ],
   "slug": "home",
+  "breadcrumbs": [
+    {
+      "url": "/home",
+      "label": "Home",
+    }
+  ],
   "_status": "published",
 };

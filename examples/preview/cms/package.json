@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@faceless-ui/modal": "^2.0.1",
+    "@payloadcms/plugin-nested-docs": "^1.0.4",
     "@payloadcms/plugin-seo": "^1.0.8",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
