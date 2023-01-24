@@ -2,6 +2,7 @@
 import express from 'express';
 import serveStatic from 'serve-static';
 import { Sharp, ResizeOptions } from 'sharp';
+import type { Options as ExpressFileUploadOptions } from 'express-fileupload';
 
 export type FileSize = {
   filename: string;
@@ -44,7 +45,9 @@ export type ImageSize = ResizeOptions & {
 
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => string
 
-export type IncomingUploadType = {
+export type IncomingUploadType = Partial<
+  Pick<ExpressFileUploadOptions, 'useTempFiles' | 'tempFileDir'>
+> & {
   imageSizes?: ImageSize[]
   staticURL?: string
   staticDir?: string
