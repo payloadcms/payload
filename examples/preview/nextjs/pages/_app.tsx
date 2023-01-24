@@ -1,13 +1,15 @@
-import App, { AppContext, AppProps } from 'next/app';
+import App, { AppContext, AppProps as NextAppProps } from 'next/app';
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useRouter } from 'next/router';
+import { MainMenu } from "../payload-types";
 import { Header } from '../components/Header';
 import { GlobalsProvider } from '../providers/Globals';
 import { CloseModalOnRouteChange } from '../components/CloseModalOnRouteChange';
-import { MainMenu } from "../payload-types";
+import { useNavigationScrollTo } from '../utilities/useNavigationScrollTo';
+import { CookiesProvider } from 'react-cookie';
 
 import '../css/app.scss';
-
 export interface IGlobals {
   mainMenu: MainMenu,
 }
@@ -24,6 +26,12 @@ export const getAllGlobals = async (): Promise<IGlobals> => {
   }
 }
 
+const transitionTime = 500;
+
+type AppProps<P = any> = {
+  pageProps: P;
+} & Omit<NextAppProps<P>, "pageProps">;
+
 const PayloadApp = (appProps: AppProps & {
   globals: IGlobals,
 }): React.ReactElement => {
@@ -33,8 +41,31 @@ const PayloadApp = (appProps: AppProps & {
     globals,
   } = appProps;
 
+  const {
+    breadcrumbs,
+    collection,
+    id,
+    preview,
+  } = pageProps;
+
+  const router = useRouter();
+  useNavigationScrollTo({
+    router,
+    navigationTime: transitionTime
+  });
+
+  const onPreviewExit = useCallback(() => {
+    const exit = async () => {
+      const exitReq = await fetch('/api/exit-preview');
+      if (exitReq.status === 200) {
+        router.reload();
+      }
+    }
+    exit();
+  }, [router])
+
   return (
-    <React.Fragment>
+    <CookiesProvider>
       <GlobalsProvider {...globals}>
         <ModalProvider
           classPrefix="form"
@@ -42,12 +73,19 @@ const PayloadApp = (appProps: AppProps & {
           zIndex="var(--modal-z-index)"
         >
           <CloseModalOnRouteChange />
-          <Header />
+          <Header
+            adminBarProps={{
+              collection,
+              id: id,
+              preview,
+              onPreviewExit
+            }}
+          />
           <Component {...pageProps} />
           <ModalContainer />
         </ModalProvider>
       </GlobalsProvider>
-    </React.Fragment>
+    </CookiesProvider>
   )
 }
 

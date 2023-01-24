@@ -47,6 +47,13 @@ export interface Page {
     blockType: 'content';
   }[];
   slug?: string;
+  parent?: string | Page;
+  breadcrumbs: {
+    doc?: string | Page;
+    url?: string;
+    label?: string;
+    id?: string;
+  }[];
   _status?: 'draft' | 'published';
   createdAt: string;
   updatedAt: string;

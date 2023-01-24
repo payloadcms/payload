@@ -1,14 +1,16 @@
 import { ModalToggler } from '@faceless-ui/modal';
 import Link from 'next/link';
-import React, { Fragment } from 'react';
+import React, { useState } from 'react';
 import { useGlobals } from '../../providers/Globals';
 import { Gutter } from '../Gutter';
 import { MenuIcon } from '../icons/Menu';
 import { CMSLink } from '../Link';
 import { Logo } from '../Logo';
 import { MobileMenuModal, slug as menuModalSlug } from './MobileMenuModal';
+import { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar';
 
 import classes from './index.module.scss';
+import { AdminBar } from './AdminBar';
 
 type HeaderBarProps = {
   children?: React.ReactNode;
@@ -34,13 +36,26 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
   )
 }
 
-export const Header: React.FC = () => {
+export const Header: React.FC<{
+  adminBarProps: PayloadAdminBarProps
+}> = (props) => {
+  const {
+    adminBarProps,
+  } = props;
+
+  const [user, setUser] = useState<PayloadMeUser>();
+
   const { mainMenu: { navItems } } = useGlobals();
 
   const hasNavItems = navItems && Array.isArray(navItems) && navItems.length > 0;
 
   return (
-    <Fragment>
+    <div>
+      <AdminBar
+        adminBarProps={adminBarProps}
+        user={user}
+        setUser={setUser}
+      />
       <HeaderBar>
         {hasNavItems && (
           <nav className={classes.nav}>
@@ -55,6 +70,6 @@ export const Header: React.FC = () => {
       {hasNavItems && (
         <MobileMenuModal navItems={navItems} />
       )}
-    </Fragment>
+    </div>
   )
 }
