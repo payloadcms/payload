@@ -34,7 +34,7 @@
 
   @include mid-break {
     --gutter-h: #{base(2)};
-    --nav-width: 100%;
+    --nav-width: 0;
   }
 
   @include small-break {
