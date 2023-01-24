@@ -11,7 +11,7 @@ import Password from '../../forms/field-types/Password';
 import FormSubmit from '../../forms/Submit';
 import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
-import { useLoadingOverlay } from '../../utilities/LoadingOverlay';
+import { FormLoadingOverlayToggle } from '../../elements/Loading';
 
 import './index.scss';
 
@@ -21,7 +21,6 @@ const Login: React.FC = () => {
   const history = useHistory();
   const { t } = useTranslation('authentication');
   const { user, setToken } = useAuth();
-  const { toggleLoadingOverlay } = useLoadingOverlay();
   const config = useConfig();
   const {
     admin: {
@@ -44,10 +43,6 @@ const Login: React.FC = () => {
 
   const onSuccess = (data) => {
     if (data.token) {
-      toggleLoadingOverlay({
-        key: 'login',
-        isLoading: false,
-      });
       setToken(data.token);
       history.push(admin);
     }
@@ -99,17 +94,14 @@ const Login: React.FC = () => {
             <Form
               disableSuccessStatus
               waitForAutocomplete
-              disableNativeFormSubmission={false}
-              onSubmit={() => {
-                toggleLoadingOverlay({
-                  key: 'login',
-                  isLoading: true,
-                });
-              }}
               onSuccess={onSuccess}
               method="post"
               action={`${serverURL}${api}/${userSlug}/login`}
             >
+              <FormLoadingOverlayToggle
+                action="loading"
+                name="login-form"
+              />
               <Email
                 label={t('general:email')}
                 name="email"

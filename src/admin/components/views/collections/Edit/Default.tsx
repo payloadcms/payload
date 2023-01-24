@@ -93,9 +93,11 @@ const DefaultEditView: React.FC<Props> = (props) => {
             initialState={initialState}
           >
             <FormLoadingOverlayToggle
+              formIsLoading={isLoading}
               action={isLoading ? 'loading' : operation}
               name={`collection-edit--${collection.labels.singular}`}
               loadingSuffix={getTranslation(collection.labels.singular, i18n)}
+              type="withoutNav"
             />
 
             {!isLoading && (
