@@ -10,12 +10,12 @@ import { Props as CellProps } from './Cell/types';
 
 const buildColumns = ({
   collection,
-  columns,
+  activeColumns,
   t,
   cellProps,
 }: {
   collection: SanitizedCollectionConfig,
-  columns: string[],
+  activeColumns: string[],
   t: TFunction,
   cellProps?: Partial<CellProps>[]
 }): Column[] => {
@@ -36,51 +36,43 @@ const buildColumns = ({
       type: 'date',
       label: t('createdAt'),
     },
-  ], true);
+  ]);
 
-  return (columns || []).reduce((cols, col, colIndex) => {
-    let field = null;
+  const cols: Column[] = flattenedFields.map((field, colIndex) => {
+    const isActive = activeColumns.includes(field.name);
 
-    flattenedFields.forEach((fieldToCheck) => {
-      if (fieldToCheck.name === col) {
-        field = fieldToCheck;
-      }
-    });
-
-    if (field) {
-      return [
-        ...cols,
-        {
-          accessor: field.name,
-          components: {
-            Heading: (
-              <SortColumn
-                label={field.label || field.name}
-                name={field.name}
-                disable={(field.disableSort || fieldIsPresentationalOnly(field)) || undefined}
-              />
-            ),
-            renderCell: (rowData, cellData) => {
-              return (
-                <Cell
-                  key={JSON.stringify(cellData)}
-                  field={field}
-                  colIndex={colIndex}
-                  collection={collection}
-                  rowData={rowData}
-                  cellData={cellData}
-                  link={colIndex === 0}
-                  {...cellProps?.[colIndex] || {}}
-                />
-              );
-            },
-          },
+    return {
+      active: isActive,
+      accessor: field.name,
+      name: field.name,
+      label: field.label,
+      components: {
+        Heading: (
+          <SortColumn
+            label={field.label || field.name}
+            name={field.name}
+            disable={(('disableSort' in field && Boolean(field.disableSort)) || fieldIsPresentationalOnly(field)) || undefined}
+          />
+        ),
+        renderCell: (rowData, cellData) => {
+          return (
+            <Cell
+              key={JSON.stringify(cellData)}
+              field={field}
+              colIndex={colIndex}
+              collection={collection}
+              rowData={rowData}
+              cellData={cellData}
+              link={colIndex === 0}
+              {...cellProps?.[colIndex] || {}}
+            />
+          );
         },
-      ];
-    }
+      },
+    };
+  });
 
-    return cols;
-  }, []);
+  return cols;
 };
 
 export default buildColumns;

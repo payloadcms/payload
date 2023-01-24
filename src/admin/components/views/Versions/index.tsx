@@ -11,7 +11,7 @@ import Meta from '../../utilities/Meta';
 import { Props } from './types';
 import IDLabel from '../../elements/IDLabel';
 import { getColumns } from './columns';
-import Table from '../../elements/Table';
+import { Table } from '../../elements/Table';
 import Paginator from '../../elements/Paginator';
 import PerPage from '../../elements/PerPage';
 import { useSearchParams } from '../../utilities/SearchParams';

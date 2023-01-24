@@ -12,8 +12,11 @@ export type Props = {
   setListControls: (controls: unknown) => void
   setSort: (sort: string) => void
   tableColumns: Column[]
-  columnNames: string[]
-  setColumns: (columns: string[]) => void
+  toggleColumn: (column: string) => void
+  moveColumn: (args: {
+    fromIndex: number
+    toIndex: number
+  }) => void
   hasCreatePermission: boolean
   setLimit: (limit: number) => void
   limit: number
@@ -34,7 +37,10 @@ export type ListIndexProps = {
 }
 
 export type ListPreferences = {
-  columns: string[]
+  columns: {
+    accessor: string
+    active: boolean
+  }[]
   limit: number
   sort: number
 }

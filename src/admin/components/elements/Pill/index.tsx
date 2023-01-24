@@ -20,7 +20,7 @@ const Pill: React.FC<Props> = (props) => {
     children,
   } = props;
 
-  const { attributes, listeners, transform, setNodeRef } = useDraggableSortable({
+  const { attributes, listeners, transform, setNodeRef, isDragging } = useDraggableSortable({
     id,
   });
 
@@ -33,6 +33,7 @@ const Pill: React.FC<Props> = (props) => {
     icon && `${baseClass}--has-icon`,
     icon && `${baseClass}--align-icon-${alignIcon}`,
     draggable && `${baseClass}--draggable`,
+    isDragging && `${baseClass}--is-dragging`,
   ].filter(Boolean).join(' ');
 
   let Element: ElementType | React.FC<RenderedTypeProps> = 'div';

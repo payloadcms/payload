@@ -1,8 +1,8 @@
-import { Field } from '../../../../../../fields/config/types';
+import { FieldAffectingData, UIField } from '../../../../../../fields/config/types';
 import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
 
 export type Props = {
-  field: Field
+  field: UIField | FieldAffectingData
   colIndex: number
   collection: SanitizedCollectionConfig
   cellData: unknown

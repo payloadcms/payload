@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { useTranslation } from 'react-i18next';
@@ -13,9 +13,9 @@ import buildColumns from './buildColumns';
 import { ListIndexProps, ListPreferences } from './types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { useSearchParams } from '../../../utilities/SearchParams';
-import { Column } from '../../../elements/Table/types';
 import { Field } from '../../../../../fields/config/types';
 import getInitialColumns from './getInitialColumns';
+import { columnReducer } from './columnReducer';
 
 const ListView: React.FC<ListIndexProps> = (props) => {
   const {
@@ -48,21 +48,22 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const { page, sort, limit, where } = useSearchParams();
   const history = useHistory();
   const { t } = useTranslation('general');
-
   const [fetchURL, setFetchURL] = useState<string>('');
   const [fields] = useState<Field[]>(() => formatFields(collection, t));
-  const [tableColumns, setTableColumns] = useState<Column[]>(() => {
+
+  const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
     const initialColumns = getInitialColumns(fields, useAsTitle, defaultColumns);
-    return buildColumns({ collection, columns: initialColumns, t });
+    return buildColumns({
+      collection,
+      activeColumns: initialColumns,
+      t,
+    });
   });
 
   const collectionPermissions = permissions?.collections?.[slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
   const newDocumentURL = `${admin}/collections/${slug}/create`;
   const [{ data }, { setParams: setFetchParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } });
-
-  const activeColumnNames = tableColumns.map(({ accessor }) => accessor);
-  const stringifiedActiveColumns = JSON.stringify(activeColumnNames);
 
   useEffect(() => {
     setStepNav([
@@ -106,7 +107,14 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     (async () => {
       const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
       if (currentPreferences?.columns) {
-        setTableColumns(buildColumns({ collection, columns: currentPreferences?.columns, t }));
+        dispatchTableColumns({
+          type: 'set',
+          payload: {
+            activeColumns: currentPreferences?.columns.filter((c) => c.active).map(({ accessor }) => accessor),
+            t,
+            collection,
+          },
+        });
       }
 
       const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 0 });
@@ -136,15 +144,42 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     const newPreferences = {
       limit,
       sort,
-      columns: JSON.parse(stringifiedActiveColumns),
+      columns: tableColumns.map((c) => ({
+        accessor: c.accessor,
+        active: c.active,
+      })),
     };
 
     setPreference(preferenceKey, newPreferences);
-  }, [sort, limit, stringifiedActiveColumns, preferenceKey, setPreference]);
+  }, [sort, limit, preferenceKey, setPreference, fields, tableColumns]);
 
-  const setActiveColumns = useCallback((columns: string[]) => {
-    setTableColumns(buildColumns({ collection, columns, t }));
-  }, [collection, t]);
+  const toggleColumn = useCallback((column: string) => {
+    dispatchTableColumns({
+      type: 'toggle',
+      payload: {
+        column,
+        t,
+        collection,
+      },
+    });
+  }, [t, collection]);
+
+  const moveColumn = useCallback((args: {
+    fromIndex: number
+    toIndex: number
+  }) => {
+    const { fromIndex, toIndex } = args;
+
+    dispatchTableColumns({
+      type: 'move',
+      payload: {
+        fromIndex,
+        toIndex,
+        t,
+        collection,
+      },
+    });
+  }, [t, collection]);
 
   return (
     <RenderCustomComponent
@@ -156,8 +191,8 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         hasCreatePermission,
         data,
         tableColumns,
-        columnNames: activeColumnNames,
-        setColumns: setActiveColumns,
+        toggleColumn,
+        moveColumn,
         limit: limit || defaultLimit,
       }}
     />

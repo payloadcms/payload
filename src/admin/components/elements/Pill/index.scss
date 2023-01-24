@@ -20,14 +20,13 @@
     outline: none;
   }
 
-  &--draggable {
-    transition: transform 150ms linear;
-    padding-left: 0;
-  }
-
   &--has-action {
     cursor: pointer;
     text-decoration: none;
+  }
+
+  &--is-dragging {
+    cursor: grabbing;
   }
 
   &--has-icon {

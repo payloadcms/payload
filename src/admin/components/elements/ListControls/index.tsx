@@ -23,7 +23,8 @@ const ListControls: React.FC<Props> = (props) => {
     enableColumns = true,
     enableSort = false,
     columns,
-    setColumns,
+    toggleColumn,
+    moveColumn,
     handleSortChange,
     handleWhereChange,
     modifySearchQuery = true,
@@ -98,7 +99,8 @@ const ListControls: React.FC<Props> = (props) => {
           <ColumnSelector
             collection={collection}
             columns={columns}
-            setColumns={setColumns}
+            toggleColumn={toggleColumn}
+            moveColumn={moveColumn}
           />
         </AnimateHeight>
       )}

@@ -8,7 +8,7 @@ import Paginator from '../../../elements/Paginator';
 import ListControls from '../../../elements/ListControls';
 import Pill from '../../../elements/Pill';
 import Button from '../../../elements/Button';
-import Table from '../../../elements/Table';
+import { Table } from '../../../elements/Table';
 import Meta from '../../../utilities/Meta';
 import { Props } from './types';
 import ViewDescription from '../../../elements/ViewDescription';
@@ -40,8 +40,8 @@ const DefaultList: React.FC<Props> = (props) => {
     newDocumentURL,
     limit,
     tableColumns,
-    columnNames,
-    setColumns,
+    toggleColumn,
+    moveColumn,
     hasCreatePermission,
     disableEyebrow,
     modifySearchParams,
@@ -89,8 +89,9 @@ const DefaultList: React.FC<Props> = (props) => {
         </header>
         <ListControls
           collection={collection}
-          columns={columnNames}
-          setColumns={setColumns}
+          columns={tableColumns}
+          toggleColumn={toggleColumn}
+          moveColumn={moveColumn}
           enableColumns={Boolean(!upload)}
           enableSort={Boolean(upload)}
           modifySearchQuery={modifySearchParams}
