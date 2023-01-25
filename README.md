@@ -1,17 +1,16 @@
-<h1 style="border: none; margin-bottom:0; padding-bottom: 0;" align="center">
+<p style="border: none; margin-bottom:0; padding-bottom: 0;" align="center">
   <a href="https://payloadcms.com">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-light.svg">
       <img width="350" alt="payload cms logo" src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-dark.svg">
     </picture>
   </a>
-</h1>
+</p>
 
-<h2 align="center" style="border: none;padding-bottom: 24px !important;">The most powerful TypeScript CMS</h2>
+<h3 align="center">The most powerful TypeScript CMS</h3>
 <p align="center">Code-first Headless CMS that bridges the gap between CMS and application framework</p>
 
 <h3 align="center">
-  <br />
   <a href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the docs</strong></a>
   ·
   <a href="https://demo.payloadcms.com/" rel="dofollow"><strong>Try Live Demo</strong></a>
