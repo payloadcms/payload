@@ -11,9 +11,9 @@
 <p align="center">Code-first Headless CMS that bridges the gap between CMS and application framework</p>
 
 <h3 align="center">
-  <a href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the docs</strong></a>
+  <a target="_blank" href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the docs</strong></a>
   ·
-  <a href="https://demo.payloadcms.com/" rel="dofollow"><strong>Try Live Demo</strong></a>
+  <a target="_blank" href="https://demo.payloadcms.com/" rel="dofollow"><strong>Try Live Demo</strong></a>
   <br />
 </h3>
 
@@ -62,7 +62,7 @@ Payload is a CMS that has been designed for developers from the ground up to del
 - Completely control the Admin panel by using your own React components. Swap out fields or even entire views with ease.
 - Use your data however and wherever you need thanks to auto-generated, yet fully extensible REST, GraphQL, and Local Node APIs.
 
-<a href="https://payloadcms.com/" rel="dofollow"><strong>Read more on our website</strong></a>
+<a target="_blank" href="https://payloadcms.com/" rel="dofollow"><strong>Read more on our website</strong></a>
 
 ## ✨ Features
 
