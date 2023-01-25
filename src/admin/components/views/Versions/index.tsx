@@ -10,7 +10,7 @@ import { StepNavItem } from '../../elements/StepNav/types';
 import Meta from '../../utilities/Meta';
 import { Props } from './types';
 import IDLabel from '../../elements/IDLabel';
-import { getColumns } from './columns';
+import { buildColumns } from './columns';
 import { Table } from '../../elements/Table';
 import Paginator from '../../elements/Paginator';
 import PerPage from '../../elements/PerPage';
@@ -27,7 +27,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   const { setStepNav } = useStepNav();
   const { params: { id } } = useRouteMatch<{ id: string }>();
   const { t, i18n } = useTranslation('version');
-  const [tableColumns] = useState(() => getColumns(collection, global, t));
+  const [tableColumns] = useState(() => buildColumns(collection, global, t));
   const [fetchURL, setFetchURL] = useState('');
   const { page, sort, limit } = useSearchParams();
 

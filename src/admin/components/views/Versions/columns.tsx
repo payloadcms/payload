@@ -38,9 +38,16 @@ const TextCell: React.FC<{children?: React.ReactNode}> = ({ children }) => (
   </span>
 );
 
-export const getColumns = (collection: SanitizedCollectionConfig, global: SanitizedGlobalConfig, t: TFunction): Column[] => [
+export const buildColumns = (
+  collection: SanitizedCollectionConfig,
+  global: SanitizedGlobalConfig,
+  t: TFunction,
+): Column[] => [
   {
     accessor: 'updatedAt',
+    active: true,
+    label: '',
+    name: '',
     components: {
       Heading: (
         <SortColumn
@@ -60,6 +67,9 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
   },
   {
     accessor: 'id',
+    active: true,
+    label: '',
+    name: '',
     components: {
       Heading: (
         <SortColumn
@@ -73,6 +83,9 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
   },
   {
     accessor: 'autosave',
+    active: true,
+    label: '',
+    name: '',
     components: {
       Heading: (
         <SortColumn

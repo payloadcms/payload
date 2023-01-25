@@ -10,12 +10,12 @@ import { Props as CellProps } from './Cell/types';
 
 const buildColumns = ({
   collection,
-  activeColumns,
+  columns,
   t,
   cellProps,
 }: {
   collection: SanitizedCollectionConfig,
-  activeColumns: string[],
+  columns: Pick<Column, 'accessor' | 'active'>[],
   t: TFunction,
   cellProps?: Partial<CellProps>[]
 }): Column[] => {
@@ -38,8 +38,21 @@ const buildColumns = ({
     },
   ]);
 
-  const cols: Column[] = flattenedFields.map((field, colIndex) => {
-    const isActive = activeColumns.includes(field.name);
+  // sort the fields to the order of activeColumns
+  const sortedFields = flattenedFields.sort((a, b) => {
+    const aIndex = columns.findIndex((column) => column.accessor === a.name);
+    const bIndex = columns.findIndex((column) => column.accessor === b.name);
+    if (aIndex === -1 && bIndex === -1) return 0;
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+    return aIndex - bIndex;
+  });
+
+  const firstActiveColumn = sortedFields.find((field) => columns.find((column) => column.accessor === field.name)?.active);
+
+  const cols: Column[] = sortedFields.map((field, colIndex) => {
+    const isActive = columns.find((column) => column.accessor === field.name)?.active || false;
+    const isFirstActive = firstActiveColumn?.name === field.name;
 
     return {
       active: isActive,
@@ -63,7 +76,7 @@ const buildColumns = ({
               collection={collection}
               rowData={rowData}
               cellData={cellData}
-              link={colIndex === 0}
+              link={isFirstActive}
               {...cellProps?.[colIndex] || {}}
             />
           );

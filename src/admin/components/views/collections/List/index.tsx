@@ -55,7 +55,10 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     const initialColumns = getInitialColumns(fields, useAsTitle, defaultColumns);
     return buildColumns({
       collection,
-      activeColumns: initialColumns,
+      columns: initialColumns.map((column) => ({
+        accessor: column,
+        active: true,
+      })),
       t,
     });
   });
@@ -110,7 +113,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         dispatchTableColumns({
           type: 'set',
           payload: {
-            activeColumns: currentPreferences?.columns.filter((c) => c.active).map(({ accessor }) => accessor),
+            columns: currentPreferences.columns,
             t,
             collection,
           },
@@ -158,11 +161,11 @@ const ListView: React.FC<ListIndexProps> = (props) => {
       type: 'toggle',
       payload: {
         column,
-        t,
         collection,
+        t,
       },
     });
-  }, [t, collection]);
+  }, [collection, t]);
 
   const moveColumn = useCallback((args: {
     fromIndex: number
@@ -175,11 +178,11 @@ const ListView: React.FC<ListIndexProps> = (props) => {
       payload: {
         fromIndex,
         toIndex,
-        t,
         collection,
+        t,
       },
     });
-  }, [t, collection]);
+  }, [collection, t]);
 
   return (
     <RenderCustomComponent

@@ -15,7 +15,7 @@ type TOGGLE = {
 type SET = {
   type: 'set',
   payload: {
-    activeColumns: string[]
+    columns: Pick<Column, 'accessor' | 'active'>[]
     t: TFunction
     collection: SanitizedCollectionConfig
   }
@@ -42,16 +42,19 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
         collection,
       } = action.payload;
 
-      const activeColumnsNames = state.filter((c) => c.active).map((c) => c.accessor);
-      if (activeColumnsNames.includes(column)) {
-        const index = activeColumnsNames.indexOf(column);
-        activeColumnsNames.splice(index, 1);
-      } else {
-        activeColumnsNames.push(column);
-      }
+      const withToggledColumn = state.map((col) => {
+        if (col.name === column) {
+          return {
+            ...col,
+            active: !col.active,
+          };
+        }
+
+        return col;
+      });
 
       return buildColumns({
-        activeColumns: activeColumnsNames,
+        columns: withToggledColumn,
         collection,
         t,
       });
@@ -64,25 +67,25 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
         collection,
       } = action.payload;
 
-      const activeColumnsNames = state.filter((c) => c.active).map((c) => c.accessor);
-      const [columnToMove] = activeColumnsNames.splice(fromIndex, 1);
-      activeColumnsNames.splice(toIndex, 0, columnToMove);
+      const withMovedColumn = [...state];
+      const [columnToMove] = withMovedColumn.splice(fromIndex, 1);
+      withMovedColumn.splice(toIndex, 0, columnToMove);
 
       return buildColumns({
-        activeColumns: activeColumnsNames,
+        columns: withMovedColumn,
         collection,
         t,
       });
     }
     case 'set': {
       const {
-        activeColumns,
+        columns,
         t,
         collection,
       } = action.payload;
 
       return buildColumns({
-        activeColumns,
+        columns,
         collection,
         t,
       });
