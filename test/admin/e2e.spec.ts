@@ -65,7 +65,7 @@ describe('admin', () => {
       await expect(link).toBeVisible();
 
       await navGroup.click();
-      await expect(link).not.toBeVisible();
+      await expect(link).toBeHidden();
 
       await navGroup.click();
       await expect(link).toBeVisible();
@@ -80,7 +80,7 @@ describe('admin', () => {
       await expect(link).toBeVisible();
 
       await navGroup.click();
-      await expect(link).not.toBeVisible();
+      await expect(link).toBeHidden();
 
       await navGroup.click();
       await expect(link).toBeVisible();
@@ -95,7 +95,7 @@ describe('admin', () => {
       await page.goto(url.admin);
 
       const link = await page.locator('#nav-group-one-collection-ones');
-      await expect(link).not.toBeVisible();
+      await expect(link).toBeHidden();
     });
 
     test('breadcrumbs - from list to dashboard', async () => {
@@ -231,34 +231,63 @@ describe('admin', () => {
         const columnCountLocator = 'table >> thead >> tr >> th';
         await createPost();
         await page.locator('.list-controls__toggle-columns').click();
-        await wait(1000); // Wait for column toggle UI, should probably use waitForSelector
+        await wait(500); // Wait for column toggle UI, should probably use waitForSelector
 
         const numberOfColumns = await page.locator(columnCountLocator).count();
-        const idButton = page.locator('.column-selector >> text=ID');
+        await expect(await page.locator('table >> thead >> tr >> th:first-child')).toHaveText('ID');
+
+        const idButton = await page.locator('.column-selector >> text=ID');
 
         // Remove ID column
-        await idButton.click({ delay: 100 });
-        await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1);
+        await idButton.click();
+        await wait(100);
+        await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1);
+        await expect(await page.locator('table >> thead >> tr >> th:first-child')).toHaveText('Number');
 
         // Add back ID column
-        await idButton.click({ delay: 100 });
-        await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns);
+        await idButton.click();
+        await wait(100);
+        await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns);
+        await expect(await page.locator('table >> thead >> tr >> th:first-child')).toHaveText('ID');
       });
 
-      test('useAsTitle cell is a link', async () => {
+      test('fist cell is a link', async () => {
         const { id } = await createPost();
-        const itemTitle = page.locator(`${tableRowLocator} td.cell-title a`);
-        await expect(itemTitle).toHaveAttribute('href', `/admin/collections/posts/${id}`);
+        const firstCell = await page.locator(`${tableRowLocator} td`).first().locator('a');
+        await expect(firstCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
+
+        // open the column controls
+        await page.locator('.list-controls__toggle-columns').click();
+        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+
+        // toggle off the ID column
+        page.locator('.column-selector >> text=ID').click();
+        await wait(200);
+
+        // recheck that the first cell is still a link
+        await expect(firstCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
       });
 
       test('filter rows', async () => {
         const { id } = await createPost({ title: 'post1' });
         await createPost({ title: 'post2' });
 
+        // open the column controls
+        await page.locator('.list-controls__toggle-columns').click();
+        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+
+        // ensure the ID column is active
+        const idButton = await page.locator('.column-selector >> text=ID');
+        const buttonClasses = await idButton.getAttribute('class');
+        if (buttonClasses && !buttonClasses.includes('column-selector__column--active')) {
+          await idButton.click();
+          await wait(200);
+        }
+
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
 
         await page.locator('.list-controls__toggle-where').click();
-        await wait(1000); // Wait for column toggle UI, should probably use waitForSelector
+        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
 
         await page.locator('.where-builder__add-first-filter').click();
 
@@ -284,26 +313,28 @@ describe('admin', () => {
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
       });
 
-      test('drag columns', async () => {
+      test('drag and reorder columns', async () => {
         await createPost();
+
+        // open the column controls
         await page.locator('.list-controls__toggle-columns').click();
-        await page.waitForSelector('.column-selector');
+        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
 
-        const descriptionDrag = page.locator('#col-description .column-selector__column');
-        const idDrag = page.locator('#col-id .column-selector__drag');
+        const numberBoundingBox = await page.locator('.column-selector >> text=Number').boundingBox();
+        const idBoundingBox = await page.locator('.column-selector >> text=ID').boundingBox();
 
-        const descriptionBound = await descriptionDrag.boundingBox();
-        const idBound = await idDrag.boundingBox();
+        if (!numberBoundingBox || !idBoundingBox) return;
 
-        if (!idBound || !descriptionBound) return;
-
-        await page.mouse.move(idBound.x + 2, idBound.y + 2, { steps: 10 });
+        await page.mouse.move(numberBoundingBox.x + 2, numberBoundingBox.y + 2, { steps: 10 });
         await page.mouse.down();
-        await page.mouse.move(descriptionBound.x - 2, descriptionBound.y - 2, { steps: 10 });
+        await wait(200);
+        await page.mouse.move(idBoundingBox.x - 2, idBoundingBox.y - 2, { steps: 10 });
         await page.mouse.up();
 
         await wait(200);
-        await expect(page.locator('table >> thead >> tr >> th:first-child')).toHaveText('Number', { timeout: 500 });
+
+        await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
+        await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
       });
     });
 
@@ -422,7 +453,7 @@ describe('admin', () => {
 });
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
-  return payload.create<Post>({
+  return payload.create({
     collection: slug,
     data: {
       title,
@@ -433,7 +464,7 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
 }
 
 async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find<Post>({ collection: slug, limit: 100 });
+  const allDocs = await payload.find({ collection: slug, limit: 100 });
   const ids = allDocs.docs.map((doc) => doc.id);
   await mapAsync(ids, async (id) => {
     await payload.delete({ collection: slug, id });
