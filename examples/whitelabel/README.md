@@ -9,37 +9,21 @@ To use this example, you'll need the following software:
 
 ## Running locally
 
-[- Step 1. Clone repo](#step-1-clone-repository)
+[- Step 1. Copy example](#step-1-copy-example)
 
-[- Step 2. Go to example](#step-2-go-to-example)
+[- Step 2. Set up the environment variables](#step-2-set-up-the-environment-variables)
 
-[- Step 3. Set up the environment variables](#step-3-set-up-the-environment-variables)
+[- Step 3. Start the development server](#step-3-add-dependencies-and-start-the-development-server)
 
-[- Step 4. Start the development server](#step-4-add-dependencies-and-start-the-development-server)
+### Step 1. Copy example
 
-### Step 1. Clone repository
-
-Clone the Payload repo by running the following command at your terminal:
+Copy the example by running the following command at your terminal:
 
 ```bash
-git clone https://github.com/payloadcms/payload.git
+npx degit github:payloadcms/payload/examples/whitelabel
 ```
 
-### Step 2. Go to example
-
-Now you can either navigate to `examples/whitelabel` and spin up the example within the Payload repo:
-
-```bash
-cd /examples/whitelabel
-```
-
-Or copy the example to your desired location:
-
-```bash
-cp /examples/whitelabel /path-to-another-location
-```
-
-### Step 3. Set up the environment variables
+### Step 2. Set up the environment variables
 
 Copy the `.env.example` file in this directory to `.env`:
 
@@ -49,7 +33,7 @@ cp .env.example .env
 
 Typically, the only line that you'll need to change within your new .env for local development is the `MONGO_URI` value. If you have MongoDB running locally, then you can use the example connection string, but if you are using Mongo Atlas or similar, you'll want to fill this value in with your own connection string.
 
-### Step 4. Add dependencies and start the development server
+### Step 3. Add dependencies and start the development server
 
 ```bash
 yarn
