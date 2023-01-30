@@ -77,7 +77,6 @@ export const saveVersion = async ({
 
     if (createNewVersion) {
       const data: Record<string, unknown> = {
-        ...versionData,
         autosave: Boolean(autosave),
         version: versionData,
         createdAt: draft ? now : new Date(doc.createdAt).toISOString(),
