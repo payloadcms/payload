@@ -6,9 +6,10 @@ import useField from '../../../../forms/useField';
 import Button from '../../../../elements/Button';
 import FileDetails from '../../../../elements/FileDetails';
 import Error from '../../../../forms/Error';
-import { Props, Data } from './types';
+import { Props } from './types';
 
 import './index.scss';
+import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues';
 
 const baseClass = 'file-field';
 
@@ -26,6 +27,14 @@ const validate = (value) => {
 };
 
 const Upload: React.FC<Props> = (props) => {
+  const {
+    collection,
+    internalState,
+    internalState: {
+      filename,
+    },
+  } = props;
+
   const inputRef = useRef(null);
   const dropRef = useRef(null);
   const [selectingFile, setSelectingFile] = useState(false);
@@ -33,13 +42,7 @@ const Upload: React.FC<Props> = (props) => {
   const [dragCounter, setDragCounter] = useState(0);
   const [replacingFile, setReplacingFile] = useState(false);
   const { t } = useTranslation('upload');
-
-  const {
-    data = {} as Data,
-    collection,
-  } = props;
-
-  const { filename } = data;
+  const [doc, setDoc] = useState(reduceFieldsToValues(internalState));
 
   const {
     value,
@@ -100,6 +103,11 @@ const Upload: React.FC<Props> = (props) => {
   }, [selectingFile, inputRef, setSelectingFile]);
 
   useEffect(() => {
+    setDoc(reduceFieldsToValues(internalState));
+    setReplacingFile(false);
+  }, [internalState]);
+
+  useEffect(() => {
     const div = dropRef.current;
     if (div) {
       div.addEventListener('dragenter', handleDragIn);
@@ -118,10 +126,6 @@ const Upload: React.FC<Props> = (props) => {
     return () => null;
   }, [handleDragIn, handleDragOut, handleDrop, value]);
 
-  useEffect(() => {
-    setReplacingFile(false);
-  }, [data]);
-
   const classes = [
     baseClass,
     dragging && `${baseClass}--dragging`,
@@ -136,7 +140,7 @@ const Upload: React.FC<Props> = (props) => {
       />
       {(filename && !replacingFile) && (
         <FileDetails
-          doc={data}
+          doc={doc}
           collection={collection}
           handleRemove={() => {
             setReplacingFile(true);
