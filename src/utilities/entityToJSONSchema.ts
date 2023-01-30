@@ -5,14 +5,13 @@ import { fieldAffectsData, Field, Option, FieldAffectingData, tabHasName } from 
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 import deepCopyObject from './deepCopyObject';
-import { groupOrTabHasRequiredSubfield } from './groupOrTabHasRequiredSubfield';
 import { toWords } from './formatLabels';
 import { SanitizedConfig } from '../config/types';
 
 const nonOptionalFieldTypes = ['group', 'array', 'blocks'];
 
 const propertyIsOptional = (field: Field) => {
-  return fieldAffectsData(field) && (field.required === true || nonOptionalFieldTypes.includes(field.type));
+  return fieldAffectsData(field) && (('required' in field && field.required === true) || nonOptionalFieldTypes.includes(field.type));
 };
 
 function getCollectionIDType(collections: SanitizedCollectionConfig[], slug: string): 'string' | 'number' {
@@ -310,8 +309,7 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
           case 'tabs': {
             field.tabs.forEach((tab) => {
               if (tabHasName(tab)) {
-                const hasRequiredSubfields = groupOrTabHasRequiredSubfield(tab);
-                if (hasRequiredSubfields) requiredTopLevelProps.push(tab.name);
+                requiredTopLevelProps.push(tab.name);
 
                 topLevelProps.push([
                   tab.name,
@@ -378,7 +376,7 @@ export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: Sani
   const idField: FieldAffectingData = { type: 'text', name: 'id', required: true };
   const customIdField = entity.fields.find((field) => fieldAffectsData(field) && field.name === 'id') as FieldAffectingData;
 
-  if (customIdField) {
+  if (customIdField && customIdField.type !== 'group' && customIdField.type !== 'tab') {
     customIdField.required = true;
   } else {
     entity.fields.unshift(idField);
