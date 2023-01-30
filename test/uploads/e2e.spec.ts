@@ -49,7 +49,7 @@ describe('uploads', () => {
   test('should show upload filename in upload collection list', async () => {
     await page.goto(mediaURL.list);
 
-    const media = page.locator('.upload-card__filename');
+    const media = page.locator('.thumbnail-card__label');
     await wait(110);
 
     await expect(media).toHaveText('image.png');

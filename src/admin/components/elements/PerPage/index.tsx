@@ -18,9 +18,10 @@ export type Props = {
   limit: number
   handleChange?: (limit: number) => void
   modifySearchParams?: boolean
+  resetPage?: boolean
 }
 
-const PerPage: React.FC<Props> = ({ limits = defaultLimits, limit, handleChange, modifySearchParams = true }) => {
+const PerPage: React.FC<Props> = ({ limits = defaultLimits, limit, handleChange, modifySearchParams = true, resetPage = false }) => {
   const params = useSearchParams();
   const history = useHistory();
   const { t } = useTranslation('general');
@@ -56,6 +57,7 @@ const PerPage: React.FC<Props> = ({ limits = defaultLimits, limit, handleChange,
                         history.replace({
                           search: qs.stringify({
                             ...params,
+                            page: resetPage ? 1 : params.page,
                             limit: limitNumber,
                           }, { addQueryPrefix: true }),
                         });

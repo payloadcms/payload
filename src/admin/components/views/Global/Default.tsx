@@ -39,12 +39,12 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
 
   const {
     fields,
-    preview,
     versions,
     label,
     admin: {
       description,
       hideAPIURL,
+      preview,
     } = {},
   } = global;
 

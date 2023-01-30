@@ -64,20 +64,19 @@ export const queryDrafts = async <T extends TypeWithID>({
     },
     // Filter based on incoming query
     { $match: versionQuery },
-    // Re-sort based on incoming sort
-    {
-      $sort: Object.entries(paginationOptions.sort).reduce((sort, [key, order]) => {
-        return {
-          ...sort,
-          [key]: order === 'asc' ? 1 : -1,
-        };
-      }, {}),
-    },
-    // Add pagination limit
-    { $limit: paginationOptions.limit },
   ]);
 
-  const result = await VersionModel.aggregatePaginate(aggregate, paginationOptions);
+  const paginationSort = Object.entries(paginationOptions.sort).reduce((sort, [key, order]) => {
+    return {
+      ...sort,
+      [key]: order === 'asc' ? 1 : -1,
+    };
+  }, {});
+
+  const result = await VersionModel.aggregatePaginate(aggregate, {
+    ...paginationOptions,
+    sort: paginationSort,
+  });
 
   return {
     ...result,

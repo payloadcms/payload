@@ -13,8 +13,9 @@ type Props = {
   show?: boolean;
   loadingText?: string;
   overlayType?: string
+  animationDuration?: string;
 }
-export const LoadingOverlay: React.FC<Props> = ({ loadingText, show = true, overlayType }) => {
+export const LoadingOverlay: React.FC<Props> = ({ loadingText, show = true, overlayType, animationDuration }) => {
   const { t } = useTranslation('general');
 
   return (
@@ -24,6 +25,9 @@ export const LoadingOverlay: React.FC<Props> = ({ loadingText, show = true, over
         show ? `${baseClass}--entering` : `${baseClass}--exiting`,
         overlayType ? `${baseClass}--${overlayType}` : '',
       ].filter(Boolean).join(' ')}
+      style={{
+        animationDuration: animationDuration || '500ms',
+      }}
     >
       <div className={`${baseClass}__bars`}>
         <div className={`${baseClass}__bar`} />
@@ -72,10 +76,11 @@ export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleT> = ({ name:
 type FormLoadingOverlayToggleT = {
   name: string;
   type?: LoadingOverlayTypes;
+  formIsLoading?: boolean;
   action: 'loading' | 'create' | 'update';
   loadingSuffix?: string;
 }
-export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleT> = ({ name, action, type = 'withoutNav', loadingSuffix }) => {
+export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleT> = ({ name, formIsLoading = false, action, type = 'fullscreen', loadingSuffix }) => {
   const isProcessing = useFormProcessing();
   const { t, i18n } = useTranslation('general');
 
@@ -88,7 +93,7 @@ export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleT> = ({ 
   return (
     <LoadingOverlayToggle
       name={name}
-      show={action === 'loading' || isProcessing}
+      show={formIsLoading || isProcessing}
       type={type}
       loadingText={`${labels[action]} ${loadingSuffix ? getTranslation(loadingSuffix, i18n) : ''}`.trim()}
     />

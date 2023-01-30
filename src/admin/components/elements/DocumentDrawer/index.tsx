@@ -39,7 +39,6 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   return (
     <DrawerToggler
       slug={drawerSlug}
-      formatSlug={false}
       className={[
         className,
         `${baseClass}__toggler`,
@@ -59,7 +58,6 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
   return (
     <Drawer
       slug={drawerSlug}
-      formatSlug={false}
       className={baseClass}
     >
       <DocumentDrawerContent {...props} />

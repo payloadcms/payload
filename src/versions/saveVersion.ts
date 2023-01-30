@@ -15,8 +15,6 @@ type Args = {
   id?: string | number
   autosave?: boolean
   draft?: boolean
-  createdAt: string
-  onCreate?: boolean
 }
 
 export const saveVersion = async ({
@@ -24,12 +22,11 @@ export const saveVersion = async ({
   collection,
   global,
   id,
-  docWithLocales,
+  docWithLocales: doc,
   autosave,
   draft,
-  createdAt,
-  onCreate = false,
 }: Args): Promise<TypeWithID> => {
+  let result;
   let entityConfig;
   let entityType: 'global' | 'collection';
 
@@ -45,49 +42,47 @@ export const saveVersion = async ({
 
   const VersionModel = payload.versions[entityConfig.slug];
 
-  const versionData = { ...docWithLocales };
+  const versionData = { ...doc };
   if (draft) versionData._status = 'draft';
   if (versionData._id) delete versionData._id;
 
-  let existingAutosaveVersion;
-
-  if (autosave) {
-    const query: FilterQuery<unknown> = {};
-    if (collection) query.parent = id;
-    existingAutosaveVersion = await VersionModel.findOne(query, {}, { sort: { updatedAt: 'desc' } });
-  }
-
-  let result;
-  const now = new Date().toISOString();
-
   try {
-    if (autosave && existingAutosaveVersion?.autosave === true) {
-      const data: Record<string, unknown> = {
-        version: versionData,
-        createdAt,
-        updatedAt: now,
-      };
+    let createNewVersion = true;
+    const now = new Date().toISOString();
 
-      if (createdAt) data.updatedAt = createdAt;
+    if (autosave) {
+      const query: FilterQuery<unknown> = {};
+      if (collection) query.parent = id;
+      const latestVersion = await VersionModel.findOne(query, {}, { sort: { updatedAt: 'desc' } });
 
-      result = await VersionModel.findByIdAndUpdate(
-        {
-          _id: existingAutosaveVersion._id,
-        },
-        data,
-        { new: true, lean: true },
-      );
-      // Otherwise, create a new one
-    } else {
+      // overwrite the latest version if it's set to autosave
+      if (latestVersion?.autosave === true) {
+        createNewVersion = false;
+
+        const data: Record<string, unknown> = {
+          version: versionData,
+          createdAt: new Date(latestVersion.createdAt).toISOString(),
+          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+        };
+
+        result = await VersionModel.findByIdAndUpdate(
+          {
+            _id: latestVersion._id,
+          },
+          data,
+          { new: true, lean: true },
+        );
+      }
+    }
+
+    if (createNewVersion) {
       const data: Record<string, unknown> = {
-        version: versionData,
         autosave: Boolean(autosave),
-        updatedAt: onCreate ? createdAt : now,
-        createdAt: createdAt || now,
+        version: versionData,
+        createdAt: draft ? now : new Date(doc.createdAt).toISOString(),
+        updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
       };
-
       if (collection) data.parent = id;
-
       result = await VersionModel.create(data);
     }
   } catch (err) {

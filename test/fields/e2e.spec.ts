@@ -197,19 +197,70 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, 'block-fields');
     });
 
+    test('should open blocks drawer and select first block', async () => {
+      await page.goto(url.create);
+      const addButton = page.locator('#field-blocks > .blocks-field__drawer-toggler');
+      await expect(addButton).toContainText('Add Block');
+      await addButton.click();
+
+      const blocksDrawer = await page.locator('[id^=drawer_1_blocks-drawer-]');
+      await expect(blocksDrawer).toBeVisible();
+
+      // select the first block in the drawer
+      const firstBlockSelector = await blocksDrawer.locator('.blocks-drawer__blocks .blocks-drawer__block').first();
+      await expect(firstBlockSelector).toContainText('Text');
+      await firstBlockSelector.click();
+
+      // ensure the block was appended to the rows
+      const addedRow = await page.locator('#field-blocks #blocks-row-3');
+      await expect(addedRow).toBeVisible();
+      await expect(addedRow.locator('.blocks-field__block-pill-text')).toContainText('Text');
+    });
+
+    test('should open blocks drawer from block row and add below', async () => {
+      const firstRow = await page.locator('#field-blocks #blocks-row-0');
+      const rowActions = await firstRow.locator('.collapsible__actions');
+      await expect(rowActions).toBeVisible();
+
+      await rowActions.locator('.array-actions__button').click();
+      const addBelowButton = await rowActions.locator('.array-actions__action.array-actions__add');
+      await expect(addBelowButton).toBeVisible();
+      addBelowButton.click();
+
+      const blocksDrawer = await page.locator('[id^=drawer_1_blocks-drawer-]');
+      await expect(blocksDrawer).toBeVisible();
+
+      // select the first block in the drawer
+      const firstBlockSelector = blocksDrawer.locator('.blocks-drawer__blocks .blocks-drawer__block').first();
+      await expect(firstBlockSelector).toContainText('Text');
+      await firstBlockSelector.click();
+
+      // ensure the block was inserted beneath the first in the rows
+      const addedRow = page.locator('#field-blocks #blocks-row-1');
+      await expect(addedRow).toBeVisible();
+      await expect(addedRow.locator('.blocks-field__block-pill-text')).toContainText('Text'); // went from `Number` to `Text`
+    });
+
     test('should use i18n block labels', async () => {
       await page.goto(url.create);
       await expect(page.locator('#field-i18nBlocks .blocks-field__header')).toContainText('Block en');
 
-      const addButton = page.locator('#field-i18nBlocks .btn__label');
+      const addButton = page.locator('#field-i18nBlocks > .blocks-field__drawer-toggler');
       await expect(addButton).toContainText('Add Block en');
       await addButton.click();
 
-      const blockSelector = page.locator('#field-i18nBlocks .block-selector .block-selection').first();
-      await expect(blockSelector).toContainText('Text en');
-      await blockSelector.click();
+      const blocksDrawer = await page.locator('[id^=drawer_1_blocks-drawer-]');
+      await expect(blocksDrawer).toBeVisible();
 
-      await expect(page.locator('#i18nBlocks-row-0 .blocks-field__block-pill-text')).toContainText('Text en');
+      // select the first block in the drawer
+      const firstBlockSelector = blocksDrawer.locator('.blocks-drawer__blocks .blocks-drawer__block').first();
+      await expect(firstBlockSelector).toContainText('Text en');
+      await firstBlockSelector.click();
+
+      // ensure the block was appended to the rows
+      const firstRow = page.locator('#i18nBlocks-row-0');
+      await expect(firstRow).toBeVisible();
+      await expect(firstRow.locator('.blocks-field__block-pill-text')).toContainText('Text en');
     });
   });
 
@@ -375,7 +426,7 @@ describe('fields', () => {
 
         // Close the drawer
         await editLinkModal.locator('button[type="submit"]').click();
-        await expect(editLinkModal).not.toBeVisible();
+        await expect(editLinkModal).toBeHidden();
       });
 
       test('should populate relationship link', async () => {
@@ -398,7 +449,7 @@ describe('fields', () => {
 
         // Close the drawer
         await editLinkModal.locator('button[type="submit"]').click();
-        await expect(editLinkModal).not.toBeVisible();
+        await expect(editLinkModal).toBeHidden();
       });
 
       test('should populate new links', async () => {

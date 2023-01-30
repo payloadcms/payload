@@ -7,6 +7,7 @@ $icon-margin: base(.25);
   position: sticky;
   top: 0;
   display: flex;
+  width: 100%;
   align-items: center;
   z-index: 1;
 
@@ -17,9 +18,15 @@ $icon-margin: base(.25);
 
   .search {
     position: absolute;
+    top: 50%;
+    transform: translate3d(0, -50%, 0);
     right: base(.25);
     width: $icon-width;
     margin: 0 $icon-margin;
+
+    .stroke {
+      stroke: var(--theme-elevation-300);
+    }
   }
 
   @include mid-break {
