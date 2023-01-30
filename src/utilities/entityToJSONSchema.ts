@@ -11,7 +11,7 @@ import { SanitizedConfig } from '../config/types';
 const nonOptionalFieldTypes = ['group', 'array', 'blocks'];
 
 const propertyIsOptional = (field: Field) => {
-  return fieldAffectsData(field) && (field.required === true || nonOptionalFieldTypes.includes(field.type));
+  return fieldAffectsData(field) && (('required' in field && field.required === true) || nonOptionalFieldTypes.includes(field.type));
 };
 
 function getCollectionIDType(collections: SanitizedCollectionConfig[], slug: string): 'string' | 'number' {
@@ -376,7 +376,7 @@ export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: Sani
   const idField: FieldAffectingData = { type: 'text', name: 'id', required: true };
   const customIdField = entity.fields.find((field) => fieldAffectsData(field) && field.name === 'id') as FieldAffectingData;
 
-  if (customIdField) {
+  if (customIdField && customIdField.type !== 'group' && customIdField.type !== 'tab') {
     customIdField.required = true;
   } else {
     entity.fields.unshift(idField);

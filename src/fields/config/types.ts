@@ -201,14 +201,14 @@ export type CollapsibleField = Omit<FieldBase, 'name' | 'label'> & {
 
 export type TabsAdmin = Omit<Admin, 'description'>;
 
-type TabBase = {
+type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
   fields: Field[]
   description?: Description
 }
 
-export type NamedTab = TabBase & Omit<FieldBase, 'required' | 'validation'>
+export type NamedTab = TabBase
 
-export type UnnamedTab = TabBase & Omit<FieldBase, 'name'> & {
+export type UnnamedTab = Omit<TabBase, 'name'> & {
   label: Record<string, string> | string
   localized?: never
 }
