@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { promisify } from 'util';
-
+import path from 'path';
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { MarkOptional } from 'ts-essentials';
@@ -8,7 +8,7 @@ import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
-import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
+import { NotFound, Forbidden, APIError, ValidationError, ErrorDeletingFile } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { saveVersion } from '../../versions/saveVersion';
@@ -20,6 +20,8 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
 import { mapAsync } from '../../utilities/mapAsync';
+import fileExists from '../../uploads/fileExists';
+import { FileData } from '../../uploads/types';
 
 const unlinkFile = promisify(fs.unlink);
 
@@ -156,6 +158,39 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   });
 
   data = newFileData;
+
+  // /////////////////////////////////////
+  // Delete any associated files
+  // /////////////////////////////////////
+
+  if (collectionConfig.upload) {
+    const { staticDir } = collectionConfig.upload;
+
+    const staticPath = path.resolve(config.paths.configDir, staticDir);
+
+    const fileToDelete = `${staticPath}/${doc.filename}`;
+
+    if (await fileExists(fileToDelete)) {
+      fs.unlink(fileToDelete, (err) => {
+        if (err) {
+          throw new ErrorDeletingFile(t);
+        }
+      });
+    }
+
+    if (doc.sizes) {
+      Object.values(doc.sizes).forEach(async (size: FileData) => {
+        const sizeToDelete = `${staticPath}/${size.filename}`;
+        if (await fileExists(sizeToDelete)) {
+          fs.unlink(sizeToDelete, (err) => {
+            if (err) {
+              throw new ErrorDeletingFile(t);
+            }
+          });
+        }
+      });
+    }
+  }
 
   // /////////////////////////////////////
   // beforeValidate - Fields
