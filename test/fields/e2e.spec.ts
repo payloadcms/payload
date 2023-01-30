@@ -207,7 +207,7 @@ describe('fields', () => {
       await expect(blocksDrawer).toBeVisible();
 
       // select the first block in the drawer
-      const firstBlockSelector = await blocksDrawer.locator('.blocks-drawer .block-selection').first();
+      const firstBlockSelector = await blocksDrawer.locator('.blocks-drawer__blocks .blocks-drawer__block').first();
       await expect(firstBlockSelector).toContainText('Text');
       await firstBlockSelector.click();
 
@@ -231,7 +231,7 @@ describe('fields', () => {
       await expect(blocksDrawer).toBeVisible();
 
       // select the first block in the drawer
-      const firstBlockSelector = blocksDrawer.locator('.blocks-drawer .block-selection').first();
+      const firstBlockSelector = blocksDrawer.locator('.blocks-drawer__blocks .blocks-drawer__block').first();
       await expect(firstBlockSelector).toContainText('Text');
       await firstBlockSelector.click();
 
@@ -253,7 +253,7 @@ describe('fields', () => {
       await expect(blocksDrawer).toBeVisible();
 
       // select the first block in the drawer
-      const firstBlockSelector = blocksDrawer.locator('.blocks-drawer .block-selection').first();
+      const firstBlockSelector = blocksDrawer.locator('.blocks-drawer__blocks .blocks-drawer__block').first();
       await expect(firstBlockSelector).toContainText('Text en');
       await firstBlockSelector.click();
 
@@ -426,7 +426,7 @@ describe('fields', () => {
 
         // Close the drawer
         await editLinkModal.locator('button[type="submit"]').click();
-        await expect(editLinkModal).not.toBeVisible();
+        await expect(editLinkModal).toBeHidden();
       });
 
       test('should populate relationship link', async () => {
@@ -449,7 +449,7 @@ describe('fields', () => {
 
         // Close the drawer
         await editLinkModal.locator('button[type="submit"]').click();
-        await expect(editLinkModal).not.toBeVisible();
+        await expect(editLinkModal).toBeHidden();
       });
 
       test('should populate new links', async () => {
