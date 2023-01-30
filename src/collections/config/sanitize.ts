@@ -1,6 +1,8 @@
+import fs from 'fs';
 import merge from 'deepmerge';
 import { isPlainObject } from 'is-plain-object';
-import { SanitizedCollectionConfig, CollectionConfig } from './types';
+import { promisify } from 'util';
+import { SanitizedCollectionConfig, CollectionConfig, AfterChangeHook } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import baseAuthFields from '../../auth/baseFields/auth';
 import baseAPIKeyFields from '../../auth/baseFields/apiKey';
@@ -14,6 +16,9 @@ import { versionCollectionDefaults } from '../../versions/defaults';
 import baseVersionFields from '../../versions/baseFields';
 import TimestampsRequired from '../../errors/TimestampsRequired';
 import mergeBaseFields from '../../fields/mergeBaseFields';
+import { mapAsync } from '../../utilities/mapAsync';
+
+const unlinkFile = promisify(fs.unlink);
 
 const sanitizeCollection = (config: Config, collection: CollectionConfig): SanitizedCollectionConfig => {
   // /////////////////////////////////
@@ -61,6 +66,24 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
     });
 
     sanitized.fields = mergeBaseFields(sanitized.fields, uploadFields);
+
+    // Add afterChange hook to remove temp files, as express-fileupload does not do this automatically
+    if (config?.upload?.useTempFiles) {
+      const removeTempFilesHook: AfterChangeHook = async ({ req, doc }) => {
+        const { files } = req;
+        const fileArray = Array.isArray(files) ? files : [files];
+        await mapAsync(fileArray, async ({ file }) => {
+          await unlinkFile(file.tempFilePath);
+        });
+
+        return doc;
+      };
+
+      sanitized.hooks.afterChange = [
+        ...sanitized.hooks.afterChange,
+        removeTempFilesHook,
+      ];
+    }
   }
 
   if (sanitized.auth) {
