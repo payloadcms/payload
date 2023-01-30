@@ -309,7 +309,7 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
           case 'tabs': {
             field.tabs.forEach((tab) => {
               if (tabHasName(tab)) {
-                if (tab.required) requiredTopLevelProps.push(tab.name);
+                requiredTopLevelProps.push(tab.name);
 
                 topLevelProps.push([
                   tab.name,

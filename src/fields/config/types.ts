@@ -174,7 +174,7 @@ export type DateField = FieldBase & {
   }
 }
 
-export type GroupField = FieldBase & {
+export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
   type: 'group';
   fields: Field[];
   admin?: Admin & {
@@ -206,7 +206,7 @@ type TabBase = {
   description?: Description
 }
 
-export type NamedTab = TabBase & FieldBase
+export type NamedTab = TabBase & Omit<FieldBase, 'required' | 'validation'>
 
 export type UnnamedTab = TabBase & Omit<FieldBase, 'name'> & {
   label: Record<string, string> | string
