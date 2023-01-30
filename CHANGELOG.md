@@ -1,4 +1,4 @@
-## [1.5.15-canary.0](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.15-canary.0) (2023-01-20)
+## [1.5.15-canary.1](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.15-canary.1) (2023-01-30)
 
 ### 🐛 Bug Fixes
 
@@ -205,7 +205,10 @@ const ensureAtLeastOneVersion = async () => {
                   createdAt: doc.createdAt,
                 });
               } catch (e) {
-                console.error(`Unable to create version corresponding with collection ${slug} document ID ${doc.id}`, e?.errors || e);
+                console.error(
+                  `Unable to create version corresponding with collection ${slug} document ID ${doc.id}`,
+                  e?.errors || e
+                );
               }
 
               console.log(
