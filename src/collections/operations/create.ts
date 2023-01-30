@@ -214,8 +214,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
+  result = JSON.parse(JSON.stringify(result));
   result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
@@ -230,8 +229,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       id: result.id,
       docWithLocales: result,
       autosave,
-      createdAt: result.createdAt,
-      onCreate: true,
     });
   }
 
