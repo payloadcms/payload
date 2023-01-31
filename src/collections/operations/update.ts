@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { MarkOptional } from 'ts-essentials';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -20,7 +21,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   collection: Collection
   req: PayloadRequest
   id: string | number
-  data: Omit<T, 'id'>
+  data: MarkOptional<T, 'id' | 'createdAt' | 'updatedAt'>
   depth?: number
   disableVerificationEmail?: boolean
   overrideAccess?: boolean

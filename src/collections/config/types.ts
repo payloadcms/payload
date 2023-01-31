@@ -323,7 +323,6 @@ export type AuthCollection = {
 
 export type TypeWithID = {
   id: string | number
-  [key: string]: unknown
 }
 
 export type TypeWithTimestamps = {
