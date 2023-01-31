@@ -15,10 +15,10 @@ const start = async () => {
     secret: process.env.PAYLOAD_SECRET,
     mongoURL: process.env.MONGODB_URI,
     express: app,
-    onInit: async p => {
-      p.logger.info(`Payload Admin URL: ${p.getAdminURL()}`);
+    onInit: async () => {
+      payload.logger.info(`Payload Admin URL: ${payload.getAdminURL()}`)
     },
-  });
+  })
 
   // Add your own express routes here
 
