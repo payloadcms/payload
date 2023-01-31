@@ -19,36 +19,12 @@ export const redirectPage = {
           "type": "p",
           "children": [
             {
-              "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Et netus et malesuada fames ac turpis egestas maecenas. Sed blandit libero volutpat sed cras ornare arcu dui. Quis ipsum suspendisse ultrices gravida dictum fusce ut. Orci a scelerisque purus semper eget duis at tellus at. Sit amet facilisis magna etiam tempor. Turpis massa tincidunt dui ut ornare lectus sit amet. Fringilla est ullamcorper eget nulla facilisi etiam dignissim. Phasellus faucibus scelerisque eleifend donec pretium vulputate sapien nec sagittis. Arcu vitae elementum curabitur vitae nunc sed velit. Ornare arcu odio ut sem nulla pharetra. Sit amet massa vitae tortor condimentum lacinia quis. Elit at imperdiet dui accumsan sit amet nulla facilisi morbi."
+              "text": "Ornare massa eget egestas purus. Nisl pretium fusce id velit ut tortor pretium viverra. Egestas quis ipsum suspendisse ultrices gravida dictum fusce ut placerat. Enim nulla aliquet porttitor lacus luctus accumsan tortor posuere ac. Hendrerit dolor magna eget est lorem ipsum dolor. Amet facilisis magna etiam tempor orci. Orci a scelerisque purus semper. Tortor vitae purus faucibus ornare suspendisse. In hac habitasse platea dictumst quisque sagittis purus sit amet. Porttitor lacus luctus accumsan tortor posuere ac ut consequat semper. Feugiat in fermentum posuere urna nec tincidunt praesent semper. Nascetur ridiculus mus mauris vitae ultricies leo. Egestas egestas fringilla phasellus faucibus scelerisque. Libero enim sed faucibus turpis in eu. Amet facilisis magna etiam tempor orci eu lobortis. Commodo viverra maecenas accumsan lacus vel facilisis volutpat est. Mi quis hendrerit dolor magna eget est. Ut venenatis tellus in metus vulputate eu scelerisque felis imperdiet. Vitae auctor eu augue ut lectus arcu bibendum at varius."
             }
           ]
         },
         {
           "type": "p",
-          "children": [
-            {
-              "text": "Pellentesque nec nam aliquam sem. A scelerisque purus semper eget duis at. Scelerisque in dictum non consectetur. Dignissim diam quis enim lobortis scelerisque fermentum dui faucibus in. Eget nunc lobortis mattis aliquam faucibus purus in massa tempor. Orci dapibus ultrices in iaculis nunc sed. Viverra nibh cras pulvinar mattis nunc sed blandit libero volutpat. Vitae tortor condimentum lacinia quis vel eros donec ac odio. Sed odio morbi quis commodo odio aenean sed adipiscing diam. Faucibus a pellentesque sit amet porttitor. Ligula ullamcorper malesuada proin libero nunc consequat interdum."
-            }
-          ]
-        },
-        {
-          "type": "p",
-          "children": [
-            {
-              "text": "Amet nisl suscipit adipiscing bibendum est ultricies integer quis. Urna porttitor rhoncus dolor purus non. Faucibus pulvinar elementum integer enim neque volutpat ac tincidunt. Magna eget est lorem ipsum dolor. Interdum posuere lorem ipsum dolor sit amet consectetur. Consectetur libero id faucibus nisl tincidunt eget nullam non. Egestas diam in arcu cursus euismod quis viverra nibh cras. At tempor commodo ullamcorper a lacus. Aliquam sem et tortor consequat id porta. A condimentum vitae sapien pellentesque habitant morbi tristique. Gravida cum sociis natoque penatibus et magnis dis parturient montes. Massa sapien faucibus et molestie ac feugiat sed. Ut pharetra sit amet aliquam. Posuere lorem ipsum dolor sit amet consectetur adipiscing elit duis. Laoreet suspendisse interdum consectetur libero id faucibus."
-            }
-          ]
-        },
-        {
-          "type": "p",
-          "children": [
-            {
-              "text": "Faucibus ornare suspendisse sed nisi lacus sed viverra. Feugiat pretium nibh ipsum consequat nisl vel. Tincidunt id aliquet risus feugiat. Id eu nisl nunc mi ipsum faucibus vitae aliquet. Ultrices sagittis orci a scelerisque purus. Tempor orci eu lobortis elementum. Eu tincidunt tortor aliquam nulla facilisi cras. Proin sagittis nisl rhoncus mattis rhoncus urna neque viverra. Egestas dui id ornare arcu odio ut sem nulla. A condimentum vitae sapien pellentesque habitant morbi. Et netus et malesuada fames ac turpis egestas. Tellus elementum sagittis vitae et. Fringilla urna porttitor rhoncus dolor purus. Adipiscing vitae proin sagittis nisl rhoncus mattis rhoncus urna neque. Sit amet aliquam id diam maecenas. Orci phasellus egestas tellus rutrum. Aliquet nibh praesent tristique magna. Morbi tincidunt augue interdum velit euismod. Maecenas volutpat blandit aliquam etiam erat velit scelerisque in. Diam maecenas sed enim ut sem viverra aliquet."
-            }
-          ]
-        },
-        {
-          "type": "blockquote",
           "children": [
             {
               "text": ""
@@ -56,15 +32,31 @@ export const redirectPage = {
           ]
         },
         {
-          "type": "blockquote",
+          "type": "p",
           "children": [
             {
-              "text": "\n"
+              "text": "Nulla facilisi nullam vehicula ipsum a arcu cursus vitae congue. Nullam eget felis eget nunc lobortis. Placerat vestibulum lectus mauris ultrices eros in. Nisl nunc mi ipsum faucibus vitae aliquet nec ullamcorper. Viverra nibh cras pulvinar mattis nunc sed blandit libero volutpat. In fermentum posuere urna nec. Ut ornare lectus sit amet est placerat in. Parturient montes nascetur ridiculus mus mauris. Facilisis volutpat est velit egestas dui id. Maecenas sed enim ut sem viverra aliquet eget. Etiam erat velit scelerisque in dictum non. Vivamus arcu felis bibendum ut. Vitae et leo duis ut. Ultricies integer quis auctor elit sed vulputate mi sit amet."
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "children": [
+            {
+              "text": ""
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "children": [
+            {
+              "text": "Eget nunc lobortis mattis aliquam faucibus. Cum sociis natoque penatibus et magnis. Dolor sit amet consectetur adipiscing elit ut aliquam. Ut tellus elementum sagittis vitae. Elit eget gravida cum sociis natoque penatibus et magnis. Id porta nibh venenatis cras. Interdum posuere lorem ipsum dolor sit amet consectetur adipiscing. Netus et malesuada fames ac turpis. Id aliquet lectus proin nibh nisl condimentum id. Elementum facilisis leo vel fringilla est ullamcorper eget nulla. Sapien eget mi proin sed libero. Ut venenatis tellus in metus vulputate eu. Adipiscing commodo elit at imperdiet dui accumsan sit. Pretium lectus quam id leo in vitae turpis massa. Faucibus purus in massa tempor nec. Elementum tempus egestas sed sed risus pretium quam. Sit amet dictum sit amet justo donec enim diam vulputate. Tincidunt id aliquet risus feugiat. Vitae tempus quam pellentesque nec nam aliquam."
             }
           ]
         }
       ],
-      "id": "63c85139baa7304276c11d9f",
+      "id": "63d96da772844946f7c661f4",
       "blockType": "content"
     }
   ],
@@ -73,6 +65,7 @@ export const redirectPage = {
     {
       "url": "/redirect-page",
       "label": "Redirect Page",
+      "id": "63d96dc4cd52dd0fecbc6b27"
     }
   ],
   "_status": "published",

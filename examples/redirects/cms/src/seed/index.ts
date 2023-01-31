@@ -11,19 +11,21 @@ export const seed = async (payload: Payload) => {
     },
   });
 
-  const homepageJSON = JSON.parse(JSON.stringify(home));
-
   const redirectPageJSON = JSON.parse(JSON.stringify(redirectPage));
+
+  const { id: redirectPageID } = await payload.create({
+    collection: 'pages',
+    data: redirectPageJSON,
+  });
+
+  const homepageJSON = JSON.parse(JSON.stringify(home));
 
   await payload.create({
     collection: 'pages',
     data: homepageJSON,
   });
 
-  const { id: redirectPageID } = await payload.create({
-    collection: 'pages',
-    data: redirectPageJSON,
-  });
+
 
   await payload.updateGlobal({
     slug: 'main-menu',
