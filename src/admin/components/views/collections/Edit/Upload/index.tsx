@@ -7,9 +7,9 @@ import Button from '../../../../elements/Button';
 import FileDetails from '../../../../elements/FileDetails';
 import Error from '../../../../forms/Error';
 import { Props } from './types';
+import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues';
 
 import './index.scss';
-import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues';
 
 const baseClass = 'file-field';
 
@@ -30,9 +30,6 @@ const Upload: React.FC<Props> = (props) => {
   const {
     collection,
     internalState,
-    internalState: {
-      filename,
-    },
   } = props;
 
   const inputRef = useRef(null);
@@ -42,7 +39,7 @@ const Upload: React.FC<Props> = (props) => {
   const [dragCounter, setDragCounter] = useState(0);
   const [replacingFile, setReplacingFile] = useState(false);
   const { t } = useTranslation('upload');
-  const [doc, setDoc] = useState(reduceFieldsToValues(internalState));
+  const [doc, setDoc] = useState(reduceFieldsToValues(internalState || {}, true));
 
   const {
     value,
@@ -103,7 +100,7 @@ const Upload: React.FC<Props> = (props) => {
   }, [selectingFile, inputRef, setSelectingFile]);
 
   useEffect(() => {
-    setDoc(reduceFieldsToValues(internalState));
+    setDoc(reduceFieldsToValues(internalState || {}, true));
     setReplacingFile(false);
   }, [internalState]);
 
@@ -138,7 +135,7 @@ const Upload: React.FC<Props> = (props) => {
         showError={showError}
         message={errorMessage}
       />
-      {(filename && !replacingFile) && (
+      {(doc.filename && !replacingFile) && (
         <FileDetails
           doc={doc}
           collection={collection}
@@ -148,7 +145,7 @@ const Upload: React.FC<Props> = (props) => {
           }}
         />
       )}
-      {(!filename || replacingFile) && (
+      {(!doc.filename || replacingFile) && (
         <div className={`${baseClass}__upload`}>
           {value && (
             <div className={`${baseClass}__file-selected`}>

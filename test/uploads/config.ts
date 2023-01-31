@@ -53,7 +53,7 @@ export default buildConfig({
           {
             name: 'maintainedAspectRatio',
             width: 1024,
-            height: null,
+            height: undefined,
             crop: 'center',
             position: 'center',
             formatOptions: { format: 'png', options: { quality: 90 } },
@@ -61,7 +61,7 @@ export default buildConfig({
           {
             name: 'differentFormatFromMainImage',
             width: 200,
-            height: null,
+            height: undefined,
             formatOptions: { format: 'jpg', options: { quality: 90 } },
           },
           {
