@@ -27,7 +27,6 @@ export const ListDrawerToggler: React.FC<ListTogglerProps> = ({
   return (
     <DrawerToggler
       slug={drawerSlug}
-      formatSlug={false}
       className={[
         className,
         `${baseClass}__toggler`,
@@ -46,7 +45,6 @@ export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
   return (
     <Drawer
       slug={drawerSlug}
-      formatSlug={false}
       className={baseClass}
     >
       <ListDrawerContent {...props} />
