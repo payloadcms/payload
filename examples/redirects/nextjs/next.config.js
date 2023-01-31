@@ -1,6 +1,6 @@
-/** @type {import('next').NextConfig} */
-
 const redirects = require('./redirects');
+
+/** @type {import('next').NextConfig} */
 
 const nextConfig = {
   reactStrictMode: true,

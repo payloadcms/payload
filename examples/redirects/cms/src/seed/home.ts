@@ -19,7 +19,7 @@ export const home = {
           "type": "h6",
           "children": [
             {
-              "text": "To view the redirect functionality in action - input this url (https://www.payloadcms.com) into a separate browser and you will be redirected to the "
+              "text": "To view the redirect functionality in action - input this url (http://localhost:3000/payload) into a separate browser and you will be redirected to the "
             },
             {
               "type": "link",
