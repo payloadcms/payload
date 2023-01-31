@@ -22,13 +22,19 @@
 
   &__block {
     margin: base(0.5);
-    width: calc(25% - #{base(1)});
+    width: calc(12.5% - #{base(1)});
   }
 
   &__default-image {
     width: 100%;
     overflow: hidden;
     padding-top: base(0.75);
+  }
+
+  @include large-break {
+    &__block {
+      width: calc(20% - #{base(1)});
+    }
   }
 
   @include mid-break {
