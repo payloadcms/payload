@@ -226,16 +226,6 @@ const RichText: React.FC<Props> = (props) => {
     };
   }, [loaded, readOnly]);
 
-  useEffect(() => {
-    // If there is a change to the initial value, we need to reset Slate history
-    // and clear selection because the old selection may no longer be valid
-    // as returned JSON may be modified in hooks and have a different shape
-    if (Array.isArray(initialValue) && initialValue.length > 0) {
-      if (editor.selection) ReactEditor.deselect(editor);
-      editor.history = { redos: [], undos: [] };
-    }
-  }, [initialValue, editor]);
-
   if (!loaded) {
     return null;
   }
@@ -272,6 +262,7 @@ const RichText: React.FC<Props> = (props) => {
           required={required}
         />
         <Slate
+          key={JSON.stringify(initialValue)}
           editor={editor}
           value={valueToRender as any[]}
           onChange={handleChange}
