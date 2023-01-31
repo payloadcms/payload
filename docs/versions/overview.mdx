@@ -52,7 +52,7 @@ Configuring Versions is done by adding the `versions` key to your Collection con
 
 | Option                       | Description  |
 | ---------------------------- | -------------|
-| `maxPerDoc`                  | Use this setting to control how many versions to keep on a document by document basis. Must be an integer. |
+| `maxPerDoc`                  | Use this setting to control how many versions to keep on a document by document basis. Must be an integer. Defaults to 100, use 0 to save all versions. |
 | `retainDeleted`              | Boolean to determine if, when a document is deleted, you'd like to retain versions of that document, or go through and automatically delete all versions that are associated with the deleted document. |
 | `drafts `                    | Enable [Drafts](/docs/versions/drafts) mode for this collection. To enable, set to `true` or pass an object with `draft` [options](/docs/versions/drafts#options). |
 

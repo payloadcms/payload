@@ -94,12 +94,12 @@ export const saveVersion = async ({
     payload.logger.error(err);
   }
 
-  let max: number;
+  let max = 100;
 
   if (collection && typeof collection.versions.maxPerDoc === 'number') max = collection.versions.maxPerDoc;
   if (global && typeof global.versions.max === 'number') max = global.versions.max;
 
-  if (collection && collection.versions.maxPerDoc) {
+  if (max > 0) {
     enforceMaxVersions({
       id,
       payload,
