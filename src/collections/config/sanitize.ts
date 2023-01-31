@@ -79,10 +79,7 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
         return doc;
       };
 
-      sanitized.hooks.afterChange = [
-        ...sanitized.hooks.afterChange,
-        removeTempFilesHook,
-      ];
+      sanitized.hooks.afterChange.push(removeTempFilesHook);
     }
   }
 

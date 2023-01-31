@@ -74,7 +74,7 @@ export const generateFileData = async <T>({
   try {
     const fileSupportsResize = canResizeImage(file.mimetype);
     let fsSafeName: string;
-    let sharpInstance: Sharp | undefined;
+    let originalFile: Sharp | undefined;
     let dimensions: ProbedImageSize | undefined;
     let fileBuffer;
     let ext;
@@ -82,17 +82,17 @@ export const generateFileData = async <T>({
 
     if (fileSupportsResize) {
       if (file.tempFilePath) {
-        sharpInstance = sharp(file.tempFilePath);
+        originalFile = sharp(file.tempFilePath);
       } else {
-        sharpInstance = sharp(file.data);
+        originalFile = sharp(file.data);
       }
 
       if (resizeOptions) {
-        sharpInstance = sharpInstance
+        originalFile = originalFile
           .resize(resizeOptions);
       }
       if (formatOptions) {
-        sharpInstance = sharpInstance.toFormat(formatOptions.format, formatOptions.options);
+        originalFile = originalFile.toFormat(formatOptions.format, formatOptions.options);
       }
     }
 
@@ -102,8 +102,8 @@ export const generateFileData = async <T>({
       fileData.height = dimensions.height;
     }
 
-    if (sharpInstance) {
-      fileBuffer = await sharpInstance.toBuffer({ resolveWithObject: true });
+    if (originalFile) {
+      fileBuffer = await originalFile.toBuffer({ resolveWithObject: true });
       ({ mime, ext } = await fromBuffer(fileBuffer.data));
       fileData.width = fileBuffer.info.width;
       fileData.height = fileBuffer.info.height;
@@ -127,6 +127,7 @@ export const generateFileData = async <T>({
 
     fileData.filename = fsSafeName;
 
+    // Original file
     filesToSave.push({
       path: `${staticPath}/${fsSafeName}`,
       buffer: fileBuffer?.data || file.data,
@@ -137,7 +138,7 @@ export const generateFileData = async <T>({
 
       const { sizeData, sizesToSave } = await resizeAndSave({
         req,
-        file: fileBuffer?.data || file.data,
+        file: file.data,
         dimensions,
         staticPath,
         config: collectionConfig,
