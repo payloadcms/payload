@@ -138,7 +138,7 @@ export const generateFileData = async <T>({
 
       const { sizeData, sizesToSave } = await resizeAndSave({
         req,
-        file: file.data,
+        file,
         dimensions,
         staticPath,
         config: collectionConfig,
