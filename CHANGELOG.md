@@ -219,12 +219,14 @@ const ensureAtLeastOneVersion = async () => {
           })
         );
 
-        const versionsWithoutParentDocs = await VersionsModel.deleteMany({
-          parent: { $nin: existingDocIds },
-        });
+        if (!versions?.retainDeleted) {
+          const versionsWithoutParentDocs = await VersionsModel.deleteMany({
+            parent: { $nin: existingDocIds },
+          });
 
-        if (versionsWithoutParentDocs.deletedCount > 0) {
-          console.log(`Removing ${versionsWithoutParentDocs.deletedCount} versions for ${slug} collection - parent documents no longer exist`);
+          if (versionsWithoutParentDocs.deletedCount > 0) {
+            console.log(`Removing ${versionsWithoutParentDocs.deletedCount} versions for ${slug} collection - parent documents no longer exist`);
+          }
         }
       }
     })
