@@ -182,10 +182,11 @@ const ensureAtLeastOneVersion = async () => {
           limit: 0,
         });
 
+        const VersionsModel = payload.versions[slug];
+        const existingCollectionDocIds: Array<string> = [];
         await Promise.all(
           docs.map(async (doc) => {
-            const VersionsModel = payload.versions[slug];
-
+            existingCollectionDocIds.push(doc.id);
             // Find at least one version for the doc
             const versions = await VersionsModel.find(
               { parent: doc.id },
@@ -217,6 +218,14 @@ const ensureAtLeastOneVersion = async () => {
             }
           })
         );
+
+        const versionsWithoutParentDocs = await VersionsModel.deleteMany({
+          parent: { $nin: existingDocIds },
+        });
+
+        if (versionsWithoutParentDocs.deletedCount > 0) {
+          console.log(`Removing ${versionsWithoutParentDocs.deletedCount} versions for ${slug} collection - parent documents no longer exist`);
+        }
       }
     })
   );
