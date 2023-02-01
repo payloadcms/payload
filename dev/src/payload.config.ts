@@ -9,6 +9,7 @@ import type { Adapter } from '../../src/types'
 import { Media } from './collections/Media'
 
 let adapter: Adapter
+let uploadOptions
 
 if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'azure') {
   adapter = azureBlobStorageAdapter({
@@ -20,6 +21,11 @@ if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'azure') {
 }
 
 if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 's3') {
+  // The s3 adapter supports using temp files for uploads
+  uploadOptions = {
+    useTempFiles: true,
+  }
+
   adapter = s3Adapter({
     config: {
       endpoint: process.env.S3_ENDPOINT,
@@ -47,6 +53,7 @@ if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'gcs') {
 export default buildConfig({
   serverURL: 'http://localhost:3000',
   collections: [Media, Users],
+  upload: uploadOptions,
   admin: {
     // NOTE - these webpack extensions are only required
     // for development of this plugin.
@@ -59,6 +66,8 @@ export default buildConfig({
           alias: {
             ...(config.resolve.alias || {}),
             react: path.resolve(__dirname, '../node_modules/react'),
+            fs: path.resolve(__dirname, 'mocks/fileStub.js'),
+            util: path.resolve(__dirname, 'mocks/promisifyMock.js'),
             '@azure/storage-blob': path.resolve(__dirname, '../../src/adapters/azure/mock.js'),
             '@aws-sdk/client-s3': path.resolve(__dirname, '../../src/adapters/s3/mock.js'),
             '@google-cloud/storage': path.resolve(__dirname, '../../src/adapters/gcs/mock.js'),
@@ -72,6 +81,7 @@ export default buildConfig({
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
   plugins: [
+    // @ts-expect-error
     cloudStorage({
       collections: {
         media: {
@@ -81,12 +91,19 @@ export default buildConfig({
     }),
   ],
   onInit: async payload => {
-    await payload.create({
+    const users = await payload.find({
       collection: 'users',
-      data: {
-        email: 'dev@payloadcms.com',
-        password: 'test',
-      },
+      limit: 1,
     })
+
+    if (!users.docs.length) {
+      await payload.create({
+        collection: 'users',
+        data: {
+          email: 'dev@payloadcms.com',
+          password: 'test',
+        },
+      })
+    }
   },
 })

@@ -18,6 +18,8 @@ export function getIncomingFiles({
       filename: data.filename,
       mimeType: data.mimeType,
       buffer: file.data,
+      tempFilePath: file.tempFilePath,
+      filesize: file.size,
     }
 
     files = [mainFile]
@@ -30,6 +32,7 @@ export function getIncomingFiles({
               filename: `${resizedFileData.filename}`,
               mimeType: data.mimeType,
               buffer: req.payloadUploadSizes[key],
+              filesize: req.payloadUploadSizes[key].length,
             },
           ])
         }

@@ -7,7 +7,9 @@ import type { Configuration as WebpackConfig } from 'webpack'
 export interface File {
   buffer: Buffer
   filename: string
+  filesize: number
   mimeType: string
+  tempFilePath?: string
 }
 
 export type HandleUpload = (args: {
