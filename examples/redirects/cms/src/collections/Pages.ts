@@ -1,7 +1,6 @@
 import { CollectionConfig } from 'payload/types';
-import { Content } from '../blocks/Content';
-import { hero } from '../fields/hero';
 import { slugField } from '../fields/slug';
+import richText from '../fields/richText';
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -22,27 +21,9 @@ export const Pages: CollectionConfig = {
       required: true,
     },
     {
-      type: 'tabs',
-      tabs: [
-        {
-          label: 'Hero',
-          fields: [
-            hero,
-          ],
-        },
-        {
-          label: 'Content',
-          fields: [
-            {
-              name: 'layout',
-              type: 'blocks',
-              required: true,
-              blocks: [
-                Content,
-              ],
-            },
-          ],
-        },
+      type: 'row',
+      fields: [
+        richText(),
       ],
     },
     slugField(),

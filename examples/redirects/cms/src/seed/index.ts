@@ -1,7 +1,8 @@
 import { Payload } from 'payload';
 import { redirectPage } from './redirectPage';
 import { home } from './home';
-import { redirect } from './redirect';
+import { internalRedirect } from './internalRedirect';
+import { externalRedirect } from './externalRedirect';
 
 export const seed = async (payload: Payload) => {
   await payload.create({
@@ -19,11 +20,18 @@ export const seed = async (payload: Payload) => {
     data: redirectPageJSON,
   });
 
-  const redirectJSON = JSON.parse(JSON.stringify(redirect).replace(/{{REDIRECT_PAGE_ID}}/g, redirectPageID));
+  const internalRedirectJSON = JSON.parse(JSON.stringify(internalRedirect).replace(/{{REDIRECT_PAGE_ID}}/g, redirectPageID));
 
-  const { id: redirectID } = await payload.create({
+   await payload.create({
     collection: 'redirects',
-    data: redirectJSON,
+    data: internalRedirectJSON,
+  })
+
+  const externalRedirectJSON = JSON.parse(JSON.stringify(externalRedirect));
+
+  await payload.create({
+    collection: 'redirects',
+    data: externalRedirectJSON,
   })
 
   const homepageJSON = JSON.parse(JSON.stringify(home));
@@ -32,8 +40,6 @@ export const seed = async (payload: Payload) => {
     collection: 'pages',
     data: homepageJSON,
   });
-
-
 
   await payload.updateGlobal({
     slug: 'main-menu',

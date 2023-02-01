@@ -6,19 +6,20 @@ import {
 } from 'next';
 import { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
-import Blocks from '../components/Blocks';
-import { Hero } from '../components/Hero';
 import type { Page, MainMenu } from '../payload-types';
 import { Gutter } from '../components/Gutter';
 import { VerticalPadding } from '../components/VerticalPadding';
+import RichText from '../components/RichText';
+
+import classes from './[...slug].module.scss';
 
 const Page: React.FC<Page & {
   mainMenu: MainMenu
   preview?: boolean
 }> = (props) => {
   const {
-    hero,
-    layout,
+    title,
+    richText,
   } = props;
 
   const {
@@ -39,8 +40,12 @@ const Page: React.FC<Page & {
       )}
       {!isFallback && (
         <Fragment>
-          <Hero {...hero} />
-          <Blocks blocks={layout} />
+          <Gutter>
+            <h1 className={classes.hero}>{title}</h1>
+            <VerticalPadding>
+              <RichText content={richText} />
+            </VerticalPadding>
+          </Gutter>
         </Fragment>
       )}
     </main>
