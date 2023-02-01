@@ -33,6 +33,8 @@
   },
   "files": [
     "dist",
+    "fields.js",
+    "fields.d.ts",
     "types.js",
     "types.d.ts"
   ]
