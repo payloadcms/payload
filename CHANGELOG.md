@@ -2,7 +2,6 @@
 
 ### 🐛 Bug Fixes
 
-- bump pino and pino-pretty to accommodate yarn 2 ([773fb57](https://github.com/payloadcms/payload/commit/773fb57c71f89d5157847ee4907c1472874f9a61))
 - updated nl i18n typos ([cc7257e](https://github.com/payloadcms/payload/commit/cc7257efd529580b1eb7b6c01df9f7420838c345))
 - fixes [#1905](https://github.com/payloadcms/payload/issues/1905)
 - fixes [#1885](https://github.com/payloadcms/payload/issues/1885)
@@ -17,9 +16,7 @@
 
 - Roadmap - [improved TypeScript experience](https://github.com/payloadcms/payload/discussions/1563) - begins work to SIGNIFICANTLY improve typing of Payload's Local API, removing the need for generics and inferring types automatically from your generated types
 - Refactors the Local API to include only the bare minimum code necessary for running local API operations, which will allow us to deploy serverlessly
-
-* blocks drawer [#1909](https://github.com/payloadcms/payload/issues/1909) ([339cee4](https://github.com/payloadcms/payload/commit/339cee416a0f331d8ad718d6d0c0ad2ae8dca74d))
-
+- blocks drawer [#1909](https://github.com/payloadcms/payload/issues/1909) ([339cee4](https://github.com/payloadcms/payload/commit/339cee416a0f331d8ad718d6d0c0ad2ae8dca74d))
 - requires ts-node to start a project for any config that uses ts or jsx ([f1c342e](https://github.com/payloadcms/payload/commit/f1c342e05eb84254c9d84a425b4f0da1249fcef3))
 - simplifies versions logic ([8cfa550](https://github.com/payloadcms/payload/commit/8cfa5509540225100237e6f569eb9eb1a7d5448e))
 - add Chinese translation ([#1926](https://github.com/payloadcms/payload/issues/1926)) ([7c6ff89](https://github.com/payloadcms/payload/commit/7c6ff89ab661f9dedb171f26349bfdcfdb6ebc96))
