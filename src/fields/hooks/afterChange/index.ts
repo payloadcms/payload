@@ -5,9 +5,9 @@ import { traverseFields } from './traverseFields';
 import deepCopyObject from '../../../utilities/deepCopyObject';
 
 type Args<T> = {
-  data: Omit<T, 'id'>
-  doc: T
-  previousDoc: T
+  data: T | Record<string, unknown>
+  doc: T | Record<string, unknown>
+  previousDoc: T | Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   operation: 'create' | 'update'
   req: PayloadRequest

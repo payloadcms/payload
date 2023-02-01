@@ -1,8 +1,7 @@
-## [1.5.15-canary.2](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.15-canary.2) (2023-01-31)
+## [1.6.1](https://github.com/payloadcms/payload/compare/v1.5.9...v1.6.1) (2023-02-01)
 
 ### 🐛 Bug Fixes
 
-- bump pino and pino-pretty to accommodate yarn 2 ([773fb57](https://github.com/payloadcms/payload/commit/773fb57c71f89d5157847ee4907c1472874f9a61))
 - updated nl i18n typos ([cc7257e](https://github.com/payloadcms/payload/commit/cc7257efd529580b1eb7b6c01df9f7420838c345))
 - fixes [#1905](https://github.com/payloadcms/payload/issues/1905)
 - fixes [#1885](https://github.com/payloadcms/payload/issues/1885)
@@ -17,9 +16,11 @@
 
 - Roadmap - [improved TypeScript experience](https://github.com/payloadcms/payload/discussions/1563) - begins work to SIGNIFICANTLY improve typing of Payload's Local API, removing the need for generics and inferring types automatically from your generated types
 - Refactors the Local API to include only the bare minimum code necessary for running local API operations, which will allow us to deploy serverlessly
-- allows versions to be deleted alongside of main document deletion ([a5c76d4](https://github.com/payloadcms/payload/commit/a5c76d4bd544190511e34820c1145ef26d85dc53))
+- blocks drawer [#1909](https://github.com/payloadcms/payload/issues/1909) ([339cee4](https://github.com/payloadcms/payload/commit/339cee416a0f331d8ad718d6d0c0ad2ae8dca74d))
 - requires ts-node to start a project for any config that uses ts or jsx ([f1c342e](https://github.com/payloadcms/payload/commit/f1c342e05eb84254c9d84a425b4f0da1249fcef3))
 - simplifies versions logic ([8cfa550](https://github.com/payloadcms/payload/commit/8cfa5509540225100237e6f569eb9eb1a7d5448e))
+- add Chinese translation ([#1926](https://github.com/payloadcms/payload/issues/1926)) ([7c6ff89](https://github.com/payloadcms/payload/commit/7c6ff89ab661f9dedb171f26349bfdcfdb6ebc96))
+- add Croatian translation ([#1982](https://github.com/payloadcms/payload/issues/1982)) ([dfa47a0](https://github.com/payloadcms/payload/commit/dfa47a0e0fafa30d7e9fdef59aa001097b305c92)
 
 ### 🚨 BREAKING CHANGES
 
@@ -140,13 +141,7 @@ This release includes a substantial simplification / optimization of how Version
 
 But, some of your draft-enabled documents may need to be migrated.
 
-Here is a way for you to determine if you need to migrate:
-
-1. Do you have drafts enabled on any collections?
-1. If so, do you have any drafts that have **never been updated** at all? For example, a draft is created, and no further versions are ever created. The document only exists in your main collection, and there are no corresponding versions within the `_versions` collection.
-1. Are you worried about losing these never-updated-drafts?
-
-If you think the above bullets apply to you, then you can run a simple migration script to ensure that your "never-updated-drafts" don't disappear from the Admin UI. Your data will never disappear from your database in any case, but applicable documents to the above bullets will simply not show in the List view anymore.
+If you are using versions and drafts on any collections, you can run a simple migration script to ensure that your drafts appear correctly in the Admin UI. Your data will never disappear from your database in any case if you update, but some drafts may not show in the List view anymore.
 
 To migrate, create this file within the root of your Payload project:
 
@@ -157,7 +152,7 @@ const payload = require("payload");
 
 require("dotenv").config();
 
-const { PAYLOAD_SECRET_KEY, MONGO_URL } = process.env;
+const { PAYLOAD_SECRET, MONGODB_URI } = process.env;
 
 // This function ensures that there is at least one corresponding version for any document
 // within each of your draft-enabled collections.
@@ -167,8 +162,8 @@ const ensureAtLeastOneVersion = async () => {
   // IMPORTANT: make sure your ENV variables are filled properly here
   // as the below variable names are just for reference.
   await payload.init({
-    secret: PAYLOAD_SECRET_KEY,
-    mongoURL: MONGO_URL,
+    secret: PAYLOAD_SECRET,
+    mongoURL: MONGODB_URI,
     local: true,
   });
 
@@ -180,6 +175,8 @@ const ensureAtLeastOneVersion = async () => {
         const { docs } = await payload.find({
           collection: slug,
           limit: 0,
+          depth: 0,
+          locale: "all",
         });
 
         const VersionsModel = payload.versions[slug];
@@ -188,15 +185,18 @@ const ensureAtLeastOneVersion = async () => {
           docs.map(async (doc) => {
             existingCollectionDocIds.push(doc.id);
             // Find at least one version for the doc
-            const versions = await VersionsModel.find(
-              { parent: doc.id },
+            const versionDocs = await VersionsModel.find(
+              {
+                parent: doc.id,
+                updatedAt: { $gte: doc.updatedAt },
+              },
               null,
               { limit: 1 }
             ).lean();
 
             // If there are no corresponding versions,
             // we need to create one
-            if (versions.length === 0) {
+            if (versionDocs.length === 0) {
               try {
                 await VersionsModel.create({
                   parent: doc.id,
@@ -220,11 +220,13 @@ const ensureAtLeastOneVersion = async () => {
         );
 
         const versionsWithoutParentDocs = await VersionsModel.deleteMany({
-          parent: { $nin: existingDocIds },
+          parent: { $nin: existingCollectionDocIds },
         });
 
         if (versionsWithoutParentDocs.deletedCount > 0) {
-          console.log(`Removing ${versionsWithoutParentDocs.deletedCount} versions for ${slug} collection - parent documents no longer exist`);
+          console.log(
+            `Removing ${versionsWithoutParentDocs.deletedCount} versions for ${slug} collection - parent documents no longer exist`
+          );
         }
       }
     })
@@ -237,9 +239,9 @@ const ensureAtLeastOneVersion = async () => {
 ensureAtLeastOneVersion();
 ```
 
-Make sure your environment variables match the script's values above and then run `ts-node -T migrateVersions.ts` in your terminal.
+Make sure your environment variables match the script's values above and then run `PAYLOAD_CONFIG_PATH=src/payload.config.ts npx ts-node -T migrateVersions.ts` in your terminal. Make sure that you point the command to your Payload config.
 
-This migration script will ensure that there is at least one corresponding version for each of your draft-enabled documents. It won't modify or delete any of your existing documents at all.
+This migration script will ensure that there is at least one corresponding version for each of your draft-enabled documents. It will also delete any versions that no longer have parent documents.
 
 ### 👀 Example of a properly migrated project
 

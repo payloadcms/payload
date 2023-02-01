@@ -6,7 +6,6 @@ export const versionCollectionDefaults: IncomingCollectionVersions = {
       interval: 2000, // in milliseconds
     },
   },
-  retainDeleted: false,
 };
 
 export const versionGlobalDefaults: IncomingGlobalVersions = {

@@ -370,7 +370,7 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
 }
 
 export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig): JSONSchema4 {
-  const entity = deepCopyObject(incomingEntity);
+  const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity);
   const title = entity.typescript?.interface ? entity.typescript.interface : singular(toWords(entity.slug, true));
 
   const idField: FieldAffectingData = { type: 'text', name: 'id', required: true };
@@ -395,6 +395,13 @@ export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: Sani
         required: true,
       },
     );
+  }
+
+  if ('auth' in entity && !entity.auth?.disableLocalStrategy) {
+    entity.fields.push({
+      type: 'text',
+      name: 'password',
+    });
   }
 
   return {

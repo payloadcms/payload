@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { MarkOptional } from 'ts-essentials';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
@@ -25,7 +26,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  data: Omit<T, 'id'>
+  data: MarkOptional<T, 'id' | 'createdAt' | 'updatedAt'>
   overwriteExistingFiles?: boolean
   draft?: boolean
   autosave?: boolean
