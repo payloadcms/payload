@@ -1,7 +1,8 @@
 import { buildConfig } from 'payload/config';
 import path from 'path';
-// import redirects from '../../dist';
 import redirects from '../../src'
+// to build this demo you must import the plugin from dist
+// import redirects from '../../dist';
 import Users from './collections/Users'
 import Pages from './collections/Pages'
 
