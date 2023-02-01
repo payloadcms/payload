@@ -1,3 +1,36 @@
+
+
+## [1.6.1](https://github.com/payloadcms/payload/compare/v1.5.9...v1.6.1) (2023-02-01)
+
+
+### Bug Fixes
+
+* [#1870](https://github.com/payloadcms/payload/issues/1870) and [#1859](https://github.com/payloadcms/payload/issues/1859)  ([c0ac155](https://github.com/payloadcms/payload/commit/c0ac155a719aa69e1d0e2da97659c56d024325db))
+* aligns global preview config with the docs ([#1940](https://github.com/payloadcms/payload/issues/1940)) ([e7908b7](https://github.com/payloadcms/payload/commit/e7908b7f37bcef898a9cba12f536dfa6f4f0df90))
+* bump pino and pino-pretty to accommodate yarn 2 ([773fb57](https://github.com/payloadcms/payload/commit/773fb57c71f89d5157847ee4907c1472874f9a61))
+* collection view pagination with limits resulting in empty list ([8b778b6](https://github.com/payloadcms/payload/commit/8b778b6407651cd5802760bc7e67eb8d037f4b1e))
+* corrects type for required named tab fields ([#1939](https://github.com/payloadcms/payload/issues/1939)) ([3058eb5](https://github.com/payloadcms/payload/commit/3058eb561710f0e23afe4873e497f8ff9f4e236e))
+* creates backup of latest version after restoring draft [#1873](https://github.com/payloadcms/payload/issues/1873) ([bd4da37](https://github.com/payloadcms/payload/commit/bd4da37f237d7bd33583d21b4ed8b910dd7d71cb))
+* disables escapeValue for i18n ([#1886](https://github.com/payloadcms/payload/issues/1886)) ([eec4b3a](https://github.com/payloadcms/payload/commit/eec4b3ace5a3c9bbea168f2c87de1243414042aa))
+* ensures loader disappears after unsuccessful login, adjusts mobile loader styles ([#1948](https://github.com/payloadcms/payload/issues/1948)) ([3d854f7](https://github.com/payloadcms/payload/commit/3d854f7724f080a1be2271797f63e1448668f401))
+* hides fallback locale checkbox when field localization is set to false ([#1893](https://github.com/payloadcms/payload/issues/1893)) ([0623039](https://github.com/payloadcms/payload/commit/06230398d7251240e45e843f1a4d70e6e7f547e7))
+* limits and sorts within pagination and not on initial aggregation ([9b613ee](https://github.com/payloadcms/payload/commit/9b613ee202d096a472c58b00e0ef5cfbe4fcdc5a))
+* relation to many index unique fields ([#1979](https://github.com/payloadcms/payload/issues/1979)) ([453a903](https://github.com/payloadcms/payload/commit/453a9036be3d121a38d41581c0ca80c6c176b8c5))
+* updated nl i18n typos ([cc7257e](https://github.com/payloadcms/payload/commit/cc7257efd529580b1eb7b6c01df9f7420838c345))
+* versions error on cosmos db ([338c4e2](https://github.com/payloadcms/payload/commit/338c4e2fb1f7fa4877b14b6a7adfdd80b08996d3))
+
+
+### Features
+
+* add Chinese translation ([#1926](https://github.com/payloadcms/payload/issues/1926)) ([7c6ff89](https://github.com/payloadcms/payload/commit/7c6ff89ab661f9dedb171f26349bfdcfdb6ebc96))
+* add Croatian translation ([#1982](https://github.com/payloadcms/payload/issues/1982)) ([dfa47a0](https://github.com/payloadcms/payload/commit/dfa47a0e0fafa30d7e9fdef59aa001097b305c92))
+* allows versions to be deleted alongside of main document deletion ([a5c76d4](https://github.com/payloadcms/payload/commit/a5c76d4bd544190511e34820c1145ef26d85dc53))
+* blocks drawer [#1909](https://github.com/payloadcms/payload/issues/1909) ([339cee4](https://github.com/payloadcms/payload/commit/339cee416a0f331d8ad718d6d0c0ad2ae8dca74d))
+* explicitly exports utilities ([1efc6f5](https://github.com/payloadcms/payload/commit/1efc6f53d3b184babf6857491260bdf9c9329901))
+* isolates local api to local-only functions, converts it to ts generic for stronger typing ([d3d367c](https://github.com/payloadcms/payload/commit/d3d367c635f72b7353ad9a6ff9ecad6a5f56dd08))
+* requires ts-node to start a project for any config that uses ts or jsx ([f1c342e](https://github.com/payloadcms/payload/commit/f1c342e05eb84254c9d84a425b4f0da1249fcef3))
+* simplifies versions logic ([8cfa550](https://github.com/payloadcms/payload/commit/8cfa5509540225100237e6f569eb9eb1a7d5448e))
+
 ## 1.6.0
 
 ### 🐛 Bug Fixes
