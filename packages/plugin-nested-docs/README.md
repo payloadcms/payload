@@ -183,7 +183,7 @@ import {
   PluginConfig,
   GenerateURL,
   GenerateLabel,
-} from "@payloadcms/plugin-nested-docs/dist/types";
+} from "@payloadcms/plugin-nested-docs/types";
 ```
 
 ## Development
@@ -242,5 +242,3 @@ To actively develop or debug this plugin you can either work directly within the
    ```
 
 ## Screenshots
-
-<!-- ![screenshot 1](https://github.com/@payloadcms/plugin-nested-docs/blob/main/images/screenshot-1.jpg?raw=true) -->
