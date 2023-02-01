@@ -205,9 +205,8 @@ const RichText: React.FC<Props> = (props) => {
     function setClickableState(clickState: 'disabled' | 'enabled') {
       const selectors = 'button, a, [role="button"]';
       const toolbarButtons: (HTMLButtonElement | HTMLAnchorElement)[] = toolbarRef.current?.querySelectorAll(selectors);
-      const editorButtons: (HTMLButtonElement | HTMLAnchorElement)[] = editorRef.current?.querySelectorAll(selectors);
 
-      [...(toolbarButtons || []), ...(editorButtons || [])].forEach((child) => {
+      (toolbarButtons || []).forEach((child) => {
         const isButton = child.tagName === 'BUTTON';
         const isDisabling = clickState === 'disabled';
         child.setAttribute('tabIndex', isDisabling ? '-1' : '0');

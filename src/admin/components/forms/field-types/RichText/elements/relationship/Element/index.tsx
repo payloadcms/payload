@@ -28,9 +28,13 @@ const Element: React.FC<{
     attributes,
     children,
     element,
+    element: {
+      relationTo,
+      value,
+    },
     fieldProps,
   } = props;
-  const { relationTo, value } = element;
+
   const { collections, serverURL, routes: { api } } = useConfig();
   const [enabledCollectionSlugs] = useState(() => collections.filter(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship).map(({ slug }) => slug));
   const [relatedCollection, setRelatedCollection] = useState(() => collections.find((coll) => coll.slug === relationTo));
@@ -146,30 +150,27 @@ const Element: React.FC<{
       </div>
       <div className={`${baseClass}__actions`}>
         {value?.id && (
-          <DocumentDrawerToggler
-            className={`${baseClass}__toggler`}
-            disabled={fieldProps?.admin?.readOnly}
-          >
+          <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
             <Button
               icon="edit"
               round
               buttonStyle="icon-label"
               el="div"
-              className={`${baseClass}__actionButton`}
               onClick={(e) => {
                 e.preventDefault();
               }}
               tooltip={t('general:editLabel', { label: getTranslation(relatedCollection.labels.singular, i18n) })}
-              disabled={fieldProps?.admin?.readOnly}
             />
           </DocumentDrawerToggler>
         )}
-        <ListDrawerToggler disabled={fieldProps?.admin?.readOnly}>
+        <ListDrawerToggler
+          disabled={fieldProps?.admin?.readOnly}
+          className={`${baseClass}__list-drawer-toggler`}
+        >
           <Button
             icon="swap"
             round
             buttonStyle="icon-label"
-            className={`${baseClass}__actionButton`}
             onClick={() => {
             // do nothing
             }}
@@ -182,7 +183,7 @@ const Element: React.FC<{
           icon="x"
           round
           buttonStyle="icon-label"
-          className={`${baseClass}__actionButton`}
+          className={`${baseClass}__removeButton`}
           onClick={(e) => {
             e.preventDefault();
             removeRelationship();
