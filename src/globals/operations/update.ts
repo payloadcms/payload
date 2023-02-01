@@ -1,5 +1,5 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { docHasTimestamps, Where } from '../../types';
+import { Where } from '../../types';
 import { SanitizedGlobalConfig } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
 import { hasWhereAccessResult } from '../../auth';
@@ -10,6 +10,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { PayloadRequest } from '../../express/types';
 import { saveVersion } from '../../versions/saveVersion';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
+import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
 
 type Args<T extends { [field: string | number | symbol]: unknown }> = {
   globalConfig: SanitizedGlobalConfig
@@ -82,36 +83,21 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  let version;
-  let global;
+  let global = await getLatestEntityVersion({
+    payload,
+    Model,
+    config: globalConfig,
+    query,
+    lean: true,
+    entityType: 'global',
+  });
 
-  if (globalConfig.versions?.drafts) {
-    version = payload.versions[globalConfig.slug].findOne({}, {}, {
-      sort: {
-        updatedAt: 'desc',
-      },
-      lean: true,
-    });
-  }
-
-  const existingGlobal = await payload.globals.Model.findOne(query).lean();
-  version = await version;
-
-  if (!version || (existingGlobal && docHasTimestamps(existingGlobal) && version.updatedAt < existingGlobal.updatedAt)) {
-    global = existingGlobal;
-  } else {
-    global = {
-      ...version.version,
-      updatedAt: version.updatedAt,
-      createdAt: version.createdAt,
-    };
-  }
+  const globalExists = Boolean(global);
 
   let globalJSON: Record<string, unknown> = {};
 
   if (global) {
-    const globalJSONString = JSON.stringify(global);
-    globalJSON = JSON.parse(globalJSONString);
+    globalJSON = JSON.parse(JSON.stringify(global));
 
     if (globalJSON._id) {
       delete globalJSON._id;
@@ -187,7 +173,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // /////////////////////////////////////
 
   if (!shouldSaveDraft) {
-    if (existingGlobal) {
+    if (globalExists) {
       global = await Model.findOneAndUpdate(
         { globalType: slug },
         result,
@@ -199,8 +185,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     }
   }
 
-  global = JSON.stringify(global);
-  global = JSON.parse(global);
+  global = JSON.parse(JSON.stringify(global));
   global = sanitizeInternalFields(global);
 
   // /////////////////////////////////////
@@ -212,10 +197,13 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       payload,
       global: globalConfig,
       req,
-      docWithLocales: result,
+      docWithLocales: {
+        ...result,
+        createdAt: global.createdAt,
+        updatedAt: global.updatedAt,
+      },
       autosave,
       draft: shouldSaveDraft,
-      createdAt: global.createdAt,
     });
   }
 

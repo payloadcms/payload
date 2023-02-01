@@ -9,7 +9,7 @@ import { APIError } from '../../../errors';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
-  id: string
+  id: string | number
   depth?: number
   currentDepth?: number
   locale?: string

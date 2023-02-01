@@ -3,14 +3,14 @@ import {
   InitOptions,
 } from './config/types';
 import { initHTTP } from './initHTTP';
-import { Payload, BasePayload } from './payload';
+import { Payload as LocalPayload, BasePayload } from './payload';
 
 export { getPayload } from './payload';
 
 require('isomorphic-fetch');
 
-export class PayloadHTTP extends BasePayload<GeneratedTypes> {
-  async init(options: InitOptions): Promise<Payload> {
+export class Payload extends BasePayload<GeneratedTypes> {
+  async init(options: InitOptions): Promise<LocalPayload> {
     const payload = await initHTTP(options);
     Object.assign(this, payload);
 
@@ -23,7 +23,7 @@ export class PayloadHTTP extends BasePayload<GeneratedTypes> {
   }
 }
 
-const payload = new PayloadHTTP();
+const payload = new Payload();
 
 export default payload;
 module.exports = payload;

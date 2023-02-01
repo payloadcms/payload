@@ -8,7 +8,7 @@ import { Field } from '../../fields/config/types';
 import { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types';
 
 export type TypeWithID = {
-  id: string
+  id: string | number
 }
 
 export type BeforeValidateHook = (args: {

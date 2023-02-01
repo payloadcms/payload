@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { MarkOptional } from 'ts-essentials';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -14,13 +15,13 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
-import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
+import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
   req: PayloadRequest
   id: string | number
-  data: Omit<T, 'id'>
+  data: MarkOptional<T, 'id' | 'createdAt' | 'updatedAt'>
   depth?: number
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
@@ -111,7 +112,14 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  const doc = await getLatestCollectionVersion({ payload, collection, id, query, lean });
+  const doc = await getLatestEntityVersion({
+    payload,
+    Model,
+    config: collectionConfig,
+    id,
+    query,
+    lean,
+  });
 
   if (!doc && !hasWherePolicy) throw new NotFound(t);
   if (!doc && hasWherePolicy) throw new Forbidden(t);
@@ -253,11 +261,13 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       payload,
       collection: collectionConfig,
       req,
-      docWithLocales: result,
+      docWithLocales: {
+        ...result,
+        createdAt: docWithLocales.createdAt,
+      },
       id,
       autosave,
       draft: shouldSaveDraft,
-      createdAt: originalDoc.createdAt,
     });
   }
 
