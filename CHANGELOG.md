@@ -157,7 +157,7 @@ const payload = require("payload");
 
 require("dotenv").config();
 
-const { PAYLOAD_SECRET_KEY, MONGO_URL } = process.env;
+const { PAYLOAD_SECRET, MONGODB_URI } = process.env;
 
 // This function ensures that there is at least one corresponding version for any document
 // within each of your draft-enabled collections.
@@ -167,8 +167,8 @@ const ensureAtLeastOneVersion = async () => {
   // IMPORTANT: make sure your ENV variables are filled properly here
   // as the below variable names are just for reference.
   await payload.init({
-    secret: PAYLOAD_SECRET_KEY,
-    mongoURL: MONGO_URL,
+    secret: PAYLOAD_SECRET,
+    mongoURL: MONGODB_URI,
     local: true,
   });
 
@@ -180,6 +180,8 @@ const ensureAtLeastOneVersion = async () => {
         const { docs } = await payload.find({
           collection: slug,
           limit: 0,
+          depth: 0,
+          locale: "all",
         });
 
         const VersionsModel = payload.versions[slug];
@@ -188,15 +190,18 @@ const ensureAtLeastOneVersion = async () => {
           docs.map(async (doc) => {
             existingCollectionDocIds.push(doc.id);
             // Find at least one version for the doc
-            const versions = await VersionsModel.find(
-              { parent: doc.id },
+            const versionDocs = await VersionsModel.find(
+              {
+                parent: doc.id,
+                updatedAt: { $gte: doc.updatedAt },
+              },
               null,
               { limit: 1 }
             ).lean();
 
             // If there are no corresponding versions,
             // we need to create one
-            if (versions.length === 0) {
+            if (versionDocs.length === 0) {
               try {
                 await VersionsModel.create({
                   parent: doc.id,
@@ -220,7 +225,7 @@ const ensureAtLeastOneVersion = async () => {
         );
 
         const versionsWithoutParentDocs = await VersionsModel.deleteMany({
-          parent: { $nin: existingDocIds },
+          parent: { $nin: existingCollectionDocIds },
         });
 
         if (versionsWithoutParentDocs.deletedCount > 0) {
@@ -239,9 +244,9 @@ const ensureAtLeastOneVersion = async () => {
 ensureAtLeastOneVersion();
 ```
 
-Make sure your environment variables match the script's values above and then run `ts-node -T migrateVersions.ts` in your terminal.
+Make sure your environment variables match the script's values above and then run `PAYLOAD_CONFIG_PATH=src/payload.config.ts npx ts-node -T migrateVersions.ts` in your terminal. Make sure that you point the command to your Payload config.
 
-This migration script will ensure that there is at least one corresponding version for each of your draft-enabled documents. It won't modify or delete any of your existing documents at all.
+This migration script will ensure that there is at least one corresponding version for each of your draft-enabled documents. It will also delete any versions that no longer have parent documents.
 
 ### 👀 Example of a properly migrated project
 
