@@ -1,4 +1,4 @@
-## [1.5.15-canary.3](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.15-canary.3) (2023-02-01)
+## [1.5.15-canary.4](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.15-canary.4) (2023-02-01)
 
 ### 🐛 Bug Fixes
 
@@ -17,9 +17,13 @@
 
 - Roadmap - [improved TypeScript experience](https://github.com/payloadcms/payload/discussions/1563) - begins work to SIGNIFICANTLY improve typing of Payload's Local API, removing the need for generics and inferring types automatically from your generated types
 - Refactors the Local API to include only the bare minimum code necessary for running local API operations, which will allow us to deploy serverlessly
-- allows versions to be deleted alongside of main document deletion ([a5c76d4](https://github.com/payloadcms/payload/commit/a5c76d4bd544190511e34820c1145ef26d85dc53))
+
+* blocks drawer [#1909](https://github.com/payloadcms/payload/issues/1909) ([339cee4](https://github.com/payloadcms/payload/commit/339cee416a0f331d8ad718d6d0c0ad2ae8dca74d))
+
 - requires ts-node to start a project for any config that uses ts or jsx ([f1c342e](https://github.com/payloadcms/payload/commit/f1c342e05eb84254c9d84a425b4f0da1249fcef3))
 - simplifies versions logic ([8cfa550](https://github.com/payloadcms/payload/commit/8cfa5509540225100237e6f569eb9eb1a7d5448e))
+- add Chinese translation ([#1926](https://github.com/payloadcms/payload/issues/1926)) ([7c6ff89](https://github.com/payloadcms/payload/commit/7c6ff89ab661f9dedb171f26349bfdcfdb6ebc96))
+- add Croatian translation ([#1982](https://github.com/payloadcms/payload/issues/1982)) ([dfa47a0](https://github.com/payloadcms/payload/commit/dfa47a0e0fafa30d7e9fdef59aa001097b305c92)
 
 ### 🚨 BREAKING CHANGES
 
