@@ -1,6 +1,6 @@
 import { buildConfig } from 'payload/config';
 import nestedDocs from '@payloadcms/plugin-nested-docs';
-import redirects from './plugins/redirects';
+import redirects from '@payloadcms/plugin-redirects';
 import path from 'path';
 import { Users } from './collections/Users';
 import { Pages } from './collections/Pages';
