@@ -27,8 +27,7 @@ export type Arguments = {
   draft?: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function find<T extends TypeWithID>(
+async function find<T extends TypeWithID & Record<string, unknown>>(
   incomingArgs: Arguments,
 ): Promise<PaginatedDocs<T>> {
   let args = incomingArgs;

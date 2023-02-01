@@ -3,6 +3,7 @@ import de from './de.json';
 import en from './en.json';
 import es from './es.json';
 import fr from './fr.json';
+import hr from "./hr.json";
 import it from './it.json';
 import ja from './ja.json';
 import my from './my.json';
@@ -16,6 +17,7 @@ import th from './th.json';
 import tr from './tr.json';
 import ua from './ua.json';
 import vi from './vi.json';
+import zh from './zh.json';
 
 export default {
   cs,
@@ -23,6 +25,7 @@ export default {
   en,
   es,
   fr,
+  hr,
   it,
   ja,
   my,
@@ -36,4 +39,5 @@ export default {
   tr,
   ua,
   vi,
+  zh,
 };

@@ -1,12 +1,13 @@
 /* eslint-disable no-param-reassign */
 import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { MarkOptional } from 'ts-essentials';
 import { PayloadRequest } from '../../../express/types';
 import { Collection } from '../../config/types';
 import create from '../../operations/create';
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (_: unknown, args: {
-  data: Omit<GeneratedTypes['collections'][TSlug], 'id'>,
+  data: MarkOptional<GeneratedTypes['collections'][TSlug], 'id' | 'updatedAt' | 'createdAt'>,
   locale?: string
   draft: boolean
 },

@@ -7,13 +7,14 @@ keywords: version history, revisions, audit log, draft, publish, restore, autosa
 ---
 
 <Banner>
-  Payload's powerful Versions functionality allows you to keep a running history of changes over time and extensible to fit any content publishing workflow.
+  Payload's powerful Versions functionality allows you to keep a running history
+  of changes over time and extensible to fit any content publishing workflow.
 </Banner>
 
 When enabled, Payload will automatically scaffold a new Collection in your database to store versions of your document(s) over time, and the Admin UI will be extended with additional views that allow you to browse document versions, view diffs in order to see exactly what has changed in your documents (and when they changed), and restore documents back to prior versions easily.
 
 ![Versions](/images/docs/versions.png)
-*Comparing an old version to a newer version of a document*
+_Comparing an old version to a newer version of a document_
 
 **With Versions, you can:**
 
@@ -25,7 +26,9 @@ When enabled, Payload will automatically scaffold a new Collection in your datab
 - Build a powerful publishing schedule mechanism to create documents and have them become publicly readable automatically at a future date
 
 <Banner type="success">
-	Versions are extremely performant and totally opt-in. They don't change the shape of your data at all. All versions are stored in a separate Collection and can be turned on and off easily at your discretion.
+  Versions are extremely performant and totally opt-in. They don't change the
+  shape of your data at all. All versions are stored in a separate Collection
+  and can be turned on and off easily at your discretion.
 </Banner>
 
 ### Options
@@ -50,22 +53,19 @@ When you have versions, drafts, _and_ `autosave` enabled, the Admin UI will auto
 
 Configuring Versions is done by adding the `versions` key to your Collection configs. Set it to `true` to enable default Versions settings, or customize versions options by setting the property equal to an object containing the following available options:
 
-| Option                       | Description  |
-| ---------------------------- | -------------|
-| `maxPerDoc`                  | Use this setting to control how many versions to keep on a document by document basis. Must be an integer. |
-| `retainDeleted`              | Boolean to determine if, when a document is deleted, you'd like to retain versions of that document, or go through and automatically delete all versions that are associated with the deleted document. |
-| `drafts `                    | Enable [Drafts](/docs/versions/drafts) mode for this collection. To enable, set to `true` or pass an object with `draft` [options](/docs/versions/drafts#options). |
-
+| Option      | Description                                                                                                                                                        |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `maxPerDoc` | Use this setting to control how many versions to keep on a document by document basis. Must be an integer. Defaults to 100, use 0 to save all versions.            |
+| `drafts `   | Enable [Drafts](/docs/versions/drafts) mode for this collection. To enable, set to `true` or pass an object with `draft` [options](/docs/versions/drafts#options). |
 
 ### Global config
 
 Global versions work similarly to Collection versions but have a slightly different set of config properties supported.
 
-| Option    | Description  |
-| --------- | -------------|
-| `max`     | Use this setting to control how many versions to keep on a global by global basis. Must be an integer. |
-| `drafts`  | Enable [Drafts](/docs/versions/drafts) mode for this global. To enable, set to `true` or pass an object with `draft` [options](/docs/versions/drafts#options) |
-
+| Option   | Description                                                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `max`    | Use this setting to control how many versions to keep on a global by global basis. Must be an integer.                                                        |
+| `drafts` | Enable [Drafts](/docs/versions/drafts) mode for this global. To enable, set to `true` or pass an object with `draft` [options](/docs/versions/drafts#options) |
 
 #### Database impact
 
@@ -99,24 +99,24 @@ Versions expose new operations for both collections and globals. They allow you 
 
 **Collection REST endpoints:**
 
-| Method   | Path                                 | Description                            |
-| -------- | ------------------------------------ | -------------------------------------- |
-| `GET`    | `/api/{collectionSlug}/versions`     | Find and query paginated versions      |
-| `GET`    | `/api/{collectionSlug}/versions/:id` | Find a specific version by ID          |
-| `POST`   | `/api/{collectionSlug}/versions/:id` | Restore a version by ID                |
+| Method | Path                                 | Description                       |
+| ------ | ------------------------------------ | --------------------------------- |
+| `GET`  | `/api/{collectionSlug}/versions`     | Find and query paginated versions |
+| `GET`  | `/api/{collectionSlug}/versions/:id` | Find a specific version by ID     |
+| `POST` | `/api/{collectionSlug}/versions/:id` | Restore a version by ID           |
 
 **Collection GraphQL queries:**
 
-| Query Name             | Operation    |
-| ---------------------- | -------------|
-| **`version{collection.label.singular}`**     | `findVersionByID` |
-| **`versions{collection.label.plural}`**      | `findVersions` |
+| Query Name                               | Operation         |
+| ---------------------------------------- | ----------------- |
+| **`version{collection.label.singular}`** | `findVersionByID` |
+| **`versions{collection.label.plural}`**  | `findVersions`    |
 
 **And mutation:**
 
-| Query Name             | Operation    |
-| ---------------------- | -------------|
-| **`restoreVersion{collection.label.singular}`**   | `restoreVersion` |
+| Query Name                                      | Operation        |
+| ----------------------------------------------- | ---------------- |
+| **`restoreVersion{collection.label.singular}`** | `restoreVersion` |
 
 **Collection Local API methods:**
 
@@ -126,18 +126,18 @@ Versions expose new operations for both collections and globals. They allow you 
 // Result will be a paginated set of Versions.
 // See /docs/queries/pagination for more.
 const result = await payload.findVersions({
-  collection: 'posts', // required
+  collection: "posts", // required
   depth: 2,
   page: 1,
   limit: 10,
   where: {}, // pass a `where` query here
-  sort: '-createdAt',
-  locale: 'en',
+  sort: "-createdAt",
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 #### Find by ID
@@ -145,15 +145,15 @@ const result = await payload.findVersions({
 ```js
 // Result will be a Post document.
 const result = await payload.findVersionByID({
-  collection: 'posts', // required
-  id: '507f1f77bcf86cd799439013', // required
+  collection: "posts", // required
+  id: "507f1f77bcf86cd799439013", // required
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 #### Restore
@@ -161,35 +161,35 @@ const result = await payload.findVersionByID({
 ```js
 // Result will be the restored global document.
 const result = await payload.restoreVersion({
-  collection: 'posts', // required
-  id: '507f1f77bcf86cd799439013', // required
+  collection: "posts", // required
+  id: "507f1f77bcf86cd799439013", // required
   depth: 2,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 **Global REST endpoints:**
 
-| Method   | Path                                     | Description                            |
-| -------- | ---------------------------------------- | -------------------------------------- |
-| `GET`    | `/api/globals/{globalSlug}/versions`     | Find and query paginated versions      |
-| `GET`    | `/api/globals/{globalSlug}/versions/:id` | Find a specific version by ID          |
-| `POST`   | `/api/globals/{globalSlug}/versions/:id` | Restore a version by ID                |
+| Method | Path                                     | Description                       |
+| ------ | ---------------------------------------- | --------------------------------- |
+| `GET`  | `/api/globals/{globalSlug}/versions`     | Find and query paginated versions |
+| `GET`  | `/api/globals/{globalSlug}/versions/:id` | Find a specific version by ID     |
+| `POST` | `/api/globals/{globalSlug}/versions/:id` | Restore a version by ID           |
 
 **Global GraphQL queries:**
 
-| Query Name             | Operation    |
-| ---------------------- | -------------|
-| **`version{global.label}`**     | `findVersionByID` |
-| **`versions{global.label}`**    | `findVersions` |
+| Query Name                   | Operation         |
+| ---------------------------- | ----------------- |
+| **`version{global.label}`**  | `findVersionByID` |
+| **`versions{global.label}`** | `findVersions`    |
 
 **Global GraphQL mutation:**
 
-| Query Name             | Operation    |
-| ---------------------- | -------------|
-| **`restoreVersion{global.label}`**   | `restoreVersion` |
+| Query Name                         | Operation        |
+| ---------------------------------- | ---------------- |
+| **`restoreVersion{global.label}`** | `restoreVersion` |
 
 **Global Local API methods:**
 
@@ -199,18 +199,18 @@ const result = await payload.restoreVersion({
 // Result will be a paginated set of Versions.
 // See /docs/queries/pagination for more.
 const result = await payload.findGlobalVersions({
-  slug: 'header', // required
+  slug: "header", // required
   depth: 2,
   page: 1,
   limit: 10,
   where: {}, // pass a `where` query here
-  sort: '-createdAt',
-  locale: 'en',
+  sort: "-createdAt",
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 #### Find by ID
@@ -218,15 +218,15 @@ const result = await payload.findGlobalVersions({
 ```js
 // Result will be a Post document.
 const result = await payload.findGlobalVersionByID({
-  slug: 'header', // required
-  id: '507f1f77bcf86cd799439013', // required
+  slug: "header", // required
+  id: "507f1f77bcf86cd799439013", // required
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 #### Restore
@@ -234,13 +234,13 @@ const result = await payload.findGlobalVersionByID({
 ```js
 // Result will be the restored global document.
 const result = await payload.restoreGlobalVersion({
-  slug: 'header', // required
-  id: '507f1f77bcf86cd799439013', // required
+  slug: "header", // required
+  id: "507f1f77bcf86cd799439013", // required
   depth: 2,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 ### Access Control
@@ -249,6 +249,6 @@ Versions expose a new access control function on both Collections and Globals th
 
 **New version access control:**
 
-| Function                 | Allows/Denies Access |
-| ------------------------ | -------------------- |
-| **`readVersions`**       | Used to control who can read versions, and who can't. Will automatically restrict the Admin UI version viewing access. |
+| Function           | Allows/Denies Access                                                                                                   |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| **`readVersions`** | Used to control who can read versions, and who can't. Will automatically restrict the Admin UI version viewing access. |

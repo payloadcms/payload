@@ -81,10 +81,10 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 }
 
 @mixin shadow {
-  box-shadow: 0 12px 45px rgba(0, 0, 0, .03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .07);
 
   &:hover {
-    box-shadow: 0 12px 45px rgba(0, 0, 0, .07);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
   }
 }
 

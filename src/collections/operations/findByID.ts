@@ -12,7 +12,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
-  id: string
+  id: string | number
   req: PayloadRequest
   disableErrors?: boolean
   currentDepth?: number

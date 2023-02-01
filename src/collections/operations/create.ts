@@ -3,6 +3,7 @@ import { promisify } from 'util';
 
 import crypto from 'crypto';
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { MarkOptional } from 'ts-essentials';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
@@ -31,7 +32,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  data: Omit<T, 'id'>
+  data: MarkOptional<T, 'id' | 'createdAt' | 'updatedAt'>
   overwriteExistingFiles?: boolean
   draft?: boolean
   autosave?: boolean
@@ -220,8 +221,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
+  result = JSON.parse(JSON.stringify(result));
   result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
@@ -236,8 +236,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       id: result.id,
       docWithLocales: result,
       autosave,
-      createdAt: result.createdAt,
-      onCreate: true,
     });
   }
 

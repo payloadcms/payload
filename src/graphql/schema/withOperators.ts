@@ -6,7 +6,7 @@ const withOperators = (field: FieldAffectingData, type: GraphQLType, parentName:
   const name = `${combineParentName(parentName, field.name)}_operator`;
   const listOperators = ['in', 'not_in', 'all'];
 
-  if (!field.required) operators.push('exists');
+  if (!('required' in field) || !field.required) operators.push('exists');
 
   return new GraphQLInputObjectType({
     name,
