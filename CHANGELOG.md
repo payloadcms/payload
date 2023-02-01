@@ -1,5 +1,12 @@
 
 
+## [1.6.3](https://github.com/payloadcms/payload/compare/v1.6.2...v1.6.3) (2023-02-01)
+
+
+### Bug Fixes
+
+* properly await graphql schema generation ([888b3a2](https://github.com/payloadcms/payload/commit/888b3a26727b32d19e39d1a8b672eb1881effad7))
+
 ## [1.6.2](https://github.com/payloadcms/payload/compare/v1.6.1...v1.6.2) (2023-02-01)
 
 ### Features

@@ -45,7 +45,7 @@ To add an NPM script to generate your types and show Payload where to find your 
 ```json
 {
   "scripts": {
-    "generate:graphQLSchema": "PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:graphQLSchema",
+    "generate:graphQLSchema": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:graphQLSchema",
   },
 }
 ```
