@@ -2,6 +2,10 @@
 
 ## [1.6.2](https://github.com/payloadcms/payload/compare/v1.6.1...v1.6.2) (2023-02-01)
 
+### Features
+
+- Adds optional password to generated types within auth-enabled collections
+
 ## [1.6.1](https://github.com/payloadcms/payload/compare/v1.5.9...v1.6.1) (2023-02-01)
 
 ### 🐛 Bug Fixes
