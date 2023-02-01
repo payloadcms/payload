@@ -173,11 +173,13 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   // Delete versions
   // /////////////////////////////////////
 
-  deleteCollectionVersions({
-    payload,
-    id,
-    slug: collectionConfig.slug,
-  });
+  if (collectionConfig.versions) {
+    deleteCollectionVersions({
+      payload,
+      id,
+      slug: collectionConfig.slug,
+    });
+  }
 
   // /////////////////////////////////////
   // afterDelete - Collection
