@@ -1,4 +1,4 @@
-## [1.5.15-canary.2](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.15-canary.2) (2023-01-31)
+## [1.5.15-canary.3](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.15-canary.3) (2023-02-01)
 
 ### 🐛 Bug Fixes
 
@@ -225,7 +225,9 @@ const ensureAtLeastOneVersion = async () => {
           });
 
           if (versionsWithoutParentDocs.deletedCount > 0) {
-            console.log(`Removing ${versionsWithoutParentDocs.deletedCount} versions for ${slug} collection - parent documents no longer exist`);
+            console.log(
+              `Removing ${versionsWithoutParentDocs.deletedCount} versions for ${slug} collection - parent documents no longer exist`
+            );
           }
         }
       }
