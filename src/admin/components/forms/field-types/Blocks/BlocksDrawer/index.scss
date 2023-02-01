@@ -1,11 +1,6 @@
 @import '../../../../../scss/styles.scss';
 
 .blocks-drawer {
-  &__wrapper {
-    margin-top: base(2.5);
-    width: 100%;
-  }
-
   &__blocks-wrapper {
     padding: base(0.5);
     margin-top: base(1.5);
@@ -38,10 +33,6 @@
   }
 
   @include mid-break {
-    &__wrapper {
-      margin-top: base(1.5);
-    }
-
     &__blocks-wrapper {
       padding: base(0.25);
     }
