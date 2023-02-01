@@ -126,7 +126,6 @@ const collectionSchema = joi.object().keys({
   versions: joi.alternatives().try(
     joi.object({
       maxPerDoc: joi.number(),
-      retainDeleted: joi.boolean(),
       drafts: joi.alternatives().try(
         joi.object({
           autosave: joi.alternatives().try(
