@@ -6,26 +6,18 @@ import methodOverride from 'method-override';
 import qsMiddleware from 'qs-middleware';
 import fileUpload from 'express-fileupload';
 import rateLimit from 'express-rate-limit';
+import _ from 'lodash';
 import localizationMiddleware from '../../localization/middleware';
 import authenticate from './authenticate';
 import identifyAPI from './identifyAPI';
 import { Payload } from '../../payload';
-import { PayloadRequest } from '../types';
 import corsHeaders from './corsHeaders';
 import convertPayload from './convertPayload';
 import { i18nMiddleware } from './i18n';
 
 const middleware = (payload: Payload): any => {
-  const rateLimitOptions: {
-    windowMs?: number
-    max?: number
-    skip?: (req: PayloadRequest) => boolean
-  } = {
-    windowMs: payload.config.rateLimit.window,
-    max: payload.config.rateLimit.max,
-  };
-
-  if (typeof payload.config.rateLimit.skip === 'function') rateLimitOptions.skip = payload.config.rateLimit.skip;
+  const rateLimitOptions = _.omit(payload.config.rateLimit, 'window', 'trustProxy');
+  rateLimitOptions.windowMs = payload.config.rateLimit?.window;
 
   if (payload.config.express.middleware?.length) {
     payload.logger.warn('express.middleware is deprecated. Please migrate to express.postMiddleware.');

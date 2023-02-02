@@ -1,5 +1,5 @@
 import { Express, NextFunction, Response } from 'express';
-import { DeepRequired } from 'ts-essentials';
+import { Buildable, DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import { Options as ExpressFileUploadOptions } from 'express-fileupload';
 import { Configuration } from 'webpack';
@@ -9,6 +9,7 @@ import { ConnectOptions } from 'mongoose';
 import React from 'react';
 import { LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
+import { Options as RateLimitOptions } from 'express-rate-limit';
 import { Payload } from '../payload';
 import {
   AfterErrorHook,
@@ -466,12 +467,7 @@ export type Config = {
    *   max: 500,
    * }
   */
-  rateLimit?: {
-    window?: number;
-    max?: number;
-    trustProxy?: boolean;
-    skip?: (req: PayloadRequest) => boolean;
-  };
+  rateLimit?: Buildable<RateLimitOptions & { window: number, trustProxy: boolean }>;
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
    */

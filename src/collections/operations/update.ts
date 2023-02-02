@@ -195,7 +195,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  data = await beforeValidate<GeneratedTypes['collections'][TSlug]>({
+  data = await beforeValidate({
     data,
     doc: originalDoc,
     entityConfig: collectionConfig,

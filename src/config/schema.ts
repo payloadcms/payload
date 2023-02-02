@@ -134,7 +134,7 @@ export default joi.object({
       max: joi.number(),
       trustProxy: joi.boolean(),
       skip: joi.func(),
-    }),
+    }).unknown(true),
   graphQL: joi.object()
     .keys({
       mutations: joi.function(),
