@@ -2187,13 +2187,6 @@
     "@types/busboy" "*"
     "@types/express" "*"
 
-"@types/express-rate-limit@^5.1.3":
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/@types/express-rate-limit/-/express-rate-limit-5.1.3.tgz#79f2ca40d90455a5798da6f8e06d8a3d35f4a1d6"
-  integrity sha512-H+TYy3K53uPU2TqPGFYaiWc2xJV6+bIFkDd/Ma2/h67Pa6ARk9kWE0p/K9OH1Okm0et9Sfm66fmXoAxsH2PHXg==
-  dependencies:
-    "@types/express" "*"
-
 "@types/express-serve-static-core@*", "@types/express-serve-static-core@^4.17.31":
   version "4.17.33"
   resolved "https://registry.yarnpkg.com/@types/express-serve-static-core/-/express-serve-static-core-4.17.33.tgz#de35d30a9d637dc1450ad18dd583d75d5733d543"
