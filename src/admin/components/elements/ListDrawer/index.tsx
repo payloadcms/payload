@@ -4,10 +4,28 @@ import { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types';
 import { Drawer, DrawerToggler } from '../Drawer';
 import { useEditDepth } from '../../utilities/EditDepth';
 import { ListDrawerContent } from './DrawerContent';
+import { useConfig } from '../../utilities/Config';
+import { useIsWithinRichText } from '../../forms/field-types/RichText/provider';
 
 import './index.scss';
 
 export const baseClass = 'list-drawer';
+
+const drawerHasContent = ({
+  coll: {
+    admin: { enableRichTextRelationship },
+    upload,
+    slug,
+  },
+  uploads,
+  collectionSlugs,
+  withinRichText = false,
+}) => {
+  const canRenderFromOrigin = withinRichText ? enableRichTextRelationship : true;
+  const hasContentToRender = (uploads && Boolean(upload)) || collectionSlugs?.includes(slug);
+
+  return canRenderFromOrigin && hasContentToRender;
+};
 
 const formatListDrawerSlug = ({
   depth,
@@ -40,7 +58,9 @@ export const ListDrawerToggler: React.FC<ListTogglerProps> = ({
 };
 
 export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
-  const { drawerSlug } = props;
+  const { drawerSlug, enabledCollectionConfigs } = props;
+
+  if (!enabledCollectionConfigs.length) return null;
 
   return (
     <Drawer
@@ -49,7 +69,11 @@ export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
       header={false}
       gutter={false}
     >
-      <ListDrawerContent {...props} />
+      <ListDrawerContent
+        {...props}
+        drawerSlug={drawerSlug}
+        enabledCollectionConfigs={enabledCollectionConfigs}
+      />
     </Drawer>
   );
 };
@@ -60,6 +84,8 @@ export const useListDrawer: UseListDrawer = ({
   selectedCollection,
   filterOptions,
 }) => {
+  const { collections } = useConfig();
+  const isWithinRichText = useIsWithinRichText();
   const drawerDepth = useEditDepth();
   const uuid = useId();
   const { modalState, toggleModal, closeModal, openModal } = useModal();
@@ -68,6 +94,7 @@ export const useListDrawer: UseListDrawer = ({
     depth: drawerDepth,
     uuid,
   });
+  const [enabledCollectionConfigs] = useState(() => collections.filter((coll) => drawerHasContent({ coll, withinRichText: isWithinRichText, uploads, collectionSlugs })));
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen));
@@ -96,9 +123,10 @@ export const useListDrawer: UseListDrawer = ({
         key={drawerSlug}
         selectedCollection={selectedCollection}
         filterOptions={filterOptions}
+        enabledCollectionConfigs={enabledCollectionConfigs}
       />
     ));
-  }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection, filterOptions]);
+  }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection, filterOptions, enabledCollectionConfigs]);
 
   const MemoizedDrawerToggler = useMemo(() => {
     return ((props) => (
@@ -116,7 +144,8 @@ export const useListDrawer: UseListDrawer = ({
     toggleDrawer,
     closeDrawer,
     openDrawer,
-  }), [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer, openDrawer]);
+    isEmpty: Array.isArray(enabledCollectionConfigs) ? enabledCollectionConfigs.length === 0 : true,
+  }), [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer, openDrawer, enabledCollectionConfigs]);
 
   return [
     MemoizedDrawer,

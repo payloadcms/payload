@@ -38,6 +38,7 @@ const UploadButton: React.FC<{
     ListDrawerToggler,
     {
       closeDrawer,
+      isEmpty,
     },
   ] = useListDrawer({
     uploads: true,
@@ -52,6 +53,8 @@ const UploadButton: React.FC<{
     });
     closeDrawer();
   }, [editor, closeDrawer]);
+
+  if (isEmpty) return null;
 
   return (
     <Fragment>

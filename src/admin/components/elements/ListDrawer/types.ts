@@ -13,6 +13,7 @@ export type ListDrawerProps = {
   uploads?: boolean
   selectedCollection?: string
   filterOptions?: FilterOptionsResult
+  enabledCollectionConfigs?: SanitizedCollectionConfig[]
 }
 
 export type ListTogglerProps = HTMLAttributes<HTMLButtonElement> & {
@@ -37,5 +38,6 @@ export type UseListDrawer = (args: {
     toggleDrawer: () => void
     closeDrawer: () => void
     openDrawer: () => void
+    isEmpty: boolean
   }
 ]
