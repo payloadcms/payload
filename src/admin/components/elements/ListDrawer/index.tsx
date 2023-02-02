@@ -5,7 +5,7 @@ import { Drawer, DrawerToggler } from '../Drawer';
 import { useEditDepth } from '../../utilities/EditDepth';
 import { ListDrawerContent } from './DrawerContent';
 import { useConfig } from '../../utilities/Config';
-import { useIsWithinRichText } from '../../forms/field-types/RichText/provider';
+import { useWithinRichText } from '../../forms/field-types/RichText/provider';
 
 import './index.scss';
 
@@ -85,7 +85,7 @@ export const useListDrawer: UseListDrawer = ({
   filterOptions,
 }) => {
   const { collections } = useConfig();
-  const isWithinRichText = useIsWithinRichText();
+  const isWithinRichText = useWithinRichText();
   const drawerDepth = useEditDepth();
   const uuid = useId();
   const { modalState, toggleModal, closeModal, openModal } = useModal();

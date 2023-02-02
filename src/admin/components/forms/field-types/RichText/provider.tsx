@@ -12,6 +12,6 @@ export const RichTextProvider: React.FC<{ children?: React.ReactNode, withinRich
   );
 };
 
-export const useIsWithinRichText = (): boolean => useContext(Context);
+export const useWithinRichText = (): boolean => useContext(Context);
 
 export default Context;
