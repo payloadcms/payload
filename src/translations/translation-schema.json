@@ -245,6 +245,9 @@
         "deletingTitle": {
           "type": "string"
         },
+        "emailNotVerified": {
+          "type": "string"
+        },
         "emailOrPasswordIncorrect": {
           "type": "string"
         },
@@ -330,6 +333,7 @@
         "correctInvalidFields",
         "deletingFile",
         "deletingTitle",
+        "emailNotVerified",
         "emailOrPasswordIncorrect",
         "followingFieldsInvalid_many",
         "followingFieldsInvalid_one",

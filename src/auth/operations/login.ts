@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { CookieOptions, Response } from 'express';
-import { AuthenticationError, LockedAuth } from '../../errors';
+import { AuthenticationError, EmailNotVerifiedError, LockedAuth } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import isLocked from '../isLocked';
@@ -79,8 +79,12 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
   // @ts-ignore Improper typing in library, additional args should be optional
   const userDoc = await Model.findByUsername(email);
 
-  if (!userDoc || (args.collection.config.auth.verify && userDoc._verified === false)) {
+  if (!userDoc) {
     throw new AuthenticationError(req.t);
+  }
+
+  if (args.collection.config.auth.verify && userDoc._verified === false) {
+    throw new EmailNotVerifiedError(req.t);
   }
 
   if (userDoc && isLocked(userDoc.lockUntil)) {

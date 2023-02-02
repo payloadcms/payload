@@ -62,6 +62,7 @@
     "correctInvalidFields": "Please correct invalid fields.",
     "deletingFile": "There was an error deleting file.",
     "deletingTitle": "There was an error while deleting {{title}}. Please check your connection and try again.",
+    "emailNotVerified": "Email not verified",
     "emailOrPasswordIncorrect": "The email or password provided is incorrect.",
     "followingFieldsInvalid_many": "The following fields are invalid:",
     "followingFieldsInvalid_one": "The following field is invalid:",
