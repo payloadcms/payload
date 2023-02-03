@@ -1,5 +1,17 @@
 
 
+## [1.6.4](https://github.com/payloadcms/payload/compare/v1.6.3...v1.6.4) (2023-02-03)
+
+
+### Bug Fixes
+
+* only hoists localized values if localization is enabled ([8c65f6a](https://github.com/payloadcms/payload/commit/8c65f6a93836d80fb22724454f5efb49e11763ad))
+
+
+### Features
+
+* support large file uploads ([#1981](https://github.com/payloadcms/payload/issues/1981)) ([12ed655](https://github.com/payloadcms/payload/commit/12ed65588131c6db5252a1302a7dd82f0a10bd2e))
+
 ## [1.6.3](https://github.com/payloadcms/payload/compare/v1.6.2...v1.6.3) (2023-02-01)
 
 
