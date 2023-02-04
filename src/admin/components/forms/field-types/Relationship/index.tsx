@@ -26,6 +26,7 @@ import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
 import { SingleValue } from './select-components/SingleValue';
 import { MultiValueLabel } from './select-components/MultiValueLabel';
 import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
+import { useLocale } from '../../../utilities/Locale';
 
 import './index.scss';
 
@@ -64,6 +65,7 @@ const Relationship: React.FC<Props> = (props) => {
 
   const { t, i18n } = useTranslation('fields');
   const { permissions } = useAuth();
+  const locale = useLocale();
   const formProcessing = useFormProcessing();
   const hasMultipleRelations = Array.isArray(relationTo);
   const [options, dispatchOptions] = useReducer(optionsReducer, []);
@@ -140,7 +142,7 @@ const Relationship: React.FC<Props> = (props) => {
             limit: maxResultsPerRequest,
             page: lastLoadedPageToUse,
             sort: fieldToSearch,
-            locale: i18n.language,
+            locale,
             depth: 0,
           };
 
@@ -203,6 +205,7 @@ const Relationship: React.FC<Props> = (props) => {
     api,
     t,
     i18n,
+    locale,
   ]);
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: unknown) => {
@@ -242,7 +245,7 @@ const Relationship: React.FC<Props> = (props) => {
             },
           },
           depth: 0,
-          locale: i18n.language,
+          locale,
           limit: idsToLoad.length,
         };
 
@@ -274,6 +277,7 @@ const Relationship: React.FC<Props> = (props) => {
     api,
     i18n,
     relationTo,
+    locale,
   ]);
 
   // Determine if we should switch to word boundary search
@@ -287,7 +291,7 @@ const Relationship: React.FC<Props> = (props) => {
     setEnableWordBoundarySearch(!isIdOnly);
   }, [relationTo, collections]);
 
-  // When relationTo or filterOptionsResult changes, reset component
+  // When (`relationTo` || `filterOptionsResult` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useEffect(() => {
     if (firstRun.current) {
@@ -299,7 +303,7 @@ const Relationship: React.FC<Props> = (props) => {
     setLastFullyLoadedRelation(-1);
     setLastLoadedPage(1);
     setHasLoadedFirstPage(false);
-  }, [relationTo, filterOptionsResult]);
+  }, [relationTo, filterOptionsResult, locale]);
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
     dispatchOptions({ type: 'UPDATE', doc: args.doc, collection: args.collectionConfig, i18n });
@@ -373,7 +377,7 @@ const Relationship: React.FC<Props> = (props) => {
                 sort: false,
               });
             }}
-            value={valueToRender}
+            value={valueToRender ?? null}
             showError={showError}
             disabled={formProcessing}
             options={options}

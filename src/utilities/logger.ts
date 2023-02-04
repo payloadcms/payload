@@ -1,5 +1,4 @@
 import pino from 'pino';
-import memoize from 'micro-memoize';
 
 export type PayloadLogger = pino.Logger;
 
@@ -10,10 +9,10 @@ const defaultLoggerOptions = {
   },
 };
 
-export default memoize(
-  (name = 'payload', options?: pino.LoggerOptions) => pino({
-    name: options?.name || name,
-    enabled: process.env.DISABLE_LOGGING !== 'true',
-    ...(options || defaultLoggerOptions),
-  }) as PayloadLogger,
-);
+const getLogger = (name = 'payload', options?: pino.LoggerOptions): PayloadLogger => pino({
+  name: options?.name || name,
+  enabled: process.env.DISABLE_LOGGING !== 'true',
+  ...(options || defaultLoggerOptions),
+});
+
+export default getLogger;

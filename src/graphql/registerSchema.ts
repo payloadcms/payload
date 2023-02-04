@@ -2,7 +2,7 @@
 import * as GraphQL from 'graphql';
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import queryComplexity, { fieldExtensionsEstimator, simpleEstimator } from 'graphql-query-complexity';
-import { Payload } from '..';
+import { Payload } from '../payload';
 import buildLocaleInputType from './schema/buildLocaleInputType';
 import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType';
 import initCollections from '../collections/graphql/init';
@@ -79,7 +79,7 @@ export default function registerSchema(payload: Payload): void {
     if (result.errors) {
       payload.errorIndex = 0;
       const afterErrorHook = typeof payload.config.hooks.afterError === 'function' ? payload.config.hooks.afterError : null;
-      payload.errorResponses = await errorHandler(info, payload.config.debug, afterErrorHook);
+      payload.errorResponses = await errorHandler(payload, info, payload.config.debug, afterErrorHook);
     }
     return null;
   };

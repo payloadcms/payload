@@ -102,14 +102,15 @@ export default buildConfig({
         ...uploadsDoc,
         media: createdPNGDoc.id,
       },
-      file: jpgFile
-     });
+      file: jpgFile,
+    });
 
     const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace('{{ARRAY_DOC_ID}}', createdArrayDoc.id));
     const richTextDocWithRelationship = { ...richTextDocWithRelId };
 
     const richTextRelationshipIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'relationship');
     richTextDocWithRelationship.richText[richTextRelationshipIndex].value = { id: createdTextDoc.id };
+    richTextDocWithRelationship.richTextReadOnly[richTextRelationshipIndex].value = { id: createdTextDoc.id };
 
     const richTextUploadIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'upload');
     richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdJPGDoc.id };

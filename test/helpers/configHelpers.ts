@@ -1,4 +1,5 @@
 import getPort from 'get-port';
+import swcRegister from '@swc/register';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
 import shelljs from 'shelljs';
@@ -40,7 +41,22 @@ export async function initPayloadTest(options: Options): Promise<{ serverURL: st
     initOptions.express = express();
   }
 
-  await payload.initAsync(initOptions);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - bad @swc/register types
+  swcRegister({
+    sourceMaps: 'inline',
+    jsc: {
+      parser: {
+        syntax: 'typescript',
+        tsx: true,
+      },
+    },
+    module: {
+      type: 'commonjs',
+    },
+  });
+
+  await payload.init(initOptions);
 
   if (initOptions.express) {
     initOptions.express.listen(port);

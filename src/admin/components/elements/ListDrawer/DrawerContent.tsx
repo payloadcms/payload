@@ -252,13 +252,13 @@ const DrawerContent: React.FC<ListDrawerProps & {
                       {!customHeader ? getTranslation(selectedCollectionConfig?.labels?.plural, i18n) : customHeader}
                     </h2>
                     {hasCreatePermission && (
-                    <DocumentDrawerToggler
-                      className={`${baseClass}__create-new-button`}
-                    >
-                      <Pill>
-                        {t('general:createNew')}
-                      </Pill>
-                    </DocumentDrawerToggler>
+                      <DocumentDrawerToggler
+                        className={`${baseClass}__create-new-button`}
+                      >
+                        <Pill>
+                          {t('general:createNew')}
+                        </Pill>
+                      </DocumentDrawerToggler>
                     )}
                   </div>
                   <button
@@ -272,20 +272,20 @@ const DrawerContent: React.FC<ListDrawerProps & {
                   </button>
                 </div>
                 {selectedCollectionConfig?.admin?.description && (
-                <div className={`${baseClass}__sub-header`}>
-                  <ViewDescription description={selectedCollectionConfig.admin.description} />
-                </div>
+                  <div className={`${baseClass}__sub-header`}>
+                    <ViewDescription description={selectedCollectionConfig.admin.description} />
+                  </div>
                 )}
                 {moreThanOneAvailableCollection && (
-                <div className={`${baseClass}__select-collection-wrap`}>
-                  <Label label={t('selectCollectionToBrowse')} />
-                  <ReactSelect
-                    className={`${baseClass}__select-collection`}
-                    value={selectedOption}
-                    onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
-                    options={enabledCollectionConfigs.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
-                  />
-                </div>
+                  <div className={`${baseClass}__select-collection-wrap`}>
+                    <Label label={t('selectCollectionToBrowse')} />
+                    <ReactSelect
+                      className={`${baseClass}__select-collection`}
+                      value={selectedOption}
+                      onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
+                      options={enabledCollectionConfigs.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
+                    />
+                  </div>
                 )}
               </header>
             ),

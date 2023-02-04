@@ -1,13 +1,12 @@
-import { Message } from './types';
-import logger from '../utilities/logger';
+import { SendMailOptions } from 'nodemailer';
 
-export default async function sendEmail(message: Message): Promise<unknown> {
+export default async function sendEmail(message: SendMailOptions): Promise<unknown> {
   let result;
   try {
     const email = await this.email;
     result = email.transport.sendMail(message);
   } catch (err) {
-    logger.error(
+    this.logger.error(
       `Failed to send mail to ${message.to}, subject: ${message.subject}`,
       err,
     );

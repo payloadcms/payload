@@ -47,6 +47,7 @@ const RichText: React.FC<Props> = (props) => {
     required,
     validate = richText,
     label,
+    defaultValue: defaultValueFromProps,
     admin,
     admin: {
       readOnly,
@@ -204,9 +205,8 @@ const RichText: React.FC<Props> = (props) => {
     function setClickableState(clickState: 'disabled' | 'enabled') {
       const selectors = 'button, a, [role="button"]';
       const toolbarButtons: (HTMLButtonElement | HTMLAnchorElement)[] = toolbarRef.current?.querySelectorAll(selectors);
-      const editorButtons: (HTMLButtonElement | HTMLAnchorElement)[] = editorRef.current?.querySelectorAll(selectors);
 
-      [...(toolbarButtons || []), ...(editorButtons || [])].forEach((child) => {
+      (toolbarButtons || []).forEach((child) => {
         const isButton = child.tagName === 'BUTTON';
         const isDisabling = clickState === 'disabled';
         child.setAttribute('tabIndex', isDisabling ? '-1' : '0');
@@ -225,16 +225,6 @@ const RichText: React.FC<Props> = (props) => {
     };
   }, [loaded, readOnly]);
 
-  useEffect(() => {
-    // If there is a change to the initial value, we need to reset Slate history
-    // and clear selection because the old selection may no longer be valid
-    // as returned JSON may be modified in hooks and have a different shape
-    if (Array.isArray(initialValue) && initialValue.length > 0) {
-      if (editor.selection) ReactEditor.deselect(editor);
-      editor.history = { redos: [], undos: [] };
-    }
-  }, [initialValue, editor]);
-
   if (!loaded) {
     return null;
   }
@@ -250,7 +240,7 @@ const RichText: React.FC<Props> = (props) => {
     }
   }
 
-  if (!valueToRender) valueToRender = defaultValue;
+  if (!valueToRender) valueToRender = defaultValueFromProps || defaultValue;
 
   return (
     <div
@@ -271,6 +261,7 @@ const RichText: React.FC<Props> = (props) => {
           required={required}
         />
         <Slate
+          key={JSON.stringify(initialValue)}
           editor={editor}
           value={valueToRender as any[]}
           onChange={handleChange}

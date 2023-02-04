@@ -1,15 +1,15 @@
-import { TypeWithID } from '../../config/types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import findByID from '../findByID';
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
 
-export type Options = {
-  collection: string
-  id: string
+export type Options<T extends keyof GeneratedTypes['collections']> = {
+  collection: T
+  id: string | number
   depth?: number
   currentDepth?: number
   locale?: string
@@ -22,8 +22,10 @@ export type Options = {
   draft?: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default async function findByIDLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<T> {
+export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<GeneratedTypes['collections'][T]> {
   const {
     collection: collectionSlug,
     depth,
@@ -43,7 +45,7 @@ export default async function findByIDLocal<T extends TypeWithID = any>(payload:
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
   req.payloadAPI = 'local';
@@ -57,7 +59,7 @@ export default async function findByIDLocal<T extends TypeWithID = any>(payload:
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
-  return findByID({
+  return findByID<GeneratedTypes['collections'][T]>({
     depth,
     currentDepth,
     id,

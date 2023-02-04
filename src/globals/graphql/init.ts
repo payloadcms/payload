@@ -9,7 +9,7 @@ import updateResolver from './resolvers/update';
 import findVersionByIDResolver from './resolvers/findVersionByID';
 import findVersionsResolver from './resolvers/findVersions';
 import restoreVersionResolver from './resolvers/restoreVersion';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import buildObjectType from '../../graphql/schema/buildObjectType';
 import buildMutationInputType from '../../graphql/schema/buildMutationInputType';
 import buildWhereInputType from '../../graphql/schema/buildWhereInputType';
