@@ -452,6 +452,28 @@ describe('fields', () => {
         await expect(editLinkModal).toBeHidden();
       });
 
+      test('should open uploads drawer from read-only field', async () => {
+        navigateToRichTextFields();
+        const field = await page.locator('#field-richTextReadOnly');
+        const button = await field.locator('button.rich-text-upload__doc-drawer-toggler.doc-drawer__toggler');
+
+        await button.click();
+
+        const documentDrawer = await page.locator('[id^=doc-drawer_uploads_1_]');
+        await expect(documentDrawer).toBeVisible();
+      });
+
+      test('should open relationship drawer from read-only field', async () => {
+        navigateToRichTextFields();
+        const field = await page.locator('#field-richTextReadOnly');
+        const button = await field.locator('button.rich-text-relationship__doc-drawer-toggler.doc-drawer__toggler');
+
+        await button.click();
+
+        const documentDrawer = await page.locator('[id^=doc-drawer_text-fields_1_]');
+        await expect(documentDrawer).toBeVisible();
+      });
+
       test('should populate new links', async () => {
         navigateToRichTextFields();
 
