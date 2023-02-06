@@ -1,54 +1,89 @@
-export const home = {
+import { Page } from "../payload-types";
+
+export const home: Partial<Page> = {
   "title": "Home Page",
+  "slug": "home",
   "richText": [
     {
       "children": [
         {
-          "text": "Paste this url: "
+          text: "This is a "
         },
         {
-          "text": "http://localhost:3000/old-internal-link",
+          "type": "link",
+          "linkType": "custom",
+          url: "https://nextjs.org/",
+          "children": [
+            {
+              "text": "Next.js"
+            }
+          ]
+        },
+        {
+          text: " app made explicitly for Payload's "
+        },
+        {
+          "type": "link",
+          "linkType": "custom",
+          url: "https://github.com/payloadcms/payload/tree/master/examples/redirects/cms",
+          "children": [
+            {
+              "text": "Redirects Example"
+            }
+          ]
+        },
+        {
+          text: ". This example demonstrates how to implement http redirects into Payload CMS using the official "
+        },
+        {
+          "type": "link",
+          "linkType": "custom",
+          url: "https://github.com/payloadcms/plugin-redirects",
+          "children": [
+            {
+              "text": "Redirects Plugin"
+            }
+          ]
+        },
+        {
+          text: "."
+        }
+      ],
+    },
+    {
+      "children": [
+        {
+          "text": "Paste "
+        },
+        {
+          "text": "http://localhost:3000/redirect-to-internal",
           "bold": true
         },
         {
-          "text": " into your browser and you will be redirected to the "
+          "text": " into your browser to be redirected to "
         },
         {
           "type": "link",
           "linkType": "internal",
           "doc": {
-            "value": "63dacf0c3ef391338957559a",
+            "value": "{{REDIRECT_PAGE_ID}}",
             "relationTo": "pages"
           },
           "children": [
             {
-              "text": "Redirect Page"
+              "text": "this page"
             }
           ]
         },
         {
-          "text": ". "
-        }
-      ]
-    },
-    {
-      "children": [
-        {
-          "text": ""
-        }
-      ]
-    },
-    {
-      "children": [
-        {
-          "text": "Paste this url: "
+          "text": ", or paste "
         },
         {
-          "text": "http://localhost:3000/old-external-link",
+          "text": "http://localhost:3000/redirect-to-external",
           "bold": true
         },
         {
-          "text": " into your browser and will be redirected to an external custom - "
+          "text": " into your browser to be redirected to "
         },
         {
           "text": "payloadcms.com",
@@ -58,15 +93,7 @@ export const home = {
           "text": "."
         }
       ]
-    }
-  ],
-  "slug": "home",
-  "breadcrumbs": [
-    {
-      "doc": "63dad7182a218056390b64b1",
-      "url": "/home",
-      "label": "Home Page",
-    }
+    },
   ],
   "_status": "published",
 };

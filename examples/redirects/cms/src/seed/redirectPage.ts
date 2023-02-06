@@ -1,13 +1,16 @@
-export const redirectPage = {
+import { Page } from "../payload-types";
+
+export const redirectPage: Partial<Page> = {
   "title": "Redirect Page",
+  "slug": "redirected",
   "richText": [
     {
       "children": [
         {
-          "text": "You have been successfully redirected to this page if you've navigated to this page by trying to access the link "
+          "text": "You have been successfully redirected to this page if you navigated from "
         },
         {
-          "text": "http://localhost:3000/old-internal-link",
+          "text": "http://localhost:3000/redirect-to-internal",
           "bold": true
         },
         {
@@ -22,28 +25,6 @@ export const redirectPage = {
         }
       ]
     },
-    {
-      "children": [
-        {
-          "text": "Or by clicking "
-        },
-        {
-          "text": "Redirect Page",
-          "italic": true
-        },
-        {
-          "text": " in the header. "
-        }
-      ]
-    }
-  ],
-  "slug": "redirect-page",
-  "breadcrumbs": [
-    {
-      "doc": "63dad7d359b83d90abe6c3ad",
-      "url": "/redirect-page",
-      "label": "Redirect Page",
-    }
   ],
   "_status": "published",
 };

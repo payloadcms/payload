@@ -1,41 +1,22 @@
 # Redirects Example Front-End
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) that fetches data from [Payload CMS](https://payloadcms.com).
-
-This example repo was made explicitly to demonstrate the ease of using the Redirects plugin to support redirects on your site.
+This is a [Next.js](https://nextjs.org/) app made explicitly for Payload's [Redirects Example](https://github.com/payloadcms/payload/tree/master/examples/redirects/cms).
 
 ## Getting Started
 
 ### Payload CMS
 
-First you'll need a running CMS. If you have not done so already, open up the `cms` folder and follow the setup instructions. Take note of your server URL, you'll need this in the next step.
+First you'll need a running CMS. If you have not done so already, open up the `cms` folder alongside this example and follow the setup instructions. Take note of your server URL, you'll need this in the next step.
 
 ### Next.js App
 
-First, get your environment setup:
+1. Clone this repo
+2. `cd` into this directory and run `yarn` or `npm install`
+3. `cp .env.example .env` to copy the example environment variables
+4. `yarn dev` or `npm run dev` to start the server
+5. `open http://localhost:3000` to see the result
 
-1. First copy the example `.env` file as your own:
-   ```bash
-     cp .env.example .env
-   ```
-1. Then open the `.env` file and paste your Payload server URL:
-   ```bash
-     NEXT_PUBLIC_CMS_URL=http://localhost:8000
-   ```
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-Once running, you will find a couple seeded pages on your local environment.
-
-You can also start editing the pages by modifying the documents within your CMS.
+Once running you will find a couple seeded pages on your local environment with some basic instructions. You can also start editing the pages by modifying the documents within your CMS. See the [Redirects Example CMS](https://github.com/payloadcms/payload/tree/master/examples/redirects/cms) for full details.
 
 ## Learn More
 

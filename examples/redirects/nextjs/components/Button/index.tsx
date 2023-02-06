@@ -8,7 +8,6 @@ export type Props = {
   el?: 'button' | 'link' | 'a'
   onClick?: () => void
   href?: string
-  form?: string
   newTab?: boolean
   className?: string
 }
@@ -24,43 +23,22 @@ export const Button: React.FC<Props> = ({
   label,
   newTab,
   href,
-  form,
   appearance,
   className: classNameFromProps
 }) => {
-  const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {};
   const Element = elements[el];
   const className = [classNameFromProps, classes[`appearance--${appearance}`], classes.button].filter(Boolean).join(' ');
 
-  const elementProps = {
-    ...newTabProps,
-    href,
-    className,
-    form,
-  }
-
-  const content = (
-    <div className={classes.content}>
-      <span className={classes.label}>
-        {label}
-      </span>
-    </div>
-  )
-
   return (
-    <Element {...elementProps}>
-      <React.Fragment>
-        {el === 'link' && (
-          <a {...newTabProps} href={href} className={elementProps.className}>
-            {content}
-          </a>
-        )}
-        {el !== 'link' && (
-          <React.Fragment>
-            {content}
-          </React.Fragment>
-        )}
-      </React.Fragment>
+    <Element
+      href={href}
+      className={className}
+      {...newTab ? {
+        target: '_blank',
+        rel: 'noopener noreferrer'
+      } : {}}
+    >
+      {label}
     </Element>
   )
 }

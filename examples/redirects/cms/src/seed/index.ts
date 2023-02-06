@@ -20,7 +20,8 @@ export const seed = async (payload: Payload) => {
     data: redirectPageJSON,
   });
 
-  const internalRedirectJSON = JSON.parse(JSON.stringify(internalRedirect).replace(/{{REDIRECT_PAGE_ID}}/g, redirectPageID));
+  const internalRedirectJSON = JSON.parse(JSON.stringify(internalRedirect)
+    .replace(/{{REDIRECT_PAGE_ID}}/g, redirectPageID));
 
    await payload.create({
     collection: 'redirects',
@@ -34,7 +35,8 @@ export const seed = async (payload: Payload) => {
     data: externalRedirectJSON,
   })
 
-  const homepageJSON = JSON.parse(JSON.stringify(home));
+  const homepageJSON = JSON.parse(JSON.stringify(home)
+    .replace(/{{REDIRECT_PAGE_ID}}/g, redirectPageID));
 
   await payload.create({
     collection: 'pages',

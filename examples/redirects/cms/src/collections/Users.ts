@@ -6,7 +6,5 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
   },
-  fields: [
-    // Don't need any user fields here
-  ],
+  fields: [],
 };

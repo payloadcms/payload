@@ -1,5 +1,5 @@
 import { GetStaticProps } from 'next';
-import Page, { getStaticProps as sharedGetStaticProps } from './[...slug]';
+import Page, { getStaticProps as sharedGetStaticProps } from './[slug]';
 
 export default Page;
 

@@ -45,7 +45,7 @@ module.exports = async () => {
         destination = url.replace(process.env.NEXT_PUBLIC_APP_URL, '');
       }
 
-      if (type === 'reference' && reference?.value?._status === 'published') {
+      if (type === 'reference' && typeof reference.value === 'object' && reference?.value?._status === 'published') {
         destination = formatPermalink(reference)
       }
 

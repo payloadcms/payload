@@ -20,12 +20,7 @@ export const Pages: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    {
-      type: 'row',
-      fields: [
-        richText(),
-      ],
-    },
+    richText(),
     slugField(),
   ],
 };

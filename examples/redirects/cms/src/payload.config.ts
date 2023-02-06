@@ -1,10 +1,11 @@
 import { buildConfig } from 'payload/config';
-import nestedDocs from '@payloadcms/plugin-nested-docs';
 import redirects from '@payloadcms/plugin-redirects';
 import path from 'path';
 import { Users } from './collections/Users';
 import { Pages } from './collections/Pages';
 import { MainMenu } from './globals/MainMenu';
+
+require('dotenv').config();
 
 export default buildConfig({
   collections: [
@@ -22,11 +23,6 @@ export default buildConfig({
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
   plugins: [
-    nestedDocs({
-      collections: ['pages'],
-      generateLabel: (_, doc) => doc.title as string,
-      generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
-    }),
     redirects({
       collections: [
         'pages',

@@ -43,11 +43,13 @@ export const CMSLink: React.FC<CMSLinkType> = ({
 
     if (href) {
       return (
-        <Link href={href}>
-          <a {...newTabProps} className={className}>
-            {label && label}
-            {children && children}
-          </a>
+        <Link
+          href={href}
+          {...newTabProps}
+          className={className}
+        >
+          {label && label}
+          {children && children}
         </Link>
       )
     }

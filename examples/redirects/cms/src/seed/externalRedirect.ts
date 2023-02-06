@@ -1,9 +1,11 @@
-export const externalRedirect = {
-  "id": "63dacd1693ec178132c74a6e",
-  "from": "http://localhost:3000/old-external-link",
+import { Redirect } from "../payload-types";
+
+export const externalRedirect: Partial<Redirect> = {
+  "from": "http://localhost:3000/redirect-to-external",
   "to": {
     "type": "custom",
-    "url": "https://www.payloadcms.com"
+    "url": "https://www.payloadcms.com",
+    reference: null,
   },
   "createdAt": "2023-02-01T20:35:34.257Z",
   "updatedAt": "2023-02-01T20:35:34.257Z"

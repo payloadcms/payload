@@ -1,13 +1,11 @@
 import App, { AppContext, AppProps as NextAppProps } from 'next/app';
-import { ModalContainer, ModalProvider } from '@faceless-ui/modal';
 import React from 'react';
 import { MainMenu } from "../payload-types";
 import { Header } from '../components/Header';
 import { GlobalsProvider } from '../providers/Globals';
-import { CloseModalOnRouteChange } from '../components/CloseModalOnRouteChange';
-import { CookiesProvider } from 'react-cookie';
 
 import '../css/app.scss';
+
 export interface IGlobals {
   mainMenu: MainMenu,
 }
@@ -38,20 +36,10 @@ const PayloadApp = (appProps: AppProps & {
   } = appProps;
 
   return (
-    <CookiesProvider>
-      <GlobalsProvider {...globals}>
-        <ModalProvider
-          classPrefix="form"
-          transTime={0}
-          zIndex="var(--modal-z-index)"
-        >
-          <CloseModalOnRouteChange />
-          <Header />
-          <Component {...pageProps} />
-          <ModalContainer />
-        </ModalProvider>
-      </GlobalsProvider>
-    </CookiesProvider>
+    <GlobalsProvider {...globals}>
+      <Header />
+      <Component {...pageProps} />
+    </GlobalsProvider>
   )
 }
 
