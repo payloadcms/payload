@@ -52,7 +52,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   drawerSlug,
   onSelect,
   customHeader,
-  collectionSlugs: collectionSlugsFromProps,
+  collectionSlugs,
   selectedCollection,
   filterOptions,
 }) => {
@@ -65,7 +65,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [page, setPage] = useState(1);
   const [where, setWhere] = useState(null);
   const { serverURL, routes: { api }, collections } = useConfig();
-  const collectionSlugs = collectionSlugsFromProps || collections.map(({ slug }) => slug);
 
   const enabledCollectionConfigs = collections.filter(({ slug }) => {
     return collectionSlugs.includes(slug);

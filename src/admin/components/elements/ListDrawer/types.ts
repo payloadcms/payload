@@ -9,7 +9,7 @@ export type ListDrawerProps = {
   }) => void
   customHeader?: React.ReactNode
   drawerSlug?: string
-  collectionSlugs?: string[]
+  collectionSlugs: string[]
   selectedCollection?: string
   filterOptions?: FilterOptionsResult
 }
