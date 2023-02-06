@@ -5,8 +5,6 @@ import { Users } from './collections/Users';
 import { Pages } from './collections/Pages';
 import { MainMenu } from './globals/MainMenu';
 
-require('dotenv').config();
-
 export default buildConfig({
   collections: [
     Pages,
