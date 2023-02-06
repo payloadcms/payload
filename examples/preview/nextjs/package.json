@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@faceless-ui/modal": "^2.0.1",
     "escape-html": "^1.0.3",
     "next": "12.3.1",
     "payload-admin-bar": "^1.0.5",

@@ -1,11 +1,9 @@
 import App, { AppContext, AppProps as NextAppProps } from 'next/app';
-import { ModalContainer, ModalProvider } from '@faceless-ui/modal';
 import React, { useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { MainMenu } from "../payload-types";
 import { Header } from '../components/Header';
 import { GlobalsProvider } from '../providers/Globals';
-import { CloseModalOnRouteChange } from '../components/CloseModalOnRouteChange';
 import { useNavigationScrollTo } from '../utilities/useNavigationScrollTo';
 import { CookiesProvider } from 'react-cookie';
 
@@ -67,23 +65,15 @@ const PayloadApp = (appProps: AppProps & {
   return (
     <CookiesProvider>
       <GlobalsProvider {...globals}>
-        <ModalProvider
-          classPrefix="form"
-          transTime={0}
-          zIndex="var(--modal-z-index)"
-        >
-          <CloseModalOnRouteChange />
-          <Header
-            adminBarProps={{
-              collection,
-              id: id,
-              preview,
-              onPreviewExit
-            }}
-          />
-          <Component {...pageProps} />
-          <ModalContainer />
-        </ModalProvider>
+        <Header
+          adminBarProps={{
+            collection,
+            id: id,
+            preview,
+            onPreviewExit
+          }}
+        />
+        <Component {...pageProps} />
       </GlobalsProvider>
     </CookiesProvider>
   )

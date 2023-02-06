@@ -15,22 +15,4 @@
     text-decoration: none;
     margin-left: var(--base);
   }
-
-  @include mid-break {
-    display: none;
-  }
-}
-
-.mobileMenuToggler {
-  all: unset;
-  cursor: pointer;
-  display: none;
-
-  &[aria-expanded="true"] {
-    transform: rotate(-25deg);
-  }
-
-  @include mid-break {
-    display: block;
-  }
 }

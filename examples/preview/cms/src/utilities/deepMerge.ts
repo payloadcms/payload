@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 /**
  * Simple object check.
  * @param item

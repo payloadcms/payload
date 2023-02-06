@@ -5,11 +5,43 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
-export interface Config {}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "main-menu".
- */
+export interface Config {
+  collections: {
+    pages: Page;
+    users: User;
+  };
+  globals: {
+    'main-menu': MainMenu;
+  };
+}
+export interface Page {
+  id: string;
+  title: string;
+  richText: {
+    [k: string]: unknown;
+  }[];
+  slug?: string;
+  parent?: string | Page;
+  breadcrumbs: {
+    doc?: string | Page;
+    url?: string;
+    label?: string;
+    id?: string;
+  }[];
+  _status?: 'draft' | 'published';
+  createdAt: string;
+  updatedAt: string;
+}
+export interface User {
+  id: string;
+  email?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpiration?: string;
+  loginAttempts?: number;
+  lockUntil?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 export interface MainMenu {
   id: string;
   navItems: {
@@ -25,50 +57,4 @@ export interface MainMenu {
     };
     id?: string;
   }[];
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
- */
-export interface Page {
-  id: string;
-  title: string;
-  hero: {
-    richText: {
-      [k: string]: unknown;
-    }[];
-  };
-  layout: {
-    richText: {
-      [k: string]: unknown;
-    }[];
-    id?: string;
-    blockName?: string;
-    blockType: 'content';
-  }[];
-  slug?: string;
-  parent?: string | Page;
-  breadcrumbs: {
-    doc?: string | Page;
-    url?: string;
-    label?: string;
-    id?: string;
-  }[];
-  _status?: 'draft' | 'published';
-  createdAt: string;
-  updatedAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
 }

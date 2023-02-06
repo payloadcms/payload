@@ -1,50 +1,33 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import {
   GetStaticProps,
   GetStaticPropsContext,
   GetStaticPaths
 } from 'next';
 import qs from 'qs';
-import { useRouter } from 'next/router';
 import { ParsedUrlQuery } from 'querystring';
-import Blocks from '../components/Blocks';
-import { Hero } from '../components/Hero';
 import type { Page, MainMenu } from '../payload-types';
 import { revalidationRate } from '../revalidationRate';
 import { Gutter } from '../components/Gutter';
-import { VerticalPadding } from '../components/VerticalPadding';
+import RichText from '../components/RichText';
+
+import classes from './index.module.scss';
 
 const Page: React.FC<Page & {
   mainMenu: MainMenu
   preview?: boolean
 }> = (props) => {
   const {
-    hero,
-    layout,
+    title,
+    richText,
   } = props;
-
-  const {
-    isFallback // returned from getStaticPaths, see https://nextjs.org/docs/basic-features/data-fetching#fallback-pages
-  } = useRouter();
 
   return (
     <main>
-      {isFallback && (
-        <Gutter>
-          <VerticalPadding
-            top='large'
-            bottom='large'
-          >
-            <h3>Loading...</h3>
-          </VerticalPadding>
-        </Gutter>
-      )}
-      {!isFallback && (
-        <Fragment>
-          <Hero {...hero} />
-          <Blocks blocks={layout} />
-        </Fragment>
-      )}
+      <Gutter>
+        <h1 className={classes.hero}>{title}</h1>
+        <RichText content={richText} />
+      </Gutter>
     </main>
   )
 }
