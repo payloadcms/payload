@@ -55,7 +55,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   collectionSlugs: collectionSlugsFromProps,
   selectedCollection,
   filterOptions,
-  listType = 'collections',
+  contentType = 'collections',
 }) => {
   const { t, i18n } = useTranslation(['upload', 'general']);
   const { permissions } = useAuth();
@@ -70,19 +70,19 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const enabledCollectionConfigs = collections.filter(({ slug, upload, admin }) => {
     const foundSlug = collectionSlugs.includes(slug);
-    if (upload) {
-      if (listType === 'uploads' && admin?.enableRichTextRelationship) {
+    if (contentType === 'uploads') {
+      if (upload && admin?.enableRichTextRelationship) {
         return foundSlug;
       }
       return false;
     }
-    return foundSlug;
+    return !upload && foundSlug;
   });
 
   const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<SanitizedCollectionConfig>(() => {
     return enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) || enabledCollectionConfigs?.[0];
   });
-
+  console.log({ selectedCollectionConfig });
   const [selectedOption, setSelectedOption] = useState<{ label: string, value: string }>(() => (selectedCollectionConfig ? { label: getTranslation(selectedCollectionConfig.labels.singular, i18n), value: selectedCollectionConfig.slug } : undefined));
 
   const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig, t));

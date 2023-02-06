@@ -60,7 +60,7 @@ export const useListDrawer: UseListDrawer = ({
   uploads,
   selectedCollection,
   filterOptions,
-  listType = 'collections',
+  contentType = 'collections',
 }) => {
   const drawerDepth = useEditDepth();
   const uuid = useId();
@@ -98,10 +98,10 @@ export const useListDrawer: UseListDrawer = ({
         key={drawerSlug}
         selectedCollection={selectedCollection}
         filterOptions={filterOptions}
-        listType={listType}
+        contentType={contentType}
       />
     ));
-  }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection, filterOptions, listType]);
+  }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection, filterOptions, contentType]);
 
   const MemoizedDrawerToggler = useMemo(() => {
     return ((props) => (
