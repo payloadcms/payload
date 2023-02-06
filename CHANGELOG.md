@@ -1,3 +1,30 @@
+
+
+## [1.6.4](https://github.com/payloadcms/payload/compare/v1.6.3...v1.6.4) (2023-02-03)
+
+
+### Bug Fixes
+
+* only hoists localized values if localization is enabled ([8c65f6a](https://github.com/payloadcms/payload/commit/8c65f6a93836d80fb22724454f5efb49e11763ad))
+
+
+### Features
+
+* support large file uploads ([#1981](https://github.com/payloadcms/payload/issues/1981)) ([12ed655](https://github.com/payloadcms/payload/commit/12ed65588131c6db5252a1302a7dd82f0a10bd2e))
+
+## [1.6.3](https://github.com/payloadcms/payload/compare/v1.6.2...v1.6.3) (2023-02-01)
+
+
+### Bug Fixes
+
+* properly await graphql schema generation ([888b3a2](https://github.com/payloadcms/payload/commit/888b3a26727b32d19e39d1a8b672eb1881effad7))
+
+## [1.6.2](https://github.com/payloadcms/payload/compare/v1.6.1...v1.6.2) (2023-02-01)
+
+### Features
+
+- Adds optional password to generated types within auth-enabled collections
+
 ## [1.6.1](https://github.com/payloadcms/payload/compare/v1.5.9...v1.6.1) (2023-02-01)
 
 ### 🐛 Bug Fixes

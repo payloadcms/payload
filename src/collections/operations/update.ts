@@ -1,3 +1,6 @@
+import fs from 'fs';
+import { promisify } from 'util';
+
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { MarkOptional } from 'ts-essentials';
@@ -16,6 +19,9 @@ import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
+import { mapAsync } from '../../utilities/mapAsync';
+
+const unlinkFile = promisify(fs.unlink);
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -325,6 +331,17 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     }) || result;
   }, Promise.resolve());
 
+  // Remove temp files if enabled, as express-fileupload does not do this automatically
+  if (config.upload?.useTempFiles && collectionConfig.upload) {
+    const { files } = req;
+    const fileArray = Array.isArray(files) ? files : [files];
+    await mapAsync(fileArray, async ({ file }) => {
+      // Still need this check because this will not be populated if using local API
+      if (file.tempFilePath) {
+        await unlinkFile(file.tempFilePath);
+      }
+    });
+  }
   // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////

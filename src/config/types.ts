@@ -1,7 +1,7 @@
 import { Express, NextFunction, Response } from 'express';
 import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
-import { Options } from 'express-fileupload';
+import { Options as ExpressFileUploadOptions } from 'express-fileupload';
 import { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
@@ -473,7 +473,7 @@ export type Config = {
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
    */
-  upload?: Options;
+  upload?: ExpressFileUploadOptions;
   /**
    * Translate your content to different languages/locales.
    *

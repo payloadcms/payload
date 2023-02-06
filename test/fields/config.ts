@@ -110,6 +110,7 @@ export default buildConfig({
 
     const richTextRelationshipIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'relationship');
     richTextDocWithRelationship.richText[richTextRelationshipIndex].value = { id: createdTextDoc.id };
+    richTextDocWithRelationship.richTextReadOnly[richTextRelationshipIndex].value = { id: createdTextDoc.id };
 
     const richTextUploadIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'upload');
     richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdJPGDoc.id };

@@ -397,7 +397,7 @@ export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: Sani
     );
   }
 
-  if ('auth' in entity && !entity.auth?.disableLocalStrategy) {
+  if ('auth' in entity && entity.auth && !entity.auth?.disableLocalStrategy) {
     entity.fields.push({
       type: 'text',
       name: 'password',

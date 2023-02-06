@@ -145,6 +145,8 @@ const collectionSchema = joi.object().keys({
       staticURL: joi.string(),
       staticDir: joi.string(),
       disableLocalStorage: joi.bool(),
+      useTempFiles: joi.bool(),
+      tempFileDir: joi.string(),
       adminThumbnail: joi.alternatives().try(
         joi.string(),
         joi.func(),
