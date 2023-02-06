@@ -82,4 +82,12 @@
       }
     }
   }
+
+  &--is-focused {
+    button {
+      .custom-checkbox__input {
+        box-shadow: 0 0 3px 3px var(--theme-success-400);
+      }
+    }
+  }
 }
