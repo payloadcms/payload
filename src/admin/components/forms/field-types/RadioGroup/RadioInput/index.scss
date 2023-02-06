@@ -7,7 +7,10 @@
   margin: base(.10) 0;
 
   input[type=radio] {
-    display: none;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
   }
 
   &__styled-radio {
@@ -41,6 +44,15 @@
         &:before {
           opacity: 1;
         }
+      }
+    }
+  }
+
+
+  &--is-focused {
+    .radio-input {
+      &__styled-radio {
+        box-shadow: 0 0 3px 3px var(--theme-success-400);
       }
     }
   }
