@@ -48,16 +48,13 @@ const buildColumns = ({
   }],
 });
 
-export const ListDrawerContent: React.FC<ListDrawerProps & {
-  enabledCollectionConfigs: SanitizedCollectionConfig[]
-}> = ({
+export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   drawerSlug,
   onSelect,
   customHeader,
   collectionSlugs,
   uploads,
   selectedCollection,
-  enabledCollectionConfigs,
   filterOptions,
 }) => {
   const { t, i18n } = useTranslation(['upload', 'general']);
@@ -69,6 +66,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps & {
   const [page, setPage] = useState(1);
   const [where, setWhere] = useState(null);
   const { serverURL, routes: { api }, collections } = useConfig();
+
+  const enabledCollectionConfigs = collections.filter(({ slug }) => collectionSlugs.includes(slug));
 
   const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<SanitizedCollectionConfig>(() => {
     let initialSelection = enabledCollectionConfigs?.[0];
@@ -99,16 +98,12 @@ export const ListDrawerContent: React.FC<ListDrawerProps & {
 
   // allow external control of selected collection, same as the initial state logic above
   useEffect(() => {
-    let newSelection = enabledCollectionConfigs?.[0];
     if (selectedCollection) {
       // if passed a selection, find it and check if it's enabled
-      const foundSelection = collections.find(({ slug }) => slug === selectedCollection);
-      if (foundSelection) {
-        newSelection = foundSelection;
-      }
+      const selectedConfig = enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) || enabledCollectionConfigs?.[0];
+      setSelectedCollectionConfig(selectedConfig);
     }
-    setSelectedCollectionConfig(newSelection);
-  }, [selectedCollection, enabledCollectionConfigs, collectionSlugs, uploads, collections, onSelect, t]);
+  }, [selectedCollection, enabledCollectionConfigs, onSelect, t]);
 
   const activeColumnNames = tableColumns.map(({ accessor }) => accessor);
   const stringifiedActiveColumns = JSON.stringify(activeColumnNames);
@@ -127,9 +122,9 @@ export const ListDrawerContent: React.FC<ListDrawerProps & {
 
   useEffect(() => {
     if (selectedOption) {
-      setSelectedCollectionConfig(collections.find(({ slug }) => selectedOption.value === slug));
+      setSelectedCollectionConfig(enabledCollectionConfigs.find(({ slug }) => selectedOption.value === slug));
     }
-  }, [selectedOption, collections]);
+  }, [selectedOption, enabledCollectionConfigs]);
 
   const collectionPermissions = permissions?.collections?.[selectedCollectionConfig?.slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
@@ -143,12 +138,12 @@ export const ListDrawerContent: React.FC<ListDrawerProps & {
 
   useEffect(() => {
     const params: {
-        page?: number
-        sort?: string
-        where?: unknown
-        limit?: number
-        cacheBust?: number
-      } = {};
+      page?: number
+      sort?: string
+      where?: unknown
+      limit?: number
+      cacheBust?: number
+    } = {};
 
     if (page) params.page = page;
 
@@ -237,13 +232,13 @@ export const ListDrawerContent: React.FC<ListDrawerProps & {
                       {!customHeader ? getTranslation(selectedCollectionConfig?.labels?.plural, i18n) : customHeader}
                     </h2>
                     {hasCreatePermission && (
-                    <DocumentDrawerToggler
-                      className={`${baseClass}__create-new-button`}
-                    >
-                      <Pill>
-                        {t('general:createNew')}
-                      </Pill>
-                    </DocumentDrawerToggler>
+                      <DocumentDrawerToggler
+                        className={`${baseClass}__create-new-button`}
+                      >
+                        <Pill>
+                          {t('general:createNew')}
+                        </Pill>
+                      </DocumentDrawerToggler>
                     )}
                   </div>
                   <button
@@ -257,20 +252,20 @@ export const ListDrawerContent: React.FC<ListDrawerProps & {
                   </button>
                 </div>
                 {selectedCollectionConfig?.admin?.description && (
-                <div className={`${baseClass}__sub-header`}>
-                  <ViewDescription description={selectedCollectionConfig.admin.description} />
-                </div>
-                  )}
+                  <div className={`${baseClass}__sub-header`}>
+                    <ViewDescription description={selectedCollectionConfig.admin.description} />
+                  </div>
+                )}
                 {moreThanOneAvailableCollection && (
-                <div className={`${baseClass}__select-collection-wrap`}>
-                  <Label label={t('selectCollectionToBrowse')} />
-                  <ReactSelect
-                    className={`${baseClass}__select-collection`}
-                    value={selectedOption}
-                    onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
-                    options={enabledCollectionConfigs.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
-                  />
-                </div>
+                  <div className={`${baseClass}__select-collection-wrap`}>
+                    <Label label={t('selectCollectionToBrowse')} />
+                    <ReactSelect
+                      className={`${baseClass}__select-collection`}
+                      value={selectedOption}
+                      onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
+                      options={enabledCollectionConfigs.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
+                    />
+                  </div>
                 )}
               </header>
             ),

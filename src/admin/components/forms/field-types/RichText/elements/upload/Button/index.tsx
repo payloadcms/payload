@@ -5,6 +5,7 @@ import ElementButton from '../../Button';
 import UploadIcon from '../../../../../../icons/Upload';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { injectVoidElement } from '../../injectVoid';
+import { withEnabledRelationships } from '../../withEnabledRelationships';
 
 import './index.scss';
 
@@ -29,6 +30,7 @@ const insertUpload = (editor, { value, relationTo }) => {
 
 const UploadButton: React.FC<{
   path: string
+  enabledCollectionSlugs: string[]
 }> = () => {
   const { t } = useTranslation(['upload', 'general']);
   const editor = useSlate();
@@ -38,7 +40,6 @@ const UploadButton: React.FC<{
     ListDrawerToggler,
     {
       closeDrawer,
-      isEmpty,
     },
   ] = useListDrawer({
     uploads: true,
@@ -53,8 +54,6 @@ const UploadButton: React.FC<{
     });
     closeDrawer();
   }, [editor, closeDrawer]);
-
-  if (isEmpty) return null;
 
   return (
     <Fragment>
@@ -76,4 +75,4 @@ const UploadButton: React.FC<{
   );
 };
 
-export default UploadButton;
+export default withEnabledRelationships(UploadButton, { uploads: true });

@@ -13,7 +13,7 @@ export type ListDrawerProps = {
   uploads?: boolean
   selectedCollection?: string
   filterOptions?: FilterOptionsResult
-  enabledCollectionConfigs?: SanitizedCollectionConfig[]
+  enabledCollectionConfigs: SanitizedCollectionConfig[]
 }
 
 export type ListTogglerProps = HTMLAttributes<HTMLButtonElement> & {
@@ -29,7 +29,7 @@ export type UseListDrawer = (args: {
   uploads?: boolean // finds all collections with upload: true
   filterOptions?: FilterOptionsResult
 }) => [
-  React.FC<Omit<ListDrawerProps, 'collectionSlug' | 'id'>>, // drawer
+  React.FC<Omit<ListDrawerProps, 'collectionSlug' | 'id' | 'enabledCollectionConfigs'>>, // drawer
   React.FC<Omit<ListTogglerProps, 'collectionSlug' | 'id'>>, // toggler
   {
     drawerSlug: string,
@@ -38,6 +38,5 @@ export type UseListDrawer = (args: {
     toggleDrawer: () => void
     closeDrawer: () => void
     openDrawer: () => void
-    isEmpty: boolean
   }
 ]
