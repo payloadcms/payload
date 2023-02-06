@@ -12,6 +12,7 @@ import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import { Props as RichTextProps } from '../../../types';
+import { withEnabledRelationships } from '../../withEnabledRelationships';
 
 import './index.scss';
 
@@ -26,7 +27,8 @@ const Element: React.FC<{
   children: React.ReactNode
   element: any
   fieldProps: RichTextProps
-}> = ({ attributes, children, element }) => {
+  enabledCollectionSlugs: string[]
+}> = ({ attributes, children, element, enabledCollectionSlugs }) => {
   const {
     relationTo,
     value,
@@ -45,7 +47,7 @@ const Element: React.FC<{
       closeDrawer: closeListDrawer,
     },
   ] = useListDrawer({
-    uploads: true,
+    collectionSlugs: enabledCollectionSlugs,
     selectedCollection: relatedCollection.slug,
   });
 
@@ -218,4 +220,4 @@ const Element: React.FC<{
   );
 };
 
-export default Element;
+export default withEnabledRelationships(Element, { uploads: true });

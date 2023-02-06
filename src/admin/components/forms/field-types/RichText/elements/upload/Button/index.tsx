@@ -31,7 +31,7 @@ const insertUpload = (editor, { value, relationTo }) => {
 const UploadButton: React.FC<{
   path: string
   enabledCollectionSlugs: string[]
-}> = () => {
+}> = ({ enabledCollectionSlugs }) => {
   const { t } = useTranslation(['upload', 'general']);
   const editor = useSlate();
 
@@ -43,7 +43,7 @@ const UploadButton: React.FC<{
     },
   ] = useListDrawer({
     uploads: true,
-    contentType: 'uploads',
+    collectionSlugs: enabledCollectionSlugs,
   });
 
   const onSelect = useCallback(({ docID, collectionConfig }) => {

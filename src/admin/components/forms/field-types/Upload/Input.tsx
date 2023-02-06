@@ -88,7 +88,6 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   ] = useListDrawer({
     collectionSlugs,
     filterOptions: filterOptionsResult,
-    contentType: 'uploads',
   });
 
   const classes = [
