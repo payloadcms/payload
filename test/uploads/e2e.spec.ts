@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import path from 'path';
-import { relationSlug, mediaSlug } from './config';
+import { relationSlug, mediaSlug, audioSlug } from './config';
 import type { Media } from './payload-types';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
@@ -12,27 +12,44 @@ import wait from '../../src/utilities/wait';
 const { beforeAll, describe } = test;
 
 let mediaURL: AdminUrlUtil;
+let audioURL: AdminUrlUtil;
 let relationURL: AdminUrlUtil;
 
 describe('uploads', () => {
   let page: Page;
-  let mediaDoc: Media;
+  let pngDoc: Media;
+  let audioDoc: Media;
 
   beforeAll(async ({ browser }) => {
     const { serverURL } = await initPayloadE2E(__dirname);
 
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug);
+    audioURL = new AdminUrlUtil(serverURL, audioSlug);
     relationURL = new AdminUrlUtil(serverURL, relationSlug);
 
     const context = await browser.newContext();
     page = await context.newPage();
 
-    const findMedia = await payload.find({
+    const findPNG = await payload.find({
       collection: mediaSlug,
       depth: 0,
       pagination: false,
+      where: {
+        mimeType: {
+          equals: 'image/png',
+        },
+      },
     });
-    mediaDoc = findMedia.docs[0] as Media;
+
+    pngDoc = findPNG.docs[0] as Media;
+
+    const findAudio = await payload.find({
+      collection: audioSlug,
+      depth: 0,
+      pagination: false,
+    });
+
+    audioDoc = findAudio.docs[0] as Media;
 
     await login({ page, serverURL });
   });
@@ -48,11 +65,11 @@ describe('uploads', () => {
 
   test('should show upload filename in upload collection list', async () => {
     await page.goto(mediaURL.list);
+    const audioUpload = page.locator('.thumbnail-card__label').nth(0);
+    await expect(audioUpload).toHaveText('audio.mp3');
 
-    const media = page.locator('.thumbnail-card__label');
-    await wait(110);
-
-    await expect(media).toHaveText('image.png');
+    const imageUpload = page.locator('.thumbnail-card__label').nth(1);
+    await expect(imageUpload).toHaveText('image.png');
   });
 
   test('should create file upload', async () => {
@@ -68,7 +85,7 @@ describe('uploads', () => {
   });
 
   test('should show resized images', async () => {
-    await page.goto(mediaURL.edit(mediaDoc.id));
+    await page.goto(mediaURL.edit(pngDoc.id));
 
     await page.locator('.btn.file-details__toggle-more-info').click();
 
@@ -86,5 +103,36 @@ describe('uploads', () => {
 
     const iconMeta = page.locator('.file-details__sizes .file-meta').nth(4);
     await expect(iconMeta).toContainText('16x16');
+  });
+
+  test('should restrict mimetype based on filterOptions', async () => {
+    await page.goto(audioURL.edit(audioDoc.id));
+    await wait(200);
+
+    // remove the selection and open the list drawer
+    await page.locator('.file-details__remove').click();
+    await page.locator('.upload__toggler.list-drawer__toggler').click();
+    const listDrawer = await page.locator('[id^=list-drawer_1_]');
+    await expect(listDrawer).toBeVisible();
+    await wait(200); // cards are loading
+
+    // ensure the only card is the audio file
+    const cards = await listDrawer.locator('.upload-gallery .thumbnail-card');
+    expect(await cards.count()).toEqual(1);
+    const card = cards.nth(0);
+    await expect(card).toHaveText('audio.mp3');
+
+    // upload an image and try to select it
+    await listDrawer.locator('button.list-drawer__create-new-button.doc-drawer__toggler').click();
+    await expect(await page.locator('[id^=doc-drawer_media_2_]')).toBeVisible();
+    await page.locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]').setInputFiles(path.resolve(__dirname, './image.png'));
+    await page.locator('[id^=doc-drawer_media_2_] button#action-save').click();
+    await wait(200);
+    await expect(page.locator('.Toastify')).toContainText('successfully');
+
+    // save the document and expect an error
+    await page.locator('button#action-save').click();
+    await wait(200);
+    await expect(page.locator('.Toastify')).toContainText('The following field is invalid: audio');
   });
 });
