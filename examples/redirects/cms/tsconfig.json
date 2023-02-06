@@ -14,7 +14,10 @@
     "rootDir": "./src",
     "jsx": "react",
     "sourceMap": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "payload/generated-types": ["./src/payload-types.ts"]
+    },
   },
   "include": [
     "src"
@@ -26,5 +29,5 @@
   ],
   "ts-node": {
     "transpileOnly": true
-  }
+  },
 }
