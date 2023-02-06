@@ -9,7 +9,7 @@ import findConfig from './find';
 import validate from './validate';
 import { clientFiles } from './clientFiles';
 
-const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
+const loadConfig = async (logger?: pino.Logger): Promise<SanitizedConfig> => {
   const localLogger = logger ?? Logger();
 
   const configPath = findConfig();
@@ -19,14 +19,14 @@ const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
   });
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let config = require(configPath);
+  let config = await require(configPath);
 
   if (config.default) config = config.default;
 
-  let validatedConfig = config;
+  let validatedConfig = await Promise.resolve(config);
 
   if (process.env.NODE_ENV !== 'production') {
-    validatedConfig = validate(config, localLogger);
+    validatedConfig = await validate(validatedConfig, localLogger);
   }
 
   return {

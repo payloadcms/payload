@@ -6,7 +6,7 @@ const baseConfig: Config = {
   telemetry: false,
 };
 
-export function buildConfig(overrides?: Partial<Config>): SanitizedConfig {
+export async function buildConfig(overrides?: Partial<Config>): Promise<SanitizedConfig> {
   if (process.env.NODE_ENV === 'test') {
     baseConfig.admin = {
       ...(baseConfig.admin || {}),
