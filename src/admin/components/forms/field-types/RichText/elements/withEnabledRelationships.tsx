@@ -8,11 +8,11 @@ type options = { uploads: boolean };
 type FilteredCollectionsT = (collections: SanitizedCollectionConfig[], options?: options) => SanitizedCollectionConfig[];
 const filterRichTextCollections: FilteredCollectionsT = (collections, options) => {
   return collections.filter(({ admin: { enableRichTextRelationship }, upload }) => {
-    if (options?.uploads && Boolean(upload) === false) {
-      return false;
+    if (options?.uploads) {
+      return enableRichTextRelationship && Boolean(upload) === true;
     }
 
-    return enableRichTextRelationship;
+    return upload ? false : enableRichTextRelationship;
   });
 };
 

@@ -3,6 +3,8 @@ import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
 import getFileByPath from '../../src/uploads/getFileByPath';
 import removeFiles from '../helpers/removeFiles';
+import { Uploads1 } from './collections/Upload1';
+import Uploads2 from './collections/Upload2';
 
 export const mediaSlug = 'media';
 
@@ -53,7 +55,7 @@ export default buildConfig({
           {
             name: 'maintainedAspectRatio',
             width: 1024,
-            height: null,
+            height: undefined,
             crop: 'center',
             position: 'center',
             formatOptions: { format: 'png', options: { quality: 90 } },
@@ -61,7 +63,7 @@ export default buildConfig({
           {
             name: 'differentFormatFromMainImage',
             width: 200,
-            height: null,
+            height: undefined,
             formatOptions: { format: 'jpg', options: { quality: 90 } },
           },
           {
@@ -93,6 +95,8 @@ export default buildConfig({
       },
       fields: [],
     },
+    Uploads1,
+    Uploads2,
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(__dirname, './media');

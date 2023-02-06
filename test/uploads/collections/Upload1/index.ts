@@ -1,20 +1,16 @@
 import path from 'path';
 import { CollectionConfig } from '../../../../src/collections/config/types';
 
-const Uploads: CollectionConfig = {
-  slug: 'uploads',
+export const Uploads1: CollectionConfig = {
+  slug: 'uploads-1',
   upload: {
     staticDir: path.resolve(__dirname, './uploads'),
   },
   fields: [
     {
-      type: 'text',
-      name: 'text',
-    },
-    {
       type: 'upload',
       name: 'media',
-      relationTo: 'uploads',
+      relationTo: 'uploads-2',
       filterOptions: {
         mimeType: {
           equals: 'image/png',
@@ -31,5 +27,3 @@ const Uploads: CollectionConfig = {
 export const uploadsDoc = {
   text: 'An upload here',
 };
-
-export default Uploads;
