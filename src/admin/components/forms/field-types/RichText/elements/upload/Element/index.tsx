@@ -28,12 +28,18 @@ const Element: React.FC<{
   element: any
   fieldProps: RichTextProps
   enabledCollectionSlugs: string[]
-}> = ({ attributes, children, element, enabledCollectionSlugs }) => {
+}> = (props) => {
   const {
-    relationTo,
-    value,
+    attributes,
+    children,
+    element,
+    element: {
+      relationTo,
+      value,
+    },
     fieldProps,
-  } = element;
+    enabledCollectionSlugs,
+  } = props;
 
   const { collections, serverURL, routes: { api } } = useConfig();
   const { t, i18n } = useTranslation('fields');
@@ -161,27 +167,27 @@ const Element: React.FC<{
             </div>
             <div className={`${baseClass}__actions`}>
               {value?.id && (
-                <DocumentDrawerToggler className={`${baseClass}__toggler`}>
+                <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
                   <Button
                     icon="edit"
                     round
                     buttonStyle="icon-label"
                     el="div"
-                    className={`${baseClass}__actionButton`}
                     onClick={(e) => {
                       e.preventDefault();
                     }}
                     tooltip={t('general:editLabel', { label: relatedCollection.labels.singular })}
-                    disabled={fieldProps?.admin?.readOnly}
                   />
                 </DocumentDrawerToggler>
               )}
-              <ListDrawerToggler>
+              <ListDrawerToggler
+                className={`${baseClass}__list-drawer-toggler`}
+                disabled={fieldProps?.admin?.readOnly}
+              >
                 <Button
                   icon="swap"
                   round
                   buttonStyle="icon-label"
-                  className={`${baseClass}__actionButton`}
                   onClick={() => {
                     // do nothing
                   }}
@@ -194,7 +200,7 @@ const Element: React.FC<{
                 icon="x"
                 round
                 buttonStyle="icon-label"
-                className={`${baseClass}__actionButton`}
+                className={`${baseClass}__removeButton`}
                 onClick={(e) => {
                   e.preventDefault();
                   removeUpload();

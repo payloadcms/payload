@@ -2458,6 +2458,13 @@
   dependencies:
     mongoose-paginate-v2 "*"
 
+"@types/needle@*":
+  version "3.2.0"
+  resolved "https://registry.npmjs.org/@types/needle/-/needle-3.2.0.tgz#68badb910fae8e9d81c8aff4d9dc9b2044695fc7"
+  integrity sha512-6XzvzEyJ2ozFNfPajFmqH9JOt0Hp+9TawaYpJT59iIP/zR0U37cfWCRwosyIeEBBZBi021Osq4jGAD3AOju5fg==
+  dependencies:
+    "@types/node" "*"
+
 "@types/node-fetch@^2.6.2":
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.6.2.tgz#d1a9c5fd049d9415dce61571557104dec3ec81da"
@@ -2580,6 +2587,14 @@
   version "1.26.0"
   resolved "https://registry.yarnpkg.com/@types/prismjs/-/prismjs-1.26.0.tgz#a1c3809b0ad61c62cac6d4e0c56d610c910b7654"
   integrity sha512-ZTaqn/qSqUuAq1YwvOFQfVW1AR/oQJlLSZVustdjwI+GZ8kr0MSHBj0tsXPW1EqHubx50gtBEjbPGsdZwQwCjQ==
+
+"@types/probe-image-size@^7.2.0":
+  version "7.2.0"
+  resolved "https://registry.npmjs.org/@types/probe-image-size/-/probe-image-size-7.2.0.tgz#1c718b9469dc83ccd8eba09b7a6fd0ff6a38cf53"
+  integrity sha512-R5H3vw62gHNHrn+JGZbKejb+Z2D/6E5UNVlhCzIaBBLroMQMOFqy5Pap2gM+ZZHdqBtVU0/cx/M6to+mOJcoew==
+  dependencies:
+    "@types/needle" "*"
+    "@types/node" "*"
 
 "@types/prop-types@*", "@types/prop-types@^15.7.5":
   version "15.7.5"

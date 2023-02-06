@@ -50,7 +50,8 @@ export const promise = async ({
     && fieldAffectsData(field)
     && (typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null)
     && field.localized
-    && req.locale !== 'all';
+    && req.locale !== 'all'
+    && req.payload.config.localization;
 
   if (shouldHoistLocalizedValue) {
     // replace actual value with localized value before sanitizing
