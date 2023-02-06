@@ -43,6 +43,7 @@ const UploadButton: React.FC<{
     },
   ] = useListDrawer({
     uploads: true,
+    listType: 'uploads',
   });
 
   const onSelect = useCallback(({ docID, collectionConfig }) => {

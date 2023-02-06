@@ -6,7 +6,7 @@ type ButtonToRenderT = React.FC<{ enabledCollectionSlugs: string[] }>;
 type options = { uploads: boolean };
 
 type FilteredCollectionsT = (collections: SanitizedCollectionConfig[], options?: options) => SanitizedCollectionConfig[];
-export const filterRichTextCollections: FilteredCollectionsT = (collections, options) => {
+const filterRichTextCollections: FilteredCollectionsT = (collections, options) => {
   return collections.filter(({ admin: { enableRichTextRelationship }, upload }) => {
     if (options?.uploads && Boolean(upload) === false) {
       return false;

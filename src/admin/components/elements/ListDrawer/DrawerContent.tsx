@@ -52,9 +52,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   drawerSlug,
   onSelect,
   customHeader,
-  collectionSlugs,
+  collectionSlugs: collectionSlugsFromProps,
   selectedCollection,
   filterOptions,
+  listType = 'collections',
 }) => {
   const { t, i18n } = useTranslation(['upload', 'general']);
   const { permissions } = useAuth();
@@ -65,8 +66,18 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [page, setPage] = useState(1);
   const [where, setWhere] = useState(null);
   const { serverURL, routes: { api }, collections } = useConfig();
+  const collectionSlugs = collectionSlugsFromProps || collections.map(({ slug }) => slug);
 
-  const enabledCollectionConfigs = collections.filter(({ slug }) => collectionSlugs.includes(slug));
+  const enabledCollectionConfigs = collections.filter(({ slug, upload, admin }) => {
+    const foundSlug = collectionSlugs.includes(slug);
+    if (upload) {
+      if (listType === 'uploads' && admin?.enableRichTextRelationship) {
+        return foundSlug;
+      }
+      return false;
+    }
+    return foundSlug;
+  });
 
   const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<SanitizedCollectionConfig>(() => {
     return enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) || enabledCollectionConfigs?.[0];

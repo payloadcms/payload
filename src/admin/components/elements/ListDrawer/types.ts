@@ -12,6 +12,7 @@ export type ListDrawerProps = {
   collectionSlugs?: string[]
   selectedCollection?: string
   filterOptions?: FilterOptionsResult
+  listType?: 'uploads' | 'collections'
 }
 
 export type ListTogglerProps = HTMLAttributes<HTMLButtonElement> & {
@@ -26,6 +27,7 @@ export type UseListDrawer = (args: {
   selectedCollection?: string
   uploads?: boolean // finds all collections with upload: true
   filterOptions?: FilterOptionsResult
+  listType?: 'uploads' | 'collections'
 }) => [
     React.FC<Pick<ListDrawerProps, 'onSelect'>>, // drawer
     React.FC<Pick<ListTogglerProps, 'disabled' | 'className' | 'children'>>, // toggler
