@@ -1,5 +1,4 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { MarkOptional } from 'ts-essentials';
 import { Payload } from '../../../payload';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
@@ -13,7 +12,7 @@ import { APIError } from '../../../errors';
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
   id: string | number
-  data: MarkOptional<GeneratedTypes['collections'][TSlug], 'id' | 'updatedAt' | 'createdAt'>
+  data: Partial<GeneratedTypes['collections'][TSlug]>
   depth?: number
   locale?: string
   fallbackLocale?: string
