@@ -53,7 +53,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   onSelect,
   customHeader,
   collectionSlugs,
-  uploads,
   selectedCollection,
   filterOptions,
 }) => {
@@ -70,16 +69,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const enabledCollectionConfigs = collections.filter(({ slug }) => collectionSlugs.includes(slug));
 
   const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<SanitizedCollectionConfig>(() => {
-    let initialSelection = enabledCollectionConfigs?.[0];
-    if (selectedCollection) {
-      // if passed a selection, find it and check if it's enabled
-      const foundSelection = collections.find(({ slug }) => slug === selectedCollection);
-      if (foundSelection) {
-        initialSelection = foundSelection;
-      }
-    }
-
-    return initialSelection;
+    return enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) || enabledCollectionConfigs?.[0];
   });
 
   const [selectedOption, setSelectedOption] = useState<{ label: string, value: string }>(() => (selectedCollectionConfig ? { label: getTranslation(selectedCollectionConfig.labels.singular, i18n), value: selectedCollectionConfig.slug } : undefined));
