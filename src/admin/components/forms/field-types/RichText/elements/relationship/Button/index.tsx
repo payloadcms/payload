@@ -5,7 +5,7 @@ import ElementButton from '../../Button';
 import RelationshipIcon from '../../../../../../icons/Relationship';
 import { injectVoidElement } from '../../injectVoid';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
-import { withEnabledRelationships } from '../../withEnabledRelationships';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
 
 import './index.scss';
 
@@ -28,7 +28,11 @@ const insertRelationship = (editor, { value, relationTo }) => {
   ReactEditor.focus(editor);
 };
 
-const RelationshipButton: React.FC<{ path: string, enabledCollectionSlugs: string[] }> = ({ enabledCollectionSlugs }) => {
+type Props = {
+  path: string
+  enabledCollectionSlugs: string[]
+}
+const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   const { t } = useTranslation('fields');
   const editor = useSlate();
   const [selectedCollectionSlug, setSelectedCollectionSlug] = useState(() => enabledCollectionSlugs[0]);
@@ -80,4 +84,10 @@ const RelationshipButton: React.FC<{ path: string, enabledCollectionSlugs: strin
   );
 };
 
-export default withEnabledRelationships(RelationshipButton);
+export default (props: Props): React.ReactNode => {
+  return (
+    <EnabledRelationshipsCondition {...props}>
+      <RelationshipButton {...props} />
+    </EnabledRelationshipsCondition>
+  );
+};

@@ -2,7 +2,6 @@ import * as React from 'react';
 import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
 import { useConfig } from '../../../../utilities/Config';
 
-type ButtonToRenderT = React.FC<{ enabledCollectionSlugs: string[] }>;
 type options = { uploads: boolean };
 
 type FilteredCollectionsT = (collections: SanitizedCollectionConfig[], options?: options) => SanitizedCollectionConfig[];
@@ -16,18 +15,14 @@ const filterRichTextCollections: FilteredCollectionsT = (collections, options) =
   });
 };
 
-export const withEnabledRelationships = (ButtonToRender: ButtonToRenderT, renderProps?: options) => (props: { path: string }): React.ReactNode => {
+export const EnabledRelationshipsCondition: React.FC<any> = (props) => {
+  const { children, uploads = false, ...rest } = props;
   const { collections } = useConfig();
-  const [enabledCollectionSlugs] = React.useState(() => filterRichTextCollections(collections, renderProps).map(({ slug }) => slug));
+  const [enabledCollectionSlugs] = React.useState(() => filterRichTextCollections(collections, { uploads }).map(({ slug }) => slug));
 
   if (!enabledCollectionSlugs.length) {
     return null;
   }
 
-  return (
-    <ButtonToRender
-      {...props}
-      enabledCollectionSlugs={enabledCollectionSlugs}
-    />
-  );
+  return React.createElement(children, { ...rest, enabledCollectionSlugs });
 };

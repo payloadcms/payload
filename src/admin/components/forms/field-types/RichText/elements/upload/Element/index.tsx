@@ -12,7 +12,7 @@ import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import { Props as RichTextProps } from '../../../types';
-import { withEnabledRelationships } from '../../withEnabledRelationships';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
 
 import './index.scss';
 
@@ -22,13 +22,15 @@ const initialParams = {
   depth: 0,
 };
 
-const Element: React.FC<{
+type ElementProps = {
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
   element: any
   fieldProps: RichTextProps
   enabledCollectionSlugs: string[]
-}> = (props) => {
+}
+
+const Element: React.FC<ElementProps> = (props) => {
   const {
     attributes,
     children,
@@ -226,4 +228,13 @@ const Element: React.FC<{
   );
 };
 
-export default withEnabledRelationships(Element, { uploads: true });
+export default (props: ElementProps): React.ReactNode => {
+  return (
+    <EnabledRelationshipsCondition
+      {...props}
+      uploads
+    >
+      <Element {...props} />
+    </EnabledRelationshipsCondition>
+  );
+};
