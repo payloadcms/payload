@@ -39,7 +39,12 @@ export default (payloadConfig: SanitizedConfig): Configuration => {
     sideEffects: true,
     use: [
       require.resolve('style-loader'),
-      require.resolve('css-loader'),
+      {
+        loader: require.resolve('css-loader'),
+        options: {
+          url: (url) => (!url.startsWith('/')),
+        },
+      },
       {
         loader: require.resolve('postcss-loader'),
         options: {
