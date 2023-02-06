@@ -1,5 +1,8 @@
 import React from 'react';
-import DatePicker from 'react-datepicker';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import * as Locales from 'date-fns/locale';
+import { useLocale } from '../../utilities/Locale';
+import { formattedLocales } from './formattedLocales';
 import CalendarIcon from '../../icons/Calendar';
 import XIcon from '../../icons/X';
 import { Props } from './types';
@@ -25,6 +28,15 @@ const DateTime: React.FC<Props> = (props) => {
     readOnly,
     placeholder: placeholderText,
   } = props;
+
+  const currentLocale = formattedLocales[useLocale()];
+
+  try {
+    const locale = Locales[currentLocale];
+    registerLocale(currentLocale, locale);
+  } catch (e) {
+    console.warn(`Could not find DatePicker locale for ${currentLocale}`);
+  }
 
   let dateTimeFormat = displayFormat;
 
@@ -77,11 +89,13 @@ const DateTime: React.FC<Props> = (props) => {
         <DatePicker
           {...dateTimePickerProps}
           onChange={(val) => onChange(val as Date)}
-          popperModifiers={{
-            preventOverflow: {
+          locale={currentLocale || 'en-US'}
+          popperModifiers={[
+            {
+              name: 'preventOverflow',
               enabled: true,
             },
-          }}
+          ]}
         />
       </div>
     </div>
