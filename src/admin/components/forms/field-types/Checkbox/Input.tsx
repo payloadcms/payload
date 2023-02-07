@@ -28,15 +28,12 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
     required,
   } = props;
 
-  const [isFocused, setIsFocused] = React.useState(false);
-
   return (
     <span
       className={[
         baseClass,
         checked && `${baseClass}--checked`,
         readOnly && `${baseClass}--read-only`,
-        isFocused && `${baseClass}--is-focused`,
       ].filter(Boolean).join(' ')}
     >
       <input
@@ -50,8 +47,6 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
       />
       <button
         type="button"
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
         onClick={onToggle}
       >
         <span className={`${baseClass}__input`}>
