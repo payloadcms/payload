@@ -19,18 +19,18 @@ const loadConfig = async (logger?: pino.Logger): Promise<SanitizedConfig> => {
   });
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let config = await require(configPath);
+  const configPromise = require(configPath);
+
+  let config = await Promise.resolve(configPromise);
 
   if (config.default) config = config.default;
 
-  let validatedConfig = await Promise.resolve(config);
-
   if (process.env.NODE_ENV !== 'production') {
-    validatedConfig = await validate(validatedConfig, localLogger);
+    config = await validate(config, localLogger);
   }
 
   return {
-    ...validatedConfig,
+    ...config,
     paths: {
       configDir: path.dirname(configPath),
       config: configPath,

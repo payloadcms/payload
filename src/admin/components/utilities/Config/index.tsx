@@ -8,7 +8,7 @@ export const ConfigProvider: React.FC<{config: SanitizedConfig, children: React.
 
   React.useEffect(() => {
     const awaitConfig = async () => {
-      const resolvedConfig = await Promise.resolve(incomingConfig);
+      const resolvedConfig = await incomingConfig;
       setConfig(resolvedConfig);
     };
     awaitConfig();
