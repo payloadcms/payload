@@ -1,5 +1,26 @@
 
 
+## [1.6.5](https://github.com/payloadcms/payload/compare/v1.6.4...v1.6.5) (2023-02-07)
+
+
+### Bug Fixes
+
+* allows radio input to be tabbable ([b5880f2](https://github.com/payloadcms/payload/commit/b5880f26af8b97d47eca83a9fc7bd05b006cc54c))
+* auth type leaking into type gen ([1f0a1c7](https://github.com/payloadcms/payload/commit/1f0a1c796ab4126a464949f3a1bc34c7360470a5))
+* corrects keyboard accessibility for checkbox field ([65b8fd2](https://github.com/payloadcms/payload/commit/65b8fd27af05c25c3ddf86c34e1f181b8a605c27))
+* ensures preview is enabled before rendering button ([e968f40](https://github.com/payloadcms/payload/commit/e968f4067c2427965c0f96845aff8eaca36d0df6))
+* local API update typing ([#2010](https://github.com/payloadcms/payload/issues/2010)) ([4b0d4f4](https://github.com/payloadcms/payload/commit/4b0d4f4cd59940cace6b6b8cebf3d834d2b88dab)), closes [#2009](https://github.com/payloadcms/payload/issues/2009)
+* max versions incorrectly sorting, causing incorrect versions to be held onto ([2e4f7ab](https://github.com/payloadcms/payload/commit/2e4f7ab35c23f25051a5000e7902df7f255ed607))
+* named tabs not displaying data in versions view ([a41e295](https://github.com/payloadcms/payload/commit/a41e295e42fbf283733afd8b63bced9555cb1338))
+* replaced media not rendering after document save ([827428d](https://github.com/payloadcms/payload/commit/827428d6b57a7abe858ca5ddaad5ba4ec9d3a270))
+* webpack css-loader resolve urls ([ade4c01](https://github.com/payloadcms/payload/commit/ade4c011d348249e975a1510ae481018834a2ca2))
+
+
+### Features
+
+* deletes old media upon re-upload [#1897](https://github.com/payloadcms/payload/issues/1897) ([02f9be2](https://github.com/payloadcms/payload/commit/02f9be2c4a15eed6bba07f504319a2213ea411df))
+* enables document drawers from read-only fields ([#1989](https://github.com/payloadcms/payload/issues/1989)) ([0dbc4fa](https://github.com/payloadcms/payload/commit/0dbc4fa21334e1a17c5aa35d84d78973fb7f54ec))
+
 ## [1.6.4](https://github.com/payloadcms/payload/compare/v1.6.3...v1.6.4) (2023-02-03)
 
 
