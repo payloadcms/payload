@@ -130,7 +130,7 @@ describe('dataloader', () => {
 
       const innerMostRelationship = relationAWithDepth.relationship.relationship.richText[1].value.relationship.relationship;
 
-      expect(typeof innerMostRelationship).toStrictEqual(relationB.id);
+      expect(innerMostRelationship).toStrictEqual(relationB.id);
     });
   });
 });
