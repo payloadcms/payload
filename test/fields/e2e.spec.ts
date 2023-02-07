@@ -218,6 +218,7 @@ describe('fields', () => {
     });
 
     test('should open blocks drawer from block row and add below', async () => {
+      await page.goto(url.create);
       const firstRow = await page.locator('#field-blocks #blocks-row-0');
       const rowActions = await firstRow.locator('.collapsible__actions');
       await expect(rowActions).toBeVisible();
