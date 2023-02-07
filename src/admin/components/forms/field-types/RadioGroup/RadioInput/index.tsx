@@ -10,12 +10,10 @@ const baseClass = 'radio-input';
 const RadioInput: React.FC<Props> = (props) => {
   const { isSelected, option, onChange, path } = props;
   const { i18n } = useTranslation();
-  const [isFocused, setIsFocused] = React.useState(false);
 
   const classes = [
     baseClass,
     isSelected && `${baseClass}--is-selected`,
-    isFocused && `${baseClass}--is-focused`,
   ].filter(Boolean).join(' ');
 
   const id = `field-${path}-${option.value}`;
@@ -29,8 +27,6 @@ const RadioInput: React.FC<Props> = (props) => {
           id={id}
           type="radio"
           checked={isSelected}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
           onChange={() => (typeof onChange === 'function' ? onChange(option.value) : null)}
         />
         <span className={`${baseClass}__styled-radio`} />

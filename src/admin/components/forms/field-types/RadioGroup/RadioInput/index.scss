@@ -9,8 +9,10 @@
   input[type=radio] {
     opacity: 0;
     width: 0;
-    height: 0;
-    pointer-events: none;
+  }
+
+  input[type=radio]:focus+.radio-input__styled-radio {
+    box-shadow: 0 0 3px 3px var(--theme-success-400);
   }
 
   &__styled-radio {
@@ -44,15 +46,6 @@
         &:before {
           opacity: 1;
         }
-      }
-    }
-  }
-
-
-  &--is-focused {
-    .radio-input {
-      &__styled-radio {
-        box-shadow: 0 0 3px 3px var(--theme-success-400);
       }
     }
   }
