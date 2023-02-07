@@ -24,5 +24,5 @@ export const EnabledRelationshipsCondition: React.FC<any> = (props) => {
     return null;
   }
 
-  return React.createElement(children, { ...rest, enabledCollectionSlugs });
+  return React.cloneElement(children, { ...rest, enabledCollectionSlugs });
 };
