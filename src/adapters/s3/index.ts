@@ -16,7 +16,7 @@ export const s3Adapter =
   ({ config, bucket, acl }: Args): Adapter =>
   ({ collection, prefix }): GeneratedAdapter => {
     let storageClient: AWS.S3 | null = null
-    const getStorageClient = () => {
+    const getStorageClient: () => AWS.S3 = () => {
       if (storageClient) return storageClient
       storageClient = new AWS.S3(config)
       return storageClient
