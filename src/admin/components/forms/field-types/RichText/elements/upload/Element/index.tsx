@@ -12,6 +12,7 @@ import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import { Props as RichTextProps } from '../../../types';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
 
 import './index.scss';
 
@@ -21,12 +22,15 @@ const initialParams = {
   depth: 0,
 };
 
-const Element: React.FC<{
+type ElementProps = {
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
   element: any
   fieldProps: RichTextProps
-}> = (props) => {
+  enabledCollectionSlugs: string[]
+}
+
+const Element: React.FC<ElementProps> = (props) => {
   const {
     attributes,
     children,
@@ -36,6 +40,7 @@ const Element: React.FC<{
       value,
     },
     fieldProps,
+    enabledCollectionSlugs,
   } = props;
 
   const { collections, serverURL, routes: { api } } = useConfig();
@@ -50,7 +55,7 @@ const Element: React.FC<{
       closeDrawer: closeListDrawer,
     },
   ] = useListDrawer({
-    uploads: true,
+    collectionSlugs: enabledCollectionSlugs,
     selectedCollection: relatedCollection.slug,
   });
 
@@ -223,4 +228,13 @@ const Element: React.FC<{
   );
 };
 
-export default Element;
+export default (props: ElementProps): React.ReactNode => {
+  return (
+    <EnabledRelationshipsCondition
+      {...props}
+      uploads
+    >
+      <Element {...props} />
+    </EnabledRelationshipsCondition>
+  );
+};

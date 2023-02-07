@@ -45,7 +45,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
               setColumns(newState);
             }}
             alignIcon="left"
-            key={`${field.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${collection.slug}-${field.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             icon={isEnabled ? <X /> : <Plus />}
             className={[
               `${baseClass}__column`,

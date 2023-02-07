@@ -1,25 +1,23 @@
 import path from 'path';
 import { CollectionConfig } from '../../../../src/collections/config/types';
 
-const Uploads: CollectionConfig = {
-  slug: 'uploads',
+const Uploads3: CollectionConfig = {
+  slug: 'uploads3',
   upload: {
-    staticDir: path.resolve(__dirname, './uploads'),
+    staticDir: path.resolve(__dirname, './uploads3'),
+  },
+  labels: {
+    singular: 'Upload 3',
+    plural: 'Uploads 3',
+  },
+  admin: {
+    enableRichTextRelationship: false,
   },
   fields: [
     {
-      type: 'text',
-      name: 'text',
-    },
-    {
       type: 'upload',
       name: 'media',
-      relationTo: 'uploads',
-      filterOptions: {
-        mimeType: {
-          equals: 'image/png',
-        },
-      },
+      relationTo: 'uploads3',
     },
     {
       type: 'richText',
@@ -32,4 +30,4 @@ export const uploadsDoc = {
   text: 'An upload here',
 };
 
-export default Uploads;
+export default Uploads3;

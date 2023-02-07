@@ -48,26 +48,12 @@ const buildColumns = ({
   }],
 });
 
-const shouldIncludeCollection = ({
-  coll: {
-    admin: { enableRichTextRelationship },
-    upload,
-    slug,
-  },
-  uploads,
-  collectionSlugs,
-}) => (enableRichTextRelationship && ((uploads && Boolean(upload)) || collectionSlugs?.includes(slug)));
-
-const DrawerContent: React.FC<ListDrawerProps & {
-  enabledCollectionConfigs: SanitizedCollectionConfig[]
-}> = ({
+export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   drawerSlug,
   onSelect,
   customHeader,
   collectionSlugs,
-  uploads,
   selectedCollection,
-  enabledCollectionConfigs,
   filterOptions,
 }) => {
   const { t, i18n } = useTranslation(['upload', 'general']);
@@ -80,19 +66,12 @@ const DrawerContent: React.FC<ListDrawerProps & {
   const [where, setWhere] = useState(null);
   const { serverURL, routes: { api }, collections } = useConfig();
 
+  const enabledCollectionConfigs = collections.filter(({ slug }) => {
+    return collectionSlugs.includes(slug);
+  });
+
   const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<SanitizedCollectionConfig>(() => {
-    let initialSelection: SanitizedCollectionConfig;
-    if (selectedCollection) {
-      // if passed a selection, find it and check if it's enabled
-      const foundSelection = collections.find(({ slug }) => slug === selectedCollection);
-      if (foundSelection && shouldIncludeCollection({ coll: foundSelection, uploads, collectionSlugs })) {
-        initialSelection = foundSelection;
-      }
-    } else {
-      // return the first one that is enabled
-      initialSelection = collections.find((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs }));
-    }
-    return initialSelection;
+    return enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) || enabledCollectionConfigs?.[0];
   });
 
   const [selectedOption, setSelectedOption] = useState<{ label: string, value: string }>(() => (selectedCollectionConfig ? { label: getTranslation(selectedCollectionConfig.labels.singular, i18n), value: selectedCollectionConfig.slug } : undefined));
@@ -111,19 +90,12 @@ const DrawerContent: React.FC<ListDrawerProps & {
 
   // allow external control of selected collection, same as the initial state logic above
   useEffect(() => {
-    let newSelection: SanitizedCollectionConfig;
     if (selectedCollection) {
       // if passed a selection, find it and check if it's enabled
-      const foundSelection = collections.find(({ slug }) => slug === selectedCollection);
-      if (foundSelection && shouldIncludeCollection({ coll: foundSelection, uploads, collectionSlugs })) {
-        newSelection = foundSelection;
-      }
-    } else {
-      // return the first one that is enabled
-      newSelection = collections.find((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs }));
+      const selectedConfig = enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) || enabledCollectionConfigs?.[0];
+      setSelectedCollectionConfig(selectedConfig);
     }
-    setSelectedCollectionConfig(newSelection);
-  }, [selectedCollection, collectionSlugs, uploads, collections, onSelect, t]);
+  }, [selectedCollection, enabledCollectionConfigs, onSelect, t]);
 
   const activeColumnNames = tableColumns.map(({ accessor }) => accessor);
   const stringifiedActiveColumns = JSON.stringify(activeColumnNames);
@@ -142,9 +114,9 @@ const DrawerContent: React.FC<ListDrawerProps & {
 
   useEffect(() => {
     if (selectedOption) {
-      setSelectedCollectionConfig(collections.find(({ slug }) => selectedOption.value === slug));
+      setSelectedCollectionConfig(enabledCollectionConfigs.find(({ slug }) => selectedOption.value === slug));
     }
-  }, [selectedOption, collections]);
+  }, [selectedOption, enabledCollectionConfigs]);
 
   const collectionPermissions = permissions?.collections?.[selectedCollectionConfig?.slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
@@ -319,27 +291,5 @@ const DrawerContent: React.FC<ListDrawerProps & {
       </DocumentInfoProvider>
       <DocumentDrawer onSave={onCreateNew} />
     </Fragment>
-  );
-};
-
-export const ListDrawerContent: React.FC<ListDrawerProps> = (props) => {
-  const {
-    collectionSlugs,
-    uploads,
-  } = props;
-
-  const { collections } = useConfig();
-
-  const [enabledCollectionConfigs] = useState(() => collections.filter((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs })));
-
-  if (enabledCollectionConfigs.length === 0) {
-    return null;
-  }
-
-  return (
-    <DrawerContent
-      {...props}
-      enabledCollectionConfigs={enabledCollectionConfigs}
-    />
   );
 };

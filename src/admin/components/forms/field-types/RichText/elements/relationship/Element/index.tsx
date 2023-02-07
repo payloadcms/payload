@@ -9,6 +9,7 @@ import Button from '../../../../../../elements/Button';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { Props as RichTextProps } from '../../../types';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
 
 import './index.scss';
 
@@ -18,12 +19,13 @@ const initialParams = {
   depth: 0,
 };
 
-const Element: React.FC<{
+type Props = {
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
   element: any
   fieldProps: RichTextProps
-}> = (props) => {
+}
+const Element: React.FC<Props> = (props) => {
   const {
     attributes,
     children,
@@ -172,7 +174,7 @@ const Element: React.FC<{
             round
             buttonStyle="icon-label"
             onClick={() => {
-            // do nothing
+              // do nothing
             }}
             el="div"
             tooltip={t('swapRelationship')}
@@ -201,4 +203,10 @@ const Element: React.FC<{
   );
 };
 
-export default Element;
+export default (props: Props): React.ReactNode => {
+  return (
+    <EnabledRelationshipsCondition {...props}>
+      <Element {...props} />
+    </EnabledRelationshipsCondition>
+  );
+};
