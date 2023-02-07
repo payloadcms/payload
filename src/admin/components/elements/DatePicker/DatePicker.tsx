@@ -2,7 +2,6 @@ import React from 'react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import * as Locales from 'date-fns/locale';
 import { useLocale } from '../../utilities/Locale';
-import { formattedLocales } from './formattedLocales';
 import CalendarIcon from '../../icons/Calendar';
 import XIcon from '../../icons/X';
 import { Props } from './types';
@@ -11,6 +10,13 @@ import 'react-datepicker/dist/react-datepicker.css';
 import './index.scss';
 
 const baseClass = 'date-time-picker';
+
+const formattedLocales = {
+  en: 'enUS',
+  my: 'enUS', // Burmese is not currently supported
+  ua: 'uk',
+  zh: 'zhCN',
+};
 
 const DateTime: React.FC<Props> = (props) => {
   const {
@@ -29,7 +35,8 @@ const DateTime: React.FC<Props> = (props) => {
     placeholder: placeholderText,
   } = props;
 
-  const currentLocale = formattedLocales[useLocale()];
+  let currentLocale = useLocale();
+  currentLocale = formattedLocales[currentLocale] || currentLocale;
 
   try {
     const locale = Locales[currentLocale];
