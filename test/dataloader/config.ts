@@ -24,6 +24,42 @@ export default buildConfig({
 
       ],
     },
+    {
+      slug: 'relation-a',
+      labels: {
+        singular: 'Relation A',
+        plural: 'Relation As',
+      },
+      fields: [
+        {
+          name: 'relationship',
+          type: 'relationship',
+          relationTo: 'relation-b',
+        },
+        {
+          name: 'richText',
+          type: 'richText',
+        },
+      ],
+    },
+    {
+      slug: 'relation-b',
+      labels: {
+        singular: 'Relation B',
+        plural: 'Relation Bs',
+      },
+      fields: [
+        {
+          name: 'relationship',
+          type: 'relationship',
+          relationTo: 'relation-a',
+        },
+        {
+          name: 'richText',
+          type: 'richText',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     const user = await payload.create({
