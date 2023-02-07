@@ -43,7 +43,6 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
         name={name}
         checked={checked}
         readOnly
-        tabIndex={-1}
       />
       <button
         type="button"

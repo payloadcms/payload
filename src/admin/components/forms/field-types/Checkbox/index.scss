@@ -4,6 +4,10 @@
   position: relative;
   margin-bottom: $baseline;
 
+  input[type=checkbox] {
+    display: none;
+  }
+
   .tooltip {
     right: auto;
     position: relative;
