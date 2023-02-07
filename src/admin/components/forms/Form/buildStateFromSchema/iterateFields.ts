@@ -37,7 +37,7 @@ export const iterateFields = async ({
   const promises = [];
   fields.forEach((field) => {
     const initialData = data;
-    if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
+    if (!fieldIsPresentationalOnly(field)) {
       const passesCondition = Boolean((field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}) : true) && parentPassesCondition);
 
       promises.push(addFieldStatePromise({
