@@ -23,7 +23,7 @@ const DateTime: React.FC<Props> = (props) => {
     value,
     onChange,
     displayFormat,
-    pickerAppearance = 'dayAndTime',
+    pickerAppearance,
     minDate,
     maxDate,
     monthsToShow = 1,
@@ -47,10 +47,11 @@ const DateTime: React.FC<Props> = (props) => {
 
   let dateTimeFormat = displayFormat;
 
-  if (dateTimeFormat === undefined) {
+  if (dateTimeFormat === undefined && pickerAppearance) {
     if (pickerAppearance === 'dayAndTime') dateTimeFormat = 'MMM d, yyy h:mm a';
     else if (pickerAppearance === 'timeOnly') dateTimeFormat = 'h:mm a';
-    else if (pickerAppearance === 'monthOnly') dateTimeFormat = 'MM/yyyy';
+    else if (pickerAppearance === 'dayOnly') dateTimeFormat = 'dd';
+    else if (pickerAppearance === 'monthOnly') dateTimeFormat = 'MMMM';
     else dateTimeFormat = 'MMM d, yyy';
   }
 
