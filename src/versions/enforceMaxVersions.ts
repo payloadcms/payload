@@ -23,14 +23,12 @@ export const enforceMaxVersions = async ({
 
     if (id) query.parent = id;
 
-    const oldestAllowedDoc = await Model.find(query).limit(1).skip(max).sort({ createdAt: -1 });
+    const oldestAllowedDoc = await Model.find(query).limit(1).skip(max).sort({ updatedAt: -1 });
 
-    if (oldestAllowedDoc?.[0]?.createdAt) {
-      const deleteLessThan = oldestAllowedDoc[0].createdAt;
-
+    if (oldestAllowedDoc?.[0]?.updatedAt) {
       await Model.deleteMany({
-        createdAt: {
-          $lte: deleteLessThan,
+        updatedAt: {
+          $lte: oldestAllowedDoc[0].updatedAt,
         },
       });
     }
