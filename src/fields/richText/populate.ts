@@ -31,16 +31,16 @@ export const populate = async ({
 }): Promise<void> => {
   const dataRef = data as Record<string, unknown>;
 
-  const doc = await req.payloadDataLoader.load(JSON.stringify([
-    collection.config.slug,
+  const doc = await req.payloadDataLoader.load({
+    collection: collection.config.slug,
     id,
     depth,
-    currentDepth + 1,
-    req.locale,
-    req.fallbackLocale,
-    typeof overrideAccess === 'undefined' ? false : overrideAccess,
+    currentDepth: currentDepth + 1,
+    locale: req.locale,
+    fallbackLocale: req.fallbackLocale,
+    overrideAccess: typeof overrideAccess === 'undefined' ? false : overrideAccess,
     showHiddenFields,
-  ]));
+  });
 
   if (doc) {
     dataRef[key] = doc;

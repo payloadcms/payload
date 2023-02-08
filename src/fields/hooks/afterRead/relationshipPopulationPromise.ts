@@ -40,16 +40,18 @@ const populate = async ({
     }
 
     if (shouldPopulate) {
-      relationshipValue = await req.payloadDataLoader.load(JSON.stringify([
-        relatedCollection.config.slug,
-        id,
-        depth,
-        currentDepth + 1,
-        req.locale,
-        req.fallbackLocale,
-        overrideAccess,
-        showHiddenFields,
-      ]));
+      relationshipValue = await req.payloadDataLoader.load(
+        {
+          collection: relatedCollection.config.slug,
+          id: id as string,
+          depth,
+          currentDepth: currentDepth + 1,
+          locale: req.locale,
+          fallbackLocale: req.fallbackLocale,
+          overrideAccess,
+          showHiddenFields,
+        },
+      );
     }
 
     if (!relationshipValue) {

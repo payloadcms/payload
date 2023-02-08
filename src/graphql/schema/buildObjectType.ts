@@ -50,6 +50,7 @@ import { Payload } from '../../payload';
 import buildWhereInputType from './buildWhereInputType';
 import buildBlockType from './buildBlockType';
 import isFieldNullable from './isFieldNullable';
+import { PayloadRequest } from '../../express/types';
 
 type LocaleInputType = {
   locale: {
@@ -185,16 +186,18 @@ function buildObjectType({
           const id = value;
 
           if (id) {
-            const relatedDocument = await context.req.payloadDataLoader.load(JSON.stringify([
-              relatedCollectionSlug,
-              id,
-              0,
-              0,
-              locale,
-              fallbackLocale,
-              false,
-              false,
-            ]));
+            const relatedDocument = await (context.req as PayloadRequest).payloadDataLoader.load(
+              {
+                collection: relatedCollectionSlug,
+                id,
+                locale,
+                fallbackLocale,
+                currentDepth: 0,
+                depth: 0,
+                showHiddenFields: false,
+                overrideAccess: false,
+              },
+            );
 
             return relatedDocument || null;
           }
@@ -331,7 +334,6 @@ function buildObjectType({
           const value = parent[field.name];
           const locale = args.locale || context.req.locale;
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale;
-          let relatedCollectionSlug = field.relationTo;
 
           if (hasManyValues) {
             const results = [];
@@ -339,23 +341,28 @@ function buildObjectType({
 
             const createPopulationPromise = async (relatedDoc, i) => {
               let id = relatedDoc;
-              let collectionSlug = field.relationTo;
-
-              if (isRelatedToManyCollections) {
+              let collectionSlug: string;
+              if (typeof field.relationTo === 'string') {
+                collectionSlug = field.relationTo;
+              } else if (isRelatedToManyCollections && typeof relatedDoc.relationTo === 'string') {
                 collectionSlug = relatedDoc.relationTo;
                 id = relatedDoc.value;
+              } else {
+                throw new Error('Invalid relationship type');
               }
 
-              const result = await context.req.payloadDataLoader.load(JSON.stringify([
-                collectionSlug,
-                id,
-                0,
-                0,
-                locale,
-                fallbackLocale,
-                false,
-                false,
-              ]));
+              const result = await (context.req as PayloadRequest).payloadDataLoader.load(
+                {
+                  collection: collectionSlug,
+                  id,
+                  locale,
+                  fallbackLocale,
+                  currentDepth: 0,
+                  depth: 0,
+                  showHiddenFields: false,
+                  overrideAccess: false,
+                },
+              );
 
               if (result) {
                 if (isRelatedToManyCollections) {
@@ -383,7 +390,10 @@ function buildObjectType({
           }
 
           let id = value;
-          if (isRelatedToManyCollections && value) {
+          let relatedCollectionSlug: string;
+          if (typeof field.relationTo === 'string') {
+            relatedCollectionSlug = field.relationTo;
+          } else if (isRelatedToManyCollections && value && typeof value.relationTo === 'string') {
             id = value.value;
             relatedCollectionSlug = value.relationTo;
           }
@@ -391,16 +401,18 @@ function buildObjectType({
           if (id) {
             id = id.toString();
 
-            const relatedDocument = await context.req.payloadDataLoader.load(JSON.stringify([
-              relatedCollectionSlug,
-              id,
-              0,
-              0,
-              locale,
-              fallbackLocale,
-              false,
-              false,
-            ]));
+            const relatedDocument = await (context.req as PayloadRequest).payloadDataLoader.load(
+              {
+                collection: relatedCollectionSlug as string,
+                id,
+                locale,
+                fallbackLocale,
+                currentDepth: 0,
+                depth: 0,
+                showHiddenFields: false,
+                overrideAccess: false,
+              },
+            );
 
             if (relatedDocument) {
               if (isRelatedToManyCollections) {
