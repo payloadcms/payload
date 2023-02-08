@@ -25,7 +25,7 @@ export const getFields = ({
     type: 'text',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   }
 
@@ -34,7 +34,7 @@ export const getFields = ({
     type: 'text',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   }
 
@@ -88,7 +88,7 @@ export const getFields = ({
       name: 'sizes',
       type: 'group',
       admin: {
-        disabled: true,
+        hidden: true,
       },
       fields: collection.upload.imageSizes.map(size => {
         const existingSizeField = existingSizesField?.fields.find(
