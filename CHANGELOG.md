@@ -1,5 +1,12 @@
 
 
+## [1.6.7](https://github.com/payloadcms/payload/compare/v1.6.6...v1.6.7) (2023-02-08)
+
+
+### Bug Fixes
+
+* drawer state was not set when opened ([e6ac872](https://github.com/payloadcms/payload/commit/e6ac872b0d80470883836ef5aac0bdf4b62d6de9))
+
 ## [1.6.6](https://github.com/payloadcms/payload/compare/v1.6.5...v1.6.6) (2023-02-07)
 
 
