@@ -133,4 +133,92 @@ describe('dataloader', () => {
       expect(innerMostRelationship).toStrictEqual(relationB.id);
     });
   });
+  it('should avoid infinite loops in hooks', async () => {
+    const relationA = await payload.create({
+      collection: 'relation-a',
+      data: {
+        richText: [
+          {
+            children: [
+              {
+                text: 'relation a',
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    const relationB = await payload.create({
+      collection: 'relation-b',
+      data: {
+        richText: [
+          {
+            children: [
+              {
+                text: 'relation b',
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    expect(relationA.id).toBeDefined();
+    expect(relationB.id).toBeDefined();
+
+    await payload.update({
+      collection: 'relation-a',
+      id: relationA.id,
+      data: {
+        relationship: relationB.id,
+        richText: [
+          {
+            children: [
+              {
+                text: 'relation a',
+              },
+            ],
+          },
+          {
+            children: [
+              {
+                text: '',
+              },
+            ],
+            type: 'relationship',
+            value: {
+              id: relationB.id,
+            },
+            relationTo: 'relation-b',
+          },
+        ],
+      },
+    });
+
+    const relationAKey = JSON.stringify(['relation-a', relationA.id, 4, 0, 'en', 'en', true, false]);
+    const relationBKey = JSON.stringify(['relation-b', relationB.id, 4, 2, 'en', 'en', true, false]);
+
+
+    const infiniteLoop = await payload.create({
+      collection: 'infinite-loop',
+      data: {
+        textRelationships: `${relationAKey} $_$ ${relationBKey}`,
+      },
+    });
+
+    expect(infiniteLoop.id).toBeDefined();
+
+    const infiniteLoopWithHook = await payload.findByID({
+      collection: 'infinite-loop',
+      id: infiniteLoop.id,
+      depth: 4,
+    });
+
+    // infiniteLoopWithHook should return Array of length 2
+    expect(infiniteLoopWithHook.textRelationships).toHaveLength(2);
+    // it should be an array of [relationA, relationB]
+    expect(infiniteLoopWithHook.textRelationships[0].id).toStrictEqual(relationA.id);
+    expect(infiniteLoopWithHook.textRelationships[1].id).toStrictEqual(relationB.id);
+  });
 });

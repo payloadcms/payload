@@ -2,7 +2,7 @@ import { Request } from 'express';
 import type { i18n as Ii18n, TFunction } from 'i18next';
 import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../payload';
-import { Collection, TypeWithID } from '../collections/config/types';
+import { Collection } from '../collections/config/types';
 import { User } from '../auth/types';
 import { Document } from '../types';
 import { getDataLoader } from '../collections/dataloader';

@@ -60,6 +60,27 @@ export default buildConfig({
         },
       ],
     },
+    {
+      slug: 'infinite-loop',
+      labels: {
+        singular: 'Infinite Loop',
+        plural: 'Infinite Loops',
+      },
+      fields: [
+        {
+          name: 'textRelationships',
+          type: 'text',
+          hooks: {
+            afterRead: [
+              async ({ value, req: { payloadDataLoader } }) => {
+                const ids = value.split(' $_$ ').map((id) => id.trim());
+                return payloadDataLoader.loadAll(ids);
+              },
+            ],
+          },
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     const user = await payload.create({
