@@ -45,6 +45,8 @@ This plugin supports the following adapters:
 
 However, you can create your own adapter for any third-party service you would like to use.
 
+All adapters are implemented `dev` directory's [Payload Config](https://github.com/payloadcms/plugin-cloud-storage/blob/master/dev/src/payload.config.ts). See this file for examples.
+
 ## Plugin options
 
 This plugin is configurable to work across many different Payload collections. A `*` denotes that the property is required.
@@ -84,7 +86,9 @@ const adapter = azureBlobStorageAdapter({
 
 ### S3 Adapter
 
-To use the S3 adapter, you need to have `@aws-sdk/client-s3` installed in your project dependencies. To do so, run `yarn add @aws-sdk/client-s3`.
+To use the S3 adapter, some peer dependencies need to be installed:
+
+`yarn add @aws-sdk/client-s3 @aws-sdk/lib-storage`.
 
 From there, create the adapter, passing in all of its required properties:
 
@@ -97,12 +101,17 @@ const adapter = s3Adapter({
       accessKeyId: process.env.S3_ACCESS_KEY_ID,
       secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
     }
+    // ... Other S3 configuration
   },
   bucket: process.env.S3_BUCKET,
 })
 
 // Now you can pass this adapter to the plugin
 ```
+
+Other S3 Client configuration is documented [here](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html).
+
+Any upload over 50MB will automatically be uploaded using S3's multi-part upload.
 
 #### Other S3-Compatible Storage
 

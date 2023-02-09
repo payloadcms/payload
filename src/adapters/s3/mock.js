@@ -1,7 +1,8 @@
-exports.S3 = function () {
-  return null
-}
+exports.S3 = () => null
 
-exports.HeadObjectCommand = function () {
-  return null
-}
+exports.HeadObjectCommand = () => null
+exports.PutObjectCommand = () => null
+exports.UploadPartCommand = () => null
+exports.CreateMultipartUploadCommand = () => null
+exports.CompleteMultipartUploadCommand = () => null
+exports.PutObjectTaggingCommand = () => null

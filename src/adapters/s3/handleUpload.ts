@@ -3,6 +3,8 @@ import path from 'path'
 import type * as AWS from '@aws-sdk/client-s3'
 import type { CollectionConfig } from 'payload/types'
 import type stream from 'stream'
+
+import { Upload } from '@aws-sdk/lib-storage'
 import type { HandleUpload } from '../../types'
 
 interface Args {
@@ -13,6 +15,8 @@ interface Args {
   getStorageClient: () => AWS.S3
 }
 
+const multipartThreshold = 1024 * 1024 * 50 // 50MB
+
 export const getHandleUpload = ({
   getStorageClient,
   bucket,
@@ -22,20 +26,36 @@ export const getHandleUpload = ({
   return async ({ data, file }) => {
     const fileKey = path.posix.join(prefix, file.filename)
 
-    let fileBufferOrStream: Buffer | stream.Readable
-    if (file.tempFilePath) {
-      fileBufferOrStream = fs.createReadStream(file.tempFilePath)
-    } else {
-      fileBufferOrStream = file.buffer
+    const fileBufferOrStream: Buffer | stream.Readable = file.tempFilePath
+      ? fs.createReadStream(file.tempFilePath)
+      : file.buffer
+
+    if (file.buffer.length > 0 && file.buffer.length < multipartThreshold) {
+      await getStorageClient().putObject({
+        Bucket: bucket,
+        Key: fileKey,
+        Body: fileBufferOrStream,
+        ACL: acl,
+        ContentType: file.mimeType,
+      })
+
+      return data
     }
 
-    await getStorageClient().putObject({
-      Bucket: bucket,
-      Key: fileKey,
-      Body: fileBufferOrStream,
-      ACL: acl,
-      ContentType: file.mimeType,
+    const parallelUploadS3 = new Upload({
+      client: getStorageClient(),
+      params: {
+        Bucket: bucket,
+        Key: fileKey,
+        Body: fileBufferOrStream,
+        ACL: acl,
+        ContentType: file.mimeType,
+      },
+      queueSize: 4,
+      partSize: multipartThreshold,
     })
+
+    await parallelUploadS3.done()
 
     return data
   }
