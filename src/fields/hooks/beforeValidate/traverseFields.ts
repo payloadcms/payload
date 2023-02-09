@@ -2,9 +2,9 @@ import { PayloadRequest } from '../../../express/types';
 import { Field, TabAsField } from '../../config/types';
 import { promise } from './promise';
 
-type Args = {
-  data: Record<string, unknown>
-  doc: Record<string, unknown>
+type Args<T> = {
+  data: T
+  doc: T
   fields: (Field | TabAsField)[]
   id?: string | number
   operation: 'create' | 'update'
@@ -14,7 +14,7 @@ type Args = {
   siblingDoc: Record<string, unknown>
 }
 
-export const traverseFields = async ({
+export const traverseFields = async <T>({
   data,
   doc,
   fields,
@@ -24,7 +24,7 @@ export const traverseFields = async ({
   req,
   siblingData,
   siblingDoc,
-}: Args): Promise<void> => {
+}: Args<T>): Promise<void> => {
   const promises = [];
   fields.forEach((field) => {
     promises.push(promise({

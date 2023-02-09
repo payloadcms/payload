@@ -13,7 +13,6 @@ const AutosavePosts: CollectionConfig = {
   },
   versions: {
     maxPerDoc: 35,
-    retainDeleted: false,
     drafts: {
       autosave: {
         interval: 2000,

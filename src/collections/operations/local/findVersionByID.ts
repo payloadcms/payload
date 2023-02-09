@@ -1,4 +1,5 @@
-import { Payload } from '../../..';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { Payload } from '../../../payload';
 import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import { TypeWithVersion } from '../../../versions/types';
@@ -7,8 +8,8 @@ import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
 
-export type Options = {
-  collection: string
+export type Options<T extends keyof GeneratedTypes['collections']> = {
+  collection: T
   id: string
   depth?: number
   locale?: string
@@ -20,7 +21,10 @@ export type Options = {
   req?: PayloadRequest
 }
 
-export default async function findVersionByIDLocal<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<T> {
+export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<TypeWithVersion<GeneratedTypes['collections'][T]>> {
   const {
     collection: collectionSlug,
     depth,
@@ -37,7 +41,7 @@ export default async function findVersionByIDLocal<T extends TypeWithVersion<T> 
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
   req.payloadAPI = 'local';

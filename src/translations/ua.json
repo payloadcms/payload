@@ -178,7 +178,7 @@
     "leaveAnyway": "Все одно вийти",
     "leaveWithoutSaving": "Вийти без збереження",
     "light": "Світла",
-    "loading": "Загрузка...",
+    "loading": "Загрузка",
     "locales": "Переклади",
     "moveDown": "Перемістити нижче",
     "moveUp": "Перемістити вище",
@@ -218,6 +218,8 @@
     "untitled": "Без назви",
     "updatedAt": "Змінено",
     "updatedSuccessfully": "Успішно відредаговано.",
+    "updating": "оновлення",
+    "uploading": "завантаження",
     "user": "Користувач",
     "users": "Користувачі",
     "welcome": "Вітаю"

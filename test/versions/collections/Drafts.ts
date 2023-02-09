@@ -9,7 +9,6 @@ const DraftPosts: CollectionConfig = {
   },
   versions: {
     maxPerDoc: 35,
-    retainDeleted: false,
     drafts: true,
   },
   access: {

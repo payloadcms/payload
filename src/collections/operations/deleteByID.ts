@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../express/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound, Forbidden, ErrorDeletingFile } from '../../errors';
@@ -11,6 +11,7 @@ import { hasWhereAccessResult } from '../../auth/types';
 import { FileData } from '../../uploads/types';
 import fileExists from '../../uploads/fileExists';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 
 export type Arguments = {
   depth?: number
@@ -21,7 +22,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function deleteByID(incomingArgs: Arguments): Promise<Document> {
+async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(incomingArgs: Arguments): Promise<Document> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -48,6 +49,7 @@ async function deleteByID(incomingArgs: Arguments): Promise<Document> {
     req: {
       t,
       locale,
+      payload,
       payload: {
         config,
         preferences,
@@ -163,6 +165,18 @@ async function deleteByID(incomingArgs: Arguments): Promise<Document> {
     await preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug });
   }
   await preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
+
+  // /////////////////////////////////////
+  // Delete versions
+  // /////////////////////////////////////
+
+  if (collectionConfig.versions) {
+    deleteCollectionVersions({
+      payload,
+      id,
+      slug: collectionConfig.slug,
+    });
+  }
 
   // /////////////////////////////////////
   // afterDelete - Collection

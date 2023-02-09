@@ -1,4 +1,5 @@
-import { Payload } from '../../..';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { Payload } from '../../../payload';
 import { Document, Where } from '../../../types';
 import { PaginatedDocs } from '../../../mongoose/types';
 import { TypeWithVersion } from '../../../versions/types';
@@ -8,8 +9,8 @@ import { getDataLoader } from '../../dataloader';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
 
-export type Options = {
-  collection: string
+export type Options<T extends keyof GeneratedTypes['collections']> = {
+  collection: T
   depth?: number
   page?: number
   limit?: number
@@ -22,7 +23,10 @@ export type Options = {
   where?: Where
 }
 
-export default async function findVersionsLocal<T extends TypeWithVersion<T> = any>(payload: Payload, options: Options): Promise<PaginatedDocs<T>> {
+export default async function findVersionsLocal<T extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['collections'][T]>>> {
   const {
     collection: collectionSlug,
     depth,
@@ -41,7 +45,7 @@ export default async function findVersionsLocal<T extends TypeWithVersion<T> = a
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
   const i18n = i18nInit(payload.config.i18n);

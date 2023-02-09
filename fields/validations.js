@@ -1,1 +1,1 @@
-export * from '../dist/fields/validations';
+module.exports = require('../dist/fields/validations');

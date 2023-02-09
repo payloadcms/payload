@@ -23,6 +23,7 @@ import JSONFields, { jsonDoc } from './collections/JSON';
 import RelationshipFields from './collections/Relationship';
 import RadioFields, { radiosDoc } from './collections/Radio';
 import Uploads2 from './collections/Upload2';
+import Uploads3 from './collections/Uploads3';
 
 export default buildConfig({
   admin: {
@@ -57,6 +58,7 @@ export default buildConfig({
     TextFields,
     Uploads,
     Uploads2,
+    Uploads3,
   ],
   localization: {
     defaultLocale: 'en',
@@ -102,14 +104,15 @@ export default buildConfig({
         ...uploadsDoc,
         media: createdPNGDoc.id,
       },
-      file: jpgFile
-     });
+      file: jpgFile,
+    });
 
     const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace('{{ARRAY_DOC_ID}}', createdArrayDoc.id));
     const richTextDocWithRelationship = { ...richTextDocWithRelId };
 
     const richTextRelationshipIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'relationship');
     richTextDocWithRelationship.richText[richTextRelationshipIndex].value = { id: createdTextDoc.id };
+    richTextDocWithRelationship.richTextReadOnly[richTextRelationshipIndex].value = { id: createdTextDoc.id };
 
     const richTextUploadIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'upload');
     richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdJPGDoc.id };

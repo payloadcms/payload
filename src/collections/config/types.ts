@@ -329,4 +329,5 @@ export type TypeWithTimestamps = {
   id: string | number
   createdAt: string
   updatedAt: string
+  [key: string]: unknown
 }

@@ -72,8 +72,46 @@
     }
   }
 
+  &__header {
+    display: flex;
+    margin-top: base(2.5);
+    margin-bottom: base(1);
+    width: 100%;
+
+    &__title {
+      margin: 0;
+      flex-grow: 1;
+    }
+
+    &__close {
+      border: 0;
+      background-color: transparent;
+      padding: 0;
+      cursor: pointer;
+      overflow: hidden;
+      width: base(1);
+      height: base(1);
+
+      svg {
+        width: base(2.75);
+        height: base(2.75);
+        position: relative;
+        left: base(-.825);
+        top: base(-.825);
+
+        .stroke {
+          stroke-width: 2px;
+          vector-effect: non-scaling-stroke;
+        }
+      }
+    }
+  }
 
   @include mid-break {
+    &__header {
+      margin-top: base(1.5);
+    }
+
     &__close {
       width: base(1);
     }

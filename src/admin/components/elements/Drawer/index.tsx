@@ -4,7 +4,9 @@ import { useWindowInfo } from '@faceless-ui/window-info';
 import { useTranslation } from 'react-i18next';
 import { Props, TogglerProps } from './types';
 import { EditDepthContext, useEditDepth } from '../../utilities/EditDepth';
+import { Gutter } from '../Gutter';
 import './index.scss';
+import X from '../../icons/X';
 
 const baseClass = 'drawer';
 
@@ -20,7 +22,6 @@ export const formatDrawerSlug = ({
 
 export const DrawerToggler: React.FC<TogglerProps> = ({
   slug,
-  formatSlug,
   children,
   className,
   onClick,
@@ -28,12 +29,11 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
   ...rest
 }) => {
   const { openModal } = useModal();
-  const drawerDepth = useEditDepth();
 
   const handleClick = useCallback((e) => {
-    openModal(formatSlug !== false ? formatDrawerSlug({ slug, depth: drawerDepth }) : slug);
+    openModal(slug);
     if (typeof onClick === 'function') onClick(e);
-  }, [openModal, drawerDepth, slug, onClick, formatSlug]);
+  }, [openModal, slug, onClick]);
 
   return (
     <button
@@ -50,9 +50,11 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
 
 export const Drawer: React.FC<Props> = ({
   slug,
-  formatSlug,
   children,
   className,
+  header,
+  title,
+  gutter = true,
 }) => {
   const { t } = useTranslation('general');
   const { closeModal, modalState } = useModal();
@@ -60,11 +62,10 @@ export const Drawer: React.FC<Props> = ({
   const drawerDepth = useEditDepth();
   const [isOpen, setIsOpen] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
-  const [modalSlug] = useState(() => (formatSlug !== false ? formatDrawerSlug({ slug, depth: drawerDepth }) : slug));
 
   useEffect(() => {
-    setIsOpen(modalState[modalSlug]?.isOpen);
-  }, [modalSlug, modalState]);
+    setIsOpen(modalState[slug]?.isOpen);
+  }, [slug, modalState]);
 
   useEffect(() => {
     setAnimateIn(isOpen);
@@ -75,7 +76,7 @@ export const Drawer: React.FC<Props> = ({
 
     return (
       <Modal
-        slug={modalSlug}
+        slug={slug}
         className={[
           className,
           baseClass,
@@ -90,20 +91,41 @@ export const Drawer: React.FC<Props> = ({
         )}
         <button
           className={`${baseClass}__close`}
-          id={`close-drawer__${modalSlug}`}
+          id={`close-drawer__${slug}`}
           type="button"
-          onClick={() => closeModal(modalSlug)}
+          onClick={() => closeModal(slug)}
           style={{
             width: `calc(${midBreak ? 'var(--gutter-h)' : 'var(--nav-width)'} + ${drawerDepth - 1} * 25px)`,
           }}
           aria-label={t('close')}
         />
         <div className={`${baseClass}__content`}>
-          <div className={`${baseClass}__content-children`}>
+          <Gutter
+            className={`${baseClass}__content-children`}
+            right={gutter}
+            left={gutter}
+          >
             <EditDepthContext.Provider value={drawerDepth + 1}>
+              {header && header}
+              {header === undefined && (
+                <div className={`${baseClass}__header`}>
+                  <h2 className={`${baseClass}__header__title`}>
+                    {title}
+                  </h2>
+                  <button
+                    className={`${baseClass}__header__close`}
+                    id={`close-drawer__${slug}`}
+                    type="button"
+                    onClick={() => closeModal(slug)}
+                    aria-label={t('close')}
+                  >
+                    <X />
+                  </button>
+                </div>
+              )}
               {children}
             </EditDepthContext.Provider>
-          </div>
+          </Gutter>
         </div>
       </Modal>
     );

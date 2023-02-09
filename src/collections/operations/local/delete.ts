@@ -1,16 +1,16 @@
-import { TypeWithID } from '../../config/types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Document, Where } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
-import { Payload } from '../../../index';
+import { Payload } from '../../../payload';
 import deleteOperation from '../delete';
 import deleteByID from '../deleteByID';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
 
-export type BaseOptions = {
-  collection: string
-
+export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
+  collection: T
+  id: string
   depth?: number
   locale?: string
   fallbackLocale?: string
@@ -19,22 +19,22 @@ export type BaseOptions = {
   showHiddenFields?: boolean
 }
 
-export type ByIDOptions = BaseOptions & {
+export type ByIDOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {
   id: string
   where?: never
 }
 
-export type ManyOptions = BaseOptions & {
+export type ManyOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {
   where: Where
   id?: never
 }
 
-export type Options = ByIDOptions | ManyOptions
+export type Options<TSlug extends keyof GeneratedTypes['collections']> = ByIDOptions<TSlug> | ManyOptions<TSlug>
 
-async function deleteLocal<T extends TypeWithID = any>(payload: Payload, options: ByIDOptions): Promise<T>
-async function deleteLocal<T extends TypeWithID = any>(payload: Payload, options: ManyOptions): Promise<T[]>
-async function deleteLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<T | T[]>
-async function deleteLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<T | T[]> {
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ByIDOptions<TSlug>): Promise<GeneratedTypes['collections'][TSlug]>
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ManyOptions<TSlug>): Promise<GeneratedTypes['collections'][TSlug][]>
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | GeneratedTypes['collections'][TSlug][]>
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | GeneratedTypes['collections'][TSlug][]> {
   const {
     collection: collectionSlug,
     depth,
@@ -52,7 +52,7 @@ async function deleteLocal<T extends TypeWithID = any>(payload: Payload, options
 
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
   const req = {
@@ -78,9 +78,9 @@ async function deleteLocal<T extends TypeWithID = any>(payload: Payload, options
   };
 
   if (options.id) {
-    return deleteByID(args);
+    return deleteByID<TSlug>(args);
   }
-  return deleteOperation(args);
+  return deleteOperation<TSlug>(args);
 }
 
 export default deleteLocal;

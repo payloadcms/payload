@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import httpStatus from 'http-status';
 import { AccessResult } from '../../config/types';
 import { PayloadRequest } from '../../express/types';
@@ -8,11 +8,12 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { ErrorDeletingFile, APIError } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { BeforeOperationHook, Collection } from '../config/types';
-import { Document, Where } from '../../types';
+import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { FileData } from '../../uploads/types';
 import fileExists from '../../uploads/fileExists';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 
 export type Arguments = {
   depth?: number
@@ -23,7 +24,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
+async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']>(
+  incomingArgs: Arguments,
+): Promise<GeneratedTypes['collections'][TSlug][]> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -50,6 +53,7 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
     req: {
       t,
       locale,
+      payload,
       payload: {
         config,
         preferences,
@@ -170,6 +174,18 @@ async function deleteOperation(incomingArgs: Arguments): Promise<Document> {
     // /////////////////////////////////////
 
     await Model.deleteOne({ _id: id }, { lean: true });
+
+    // /////////////////////////////////////
+    // Delete versions
+    // /////////////////////////////////////
+
+    if (collectionConfig.versions) {
+      deleteCollectionVersions({
+        payload,
+        id,
+        slug: collectionConfig.slug,
+      });
+    }
 
     // /////////////////////////////////////
     // afterDelete - Collection

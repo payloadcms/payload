@@ -1,3 +1,4 @@
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import find from './find';
 import findByID from './findByID';
 import create from './create';
@@ -7,17 +8,16 @@ import auth from '../../../auth/operations/local';
 import findVersionByID from './findVersionByID';
 import findVersions from './findVersions';
 import restoreVersion from './restoreVersion';
-import { TypeWithID } from '../../config/types';
 
-async function localUpdate <T = any>(options: UpdateByIDOptions<T>): Promise<T>
-async function localUpdate <T = any>(options: UpdateManyOptions<T>): Promise<T[]>
-async function localUpdate <T = any>(options: UpdateOptions<T>): Promise<T | T[]> {
+async function localUpdate <T extends keyof GeneratedTypes['collections']>(options: UpdateByIDOptions<T>): Promise<GeneratedTypes['collections'][T]>
+async function localUpdate <T extends keyof GeneratedTypes['collections']>(options: UpdateManyOptions<T>): Promise<GeneratedTypes['collections'][T][]>
+async function localUpdate <T extends keyof GeneratedTypes['collections']>(options: UpdateOptions<T>): Promise<GeneratedTypes['collections'][T] | GeneratedTypes['collections'][T][]> {
   return update<T>(this, options);
 }
 
-async function localDelete <T extends TypeWithID = any>(options: DeleteByIDOptions): Promise<T>
-async function localDelete <T extends TypeWithID = any>(options: DeleteManyOptions): Promise<T[]>
-async function localDelete <T extends TypeWithID = any>(options: DeleteOptions): Promise<T | T[]> {
+async function localDelete <T extends keyof GeneratedTypes['collections']>(options: DeleteByIDOptions<T>): Promise<GeneratedTypes['collections'][T]>
+async function localDelete <T extends keyof GeneratedTypes['collections']>(options: DeleteManyOptions<T>): Promise<GeneratedTypes['collections'][T][]>
+async function localDelete <T extends keyof GeneratedTypes['collections']>(options: DeleteOptions<T>): Promise<GeneratedTypes['collections'][T] | GeneratedTypes['collections'][T][]> {
   return deleteLocal<T>(this, options);
 }
 
@@ -26,7 +26,7 @@ export default {
   findByID,
   create,
   update: localUpdate,
-  delete: localDelete,
+  localDelete,
   auth,
   findVersionByID,
   findVersions,

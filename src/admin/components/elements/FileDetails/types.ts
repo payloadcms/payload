@@ -1,7 +1,11 @@
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import { FileSizes } from '../../../../uploads/types';
+import { Data } from '../../forms/Form/types';
 
 export type Props = {
   collection: SanitizedCollectionConfig
-  doc: Record<string, unknown>
+  doc: Data & {
+    sizes?: FileSizes
+  }
   handleRemove?: () => void,
 }

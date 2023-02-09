@@ -159,7 +159,6 @@ const Form: React.FC<Props> = (props) => {
       };
 
       onSubmit(fields, data);
-      return;
     }
 
     const formData = contextRef.current.createFormData(overrides);

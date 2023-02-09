@@ -9,6 +9,7 @@ import { Where } from '../../types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
 
 export type Arguments = {
   collection: Collection
@@ -99,10 +100,12 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // fetch previousDoc
   // /////////////////////////////////////
 
-  const previousDoc = await payload.findByID({
-    collection: collectionConfig.slug,
+  const prevDocWithLocales = await getLatestEntityVersion({
+    payload,
     id: parentDocID,
-    depth,
+    query,
+    Model,
+    config: collectionConfig,
   });
 
   // /////////////////////////////////////
@@ -119,9 +122,24 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
+  result = JSON.parse(JSON.stringify(result));
   result = sanitizeInternalFields(result);
+
+  // /////////////////////////////////////
+  // Save `previousDoc` as a version after restoring
+  // /////////////////////////////////////
+
+  const prevVersion = { ...prevDocWithLocales };
+
+  delete prevVersion.id;
+
+  await VersionModel.create({
+    parent: parentDocID,
+    version: prevVersion,
+    autosave: false,
+    createdAt: prevVersion.createdAt,
+    updatedAt: new Date().toISOString(),
+  });
 
   // /////////////////////////////////////
   // afterRead - Fields
@@ -156,7 +174,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   result = await afterChange({
     data: result,
     doc: result,
-    previousDoc,
+    previousDoc: prevDocWithLocales,
     entityConfig: collectionConfig,
     operation: 'update',
     req,
@@ -172,7 +190,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     result = await hook({
       doc: result,
       req,
-      previousDoc,
+      previousDoc: prevDocWithLocales,
       operation: 'update',
     }) || result;
   }, Promise.resolve());
