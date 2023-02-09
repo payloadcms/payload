@@ -546,8 +546,9 @@ describe('fields', () => {
       await page.goto(url.create);
       const dateField = await page.locator('#field-default input');
       await expect(dateField).toBeVisible();
-      await dateField.fill('2021-08-01');
-      await expect(dateField).toHaveValue('2021-08-01');
+      await dateField.fill('02/07/2023');
+      await expect(dateField).toHaveValue('02/07/2023');
+      await wait(1000);
       const clearButton = await page.locator('#field-default .date-time-picker__clear-button');
       await expect(clearButton).toBeVisible();
       await clearButton.click();
