@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "dist/server.js",
   "license": "MIT",
+  "private": true,
   "scripts": {
     "dev:azure": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER=azure nodemon",
     "dev:s3": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER=s3 nodemon",

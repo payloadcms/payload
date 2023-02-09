@@ -8,15 +8,16 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint src",
-    "lint:fix": "eslint --fix --ext .ts,.tsx src"
+    "lint:fix": "eslint --fix --ext .ts,.tsx src",
+    "clean": "rimraf dist && rimraf dev/yarn.lock",
+    "prepublishOnly": "yarn clean && yarn build"
   },
-  "prepublishOnly": "yarn build",
   "peerDependencies": {
     "@aws-sdk/client-s3": "^3.142.0",
     "@aws-sdk/lib-storage": "^3.267.0",
     "@azure/storage-blob": "^12.11.0",
     "@google-cloud/storage": "^6.4.1",
-    "payload": "^1.6.6"
+    "payload": "^1.0.27"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/client-s3": {
@@ -56,6 +57,7 @@
     "nodemon": "^2.0.6",
     "payload": "^1.6.6",
     "prettier": "^2.7.1",
+    "rimraf": "^4.1.2",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   }
