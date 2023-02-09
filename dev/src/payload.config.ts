@@ -66,8 +66,6 @@ export default buildConfig({
           alias: {
             ...(config.resolve.alias || {}),
             react: path.resolve(__dirname, '../node_modules/react'),
-            fs: path.resolve(__dirname, 'mocks/fileStub.js'),
-            util: path.resolve(__dirname, 'mocks/promisifyMock.js'),
             '@azure/storage-blob': path.resolve(__dirname, '../../src/adapters/azure/mock.js'),
             '@aws-sdk/client-s3': path.resolve(__dirname, '../../src/adapters/s3/mock.js'),
             '@google-cloud/storage': path.resolve(__dirname, '../../src/adapters/gcs/mock.js'),
