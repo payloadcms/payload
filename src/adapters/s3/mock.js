@@ -1,4 +1,5 @@
 exports.S3 = () => null
+exports.Upload = () => null
 
 exports.HeadObjectCommand = () => null
 exports.PutObjectCommand = () => null
