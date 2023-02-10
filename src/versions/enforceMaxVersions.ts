@@ -22,22 +22,18 @@ export const enforceMaxVersions = async ({
   try {
     const query: { parent?: string | number } = {};
 
-    if (id) query.parent = id;
+    if (entityType === 'collection') query.parent = id;
 
     const oldestAllowedDoc = await Model.find(query).limit(1).skip(max).sort({ updatedAt: -1 });
 
     if (oldestAllowedDoc?.[0]?.updatedAt) {
       const deleteQuery: FilterQuery<unknown> = {
-        $and: [
-          {
-            updatedAt: {
-              $lte: oldestAllowedDoc[0].updatedAt,
-            },
-          },
-        ],
+        updatedAt: {
+          $lte: oldestAllowedDoc[0].updatedAt,
+        },
       };
 
-      if (id) deleteQuery.$and.push({ parent: id });
+      if (entityType === 'collection') deleteQuery.parent = id;
 
       await Model.deleteMany(deleteQuery);
     }
