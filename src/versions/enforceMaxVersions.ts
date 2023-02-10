@@ -27,9 +27,16 @@ export const enforceMaxVersions = async ({
 
     if (oldestAllowedDoc?.[0]?.updatedAt) {
       await Model.deleteMany({
-        updatedAt: {
-          $lte: oldestAllowedDoc[0].updatedAt,
-        },
+        $and: [
+          {
+            parent: id,
+          },
+          {
+            updatedAt: {
+              $lte: oldestAllowedDoc[0].updatedAt,
+            },
+          },
+        ],
       });
     }
   } catch (err) {
