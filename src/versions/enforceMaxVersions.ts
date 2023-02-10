@@ -1,3 +1,4 @@
+import { FilterQuery } from 'mongoose';
 import { Payload } from '../payload';
 import { CollectionModel } from '../collections/config/types';
 
@@ -26,11 +27,19 @@ export const enforceMaxVersions = async ({
     const oldestAllowedDoc = await Model.find(query).limit(1).skip(max).sort({ updatedAt: -1 });
 
     if (oldestAllowedDoc?.[0]?.updatedAt) {
-      await Model.deleteMany({
-        updatedAt: {
-          $lte: oldestAllowedDoc[0].updatedAt,
-        },
-      });
+      const deleteQuery: FilterQuery<unknown> = {
+        $and: [
+          {
+            updatedAt: {
+              $lte: oldestAllowedDoc[0].updatedAt,
+            },
+          },
+        ],
+      };
+
+      if (id) deleteQuery.$and.push({ parent: id });
+
+      await Model.deleteMany(deleteQuery);
     }
   } catch (err) {
     payload.logger.error(`There was an error cleaning up old versions for the ${entityType} ${slug}`);
