@@ -1,5 +1,18 @@
 
 
+## [1.6.9](https://github.com/payloadcms/payload/compare/v1.6.7...v1.6.9) (2023-02-10)
+
+
+### Bug Fixes
+
+* adds query constraint to ensureMaxVersions query ([30688bb](https://github.com/payloadcms/payload/commit/30688bbe4136285af181a5deae5e949b98bea0be))
+* translation of "or" -> "ou" in french ([#2047](https://github.com/payloadcms/payload/issues/2047)) ([dddbec2](https://github.com/payloadcms/payload/commit/dddbec268255c41b7ea786bdddc02dfeb7d66fbd))
+
+
+### Features
+
+* allows customization of the folder used to serve admin bundled files in production ([4d259a6](https://github.com/payloadcms/payload/commit/4d259a69f2c9beb1d84f703a08921469e6f1c34b))
+
 ## [1.6.7](https://github.com/payloadcms/payload/compare/v1.6.6...v1.6.7) (2023-02-08)
 
 
