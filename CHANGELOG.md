@@ -1,5 +1,12 @@
 
 
+## [1.6.8](https://github.com/payloadcms/payload/compare/v1.6.7...v1.6.8) (2023-02-10)
+
+
+### Bug Fixes
+
+* adds query constraint to ensureMaxVersions query ([30688bb](https://github.com/payloadcms/payload/commit/30688bbe4136285af181a5deae5e949b98bea0be))
+
 ## [1.6.7](https://github.com/payloadcms/payload/compare/v1.6.6...v1.6.7) (2023-02-08)
 
 
