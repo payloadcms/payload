@@ -1,10 +1,10 @@
 import React from 'react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import * as Locales from 'date-fns/locale';
-import { useLocale } from '../../utilities/Locale';
 import CalendarIcon from '../../icons/Calendar';
 import XIcon from '../../icons/X';
 import { Props } from './types';
+import { useTranslation } from 'react-i18next';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import './index.scss';
@@ -35,7 +35,9 @@ const DateTime: React.FC<Props> = (props) => {
     placeholder: placeholderText,
   } = props;
 
-  let currentLocale = useLocale();
+  // Use the user's AdminUI language preference for the locale
+  const { i18n } = useTranslation();
+  let currentLocale = i18n.language;
   currentLocale = formattedLocales[currentLocale] || currentLocale;
 
   try {
