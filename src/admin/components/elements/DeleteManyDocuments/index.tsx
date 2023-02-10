@@ -2,9 +2,6 @@ import React, { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
-import queryString from 'qs';
-import { useHistory } from 'react-router-dom';
-import { Where } from '../../../../types';
 import { useConfig } from '../../utilities/Config';
 import Button from '../Button';
 import MinimalTemplate from '../../templates/Minimal';
@@ -13,6 +10,7 @@ import { Props } from './types';
 import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import Pill from '../Pill';
+import { useAuth } from '../../utilities/Auth';
 
 import './index.scss';
 
@@ -30,11 +28,14 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
   } = props;
 
   const { serverURL, routes: { api } } = useConfig();
-  const history = useHistory();
+  const { permissions } = useAuth();
   const [deleting, setDeleting] = useState(false);
   const { toggleModal } = useModal();
   const { t, i18n } = useTranslation('general');
-  const { selected, selectAll, count } = useSelection();
+  const { selectAll, count, getQueryParams } = useSelection();
+
+  const collectionPermissions = permissions?.collections?.[slug];
+  const hasDeletePermission = collectionPermissions?.delete?.permission;
 
   const modalSlug = `delete-${slug}`;
 
@@ -44,25 +45,7 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
 
   const handleDelete = useCallback(() => {
     setDeleting(true);
-
-    let where: Where;
-    if (selectAll === SelectAllStatus.AllAvailable) {
-      const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true }).where as Where;
-      where = params || {
-        id: { not_equals: '' },
-      };
-    } else {
-      where = {
-        id: {
-          in: Object.keys(selected).filter((id) => selected[id]).map((id) => id),
-        },
-      };
-    }
-    const params = queryString.stringify({
-      where,
-    }, { addQueryPrefix: true });
-
-    requests.delete(`${serverURL}${api}/${slug}${params}`, {
+    requests.delete(`${serverURL}${api}/${slug}${getQueryParams()}`, {
       headers: {
         'Content-Type': 'application/json',
         'Accept-Language': i18n.language,
@@ -87,9 +70,9 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
         return addDefaultError();
       }
     });
-  }, [addDefaultError, api, history, i18n.language, modalSlug, resetParams, selectAll, selected, serverURL, slug, t, toggleModal]);
+  }, [addDefaultError, api, getQueryParams, i18n.language, modalSlug, resetParams, selectAll, serverURL, slug, t, toggleModal]);
 
-  if (selectAll === SelectAllStatus.None) {
+  if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
     return null;
   }
 

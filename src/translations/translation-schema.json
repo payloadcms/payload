@@ -470,6 +470,9 @@
         "selectExistingLabel": {
           "type": "string"
         },
+        "selectFieldsToEdit": {
+          "type": "string"
+        },
         "showAll": {
           "type": "string"
         },
@@ -520,6 +523,7 @@
         "saveChanges",
         "searchForBlock",
         "selectExistingLabel",
+        "selectFieldsToEdit",
         "showAll",
         "swapUpload",
         "toggleBlock",
@@ -645,6 +649,15 @@
           "type": "string"
         },
         "editing": {
+          "type": "string"
+        },
+        "editingLabel_many": {
+          "type": "string"
+        },
+        "editingLabel_one": {
+          "type": "string"
+        },
+        "editingLabel_other": {
           "type": "string"
         },
         "email": {
@@ -866,6 +879,9 @@
         "duplicateWithoutSaving",
         "editLabel",
         "editing",
+        "editingLabel_many",
+        "editingLabel_one",
+        "editingLabel_other",
         "email",
         "emailAddress",
         "enterAValue",

@@ -7,6 +7,8 @@ import React, {
   useState,
 } from 'react';
 import { useHistory } from 'react-router-dom';
+import queryString from 'qs';
+import { Where } from '../../../../../../../types';
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',
@@ -22,6 +24,7 @@ type SelectionContext = {
   toggleAll: (allAvailable?: boolean) => void
   totalDocs: number
   count: number
+  getQueryParams: () => string
 }
 
 const Context = createContext({} as SelectionContext);
@@ -71,6 +74,25 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     setSelected(newSelected);
   }, [selected]);
 
+  const getQueryParams = useCallback((): string => {
+    let where: Where;
+    if (selectAll === SelectAllStatus.AllAvailable) {
+      const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true }).where as Where;
+      where = params || {
+        id: { not_equals: '' },
+      };
+    } else {
+      where = {
+        id: {
+          in: Object.keys(selected).filter((id) => selected[id]).map((id) => id),
+        },
+      };
+    }
+    return queryString.stringify({
+      where,
+    }, { addQueryPrefix: true });
+  }, [history.location.search, selectAll, selected]);
+
   useEffect(() => {
     if (selectAll === SelectAllStatus.AllAvailable) {
       return;
@@ -114,6 +136,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     setSelection,
     totalDocs,
     count,
+    getQueryParams,
   };
 
   return (

@@ -21,6 +21,7 @@ import { getTranslation } from '../../../../../utilities/getTranslation';
 import { StaggeredShimmers } from '../../../elements/ShimmerEffect';
 import { SelectionProvider } from './SelectionProvider';
 import DeleteManyDocuments from '../../../elements/DeleteManyDocuments';
+import BulkEdit from '../../../elements/BulkEdit';
 
 import './index.scss';
 
@@ -113,16 +114,19 @@ const DefaultList: React.FC<Props> = (props) => {
             handleWhereChange={handleWhereChange}
             resetParams={resetParams}
           />
-  {!data.docs && (
-          <StaggeredShimmers
-            className={[
-              `${baseClass}__shimmer`,
-              upload ? `${baseClass}__shimmer--uploads` : `${baseClass}__shimmer--rows`,
-            ].filter(Boolean).join(' ')}
-            count={6}
-            width={upload ? 'unset' : '100%'}
-          />
-        )}        {(data.docs && data.docs.length > 0) && (
+          {!data.docs && (
+            <StaggeredShimmers
+              className={[
+                `${baseClass}__shimmer`,
+                upload ? `${baseClass}__shimmer--uploads` : `${baseClass}__shimmer--rows`,
+              ].filter(Boolean)
+                .join(' ')}
+              count={6}
+              width={upload ? 'unset' : '100%'}
+            />
+          )}
+          {' '}
+          {(data.docs && data.docs.length > 0) && (
             <React.Fragment>
               {!upload && (
                 <RelationshipProvider>
@@ -187,13 +191,18 @@ const DefaultList: React.FC<Props> = (props) => {
                   limits={collection?.admin?.pagination?.limits}
                   limit={limit}
                   modifySearchParams={modifySearchParams}
-                  handleChange={handlePerPageChange}resetPage={data.totalDocs <= data.pagingCounter}
+                  handleChange={handlePerPageChange}
+                  resetPage={data.totalDocs <= data.pagingCounter}
                 />
                 <div className={`${baseClass}__list-selection`}>
                   {smallBreak && (
                     <Fragment>
                       <ListSelection
                         label={getTranslation(collection.labels.plural, i18n)}
+                      />
+                      <BulkEdit
+                        collection={collection}
+                        resetParams={resetParams}
                       />
                       <DeleteManyDocuments
                         collection={collection}

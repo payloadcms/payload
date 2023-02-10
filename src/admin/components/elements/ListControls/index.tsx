@@ -16,6 +16,7 @@ import { getTranslation } from '../../../../utilities/getTranslation';
 import Pill from '../Pill';
 import Chevron from '../../icons/Chevron';
 import DeleteManyDocuments from '../DeleteManyDocuments';
+import BulkEdit from '../BulkEdit';
 
 import './index.scss';
 
@@ -63,10 +64,16 @@ const ListControls: React.FC<Props> = (props) => {
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
             { !smallBreak && (
-              <DeleteManyDocuments
-                collection={collection}
-                resetParams={resetParams}
-              />
+              <React.Fragment>
+                <BulkEdit
+                  collection={collection}
+                  resetParams={resetParams}
+                />
+                <DeleteManyDocuments
+                  collection={collection}
+                  resetParams={resetParams}
+                />
+              </React.Fragment>
             )}
             {enableColumns && (
               <Pill
