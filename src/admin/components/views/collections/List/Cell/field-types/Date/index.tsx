@@ -12,7 +12,7 @@ const DateCell = ({ data, field }) => {
 
   return (
     <span>
-      {data && formatDate(data, dateFormat, i18n.language)}
+      {data && formatDate(data, dateFormat, i18n?.language)}
     </span>
   );
 };

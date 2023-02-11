@@ -186,13 +186,13 @@ const DefaultAccount: React.FC<Props> = (props) => {
                           {data.updatedAt && (
                             <li>
                               <div className={`${baseClass}__label`}>{t('general:lastModified')}</div>
-                              <div>{formatDate(data.updatedAt, dateFormat, i18n.language)}</div>
+                              <div>{formatDate(data.updatedAt, dateFormat, i18n?.language)}</div>
                             </li>
                           )}
                           {data.createdAt && (
                             <li>
                               <div className={`${baseClass}__label`}>{t('general:created')}</div>
-                              <div>{formatDate(data.createdAt, dateFormat, i18n.language)}</div>
+                              <div>{formatDate(data.createdAt, dateFormat, i18n?.language)}</div>
                             </li>
                           )}
                         </React.Fragment>

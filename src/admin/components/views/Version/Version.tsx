@@ -114,7 +114,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
           url: `${admin}/collections/${collection.slug}/${id}/versions`,
         },
         {
-          label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n.language) : '',
+          label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
         },
       ];
     }
@@ -130,7 +130,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
           url: `${admin}/globals/${global.slug}/versions`,
         },
         {
-          label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n.language) : '',
+          label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
         },
       ];
     }
@@ -140,7 +140,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
   let metaTitle: string;
   let metaDesc: string;
-  const formattedCreatedAt = doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n.language) : '';
+  const formattedCreatedAt = doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '';
 
   if (collection) {
     const useAsTitle = collection?.admin?.useAsTitle || 'id';

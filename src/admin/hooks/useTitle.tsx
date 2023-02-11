@@ -20,7 +20,7 @@ const useTitle = (useAsTitle: string, collection: string): string => {
 
   if (isDate && value) {
     const dateFormat = fieldConfig?.admin?.date?.displayFormat || dateFormatFromConfig;
-    title = formatDate(value,dateFormat,i18n.language);
+    title = formatDate(value, dateFormat, i18n?.language);
   }
 
   return title;

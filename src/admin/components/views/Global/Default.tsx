@@ -175,7 +175,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                       {updatedAt && (
                         <li>
                           <div className={`${baseClass}__label`}>{t('lastModified')}</div>
-                          <div>{formatDate((updatedAt as string), dateFormat, i18n.language)}</div>
+                          <div>{formatDate((updatedAt as string), dateFormat, i18n?.language)}</div>
                         </li>
                       )}
                     </ul>

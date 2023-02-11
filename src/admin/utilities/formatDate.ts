@@ -8,8 +8,8 @@ const formattedLocales = {
   zh: 'zhCN',
 };
 
-export const formatDate = (date: Date | number | string | undefined, pattern: string, locale: string): string => {
+export const formatDate = (date: Date | number | string | undefined, pattern: string, locale?: string): string => {
   const theDate = new Date(date);
-  const currentLocale = Locale[formattedLocales[locale] || locale] || Locale['enUS'];
+  const currentLocale = !locale ? Locale['enUS'] : Locale[formattedLocales[locale] || locale] || Locale['enUS'];
   return format(theDate, pattern, { locale: currentLocale });
 };

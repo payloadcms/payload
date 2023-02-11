@@ -29,7 +29,7 @@ const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ collection, global, id, d
 
   return (
     <Link to={to}>
-      {date && formatDate(date, dateFormat, i18n.language)}
+      {date && formatDate(date, dateFormat, i18n?.language)}
     </Link>
   );
 };

@@ -279,13 +279,13 @@ const DefaultEditView: React.FC<Props> = (props) => {
                                 {updatedAt && (
                                   <li>
                                     <div className={`${baseClass}__label`}>{t('lastModified')}</div>
-                                    <div>{formatDate(data.updatedAt, dateFormat, i18n.language)}</div>
+                                    <div>{formatDate(data.updatedAt, dateFormat, i18n?.language)}</div>
                                   </li>
                                 )}
                                 {(publishedDoc?.createdAt || data?.createdAt) && (
                                   <li>
                                     <div className={`${baseClass}__label`}>{t('created')}</div>
-                                    <div>{formatDate(publishedDoc?.createdAt || data?.createdAt, dateFormat, i18n.language)}</div>
+                                    <div>{formatDate(publishedDoc?.createdAt || data?.createdAt, dateFormat, i18n?.language)}</div>
                                   </li>
                                 )}
                               </React.Fragment>
