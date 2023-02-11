@@ -48,6 +48,7 @@ export default joi.object({
   globals: joi.array(),
   admin: joi.object({
     user: joi.string(),
+    buildPath: joi.string(),
     meta: joi.object()
       .keys({
         titleSuffix: joi.string(),

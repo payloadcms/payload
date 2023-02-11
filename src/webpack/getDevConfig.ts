@@ -1,4 +1,5 @@
 import webpack, { Configuration } from 'webpack';
+import md5 from 'md5';
 import { SanitizedConfig } from '../config/types';
 import getBaseConfig from './getBaseConfig';
 
@@ -9,6 +10,8 @@ export default (payloadConfig: SanitizedConfig): Configuration => {
     ...baseConfig,
     cache: {
       type: 'filesystem',
+      // version cache when there are changes to aliases
+      version: md5(Object.entries(baseConfig.resolve.alias).join()),
       buildDependencies: {
         config: [__filename],
       },
@@ -39,7 +42,12 @@ export default (payloadConfig: SanitizedConfig): Configuration => {
     sideEffects: true,
     use: [
       require.resolve('style-loader'),
-      require.resolve('css-loader'),
+      {
+        loader: require.resolve('css-loader'),
+        options: {
+          url: (url) => (!url.startsWith('/')),
+        },
+      },
       {
         loader: require.resolve('postcss-loader'),
         options: {

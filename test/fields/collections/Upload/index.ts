@@ -21,6 +21,10 @@ const Uploads: CollectionConfig = {
         },
       },
     },
+    {
+      type: 'richText',
+      name: 'richText',
+    },
   ],
 };
 

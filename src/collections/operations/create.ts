@@ -1,5 +1,9 @@
+import fs from 'fs';
+import { promisify } from 'util';
+
 import crypto from 'crypto';
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { MarkOptional } from 'ts-essentials';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
@@ -17,6 +21,9 @@ import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { saveVersion } from '../../versions/saveVersion';
+import { mapAsync } from '../../utilities/mapAsync';
+
+const unlinkFile = promisify(fs.unlink);
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -25,7 +32,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  data: Omit<T, 'id'>
+  data: MarkOptional<T, 'id' | 'createdAt' | 'updatedAt'>
   overwriteExistingFiles?: boolean
   draft?: boolean
   autosave?: boolean
@@ -214,8 +221,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
+  result = JSON.parse(JSON.stringify(result));
   result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
@@ -230,8 +236,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       id: result.id,
       docWithLocales: result,
       autosave,
-      createdAt: result.createdAt,
-      onCreate: true,
     });
   }
 
@@ -305,6 +309,18 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       operation: 'create',
     }) || result;
   }, Promise.resolve());
+
+  // Remove temp files if enabled, as express-fileupload does not do this automatically
+  if (config.upload?.useTempFiles && collectionConfig.upload) {
+    const { files } = req;
+    const fileArray = Array.isArray(files) ? files : [files];
+    await mapAsync(fileArray, async ({ file }) => {
+      // Still need this check because this will not be populated if using local API
+      if (file.tempFilePath) {
+        await unlinkFile(file.tempFilePath);
+      }
+    });
+  }
 
   // /////////////////////////////////////
   // Return results

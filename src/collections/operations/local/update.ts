@@ -12,7 +12,7 @@ import { APIError } from '../../../errors';
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
   id: string | number
-  data: Omit<GeneratedTypes['collections'][TSlug], 'id'>
+  data: Partial<GeneratedTypes['collections'][TSlug]>
   depth?: number
   locale?: string
   fallbackLocale?: string

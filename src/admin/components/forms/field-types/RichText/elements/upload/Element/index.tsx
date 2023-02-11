@@ -12,6 +12,7 @@ import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import { Props as RichTextProps } from '../../../types';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
 
 import './index.scss';
 
@@ -21,17 +22,26 @@ const initialParams = {
   depth: 0,
 };
 
-const Element: React.FC<{
+type ElementProps = {
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
   element: any
   fieldProps: RichTextProps
-}> = ({ attributes, children, element }) => {
+  enabledCollectionSlugs: string[]
+}
+
+const Element: React.FC<ElementProps> = (props) => {
   const {
-    relationTo,
-    value,
+    attributes,
+    children,
+    element,
+    element: {
+      relationTo,
+      value,
+    },
     fieldProps,
-  } = element;
+    enabledCollectionSlugs,
+  } = props;
 
   const { collections, serverURL, routes: { api } } = useConfig();
   const { t, i18n } = useTranslation('fields');
@@ -45,7 +55,7 @@ const Element: React.FC<{
       closeDrawer: closeListDrawer,
     },
   ] = useListDrawer({
-    uploads: true,
+    collectionSlugs: enabledCollectionSlugs,
     selectedCollection: relatedCollection.slug,
   });
 
@@ -159,27 +169,27 @@ const Element: React.FC<{
             </div>
             <div className={`${baseClass}__actions`}>
               {value?.id && (
-                <DocumentDrawerToggler className={`${baseClass}__toggler`}>
+                <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
                   <Button
                     icon="edit"
                     round
                     buttonStyle="icon-label"
                     el="div"
-                    className={`${baseClass}__actionButton`}
                     onClick={(e) => {
                       e.preventDefault();
                     }}
                     tooltip={t('general:editLabel', { label: relatedCollection.labels.singular })}
-                    disabled={fieldProps?.admin?.readOnly}
                   />
                 </DocumentDrawerToggler>
               )}
-              <ListDrawerToggler>
+              <ListDrawerToggler
+                className={`${baseClass}__list-drawer-toggler`}
+                disabled={fieldProps?.admin?.readOnly}
+              >
                 <Button
                   icon="swap"
                   round
                   buttonStyle="icon-label"
-                  className={`${baseClass}__actionButton`}
                   onClick={() => {
                     // do nothing
                   }}
@@ -192,7 +202,7 @@ const Element: React.FC<{
                 icon="x"
                 round
                 buttonStyle="icon-label"
-                className={`${baseClass}__actionButton`}
+                className={`${baseClass}__removeButton`}
                 onClick={(e) => {
                   e.preventDefault();
                   removeUpload();
@@ -218,4 +228,13 @@ const Element: React.FC<{
   );
 };
 
-export default Element;
+export default (props: ElementProps): React.ReactNode => {
+  return (
+    <EnabledRelationshipsCondition
+      {...props}
+      uploads
+    >
+      <Element {...props} />
+    </EnabledRelationshipsCondition>
+  );
+};

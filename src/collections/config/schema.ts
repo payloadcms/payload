@@ -126,7 +126,6 @@ const collectionSchema = joi.object().keys({
   versions: joi.alternatives().try(
     joi.object({
       maxPerDoc: joi.number(),
-      retainDeleted: joi.boolean(),
       drafts: joi.alternatives().try(
         joi.object({
           autosave: joi.alternatives().try(
@@ -146,6 +145,8 @@ const collectionSchema = joi.object().keys({
       staticURL: joi.string(),
       staticDir: joi.string(),
       disableLocalStorage: joi.bool(),
+      useTempFiles: joi.bool(),
+      tempFileDir: joi.string(),
       adminThumbnail: joi.alternatives().try(
         joi.string(),
         joi.func(),

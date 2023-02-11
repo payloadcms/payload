@@ -1,10 +1,13 @@
+import fs from 'fs';
+import { promisify } from 'util';
+import path from 'path';
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Where, Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
-import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
+import { NotFound, Forbidden, APIError, ValidationError, ErrorDeletingFile } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { saveVersion } from '../../versions/saveVersion';
@@ -14,13 +17,18 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
-import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
+import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
+import { mapAsync } from '../../utilities/mapAsync';
+import fileExists from '../../uploads/fileExists';
+import { FileData } from '../../uploads/types';
+
+const unlinkFile = promisify(fs.unlink);
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
   req: PayloadRequest
   id: string | number
-  data: Omit<T, 'id'>
+  data: Partial<T>
   depth?: number
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
@@ -111,7 +119,14 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  const doc = await getLatestCollectionVersion({ payload, collection, id, query, lean });
+  const doc = await getLatestEntityVersion({
+    payload,
+    Model,
+    config: collectionConfig,
+    id,
+    query,
+    lean,
+  });
 
   if (!doc && !hasWherePolicy) throw new NotFound(t);
   if (!doc && hasWherePolicy) throw new Forbidden(t);
@@ -142,6 +157,39 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   });
 
   data = newFileData;
+
+  // /////////////////////////////////////
+  // Delete any associated files
+  // /////////////////////////////////////
+
+  if (collectionConfig.upload) {
+    const { staticDir } = collectionConfig.upload;
+
+    const staticPath = path.resolve(config.paths.configDir, staticDir);
+
+    const fileToDelete = `${staticPath}/${doc.filename}`;
+
+    if (await fileExists(fileToDelete)) {
+      fs.unlink(fileToDelete, (err) => {
+        if (err) {
+          throw new ErrorDeletingFile(t);
+        }
+      });
+    }
+
+    if (doc.sizes) {
+      Object.values(doc.sizes).forEach(async (size: FileData) => {
+        const sizeToDelete = `${staticPath}/${size.filename}`;
+        if (await fileExists(sizeToDelete)) {
+          fs.unlink(sizeToDelete, (err) => {
+            if (err) {
+              throw new ErrorDeletingFile(t);
+            }
+          });
+        }
+      });
+    }
+  }
 
   // /////////////////////////////////////
   // beforeValidate - Fields
@@ -253,11 +301,13 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       payload,
       collection: collectionConfig,
       req,
-      docWithLocales: result,
+      docWithLocales: {
+        ...result,
+        createdAt: docWithLocales.createdAt,
+      },
       id,
       autosave,
       draft: shouldSaveDraft,
-      createdAt: originalDoc.createdAt,
     });
   }
 
@@ -315,6 +365,17 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     }) || result;
   }, Promise.resolve());
 
+  // Remove temp files if enabled, as express-fileupload does not do this automatically
+  if (config.upload?.useTempFiles && collectionConfig.upload) {
+    const { files } = req;
+    const fileArray = Array.isArray(files) ? files : [files];
+    await mapAsync(fileArray, async ({ file }) => {
+      // Still need this check because this will not be populated if using local API
+      if (file.tempFilePath) {
+        await unlinkFile(file.tempFilePath);
+      }
+    });
+  }
   // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////

@@ -49,5 +49,88 @@ describe('dataloader', () => {
       const { docs } = response.Posts;
       expect(docs[0].title).toStrictEqual(postDoc.title);
     });
+
+    it('should avoid infinite loops', async () => {
+      const relationA = await payload.create({
+        collection: 'relation-a',
+        data: {
+          richText: [
+            {
+              children: [
+                {
+                  text: 'relation a',
+                },
+              ],
+            },
+          ],
+        },
+      });
+
+      const relationB = await payload.create({
+        collection: 'relation-b',
+        data: {
+          relationship: relationA.id,
+          richText: [
+            {
+              children: [
+                {
+                  text: 'relation b',
+                },
+              ],
+            },
+          ],
+        },
+      });
+
+      expect(relationA.id).toBeDefined();
+      expect(relationB.id).toBeDefined();
+
+      await payload.update({
+        collection: 'relation-a',
+        id: relationA.id,
+        data: {
+          relationship: relationB.id,
+          richText: [
+            {
+              children: [
+                {
+                  text: 'relation a',
+                },
+              ],
+            },
+            {
+              children: [
+                {
+                  text: '',
+                },
+              ],
+              type: 'relationship',
+              value: {
+                id: relationB.id,
+              },
+              relationTo: 'relation-b',
+            },
+          ],
+        },
+      });
+
+      const relationANoDepth = await payload.findByID({
+        collection: 'relation-a',
+        id: relationA.id,
+        depth: 0,
+      });
+
+      expect(relationANoDepth.relationship).toStrictEqual(relationB.id);
+
+      const relationAWithDepth = await payload.findByID({
+        collection: 'relation-a',
+        id: relationA.id,
+        depth: 4,
+      });
+
+      const innerMostRelationship = relationAWithDepth.relationship.relationship.richText[1].value.relationship.relationship;
+
+      expect(innerMostRelationship).toStrictEqual(relationB.id);
+    });
   });
 });

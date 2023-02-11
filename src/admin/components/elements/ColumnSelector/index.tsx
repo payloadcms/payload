@@ -14,6 +14,7 @@ const baseClass = 'column-selector';
 
 const ColumnSelector: React.FC<Props> = (props) => {
   const {
+    collection,
     columns,
     toggleColumn,
     moveColumn,
@@ -51,7 +52,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
               toggleColumn(accessor);
             }}
             alignIcon="left"
-            key={`${accessor || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${collection.slug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             icon={active ? <X /> : <Plus />}
             className={[
               `${baseClass}__column`,

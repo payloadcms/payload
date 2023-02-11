@@ -207,7 +207,7 @@ describe('fields', () => {
       await expect(blocksDrawer).toBeVisible();
 
       // select the first block in the drawer
-      const firstBlockSelector = await blocksDrawer.locator('.blocks-drawer .block-selection').first();
+      const firstBlockSelector = await blocksDrawer.locator('.blocks-drawer__blocks .blocks-drawer__block').first();
       await expect(firstBlockSelector).toContainText('Text');
       await firstBlockSelector.click();
 
@@ -218,6 +218,7 @@ describe('fields', () => {
     });
 
     test('should open blocks drawer from block row and add below', async () => {
+      await page.goto(url.create);
       const firstRow = await page.locator('#field-blocks #blocks-row-0');
       const rowActions = await firstRow.locator('.collapsible__actions');
       await expect(rowActions).toBeVisible();
@@ -231,7 +232,7 @@ describe('fields', () => {
       await expect(blocksDrawer).toBeVisible();
 
       // select the first block in the drawer
-      const firstBlockSelector = blocksDrawer.locator('.blocks-drawer .block-selection').first();
+      const firstBlockSelector = blocksDrawer.locator('.blocks-drawer__blocks .blocks-drawer__block').first();
       await expect(firstBlockSelector).toContainText('Text');
       await firstBlockSelector.click();
 
@@ -253,7 +254,7 @@ describe('fields', () => {
       await expect(blocksDrawer).toBeVisible();
 
       // select the first block in the drawer
-      const firstBlockSelector = blocksDrawer.locator('.blocks-drawer .block-selection').first();
+      const firstBlockSelector = blocksDrawer.locator('.blocks-drawer__blocks .blocks-drawer__block').first();
       await expect(firstBlockSelector).toContainText('Text en');
       await firstBlockSelector.click();
 
@@ -403,6 +404,33 @@ describe('fields', () => {
         const modalTrigger = page.locator('.rich-text--read-only .rich-text__toolbar button .link');
         await expect(modalTrigger).toBeDisabled();
       });
+
+      test('should only list RTE enabled upload collections in drawer', async () => {
+        await navigateToRichTextFields();
+
+        // Open link drawer
+        await page.locator('.rich-text__toolbar button:not([disabled]) .upload-rich-text-button').click();
+
+        // open the list select menu
+        await page.locator('.list-drawer__select-collection-wrap .rs__control').click();
+
+        const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu');
+        // `uploads-3` has enableRichTextRelationship set to false
+        await expect(menu).not.toContainText('Uploads3');
+      });
+
+      test('should only list non-upload collections in relationship drawer', async () => {
+        await navigateToRichTextFields();
+
+        // Open link drawer
+        await page.locator('.rich-text__toolbar button:not([disabled]) .relationship-rich-text-button').click();
+
+        // open the list select menu
+        await page.locator('.list-drawer__select-collection-wrap .rs__control').click();
+
+        const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu');
+        await expect(menu).not.toContainText('Uploads');
+      });
     });
 
     describe('editor', () => {
@@ -426,7 +454,7 @@ describe('fields', () => {
 
         // Close the drawer
         await editLinkModal.locator('button[type="submit"]').click();
-        await expect(editLinkModal).not.toBeVisible();
+        await expect(editLinkModal).toBeHidden();
       });
 
       test('should populate relationship link', async () => {
@@ -449,7 +477,29 @@ describe('fields', () => {
 
         // Close the drawer
         await editLinkModal.locator('button[type="submit"]').click();
-        await expect(editLinkModal).not.toBeVisible();
+        await expect(editLinkModal).toBeHidden();
+      });
+
+      test('should open uploads drawer from read-only field', async () => {
+        navigateToRichTextFields();
+        const field = await page.locator('#field-richTextReadOnly');
+        const button = await field.locator('button.rich-text-upload__doc-drawer-toggler.doc-drawer__toggler');
+
+        await button.click();
+
+        const documentDrawer = await page.locator('[id^=doc-drawer_uploads_1_]');
+        await expect(documentDrawer).toBeVisible();
+      });
+
+      test('should open relationship drawer from read-only field', async () => {
+        navigateToRichTextFields();
+        const field = await page.locator('#field-richTextReadOnly');
+        const button = await field.locator('button.rich-text-relationship__doc-drawer-toggler.doc-drawer__toggler');
+
+        await button.click();
+
+        const documentDrawer = await page.locator('[id^=doc-drawer_text-fields_1_]');
+        await expect(documentDrawer).toBeVisible();
       });
 
       test('should populate new links', async () => {
@@ -496,8 +546,9 @@ describe('fields', () => {
       await page.goto(url.create);
       const dateField = await page.locator('#field-default input');
       await expect(dateField).toBeVisible();
-      await dateField.fill('2021-08-01');
-      await expect(dateField).toHaveValue('2021-08-01');
+      await dateField.fill('02/07/2023');
+      await expect(dateField).toHaveValue('02/07/2023');
+      await wait(1000);
       const clearButton = await page.locator('#field-default .date-time-picker__clear-button');
       await expect(clearButton).toBeVisible();
       await clearButton.click();
@@ -626,6 +677,22 @@ describe('fields', () => {
       await wait(200);
       const jpgImages = await page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]');
       expect(await jpgImages.count()).toEqual(0);
+    });
+
+    test('should show drawer for input field when enableRichText is false', async () => {
+      const uploads3URL = new AdminUrlUtil(serverURL, 'uploads3');
+      await page.goto(uploads3URL.create);
+
+      // create file in uploads 3 collection
+      await page.locator('.file-field__upload input[type="file"]').setInputFiles(path.resolve(__dirname, './collections/Upload/payload.jpg'));
+      await expect(page.locator('.file-field .file-field__filename')).toContainText('payload.jpg');
+      await page.locator('#action-save').click();
+      await wait(200);
+
+      // open drawer
+      await page.locator('.field-type.upload .list-drawer__toggler').click();
+      // check title
+      await expect(page.locator('.list-drawer__header-text')).toContainText('Uploads 3');
     });
   });
 });

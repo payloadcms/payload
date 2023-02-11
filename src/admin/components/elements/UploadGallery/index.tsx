@@ -1,6 +1,6 @@
 import React from 'react';
 import { Props } from './types';
-import UploadCard from '../UploadCard';
+import { ThumbnailCard } from '../ThumbnailCard';
 
 import './index.scss';
 
@@ -14,9 +14,9 @@ const UploadGallery: React.FC<Props> = (props) => {
       <ul className={baseClass}>
         {docs.map((doc) => (
           <li key={String(doc.id)}>
-            <UploadCard
+            <ThumbnailCard
               doc={doc}
-              {...{ collection }}
+              collection={collection}
               onClick={() => onCardClick(doc)}
             />
           </li>

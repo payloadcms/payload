@@ -9,7 +9,7 @@ import { Where } from '../../types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
+import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
 
 export type Arguments = {
   collection: Collection
@@ -24,7 +24,6 @@ export type Arguments = {
 
 async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
   const {
-    collection,
     collection: {
       Model,
       config: collectionConfig,
@@ -101,11 +100,12 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // fetch previousDoc
   // /////////////////////////////////////
 
-  const prevDocWithLocales = await getLatestCollectionVersion({
+  const prevDocWithLocales = await getLatestEntityVersion({
     payload,
-    collection,
     id: parentDocID,
     query,
+    Model,
+    config: collectionConfig,
   });
 
   // /////////////////////////////////////
@@ -122,8 +122,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
+  result = JSON.parse(JSON.stringify(result));
   result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////

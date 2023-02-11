@@ -4,6 +4,10 @@
   position: relative;
   margin-bottom: $baseline;
 
+  input[type=checkbox] {
+    display: none;
+  }
+
   .tooltip {
     right: auto;
     position: relative;
@@ -64,6 +68,12 @@
     &:focus,
     &:active {
       outline: none;
+    }
+
+    &:focus {
+      .custom-checkbox__input {
+        box-shadow: 0 0 3px 3px var(--theme-success-400);
+      }
     }
 
     &:hover {

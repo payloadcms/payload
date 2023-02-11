@@ -46,7 +46,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
     onSave,
     permissions,
     isLoading,
-    initialState,
+    internalState,
     apiURL,
     action,
     hasSavePermission,
@@ -90,12 +90,14 @@ const DefaultEditView: React.FC<Props> = (props) => {
             action={action}
             onSuccess={onSave}
             disabled={!hasSavePermission}
-            initialState={initialState}
+            initialState={internalState}
           >
             <FormLoadingOverlayToggle
+              formIsLoading={isLoading}
               action={isLoading ? 'loading' : operation}
               name={`collection-edit--${collection.labels.singular}`}
               loadingSuffix={getTranslation(collection.labels.singular, i18n)}
+              type="withoutNav"
             />
 
             {!isLoading && (
@@ -147,6 +149,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       <Upload
                         data={data}
                         collection={collection}
+                        internalState={internalState}
                       />
                     )}
                     <RenderFields

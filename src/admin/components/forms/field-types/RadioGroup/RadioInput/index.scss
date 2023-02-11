@@ -7,7 +7,13 @@
   margin: base(.10) 0;
 
   input[type=radio] {
-    display: none;
+    opacity: 0;
+    width: 0;
+    margin: 0;
+  }
+
+  input[type=radio]:focus+.radio-input__styled-radio {
+    box-shadow: 0 0 3px 3px var(--theme-success-400);
   }
 
   &__styled-radio {
@@ -49,6 +55,7 @@
     &:hover {
       .radio-input {
         &__styled-radio {
+          border-color: var(--theme-elevation-250);
 
           &:before {
             opacity: .2;

@@ -1,5 +1,7 @@
 import React from 'react';
-import DatePicker from 'react-datepicker';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import * as Locales from 'date-fns/locale';
+import { useLocale } from '../../utilities/Locale';
 import CalendarIcon from '../../icons/Calendar';
 import XIcon from '../../icons/X';
 import { Props } from './types';
@@ -9,12 +11,19 @@ import './index.scss';
 
 const baseClass = 'date-time-picker';
 
+const formattedLocales = {
+  en: 'enUS',
+  my: 'enUS', // Burmese is not currently supported
+  ua: 'uk',
+  zh: 'zhCN',
+};
+
 const DateTime: React.FC<Props> = (props) => {
   const {
     value,
     onChange,
     displayFormat,
-    pickerAppearance = 'dayAndTime',
+    pickerAppearance,
     minDate,
     maxDate,
     monthsToShow = 1,
@@ -26,12 +35,23 @@ const DateTime: React.FC<Props> = (props) => {
     placeholder: placeholderText,
   } = props;
 
+  let currentLocale = useLocale();
+  currentLocale = formattedLocales[currentLocale] || currentLocale;
+
+  try {
+    const locale = Locales[currentLocale];
+    registerLocale(currentLocale, locale);
+  } catch (e) {
+    console.warn(`Could not find DatePicker locale for ${currentLocale}`);
+  }
+
   let dateTimeFormat = displayFormat;
 
-  if (dateTimeFormat === undefined) {
+  if (dateTimeFormat === undefined && pickerAppearance) {
     if (pickerAppearance === 'dayAndTime') dateTimeFormat = 'MMM d, yyy h:mm a';
     else if (pickerAppearance === 'timeOnly') dateTimeFormat = 'h:mm a';
-    else if (pickerAppearance === 'monthOnly') dateTimeFormat = 'MM/yyyy';
+    else if (pickerAppearance === 'dayOnly') dateTimeFormat = 'dd';
+    else if (pickerAppearance === 'monthOnly') dateTimeFormat = 'MMMM';
     else dateTimeFormat = 'MMM d, yyy';
   }
 
@@ -77,11 +97,13 @@ const DateTime: React.FC<Props> = (props) => {
         <DatePicker
           {...dateTimePickerProps}
           onChange={(val) => onChange(val as Date)}
-          popperModifiers={{
-            preventOverflow: {
+          locale={currentLocale || 'en-US'}
+          popperModifiers={[
+            {
+              name: 'preventOverflow',
               enabled: true,
             },
-          }}
+          ]}
         />
       </div>
     </div>

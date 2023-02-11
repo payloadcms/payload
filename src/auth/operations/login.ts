@@ -18,9 +18,9 @@ export type Result = {
   exp?: number,
 }
 
-export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+export type Arguments = {
   collection: Collection,
-  data: Omit<T, 'id'> & {
+  data: {
     email: string
     password: string
   }
@@ -32,7 +32,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
 }
 
 async function login<TSlug extends keyof GeneratedTypes['collections']>(
-  incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
+  incomingArgs: Arguments,
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   let args = incomingArgs;
 

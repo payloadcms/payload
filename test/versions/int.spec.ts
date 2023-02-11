@@ -318,6 +318,45 @@ describe('Versions', () => {
         expect(versions.docs).toHaveLength(3);
       });
     });
+
+    describe('Versions Count', () => {
+      it('retains correct versions', async () => {
+        const original = await payload.create({
+          collection: 'version-posts',
+          data: {
+            title: 'A',
+            description: 'A',
+          },
+        });
+
+        await payload.update({
+          collection: 'version-posts',
+          id: original.id,
+          data: {
+            title: 'B',
+            description: 'B',
+          },
+        });
+
+        await payload.update({
+          collection: 'version-posts',
+          id: original.id,
+          data: {
+            title: 'C',
+            description: 'C',
+          },
+        });
+
+        const versions = await payload.findVersions({
+          collection: 'version-posts',
+          sort: '-updatedAt',
+          depth: 1,
+        });
+
+        expect(versions.docs[versions.docs.length - 1].version.title).toStrictEqual('B');
+        expect(versions.docs).toHaveLength(2);
+      });
+    });
   });
 
   describe('Querying', () => {
