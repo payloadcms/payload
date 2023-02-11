@@ -7,7 +7,7 @@ import { Collection } from '../../config/types';
 import create from '../../operations/create';
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (_: unknown, args: {
-  data: MarkOptional<GeneratedTypes['collections'][TSlug], 'id' | 'updatedAt' | 'createdAt'>,
+  data: Omit<MarkOptional<GeneratedTypes['collections'][TSlug], 'id' | 'updatedAt' | 'createdAt'>, 'sizes'>,
   locale?: string
   draft: boolean
 },
