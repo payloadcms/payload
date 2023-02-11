@@ -12,9 +12,14 @@ keywords: deployment, production, config, configuration, documentation, Content 
 
 There are many ways to deploy Payload to a production environment. When evaluating how you will deploy Payload, you need to consider these main aspects:
 
+1. [Basics](#basics)
 1. [Security](#security)
 1. [Your MongoDB](#mongodb)
 1. [Permanent File Storage](#file-storage)
+
+## Basics
+
+In order for Payload to run, it requires both the server code and the built admin panel. These will be the `dist` and `build` directories by default. If you've used `create-payload-app` to create your project, executing the `build` npm script will build both and output these directories.
 
 ## Security
 
