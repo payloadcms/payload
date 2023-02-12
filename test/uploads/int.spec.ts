@@ -7,7 +7,6 @@ import { RESTClient } from '../helpers/rest';
 import config, { mediaSlug, relationSlug } from './config';
 import payload from '../../src';
 import getFileByPath from '../../src/uploads/getFileByPath';
-import type { Media } from './payload-types';
 
 const stat = promisify(fs.stat);
 
@@ -176,9 +175,9 @@ describe('Collections - Uploads', () => {
 
     expect(status).toBe(200);
 
-    // Check that previously existing files weren't affected
-    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(true);
-    expect(await fileExists(path.join(__dirname, './media', mediaDoc.sizes.icon.filename))).toBe(true);
+    // Check that previously existing files were removed
+    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(false);
+    expect(await fileExists(path.join(__dirname, './media', mediaDoc.sizes.icon.filename))).toBe(false);
   });
 
   it('should remove extra sizes on update', async () => {
@@ -186,13 +185,13 @@ describe('Collections - Uploads', () => {
     const file = await getFileByPath(filePath);
     const small = await getFileByPath(path.resolve(__dirname, './small.png'));
 
-    const { id } = await payload.create<Media>({
+    const { id } = await payload.create({
       collection: mediaSlug,
       data: {},
       file,
     });
 
-    const doc = await payload.update<Media>({
+    const doc = await payload.update({
       collection: mediaSlug,
       id,
       data: {},

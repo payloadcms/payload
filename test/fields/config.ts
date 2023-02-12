@@ -23,6 +23,7 @@ import JSONFields, { jsonDoc } from './collections/JSON';
 import RelationshipFields from './collections/Relationship';
 import RadioFields, { radiosDoc } from './collections/Radio';
 import Uploads2 from './collections/Upload2';
+import Uploads3 from './collections/Uploads3';
 
 export default buildConfig({
   admin: {
@@ -57,6 +58,7 @@ export default buildConfig({
     TextFields,
     Uploads,
     Uploads2,
+    Uploads3,
   ],
   localization: {
     defaultLocale: 'en',

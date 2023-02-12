@@ -9,7 +9,7 @@ const VersionPosts: CollectionConfig = {
   },
   versions: {
     drafts: false,
-    maxPerDoc: 35,
+    maxPerDoc: 2,
   },
   access: {
     read: ({ req: { user } }) => {

@@ -3,6 +3,8 @@ import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
 import getFileByPath from '../../src/uploads/getFileByPath';
 import removeFiles from '../helpers/removeFiles';
+import { Uploads1 } from './collections/Upload1';
+import Uploads2 from './collections/Upload2';
 
 export const mediaSlug = 'media';
 
@@ -110,6 +112,8 @@ export default buildConfig({
       },
       fields: [],
     },
+    Uploads1,
+    Uploads2,
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(__dirname, './media');

@@ -100,7 +100,7 @@ export const saveVersion = async ({
   if (global && typeof global.versions.max === 'number') max = global.versions.max;
 
   if (max > 0) {
-    enforceMaxVersions({
+    await enforceMaxVersions({
       id,
       payload,
       Model: VersionModel,

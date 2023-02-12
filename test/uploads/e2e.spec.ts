@@ -84,6 +84,10 @@ describe('uploads', () => {
     await saveDocAndAssert(page);
   });
 
+  test('should update file upload', async () => {
+    await page.goto(mediaURL.edit(pngDoc.id));
+  });
+
   test('should show resized images', async () => {
     await page.goto(mediaURL.edit(pngDoc.id));
 
