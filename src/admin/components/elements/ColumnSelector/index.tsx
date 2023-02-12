@@ -7,6 +7,7 @@ import { Props } from './types';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { useEditDepth } from '../../utilities/EditDepth';
 import DraggableSortable from '../DraggableSortable';
+import { useTableColumns } from '../TableColumns';
 
 import './index.scss';
 
@@ -15,10 +16,13 @@ const baseClass = 'column-selector';
 const ColumnSelector: React.FC<Props> = (props) => {
   const {
     collection,
+  } = props;
+
+  const {
     columns,
     toggleColumn,
     moveColumn,
-  } = props;
+  } = useTableColumns();
 
   const { i18n } = useTranslation();
   const uuid = useId();

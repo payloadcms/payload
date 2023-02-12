@@ -39,9 +39,6 @@ const DefaultList: React.FC<Props> = (props) => {
     data,
     newDocumentURL,
     limit,
-    tableColumns,
-    toggleColumn,
-    moveColumn,
     hasCreatePermission,
     disableEyebrow,
     modifySearchParams,
@@ -89,9 +86,6 @@ const DefaultList: React.FC<Props> = (props) => {
         </header>
         <ListControls
           collection={collection}
-          columns={tableColumns}
-          toggleColumn={toggleColumn}
-          moveColumn={moveColumn}
           enableColumns={Boolean(!upload)}
           enableSort={Boolean(upload)}
           modifySearchQuery={modifySearchParams}
@@ -112,10 +106,7 @@ const DefaultList: React.FC<Props> = (props) => {
           <React.Fragment>
             {!upload && (
               <RelationshipProvider>
-                <Table
-                  data={data.docs}
-                  columns={tableColumns}
-                />
+                <Table data={data.docs} />
               </RelationshipProvider>
             )}
             {upload && (

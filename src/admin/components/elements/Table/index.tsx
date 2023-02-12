@@ -1,11 +1,16 @@
 import React from 'react';
 import { Props } from './types';
+import { useTableColumns } from '../TableColumns';
 
 import './index.scss';
 
 const baseClass = 'table';
 
-export const Table: React.FC<Props> = ({ columns, data }) => {
+export const Table: React.FC<Props> = ({ data }) => {
+  const {
+    columns,
+  } = useTableColumns();
+
   const activeColumns = columns.filter((col) => col.active);
 
   if (!activeColumns || activeColumns.length === 0) {

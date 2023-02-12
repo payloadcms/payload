@@ -13,6 +13,5 @@ export type Column = {
 }
 
 export type Props = {
-  columns: Column[]
   data: unknown[]
 }
