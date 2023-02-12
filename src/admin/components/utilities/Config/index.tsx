@@ -5,13 +5,18 @@ const Context = createContext<SanitizedConfig>({} as SanitizedConfig);
 
 export const ConfigProvider: React.FC<{config: SanitizedConfig, children: React.ReactNode}> = ({ children, config: incomingConfig }) => {
   const [config, setConfig] = React.useState<SanitizedConfig>();
+  const hasAwaited = React.useRef(false);
 
   React.useEffect(() => {
-    const awaitConfig = async () => {
-      const resolvedConfig = await incomingConfig;
-      setConfig(resolvedConfig);
-    };
-    awaitConfig();
+    if (incomingConfig && !hasAwaited.current) {
+      hasAwaited.current = true;
+
+      const awaitConfig = async () => {
+        const resolvedConfig = await incomingConfig;
+        setConfig(resolvedConfig);
+      };
+      awaitConfig();
+    }
   }, [incomingConfig]);
 
   if (!config) return null;

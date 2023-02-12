@@ -1,6 +1,8 @@
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
 
+export const pagesSlug = 'pages';
+
 export default buildConfig({
   collections: [
     {
@@ -15,7 +17,7 @@ export default buildConfig({
       collections: [
         ...config.collections || [],
         {
-          slug: 'pages',
+          slug: pagesSlug,
           fields: [
             {
               name: 'title',
