@@ -251,7 +251,7 @@ describe('admin', () => {
         await expect(await page.locator('table >> thead >> tr >> th:first-child')).toHaveText('ID');
       });
 
-      test('fist cell is a link', async () => {
+      test('first cell is a link', async () => {
         const { id } = await createPost();
         const firstCell = await page.locator(`${tableRowLocator} td`).first().locator('a');
         await expect(firstCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
@@ -332,8 +332,10 @@ describe('admin', () => {
         await page.mouse.move(idBoundingBox.x - 2, idBoundingBox.y - 2, { steps: 10 });
         await page.mouse.up();
 
+        // wait for the new preferences to save and internal state to update and re-render
+        await wait(400);
+
         // ensure the "number" column is now first
-        await wait(200);
         await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
         await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
 
@@ -353,7 +355,7 @@ describe('admin', () => {
 
         await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select').click();
         // select the "post en" collection
-        await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option').nth(1).click();
+        await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"').click();
 
         // open the column controls
         await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns').click();
