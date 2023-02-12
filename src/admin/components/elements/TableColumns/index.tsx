@@ -7,6 +7,7 @@ import { Column } from '../Table/types';
 import buildColumns from './buildColumns';
 import { Action, columnReducer } from './columnReducer';
 import getInitialColumnState from './getInitialColumns';
+import { Props as CellProps } from '../../views/collections/List/Cell/types';
 
 export interface ITableColumns {
   columns: Column[]
@@ -26,8 +27,10 @@ export const useTableColumns = (): ITableColumns => useContext(TableColumnContex
 export const TableColumnsProvider: React.FC<{
   children: React.ReactNode
   collection: SanitizedCollectionConfig
+  cellProps?: Partial<CellProps>[]
 }> = ({
   children,
+  cellProps,
   collection,
   collection: {
     fields,
@@ -49,6 +52,7 @@ export const TableColumnsProvider: React.FC<{
         accessor: column,
         active: true,
       })),
+      cellProps,
       t,
     });
   });

@@ -22,31 +22,6 @@ import { Field } from '../../../../fields/config/types';
 import { baseClass } from '.';
 import { TableColumnsProvider } from '../TableColumns';
 
-// const buildColumns = ({
-//   collection,
-//   columns,
-//   onSelect,
-//   t,
-// }: Partial<Parameters<BuildColumns>[0] & {
-//   onSelect: ListDrawerProps['onSelect'];
-// }>) => buildListColumns({
-//   collection,
-//   columns,
-//   t,
-//   cellProps: [{
-//     link: false,
-//     onClick: ({ collection: rowColl, rowData }) => {
-//       if (typeof onSelect === 'function') {
-//         onSelect({
-//           docID: rowData.id,
-//           collectionConfig: rowColl,
-//         });
-//       }
-//     },
-//     className: `${baseClass}__first-cell`,
-//   }],
-// });
-
 export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   drawerSlug,
   onSelect,
@@ -170,7 +145,21 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   }
 
   return (
-    <TableColumnsProvider collection={selectedCollectionConfig}>
+    <TableColumnsProvider
+      collection={selectedCollectionConfig}
+      cellProps={[{
+        link: false,
+        onClick: ({ collection: rowColl, rowData }) => {
+          if (typeof onSelect === 'function') {
+            onSelect({
+              docID: rowData.id,
+              collectionConfig: rowColl,
+            });
+          }
+        },
+        className: `${baseClass}__first-cell`,
+      }]}
+    >
       <DocumentInfoProvider collection={selectedCollectionConfig}>
         <RenderCustomComponent
           DefaultComponent={DefaultList}
