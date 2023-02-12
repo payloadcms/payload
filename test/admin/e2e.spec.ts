@@ -325,16 +325,42 @@ describe('admin', () => {
 
         if (!numberBoundingBox || !idBoundingBox) return;
 
+        // drag the "number" column to the left of the "ID" column
         await page.mouse.move(numberBoundingBox.x + 2, numberBoundingBox.y + 2, { steps: 10 });
         await page.mouse.down();
         await wait(200);
         await page.mouse.move(idBoundingBox.x - 2, idBoundingBox.y - 2, { steps: 10 });
         await page.mouse.up();
 
+        // ensure the "number" column is now first
         await wait(200);
-
         await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
         await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
+
+        // reload to ensure the order was persisted
+        await page.reload();
+        await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
+        await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
+      });
+
+      test('reorder columns from drawer', async () => {
+        await page.goto(url.create);
+
+        // Open the drawer
+        await page.locator('.rich-text .list-drawer__toggler').click();
+        const listDrawer = page.locator('[id^=list-drawer_1_]');
+        await expect(listDrawer).toBeVisible();
+
+        await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select').click();
+        // select the "post en" collection
+        await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option').nth(1).click();
+
+        // open the column controls
+        await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns').click();
+        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+
+        // ensure that the columns are in the correct order
+        await expect(await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
       });
     });
 

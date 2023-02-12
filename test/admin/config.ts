@@ -102,6 +102,15 @@ export default buildConfig({
           name: 'number',
           type: 'number',
         },
+        {
+          name: 'richText',
+          type: 'richText',
+          admin: {
+            elements: [
+              'relationship',
+            ],
+          },
+        },
       ],
     },
     {
