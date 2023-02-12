@@ -337,7 +337,7 @@ describe('admin', () => {
         await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
         await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
 
-        // reload to ensure the order was persisted
+        // reload to ensure the preferred order was stored in the database
         await page.reload();
         await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
         await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');

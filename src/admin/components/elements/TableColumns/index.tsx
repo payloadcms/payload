@@ -64,7 +64,17 @@ export const TableColumnsProvider: React.FC<{
         dispatchTableColumns({
           type: 'set',
           payload: {
-            columns: currentPreferences.columns,
+            columns: currentPreferences.columns.map((column) => {
+              // 'string' is for backwards compatibility
+              // the preference used to be stored as an array of strings
+              if (typeof column === 'string') {
+                return {
+                  accessor: column,
+                  active: true,
+                };
+              }
+              return column;
+            }),
             t,
             collection,
           },
