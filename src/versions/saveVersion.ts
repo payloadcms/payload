@@ -79,7 +79,7 @@ export const saveVersion = async ({
       const data: Record<string, unknown> = {
         autosave: Boolean(autosave),
         version: versionData,
-        createdAt: draft ? now : new Date(doc.createdAt).toISOString(),
+        createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
         updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
       };
       if (collection) data.parent = id;
