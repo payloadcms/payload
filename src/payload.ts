@@ -181,7 +181,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     } else {
       // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
       const loadConfig = require('./config/load').default;
-      this.config = loadConfig(this.logger);
+      this.config = await loadConfig(this.logger);
     }
 
     // Configure email service

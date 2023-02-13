@@ -1,13 +1,14 @@
 import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import payload from '../../src';
-import config from './config';
-import type { Array as ArrayCollection } from './payload-types';
+import configPromise from './config';
 
-const collection = config.collections[0]?.slug;
+let collection: string;
 
 describe('array-update', () => {
   beforeAll(async () => {
+    const config = await configPromise;
+    collection = config.collections[0]?.slug;
     await initPayloadTest({ __dirname });
   });
 
@@ -45,7 +46,7 @@ describe('array-update', () => {
       required: updatedText,
     };
 
-    const updatedDoc = await payload.update<ArrayCollection>({
+    const updatedDoc = await payload.update({
       id: doc.id,
       collection,
       data: {
@@ -67,7 +68,7 @@ describe('array-update', () => {
       optional: 'optional test',
     };
 
-    const doc = await payload.create<ArrayCollection>({
+    const doc = await payload.create({
       collection,
       data: {
         array: [
@@ -80,7 +81,7 @@ describe('array-update', () => {
       },
     });
 
-    const updatedDoc = await payload.update<ArrayCollection>({
+    const updatedDoc = await payload.update({
       id: doc.id,
       collection,
       data: {
