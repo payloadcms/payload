@@ -30,6 +30,15 @@ const RelationshipFields: CollectionConfig = {
       relationTo: 'users',
       defaultValue: ({ user }) => user.id,
     },
+    {
+      name: 'relationHasManyWithDynamicDefault',
+      type: 'relationship',
+      relationTo: ['users'],
+      defaultValue: ({ user }) => ({
+        relationTo: 'users',
+        value: user.id,
+      }),
+    },
   ],
 };
 

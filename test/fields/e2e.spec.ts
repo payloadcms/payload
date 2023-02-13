@@ -637,6 +637,7 @@ describe('fields', () => {
     test('should populate relationship dynamic default value', async () => {
       await page.goto(url.create);
       await expect(page.locator('#field-relationWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
+      await expect(page.locator('#field-relationHasManyWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
     });
   });
 
