@@ -39,6 +39,10 @@ const connectMongoose = async (
   try {
     await mongoose.connect(urlToConnect, connectionOptions);
 
+    mongoose.connection.on('error', (err) => {
+      logger.error(`mongoose error: ${err}`)
+    });
+
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
       logger.info('---- DROPPING DATABASE ----');
       await mongoose.connection.dropDatabase();
