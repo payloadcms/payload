@@ -288,6 +288,7 @@ export type RelationshipField = FieldBase & {
   filterOptions?: FilterOptions;
   admin?: Admin & {
     isSortable?: boolean;
+    allowCreate?: boolean;
   }
 }
 

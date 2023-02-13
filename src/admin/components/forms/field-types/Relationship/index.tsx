@@ -52,6 +52,7 @@ const Relationship: React.FC<Props> = (props) => {
       description,
       condition,
       isSortable = true,
+      allowCreate = true,
     } = {},
   } = props;
 
@@ -411,7 +412,7 @@ const Relationship: React.FC<Props> = (props) => {
               return r.test(item.label);
             } : undefined}
           />
-          {!readOnly && (
+          {!readOnly && allowCreate && (
             <AddNewRelation
               {...{ path: pathOrName, hasMany, relationTo, value, setValue, dispatchOptions }}
             />
