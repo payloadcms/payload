@@ -34,7 +34,6 @@ async function findVersions<T extends TypeWithVersion<T>>(
     limit,
     depth,
     globalConfig,
-    session,
     req,
     req: {
       locale,
@@ -43,6 +42,8 @@ async function findVersions<T extends TypeWithVersion<T>>(
     overrideAccess,
     showHiddenFields,
   } = args;
+
+  const session = args.session || req.session;
 
   const VersionsModel = payload.versions[globalConfig.slug];
 

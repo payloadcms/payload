@@ -27,7 +27,9 @@ export const saveVersion = async ({
   docWithLocales: doc,
   autosave,
   draft,
+  req,
 }: Args): Promise<TypeWithID> => {
+  session ||= req.session;
   const sessionOpts = session ? { session } : undefined;
 
   let result;

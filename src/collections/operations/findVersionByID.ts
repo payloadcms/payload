@@ -25,7 +25,6 @@ export type Arguments = {
 
 async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
   const {
-    session,
     depth,
     collection: {
       config: collectionConfig,
@@ -42,6 +41,8 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     overrideAccess,
     showHiddenFields,
   } = args;
+
+  const session = args.session || req.session;
 
   if (!id) {
     throw new APIError('Missing ID of version.', httpStatus.BAD_REQUEST);

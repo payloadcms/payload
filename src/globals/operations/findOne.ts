@@ -24,7 +24,6 @@ type Args = {
 async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T> {
   const {
     globalConfig,
-    session,
     locale,
     req,
     req: {
@@ -36,6 +35,8 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     draft: draftEnabled = false,
     overrideAccess = false,
   } = args;
+
+  const session = args.session || req.session;
 
   const { globals: { Model } } = payload;
 

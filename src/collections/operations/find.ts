@@ -48,7 +48,6 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   }, Promise.resolve());
 
   const {
-    session,
     where,
     page,
     limit,
@@ -70,6 +69,8 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     showHiddenFields,
     pagination = true,
   } = args;
+
+  const session = args.session || req.session;
 
   // /////////////////////////////////////
   // Access

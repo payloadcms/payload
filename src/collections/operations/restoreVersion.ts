@@ -26,7 +26,6 @@ export type Arguments = {
 
 async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
   const {
-    session,
     collection: {
       Model,
       config: collectionConfig,
@@ -42,6 +41,8 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     },
     req,
   } = args;
+
+  const session = args.session || req.session;
 
   if (!id) {
     throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST);

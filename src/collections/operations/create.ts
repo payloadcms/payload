@@ -59,7 +59,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
   }, Promise.resolve());
 
   const {
-    session,
     collection,
     collection: {
       Model,
@@ -81,6 +80,8 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     draft = false,
     autosave = false,
   } = args;
+
+  const session = args.session || req.session;
 
   let { data } = args;
 

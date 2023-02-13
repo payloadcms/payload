@@ -59,7 +59,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   }, Promise.resolve());
 
   const {
-    session,
     depth,
     collection,
     collection: {
@@ -82,6 +81,8 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     draft: draftArg = false,
     autosave = false,
   } = args;
+
+  const session = args.session || req.session;
 
   if (!id) {
     throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST);

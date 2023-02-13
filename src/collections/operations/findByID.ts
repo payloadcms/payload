@@ -43,7 +43,6 @@ async function findByID<T extends TypeWithID>(
   }, Promise.resolve());
 
   const {
-    session,
     depth,
     collection: {
       Model,
@@ -62,6 +61,8 @@ async function findByID<T extends TypeWithID>(
     showHiddenFields,
     draft: draftEnabled = false,
   } = args;
+
+  const session = args.session || req.session;
 
   // /////////////////////////////////////
   // Access

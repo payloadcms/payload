@@ -29,7 +29,6 @@ async function findVersions<T extends TypeWithVersion<T>>(
   args: Arguments,
 ): Promise<PaginatedDocs<T>> {
   const {
-    session,
     where,
     page,
     limit,
@@ -45,6 +44,8 @@ async function findVersions<T extends TypeWithVersion<T>>(
     overrideAccess,
     showHiddenFields,
   } = args;
+
+  const session = args.session || req.session;
 
   const VersionsModel = payload.versions[collectionConfig.slug] as CollectionModel;
 

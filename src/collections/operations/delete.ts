@@ -44,7 +44,6 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   }, Promise.resolve());
 
   const {
-    session,
     depth,
     collection: {
       Model,
@@ -65,6 +64,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     showHiddenFields,
   } = args;
 
+  const session = args.session || req.session;
   const sessionOpts = session ? { session } : undefined;
 
   // /////////////////////////////////////

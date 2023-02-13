@@ -26,7 +26,6 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
   const {
     depth,
     globalConfig,
-    session,
     id,
     req,
     req: {
@@ -39,6 +38,8 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     overrideAccess,
     showHiddenFields,
   } = args;
+
+  const session = args.session || req.session;
 
   const VersionsModel = payload.versions[globalConfig.slug];
 

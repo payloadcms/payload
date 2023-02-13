@@ -31,7 +31,6 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
     globalConfig,
-    session,
     slug,
     req,
     req: {
@@ -50,6 +49,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     autosave,
   } = args;
 
+  const session = args.session || req.session;
   const sessionOpts = session ? { session } : undefined;
 
   let { data } = args;

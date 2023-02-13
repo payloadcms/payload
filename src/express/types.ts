@@ -6,6 +6,7 @@ import { Payload } from '../payload';
 import { Collection, TypeWithID } from '../collections/config/types';
 import { User } from '../auth/types';
 import { Document } from '../types';
+import { ClientSession } from 'mongoose';
 
 /** Express request with some Payload related context added */
 export declare type PayloadRequest<U = any> = Request & {
@@ -20,6 +21,8 @@ export declare type PayloadRequest<U = any> = Request & {
   locale?: string;
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: string;
+  /** The request default Mongoose session */
+  session?: ClientSession;
   /** Information about the collection that is being accessed
    * - Configuration from payload-config.ts
    * - Mongo model for this collection

@@ -23,7 +23,6 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     id,
     depth,
     globalConfig,
-    session,
     req,
     req: {
       t,
@@ -38,6 +37,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     showHiddenFields,
   } = args;
 
+  const session = args.session || req.session;
   const sessionOpts = session ? { session } : undefined;
 
   // /////////////////////////////////////
