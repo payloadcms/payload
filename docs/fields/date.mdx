@@ -38,8 +38,8 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 
 | Option                 | Description                                                                                                                                         |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`pickerAppearance`** | Determines the appearance of the datepicker: `dayAndTime` `timeOnly` `dayOnly` `monthOnly`. Defaults to `dayAndTime`.                                           |
-| **`displayFormat`**    | Determines how the date is presented. dayAndTime default to `MMM d, yyy h:mm a` timeOnly defaults to `h:mm a` dayOnly defaults to `MMM d, yyy` and monthOnly defaults to `MM/yyyy`. |
+| **`pickerAppearance`** | Determines the appearance of the datepicker: `dayAndTime` `timeOnly` `dayOnly` `monthOnly`. Defaults to a calendar day picker - see `displayFormat`.                                           |
+| **`displayFormat`**    | Determines how the date is presented. dayAndTime default to `MMM d, yyy h:mm a` timeOnly defaults to `h:mm a` dayOnly defaults to `dd` and monthOnly defaults to `MMMM`. Defaults to `MMM d, yyy` when `pickerAppearance` is not set. |
 | **`placeholder`**      | Placeholder text for the field.                                                                                                                     |
 | **`monthsToShow`**     | Number of months to display max is 2. Defaults to 1.                                                                                                |
 | **`minDate`**          | Passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md).                               |
