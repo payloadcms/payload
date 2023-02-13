@@ -6,8 +6,10 @@ import { getDataLoader } from '../../dataloader';
 import restoreVersion from '../restoreVersion';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { ClientSession } from 'mongoose';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
+  session?: ClientSession
   collection: T
   id: string
   depth?: number
@@ -23,6 +25,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   options: Options<T>,
 ): Promise<GeneratedTypes['collections'][T]> {
   const {
+    session,
     collection: collectionSlug,
     depth,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
@@ -53,6 +56,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   const args = {
+    session,
     payload,
     depth,
     collection,

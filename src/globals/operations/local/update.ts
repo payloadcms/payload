@@ -6,8 +6,10 @@ import update from '../update';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { ClientSession } from 'mongoose';
 
 export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
+  session?: ClientSession
   slug: TSlug
   depth?: number
   locale?: string
@@ -24,6 +26,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
+    session,
     slug: globalSlug,
     depth,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
@@ -55,6 +58,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return update<TSlug>({
+    session,
     slug: globalSlug,
     data,
     depth,

@@ -6,8 +6,10 @@ import { Document } from '../../../types';
 import findOne from '../findOne';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { ClientSession } from 'mongoose';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
+  session?: ClientSession
   slug: T
   depth?: number
   locale?: string
@@ -23,6 +25,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
   options: Options<T>,
 ): Promise<GeneratedTypes['globals'][T]> {
   const {
+    session,
     slug: globalSlug,
     depth,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
@@ -54,6 +57,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findOne({
+    session,
     slug: globalSlug as string,
     depth,
     globalConfig,

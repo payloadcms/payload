@@ -10,8 +10,10 @@ import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { ClientSession } from 'mongoose';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
+  session?: ClientSession
   collection: TSlug
   data: MarkOptional<GeneratedTypes['collections'][TSlug], 'id' | 'updatedAt' | 'createdAt'>
   depth?: number
@@ -33,6 +35,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   const {
+    session,
     collection: collectionSlug,
     depth,
     locale = null,
@@ -71,6 +74,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return create<TSlug>({
+    session,
     depth,
     data,
     collection,

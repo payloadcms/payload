@@ -8,8 +8,10 @@ import { getDataLoader } from '../../../collections/dataloader';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { TypeWithVersion } from '../../../versions/types';
+import { ClientSession } from 'mongoose';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
+  session?: ClientSession
   slug: T
   depth?: number
   page?: number
@@ -28,6 +30,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   options: Options<T>,
 ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['globals'][T]>>> {
   const {
+    session,
     slug: globalSlug,
     depth,
     page,
@@ -61,6 +64,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findVersions({
+    session,
     where,
     page,
     limit,

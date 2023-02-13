@@ -7,8 +7,10 @@ import findVersionByID from '../findVersionByID';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { ClientSession } from 'mongoose';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
+  session?: ClientSession
   collection: T
   id: string
   depth?: number
@@ -26,6 +28,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
   options: Options<T>,
 ): Promise<TypeWithVersion<GeneratedTypes['collections'][T]>> {
   const {
+    session,
     collection: collectionSlug,
     depth,
     id,
@@ -54,6 +57,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findVersionByID({
+    session,
     depth,
     id,
     collection,

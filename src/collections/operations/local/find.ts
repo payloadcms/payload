@@ -7,8 +7,10 @@ import find from '../find';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { ClientSession } from 'mongoose';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
+  session?: ClientSession
   collection: T
   depth?: number
   currentDepth?: number
@@ -32,6 +34,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
   options: Options<T>,
 ): Promise<PaginatedDocs<GeneratedTypes['collections'][T]>> {
   const {
+    session,
     collection: collectionSlug,
     depth,
     currentDepth,
@@ -69,6 +72,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
   if (typeof user !== 'undefined') req.user = user;
 
   return find<GeneratedTypes['collections'][T]>({
+    session,
     depth,
     currentDepth,
     sort,

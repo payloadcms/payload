@@ -6,8 +6,10 @@ import { Payload } from '../../../payload';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { ClientSession } from 'mongoose';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
+  session?: ClientSession
   collection: T
   id: string | number
   depth?: number
@@ -27,6 +29,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
   options: Options<T>,
 ): Promise<GeneratedTypes['collections'][T]> {
   const {
+    session,
     collection: collectionSlug,
     depth,
     currentDepth,
@@ -60,6 +63,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findByID<GeneratedTypes['collections'][T]>({
+    session,
     depth,
     currentDepth,
     id,

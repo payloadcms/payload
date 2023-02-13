@@ -8,8 +8,10 @@ import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { ClientSession } from 'mongoose';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
+  session?: ClientSession
   collection: TSlug
   id: string | number
   data: Partial<GeneratedTypes['collections'][TSlug]>
@@ -31,6 +33,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['co
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   const {
+    session,
     collection: collectionSlug,
     depth,
     locale = null,
@@ -72,6 +75,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['co
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   const args = {
+    session,
     depth,
     data,
     collection,

@@ -6,8 +6,10 @@ import deleteOperation from '../delete';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { ClientSession } from 'mongoose';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
+  session?: ClientSession
   collection: T
   id: string
   depth?: number
@@ -23,6 +25,7 @@ export default async function deleteLocal<TSlug extends keyof GeneratedTypes['co
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   const {
+    session,
     collection: collectionSlug,
     depth,
     id,
@@ -54,6 +57,7 @@ export default async function deleteLocal<TSlug extends keyof GeneratedTypes['co
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return deleteOperation<TSlug>({
+    session,
     depth,
     id,
     collection,

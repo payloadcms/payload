@@ -6,8 +6,10 @@ import { Document } from '../../../types';
 import restoreVersion from '../restoreVersion';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { ClientSession } from 'mongoose';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
+  session?: ClientSession
   slug: string
   id: string
   depth?: number
@@ -23,6 +25,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   options: Options<T>,
 ): Promise<GeneratedTypes['globals'][T]> {
   const {
+    session,
     slug: globalSlug,
     depth,
     id,
@@ -53,6 +56,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return restoreVersion({
+    session,
     depth,
     globalConfig,
     overrideAccess,
