@@ -90,6 +90,8 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   mongoURL: string | false;
 
+  mongooseConnection: mongoose.Connection;
+
   mongoMemoryServer: any
 
   local: boolean;
@@ -141,10 +143,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.logger = Logger('payload', options.loggerOptions);
     this.mongoURL = options.mongoURL;
 
-    if (this.mongoURL) {
-      mongoose.set('strictQuery', false);
-      this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, this.logger);
-    }
+    await connectMongoose(this, options.mongoOptions);
 
     this.logger.info('Starting Payload...');
     if (!options.secret) {
