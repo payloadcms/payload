@@ -117,7 +117,11 @@ const Relationship: React.FC<Props> = (props) => {
     const relationsToFetch = lastFullyLoadedRelationToUse === -1 ? relations : relations.slice(lastFullyLoadedRelationToUse + 1);
 
     let resultsFetched = 0;
-    const relationMap = createRelationMap({ hasMany, relationTo, value: valueArg });
+    const relationMap = createRelationMap({
+      hasMany,
+      relationTo,
+      value: valueArg,
+    });
 
     if (!errorLoading) {
       relationsToFetch.reduce(async (priorRelation, relation) => {
@@ -209,12 +213,12 @@ const Relationship: React.FC<Props> = (props) => {
     locale,
   ]);
 
-  const updateSearch = useDebouncedCallback((searchArg: string, valueArg: unknown) => {
+  const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
     getResults({ search: searchArg, value: valueArg, sort: true });
     setSearch(searchArg);
   }, [getResults]);
 
-  const handleInputChange = useCallback((searchArg: string, valueArg: unknown) => {
+  const handleInputChange = useCallback((searchArg: string, valueArg: Value | Value[]) => {
     if (search !== searchArg) {
       updateSearch(searchArg, valueArg);
     }
