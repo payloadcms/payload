@@ -77,6 +77,10 @@ export default async function resizeAndSave({
         resized = resized.toFormat(desiredSize.formatOptions.format, desiredSize.formatOptions.options);
       }
 
+      if (desiredSize.trimOptions) {
+        resized = resized.trim(desiredSize.trimOptions);
+      }
+
       const bufferObject = await resized.toBuffer({
         resolveWithObject: true,
       });
