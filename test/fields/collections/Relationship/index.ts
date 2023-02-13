@@ -24,6 +24,12 @@ const RelationshipFields: CollectionConfig = {
         allowCreate: false,
       },
     },
+    {
+      name: 'relationWithDynamicDefault',
+      type: 'relationship',
+      relationTo: 'users',
+      defaultValue: ({ user }) => user.id,
+    },
   ],
 };
 
