@@ -1,0 +1,29 @@
+{
+  "name": "nextjs-preview-example",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "escape-html": "^1.0.3",
+    "next": "12.3.1",
+    "payload-admin-bar": "^1.0.5",
+    "payload-plugin-nested-pages": "^0.0.4",
+    "react": "18.2.0",
+    "react-cookie": "^4.1.1",
+    "react-dom": "18.2.0",
+    "sass": "^1.55.0",
+    "slate": "^0.84.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.11.3",
+    "@types/react": "18.0.21",
+    "eslint": "8.25.0",
+    "eslint-config-next": "12.3.1",
+    "typescript": "4.8.4"
+  }
+}
