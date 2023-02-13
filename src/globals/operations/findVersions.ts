@@ -10,9 +10,11 @@ import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
 import { TypeWithVersion } from '../../versions/types';
+import { ClientSession } from 'mongoose';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
+  session?: ClientSession
   where?: Where
   page?: number
   limit?: number
@@ -32,6 +34,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     limit,
     depth,
     globalConfig,
+    session,
     req,
     req: {
       locale,
@@ -104,6 +107,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     sort: {
       [sortProperty]: sortOrder,
     },
+    ...(session ? { options: { session }} : {}),
     lean: true,
     leanWithId: true,
     useEstimatedCount,

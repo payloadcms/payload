@@ -10,8 +10,10 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
+import { ClientSession } from 'mongoose';
 
 export type Arguments = {
+  session?: ClientSession
   collection: Collection
   where?: Where
   page?: number
@@ -27,6 +29,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
   args: Arguments,
 ): Promise<PaginatedDocs<T>> {
   const {
+    session,
     where,
     page,
     limit,
@@ -109,6 +112,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     lean: true,
     leanWithId: true,
     useEstimatedCount,
+    ...(session ? { options: { session }} : {}),
   });
 
   // /////////////////////////////////////

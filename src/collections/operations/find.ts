@@ -10,8 +10,10 @@ import { buildSortParam } from '../../mongoose/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { queryDrafts } from '../../versions/drafts/queryDrafts';
+import { ClientSession } from 'mongoose';
 
 export type Arguments = {
+  session?: ClientSession
   collection: Collection
   where?: Where
   page?: number
@@ -46,6 +48,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   }, Promise.resolve());
 
   const {
+    session,
     where,
     page,
     limit,
@@ -157,6 +160,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     options: {
       // limit must also be set here, it's ignored when pagination is false
       limit: limitToUse,
+      ...(session ? { session } : {}),
     },
   };
 
@@ -167,6 +171,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       locale,
       paginationOptions,
       payload,
+      session,
       where,
     });
   } else {

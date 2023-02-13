@@ -22,10 +22,12 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { saveVersion } from '../../versions/saveVersion';
 import { mapAsync } from '../../utilities/mapAsync';
+import { ClientSession } from 'mongoose';
 
 const unlinkFile = promisify(fs.unlink);
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+  session?: ClientSession
   collection: Collection
   req: PayloadRequest
   depth?: number
@@ -57,6 +59,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
   }, Promise.resolve());
 
   const {
+    session,
     collection,
     collection: {
       Model,
@@ -207,7 +210,11 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     }
   } else {
     try {
-      doc = await Model.create(resultWithLocales);
+      if (session) {
+        [doc] = await Model.create([resultWithLocales], { session })
+      } else {
+        doc = await Model.create(resultWithLocales);
+      }
     } catch (error) {
       // Handle uniqueness error from MongoDB
       throw error.code === 11000 && error.keyValue
@@ -231,6 +238,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
   if (collectionConfig.versions) {
     await saveVersion({
       payload,
+      session,
       collection: collectionConfig,
       req,
       id: result.id,

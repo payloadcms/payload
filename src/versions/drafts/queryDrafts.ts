@@ -5,6 +5,7 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { Collection, CollectionModel, TypeWithID } from '../../collections/config/types';
 import { hasWhereAccessResult } from '../../auth';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
+import { ClientSession } from 'mongoose';
 
 type AggregateVersion<T> = {
   _id: string
@@ -14,6 +15,7 @@ type AggregateVersion<T> = {
 }
 
 type Args = {
+  session?: ClientSession
   accessResult: AccessResult
   collection: Collection
   locale: string
@@ -23,6 +25,7 @@ type Args = {
 }
 
 export const queryDrafts = async <T extends TypeWithID>({
+  session,
   accessResult,
   collection,
   locale,
@@ -64,7 +67,7 @@ export const queryDrafts = async <T extends TypeWithID>({
     },
     // Filter based on incoming query
     { $match: versionQuery },
-  ]);
+  ], session ? { session } : undefined);
 
   const paginationSort = Object.entries(paginationOptions.sort).reduce((sort, [key, order]) => {
     return {
@@ -76,6 +79,7 @@ export const queryDrafts = async <T extends TypeWithID>({
   const result = await VersionModel.aggregatePaginate(aggregate, {
     ...paginationOptions,
     sort: paginationSort,
+    ...(session ? { options: { session }} : {}),
   });
 
   return {

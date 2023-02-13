@@ -1,4 +1,4 @@
-import { FilterQuery } from 'mongoose';
+import { ClientSession, FilterQuery } from 'mongoose';
 import { Payload } from '../payload';
 import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
@@ -8,6 +8,7 @@ import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 type Args = {
   payload: Payload
+  session?: ClientSession
   global?: SanitizedGlobalConfig
   collection?: SanitizedCollectionConfig
   req: PayloadRequest
@@ -19,6 +20,7 @@ type Args = {
 
 export const saveVersion = async ({
   payload,
+  session,
   collection,
   global,
   id,
@@ -26,6 +28,8 @@ export const saveVersion = async ({
   autosave,
   draft,
 }: Args): Promise<TypeWithID> => {
+  const sessionOpts = session ? { session } : undefined;
+
   let result;
   let entityConfig;
   let entityType: 'global' | 'collection';
@@ -53,7 +57,10 @@ export const saveVersion = async ({
     if (autosave) {
       const query: FilterQuery<unknown> = {};
       if (collection) query.parent = id;
-      const latestVersion = await VersionModel.findOne(query, {}, { sort: { updatedAt: 'desc' } });
+      const latestVersion = await VersionModel.findOne(query, {}, {
+        sort: { updatedAt: 'desc' },
+        ...sessionOpts,
+      });
 
       // overwrite the latest version if it's set to autosave
       if (latestVersion?.autosave === true) {
@@ -70,7 +77,11 @@ export const saveVersion = async ({
             _id: latestVersion._id,
           },
           data,
-          { new: true, lean: true },
+          {
+            new: true,
+            lean: true,
+            ...sessionOpts,
+          },
         );
       }
     }
@@ -103,6 +114,7 @@ export const saveVersion = async ({
     await enforceMaxVersions({
       id,
       payload,
+      session,
       Model: VersionModel,
       slug: entityConfig.slug,
       entityType,

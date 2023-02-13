@@ -21,10 +21,12 @@ import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersio
 import { mapAsync } from '../../utilities/mapAsync';
 import fileExists from '../../uploads/fileExists';
 import { FileData } from '../../uploads/types';
+import { ClientSession } from 'mongoose';
 
 const unlinkFile = promisify(fs.unlink);
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+  session?: ClientSession
   collection: Collection
   req: PayloadRequest
   id: string | number
@@ -57,6 +59,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   }, Promise.resolve());
 
   const {
+    session,
     depth,
     collection,
     collection: {
@@ -121,6 +124,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
   const doc = await getLatestEntityVersion({
     payload,
+    session,
     Model,
     config: collectionConfig,
     id,
@@ -299,6 +303,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   if (collectionConfig.versions) {
     result = await saveVersion({
       payload,
+      session,
       collection: collectionConfig,
       req,
       docWithLocales: {

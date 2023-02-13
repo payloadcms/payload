@@ -13,8 +13,10 @@ import { FileData } from '../../uploads/types';
 import fileExists from '../../uploads/fileExists';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
+import { ClientSession } from 'mongoose';
 
 export type Arguments = {
+  session?: ClientSession
   depth?: number
   collection: Collection
   id: string
@@ -42,6 +44,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   }, Promise.resolve());
 
   const {
+    session,
     depth,
     collection: {
       Model,
@@ -61,6 +64,8 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     overrideAccess,
     showHiddenFields,
   } = args;
+
+  const sessionOpts = session ? { session } : undefined;
 
   // /////////////////////////////////////
   // Access
@@ -106,7 +111,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  const docToDelete = await Model.findOne(query);
+  const docToDelete = await Model.findOne(query, {}, sessionOpts);
 
   if (!docToDelete && !hasWhereAccess) throw new NotFound(t);
   if (!docToDelete && hasWhereAccess) throw new Forbidden(t);
@@ -150,7 +155,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   // Delete document
   // /////////////////////////////////////
 
-  const doc = await Model.findOneAndDelete({ _id: id });
+  const doc = await Model.findOneAndDelete({ _id: id }, sessionOpts);
 
   let result: Document = doc.toJSON({ virtuals: true });
 
@@ -165,9 +170,9 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   // /////////////////////////////////////
 
   if (collectionConfig.auth) {
-    await preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug });
+    await preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug }, sessionOpts);
   }
-  await preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
+  await preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` }, sessionOpts);
 
   // /////////////////////////////////////
   // Delete versions
@@ -176,6 +181,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   if (collectionConfig.versions) {
     deleteCollectionVersions({
       payload,
+      session,
       id,
       slug: collectionConfig.slug,
     });

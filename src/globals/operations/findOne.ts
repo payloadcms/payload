@@ -7,9 +7,11 @@ import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftI
 import { afterRead } from '../../fields/hooks/afterRead';
 import { SanitizedGlobalConfig } from '../config/types';
 import { PayloadRequest } from '../../express/types';
+import { ClientSession } from 'mongoose';
 
 type Args = {
   globalConfig: SanitizedGlobalConfig
+  session?: ClientSession
   locale?: string
   req: PayloadRequest
   slug: string
@@ -22,6 +24,7 @@ type Args = {
 async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T> {
   const {
     globalConfig,
+    session,
     locale,
     req,
     req: {
@@ -68,7 +71,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
   // Perform database operation
   // /////////////////////////////////////
 
-  let doc = await Model.findOne(query).lean() as any;
+  let doc: any = await Model.findOne(query, {}, session ? { session } : undefined).lean();
 
   if (!doc) {
     doc = {};

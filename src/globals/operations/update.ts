@@ -11,9 +11,11 @@ import { PayloadRequest } from '../../express/types';
 import { saveVersion } from '../../versions/saveVersion';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
+import { ClientSession } from 'mongoose';
 
 type Args<T extends { [field: string | number | symbol]: unknown }> = {
   globalConfig: SanitizedGlobalConfig
+  session?: ClientSession
   slug: string | number | symbol
   req: PayloadRequest
   depth?: number
@@ -29,6 +31,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
     globalConfig,
+    session,
     slug,
     req,
     req: {
@@ -46,6 +49,8 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     draft: draftArg,
     autosave,
   } = args;
+
+  const sessionOpts = session ? { session } : undefined;
 
   let { data } = args;
 
@@ -85,6 +90,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
   let global = await getLatestEntityVersion({
     payload,
+    session,
     Model,
     config: globalConfig,
     query,
@@ -177,11 +183,17 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       global = await Model.findOneAndUpdate(
         { globalType: slug },
         result,
-        { new: true },
+        {
+          new: true,
+          ...sessionOpts,
+        },
       );
     } else {
       result.globalType = slug;
-      global = await Model.create(result);
+      global = await Model.create(
+        result,
+        sessionOpts
+      );
     }
   }
 
@@ -195,6 +207,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   if (globalConfig.versions) {
     global = await saveVersion({
       payload,
+      session,
       global: globalConfig,
       req,
       docWithLocales: {

@@ -6,9 +6,11 @@ import { SanitizedGlobalConfig } from '../config/types';
 import { NotFound } from '../../errors';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { ClientSession } from 'mongoose';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
+  session?: ClientSession
   id: string | number
   depth?: number
   req?: PayloadRequest
@@ -21,6 +23,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     id,
     depth,
     globalConfig,
+    session,
     req,
     req: {
       t,
@@ -34,6 +37,8 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     overrideAccess,
     showHiddenFields,
   } = args;
+
+  const sessionOpts = session ? { session } : undefined;
 
   // /////////////////////////////////////
   // Access
@@ -49,9 +54,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
   const VersionModel = payload.versions[globalConfig.slug];
 
-  let rawVersion = await VersionModel.findOne({
-    _id: id,
-  });
+  let rawVersion = await VersionModel.findOne({ _id: id }, {}, sessionOpts);
 
   if (!rawVersion) {
     throw new NotFound(t);
@@ -72,7 +75,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
   // Update global
   // /////////////////////////////////////
 
-  const global = await Model.findOne({ globalType: globalConfig.slug });
+  const global = await Model.findOne({ globalType: globalConfig.slug }, {}, sessionOpts);
 
   let result = rawVersion.version;
 
@@ -80,11 +83,14 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     result = await Model.findOneAndUpdate(
       { globalType: globalConfig.slug },
       result,
-      { new: true },
+      {
+        new: true,
+        ...sessionOpts,
+      },
     );
   } else {
     result.globalType = globalConfig.slug;
-    result = await Model.create(result);
+    result = await Model.create([result], sessionOpts);
   }
 
   result = result.toJSON({ virtuals: true });

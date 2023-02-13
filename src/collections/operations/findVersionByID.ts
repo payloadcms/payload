@@ -9,8 +9,10 @@ import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { ClientSession } from 'mongoose';
 
 export type Arguments = {
+  session?: ClientSession
   collection: Collection
   id: string | number
   req: PayloadRequest
@@ -23,6 +25,7 @@ export type Arguments = {
 
 async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
   const {
+    session,
     depth,
     collection: {
       config: collectionConfig,
@@ -81,7 +84,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
   if (!query.$and[0]._id) throw new NotFound(t);
 
-  let result = await VersionsModel.findOne(query, {}).lean();
+  let result = await VersionsModel.findOne(query, {}, session ? { session } : undefined).lean();
 
   if (!result) {
     if (!disableErrors) {

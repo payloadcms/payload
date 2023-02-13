@@ -9,8 +9,10 @@ import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { ClientSession } from 'mongoose';
 
 export type Arguments = {
+  session?: ClientSession
   collection: Collection
   id: string | number
   req: PayloadRequest
@@ -41,6 +43,7 @@ async function findByID<T extends TypeWithID>(
   }, Promise.resolve());
 
   const {
+    session,
     depth,
     collection: {
       Model,
@@ -96,7 +99,7 @@ async function findByID<T extends TypeWithID>(
   if (!req.findByID) req.findByID = {};
 
   if (!req.findByID[collectionConfig.slug]) {
-    const nonMemoizedFindByID = async (q) => Model.findOne(q, {}).lean();
+    const nonMemoizedFindByID = async (q) => Model.findOne(q, {}, session ? { session } : undefined).lean();
     req.findByID[collectionConfig.slug] = memoize(nonMemoizedFindByID, {
       isPromise: true,
       maxSize: 100,
@@ -128,6 +131,7 @@ async function findByID<T extends TypeWithID>(
   if (collectionConfig.versions?.drafts && draftEnabled) {
     result = await replaceWithDraftIfAvailable({
       payload,
+      session,
       entity: collectionConfig,
       entityType: 'collection',
       doc: result,

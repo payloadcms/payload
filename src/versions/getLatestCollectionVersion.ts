@@ -2,9 +2,11 @@ import { docHasTimestamps, Document } from '../types';
 import { Payload } from '../payload';
 import { CollectionModel, SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
 import { GlobalModel, SanitizedGlobalConfig } from '../globals/config/types';
+import { ClientSession } from 'mongoose';
 
 type Args = {
   payload: Payload
+  session?: ClientSession
   query: Record<string, unknown>
   lean?: boolean
 } & ({
@@ -21,6 +23,7 @@ type Args = {
 
 export const getLatestEntityVersion = async <T extends TypeWithID = any>({
   payload,
+  session,
   entityType = 'collection',
   config,
   Model,
@@ -28,6 +31,8 @@ export const getLatestEntityVersion = async <T extends TypeWithID = any>({
   id,
   lean = true,
 }: Args): Promise<T> => {
+  const sessionOpts = session ? { session } : undefined;
+
   let latestVersion;
 
   if (config.versions?.drafts) {
@@ -36,10 +41,14 @@ export const getLatestEntityVersion = async <T extends TypeWithID = any>({
     }, {}, {
       sort: { updatedAt: 'desc' },
       lean,
+      ...sessionOpts,
     });
   }
 
-  const doc = await (Model as any).findOne(query, {}, { lean }) as Document;
+  const doc = await (Model as any).findOne(query, {}, {
+    lean,
+    ...sessionOpts,
+  }) as Document;
 
   if (!latestVersion || (docHasTimestamps(doc) && latestVersion.updatedAt < doc.updatedAt)) {
     if (entityType === 'collection') {

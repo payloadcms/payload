@@ -6,9 +6,11 @@ import { CollectionModel, SanitizedCollectionConfig, TypeWithID } from '../../co
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
+import { ClientSession } from 'mongoose';
 
 type Arguments<T> = {
   payload: Payload
+  session?: ClientSession
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
   doc: T
@@ -18,6 +20,7 @@ type Arguments<T> = {
 
 const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   payload,
+  session,
   entity,
   entityType,
   doc,
@@ -64,6 +67,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   let draft = await VersionModel.findOne(query, {}, {
     lean: true,
     sort: { updatedAt: 'desc' },
+    ...(session ? { session } : {}),
   });
 
   if (!draft) {

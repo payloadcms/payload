@@ -10,8 +10,10 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
+import { ClientSession } from 'mongoose';
 
 export type Arguments = {
+  session?: ClientSession
   collection: Collection
   id: string | number
   req: PayloadRequest
@@ -24,6 +26,7 @@ export type Arguments = {
 
 async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
   const {
+    session,
     collection: {
       Model,
       config: collectionConfig,
@@ -44,6 +47,8 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST);
   }
 
+  const sessionOpts = session ? { session } : undefined;
+
   // /////////////////////////////////////
   // Retrieve original raw version
   // /////////////////////////////////////
@@ -52,7 +57,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   let rawVersion = await VersionModel.findOne({
     _id: id,
-  });
+  }, sessionOpts);
 
   if (!rawVersion) {
     throw new NotFound(t);
@@ -91,7 +96,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  const doc = await Model.findOne(query);
+  const doc = await Model.findOne(query, {}, sessionOpts);
 
   if (!doc && !hasWherePolicy) throw new NotFound(t);
   if (!doc && hasWherePolicy) throw new Forbidden(t);
@@ -102,6 +107,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   const prevDocWithLocales = await getLatestEntityVersion({
     payload,
+    session,
     id: parentDocID,
     query,
     Model,
@@ -115,7 +121,10 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   let result = await Model.findByIdAndUpdate(
     { _id: parentDocID },
     rawVersion.version,
-    { new: true },
+    {
+      new: true,
+      ...sessionOpts,
+    },
   );
 
   result = result.toJSON({ virtuals: true });
@@ -139,6 +148,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     autosave: false,
     createdAt: prevVersion.createdAt,
     updatedAt: new Date().toISOString(),
+    ...sessionOpts,
   });
 
   // /////////////////////////////////////
