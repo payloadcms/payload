@@ -1,4 +1,4 @@
-import { ValueWithRelation } from './types';
+import { Value } from './types';
 
 type RelationMap = {
   [relation: string]: unknown[]
@@ -7,7 +7,7 @@ type RelationMap = {
 type CreateRelationMap = (args: {
   hasMany: boolean
   relationTo: string | string[]
-  value: unknown
+  value: Value | Value[] // really needs to be `ValueWithRelation`
 }) => RelationMap;
 
 export const createRelationMap: CreateRelationMap = ({
@@ -33,15 +33,18 @@ export const createRelationMap: CreateRelationMap = ({
 
   if (hasMany && Array.isArray(value)) {
     value.forEach((val) => {
-      if (hasMultipleRelations) {
+      if (hasMultipleRelations && typeof val === 'object' && 'relationTo' in val && 'value' in val) {
         add(val.relationTo, val.value);
-      } else {
+      }
+
+      if (!hasMultipleRelations && typeof relationTo === 'string') {
         add(relationTo, val);
       }
     });
-  } else if (hasMultipleRelations) {
-    const valueWithRelation = value as ValueWithRelation;
-    add(valueWithRelation?.relationTo, valueWithRelation?.value);
+  } else if (hasMultipleRelations && Array.isArray(relationTo)) {
+    if (typeof value === 'object' && 'relationTo' in value && 'value' in value) {
+      add(value.relationTo, value.value);
+    }
   } else {
     add(relationTo, value);
   }

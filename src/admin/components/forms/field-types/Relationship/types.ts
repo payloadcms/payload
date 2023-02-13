@@ -19,10 +19,12 @@ export type OptionGroup = {
   options: Option[]
 }
 
-export type Value = {
+export type ValueWithRelation = {
   relationTo: string
   value: string | number
-} | string | number
+}
+
+export type Value = ValueWithRelation | string | number
 
 type CLEAR = {
   type: 'CLEAR'
@@ -46,16 +48,11 @@ type ADD = {
 
 export type Action = CLEAR | ADD | UPDATE
 
-export type ValueWithRelation = {
-  relationTo: string
-  value: string
-}
-
 export type GetResults = (args: {
   lastFullyLoadedRelation?: number
   lastLoadedPage?: number
   search?: string
-  value?: unknown
+  value?: Value | Value[]
   sort?: boolean
   onSuccess?: () => void
 }) => Promise<void>
