@@ -16,6 +16,14 @@ const RelationshipFields: CollectionConfig = {
       type: 'relationship',
       relationTo: relationshipFieldsSlug,
     },
+    {
+      name: 'relationToSelfSelectOnly',
+      type: 'relationship',
+      relationTo: relationshipFieldsSlug,
+      admin: {
+        allowCreate: false,
+      },
+    },
   ],
 };
 

@@ -627,6 +627,12 @@ describe('fields', () => {
 
       await expect(page.locator('.Toastify')).toContainText('successfully');
     });
+
+    test('should hide relationship add new button', async () => {
+      await page.goto(url.create);
+      // expect the button to not exist in the field
+      await expect(await page.locator('#relationToSelfSelectOnly-add-new .relationship-add-new__add-button').count()).toEqual(0);
+    });
   });
 
   describe('upload', () => {
