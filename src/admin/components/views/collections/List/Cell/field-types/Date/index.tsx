@@ -1,7 +1,7 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../utilities/Config';
 import { formatDate } from '../../../../../../../utilities/formatDate';
-import { useTranslation } from 'react-i18next';
 
 const DateCell = ({ data, field }) => {
   const { admin: { dateFormat: dateFormatFromConfig } } = useConfig();

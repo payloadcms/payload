@@ -1,15 +1,9 @@
 import { format } from 'date-fns';
 import * as Locale from 'date-fns/locale';
-
-const formattedLocales = {
-  en: 'enUS',
-  my: 'enUS', // Burmese is not currently supported
-  ua: 'uk',
-  zh: 'zhCN',
-};
+import { getSupportedDateLocale } from './getSupportedDateLocale';
 
 export const formatDate = (date: Date | number | string | undefined, pattern: string, locale?: string): string => {
   const theDate = new Date(date);
-  const currentLocale = !locale ? Locale['enUS'] : Locale[formattedLocales[locale] || locale] || Locale['enUS'];
+  const currentLocale = Locale[getSupportedDateLocale(locale)];
   return format(theDate, pattern, { locale: currentLocale });
 };
