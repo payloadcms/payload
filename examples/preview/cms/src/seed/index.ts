@@ -1,29 +1,35 @@
-import { Payload } from 'payload';
-import { draftPage } from './draftPage';
-import { home } from './home';
+import type { Payload } from 'payload'
+import { examplePage } from './page'
+import { examplePageDraft } from './pageDraft'
+import { home } from './home'
 
-export const seed = async (payload: Payload) => {
+export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: 'users',
     data: {
       email: 'dev@payloadcms.com',
       password: 'test',
     },
-  });
+  })
 
-  const homepageJSON = JSON.parse(JSON.stringify(home));
+  const { id: examplePageID } = await payload.create({
+    collection: 'pages',
+    data: examplePage as any, // eslint-disable-line
+  })
 
-  const draftPageJSON = JSON.parse(JSON.stringify(draftPage));
+  await payload.update({
+    collection: 'pages',
+    id: examplePageID,
+    draft: true,
+    data: examplePageDraft as any, // eslint-disable-line
+  })
+
+  const homepageJSON = JSON.parse(JSON.stringify(home).replace('{{DRAFT_PAGE_ID}}', examplePageID))
 
   await payload.create({
     collection: 'pages',
     data: homepageJSON,
-  });
-
-  const { id: draftPageID } = await payload.create({
-    collection: 'pages',
-    data: draftPageJSON,
-  });
+  })
 
   await payload.updateGlobal({
     slug: 'main-menu',
@@ -31,15 +37,24 @@ export const seed = async (payload: Payload) => {
       navItems: [
         {
           link: {
+            type: 'custom',
+            reference: null,
+            label: 'Dashboard',
+            url: 'http://localhost:8000/admin',
+          },
+        },
+        {
+          link: {
             type: 'reference',
             reference: {
               relationTo: 'pages',
-              value: draftPageID
+              value: examplePageID,
             },
-            label: 'Draft Page',
-          }
+            label: 'Example Page',
+            url: '',
+          },
         },
-      ]
-    }
+      ],
+    },
   })
-};
+}

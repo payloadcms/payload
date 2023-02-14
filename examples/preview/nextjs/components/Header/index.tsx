@@ -1,16 +1,17 @@
-import Link from 'next/link';
-import React, { useState } from 'react';
-import { useGlobals } from '../../providers/Globals';
-import { Gutter } from '../Gutter';
-import { Logo } from '../Logo';
-import { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar';
+import React, { useState } from 'react'
+import Link from 'next/link'
+import { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
 
-import classes from './index.module.scss';
-import { AdminBar } from './AdminBar';
-import { CMSLink } from '../CMSLink';
+import { MainMenu } from '../../payload-types'
+import { CMSLink } from '../CMSLink'
+import { Gutter } from '../Gutter'
+import { Logo } from '../Logo'
+import { AdminBar } from './AdminBar'
+
+import classes from './index.module.scss'
 
 type HeaderBarProps = {
-  children?: React.ReactNode;
+  children?: React.ReactNode
 }
 
 export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
@@ -18,45 +19,38 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
     <header className={classes.header}>
       <Gutter className={classes.wrap}>
         <Link href="/">
-          <a>
-            <Logo />
-          </a>
+          <Logo />
         </Link>
-
         {children}
-
       </Gutter>
     </header>
   )
 }
 
 export const Header: React.FC<{
+  globals: {
+    mainMenu: MainMenu
+  }
   adminBarProps: PayloadAdminBarProps
-}> = (props) => {
+}> = props => {
+  const { globals, adminBarProps } = props
+
+  const [user, setUser] = useState<PayloadMeUser>()
+
   const {
-    adminBarProps,
-  } = props;
+    mainMenu: { navItems },
+  } = globals
 
-  const [user, setUser] = useState<PayloadMeUser>();
-
-  const { mainMenu: { navItems } } = useGlobals();
-
-  const hasNavItems = navItems && Array.isArray(navItems) && navItems.length > 0;
+  const hasNavItems = navItems && Array.isArray(navItems) && navItems.length > 0
 
   return (
     <div>
-      <AdminBar
-        adminBarProps={adminBarProps}
-        user={user}
-        setUser={setUser}
-      />
+      <AdminBar adminBarProps={adminBarProps} user={user} setUser={setUser} />
       <HeaderBar>
         {hasNavItems && (
           <nav className={classes.nav}>
             {navItems.map(({ link }, i) => {
-              return (
-                <CMSLink key={i} {...link} />
-              )
+              return <CMSLink key={i} {...link} />
             })}
           </nav>
         )}

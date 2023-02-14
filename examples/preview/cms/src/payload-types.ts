@@ -7,54 +7,49 @@
 
 export interface Config {
   collections: {
-    pages: Page;
-    users: User;
-  };
+    pages: Page
+    users: User
+  }
   globals: {
-    'main-menu': MainMenu;
-  };
+    'main-menu': MainMenu
+  }
 }
 export interface Page {
-  id: string;
-  title: string;
-  richText: {
-    [k: string]: unknown;
-  }[];
-  slug?: string;
-  parent?: string | Page;
-  breadcrumbs: {
-    doc?: string | Page;
-    url?: string;
-    label?: string;
-    id?: string;
-  }[];
-  _status?: 'draft' | 'published';
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  title: string
+  slug?: string
+  richText: Array<{
+    [k: string]: unknown
+  }>
+  _status?: 'draft' | 'published'
+  createdAt: string
+  updatedAt: string
+  password?: string
 }
 export interface User {
-  id: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  createdAt: string
+  updatedAt: string
+  password?: string
 }
 export interface MainMenu {
-  id: string;
-  navItems: {
+  id: string
+  navItems: Array<{
     link: {
-      type?: 'reference' | 'custom';
-      newTab?: boolean;
+      type?: 'reference' | 'custom'
+      newTab?: boolean
       reference: {
-        value: string | Page;
-        relationTo: 'pages';
-      };
-      url: string;
-      label: string;
-    };
-    id?: string;
-  }[];
+        value: string | Page
+        relationTo: 'pages'
+      }
+      url: string
+      label: string
+    }
+    id?: string
+  }>
 }

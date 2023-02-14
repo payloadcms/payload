@@ -1,93 +1,76 @@
-import App, { AppContext, AppProps as NextAppProps } from 'next/app';
-import React, { useCallback } from 'react';
-import { useRouter } from 'next/router';
-import { MainMenu } from "../payload-types";
-import { Header } from '../components/Header';
-import { GlobalsProvider } from '../providers/Globals';
-import { useNavigationScrollTo } from '../utilities/useNavigationScrollTo';
-import { CookiesProvider } from 'react-cookie';
+import React, { useCallback } from 'react'
+import { CookiesProvider } from 'react-cookie'
+import App, { AppContext, AppProps as NextAppProps } from 'next/app'
+import { useRouter } from 'next/router'
 
-import '../css/app.scss';
+import { Header } from '../components/Header'
+import { MainMenu } from '../payload-types'
+
+import '../css/app.scss'
+
 export interface IGlobals {
-  mainMenu: MainMenu,
+  mainMenu: MainMenu
 }
 
 export const getAllGlobals = async (): Promise<IGlobals> => {
-  const [
-    mainMenu,
-  ] = await Promise.all([
-    fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/globals/main-menu?depth=1`).then((res) => res.json()),
-  ]);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/globals/main-menu?depth=1`)
+  const mainMenu = await res.json()
 
   return {
     mainMenu,
   }
 }
 
-const transitionTime = 500;
-
 type AppProps<P = any> = {
-  pageProps: P;
-} & Omit<NextAppProps<P>, "pageProps">;
+  pageProps: P
+} & Omit<NextAppProps<P>, 'pageProps'>
 
-const PayloadApp = (appProps: AppProps & {
-  globals: IGlobals,
-}): React.ReactElement => {
-  const {
-    Component,
-    pageProps,
-    globals,
-  } = appProps;
+const PayloadApp = (
+  appProps: AppProps & {
+    globals: IGlobals
+  },
+): React.ReactElement => {
+  const { Component, pageProps, globals } = appProps
 
-  const {
-    breadcrumbs,
-    collection,
-    id,
-    preview,
-  } = pageProps;
+  const { collection, id, preview } = pageProps
 
-  const router = useRouter();
-  useNavigationScrollTo({
-    router,
-    navigationTime: transitionTime
-  });
+  const router = useRouter()
 
   const onPreviewExit = useCallback(() => {
     const exit = async () => {
-      const exitReq = await fetch('/api/exit-preview');
+      const exitReq = await fetch('/api/exit-preview')
       if (exitReq.status === 200) {
-        router.reload();
+        router.reload()
       }
     }
-    exit();
+    exit()
   }, [router])
 
   return (
     <CookiesProvider>
-      <GlobalsProvider {...globals}>
-        <Header
-          adminBarProps={{
-            collection,
-            id: id,
-            preview,
-            onPreviewExit
-          }}
-        />
-        <Component {...pageProps} />
-      </GlobalsProvider>
+      <Header
+        globals={globals}
+        adminBarProps={{
+          collection,
+          id,
+          preview,
+          onPreviewExit,
+        }}
+      />
+      <Component {...pageProps} />
     </CookiesProvider>
   )
 }
 
 PayloadApp.getInitialProps = async (appContext: AppContext) => {
-  const appProps = await App.getInitialProps(appContext);
+  const appProps = await App.getInitialProps(appContext)
 
-  const globals = await getAllGlobals();
+  const globals = await getAllGlobals()
 
   return {
     ...appProps,
-    globals
-  };
-};
+    globals,
+  }
+}
 
 export default PayloadApp

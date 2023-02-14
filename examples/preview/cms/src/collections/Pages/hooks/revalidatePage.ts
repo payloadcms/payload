@@ -1,15 +1,34 @@
-import { AfterChangeHook } from 'payload/dist/collections/config/types';
-import { revalidatePath } from '../../../utilities/revalidatePath';
-import { formatAppURL } from '../formatAppURL';
+import type { AfterChangeHook } from 'payload/dist/collections/config/types'
 
-export const revalidatePage: AfterChangeHook = ({ doc }) => {
-  const url = new URL(formatAppURL(doc.breadcrumbs));
+// ensure that the home page is revalidated at '/' instead of '/home'
+export const formatAppURL = ({ doc }): string => {
+  const pathToUse = doc.slug === 'home' ? '' : doc.slug
+  const { pathname } = new URL(`${process.env.PAYLOAD_PUBLIC_SITE_URL}/${pathToUse}`)
+  return pathname
+}
 
-  revalidatePath(url.pathname);
+// Revalidate the page in the background, so the user doesn't have to wait
+// Notice that the hook itself is not async and we are not awaiting `revalidate`
+export const revalidatePage: AfterChangeHook = ({ doc, req }) => {
+  const url = formatAppURL({ doc })
 
-  if (url.pathname === '/home') {
-    revalidatePath('/')
+  const revalidate = async (): Promise<void> => {
+    try {
+      const res = await fetch(
+        `${process.env.PAYLOAD_PUBLIC_SITE_URL}/api/revalidate?secret=${process.env.REVALIDATION_KEY}&revalidatePath=${url}`,
+      )
+
+      if (res.ok) {
+        req.payload.logger.info(`Revalidated path ${url}`)
+      } else {
+        req.payload.logger.error(`Error revalidating path ${url}`)
+      }
+    } catch (err: unknown) {
+      req.payload.logger.error(`Error hitting revalidate route for ${url}`)
+    }
   }
 
-  return doc;
-};
+  revalidate()
+
+  return doc
+}

@@ -1,24 +1,47 @@
 # Preview Example for Payload CMS
 
-This is an example repo that showcases how to implement the `preview` feature into Payload CMS.
+This example demonstrates how to implement preview into Payload CMS using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts).
 
-There is a fully working Next.js app tailored specifically for this example which can be found [here](../nextjs). Follow the instructions there to get started. If you are setting up `preview` for another front-end, please consider contributing to this repo with your own example!
+There is a fully working Next.js app tailored specifically for this example which can be found [here](../nextjs). Follow the instructions there to get started. If you are setting up preview for another front-end, please consider contributing to this repo with your own example!
 
 ## Getting Started
 
 1. Clone this repo
-2. `cd` into the directory and run `yarn` or `npm install`
-3. Copy (`cp`) the `.env.example` file to an `.env` file
-4. Run `yarn dev` or `npm run dev` to start the development server
-5. Visit `http://localhost:8000/admin` to access the admin panel
-6. Login with the following credentials:
-   - Email: `dev@payloadcms.com`
-   - Password: `test`
+2. `cd` into this directory and run `yarn` or `npm install`
+3. `cp .env.example .env` to copy the example environment variables
+4. `yarn dev` or `npm run dev` to start the server and seed the database
+5. `open http://localhost:8000/admin` to access the admin panel
+6. Login with email `dev@payloadcms.com` and password `test`
 
 ## How it works
 
-On boot, a seed script is included to create a `user`, a `Home` page, and a `Draft` page for you to test with:
+A `pages` collection is created with `versions: { drafts: true }` and access control that restricts access to only logged-in users and `published` pages. On your front-end, a query similar to this can be used to fetch data and bypass access control in preview mode:
 
-- The `Home` page has been set to `published` on start up, however the `Draft` page is only set to draft (not published yet). You can edit these pages - save them - and then preview them to view your saved changes without having these changes published and accessible to the public.
-- Upon previewing, you will notice an `admin bar` above the header of the site. This admin bar gives you freedom to exit preview mode, which will then return the page to it's most recent published version.
-- Note: the admin bar will only ever be seen by users logged into the cms. The admin bar stays hidden to public viewers.
+```ts
+  const preview = true; // set this based on your own front-end environment (see `Preview Mode` below)
+  const pageSlug = 'example-page'; // same here
+  const searchParams = `?where[slug][equals]=${pageSlug}&depth=1${preview ? `&draft=true` : ''}`
+
+  // when previewing, send the payload token to bypass draft access control
+  const pageReq = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/pages${searchParams}`, {
+    headers: {
+      ...preview ? {
+         Authorization: `JWT ${payloadToken}`,
+      } : {},
+    },
+  })
+```
+
+[CORS](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors), [CSRF](https://payloadcms.com/docs/production/preventing-abuse#cross-site-request-forgery-csrf), and [Cookies](https://payloadcms.com/docs/authentication/config#options) are all configured to ensure that the admin panel and front-end can communicate with each other securely.
+
+### Preview Mode
+
+To enter preview mode we format a custom URL using a [preview function](https://payloadcms.com/docs/configuration/collections#preview) in the collection config. When a user clicks the "Preview" button, they are routed to this URL along with their http-only cookies and revalidation key. Your front-end can then use the `payload-token` and revalidation key to verify the request and enter into its own preview mode.
+
+### Instant Static Regeneration (ISR)
+
+If your front-end is statically generated then you may also want to regenerate the HTML for each page as they are published. To do this, we add an `afterChange` hook to the collection that fires a request to your front-end in the background each time the document is updated. You can handle this request on your front-end and regenerate the HTML for your page however needed.
+
+### Seed
+
+On boot, a seed script is included to create a user, a home page, and an example page with two versions, one published and one draft.

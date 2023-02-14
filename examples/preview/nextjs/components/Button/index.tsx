@@ -1,6 +1,7 @@
-import Link from 'next/link';
-import React from 'react';
-import classes from './index.module.scss';
+import React, { ElementType } from 'react'
+import Link from 'next/link'
+
+import classes from './index.module.scss'
 
 export type Props = {
   label: string
@@ -8,59 +9,63 @@ export type Props = {
   el?: 'button' | 'link' | 'a'
   onClick?: () => void
   href?: string
-  form?: string
   newTab?: boolean
   className?: string
-}
-
-const elements = {
-  a: 'a',
-  link: Link,
-  button: 'button',
+  type?: 'submit' | 'button'
+  disabled?: boolean
 }
 
 export const Button: React.FC<Props> = ({
-  el = 'button',
+  el: elFromProps = 'link',
   label,
   newTab,
   href,
-  form,
   appearance,
-  className: classNameFromProps
+  className: classNameFromProps,
+  onClick,
+  type = 'button',
+  disabled,
 }) => {
-  const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {};
-  const Element = elements[el];
-  const className = [classNameFromProps, classes[`appearance--${appearance}`], classes.button].filter(Boolean).join(' ');
-
-  const elementProps = {
-    ...newTabProps,
-    href,
-    className,
-    form,
-  }
+  let el = elFromProps
+  const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
+  const className = [
+    classes.button,
+    classNameFromProps,
+    classes[`appearance--${appearance}`],
+    classes.button,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   const content = (
     <div className={classes.content}>
-      <span className={classes.label}>
-        {label}
-      </span>
+      {/* <Chevron /> */}
+      <span className={classes.label}>{label}</span>
     </div>
   )
 
+  if (onClick || type === 'submit') el = 'button'
+
+  if (el === 'link') {
+    return (
+      <Link href={href} className={className} {...newTabProps} onClick={onClick}>
+        {content}
+      </Link>
+    )
+  }
+
+  const Element: ElementType = el
+
   return (
-    <Element {...elementProps}>
-      <React.Fragment>
-        {el === 'link' && (
-          <a {...newTabProps} href={href} className={elementProps.className}>
-            {content}
-          </a>
-        )}
-        {el !== 'link' && (
-          <React.Fragment>
-            {content}
-          </React.Fragment>
-        )}
-      </React.Fragment>
+    <Element
+      href={href}
+      className={className}
+      type={type}
+      {...newTabProps}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {content}
     </Element>
   )
 }

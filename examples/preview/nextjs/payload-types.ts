@@ -17,20 +17,14 @@ export interface Config {
 export interface Page {
   id: string;
   title: string;
+  slug?: string;
   richText: {
     [k: string]: unknown;
-  }[];
-  slug?: string;
-  parent?: string | Page;
-  breadcrumbs: {
-    doc?: string | Page;
-    url?: string;
-    label?: string;
-    id?: string;
   }[];
   _status?: 'draft' | 'published';
   createdAt: string;
   updatedAt: string;
+  password?: string;
 }
 export interface User {
   id: string;
@@ -41,6 +35,7 @@ export interface User {
   lockUntil?: string;
   createdAt: string;
   updatedAt: string;
+  password?: string;
 }
 export interface MainMenu {
   id: string;

@@ -1,9 +1,10 @@
-import { GetStaticProps } from 'next';
-import Page, { getStaticProps as sharedGetStaticProps } from './[...slug]';
+import { GetStaticProps } from 'next'
 
-export default Page;
+import Page, { getStaticProps as sharedGetStaticProps } from './[slug]'
 
-export const getStaticProps: GetStaticProps = async (ctx) => {
-  const func = sharedGetStaticProps.bind(this);
-  return func(ctx);
-};
+export default Page
+
+export const getStaticProps: GetStaticProps = async ctx => {
+  const func = sharedGetStaticProps.bind(this)
+  return func(ctx)
+}

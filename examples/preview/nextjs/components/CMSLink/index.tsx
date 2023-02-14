@@ -1,9 +1,10 @@
-import Link from 'next/link';
-import React from 'react';
-import { Page } from '../../payload-types';
-import { Button } from '../Button';
+import React from 'react'
+import Link from 'next/link'
 
-type CMSLinkType = {
+import { Page } from '../../payload-types'
+import { Button } from '../Button'
+
+export type CMSLinkType = {
   type?: 'custom' | 'reference'
   url?: string
   newTab?: boolean
@@ -27,10 +28,13 @@ export const CMSLink: React.FC<CMSLinkType> = ({
   children,
   className,
 }) => {
-  const href = (type === 'reference' && typeof reference?.value === 'object' && reference.value.slug) ? `/${reference.value.slug}` : url;
+  const href =
+    type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
+      ? `/${reference.value.slug}`
+      : url
 
   if (!appearance) {
-    const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+    const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
 
     if (type === 'custom') {
       return (
@@ -43,11 +47,9 @@ export const CMSLink: React.FC<CMSLinkType> = ({
 
     if (href) {
       return (
-        <Link href={href}>
-          <a {...newTabProps} className={className}>
-            {label && label}
-            {children && children}
-          </a>
+        <Link href={href} {...newTabProps} className={className}>
+          {label && label}
+          {children && children}
         </Link>
       )
     }
@@ -60,7 +62,5 @@ export const CMSLink: React.FC<CMSLinkType> = ({
     label,
   }
 
-  return (
-    <Button className={className} {...buttonProps} el="link" />
-  )
+  return <Button className={className} {...buttonProps} el="link" />
 }

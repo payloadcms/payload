@@ -1,27 +1,19 @@
-import React from 'react';
-import { PayloadMeUser, PayloadAdminBarProps, PayloadAdminBar } from 'payload-admin-bar';
-import { Gutter } from '../../Gutter';
+import React from 'react'
+import { PayloadAdminBar, PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
 
-import classes from './index.module.scss';
+import { Gutter } from '../../Gutter'
+
+import classes from './index.module.scss'
 
 export const AdminBar: React.FC<{
   adminBarProps?: PayloadAdminBarProps
   user?: PayloadMeUser
-  setUser?: (user: PayloadMeUser) => void
-}> = (props) => {
-  const {
-    adminBarProps,
-    user,
-    setUser
-  } = props;
+  setUser?: (user: PayloadMeUser) => void // eslint-disable-line no-unused-vars
+}> = props => {
+  const { adminBarProps, user, setUser } = props
 
   return (
-    <div
-      className={[
-        classes.adminBar,
-        user && classes.show
-      ].filter(Boolean).join(' ')}
-    >
+    <div className={[classes.adminBar, user && classes.show].filter(Boolean).join(' ')}>
       <Gutter className={classes.container}>
         <PayloadAdminBar
           {...adminBarProps}
@@ -37,10 +29,10 @@ export const AdminBar: React.FC<{
             position: 'relative',
             zIndex: 'unset',
             padding: 0,
-            backgroundColor: 'transparent'
+            backgroundColor: 'transparent',
           }}
         />
       </Gutter>
-    </div >
+    </div>
   )
 }
