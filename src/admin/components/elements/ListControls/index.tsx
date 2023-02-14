@@ -17,6 +17,8 @@ import Pill from '../Pill';
 import Chevron from '../../icons/Chevron';
 import DeleteManyDocuments from '../DeleteManyDocuments';
 import BulkEdit from '../BulkEdit';
+import PublishMany from '../PublishMany';
+import UnpublishMany from '../UnpublishMany';
 
 import './index.scss';
 
@@ -66,6 +68,14 @@ const ListControls: React.FC<Props> = (props) => {
             { !smallBreak && (
               <React.Fragment>
                 <BulkEdit
+                  collection={collection}
+                  resetParams={resetParams}
+                />
+                <PublishMany
+                  collection={collection}
+                  resetParams={resetParams}
+                />
+                <UnpublishMany
                   collection={collection}
                   resetParams={resetParams}
                 />

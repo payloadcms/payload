@@ -142,12 +142,10 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   return Promise.all(docs.map(async (doc) => {
-    // if (!doc && !hasWherePolicy) throw new NotFound(t);
-    // if (!doc && hasWherePolicy) throw new Forbidden(t);
-    const id = doc._id;
-
     let docWithLocales: Document = JSON.stringify(doc);
     docWithLocales = JSON.parse(docWithLocales);
+
+    const id = docWithLocales._id;
 
     const originalDoc = await afterRead({
       depth: 0,

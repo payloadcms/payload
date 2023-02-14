@@ -32,10 +32,10 @@ const BulkEdit: React.FC<Props> = (props) => {
 
   const { permissions } = useAuth();
   const { serverURL, routes: { api } } = useConfig();
-  const [selected, setSelected] = useState([]);
   const { closeModal } = useModal();
-  const { t, i18n } = useTranslation('general');
   const { selectAll, count, getQueryParams } = useSelection();
+  const { t, i18n } = useTranslation('general');
+  const [selected, setSelected] = useState([]);
 
   const collectionPermissions = permissions?.collections?.[slug];
   const hasUpdatePermission = collectionPermissions?.update?.permission;

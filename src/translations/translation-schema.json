@@ -1100,6 +1100,9 @@
         "compareVersion": {
           "type": "string"
         },
+        "confirmPublish": {
+          "type": "string"
+        },
         "confirmRevertToSaved": {
           "type": "string"
         },
@@ -1134,6 +1137,9 @@
           "type": "string"
         },
         "publishChanges": {
+          "type": "string"
+        },
+        "publish": {
           "type": "string"
         },
         "published": {
@@ -1228,6 +1234,7 @@
         "autosavedVersion",
         "changed",
         "compareVersion",
+        "confirmPublish",
         "confirmRevertToSaved",
         "confirmUnpublish",
         "confirmVersionRestoration",
@@ -1240,6 +1247,7 @@
         "preview",
         "problemRestoringVersion",
         "publishChanges",
+        "publish",
         "published",
         "restoreThisVersion",
         "restoredSuccessfully",

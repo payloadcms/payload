@@ -1,7 +1,8 @@
 import { GlobalConfig } from '../../../src/globals/config/types';
+import { autoSaveGlobalSlug } from '../shared';
 
 const AutosaveGlobal: GlobalConfig = {
-  slug: 'autosave-global',
+  slug: autoSaveGlobalSlug,
   label: 'Autosave Global',
   preview: () => 'https://payloadcms.com',
   versions: {

@@ -14,9 +14,9 @@ import { useAuth } from '../../utilities/Auth';
 
 import './index.scss';
 
-const baseClass = 'delete-documents';
+const baseClass = 'unpublish-many';
 
-const DeleteManyDocuments: React.FC<Props> = (props) => {
+const UnpublishMany: React.FC<Props> = (props) => {
   const {
     resetParams,
     collection: {
@@ -24,28 +24,32 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
       labels: {
         plural,
       },
+      versions,
     } = {},
   } = props;
 
-  const { permissions } = useAuth();
   const { serverURL, routes: { api } } = useConfig();
+  const { permissions } = useAuth();
   const { toggleModal } = useModal();
+  const { t, i18n } = useTranslation('version');
   const { selectAll, count, getQueryParams } = useSelection();
-  const { t, i18n } = useTranslation('general');
-  const [deleting, setDeleting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const collectionPermissions = permissions?.collections?.[slug];
-  const hasDeletePermission = collectionPermissions?.delete?.permission;
+  const hasPermission = collectionPermissions?.update?.permission;
 
-  const modalSlug = `delete-${slug}`;
+  const modalSlug = `unpublish-${slug}`;
 
   const addDefaultError = useCallback(() => {
     toast.error(t('error:unknown'));
   }, [t]);
 
-  const handleDelete = useCallback(() => {
-    setDeleting(true);
-    requests.delete(`${serverURL}${api}/${slug}${getQueryParams()}`, {
+  const handleUnpublish = useCallback(() => {
+    setSubmitted(true);
+    requests.patch(`${serverURL}${api}/${slug}${getQueryParams()}`, {
+      body: JSON.stringify({
+        _status: 'draft',
+      }),
       headers: {
         'Content-Type': 'application/json',
         'Accept-Language': i18n.language,
@@ -55,7 +59,7 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
         const json = await res.json();
         toggleModal(modalSlug);
         if (res.status < 400) {
-          toast.success(t('deletedSuccessfully'));
+          toast.success(t('general:updatedSuccessfully'));
           resetParams({ page: selectAll ? 1 : undefined });
           return null;
         }
@@ -72,7 +76,7 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
     });
   }, [addDefaultError, api, getQueryParams, i18n.language, modalSlug, resetParams, selectAll, serverURL, slug, t, toggleModal]);
 
-  if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
+  if (versions.drafts && (selectAll === SelectAllStatus.None || !hasPermission)) {
     return null;
   }
 
@@ -81,34 +85,34 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
       <Pill
         className={`${baseClass}__toggle`}
         onClick={() => {
-          setDeleting(false);
+          setSubmitted(false);
           toggleModal(modalSlug);
         }}
       >
-        {t('delete')}
+        {t('unpublish')}
       </Pill>
       <Modal
         slug={modalSlug}
         className={baseClass}
       >
         <MinimalTemplate className={`${baseClass}__template`}>
-          <h1>{t('confirmDeletion')}</h1>
+          <h1>{t('confirmUnpublish')}</h1>
           <p>
-            {t('aboutToDeleteCount', { label: getTranslation(plural, i18n), count })}
+            {t('aboutToUnpublishCount', { label: getTranslation(plural, i18n), count })}
           </p>
           <Button
             id="confirm-cancel"
             buttonStyle="secondary"
             type="button"
-            onClick={deleting ? undefined : () => toggleModal(modalSlug)}
+            onClick={submitted ? undefined : () => toggleModal(modalSlug)}
           >
-            {t('cancel')}
+            {t('general:cancel')}
           </Button>
           <Button
-            onClick={deleting ? undefined : handleDelete}
-            id="confirm-delete"
+            onClick={submitted ? undefined : handleUnpublish}
+            id="confirm-unpublish"
           >
-            {deleting ? t('deleting') : t('confirm')}
+            {submitted ? t('unpublishing') : t('general:confirm')}
           </Button>
         </MinimalTemplate>
       </Modal>
@@ -116,4 +120,4 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
   );
 };
 
-export default DeleteManyDocuments;
+export default UnpublishMany;

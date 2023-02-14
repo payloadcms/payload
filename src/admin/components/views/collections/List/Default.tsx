@@ -22,6 +22,8 @@ import { StaggeredShimmers } from '../../../elements/ShimmerEffect';
 import { SelectionProvider } from './SelectionProvider';
 import DeleteManyDocuments from '../../../elements/DeleteManyDocuments';
 import BulkEdit from '../../../elements/BulkEdit';
+import PublishMany from '../../../elements/PublishMany';
+import UnpublishMany from '../../../elements/UnpublishMany';
 
 import './index.scss';
 
@@ -201,6 +203,14 @@ const DefaultList: React.FC<Props> = (props) => {
                         label={getTranslation(collection.labels.plural, i18n)}
                       />
                       <BulkEdit
+                        collection={collection}
+                        resetParams={resetParams}
+                      />
+                      <PublishMany
+                        collection={collection}
+                        resetParams={resetParams}
+                      />
+                      <UnpublishMany
                         collection={collection}
                         resetParams={resetParams}
                       />
