@@ -1,7 +1,6 @@
 import express from 'express';
 import compression from 'compression';
 import history from 'connect-history-api-fallback';
-import path from 'path';
 import initWebpack from '../webpack/init';
 import { Payload } from '../payload';
 
@@ -22,7 +21,7 @@ function initAdmin(ctx: Payload): void {
       });
 
       router.use(compression(ctx.config.express.compression));
-      router.use(express.static(path.resolve(process.cwd(), 'build'), { redirect: false }));
+      router.use(express.static(ctx.config.admin.buildPath, { redirect: false }));
 
       ctx.express.use(ctx.config.routes.admin, router);
     } else {

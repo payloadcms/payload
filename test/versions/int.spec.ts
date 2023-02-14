@@ -1,7 +1,7 @@
 import { request, GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
 import payload from '../../src';
-import config from './config';
+import configPromise from './config';
 import AutosavePosts from './collections/Autosave';
 import AutosaveGlobal from './globals/Autosave';
 import { devUser } from '../credentials';
@@ -27,6 +27,8 @@ const globalGraphQLOriginalTitle = 'updated global title';
 
 describe('Versions', () => {
   beforeAll(async () => {
+    const config = await configPromise;
+
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
 

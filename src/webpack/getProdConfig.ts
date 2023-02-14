@@ -15,7 +15,7 @@ export default (payloadConfig: SanitizedConfig): Configuration => {
     ...baseConfig,
     output: {
       publicPath: `${payloadConfig.routes.admin}/`,
-      path: path.resolve(process.cwd(), 'build'),
+      path: payloadConfig.admin.buildPath,
       filename: '[name].[chunkhash].js',
       chunkFilename: '[name].[chunkhash].js',
     },

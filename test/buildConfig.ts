@@ -1,7 +1,7 @@
 import { Config, SanitizedConfig } from '../src/config/types';
 import { buildConfig as buildPayloadConfig } from '../src/config/build';
 
-export function buildConfig(config?: Partial<Config>): SanitizedConfig {
+export function buildConfig(config?: Partial<Config>): Promise<SanitizedConfig> {
   const [name] = process.argv.slice(2);
   const baseConfig: Config = {
     telemetry: false,

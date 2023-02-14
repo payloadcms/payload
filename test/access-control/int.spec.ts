@@ -5,7 +5,7 @@ import { Forbidden } from '../../src/errors';
 import type { PayloadRequest } from '../../src/types';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { relyOnRequestHeadersSlug, requestHeaders, restrictedSlug, siblingDataSlug, slug } from './config';
-import type { Restricted, Post, SiblingDatum, RelyOnRequestHeader } from './payload-types';
+import type { Restricted, Post, RelyOnRequestHeader } from './payload-types';
 import { firstArrayText, secondArrayText } from './shared';
 
 describe('Access Control', () => {
@@ -17,12 +17,12 @@ describe('Access Control', () => {
   });
 
   beforeEach(async () => {
-    post1 = await payload.create<Post>({
+    post1 = await payload.create({
       collection: slug,
       data: { name: 'name' },
     });
 
-    restricted = await payload.create<Restricted>({
+    restricted = await payload.create({
       collection: restrictedSlug,
       data: { name: 'restricted' },
     });
@@ -37,7 +37,7 @@ describe('Access Control', () => {
   it.todo('should properly prevent / allow public users from reading a restricted field');
 
   it('should be able to restrict access based upon siblingData', async () => {
-    const { id } = await payload.create<SiblingDatum>({
+    const { id } = await payload.create({
       collection: siblingDataSlug,
       data: {
         array: [
@@ -53,7 +53,7 @@ describe('Access Control', () => {
       },
     });
 
-    const doc = await payload.findByID<SiblingDatum>({
+    const doc = await payload.findByID({
       id,
       collection: siblingDataSlug,
       overrideAccess: false,
@@ -64,7 +64,7 @@ describe('Access Control', () => {
     expect(doc.array?.[1].text).toBeUndefined();
 
     // Retrieve with default of overriding access
-    const docOverride = await payload.findByID<SiblingDatum>({
+    const docOverride = await payload.findByID({
       id,
       collection: siblingDataSlug,
     });
@@ -150,7 +150,7 @@ describe('Access Control', () => {
   describe('Override Access', () => {
     describe('Fields', () => {
       it('should allow overrideAccess: false', async () => {
-        const req = async () => payload.update<Post>({
+        const req = async () => payload.update({
           collection: slug,
           id: post1.id,
           data: { restrictedField: restricted.id },
@@ -161,7 +161,7 @@ describe('Access Control', () => {
       });
 
       it('should allow overrideAccess: true', async () => {
-        const doc = await payload.update<Post>({
+        const doc = await payload.update({
           collection: slug,
           id: post1.id,
           data: { restrictedField: restricted.id },
@@ -172,7 +172,7 @@ describe('Access Control', () => {
       });
 
       it('should allow overrideAccess by default', async () => {
-        const doc = await payload.update<Post>({
+        const doc = await payload.update({
           collection: slug,
           id: post1.id,
           data: { restrictedField: restricted.id },
@@ -221,7 +221,7 @@ describe('Access Control', () => {
 });
 
 async function createDoc<Collection>(data: Partial<Collection>, overrideSlug = slug, options?: Partial<CreateOptions<Collection>>): Promise<Collection> {
-  return payload.create<Collection>({
+  return payload.create({
     ...options,
     collection: overrideSlug,
     data: data ?? {},

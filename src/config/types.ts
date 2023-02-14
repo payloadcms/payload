@@ -27,7 +27,7 @@ type Email = {
 };
 
 // eslint-disable-next-line no-use-before-define
-export type Plugin = (config: Config) => Config;
+export type Plugin = (config: Config) => Promise<Config> | Config;
 
 type GeneratePreviewURLOptions = {
   locale: string;
@@ -250,6 +250,8 @@ export type Config = {
        */
       favicon?: string;
     };
+    /** Specify an absolute path for where to store the built Admin panel bundle used in production. */
+    buildPath?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean;
     /** Replace the entirety of the index.html file used by the Admin panel. Reference the base index.html file to ensure your replacement has the appropriate HTML elements. */
