@@ -27,7 +27,7 @@ type Email = {
 };
 
 // eslint-disable-next-line no-use-before-define
-export type Plugin = (config: Config) => Config;
+export type Plugin = (config: Config) => Promise<Config> | Config;
 
 type GeneratePreviewURLOptions = {
   locale: string;

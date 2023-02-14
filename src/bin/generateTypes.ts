@@ -32,9 +32,9 @@ function configToJsonSchema(config: SanitizedConfig): JSONSchema4 {
   };
 }
 
-export function generateTypes(): void {
+export async function generateTypes(): Promise<void> {
   const logger = Logger();
-  const config = loadConfig();
+  const config = await loadConfig();
   const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile;
 
   logger.info('Compiling TS types for Collections and Globals...');

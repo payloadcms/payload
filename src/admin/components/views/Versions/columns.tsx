@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link, useRouteMatch } from 'react-router-dom';
-import format from 'date-fns/format';
-import type { TFunction } from 'react-i18next';
+import { TFunction, useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { Column } from '../../elements/Table/types';
 import SortColumn from '../../elements/SortColumn';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 import { Pill } from '../..';
+import { formatDate } from '../../../utilities/formatDate';
 
 type CreatedAtCellProps = {
   id: string
@@ -20,6 +20,8 @@ const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ collection, global, id, d
   const { routes: { admin }, admin: { dateFormat } } = useConfig();
   const { params: { id: docID } } = useRouteMatch<{ id: string }>();
 
+  const { i18n } = useTranslation();
+
   let to: string;
 
   if (collection) to = `${admin}/collections/${collection.slug}/${docID}/versions/${id}`;
@@ -27,7 +29,7 @@ const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ collection, global, id, d
 
   return (
     <Link to={to}>
-      {date && format(new Date(date), dateFormat)}
+      {date && formatDate(date, dateFormat, i18n?.language)}
     </Link>
   );
 };

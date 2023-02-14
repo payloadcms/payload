@@ -36,6 +36,14 @@ export default buildConfig({
         },
       ],
     },
+    {
+      slug: 'api-keys',
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({

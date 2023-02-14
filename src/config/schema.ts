@@ -1,4 +1,3 @@
-import { JSONDefinition } from 'graphql-scalars';
 import joi from 'joi';
 
 const component = joi.alternatives().try(

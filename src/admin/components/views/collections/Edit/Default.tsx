@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import format from 'date-fns/format';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import Eyebrow from '../../../elements/Eyebrow';
@@ -29,6 +28,7 @@ import { Gutter } from '../../../elements/Gutter';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { SetStepNav } from './SetStepNav';
 import { FormLoadingOverlayToggle } from '../../../elements/Loading';
+import { formatDate } from '../../../../utilities/formatDate';
 
 import './index.scss';
 
@@ -279,13 +279,13 @@ const DefaultEditView: React.FC<Props> = (props) => {
                                 {updatedAt && (
                                   <li>
                                     <div className={`${baseClass}__label`}>{t('lastModified')}</div>
-                                    <div>{format(new Date(updatedAt), dateFormat)}</div>
+                                    <div>{formatDate(data.updatedAt, dateFormat, i18n?.language)}</div>
                                   </li>
                                 )}
                                 {(publishedDoc?.createdAt || data?.createdAt) && (
                                   <li>
                                     <div className={`${baseClass}__label`}>{t('created')}</div>
-                                    <div>{format(new Date(publishedDoc?.createdAt || data?.createdAt), dateFormat)}</div>
+                                    <div>{formatDate(publishedDoc?.createdAt || data?.createdAt, dateFormat, i18n?.language)}</div>
                                   </li>
                                 )}
                               </React.Fragment>
