@@ -32,7 +32,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  data: Omit<MarkOptional<T, 'id' | 'updatedAt' | 'createdAt'>, 'sizes'>
+  data: MarkOptional<T, 'id' | 'updatedAt' | 'createdAt' | 'sizes'>
   overwriteExistingFiles?: boolean
   draft?: boolean
   autosave?: boolean
