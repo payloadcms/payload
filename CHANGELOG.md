@@ -1,5 +1,25 @@
 
 
+## [1.6.10](https://github.com/payloadcms/payload/compare/v1.6.9...v1.6.10) (2023-02-14)
+
+
+### Bug Fixes
+
+* [#2077](https://github.com/payloadcms/payload/issues/2077) useAPIKey UI missing with disableLocalStrategy ([#2084](https://github.com/payloadcms/payload/issues/2084)) ([586b25a](https://github.com/payloadcms/payload/commit/586b25a54c6ec8bd134bce05c480cd429e47e252))
+* Add missing Spanish translations and fix typos ([c4742e5](https://github.com/payloadcms/payload/commit/c4742e5c303ca4ba41c2fbb45a8e8474608418c1))
+* document type in update request handler ([d5cd970](https://github.com/payloadcms/payload/commit/d5cd9709f717b08b930461079b147967d8d7a885))
+* ensures versions createdAt matches the original doc ([8c7e37c](https://github.com/payloadcms/payload/commit/8c7e37c56aab2bb28de01cf7d4a91062cbde80de))
+* globals not saving drafts unless published first ([#2082](https://github.com/payloadcms/payload/issues/2082)) ([4999fba](https://github.com/payloadcms/payload/commit/4999fbaee680e256ece7083fbe422f25e85de0d5))
+* Use the user's AdminUI locale for the DatePicker ([#2046](https://github.com/payloadcms/payload/issues/2046)) ([#2057](https://github.com/payloadcms/payload/issues/2057)) ([b4a7e91](https://github.com/payloadcms/payload/commit/b4a7e912b2117cef3345adb8b514958345838030))
+* validate type ([7bb0984](https://github.com/payloadcms/payload/commit/7bb0984a12a0d80d9ac2af82427ac7dbc985ffc5))
+
+
+### Features
+
+* allows control over relationship add new button ([6096044](https://github.com/payloadcms/payload/commit/6096044fe058113ca47c7f7d833cb788d97df9a2))
+* async plugins ([#2030](https://github.com/payloadcms/payload/issues/2030)) ([9f30553](https://github.com/payloadcms/payload/commit/9f3055381337f80229f220c1e6114b4ea56be969))
+* export more errors ([3a2a41d](https://github.com/payloadcms/payload/commit/3a2a41d2b6ead4188b432d9e6780764a7c08b2dd))
+
 ## [1.6.9](https://github.com/payloadcms/payload/compare/v1.6.7...v1.6.9) (2023-02-10)
 
 
