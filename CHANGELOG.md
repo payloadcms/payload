@@ -1,5 +1,17 @@
 
 
+## [1.6.11](https://github.com/payloadcms/payload/compare/v1.6.10...v1.6.11) (2023-02-15)
+
+
+### Bug Fixes
+
+* existing upload deletion [#2098](https://github.com/payloadcms/payload/issues/2098) ([#2101](https://github.com/payloadcms/payload/issues/2101)) ([060c380](https://github.com/payloadcms/payload/commit/060c3805e567fe450c4b9aa00fbdbb919427c625))
+
+
+### Features
+
+* preview example ([#1950](https://github.com/payloadcms/payload/issues/1950)) ([0a87f10](https://github.com/payloadcms/payload/commit/0a87f106ecb5c95738109db5231d72abd281e7e1))
+
 ## [1.6.10](https://github.com/payloadcms/payload/compare/v1.6.9...v1.6.10) (2023-02-14)
 
 
