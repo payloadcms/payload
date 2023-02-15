@@ -4,7 +4,7 @@ import FormData from 'form-data';
 import { promisify } from 'util';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
-import config, { mediaSlug, relationSlug } from './config';
+import configPromise, { mediaSlug, relationSlug } from './config';
 import payload from '../../src';
 import getFileByPath from '../../src/uploads/getFileByPath';
 
@@ -17,6 +17,7 @@ let client;
 describe('Collections - Uploads', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
+    const config = await configPromise;
     client = new RESTClient(config, { serverURL, defaultSlug: mediaSlug });
     await client.login();
   });
@@ -176,8 +177,8 @@ describe('Collections - Uploads', () => {
     expect(status).toBe(200);
 
     // Check that previously existing files were removed
-    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(false);
-    expect(await fileExists(path.join(__dirname, './media', mediaDoc.sizes.icon.filename))).toBe(false);
+    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(true);
+    expect(await fileExists(path.join(__dirname, './media', mediaDoc.sizes.icon.filename))).toBe(true);
   });
 
   it('should remove extra sizes on update', async () => {

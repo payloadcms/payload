@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
-import config from './config';
+import configPromise from './config';
 import payload from '../../src';
 import type { Post } from './payload-types';
 
-const slug = config.collections[0]?.slug;
+let slug = '';
 const title = 'title';
 
 let client: GraphQLClient;
@@ -13,6 +13,8 @@ let client: GraphQLClient;
 describe('collections-graphql', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
+    const config = await configPromise;
+    slug = config.collections[0]?.slug;
     const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
     client = new GraphQLClient(url);
   });
@@ -354,7 +356,7 @@ describe('collections-graphql', () => {
 });
 
 async function createPost(overrides?: Partial<Post>) {
-  const doc = await payload.create<Post>({
+  const doc = await payload.create({
     collection: slug,
     data: { title: 'title', ...overrides },
   });
