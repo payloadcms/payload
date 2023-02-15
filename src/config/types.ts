@@ -108,7 +108,7 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions;
-  config?: SanitizedConfig
+  config?: Promise<SanitizedConfig>
 };
 
 /**

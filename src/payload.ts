@@ -167,11 +167,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.local = options.local;
 
     if (options.config) {
-      this.config = options.config;
+      this.config = await options.config;
       const configPath = findConfig();
 
       this.config = {
-        ...options.config,
+        ...this.config,
         paths: {
           configDir: path.dirname(configPath),
           config: configPath,
