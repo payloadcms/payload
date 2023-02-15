@@ -7,7 +7,7 @@ import { Props } from './types';
 import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { useAuth } from '../../utilities/Auth';
-import { FieldSelect } from './FieldSelect';
+import { Index } from '../FieldSelect';
 import FormSubmit from '../../forms/Submit';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
@@ -16,9 +16,9 @@ import fieldTypes from '../../forms/field-types';
 
 import './index.scss';
 
-const baseClass = 'bulk-edit';
+const baseClass = 'edit-many';
 
-const BulkEdit: React.FC<Props> = (props) => {
+const EditMany: React.FC<Props> = (props) => {
   const {
     resetParams,
     collection,
@@ -64,7 +64,9 @@ const BulkEdit: React.FC<Props> = (props) => {
           'pill--has-action',
         ].join(' ')}
         aria-label={t('edit')}
-        onClick={() => { setSelected([]); }}
+        onClick={() => {
+          setSelected([]);
+        }}
       >
         {t('edit')}
       </DrawerToggler>
@@ -72,16 +74,17 @@ const BulkEdit: React.FC<Props> = (props) => {
         slug={drawerSlug}
         title={t('editingLabel', { label: getTranslation(plural, i18n), count })}
       >
-        <FieldSelect
-          fields={collection.fields}
-          setSelected={setSelected}
-        />
         <OperationContext.Provider value="update">
           <Form
             onSuccess={onSuccess}
             action={`${serverURL}${api}/${slug}${getQueryParams()}`}
             method="patch"
+            disabled={selected.length === 0}
           >
+            <Index
+              fields={collection.fields}
+              setSelected={setSelected}
+            />
             <RenderFields
               fieldTypes={fieldTypes}
               fieldSchema={selected}
@@ -97,4 +100,4 @@ const BulkEdit: React.FC<Props> = (props) => {
   );
 };
 
-export default BulkEdit;
+export default EditMany;

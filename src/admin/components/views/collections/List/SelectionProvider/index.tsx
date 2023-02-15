@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
-import { Where } from '../../../../../../../types';
+import { Where } from '../../../../../../types';
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',

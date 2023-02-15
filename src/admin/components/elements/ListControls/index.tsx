@@ -15,8 +15,8 @@ import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import Pill from '../Pill';
 import Chevron from '../../icons/Chevron';
-import DeleteManyDocuments from '../DeleteManyDocuments';
-import BulkEdit from '../BulkEdit';
+import EditMany from '../EditMany';
+import DeleteMany from '../DeleteMany';
 import PublishMany from '../PublishMany';
 import UnpublishMany from '../UnpublishMany';
 
@@ -67,7 +67,7 @@ const ListControls: React.FC<Props> = (props) => {
           <div className={`${baseClass}__buttons-wrap`}>
             { !smallBreak && (
               <React.Fragment>
-                <BulkEdit
+                <EditMany
                   collection={collection}
                   resetParams={resetParams}
                 />
@@ -79,7 +79,7 @@ const ListControls: React.FC<Props> = (props) => {
                   collection={collection}
                   resetParams={resetParams}
                 />
-                <DeleteManyDocuments
+                <DeleteMany
                   collection={collection}
                   resetParams={resetParams}
                 />

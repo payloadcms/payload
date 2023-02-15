@@ -20,8 +20,8 @@ import { RelationshipProvider } from './RelationshipProvider';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { StaggeredShimmers } from '../../../elements/ShimmerEffect';
 import { SelectionProvider } from './SelectionProvider';
-import DeleteManyDocuments from '../../../elements/DeleteManyDocuments';
-import BulkEdit from '../../../elements/BulkEdit';
+import EditMany from '../../../elements/EditMany';
+import DeleteMany from '../../../elements/DeleteMany';
 import PublishMany from '../../../elements/PublishMany';
 import UnpublishMany from '../../../elements/UnpublishMany';
 
@@ -202,7 +202,7 @@ const DefaultList: React.FC<Props> = (props) => {
                       <ListSelection
                         label={getTranslation(collection.labels.plural, i18n)}
                       />
-                      <BulkEdit
+                      <EditMany
                         collection={collection}
                         resetParams={resetParams}
                       />
@@ -214,7 +214,7 @@ const DefaultList: React.FC<Props> = (props) => {
                         collection={collection}
                         resetParams={resetParams}
                       />
-                      <DeleteManyDocuments
+                      <DeleteMany
                         collection={collection}
                         resetParams={resetParams}
                       />

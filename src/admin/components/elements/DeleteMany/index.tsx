@@ -16,7 +16,7 @@ import './index.scss';
 
 const baseClass = 'delete-documents';
 
-const DeleteManyDocuments: React.FC<Props> = (props) => {
+const DeleteMany: React.FC<Props> = (props) => {
   const {
     resetParams,
     collection: {
@@ -116,4 +116,4 @@ const DeleteManyDocuments: React.FC<Props> = (props) => {
   );
 };
 
-export default DeleteManyDocuments;
+export default DeleteMany;
