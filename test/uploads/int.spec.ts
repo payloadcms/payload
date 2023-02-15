@@ -181,6 +181,38 @@ describe('Collections - Uploads', () => {
     expect(await fileExists(path.join(__dirname, './media', mediaDoc.sizes.icon.filename))).toBe(true);
   });
 
+  it('should remove existing media on re-upload', async () => {
+    // Create temp file
+    const filePath = path.resolve(__dirname, './temp.png');
+    const file = await getFileByPath(filePath);
+    file.name = 'temp.png';
+
+    const mediaDoc = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file,
+    });
+
+    // Check that the temp file was created
+    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(true);
+
+    // Replace the temp file with a new one
+    const newFilePath = path.resolve(__dirname, './temp-renamed.png');
+    const newFile = await getFileByPath(newFilePath);
+    newFile.name = 'temp-renamed.png';
+
+    const updatedMediaDoc = await payload.update({
+      collection: mediaSlug,
+      id: mediaDoc.id,
+      file: newFile,
+      data: {},
+    });
+
+    // Check that the replacement file was created and the old one was removed
+    expect(await fileExists(path.join(__dirname, './media', updatedMediaDoc.filename))).toBe(true);
+    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(false);
+  });
+
   it('should remove extra sizes on update', async () => {
     const filePath = path.resolve(__dirname, './image.png');
     const file = await getFileByPath(filePath);
