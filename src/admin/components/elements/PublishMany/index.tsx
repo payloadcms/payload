@@ -76,7 +76,7 @@ const PublishMany: React.FC<Props> = (props) => {
     });
   }, [addDefaultError, api, getQueryParams, i18n.language, modalSlug, resetParams, selectAll, serverURL, slug, t, toggleModal]);
 
-  if (versions.drafts && (selectAll === SelectAllStatus.None || !hasPermission)) {
+  if (!(versions?.drafts) || (selectAll === SelectAllStatus.None || !hasPermission)) {
     return null;
   }
 

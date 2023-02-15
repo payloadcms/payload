@@ -12,7 +12,7 @@ type Props = {
   setSelected: (fields: Field[]) => void
 }
 
-const filterFields = ['id', 'createdAt', 'updatedAt'];
+const filterFields = ['id', 'createdAt', 'updatedAt', '_status'];
 const reduceFields = (fields, i18n) => flattenTopLevelFields(fields)
   .reduce((reduced, field) => {
     if (filterFields.includes(field.name)) {
