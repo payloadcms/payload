@@ -63,6 +63,20 @@ describe('versions', () => {
       await page.locator('#confirm-publish').click();
 
       await expect(page.locator('.row-1 .cell-_status')).toContainText('Published');
+      await expect(page.locator('.row-2 .cell-_status')).toContainText('Published');
+    });
+
+    test('should bulk unpublish', async () => {
+      await page.goto(url.list);
+
+      await page.locator('.select-all__input').click();
+
+      await page.locator('.unpublish-many__toggle').click();
+
+      await page.locator('#confirm-unpublish').click();
+
+      await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft');
+      await expect(page.locator('.row-2 .cell-_status')).toContainText('Draft');
     });
   });
 });
