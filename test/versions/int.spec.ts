@@ -321,9 +321,11 @@ describe('Versions', () => {
       });
     });
 
-    describe('Versions Count', () => {
+    describe('Max Versions', () => {
+      // create 2 documents with 3 versions each
+      // expect 2 documents with 2 versions each
       it('retains correct versions', async () => {
-        const original = await payload.create({
+        const doc1 = await payload.create({
           collection: 'version-posts',
           data: {
             title: 'A',
@@ -333,7 +335,7 @@ describe('Versions', () => {
 
         await payload.update({
           collection: 'version-posts',
-          id: original.id,
+          id: doc1.id,
           data: {
             title: 'B',
             description: 'B',
@@ -342,21 +344,75 @@ describe('Versions', () => {
 
         await payload.update({
           collection: 'version-posts',
-          id: original.id,
+          id: doc1.id,
           data: {
             title: 'C',
             description: 'C',
           },
         });
 
-        const versions = await payload.findVersions({
+        const doc2 = await payload.create({
           collection: 'version-posts',
-          sort: '-updatedAt',
-          depth: 1,
+          data: {
+            title: 'D',
+            description: 'D',
+          },
         });
 
-        expect(versions.docs[versions.docs.length - 1].version.title).toStrictEqual('B');
-        expect(versions.docs).toHaveLength(2);
+        await payload.update({
+          collection: 'version-posts',
+          id: doc2.id,
+          data: {
+            title: 'E',
+            description: 'E',
+          },
+        });
+
+        await payload.update({
+          collection: 'version-posts',
+          id: doc2.id,
+          data: {
+            title: 'F',
+            description: 'F',
+          },
+        });
+
+        const doc1Versions = await payload.findVersions({
+          collection: 'version-posts',
+          sort: '-updatedAt',
+          where: {
+            parent: {
+              equals: doc1.id,
+            },
+          },
+        });
+
+        const doc2Versions = await payload.findVersions({
+          collection: 'version-posts',
+          sort: '-updatedAt',
+          where: {
+            parent: {
+              equals: doc2.id,
+            },
+          },
+        });
+
+        // correctly retains 2 documents in the versions collection
+        expect(doc1Versions.totalDocs).toStrictEqual(2);
+        // correctly retains the most recent 2 versions
+        expect(doc1Versions.docs[1].version.title).toStrictEqual('B');
+
+        // correctly retains 2 documents in the versions collection
+        expect(doc2Versions.totalDocs).toStrictEqual(2);
+        // correctly retains the most recent 2 versions
+        expect(doc2Versions.docs[1].version.title).toStrictEqual('E');
+
+        const docs = await payload.find({
+          collection: 'version-posts',
+        });
+
+        // correctly retains 2 documents in the actual collection
+        expect(docs.totalDocs).toStrictEqual(2);
       });
     });
   });
