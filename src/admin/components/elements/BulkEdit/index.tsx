@@ -64,6 +64,7 @@ const BulkEdit: React.FC<Props> = (props) => {
           'pill--has-action',
         ].join(' ')}
         aria-label={t('edit')}
+        onClick={() => { setSelected([]); }}
       >
         {t('edit')}
       </DrawerToggler>
