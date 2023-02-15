@@ -1,0 +1,16 @@
+.form {
+  margin-bottom: 30px;
+}
+
+.success,
+.error {
+  margin-bottom: 15px;
+}
+
+.success {
+  color: green;
+}
+
+.error {
+  color: red;
+}
