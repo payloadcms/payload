@@ -46,7 +46,7 @@ const PublishMany: React.FC<Props> = (props) => {
 
   const handlePublish = useCallback(() => {
     setSubmitted(true);
-    requests.patch(`${serverURL}${api}/${slug}${getQueryParams()}`, {
+    requests.patch(`${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'published' } })}`, {
       body: JSON.stringify({
         _status: 'published',
       }),

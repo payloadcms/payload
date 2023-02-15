@@ -46,7 +46,7 @@ const UnpublishMany: React.FC<Props> = (props) => {
 
   const handleUnpublish = useCallback(() => {
     setSubmitted(true);
-    requests.patch(`${serverURL}${api}/${slug}${getQueryParams()}`, {
+    requests.patch(`${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'draft' } })}`, {
       body: JSON.stringify({
         _status: 'draft',
       }),

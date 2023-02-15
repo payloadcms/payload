@@ -24,7 +24,7 @@ type SelectionContext = {
   toggleAll: (allAvailable?: boolean) => void
   totalDocs: number
   count: number
-  getQueryParams: () => string
+  getQueryParams: (additionalParams?: Where) => string
 }
 
 const Context = createContext({} as SelectionContext);
@@ -74,7 +74,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     setSelected(newSelected);
   }, [selected]);
 
-  const getQueryParams = useCallback((): string => {
+  const getQueryParams = useCallback((additionalParams?: Where): string => {
     let where: Where;
     if (selectAll === SelectAllStatus.AllAvailable) {
       const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true }).where as Where;
@@ -86,6 +86,14 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
         id: {
           in: Object.keys(selected).filter((id) => selected[id]).map((id) => id),
         },
+      };
+    }
+    if (additionalParams) {
+      where = {
+        and: [
+          { ...additionalParams },
+          where,
+        ],
       };
     }
     return queryString.stringify({
