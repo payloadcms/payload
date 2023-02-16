@@ -2,17 +2,12 @@
 
 This example demonstrates multiple use-cases for virtual fields.
 
-The following software is required:
-- Yarn or NPM
-- NodeJS version 10+
-- A Mongo Database - IMPORTANT: you need to either have MongoDB running locally, or have signed up for a free MongoDB Atlas server in order to run this example locally.
-
 ## Getting Started
 
 First copy this example with [Degit](https://www.npmjs.com/package/degit) by running the following command at your terminal:
 
 ```bash
-npx degit github:payloadcms/payload/examples/virtualFields
+npx degit github:payloadcms/payload/examples/virtual-fields
 ```
 
 1. `cd` into this directory and run `yarn` or `npm install`
