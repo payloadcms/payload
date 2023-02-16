@@ -4,7 +4,7 @@
   "main": "dist/server.js",
   "license": "MIT",
   "scripts": {
-    "seed": "cross-env PAYLOAD_SEED=true PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
+    "seed": "cross-env PAYLOAD_PUBLIC_SEED=true PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
     "dev": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
     "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload build",
     "build:server": "tsc",
@@ -17,7 +17,7 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "^1.5.9"
+    "payload": "^1.6.11"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",

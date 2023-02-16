@@ -25,7 +25,7 @@ const start = async () => {
     },
   });
 
-  if (process.env.PAYLOAD_SEED === 'true') {
+  if (process.env.PAYLOAD_PUBLIC_SEED === 'true') {
     await seed();
   }
 

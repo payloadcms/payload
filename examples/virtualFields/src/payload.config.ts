@@ -4,11 +4,15 @@ import Events from './collections/Events';
 import Locations from './collections/Location';
 import Staff from './collections/Staff';
 import Users from './collections/Users';
+import BeforeLogin from './components/BeforeLogin';
 
 export default buildConfig({
   serverURL: 'http://localhost:3000',
   admin: {
     user: Users.slug,
+    components: {
+      beforeLogin: [BeforeLogin],
+    },
   },
   collections: [
     Events,
