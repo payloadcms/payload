@@ -6,22 +6,13 @@ import { staffOne, staffTwo } from './staff';
 
 export async function seed() {
   try {
-    payload.logger.info('Dropping database...');
-    await dropDB();
-    payload.logger.info('Database dropped.');
-    payload.logger.info('Seeding database...');
+    payload.logger.info('---- SEEDING DATABASE ----');
     await seedData();
-    payload.logger.info('Seed Complete.');
+    payload.logger.info('---- SEED COMPLETE ----');
   } catch (error) {
     console.error(error);
     payload.logger.error('Error seeding database.');
   }
-}
-
-async function dropDB() {
-  const client = await MongoClient.connect(process.env.MONGODB_URI);
-  const db = client.db(new URL(process.env.MONGODB_URI).pathname.substring(1));
-  await db.dropDatabase();
 }
 
 async function seedData() {
