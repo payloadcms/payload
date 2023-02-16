@@ -7,21 +7,21 @@
 
 export interface Config {
   collections: {
-    users: User;
-  };
-  globals: {};
+    users: User
+  }
+  globals: {}
 }
 export interface User {
-  id: string;
-  firstName?: string;
-  lastName?: string;
-  roles?: ('admin' | 'user')[];
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
-  password?: string;
+  id: string
+  firstName?: string
+  lastName?: string
+  roles?: Array<'admin' | 'user'>
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  createdAt: string
+  updatedAt: string
+  password?: string
 }

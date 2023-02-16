@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload/types'
-import adminsAndUser from './access/adminsAndUser'
+
 import { admins } from './access/admins'
+import adminsAndUser from './access/adminsAndUser'
 import { anyone } from './access/anyone'
 import { checkRole } from './access/checkRole'
 import { loginAfterCreate } from './hooks/loginAfterCreate'

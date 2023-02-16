@@ -1,6 +1,7 @@
-import path from 'path'
 import express from 'express'
+import path from 'path'
 import payload from 'payload'
+
 import { seed } from './seed'
 
 // eslint-disable-next-line
