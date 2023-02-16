@@ -1,7 +1,7 @@
 import express from 'express';
 import payload from 'payload';
 import path from 'path';
-import { seed } from './seed';
+import { seedData } from './seed';
 
 require('dotenv').config({
   path: path.resolve(__dirname, '../.env'),
@@ -26,7 +26,9 @@ const start = async () => {
   });
 
   if (process.env.PAYLOAD_PUBLIC_SEED === 'true') {
-    await seed();
+    payload.logger.info('---- SEEDING DATABASE ----');
+    await seedData();
+    payload.logger.info('---- SEED COMPLETE ----');
   }
 
   app.listen(3000);

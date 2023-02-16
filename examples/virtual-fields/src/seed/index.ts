@@ -4,18 +4,7 @@ import { eventsOne, eventsTwo } from './events';
 import { locationOne, locationTwo } from './locations';
 import { staffOne, staffTwo } from './staff';
 
-export async function seed() {
-  try {
-    payload.logger.info('---- SEEDING DATABASE ----');
-    await seedData();
-    payload.logger.info('---- SEED COMPLETE ----');
-  } catch (error) {
-    console.error(error);
-    payload.logger.error('Error seeding database.');
-  }
-}
-
-async function seedData() {
+export async function seedData() {
   await payload.create({
     collection: 'users',
     data: {
