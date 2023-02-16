@@ -32,7 +32,7 @@ A `pages` collection is created with `versions: { drafts: true }` and access con
   })
 ```
 
-[CORS](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors), [CSRF](https://payloadcms.com/docs/production/preventing-abuse#cross-site-request-forgery-csrf), and [Cookies](https://payloadcms.com/docs/authentication/config#options) are all configured to ensure that the admin panel and front-end can communicate with each other securely.
+The [`cors`](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors), [`csrf`](https://payloadcms.com/docs/production/preventing-abuse#cross-site-request-forgery-csrf), and [`cookies`](https://payloadcms.com/docs/authentication/config#options) settings are also configured to ensure that the admin panel and front-end can communicate with each other securely.
 
 ### Preview Mode
 
