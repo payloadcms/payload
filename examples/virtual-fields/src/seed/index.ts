@@ -28,9 +28,8 @@ async function seedData() {
   await payload.create({
     collection: 'users',
     data: {
-      name: 'Demo User',
-      email: 'demo@payloadcms.com',
-      password: 'demo',
+      email: 'dev@payloadcms.com',
+      password: 'test',
     },
   });
 
