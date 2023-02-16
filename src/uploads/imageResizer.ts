@@ -1,3 +1,4 @@
+import { UploadedFile } from 'express-fileupload';
 import { fromBuffer } from 'file-type';
 import fs from 'fs';
 import sanitize from 'sanitize-filename';
@@ -11,7 +12,7 @@ type Dimensions = { width?: number, height?: number }
 
 type Args = {
   req: PayloadRequest
-  file: Buffer
+  file: UploadedFile
   dimensions: Dimensions
   staticPath: string
   config: SanitizedCollectionConfig
@@ -55,6 +56,8 @@ export default async function resizeAndSave({
   const sizesToSave: FileToSave[] = [];
   const sizeData = {};
 
+  const sharpInstance = sharp(file.tempFilePath || file.data);
+
   const promises = imageSizes
     .map(async (desiredSize) => {
       if (!needsResize(desiredSize, dimensions)) {
@@ -68,7 +71,7 @@ export default async function resizeAndSave({
         };
         return;
       }
-      let resized = sharp(file).resize(desiredSize);
+      let resized = sharpInstance.resize(desiredSize);
 
       if (desiredSize.formatOptions) {
         resized = resized.toFormat(desiredSize.formatOptions.format, desiredSize.formatOptions.options);

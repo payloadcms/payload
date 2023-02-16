@@ -101,7 +101,7 @@ const relationshipPopulationPromise = async ({
   const rowPromises = [];
 
   if (fieldSupportsMany(field) && field.hasMany) {
-    if (req.locale === 'all' && typeof siblingDoc[field.name] === 'object') {
+    if (req.locale === 'all' && typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null) {
       Object.keys(siblingDoc[field.name]).forEach((key) => {
         if (Array.isArray(siblingDoc[field.name][key])) {
           siblingDoc[field.name][key].forEach((relatedDoc, index) => {
@@ -144,7 +144,7 @@ const relationshipPopulationPromise = async ({
         rowPromises.push(rowPromise());
       });
     }
-  } else if (typeof siblingDoc[field.name] === 'object' && req.locale === 'all') {
+  } else if (typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null && req.locale === 'all') {
     Object.keys(siblingDoc[field.name]).forEach((key) => {
       const rowPromise = async () => {
         await populate({

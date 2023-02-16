@@ -167,11 +167,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.local = options.local;
 
     if (options.config) {
-      this.config = options.config;
+      this.config = await options.config;
       const configPath = findConfig();
 
       this.config = {
-        ...options.config,
+        ...this.config,
         paths: {
           configDir: path.dirname(configPath),
           config: configPath,
@@ -181,7 +181,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     } else {
       // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
       const loadConfig = require('./config/load').default;
-      this.config = loadConfig(this.logger);
+      this.config = await loadConfig(this.logger);
     }
 
     // Configure email service

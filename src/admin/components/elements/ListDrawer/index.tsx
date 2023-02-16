@@ -46,6 +46,8 @@ export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
     <Drawer
       slug={drawerSlug}
       className={baseClass}
+      header={false}
+      gutter={false}
     >
       <ListDrawerContent {...props} />
     </Drawer>

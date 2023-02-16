@@ -5,6 +5,7 @@ import ElementButton from '../../Button';
 import UploadIcon from '../../../../../../icons/Upload';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { injectVoidElement } from '../../injectVoid';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
 
 import './index.scss';
 
@@ -27,9 +28,12 @@ const insertUpload = (editor, { value, relationTo }) => {
   ReactEditor.focus(editor);
 };
 
-const UploadButton: React.FC<{
+type ButtonProps = {
   path: string
-}> = () => {
+  enabledCollectionSlugs: string[]
+}
+
+const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
   const { t } = useTranslation(['upload', 'general']);
   const editor = useSlate();
 
@@ -41,6 +45,7 @@ const UploadButton: React.FC<{
     },
   ] = useListDrawer({
     uploads: true,
+    collectionSlugs: enabledCollectionSlugs,
   });
 
   const onSelect = useCallback(({ docID, collectionConfig }) => {
@@ -73,4 +78,13 @@ const UploadButton: React.FC<{
   );
 };
 
-export default UploadButton;
+export default (props: ButtonProps): React.ReactNode => {
+  return (
+    <EnabledRelationshipsCondition
+      {...props}
+      uploads
+    >
+      <UploadButton {...props} />
+    </EnabledRelationshipsCondition>
+  );
+};

@@ -1,7 +1,6 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
-import type { Post } from './payload-types';
 
 export interface Relation {
   id: string;
@@ -135,13 +134,13 @@ export default buildConfig({
       },
     });
 
-    const rel1 = await payload.create<Relation>({
+    const rel1 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name',
       },
     });
-    const rel2 = await payload.create<Relation>({
+    const rel2 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name2',
@@ -156,14 +155,14 @@ export default buildConfig({
     });
 
     // Relation - hasMany
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'rel to hasMany',
         relationHasManyField: rel1.id,
       },
     });
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'rel to hasMany 2',
@@ -172,7 +171,7 @@ export default buildConfig({
     });
 
     // Relation - relationTo multi
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'rel to multi',
@@ -184,7 +183,7 @@ export default buildConfig({
     });
 
     // Relation - relationTo multi hasMany
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'rel to multi hasMany',
