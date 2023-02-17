@@ -1,67 +1,157 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import { User } from '../../payload-types'
-
-type Login = (args: { email: string; password: string }) => Promise<void> // eslint-disable-line no-unused-vars
-
-type Logout = () => Promise<void>
-
-type AuthContext = {
-  user?: User | null
-  setUser: (user: User | null) => void // eslint-disable-line no-unused-vars
-  logout: Logout
-  login: Login
-}
+import { gql, USER } from './gql'
+import { rest } from './rest'
+import { AuthContext, Create, ForgotPassword, Login, Logout, ResetPassword } from './types'
 
 const Context = createContext({} as AuthContext)
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 'gql' }> = ({
+  children,
+  api = 'rest',
+}) => {
   const [user, setUser] = useState<User | null>()
 
-  const login = useCallback<Login>(async args => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/login`, {
-      method: 'POST',
-      body: JSON.stringify(args),
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+  const create = useCallback<Create>(
+    async args => {
+      if (api === 'rest') {
+        const user = await rest(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users`, args)
+        setUser(user)
+        return user
+      }
 
-    if (res.ok) {
-      const json = await res.json()
-      setUser(json.user)
-    } else {
-      throw new Error('Invalid login')
-    }
-  }, [])
+      if (api === 'gql') {
+        const { createUser: user } = await gql(`mutation {
+        createUser(data: { email: "${args.email}", password: "${args.password}", firstName: "${args.firstName}", lastName: "${args.lastName}" }) {
+          ${USER}
+        }
+      }`)
+
+        setUser(user)
+        return user
+      }
+    },
+    [api],
+  )
+
+  const login = useCallback<Login>(
+    async args => {
+      if (api === 'rest') {
+        const user = await rest(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/login`, args)
+        setUser(user)
+        return user
+      }
+
+      if (api === 'gql') {
+        const { loginUser } = await gql(`mutation {
+        loginUser(email: "${args.email}", password: "${args.password}") {
+          user {
+            ${USER}
+          }
+          exp
+        }
+      }`)
+
+        setUser(loginUser?.user)
+        return loginUser?.user
+      }
+    },
+    [api],
+  )
 
   const logout = useCallback<Logout>(async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/logout`, {
-      method: 'POST',
-      // Make sure to include cookies with fetch
-      credentials: 'include',
-    })
-
-    if (res.ok) {
+    if (api === 'rest') {
+      await rest(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/logout`)
       setUser(null)
-    } else {
-      throw new Error('There was a problem while logging out.')
+      return
     }
-  }, [])
+
+    if (api === 'gql') {
+      await gql(`mutation {
+        logoutUser
+      }`)
+
+      setUser(null)
+    }
+  }, [api])
 
   // On mount, get user and set
   useEffect(() => {
     const fetchMe = async () => {
-      const result = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/me`, {
-        // Make sure to include cookies with fetch
-        credentials: 'include',
-      }).then(req => req.json())
-      setUser(result.user || null)
+      if (api === 'rest') {
+        const user = await rest(
+          `${process.env.NEXT_PUBLIC_CMS_URL}/api/users/me`,
+          {},
+          {
+            method: 'GET',
+          },
+        )
+        setUser(user)
+      }
+
+      if (api === 'gql') {
+        const { meUser } = await gql(`query {
+          meUser {
+            user {
+              ${USER}
+            }
+            exp
+          }
+        }`)
+
+        setUser(meUser.user)
+      }
     }
 
     fetchMe()
-  }, [])
+  }, [api])
+
+  const forgotPassword = useCallback<ForgotPassword>(
+    async args => {
+      if (api === 'rest') {
+        const user = await rest(
+          `${process.env.NEXT_PUBLIC_CMS_URL}/api/users/forgot-password`,
+          args,
+        )
+        setUser(user)
+        return user
+      }
+
+      if (api === 'gql') {
+        const { forgotPasswordUser } = await gql(`mutation {
+        forgotPasswordUser(email: "${args.email}")
+      }`)
+
+        return forgotPasswordUser
+      }
+    },
+    [api],
+  )
+
+  const resetPassword = useCallback<ResetPassword>(
+    async args => {
+      if (api === 'rest') {
+        const user = await rest(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/reset-password`, args)
+        setUser(user)
+        return user
+      }
+
+      if (api === 'gql') {
+        const { resetPasswordUser } = await gql(`mutation {
+        resetPasswordUser(password: "${args.password}", token: "${args.token}") {
+          user {
+            ${USER}
+          }
+        }
+      }`)
+
+        setUser(resetPasswordUser.user)
+        return resetPasswordUser.user
+      }
+    },
+    [api],
+  )
 
   return (
     <Context.Provider
@@ -70,6 +160,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser,
         login,
         logout,
+        create,
+        resetPassword,
+        forgotPassword,
       }}
     >
       {children}

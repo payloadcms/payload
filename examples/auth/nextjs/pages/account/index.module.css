@@ -3,8 +3,9 @@
 }
 
 .success,
-.error {
-  margin-bottom: 15px;
+.error,
+.message {
+  margin-bottom: 30px;
 }
 
 .success {

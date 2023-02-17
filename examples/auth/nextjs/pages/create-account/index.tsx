@@ -17,7 +17,7 @@ type FormData = {
 const CreateAccount: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const { login } = useAuth()
+  const { login, create, user } = useAuth()
 
   const {
     register,
@@ -27,28 +27,16 @@ const CreateAccount: React.FC = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      if (response.ok) {
-        // Automatically log the user in
+      try {
+        await create(data as Parameters<typeof create>[0])
+        // Automatically log the user in after creating their account
         await login({ email: data.email, password: data.password })
-
-        // Set success message for user
         setSuccess(true)
-
-        // Clear any existing errors
-        setError('')
-      } else {
-        setError('There was a problem creating your account. Please try again later.')
+      } catch (err) {
+        setError(err?.message || 'An error occurred while attempting to create your account.')
       }
     },
-    [login],
+    [login, create],
   )
 
   return (

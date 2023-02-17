@@ -83,6 +83,7 @@ const Account: React.FC = () => {
   return (
     <Gutter>
       <h1>Account</h1>
+      {router.query.message && <div className={classes.message}>{router.query.message}</div>}
       {error && <div className={classes.error}>{error}</div>}
       {success && <div className={classes.success}>{success}</div>}
       <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>

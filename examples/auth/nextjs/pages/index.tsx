@@ -16,14 +16,14 @@ const Home: React.FC = () => {
         </Link>
         {". This example demonstrates how to implement Payload's "}
         <Link href="https://payloadcms.com/docs/authentication/overview">Authentication</Link>
-        {' strategies.'}
+        {' strategies in both the REST and GraphQL APIs.'}
       </p>
       <p>
         {'Visit the '}
         <Link href="/login">Login</Link>
         {' page to start the authentication flow. Once logged in, you will be redirected to the '}
         <Link href="/account">Account</Link>
-        {" page which is restricted to user's only."}
+        {` page which is restricted to user's only. To toggle APIs, simply toggle the "api" prop in _app.tsx between "rest" and "gql".`}
       </p>
     </Gutter>
   )
