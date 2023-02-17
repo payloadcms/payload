@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
+import { useAuth } from '../../components/Auth'
 import { Gutter } from '../../components/Gutter'
 import { Input } from '../../components/Input'
 import classes from './index.module.css'
@@ -12,6 +13,7 @@ type FormData = {
 const RecoverPassword: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const { forgotPassword } = useAuth()
 
   const {
     register,
@@ -19,27 +21,21 @@ const RecoverPassword: React.FC = () => {
     formState: { errors },
   } = useForm<FormData>()
 
-  const onSubmit = useCallback(async (data: FormData) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/forgot-password`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+  const onSubmit = useCallback(
+    async (data: FormData) => {
+      try {
+        const user = await forgotPassword(data as Parameters<typeof forgotPassword>[0])
 
-    if (response.ok) {
-      // Set success message for user
-      setSuccess(true)
-
-      // Clear any existing errors
-      setError('')
-    } else {
-      setError(
-        'There was a problem while attempting to send you a password reset email. Please try again later.',
-      )
-    }
-  }, [])
+        if (user) {
+          setSuccess(true)
+          setError('')
+        }
+      } catch (err) {
+        setError(err?.message || 'An error occurred while attempting to recover password.')
+      }
+    },
+    [forgotPassword],
+  )
 
   return (
     <Gutter>

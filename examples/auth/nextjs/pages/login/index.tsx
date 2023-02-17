@@ -29,8 +29,8 @@ const Login: React.FC = () => {
       try {
         await login(data)
         router.push('/account')
-      } catch (_) {
-        setError('There was an error with the credentials provided. Please try again.')
+      } catch (err) {
+        setError(err?.message || 'An error occurred while attempting to login.')
       }
     },
     [login, router],

@@ -7,7 +7,9 @@ import '../css/app.scss'
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <AuthProvider>
+    // The `AuthProvider` can be used with either REST or GraphQL APIs
+    // Just change the `api` prop to "graphql" or "rest", that's it!
+    <AuthProvider api="rest">
       <Header />
       <Component {...pageProps} />
     </AuthProvider>

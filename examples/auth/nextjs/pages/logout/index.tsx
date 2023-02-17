@@ -15,8 +15,8 @@ const Logout: React.FC = () => {
       try {
         await logout()
         setSuccess('Logged out successfully.')
-      } catch (_) {
-        setError('You are already logged out.')
+      } catch (err) {
+        setError(err?.message || 'An error occurred while attempting to logout.')
       }
     }
 

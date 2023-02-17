@@ -14,7 +14,7 @@ type FormData = {
 
 const ResetPassword: React.FC = () => {
   const [error, setError] = useState('')
-  const { login } = useAuth()
+  const { login, resetPassword } = useAuth()
   const router = useRouter()
 
   const token = typeof router.query.token === 'string' ? router.query.token : undefined
@@ -28,31 +28,23 @@ const ResetPassword: React.FC = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/reset-password`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      try {
+        const user = await resetPassword(data as Parameters<typeof resetPassword>[0])
 
-      if (response.ok) {
-        const json = await response.json()
-
-        // Automatically log the user in after they successfully reset password
-        await login({ email: json.user.email, password: data.password })
-
-        // Redirect them to /account with success message in URL
-        router.push('/account?success=Password reset successfully.')
-      } else {
-        setError('There was a problem while resetting your password. Please try again later.')
+        if (user) {
+          // Automatically log the user in after they successfully reset password
+          // Then redirect them to /account with success message in URL
+          await login({ email: user.email, password: data.password })
+          router.push('/account?success=Password reset successfully.')
+        }
+      } catch (err) {
+        setError(err?.message || 'An error occurred while attempting to reset password.')
       }
     },
-    [router, login],
+    [router, login, resetPassword],
   )
 
-  // when NextJS populates token within router,
-  // reset form with new token value
+  // When Next.js populates token within router, reset form with new token value
   useEffect(() => {
     reset({ token })
   }, [reset, token])
