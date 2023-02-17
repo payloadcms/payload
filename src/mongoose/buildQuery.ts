@@ -228,6 +228,10 @@ class ParamParser {
       const schemaOptions = getSchemaTypeOptions(schemaType);
       const formattedValue = sanitizeQueryValue(schemaType, path, operator, val);
 
+      if (['salt', 'hash'].includes(path) || schemaType?.options?.hidden) {
+        return undefined;
+      }
+
       // If there are multiple collections to search through,
       // Recursively build up a list of query constraints
       if (collectionPaths.length > 1) {
