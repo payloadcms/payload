@@ -1,99 +1,99 @@
-import { Page } from "../payload-types";
+import type { Page } from '../payload-types'
 
 export const home: Partial<Page> = {
-  "title": "Home Page",
-  "slug": "home",
-  "richText": [
+  title: 'Home Page',
+  slug: 'home',
+  richText: [
     {
-      "children": [
+      children: [
         {
-          text: "This is a "
+          text: 'This is a ',
         },
         {
-          "type": "link",
-          "linkType": "custom",
-          url: "https://nextjs.org/",
-          "children": [
+          type: 'link',
+          linkType: 'custom',
+          url: 'https://nextjs.org/',
+          children: [
             {
-              "text": "Next.js"
-            }
-          ]
+              text: 'Next.js',
+            },
+          ],
         },
         {
-          text: " app made explicitly for Payload's "
+          text: " app made explicitly for Payload's ",
         },
         {
-          "type": "link",
-          "linkType": "custom",
-          url: "https://github.com/payloadcms/payload/tree/master/examples/redirects/cms",
-          "children": [
+          type: 'link',
+          linkType: 'custom',
+          url: 'https://github.com/payloadcms/payload/tree/master/examples/redirects/cms',
+          children: [
             {
-              "text": "Redirects Example"
-            }
-          ]
+              text: 'Redirects Example',
+            },
+          ],
         },
         {
-          text: ". This example demonstrates how to implement http redirects into Payload CMS using the official "
+          text: '. This example demonstrates how to implement http redirects into Payload CMS using the official ',
         },
         {
-          "type": "link",
-          "linkType": "custom",
-          url: "https://github.com/payloadcms/plugin-redirects",
-          "children": [
+          type: 'link',
+          linkType: 'custom',
+          url: 'https://github.com/payloadcms/plugin-redirects',
+          children: [
             {
-              "text": "Redirects Plugin"
-            }
-          ]
+              text: 'Redirects Plugin',
+            },
+          ],
         },
         {
-          text: "."
-        }
+          text: '.',
+        },
       ],
     },
     {
-      "children": [
+      children: [
         {
-          "text": "Paste "
+          text: 'Paste ',
         },
         {
-          "text": "http://localhost:3000/redirect-to-internal",
-          "bold": true
+          text: 'http://localhost:3000/redirect-to-internal',
+          bold: true,
         },
         {
-          "text": " into your browser to be redirected to "
+          text: ' into your browser to be redirected to ',
         },
         {
-          "type": "link",
-          "linkType": "internal",
-          "doc": {
-            "value": "{{REDIRECT_PAGE_ID}}",
-            "relationTo": "pages"
+          type: 'link',
+          linkType: 'internal',
+          doc: {
+            value: '{{REDIRECT_PAGE_ID}}',
+            relationTo: 'pages',
           },
-          "children": [
+          children: [
             {
-              "text": "this page"
-            }
-          ]
+              text: 'this page',
+            },
+          ],
         },
         {
-          "text": ", or paste "
+          text: ', or paste ',
         },
         {
-          "text": "http://localhost:3000/redirect-to-external",
-          "bold": true
+          text: 'http://localhost:3000/redirect-to-external',
+          bold: true,
         },
         {
-          "text": " into your browser to be redirected to "
+          text: ' into your browser to be redirected to ',
         },
         {
-          "text": "payloadcms.com",
-          "bold": true
+          text: 'payloadcms.com',
+          bold: true,
         },
         {
-          "text": "."
-        }
-      ]
+          text: '.',
+        },
+      ],
     },
   ],
-  "_status": "published",
-};
+  _status: 'published',
+}
