@@ -1,5 +1,20 @@
 
 
+## [1.6.12](https://github.com/payloadcms/payload/compare/v1.6.11...v1.6.12) (2023-02-17)
+
+
+### Bug Fixes
+
+* ensures only valid fields can be queried on ([1930bc2](https://github.com/payloadcms/payload/commit/1930bc260e721c5c7a10793b5d2a7809694089f3))
+
+
+### Features
+
+* adds gql auth example ([#2115](https://github.com/payloadcms/payload/issues/2115)) ([fa32c27](https://github.com/payloadcms/payload/commit/fa32c2771637af11d7ef0fb21b2f1f3cceae1ead))
+* auth example ([c076c77](https://github.com/payloadcms/payload/commit/c076c77db4a26cf514a040b1048de25b1141f0cb))
+* separates admin root component from DOM render logic ([ff4d1f6](https://github.com/payloadcms/payload/commit/ff4d1f6ac26f5cac56b6c5b7b67b99f50067cb8d))
+* virtual fields example ([#1990](https://github.com/payloadcms/payload/issues/1990)) ([2af0c04](https://github.com/payloadcms/payload/commit/2af0c04c8ae5892b317af240c1502bc21bb65253))
+
 ## [1.6.11](https://github.com/payloadcms/payload/compare/v1.6.10...v1.6.11) (2023-02-15)
 
 
