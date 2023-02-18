@@ -7,7 +7,7 @@ $caretSize: 6;
 	background-color: var(--theme-elevation-800);
 	position: absolute;
 	z-index: 2;
-	bottom: 100%;
+	top: 125%;
 	left: 50%;
 	transform: translate3d(-50%, calc(#{$caretSize}px * -1), 0);
 	padding: base(.2) base(.4);
@@ -22,14 +22,14 @@ $caretSize: 6;
     content: ' ';
     display: block;
     position: absolute;
-    bottom: 0;
+    bottom: 120%;
     left: 50%;
     transform: translate3d(-50%, 100%, 0);
     width: 0;
     height: 0;
     border-left: #{$caretSize}px solid transparent;
     border-right: #{$caretSize}px solid transparent;
-    border-top: #{$caretSize}px solid var(--theme-elevation-800);
+    border-bottom: #{$caretSize}px solid var(--theme-elevation-800);
   }
 
   &--show {
