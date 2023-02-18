@@ -1,5 +1,12 @@
 
 
+## [1.6.13](https://github.com/payloadcms/payload/compare/v1.6.12...v1.6.13) (2023-02-18)
+
+
+### Bug Fixes
+
+* [#2125](https://github.com/payloadcms/payload/issues/2125), ensures createdAt and updatedAt are returned in update operations ([42ebf68](https://github.com/payloadcms/payload/commit/42ebf6893257256554a57e6b6684a726d11800b8))
+
 ## [1.6.12](https://github.com/payloadcms/payload/compare/v1.6.11...v1.6.12) (2023-02-17)
 
 
