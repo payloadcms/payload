@@ -546,6 +546,8 @@ describe('Versions', () => {
         const update = `mutation {
           updateAutosavePost(id: "${collectionGraphQLPostID}", data: {title: "${updatedTitle}"}) {
             title
+            updatedAt
+            createdAt
           }
         }`;
         await graphQLClient.request(update);

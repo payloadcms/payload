@@ -110,10 +110,14 @@ export const saveVersion = async ({
     });
   }
 
-  result = result.version;
   result = JSON.parse(JSON.stringify(result));
-  result = sanitizeInternalFields(result);
-  result.id = id;
 
-  return result;
+  let createdVersion = result.version;
+  createdVersion.createdAt = result.createdAt;
+  createdVersion.updatedAt = result.updatedAt;
+
+  createdVersion = sanitizeInternalFields(createdVersion);
+  createdVersion.id = id;
+
+  return createdVersion;
 };
