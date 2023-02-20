@@ -1,4 +1,4 @@
-import React, { Fragment, isValidElement } from 'react';
+import React, { forwardRef, Fragment, isValidElement } from 'react';
 import { Link } from 'react-router-dom';
 import { Props } from './types';
 
@@ -49,7 +49,7 @@ const ButtonContents = ({ children, icon, tooltip, showTooltip }) => {
   );
 };
 
-const Button: React.FC<Props> = (props) => {
+const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, Props>((props, ref) => {
   const {
     className,
     id,
@@ -125,6 +125,7 @@ const Button: React.FC<Props> = (props) => {
       return (
         <a
           {...buttonProps}
+          ref={ref as React.LegacyRef<HTMLAnchorElement>}
           href={url}
         >
           <ButtonContents
@@ -143,6 +144,7 @@ const Button: React.FC<Props> = (props) => {
       return (
         <Tag
           type="submit"
+          ref={ref}
           {...buttonProps}
         >
           <ButtonContents
@@ -155,6 +157,6 @@ const Button: React.FC<Props> = (props) => {
         </Tag>
       );
   }
-};
+});
 
 export default Button;

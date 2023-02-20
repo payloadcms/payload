@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import FormSubmit from '../../forms/Submit';
@@ -18,6 +18,7 @@ const SaveDraft: React.FC = () => {
   const modified = useFormModified();
   const locale = useLocale();
   const { t } = useTranslation('version');
+  const ref = useRef<HTMLButtonElement>(null);
 
   const canSaveDraft = modified;
 
@@ -45,16 +46,18 @@ const SaveDraft: React.FC = () => {
     });
   }, [submit, collection, global, serverURL, api, locale, id]);
 
-  // Hotkeys
-  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true }, (e) => {
+  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true }, (e, deps) => {
     e.preventDefault();
-    if (canSaveDraft) {
-      saveDraft();
+    e.stopPropagation();
+    const [enableClick] = deps as [boolean]; // alias for `canSaveDraft`
+    if (enableClick && ref.current) {
+      ref.current.click();
     }
-  });
+  }, [canSaveDraft]);
 
   return (
     <FormSubmit
+      ref={ref}
       className={baseClass}
       type="button"
       buttonStyle="secondary"
