@@ -6,6 +6,7 @@ import { initReactI18next } from 'react-i18next';
 import deepmerge from 'deepmerge';
 import { defaultOptions } from '../../../../translations/defaultOptions';
 import { useConfig } from '../Config';
+import { getSupportedMonacoLocale } from '../../../utilities/getSupportedMonacoLocale';
 
 export const I18n: React.FC = () => {
   const config = useConfig();
@@ -18,7 +19,7 @@ export const I18n: React.FC = () => {
     .use(LanguageDetector)
     .use(initReactI18next)
     .init(deepmerge(defaultOptions, config.i18n || {}));
-  loader.config({ 'vs/nls': { availableLanguages: { '*': i18n.language === 'en' ? '' : i18n.language } } });
+  loader.config({ 'vs/nls': { availableLanguages: { '*': getSupportedMonacoLocale(i18n.language) } } });
   return null;
 };
 
