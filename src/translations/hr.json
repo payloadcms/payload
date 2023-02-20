@@ -228,6 +228,20 @@
     "users": "Korisnici",
     "welcome": "Dobrodošli"
   },
+  "operators": {
+    "equals": "jednako",
+    "isNotEqualTo": "nije jednako",
+    "isIn": "je u",
+    "isNotIn": "nije unutra",
+    "exists": "postoji",
+    "isGreaterThan": "je veće od",
+    "isLessThan": "manje je od",
+    "isLessThanOrEqualTo": "manje je ili jednako",
+    "isGreaterThanOrEqualTo": "je veće od ili jednako",
+    "near": "blizu",
+    "isLike": "je kao",
+    "contains": "sadrži"
+  },
   "upload": {
     "dragAndDropHere": "ili povucite i ispustite datoteku ovdje",
     "fileName": "Ime datoteke",

@@ -217,6 +217,20 @@
     "users": "အသုံးပြုသူများ",
     "welcome": "ကြိုဆိုပါတယ်။"
   },
+  "operators": {
+    "equals": "ညီမျှ",
+    "isNotEqualTo": "ညီမျှသည်",
+    "isIn": "ရှိ",
+    "isNotIn": "မဝင်ပါ",
+    "exists": "တည်ရှိသည်",
+    "isGreaterThan": "ထက်ကြီးသည်",
+    "isLessThan": "ထက်နည်းသည်",
+    "isLessThanOrEqualTo": "ထက်နည်းသည် သို့မဟုတ် ညီမျှသည်",
+    "isGreaterThanOrEqualTo": "ထက်ကြီးသည် သို့မဟုတ် ညီမျှသည်",
+    "near": "နီး",
+    "isLike": "တူသည်",
+    "contains": "ပါဝင်သည်"
+  },
   "upload": {
     "dragAndDropHere": "သို့မဟုတ် ဖိုင်တစ်ခုကို ဤနေရာတွင် ဆွဲချပါ။",
     "fileName": "ဖိုင် နာမည်",

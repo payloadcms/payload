@@ -218,6 +218,20 @@
     "users": "Gebruikers",
     "welcome": "Welkom"
   },
+  "operators": {
+    "equals": "is gelijk aan",
+    "isNotEqualTo": "is niet gelijk aan",
+    "isIn": "is binnen",
+    "isNotIn": "zit er niet in",
+    "exists": "bestaat",
+    "isGreaterThan": "is groter dan",
+    "isLessThan": "is kleiner dan",
+    "isLessThanOrEqualTo": "is kleiner dan of gelijk aan",
+    "isGreaterThanOrEqualTo": "is groter dan of gelijk aan",
+    "near": "nabij",
+    "isLike": "is als",
+    "contains": "bevat"
+  },
   "upload": {
     "dragAndDropHere": "of sleep een bestand naar hier",
     "fileName": "Bestandsnaam",
