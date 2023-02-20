@@ -8,7 +8,6 @@ import { Props } from './types';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
 import { CodeEditor } from '../../../elements/CodeEditor';
-import { ShimmerEffect } from '../../../elements/ShimmerEffect';
 
 import './index.scss';
 
