@@ -218,6 +218,20 @@
     "users": "Användare",
     "welcome": "Välkommen"
   },
+  "operators": {
+    "equals": "likar med",
+    "isNotEqualTo": "är inte lika med",
+    "isIn": "är med",
+    "isNotIn": "är inte med",
+    "exists": "finns",
+    "isGreaterThan": "är större än",
+    "isLessThan": "är mindre än",
+    "isLessThanOrEqualTo": "är mindre än eller lika med",
+    "isGreaterThanOrEqualTo": "är större än eller lika med",
+    "near": "nära",
+    "isLike": "är som",
+    "contains": "innehåller"
+  },
   "upload": {
     "dragAndDropHere": "eller dra och släpp en fil här",
     "fileName": "Filnamn",

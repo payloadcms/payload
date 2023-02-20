@@ -227,6 +227,20 @@
     "users": "Brukere",
     "welcome": "Velkommen"
   },
+  "operators": {
+    "equals": "lik",
+    "isNotEqualTo": "er ikke lik",
+    "isIn": "er i",
+    "isNotIn": "er ikke med",
+    "exists": "eksisterer",
+    "isGreaterThan": "er større enn",
+    "isLessThan": "er mindre enn",
+    "isLessThanOrEqualTo": "er mindre enn eller lik",
+    "isGreaterThanOrEqualTo": "er større enn eller lik",
+    "near": "nær",
+    "isLike": "er som",
+    "contains": "contains"
+  },
   "upload": {
     "dragAndDropHere": "eller dra og slipp en fil her",
     "fileName": "Filnavn",

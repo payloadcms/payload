@@ -225,6 +225,20 @@
     "users": "Uživatelé",
     "welcome": "Vítejte"
   },
+  "operators": {
+    "equals": "rovná se",
+    "isNotEqualTo": "není rovno",
+    "isIn": "je v",
+    "isNotIn": "není in",
+    "exists": "existuje",
+    "isGreaterThan": "je větší než",
+    "isLessThan": "je menší než",
+    "isLessThanOrEqualTo": "je menší nebo rovno",
+    "isGreaterThanOrEqualTo": "je větší nebo rovno",
+    "near": "blízko",
+    "isLike": "je jako",
+    "contains": "obsahuje"
+  },
   "upload": {
     "dragAndDropHere": "nebo sem přetáhněte soubor",
     "fileName": "Název souboru",

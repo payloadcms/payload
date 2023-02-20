@@ -1,7 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
+    "$schema": {
+      "type": "string"
+    },
     "authentication": {
       "type": "object",
       "additionalProperties": false,
@@ -905,6 +909,62 @@
         "welcome"
       ]
     },
+    "operators": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "equals": {
+          "type": "string"
+        },
+        "isNotEqualTo":{
+          "type": "string"
+        },
+        "isIn": {
+          "type": "string"
+        },
+        "isNotIn":{
+          "type": "string"
+        },
+        "exists": {
+          "type": "string"
+        },
+        "isGreaterThan":{
+          "type": "string"
+        },
+        "isLessThan": {
+          "type": "string"
+        },
+        "isLessThanOrEqualTo":{
+          "type": "string"
+        },
+        "isGreaterThanOrEqualTo": {
+          "type": "string"
+        },
+        "near":{
+          "type": "string"
+        },
+        "isLike": {
+          "type": "string"
+        },
+        "contains":{
+          "type": "string"
+        }
+      },
+      "required": [
+        "equals",
+        "isNotEqualTo",
+        "isIn",
+        "isNotIn",
+        "exists",
+        "isGreaterThan",
+        "isLessThan",
+        "isLessThanOrEqualTo",
+        "isGreaterThanOrEqualTo",
+        "near",
+        "isLike",
+        "contains"
+      ]
+    },
     "upload": {
       "type": "object",
       "additionalProperties": false,
@@ -1239,6 +1299,7 @@
     "error",
     "fields",
     "general",
+    "operators",
     "upload",
     "validation",
     "version"
