@@ -62,44 +62,48 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
   await user.save();
 
-  await user.authenticate(data.password);
+  let token: string;
 
-  const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
-    if (fieldAffectsData(field) && field.saveToJWT) {
-      return {
-        ...signedFields,
-        [field.name]: user[field.name],
+  if (!collectionConfig.auth.verify || user._verified) {
+    await user.authenticate(data.password);
+
+    const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
+      if (fieldAffectsData(field) && field.saveToJWT) {
+        return {
+          ...signedFields,
+          [field.name]: user[field.name],
+        };
+      }
+      return signedFields;
+    }, {
+      email: user.email,
+      id: user.id,
+      collection: collectionConfig.slug,
+    });
+
+    token = jwt.sign(
+      fieldsToSign,
+      secret,
+      {
+        expiresIn: collectionConfig.auth.tokenExpiration,
+      },
+    );
+
+    if (args.res) {
+      const cookieOptions = {
+        path: '/',
+        httpOnly: true,
+        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
+        secure: collectionConfig.auth.cookies.secure,
+        sameSite: collectionConfig.auth.cookies.sameSite,
+        domain: undefined,
       };
+
+
+      if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
+
+      args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
     }
-    return signedFields;
-  }, {
-    email: user.email,
-    id: user.id,
-    collection: collectionConfig.slug,
-  });
-
-  const token = jwt.sign(
-    fieldsToSign,
-    secret,
-    {
-      expiresIn: collectionConfig.auth.tokenExpiration,
-    },
-  );
-
-  if (args.res) {
-    const cookieOptions = {
-      path: '/',
-      httpOnly: true,
-      expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-      secure: collectionConfig.auth.cookies.secure,
-      sameSite: collectionConfig.auth.cookies.sameSite,
-      domain: undefined,
-    };
-
-
-    if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
-
-    args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }
 
   const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess });

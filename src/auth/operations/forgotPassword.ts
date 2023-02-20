@@ -67,6 +67,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     resetPasswordToken?: string,
     resetPasswordExpiration?: number | Date,
   }
+
   const user: UserDoc = await Model.findOne({ email: (data.email as string).toLowerCase() });
 
   if (!user) return null;
