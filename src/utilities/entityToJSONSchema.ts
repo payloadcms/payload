@@ -70,7 +70,17 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
           }
 
           case 'json': {
-            fieldSchema = { type: 'object' };
+            // https://www.rfc-editor.org/rfc/rfc7159#section-3
+            fieldSchema = {
+              oneOf: [
+                { type: 'object' },
+                { type: 'array' },
+                { type: 'string' },
+                { type: 'number' },
+                { type: 'boolean' },
+                { type: 'null' },
+              ],
+            };
             break;
           }
 
