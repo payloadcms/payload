@@ -1,3 +1,4 @@
+import { PaginateOptions } from 'mongoose';
 import { AccessResult } from '../../config/types';
 import { Where } from '../../types';
 import { Payload } from '../../payload';
@@ -17,7 +18,7 @@ type Args = {
   accessResult: AccessResult
   collection: Collection
   locale: string
-  paginationOptions: any
+  paginationOptions: PaginateOptions
   payload: Payload
   where: Where
 }
@@ -76,7 +77,8 @@ export const queryDrafts = async <T extends TypeWithID>({
   const result = await VersionModel.aggregatePaginate(aggregate, {
     ...paginationOptions,
     sort: paginationSort,
-  });
+    useFacet: payload.mongoOptions?.useFacet,
+  } as PaginateOptions);
 
   return {
     ...result,
