@@ -128,7 +128,7 @@
     "is-plain-object": "^5.0.0",
     "isomorphic-fetch": "^3.0.0",
     "joi": "^17.7.0",
-    "json-schema-to-typescript": "^11.0.2",
+    "json-schema-to-typescript": "11.0.3",
     "jsonwebtoken": "^9.0.0",
     "jwt-decode": "^3.1.2",
     "md5": "^2.3.0",
