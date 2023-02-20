@@ -23,7 +23,7 @@ const reduceFields = (fields, i18n) => flattenTopLevelFields(fields)
     if (filterFields.includes(field.name)) {
       return reduced;
     }
-    if (fieldAffectsData(field) && (field.hidden || field.admin.readOnly)) {
+    if (fieldAffectsData(field) && (field.unique || field.hidden || field.admin.hidden || field.admin.readOnly || field.admin.disableBulkEdit)) {
       return reduced;
     }
     const formattedField = {
