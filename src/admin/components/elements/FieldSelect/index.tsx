@@ -23,6 +23,9 @@ const reduceFields = (fields, i18n) => flattenTopLevelFields(fields)
     if (filterFields.includes(field.name)) {
       return reduced;
     }
+    // TODO:
+    // tabs
+    // groups
     if (fieldAffectsData(field) && (field.unique || field.hidden || field.admin.hidden || field.admin.readOnly || field.admin.disableBulkEdit)) {
       return reduced;
     }

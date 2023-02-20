@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useModal } from '@faceless-ui/modal';
 import { useConfig } from '../../utilities/Config';
@@ -10,6 +10,7 @@ import { useAuth } from '../../utilities/Auth';
 import { Index } from '../FieldSelect';
 import FormSubmit from '../../forms/Submit';
 import Form from '../../forms/Form';
+import { useForm } from '../../forms/Form/context';
 import RenderFields from '../../forms/RenderFields';
 import { OperationContext } from '../../utilities/OperationProvider';
 import fieldTypes from '../../forms/field-types';
@@ -18,6 +19,27 @@ import './index.scss';
 
 const baseClass = 'edit-many';
 
+const Submit: React.FC<{disabled: boolean, action: string}> = ({ action, disabled }) => {
+  const { submit } = useForm();
+  const { t } = useTranslation('general');
+
+  const save = useCallback(() => {
+    submit({
+      skipValidation: true,
+      method: 'PATCH',
+      action,
+    });
+  }, [action, submit]);
+
+  return (
+    <FormSubmit
+      onClick={save}
+      disabled={disabled}
+    >
+      {t('save')}
+    </FormSubmit>
+  );
+};
 const EditMany: React.FC<Props> = (props) => {
   const {
     resetParams,
@@ -77,9 +99,6 @@ const EditMany: React.FC<Props> = (props) => {
         <OperationContext.Provider value="update">
           <Form
             onSuccess={onSuccess}
-            action={`${serverURL}${api}/${slug}${getQueryParams()}`}
-            method="patch"
-            disabled={selected.length === 0}
           >
             <Index
               fields={collection.fields}
@@ -90,9 +109,10 @@ const EditMany: React.FC<Props> = (props) => {
               fieldSchema={selected}
             />
             {/* TODO: move save button to sidebar */}
-            <FormSubmit>
-              {t('save')}
-            </FormSubmit>
+            <Submit
+              action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+              disabled={selected.length === 0}
+            />
           </Form>
         </OperationContext.Provider>
       </Drawer>
