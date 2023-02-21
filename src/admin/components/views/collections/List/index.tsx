@@ -114,7 +114,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
       const search = {
         ...params,
         sort: params?.sort || currentPreferences?.sort,
-        limit: params?.limit || currentPreferences?.limit,
+        limit: params?.limit || currentPreferences?.limit || defaultLimit,
       };
 
       const newSearchQuery = queryString.stringify(search, { addQueryPrefix: true });
@@ -125,7 +125,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         });
       }
     })();
-  }, [collection, getPreference, preferenceKey, history, t]);
+  }, [collection, getPreference, preferenceKey, history, t, defaultLimit]);
 
   // /////////////////////////////////////
   // When any preference-enabled values are updated,
