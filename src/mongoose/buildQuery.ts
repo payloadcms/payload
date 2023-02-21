@@ -37,6 +37,8 @@ type SearchParam = {
 class ParamParser {
   locale: string;
 
+  queryHiddenFields: boolean
+
   rawParams: any;
 
   model: any;
@@ -48,11 +50,12 @@ class ParamParser {
     sort: boolean;
   };
 
-  constructor(model, rawParams, locale: string) {
+  constructor(model, rawParams, locale: string, queryHiddenFields?: boolean) {
     this.parse = this.parse.bind(this);
     this.model = model;
     this.rawParams = rawParams;
     this.locale = locale;
+    this.queryHiddenFields = queryHiddenFields;
     this.query = {
       searchParams: {},
       sort: false,
@@ -228,7 +231,7 @@ class ParamParser {
       const schemaOptions = getSchemaTypeOptions(schemaType);
       const formattedValue = sanitizeQueryValue(schemaType, path, operator, val);
 
-      if (['salt', 'hash'].includes(path) || schemaType?.options?.hidden) {
+      if (!this.queryHiddenFields && (['salt', 'hash'].includes(path) || schemaType?.options?.hidden)) {
         return undefined;
       }
 
@@ -359,8 +362,8 @@ class ParamParser {
 // which can then be used in subsequent Mongoose queries.
 function buildQueryPlugin(schema) {
   const modifiedSchema = schema;
-  async function buildQuery(rawParams, locale) {
-    const paramParser = new ParamParser(this, rawParams, locale);
+  async function buildQuery(rawParams, locale, queryHiddenFields = false) {
+    const paramParser = new ParamParser(this, rawParams, locale, queryHiddenFields);
     const params = await paramParser.parse();
     return params.searchParams;
   }
