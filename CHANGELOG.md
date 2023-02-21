@@ -1,5 +1,12 @@
 
 
+## [1.6.15](https://github.com/payloadcms/payload/compare/v1.6.14...v1.6.15) (2023-02-21)
+
+
+### Bug Fixes
+
+* mongoose connection error with useFacet ([5888fb9](https://github.com/payloadcms/payload/commit/5888fb9b3f82f49686da27c216b40c38b5a5d6c2))
+
 ## [1.6.14](https://github.com/payloadcms/payload/compare/v1.6.13...v1.6.14) (2023-02-21)
 
 
