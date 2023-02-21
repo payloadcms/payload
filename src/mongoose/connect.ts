@@ -2,7 +2,7 @@
 /* eslint-disable global-require */
 import mongoose, { ConnectOptions } from 'mongoose';
 import pino from 'pino';
-import { InitOptions } from '../../config';
+import { InitOptions } from '../config/types';
 import { connection } from './testCredentials';
 
 const connectMongoose = async (
