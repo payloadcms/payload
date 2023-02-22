@@ -61,7 +61,7 @@ const DeleteMany: React.FC<Props> = (props) => {
         }
 
         if (json.errors) {
-          json.errors.forEach((error) => toast.error(error.message));
+          toast.error(json.message);
         } else {
           addDefaultError();
         }

@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { Document, Where } from '../../types';
 import deleteOperation from '../operations/delete';
+import formatSuccessResponse from '../../express/responses/formatSuccess';
 
 export type DeleteResult = {
   message: string;
@@ -11,15 +12,35 @@ export type DeleteResult = {
 
 export default async function deleteHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<DeleteResult> | void> {
   try {
-    const docs = await deleteOperation({
+    const result = await deleteOperation({
       req,
       collection: req.collection,
       where: req.query.where as Where,
       depth: parseInt(String(req.query.depth), 10),
     });
 
-    return res.status(httpStatus.OK).json({
-      docs,
+    if (result.errors.length === 0) {
+      const message = req.t('general:deletedCountSuccessfully', {
+        count: result.docs.length,
+        label: req.collection.config.labels[result.docs.length > 1 ? 'plural' : 'singular'],
+      });
+
+      return res.status(httpStatus.OK).json({
+        ...formatSuccessResponse(message, 'message'),
+        ...result,
+      });
+    }
+
+    const total = result.docs.length + result.errors.length;
+    const message = req.t('error:unableToDeleteCount', {
+      count: result.errors.length,
+      total,
+      label: req.collection.config.labels[total > 1 ? 'plural' : 'singular'],
+    });
+
+    return res.status(httpStatus.BAD_REQUEST).json({
+      message,
+      ...result,
     });
   } catch (error) {
     return next(error);

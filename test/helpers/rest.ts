@@ -92,7 +92,7 @@ type DocResponse<T> = {
 type DocsResponse<T> = {
   status: number;
   docs: T[];
-  errors?: { name: string, message: string, data: any }[]
+  errors?: { name: string, message: string, data: any, id: string | number}[]
 };
 
 const headers = {

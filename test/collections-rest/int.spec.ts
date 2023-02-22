@@ -2,10 +2,10 @@ import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
 import { initPayloadTest } from '../helpers/configHelpers';
 import type { Relation } from './config';
-import config, { customIdNumberSlug, customIdSlug, slug, relationSlug, pointSlug } from './config';
+import config, { customIdNumberSlug, customIdSlug, slug, relationSlug, pointSlug, errorOnHookSlug } from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
-import type { Post } from './payload-types';
+import type { ErrorOnHook, Post } from './payload-types';
 import { mapAsync } from '../../src/utilities/mapAsync';
 
 let client: RESTClient;
@@ -69,7 +69,7 @@ describe('collections-rest', () => {
 
       const description = 'updated';
       const { status, docs } = await client.updateMany<Post>({
-        query: { title: { eq: 'title' } },
+        query: { title: { equals: 'title' } },
         data: { description },
       });
 
@@ -77,6 +77,39 @@ describe('collections-rest', () => {
       expect(docs[0].title).toEqual('title'); // Check was not modified
       expect(docs[0].description).toEqual(description);
       expect(docs.pop().description).toEqual(description);
+    });
+
+    it('should return formatted errors for bulk updates', async () => {
+      const errorDoc = await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          text: 'test',
+          errorBeforeChange: true,
+        },
+      });
+      const successDoc = await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          text: 'test',
+          errorBeforeChange: false,
+        },
+      });
+
+      const update = 'update';
+
+      const result = await client.updateMany<ErrorOnHook>({
+        slug: errorOnHookSlug,
+        query: { text: { equals: 'test' } },
+        data: { text: update },
+      });
+
+      expect(result.status).toEqual(400);
+      expect(result.docs).toHaveLength(1);
+      expect(result.docs[0].id).toEqual(successDoc.id);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].message).toBeDefined();
+      expect(result.errors[0].id).toEqual(errorDoc.id);
+      expect(result.docs[0].text).toEqual(update);
     });
 
     it('should bulk delete', async () => {
@@ -92,6 +125,34 @@ describe('collections-rest', () => {
       expect(status).toEqual(200);
       expect(docs[0].title).toEqual('title'); // Check was not modified
       expect(docs).toHaveLength(count);
+    });
+
+    it('should return formatted errors for bulk deletes', async () => {
+      await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          text: 'test',
+          errorAfterDelete: true,
+        },
+      });
+      await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          text: 'test',
+          errorAfterDelete: false,
+        },
+      });
+
+      const result = await client.deleteMany({
+        slug: errorOnHookSlug,
+        query: { text: { equals: 'test' } },
+      });
+
+      expect(result.status).toEqual(400);
+      expect(result.docs).toHaveLength(1);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].message).toBeDefined();
+      expect(result.errors[0].id).toBeDefined();
     });
 
     describe('Custom ID', () => {

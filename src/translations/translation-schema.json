@@ -318,6 +318,12 @@
         "unspecific": {
           "type": "string"
         },
+        "unableToDeleteCount": {
+          "type": "string"
+        },
+        "unableToUpdateCount": {
+          "type": "string"
+        },
         "userLocked": {
           "type": "string"
         },
@@ -357,6 +363,8 @@
         "unauthorized",
         "unknown",
         "unspecific",
+        "unableToDeleteCount",
+        "unableToUpdateCount",
         "userLocked",
         "valueMustBeUnique",
         "verificationTokenInvalid"
@@ -631,6 +639,9 @@
         "delete": {
           "type": "string"
         },
+        "deletedCountSuccessfully": {
+          "type": "string"
+        },
         "deletedSuccessfully": {
           "type": "string"
         },
@@ -826,6 +837,9 @@
         "updatedAt": {
           "type": "string"
         },
+        "updatedCountSuccessfully": {
+          "type": "string"
+        },
         "updatedSuccessfully": {
           "type": "string"
         },
@@ -876,6 +890,7 @@
         "dark",
         "dashboard",
         "delete",
+        "deletedCountSuccessfully",
         "deletedSuccessfully",
         "deleting",
         "descending",
@@ -939,6 +954,7 @@
         "unsavedChangesDuplicate",
         "untitled",
         "updatedAt",
+        "updatedCountSuccessfully",
         "updatedSuccessfully",
         "user",
         "users",

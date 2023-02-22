@@ -26,7 +26,13 @@ export type Arguments = {
 
 async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments,
-): Promise<GeneratedTypes['collections'][TSlug][]> {
+): Promise<{
+  docs: GeneratedTypes['collections'][TSlug][],
+  errors: {
+    message: string
+    id: GeneratedTypes['collections'][TSlug]['id']
+  }[]
+}> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -109,6 +115,8 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
   const docs = await Model.find(query, {}, { lean: true });
 
+  const errors = [];
+
   /* eslint-disable no-param-reassign */
   const promises = docs.map(async (doc) => {
     let result;
@@ -121,121 +129,129 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
     const { id } = doc;
 
-    // /////////////////////////////////////
-    // beforeDelete - Collection
-    // /////////////////////////////////////
+    try {
+      // /////////////////////////////////////
+      // beforeDelete - Collection
+      // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeDelete.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await collectionConfig.hooks.beforeDelete.reduce(async (priorHook, hook) => {
+        await priorHook;
 
-      return hook({
-        req,
-        id,
-      });
-    }, Promise.resolve());
+        return hook({
+          req,
+          id,
+        });
+      }, Promise.resolve());
 
 
-    // /////////////////////////////////////
-    // Delete any associated files
-    // /////////////////////////////////////
+      // /////////////////////////////////////
+      // Delete any associated files
+      // /////////////////////////////////////
 
-    if (collectionConfig.upload) {
-      const { staticDir } = collectionConfig.upload;
+      if (collectionConfig.upload) {
+        const { staticDir } = collectionConfig.upload;
 
-      const staticPath = path.resolve(config.paths.configDir, staticDir);
+        const staticPath = path.resolve(config.paths.configDir, staticDir);
 
-      const fileToDelete = `${staticPath}/${doc.filename}`;
+        const fileToDelete = `${staticPath}/${doc.filename}`;
 
-      if (await fileExists(fileToDelete)) {
-        fs.unlink(fileToDelete, (err) => {
-          if (err) {
-            throw new ErrorDeletingFile(t);
-          }
+        if (await fileExists(fileToDelete)) {
+          fs.unlink(fileToDelete, (err) => {
+            if (err) {
+              throw new ErrorDeletingFile(t);
+            }
+          });
+        }
+
+        if (doc.sizes) {
+          Object.values(doc.sizes)
+            .forEach(async (size: FileData) => {
+              const sizeToDelete = `${staticPath}/${size.filename}`;
+              if (await fileExists(sizeToDelete)) {
+                fs.unlink(sizeToDelete, (err) => {
+                  if (err) {
+                    throw new ErrorDeletingFile(t);
+                  }
+                });
+              }
+            });
+        }
+      }
+
+      // /////////////////////////////////////
+      // Delete document
+      // /////////////////////////////////////
+
+      await Model.deleteOne({ _id: id }, { lean: true });
+
+      // /////////////////////////////////////
+      // Delete versions
+      // /////////////////////////////////////
+
+      if (collectionConfig.versions) {
+        deleteCollectionVersions({
+          payload,
+          id,
+          slug: collectionConfig.slug,
         });
       }
 
-      if (doc.sizes) {
-        Object.values(doc.sizes)
-          .forEach(async (size: FileData) => {
-            const sizeToDelete = `${staticPath}/${size.filename}`;
-            if (await fileExists(sizeToDelete)) {
-              fs.unlink(sizeToDelete, (err) => {
-                if (err) {
-                  throw new ErrorDeletingFile(t);
-                }
-              });
-            }
-          });
-      }
-    }
+      // /////////////////////////////////////
+      // afterDelete - Collection
+      // /////////////////////////////////////
 
-    // /////////////////////////////////////
-    // Delete document
-    // /////////////////////////////////////
+      await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
+        await priorHook;
 
-    await Model.deleteOne({ _id: id }, { lean: true });
+        result = await hook({
+          req,
+          id,
+          doc,
+        }) || doc;
+      }, Promise.resolve());
 
-    // /////////////////////////////////////
-    // Delete versions
-    // /////////////////////////////////////
 
-    if (collectionConfig.versions) {
-      deleteCollectionVersions({
-        payload,
-        id,
-        slug: collectionConfig.slug,
+      // /////////////////////////////////////
+      // afterRead - Fields
+      // /////////////////////////////////////
+
+      result = await afterRead({
+        depth,
+        doc: result || doc,
+        entityConfig: collectionConfig,
+        overrideAccess,
+        req,
+        showHiddenFields,
+      });
+
+      // /////////////////////////////////////
+      // afterRead - Collection
+      // /////////////////////////////////////
+
+      await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+        await priorHook;
+
+        result = await hook({
+          req,
+          doc: result || doc,
+        }) || result;
+      }, Promise.resolve());
+
+      // /////////////////////////////////////
+      // 8. Return results
+      // /////////////////////////////////////
+
+      return result;
+    } catch (error) {
+      errors.push({
+        message: error.message,
+        id: doc.id,
       });
     }
-
-    // /////////////////////////////////////
-    // afterDelete - Collection
-    // /////////////////////////////////////
-
-    await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
-      await priorHook;
-
-      result = await hook({
-        req,
-        id,
-        doc,
-      }) || doc;
-    }, Promise.resolve());
-
-
-    // /////////////////////////////////////
-    // afterRead - Fields
-    // /////////////////////////////////////
-
-    result = await afterRead({
-      depth,
-      doc: result || doc,
-      entityConfig: collectionConfig,
-      overrideAccess,
-      req,
-      showHiddenFields,
-    });
-
-    // /////////////////////////////////////
-    // afterRead - Collection
-    // /////////////////////////////////////
-
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook;
-
-      result = await hook({
-        req,
-        doc: result || doc,
-      }) || result;
-    }, Promise.resolve());
-
-    // /////////////////////////////////////
-    // 8. Return results
-    // /////////////////////////////////////
-
-    return result;
+    return null;
   });
 
-  await Promise.all(promises);
+  const awaitedDocs = await Promise.all(promises);
 
   // /////////////////////////////////////
   // Delete Preferences
@@ -249,7 +265,10 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   }
   preferences.Model.deleteMany({ key: { in: docs.map(({ id }) => `collection-${collectionConfig.slug}-${id}`) } });
 
-  return Promise.all(promises);
+  return {
+    docs: awaitedDocs.filter(Boolean),
+    errors,
+  };
 }
 
 export default deleteOperation;
