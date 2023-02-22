@@ -67,18 +67,24 @@ export const queryDrafts = async <T extends TypeWithID>({
     { $match: versionQuery },
   ]);
 
-  const paginationSort = Object.entries(paginationOptions.sort).reduce((sort, [key, order]) => {
-    return {
-      ...sort,
-      [key]: order === 'asc' ? 1 : -1,
-    };
-  }, {});
-
-  const result = await VersionModel.aggregatePaginate(aggregate, {
+  const aggregatePaginateOptions = {
     ...paginationOptions,
-    sort: paginationSort,
     useFacet: payload.mongoOptions?.useFacet,
-  } as PaginateOptions);
+    sort: Object.entries(paginationOptions.sort).reduce((sort, [incomingSortKey, order]) => {
+      let key = incomingSortKey;
+
+      if (!['createdAt', 'updatedAt', '_id'].includes(incomingSortKey)) {
+        key = `version.${incomingSortKey}`
+      }
+
+      return {
+        ...sort,
+        [key]: order === 'asc' ? 1 : -1,
+      };
+    }, {})
+  }
+
+  const result = await VersionModel.aggregatePaginate(aggregate, aggregatePaginateOptions);
 
   return {
     ...result,
