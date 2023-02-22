@@ -701,6 +701,7 @@ describe('fields', () => {
       await page.locator('#action-save').click();
 
       await expect(page.locator('.Toastify')).toContainText('successfully');
+      await wait(2000)
 
       // open drawer
       await page.locator('.field-type.upload .list-drawer__toggler').click();
