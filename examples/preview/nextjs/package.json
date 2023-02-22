@@ -1,0 +1,39 @@
+{
+  "name": "nextjs-preview-example",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "escape-html": "^1.0.3",
+    "next": "^13.1.6",
+    "payload-admin-bar": "^1.0.5",
+    "qs": "^6.11.0",
+    "react": "18.2.0",
+    "react-cookie": "^4.1.1",
+    "react-dom": "18.2.0",
+    "sass": "^1.55.0",
+    "slate": "^0.84.0"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^13.1.6",
+    "@types/node": "18.11.3",
+    "@types/react": "18.0.21",
+    "@typescript-eslint/eslint-plugin": "^5.51.0",
+    "@typescript-eslint/parser": "^5.51.0",
+    "@payloadcms/eslint-config": "^0.0.1",
+    "eslint": "8.25.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-filenames": "^1.3.2",
+    "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "prettier": "^2.7.1",
+    "typescript": "4.8.4"
+  }
+}

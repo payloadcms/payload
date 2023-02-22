@@ -162,7 +162,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // Delete any associated files
   // /////////////////////////////////////
 
-  if (collectionConfig.upload) {
+  if (collectionConfig.upload && filesToUpload && filesToUpload.length > 0) {
     const { staticDir } = collectionConfig.upload;
 
     const staticPath = path.resolve(config.paths.configDir, staticDir);

@@ -218,6 +218,20 @@
     "users": "Những người dùng",
     "welcome": "Xin chào"
   },
+  "operators": {
+    "equals": "bằng",
+    "isNotEqualTo": "không bằng",
+    "isIn": "đang ở",
+    "isNotIn": "không có trong",
+    "exists": "tồn tại",
+    "isGreaterThan": "lớn hơn",
+    "isLessThan": "nhỏ hơn",
+    "isLessThanOrEqualTo": "nhỏ hơn hoặc bằng",
+    "isGreaterThanOrEqualTo": "lớn hơn hoặc bằng",
+    "near": "gần",
+    "isLike": "giống như",
+    "contains": "chứa"
+  },
   "upload": {
     "dragAndDropHere": "hoặc kéo và thả file vào đây",
     "fileName": "Tên file",

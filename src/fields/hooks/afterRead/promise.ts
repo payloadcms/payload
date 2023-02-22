@@ -111,7 +111,7 @@ export const promise = async ({
     }
 
     case 'richText': {
-      if (((field.admin?.elements?.includes('relationship') || field.admin?.elements?.includes('upload')) || !field?.admin?.elements)) {
+      if (((field.admin?.elements?.includes('relationship') || field.admin?.elements?.includes('upload') || field.admin?.elements?.includes('link')) || !field?.admin?.elements)) {
         populationPromises.push(richTextRelationshipPromise({
           currentDepth,
           depth,

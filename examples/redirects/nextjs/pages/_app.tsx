@@ -1,21 +1,19 @@
-import App, { AppContext, AppProps as NextAppProps } from 'next/app';
-import React from 'react';
-import { MainMenu } from "../payload-types";
-import { Header } from '../components/Header';
-import { GlobalsProvider } from '../providers/Globals';
+import React from 'react'
+import App, { AppContext, AppProps as NextAppProps } from 'next/app'
 
-import '../css/app.scss';
+import { Header } from '../components/Header'
+import { MainMenu } from '../payload-types'
+import { GlobalsProvider } from '../providers/Globals'
+
+import '../css/app.scss'
 
 export interface IGlobals {
-  mainMenu: MainMenu,
+  mainMenu: MainMenu
 }
 
 export const getAllGlobals = async (): Promise<IGlobals> => {
-  const [
-    mainMenu,
-  ] = await Promise.all([
-    fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/globals/main-menu?depth=1`).then((res) => res.json()),
-  ]);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/globals/main-menu?depth=1`)
+  const mainMenu = await res.json()
 
   return {
     mainMenu,
@@ -23,17 +21,15 @@ export const getAllGlobals = async (): Promise<IGlobals> => {
 }
 
 type AppProps<P = any> = {
-  pageProps: P;
-} & Omit<NextAppProps<P>, "pageProps">;
+  pageProps: P
+} & Omit<NextAppProps<P>, 'pageProps'>
 
-const PayloadApp = (appProps: AppProps & {
-  globals: IGlobals,
-}): React.ReactElement => {
-  const {
-    Component,
-    pageProps,
-    globals,
-  } = appProps;
+const PayloadApp = (
+  appProps: AppProps & {
+    globals: IGlobals
+  },
+): React.ReactElement => {
+  const { Component, pageProps, globals } = appProps
 
   return (
     <GlobalsProvider {...globals}>
@@ -44,14 +40,14 @@ const PayloadApp = (appProps: AppProps & {
 }
 
 PayloadApp.getInitialProps = async (appContext: AppContext) => {
-  const appProps = await App.getInitialProps(appContext);
+  const appProps = await App.getInitialProps(appContext)
 
-  const globals = await getAllGlobals();
+  const globals = await getAllGlobals()
 
   return {
     ...appProps,
-    globals
-  };
-};
+    globals,
+  }
+}
 
 export default PayloadApp

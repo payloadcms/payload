@@ -178,7 +178,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     // Delete any associated files
     // /////////////////////////////////////
 
-    if (collectionConfig.upload) {
+    if (collectionConfig.upload && filesToUpload && filesToUpload.length > 0) {
       const { staticDir } = collectionConfig.upload;
 
       const staticPath = path.resolve(config.paths.configDir, staticDir);
@@ -194,23 +194,22 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       }
 
       if (doc.sizes) {
-        Object.values(doc.sizes)
-          .forEach(async (size: FileData) => {
-            const sizeToDelete = `${staticPath}/${size.filename}`;
-            if (await fileExists(sizeToDelete)) {
-              fs.unlink(sizeToDelete, (err) => {
-                if (err) {
-                  throw new ErrorDeletingFile(t);
-                }
-              });
-            }
-          });
+        Object.values(doc.sizes).forEach(async (size: FileData) => {
+          const sizeToDelete = `${staticPath}/${size.filename}`;
+          if (await fileExists(sizeToDelete)) {
+            fs.unlink(sizeToDelete, (err) => {
+              if (err) {
+                throw new ErrorDeletingFile(t);
+              }
+            });
+          }
+        });
       }
     }
 
-    // /////////////////////////////////////
-    // beforeValidate - Fields
-    // /////////////////////////////////////
+  // /////////////////////////////////////
+  // beforeValidate - Fields
+  // /////////////////////////////////////
 
     data = await beforeValidate<GeneratedTypes['collections'][TSlug]>({
       data,

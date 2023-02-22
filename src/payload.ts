@@ -90,6 +90,8 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   mongoURL: string | false;
 
+  mongoOptions: InitOptions['mongoOptions'];
+
   mongoMemoryServer: any
 
   local: boolean;
@@ -140,6 +142,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   async init(options: InitOptions): Promise<Payload> {
     this.logger = Logger('payload', options.loggerOptions);
     this.mongoURL = options.mongoURL;
+    this.mongoOptions = options.mongoOptions;
 
     if (this.mongoURL) {
       mongoose.set('strictQuery', false);
@@ -167,11 +170,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.local = options.local;
 
     if (options.config) {
-      this.config = options.config;
+      this.config = await options.config;
       const configPath = findConfig();
 
       this.config = {
-        ...options.config,
+        ...this.config,
         paths: {
           configDir: path.dirname(configPath),
           config: configPath,

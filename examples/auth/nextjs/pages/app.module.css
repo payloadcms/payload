@@ -1,0 +1,12 @@
+.app {
+  font-family: system-ui;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 30px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin: 25px 0;
+}

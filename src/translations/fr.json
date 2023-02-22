@@ -218,6 +218,20 @@
     "users": "Utilisateurs",
     "welcome": "Bienvenu(e)"
   },
+  "operators": {
+    "equals": "est égal à",
+    "isNotEqualTo": "n'est pas égal à",
+    "isIn": "est dans",
+    "isNotIn": "n'est pas dans",
+    "exists": "existe",
+    "isGreaterThan": "est supérieur à",
+    "isLessThan": "est inférieur à",
+    "isLessThanOrEqualTo": "est inférieur ou égal à",
+    "isGreaterThanOrEqualTo": "est supérieur ou égal à",
+    "near": "proche",
+    "isLike": "est comme",
+    "contains": "contient"
+  },
   "upload": {
     "dragAndDropHere": "ou glissez-déposez un fichier ici",
     "fileName": "Nom du fichier",

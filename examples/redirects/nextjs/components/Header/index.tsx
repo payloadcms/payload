@@ -1,14 +1,15 @@
-import Link from 'next/link';
-import React from 'react';
-import { useGlobals } from '../../providers/Globals';
-import { Gutter } from '../Gutter';
-import { CMSLink } from '../CMSLink';
-import { Logo } from '../Logo';
+import React from 'react'
+import Link from 'next/link'
 
-import classes from './index.module.scss';
+import { useGlobals } from '../../providers/Globals'
+import { CMSLink } from '../CMSLink'
+import { Gutter } from '../Gutter'
+import { Logo } from '../Logo'
+
+import classes from './index.module.scss'
 
 type HeaderBarProps = {
-  children?: React.ReactNode;
+  children?: React.ReactNode
 }
 
 export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
@@ -25,15 +26,15 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
 }
 
 export const Header: React.FC = () => {
-  const { mainMenu: { navItems } } = useGlobals();
+  const {
+    mainMenu: { navItems },
+  } = useGlobals()
 
   return (
     <HeaderBar>
       <nav className={classes.nav}>
         {navItems.map(({ link }, i) => {
-          return (
-            <CMSLink key={i} {...link} />
-          )
+          return <CMSLink key={i} {...link} />
         })}
       </nav>
     </HeaderBar>

@@ -6186,6 +6186,11 @@ get-symbol-description@^1.0.0:
     call-bind "^1.0.2"
     get-intrinsic "^1.1.1"
 
+get-tsconfig@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.npmjs.org/get-tsconfig/-/get-tsconfig-4.4.0.tgz#64eee64596668a81b8fce18403f94f245ee0d4e5"
+  integrity sha512-0Gdjo/9+FzsYhXCEFueo2aY1z1tpXrxWZzP7k8ul9qt1U5o8rYJwTJYmaeHdrVosYIVYkOy2iwCJ9FdpocJhPQ==
+
 get-uri@3:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/get-uri/-/get-uri-3.0.2.tgz#f0ef1356faabc70e1f9404fa3b66b2ba9bfc725c"
@@ -7753,10 +7758,10 @@ json-parse-even-better-errors@^2.3.0, json-parse-even-better-errors@^2.3.1:
   resolved "https://registry.yarnpkg.com/json-parse-even-better-errors/-/json-parse-even-better-errors-2.3.1.tgz#7c47805a94319928e05777405dc12e1f7a4ee02d"
   integrity sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==
 
-json-schema-to-typescript@^11.0.2:
-  version "11.0.2"
-  resolved "https://registry.yarnpkg.com/json-schema-to-typescript/-/json-schema-to-typescript-11.0.2.tgz#80348391abb4ffb75daf312380c2f01c552ffba8"
-  integrity sha512-XRyeXBJeo/IH4eTP5D1ptX78vCvH86nMDt2k3AxO28C3uYWEDmy4mgPyMpb8bLJ/pJMElOGuQbnKR5Y6NSh3QQ==
+json-schema-to-typescript@11.0.3:
+  version "11.0.3"
+  resolved "https://registry.yarnpkg.com/json-schema-to-typescript/-/json-schema-to-typescript-11.0.3.tgz#9b401c2b78329959f1c4c4e0639a6bdcf6a6ed77"
+  integrity sha512-EaEE9Y4VZ8b9jW5zce5a9L3+p4C9AqgIRHbNVDJahfMnoKzcd4sDb98BLxLdQhJEuRAXyKLg4H66NKm80W8ilg==
   dependencies:
     "@bcherny/json-schema-ref-parser" "9.0.9"
     "@types/json-schema" "^7.0.11"

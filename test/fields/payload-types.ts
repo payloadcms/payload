@@ -26,6 +26,7 @@ export interface Config {
     'text-fields': TextField;
     uploads: Upload;
     uploads2: Uploads2;
+    uploads3: Uploads3;
     users: User;
   };
   globals: {};
@@ -312,9 +313,15 @@ export interface IndexedField {
 }
 export interface JsonField {
   id: string;
-  json?: {
-    [k: string]: unknown;
-  };
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -365,6 +372,12 @@ export interface RelationshipField {
         relationTo: 'array-fields';
       };
   relationToSelf?: string | RelationshipField;
+  relationToSelfSelectOnly?: string | RelationshipField;
+  relationWithDynamicDefault?: string | User;
+  relationHasManyWithDynamicDefault?: {
+    value: string | User;
+    relationTo: 'users';
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -378,6 +391,17 @@ export interface TextField {
   overrideLength?: string;
   createdAt: string;
   updatedAt: string;
+}
+export interface User {
+  id: string;
+  email?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpiration?: string;
+  loginAttempts?: number;
+  lockUntil?: string;
+  createdAt: string;
+  updatedAt: string;
+  password?: string;
 }
 export interface RichTextField {
   id: string;
@@ -457,7 +481,7 @@ export interface TabsField {
   };
   textInRow: string;
   numberInRow: number;
-  tab?: {
+  tab: {
     array: {
       text: string;
       id?: string;
@@ -465,16 +489,16 @@ export interface TabsField {
     text?: string;
     defaultValue?: string;
   };
-  namedTabWithDefaultValue?: {
+  namedTabWithDefaultValue: {
     defaultValue?: string;
   };
-  localizedTab?: {
+  localizedTab: {
     text?: string;
   };
-  accessControlTab?: {
+  accessControlTab: {
     text?: string;
   };
-  hooksTab?: {
+  hooksTab: {
     beforeValidate?: boolean;
     beforeChange?: boolean;
     afterChange?: boolean;
@@ -482,7 +506,7 @@ export interface TabsField {
   };
   textarea?: string;
   anotherText: string;
-  nestedTab?: {
+  nestedTab: {
     text?: string;
   };
   createdAt: string;
@@ -492,6 +516,9 @@ export interface Upload {
   id: string;
   text?: string;
   media?: string | Upload;
+  richText?: {
+    [k: string]: unknown;
+  }[];
   url?: string;
   filename?: string;
   mimeType?: string;
@@ -514,13 +541,18 @@ export interface Uploads2 {
   createdAt: string;
   updatedAt: string;
 }
-export interface User {
+export interface Uploads3 {
   id: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
+  media?: string | Uploads3;
+  richText?: {
+    [k: string]: unknown;
+  }[];
+  url?: string;
+  filename?: string;
+  mimeType?: string;
+  filesize?: number;
+  width?: number;
+  height?: number;
   createdAt: string;
   updatedAt: string;
 }

@@ -20,6 +20,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   overrideAccess?: boolean
   disableErrors?: boolean
   showHiddenFields?: boolean
+  queryHiddenFields?: boolean
   pagination?: boolean
   sort?: string
   where?: Where
@@ -44,6 +45,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     overrideAccess = true,
     disableErrors,
     showHiddenFields,
+    queryHiddenFields,
     sort,
     draft = false,
     pagination = true,
@@ -79,6 +81,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     overrideAccess,
     disableErrors,
     showHiddenFields,
+    queryHiddenFields,
     draft,
     pagination,
     req,
