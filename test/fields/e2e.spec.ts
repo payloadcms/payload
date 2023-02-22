@@ -699,7 +699,8 @@ describe('fields', () => {
       await page.locator('.file-field__upload input[type="file"]').setInputFiles(path.resolve(__dirname, './collections/Upload/payload.jpg'));
       await expect(page.locator('.file-field .file-field__filename')).toContainText('payload.jpg');
       await page.locator('#action-save').click();
-      await wait(200);
+
+      await expect(page.locator('.Toastify')).toContainText('successfully');
 
       // open drawer
       await page.locator('.field-type.upload .list-drawer__toggler').click();
