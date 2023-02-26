@@ -1,13 +1,12 @@
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useModal } from '@faceless-ui/modal';
 import { useConfig } from '../../utilities/Config';
 import { Drawer, DrawerToggler } from '../Drawer';
 import { Props } from './types';
 import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { useAuth } from '../../utilities/Auth';
-import { Index } from '../FieldSelect';
+import { FieldSelect } from '../FieldSelect';
 import FormSubmit from '../../forms/Submit';
 import Form from '../../forms/Form';
 import { useForm } from '../../forms/Form/context';
@@ -54,7 +53,6 @@ const EditMany: React.FC<Props> = (props) => {
 
   const { permissions } = useAuth();
   const { serverURL, routes: { api } } = useConfig();
-  const { closeModal } = useModal();
   const { selectAll, count, getQueryParams } = useSelection();
   const { t, i18n } = useTranslation('general');
   const [selected, setSelected] = useState([]);
@@ -69,9 +67,7 @@ const EditMany: React.FC<Props> = (props) => {
   }
 
   const onSuccess = () => {
-    resetParams({ page: selectAll ? 1 : undefined });
-    setSelected([]);
-    closeModal(drawerSlug);
+    resetParams({ page: selectAll === SelectAllStatus.AllAvailable ? 1 : undefined });
   };
 
   return (
@@ -100,7 +96,7 @@ const EditMany: React.FC<Props> = (props) => {
           <Form
             onSuccess={onSuccess}
           >
-            <Index
+            <FieldSelect
               fields={collection.fields}
               setSelected={setSelected}
             />

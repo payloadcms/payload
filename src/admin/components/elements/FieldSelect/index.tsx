@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Field, fieldAffectsData } from '../../../../fields/config/types';
+import {
+  Field, fieldAffectsData,
+  fieldHasSubFields, FieldWithPath,
+  tabHasName,
+} from '../../../../fields/config/types';
 import ReactSelect from '../ReactSelect';
-import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import Label from '../../forms/Label';
 import { useForm } from '../../forms/Form/context';
@@ -14,35 +17,51 @@ const baseClass = 'field-select';
 
 type Props = {
   fields: Field[];
-  setSelected: (fields: Field[]) => void
+  setSelected: (fields: FieldWithPath[]) => void
 }
 
 const filterFields = ['id', 'createdAt', 'updatedAt', '_status'];
-const reduceFields = (fields, i18n) => flattenTopLevelFields(fields)
-  .reduce((reduced, field) => {
-    if (filterFields.includes(field.name)) {
-      return reduced;
+
+const combineLabel = (prefix, field, i18n): string => (
+  `${prefix === '' ? '' : `${prefix} > `}${getTranslation(field.label || field.name, i18n) || ''}`
+);
+const reduceFields = (fields: Field[], i18n, path = '', labelPrefix = ''): {label: string, value: FieldWithPath}[] => (
+  fields.reduce((fieldsToUse, field) => {
+    // escape for a variety of reasons
+    if (fieldAffectsData(field) && (filterFields.includes(field.name) || field.unique || field.hidden || field.admin.hidden || field.admin.readOnly || field.admin.disableBulkEdit)) {
+      return fieldsToUse;
     }
-    // TODO:
-    // tabs
-    // groups
-    if (fieldAffectsData(field) && (field.unique || field.hidden || field.admin.hidden || field.admin.readOnly || field.admin.disableBulkEdit)) {
-      return reduced;
+    if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
+      return [
+        ...fieldsToUse,
+        ...reduceFields(field.fields, i18n, createNestedFieldPath(path, field), combineLabel(labelPrefix, field, i18n)),
+      ];
+    }
+    if (field.type === 'tabs') {
+      return [
+        ...fieldsToUse,
+        ...field.tabs.reduce((tabFields, tab) => {
+          return [
+            ...tabFields,
+            ...(reduceFields(tab.fields, i18n, tabHasName(tab) ? createNestedFieldPath(path, field) : path, combineLabel(labelPrefix, field, i18n))),
+          ];
+        }, []),
+      ];
     }
     const formattedField = {
-      label: getTranslation(field.label || field.name, i18n),
+      label: combineLabel(labelPrefix, field, i18n),
       value: {
         ...field,
-        path: '',
+        path: createNestedFieldPath(path, field),
       },
     };
 
     return [
-      ...reduced,
+      ...fieldsToUse,
       formattedField,
     ];
-  }, []);
-export const Index: React.FC<Props> = ({
+  }, []));
+export const FieldSelect: React.FC<Props> = ({
   fields,
   setSelected,
 }) => {
@@ -56,6 +75,7 @@ export const Index: React.FC<Props> = ({
     } else {
       setSelected(selected.map(({ value }) => value));
     }
+    // remove deselected values from form state
     if (selected === null || Object.keys(activeFields).length > selected.length) {
       Object.keys(activeFields).forEach((path) => {
         if (selected === null || !selected.find((field) => {
