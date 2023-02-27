@@ -634,6 +634,16 @@ describe('fields', () => {
       await expect(await page.locator('#relationToSelfSelectOnly-add-new .relationship-add-new__add-button').count()).toEqual(0);
     });
 
+    test('should clear relationship values', async () => {
+      await page.goto(url.create);
+
+      const field = await page.locator('#field-relationship');
+      await field.click();
+      await page.locator('.rs__option:has-text("Seeded text document")').click();
+      await field.locator('.clear-indicator').click();
+      await expect(field.locator('.rs__placeholder')).toBeVisible();
+    });
+
     test('should populate relationship dynamic default value', async () => {
       await page.goto(url.create);
       await expect(page.locator('#field-relationWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
@@ -700,7 +710,7 @@ describe('fields', () => {
       await expect(page.locator('.file-field .file-field__filename')).toContainText('payload.jpg');
       await page.locator('#action-save').click();
 
-      await wait(200)
+      await wait(200);
 
       // open drawer
       await page.locator('.field-type.upload .list-drawer__toggler').click();
