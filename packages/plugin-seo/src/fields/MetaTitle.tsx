@@ -73,31 +73,33 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
       >
         <div>
           {label}
-          &nbsp;
-          &mdash;
-          &nbsp;
-          <button
-            onClick={regenerateTitle}
-            type="button"
-            style={{
-              padding: 0,
-              background: 'none',
-              border: 'none',
-              backgroundColor: 'transparent',
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              color: 'currentcolor',
-            }}
-          >
-            Auto-generate
-          </button>
+          {typeof pluginConfig.generateTitle === 'function' && (
+            <>
+              &nbsp; &mdash; &nbsp;
+              <button
+                onClick={regenerateTitle}
+                type="button"
+                style={{
+                  padding: 0,
+                  background: 'none',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  color: 'currentcolor',
+                }}
+              >
+                Auto-generate
+              </button>
+            </>
+          )}
         </div>
         <div
           style={{
             color: '#9A9A9A',
           }}
         >
-          {`This should be between ${minLength} and ${maxLength} characters. Auto-generation will format a title using the page title. For help in writing quality meta titles, see `}
+          {`This should be between ${minLength} and ${maxLength} characters. For help in writing quality meta titles, see `}
           <a
             href="https://developers.google.com/search/docs/advanced/appearance/title-link#page-titles"
             rel="noopener noreferrer"
