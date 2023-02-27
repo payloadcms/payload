@@ -92,7 +92,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     entityType: 'global',
   });
 
-  const globalExists = Boolean(global);
+  const globalExists = global?._globalExists || false;
 
   let globalJSON: Record<string, unknown> = {};
 

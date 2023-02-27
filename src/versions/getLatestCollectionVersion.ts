@@ -46,11 +46,16 @@ export const getLatestEntityVersion = async <T extends TypeWithID = any>({
       doc.id = doc._id;
       return doc;
     }
-    return doc;
+
+    return {
+      ...doc,
+      _globalExists: Boolean(doc),
+    };
   }
 
   return {
     ...latestVersion.version,
+    ...(entityType === 'global' && { _globalExists: Boolean(doc) }),
     id,
     updatedAt: latestVersion.updatedAt,
     createdAt: latestVersion.createdAt,
