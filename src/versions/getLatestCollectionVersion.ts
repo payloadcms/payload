@@ -1,27 +1,18 @@
-import { docHasTimestamps, Document } from '../types';
+import { docHasTimestamps } from '../types';
 import { Payload } from '../payload';
 import { CollectionModel, SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
-import { GlobalModel, SanitizedGlobalConfig } from '../globals/config/types';
 
 type Args = {
   payload: Payload
   query: Record<string, unknown>
   lean?: boolean
-} & ({
-  entityType: 'global'
-  id?: never
-  Model: GlobalModel
-  config: SanitizedGlobalConfig
-} | {
-  entityType?: 'collection'
   id: string | number
   Model: CollectionModel
   config: SanitizedCollectionConfig
-})
+}
 
-export const getLatestEntityVersion = async <T extends TypeWithID = any>({
+export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   payload,
-  entityType = 'collection',
   config,
   Model,
   query,
@@ -39,23 +30,15 @@ export const getLatestEntityVersion = async <T extends TypeWithID = any>({
     });
   }
 
-  const doc = await (Model as any).findOne(query, {}, { lean }) as Document;
+  const doc = await Model.findOne(query, {}, { lean });
 
   if (!latestVersion || (docHasTimestamps(doc) && latestVersion.updatedAt < doc.updatedAt)) {
-    if (entityType === 'collection') {
-      doc.id = doc._id;
-      return doc;
-    }
-
-    return {
-      ...doc,
-      _globalExists: Boolean(doc),
-    };
+    doc.id = doc._id;
+    return doc;
   }
 
   return {
     ...latestVersion.version,
-    ...(entityType === 'global' && { _globalExists: Boolean(doc) }),
     id,
     updatedAt: latestVersion.updatedAt,
     createdAt: latestVersion.createdAt,

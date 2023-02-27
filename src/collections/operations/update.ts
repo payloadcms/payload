@@ -17,7 +17,7 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
-import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 import { mapAsync } from '../../utilities/mapAsync';
 import fileExists from '../../uploads/fileExists';
 import { FileData } from '../../uploads/types';
@@ -119,7 +119,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
   const query = await Model.buildQuery(queryToBuild, locale);
 
-  const doc = await getLatestEntityVersion({
+  const doc = await getLatestCollectionVersion({
     payload,
     Model,
     config: collectionConfig,
