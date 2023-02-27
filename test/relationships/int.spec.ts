@@ -223,6 +223,89 @@ describe('Relationships', () => {
         });
       });
     });
+
+    describe('Nested Querying', () => {
+      let thirdLevelID: string;
+      let secondLevelID: string;
+      let firstLevelID: string;
+
+      beforeAll(async () => {
+        const thirdLevelDoc = await payload.create({
+          collection: 'chained-relation',
+          data: {
+            name: 'third',
+          },
+        });
+
+        thirdLevelID = thirdLevelDoc.id;
+
+        console.log({ thirdLevelID });
+
+        const secondLevelDoc = await payload.create({
+          collection: 'chained-relation',
+          data: {
+            name: 'second',
+            relation: thirdLevelID,
+          },
+        });
+
+        secondLevelID = secondLevelDoc.id;
+
+        console.log({ secondLevelID });
+
+        const firstLevelDoc = await payload.create({
+          collection: 'chained-relation',
+          data: {
+            name: 'first',
+            relation: secondLevelID,
+          },
+        });
+
+        firstLevelID = firstLevelDoc.id;
+
+        console.log({ firstLevelID });
+      });
+
+      it('should allow querying one level deep', async () => {
+        const query1 = await payload.find({
+          collection: 'chained-relation',
+          where: {
+            'relation.name': {
+              equals: 'second',
+            },
+          },
+        });
+
+        expect(query1.docs).toHaveLength(1);
+        expect(query1.docs[0].id).toStrictEqual(firstLevelID);
+
+        const query2 = await payload.find({
+          collection: 'chained-relation',
+          where: {
+            'relation.name': {
+              equals: 'third',
+            },
+          },
+        });
+
+        expect(query2.docs).toHaveLength(1);
+        expect(query2.docs[0].id).toStrictEqual(secondLevelID);
+      });
+
+      it('should allow querying two levels deep', async () => {
+        const query = await payload.find({
+          collection: 'chained-relation',
+          where: {
+            'relation.relation.name': {
+              equals: 'third',
+            },
+          },
+        });
+
+        expect(query.docs).toHaveLength(1);
+        expect(query.docs[0].id).toStrictEqual(firstLevelID);
+      });
+    });
   });
 });
 
