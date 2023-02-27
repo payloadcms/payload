@@ -13,11 +13,11 @@ import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import { Props as RichTextProps } from '../../../types';
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
-
-import './index.scss';
 import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
 import { UploadDrawer } from './UploadDrawer';
 import { DrawerToggler } from '../../../../../../elements/Drawer';
+
+import './index.scss';
 
 const baseClass = 'rich-text-upload';
 
@@ -147,6 +147,8 @@ const Element: React.FC<ElementProps> = (props) => {
     closeListDrawer();
   }, [closeListDrawer, editor, element, collections]);
 
+  const customFields = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields;
+
   return (
     <div
       className={[
@@ -173,24 +175,12 @@ const Element: React.FC<ElementProps> = (props) => {
               {getTranslation(relatedCollection.labels.singular, i18n)}
             </div>
             <div className={`${baseClass}__actions`}>
-              <DrawerToggler
-                slug={drawerSlug}
-                className={`${baseClass}__upload-drawer-toggler`}
-                disabled={fieldProps?.admin?.readOnly}
-              >
-                <Button
-                  icon="link"
-                  round
-                  buttonStyle="icon-label"
-                  el="div"
-                  onClick={(e) => {
-                    e.preventDefault();
-                  }}
-                  tooltip={t('fields:editRelationship')}
-                />
-              </DrawerToggler>
-              {value?.id && (
-                <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
+              {customFields?.length > 0 && (
+                <DrawerToggler
+                  slug={drawerSlug}
+                  className={`${baseClass}__upload-drawer-toggler`}
+                  disabled={fieldProps?.admin?.readOnly}
+                >
                   <Button
                     icon="edit"
                     round
@@ -199,9 +189,9 @@ const Element: React.FC<ElementProps> = (props) => {
                     onClick={(e) => {
                       e.preventDefault();
                     }}
-                    tooltip={t('general:editLabel', { label: relatedCollection.labels.singular })}
+                    tooltip={t('fields:editRelationship')}
                   />
-                </DocumentDrawerToggler>
+                </DrawerToggler>
               )}
               <ListDrawerToggler
                 className={`${baseClass}__list-drawer-toggler`}
@@ -235,9 +225,11 @@ const Element: React.FC<ElementProps> = (props) => {
           </div>
         </div>
         <div className={`${baseClass}__bottomRow`}>
-          <strong>
-            {data?.filename}
-          </strong>
+          <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
+            <strong>
+              {data?.filename}
+            </strong>
+          </DocumentDrawerToggler>
         </div>
       </div>
       {children}

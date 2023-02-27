@@ -49,15 +49,17 @@
     outline: none;
   }
 
+  .rich-text-relationship__doc-drawer-toggler {
+    text-decoration: underline;
+    pointer-events: all;
+    line-height: inherit;
+  }
+
   &__actions {
     display: flex;
     align-items: center;
     flex-shrink: 0;
     margin-left: base(0.5);
-
-    .rich-text-relationship__doc-drawer-toggler {
-      pointer-events: all;
-    }
 
     & > *:not(:last-child) {
       margin-right: base(.25);
