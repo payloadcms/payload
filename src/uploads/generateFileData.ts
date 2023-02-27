@@ -71,6 +71,7 @@ export const generateFileData = async <T>({
   let newData = data;
   const filesToSave: FileToSave[] = [];
   const fileData: Partial<FileData> = {};
+  const fileIsAnimated = (file.mimetype === 'image/gif') || (file.mimetype === 'image/webp');
   try {
     const fileSupportsResize = canResizeImage(file.mimetype);
     let fsSafeName: string;
@@ -80,11 +81,15 @@ export const generateFileData = async <T>({
     let ext;
     let mime: string;
 
+    const sharpOptions: sharp.SharpOptions = {};
+
+    if (fileIsAnimated) sharpOptions.animated = true;
+
     if (fileSupportsResize) {
       if (file.tempFilePath) {
-        originalFile = sharp(file.tempFilePath);
+        originalFile = sharp(file.tempFilePath, sharpOptions);
       } else {
-        originalFile = sharp(file.data);
+        originalFile = sharp(file.data, sharpOptions);
       }
 
       if (resizeOptions) {
