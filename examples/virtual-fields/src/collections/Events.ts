@@ -1,11 +1,19 @@
 import payload from 'payload';
-import { CollectionConfig, FieldHook } from 'payload/types';
+import { CollectionAfterReadHook, CollectionConfig, FieldHook } from 'payload/types';
 
-const getTotalPrice: FieldHook = async ({ data }) => {
-  const { price, salesTaxPercentage, fees } = data.tickets;
+const getTotalPrice: CollectionAfterReadHook = async ({ doc }) => {
+  const { price, salesTaxPercentage, fees } = doc.tickets;
   const totalPrice = Math.round(price * (1 + (salesTaxPercentage / 100))) + fees;
 
-  return totalPrice;
+  const updatedDoc = {
+    ...doc,
+    tickets: {
+      ...doc.tickets,
+      totalPrice,
+    },
+  };
+
+  return updatedDoc;
 };
 
 const Events: CollectionConfig = {
@@ -13,6 +21,9 @@ const Events: CollectionConfig = {
   admin: {
     defaultColumns: ['title', 'date', 'location'],
     useAsTitle: 'title',
+  },
+  hooks: {
+    afterRead: [getTotalPrice],
   },
   fields: [
     {
@@ -76,9 +87,6 @@ const Events: CollectionConfig = {
               admin: {
                 description: 'USD',
                 readOnly: true,
-              },
-              hooks: {
-                afterRead: [getTotalPrice],
               },
             },
           ],

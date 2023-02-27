@@ -1,8 +1,13 @@
-import { CollectionConfig, FieldHook } from 'payload/types';
+import { CollectionAfterReadHook, CollectionConfig } from 'payload/types';
 
-const populateFullTitle: FieldHook = async ({ data }) => (
-  `${data.title} ${data.firstName} ${data.lastName}`
-);
+const populateFullTitle: CollectionAfterReadHook = async ({ doc }) => {
+  const fullTitle = `${doc.title} ${doc.firstName} ${doc.lastName}`;
+
+  return {
+    ...doc,
+    fullTitle,
+  };
+};
 
 const Staff: CollectionConfig = {
   slug: 'staff',
@@ -10,15 +15,13 @@ const Staff: CollectionConfig = {
     defaultColumns: ['fullTitle', 'location'],
     useAsTitle: 'fullTitle',
   },
+  hooks: {
+    afterRead: [populateFullTitle],
+  },
   fields: [
     {
       name: 'fullTitle',
       type: 'text',
-      hooks: {
-        afterRead: [
-          populateFullTitle,
-        ],
-      },
       admin: {
         hidden: true,
       },
