@@ -15,6 +15,9 @@ import { Props as RichTextProps } from '../../../types';
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
 
 import './index.scss';
+import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
+import { UploadDrawer } from './UploadDrawer';
+import { DrawerToggler } from '../../../../../../elements/Drawer';
 
 const baseClass = 'rich-text-upload';
 
@@ -22,7 +25,7 @@ const initialParams = {
   depth: 0,
 };
 
-type ElementProps = {
+export type ElementProps = {
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
   element: any
@@ -47,6 +50,8 @@ const Element: React.FC<ElementProps> = (props) => {
   const { t, i18n } = useTranslation('fields');
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
   const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
+
+  const drawerSlug = useDrawerSlug('upload-drawer');
 
   const [
     ListDrawer,
@@ -168,6 +173,21 @@ const Element: React.FC<ElementProps> = (props) => {
               {getTranslation(relatedCollection.labels.singular, i18n)}
             </div>
             <div className={`${baseClass}__actions`}>
+              <DrawerToggler
+                slug={drawerSlug}
+                className={`${baseClass}__upload-drawer-toggler`}
+              >
+                <Button
+                  icon="edit"
+                  round
+                  buttonStyle="icon-label"
+                  el="div"
+                  onClick={(e) => {
+                    e.preventDefault();
+                  }}
+                  tooltip={t('general:editLabel', { label: relatedCollection.labels.singular })}
+                />
+              </DrawerToggler>
               {value?.id && (
                 <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
                   <Button
@@ -224,6 +244,11 @@ const Element: React.FC<ElementProps> = (props) => {
         <DocumentDrawer onSave={updateUpload} />
       )}
       <ListDrawer onSelect={swapUpload} />
+      <UploadDrawer
+        drawerSlug={drawerSlug}
+        relatedCollection={relatedCollection}
+        {...props}
+      />
     </div>
   );
 };
