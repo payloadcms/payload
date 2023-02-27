@@ -176,6 +176,7 @@ const Element: React.FC<ElementProps> = (props) => {
               <DrawerToggler
                 slug={drawerSlug}
                 className={`${baseClass}__upload-drawer-toggler`}
+                disabled={fieldProps?.admin?.readOnly}
               >
                 <Button
                   icon="link"
