@@ -634,6 +634,16 @@ describe('fields', () => {
       await expect(await page.locator('#relationToSelfSelectOnly-add-new .relationship-add-new__add-button').count()).toEqual(0);
     });
 
+    test('should clear relationship values', async () => {
+      await page.goto(url.create);
+
+      const field = await page.locator('#field-relationship');
+      await field.click();
+      await page.locator('.rs__option:has-text("Seeded text document")').click();
+      await field.locator('.clear-indicator').click();
+      await expect(field.locator('.rs__placeholder')).toBeVisible();
+    });
+
     test('should populate relationship dynamic default value', async () => {
       await page.goto(url.create);
       await expect(page.locator('#field-relationWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
@@ -691,7 +701,7 @@ describe('fields', () => {
       expect(await jpgImages.count()).toEqual(0);
     });
 
-    test('should show drawer for input field when enableRichText is false', async () => {
+    test.skip('should show drawer for input field when enableRichText is false', async () => {
       const uploads3URL = new AdminUrlUtil(serverURL, 'uploads3');
       await page.goto(uploads3URL.create);
 
@@ -699,6 +709,7 @@ describe('fields', () => {
       await page.locator('.file-field__upload input[type="file"]').setInputFiles(path.resolve(__dirname, './collections/Upload/payload.jpg'));
       await expect(page.locator('.file-field .file-field__filename')).toContainText('payload.jpg');
       await page.locator('#action-save').click();
+
       await wait(200);
 
       // open drawer

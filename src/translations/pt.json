@@ -217,6 +217,20 @@
     "users": "usuários",
     "welcome": "Boas vindas"
   },
+  "operators": {
+    "equals": "igual",
+    "isNotEqualTo": "não é igual a",
+    "isIn": "está em",
+    "isNotIn": "não está em",
+    "exists": "existe",
+    "isGreaterThan": "é maior que",
+    "isLessThan": "é menor que",
+    "isLessThanOrEqualTo": "é menor ou igual a",
+    "isGreaterThanOrEqualTo": "é maior ou igual a",
+    "near": "perto",
+    "isLike": "é como",
+    "contains": "contém"
+  },
   "upload": {
     "dragAndDropHere": "ou arraste um arquivo aqui",
     "fileName": "Nome do Arquivo",

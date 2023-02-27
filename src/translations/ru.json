@@ -227,6 +227,20 @@
     "users": "пользователи",
     "welcome": "Добро пожаловать"
   },
+  "operators": {
+    "equals": "равно",
+    "isNotEqualTo": "не равно",
+    "isIn": "находится",
+    "isNotIn": "нет в",
+    "exists": "существует",
+    "isGreaterThan": "больше чем",
+    "isLessThan": "меньше чем",
+    "isLessThanOrEqualTo": "меньше или равно",
+    "isGreaterThanOrEqualTo": "больше или равно",
+    "near": "рядом",
+    "isLike": "похоже",
+    "contains": "содержит"
+  },
   "upload": {
     "dragAndDropHere": "или перетащите файл сюда",
     "fileName": "Имя файла",

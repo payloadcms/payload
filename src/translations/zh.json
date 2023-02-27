@@ -226,6 +226,20 @@
     "users": "用户",
     "welcome": "欢迎"
   },
+  "operators": {
+    "equals": "等于",
+    "isNotEqualTo": "不等于",
+    "isIn": "在",
+    "isNotIn": "不在",
+    "exists": "存在",
+    "isGreaterThan": "大于",
+    "isLessThan": "小于",
+    "isLessThanOrEqualTo": "小于或等于",
+    "isGreaterThanOrEqualTo": "大于等于",
+    "near": "附近",
+    "isLike": "就像",
+    "contains": "包含"
+  },
   "upload": {
     "dragAndDropHere": "或在这里拖放一个文件",
     "fileName": "文件名",

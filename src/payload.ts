@@ -90,6 +90,8 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   mongoURL: string | false;
 
+  mongoOptions: InitOptions['mongoOptions'];
+
   mongoMemoryServer: any
 
   local: boolean;
@@ -140,6 +142,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   async init(options: InitOptions): Promise<Payload> {
     this.logger = Logger('payload', options.loggerOptions);
     this.mongoURL = options.mongoURL;
+    this.mongoOptions = options.mongoOptions;
 
     if (this.mongoURL) {
       mongoose.set('strictQuery', false);

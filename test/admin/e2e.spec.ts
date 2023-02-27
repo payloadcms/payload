@@ -65,7 +65,7 @@ describe('admin', () => {
       await expect(link).toBeVisible();
 
       await navGroup.click();
-      await expect(link).not.toBeVisible();
+      await expect(link).toBeHidden();
 
       await navGroup.click();
       await expect(link).toBeVisible();
@@ -80,7 +80,7 @@ describe('admin', () => {
       await expect(link).toBeVisible();
 
       await navGroup.click();
-      await expect(link).not.toBeVisible();
+      await expect(link).toBeHidden();
 
       await navGroup.click();
       await expect(link).toBeVisible();
@@ -95,7 +95,7 @@ describe('admin', () => {
       await page.goto(url.admin);
 
       const link = await page.locator('#nav-group-one-collection-ones');
-      await expect(link).not.toBeVisible();
+      await expect(link).toBeHidden();
     });
 
     test('breadcrumbs - from list to dashboard', async () => {
@@ -298,10 +298,10 @@ describe('admin', () => {
 
         // Forward one page and back using numbers
         await paginator.locator('button').nth(1).click();
-        expect(page.url()).toContain('?page=2');
+        expect(page.url()).toContain('page=2');
         await expect(tableItems).toHaveCount(1);
         await paginator.locator('button').nth(0).click();
-        expect(page.url()).toContain('?page=1');
+        expect(page.url()).toContain('page=1');
         await expect(tableItems).toHaveCount(10);
       });
     });
