@@ -178,14 +178,14 @@ const Element: React.FC<ElementProps> = (props) => {
                 className={`${baseClass}__upload-drawer-toggler`}
               >
                 <Button
-                  icon="edit"
+                  icon="link"
                   round
                   buttonStyle="icon-label"
                   el="div"
                   onClick={(e) => {
                     e.preventDefault();
                   }}
-                  tooltip={t('general:editLabel', { label: relatedCollection.labels.singular })}
+                  tooltip={t('fields:editRelationship')}
                 />
               </DrawerToggler>
               {value?.id && (

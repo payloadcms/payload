@@ -91,7 +91,16 @@
     margin: 0;
     outline: none;
     line-height: inherit;
-   }
+
+    .btn__icon {
+      padding: 3px;
+    }
+
+    svg {
+      width: base(0.75);
+      height: base(0.75);
+    }
+  }
 
   &__doc-drawer-toggler,
   &__list-drawer-toggler,

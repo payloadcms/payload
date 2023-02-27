@@ -107,6 +107,7 @@
     "customURL": "Custom URL",
     "editLabelData": "Edit {{label}} data",
     "editLink": "Edit Link",
+    "editRelationship": "Edit Relationship",
     "enterURL": "Enter a URL",
     "internalLink": "Internal Link",
     "itemsAndMore": "{{items}} and {{count}} more",

@@ -74,7 +74,7 @@ export const UploadDrawer: React.FC<ElementProps & {
           fieldSchema={fieldSchema}
         />
         <FormSubmit>
-          {t('saveChanges')}
+          {t('fields:saveChanges')}
         </FormSubmit>
       </Form>
     </Drawer>

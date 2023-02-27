@@ -103,6 +103,8 @@
     "chooseLabel": "Scegli {{label}}",
     "collapseAll": "Comprimi tutto",
     "editLabelData": "Modifica i dati di {{label}}",
+    "editLink": "Modifica Collegamento",
+    "editRelationship": "Modifica Relazione",
     "itemsAndMore": "{{items}} e altri {{count}}",
     "labelRelationship": "Relazione {{label}}",
     "latitude": "Latitudine",

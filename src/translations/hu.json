@@ -107,6 +107,7 @@
         "customURL": "Egyéni URL",
         "editLabelData": "{{label}} adatok szerkesztése",
         "editLink": "Link szerkesztése",
+        "editRelationship": "Kapcsolat hozzáadása",
         "enterURL": "Adjon meg egy URL-t",
         "internalLink": "Belső link",
         "itemsAndMore": "{{items}} és további {{count}}",

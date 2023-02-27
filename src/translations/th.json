@@ -107,6 +107,7 @@
     "customURL": "URL ที่กำหนดเอง",
     "editLabelData": "แก้ไขข้อมูล {{label}}",
     "editLink": "แก้ไขลิงก์",
+    "editRelationship": "แก้ไขความสัมพันธ์",
     "enterURL": "ระบุ URL",
     "internalLink": "ลิงก์ภายใน",
     "itemsAndMore": "{{items}} และเพิ่มเติมอีก {{count}}",

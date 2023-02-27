@@ -103,6 +103,8 @@
     "chooseLabel": "Chọn: {{label}}",
     "collapseAll": "Ẩn toàn bộ",
     "editLabelData": "Chỉnh sửa nội dung của: {{label}}",
+    "editLink": "Chỉnh sửa liên kết",
+    "editRelationship": "Chỉnh sửa mối quan hệ",
     "itemsAndMore": "{{items}} và {{count}} món nữa",
     "labelRelationship": "Mối quan hệ của {{label}} (Relationship)",
     "latitude": "Vĩ độ",
