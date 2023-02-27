@@ -1,6 +1,7 @@
-import { useWatchForm } from 'payload/components/forms';
+import { useAllFormFields } from 'payload/components/forms';
 import React, { useEffect, useState } from 'react';
 import { Field } from 'payload/dist/admin/components/forms/Form/types';
+import { useLocale } from 'payload/components/utilities';
 import { PluginConfig } from '../types';
 
 type PreviewFieldWithProps = Field & {
@@ -13,7 +14,8 @@ export const Preview: React.FC<PreviewFieldWithProps | {}> = (props) => {
     }
   } = props as PreviewFieldWithProps || {}; // TODO: this typing is temporary until payload types are updated for custom field props;
 
-  const { fields } = useWatchForm();
+  const locale = useLocale();
+  const [fields] = useAllFormFields()
 
   const {
     'meta.title': {
@@ -29,7 +31,7 @@ export const Preview: React.FC<PreviewFieldWithProps | {}> = (props) => {
   useEffect(() => {
     const getHref = async () => {
       if (typeof generateURL === 'function' && !href) {
-        const newHref = await generateURL({ doc: { fields } })
+        const newHref = await generateURL({ doc: { fields }, locale })
         setHref(newHref);
       }
     }

@@ -60,7 +60,7 @@ export default buildConfig({
       uploadsCollection: 'media',
       generateTitle: ({ doc }: any) => `Website.com — ${doc?.title?.value}`,
       generateDescription: ({ doc }: any) => doc?.excerpt?.value,
-      generateURL: ({ doc }: any) => `https://yoursite.com/${doc?.slug?.value || ''}`
+      generateURL: ({ doc, locale }: any) => `https://yoursite.com/${locale ? locale + "/" : ""}${doc?.slug?.value || ''}`
     }),
   ],
   typescript: {
