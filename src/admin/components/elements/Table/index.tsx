@@ -1,52 +1,70 @@
 import React from 'react';
 import { Props } from './types';
+import { useTableColumns } from '../TableColumns';
 
 import './index.scss';
 
 const baseClass = 'table';
 
-const Table: React.FC<Props> = ({ columns, data }) => {
-  if (columns && columns.length > 0) {
+export const Table: React.FC<Props> = ({ data }) => {
+  const {
+    columns,
+  } = useTableColumns();
+
+  const activeColumns = columns.filter((col) => col.active);
+
+  if (!activeColumns || activeColumns.length === 0) {
     return (
-      <div className={baseClass}>
-        <table
-          cellPadding="0"
-          cellSpacing="0"
-        >
-          <thead>
-            <tr>
-              {columns.map((col, i) => (
-                <th
-                  key={i}
-                  id={`heading-${col.accessor}`}
-                >
-                  {col.components.Heading}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data && data.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                className={`row-${rowIndex + 1}`}
+      <div>
+        No columns selected
+      </div>
+    );
+  }
+
+  return (
+    <div className={baseClass}>
+      <table
+        cellPadding="0"
+        cellSpacing="0"
+      >
+        <thead>
+          <tr>
+            {activeColumns.map((col, i) => (
+              <th
+                key={i}
+                id={`heading-${col.accessor}`}
               >
-                {columns.map((col, colIndex) => (
+                {col.components.Heading}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data && data.map((row, rowIndex) => (
+            <tr
+              key={rowIndex}
+              className={`row-${rowIndex + 1}`}
+            >
+              {columns.map((col, colIndex) => {
+                const { active } = col;
+
+                if (!active) return null;
+
+                return (
                   <td
                     key={colIndex}
                     className={`cell-${col.accessor}`}
                   >
                     {col.components.renderCell(row, row[col.accessor])}
                   </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-
-  return null;
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 };
+
 export default Table;

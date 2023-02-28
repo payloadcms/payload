@@ -102,6 +102,8 @@
     "chooseLabel": "{{label}} အားရွေးချယ်ပါ။",
     "collapseAll": "အားလုံးကို ခေါက်သိမ်းပါ။",
     "editLabelData": "ဒေတာ {{label}} ကို တည်းဖြတ်ပါ။",
+    "editLink": "လင့်ခ်ကို တည်းဖြတ်ပါ။",
+    "editRelationship": "Relationship ကို တည်းဖြတ်ပါ။",
     "itemsAndMore": "{{items}} နှင့် နောက်ထပ် {{count}} ခု",
     "labelRelationship": "{{label}} Relationship",
     "latitude": "vĩ độ",

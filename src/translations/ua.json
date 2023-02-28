@@ -105,6 +105,7 @@
     "customURL": "Власний URL",
     "editLabelData": "Редагувати данні {{label}}",
     "editLink": "Редагувати посилання",
+    "editRelationship": "Редагувати взаємозв'язок",
     "enterURL": "Введіть URL",
     "internalLink": "Внутрішнє посилання",
     "itemsAndMore": "{{items}} і ще {{count}}",

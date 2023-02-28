@@ -480,7 +480,20 @@ describe('fields', () => {
         await expect(editLinkModal).toBeHidden();
       });
 
-      test('should open uploads drawer from read-only field', async () => {
+      test('should open upload drawer and render custom relationship fields', async () => {
+        navigateToRichTextFields();
+        const field = await page.locator('#field-richText');
+        const button = await field.locator('button.rich-text-upload__upload-drawer-toggler');
+
+        await button.click();
+
+        const documentDrawer = await page.locator('[id^=drawer_1_upload-drawer-]');
+        await expect(documentDrawer).toBeVisible();
+        const caption = await documentDrawer.locator('#field-caption');
+        await expect(caption).toBeVisible();
+      });
+
+      test('should open upload document drawer from read-only field', async () => {
         navigateToRichTextFields();
         const field = await page.locator('#field-richTextReadOnly');
         const button = await field.locator('button.rich-text-upload__doc-drawer-toggler.doc-drawer__toggler');
@@ -491,7 +504,7 @@ describe('fields', () => {
         await expect(documentDrawer).toBeVisible();
       });
 
-      test('should open relationship drawer from read-only field', async () => {
+      test('should open relationship document drawer from read-only field', async () => {
         navigateToRichTextFields();
         const field = await page.locator('#field-richTextReadOnly');
         const button = await field.locator('button.rich-text-relationship__doc-drawer-toggler.doc-drawer__toggler');
@@ -634,6 +647,16 @@ describe('fields', () => {
       await expect(await page.locator('#relationToSelfSelectOnly-add-new .relationship-add-new__add-button').count()).toEqual(0);
     });
 
+    test('should clear relationship values', async () => {
+      await page.goto(url.create);
+
+      const field = await page.locator('#field-relationship');
+      await field.click();
+      await page.locator('.rs__option:has-text("Seeded text document")').click();
+      await field.locator('.clear-indicator').click();
+      await expect(field.locator('.rs__placeholder')).toBeVisible();
+    });
+
     test('should populate relationship dynamic default value', async () => {
       await page.goto(url.create);
       await expect(page.locator('#field-relationWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
@@ -700,7 +723,7 @@ describe('fields', () => {
       await expect(page.locator('.file-field .file-field__filename')).toContainText('payload.jpg');
       await page.locator('#action-save').click();
 
-      await wait(200)
+      await wait(200);
 
       // open drawer
       await page.locator('.field-type.upload .list-drawer__toggler').click();

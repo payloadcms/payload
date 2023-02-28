@@ -146,25 +146,13 @@ const Element: React.FC<Props> = (props) => {
         <p className={`${baseClass}__label`}>
           {t('labelRelationship', { label: getTranslation(relatedCollection.labels.singular, i18n) })}
         </p>
-        <p className={`${baseClass}__title`}>
-          {data[relatedCollection?.admin?.useAsTitle || 'id']}
-        </p>
+        <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
+          <p className={`${baseClass}__title`}>
+            {data[relatedCollection?.admin?.useAsTitle || 'id']}
+          </p>
+        </DocumentDrawerToggler>
       </div>
       <div className={`${baseClass}__actions`}>
-        {value?.id && (
-          <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
-            <Button
-              icon="edit"
-              round
-              buttonStyle="icon-label"
-              el="div"
-              onClick={(e) => {
-                e.preventDefault();
-              }}
-              tooltip={t('general:editLabel', { label: getTranslation(relatedCollection.labels.singular, i18n) })}
-            />
-          </DocumentDrawerToggler>
-        )}
         <ListDrawerToggler
           disabled={fieldProps?.admin?.readOnly}
           className={`${baseClass}__list-drawer-toggler`}

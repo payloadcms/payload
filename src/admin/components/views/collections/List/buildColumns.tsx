@@ -15,7 +15,7 @@ const buildColumns = ({
   cellProps,
 }: {
   collection: SanitizedCollectionConfig,
-  columns: string[],
+  columns: Pick<Column, 'accessor' | 'active'>[],
   t: TFunction,
   cellProps?: Partial<CellProps>[]
 }): Column[] => {
@@ -36,51 +36,56 @@ const buildColumns = ({
       type: 'date',
       label: t('createdAt'),
     },
-  ], true);
+  ]);
 
-  return (columns || []).reduce((cols, col, colIndex) => {
-    let field = null;
+  // sort the fields to the order of activeColumns
+  const sortedFields = flattenedFields.sort((a, b) => {
+    const aIndex = columns.findIndex((column) => column.accessor === a.name);
+    const bIndex = columns.findIndex((column) => column.accessor === b.name);
+    if (aIndex === -1 && bIndex === -1) return 0;
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+    return aIndex - bIndex;
+  });
 
-    flattenedFields.forEach((fieldToCheck) => {
-      if (fieldToCheck.name === col) {
-        field = fieldToCheck;
-      }
-    });
+  const firstActiveColumn = sortedFields.find((field) => columns.find((column) => column.accessor === field.name)?.active);
 
-    if (field) {
-      return [
-        ...cols,
-        {
-          accessor: field.name,
-          components: {
-            Heading: (
-              <SortColumn
-                label={field.label || field.name}
-                name={field.name}
-                disable={(field.disableSort || fieldIsPresentationalOnly(field)) || undefined}
-              />
-            ),
-            renderCell: (rowData, cellData) => {
-              return (
-                <Cell
-                  key={JSON.stringify(cellData)}
-                  field={field}
-                  colIndex={colIndex}
-                  collection={collection}
-                  rowData={rowData}
-                  cellData={cellData}
-                  link={colIndex === 0}
-                  {...cellProps?.[colIndex] || {}}
-                />
-              );
-            },
-          },
+  const cols: Column[] = sortedFields.map((field, colIndex) => {
+    const isActive = columns.find((column) => column.accessor === field.name)?.active || false;
+    const isFirstActive = firstActiveColumn?.name === field.name;
+
+    return {
+      active: isActive,
+      accessor: field.name,
+      name: field.name,
+      label: field.label,
+      components: {
+        Heading: (
+          <SortColumn
+            label={field.label || field.name}
+            name={field.name}
+            disable={(('disableSort' in field && Boolean(field.disableSort)) || fieldIsPresentationalOnly(field)) || undefined}
+          />
+        ),
+        renderCell: (rowData, cellData) => {
+          return (
+            <Cell
+              key={JSON.stringify(cellData)}
+              field={field}
+              colIndex={colIndex}
+              collection={collection}
+              rowData={rowData}
+              cellData={cellData}
+              link={isFirstActive}
+              {...cellProps?.[colIndex] || {}}
+            />
+          );
         },
-      ];
-    }
+      },
+    };
+  });
 
-    return cols;
-  }, []);
+  return cols;
 };
 
 export default buildColumns;

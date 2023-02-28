@@ -52,7 +52,9 @@ const EditView: React.FC<IndexProps> = (props) => {
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' }, initialData: null },
   );
 
-  const onSave = useCallback(async (json: any) => {
+  const onSave = useCallback(async (json: {
+    doc
+  }) => {
     getVersions();
     getDocPermissions();
     setUpdatedAt(json?.doc?.updatedAt);

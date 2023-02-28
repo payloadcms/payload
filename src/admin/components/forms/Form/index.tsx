@@ -141,7 +141,7 @@ const Form: React.FC<Props> = (props) => {
 
     const isValid = skipValidation ? true : await contextRef.current.validateForm();
 
-    setSubmitted(true);
+    if (!skipValidation) setSubmitted(true);
 
     // If not valid, prevent submission
     if (!isValid) {

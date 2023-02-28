@@ -107,6 +107,7 @@
     "customURL": "自定义URL",
     "editLabelData": "编辑{{label}}数据",
     "editLink": "编辑链接",
+    "editRelationship": "编辑关系",
     "enterURL": "输入一个URL",
     "internalLink": "内部链接",
     "itemsAndMore": "{{items}}和{{count}}更多",
