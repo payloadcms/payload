@@ -535,7 +535,7 @@ describe('Fields', () => {
         },
       });
 
-      expect(createdJSON.json.state).toBeDefined();
+      expect(createdJSON.json.state).toEqual({});
     });
   });
 

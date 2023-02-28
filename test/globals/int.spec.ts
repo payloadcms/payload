@@ -70,7 +70,7 @@ describe('globals', () => {
         },
       });
 
-      expect(createdJSON.json.state).toBeDefined();
+      expect(createdJSON.json.state).toEqual({});
     });
 
     it('should create', async () => {
