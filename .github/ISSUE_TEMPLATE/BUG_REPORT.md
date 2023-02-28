@@ -21,7 +21,7 @@ labels: 'possible-bug'
 <!---
 Please fork this repository and recreate your issue in the `/test/_community/` folder. This will help expedite the resolution time for bugs by isolating them in a simpler form.
 
-Please see the [issue guide](https://github.com/payloadcms/payload/blob/master/ISSUE_GUIDE.md#code) for more information.
+Please see the [issue guide](https://github.com/payloadcms/payload/blob/master/ISSUE_GUIDE.md) for more information.
 
 IMPORTANT: The goal is to isolate the problem by reducing the number of fields/collections you add to the test/_community folder. This folder is not meant for you to copy your project into, but to recreate the issue you are experiencing with minimal config.
 -->
