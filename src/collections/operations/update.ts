@@ -159,39 +159,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   data = newFileData;
 
   // /////////////////////////////////////
-  // Delete any associated files
-  // /////////////////////////////////////
-
-  if (collectionConfig.upload) {
-    const { staticDir } = collectionConfig.upload;
-
-    const staticPath = path.resolve(config.paths.configDir, staticDir);
-
-    const fileToDelete = `${staticPath}/${doc.filename}`;
-
-    if (await fileExists(fileToDelete)) {
-      fs.unlink(fileToDelete, (err) => {
-        if (err) {
-          throw new ErrorDeletingFile(t);
-        }
-      });
-    }
-
-    if (doc.sizes) {
-      Object.values(doc.sizes).forEach(async (size: FileData) => {
-        const sizeToDelete = `${staticPath}/${size.filename}`;
-        if (await fileExists(sizeToDelete)) {
-          fs.unlink(sizeToDelete, (err) => {
-            if (err) {
-              throw new ErrorDeletingFile(t);
-            }
-          });
-        }
-      });
-    }
-  }
-
-  // /////////////////////////////////////
   // beforeValidate - Fields
   // /////////////////////////////////////
 
@@ -291,6 +258,39 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   result = JSON.parse(JSON.stringify(result));
   result.id = result._id as string | number;
   result = sanitizeInternalFields(result);
+
+  // /////////////////////////////////////
+  // Delete any associated files
+  // /////////////////////////////////////
+
+  if (collectionConfig.upload && filesToUpload && filesToUpload.length > 0) {
+    const { staticDir } = collectionConfig.upload;
+
+    const staticPath = path.resolve(config.paths.configDir, staticDir);
+
+    const fileToDelete = `${staticPath}/${doc.filename}`;
+
+    if (await fileExists(fileToDelete)) {
+      fs.unlink(fileToDelete, (err) => {
+        if (err) {
+          throw new ErrorDeletingFile(t);
+        }
+      });
+    }
+
+    if (doc.sizes) {
+      Object.values(doc.sizes).forEach(async (size: FileData) => {
+        const sizeToDelete = `${staticPath}/${size.filename}`;
+        if (await fileExists(sizeToDelete)) {
+          fs.unlink(sizeToDelete, (err) => {
+            if (err) {
+              throw new ErrorDeletingFile(t);
+            }
+          });
+        }
+      });
+    }
+  }
 
   // /////////////////////////////////////
   // Create version

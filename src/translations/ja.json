@@ -217,6 +217,20 @@
     "users": "ユーザー",
     "welcome": "ようこそ"
   },
+  "operators": {
+    "equals": "等しい",
+    "isNotEqualTo": "等しくない",
+    "isIn": "あります",
+    "isNotIn": "入っていません",
+    "exists": "存在す",
+    "isGreaterThan": "より大きい",
+    "isLessThan": "より小さい",
+    "isLessThanOrEqualTo": "以下",
+    "isGreaterThanOrEqualTo": "以上",
+    "near": "近く",
+    "isLike": "のような",
+    "contains": "含む"
+  },
   "upload": {
     "dragAndDropHere": "または、このエリアにファイルをドラッグ & ドロップ",
     "fileName": "ファイル名",

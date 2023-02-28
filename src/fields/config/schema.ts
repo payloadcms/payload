@@ -323,6 +323,7 @@ export const relationship = baseField.keys({
   ),
   admin: baseAdminFields.keys({
     isSortable: joi.boolean().default(false),
+    allowCreate: joi.boolean().default(true),
   }),
 });
 

@@ -58,6 +58,10 @@ const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSc
     schema.sparse = true;
   }
 
+  if (field.hidden) {
+    schema.hidden = true;
+  }
+
   return schema;
 };
 

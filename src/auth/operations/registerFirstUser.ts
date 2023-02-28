@@ -7,7 +7,7 @@ import { Collection } from '../../collections/config/types';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
-  data: MarkOptional<T, 'id' | 'updatedAt' | 'createdAt'> & {
+  data: MarkOptional<T, 'id' | 'updatedAt' | 'createdAt' | 'sizes'> & {
     email: string
     password: string
   }

@@ -27,7 +27,7 @@ type Email = {
 };
 
 // eslint-disable-next-line no-use-before-define
-export type Plugin = (config: Config) => Config;
+export type Plugin = (config: Config) => Promise<Config> | Config;
 
 type GeneratePreviewURLOptions = {
   locale: string;
@@ -77,7 +77,10 @@ export type InitOptions = {
   /** Mongo connection URL, starts with `mongo` */
   mongoURL: string | false;
   /** Extra configuration options that will be passed to Mongo */
-  mongoOptions?: ConnectOptions;
+  mongoOptions?: ConnectOptions & {
+    /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
+    useFacet?: boolean
+  };
 
   /** Secure string that Payload will use for any encryption workflows */
   secret: string;
@@ -108,7 +111,7 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions;
-  config?: SanitizedConfig
+  config?: Promise<SanitizedConfig>
 };
 
 /**

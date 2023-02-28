@@ -15,11 +15,16 @@ There is a fully working Next.js app tailored specifically for this example whic
 
 ## How it works
 
-A `redirects` collection with `from` and `to` fields. Your front-end can fetch these redirects as needed and inject them into your own router. `from` is a simple string, while `to` is a conditional field that allows you to select between related documents or a custom url.
+The [Redirects Plugin](https://github.com/payloadcms/plugin-redirects) automatically adds a `redirects` collection to your config which your front-end can fetch and inject them into its own router. The redirect fields are:
+
+- `from` This is a URL string that will be matched against the request path.
+- `to` This is a conditional field that allows you to select between related documents or a custom URL.
+
+See the official [Redirects Plugin](https://github.com/payloadcms/plugin-redirects) for full details.
 
 ### Seed
 
-On boot, a seed script is included to create a user, a home page, and a th following redirects for you to test with:
+On boot, a seed script is included to create a user, a home page, and a the following redirects for you to test with:
 
 - From `/redirect-to-external` to `https://payloadcms.com`
 - From `/redirect-to-internal` to `/redirected`

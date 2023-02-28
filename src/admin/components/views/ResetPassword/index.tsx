@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { Trans, useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
@@ -29,6 +30,9 @@ const ResetPassword: React.FC = () => {
     if (data.token) {
       setToken(data.token);
       history.push(`${admin}`);
+    } else {
+      history.push(`${admin}/login`);
+      toast.success(t('general:updatedSuccessfully'), { autoClose: 3000 });
     }
   };
 
