@@ -76,10 +76,8 @@ const serialize = (children: Children): React.ReactElement[] =>
       case 'li':
         return <li key={i}>{serialize(node.children)}</li>
       case 'link':
-        let pageLink: string = ''
         if (node?.linkType === 'internal') {
-          pageLink = `/${node?.doc?.value?.slug}`
-          return <Link href={pageLink}>{serialize(node.children)}</Link>
+          return <Link href={`/${node?.doc?.value?.slug}`}>{serialize(node.children)}</Link>
         } else {
           return (
             <a href={escapeHTML(node.url)} key={i}>
