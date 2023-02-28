@@ -1,5 +1,5 @@
 import React from 'react';
-import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
+import { DragHandleProps } from '../DraggableSortable/DraggableSortableItem/types';
 
 export type Props = {
   collapsed?: boolean
@@ -9,5 +9,5 @@ export type Props = {
   children: React.ReactNode
   onToggle?: (collapsed: boolean) => void
   initCollapsed?: boolean
-  dragHandleProps?: DraggableProvidedDragHandleProps
+  dragHandleProps?: DragHandleProps
 }

@@ -10,13 +10,10 @@ import DefaultList from './Default';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import { useStepNav } from '../../../elements/StepNav';
 import formatFields from './formatFields';
-import buildColumns from './buildColumns';
 import { Props, ListIndexProps, ListPreferences } from './types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { useSearchParams } from '../../../utilities/SearchParams';
-import { Column } from '../../../elements/Table/types';
 import { Field } from '../../../../../fields/config/types';
-import getInitialColumns from './getInitialColumns';
 
 const ListView: React.FC<ListIndexProps> = (props) => {
   const {
@@ -27,8 +24,6 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         plural,
       },
       admin: {
-        useAsTitle,
-        defaultColumns,
         pagination: {
           defaultLimit,
         },
@@ -49,21 +44,12 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const { page, sort, limit, where } = useSearchParams();
   const history = useHistory();
   const { t } = useTranslation('general');
-
   const [fetchURL, setFetchURL] = useState<string>('');
   const [fields] = useState<Field[]>(() => formatFields(collection, t));
-  const [tableColumns, setTableColumns] = useState<Column[]>(() => {
-    const initialColumns = getInitialColumns(fields, useAsTitle, defaultColumns);
-    return buildColumns({ collection, columns: initialColumns, t });
-  });
-
   const collectionPermissions = permissions?.collections?.[slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
   const newDocumentURL = `${admin}/collections/${slug}/create`;
   const [{ data }, { setParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } });
-
-  const activeColumnNames = tableColumns.map(({ accessor }) => accessor);
-  const stringifiedActiveColumns = JSON.stringify(activeColumnNames);
 
   useEffect(() => {
     setStepNav([
@@ -110,9 +96,6 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   useEffect(() => {
     (async () => {
       const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
-      if (currentPreferences?.columns) {
-        setTableColumns(buildColumns({ collection, columns: currentPreferences?.columns, t }));
-      }
 
       const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 0 });
 
@@ -133,23 +116,22 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   }, [collection, getPreference, preferenceKey, history, t, defaultLimit]);
 
   // /////////////////////////////////////
-  // When any preference-enabled values are updated,
-  // Set preferences
+  // Set preferences on change
   // /////////////////////////////////////
 
   useEffect(() => {
-    const newPreferences = {
-      limit,
-      sort,
-      columns: JSON.parse(stringifiedActiveColumns),
-    };
+    (async () => {
+      const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
 
-    setPreference(preferenceKey, newPreferences);
-  }, [sort, limit, stringifiedActiveColumns, preferenceKey, setPreference]);
+      const newPreferences = {
+        ...currentPreferences,
+        limit,
+        sort,
+      };
 
-  const setActiveColumns = useCallback((columns: string[]) => {
-    setTableColumns(buildColumns({ collection, columns, t }));
-  }, [collection, t]);
+      setPreference(preferenceKey, newPreferences);
+    })();
+  }, [sort, limit, preferenceKey, setPreference, getPreference]);
 
   return (
     <RenderCustomComponent
@@ -160,9 +142,6 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         newDocumentURL,
         hasCreatePermission,
         data,
-        tableColumns,
-        columnNames: activeColumnNames,
-        setColumns: setActiveColumns,
         limit: limit || defaultLimit,
         resetParams,
       }}

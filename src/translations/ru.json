@@ -107,6 +107,7 @@
     "customURL": "Пользовательский URL",
     "editLabelData": "Редактировать данные {{label}}",
     "editLink": "Редактировать ссылку",
+    "editRelationship": "Редактировать Отношения",
     "enterURL": "Введите URL",
     "internalLink": "Внутренняя ссылка",
     "itemsAndMore": "{{items}} и ещё {{count}}",

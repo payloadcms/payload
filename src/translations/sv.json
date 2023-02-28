@@ -103,6 +103,8 @@
     "chooseLabel": "Välj {{label}}",
     "collapseAll": "kollapsa Alla",
     "editLabelData": "Redigera {{label}} data",
+    "editLink": "Redigera Länk",
+    "editRelationship": "Redigera Relation",
     "itemsAndMore": "{{items}} och {{count}} mer",
     "labelRelationship": "{{label}} Relation",
     "latitude": "Latitud",

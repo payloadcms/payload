@@ -266,8 +266,10 @@ class ParamParser {
 
             if (collectionPathsToSearch.length === 1) return { path, value: { $in } };
 
+            const nextSubPath = collectionPathsToSearch[i + 1].path;
+
             return {
-              value: { _id: { $in } },
+              value: { [nextSubPath]: { $in } },
             };
           }
 

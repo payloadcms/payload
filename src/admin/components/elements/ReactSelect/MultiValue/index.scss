@@ -7,9 +7,5 @@
     border: $style-stroke-width-s solid var(--theme-elevation-800);
     line-height: calc(#{$baseline} - #{$style-stroke-width-s * 2});
     margin: base(.25) base(.5) base(.25) 0;
-
-    &.draggable {
-      cursor: grab;
-    }
   }
 }

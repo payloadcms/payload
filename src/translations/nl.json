@@ -103,6 +103,8 @@
     "chooseLabel": "Kies {{label}}",
     "collapseAll": "Alles samenvouwen",
     "editLabelData": "Bewerk gegevens van {{label}}",
+    "editLink": "Link bewerken",
+    "editRelationship": "Relatie Relatie",
     "itemsAndMore": "{{items}} en {{count}} meer",
     "labelRelationship": "{{label}} relatie",
     "latitude": "Breedtegraad",

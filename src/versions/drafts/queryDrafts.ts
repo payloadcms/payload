@@ -70,21 +70,26 @@ export const queryDrafts = async <T extends TypeWithID>({
   let result;
 
   if (paginationOptions) {
-    const paginationSort = Object.entries(paginationOptions.sort).reduce((sort, [key, order]) => {
-      return {
-        ...sort,
-        [key]: order === 'asc' ? 1 : -1,
-      };
-    }, {});
-
-    result = await VersionModel.aggregatePaginate(aggregate, {
+    const aggregatePaginateOptions = {
       ...paginationOptions,
-      sort: paginationSort,
       useFacet: payload.mongoOptions?.useFacet,
-    } as PaginateOptions);
-  }
+      sort: Object.entries(paginationOptions.sort)
+        .reduce((sort, [incomingSortKey, order]) => {
+          let key = incomingSortKey;
 
-  if (!result) {
+          if (!['createdAt', 'updatedAt', '_id'].includes(incomingSortKey)) {
+            key = `version.${incomingSortKey}`;
+          }
+
+          return {
+            ...sort,
+            [key]: order === 'asc' ? 1 : -1,
+          };
+        }, {}),
+    };
+
+    result = await VersionModel.aggregatePaginate(aggregate, aggregatePaginateOptions);
+  } else {
     result = aggregate.exec();
   }
 

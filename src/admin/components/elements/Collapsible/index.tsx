@@ -46,7 +46,8 @@ export const Collapsible: React.FC<Props> = ({
           {dragHandleProps && (
             <div
               className={`${baseClass}__drag`}
-              {...dragHandleProps}
+              {...dragHandleProps.attributes}
+              {...dragHandleProps.listeners}
             >
               <DragHandle />
             </div>

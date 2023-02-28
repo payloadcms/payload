@@ -102,6 +102,8 @@
     "chooseLabel": "Escolher {{label}}",
     "collapseAll": "Recolher todos",
     "editLabelData": "Editar dados de {{label}}",
+    "editLink": "Editar Link",
+    "editRelationship": "Editar Relacionamento",
     "itemsAndMore": "{{items}} e mais {{count}}",
     "labelRelationship": "Relacionado a {{label}}",
     "latitude": "Latitude",

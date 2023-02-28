@@ -9,7 +9,7 @@ import { Where } from '../../types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 
 export type Arguments = {
   collection: Collection
@@ -100,7 +100,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // fetch previousDoc
   // /////////////////////////////////////
 
-  const prevDocWithLocales = await getLatestEntityVersion({
+  const prevDocWithLocales = await getLatestCollectionVersion({
     payload,
     id: parentDocID,
     query,

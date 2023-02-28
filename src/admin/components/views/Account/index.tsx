@@ -49,6 +49,7 @@ const AccountView: React.FC = () => {
         'fallback-locale': 'null',
         depth: 0,
       },
+      initialData: null,
     },
   );
 
@@ -87,7 +88,7 @@ const AccountView: React.FC = () => {
       setInitialState(state);
     };
 
-    awaitInitialState();
+    if (dataToRender) awaitInitialState();
   }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, t]);
 
   const isLoading = !initialState || !docPermissions || isLoadingData;

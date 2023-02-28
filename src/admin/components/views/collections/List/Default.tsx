@@ -10,7 +10,7 @@ import ListControls from '../../../elements/ListControls';
 import ListSelection from '../../../elements/ListSelection';
 import Pill from '../../../elements/Pill';
 import Button from '../../../elements/Button';
-import Table from '../../../elements/Table';
+import { Table } from '../../../elements/Table';
 import Meta from '../../../utilities/Meta';
 import { Props } from './types';
 import ViewDescription from '../../../elements/ViewDescription';
@@ -46,9 +46,6 @@ const DefaultList: React.FC<Props> = (props) => {
     data,
     newDocumentURL,
     limit,
-    tableColumns,
-    columnNames,
-    setColumns,
     hasCreatePermission,
     disableEyebrow,
     modifySearchParams,
@@ -107,8 +104,6 @@ const DefaultList: React.FC<Props> = (props) => {
           </header>
           <ListControls
             collection={collection}
-            columns={columnNames}
-            setColumns={setColumns}
             enableColumns={Boolean(!upload)}
             enableSort={Boolean(upload)}
             modifySearchQuery={modifySearchParams}
@@ -121,21 +116,16 @@ const DefaultList: React.FC<Props> = (props) => {
               className={[
                 `${baseClass}__shimmer`,
                 upload ? `${baseClass}__shimmer--uploads` : `${baseClass}__shimmer--rows`,
-              ].filter(Boolean)
-                .join(' ')}
+              ].filter(Boolean).join(' ')}
               count={6}
               width={upload ? 'unset' : '100%'}
             />
           )}
-          {' '}
           {(data.docs && data.docs.length > 0) && (
             <React.Fragment>
               {!upload && (
                 <RelationshipProvider>
-                  <Table
-                    data={data.docs}
-                    columns={tableColumns}
-                  />
+                  <Table data={data.docs} />
                 </RelationshipProvider>
               )}
               {upload && (

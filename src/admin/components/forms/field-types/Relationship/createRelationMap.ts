@@ -7,7 +7,7 @@ type RelationMap = {
 type CreateRelationMap = (args: {
   hasMany: boolean
   relationTo: string | string[]
-  value: Value | Value[] // really needs to be `ValueWithRelation`
+  value: Value | Value[] | null // really needs to be `ValueWithRelation`
 }) => RelationMap;
 
 export const createRelationMap: CreateRelationMap = ({
@@ -23,6 +23,10 @@ export const createRelationMap: CreateRelationMap = ({
     }, {});
   } else {
     relationMap = { [relationTo]: [] };
+  }
+
+  if (value === null) {
+    return relationMap;
   }
 
   const add = (relation: string, id: unknown) => {

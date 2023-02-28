@@ -6,6 +6,8 @@ export type Props = {
   alignIcon?: 'left' | 'right',
   onClick?: () => void,
   pillStyle?: 'white' | 'light' | 'dark' | 'light-gray' | 'warning' | 'success',
+  draggable?: boolean,
+  id?: string
 }
 
 export type RenderedTypeProps = {
