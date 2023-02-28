@@ -84,8 +84,22 @@
     }
   }
 
+  &__upload-drawer-toggler  {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    outline: none;
+    line-height: inherit;
+  }
+
+  &__doc-drawer-toggler {
+    text-decoration: underline;
+  }
+
   &__doc-drawer-toggler,
-  &__list-drawer-toggler {
+  &__list-drawer-toggler,
+  &__upload-drawer-toggler {
     & > * {
       margin: 0;
     }

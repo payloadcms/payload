@@ -480,7 +480,20 @@ describe('fields', () => {
         await expect(editLinkModal).toBeHidden();
       });
 
-      test('should open uploads drawer from read-only field', async () => {
+      test('should open upload drawer and render custom relationship fields', async () => {
+        navigateToRichTextFields();
+        const field = await page.locator('#field-richText');
+        const button = await field.locator('button.rich-text-upload__upload-drawer-toggler');
+
+        await button.click();
+
+        const documentDrawer = await page.locator('[id^=drawer_1_upload-drawer-]');
+        await expect(documentDrawer).toBeVisible();
+        const caption = await documentDrawer.locator('#field-caption');
+        await expect(caption).toBeVisible();
+      });
+
+      test('should open upload document drawer from read-only field', async () => {
         navigateToRichTextFields();
         const field = await page.locator('#field-richTextReadOnly');
         const button = await field.locator('button.rich-text-upload__doc-drawer-toggler.doc-drawer__toggler');
@@ -491,7 +504,7 @@ describe('fields', () => {
         await expect(documentDrawer).toBeVisible();
       });
 
-      test('should open relationship drawer from read-only field', async () => {
+      test('should open relationship document drawer from read-only field', async () => {
         navigateToRichTextFields();
         const field = await page.locator('#field-richTextReadOnly');
         const button = await field.locator('button.rich-text-relationship__doc-drawer-toggler.doc-drawer__toggler');

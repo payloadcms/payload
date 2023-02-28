@@ -102,6 +102,8 @@
     "chooseLabel": "{{label}} を選択",
     "collapseAll": "すべて閉じる",
     "editLabelData": "{{label}} データを編集",
+    "editLink": "リンクを編集",
+    "editRelationship": "リレーションシップを編集",
     "itemsAndMore": "{{items}} 他{{count}}件",
     "labelRelationship": "{{label}} リレーションシップ",
     "latitude": "緯度",

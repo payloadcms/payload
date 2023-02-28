@@ -384,6 +384,9 @@
         "editLink": {
           "type": "string"
         },
+        "editRelationship": {
+          "type": "string"
+        },
         "enterURL": {
           "type": "string"
         },
@@ -497,6 +500,7 @@
         "chooseDocumentToLink",
         "customURL",
         "editLink",
+        "editRelationship",
         "enterURL",
         "internalLink",
         "linkType",
