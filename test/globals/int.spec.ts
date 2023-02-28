@@ -60,6 +60,19 @@ describe('globals', () => {
   });
 
   describe('local', () => {
+    it('should save empty json objects', async () => {
+      const createdJSON = await payload.updateGlobal({
+        slug,
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(createdJSON.json.state).toBeDefined();
+    });
+
     it('should create', async () => {
       const data = {
         title: 'title',

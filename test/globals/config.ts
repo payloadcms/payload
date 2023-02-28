@@ -25,6 +25,10 @@ export default buildConfig({
       access,
       fields: [
         {
+          name: 'json',
+          type: 'json',
+        },
+        {
           name: 'title',
           type: 'text',
         },

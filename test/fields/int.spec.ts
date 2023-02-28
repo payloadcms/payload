@@ -524,6 +524,19 @@ describe('Fields', () => {
         },
       })).rejects.toThrow('The following field is invalid: json');
     });
+
+    it('should save empty json objects', async () => {
+      const createdJSON = await payload.create({
+        collection: 'json-fields',
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(createdJSON.json.state).toBeDefined();
+    });
   });
 
   describe('richText', () => {

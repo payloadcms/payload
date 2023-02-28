@@ -40,7 +40,6 @@ export type BuildSchemaOptions = {
   allowIDField?: boolean
   disableUnique?: boolean
   draftsEnabled?: boolean
-  global?: boolean
   indexSortableFields?: boolean
 }
 
