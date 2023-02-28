@@ -5,7 +5,7 @@ const config: PlaywrightTestConfig = {
   testDir: 'test',
   testMatch: '*e2e.spec.ts',
   workers: 999,
-  timeout: 600000,
+  timeout: 180000, // 3 minutes
   use: {
     video: 'retain-on-failure',
     trace: 'retain-on-failure',
