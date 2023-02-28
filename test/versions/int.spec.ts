@@ -554,7 +554,7 @@ describe('Versions', () => {
 
         // language=graphQL
         const query = `query {
-            versionsAutosavePosts(where: { parent: { equals: "${collectionGraphQLPostID}" } }) {
+          versionsAutosavePosts(where: { parent: { equals: "${collectionGraphQLPostID}" } }) {
             docs {
               id
             }
@@ -592,12 +592,12 @@ describe('Versions', () => {
       it('should allow read of versions by querying version content', async () => {
         // language=graphQL
         const query = `query {
-            versionsAutosavePosts(where: { version__title: {equals: "${collectionGraphQLOriginalTitle}" } }) {
+          versionsAutosavePosts(where: { version__title: {equals: "${collectionGraphQLOriginalTitle}" } }) {
             docs {
               id
               parent {
-              id
-            }
+                id
+              }
               version {
                 title
               }
@@ -805,6 +805,31 @@ describe('Versions', () => {
         expect(publishedGlobal.title).toBe(originalTitle);
         expect(updatedGlobal.title.en).toBe(updatedTitle);
         expect(updatedGlobal.title.es).toBe(updatedTitle);
+      });
+
+      it('should allow a draft to be published', async () => {
+        const originalTitle = 'Here is a draft';
+
+        await payload.updateGlobal({
+          slug: globalSlug,
+          data: {
+            title: originalTitle,
+            _status: 'draft',
+          },
+          draft: true,
+        });
+
+        const updatedTitle = 'Now try to publish';
+
+        const result = await payload.updateGlobal({
+          slug: globalSlug,
+          data: {
+            title: updatedTitle,
+            _status: 'published',
+          },
+        });
+
+        expect(result.title).toBe(updatedTitle);
       });
     });
   });

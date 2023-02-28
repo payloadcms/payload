@@ -10,7 +10,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { PayloadRequest } from '../../express/types';
 import { saveVersion } from '../../versions/saveVersion';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
+import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion';
 
 type Args<T extends { [field: string | number | symbol]: unknown }> = {
   globalConfig: SanitizedGlobalConfig
@@ -83,16 +83,13 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  const global = await getLatestEntityVersion({
+  const { global, globalExists } = await getLatestGlobalVersion({
     payload,
     Model,
     config: globalConfig,
     query,
     lean: true,
-    entityType: 'global',
   });
-
-  const globalExists = Boolean(global);
 
   let globalJSON: Record<string, unknown> = {};
 
