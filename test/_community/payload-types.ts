@@ -7,10 +7,18 @@
 
 export interface Config {
   collections: {
+    posts: Post;
     users: User;
-    pages: Page;
   };
-  globals: {};
+  globals: {
+    menu: Menu;
+  };
+}
+export interface Post {
+  id: string;
+  text?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 export interface User {
   id: string;
@@ -23,9 +31,7 @@ export interface User {
   updatedAt: string;
   password?: string;
 }
-export interface Page {
+export interface Menu {
   id: string;
-  title?: string;
-  createdAt: string;
-  updatedAt: string;
+  globalText?: string;
 }
