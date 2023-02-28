@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useReducer } from 'react';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
@@ -27,6 +26,8 @@ import { getTranslation } from '../../../../../utilities/getTranslation';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 import { useConfig } from '../../../utilities/Config';
 import { NullifyLocaleField } from '../../NullifyField';
+import DraggableSortable from '../../../elements/DraggableSortable';
+import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
 
 import './index.scss';
 
@@ -142,13 +143,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     setModified(true);
   }, [dispatchRows, dispatchFields, path, setModified]);
 
-  const onDragEnd = useCallback((result) => {
-    if (!result.destination) return;
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-    moveRow(sourceIndex, destinationIndex);
-  }, [moveRow]);
-
   const setCollapse = useCallback(
     async (rowID: string, collapsed: boolean) => {
       dispatchRows({ type: 'SET_COLLAPSE', id: rowID, collapsed });
@@ -224,161 +218,160 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   if (!rows) return null;
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div
-        id={`field-${path.replace(/\./gi, '__')}`}
-        className={classes}
-      >
-        <div className={`${baseClass}__error-wrap`}>
-          <Error
-            showError={showError}
-            message={errorMessage}
-          />
-        </div>
-        <header className={`${baseClass}__header`}>
-          <div className={`${baseClass}__header-wrap`}>
-            <h3>{getTranslation(label || name, i18n)}</h3>
-            <ul className={`${baseClass}__header-actions`}>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => toggleCollapseAll(true)}
-                  className={`${baseClass}__header-action`}
-                >
-                  {t('collapseAll')}
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => toggleCollapseAll(false)}
-                  className={`${baseClass}__header-action`}
-                >
-                  {t('showAll')}
-                </button>
-              </li>
-            </ul>
-          </div>
-          <FieldDescription
-            className={`field-description-${path.replace(/\./gi, '__')}`}
-            value={value}
-            description={description}
-          />
-        </header>
-
-        <NullifyLocaleField
-          path={path}
-          fieldValue={value}
+    <div
+      id={`field-${path.replace(/\./gi, '__')}`}
+      className={classes}
+    >
+      <div className={`${baseClass}__error-wrap`}>
+        <Error
+          showError={showError}
+          message={errorMessage}
         />
-
-        <Droppable droppableId="array-drop">
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-            >
-              {rows.length > 0 && rows.map((row, i) => {
-                const rowNumber = i + 1;
-                const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowNumber).padStart(2, '0')}`;
-
-                return (
-                  <Draggable
-                    key={row.id}
-                    draggableId={row.id}
-                    index={i}
-                    isDragDisabled={readOnly}
-                  >
-                    {(providedDrag) => (
-                      <div
-                        id={`${path}-row-${i}`}
-                        ref={providedDrag.innerRef}
-                        {...providedDrag.draggableProps}
-                      >
-                        <Collapsible
-                          collapsed={row.collapsed}
-                          onToggle={(collapsed) => setCollapse(row.id, collapsed)}
-                          className={`${baseClass}__row`}
-                          key={row.id}
-                          dragHandleProps={providedDrag.dragHandleProps}
-                          header={(
-                            <RowLabel
-                              path={`${path}.${i}`}
-                              label={CustomRowLabel || fallbackLabel}
-                              rowNumber={rowNumber}
-                            />
-                          )}
-                          actions={!readOnly ? (
-                            <ArrayAction
-                              rowCount={rows.length}
-                              duplicateRow={duplicateRow}
-                              addRow={addRow}
-                              moveRow={moveRow}
-                              removeRow={removeRow}
-                              index={i}
-                            />
-                          ) : undefined}
-                        >
-                          <HiddenInput
-                            name={`${path}.${i}.id`}
-                            value={row.id}
-                          />
-                          <RenderFields
-                            className={`${baseClass}__fields`}
-                            forceRender
-                            readOnly={readOnly}
-                            fieldTypes={fieldTypes}
-                            permissions={permissions?.fields}
-                            indexPath={indexPath}
-                            fieldSchema={fields.map((field) => ({
-                              ...field,
-                              path: createNestedFieldPath(`${path}.${i}`, field),
-                            }))}
-                          />
-
-                        </Collapsible>
-                      </div>
-                    )}
-                  </Draggable>
-                );
-              })}
-              {!checkSkipValidation(value) && (
-                <React.Fragment>
-                  {(rows.length < minRows || (required && rows.length === 0)) && (
-                    <Banner type="error">
-                      {t('validation:requiresAtLeast', {
-                        count: minRows,
-                        label: getTranslation(minRows ? labels.plural : labels.singular, i18n) || t(minRows > 1 ? 'general:row' : 'general:rows'),
-                      })}
-                    </Banner>
-                  )}
-                  {(rows.length === 0 && readOnly) && (
-                    <Banner>
-                      {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
-                    </Banner>
-                  )}
-                </React.Fragment>
-              )}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-
-        {(!readOnly && !hasMaxRows) && (
-          <div className={`${baseClass}__add-button-wrap`}>
-            <Button
-              onClick={() => addRow(value as number)}
-              buttonStyle="icon-label"
-              icon="plus"
-              iconStyle="with-border"
-              iconPosition="left"
-            >
-              {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
-            </Button>
-          </div>
-        )}
-
       </div>
-    </DragDropContext>
+      <header className={`${baseClass}__header`}>
+        <div className={`${baseClass}__header-wrap`}>
+          <h3>{getTranslation(label || name, i18n)}</h3>
+          <ul className={`${baseClass}__header-actions`}>
+            <li>
+              <button
+                type="button"
+                onClick={() => toggleCollapseAll(true)}
+                className={`${baseClass}__header-action`}
+              >
+                {t('collapseAll')}
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                onClick={() => toggleCollapseAll(false)}
+                className={`${baseClass}__header-action`}
+              >
+                {t('showAll')}
+              </button>
+            </li>
+          </ul>
+        </div>
+        <FieldDescription
+          className={`field-description-${path.replace(/\./gi, '__')}`}
+          value={value}
+          description={description}
+        />
+      </header>
+
+      <NullifyLocaleField
+        path={path}
+        fieldValue={value}
+      />
+
+      <DraggableSortable
+        ids={rows.map((row) => row.id)}
+        onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
+      >
+        {rows.length > 0 && rows.map((row, i) => {
+          const rowNumber = i + 1;
+          const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowNumber).padStart(2, '0')}`;
+
+          return (
+            <DraggableSortableItem
+              key={row.id}
+              id={row.id}
+              disabled={readOnly}
+            >
+              {({ setNodeRef, transform, attributes, listeners }) => (
+                <div
+                  id={`${path}-row-${i}`}
+                  key={`${path}-row-${i}`}
+                  ref={setNodeRef}
+                  style={{
+                    transform,
+                  }}
+                >
+                  <Collapsible
+                    collapsed={row.collapsed}
+                    onToggle={(collapsed) => setCollapse(row.id, collapsed)}
+                    className={`${baseClass}__row`}
+                    key={row.id}
+                    dragHandleProps={{
+                      id: row.id,
+                      attributes,
+                      listeners,
+                    }}
+                    header={(
+                      <RowLabel
+                        path={`${path}.${i}`}
+                        label={CustomRowLabel || fallbackLabel}
+                        rowNumber={rowNumber}
+                      />
+                    )}
+                    actions={!readOnly ? (
+                      <ArrayAction
+                        rowCount={rows.length}
+                        duplicateRow={duplicateRow}
+                        addRow={addRow}
+                        moveRow={moveRow}
+                        removeRow={removeRow}
+                        index={i}
+                      />
+                    ) : undefined}
+                  >
+                    <HiddenInput
+                      name={`${path}.${i}.id`}
+                      value={row.id}
+                    />
+                    <RenderFields
+                      className={`${baseClass}__fields`}
+                      forceRender
+                      readOnly={readOnly}
+                      fieldTypes={fieldTypes}
+                      permissions={permissions?.fields}
+                      indexPath={indexPath}
+                      fieldSchema={fields.map((field) => ({
+                        ...field,
+                        path: createNestedFieldPath(`${path}.${i}`, field),
+                      }))}
+                    />
+
+                  </Collapsible>
+                </div>
+              )}
+            </DraggableSortableItem>
+          );
+        })}
+        {!checkSkipValidation(value) && (
+          <React.Fragment>
+            {(rows.length < minRows || (required && rows.length === 0)) && (
+              <Banner type="error">
+                {t('validation:requiresAtLeast', {
+                  count: minRows,
+                  label: getTranslation(minRows ? labels.plural : labels.singular, i18n) || t(minRows > 1 ? 'general:row' : 'general:rows'),
+                })}
+              </Banner>
+            )}
+            {(rows.length === 0 && readOnly) && (
+              <Banner>
+                {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
+              </Banner>
+            )}
+          </React.Fragment>
+        )}
+      </DraggableSortable>
+
+      {(!readOnly && !hasMaxRows) && (
+        <div className={`${baseClass}__add-button-wrap`}>
+          <Button
+            onClick={() => addRow(value as number)}
+            buttonStyle="icon-label"
+            icon="plus"
+            iconStyle="with-border"
+            iconPosition="left"
+          >
+            {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
+          </Button>
+        </div>
+      )}
+
+    </div>
   );
 };
 

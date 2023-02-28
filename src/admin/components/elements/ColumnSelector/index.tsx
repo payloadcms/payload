@@ -1,12 +1,14 @@
-import React, { useEffect, useId, useState } from 'react';
+import React, { useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
 import Pill from '../Pill';
 import Plus from '../../icons/Plus';
 import X from '../../icons/X';
 import { Props } from './types';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { useEditDepth } from '../../utilities/EditDepth';
+import DraggableSortable from '../DraggableSortable';
+import { useTableColumns } from '../TableColumns';
+
 import './index.scss';
 
 const baseClass = 'column-selector';
@@ -14,49 +16,58 @@ const baseClass = 'column-selector';
 const ColumnSelector: React.FC<Props> = (props) => {
   const {
     collection,
-    columns,
-    setColumns,
   } = props;
 
-  const [fields, setFields] = useState(() => flattenTopLevelFields(collection.fields, true));
-
-  useEffect(() => {
-    setFields(flattenTopLevelFields(collection.fields, true));
-  }, [collection.fields]);
+  const {
+    columns,
+    toggleColumn,
+    moveColumn,
+  } = useTableColumns();
 
   const { i18n } = useTranslation();
   const uuid = useId();
   const editDepth = useEditDepth();
+  if (!columns) { return null; }
 
   return (
-    <div className={baseClass}>
-      {fields && fields.map((field, i) => {
-        const isEnabled = columns.find((column) => column === field.name);
+    <DraggableSortable
+      className={baseClass}
+      ids={columns.map((col) => col.accessor)}
+      onDragEnd={({ moveFromIndex, moveToIndex }) => {
+        moveColumn({
+          fromIndex: moveFromIndex,
+          toIndex: moveToIndex,
+        });
+      }}
+    >
+      {columns.map((col, i) => {
+        const {
+          accessor,
+          active,
+          label,
+          name,
+        } = col;
+
         return (
           <Pill
+            draggable
+            id={accessor}
             onClick={() => {
-              let newState = [...columns];
-              if (isEnabled) {
-                newState = newState.filter((remainingColumn) => remainingColumn !== field.name);
-              } else {
-                newState.unshift(field.name);
-              }
-
-              setColumns(newState);
+              toggleColumn(accessor);
             }}
             alignIcon="left"
-            key={`${collection.slug}-${field.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
-            icon={isEnabled ? <X /> : <Plus />}
+            key={`${collection.slug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            icon={active ? <X /> : <Plus />}
             className={[
               `${baseClass}__column`,
-              isEnabled && `${baseClass}__column--active`,
+              active && `${baseClass}__column--active`,
             ].filter(Boolean).join(' ')}
           >
-            {getTranslation(field.label || field.name, i18n)}
+            {getTranslation(label || name, i18n)}
           </Pill>
         );
       })}
-    </div>
+    </DraggableSortable>
   );
 };
 

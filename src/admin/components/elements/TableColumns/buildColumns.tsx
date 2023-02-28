@@ -1,12 +1,12 @@
 import React from 'react';
 import type { TFunction } from 'react-i18next';
-import Cell from './Cell';
-import SortColumn from '../../../elements/SortColumn';
-import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { Column } from '../../../elements/Table/types';
-import { fieldIsPresentationalOnly } from '../../../../../fields/config/types';
-import flattenFields from '../../../../../utilities/flattenTopLevelFields';
-import { Props as CellProps } from './Cell/types';
+import Cell from '../../views/collections/List/Cell';
+import SortColumn from '../SortColumn';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import { Column } from '../Table/types';
+import { fieldIsPresentationalOnly } from '../../../../fields/config/types';
+import flattenFields from '../../../../utilities/flattenTopLevelFields';
+import { Props as CellProps } from '../../views/collections/List/Cell/types';
 
 const buildColumns = ({
   collection,
