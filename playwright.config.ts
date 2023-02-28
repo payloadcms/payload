@@ -8,7 +8,7 @@ const config: PlaywrightTestConfig = {
   timeout: 600000,
   use: {
     video: 'retain-on-failure',
-    trace: 'on',
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
 };
