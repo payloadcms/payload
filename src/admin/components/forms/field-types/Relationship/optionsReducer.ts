@@ -15,6 +15,17 @@ const reduceToIDs = (options) => options.reduce((ids, option) => {
   ];
 }, []);
 
+const reduceDotNotation = (doc: any, key: string) => {
+  const nestedKeys = key.split('.');
+  let value = doc;
+
+  nestedKeys.forEach((nestedKey) => {
+    value = value[nestedKey] || '';
+  });
+
+  return value;
+};
+
 const sortOptions = (options: Option[]): Option[] => options.sort((a: Option, b: Option) => {
   if (typeof a?.label?.localeCompare === 'function' && typeof b?.label?.localeCompare === 'function') {
     return a.label.localeCompare(b.label);
@@ -38,7 +49,7 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
       const foundOption = foundOptionGroup?.options?.find((option) => option.value === doc.id);
 
       if (foundOption) {
-        foundOption.label = doc[labelKey] || `${i18n.t('general:untitled')} - ID: ${doc.id}`;
+        foundOption.label = reduceDotNotation(doc, labelKey) || `${i18n.t('general:untitled')} - ID: ${doc.id}`;
         foundOption.relationTo = relation;
       }
 
@@ -60,7 +71,7 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
           return [
             ...docSubOptions,
             {
-              label: doc[labelKey] || `${i18n.t('general:untitled')} - ID: ${doc.id}`,
+              label: reduceDotNotation(doc, labelKey) || `${i18n.t('general:untitled')} - ID: ${doc.id}`,
               relationTo: relation,
               value: doc.id,
             },
