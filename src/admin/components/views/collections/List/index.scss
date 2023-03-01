@@ -85,6 +85,11 @@
     }
   }
 
+  &__list-selection-actions {
+    display: flex;
+    gap: base(.25);
+  }
+
   &__shimmer {
     margin-top: base(1.75);
   }

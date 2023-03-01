@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useModal } from '@faceless-ui/modal';
 import { useConfig } from '../../utilities/Config';
 import { Drawer, DrawerToggler } from '../Drawer';
 import { Props } from './types';
@@ -13,6 +14,7 @@ import { useForm } from '../../forms/Form/context';
 import RenderFields from '../../forms/RenderFields';
 import { OperationContext } from '../../utilities/OperationProvider';
 import fieldTypes from '../../forms/field-types';
+import X from '../../icons/X';
 
 import './index.scss';
 
@@ -52,6 +54,7 @@ const EditMany: React.FC<Props> = (props) => {
   } = props;
 
   const { permissions } = useAuth();
+  const { closeModal } = useModal();
   const { serverURL, routes: { api } } = useConfig();
   const { selectAll, count, getQueryParams } = useSelection();
   const { t, i18n } = useTranslation('general');
@@ -90,25 +93,49 @@ const EditMany: React.FC<Props> = (props) => {
       </DrawerToggler>
       <Drawer
         slug={drawerSlug}
-        title={t('editingLabel', { label: getTranslation(plural, i18n), count })}
+        header={null}
       >
         <OperationContext.Provider value="update">
           <Form
+            className={`${baseClass}__form`}
             onSuccess={onSuccess}
           >
-            <FieldSelect
-              fields={collection.fields}
-              setSelected={setSelected}
-            />
-            <RenderFields
-              fieldTypes={fieldTypes}
-              fieldSchema={selected}
-            />
-            {/* TODO: move save button to sidebar */}
-            <Submit
-              action={`${serverURL}${api}/${slug}${getQueryParams()}`}
-              disabled={selected.length === 0}
-            />
+            <div className={`${baseClass}__main`}>
+              <div className={`${baseClass}__header`}>
+                <h2 className={`${baseClass}__header__title`}>
+                  {t('editingLabel', { label: getTranslation(plural, i18n), count })}
+                </h2>
+                <button
+                  className={`${baseClass}__header__close`}
+                  id={`close-drawer__${drawerSlug}`}
+                  type="button"
+                  onClick={() => closeModal(drawerSlug)}
+                  aria-label={t('close')}
+                >
+                  <X />
+                </button>
+              </div>
+              <FieldSelect
+                fields={collection.fields}
+                setSelected={setSelected}
+              />
+              <RenderFields
+                fieldTypes={fieldTypes}
+                fieldSchema={selected}
+              />
+              <div className={`${baseClass}__sidebar-wrap`}>
+                <div className={`${baseClass}__sidebar`}>
+                  <div className={`${baseClass}__sidebar-sticky-wrap`}>
+                    <div className={`${baseClass}__document-actions`}>
+                      <Submit
+                        action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                        disabled={selected.length === 0}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </Form>
         </OperationContext.Provider>
       </Drawer>

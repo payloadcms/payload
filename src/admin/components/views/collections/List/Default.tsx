@@ -192,22 +192,24 @@ const DefaultList: React.FC<Props> = (props) => {
                       <ListSelection
                         label={getTranslation(collection.labels.plural, i18n)}
                       />
-                      <EditMany
-                        collection={collection}
-                        resetParams={resetParams}
-                      />
-                      <PublishMany
-                        collection={collection}
-                        resetParams={resetParams}
-                      />
-                      <UnpublishMany
-                        collection={collection}
-                        resetParams={resetParams}
-                      />
-                      <DeleteMany
-                        collection={collection}
-                        resetParams={resetParams}
-                      />
+                      <div className={`${baseClass}__list-selection-actions`}>
+                        <EditMany
+                          collection={collection}
+                          resetParams={resetParams}
+                        />
+                        <PublishMany
+                          collection={collection}
+                          resetParams={resetParams}
+                        />
+                        <UnpublishMany
+                          collection={collection}
+                          resetParams={resetParams}
+                        />
+                        <DeleteMany
+                          collection={collection}
+                          resetParams={resetParams}
+                        />
+                      </div>
                     </Fragment>
                   )}
                 </div>
