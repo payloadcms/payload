@@ -78,6 +78,11 @@ const Events: CollectionConfig = {
                 readOnly: true,
               },
               hooks: {
+                beforeChange: [({ siblingData }) => {
+                  // Mutate the sibling data to prevent DB storage
+                  // eslint-disable-next-line no-param-reassign
+                  siblingData.totalPrice = undefined;
+                }],
                 afterRead: [getTotalPrice],
               },
             },
