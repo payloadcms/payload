@@ -73,6 +73,10 @@ const Events: CollectionConfig = {
             {
               name: 'totalPrice',
               type: 'number',
+              access: {
+                create: () => false,
+                update: () => false,
+              },
               admin: {
                 description: 'USD',
                 readOnly: true,

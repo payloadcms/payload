@@ -14,6 +14,10 @@ const Staff: CollectionConfig = {
     {
       name: 'fullTitle',
       type: 'text',
+      access: {
+        create: () => false,
+        update: () => false,
+      },
       hooks: {
         beforeChange: [({ siblingData }) => {
           // Mutate the sibling data to prevent DB storage

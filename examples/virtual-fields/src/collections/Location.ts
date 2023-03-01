@@ -76,6 +76,10 @@ const Locations: CollectionConfig = {
           formatLocation,
         ],
       },
+      access: {
+        create: () => false,
+        update: () => false,
+      },
       admin: {
         hidden: true,
       },
@@ -105,6 +109,10 @@ const Locations: CollectionConfig = {
       type: 'relationship',
       relationTo: 'events',
       hasMany: true,
+      access: {
+        create: () => false,
+        update: () => false,
+      },
       admin: {
         readOnly: true,
       },
@@ -123,6 +131,10 @@ const Locations: CollectionConfig = {
       relationTo: 'staff',
       hasMany: true,
       maxDepth: 0,
+      access: {
+        create: () => false,
+        update: () => false,
+      },
       admin: {
         readOnly: true,
       },
@@ -142,6 +154,10 @@ const Locations: CollectionConfig = {
       admin: {
         position: 'sidebar',
         readOnly: true,
+      },
+      access: {
+        create: () => false,
+        update: () => false,
       },
       hooks: {
         beforeChange: [({ siblingData }) => {
