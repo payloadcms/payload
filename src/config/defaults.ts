@@ -13,6 +13,7 @@ export const defaults: Config = {
   csrf: [],
   cors: [],
   admin: {
+    buildPath: path.resolve(process.cwd(), './build'),
     meta: {
       titleSuffix: '- Payload',
     },

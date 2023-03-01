@@ -1,5 +1,9 @@
 @import '../../../scss/styles';
 
+.react-select-container {
+  width: 100%;
+}
+
 .react-select {
   .rs__control {
     @include formInput;

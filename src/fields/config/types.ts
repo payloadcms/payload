@@ -88,7 +88,7 @@ export type ValidateOptions<T, S, F> = {
   t: TFunction
 } & F;
 
-export type Validate<T = any, S = any, F = any> = (value?: T, options?: ValidateOptions<F, S, Partial<F>>) => string | true | Promise<string | true>;
+export type Validate<T = any, S = any, F = any> = (value: T, options: ValidateOptions<F, S, Partial<F>>) => string | true | Promise<string | true>;
 
 export type OptionObject = {
   label: Record<string, string> | string
@@ -174,7 +174,7 @@ export type DateField = FieldBase & {
   }
 }
 
-export type GroupField = FieldBase & {
+export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
   type: 'group';
   fields: Field[];
   admin?: Admin & {
@@ -201,14 +201,14 @@ export type CollapsibleField = Omit<FieldBase, 'name' | 'label'> & {
 
 export type TabsAdmin = Omit<Admin, 'description'>;
 
-type TabBase = {
+type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
   fields: Field[]
   description?: Description
 }
 
-export type NamedTab = TabBase & FieldBase
+export type NamedTab = TabBase
 
-export type UnnamedTab = TabBase & Omit<FieldBase, 'name'> & {
+export type UnnamedTab = Omit<TabBase, 'name'> & {
   label: Record<string, string> | string
   localized?: never
 }
@@ -288,6 +288,7 @@ export type RelationshipField = FieldBase & {
   filterOptions?: FilterOptions;
   admin?: Admin & {
     isSortable?: boolean;
+    allowCreate?: boolean;
   }
 }
 

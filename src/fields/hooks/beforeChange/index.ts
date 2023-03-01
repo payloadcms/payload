@@ -7,8 +7,8 @@ import { ValidationError } from '../../../errors';
 import deepCopyObject from '../../../utilities/deepCopyObject';
 
 type Args<T> = {
-  data: Omit<T, 'id'>
-  doc: T
+  data: T | Record<string, unknown>
+  doc: T | Record<string, unknown>
   docWithLocales: Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   id?: string | number

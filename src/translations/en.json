@@ -107,6 +107,7 @@
     "customURL": "Custom URL",
     "editLabelData": "Edit {{label}} data",
     "editLink": "Edit Link",
+    "editRelationship": "Edit Relationship",
     "enterURL": "Enter a URL",
     "internalLink": "Internal Link",
     "itemsAndMore": "{{items}} and {{count}} more",
@@ -227,6 +228,20 @@
     "user": "User",
     "users": "Users",
     "welcome": "Welcome"
+  },
+  "operators": {
+    "equals": "equals",
+    "isNotEqualTo": "is not equal to",
+    "isIn": "is in",
+    "isNotIn": "is not in",
+    "exists": "exists",
+    "isGreaterThan": "is greater than",
+    "isLessThan": "is less than",
+    "isLessThanOrEqualTo": "is less than or equal to",
+    "isGreaterThanOrEqualTo": "is greater than or equal to",
+    "near": "near",
+    "isLike": "is like",
+    "contains": "contains"
   },
   "upload": {
     "dragAndDropHere": "or drag and drop a file here",

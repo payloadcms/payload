@@ -1,8 +1,161 @@
-## [1.5.14-canary.0](https://github.com/payloadcms/payload/compare/v1.5.9...v1.5.14-canary.0) (2023-01-20)
+
+
+## [1.6.15](https://github.com/payloadcms/payload/compare/v1.6.14...v1.6.15) (2023-02-21)
+
+
+### Bug Fixes
+
+* mongoose connection error with useFacet ([5888fb9](https://github.com/payloadcms/payload/commit/5888fb9b3f82f49686da27c216b40c38b5a5d6c2))
+
+## [1.6.14](https://github.com/payloadcms/payload/compare/v1.6.13...v1.6.14) (2023-02-21)
+
+
+### Bug Fixes
+
+* [#2091](https://github.com/payloadcms/payload/issues/2091) admin translations for filter operators ([#2143](https://github.com/payloadcms/payload/issues/2143)) ([8a8c392](https://github.com/payloadcms/payload/commit/8a8c3920950ece5995f81bff717b30a2baf8f219))
+* [#2096](https://github.com/payloadcms/payload/issues/2096), allows custom ts paths with payload generate:types ([686a616](https://github.com/payloadcms/payload/commit/686a616b4cf06685fd22b075cf87ceafec455e40))
+* [#2117](https://github.com/payloadcms/payload/issues/2117) collection pagination defaultLimit ([#2147](https://github.com/payloadcms/payload/issues/2147)) ([2a4db38](https://github.com/payloadcms/payload/commit/2a4db3896ead2b49c0a7ebc5da6b9825b223ca19))
+* [#2131](https://github.com/payloadcms/payload/issues/2131), doesn't log in unverified user after resetting password ([3eb85b1](https://github.com/payloadcms/payload/commit/3eb85b1554ceb705c4a1436af4d9ba982e4cdbdf))
+* [#2134](https://github.com/payloadcms/payload/issues/2134), allows links to be populated without having relationship or upload enabled ([32a0778](https://github.com/payloadcms/payload/commit/32a0778fc4311509699b14f9a3f145380ec56e25))
+* [#2148](https://github.com/payloadcms/payload/issues/2148), adds queryHiddenFields property to find operation ([15b6bb3](https://github.com/payloadcms/payload/commit/15b6bb3d756697428775df5ece3c6092d0537d82))
+* checks locale is valid for monaco code editor ([#2144](https://github.com/payloadcms/payload/issues/2144)) ([40224ed](https://github.com/payloadcms/payload/commit/40224ed1bcd886be8bf2f5b42a272db7615495c1))
+* generate proper json field type according to rfc ([#2137](https://github.com/payloadcms/payload/issues/2137)) ([7e88698](https://github.com/payloadcms/payload/commit/7e8869858cfca70b2e996d984e065da75398076b))
+* removes custom header and gutter from rte link drawer [#2120](https://github.com/payloadcms/payload/issues/2120) ([#2135](https://github.com/payloadcms/payload/issues/2135)) ([6a7663b](https://github.com/payloadcms/payload/commit/6a7663beb57f624ea52d95a8f26345dcd32d65bc))
+* sizes property optional on upload ([#2066](https://github.com/payloadcms/payload/issues/2066)) ([79d047e](https://github.com/payloadcms/payload/commit/79d047e64fd40507abf9de2ced5dab7aeb2bb6fa))
+* useFacet config option to disable $facet aggregation ([#2141](https://github.com/payloadcms/payload/issues/2141)) ([b4a2074](https://github.com/payloadcms/payload/commit/b4a20741b2d995e5e46875c2ae1f11ff5b319e6b))
+
+## [1.6.13](https://github.com/payloadcms/payload/compare/v1.6.12...v1.6.13) (2023-02-18)
+
+
+### Bug Fixes
+
+* [#2125](https://github.com/payloadcms/payload/issues/2125), ensures createdAt and updatedAt are returned in update operations ([42ebf68](https://github.com/payloadcms/payload/commit/42ebf6893257256554a57e6b6684a726d11800b8))
+
+## [1.6.12](https://github.com/payloadcms/payload/compare/v1.6.11...v1.6.12) (2023-02-17)
+
+
+### Bug Fixes
+
+* ensures only valid fields can be queried on ([1930bc2](https://github.com/payloadcms/payload/commit/1930bc260e721c5c7a10793b5d2a7809694089f3))
+
+
+### Features
+
+* adds gql auth example ([#2115](https://github.com/payloadcms/payload/issues/2115)) ([fa32c27](https://github.com/payloadcms/payload/commit/fa32c2771637af11d7ef0fb21b2f1f3cceae1ead))
+* auth example ([c076c77](https://github.com/payloadcms/payload/commit/c076c77db4a26cf514a040b1048de25b1141f0cb))
+* separates admin root component from DOM render logic ([ff4d1f6](https://github.com/payloadcms/payload/commit/ff4d1f6ac26f5cac56b6c5b7b67b99f50067cb8d))
+* virtual fields example ([#1990](https://github.com/payloadcms/payload/issues/1990)) ([2af0c04](https://github.com/payloadcms/payload/commit/2af0c04c8ae5892b317af240c1502bc21bb65253))
+
+## [1.6.11](https://github.com/payloadcms/payload/compare/v1.6.10...v1.6.11) (2023-02-15)
+
+
+### Bug Fixes
+
+* existing upload deletion [#2098](https://github.com/payloadcms/payload/issues/2098) ([#2101](https://github.com/payloadcms/payload/issues/2101)) ([060c380](https://github.com/payloadcms/payload/commit/060c3805e567fe450c4b9aa00fbdbb919427c625))
+
+
+### Features
+
+* preview example ([#1950](https://github.com/payloadcms/payload/issues/1950)) ([0a87f10](https://github.com/payloadcms/payload/commit/0a87f106ecb5c95738109db5231d72abd281e7e1))
+
+## [1.6.10](https://github.com/payloadcms/payload/compare/v1.6.9...v1.6.10) (2023-02-14)
+
+
+### Bug Fixes
+
+* [#2077](https://github.com/payloadcms/payload/issues/2077) useAPIKey UI missing with disableLocalStrategy ([#2084](https://github.com/payloadcms/payload/issues/2084)) ([586b25a](https://github.com/payloadcms/payload/commit/586b25a54c6ec8bd134bce05c480cd429e47e252))
+* Add missing Spanish translations and fix typos ([c4742e5](https://github.com/payloadcms/payload/commit/c4742e5c303ca4ba41c2fbb45a8e8474608418c1))
+* document type in update request handler ([d5cd970](https://github.com/payloadcms/payload/commit/d5cd9709f717b08b930461079b147967d8d7a885))
+* ensures versions createdAt matches the original doc ([8c7e37c](https://github.com/payloadcms/payload/commit/8c7e37c56aab2bb28de01cf7d4a91062cbde80de))
+* globals not saving drafts unless published first ([#2082](https://github.com/payloadcms/payload/issues/2082)) ([4999fba](https://github.com/payloadcms/payload/commit/4999fbaee680e256ece7083fbe422f25e85de0d5))
+* Use the user's AdminUI locale for the DatePicker ([#2046](https://github.com/payloadcms/payload/issues/2046)) ([#2057](https://github.com/payloadcms/payload/issues/2057)) ([b4a7e91](https://github.com/payloadcms/payload/commit/b4a7e912b2117cef3345adb8b514958345838030))
+* validate type ([7bb0984](https://github.com/payloadcms/payload/commit/7bb0984a12a0d80d9ac2af82427ac7dbc985ffc5))
+
+
+### Features
+
+* allows control over relationship add new button ([6096044](https://github.com/payloadcms/payload/commit/6096044fe058113ca47c7f7d833cb788d97df9a2))
+* async plugins ([#2030](https://github.com/payloadcms/payload/issues/2030)) ([9f30553](https://github.com/payloadcms/payload/commit/9f3055381337f80229f220c1e6114b4ea56be969))
+* export more errors ([3a2a41d](https://github.com/payloadcms/payload/commit/3a2a41d2b6ead4188b432d9e6780764a7c08b2dd))
+
+## [1.6.9](https://github.com/payloadcms/payload/compare/v1.6.7...v1.6.9) (2023-02-10)
+
+
+### Bug Fixes
+
+* adds query constraint to ensureMaxVersions query ([30688bb](https://github.com/payloadcms/payload/commit/30688bbe4136285af181a5deae5e949b98bea0be))
+* translation of "or" -> "ou" in french ([#2047](https://github.com/payloadcms/payload/issues/2047)) ([dddbec2](https://github.com/payloadcms/payload/commit/dddbec268255c41b7ea786bdddc02dfeb7d66fbd))
+
+
+### Features
+
+* allows customization of the folder used to serve admin bundled files in production ([4d259a6](https://github.com/payloadcms/payload/commit/4d259a69f2c9beb1d84f703a08921469e6f1c34b))
+
+## [1.6.7](https://github.com/payloadcms/payload/compare/v1.6.6...v1.6.7) (2023-02-08)
+
+
+### Bug Fixes
+
+* drawer state was not set when opened ([e6ac872](https://github.com/payloadcms/payload/commit/e6ac872b0d80470883836ef5aac0bdf4b62d6de9))
+
+## [1.6.6](https://github.com/payloadcms/payload/compare/v1.6.5...v1.6.6) (2023-02-07)
+
+
+### Bug Fixes
+
+* [#1887](https://github.com/payloadcms/payload/issues/1887), dataloader rich text population infinite loop ([ac2e174](https://github.com/payloadcms/payload/commit/ac2e174643419e5b01cfbbf53234b0145aeb5e4e))
+* enables locales with date field ([aefb655](https://github.com/payloadcms/payload/commit/aefb655769e7998a44cef9f93a19e4aef24c50bb))
+
+## [1.6.5](https://github.com/payloadcms/payload/compare/v1.6.4...v1.6.5) (2023-02-07)
+
+
+### Bug Fixes
+
+* allows radio input to be tabbable ([b5880f2](https://github.com/payloadcms/payload/commit/b5880f26af8b97d47eca83a9fc7bd05b006cc54c))
+* auth type leaking into type gen ([1f0a1c7](https://github.com/payloadcms/payload/commit/1f0a1c796ab4126a464949f3a1bc34c7360470a5))
+* corrects keyboard accessibility for checkbox field ([65b8fd2](https://github.com/payloadcms/payload/commit/65b8fd27af05c25c3ddf86c34e1f181b8a605c27))
+* ensures preview is enabled before rendering button ([e968f40](https://github.com/payloadcms/payload/commit/e968f4067c2427965c0f96845aff8eaca36d0df6))
+* local API update typing ([#2010](https://github.com/payloadcms/payload/issues/2010)) ([4b0d4f4](https://github.com/payloadcms/payload/commit/4b0d4f4cd59940cace6b6b8cebf3d834d2b88dab)), closes [#2009](https://github.com/payloadcms/payload/issues/2009)
+* max versions incorrectly sorting, causing incorrect versions to be held onto ([2e4f7ab](https://github.com/payloadcms/payload/commit/2e4f7ab35c23f25051a5000e7902df7f255ed607))
+* named tabs not displaying data in versions view ([a41e295](https://github.com/payloadcms/payload/commit/a41e295e42fbf283733afd8b63bced9555cb1338))
+* replaced media not rendering after document save ([827428d](https://github.com/payloadcms/payload/commit/827428d6b57a7abe858ca5ddaad5ba4ec9d3a270))
+* webpack css-loader resolve urls ([ade4c01](https://github.com/payloadcms/payload/commit/ade4c011d348249e975a1510ae481018834a2ca2))
+
+
+### Features
+
+* deletes old media upon re-upload [#1897](https://github.com/payloadcms/payload/issues/1897) ([02f9be2](https://github.com/payloadcms/payload/commit/02f9be2c4a15eed6bba07f504319a2213ea411df))
+* enables document drawers from read-only fields ([#1989](https://github.com/payloadcms/payload/issues/1989)) ([0dbc4fa](https://github.com/payloadcms/payload/commit/0dbc4fa21334e1a17c5aa35d84d78973fb7f54ec))
+
+## [1.6.4](https://github.com/payloadcms/payload/compare/v1.6.3...v1.6.4) (2023-02-03)
+
+
+### Bug Fixes
+
+* only hoists localized values if localization is enabled ([8c65f6a](https://github.com/payloadcms/payload/commit/8c65f6a93836d80fb22724454f5efb49e11763ad))
+
+
+### Features
+
+* support large file uploads ([#1981](https://github.com/payloadcms/payload/issues/1981)) ([12ed655](https://github.com/payloadcms/payload/commit/12ed65588131c6db5252a1302a7dd82f0a10bd2e))
+
+## [1.6.3](https://github.com/payloadcms/payload/compare/v1.6.2...v1.6.3) (2023-02-01)
+
+
+### Bug Fixes
+
+* properly await graphql schema generation ([888b3a2](https://github.com/payloadcms/payload/commit/888b3a26727b32d19e39d1a8b672eb1881effad7))
+
+## [1.6.2](https://github.com/payloadcms/payload/compare/v1.6.1...v1.6.2) (2023-02-01)
+
+### Features
+
+- Adds optional password to generated types within auth-enabled collections
+
+## [1.6.1](https://github.com/payloadcms/payload/compare/v1.5.9...v1.6.1) (2023-02-01)
 
 ### 🐛 Bug Fixes
 
-- bump pino and pino-pretty to accommodate yarn 2 ([773fb57](https://github.com/payloadcms/payload/commit/773fb57c71f89d5157847ee4907c1472874f9a61))
 - updated nl i18n typos ([cc7257e](https://github.com/payloadcms/payload/commit/cc7257efd529580b1eb7b6c01df9f7420838c345))
 - fixes [#1905](https://github.com/payloadcms/payload/issues/1905)
 - fixes [#1885](https://github.com/payloadcms/payload/issues/1885)
@@ -10,7 +163,6 @@
 - versions error on cosmos db ([338c4e2](https://github.com/payloadcms/payload/commit/338c4e2fb1f7fa4877b14b6a7adfdd80b08996d3))
 - hides fallback locale checkbox when field localization is set to false ([#1893](https://github.com/payloadcms/payload/issues/1893)) ([0623039](https://github.com/payloadcms/payload/commit/06230398d7251240e45e843f1a4d70e6e7f547e7))
 - [#1870](https://github.com/payloadcms/payload/issues/1870) and [#1859](https://github.com/payloadcms/payload/issues/1859) ([c0ac155](https://github.com/payloadcms/payload/commit/c0ac155a719aa69e1d0e2da97659c56d024325db))
-- bump pino and pino-pretty to accommodate yarn 2 ([773fb57](https://github.com/payloadcms/payload/commit/773fb57c71f89d5157847ee4907c1472874f9a61))
 - creates backup of latest version after restoring draft [#1873](https://github.com/payloadcms/payload/issues/1873) ([bd4da37](https://github.com/payloadcms/payload/commit/bd4da37f237d7bd33583d21b4ed8b910dd7d71cb))
 - disables escapeValue for i18n ([#1886](https://github.com/payloadcms/payload/issues/1886)) ([eec4b3a](https://github.com/payloadcms/payload/commit/eec4b3ace5a3c9bbea168f2c87de1243414042aa))
 
@@ -18,9 +170,11 @@
 
 - Roadmap - [improved TypeScript experience](https://github.com/payloadcms/payload/discussions/1563) - begins work to SIGNIFICANTLY improve typing of Payload's Local API, removing the need for generics and inferring types automatically from your generated types
 - Refactors the Local API to include only the bare minimum code necessary for running local API operations, which will allow us to deploy serverlessly
-- allows versions to be deleted alongside of main document deletion ([a5c76d4](https://github.com/payloadcms/payload/commit/a5c76d4bd544190511e34820c1145ef26d85dc53))
+- blocks drawer [#1909](https://github.com/payloadcms/payload/issues/1909) ([339cee4](https://github.com/payloadcms/payload/commit/339cee416a0f331d8ad718d6d0c0ad2ae8dca74d))
 - requires ts-node to start a project for any config that uses ts or jsx ([f1c342e](https://github.com/payloadcms/payload/commit/f1c342e05eb84254c9d84a425b4f0da1249fcef3))
 - simplifies versions logic ([8cfa550](https://github.com/payloadcms/payload/commit/8cfa5509540225100237e6f569eb9eb1a7d5448e))
+- add Chinese translation ([#1926](https://github.com/payloadcms/payload/issues/1926)) ([7c6ff89](https://github.com/payloadcms/payload/commit/7c6ff89ab661f9dedb171f26349bfdcfdb6ebc96))
+- add Croatian translation ([#1982](https://github.com/payloadcms/payload/issues/1982)) ([dfa47a0](https://github.com/payloadcms/payload/commit/dfa47a0e0fafa30d7e9fdef59aa001097b305c92)
 
 ### 🚨 BREAKING CHANGES
 
@@ -141,13 +295,7 @@ This release includes a substantial simplification / optimization of how Version
 
 But, some of your draft-enabled documents may need to be migrated.
 
-Here is a way for you to determine if you need to migrate:
-
-1. Do you have drafts enabled on any collections?
-1. If so, do you have any drafts that have **never been updated** at all? For example, a draft is created, and no further versions are ever created. The document only exists in your main collection, and there are no corresponding versions within the `_versions` collection.
-1. Are you worried about losing these never-updated-drafts?
-
-If you think the above bullets apply to you, then you can run a simple migration script to ensure that your "never-updated-drafts" don't disappear from the Admin UI. Your data will never disappear from your database in any case, but applicable documents to the above bullets will simply not show in the List view anymore.
+If you are using versions and drafts on any collections, you can run a simple migration script to ensure that your drafts appear correctly in the Admin UI. Your data will never disappear from your database in any case if you update, but some drafts may not show in the List view anymore.
 
 To migrate, create this file within the root of your Payload project:
 
@@ -158,7 +306,7 @@ const payload = require("payload");
 
 require("dotenv").config();
 
-const { PAYLOAD_SECRET_KEY, MONGO_URL } = process.env;
+const { PAYLOAD_SECRET, MONGODB_URI } = process.env;
 
 // This function ensures that there is at least one corresponding version for any document
 // within each of your draft-enabled collections.
@@ -168,8 +316,8 @@ const ensureAtLeastOneVersion = async () => {
   // IMPORTANT: make sure your ENV variables are filled properly here
   // as the below variable names are just for reference.
   await payload.init({
-    secret: PAYLOAD_SECRET_KEY,
-    mongoURL: MONGO_URL,
+    secret: PAYLOAD_SECRET,
+    mongoURL: MONGODB_URI,
     local: true,
   });
 
@@ -181,22 +329,28 @@ const ensureAtLeastOneVersion = async () => {
         const { docs } = await payload.find({
           collection: slug,
           limit: 0,
+          depth: 0,
+          locale: "all",
         });
 
+        const VersionsModel = payload.versions[slug];
+        const existingCollectionDocIds: Array<string> = [];
         await Promise.all(
           docs.map(async (doc) => {
-            const VersionsModel = payload.versions[slug];
-
+            existingCollectionDocIds.push(doc.id);
             // Find at least one version for the doc
-            const versions = await VersionsModel.find(
-              { parent: doc.id },
+            const versionDocs = await VersionsModel.find(
+              {
+                parent: doc.id,
+                updatedAt: { $gte: doc.updatedAt },
+              },
               null,
               { limit: 1 }
             ).lean();
 
             // If there are no corresponding versions,
             // we need to create one
-            if (versions.length === 0) {
+            if (versionDocs.length === 0) {
               try {
                 await VersionsModel.create({
                   parent: doc.id,
@@ -206,7 +360,10 @@ const ensureAtLeastOneVersion = async () => {
                   createdAt: doc.createdAt,
                 });
               } catch (e) {
-                console.error(`Unable to create version corresponding with collection ${slug} document ID ${doc.id}`, e?.errors || e);
+                console.error(
+                  `Unable to create version corresponding with collection ${slug} document ID ${doc.id}`,
+                  e?.errors || e
+                );
               }
 
               console.log(
@@ -215,6 +372,16 @@ const ensureAtLeastOneVersion = async () => {
             }
           })
         );
+
+        const versionsWithoutParentDocs = await VersionsModel.deleteMany({
+          parent: { $nin: existingCollectionDocIds },
+        });
+
+        if (versionsWithoutParentDocs.deletedCount > 0) {
+          console.log(
+            `Removing ${versionsWithoutParentDocs.deletedCount} versions for ${slug} collection - parent documents no longer exist`
+          );
+        }
       }
     })
   );
@@ -226,9 +393,9 @@ const ensureAtLeastOneVersion = async () => {
 ensureAtLeastOneVersion();
 ```
 
-Make sure your environment variables match the script's values above and then run `ts-node -T migrateVersions.ts` in your terminal.
+Make sure your environment variables match the script's values above and then run `PAYLOAD_CONFIG_PATH=src/payload.config.ts npx ts-node -T migrateVersions.ts` in your terminal. Make sure that you point the command to your Payload config.
 
-This migration script will ensure that there is at least one corresponding version for each of your draft-enabled documents. It won't modify or delete any of your existing documents at all.
+This migration script will ensure that there is at least one corresponding version for each of your draft-enabled documents. It will also delete any versions that no longer have parent documents.
 
 ### 👀 Example of a properly migrated project
 

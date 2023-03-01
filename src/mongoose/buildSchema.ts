@@ -40,7 +40,6 @@ export type BuildSchemaOptions = {
   allowIDField?: boolean
   disableUnique?: boolean
   draftsEnabled?: boolean
-  global?: boolean
   indexSortableFields?: boolean
 }
 
@@ -56,6 +55,10 @@ const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSc
 
   if ((schema.unique && (field.localized || draftsEnabled))) {
     schema.sparse = true;
+  }
+
+  if (field.hidden) {
+    schema.hidden = true;
   }
 
   return schema;
@@ -241,12 +244,16 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           let localeSchema: { [key: string]: any } = {};
 
           if (hasManyRelations) {
-            localeSchema._id = false;
-            localeSchema.value = {
+            localeSchema = {
+              ...formatBaseSchema(field, buildSchemaOptions),
               type: Schema.Types.Mixed,
-              refPath: `${field.name}.${locale}.relationTo`,
+              _id: false,
+              value: {
+                type: Schema.Types.Mixed,
+                refPath: `${field.name}.${locale}.relationTo`,
+              },
+              relationTo: { type: String, enum: field.relationTo },
             };
-            localeSchema.relationTo = { type: String, enum: field.relationTo };
           } else {
             localeSchema = {
               ...formatBaseSchema(field, buildSchemaOptions),
@@ -263,12 +270,16 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         localized: true,
       };
     } else if (hasManyRelations) {
-      schemaToReturn._id = false;
-      schemaToReturn.value = {
+      schemaToReturn = {
+        ...formatBaseSchema(field, buildSchemaOptions),
         type: Schema.Types.Mixed,
-        refPath: `${field.name}.relationTo`,
+        _id: false,
+        value: {
+          type: Schema.Types.Mixed,
+          refPath: `${field.name}.relationTo`,
+        },
+        relationTo: { type: String, enum: field.relationTo },
       };
-      schemaToReturn.relationTo = { type: String, enum: field.relationTo };
 
       if (field.hasMany) {
         schemaToReturn = {

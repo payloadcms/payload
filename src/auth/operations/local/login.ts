@@ -9,7 +9,7 @@ import { APIError } from '../../../errors';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
-  data: Omit<GeneratedTypes['collections'][TSlug], 'id'> & {
+  data: {
     email: string
     password: string
   }

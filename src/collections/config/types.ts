@@ -18,7 +18,7 @@ interface PassportLocalModel {
 }
 
 export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {
-  buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
+  buildQuery: (query: unknown, locale: string, queryHiddenFields?: boolean) => Record<string, unknown>
 }
 
 export interface AuthCollectionModel extends CollectionModel {
@@ -323,7 +323,6 @@ export type AuthCollection = {
 
 export type TypeWithID = {
   id: string | number
-  [key: string]: unknown
 }
 
 export type TypeWithTimestamps = {

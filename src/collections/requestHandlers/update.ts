@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import formatSuccessResponse from '../../express/responses/formatSuccess';
+import { Document } from '../../types';
 import update from '../operations/update';
 
 export type UpdateResult = {

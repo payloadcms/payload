@@ -22,7 +22,15 @@ export type FileData = {
   width: number;
   height: number;
   sizes: FileSizes;
+  tempFilePath?: string;
 };
+
+export type ProbedImageSize = {
+  width: number,
+  height: number,
+  type: string,
+  mime: string,
+}
 
 /**
  * Params sent to the sharp toFormat() function

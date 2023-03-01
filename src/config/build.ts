@@ -8,14 +8,17 @@ import sanitize from './sanitize';
  * @param config Payload Config
  * @returns Built and sanitized Payload Config
  */
-export function buildConfig(config: Config): SanitizedConfig {
+export async function buildConfig(config: Config): Promise<SanitizedConfig> {
   if (Array.isArray(config.plugins)) {
-    const configWithPlugins = config.plugins.reduce(
-      (updatedConfig, plugin) => plugin(updatedConfig),
-      config,
+    const configAfterPlugins = await config.plugins.reduce(
+      async (acc, plugin) => {
+        const configAfterPlugin = await acc;
+        return plugin(configAfterPlugin);
+      },
+      Promise.resolve(config),
     );
 
-    const sanitizedConfig = sanitize(configWithPlugins);
+    const sanitizedConfig = sanitize(configAfterPlugins);
 
     return sanitizedConfig;
   }

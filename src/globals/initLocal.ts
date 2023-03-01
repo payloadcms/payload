@@ -27,6 +27,7 @@ export default function initGlobalsLocal(ctx: Payload): void {
             draftsEnabled: true,
             options: {
               timestamps: false,
+              minimize: false,
             },
           },
         );

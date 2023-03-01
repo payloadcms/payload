@@ -1,6 +1,8 @@
 @import '../../../scss/styles.scss';
 
 .column-selector {
+  display: flex;
+  flex-wrap: wrap;
   background: var(--theme-elevation-50);
   padding: base(1) base(1) base(.5);
 

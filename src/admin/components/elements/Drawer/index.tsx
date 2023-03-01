@@ -4,7 +4,9 @@ import { useWindowInfo } from '@faceless-ui/window-info';
 import { useTranslation } from 'react-i18next';
 import { Props, TogglerProps } from './types';
 import { EditDepthContext, useEditDepth } from '../../utilities/EditDepth';
+import { Gutter } from '../Gutter';
 import './index.scss';
+import X from '../../icons/X';
 
 const baseClass = 'drawer';
 
@@ -50,6 +52,9 @@ export const Drawer: React.FC<Props> = ({
   slug,
   children,
   className,
+  header,
+  title,
+  gutter = true,
 }) => {
   const { t } = useTranslation('general');
   const { closeModal, modalState } = useModal();
@@ -95,11 +100,32 @@ export const Drawer: React.FC<Props> = ({
           aria-label={t('close')}
         />
         <div className={`${baseClass}__content`}>
-          <div className={`${baseClass}__content-children`}>
+          <Gutter
+            className={`${baseClass}__content-children`}
+            right={gutter}
+            left={gutter}
+          >
             <EditDepthContext.Provider value={drawerDepth + 1}>
+              {header && header}
+              {header === undefined && (
+                <div className={`${baseClass}__header`}>
+                  <h2 className={`${baseClass}__header__title`}>
+                    {title}
+                  </h2>
+                  <button
+                    className={`${baseClass}__header__close`}
+                    id={`close-drawer__${slug}`}
+                    type="button"
+                    onClick={() => closeModal(slug)}
+                    aria-label={t('close')}
+                  >
+                    <X />
+                  </button>
+                </div>
+              )}
               {children}
             </EditDepthContext.Provider>
-          </div>
+          </Gutter>
         </div>
       </Modal>
     );

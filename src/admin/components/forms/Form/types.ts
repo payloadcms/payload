@@ -39,15 +39,8 @@ export type Props = {
   log?: boolean
   validationOperation?: 'create' | 'update'
   children?: React.ReactNode
-} & (
-    {
-      action: string
-      disableNativeFormSubmission?: boolean
-    } | {
-      action?: string
-      disableNativeFormSubmission?: never
-    }
-  )
+  action?: string
+}
 
 export type SubmitOptions = {
   action?: string

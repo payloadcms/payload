@@ -24,7 +24,6 @@ export type Arguments = {
 
 async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
   const {
-    collection,
     collection: {
       Model,
       config: collectionConfig,
@@ -103,9 +102,10 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   const prevDocWithLocales = await getLatestCollectionVersion({
     payload,
-    collection,
     id: parentDocID,
     query,
+    Model,
+    config: collectionConfig,
   });
 
   // /////////////////////////////////////
@@ -122,8 +122,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
+  result = JSON.parse(JSON.stringify(result));
   result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////

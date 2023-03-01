@@ -24,11 +24,11 @@ export type Arguments = {
   disableErrors?: boolean
   pagination?: boolean
   showHiddenFields?: boolean
+  queryHiddenFields?: boolean
   draft?: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function find<T extends TypeWithID>(
+async function find<T extends TypeWithID & Record<string, unknown>>(
   incomingArgs: Arguments,
 ): Promise<PaginatedDocs<T>> {
   let args = incomingArgs;
@@ -66,6 +66,7 @@ async function find<T extends TypeWithID>(
     overrideAccess,
     disableErrors,
     showHiddenFields,
+    queryHiddenFields,
     pagination = true,
   } = args;
 
@@ -125,7 +126,7 @@ async function find<T extends TypeWithID>(
     }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery(queryToBuild, locale, queryHiddenFields);
 
   // /////////////////////////////////////
   // Find

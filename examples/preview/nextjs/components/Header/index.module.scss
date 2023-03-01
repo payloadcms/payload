@@ -1,0 +1,18 @@
+@use '../../css/queries.scss' as *;
+
+.header {
+  padding: var(--base) 0;
+  z-index: var(--header-z-index);
+}
+
+.wrap {
+  display: flex;
+  justify-content: space-between;
+}
+
+.nav {
+  a {
+    text-decoration: none;
+    margin-left: var(--base);
+  }
+}

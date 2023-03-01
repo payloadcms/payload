@@ -57,7 +57,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   const [{ data, isLoading: isLoadingData }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
-    { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
+    { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' }, initialData: null },
   );
 
   const dataToRender = locationState?.data || data;
@@ -77,7 +77,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
       setInitialState(state);
     };
 
-    awaitInitialState();
+    if (dataToRender) awaitInitialState();
   }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t]);
 
   const isLoading = !initialState || !docPermissions || isLoadingData;

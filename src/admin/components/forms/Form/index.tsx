@@ -31,7 +31,6 @@ const baseClass = 'form';
 const Form: React.FC<Props> = (props) => {
   const {
     disabled,
-    disableNativeFormSubmission = true,
     onSubmit,
     method,
     action,
@@ -142,7 +141,7 @@ const Form: React.FC<Props> = (props) => {
 
     const isValid = skipValidation ? true : await contextRef.current.validateForm();
 
-    setSubmitted(true);
+    if (!skipValidation) setSubmitted(true);
 
     // If not valid, prevent submission
     if (!isValid) {
@@ -160,7 +159,6 @@ const Form: React.FC<Props> = (props) => {
       };
 
       onSubmit(fields, data);
-      if (disableNativeFormSubmission) return;
     }
 
     const formData = contextRef.current.createFormData(overrides);
@@ -301,7 +299,6 @@ const Form: React.FC<Props> = (props) => {
     t,
     i18n,
     waitForAutocomplete,
-    disableNativeFormSubmission,
   ]);
 
   const getFields = useCallback(() => contextRef.current.fields, [contextRef]);

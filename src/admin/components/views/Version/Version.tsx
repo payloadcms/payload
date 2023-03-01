@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import format from 'date-fns/format';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
@@ -21,6 +20,7 @@ import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/
 import { FieldPermissions } from '../../../../auth';
 import { useLocale } from '../../utilities/Locale';
 import { Gutter } from '../../elements/Gutter';
+import { formatDate } from '../../../utilities/formatDate';
 
 import './index.scss';
 
@@ -114,7 +114,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
           url: `${admin}/collections/${collection.slug}/${id}/versions`,
         },
         {
-          label: doc?.createdAt ? format(new Date(doc.createdAt), dateFormat) : '',
+          label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
         },
       ];
     }
@@ -130,7 +130,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
           url: `${admin}/globals/${global.slug}/versions`,
         },
         {
-          label: doc?.createdAt ? format(new Date(doc.createdAt), dateFormat) : '',
+          label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
         },
       ];
     }
@@ -140,7 +140,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
   let metaTitle: string;
   let metaDesc: string;
-  const formattedCreatedAt = doc?.createdAt ? format(new Date(doc.createdAt), dateFormat) : '';
+  const formattedCreatedAt = doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '';
 
   if (collection) {
     const useAsTitle = collection?.admin?.useAsTitle || 'id';

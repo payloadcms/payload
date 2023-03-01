@@ -94,6 +94,7 @@
     "chooseDocumentToLink": "Bağlantı verilecek bir döküman seçin.",
     "customURL": "Özel URL",
     "editLink": "Bağlantıyı Düzenle",
+    "editRelationship": "İlişkiyi Ekle",
     "enterURL": "Bir URL girin",
     "internalLink": "İç bağlantı",
     "linkType": "Bağlantı türü",
@@ -226,6 +227,20 @@
     "user": "kullanıcı",
     "users": "kullanıcı",
     "welcome": "Hoşgeldiniz"
+  },
+  "operators": {
+    "equals": "eşittir",
+    "isNotEqualTo": "eşit değildir",
+    "isIn": "içinde",
+    "isNotIn": "içinde değil",
+    "exists": "var",
+    "isGreaterThan": "şundan büyüktür",
+    "isLessThan": "küçüktür",
+    "isLessThanOrEqualTo": "küçüktür veya eşittir",
+    "isGreaterThanOrEqualTo": "büyüktür veya eşittir",
+    "near": "yakın",
+    "isLike": "gibidir",
+    "contains": "içerir"
   },
   "upload": {
     "dragAndDrop": "Bir dosya sürükleyip bırakabilirsiniz",

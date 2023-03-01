@@ -50,7 +50,8 @@ export const promise = async ({
     && fieldAffectsData(field)
     && (typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null)
     && field.localized
-    && req.locale !== 'all';
+    && req.locale !== 'all'
+    && req.payload.config.localization;
 
   if (shouldHoistLocalizedValue) {
     // replace actual value with localized value before sanitizing
@@ -110,7 +111,7 @@ export const promise = async ({
     }
 
     case 'richText': {
-      if (((field.admin?.elements?.includes('relationship') || field.admin?.elements?.includes('upload')) || !field?.admin?.elements)) {
+      if (((field.admin?.elements?.includes('relationship') || field.admin?.elements?.includes('upload') || field.admin?.elements?.includes('link')) || !field?.admin?.elements)) {
         populationPromises.push(richTextRelationshipPromise({
           currentDepth,
           depth,
