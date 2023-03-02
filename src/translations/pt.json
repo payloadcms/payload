@@ -178,7 +178,7 @@
     "newPassword": "Nova Senha",
     "noFiltersSet": "Nenhum filtro definido",
     "noLabel": "<Nenhum(a) {{label}}>",
-    "noResults": "Nenhum(a) {{label}} encontrado(a). Ou nenhum(a) {{label}} existe ainda, ou nenhum(a) corresponde aos filtros que você especificou acima.",
+    "noResults": "Nenhum {{label}} encontrado. Ou nenhum(a) {{label}} existe ainda, ou nenhum(a) corresponde aos filtros que você especificou acima.",
     "noValue": "Nenhum valor",
     "none": "Nenhum",
     "notFound": "Não Encontrado",
