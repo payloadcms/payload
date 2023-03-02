@@ -7,9 +7,34 @@ import './index.scss';
 
 const baseClass = 'pill';
 
-const Pill: React.FC<Props> = (props) => {
-  const {
+const DraggablePill: React.FC<Props> = (props) => {
+  const { className, id } = props;
+
+  const { attributes, listeners, transform, setNodeRef, isDragging } = useDraggableSortable({
     id,
+  });
+
+  return (
+    <StaticPill
+      {...props}
+      className={[
+        isDragging && `${baseClass}--is-dragging`,
+        className,
+      ].filter(Boolean).join(' ')}
+      elementProps={{
+        ...listeners,
+        ...attributes,
+        style: {
+          transform,
+        },
+        ref: setNodeRef,
+      }}
+    />
+  );
+};
+
+const StaticPill: React.FC<Props> = (props) => {
+  const {
     className,
     to,
     icon,
@@ -18,11 +43,8 @@ const Pill: React.FC<Props> = (props) => {
     pillStyle = 'light',
     draggable,
     children,
+    elementProps,
   } = props;
-
-  const { attributes, listeners, transform, setNodeRef, isDragging } = useDraggableSortable({
-    id,
-  });
 
   const classes = [
     baseClass,
@@ -33,7 +55,6 @@ const Pill: React.FC<Props> = (props) => {
     icon && `${baseClass}--has-icon`,
     icon && `${baseClass}--align-icon-${alignIcon}`,
     draggable && `${baseClass}--draggable`,
-    isDragging && `${baseClass}--is-dragging`,
   ].filter(Boolean).join(' ');
 
   let Element: ElementType | React.FC<RenderedTypeProps> = 'div';
@@ -43,17 +64,10 @@ const Pill: React.FC<Props> = (props) => {
 
   return (
     <Element
+      {...elementProps}
       className={classes}
       type={Element === 'button' ? 'button' : undefined}
       to={to || undefined}
-      {...draggable ? {
-        ...listeners,
-        ...attributes,
-        style: {
-          transform,
-        },
-        ref: setNodeRef,
-      } : {}}
       onClick={onClick}
     >
       {(icon && alignIcon === 'left') && (
@@ -69,6 +83,13 @@ const Pill: React.FC<Props> = (props) => {
       )}
     </Element>
   );
+};
+
+const Pill: React.FC<Props> = (props) => {
+  const { draggable } = props;
+
+  if (draggable) return <DraggablePill {...props} />;
+  return <StaticPill {...props} />;
 };
 
 export default Pill;
