@@ -19,8 +19,8 @@ const buildColumns = ({
   t: TFunction,
   cellProps?: Partial<CellProps>[]
 }): Column[] => {
-  const flattenedFields = flattenFields([
-    ...collection.fields,
+  // combine the configured fields with the base fields then remove duplicates
+  const combinedFields = collection.fields.concat([
     {
       name: 'id',
       type: 'text',
@@ -36,7 +36,9 @@ const buildColumns = ({
       type: 'date',
       label: t('createdAt'),
     },
-  ]);
+  ]).filter((field, index, self) => self.findIndex((thisField) => 'name' in thisField && 'name' in field && thisField.name === field.name) === index);
+
+  const flattenedFields = flattenFields(combinedFields);
 
   // sort the fields to the order of activeColumns
   const sortedFields = flattenedFields.sort((a, b) => {
