@@ -1,4 +1,4 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
+import { Config as GeneratedTypes } from '../../../generated-types';
 import { Document, Where } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import { Payload } from '../../../payload';
@@ -7,6 +7,7 @@ import deleteByID from '../deleteByID';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { BulkOperationResult } from '../../config/types';
 
 export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -32,9 +33,9 @@ export type ManyOptions<T extends keyof GeneratedTypes['collections']> = BaseOpt
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = ByIDOptions<TSlug> | ManyOptions<TSlug>
 
 async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ByIDOptions<TSlug>): Promise<GeneratedTypes['collections'][TSlug]>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ManyOptions<TSlug>): Promise<GeneratedTypes['collections'][TSlug][]>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | GeneratedTypes['collections'][TSlug][]>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | GeneratedTypes['collections'][TSlug][]> {
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ManyOptions<TSlug>): Promise<BulkOperationResult<TSlug>>
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>>
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>> {
   const {
     collection: collectionSlug,
     depth,

@@ -8,16 +8,17 @@ import auth from '../../../auth/operations/local';
 import findVersionByID from './findVersionByID';
 import findVersions from './findVersions';
 import restoreVersion from './restoreVersion';
+import { BulkOperationResult } from '../../config/types';
 
 async function localUpdate <T extends keyof GeneratedTypes['collections']>(options: UpdateByIDOptions<T>): Promise<GeneratedTypes['collections'][T]>
-async function localUpdate <T extends keyof GeneratedTypes['collections']>(options: UpdateManyOptions<T>): Promise<GeneratedTypes['collections'][T][]>
-async function localUpdate <T extends keyof GeneratedTypes['collections']>(options: UpdateOptions<T>): Promise<GeneratedTypes['collections'][T] | GeneratedTypes['collections'][T][]> {
+async function localUpdate <T extends keyof GeneratedTypes['collections']>(options: UpdateManyOptions<T>): Promise<BulkOperationResult<T>>
+async function localUpdate <T extends keyof GeneratedTypes['collections']>(options: UpdateOptions<T>): Promise<GeneratedTypes['collections'][T] | BulkOperationResult<T>> {
   return update<T>(this, options);
 }
 
 async function localDelete <T extends keyof GeneratedTypes['collections']>(options: DeleteByIDOptions<T>): Promise<GeneratedTypes['collections'][T]>
-async function localDelete <T extends keyof GeneratedTypes['collections']>(options: DeleteManyOptions<T>): Promise<GeneratedTypes['collections'][T][]>
-async function localDelete <T extends keyof GeneratedTypes['collections']>(options: DeleteOptions<T>): Promise<GeneratedTypes['collections'][T] | GeneratedTypes['collections'][T][]> {
+async function localDelete <T extends keyof GeneratedTypes['collections']>(options: DeleteManyOptions<T>): Promise<BulkOperationResult<T>>
+async function localDelete <T extends keyof GeneratedTypes['collections']>(options: DeleteOptions<T>): Promise<GeneratedTypes['collections'][T] | BulkOperationResult<T>> {
   return deleteLocal<T>(this, options);
 }
 

@@ -9,6 +9,7 @@ import { PayloadRequest } from '../../express/types';
 import { IncomingAuthType, Auth } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
+import { Config as GeneratedTypes } from '../../generated-types';
 
 type Register<T = any> = (doc: T, password: string) => T;
 
@@ -315,6 +316,14 @@ export type Collection = {
     updateMutationInputType: GraphQLNonNull<any>
   }
 };
+
+export type BulkOperationResult<TSlug extends keyof GeneratedTypes['collections']> = {
+  docs: GeneratedTypes['collections'][TSlug][],
+  errors: {
+    message: string
+    id: GeneratedTypes['collections'][TSlug]['id']
+  }[]
+}
 
 export type AuthCollection = {
   Model: AuthCollectionModel;

@@ -4,7 +4,7 @@ import path from 'path';
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Document, Where } from '../../types';
-import { Collection } from '../config/types';
+import { BulkOperationResult, Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { APIError, ValidationError, ErrorDeletingFile } from '../../errors';
@@ -37,16 +37,9 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   overwriteExistingFiles?: boolean
   draft?: boolean
 }
-
 async function update<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
-): Promise<{
-  docs: GeneratedTypes['collections'][TSlug][],
-  errors: {
-    message: string
-    id: GeneratedTypes['collections'][TSlug]['id']
-  }[]
-}> {
+): Promise<BulkOperationResult<TSlug>> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
