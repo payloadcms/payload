@@ -7,10 +7,40 @@
 
 export interface Config {
   collections: {
+    'autosave-posts': AutosavePost;
+    'draft-posts': DraftPost;
+    'version-posts': VersionPost;
     users: User;
-    pages: Page;
   };
-  globals: {};
+  globals: {
+    'autosave-global': AutosaveGlobal;
+    'draft-global': DraftGlobal;
+  };
+}
+export interface AutosavePost {
+  id: string;
+  title: string;
+  description: string;
+  _status?: 'draft' | 'published';
+  createdAt: string;
+  updatedAt: string;
+}
+export interface DraftPost {
+  id: string;
+  title: string;
+  description: string;
+  radio?: 'test';
+  select?: ('test1' | 'test2')[];
+  _status?: 'draft' | 'published';
+  createdAt: string;
+  updatedAt: string;
+}
+export interface VersionPost {
+  id: string;
+  title: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
 }
 export interface User {
   id: string;
@@ -23,9 +53,13 @@ export interface User {
   updatedAt: string;
   password?: string;
 }
-export interface Page {
+export interface AutosaveGlobal {
   id: string;
-  title?: string;
-  createdAt: string;
-  updatedAt: string;
+  title: string;
+  _status?: 'draft' | 'published';
+}
+export interface DraftGlobal {
+  id: string;
+  title: string;
+  _status?: 'draft' | 'published';
 }
