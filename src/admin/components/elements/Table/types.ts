@@ -7,11 +7,12 @@ export type Column = {
   name: FieldBase['name']
   active: boolean
   components: {
-    Heading: React.ReactNode
-    renderCell: (row: any, data: any) => React.ReactNode
+    Heading?: React.ReactNode
+    renderCell?: (row: any, data: any) => React.ReactNode
   },
 }
 
 export type Props = {
   data: unknown[]
+  columns?: Column[]
 }
