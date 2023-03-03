@@ -73,11 +73,20 @@ const Events: CollectionConfig = {
             {
               name: 'totalPrice',
               type: 'number',
+              access: {
+                create: () => false,
+                update: () => false,
+              },
               admin: {
                 description: 'USD',
                 readOnly: true,
               },
               hooks: {
+                beforeChange: [({ siblingData }) => {
+                  // Mutate the sibling data to prevent DB storage
+                  // eslint-disable-next-line no-param-reassign
+                  siblingData.totalPrice = undefined;
+                }],
                 afterRead: [getTotalPrice],
               },
             },
