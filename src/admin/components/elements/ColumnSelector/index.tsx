@@ -27,6 +27,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
   const { i18n } = useTranslation();
   const uuid = useId();
   const editDepth = useEditDepth();
+
   if (!columns) { return null; }
 
   return (
