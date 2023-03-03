@@ -6,12 +6,13 @@ import './index.scss';
 
 const baseClass = 'table';
 
-export const Table: React.FC<Props> = ({ data }) => {
+export const Table: React.FC<Props> = ({ data, columns: columnsFromProps }) => {
   const {
-    columns,
+    columns: columnsFromContext,
   } = useTableColumns();
 
-  const activeColumns = columns.filter((col) => col.active);
+  const columns = (columnsFromProps || columnsFromContext);
+  const activeColumns = columns?.filter((col) => col.active);
 
   if (!activeColumns || activeColumns.length === 0) {
     return (

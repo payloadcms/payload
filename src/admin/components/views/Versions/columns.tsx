@@ -40,7 +40,7 @@ const TextCell: React.FC<{children?: React.ReactNode}> = ({ children }) => (
   </span>
 );
 
-export const buildColumns = (
+export const buildVersionColumns = (
   collection: SanitizedCollectionConfig,
   global: SanitizedGlobalConfig,
   t: TFunction,
