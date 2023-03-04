@@ -1,4 +1,4 @@
-import { text, textarea, password, select, point, number } from './validations';
+import { text, textarea, password, select, point, number, relationship } from './validations';
 import { ValidateOptions } from './config/types';
 
 const t = jest.fn((string) => string);
@@ -182,6 +182,66 @@ describe('Field Validations', () => {
       const val = [0.1];
       const result = point(val, options);
       expect(result).not.toBe(true);
+    });
+  });
+
+  describe('relationship', () => {
+    options.relationTo = 'relation';
+    options.payload = {
+      collections: {
+        relation: {
+          config: {
+            slug: 'relation',
+            fields: [{
+              name: 'id',
+              type: 'text',
+            }],
+          },
+        },
+      },
+    };
+    it('should handle required', async () => {
+      options.required = true;
+      const val = undefined;
+      const result = await relationship(val, options);
+      expect(result).not.toBe(true);
+    });
+    it('should handle required with hasMany', async () => {
+      options.required = true;
+      options.hasMany = true;
+      const val = [];
+      const result = await relationship(val, options);
+      expect(result).not.toBe(true);
+    });
+    it('should enforce hasMany min', async () => {
+      const minOptions = {
+        ...options,
+        hasMany: true,
+        min: 2,
+      };
+
+      const val = ['a'];
+
+      const result = await relationship(val, minOptions);
+      expect(result).not.toBe(true);
+
+      const allowed = await relationship(['a', 'b'], minOptions);
+      expect(allowed).toStrictEqual(true);
+    });
+    it('should enforce hasMany max', async () => {
+      const maxOptions = {
+        ...options,
+        max: 2,
+        hasMany: true,
+      };
+      let val = ['a', 'b', 'c'];
+
+      const result = await relationship(val, maxOptions);
+      expect(result).not.toBe(true);
+
+      val = ['a'];
+      const allowed = await relationship(val, maxOptions);
+      expect(allowed).toStrictEqual(true);
     });
   });
 
