@@ -41,6 +41,54 @@ const Submit: React.FC<{disabled: boolean, action: string}> = ({ action, disable
     </FormSubmit>
   );
 };
+const Publish: React.FC<{disabled: boolean, action: string}> = ({ action, disabled }) => {
+  const { submit } = useForm();
+  const { t } = useTranslation('versions');
+
+  const save = useCallback(() => {
+    submit({
+      skipValidation: true,
+      method: 'PATCH',
+      overrides: {
+        _status: 'published',
+      },
+      action,
+    });
+  }, [action, submit]);
+
+  return (
+    <FormSubmit
+      onClick={save}
+      disabled={disabled}
+    >
+      {t('publishChanges')}
+    </FormSubmit>
+  );
+};
+const SaveDraft: React.FC<{disabled: boolean, action: string}> = ({ action, disabled }) => {
+  const { submit } = useForm();
+  const { t } = useTranslation('versions');
+
+  const save = useCallback(() => {
+    submit({
+      skipValidation: true,
+      method: 'PATCH',
+      overrides: {
+        _status: 'draft',
+      },
+      action,
+    });
+  }, [action, submit]);
+
+  return (
+    <FormSubmit
+      onClick={save}
+      disabled={disabled}
+    >
+      {t('saveDraft')}
+    </FormSubmit>
+  );
+};
 const EditMany: React.FC<Props> = (props) => {
   const {
     resetParams,
@@ -77,13 +125,7 @@ const EditMany: React.FC<Props> = (props) => {
     <div className={baseClass}>
       <DrawerToggler
         slug={drawerSlug}
-        className={[
-          `${baseClass}__toggle`,
-          // TODO: improve
-          'pill',
-          'pill--style-light',
-          'pill--has-action',
-        ].join(' ')}
+        className={`${baseClass}__toggle`}
         aria-label={t('edit')}
         onClick={() => {
           setSelected([]);
@@ -131,6 +173,18 @@ const EditMany: React.FC<Props> = (props) => {
                         action={`${serverURL}${api}/${slug}${getQueryParams()}`}
                         disabled={selected.length === 0}
                       />
+                      { collection.versions && (
+                        <React.Fragment>
+                          <Publish
+                            action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                            disabled={selected.length === 0}
+                          />
+                          <SaveDraft
+                            action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                            disabled={selected.length === 0}
+                          />
+                        </React.Fragment>
+                      )}
                     </div>
                   </div>
                 </div>

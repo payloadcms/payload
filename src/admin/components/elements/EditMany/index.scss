@@ -2,6 +2,36 @@
 
 .edit-many {
 
+  &__toggle {
+    font-size: 1rem;
+    line-height: base(1);
+    display: inline-flex;
+    background: var(--theme-elevation-150);
+    color: var(--theme-elevation-800);
+    border-radius: $style-radius-s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 0;
+    padding: 0 base(.25);
+    align-items: center;
+    cursor: pointer;
+    text-decoration: none;
+
+    &:active,
+    &:focus {
+      outline: none;
+    }
+
+    &:hover {
+      background: var(--theme-elevation-100);
+    }
+
+    &:active {
+      background: var(--theme-elevation-100);
+    }
+  }
+
   &__form {
     height: 100%;
   }
