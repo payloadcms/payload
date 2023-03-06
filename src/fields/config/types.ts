@@ -290,7 +290,15 @@ export type RelationshipField = FieldBase & {
     isSortable?: boolean;
     allowCreate?: boolean;
   }
-}
+} & ({
+  hasMany: true
+  min?: number
+  max?: number
+} | {
+  hasMany?: false | undefined
+  min?: undefined
+  max?: undefined
+})
 
 export type ValueWithRelation = {
   relationTo: string
