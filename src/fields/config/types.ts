@@ -78,17 +78,17 @@ export type Labels = {
   plural: Record<string, string> | string;
 };
 
-export type ValidateOptions<T, S, F> = {
-  data: Partial<T>
-  siblingData: Partial<S>
+export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
+  data: Partial<TData>
+  siblingData: Partial<TSiblingData>
   id?: string | number
   user?: Partial<User>
   operation?: Operation
   payload?: Payload
   t: TFunction
-} & F;
+} & TFieldConfig;
 
-export type Validate<T = any, S = any, F = any> = (value: T, options: ValidateOptions<F, S, Partial<F>>) => string | true | Promise<string | true>;
+export type Validate<TValue = any, TData = any, TSiblingData = any, TFieldConfig = any> = (value: TValue, options: ValidateOptions<TData, TSiblingData, TFieldConfig>) => string | true | Promise<string | true>;
 
 export type OptionObject = {
   label: Record<string, string> | string
