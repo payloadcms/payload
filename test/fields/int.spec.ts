@@ -12,11 +12,14 @@ import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSl
 import { defaultNumber, numberDoc } from './collections/Number';
 
 let client;
+let serverURL;
+let config;
 
 describe('Fields', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
-    const config = await configPromise;
+    ({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }));
+    config = await configPromise;
+
     client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
     await client.login();
   });
@@ -536,6 +539,37 @@ describe('Fields', () => {
       });
 
       expect(createdJSON.json.state).toEqual({});
+    });
+
+    it('should save empty json objects via REST', async () => {
+      const jsonClient = new RESTClient(config, { serverURL, defaultSlug: 'json-fields' });
+      await jsonClient.login();
+
+      const { doc: ogDoc } = await jsonClient.create({
+        auth: true,
+        data: {
+          json: {
+            empty: {},
+            state: {
+              foo: 'bar',
+            },
+          },
+        },
+      });
+
+      expect(ogDoc.json.empty).toEqual({});
+
+      const { doc } = await jsonClient.update({
+        auth: true,
+        id: ogDoc.id,
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(doc.json.state).toEqual({});
     });
   });
 

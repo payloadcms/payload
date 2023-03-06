@@ -57,6 +57,19 @@ describe('globals', () => {
       expect(doc.array).toMatchObject(array);
       expect(doc.id).toBeDefined();
     });
+
+    it('should save empty json objects', async () => {
+      const { doc } = await client.updateGlobal({
+        slug,
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(doc.json.state).toEqual({});
+    });
   });
 
   describe('local', () => {
