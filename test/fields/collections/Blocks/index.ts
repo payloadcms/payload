@@ -205,7 +205,12 @@ const BlockFields: CollectionConfig = {
 };
 
 export const blocksDoc = {
-  blocks: blocksFieldSeedData,
+  blocks: Array.from(Array(100).keys()).reduce((blocks) => {
+    return [
+      ...blocks,
+      ...blocksFieldSeedData,
+    ];
+  }, []),
   localizedBlocks: blocksFieldSeedData,
 };
 
