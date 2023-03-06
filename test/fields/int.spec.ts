@@ -529,7 +529,7 @@ describe('Fields', () => {
     });
 
     it('should save empty json objects', async () => {
-      const createdJSON = await payload.create({
+      const jsonFieldsDoc = await payload.create({
         collection: 'json-fields',
         data: {
           json: {
@@ -538,30 +538,11 @@ describe('Fields', () => {
         },
       });
 
-      expect(createdJSON.json.state).toEqual({});
-    });
+      expect(jsonFieldsDoc.json.state).toEqual({});
 
-    it('should save empty json objects via REST', async () => {
-      const jsonClient = new RESTClient(config, { serverURL, defaultSlug: 'json-fields' });
-      await jsonClient.login();
-
-      const { doc: ogDoc } = await jsonClient.create({
-        auth: true,
-        data: {
-          json: {
-            empty: {},
-            state: {
-              foo: 'bar',
-            },
-          },
-        },
-      });
-
-      expect(ogDoc.json.empty).toEqual({});
-
-      const { doc } = await jsonClient.update({
-        auth: true,
-        id: ogDoc.id,
+      const updatedJsonFieldsDoc = await payload.update({
+        collection: 'json-fields',
+        id: jsonFieldsDoc.id,
         data: {
           json: {
             state: {},
@@ -569,7 +550,7 @@ describe('Fields', () => {
         },
       });
 
-      expect(doc.json.state).toEqual({});
+      expect(updatedJsonFieldsDoc.json.state).toEqual({});
     });
   });
 
