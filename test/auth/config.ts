@@ -2,6 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
+import { admins } from './admins';
 
 export const slug = 'users';
 
@@ -35,6 +36,15 @@ export default buildConfig({
           required: true,
           saveToJWT: true,
           hasMany: true,
+        },
+        {
+          name: 'name',
+          type: 'text',
+          defaultValue: 'Dev',
+          access: {
+            create: admins,
+            read: admins,
+          },
         },
       ],
     },
