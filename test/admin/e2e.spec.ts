@@ -312,8 +312,10 @@ describe('admin', () => {
         await wait(1000);
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
       });
+    });
 
-      test('drag and reorder columns', async () => {
+    describe('table columns', () => {
+      test('should drag to reorder columns and save to preferences', async () => {
         await createPost();
 
         // open the column controls
@@ -345,7 +347,7 @@ describe('admin', () => {
         await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
       });
 
-      test('reorder columns from drawer', async () => {
+      test('should render drawer columns in order', async () => {
         await page.goto(url.create);
 
         // Open the drawer
@@ -353,16 +355,59 @@ describe('admin', () => {
         const listDrawer = page.locator('[id^=list-drawer_1_]');
         await expect(listDrawer).toBeVisible();
 
-        await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select').click();
-        // select the "post en" collection
+        const collectionSelector = await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select');
+        const columnSelector = await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns');
+
+        // select the "Post en" collection
+        await collectionSelector.click();
         await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"').click();
 
         // open the column controls
-        await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns').click();
+        await columnSelector.click();
         await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
 
         // ensure that the columns are in the correct order
         await expect(await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
+      });
+
+      test('should retain preferences when changing drawer collections', async () => {
+        await page.goto(url.create);
+
+        // Open the drawer
+        await page.locator('.rich-text .list-drawer__toggler').click();
+        const listDrawer = page.locator('[id^=list-drawer_1_]');
+        await expect(listDrawer).toBeVisible();
+
+        const collectionSelector = await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select');
+        const columnSelector = await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns');
+
+        // open the column controls
+        await columnSelector.click();
+        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+
+        // deselect the "id" column
+        await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column >> text=ID').click();
+
+        // select the "Post en" collection
+        await collectionSelector.click();
+        await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"').click();
+
+        // deselect the "number" column
+        await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column >> text=Number').click();
+
+        // select the "User" collection again
+        await collectionSelector.click();
+        await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="User"').click();
+
+        // ensure that the "id" column is still deselected
+        await expect(await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).not.toHaveClass('column-selector__column--active');
+
+        // select the "Post en" collection again
+        await collectionSelector.click();
+        await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"').click();
+
+        // ensure that the "number" column is still deselected
+        await expect(await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).not.toHaveClass('column-selector__column--active');
       });
     });
 
