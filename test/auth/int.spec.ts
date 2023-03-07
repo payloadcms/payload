@@ -261,17 +261,22 @@ describe('Auth', () => {
           expect(lockUntil).toBeDefined();
         });
 
-        it('should exclude access controlled field from [collection-name]/me if not admin', async () => {
+        it('should exclude access controlled field from [collection-name]/me', async () => {
           const apiKey = '0123456789ABCDEFGH';
           const user = await payload.create({
             collection: slug,
             data: {
               email: 'test@example.com',
               password: 'test',
-              roles: ['user'], // Not an admin
               apiKey,
             },
           });
+
+          const retrievedUser = await payload.findByID({
+            collection: slug,
+            id: user.id,
+          });
+
           const response = await fetch(`${apiUrl}/${slug}/me`, {
             headers: {
               ...headers,
@@ -281,6 +286,7 @@ describe('Auth', () => {
 
           const data = await response.json();
 
+          expect(retrievedUser.name).toBeDefined();
           expect(response.status).toBe(200);
           expect(data.user.name).toBeUndefined();
         });
