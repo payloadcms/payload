@@ -91,6 +91,7 @@ export const TableColumnsProvider: React.FC<{
             }),
             t,
             collection,
+            cellProps,
           },
         });
 
@@ -99,7 +100,7 @@ export const TableColumnsProvider: React.FC<{
     };
 
     sync();
-  }, [preferenceKey, setPreference, fields, tableColumns, getPreference, useAsTitle, defaultColumns, t, collection]);
+  }, [preferenceKey, setPreference, fields, tableColumns, getPreference, useAsTitle, defaultColumns, t, collection, cellProps]);
 
   // /////////////////////////////////////
   // Set preferences on column change
@@ -136,9 +137,10 @@ export const TableColumnsProvider: React.FC<{
         })),
         t,
         // onSelect,
+        cellProps,
       },
     });
-  }, [collection, t]);
+  }, [collection, t, cellProps]);
 
   const moveColumn = useCallback((args: {
     fromIndex: number
@@ -153,9 +155,10 @@ export const TableColumnsProvider: React.FC<{
         toIndex,
         collection,
         t,
+        cellProps,
       },
     });
-  }, [collection, t]);
+  }, [collection, t, cellProps]);
 
   const toggleColumn = useCallback((column: string) => {
     dispatchTableColumns({
@@ -164,9 +167,10 @@ export const TableColumnsProvider: React.FC<{
         column,
         collection,
         t,
+        cellProps,
       },
     });
-  }, [collection, t]);
+  }, [collection, t, cellProps]);
 
   return (
     <TableColumnContext.Provider
