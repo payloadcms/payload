@@ -86,7 +86,7 @@ describe('fields', () => {
       const json = page.locator('.json-field .inputarea');
       await json.fill(input);
 
-      await saveDocAndAssert(page);
+      await saveDocAndAssert(page, '.form-submit button');
       await expect(page.locator('.json-field')).toContainText('"foo": "bar"');
     });
   });

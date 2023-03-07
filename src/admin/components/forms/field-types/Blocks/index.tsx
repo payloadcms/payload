@@ -197,6 +197,7 @@ const BlocksField: React.FC<Props> = (props) => {
   useEffect(() => {
     const initializeRowState = async () => {
       const data = formContext.getDataByPath<Row[]>(path);
+
       const preferences = (await getPreference(preferencesKey)) || { fields: {} };
       dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed, initCollapsed });
     };
@@ -332,7 +333,6 @@ const BlocksField: React.FC<Props> = (props) => {
                       />
                       <RenderFields
                         className={`${baseClass}__fields`}
-                        forceRender
                         readOnly={readOnly}
                         fieldTypes={fieldTypes}
                         permissions={permissions?.fields}
