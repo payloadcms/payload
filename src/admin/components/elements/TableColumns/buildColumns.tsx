@@ -4,7 +4,7 @@ import Cell from '../../views/collections/List/Cell';
 import SortColumn from '../SortColumn';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { Column } from '../Table/types';
-import { fieldIsPresentationalOnly } from '../../../../fields/config/types';
+import { Field, fieldIsPresentationalOnly } from '../../../../fields/config/types';
 import flattenFields from '../../../../utilities/flattenTopLevelFields';
 import { Props as CellProps } from '../../views/collections/List/Cell/types';
 
@@ -19,8 +19,8 @@ const buildColumns = ({
   t: TFunction,
   cellProps?: Partial<CellProps>[]
 }): Column[] => {
-  // combine the configured fields with the base fields then remove duplicates
-  const combinedFields = collection.fields.concat([
+  // only insert each base field if it doesn't already exist in the collection
+  const baseFields: Field[] = [
     {
       name: 'id',
       type: 'text',
@@ -36,7 +36,13 @@ const buildColumns = ({
       type: 'date',
       label: t('createdAt'),
     },
-  ]).filter((field, index, self) => self.findIndex((thisField) => 'name' in thisField && 'name' in field && thisField.name === field.name) === index);
+  ];
+
+  const combinedFields = baseFields.reduce((acc, field) => {
+    // if the field already exists in the collection, don't add it
+    if (acc.find((f) => 'name' in f && 'name' in field && f.name === field.name)) return acc;
+    return [...acc, field];
+  }, collection.fields);
 
   const flattenedFields = flattenFields(combinedFields);
 
