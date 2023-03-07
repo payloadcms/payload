@@ -731,4 +731,32 @@ describe('fields', () => {
       await expect(page.locator('.list-drawer__header-text')).toContainText('Uploads 3');
     });
   });
+
+  describe('row', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'row-fields');
+    });
+
+    test('should show row fields as table columns', async () => {
+      await page.goto(url.create);
+
+      // fill the required fields, including the row field
+      const titleInput = page.locator('input#field-title');
+      await titleInput.fill('Test Row');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      // ensure the 'title' field is visible in the table header
+      await page.goto(url.list);
+      const titleHeading = page.locator('th#heading-title');
+      await expect(titleHeading).toBeVisible();
+
+      // ensure the 'title' field shows the correct value in the table cell
+      const titleCell = page.locator('.row-1 td.cell-title');
+      await expect(titleCell).toBeVisible();
+      await expect(titleCell).toContainText('Test Row');
+    });
+  });
 });
