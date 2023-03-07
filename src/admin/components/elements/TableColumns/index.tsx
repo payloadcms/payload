@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer, createContext, useContext } from 'react';
+import React, { useCallback, useEffect, useReducer, createContext, useContext, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { usePreferences } from '../../utilities/Preferences';
@@ -42,6 +42,8 @@ export const TableColumnsProvider: React.FC<{
 }) => {
   const { t } = useTranslation('general');
   const preferenceKey = `${collection.slug}-list`;
+  const prevCollection = useRef<SanitizedCollectionConfig['slug']>();
+  const hasInitialized = useRef(false);
   const { getPreference, setPreference } = usePreferences();
 
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
@@ -58,17 +60,25 @@ export const TableColumnsProvider: React.FC<{
   });
 
   // /////////////////////////////////////
-  // Fetch preferences on first load
+  // Sync preferences on collection change
   // /////////////////////////////////////
 
   useEffect(() => {
-    const makeRequest = async () => {
-      const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
-      if (currentPreferences?.columns) {
+    const sync = async () => {
+      const collectionHasChanged = prevCollection.current !== collection.slug;
+
+      if (collectionHasChanged) {
+        hasInitialized.current = false;
+
+        const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
+        prevCollection.current = collection.slug;
+        const initialColumns = getInitialColumnState(fields, useAsTitle, defaultColumns);
+        const newCols = currentPreferences?.columns || initialColumns;
+
         dispatchTableColumns({
           type: 'set',
           payload: {
-            columns: currentPreferences.columns.map((column) => {
+            columns: newCols.map((column) => {
               // 'string' is for backwards compatibility
               // the preference used to be stored as an array of strings
               if (typeof column === 'string') {
@@ -83,17 +93,22 @@ export const TableColumnsProvider: React.FC<{
             collection,
           },
         });
+
+        hasInitialized.current = true;
       }
     };
-    makeRequest();
-  }, [collection, getPreference, preferenceKey, t]);
+
+    sync();
+  }, [preferenceKey, setPreference, fields, tableColumns, getPreference, useAsTitle, defaultColumns, t, collection]);
 
   // /////////////////////////////////////
-  // Set preferences on change
+  // Set preferences on column change
   // /////////////////////////////////////
 
   useEffect(() => {
-    (async () => {
+    if (!hasInitialized.current) return;
+
+    const sync = async () => {
       const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
 
       const newPreferences = {
@@ -105,8 +120,10 @@ export const TableColumnsProvider: React.FC<{
       };
 
       setPreference(preferenceKey, newPreferences);
-    })();
-  }, [preferenceKey, setPreference, fields, tableColumns, getPreference]);
+    };
+
+    sync();
+  }, [tableColumns, preferenceKey, setPreference, getPreference]);
 
   const setActiveColumns = useCallback((columns: string[]) => {
     dispatchTableColumns({
