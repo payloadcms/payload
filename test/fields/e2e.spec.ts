@@ -742,8 +742,10 @@ describe('fields', () => {
       await page.goto(url.create);
 
       // fill the required fields, including the row field
+      const idInput = page.locator('input#field-id');
+      await idInput.fill('123');
       const titleInput = page.locator('input#field-title');
-      await titleInput.fill('Test Row');
+      await titleInput.fill('Row 123');
       await page.locator('#action-save').click();
       await wait(200);
       await expect(page.locator('.Toastify')).toContainText('successfully');
@@ -756,7 +758,25 @@ describe('fields', () => {
       // ensure the 'title' field shows the correct value in the table cell
       const titleCell = page.locator('.row-1 td.cell-title');
       await expect(titleCell).toBeVisible();
-      await expect(titleCell).toContainText('Test Row');
+      await expect(titleCell).toContainText('Row 123');
+    });
+
+    test('should not show duplicative ID field', async () => {
+      await page.goto(url.create);
+      // fill the required fields, including the custom ID field
+      const idInput = page.locator('input#field-id');
+      await idInput.fill('456');
+      const titleInput = page.locator('input#field-title');
+      await titleInput.fill('Row 456');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      // ensure there are not two ID fields in the table header
+      await page.goto(url.list);
+      const idHeadings = page.locator('th#heading-id');
+      await expect(idHeadings).toBeVisible();
+      await expect(idHeadings).toHaveCount(1);
     });
   });
 });

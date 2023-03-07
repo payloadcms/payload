@@ -10,6 +10,12 @@ const RowFields: CollectionConfig = {
   },
   fields: [
     {
+      name: 'id',
+      label: 'Custom ID',
+      type: 'text',
+      required: true,
+    },
+    {
       type: 'row',
       fields: [
         {
