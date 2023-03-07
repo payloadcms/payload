@@ -731,4 +731,52 @@ describe('fields', () => {
       await expect(page.locator('.list-drawer__header-text')).toContainText('Uploads 3');
     });
   });
+
+  describe('row', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'row-fields');
+    });
+
+    test('should show row fields as table columns', async () => {
+      await page.goto(url.create);
+
+      // fill the required fields, including the row field
+      const idInput = page.locator('input#field-id');
+      await idInput.fill('123');
+      const titleInput = page.locator('input#field-title');
+      await titleInput.fill('Row 123');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      // ensure the 'title' field is visible in the table header
+      await page.goto(url.list);
+      const titleHeading = page.locator('th#heading-title');
+      await expect(titleHeading).toBeVisible();
+
+      // ensure the 'title' field shows the correct value in the table cell
+      const titleCell = page.locator('.row-1 td.cell-title');
+      await expect(titleCell).toBeVisible();
+      await expect(titleCell).toContainText('Row 123');
+    });
+
+    test('should not show duplicative ID field', async () => {
+      await page.goto(url.create);
+      // fill the required fields, including the custom ID field
+      const idInput = page.locator('input#field-id');
+      await idInput.fill('456');
+      const titleInput = page.locator('input#field-title');
+      await titleInput.fill('Row 456');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      // ensure there are not two ID fields in the table header
+      await page.goto(url.list);
+      const idHeadings = page.locator('th#heading-id');
+      await expect(idHeadings).toBeVisible();
+      await expect(idHeadings).toHaveCount(1);
+    });
+  });
 });

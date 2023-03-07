@@ -24,6 +24,7 @@ import RelationshipFields from './collections/Relationship';
 import RadioFields, { radiosDoc } from './collections/Radio';
 import Uploads2 from './collections/Upload2';
 import Uploads3 from './collections/Uploads3';
+import RowFields from './collections/Row';
 
 export default buildConfig({
   admin: {
@@ -47,6 +48,7 @@ export default buildConfig({
     DateFields,
     RadioFields,
     GroupFields,
+    RowFields,
     IndexedFields,
     JSONFields,
     NumberFields,
