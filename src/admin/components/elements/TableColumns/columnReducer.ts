@@ -2,6 +2,8 @@ import { TFunction } from 'react-i18next';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { Column } from '../Table/types';
 import buildColumns from './buildColumns';
+import { Props as CellProps } from '../../views/collections/List/Cell/types';
+
 
 type TOGGLE = {
   type: 'toggle',
@@ -9,6 +11,7 @@ type TOGGLE = {
     column: string
     t: TFunction
     collection: SanitizedCollectionConfig
+    cellProps: Partial<CellProps>[]
   }
 }
 
@@ -18,6 +21,7 @@ type SET = {
     columns: Pick<Column, 'accessor' | 'active'>[]
     t: TFunction
     collection: SanitizedCollectionConfig
+    cellProps: Partial<CellProps>[]
   }
 }
 
@@ -28,6 +32,7 @@ type MOVE = {
     toIndex: number
     t: TFunction
     collection: SanitizedCollectionConfig
+    cellProps: Partial<CellProps>[]
   }
 }
 
@@ -40,6 +45,7 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
         column,
         t,
         collection,
+        cellProps,
       } = action.payload;
 
       const withToggledColumn = state.map((col) => {
@@ -57,6 +63,7 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
         columns: withToggledColumn,
         collection,
         t,
+        cellProps,
       });
     }
     case 'move': {
@@ -65,6 +72,7 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
         toIndex,
         t,
         collection,
+        cellProps,
       } = action.payload;
 
       const withMovedColumn = [...state];
@@ -75,6 +83,7 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
         columns: withMovedColumn,
         collection,
         t,
+        cellProps,
       });
     }
     case 'set': {
@@ -82,12 +91,14 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
         columns,
         t,
         collection,
+        cellProps,
       } = action.payload;
 
       return buildColumns({
         columns,
         collection,
         t,
+        cellProps,
       });
     }
     default:

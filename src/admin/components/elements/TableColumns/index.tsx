@@ -81,12 +81,13 @@ export const TableColumnsProvider: React.FC<{
             }),
             t,
             collection,
+            cellProps,
           },
         });
       }
     };
     makeRequest();
-  }, [collection, getPreference, preferenceKey, t]);
+  }, [collection, getPreference, preferenceKey, t, cellProps]);
 
   // /////////////////////////////////////
   // Set preferences on change
@@ -119,9 +120,10 @@ export const TableColumnsProvider: React.FC<{
         })),
         t,
         // onSelect,
+        cellProps,
       },
     });
-  }, [collection, t]);
+  }, [collection, t, cellProps]);
 
   const moveColumn = useCallback((args: {
     fromIndex: number
@@ -136,9 +138,10 @@ export const TableColumnsProvider: React.FC<{
         toIndex,
         collection,
         t,
+        cellProps,
       },
     });
-  }, [collection, t]);
+  }, [collection, t, cellProps]);
 
   const toggleColumn = useCallback((column: string) => {
     dispatchTableColumns({
@@ -147,9 +150,10 @@ export const TableColumnsProvider: React.FC<{
         column,
         collection,
         t,
+        cellProps,
       },
     });
-  }, [collection, t]);
+  }, [collection, t, cellProps]);
 
   return (
     <TableColumnContext.Provider

@@ -13,8 +13,10 @@ export const Table: React.FC<Props> = ({ data, columns: columnsFromProps }) => {
 
   const columns = (columnsFromProps || columnsFromContext);
   const activeColumns = columns?.filter((col) => col.active);
+  const hasActiveColumns = Boolean(activeColumns?.length > 0);
+  const columnsToRender = hasActiveColumns ? activeColumns : columns;
 
-  if (!activeColumns || activeColumns.length === 0) {
+  if (!columnsToRender || columnsToRender.length === 0) {
     return (
       <div>
         No columns selected
@@ -30,7 +32,7 @@ export const Table: React.FC<Props> = ({ data, columns: columnsFromProps }) => {
       >
         <thead>
           <tr>
-            {activeColumns.map((col, i) => (
+            {columnsToRender.map((col, i) => (
               <th
                 key={i}
                 id={`heading-${col.accessor}`}
@@ -49,7 +51,7 @@ export const Table: React.FC<Props> = ({ data, columns: columnsFromProps }) => {
               {columns.map((col, colIndex) => {
                 const { active } = col;
 
-                if (!active) return null;
+                if (hasActiveColumns && !active) return null;
 
                 return (
                   <td
