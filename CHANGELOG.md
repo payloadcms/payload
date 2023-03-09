@@ -1,5 +1,15 @@
 
 
+## [1.6.18](https://github.com/payloadcms/payload/compare/v1.6.17...v1.6.18) (2023-03-09)
+
+
+### Bug Fixes
+
+* [#2272](https://github.com/payloadcms/payload/issues/2272), rich text within blocks causing crash on reorder ([7daddf8](https://github.com/payloadcms/payload/commit/7daddf864d71e83fa74bc76768d85d4c7fa93d9a))
+* allows swc/register to transpile files above current workspace ([ef826c8](https://github.com/payloadcms/payload/commit/ef826c88ec40878bb36e960c2df2c68ec3c54ef6))
+* renders row fields as table columns [#2257](https://github.com/payloadcms/payload/issues/2257) ([b10e842](https://github.com/payloadcms/payload/commit/b10e842e89a4e0839d0f391cfbafa916134c47c8))
+* table column preferences sync ([a1ddd2e](https://github.com/payloadcms/payload/commit/a1ddd2e2e37a76471631a90938a9ceaba8f9a394))
+
 ## [1.6.17](https://github.com/payloadcms/payload/compare/v1.6.15...v1.6.17) (2023-03-06)
 
 
