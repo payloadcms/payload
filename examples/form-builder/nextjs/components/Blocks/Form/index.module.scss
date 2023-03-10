@@ -1,0 +1,50 @@
+@use '../.../../../../css/queries.scss' as *;
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.intro {
+  margin-bottom: var(--base);
+
+  @include mid-break {
+    margin-bottom: var(--base);
+  }
+}
+
+.fieldWrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: calc(var(--base) * -0.5);
+  margin-right: calc(var(--base) * -0.5);
+  width: calc(100% + #{var(--base)});
+
+  >* {
+    width: 100%;
+  }
+}
+
+.Select {
+  & label {
+    position: absolute;
+    top: calc(var(--base) * -0.5);
+  }
+}
+
+.sidebarContent {
+  @include mid-break {
+    display: none;
+  }
+}
+
+.mobileSidebar {
+  display: none;
+
+  @include mid-break {
+    display: block;
+    margin-bottom: calc(var(--base) * 2);
+  }
+}
