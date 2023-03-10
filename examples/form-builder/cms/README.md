@@ -15,7 +15,7 @@ This is an example repo for a CMS built with [Payload](https://payloadcms.com). 
 
 ## Frontend Development
 
-Clone the [frontend](https://github.com/payloadcms/form-builder-example-website) and follow the instructions there to get started. You can use this repo as a backend for the frontend and see for yourself how it all works together.
+There is a fully working Next.js app tailored specifically for this example which can be found [here](../nextjs). Follow the instructions there to get started. You can use this repo as a backend for the frontend and see for yourself how it all works together.
 
 ## Usage
 
