@@ -1,1 +1,1 @@
-export { cloudStorage } from './plugin'
+export { payloadCloud } from './plugin'

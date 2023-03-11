@@ -1,0 +1,1 @@
+exports.getStorageClient = () => null

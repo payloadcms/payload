@@ -1,46 +1,29 @@
 import type { Config } from 'payload/config'
+import path from 'path'
 import type { Configuration as WebpackConfig } from 'webpack'
-import type { GeneratedAdapter, PluginOptions } from './types'
-
-interface Args {
-  config: Config
-  options: PluginOptions
-}
 
 export const extendWebpackConfig =
-  ({ config, options }: Args): ((webpackConfig: WebpackConfig) => WebpackConfig) =>
+  (config: Config): ((webpackConfig: WebpackConfig) => WebpackConfig) =>
   webpackConfig => {
     const existingWebpackConfig =
       typeof config.admin?.webpack === 'function'
         ? config.admin.webpack(webpackConfig)
         : webpackConfig
 
-    const newConfig: WebpackConfig = {
+    return {
       ...existingWebpackConfig,
       resolve: {
         ...(existingWebpackConfig.resolve || {}),
         alias: {
           ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
+          fs: path.resolve(__dirname, './mocks/fileStub.js'),
+          '@aws-sdk/client-s3': path.resolve(__dirname, './mocks/s3.js'),
+          '@aws-sdk/lib-storage': path.resolve(__dirname, './mocks/s3.js'),
+          [path.resolve(__dirname, './utilities/getStorageClient')]: path.resolve(
+            __dirname,
+            './mocks/storageClient.js',
+          ),
         },
       },
     }
-
-    return Object.entries(options.collections).reduce(
-      (resultingWebpackConfig, [slug, collectionOptions]) => {
-        const matchedCollection = config.collections?.find(coll => coll.slug === slug)
-
-        if (matchedCollection && typeof collectionOptions.adapter === 'function') {
-          const adapter: GeneratedAdapter = collectionOptions.adapter({
-            collection: matchedCollection,
-          })
-
-          if (adapter.webpack) {
-            return adapter.webpack(resultingWebpackConfig)
-          }
-        }
-
-        return resultingWebpackConfig
-      },
-      newConfig,
-    )
   }
