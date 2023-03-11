@@ -13,8 +13,8 @@ export const authAsCognitoUser = async (
   }
 
   const userPool = new CognitoUserPool({
-    ClientId: process.env.AWS_COGNITO_USER_POOL_CLIENT_ID as string,
-    UserPoolId: process.env.AWS_COGNITO_USER_POOL_ID as string,
+    ClientId: process.env.PAYLOAD_CLOUD_COGNITO_USER_POOL_CLIENT_ID as string,
+    UserPoolId: process.env.PAYLOAD_CLOUD_COGNITO_USER_POOL_ID as string,
   })
 
   const authenticationDetails = new AuthenticationDetails({

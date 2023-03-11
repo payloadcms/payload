@@ -30,7 +30,7 @@ export const getBeforeChangeHook =
 
         if (file.buffer.length > 0 && file.buffer.length < multipartThreshold) {
           await storageClient.putObject({
-            Bucket: process.env.AWS_S3_BUCKET,
+            Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
             Key: createKey({ collection: collection.slug, filename: fileKey, identityID }),
             Body: fileBufferOrStream,
             ContentType: file.mimeType,
@@ -40,7 +40,7 @@ export const getBeforeChangeHook =
         const parallelUploadS3 = new Upload({
           client: storageClient,
           params: {
-            Bucket: process.env.AWS_S3_BUCKET,
+            Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
             Key: createKey({ collection: collection.slug, filename: fileKey, identityID }),
             Body: fileBufferOrStream,
             ContentType: file.mimeType,

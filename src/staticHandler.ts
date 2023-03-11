@@ -15,7 +15,7 @@ export const getStaticHandler =
       const { storageClient, identityID } = await getStorageClient()
 
       const object = await storageClient.getObject({
-        Bucket: process.env.AWS_S3_BUCKET,
+        Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
         Key: createKey({ collection: collection.slug, filename: req.params.filename, identityID }),
       })
 

@@ -23,7 +23,7 @@ export const getAfterDeleteHook = ({
 
       const promises = filesToDelete.map(async filename => {
         await storageClient.deleteObject({
-          Bucket: process.env.AWS_S3_BUCKET,
+          Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
           Key: createKey({ collection: collection.slug, filename, identityID }),
         })
       })
