@@ -29,36 +29,36 @@ export const payloadCloud =
         ...(config.admin || {}),
         webpack,
       },
-      collections: (config.collections || []).map(existingCollection => {
-        if (existingCollection.upload) {
+      collections: (config.collections || []).map(collection => {
+        if (collection.upload) {
           return {
-            ...existingCollection,
+            ...collection,
             upload: {
-              ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
+              ...(typeof collection.upload === 'object' ? collection.upload : {}),
               handlers: [
-                ...(typeof existingCollection.upload === 'object' &&
-                Array.isArray(existingCollection.upload.handlers)
-                  ? existingCollection.upload.handlers
+                ...(typeof collection.upload === 'object' &&
+                Array.isArray(collection.upload.handlers)
+                  ? collection.upload.handlers
                   : []),
-                getStaticHandler({ collection: existingCollection }),
+                getStaticHandler({ collection }),
               ],
               disableLocalStorage: true,
             },
             hooks: {
-              ...(existingCollection.hooks || {}),
+              ...(collection.hooks || {}),
               beforeChange: [
-                ...(existingCollection.hooks?.beforeChange || []),
-                getBeforeChangeHook({ collection: existingCollection }),
+                ...(collection.hooks?.beforeChange || []),
+                getBeforeChangeHook({ collection }),
               ],
               afterDelete: [
-                ...(existingCollection.hooks?.afterDelete || []),
-                getAfterDeleteHook({ collection: existingCollection }),
+                ...(collection.hooks?.afterDelete || []),
+                getAfterDeleteHook({ collection }),
               ],
             },
           }
         }
 
-        return existingCollection
+        return collection
       }),
     }
   }
