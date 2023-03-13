@@ -71,7 +71,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   useEffect(() => {
     const awaitInternalState = async () => {
       setUpdatedAt(dataToRender?.updatedAt);
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: isEditing ? 'update' : 'create', id, locale, t });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender || {}, user, operation: isEditing ? 'update' : 'create', id, locale, t });
       await getPreference(preferencesKey);
       setInternalState(state);
     };

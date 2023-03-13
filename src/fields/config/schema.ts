@@ -325,6 +325,10 @@ export const relationship = baseField.keys({
     isSortable: joi.boolean().default(false),
     allowCreate: joi.boolean().default(true),
   }),
+  min: joi.number()
+    .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
+  max: joi.number()
+    .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
 });
 
 export const blocks = baseField.keys({

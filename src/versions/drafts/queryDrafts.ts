@@ -65,7 +65,9 @@ export const queryDrafts = async <T extends TypeWithID>({
     },
     // Filter based on incoming query
     { $match: versionQuery },
-  ]);
+  ], {
+    allowDiskUse: true,
+  });
 
   const aggregatePaginateOptions = {
     ...paginationOptions,

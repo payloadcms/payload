@@ -29,7 +29,7 @@ In the locations collection, you have separate text fields to input a city, stat
 
 Everything else here are virtual fields:
 
-`location`: Text field providing a formatted location name by concatenating `city + state + country` which is then used as the document title
+`location`: Text field providing a formatted location name by concatenating `city + state + country` which is then used as the document title.
 
 `events`: Relationship field containing all events associated with the location.
 
@@ -53,9 +53,9 @@ Similarly to Events, you will assign a location to the staff member from the opt
 
 This collection uses the following virtual field to format the staff name fields:
 
-`fullTitle`: Text field providing a formatted name by concatenating `title + firstName + lastName` which is then used as the document title
+`fullTitle`: Text field providing a formatted name by concatenating `title + firstName + lastName` which is then used as the document title.
 
-In the code, navigate to `src/collections` to see how these fields are functioning and read more about `afterRead` hooks [here](https://payloadcms.com/docs/hooks/fields).
+In the code, navigate to `src/collections` to see how these fields are populated and read more about `afterRead` hooks [here](https://payloadcms.com/docs/hooks).
 
 ## Questions
 

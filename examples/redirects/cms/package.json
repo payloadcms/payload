@@ -20,15 +20,15 @@
     "@payloadcms/plugin-redirects": "^1.0.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "^1.6.2"
+    "payload": "^1.6.15"
   },
   "devDependencies": {
+    "@payloadcms/eslint-config": "^0.0.1",
+    "@types/express": "^4.17.9",
     "@types/node": "18.11.3",
     "@types/react": "18.0.21",
-    "@types/express": "^4.17.9",
     "@typescript-eslint/eslint-plugin": "^5.51.0",
     "@typescript-eslint/parser": "^5.51.0",
-    "@payloadcms/eslint-config": "^0.0.1",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "eslint": "^8.19.0",

@@ -1,3 +1,5 @@
+const redirects = require('./redirects')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -5,6 +7,7 @@ const nextConfig = {
   images: {
     domains: ['localhost', process.env.NEXT_PUBLIC_CMS_URL],
   },
+  redirects,
 }
 
 module.exports = nextConfig

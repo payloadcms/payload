@@ -16,6 +16,7 @@ import PerPage from '../../elements/PerPage';
 import { useSearchParams } from '../../utilities/SearchParams';
 import { Gutter } from '../../elements/Gutter';
 import { getTranslation } from '../../../../utilities/getTranslation';
+import { buildVersionColumns } from './columns';
 
 import './index.scss';
 
@@ -181,7 +182,14 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
 
           {versionsData?.totalDocs > 0 && (
             <React.Fragment>
-              <Table data={versionsData?.docs} />
+              <Table
+                data={versionsData?.docs}
+                columns={buildVersionColumns(
+                  collection,
+                  global,
+                  t,
+                )}
+              />
               <div className={`${baseClass}__page-controls`}>
                 <Paginator
                   limit={versionsData.limit}

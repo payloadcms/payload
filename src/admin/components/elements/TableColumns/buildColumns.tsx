@@ -4,7 +4,7 @@ import Cell from '../../views/collections/List/Cell';
 import SortColumn from '../SortColumn';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { Column } from '../Table/types';
-import { fieldIsPresentationalOnly } from '../../../../fields/config/types';
+import { Field, fieldIsPresentationalOnly } from '../../../../fields/config/types';
 import flattenFields from '../../../../utilities/flattenTopLevelFields';
 import { Props as CellProps } from '../../views/collections/List/Cell/types';
 
@@ -17,10 +17,10 @@ const buildColumns = ({
   collection: SanitizedCollectionConfig,
   columns: Pick<Column, 'accessor' | 'active'>[],
   t: TFunction,
-  cellProps?: Partial<CellProps>[]
+  cellProps: Partial<CellProps>[]
 }): Column[] => {
-  const flattenedFields = flattenFields([
-    ...collection.fields,
+  // only insert each base field if it doesn't already exist in the collection
+  const baseFields: Field[] = [
     {
       name: 'id',
       type: 'text',
@@ -36,7 +36,15 @@ const buildColumns = ({
       type: 'date',
       label: t('createdAt'),
     },
-  ]);
+  ];
+
+  const combinedFields = baseFields.reduce((acc, field) => {
+    // if the field already exists in the collection, don't add it
+    if (acc.find((f) => 'name' in f && 'name' in field && f.name === field.name)) return acc;
+    return [...acc, field];
+  }, collection.fields);
+
+  const flattenedFields = flattenFields(combinedFields, true);
 
   // sort the fields to the order of activeColumns
   const sortedFields = flattenedFields.sort((a, b) => {
@@ -64,7 +72,11 @@ const buildColumns = ({
           <SortColumn
             label={field.label || field.name}
             name={field.name}
-            disable={(('disableSort' in field && Boolean(field.disableSort)) || fieldIsPresentationalOnly(field)) || undefined}
+            disable={
+              ('disableSort' in field && Boolean(field.disableSort))
+              || fieldIsPresentationalOnly(field)
+              || undefined
+            }
           />
         ),
         renderCell: (rowData, cellData) => {
@@ -77,7 +89,7 @@ const buildColumns = ({
               rowData={rowData}
               cellData={cellData}
               link={isFirstActive}
-              {...cellProps?.[colIndex] || {}}
+              {...(cellProps?.[colIndex] || {})}
             />
           );
         },
