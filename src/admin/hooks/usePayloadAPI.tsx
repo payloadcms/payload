@@ -65,8 +65,10 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
         setData(json);
         setIsLoading(false);
       } catch (error) {
-        setIsError(true);
-        setIsLoading(false);
+        if (!abortController.signal.aborted) {
+          setIsError(true);
+          setIsLoading(false);
+        }
       }
     };
 
