@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Props } from './types';
 import Thumbnail from '../Thumbnail';
@@ -28,6 +28,8 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
     alignLabel && `${baseClass}--align-label-${alignLabel}`,
   ].filter(Boolean).join(' ');
 
+  const title: any = doc?.[collection?.admin?.useAsTitle] || doc?.filename || `[${t('untitled')}]`;
+
   return (
     <div
       className={classes}
@@ -45,12 +47,7 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
         )}
       </div>
       <div className={`${baseClass}__label`}>
-        {label && label}
-        {!label && doc && (
-          <Fragment>
-            {typeof doc?.filename === 'string' ? doc?.filename : `[${t('untitled')}]`}
-          </Fragment>
-        )}
+        {label || title}
       </div>
     </div>
   );
