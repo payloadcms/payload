@@ -44,7 +44,7 @@ const buildColumns = ({
     return [...acc, field];
   }, collection.fields);
 
-  const flattenedFields = flattenFields(combinedFields);
+  const flattenedFields = flattenFields(combinedFields, true);
 
   // sort the fields to the order of activeColumns
   const sortedFields = flattenedFields.sort((a, b) => {
