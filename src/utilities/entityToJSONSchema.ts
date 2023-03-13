@@ -8,10 +8,9 @@ import deepCopyObject from './deepCopyObject';
 import { toWords } from './formatLabels';
 import { SanitizedConfig } from '../config/types';
 
-const nonOptionalFieldTypes = ['group', 'array', 'blocks'];
 
 const propertyIsOptional = (field: Field) => {
-  return fieldAffectsData(field) && (('required' in field && field.required === true) || nonOptionalFieldTypes.includes(field.type));
+  return fieldAffectsData(field) && (('required' in field && field.required === true));
 };
 
 function getCollectionIDType(collections: SanitizedCollectionConfig[], slug: string): 'string' | 'number' {
