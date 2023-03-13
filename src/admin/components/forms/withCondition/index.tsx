@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect } from 'react';
 import { FieldBase } from '../../../../fields/config/types';
 import { useAllFormFields } from '../Form/context';

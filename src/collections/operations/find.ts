@@ -24,6 +24,7 @@ export type Arguments = {
   disableErrors?: boolean
   pagination?: boolean
   showHiddenFields?: boolean
+  queryHiddenFields?: boolean
   draft?: boolean
 }
 
@@ -65,6 +66,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     overrideAccess,
     disableErrors,
     showHiddenFields,
+    queryHiddenFields,
     pagination = true,
   } = args;
 
@@ -124,7 +126,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery(queryToBuild, locale, queryHiddenFields);
 
   // /////////////////////////////////////
   // Find
@@ -231,7 +233,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef = await hook({ req, query, doc, findMany: true }) || doc;
+        docRef = await hook({ req, query, doc: docRef, findMany: true }) || doc;
       }, Promise.resolve());
 
       return docRef;

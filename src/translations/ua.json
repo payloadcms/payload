@@ -105,6 +105,7 @@
     "customURL": "Власний URL",
     "editLabelData": "Редагувати данні {{label}}",
     "editLink": "Редагувати посилання",
+    "editRelationship": "Редагувати взаємозв'язок",
     "enterURL": "Введіть URL",
     "internalLink": "Внутрішнє посилання",
     "itemsAndMore": "{{items}} і ще {{count}}",
@@ -223,6 +224,20 @@
     "user": "Користувач",
     "users": "Користувачі",
     "welcome": "Вітаю"
+  },
+  "operators": {
+    "equals": "дорівнює",
+    "isNotEqualTo": "не дорівнює",
+    "isIn": "є в",
+    "isNotIn": "не в",
+    "exists": "існує",
+    "isGreaterThan": "більше ніж",
+    "isLessThan": "менше ніж",
+    "isLessThanOrEqualTo": "менше або дорівнює",
+    "isGreaterThanOrEqualTo": "більше або дорівнює",
+    "near": "поруч",
+    "isLike": "схоже",
+    "contains": "містить"
   },
   "upload": {
     "dragAndDropHere": "або перемістіть сюди файл",

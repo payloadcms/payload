@@ -1,3 +1,5 @@
+import { v4 as uuid } from 'uuid';
+import { mapAsync } from '../../src/utilities/mapAsync';
 import { buildConfig } from '../buildConfig';
 import { devUser } from '../credentials';
 
@@ -36,6 +38,26 @@ export default buildConfig({
         },
       ],
     },
+    {
+      slug: 'api-keys',
+      access: {
+        read: ({ req: { user } }) => {
+          if (user.collection === 'api-keys') {
+            return {
+              id: {
+                equals: user.id,
+              },
+            };
+          }
+          return true;
+        },
+      },
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -44,6 +66,16 @@ export default buildConfig({
         email: devUser.email,
         password: devUser.password,
       },
+    });
+
+    await mapAsync([...Array(2)], async () => {
+      await payload.create({
+        collection: 'api-keys',
+        data: {
+          apiKey: uuid(),
+          enableAPIKey: true,
+        },
+      });
     });
   },
 });

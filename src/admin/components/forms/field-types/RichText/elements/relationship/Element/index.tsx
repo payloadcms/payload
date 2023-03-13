@@ -9,6 +9,7 @@ import Button from '../../../../../../elements/Button';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { Props as RichTextProps } from '../../../types';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
 
 import './index.scss';
 
@@ -18,12 +19,13 @@ const initialParams = {
   depth: 0,
 };
 
-const Element: React.FC<{
+type Props = {
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
   element: any
   fieldProps: RichTextProps
-}> = (props) => {
+}
+const Element: React.FC<Props> = (props) => {
   const {
     attributes,
     children,
@@ -144,25 +146,13 @@ const Element: React.FC<{
         <p className={`${baseClass}__label`}>
           {t('labelRelationship', { label: getTranslation(relatedCollection.labels.singular, i18n) })}
         </p>
-        <p className={`${baseClass}__title`}>
-          {data[relatedCollection?.admin?.useAsTitle || 'id']}
-        </p>
+        <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
+          <p className={`${baseClass}__title`}>
+            {data[relatedCollection?.admin?.useAsTitle || 'id']}
+          </p>
+        </DocumentDrawerToggler>
       </div>
       <div className={`${baseClass}__actions`}>
-        {value?.id && (
-          <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
-            <Button
-              icon="edit"
-              round
-              buttonStyle="icon-label"
-              el="div"
-              onClick={(e) => {
-                e.preventDefault();
-              }}
-              tooltip={t('general:editLabel', { label: getTranslation(relatedCollection.labels.singular, i18n) })}
-            />
-          </DocumentDrawerToggler>
-        )}
         <ListDrawerToggler
           disabled={fieldProps?.admin?.readOnly}
           className={`${baseClass}__list-drawer-toggler`}
@@ -172,7 +162,7 @@ const Element: React.FC<{
             round
             buttonStyle="icon-label"
             onClick={() => {
-            // do nothing
+              // do nothing
             }}
             el="div"
             tooltip={t('swapRelationship')}
@@ -201,4 +191,10 @@ const Element: React.FC<{
   );
 };
 
-export default Element;
+export default (props: Props): React.ReactNode => {
+  return (
+    <EnabledRelationshipsCondition {...props}>
+      <Element {...props} />
+    </EnabledRelationshipsCondition>
+  );
+};

@@ -1,5 +1,4 @@
 import React from 'react';
-import format from 'date-fns/format';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import Eyebrow from '../../elements/Eyebrow';
@@ -23,6 +22,7 @@ import { OperationContext } from '../../utilities/OperationProvider';
 import { Gutter } from '../../elements/Gutter';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { FormLoadingOverlayToggle } from '../../elements/Loading';
+import { formatDate } from '../../../utilities/formatDate';
 
 import './index.scss';
 
@@ -175,7 +175,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                       {updatedAt && (
                         <li>
                           <div className={`${baseClass}__label`}>{t('lastModified')}</div>
-                          <div>{format(new Date(updatedAt as string), dateFormat)}</div>
+                          <div>{formatDate((updatedAt as string), dateFormat, i18n?.language)}</div>
                         </li>
                       )}
                     </ul>

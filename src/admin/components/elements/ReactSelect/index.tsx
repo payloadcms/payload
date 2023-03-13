@@ -1,21 +1,7 @@
-import React, { useCallback, useId } from 'react';
-import {
-  DragEndEvent,
-  useDroppable,
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
+import React from 'react';
 import Select from 'react-select';
 import { useTranslation } from 'react-i18next';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
+import { arrayMove } from '@dnd-kit/sortable';
 import { Props } from './types';
 import Chevron from '../../icons/Chevron';
 import { getTranslation } from '../../../../utilities/getTranslation';
@@ -26,6 +12,8 @@ import { ValueContainer } from './ValueContainer';
 import { ClearIndicator } from './ClearIndicator';
 import { MultiValueRemove } from './MultiValueRemove';
 import { Control } from './Control';
+import DraggableSortable from '../DraggableSortable';
+
 import './index.scss';
 
 const SelectAdapter: React.FC<Props> = (props) => {
@@ -45,7 +33,6 @@ const SelectAdapter: React.FC<Props> = (props) => {
     isLoading,
     onMenuOpen,
     components,
-    droppableRef,
     selectProps,
   } = props;
 
@@ -73,7 +60,6 @@ const SelectAdapter: React.FC<Props> = (props) => {
       onMenuOpen={onMenuOpen}
       selectProps={{
         ...selectProps,
-        droppableRef,
       }}
       components={{
         ValueContainer,
@@ -96,51 +82,23 @@ const SortableSelect: React.FC<Props> = (props) => {
     value,
   } = props;
 
-  const uuid = useId();
-
-  const { setNodeRef } = useDroppable({
-    id: uuid,
-  });
-
-  const onDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (!active || !over) return;
-
-    let sorted = value;
-
-    if (value && Array.isArray(value)) {
-      const oldIndex = value.findIndex((item) => item.value === active.id);
-      const newIndex = value.findIndex((item) => item.value === over.id);
-      sorted = arrayMove(value, oldIndex, newIndex);
-    }
-
-    onChange(sorted);
-  }, [onChange, value]);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
-
   let ids: string[] = [];
   if (value) ids = Array.isArray(value) ? value.map((item) => item?.value as string) : [value?.value as string]; // TODO: fix these types
 
   return (
-    <DndContext
-      onDragEnd={onDragEnd}
-      sensors={sensors}
-      collisionDetection={closestCenter}
+    <DraggableSortable
+      ids={ids}
+      className="react-select-container"
+      onDragEnd={({ moveFromIndex, moveToIndex }) => {
+        let sorted = value;
+        if (value && Array.isArray(value)) {
+          sorted = arrayMove(value, moveFromIndex, moveToIndex);
+        }
+        onChange(sorted);
+      }}
     >
-      <SortableContext items={ids}>
-        <SelectAdapter
-          {...props}
-          droppableRef={setNodeRef}
-        />
-      </SortableContext>
-    </DndContext>
+      <SelectAdapter {...props} />
+    </DraggableSortable>
   );
 };
 

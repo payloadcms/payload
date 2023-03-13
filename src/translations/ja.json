@@ -102,6 +102,8 @@
     "chooseLabel": "{{label}} を選択",
     "collapseAll": "すべて閉じる",
     "editLabelData": "{{label}} データを編集",
+    "editLink": "リンクを編集",
+    "editRelationship": "リレーションシップを編集",
     "itemsAndMore": "{{items}} 他{{count}}件",
     "labelRelationship": "{{label}} リレーションシップ",
     "latitude": "緯度",
@@ -216,6 +218,20 @@
     "user": "ユーザー",
     "users": "ユーザー",
     "welcome": "ようこそ"
+  },
+  "operators": {
+    "equals": "等しい",
+    "isNotEqualTo": "等しくない",
+    "isIn": "あります",
+    "isNotIn": "入っていません",
+    "exists": "存在す",
+    "isGreaterThan": "より大きい",
+    "isLessThan": "より小さい",
+    "isLessThanOrEqualTo": "以下",
+    "isGreaterThanOrEqualTo": "以上",
+    "near": "近く",
+    "isLike": "のような",
+    "contains": "含む"
   },
   "upload": {
     "dragAndDropHere": "または、このエリアにファイルをドラッグ & ドロップ",

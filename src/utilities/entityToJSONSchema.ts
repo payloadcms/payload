@@ -8,10 +8,9 @@ import deepCopyObject from './deepCopyObject';
 import { toWords } from './formatLabels';
 import { SanitizedConfig } from '../config/types';
 
-const nonOptionalFieldTypes = ['group', 'array', 'blocks'];
 
 const propertyIsOptional = (field: Field) => {
-  return fieldAffectsData(field) && (('required' in field && field.required === true) || nonOptionalFieldTypes.includes(field.type));
+  return fieldAffectsData(field) && (('required' in field && field.required === true));
 };
 
 function getCollectionIDType(collections: SanitizedCollectionConfig[], slug: string): 'string' | 'number' {
@@ -70,7 +69,17 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
           }
 
           case 'json': {
-            fieldSchema = { type: 'object' };
+            // https://www.rfc-editor.org/rfc/rfc7159#section-3
+            fieldSchema = {
+              oneOf: [
+                { type: 'object' },
+                { type: 'array' },
+                { type: 'string' },
+                { type: 'number' },
+                { type: 'boolean' },
+                { type: 'null' },
+              ],
+            };
             break;
           }
 
@@ -397,7 +406,7 @@ export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: Sani
     );
   }
 
-  if ('auth' in entity && !entity.auth?.disableLocalStrategy) {
+  if ('auth' in entity && entity.auth && !entity.auth?.disableLocalStrategy) {
     entity.fields.push({
       type: 'text',
       name: 'password',

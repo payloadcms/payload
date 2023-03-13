@@ -67,56 +67,60 @@ const Auth: React.FC<Props> = (props) => {
     }
   }, [modified]);
 
-  if (collection.auth.disableLocalStrategy) {
+  if (collection.auth.disableLocalStrategy && !collection.auth.useAPIKey) {
     return null;
   }
 
   return (
     <div className={baseClass}>
-      <Email
-        required
-        name="email"
-        label={t('general:email')}
-        admin={{ autoComplete: 'email' }}
-      />
-      {(changingPassword || requirePassword) && (
-        <div className={`${baseClass}__changing-password`}>
-          <Password
-            autoComplete="off"
+      { !collection.auth.disableLocalStrategy && (
+        <React.Fragment>
+          <Email
             required
-            name="password"
-            label={t('newPassword')}
+            name="email"
+            label={t('general:email')}
+            admin={{ autoComplete: 'email' }}
           />
-          <ConfirmPassword />
-          {!requirePassword && (
+          {(changingPassword || requirePassword) && (
+            <div className={`${baseClass}__changing-password`}>
+              <Password
+                autoComplete="off"
+                required
+                name="password"
+                label={t('newPassword')}
+              />
+              <ConfirmPassword />
+              {!requirePassword && (
+                <Button
+                  size="small"
+                  buttonStyle="secondary"
+                  onClick={() => handleChangePassword(false)}
+                >
+                  {t('general:cancel')}
+                </Button>
+              )}
+            </div>
+          )}
+          {(!changingPassword && !requirePassword) && (
+            <Button
+              id="change-password"
+              size="small"
+              buttonStyle="secondary"
+              onClick={() => handleChangePassword(true)}
+            >
+              {t('changePassword')}
+            </Button>
+          )}
+          {operation === 'update' && (
             <Button
               size="small"
               buttonStyle="secondary"
-              onClick={() => handleChangePassword(false)}
+              onClick={() => unlock()}
             >
-              {t('general:cancel')}
+              {t('forceUnlock')}
             </Button>
           )}
-        </div>
-      )}
-      {(!changingPassword && !requirePassword) && (
-        <Button
-          id="change-password"
-          size="small"
-          buttonStyle="secondary"
-          onClick={() => handleChangePassword(true)}
-        >
-          {t('changePassword')}
-        </Button>
-      )}
-      {operation === 'update' && (
-        <Button
-          size="small"
-          buttonStyle="secondary"
-          onClick={() => unlock()}
-        >
-          {t('forceUnlock')}
-        </Button>
+        </React.Fragment>
       )}
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>

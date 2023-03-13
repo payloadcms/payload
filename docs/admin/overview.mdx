@@ -11,49 +11,54 @@ Payload dynamically generates a beautiful, fully functional React admin panel to
 The Payload Admin panel is built with Webpack, code-split, highly performant (even with 100+ fields), and written fully in TypeScript.
 
 <Banner type="success">
-  The Admin panel is meant to be simple enough to give you a starting point but not bring too much complexity, so that you can easily customize it to suit the needs of your application and your editors.
+  The Admin panel is meant to be simple enough to give you a starting point but
+  not bring too much complexity, so that you can easily customize it to suit the
+  needs of your application and your editors.
 </Banner>
 
 ![Payload's Admin panel built in React](https://payloadcms.com/images/docs/admin.jpg)
 
-*Screenshot of the Admin panel while editing a document from an example `AllFields` collection*
+_Screenshot of the Admin panel while editing a document from an example `AllFields` collection_
 
 ## Admin Options
 
 All options for the Admin panel are defined in your base Payload config file.
 
-| Option                | Description  |
-| --------------------- | -------------|
-| `user`                | The `slug` of a Collection that you want be used to log in to the Admin dashboard. [More](/docs/admin/overview#the-admin-user-collection) |
-| `meta`                | Base meta data to use for the Admin panel. Included properties are `titleSuffix`, `ogImage`, and `favicon`. |
-| `disable`             | If set to `true`, the entire Admin panel will be disabled. |
+| Option                | Description                                                                                                                                                                                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------------- |
+| `user`                | The `slug` of a Collection that you want be used to log in to the Admin dashboard. [More](/docs/admin/overview#the-admin-user-collection)                                                                                                                    |
+| `buildPath`           | Specify an absolute path for where to store the built Admin panel bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                                                                                                             |
+| `meta`                | Base meta data to use for the Admin panel. Included properties are `titleSuffix`, `ogImage`, and `favicon`.                                                                                                                                                  |
+| `disable`             | If set to `true`, the entire Admin panel will be disabled.                                                                                                                                                                                                   |
 | `indexHTML`           | Optionally replace the entirety of the `index.html` file used by the Admin panel. Reference the [base index.html file](https://github.com/payloadcms/payload/blob/master/src/admin/index.html) to ensure your replacement has the appropriate HTML elements. |
-| `css`                 | Absolute path to a stylesheet that you can use to override / customize the Admin panel styling. [More](/docs/admin/customizing-css). |
-| `scss`                | Absolute path to a Sass variables / mixins stylesheet meant to override Payload styles to make for an easy re-skinning of the Admin panel. [More](/docs/admin/customizing-css#overriding-scss-variables). |
-| `dateFormat`          | Global date format that will be used for all dates in the Admin panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used. |
-| `avatar`              | Set account profile picture. Options: `gravatar`, `default` or a custom React component. |
-| `components`          | Component overrides that affect the entirety of the Admin panel. [More](/docs/admin/components) |
-| `webpack`             | Customize the Webpack config that's used to generate the Admin panel. [More](/docs/admin/webpack) |                                                                                                                                                                                   |
-| **`logoutRoute`**     | The route for the `logout` page.                                                                                                                                                                 |
-| **`inactivityRoute`** | The route for the `logout` inactivity page.                                                                                                                                                         |
-
+| `css`                 | Absolute path to a stylesheet that you can use to override / customize the Admin panel styling. [More](/docs/admin/customizing-css).                                                                                                                         |
+| `scss`                | Absolute path to a Sass variables / mixins stylesheet meant to override Payload styles to make for an easy re-skinning of the Admin panel. [More](/docs/admin/customizing-css#overriding-scss-variables).                                                    |
+| `dateFormat`          | Global date format that will be used for all dates in the Admin panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                                                                                                               |
+| `avatar`              | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                                                                                                                     |
+| `components`          | Component overrides that affect the entirety of the Admin panel. [More](/docs/admin/components)                                                                                                                                                              |
+| `webpack`             | Customize the Webpack config that's used to generate the Admin panel. [More](/docs/admin/webpack)                                                                                                                                                            |     |
+| **`logoutRoute`**     | The route for the `logout` page.                                                                                                                                                                                                                             |
+| **`inactivityRoute`** | The route for the `logout` inactivity page.                                                                                                                                                                                                                  |
 
 ### The Admin User Collection
 
 <Banner type="warning">
-  <strong>Important:</strong><br />
-  The Payload Admin panel can only be used by one Collection that supports <a href="/docs/authentication/overview">Authentication</a>.
+  <strong>Important:</strong>
+  <br />
+  The Payload Admin panel can only be used by one Collection that supports{" "}
+  <a href="/docs/authentication/overview">Authentication</a>.
 </Banner>
 
 To specify which Collection to use to log in to the Admin panel, pass the `admin` options a `user` key equal to the slug of the Collection that you'd like to use.
 
 `payload.config.js`:
+
 ```ts
-import { buildConfig } from 'payload/config';
+import { buildConfig } from "payload/config";
 
 const config = buildConfig({
   admin: {
-    user: 'admins', // highlight-line
+    user: "admins", // highlight-line
   },
 });
 ```

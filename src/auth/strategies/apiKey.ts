@@ -45,6 +45,7 @@ export default (payload: Payload, { Model, config }): PassportAPIKey => {
         },
         req: req as PayloadRequest,
         overrideAccess: true,
+        queryHiddenFields: true,
         depth: config.auth.depth,
       });
 

@@ -23,6 +23,8 @@ import JSONFields, { jsonDoc } from './collections/JSON';
 import RelationshipFields from './collections/Relationship';
 import RadioFields, { radiosDoc } from './collections/Radio';
 import Uploads2 from './collections/Upload2';
+import Uploads3 from './collections/Uploads3';
+import RowFields from './collections/Row';
 
 export default buildConfig({
   admin: {
@@ -46,6 +48,7 @@ export default buildConfig({
     DateFields,
     RadioFields,
     GroupFields,
+    RowFields,
     IndexedFields,
     JSONFields,
     NumberFields,
@@ -57,6 +60,7 @@ export default buildConfig({
     TextFields,
     Uploads,
     Uploads2,
+    Uploads3,
   ],
   localization: {
     defaultLocale: 'en',
@@ -105,7 +109,7 @@ export default buildConfig({
       file: jpgFile,
     });
 
-    const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace('{{ARRAY_DOC_ID}}', createdArrayDoc.id));
+    const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace(/{{ARRAY_DOC_ID}}/g, createdArrayDoc.id));
     const richTextDocWithRelationship = { ...richTextDocWithRelId };
 
     const richTextRelationshipIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'relationship');

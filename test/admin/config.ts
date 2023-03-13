@@ -9,6 +9,8 @@ import BeforeLogin from './components/BeforeLogin';
 import AfterNavLinks from './components/AfterNavLinks';
 import { slug, globalSlug } from './shared';
 import Logout from './components/Logout';
+import DemoUIFieldField from './components/DemoUIField/Field';
+import DemoUIFieldCell from './components/DemoUIField/Cell';
 
 export interface Post {
   id: string;
@@ -82,6 +84,8 @@ export default buildConfig({
         description: { en: 'Description en', es: 'Description es' },
         listSearchableFields: ['title', 'description', 'number'],
         group: { en: 'One', es: 'Una' },
+        useAsTitle: 'title',
+        defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
       },
       fields: [
         {
@@ -99,6 +103,26 @@ export default buildConfig({
         {
           name: 'number',
           type: 'number',
+        },
+        {
+          name: 'richText',
+          type: 'richText',
+          admin: {
+            elements: [
+              'relationship',
+            ],
+          },
+        },
+        {
+          type: 'ui',
+          name: 'demoUIField',
+          label: 'Demo UI Field',
+          admin: {
+            components: {
+              Field: DemoUIFieldField,
+              Cell: DemoUIFieldCell,
+            },
+          },
         },
       ],
     },

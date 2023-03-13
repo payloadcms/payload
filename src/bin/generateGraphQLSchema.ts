@@ -7,7 +7,7 @@ import payload from '..';
 
 export async function generateGraphQLSchema(): Promise<void> {
   const logger = Logger();
-  const config = loadConfig();
+  const config = await loadConfig();
 
   await payload.init({
     secret: '--unused--',

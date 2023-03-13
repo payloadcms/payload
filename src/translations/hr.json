@@ -107,6 +107,7 @@
     "customURL": "Prilagođeni URL",
     "editLabelData": "Uredi {{label}} podatke",
     "editLink": "Uredi poveznicu",
+    "editRelationship": "Uredi odnos",
     "enterURL": "Unesi URL",
     "internalLink": "Interna poveznika",
     "itemsAndMore": "{{items}} i {{count}} više",
@@ -215,7 +216,7 @@
     "submit": "Podnesi",
     "successfullyCreated": "{{label}} uspješno kreirano.",
     "successfullyDuplicated": "{{label}} uspješno duplicirano.",
-    "thisLanguage": "Engleski",
+    "thisLanguage": "Hrvatski",
     "titleDeleted": "{{label}} \"{{title}}\" uspješno obrisano.",
     "unauthorized": "Neovlašteno",
     "unsavedChangesDuplicate": "Imate nespremljene promjene. Želite li nastaviti s dupliciranjem?",
@@ -227,6 +228,20 @@
     "user": "Korisnik",
     "users": "Korisnici",
     "welcome": "Dobrodošli"
+  },
+  "operators": {
+    "equals": "jednako",
+    "isNotEqualTo": "nije jednako",
+    "isIn": "je u",
+    "isNotIn": "nije unutra",
+    "exists": "postoji",
+    "isGreaterThan": "je veće od",
+    "isLessThan": "manje je od",
+    "isLessThanOrEqualTo": "manje je ili jednako",
+    "isGreaterThanOrEqualTo": "je veće od ili jednako",
+    "near": "blizu",
+    "isLike": "je kao",
+    "contains": "sadrži"
   },
   "upload": {
     "dragAndDropHere": "ili povucite i ispustite datoteku ovdje",

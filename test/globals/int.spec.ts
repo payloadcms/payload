@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
-import config, { arraySlug, englishLocale, slug, spanishLocale } from './config';
+import configPromise, { arraySlug, englishLocale, slug, spanishLocale } from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
 
@@ -13,6 +13,7 @@ describe('globals', () => {
   describe('REST', () => {
     let client: RESTClient;
     beforeAll(async () => {
+      const config = await configPromise;
       client = new RESTClient(config, { serverURL, defaultSlug: slug });
     });
     it('should create', async () => {
@@ -59,6 +60,19 @@ describe('globals', () => {
   });
 
   describe('local', () => {
+    it('should save empty json objects', async () => {
+      const createdJSON = await payload.updateGlobal({
+        slug,
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(createdJSON.json.state).toEqual({});
+    });
+
     it('should create', async () => {
       const data = {
         title: 'title',
@@ -135,6 +149,7 @@ describe('globals', () => {
   describe('graphql', () => {
     let client: GraphQLClient;
     beforeAll(async () => {
+      const config = await configPromise;
       const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
       client = new GraphQLClient(url);
     });

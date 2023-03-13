@@ -66,6 +66,7 @@ export interface UserDocument extends PayloadMongooseDocument {
   authenticate: (pass: string) => Promise<void>
   resetPasswordExpiration: number
   email: string
+  _verified?: boolean
 }
 
 type GenerateVerifyEmailHTML = (args: { req: PayloadRequest, token: string, user: any }) => Promise<string> | string

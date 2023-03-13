@@ -1,5 +1,206 @@
 
 
+## [1.6.19](https://github.com/payloadcms/payload/compare/v1.6.18...v1.6.19) (2023-03-09)
+
+
+### Bug Fixes
+
+* ensures nested fields save properly within link, upload rte ([057522c](https://github.com/payloadcms/payload/commit/057522c5bdade430c6e60f589a32f174739d400c))
+
+## [1.6.18](https://github.com/payloadcms/payload/compare/v1.6.17...v1.6.18) (2023-03-09)
+
+
+### Bug Fixes
+
+* [#2272](https://github.com/payloadcms/payload/issues/2272), rich text within blocks causing crash on reorder ([7daddf8](https://github.com/payloadcms/payload/commit/7daddf864d71e83fa74bc76768d85d4c7fa93d9a))
+* allows swc/register to transpile files above current workspace ([ef826c8](https://github.com/payloadcms/payload/commit/ef826c88ec40878bb36e960c2df2c68ec3c54ef6))
+* renders row fields as table columns [#2257](https://github.com/payloadcms/payload/issues/2257) ([b10e842](https://github.com/payloadcms/payload/commit/b10e842e89a4e0839d0f391cfbafa916134c47c8))
+* table column preferences sync ([a1ddd2e](https://github.com/payloadcms/payload/commit/a1ddd2e2e37a76471631a90938a9ceaba8f9a394))
+
+## [1.6.17](https://github.com/payloadcms/payload/compare/v1.6.15...v1.6.17) (2023-03-06)
+
+
+### Bug Fixes
+
+* [#2150](https://github.com/payloadcms/payload/issues/2150), can now query on N number of levels deep ([ac54b11](https://github.com/payloadcms/payload/commit/ac54b11f9d2f9cfde15a4421d13ce26ffd6cdc63))
+* [#2179](https://github.com/payloadcms/payload/issues/2179), async default values resetting form state ([a4de51a](https://github.com/payloadcms/payload/commit/a4de51adaaa9399fa9036e485eb2e7f350719638))
+* allows empty objects to be retained in db ([0247e2d](https://github.com/payloadcms/payload/commit/0247e2d1068527213f007c71f6efa1aff4c21af6))
+* clear relationship value ([#2188](https://github.com/payloadcms/payload/issues/2188)) ([387cec9](https://github.com/payloadcms/payload/commit/387cec983868d6c10c043248b45fc8c1657e4981))
+* conditionally renders draggable pill ([#2224](https://github.com/payloadcms/payload/issues/2224)) ([812ab9f](https://github.com/payloadcms/payload/commit/812ab9f86824aca3689ddef8af759a84f59f2148))
+* ensures sorting on drafts works in all cases ([c87fd2b](https://github.com/payloadcms/payload/commit/c87fd2b649e59afb6fe7998d04142f3ba246dcef))
+* globals publish after draft ([44651e6](https://github.com/payloadcms/payload/commit/44651e6ecc354dbe17a08fccfafd686420d07158))
+* minimize not set to false on all field type schemas ([ace032e](https://github.com/payloadcms/payload/commit/ace032ef897dc55131c6cf7cb80dc1a652940748))
+* pass result of previous hook into next hook ([c661ac2](https://github.com/payloadcms/payload/commit/c661ac2e8a26251e77c558e00ed3c32741d2d385))
+* properly resizes animated images ([#2181](https://github.com/payloadcms/payload/issues/2181)) ([8c4f890](https://github.com/payloadcms/payload/commit/8c4f890af0cbd1f2b3a2dd1980d26ba3e721f154))
+* properly set req.payload on forgotPassword in local API ([#2194](https://github.com/payloadcms/payload/issues/2194)) ([5ac436e](https://github.com/payloadcms/payload/commit/5ac436e1843aacc81072992805bdbd1aed41d243))
+* redirects example ([#2209](https://github.com/payloadcms/payload/issues/2209)) ([5aa203d](https://github.com/payloadcms/payload/commit/5aa203d020177eb25b7675d6ab30fc8721b9fe0c))
+* removes duplicative fields from table columns [#2221](https://github.com/payloadcms/payload/issues/2221) ([#2226](https://github.com/payloadcms/payload/issues/2226)) ([474a3cb](https://github.com/payloadcms/payload/commit/474a3cbf7a90ab02d9e6c86ee018895576cbcab9))
+* renders rte upload drawer [#2178](https://github.com/payloadcms/payload/issues/2178) ([523d9d4](https://github.com/payloadcms/payload/commit/523d9d495261b44fdb9c7922bfa9cdd8aaba85fb))
+* skips field validation on submit if skipValidation is set to true ([cf17760](https://github.com/payloadcms/payload/commit/cf17760735d466a5817fc37bc3dc6f3ad8c52f7a))
+* Validate typescript signature ([8d31ed6](https://github.com/payloadcms/payload/commit/8d31ed6d39d1a4d147e13de5b96073fab5563173))
+* version comparison view errors on old select value ([#2163](https://github.com/payloadcms/payload/issues/2163)) ([a3cc3c3](https://github.com/payloadcms/payload/commit/a3cc3c342928e00564a662ba210635d78238fed8))
+* versions table ([#2235](https://github.com/payloadcms/payload/issues/2235)) ([066f5f6](https://github.com/payloadcms/payload/commit/066f5f6d2cb48525896366166693af6c92d1814d))
+* virtual fields example ([#2214](https://github.com/payloadcms/payload/issues/2214)) ([f6eb020](https://github.com/payloadcms/payload/commit/f6eb0202fec15a0ba0e6c357ecdb9ace62bd2ea9))
+
+
+### Features
+
+* Add Hungarian Translations ([#2169](https://github.com/payloadcms/payload/issues/2169)) ([ebd16e8](https://github.com/payloadcms/payload/commit/ebd16e8fdf811ec19dd5231b01c91f201d00d3a3))
+* adds min and max options to relationship with hasMany ([0f38a0d](https://github.com/payloadcms/payload/commit/0f38a0dcf6a4d993579ed3af55940f28b13f5d3d))
+* drag-and-drop columns ([#2142](https://github.com/payloadcms/payload/issues/2142)) ([e2c65e3](https://github.com/payloadcms/payload/commit/e2c65e3fa519fc04c7d1552064980ffee145a3bc))
+* improves ui performance with thousands of fields ([0779f8d](https://github.com/payloadcms/payload/commit/0779f8d73da4767e9918b04cc8795e52b2198f4c))
+
+## [1.6.16](https://github.com/payloadcms/payload/compare/v1.6.15...v1.6.16) (2023-02-28)
+
+
+### Bug Fixes
+
+* [#2150](https://github.com/payloadcms/payload/issues/2150), can now query on N number of levels deep ([ac54b11](https://github.com/payloadcms/payload/commit/ac54b11f9d2f9cfde15a4421d13ce26ffd6cdc63))
+* [#2179](https://github.com/payloadcms/payload/issues/2179), async default values resetting form state ([a4de51a](https://github.com/payloadcms/payload/commit/a4de51adaaa9399fa9036e485eb2e7f350719638))
+* allows empty objects to be retained in db ([0247e2d](https://github.com/payloadcms/payload/commit/0247e2d1068527213f007c71f6efa1aff4c21af6))
+* clear relationship value ([#2188](https://github.com/payloadcms/payload/issues/2188)) ([387cec9](https://github.com/payloadcms/payload/commit/387cec983868d6c10c043248b45fc8c1657e4981))
+* ensures sorting on drafts works in all cases ([c87fd2b](https://github.com/payloadcms/payload/commit/c87fd2b649e59afb6fe7998d04142f3ba246dcef))
+* globals publish after draft ([44651e6](https://github.com/payloadcms/payload/commit/44651e6ecc354dbe17a08fccfafd686420d07158))
+* properly resizes animated images ([#2181](https://github.com/payloadcms/payload/issues/2181)) ([8c4f890](https://github.com/payloadcms/payload/commit/8c4f890af0cbd1f2b3a2dd1980d26ba3e721f154))
+* properly set req.payload on forgotPassword in local API ([#2194](https://github.com/payloadcms/payload/issues/2194)) ([5ac436e](https://github.com/payloadcms/payload/commit/5ac436e1843aacc81072992805bdbd1aed41d243))
+* redirects example ([#2209](https://github.com/payloadcms/payload/issues/2209)) ([5aa203d](https://github.com/payloadcms/payload/commit/5aa203d020177eb25b7675d6ab30fc8721b9fe0c))
+* renders rte upload drawer [#2178](https://github.com/payloadcms/payload/issues/2178) ([523d9d4](https://github.com/payloadcms/payload/commit/523d9d495261b44fdb9c7922bfa9cdd8aaba85fb))
+* skips field validation on submit if skipValidation is set to true ([cf17760](https://github.com/payloadcms/payload/commit/cf17760735d466a5817fc37bc3dc6f3ad8c52f7a))
+* version comparison view errors on old select value ([#2163](https://github.com/payloadcms/payload/issues/2163)) ([a3cc3c3](https://github.com/payloadcms/payload/commit/a3cc3c342928e00564a662ba210635d78238fed8))
+
+
+### Features
+
+* Add Hungarian Translations ([#2169](https://github.com/payloadcms/payload/issues/2169)) ([ebd16e8](https://github.com/payloadcms/payload/commit/ebd16e8fdf811ec19dd5231b01c91f201d00d3a3))
+* drag-and-drop columns ([#2142](https://github.com/payloadcms/payload/issues/2142)) ([e2c65e3](https://github.com/payloadcms/payload/commit/e2c65e3fa519fc04c7d1552064980ffee145a3bc))
+
+## [1.6.15](https://github.com/payloadcms/payload/compare/v1.6.14...v1.6.15) (2023-02-21)
+
+
+### Bug Fixes
+
+* mongoose connection error with useFacet ([5888fb9](https://github.com/payloadcms/payload/commit/5888fb9b3f82f49686da27c216b40c38b5a5d6c2))
+
+## [1.6.14](https://github.com/payloadcms/payload/compare/v1.6.13...v1.6.14) (2023-02-21)
+
+
+### Bug Fixes
+
+* [#2091](https://github.com/payloadcms/payload/issues/2091) admin translations for filter operators ([#2143](https://github.com/payloadcms/payload/issues/2143)) ([8a8c392](https://github.com/payloadcms/payload/commit/8a8c3920950ece5995f81bff717b30a2baf8f219))
+* [#2096](https://github.com/payloadcms/payload/issues/2096), allows custom ts paths with payload generate:types ([686a616](https://github.com/payloadcms/payload/commit/686a616b4cf06685fd22b075cf87ceafec455e40))
+* [#2117](https://github.com/payloadcms/payload/issues/2117) collection pagination defaultLimit ([#2147](https://github.com/payloadcms/payload/issues/2147)) ([2a4db38](https://github.com/payloadcms/payload/commit/2a4db3896ead2b49c0a7ebc5da6b9825b223ca19))
+* [#2131](https://github.com/payloadcms/payload/issues/2131), doesn't log in unverified user after resetting password ([3eb85b1](https://github.com/payloadcms/payload/commit/3eb85b1554ceb705c4a1436af4d9ba982e4cdbdf))
+* [#2134](https://github.com/payloadcms/payload/issues/2134), allows links to be populated without having relationship or upload enabled ([32a0778](https://github.com/payloadcms/payload/commit/32a0778fc4311509699b14f9a3f145380ec56e25))
+* [#2148](https://github.com/payloadcms/payload/issues/2148), adds queryHiddenFields property to find operation ([15b6bb3](https://github.com/payloadcms/payload/commit/15b6bb3d756697428775df5ece3c6092d0537d82))
+* checks locale is valid for monaco code editor ([#2144](https://github.com/payloadcms/payload/issues/2144)) ([40224ed](https://github.com/payloadcms/payload/commit/40224ed1bcd886be8bf2f5b42a272db7615495c1))
+* generate proper json field type according to rfc ([#2137](https://github.com/payloadcms/payload/issues/2137)) ([7e88698](https://github.com/payloadcms/payload/commit/7e8869858cfca70b2e996d984e065da75398076b))
+* removes custom header and gutter from rte link drawer [#2120](https://github.com/payloadcms/payload/issues/2120) ([#2135](https://github.com/payloadcms/payload/issues/2135)) ([6a7663b](https://github.com/payloadcms/payload/commit/6a7663beb57f624ea52d95a8f26345dcd32d65bc))
+* sizes property optional on upload ([#2066](https://github.com/payloadcms/payload/issues/2066)) ([79d047e](https://github.com/payloadcms/payload/commit/79d047e64fd40507abf9de2ced5dab7aeb2bb6fa))
+* useFacet config option to disable $facet aggregation ([#2141](https://github.com/payloadcms/payload/issues/2141)) ([b4a2074](https://github.com/payloadcms/payload/commit/b4a20741b2d995e5e46875c2ae1f11ff5b319e6b))
+
+## [1.6.13](https://github.com/payloadcms/payload/compare/v1.6.12...v1.6.13) (2023-02-18)
+
+
+### Bug Fixes
+
+* [#2125](https://github.com/payloadcms/payload/issues/2125), ensures createdAt and updatedAt are returned in update operations ([42ebf68](https://github.com/payloadcms/payload/commit/42ebf6893257256554a57e6b6684a726d11800b8))
+
+## [1.6.12](https://github.com/payloadcms/payload/compare/v1.6.11...v1.6.12) (2023-02-17)
+
+
+### Bug Fixes
+
+* ensures only valid fields can be queried on ([1930bc2](https://github.com/payloadcms/payload/commit/1930bc260e721c5c7a10793b5d2a7809694089f3))
+
+
+### Features
+
+* adds gql auth example ([#2115](https://github.com/payloadcms/payload/issues/2115)) ([fa32c27](https://github.com/payloadcms/payload/commit/fa32c2771637af11d7ef0fb21b2f1f3cceae1ead))
+* auth example ([c076c77](https://github.com/payloadcms/payload/commit/c076c77db4a26cf514a040b1048de25b1141f0cb))
+* separates admin root component from DOM render logic ([ff4d1f6](https://github.com/payloadcms/payload/commit/ff4d1f6ac26f5cac56b6c5b7b67b99f50067cb8d))
+* virtual fields example ([#1990](https://github.com/payloadcms/payload/issues/1990)) ([2af0c04](https://github.com/payloadcms/payload/commit/2af0c04c8ae5892b317af240c1502bc21bb65253))
+
+## [1.6.11](https://github.com/payloadcms/payload/compare/v1.6.10...v1.6.11) (2023-02-15)
+
+
+### Bug Fixes
+
+* existing upload deletion [#2098](https://github.com/payloadcms/payload/issues/2098) ([#2101](https://github.com/payloadcms/payload/issues/2101)) ([060c380](https://github.com/payloadcms/payload/commit/060c3805e567fe450c4b9aa00fbdbb919427c625))
+
+
+### Features
+
+* preview example ([#1950](https://github.com/payloadcms/payload/issues/1950)) ([0a87f10](https://github.com/payloadcms/payload/commit/0a87f106ecb5c95738109db5231d72abd281e7e1))
+
+## [1.6.10](https://github.com/payloadcms/payload/compare/v1.6.9...v1.6.10) (2023-02-14)
+
+
+### Bug Fixes
+
+* [#2077](https://github.com/payloadcms/payload/issues/2077) useAPIKey UI missing with disableLocalStrategy ([#2084](https://github.com/payloadcms/payload/issues/2084)) ([586b25a](https://github.com/payloadcms/payload/commit/586b25a54c6ec8bd134bce05c480cd429e47e252))
+* Add missing Spanish translations and fix typos ([c4742e5](https://github.com/payloadcms/payload/commit/c4742e5c303ca4ba41c2fbb45a8e8474608418c1))
+* document type in update request handler ([d5cd970](https://github.com/payloadcms/payload/commit/d5cd9709f717b08b930461079b147967d8d7a885))
+* ensures versions createdAt matches the original doc ([8c7e37c](https://github.com/payloadcms/payload/commit/8c7e37c56aab2bb28de01cf7d4a91062cbde80de))
+* globals not saving drafts unless published first ([#2082](https://github.com/payloadcms/payload/issues/2082)) ([4999fba](https://github.com/payloadcms/payload/commit/4999fbaee680e256ece7083fbe422f25e85de0d5))
+* Use the user's AdminUI locale for the DatePicker ([#2046](https://github.com/payloadcms/payload/issues/2046)) ([#2057](https://github.com/payloadcms/payload/issues/2057)) ([b4a7e91](https://github.com/payloadcms/payload/commit/b4a7e912b2117cef3345adb8b514958345838030))
+* validate type ([7bb0984](https://github.com/payloadcms/payload/commit/7bb0984a12a0d80d9ac2af82427ac7dbc985ffc5))
+
+
+### Features
+
+* allows control over relationship add new button ([6096044](https://github.com/payloadcms/payload/commit/6096044fe058113ca47c7f7d833cb788d97df9a2))
+* async plugins ([#2030](https://github.com/payloadcms/payload/issues/2030)) ([9f30553](https://github.com/payloadcms/payload/commit/9f3055381337f80229f220c1e6114b4ea56be969))
+* export more errors ([3a2a41d](https://github.com/payloadcms/payload/commit/3a2a41d2b6ead4188b432d9e6780764a7c08b2dd))
+
+## [1.6.9](https://github.com/payloadcms/payload/compare/v1.6.7...v1.6.9) (2023-02-10)
+
+
+### Bug Fixes
+
+* adds query constraint to ensureMaxVersions query ([30688bb](https://github.com/payloadcms/payload/commit/30688bbe4136285af181a5deae5e949b98bea0be))
+* translation of "or" -> "ou" in french ([#2047](https://github.com/payloadcms/payload/issues/2047)) ([dddbec2](https://github.com/payloadcms/payload/commit/dddbec268255c41b7ea786bdddc02dfeb7d66fbd))
+
+
+### Features
+
+* allows customization of the folder used to serve admin bundled files in production ([4d259a6](https://github.com/payloadcms/payload/commit/4d259a69f2c9beb1d84f703a08921469e6f1c34b))
+
+## [1.6.7](https://github.com/payloadcms/payload/compare/v1.6.6...v1.6.7) (2023-02-08)
+
+
+### Bug Fixes
+
+* drawer state was not set when opened ([e6ac872](https://github.com/payloadcms/payload/commit/e6ac872b0d80470883836ef5aac0bdf4b62d6de9))
+
+## [1.6.6](https://github.com/payloadcms/payload/compare/v1.6.5...v1.6.6) (2023-02-07)
+
+
+### Bug Fixes
+
+* [#1887](https://github.com/payloadcms/payload/issues/1887), dataloader rich text population infinite loop ([ac2e174](https://github.com/payloadcms/payload/commit/ac2e174643419e5b01cfbbf53234b0145aeb5e4e))
+* enables locales with date field ([aefb655](https://github.com/payloadcms/payload/commit/aefb655769e7998a44cef9f93a19e4aef24c50bb))
+
+## [1.6.5](https://github.com/payloadcms/payload/compare/v1.6.4...v1.6.5) (2023-02-07)
+
+
+### Bug Fixes
+
+* allows radio input to be tabbable ([b5880f2](https://github.com/payloadcms/payload/commit/b5880f26af8b97d47eca83a9fc7bd05b006cc54c))
+* auth type leaking into type gen ([1f0a1c7](https://github.com/payloadcms/payload/commit/1f0a1c796ab4126a464949f3a1bc34c7360470a5))
+* corrects keyboard accessibility for checkbox field ([65b8fd2](https://github.com/payloadcms/payload/commit/65b8fd27af05c25c3ddf86c34e1f181b8a605c27))
+* ensures preview is enabled before rendering button ([e968f40](https://github.com/payloadcms/payload/commit/e968f4067c2427965c0f96845aff8eaca36d0df6))
+* local API update typing ([#2010](https://github.com/payloadcms/payload/issues/2010)) ([4b0d4f4](https://github.com/payloadcms/payload/commit/4b0d4f4cd59940cace6b6b8cebf3d834d2b88dab)), closes [#2009](https://github.com/payloadcms/payload/issues/2009)
+* max versions incorrectly sorting, causing incorrect versions to be held onto ([2e4f7ab](https://github.com/payloadcms/payload/commit/2e4f7ab35c23f25051a5000e7902df7f255ed607))
+* named tabs not displaying data in versions view ([a41e295](https://github.com/payloadcms/payload/commit/a41e295e42fbf283733afd8b63bced9555cb1338))
+* replaced media not rendering after document save ([827428d](https://github.com/payloadcms/payload/commit/827428d6b57a7abe858ca5ddaad5ba4ec9d3a270))
+* webpack css-loader resolve urls ([ade4c01](https://github.com/payloadcms/payload/commit/ade4c011d348249e975a1510ae481018834a2ca2))
+
+
+### Features
+
+* deletes old media upon re-upload [#1897](https://github.com/payloadcms/payload/issues/1897) ([02f9be2](https://github.com/payloadcms/payload/commit/02f9be2c4a15eed6bba07f504319a2213ea411df))
+* enables document drawers from read-only fields ([#1989](https://github.com/payloadcms/payload/issues/1989)) ([0dbc4fa](https://github.com/payloadcms/payload/commit/0dbc4fa21334e1a17c5aa35d84d78973fb7f54ec))
+
 ## [1.6.4](https://github.com/payloadcms/payload/compare/v1.6.3...v1.6.4) (2023-02-03)
 
 

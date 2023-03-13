@@ -14,6 +14,7 @@ import Version from './views/Version';
 import { DocumentInfoProvider } from './utilities/DocumentInfo';
 import { useLocale } from './utilities/Locale';
 import { LoadingOverlayToggle } from './elements/Loading';
+import { TableColumnsProvider } from './elements/TableColumns';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -188,10 +189,12 @@ const Routes = () => {
                                     render={(routeProps) => {
                                       if (permissions?.collections?.[collection.slug]?.read?.permission) {
                                         return (
-                                          <List
-                                            {...routeProps}
-                                            collection={collection}
-                                          />
+                                          <TableColumnsProvider collection={collection}>
+                                            <List
+                                              {...routeProps}
+                                              collection={collection}
+                                            />
+                                          </TableColumnsProvider>
                                         );
                                       }
 

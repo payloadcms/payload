@@ -86,7 +86,7 @@ describe('fields', () => {
       const json = page.locator('.json-field .inputarea');
       await json.fill(input);
 
-      await saveDocAndAssert(page);
+      await saveDocAndAssert(page, '.form-submit button');
       await expect(page.locator('.json-field')).toContainText('"foo": "bar"');
     });
   });
@@ -218,6 +218,7 @@ describe('fields', () => {
     });
 
     test('should open blocks drawer from block row and add below', async () => {
+      await page.goto(url.create);
       const firstRow = await page.locator('#field-blocks #blocks-row-0');
       const rowActions = await firstRow.locator('.collapsible__actions');
       await expect(rowActions).toBeVisible();
@@ -403,6 +404,33 @@ describe('fields', () => {
         const modalTrigger = page.locator('.rich-text--read-only .rich-text__toolbar button .link');
         await expect(modalTrigger).toBeDisabled();
       });
+
+      test('should only list RTE enabled upload collections in drawer', async () => {
+        await navigateToRichTextFields();
+
+        // Open link drawer
+        await page.locator('.rich-text__toolbar button:not([disabled]) .upload-rich-text-button').click();
+
+        // open the list select menu
+        await page.locator('.list-drawer__select-collection-wrap .rs__control').click();
+
+        const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu');
+        // `uploads-3` has enableRichTextRelationship set to false
+        await expect(menu).not.toContainText('Uploads3');
+      });
+
+      test('should only list non-upload collections in relationship drawer', async () => {
+        await navigateToRichTextFields();
+
+        // Open link drawer
+        await page.locator('.rich-text__toolbar button:not([disabled]) .relationship-rich-text-button').click();
+
+        // open the list select menu
+        await page.locator('.list-drawer__select-collection-wrap .rs__control').click();
+
+        const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu');
+        await expect(menu).not.toContainText('Uploads');
+      });
     });
 
     describe('editor', () => {
@@ -452,7 +480,20 @@ describe('fields', () => {
         await expect(editLinkModal).toBeHidden();
       });
 
-      test('should open uploads drawer from read-only field', async () => {
+      test('should open upload drawer and render custom relationship fields', async () => {
+        navigateToRichTextFields();
+        const field = await page.locator('#field-richText');
+        const button = await field.locator('button.rich-text-upload__upload-drawer-toggler');
+
+        await button.click();
+
+        const documentDrawer = await page.locator('[id^=drawer_1_upload-drawer-]');
+        await expect(documentDrawer).toBeVisible();
+        const caption = await documentDrawer.locator('#field-caption');
+        await expect(caption).toBeVisible();
+      });
+
+      test('should open upload document drawer from read-only field', async () => {
         navigateToRichTextFields();
         const field = await page.locator('#field-richTextReadOnly');
         const button = await field.locator('button.rich-text-upload__doc-drawer-toggler.doc-drawer__toggler');
@@ -463,7 +504,7 @@ describe('fields', () => {
         await expect(documentDrawer).toBeVisible();
       });
 
-      test('should open relationship drawer from read-only field', async () => {
+      test('should open relationship document drawer from read-only field', async () => {
         navigateToRichTextFields();
         const field = await page.locator('#field-richTextReadOnly');
         const button = await field.locator('button.rich-text-relationship__doc-drawer-toggler.doc-drawer__toggler');
@@ -518,8 +559,9 @@ describe('fields', () => {
       await page.goto(url.create);
       const dateField = await page.locator('#field-default input');
       await expect(dateField).toBeVisible();
-      await dateField.fill('2021-08-01');
-      await expect(dateField).toHaveValue('2021-08-01');
+      await dateField.fill('02/07/2023');
+      await expect(dateField).toHaveValue('02/07/2023');
+      await wait(1000);
       const clearButton = await page.locator('#field-default .date-time-picker__clear-button');
       await expect(clearButton).toBeVisible();
       await clearButton.click();
@@ -598,6 +640,28 @@ describe('fields', () => {
 
       await expect(page.locator('.Toastify')).toContainText('successfully');
     });
+
+    test('should hide relationship add new button', async () => {
+      await page.goto(url.create);
+      // expect the button to not exist in the field
+      await expect(await page.locator('#relationToSelfSelectOnly-add-new .relationship-add-new__add-button').count()).toEqual(0);
+    });
+
+    test('should clear relationship values', async () => {
+      await page.goto(url.create);
+
+      const field = await page.locator('#field-relationship');
+      await field.click();
+      await page.locator('.rs__option:has-text("Seeded text document")').click();
+      await field.locator('.clear-indicator').click();
+      await expect(field.locator('.rs__placeholder')).toBeVisible();
+    });
+
+    test('should populate relationship dynamic default value', async () => {
+      await page.goto(url.create);
+      await expect(page.locator('#field-relationWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
+      await expect(page.locator('#field-relationHasManyWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
+    });
   });
 
   describe('upload', () => {
@@ -648,6 +712,71 @@ describe('fields', () => {
       await wait(200);
       const jpgImages = await page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]');
       expect(await jpgImages.count()).toEqual(0);
+    });
+
+    test.skip('should show drawer for input field when enableRichText is false', async () => {
+      const uploads3URL = new AdminUrlUtil(serverURL, 'uploads3');
+      await page.goto(uploads3URL.create);
+
+      // create file in uploads 3 collection
+      await page.locator('.file-field__upload input[type="file"]').setInputFiles(path.resolve(__dirname, './collections/Upload/payload.jpg'));
+      await expect(page.locator('.file-field .file-field__filename')).toContainText('payload.jpg');
+      await page.locator('#action-save').click();
+
+      await wait(200);
+
+      // open drawer
+      await page.locator('.field-type.upload .list-drawer__toggler').click();
+      // check title
+      await expect(page.locator('.list-drawer__header-text')).toContainText('Uploads 3');
+    });
+  });
+
+  describe('row', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'row-fields');
+    });
+
+    test('should show row fields as table columns', async () => {
+      await page.goto(url.create);
+
+      // fill the required fields, including the row field
+      const idInput = page.locator('input#field-id');
+      await idInput.fill('123');
+      const titleInput = page.locator('input#field-title');
+      await titleInput.fill('Row 123');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      // ensure the 'title' field is visible in the table header
+      await page.goto(url.list);
+      const titleHeading = page.locator('th#heading-title');
+      await expect(titleHeading).toBeVisible();
+
+      // ensure the 'title' field shows the correct value in the table cell
+      const titleCell = page.locator('.row-1 td.cell-title');
+      await expect(titleCell).toBeVisible();
+      await expect(titleCell).toContainText('Row 123');
+    });
+
+    test('should not show duplicative ID field', async () => {
+      await page.goto(url.create);
+      // fill the required fields, including the custom ID field
+      const idInput = page.locator('input#field-id');
+      await idInput.fill('456');
+      const titleInput = page.locator('input#field-title');
+      await titleInput.fill('Row 456');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      // ensure there are not two ID fields in the table header
+      await page.goto(url.list);
+      const idHeadings = page.locator('th#heading-id');
+      await expect(idHeadings).toBeVisible();
+      await expect(idHeadings).toHaveCount(1);
     });
   });
 });

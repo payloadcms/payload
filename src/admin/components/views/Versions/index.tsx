@@ -10,13 +10,13 @@ import { StepNavItem } from '../../elements/StepNav/types';
 import Meta from '../../utilities/Meta';
 import { Props } from './types';
 import IDLabel from '../../elements/IDLabel';
-import { getColumns } from './columns';
-import Table from '../../elements/Table';
+import { Table } from '../../elements/Table';
 import Paginator from '../../elements/Paginator';
 import PerPage from '../../elements/PerPage';
 import { useSearchParams } from '../../utilities/SearchParams';
 import { Gutter } from '../../elements/Gutter';
 import { getTranslation } from '../../../../utilities/getTranslation';
+import { buildVersionColumns } from './columns';
 
 import './index.scss';
 
@@ -27,7 +27,6 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   const { setStepNav } = useStepNav();
   const { params: { id } } = useRouteMatch<{ id: string }>();
   const { t, i18n } = useTranslation('version');
-  const [tableColumns] = useState(() => getColumns(collection, global, t));
   const [fetchURL, setFetchURL] = useState('');
   const { page, sort, limit } = useSearchParams();
 
@@ -185,7 +184,11 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
             <React.Fragment>
               <Table
                 data={versionsData?.docs}
-                columns={tableColumns}
+                columns={buildVersionColumns(
+                  collection,
+                  global,
+                  t,
+                )}
               />
               <div className={`${baseClass}__page-controls`}>
                 <Paginator

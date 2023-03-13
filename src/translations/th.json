@@ -107,6 +107,7 @@
     "customURL": "URL ที่กำหนดเอง",
     "editLabelData": "แก้ไขข้อมูล {{label}}",
     "editLink": "แก้ไขลิงก์",
+    "editRelationship": "แก้ไขความสัมพันธ์",
     "enterURL": "ระบุ URL",
     "internalLink": "ลิงก์ภายใน",
     "itemsAndMore": "{{items}} และเพิ่มเติมอีก {{count}}",
@@ -227,6 +228,20 @@
     "user": "ผู้ใช้",
     "users": "ผู้ใช้",
     "welcome": "ยินดีต้อนรับ"
+  },
+  "operators": {
+    "equals": "เท่ากับ",
+    "isNotEqualTo": "ไม่เท่ากับ",
+    "isIn": "อยู่ใน",
+    "isNotIn": "ไม่ได้อยู่ใน",
+    "exists": "มีอยู่",
+    "isGreaterThan": "มากกว่า",
+    "isLessThan": "น้อยกว่า",
+    "isLessThanOrEqualTo": "น้อยกว่าหรือเท่ากับ",
+    "isGreaterThanOrEqualTo": "มากกว่าหรือเท่ากับ",
+    "near": "ใกล้",
+    "isLike": "เหมือน",
+    "contains": "มี"
   },
   "upload": {
     "dragAndDropHere": "หรือลากและวางไฟล์ที่นี่",

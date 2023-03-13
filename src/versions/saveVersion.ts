@@ -79,7 +79,7 @@ export const saveVersion = async ({
       const data: Record<string, unknown> = {
         autosave: Boolean(autosave),
         version: versionData,
-        createdAt: draft ? now : new Date(doc.createdAt).toISOString(),
+        createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
         updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
       };
       if (collection) data.parent = id;
@@ -100,7 +100,7 @@ export const saveVersion = async ({
   if (global && typeof global.versions.max === 'number') max = global.versions.max;
 
   if (max > 0) {
-    enforceMaxVersions({
+    await enforceMaxVersions({
       id,
       payload,
       Model: VersionModel,
@@ -110,10 +110,14 @@ export const saveVersion = async ({
     });
   }
 
-  result = result.version;
   result = JSON.parse(JSON.stringify(result));
-  result = sanitizeInternalFields(result);
-  result.id = id;
 
-  return result;
+  let createdVersion = result.version;
+  createdVersion.createdAt = result.createdAt;
+  createdVersion.updatedAt = result.updatedAt;
+
+  createdVersion = sanitizeInternalFields(createdVersion);
+  createdVersion.id = id;
+
+  return createdVersion;
 };

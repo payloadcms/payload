@@ -107,6 +107,7 @@
     "customURL": "自定义URL",
     "editLabelData": "编辑{{label}}数据",
     "editLink": "编辑链接",
+    "editRelationship": "编辑关系",
     "enterURL": "输入一个URL",
     "internalLink": "内部链接",
     "itemsAndMore": "{{items}}和{{count}}更多",
@@ -225,6 +226,20 @@
     "user": "用户",
     "users": "用户",
     "welcome": "欢迎"
+  },
+  "operators": {
+    "equals": "等于",
+    "isNotEqualTo": "不等于",
+    "isIn": "在",
+    "isNotIn": "不在",
+    "exists": "存在",
+    "isGreaterThan": "大于",
+    "isLessThan": "小于",
+    "isLessThanOrEqualTo": "小于或等于",
+    "isGreaterThanOrEqualTo": "大于等于",
+    "near": "附近",
+    "isLike": "就像",
+    "contains": "包含"
   },
   "upload": {
     "dragAndDropHere": "或在这里拖放一个文件",

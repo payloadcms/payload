@@ -103,6 +103,8 @@
     "chooseLabel": "Chọn: {{label}}",
     "collapseAll": "Ẩn toàn bộ",
     "editLabelData": "Chỉnh sửa nội dung của: {{label}}",
+    "editLink": "Chỉnh sửa liên kết",
+    "editRelationship": "Chỉnh sửa mối quan hệ",
     "itemsAndMore": "{{items}} và {{count}} món nữa",
     "labelRelationship": "Mối quan hệ của {{label}} (Relationship)",
     "latitude": "Vĩ độ",
@@ -217,6 +219,20 @@
     "user": "Người dùng",
     "users": "Những người dùng",
     "welcome": "Xin chào"
+  },
+  "operators": {
+    "equals": "bằng",
+    "isNotEqualTo": "không bằng",
+    "isIn": "đang ở",
+    "isNotIn": "không có trong",
+    "exists": "tồn tại",
+    "isGreaterThan": "lớn hơn",
+    "isLessThan": "nhỏ hơn",
+    "isLessThanOrEqualTo": "nhỏ hơn hoặc bằng",
+    "isGreaterThanOrEqualTo": "lớn hơn hoặc bằng",
+    "near": "gần",
+    "isLike": "giống như",
+    "contains": "chứa"
   },
   "upload": {
     "dragAndDropHere": "hoặc kéo và thả file vào đây",
