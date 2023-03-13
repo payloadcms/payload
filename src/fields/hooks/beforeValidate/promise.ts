@@ -56,6 +56,21 @@ export const promise = async <T>({
         break;
       }
 
+      case 'point': {
+        if (Array.isArray(siblingData[field.name])) {
+          siblingData[field.name] = (siblingData[field.name] as string[]).map((coordinate, i) => {
+            if (typeof coordinate === 'string') {
+              const value = siblingData[field.name][i] as string;
+              const trimmed = value.trim();
+              return (trimmed.length === 0) ? null : parseFloat(trimmed);
+            }
+            return coordinate;
+          });
+        }
+
+        break;
+      }
+
       case 'checkbox': {
         if (siblingData[field.name] === 'true') siblingData[field.name] = true;
         if (siblingData[field.name] === 'false') siblingData[field.name] = false;
