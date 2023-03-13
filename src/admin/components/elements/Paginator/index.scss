@@ -18,6 +18,10 @@
     }
   }
 
+  .clickable-arrow--right {
+    margin-right: base(.25);
+  }
+
   .clickable-arrow,
   &__page {
     @extend %btn-reset;
