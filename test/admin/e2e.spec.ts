@@ -409,6 +409,12 @@ describe('admin', () => {
         // ensure that the "number" column is still deselected
         await expect(await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).not.toHaveClass('column-selector__column--active');
       });
+
+      test('should render custom table cell component', async () => {
+        await createPost();
+        await page.goto(url.list);
+        await expect(await page.locator('table >> thead >> tr >> th >> text=Demo UI Field')).toBeVisible();
+      });
     });
 
     describe('pagination', () => {
