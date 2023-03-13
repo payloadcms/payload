@@ -3,4 +3,5 @@ export type Props = {
   children: React.ReactNode
   show?: boolean
   delay?: number
+  boundingRef?: React.RefObject<HTMLElement>
 }
