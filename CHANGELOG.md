@@ -1,5 +1,30 @@
 
 
+## [1.6.20](https://github.com/payloadcms/payload/compare/v1.6.19...v1.6.20) (2023-03-13)
+
+
+### Bug Fixes
+
+* allow thumbnails in upload gallery to show useAsTitle value ([aae6d71](https://github.com/payloadcms/payload/commit/aae6d716e5608270ca142f2f4df214f9e271deb4))
+* allows useListDrawer to work without collectionSlugs defined ([e1553c2](https://github.com/payloadcms/payload/commit/e1553c2fc88ac582744cd72d15c9e9ef3b8ec549))
+* cancels existing fetches if new fetches are started ([ccc92fd](https://github.com/payloadcms/payload/commit/ccc92fdb7519e14ff1092f19ae4e7060fa413aab))
+* check relationships indexed access for undefined ([959f017](https://github.com/payloadcms/payload/commit/959f01739c30450f3a6d052dd6083fdacf1527a4))
+* ensures documentID exists in doc documentDrawers ([#2304](https://github.com/payloadcms/payload/issues/2304)) ([566c45b](https://github.com/payloadcms/payload/commit/566c45b0b436a9a3ea8eff27de2ea829dd6a2f0c))
+* flattens title fields to allow seaching by title if title inside Row field ([75e776d](https://github.com/payloadcms/payload/commit/75e776ddb43b292eae6c1204589d9dc22deab50c))
+* keep drop zone active when hovering inner elements ([#2295](https://github.com/payloadcms/payload/issues/2295)) ([39e303a](https://github.com/payloadcms/payload/commit/39e303add62d2dbd3e72d17e64e1ea5d940b0298))
+* Prevent browser initial favicon request ([fd8ea88](https://github.com/payloadcms/payload/commit/fd8ea88488c80627346733e0595a2ef34c964a87))
+* removes forced require on array, block, group ts ([657aa65](https://github.com/payloadcms/payload/commit/657aa65e993d13e9a294456b73adcd57f20d7c87))
+* removes pagination type from top level admin config types ([bf9929e](https://github.com/payloadcms/payload/commit/bf9929e9a9919488f6de0e172909fa27719ecb04))
+* renders presentational table columns ([4e1748f](https://github.com/payloadcms/payload/commit/4e1748fb8a3554586b377e60738130d03ec12f38))
+* undefined point fields saving as empty object ([#2313](https://github.com/payloadcms/payload/issues/2313)) ([af16415](https://github.com/payloadcms/payload/commit/af164159fb52f4b0ef97e2fa34b881f97bc07310))
+
+
+### Features
+
+* [#2280](https://github.com/payloadcms/payload/issues/2280) Improve UX of paginator ([#2293](https://github.com/payloadcms/payload/issues/2293)) ([1df3d14](https://github.com/payloadcms/payload/commit/1df3d149e06cc955a61c4371371b601c0d9aad2b))
+* exposes useTheme hook ([abebde6](https://github.com/payloadcms/payload/commit/abebde6b120a9dddc9971325b616b9cb31bcba90))
+* provide refresh permissions for auth context ([e9c796e](https://github.com/payloadcms/payload/commit/e9c796e42c1bb1e0ce72d057ee88dee624b94c24))
+
 ## [1.6.19](https://github.com/payloadcms/payload/compare/v1.6.18...v1.6.19) (2023-03-09)
 
 
