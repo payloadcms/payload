@@ -13,11 +13,6 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
     onClick,
     doc,
     collection,
-    collection: {
-      admin: {
-        useAsTitle,
-      },
-    },
     thumbnail,
     label,
     alignLabel,
@@ -33,7 +28,7 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
     alignLabel && `${baseClass}--align-label-${alignLabel}`,
   ].filter(Boolean).join(' ');
 
-  const title: any = doc?.[useAsTitle] || doc?.filename || `[${t('untitled')}]`;
+  const title: any = doc?.[collection?.admin?.useAsTitle] || doc?.filename || `[${t('untitled')}]`;
 
   return (
     <div
