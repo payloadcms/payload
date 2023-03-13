@@ -22,7 +22,7 @@ export type ListTogglerProps = HTMLAttributes<HTMLButtonElement> & {
 }
 
 export type UseListDrawer = (args: {
-  collectionSlugs: string[]
+  collectionSlugs?: string[]
   selectedCollection?: string
   uploads?: boolean // finds all collections with upload: true
   filterOptions?: FilterOptionsResult
