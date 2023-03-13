@@ -43,12 +43,15 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   });
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchData = async () => {
       setIsError(false);
       setIsLoading(true);
 
       try {
         const response = await requests.get(`${url}${search}`, {
+          signal: abortController.signal,
           headers: {
             'Accept-Language': i18n.language,
           },
@@ -73,6 +76,10 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
       setIsError(false);
       setIsLoading(false);
     }
+
+    return () => {
+      abortController.abort();
+    };
   }, [url, locale, search, i18n.language]);
 
   return [{ data, isLoading, isError }, { setParams }];
