@@ -93,7 +93,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   if (isError) return null;
 
   return (
-    <DocumentInfoProvider collection={collectionConfig}>
+    <DocumentInfoProvider
+      collection={collectionConfig}
+      id={id}
+    >
       <RenderCustomComponent
         DefaultComponent={DefaultEdit}
         CustomComponent={collectionConfig.admin?.components?.views?.Edit}
