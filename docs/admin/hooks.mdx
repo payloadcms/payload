@@ -226,14 +226,15 @@ const Greeting: React.FC = () => {
 
 Useful to retrieve info about the currently logged in user as well as methods for interacting with it. It sends back an object with the following properties:
 
-| Property            | Description                                                                             |
-|---------------------|-----------------------------------------------------------------------------------------|
-| **`user`**          | The currently logged in user                                                            |
-| **`logOut`**        | A method to log out the currently logged in user                                        |
-| **`refreshCookie`** | A method to trigger the silent refreshing of a user's auth token                        |
-| **`setToken`**      | Set the token of the user, to be decoded and used to reset the user and token in memory |
-| **`token`**         | The logged in user's token (useful for creating preview links, etc.)                    |
-| **`permissions`**   | The permissions of the current user                                                     |
+| Property                 | Description                                                                             |
+|--------------------------|-----------------------------------------------------------------------------------------|
+| **`user`**               | The currently logged in user                                                            |
+| **`logOut`**             | A method to log out the currently logged in user                                        |
+| **`refreshCookie`**      | A method to trigger the silent refreshing of a user's auth token                        |
+| **`setToken`**           | Set the token of the user, to be decoded and used to reset the user and token in memory |
+| **`token`**              | The logged in user's token (useful for creating preview links, etc.)                    |
+| **`refreshPermissions`** | Load new permissions (useful when content that effects permissions has been changed)    |
+| **`permissions`**        | The permissions of the current user                                                     |
 
 ```tsx
 import { useAuth } from 'payload/components/utilities';
