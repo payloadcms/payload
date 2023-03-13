@@ -31,7 +31,11 @@ export const createRelationMap: CreateRelationMap = ({
 
   const add = (relation: string, id: unknown) => {
     if (((typeof id === 'string') || typeof id === 'number') && typeof relation === 'string') {
-      relationMap[relation].push(id);
+      if (relationMap[relation]) {
+        relationMap[relation].push(id);
+      } else {
+        relationMap[relation] = [id];
+      }
     }
   };
 
