@@ -1,14 +1,13 @@
 @import '../../../scss/styles.scss';
 
-$caretSize: 6;
-
 .tooltip {
+  --caret-size: 6px;
+
   opacity: 0;
 	background-color: var(--theme-elevation-800);
 	position: absolute;
 	z-index: 2;
 	left: 50%;
-	transform: translate3d(-50%, calc(#{$caretSize}px * -1), 0);
 	padding: base(.2) base(.4);
 	color: var(--theme-elevation-0);
 	line-height: base(.75);
@@ -25,8 +24,8 @@ $caretSize: 6;
     transform: translate3d(-50%, 100%, 0);
     width: 0;
     height: 0;
-    border-left: #{$caretSize}px solid transparent;
-    border-right: #{$caretSize}px solid transparent;
+    border-left: var(--caret-size) solid transparent;
+    border-right: var(--caret-size) solid transparent;
   }
 
   &--show {
@@ -38,19 +37,21 @@ $caretSize: 6;
 
   &--position-top {
     bottom: 100%;
+    transform: translate3d(-50%, calc(var(--caret-size) * -1), 0);
+
     &::after {
-      bottom: 0;
-      border-top: #{$caretSize}px solid var(--theme-elevation-800);
+      bottom: 1px;
+      border-top: var(--caret-size) solid var(--theme-elevation-800);
     }
   }
 
   &--position-bottom {
     top: 100%;
-    bottom: unset;
+    transform: translate3d(-50%, var(--caret-size), 0);
 
     &::after {
-      bottom: 100%;
-      border-bottom: #{$caretSize}px solid var(--theme-elevation-800);
+      bottom: calc(100% + var(--caret-size) - 1px);
+      border-bottom: var(--caret-size) solid var(--theme-elevation-800);
     }
   }
 

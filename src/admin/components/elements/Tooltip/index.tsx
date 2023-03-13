@@ -18,7 +18,7 @@ const Tooltip: React.FC<Props> = (props) => {
 
   const [ref, intersectionEntry] = useIntersect({
     threshold: 0,
-    rootMargin: '-150px 0px 0px 100px',
+    rootMargin: '-145px 0px 0px 100px',
     root: boundingRef?.current || null,
   });
 
@@ -45,17 +45,30 @@ const Tooltip: React.FC<Props> = (props) => {
   }, [intersectionEntry]);
 
   return (
-    <aside
-      ref={ref}
-      className={[
-        'tooltip',
-        className,
-        show && 'tooltip--show',
-        position && `tooltip--position-${position}`,
-      ].filter(Boolean).join(' ')}
-    >
-      {children}
-    </aside>
+    <React.Fragment>
+      <aside
+        ref={ref}
+        className={[
+          'tooltip',
+          className,
+          'tooltip--position-top',
+        ].filter(Boolean).join(' ')}
+        aria-hidden="true"
+      >
+        {children}
+      </aside>
+
+      <aside
+        className={[
+          'tooltip',
+          className,
+          show && 'tooltip--show',
+          `tooltip--position-${position}`,
+        ].filter(Boolean).join(' ')}
+      >
+        {children}
+      </aside>
+    </React.Fragment>
   );
 };
 
