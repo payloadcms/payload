@@ -11,6 +11,7 @@ import Button from '../Button';
 import { Props } from './types';
 import { useSearchParams } from '../../utilities/SearchParams';
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery';
+import flattenFields from '../../../../utilities/flattenTopLevelFields';
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import Pill from '../Pill';
@@ -45,7 +46,10 @@ const ListControls: React.FC<Props> = (props) => {
   const params = useSearchParams();
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where);
 
-  const [titleField] = useState(() => fields.find((field) => fieldAffectsData(field) && field.name === useAsTitle));
+  const [titleField] = useState(() => {
+    const topLevelFields = flattenFields(fields);
+    return topLevelFields.find((field) => fieldAffectsData(field) && field.name === useAsTitle);
+  });
   const [textFieldsToBeSearched] = useState(getTextFieldsToBeSearched(listSearchableFields, fields));
   const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
   const { t, i18n } = useTranslation('general');

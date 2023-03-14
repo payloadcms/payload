@@ -168,7 +168,8 @@ const RichText: React.FC<Props> = (props) => {
     CreatedEditor = enablePlugins(CreatedEditor, leaves);
 
     return CreatedEditor;
-  }, [elements, leaves]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [elements, leaves, path]);
 
   // All slate changes fire the onChange event
   // including selection changes
@@ -224,6 +225,16 @@ const RichText: React.FC<Props> = (props) => {
       }
     };
   }, [loaded, readOnly]);
+
+  // useEffect(() => {
+  //   // If there is a change to the initial value, we need to reset Slate history
+  //   // and clear selection because the old selection may no longer be valid
+  //   // as returned JSON may be modified in hooks and have a different shape
+  //   if (editor.selection) {
+  //     console.log('deselecting');
+  //     ReactEditor.deselect(editor);
+  //   }
+  // }, [path, editor]);
 
   if (!loaded) {
     return null;

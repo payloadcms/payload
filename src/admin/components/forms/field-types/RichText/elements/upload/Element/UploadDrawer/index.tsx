@@ -14,6 +14,7 @@ import RenderFields from '../../../../../../RenderFields';
 import FormSubmit from '../../../../../../Submit';
 import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema';
 import { getTranslation } from '../../../../../../../../../utilities/getTranslation';
+import deepCopyObject from '../../../../../../../../../utilities/deepCopyObject';
 
 export const UploadDrawer: React.FC<ElementProps & {
   drawerSlug: string
@@ -52,7 +53,7 @@ export const UploadDrawer: React.FC<ElementProps & {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema, data: { ...element?.fields || {} }, user, operation: 'update', locale, t });
+      const state = await buildStateFromSchema({ fieldSchema, data: deepCopyObject(element?.fields || {}), user, operation: 'update', locale, t });
       setInitialState(state);
     };
 

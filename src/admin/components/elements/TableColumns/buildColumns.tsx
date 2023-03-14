@@ -16,7 +16,7 @@ const buildColumns = ({
 }: {
   collection: SanitizedCollectionConfig,
   columns: Pick<Column, 'accessor' | 'active'>[],
-  cellProps?: Partial<CellProps>[]
+  cellProps: Partial<CellProps>[]
 }): Column[] => {
   const flattenedFields = flattenFields(collection.fields);
 
@@ -46,7 +46,11 @@ const buildColumns = ({
           <SortColumn
             label={field.label || field.name}
             name={field.name}
-            disable={(('disableSort' in field && Boolean(field.disableSort)) || fieldIsPresentationalOnly(field)) || undefined}
+            disable={
+              ('disableSort' in field && Boolean(field.disableSort))
+              || fieldIsPresentationalOnly(field)
+              || undefined
+            }
           />
         ),
         renderCell: (rowData, cellData) => {
@@ -59,7 +63,7 @@ const buildColumns = ({
               rowData={rowData}
               cellData={cellData}
               link={isFirstActive}
-              {...cellProps?.[colIndex] || {}}
+              {...(cellProps?.[colIndex] || {})}
             />
           );
         },

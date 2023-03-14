@@ -14,4 +14,5 @@ export type Column = {
 
 export type Props = {
   data: unknown[]
+  columns?: Column[]
 }

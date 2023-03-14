@@ -1,12 +1,15 @@
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { Column } from '../Table/types';
 import buildColumns from './buildColumns';
+import { Props as CellProps } from '../../views/collections/List/Cell/types';
+
 
 type TOGGLE = {
   type: 'toggle',
   payload: {
     column: string
     collection: SanitizedCollectionConfig
+    cellProps: Partial<CellProps>[]
   }
 }
 
@@ -15,6 +18,7 @@ type SET = {
   payload: {
     columns: Pick<Column, 'accessor' | 'active'>[]
     collection: SanitizedCollectionConfig
+    cellProps: Partial<CellProps>[]
   }
 }
 
@@ -24,6 +28,7 @@ type MOVE = {
     fromIndex: number
     toIndex: number
     collection: SanitizedCollectionConfig
+    cellProps: Partial<CellProps>[]
   }
 }
 
@@ -35,6 +40,7 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
       const {
         column,
         collection,
+        cellProps,
       } = action.payload;
 
       const withToggledColumn = state.map((col) => {
@@ -51,6 +57,7 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
       return buildColumns({
         columns: withToggledColumn,
         collection,
+        cellProps,
       });
     }
     case 'move': {
@@ -58,6 +65,7 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
         fromIndex,
         toIndex,
         collection,
+        cellProps,
       } = action.payload;
 
       const withMovedColumn = [...state];
@@ -67,17 +75,20 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
       return buildColumns({
         columns: withMovedColumn,
         collection,
+        cellProps,
       });
     }
     case 'set': {
       const {
         columns,
         collection,
+        cellProps,
       } = action.payload;
 
       return buildColumns({
         columns,
         collection,
+        cellProps,
       });
     }
     default:

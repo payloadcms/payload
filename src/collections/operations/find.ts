@@ -233,7 +233,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef = await hook({ req, query, doc, findMany: true }) || doc;
+        docRef = await hook({ req, query, doc: docRef, findMany: true }) || doc;
       }, Promise.resolve());
 
       return docRef;

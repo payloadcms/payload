@@ -20,6 +20,9 @@ const swcOptions = {
   module: {
     type: 'commonjs',
   },
+  ignore: [
+    /.*\/node_modules\/.*/, // parse everything besides files within node_modules
+  ],
 };
 
 if (tsConfig?.config?.compilerOptions?.paths) {

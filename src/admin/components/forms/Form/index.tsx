@@ -154,7 +154,7 @@ const Form: React.FC<Props> = (props) => {
     // If submit handler comes through via props, run that
     if (onSubmit) {
       const data = {
-        ...reduceFieldsToValues(fields),
+        ...reduceFieldsToValues(fields, true),
         ...overrides,
       };
 

@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import path from 'path';
+import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
@@ -86,7 +87,7 @@ describe('fields', () => {
       const json = page.locator('.json-field .inputarea');
       await json.fill(input);
 
-      await saveDocAndAssert(page);
+      await saveDocAndAssert(page, '.form-submit button');
       await expect(page.locator('.json-field')).toContainText('"foo": "bar"');
     });
   });
@@ -136,8 +137,26 @@ describe('fields', () => {
 
   describe('point', () => {
     let url: AdminUrlUtil;
-    beforeAll(() => {
+    let filledGroupPoint;
+    let emptyGroupPoint;
+    beforeAll(async () => {
       url = new AdminUrlUtil(serverURL, pointFieldsSlug);
+      filledGroupPoint = await payload.create({
+        collection: pointFieldsSlug,
+        data: {
+          point: [5, 5],
+          localized: [4, 2],
+          group: { point: [4, 2] },
+        },
+      });
+      emptyGroupPoint = await payload.create({
+        collection: pointFieldsSlug,
+        data: {
+          point: [5, 5],
+          localized: [3, -2],
+          group: {},
+        },
+      });
     });
 
     test('should save point', async () => {
@@ -161,6 +180,57 @@ describe('fields', () => {
       await groupLatField.fill('-8');
 
       await saveDocAndAssert(page);
+      await expect(await longField.getAttribute('value')).toEqual('9');
+      await expect(await latField.getAttribute('value')).toEqual('-2');
+      await expect(await localizedLongField.getAttribute('value')).toEqual('1');
+      await expect(await localizedLatField.getAttribute('value')).toEqual('-1');
+      await expect(await groupLongitude.getAttribute('value')).toEqual('3');
+      await expect(await groupLatField.getAttribute('value')).toEqual('-8');
+    });
+
+    test('should update point', async () => {
+      await page.goto(url.edit(emptyGroupPoint.id));
+      const longField = page.locator('#field-longitude-point');
+      await longField.fill('9');
+
+      const latField = page.locator('#field-latitude-point');
+      await latField.fill('-2');
+
+      const localizedLongField = page.locator('#field-longitude-localized');
+      await localizedLongField.fill('2');
+
+      const localizedLatField = page.locator('#field-latitude-localized');
+      await localizedLatField.fill('-2');
+
+      const groupLongitude = page.locator('#field-longitude-group__point');
+      await groupLongitude.fill('3');
+
+      const groupLatField = page.locator('#field-latitude-group__point');
+      await groupLatField.fill('-8');
+
+      await saveDocAndAssert(page);
+
+      await expect(await longField.getAttribute('value')).toEqual('9');
+      await expect(await latField.getAttribute('value')).toEqual('-2');
+      await expect(await localizedLongField.getAttribute('value')).toEqual('2');
+      await expect(await localizedLatField.getAttribute('value')).toEqual('-2');
+      await expect(await groupLongitude.getAttribute('value')).toEqual('3');
+      await expect(await groupLatField.getAttribute('value')).toEqual('-8');
+    });
+
+    test('should be able to clear a value point', async () => {
+      await page.goto(url.edit(filledGroupPoint.id));
+
+      const groupLongitude = page.locator('#field-longitude-group__point');
+      await groupLongitude.fill('');
+
+      const groupLatField = page.locator('#field-latitude-group__point');
+      await groupLatField.fill('');
+
+      await saveDocAndAssert(page);
+
+      await expect(await groupLongitude.getAttribute('value')).toEqual('');
+      await expect(await groupLatField.getAttribute('value')).toEqual('');
     });
   });
 
@@ -729,6 +799,54 @@ describe('fields', () => {
       await page.locator('.field-type.upload .list-drawer__toggler').click();
       // check title
       await expect(page.locator('.list-drawer__header-text')).toContainText('Uploads 3');
+    });
+  });
+
+  describe('row', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'row-fields');
+    });
+
+    test('should show row fields as table columns', async () => {
+      await page.goto(url.create);
+
+      // fill the required fields, including the row field
+      const idInput = page.locator('input#field-id');
+      await idInput.fill('123');
+      const titleInput = page.locator('input#field-title');
+      await titleInput.fill('Row 123');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      // ensure the 'title' field is visible in the table header
+      await page.goto(url.list);
+      const titleHeading = page.locator('th#heading-title');
+      await expect(titleHeading).toBeVisible();
+
+      // ensure the 'title' field shows the correct value in the table cell
+      const titleCell = page.locator('.row-1 td.cell-title');
+      await expect(titleCell).toBeVisible();
+      await expect(titleCell).toContainText('Row 123');
+    });
+
+    test('should not show duplicative ID field', async () => {
+      await page.goto(url.create);
+      // fill the required fields, including the custom ID field
+      const idInput = page.locator('input#field-id');
+      await idInput.fill('456');
+      const titleInput = page.locator('input#field-title');
+      await titleInput.fill('Row 456');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      // ensure there are not two ID fields in the table header
+      await page.goto(url.list);
+      const idHeadings = page.locator('th#heading-id');
+      await expect(idHeadings).toBeVisible();
+      await expect(idHeadings).toHaveCount(1);
     });
   });
 });

@@ -12,7 +12,7 @@ export const requests = {
     }
     return fetch(`${url}${query}`, {
       credentials: 'include',
-      headers: options.headers,
+      ...options,
     });
   },
 
