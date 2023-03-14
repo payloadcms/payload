@@ -1,10 +1,9 @@
 import mongoose from 'mongoose';
 import payload from '../../src';
-import type { Options as CreateOptions } from '../../src/collections/operations/local/create';
 import { Forbidden } from '../../src/errors';
 import type { PayloadRequest } from '../../src/types';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { relyOnRequestHeadersSlug, requestHeaders, restrictedSlug, siblingDataSlug, slug } from './config';
+import { hiddenFieldsSlug, relyOnRequestHeadersSlug, requestHeaders, restrictedSlug, siblingDataSlug, slug } from './config';
 import type { Restricted, Post, RelyOnRequestHeader } from './payload-types';
 import { firstArrayText, secondArrayText } from './shared';
 
@@ -34,7 +33,38 @@ describe('Access Control', () => {
     await payload.mongoMemoryServer.stop();
   });
 
-  it.todo('should properly prevent / allow public users from reading a restricted field');
+  it('should not affect hidden fields when patching data', async () => {
+    const doc = await payload.create({
+      collection: hiddenFieldsSlug,
+      data: {
+        partiallyHiddenArray: [{
+          name: 'public_name',
+          value: 'private_value',
+        }],
+        partiallyHiddenGroup: {
+          name: 'public_name',
+          value: 'private_value',
+        },
+      },
+    });
+
+    await payload.update({
+      collection: hiddenFieldsSlug,
+      id: doc.id,
+      data: {
+        title: 'Doc Title',
+      },
+    });
+
+    const updatedDoc = await payload.findByID({
+      collection: hiddenFieldsSlug,
+      id: doc.id,
+      showHiddenFields: true,
+    });
+
+    expect(updatedDoc.partiallyHiddenGroup.value).toEqual('private_value');
+    expect(updatedDoc.partiallyHiddenArray[0].value).toEqual('private_value');
+  });
 
   it('should be able to restrict access based upon siblingData', async () => {
     const { id } = await payload.create({
@@ -220,7 +250,7 @@ describe('Access Control', () => {
   });
 });
 
-async function createDoc<Collection>(data: Partial<Collection>, overrideSlug = slug, options?: Partial<CreateOptions<Collection>>): Promise<Collection> {
+async function createDoc<Collection>(data: Partial<Collection>, overrideSlug = slug, options?: Partial<Collection>): Promise<Collection> {
   return payload.create({
     ...options,
     collection: overrideSlug,

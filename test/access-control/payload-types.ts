@@ -5,11 +5,20 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
-export interface Config {}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
+export interface Config {
+  collections: {
+    users: User;
+    posts: Post;
+    restricted: Restricted;
+    'read-only-collection': ReadOnlyCollection;
+    'restricted-versions': RestrictedVersion;
+    'sibling-data': SiblingDatum;
+    'rely-on-request-headers': RelyOnRequestHeader;
+    'doc-level-access': DocLevelAccess;
+    'hidden-fields': HiddenField;
+  };
+  globals: {};
+}
 export interface User {
   id: string;
   email?: string;
@@ -19,15 +28,12 @@ export interface User {
   lockUntil?: string;
   createdAt: string;
   updatedAt: string;
+  password?: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
 export interface Post {
   id: string;
   restrictedField?: string;
-  group: {
+  group?: {
     restrictedGroupText?: string;
   };
   restrictedRowText?: string;
@@ -35,43 +41,27 @@ export interface Post {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "restricted".
- */
 export interface Restricted {
   id: string;
   name?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "read-only-collection".
- */
 export interface ReadOnlyCollection {
   id: string;
   name?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "restricted-versions".
- */
 export interface RestrictedVersion {
   id: string;
   name?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "sibling-data".
- */
 export interface SiblingDatum {
   id: string;
-  array: {
+  array?: {
     allowPublicReadability?: boolean;
     text?: string;
     id?: string;
@@ -79,25 +69,32 @@ export interface SiblingDatum {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "rely-on-request-headers".
- */
 export interface RelyOnRequestHeader {
   id: string;
   name?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "doc-level-access".
- */
 export interface DocLevelAccess {
   id: string;
   approvedForRemoval?: boolean;
   approvedTitle?: string;
   lockTitle?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface HiddenField {
+  id: string;
+  title?: string;
+  partiallyHiddenGroup?: {
+    name?: string;
+    value?: string;
+  };
+  partiallyHiddenArray?: {
+    name?: string;
+    value?: string;
+    id?: string;
+  }[];
   createdAt: string;
   updatedAt: string;
 }
