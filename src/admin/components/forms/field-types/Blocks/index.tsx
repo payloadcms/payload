@@ -53,6 +53,7 @@ const BlocksField: React.FC<Props> = (props) => {
     validate = blocksValidator,
     permissions,
     indexPath,
+    localized,
     admin: {
       readOnly,
       description,
@@ -257,6 +258,7 @@ const BlocksField: React.FC<Props> = (props) => {
       </header>
 
       <NullifyLocaleField
+        localized={localized}
         path={path}
         fieldValue={value}
       />

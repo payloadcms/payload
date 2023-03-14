@@ -45,6 +45,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     minRows,
     permissions,
     indexPath,
+    localized,
     admin: {
       readOnly,
       description,
@@ -260,6 +261,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       </header>
 
       <NullifyLocaleField
+        localized={localized}
         path={path}
         fieldValue={value}
       />
