@@ -17,6 +17,7 @@ import fieldTypes from '../../forms/field-types';
 import X from '../../icons/X';
 
 import './index.scss';
+import Upload from '../../views/collections/Edit/Upload';
 
 const baseClass = 'edit-many';
 
@@ -43,7 +44,7 @@ const Submit: React.FC<{disabled: boolean, action: string}> = ({ action, disable
 };
 const Publish: React.FC<{disabled: boolean, action: string}> = ({ action, disabled }) => {
   const { submit } = useForm();
-  const { t } = useTranslation('versions');
+  const { t } = useTranslation('version');
 
   const save = useCallback(() => {
     submit({
@@ -67,7 +68,7 @@ const Publish: React.FC<{disabled: boolean, action: string}> = ({ action, disabl
 };
 const SaveDraft: React.FC<{disabled: boolean, action: string}> = ({ action, disabled }) => {
   const { submit } = useForm();
-  const { t } = useTranslation('versions');
+  const { t } = useTranslation('version');
 
   const save = useCallback(() => {
     submit({
@@ -98,6 +99,7 @@ const EditMany: React.FC<Props> = (props) => {
       labels: {
         plural,
       },
+      fields,
     } = {},
   } = props;
 
@@ -158,7 +160,7 @@ const EditMany: React.FC<Props> = (props) => {
                 </button>
               </div>
               <FieldSelect
-                fields={collection.fields}
+                fields={fields}
                 setSelected={setSelected}
               />
               <RenderFields

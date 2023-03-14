@@ -1,5 +1,4 @@
 import React from 'react';
-import type { TFunction } from 'react-i18next';
 import Cell from '../../views/collections/List/Cell';
 import SortColumn from '../SortColumn';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
@@ -13,32 +12,13 @@ import SelectRow from '../../views/collections/List/SelectRow';
 const buildColumns = ({
   collection,
   columns,
-  t,
   cellProps,
 }: {
   collection: SanitizedCollectionConfig,
   columns: Pick<Column, 'accessor' | 'active'>[],
-  t: TFunction,
   cellProps?: Partial<CellProps>[]
 }): Column[] => {
-  const flattenedFields = flattenFields([
-    ...collection.fields,
-    {
-      name: 'id',
-      type: 'text',
-      label: 'ID',
-    },
-    {
-      name: 'updatedAt',
-      type: 'date',
-      label: t('updatedAt'),
-    },
-    {
-      name: 'createdAt',
-      type: 'date',
-      label: t('createdAt'),
-    },
-  ]);
+  const flattenedFields = flattenFields(collection.fields);
 
   // sort the fields to the order of activeColumns
   const sortedFields = flattenedFields.sort((a, b) => {

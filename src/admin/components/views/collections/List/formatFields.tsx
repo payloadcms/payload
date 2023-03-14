@@ -1,6 +1,9 @@
 import { TFunction } from 'react-i18next';
+import React from 'react';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { Field, fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../fields/config/types';
+import UploadCell from './Cell/field-types/Upload';
+import { Props } from './Cell/types';
 
 const formatFields = (config: SanitizedCollectionConfig, t: TFunction): Field[] => {
   const hasID = config.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') > -1;
@@ -30,11 +33,23 @@ const formatFields = (config: SanitizedCollectionConfig, t: TFunction): Field[] 
   }
 
   if (config.upload) {
-    fields = fields.concat([
+    const Cell: React.FC<Props> = (props) => (
+      <UploadCell
+        collection={config}
+        {...props}
+      />
+    );
+    fields = fields.filter((field) => (fieldAffectsData(field) && field.name !== 'filename')).concat([
       {
         name: 'filename',
         label: t('upload:fileName'),
         type: 'text',
+        admin: {
+          disableBulkEdit: true,
+          components: {
+            Cell,
+          },
+        },
       },
     ]);
   }

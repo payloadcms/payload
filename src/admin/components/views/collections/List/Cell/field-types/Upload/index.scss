@@ -1,0 +1,11 @@
+@import '../../../../../../../scss/styles.scss';
+
+.upload-cell {
+  display: flex;
+  flex-wrap: nowrap;
+
+  &__filename {
+    align-self: center;
+    margin-left: base(1);
+  }
+}

@@ -13,7 +13,8 @@ import formatFields from './formatFields';
 import { Props, ListIndexProps, ListPreferences } from './types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { useSearchParams } from '../../../utilities/SearchParams';
-import { Field } from '../../../../../fields/config/types';
+import { TableColumnsProvider } from '../../../elements/TableColumns';
+import type { Field } from '../../../../../fields/config/types';
 
 const ListView: React.FC<ListIndexProps> = (props) => {
   const {
@@ -134,18 +135,20 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   }, [sort, limit, preferenceKey, setPreference, getPreference]);
 
   return (
-    <RenderCustomComponent
-      DefaultComponent={DefaultList}
-      CustomComponent={CustomList}
-      componentProps={{
-        collection: { ...collection, fields },
-        newDocumentURL,
-        hasCreatePermission,
-        data,
-        limit: limit || defaultLimit,
-        resetParams,
-      }}
-    />
+    <TableColumnsProvider collection={{ ...collection, fields }}>
+      <RenderCustomComponent
+        DefaultComponent={DefaultList}
+        CustomComponent={CustomList}
+        componentProps={{
+          collection: { ...collection, fields },
+          newDocumentURL,
+          hasCreatePermission,
+          data,
+          limit: limit || defaultLimit,
+          resetParams,
+        }}
+      />
+    </TableColumnsProvider>
   );
 };
 

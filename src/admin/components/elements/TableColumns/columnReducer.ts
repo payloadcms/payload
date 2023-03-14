@@ -1,4 +1,3 @@
-import { TFunction } from 'react-i18next';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { Column } from '../Table/types';
 import buildColumns from './buildColumns';
@@ -7,7 +6,6 @@ type TOGGLE = {
   type: 'toggle',
   payload: {
     column: string
-    t: TFunction
     collection: SanitizedCollectionConfig
   }
 }
@@ -16,7 +14,6 @@ type SET = {
   type: 'set',
   payload: {
     columns: Pick<Column, 'accessor' | 'active'>[]
-    t: TFunction
     collection: SanitizedCollectionConfig
   }
 }
@@ -26,7 +23,6 @@ type MOVE = {
   payload: {
     fromIndex: number
     toIndex: number
-    t: TFunction
     collection: SanitizedCollectionConfig
   }
 }
@@ -38,7 +34,6 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
     case 'toggle': {
       const {
         column,
-        t,
         collection,
       } = action.payload;
 
@@ -56,14 +51,12 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
       return buildColumns({
         columns: withToggledColumn,
         collection,
-        t,
       });
     }
     case 'move': {
       const {
         fromIndex,
         toIndex,
-        t,
         collection,
       } = action.payload;
 
@@ -74,20 +67,17 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
       return buildColumns({
         columns: withMovedColumn,
         collection,
-        t,
       });
     }
     case 'set': {
       const {
         columns,
-        t,
         collection,
       } = action.payload;
 
       return buildColumns({
         columns,
         collection,
-        t,
       });
     }
     default:

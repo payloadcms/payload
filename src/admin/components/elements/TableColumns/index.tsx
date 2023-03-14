@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useReducer, createContext, useContext } from 'react';
-import { useTranslation } from 'react-i18next';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { usePreferences } from '../../utilities/Preferences';
 import { ListPreferences } from '../../views/collections/List/types';
@@ -40,7 +39,6 @@ export const TableColumnsProvider: React.FC<{
     },
   },
 }) => {
-  const { t } = useTranslation('general');
   const preferenceKey = `${collection.slug}-list`;
   const { getPreference, setPreference } = usePreferences();
 
@@ -53,7 +51,6 @@ export const TableColumnsProvider: React.FC<{
         active: true,
       })),
       cellProps,
-      t,
     });
   });
 
@@ -79,14 +76,13 @@ export const TableColumnsProvider: React.FC<{
               }
               return column;
             }),
-            t,
             collection,
           },
         });
       }
     };
     makeRequest();
-  }, [collection, getPreference, preferenceKey, t]);
+  }, [collection, getPreference, preferenceKey]);
 
   // /////////////////////////////////////
   // Set preferences on change
@@ -117,11 +113,10 @@ export const TableColumnsProvider: React.FC<{
           accessor: column,
           active: true,
         })),
-        t,
         // onSelect,
       },
     });
-  }, [collection, t]);
+  }, [collection]);
 
   const moveColumn = useCallback((args: {
     fromIndex: number
@@ -135,10 +130,9 @@ export const TableColumnsProvider: React.FC<{
         fromIndex,
         toIndex,
         collection,
-        t,
       },
     });
-  }, [collection, t]);
+  }, [collection]);
 
   const toggleColumn = useCallback((column: string) => {
     dispatchTableColumns({
@@ -146,10 +140,9 @@ export const TableColumnsProvider: React.FC<{
       payload: {
         column,
         collection,
-        t,
       },
     });
-  }, [collection, t]);
+  }, [collection]);
 
   return (
     <TableColumnContext.Provider
