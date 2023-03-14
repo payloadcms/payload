@@ -37,10 +37,14 @@ describe('Access Control', () => {
     const doc = await payload.create({
       collection: hiddenFieldsSlug,
       data: {
-        partiallyHidden: [{
+        partiallyHiddenArray: [{
           name: 'public_name',
           value: 'private_value',
         }],
+        partiallyHiddenGroup: {
+          name: 'public_name',
+          value: 'private_value',
+        },
       },
     });
 
@@ -58,7 +62,8 @@ describe('Access Control', () => {
       showHiddenFields: true,
     });
 
-    expect(updatedDoc.partiallyHidden[0].value).toEqual('private_value');
+    expect(updatedDoc.partiallyHiddenGroup.value).toEqual('private_value');
+    expect(updatedDoc.partiallyHiddenArray[0].value).toEqual('private_value');
   });
 
   it('should be able to restrict access based upon siblingData', async () => {

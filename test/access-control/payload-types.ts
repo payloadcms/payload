@@ -86,7 +86,11 @@ export interface DocLevelAccess {
 export interface HiddenField {
   id: string;
   title?: string;
-  partiallyHidden?: {
+  partiallyHiddenGroup?: {
+    name?: string;
+    value?: string;
+  };
+  partiallyHiddenArray?: {
     name?: string;
     value?: string;
     id?: string;

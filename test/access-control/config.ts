@@ -252,7 +252,22 @@ export default buildConfig({
           type: 'text',
         },
         {
-          name: 'partiallyHidden',
+          name: 'partiallyHiddenGroup',
+          type: 'group',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+            },
+            {
+              name: 'value',
+              type: 'text',
+              hidden: true,
+            },
+          ],
+        },
+        {
+          name: 'partiallyHiddenArray',
           type: 'array',
           fields: [
             {
