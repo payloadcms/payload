@@ -1,5 +1,12 @@
 
 
+## [1.6.21](https://github.com/payloadcms/payload/compare/v1.6.20...v1.6.21) (2023-03-15)
+
+
+### Bug Fixes
+
+* hidden fields being mutated on patch ([#2317](https://github.com/payloadcms/payload/issues/2317)) ([8d65ba1](https://github.com/payloadcms/payload/commit/8d65ba1efd8744042bbaf669c10b6837a6b972f8))
+
 ## [1.6.20](https://github.com/payloadcms/payload/compare/v1.6.19...v1.6.20) (2023-03-13)
 
 
