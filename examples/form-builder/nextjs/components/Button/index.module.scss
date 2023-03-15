@@ -34,11 +34,23 @@
 .appearance--primary {
   background-color: var(--color-black);
   color: var(--color-white);
+
+  &:hover, &:focus {
+    background-color: var(--color-white);
+    color: var(--color-black);
+    box-shadow: inset 0 0 0 1px var(--color-black);
+  }
 }
 
 .appearance--secondary {
   background-color: var(--color-white);
   box-shadow: inset 0 0 0 1px var(--color-black);
+
+  &:hover, &:focus {
+    background-color: var(--color-black);
+    color: var(--color-white);
+    box-shadow: inset 0 0 0 1px var(--color-black);
+  }
 }
 
 .appearance--default {

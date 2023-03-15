@@ -60,6 +60,7 @@ export const signUpForm = {
           text: 'Your sign up submission was successful.',
         },
       ],
+      type: 'h2',
     },
   ],
   emails: [

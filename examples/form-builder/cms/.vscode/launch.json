@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Learn with Jason CMS",
+      "name": "Form Builder Example CMS",
       "program": "${workspaceFolder}/src/server.ts",
       "preLaunchTask": "npm: build:server",
       "env": {

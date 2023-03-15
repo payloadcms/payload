@@ -74,7 +74,7 @@ export const advancedForm = {
       blockType: 'number',
     },
     {
-      name: 'county',
+      name: 'country',
       label: 'Country',
       width: 50,
       required: true,
@@ -92,6 +92,7 @@ export const advancedForm = {
           text: 'Your shipping information submission was successful.',
         },
       ],
+      type: 'h2',
     },
   ],
   emails: [

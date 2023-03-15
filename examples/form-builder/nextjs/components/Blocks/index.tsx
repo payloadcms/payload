@@ -38,6 +38,7 @@ const Blocks: React.FC<{
               <VerticalPadding
                 key={isFormBlock ? formID : index}
                 top='small'
+                bottom='small'
               >
                 {/*@ts-ignore*/}
                 <Block

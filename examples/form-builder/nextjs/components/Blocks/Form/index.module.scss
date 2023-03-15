@@ -5,11 +5,27 @@
   flex-direction: column;
 }
 
+.hasSubmitted {
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+
+  @include small-break {
+    height: 100%;
+  }
+}
+
 .intro {
   margin-bottom: var(--base);
 
   @include mid-break {
     margin-bottom: var(--base);
+  }
+}
+
+.confirmationMessage {
+  * {
+    margin: 0;
   }
 }
 

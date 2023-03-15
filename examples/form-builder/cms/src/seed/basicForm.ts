@@ -78,6 +78,7 @@ export const basicForm = {
           text: 'The basic form has been submitted successfully.',
         },
       ],
+      type: 'h2',
     },
   ],
   emails: [

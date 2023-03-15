@@ -48,6 +48,7 @@ export const contactForm = {
           text: 'The contact form has been submitted successfully.',
         },
       ],
+      type: 'h2',
     },
   ],
   emails: [
