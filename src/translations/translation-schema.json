@@ -1153,6 +1153,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "aboutToPublishSelection": {
+          "type": "string"
+        },
         "aboutToRestore": {
           "type": "string"
         },
@@ -1163,6 +1166,9 @@
           "type": "string"
         },
         "aboutToUnpublish": {
+          "type": "string"
+        },
+        "aboutToUnpublishSelection": {
           "type": "string"
         },
         "autosave": {
@@ -1305,10 +1311,12 @@
         }
       },
       "required": [
+        "aboutToPublishSelection",
         "aboutToRestore",
         "aboutToRestoreGlobal",
         "aboutToRevertToPublished",
         "aboutToUnpublish",
+        "aboutToUnpublishSelection",
         "autosave",
         "autosavedSuccessfully",
         "autosavedVersion",

@@ -98,7 +98,7 @@ const UnpublishMany: React.FC<Props> = (props) => {
         <MinimalTemplate className={`${baseClass}__template`}>
           <h1>{t('confirmUnpublish')}</h1>
           <p>
-            {t('aboutToUnpublishCount', { label: getTranslation(plural, i18n), count })}
+            {t('aboutToUnpublishSelection', { label: getTranslation(plural, i18n) })}
           </p>
           <Button
             id="confirm-cancel"

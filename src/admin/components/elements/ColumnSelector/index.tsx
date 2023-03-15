@@ -21,12 +21,12 @@ const ColumnSelector: React.FC<Props> = (props) => {
   const { i18n } = useTranslation();
   const uuid = useId();
   const editDepth = useEditDepth();
-  const [columns] = useState(() => tableColumns.filter((column) => column.accessor !== '_select'));
   const {
     columns: tableColumns,
     toggleColumn,
     moveColumn,
   } = useTableColumns();
+  const [columns] = useState(() => tableColumns.filter((column) => column.accessor !== '_select'));
 
   if (!columns) return null;
 

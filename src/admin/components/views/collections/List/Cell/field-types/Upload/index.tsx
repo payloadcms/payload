@@ -18,7 +18,10 @@ const UploadCell:React.FC<Props> = ({ rowData, cellData, collection }: Props) =>
     >
       <Thumbnail
         size="small"
-        doc={{ ...rowData, filename: cellData }}
+        doc={{
+          ...rowData,
+          filename: cellData,
+        }}
         collection={collection}
       />
       <span className={`${baseClass}__filename`}>{ String(cellData) }</span>
