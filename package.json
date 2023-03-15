@@ -186,7 +186,7 @@
     "url-loader": "^4.1.1",
     "use-context-selector": "^1.4.1",
     "uuid": "^8.3.2",
-    "webpack": "^5.75.0",
+    "webpack": "^5.76.0",
     "webpack-bundle-analyzer": "^4.7.0",
     "webpack-cli": "^4.10.0",
     "webpack-dev-middleware": "^4.3.0",
