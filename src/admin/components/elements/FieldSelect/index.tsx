@@ -20,15 +20,13 @@ type Props = {
   setSelected: (fields: FieldWithPath[]) => void
 }
 
-const filterFields = ['id', 'createdAt', 'updatedAt', '_status'];
-
 const combineLabel = (prefix, field, i18n): string => (
   `${prefix === '' ? '' : `${prefix} > `}${getTranslation(field.label || field.name, i18n) || ''}`
 );
 const reduceFields = (fields: Field[], i18n, path = '', labelPrefix = ''): {label: string, value: FieldWithPath}[] => (
   fields.reduce((fieldsToUse, field) => {
     // escape for a variety of reasons
-    if (fieldAffectsData(field) && (filterFields.includes(field.name) || field.unique || field.hidden || field.admin?.hidden || field.admin?.readOnly || field.admin?.disableBulkEdit)) {
+    if (fieldAffectsData(field) && (field.admin?.disableBulkEdit || field.unique || field.hidden || field.admin?.hidden || field.admin?.readOnly)) {
       return fieldsToUse;
     }
     if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
