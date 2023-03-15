@@ -59,6 +59,10 @@
     .file-field__drop-zone {
       border-color: var(--theme-success-500);
       background: var(--theme-success-150);
+
+      * {
+        pointer-events: none;
+      }
     }
   }
 

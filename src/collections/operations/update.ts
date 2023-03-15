@@ -140,7 +140,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     entityConfig: collectionConfig,
     req,
     overrideAccess: true,
-    showHiddenFields,
+    showHiddenFields: true,
   });
 
   // /////////////////////////////////////

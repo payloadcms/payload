@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import path from 'path';
+import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
@@ -136,8 +137,26 @@ describe('fields', () => {
 
   describe('point', () => {
     let url: AdminUrlUtil;
-    beforeAll(() => {
+    let filledGroupPoint;
+    let emptyGroupPoint;
+    beforeAll(async () => {
       url = new AdminUrlUtil(serverURL, pointFieldsSlug);
+      filledGroupPoint = await payload.create({
+        collection: pointFieldsSlug,
+        data: {
+          point: [5, 5],
+          localized: [4, 2],
+          group: { point: [4, 2] },
+        },
+      });
+      emptyGroupPoint = await payload.create({
+        collection: pointFieldsSlug,
+        data: {
+          point: [5, 5],
+          localized: [3, -2],
+          group: {},
+        },
+      });
     });
 
     test('should save point', async () => {
@@ -161,6 +180,57 @@ describe('fields', () => {
       await groupLatField.fill('-8');
 
       await saveDocAndAssert(page);
+      await expect(await longField.getAttribute('value')).toEqual('9');
+      await expect(await latField.getAttribute('value')).toEqual('-2');
+      await expect(await localizedLongField.getAttribute('value')).toEqual('1');
+      await expect(await localizedLatField.getAttribute('value')).toEqual('-1');
+      await expect(await groupLongitude.getAttribute('value')).toEqual('3');
+      await expect(await groupLatField.getAttribute('value')).toEqual('-8');
+    });
+
+    test('should update point', async () => {
+      await page.goto(url.edit(emptyGroupPoint.id));
+      const longField = page.locator('#field-longitude-point');
+      await longField.fill('9');
+
+      const latField = page.locator('#field-latitude-point');
+      await latField.fill('-2');
+
+      const localizedLongField = page.locator('#field-longitude-localized');
+      await localizedLongField.fill('2');
+
+      const localizedLatField = page.locator('#field-latitude-localized');
+      await localizedLatField.fill('-2');
+
+      const groupLongitude = page.locator('#field-longitude-group__point');
+      await groupLongitude.fill('3');
+
+      const groupLatField = page.locator('#field-latitude-group__point');
+      await groupLatField.fill('-8');
+
+      await saveDocAndAssert(page);
+
+      await expect(await longField.getAttribute('value')).toEqual('9');
+      await expect(await latField.getAttribute('value')).toEqual('-2');
+      await expect(await localizedLongField.getAttribute('value')).toEqual('2');
+      await expect(await localizedLatField.getAttribute('value')).toEqual('-2');
+      await expect(await groupLongitude.getAttribute('value')).toEqual('3');
+      await expect(await groupLatField.getAttribute('value')).toEqual('-8');
+    });
+
+    test('should be able to clear a value point', async () => {
+      await page.goto(url.edit(filledGroupPoint.id));
+
+      const groupLongitude = page.locator('#field-longitude-group__point');
+      await groupLongitude.fill('');
+
+      const groupLatField = page.locator('#field-latitude-group__point');
+      await groupLatField.fill('');
+
+      await saveDocAndAssert(page);
+
+      await expect(await groupLongitude.getAttribute('value')).toEqual('');
+      await expect(await groupLatField.getAttribute('value')).toEqual('');
     });
   });
 

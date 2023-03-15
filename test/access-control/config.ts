@@ -11,6 +11,7 @@ export const restrictedVersionsSlug = 'restricted-versions';
 export const siblingDataSlug = 'sibling-data';
 export const relyOnRequestHeadersSlug = 'rely-on-request-headers';
 export const docLevelAccessSlug = 'doc-level-access';
+export const hiddenFieldsSlug = 'hidden-fields';
 
 const openAccess = {
   create: () => true,
@@ -239,6 +240,46 @@ export default buildConfig({
           name: 'lockTitle',
           type: 'checkbox',
           defaultValue: false,
+        },
+      ],
+    },
+    {
+      slug: hiddenFieldsSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'partiallyHiddenGroup',
+          type: 'group',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+            },
+            {
+              name: 'value',
+              type: 'text',
+              hidden: true,
+            },
+          ],
+        },
+        {
+          name: 'partiallyHiddenArray',
+          type: 'array',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+            },
+            {
+              name: 'value',
+              type: 'text',
+              hidden: true,
+            },
+          ],
         },
       ],
     },

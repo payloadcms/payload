@@ -331,25 +331,6 @@ export type Config = {
         Dashboard?: React.ComponentType<any>;
       };
     };
-    /**
-     * Control pagination when querying collections.
-     *
-     * @see https://payloadcms.com/docs/queries/overview
-    */
-    pagination?: {
-      /**
-       * Limit the number of documents that are displayed on 1 page in the list view
-       *
-       * @default 10
-       */
-      defaultLimit?: number;
-      /**
-       * Suggest alternative options for the limit of documents on the list view
-       *
-       * @default [5, 10, 25, 50, 100]
-       */
-      limits?: number[]
-    };
     /** Customize the Webpack config that's used to generate the Admin panel. */
     webpack?: (config: Configuration) => Configuration;
   };

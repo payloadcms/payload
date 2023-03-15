@@ -4,6 +4,7 @@ import { useConfig } from '../Config';
 import { Props } from './types';
 import payloadFavicon from '../../../assets/images/favicon.svg';
 import payloadOgImage from '../../../assets/images/og-image.png';
+import useMountEffect from '../../../hooks/useMountEffect';
 
 const Meta: React.FC<Props> = ({
   description,
@@ -16,6 +17,13 @@ const Meta: React.FC<Props> = ({
   const titleSuffix = config.admin.meta?.titleSuffix ?? '- Payload';
   const favicon = config.admin.meta.favicon ?? payloadFavicon;
   const ogImage = config.admin.meta.ogImage ?? payloadOgImage;
+
+  useMountEffect(() => {
+    const faviconElement = document.querySelector<HTMLLinkElement>('link[data-placeholder-favicon]');
+    if (faviconElement) {
+      faviconElement.remove();
+    }
+  });
 
   return (
     <Helmet

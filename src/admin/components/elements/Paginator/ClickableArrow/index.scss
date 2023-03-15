@@ -2,9 +2,14 @@
 
 .clickable-arrow {
   cursor: pointer;
-  transform: rotate(-90deg);
 
-  &--left {
+  &--right {
+    .icon {
+      transform: rotate(-90deg);
+    }
+  }
+
+  &--left .icon {
     transform: rotate(90deg);
   }
 
