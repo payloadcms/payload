@@ -1,4 +1,4 @@
-import webpack from 'webpack';
+import webpack, { Compiler } from 'webpack';
 import express, { Router } from 'express';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
@@ -15,7 +15,7 @@ function initWebpack(config: SanitizedConfig): Router {
     publicPath: webpackDevConfig.output.publicPath as string,
   }));
 
-  router.use(webpackHotMiddleware(compiler));
+  router.use(webpackHotMiddleware(compiler as any));
 
   return router;
 }

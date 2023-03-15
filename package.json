@@ -187,9 +187,9 @@
     "use-context-selector": "^1.4.1",
     "uuid": "^8.3.2",
     "webpack": "^5.76.0",
-    "webpack-bundle-analyzer": "^4.7.0",
+    "webpack-bundle-analyzer": "^4.8.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-middleware": "^4.3.0",
+    "webpack-dev-middleware": "6.0.1",
     "webpack-hot-middleware": "^2.25.3"
   },
   "devDependencies": {
@@ -252,9 +252,8 @@
     "@types/shelljs": "^0.8.11",
     "@types/testing-library__jest-dom": "^5.14.5",
     "@types/uuid": "^8.3.4",
-    "@types/webpack": "4.41.33",
     "@types/webpack-bundle-analyzer": "^4.6.0",
-    "@types/webpack-dev-middleware": "4.3.0",
+    "@types/webpack-dev-middleware": "^5.3.0",
     "@types/webpack-env": "^1.18.0",
     "@types/webpack-hot-middleware": "2.25.6",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
