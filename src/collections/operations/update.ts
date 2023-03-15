@@ -263,7 +263,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   // Delete any associated files
   // /////////////////////////////////////
 
-  if (collectionConfig.upload && filesToUpload && filesToUpload.length > 0) {
+  if (collectionConfig.upload && !overwriteExistingFiles && filesToUpload && filesToUpload.length > 0) {
     const { staticDir } = collectionConfig.upload;
 
     const staticPath = path.resolve(config.paths.configDir, staticDir);
