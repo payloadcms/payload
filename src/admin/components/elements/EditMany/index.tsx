@@ -17,7 +17,6 @@ import fieldTypes from '../../forms/field-types';
 import X from '../../icons/X';
 
 import './index.scss';
-import Upload from '../../views/collections/Edit/Upload';
 
 const baseClass = 'edit-many';
 

@@ -107,7 +107,6 @@
   }
 
   &__collection-actions,
-  &__document-actions,
   &__meta,
   &__sidebar-fields {
     padding-left: base(1.5);
@@ -126,6 +125,29 @@
 
     @include mid-break {
       @include blur-bg;
+    }
+  }
+
+  &__document-actions {
+    display: flex;
+    flex-wrap: wrap;
+    padding: base(1);
+    gap: base(.5);
+
+    .form-submit {
+      width: calc(50% - #{base(1)});
+
+      @include mid-break {
+        width: auto;
+        flex-grow: 1;
+      }
+
+      .btn {
+        width: 100%;
+        padding-left: base(.5);
+        padding-right: base(.5);
+        margin-bottom: 0;
+      }
     }
   }
 
@@ -164,10 +186,5 @@
       padding-left: var(--gutter-h);
       padding-right: var(--gutter-h);
     }
-
-    &__sidebar {
-      padding-bottom: base(3.5);
-    }
   }
-
 }
