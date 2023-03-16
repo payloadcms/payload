@@ -77,7 +77,7 @@ export const FieldSelect: React.FC<Props> = ({
     if (selected === null || Object.keys(activeFields).length > selected.length) {
       Object.keys(activeFields).forEach((path) => {
         if (selected === null || !selected.find((field) => {
-          return createNestedFieldPath(field.value.path, field.value) === path;
+          return field.value.path === path;
         })) {
           dispatchFields({
             type: 'REMOVE',
