@@ -66,6 +66,41 @@ describe('Access Control', () => {
     expect(updatedDoc.partiallyHiddenArray[0].value).toEqual('private_value');
   });
 
+  it('should not affect hidden fields when patching data - update many', async () => {
+    const docsMany = await payload.create({
+      collection: hiddenFieldsSlug,
+      data: {
+        partiallyHiddenArray: [{
+          name: 'public_name',
+          value: 'private_value',
+        }],
+        partiallyHiddenGroup: {
+          name: 'public_name',
+          value: 'private_value',
+        },
+      },
+    });
+
+    await payload.update({
+      collection: hiddenFieldsSlug,
+      where: {
+        id: { equals: docsMany.id },
+      },
+      data: {
+        title: 'Doc Title',
+      },
+    });
+
+    const updatedMany = await payload.findByID({
+      collection: hiddenFieldsSlug,
+      id: docsMany.id,
+      showHiddenFields: true,
+    });
+
+    expect(updatedMany.partiallyHiddenGroup.value).toEqual('private_value');
+    expect(updatedMany.partiallyHiddenArray[0].value).toEqual('private_value');
+  });
+
   it('should be able to restrict access based upon siblingData', async () => {
     const { id } = await payload.create({
       collection: siblingDataSlug,
@@ -210,6 +245,44 @@ describe('Access Control', () => {
 
         expect(doc).toMatchObject({ id: post1.id });
       });
+
+      it('should allow overrideAccess: false - update many', async () => {
+        const req = async () => payload.update({
+          collection: slug,
+          where: {
+            id: { equals: post1.id },
+          },
+          data: { restrictedField: restricted.id },
+          overrideAccess: false, // this should respect access control
+        });
+
+        await expect(req).rejects.toThrow(Forbidden);
+      });
+
+      it('should allow overrideAccess: true - update many', async () => {
+        const doc = await payload.update({
+          collection: slug,
+          where: {
+            id: { equals: post1.id },
+          },
+          data: { restrictedField: restricted.id },
+          overrideAccess: true, // this should override access control
+        });
+
+        expect(doc.docs[0]).toMatchObject({ id: post1.id });
+      });
+
+      it('should allow overrideAccess by default - update many', async () => {
+        const doc = await payload.update({
+          collection: slug,
+          where: {
+            id: { equals: post1.id },
+          },
+          data: { restrictedField: restricted.id },
+        });
+
+        expect(doc.docs[0]).toMatchObject({ id: post1.id });
+      });
     });
 
     describe('Collections', () => {
@@ -245,6 +318,44 @@ describe('Access Control', () => {
         });
 
         expect(doc).toMatchObject({ id: restricted.id, name: updatedName });
+      });
+
+      it('should allow overrideAccess: false - update many', async () => {
+        const req = async () => payload.update({
+          collection: restrictedSlug,
+          where: {
+            id: { equals: restricted.id },
+          },
+          data: { name: updatedName },
+          overrideAccess: false, // this should respect access control
+        });
+
+        await expect(req).rejects.toThrow(Forbidden);
+      });
+
+      it('should allow overrideAccess: true - update many', async () => {
+        const doc = await payload.update({
+          collection: restrictedSlug,
+          where: {
+            id: { equals: restricted.id },
+          },
+          data: { name: updatedName },
+          overrideAccess: true, // this should override access control
+        });
+
+        expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName });
+      });
+
+      it('should allow overrideAccess by default - update many', async () => {
+        const doc = await payload.update({
+          collection: restrictedSlug,
+          where: {
+            id: { equals: restricted.id },
+          },
+          data: { name: updatedName },
+        });
+
+        expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName });
       });
     });
   });
