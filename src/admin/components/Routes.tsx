@@ -189,12 +189,10 @@ const Routes = () => {
                                     render={(routeProps) => {
                                       if (permissions?.collections?.[collection.slug]?.read?.permission) {
                                         return (
-                                          <TableColumnsProvider collection={collection}>
-                                            <List
-                                              {...routeProps}
-                                              collection={collection}
-                                            />
-                                          </TableColumnsProvider>
+                                          <List
+                                            {...routeProps}
+                                            collection={collection}
+                                          />
                                         );
                                       }
 

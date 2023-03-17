@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import React, { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Pill from '../Pill';
 import Plus from '../../icons/Plus';
@@ -18,17 +18,17 @@ const ColumnSelector: React.FC<Props> = (props) => {
     collection,
   } = props;
 
-  const {
-    columns,
-    toggleColumn,
-    moveColumn,
-  } = useTableColumns();
-
   const { i18n } = useTranslation();
   const uuid = useId();
   const editDepth = useEditDepth();
+  const {
+    columns: tableColumns,
+    toggleColumn,
+    moveColumn,
+  } = useTableColumns();
+  const [columns] = useState(() => tableColumns.filter((column) => column.accessor !== '_select'));
 
-  if (!columns) { return null; }
+  if (!columns) return null;
 
   return (
     <DraggableSortable

@@ -70,6 +70,7 @@ type Admin = {
     Cell?: React.ComponentType<any>;
     Field?: React.ComponentType<any>;
   }
+  disableBulkEdit?: boolean
   hidden?: boolean
 }
 
@@ -233,6 +234,7 @@ export type UIField = {
     position?: string
     width?: string
     condition?: Condition
+    disableBulkEdit?: boolean
     components?: {
       Filter?: React.ComponentType<any>;
       Cell?: React.ComponentType<any>;

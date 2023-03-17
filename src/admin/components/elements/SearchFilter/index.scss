@@ -7,10 +7,20 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    right: base(.5);
+    left: base(.5);
   }
 
   &__input {
     @include formInput;
+    box-shadow: none;
+    padding-left: base(2);
+    background-color: var(--theme-elevation-50);
+    border: none;
+
+    &:not(:disabled) {
+        &:hover, &:focus {
+        box-shadow: none;
+      }
+    }
   }
 }

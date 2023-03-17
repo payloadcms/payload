@@ -222,16 +222,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             hasCreatePermission,
             disableEyebrow: true,
             modifySearchParams: false,
-            onCardClick: (doc) => {
-              if (typeof onSelect === 'function') {
-                onSelect({
-                  docID: doc.id,
-                  collectionConfig: selectedCollectionConfig,
-                });
-              }
-              closeModal(drawerSlug);
-            },
-            disableCardLink: true,
             handleSortChange: setSort,
             handleWhereChange: setWhere,
             handlePageChange: setPage,

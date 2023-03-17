@@ -1,7 +1,8 @@
 import { GlobalConfig } from '../../../src/globals/config/types';
+import { draftGlobalSlug } from '../shared';
 
 const DraftGlobal: GlobalConfig = {
-  slug: 'draft-global',
+  slug: draftGlobalSlug,
   label: 'Draft Global',
   preview: () => 'https://payloadcms.com',
   versions: {

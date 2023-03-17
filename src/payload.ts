@@ -29,8 +29,6 @@ import { Preferences } from './preferences/types';
 import { Options as CreateOptions } from './collections/operations/local/create';
 import { Options as FindOptions } from './collections/operations/local/find';
 import { Options as FindByIDOptions } from './collections/operations/local/findByID';
-import { Options as UpdateOptions } from './collections/operations/local/update';
-import { Options as DeleteOptions } from './collections/operations/local/delete';
 import { Options as FindVersionsOptions } from './collections/operations/local/findVersions';
 import { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID';
 import { Options as RestoreVersionOptions } from './collections/operations/local/restoreVersion';
@@ -249,23 +247,18 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   }
 
   /**
-   * @description Update document
+   * @description Update one or more documents
    * @param options
-   * @returns Updated document
+   * @returns Updated document(s)
    */
-  update = async <T extends keyof TGeneratedTypes['collections']>(
-    options: UpdateOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
-    const { update } = localOperations;
-    return update<T>(this, options);
-  }
+  update = localOperations.update
 
-  delete = async <T extends keyof TGeneratedTypes['collections']>(
-    options: DeleteOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
-    const { localDelete } = localOperations;
-    return localDelete<T>(this, options);
-  }
+  /**
+   * @description delete one or more documents
+   * @param options
+   * @returns Updated document(s)
+   */
+  delete = localOperations.localDelete;
 
   /**
    * @description Find versions with criteria
