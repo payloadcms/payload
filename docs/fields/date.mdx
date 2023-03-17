@@ -58,20 +58,20 @@ Common use cases for customizing the `date` property are to restrict your field 
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from "payload/types";
+import { CollectionConfig } from 'payload/types';
 
 const ExampleCollection: CollectionConfig = {
-  slug: "example-collection",
+  slug: 'example-collection',
   fields: [
     {
-      name: "time", // required
-      type: "date", // required
-      label: "Event Start Time",
-      defaultValue: "1988-11-05T8:00:00.000+05:00",
+      name: 'time', // required
+      type: 'date', // required
+      label: 'Event Start Time',
+      defaultValue: '1988-11-05T8:00:00.000+05:00',
       admin: {
         date: {
           // All config options above should be placed here
-          pickerAppearance: "timeOnly",
+          pickerAppearance: 'timeOnly',
         },
       },
     },
