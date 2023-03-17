@@ -23,6 +23,17 @@ const sortOptions = (options: Option[]): Option[] => options.sort((a: Option, b:
   return 0;
 });
 
+const getNestedTitle = (obj, prop) => {
+  var _prop = prop.split(".")
+  for (var i = 0; i < _prop.length; i++) {
+    if (_prop[i] in obj)
+      obj = obj[_prop[i]]
+    else
+      return;
+  }
+  return obj;
+}
+
 const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => {
   switch (action.type) {
     case 'CLEAR': {
@@ -38,7 +49,7 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
       const foundOption = foundOptionGroup?.options?.find((option) => option.value === doc.id);
 
       if (foundOption) {
-        foundOption.label = doc[labelKey] || `${i18n.t('general:untitled')} - ID: ${doc.id}`;
+        foundOption.label = getNestedTitle(doc, labelKey) || `${i18n.t('general:untitled')} - ID: ${doc.id}`;
         foundOption.relationTo = relation;
       }
 
@@ -60,7 +71,7 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
           return [
             ...docSubOptions,
             {
-              label: doc[labelKey] || `${i18n.t('general:untitled')} - ID: ${doc.id}`,
+              label: getNestedTitle(doc, labelKey) || `${i18n.t('general:untitled')} - ID: ${doc.id}`,
               relationTo: relation,
               value: doc.id,
             },
