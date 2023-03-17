@@ -18,17 +18,17 @@ const ColumnSelector: React.FC<Props> = (props) => {
     collection,
   } = props;
 
-  const { i18n } = useTranslation();
-  const uuid = useId();
-  const editDepth = useEditDepth();
   const {
-    columns: tableColumns,
+    columns,
     toggleColumn,
     moveColumn,
   } = useTableColumns();
-  const [columns] = useState(() => tableColumns.filter((column) => column.accessor !== '_select'));
 
-  if (!columns) return null;
+  const { i18n } = useTranslation();
+  const uuid = useId();
+  const editDepth = useEditDepth();
+
+  if (!columns) { return null; }
 
   return (
     <DraggableSortable
@@ -48,6 +48,8 @@ const ColumnSelector: React.FC<Props> = (props) => {
           label,
           name,
         } = col;
+
+        if (col.accessor === '_select') return null;
 
         return (
           <Pill

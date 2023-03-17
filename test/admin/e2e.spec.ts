@@ -230,12 +230,12 @@ describe('admin', () => {
       test('toggle columns', async () => {
         const columnCountLocator = 'table >> thead >> tr >> th';
         await createPost();
-        await console.log(page.locator('.list-controls__toggle-columns'));
+
         await page.locator('.list-controls__toggle-columns').click();
         await wait(500); // Wait for column toggle UI, should probably use waitForSelector
 
         const numberOfColumns = await page.locator(columnCountLocator).count();
-        await expect(await page.locator('table >> thead >> tr >> th:first-child')).toHaveText('ID');
+        await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
 
         const idButton = await page.locator('.column-selector >> text=ID');
 
@@ -243,19 +243,19 @@ describe('admin', () => {
         await idButton.click();
         await wait(100);
         await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1);
-        await expect(await page.locator('table >> thead >> tr >> th:first-child')).toHaveText('Number');
+        await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('Number');
 
         // Add back ID column
         await idButton.click();
         await wait(100);
         await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns);
-        await expect(await page.locator('table >> thead >> tr >> th:first-child')).toHaveText('ID');
+        await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
       });
 
-      test('first cell is a link', async () => {
+      test('2nd cell is a link', async () => {
         const { id } = await createPost();
-        const firstCell = await page.locator(`${tableRowLocator} td`).first().locator('a');
-        await expect(firstCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
+        const linkCell = await page.locator(`${tableRowLocator} td`).nth(1).locator('a');
+        await expect(linkCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click();
@@ -265,8 +265,8 @@ describe('admin', () => {
         page.locator('.column-selector >> text=ID').click();
         await wait(200);
 
-        // recheck that the first cell is still a link
-        await expect(firstCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
+        // recheck that the 2nd cell is still a link
+        await expect(linkCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
       });
 
       test('filter rows', async () => {
@@ -339,15 +339,17 @@ describe('admin', () => {
 
         // ensure the "number" column is now first
         await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
-        await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
+        await expect(await page.locator('table thead tr th').nth(1)).toHaveText('Number');
+        // await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
 
         // reload to ensure the preferred order was stored in the database
         await page.reload();
         await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
-        await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
+        await expect(await page.locator('table thead tr th').nth(1)).toHaveText('Number');
       });
 
       test('should render drawer columns in order', async () => {
+        await createPost();
         await page.goto(url.create);
 
         // Open the drawer
@@ -356,13 +358,13 @@ describe('admin', () => {
         await expect(listDrawer).toBeVisible();
 
         const collectionSelector = await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select');
-        const columnSelector = await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns');
 
         // select the "Post en" collection
         await collectionSelector.click();
         await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"').click();
 
         // open the column controls
+        const columnSelector = await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns');
         await columnSelector.click();
         await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
 

@@ -65,10 +65,10 @@ describe('uploads', () => {
 
   test('should show upload filename in upload collection list', async () => {
     await page.goto(mediaURL.list);
-    const audioUpload = page.locator('.thumbnail-card__label').nth(0);
+    const audioUpload = page.locator('tr.row-1 .cell-filename');
     await expect(audioUpload).toHaveText('audio.mp3');
 
-    const imageUpload = page.locator('.thumbnail-card__label').nth(1);
+    const imageUpload = page.locator('tr.row-2 .cell-filename');
     await expect(imageUpload).toHaveText('image.png');
   });
 
@@ -118,13 +118,13 @@ describe('uploads', () => {
     await page.locator('.upload__toggler.list-drawer__toggler').click();
     const listDrawer = await page.locator('[id^=list-drawer_1_]');
     await expect(listDrawer).toBeVisible();
-    await wait(200); // cards are loading
+    await wait(200); // list is loading
 
     // ensure the only card is the audio file
-    const cards = await listDrawer.locator('.upload-gallery .thumbnail-card');
-    expect(await cards.count()).toEqual(1);
-    const card = cards.nth(0);
-    await expect(card).toHaveText('audio.mp3');
+    const rows = await listDrawer.locator('table tbody tr');
+    expect(await rows.count()).toEqual(1);
+    const filename = rows.locator('.cell-filename');
+    await expect(filename).toHaveText('audio.mp3');
 
     // upload an image and try to select it
     await listDrawer.locator('button.list-drawer__create-new-button.doc-drawer__toggler').click();
