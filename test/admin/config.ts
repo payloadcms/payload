@@ -125,6 +125,9 @@ export default buildConfig({
           },
         },
       ],
+      versions: {
+        drafts: true,
+      }
     },
     {
       slug: 'group-one-collection-ones',
