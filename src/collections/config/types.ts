@@ -102,13 +102,13 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
 
 export type BeforeDeleteHook = (args: {
   req: PayloadRequest;
-  id: string;
+  id: string | number;
 }) => any;
 
 export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
-  id: string;
+  id: string | number;
 }) => any;
 
 export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;

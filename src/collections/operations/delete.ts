@@ -1,19 +1,16 @@
-import fs from 'fs';
-import path from 'path';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import httpStatus from 'http-status';
 import { AccessResult } from '../../config/types';
 import { PayloadRequest } from '../../express/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { ErrorDeletingFile, APIError } from '../../errors';
+import { APIError } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { BeforeOperationHook, Collection } from '../config/types';
 import { Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
-import { FileData } from '../../uploads/types';
-import fileExists from '../../uploads/fileExists';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 
 export type Arguments = {
   depth?: number
@@ -143,40 +140,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         });
       }, Promise.resolve());
 
-
-      // /////////////////////////////////////
-      // Delete any associated files
-      // /////////////////////////////////////
-
-      if (collectionConfig.upload) {
-        const { staticDir } = collectionConfig.upload;
-
-        const staticPath = path.resolve(config.paths.configDir, staticDir);
-
-        const fileToDelete = `${staticPath}/${doc.filename}`;
-
-        if (await fileExists(fileToDelete)) {
-          fs.unlink(fileToDelete, (err) => {
-            if (err) {
-              throw new ErrorDeletingFile(t);
-            }
-          });
-        }
-
-        if (doc.sizes) {
-          Object.values(doc.sizes)
-            .forEach(async (size: FileData) => {
-              const sizeToDelete = `${staticPath}/${size.filename}`;
-              if (await fileExists(sizeToDelete)) {
-                fs.unlink(sizeToDelete, (err) => {
-                  if (err) {
-                    throw new ErrorDeletingFile(t);
-                  }
-                });
-              }
-            });
-        }
-      }
+      await deleteAssociatedFiles({ config, collectionConfig, doc, t, overrideDelete: true });
 
       // /////////////////////////////////////
       // Delete document

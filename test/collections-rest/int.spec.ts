@@ -13,7 +13,7 @@ let client: RESTClient;
 describe('collections-rest', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
-    client = new RESTClient(config, { serverURL, defaultSlug: slug });
+    client = new RESTClient(await config, { serverURL, defaultSlug: slug });
   });
 
   afterAll(async () => {
@@ -80,17 +80,18 @@ describe('collections-rest', () => {
     });
 
     it('should return formatted errors for bulk updates', async () => {
+      const text = 'bulk-update-test-errors';
       const errorDoc = await payload.create({
         collection: errorOnHookSlug,
         data: {
-          text: 'test',
+          text,
           errorBeforeChange: true,
         },
       });
       const successDoc = await payload.create({
         collection: errorOnHookSlug,
         data: {
-          text: 'test',
+          text,
           errorBeforeChange: false,
         },
       });
@@ -99,7 +100,7 @@ describe('collections-rest', () => {
 
       const result = await client.updateMany<ErrorOnHook>({
         slug: errorOnHookSlug,
-        query: { text: { equals: 'test' } },
+        query: { text: { equals: text } },
         data: { text: update },
       });
 
@@ -790,7 +791,7 @@ async function createPosts(count: number) {
 }
 
 async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find<Post>({ collection: slug, limit: 100 });
+  const allDocs = await payload.find({ collection: slug, limit: 100 });
   const ids = allDocs.docs.map((doc) => doc.id);
   await mapAsync(ids, async (id) => {
     await payload.delete({ collection: slug, id });

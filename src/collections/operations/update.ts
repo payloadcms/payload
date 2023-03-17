@@ -1,13 +1,10 @@
-import fs from 'fs';
-import { promisify } from 'util';
-import path from 'path';
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Document, Where } from '../../types';
 import { BulkOperationResult, Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
-import { APIError, ValidationError, ErrorDeletingFile } from '../../errors';
+import { APIError, ValidationError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { saveVersion } from '../../versions/saveVersion';
@@ -18,12 +15,9 @@ import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { AccessResult } from '../../config/types';
-import { mapAsync } from '../../utilities/mapAsync';
-import fileExists from '../../uploads/fileExists';
-import { FileData } from '../../uploads/types';
 import { queryDrafts } from '../../versions/drafts/queryDrafts';
-
-const unlinkFile = promisify(fs.unlink);
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -138,6 +132,24 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     docs = await Model.find(query, {}, { lean: true });
   }
 
+  // /////////////////////////////////////
+  // Generate data for all files and sizes
+  // /////////////////////////////////////
+
+  const {
+    data: newFileData,
+    files: filesToUpload,
+  } = await generateFileData({
+    config,
+    collection,
+    req,
+    data,
+    throwOnMissingFile: false,
+    overwriteExistingFiles,
+  });
+
+  data = newFileData;
+
   const errors = [];
 
   const promises = docs.map(async (doc) => {
@@ -156,58 +168,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         showHiddenFields,
       });
 
-      // /////////////////////////////////////
-      // Generate data for all files and sizes
-      // /////////////////////////////////////
-
-      // TODO: this needs to only run one time by assigning to a promise
-      const {
-        data: newFileData,
-        files: filesToUpload,
-      } = await generateFileData({
-        config,
-        collection,
-        req,
-        data,
-        throwOnMissingFile: false,
-        overwriteExistingFiles,
-      });
-
-      data = newFileData;
-
-      // /////////////////////////////////////
-      // Delete any associated files
-      // /////////////////////////////////////
-
-      if (collectionConfig.upload && filesToUpload && filesToUpload.length > 0) {
-        const { staticDir } = collectionConfig.upload;
-
-        const staticPath = path.resolve(config.paths.configDir, staticDir);
-
-        const fileToDelete = `${staticPath}/${doc.filename}`;
-
-        if (await fileExists(fileToDelete)) {
-          fs.unlink(fileToDelete, (err) => {
-            if (err) {
-              throw new ErrorDeletingFile(t);
-            }
-          });
-        }
-
-        if (doc.sizes) {
-          Object.values(doc.sizes)
-            .forEach(async (size: FileData) => {
-              const sizeToDelete = `${staticPath}/${size.filename}`;
-              if (await fileExists(sizeToDelete)) {
-                fs.unlink(sizeToDelete, (err) => {
-                  if (err) {
-                    throw new ErrorDeletingFile(t);
-                  }
-                });
-              }
-            });
-        }
-      }
+      await deleteAssociatedFiles({ config, collectionConfig, doc: docWithLocales, t, overrideDelete: false });
 
       // /////////////////////////////////////
       // beforeValidate - Fields
@@ -374,17 +335,12 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         }) || result;
       }, Promise.resolve());
 
-      // Remove temp files if enabled, as express-fileupload does not do this automatically
-      if (config.upload?.useTempFiles && collectionConfig.upload) {
-        const { files } = req;
-        const fileArray = Array.isArray(files) ? files : [files];
-        await mapAsync(fileArray, async ({ file }) => {
-          // Still need this check because this will not be populated if using local API
-          if (file.tempFilePath) {
-            await unlinkFile(file.tempFilePath);
-          }
-        });
-      }
+      await unlinkTempFiles({
+        req,
+        config,
+        collectionConfig,
+      });
+
       // /////////////////////////////////////
       // Return results
       // /////////////////////////////////////
