@@ -135,7 +135,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   }, [sort, limit, preferenceKey, setPreference, getPreference]);
 
   return (
-    <TableColumnsProvider collection={{ ...collection, fields }}>
+    <TableColumnsProvider collection={collection}>
       <RenderCustomComponent
         DefaultComponent={DefaultList}
         CustomComponent={CustomList}
