@@ -162,6 +162,53 @@ describe('admin', () => {
       expect(page.url()).toContain(url.list);
     });
 
+    test('should bulk delete', async () => {
+      createPost();
+      createPost();
+      createPost();
+
+      await page.goto(url.list);
+
+      await page.locator('.select-all__input').click();
+
+      await page.locator('.delete-documents__toggle').click();
+
+      await page.locator('#confirm-delete').click();
+
+      await expect(page.locator('.Toastify__toast--success')).toHaveCount(1);
+      await expect(page.locator('.collection-list__no-results')).toBeVisible();
+    });
+
+    test('should bulk update', async () => {
+      createPost();
+      createPost();
+      createPost();
+
+      const bulkTitle = 'Bulk update title';
+      await page.goto(url.list);
+
+      await page.locator('.select-all__input').click();
+      await page.locator('.edit-many__toggle').click();
+      await page.locator('.field-select .rs__control').click();
+      const options = page.locator('.rs__option');
+      const titleOption = await options.locator('text=Title en');
+
+      await expect(titleOption).toHaveText('Title en');
+
+      await titleOption.click();
+      const titleInput = await page.locator('#field-title');
+
+      await expect(titleInput).toBeVisible();
+
+      await titleInput.fill(bulkTitle);
+
+      await page.locator('.form-submit button[type="submit"]').click();
+      await expect(page.locator('.Toastify__toast--success')).toContainText('Updated 3 Posts en successfully.');
+      await expect(page.locator('.row-1 .cell-title')).toContainText(bulkTitle);
+      await expect(page.locator('.row-2 .cell-title')).toContainText(bulkTitle);
+      await expect(page.locator('.row-3 .cell-title')).toContainText(bulkTitle);
+    });
+
     test('should save globals', async () => {
       await page.goto(url.global(globalSlug));
 
