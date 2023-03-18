@@ -134,6 +134,26 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     })();
   }, [sort, limit, preferenceKey, setPreference, getPreference]);
 
+  // /////////////////////////////////////
+  // Prevent going beyond page limit
+  // /////////////////////////////////////
+
+  useEffect(() => {
+    if (data.pagingCounter > data.totalDocs) {
+      const params = queryString.parse(history.location.search, {
+        ignoreQueryPrefix: true,
+        depth: 0,
+      });
+      const newSearchQuery = queryString.stringify({
+        ...params,
+        page: data.totalPages,
+      }, { addQueryPrefix: true });
+      history.replace({
+        search: newSearchQuery,
+      });
+    }
+  }, [data, history, resetParams]);
+
   return (
     <TableColumnsProvider collection={collection}>
       <RenderCustomComponent
