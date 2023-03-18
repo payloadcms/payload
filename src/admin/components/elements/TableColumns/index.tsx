@@ -51,7 +51,6 @@ export const TableColumnsProvider: React.FC<{
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
     const initialColumns = getInitialColumnState(formattedFields, useAsTitle, defaultColumns);
 
-    console.log(collection.fields);
     return buildColumns({
       collection,
       columns: initialColumns.map((column) => ({

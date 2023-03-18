@@ -19,7 +19,7 @@ const buildColumns = ({
   cellProps: Partial<CellProps>[]
 }): Column[] => {
   // sort the fields to the order of activeColumns
-  const sortedFields = flattenFields(collection.fields).sort((a, b) => {
+  const sortedFields = flattenFields(collection.fields, true).sort((a, b) => {
     const aIndex = columns.findIndex((column) => column.accessor === a.name);
     const bIndex = columns.findIndex((column) => column.accessor === b.name);
     if (aIndex === -1 && bIndex === -1) return 0;
