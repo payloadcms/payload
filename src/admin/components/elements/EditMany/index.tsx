@@ -34,6 +34,7 @@ const Submit: React.FC<{disabled: boolean, action: string}> = ({ action, disable
 
   return (
     <FormSubmit
+      className={`${baseClass}__save`}
       onClick={save}
       disabled={disabled}
     >
@@ -58,6 +59,7 @@ const Publish: React.FC<{disabled: boolean, action: string}> = ({ action, disabl
 
   return (
     <FormSubmit
+      className={`${baseClass}__publish`}
       onClick={save}
       disabled={disabled}
     >
@@ -82,6 +84,7 @@ const SaveDraft: React.FC<{disabled: boolean, action: string}> = ({ action, disa
 
   return (
     <FormSubmit
+      className={`${baseClass}__draft`}
       onClick={save}
       disabled={disabled}
     >

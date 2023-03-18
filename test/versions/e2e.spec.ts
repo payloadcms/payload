@@ -78,5 +78,39 @@ describe('versions', () => {
       await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft');
       await expect(page.locator('.row-2 .cell-_status')).toContainText('Draft');
     });
+
+    test('should publish while editing many', async () => {
+      const description = 'published document';
+      await page.goto(url.list);
+      await page.locator('.select-all__input').click();
+      await page.locator('.edit-many__toggle').click();
+      await page.locator('.field-select .rs__control').click();
+      const options = page.locator('.rs__option');
+      const field = await options.locator('text=description');
+      await field.click();
+      await page.locator('#field-description').fill(description);
+      await page.locator('.form-submit .edit-many__publish').click();
+
+      await expect(page.locator('.Toastify__toast--success')).toContainText('Updated 2 Draft Posts successfully.');
+      await expect(page.locator('.row-1 .cell-_status')).toContainText('Published');
+      await expect(page.locator('.row-2 .cell-_status')).toContainText('Published');
+    });
+
+    test('should save as draft while editing many', async () => {
+      const description = 'draft document';
+      await page.goto(url.list);
+      await page.locator('.select-all__input').click();
+      await page.locator('.edit-many__toggle').click();
+      await page.locator('.field-select .rs__control').click();
+      const options = page.locator('.rs__option');
+      const field = await options.locator('text=description');
+      await field.click();
+      await page.locator('#field-description').fill(description);
+      await page.locator('.form-submit .edit-many__draft').click();
+
+      await expect(page.locator('.Toastify__toast--success')).toContainText('Updated 2 Draft Posts successfully.');
+      await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft');
+      await expect(page.locator('.row-2 .cell-_status')).toContainText('Draft');
+    });
   });
 });
