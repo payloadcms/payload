@@ -165,10 +165,10 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         entityConfig: collectionConfig,
         req,
         overrideAccess: true,
-        showHiddenFields,
+        showHiddenFields: true,
       });
 
-      await deleteAssociatedFiles({ config, collectionConfig, doc: docWithLocales, t, overrideDelete: false });
+      await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc: docWithLocales, t, overrideDelete: false });
 
       // /////////////////////////////////////
       // beforeValidate - Fields
