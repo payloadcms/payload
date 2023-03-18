@@ -139,7 +139,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   // /////////////////////////////////////
 
   useEffect(() => {
-    if (data.pagingCounter > data.totalDocs) {
+    if (data?.totalDocs && data.pagingCounter > data.totalDocs) {
       const params = queryString.parse(history.location.search, {
         ignoreQueryPrefix: true,
         depth: 0,
