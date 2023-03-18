@@ -162,7 +162,7 @@ const result = await payload.findByID({
 });
 ```
 
-#### Update
+#### Update by ID
 
 ```js
 // Result will be the updated Post document.
@@ -193,6 +193,44 @@ const result = await payload.update({
 });
 ```
 
+#### Update Many
+
+```js
+// Result will be an object with:
+// {
+//   docs: [], // each document that was updated
+//   errors: [], // each error also includes the id of the document
+// }
+const result = await payload.update({
+  collection: "posts", // required
+  where: {
+    // required
+    fieldName: { equals: 'value' },
+  },
+  data: {
+    // required
+    title: "sure",
+    description: "maybe",
+  },
+  depth: 0,
+  locale: "en",
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+
+  // If your collection supports uploads, you can upload
+  // a file directly through the Local API by providing
+  // its full, absolute file path.
+  filePath: path.resolve(__dirname, "./path-to-image.jpg"),
+
+  // If you are uploading a file and would like to replace
+  // the existing file instead of generating a new filename,
+  // you can set the following property to `true`
+  overwriteExistingFiles: true,
+});
+```
+
 #### Delete
 
 ```js
@@ -201,6 +239,29 @@ const result = await payload.delete({
   collection: "posts", // required
   id: "507f1f77bcf86cd799439011", // required
   depth: 2,
+  locale: "en",
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+});
+```
+
+#### Delete Many
+
+```js
+// Result will be an object with:
+// {
+//   docs: [], // each document that is now deleted
+//   errors: [], // any errors that occurred, including the id of the errored on document
+// }
+const result = await payload.delete({
+  collection: "posts", // required
+  where: {
+    // required
+    fieldName: { equals: 'value' },
+  },
+  depth: 0,
   locale: "en",
   fallbackLocale: false,
   user: dummyUser,
