@@ -55,7 +55,7 @@ const DeleteMany: React.FC<Props> = (props) => {
         const json = await res.json();
         toggleModal(modalSlug);
         if (res.status < 400) {
-          toast.success(t('deletedSuccessfully'));
+          toast.success(json.message || t('deletedSuccessfully'), { autoClose: 3000 });
           toggleAll();
           resetParams({ page: selectAll ? 1 : undefined });
           return null;
@@ -71,7 +71,7 @@ const DeleteMany: React.FC<Props> = (props) => {
         return addDefaultError();
       }
     });
-  }, [addDefaultError, api, getQueryParams, i18n.language, modalSlug, resetParams, selectAll, serverURL, slug, t, toggleModal]);
+  }, [addDefaultError, api, getQueryParams, i18n.language, modalSlug, resetParams, selectAll, serverURL, slug, t, toggleAll, toggleModal]);
 
   if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
     return null;

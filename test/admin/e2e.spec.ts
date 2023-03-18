@@ -175,7 +175,7 @@ describe('admin', () => {
 
       await page.locator('#confirm-delete').click();
 
-      await expect(page.locator('.Toastify__toast--success')).toHaveCount(1);
+      await expect(page.locator('.Toastify__toast--success')).toHaveText('Deleted 3 Posts en successfully.');
       await expect(page.locator('.collection-list__no-results')).toBeVisible();
     });
 
