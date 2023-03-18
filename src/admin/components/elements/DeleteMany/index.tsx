@@ -30,7 +30,7 @@ const DeleteMany: React.FC<Props> = (props) => {
   const { permissions } = useAuth();
   const { serverURL, routes: { api } } = useConfig();
   const { toggleModal } = useModal();
-  const { selectAll, count, getQueryParams } = useSelection();
+  const { selectAll, count, getQueryParams, toggleAll } = useSelection();
   const { t, i18n } = useTranslation('general');
   const [deleting, setDeleting] = useState(false);
 
@@ -56,6 +56,7 @@ const DeleteMany: React.FC<Props> = (props) => {
         toggleModal(modalSlug);
         if (res.status < 400) {
           toast.success(t('deletedSuccessfully'));
+          toggleAll();
           resetParams({ page: selectAll ? 1 : undefined });
           return null;
         }
