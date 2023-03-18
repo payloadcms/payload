@@ -2,6 +2,7 @@ import React from 'react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import * as Locales from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
+import { getMonth, getYear } from 'date-fns';
 import CalendarIcon from '../../icons/Calendar';
 import XIcon from '../../icons/X';
 import { Props } from './types';
@@ -49,6 +50,22 @@ const DateTime: React.FC<Props> = (props) => {
     else dateTimeFormat = 'MMM d, yyy';
   }
 
+  const years = Array.from({ length: getYear(new Date()) - 1990 + 1 }, (_, i) => i + 1990);
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
   const dateTimePickerProps = {
     minDate,
     maxDate,
@@ -66,6 +83,89 @@ const DateTime: React.FC<Props> = (props) => {
     selected: value && new Date(value),
     customInputRef: 'ref',
     showMonthYearPicker: pickerAppearance === 'monthOnly',
+    renderCustomHeader: ({
+      date,
+      changeYear,
+      changeMonth,
+      decreaseMonth,
+      increaseMonth,
+      prevMonthButtonDisabled,
+      nextMonthButtonDisabled,
+    }) => (
+      <div
+        className="react-datepicker__current-month"
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
+
+        <button
+          type="button"
+          onClick={decreaseMonth}
+          disabled={prevMonthButtonDisabled}
+          aria-label="Previous Month"
+          className="react-datepicker__navigation react-datepicker__navigation--previous"
+        >
+          <span
+            className="react-datepicker__navigation-icon react-datepicker__navigation-icon--previous"
+          >
+            Previous Month
+          </span>
+        </button>
+        <div
+          style={{
+            display: 'flex',
+            gap: 4,
+          }}
+        >
+          {pickerAppearance !== 'monthOnly' && (
+            <select
+              value={months[getMonth(date)]}
+              onChange={({ target }) => changeMonth(months.indexOf(target.value))}
+            >
+              {months.map((option) => (
+                <option
+                  key={option}
+                  value={option}
+                >
+                  {option}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <select
+            value={getYear(date)}
+            onChange={({ target }) => changeYear(target.value)}
+          >
+            {years.map((option) => (
+              <option
+                key={option}
+                value={option}
+              >
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          type="button"
+          onClick={increaseMonth}
+          disabled={nextMonthButtonDisabled}
+          aria-label="Previous Month"
+          className="react-datepicker__navigation react-datepicker__navigation--next"
+        >
+          <span
+            className="react-datepicker__navigation-icon react-datepicker__navigation-icon--next"
+          >
+            Next Month
+          </span>
+        </button>
+
+      </div>
+    ),
   };
 
   const classes = [
