@@ -10,9 +10,9 @@ import Plus from '../../../../icons/Plus';
 import { getTranslation } from '../../../../../../utilities/getTranslation';
 import Tooltip from '../../../../elements/Tooltip';
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer';
+import { useConfig } from '../../../../utilities/Config';
 
 import './index.scss';
-import { useConfig } from '../../../../utilities/Config';
 
 const baseClass = 'relationship-add-new';
 
