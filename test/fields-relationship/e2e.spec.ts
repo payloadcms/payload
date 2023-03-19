@@ -79,6 +79,9 @@ describe('fields - relationship', () => {
       collection: relationWithTitleSlug,
       data: {
         name: 'relation-title',
+        meta: {
+          title: 'relation-title',
+        },
       },
     });
 
@@ -87,6 +90,9 @@ describe('fields - relationship', () => {
       collection: relationWithTitleSlug,
       data: {
         name: 'word boundary search',
+        meta: {
+          title: 'word boundary search',
+        },
       },
     });
 

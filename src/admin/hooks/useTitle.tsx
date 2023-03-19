@@ -7,14 +7,12 @@ import { Field } from '../components/forms/Form/types';
 import { useConfig } from '../components/utilities/Config';
 import { formatDate } from '../utilities/formatDate';
 
-type GetTitleArgs = {
+export const formatUseAsTitle = (args: {
   field: Field
   collection: SanitizedCollectionConfig
   i18n: typeof i18next
   config: SanitizedConfig
-}
-
-export const formatUseAsTitle = (args: GetTitleArgs): string => {
+}): string => {
   const {
     field,
     collection,
