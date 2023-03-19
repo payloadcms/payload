@@ -12,6 +12,7 @@ import Tooltip from '../../../../elements/Tooltip';
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer';
 
 import './index.scss';
+import { useConfig } from '../../../../utilities/Config';
 
 const baseClass = 'relationship-add-new';
 
@@ -25,6 +26,8 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
   const [popupOpen, setPopupOpen] = useState(false);
   const { t, i18n } = useTranslation('fields');
   const [showTooltip, setShowTooltip] = useState(false);
+  const config = useConfig();
+
   const [
     DocumentDrawer,
     DocumentDrawerToggler,
@@ -47,6 +50,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
       ],
       sort: true,
       i18n,
+      config,
     });
 
     if (hasMany) {
@@ -56,7 +60,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
     }
 
     setSelectedCollection(undefined);
-  }, [relationTo, collectionConfig, dispatchOptions, i18n, hasMany, setValue, value]);
+  }, [relationTo, collectionConfig, dispatchOptions, i18n, hasMany, setValue, value, config]);
 
   const onPopopToggle = useCallback((state) => {
     setPopupOpen(state);

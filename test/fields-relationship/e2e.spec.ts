@@ -17,7 +17,6 @@ import wait from '../../src/utilities/wait';
 
 const { beforeAll, beforeEach, describe } = test;
 
-
 describe('fields - relationship', () => {
   let url: AdminUrlUtil;
   let page: Page;
@@ -309,7 +308,7 @@ describe('fields - relationship', () => {
       const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option');
       await expect(options).toHaveCount(1);
 
-      await input.fill('non-occuring-string');
+      await input.fill('non-occurring-string');
       await expect(options).toHaveCount(0);
     });
 

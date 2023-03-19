@@ -23,9 +23,6 @@ const DeleteDocument: React.FC<Props> = (props) => {
     buttonId,
     collection,
     collection: {
-      admin: {
-        useAsTitle,
-      },
       slug,
       labels: {
         singular,
@@ -39,7 +36,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const { toggleModal } = useModal();
   const history = useHistory();
   const { t, i18n } = useTranslation('general');
-  const title = useTitle(useAsTitle, collection.slug) || id;
+  const title = useTitle(collection);
   const titleToRender = titleFromProps || title;
 
   const modalSlug = `delete-${id}`;
