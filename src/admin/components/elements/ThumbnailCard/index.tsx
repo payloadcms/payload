@@ -33,6 +33,7 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
       className={classes}
       onClick={typeof onClick === 'function' ? onClick : undefined}
       onKeyDown={typeof onKeyDown === 'function' ? onKeyDown : undefined}
+      title={label ? label : typeof doc?.filename === 'string' ? doc?.filename : `[${t('untitled')}]`}
     >
       <div className={`${baseClass}__thumbnail`}>
         {thumbnail && thumbnail}
