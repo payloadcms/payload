@@ -10,17 +10,19 @@ import {
 
 const flattenFields = (fields: Field[], keepPresentationalFields?: boolean): (FieldAffectingData | FieldPresentationalOnly)[] => {
   return fields.reduce((fieldsToUse, field) => {
-    if (fieldAffectsData(field) || (keepPresentationalFields && fieldIsPresentationalOnly(field))) {
-      return [
-        ...fieldsToUse,
-        field,
-      ];
-    }
-
     if (fieldHasSubFields(field)) {
+      const subfields = field.fields.map((subfield) => {
+        const name = [(<any>field).name, (<any>subfield).name].join('.');
+
+        return {
+          ...subfield,
+          name,
+        };
+      });
+
       return [
         ...fieldsToUse,
-        ...flattenFields(field.fields, keepPresentationalFields),
+        ...flattenFields(subfields, keepPresentationalFields),
       ];
     }
 
@@ -35,6 +37,14 @@ const flattenFields = (fields: Field[], keepPresentationalFields?: boolean): (Fi
         }, []),
       ];
     }
+
+    if (fieldAffectsData(field) || (keepPresentationalFields && fieldIsPresentationalOnly(field))) {
+      return [
+        ...fieldsToUse,
+        field,
+      ];
+    }
+
     return fieldsToUse;
   }, []);
 };

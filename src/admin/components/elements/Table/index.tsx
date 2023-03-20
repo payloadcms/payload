@@ -51,12 +51,14 @@ export const Table: React.FC<Props> = ({ data, columns: columnsFromProps }) => {
 
                 if (!active) return null;
 
+                const value = (col.accessor.split('.').reduce((acc, curr) => acc[curr], row));
+
                 return (
                   <td
                     key={colIndex}
                     className={`cell-${col.accessor}`}
                   >
-                    {col.components.renderCell(row, row[col.accessor])}
+                    {col.components.renderCell(row, value)}
                   </td>
                 );
               })}
