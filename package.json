@@ -13,7 +13,7 @@
     "prepublishOnly": "yarn clean && yarn build"
   },
   "peerDependencies": {
-    "payload": "^1.0.27"
+    "payload": "^1.6.21"
   },
   "files": [
     "dist",
