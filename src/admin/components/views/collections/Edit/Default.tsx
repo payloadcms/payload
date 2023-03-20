@@ -80,6 +80,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
 
   const operation = isEditing ? 'update' : 'create';
 
+  const hasSidebarFields = fields.some((field) => field?.admin?.position === 'sidebar');
+
   return (
     <React.Fragment>
       <div className={classes}>
@@ -220,32 +222,37 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           </React.Fragment>
                         )}
                       </div>
-                      <div className={`${baseClass}__sidebar-fields`}>
-                        {(isEditing && preview && (collection.versions?.drafts && !collection.versions?.drafts?.autosave)) && (
-                          <PreviewButton
-                            generatePreviewURL={preview}
-                          />
-                        )}
-                        {collection.versions?.drafts && (
-                          <React.Fragment>
-                            <Status />
-                            {(collection.versions?.drafts.autosave && hasSavePermission) && (
-                              <Autosave
-                                publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
-                                collection={collection}
-                                id={id}
+                      {(hasSidebarFields || preview || collection.versions?.drafts)
+                        && (
+                          <div className={`${baseClass}__sidebar-fields`}>
+                            {(isEditing && preview && (collection.versions?.drafts && !collection.versions?.drafts?.autosave)) && (
+                              <PreviewButton
+                                generatePreviewURL={preview}
                               />
                             )}
-                          </React.Fragment>
+                            {collection.versions?.drafts && (
+                              <React.Fragment>
+                                <Status />
+                                {(collection.versions?.drafts.autosave && hasSavePermission) && (
+                                  <Autosave
+                                    publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
+                                    collection={collection}
+                                    id={id}
+                                  />
+                                )}
+                              </React.Fragment>
+                            )}
+                            {hasSidebarFields && (
+                              <RenderFields
+                                readOnly={!hasSavePermission}
+                                permissions={permissions.fields}
+                                filter={(field) => field?.admin?.position === 'sidebar'}
+                                fieldTypes={fieldTypes}
+                                fieldSchema={fields}
+                              />
+                            )}
+                          </div>
                         )}
-                        <RenderFields
-                          readOnly={!hasSavePermission}
-                          permissions={permissions.fields}
-                          filter={(field) => field?.admin?.position === 'sidebar'}
-                          fieldTypes={fieldTypes}
-                          fieldSchema={fields}
-                        />
-                      </div>
                       {
                         isEditing && (
                           <ul className={`${baseClass}__meta`}>
