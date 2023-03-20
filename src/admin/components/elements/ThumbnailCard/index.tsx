@@ -12,11 +12,11 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
     className,
     onClick,
     doc,
+    label,
     collection,
     thumbnail,
     alignLabel,
     onKeyDown,
-    label: labelFromProps,
   } = props;
 
   const { t } = useTranslation('general');
@@ -28,13 +28,12 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
     alignLabel && `${baseClass}--align-label-${alignLabel}`,
   ].filter(Boolean).join(' ');
 
-  let label = labelFromProps;
-  if (!label) label = typeof doc?.filename === 'string' ? doc?.filename : `[${t('untitled')}]`;
+  const defaultTitle: any = doc?.[collection?.admin?.useAsTitle] || doc?.filename || `[${t('untitled')}]`;
 
   return (
     <div
-      title={label}
       className={classes}
+      title={label || defaultTitle}
       onClick={typeof onClick === 'function' ? onClick : undefined}
       onKeyDown={typeof onKeyDown === 'function' ? onKeyDown : undefined}
     >
@@ -49,7 +48,7 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
         )}
       </div>
       <div className={`${baseClass}__label`}>
-        {label}
+        {label || defaultTitle}
       </div>
     </div>
   );
