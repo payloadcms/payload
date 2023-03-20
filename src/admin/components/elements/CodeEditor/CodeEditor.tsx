@@ -37,6 +37,7 @@ const CodeEditor: React.FC<Props> = (props) => {
           ...options,
         }
       }
+      height={height}
       {...rest}
     />
   );
