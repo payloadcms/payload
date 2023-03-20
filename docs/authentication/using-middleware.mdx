@@ -15,6 +15,12 @@ This approach has a ton of benefits - it's great for isolation of concerns and l
   custom Express endpoints by adding Payload's authentication middleware.
 </Banner>
 
+<Banner type="warning">
+  Payload must be initialized before the `payload.authenticate` middleware can
+  be used. This is done by calling `payload.init()` prior to adding the
+  middleware.
+</Banner>
+
 Example in `server.js`:
 
 ```ts
