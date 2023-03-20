@@ -9,7 +9,7 @@ import { ShimmerEffect } from '../ShimmerEffect';
 const baseClass = 'code-editor';
 
 const CodeEditor: React.FC<Props> = (props) => {
-  const { readOnly, className, options, ...rest } = props;
+  const { readOnly, className, options, height, ...rest } = props;
 
   const { theme } = useTheme();
 
@@ -23,7 +23,7 @@ const CodeEditor: React.FC<Props> = (props) => {
     <Editor
       className={classes}
       theme={theme === 'dark' ? 'vs-dark' : 'vs'}
-      loading={<ShimmerEffect height="35vh" />}
+      loading={<ShimmerEffect height={height} />}
       options={
         {
           detectIndentation: true,
