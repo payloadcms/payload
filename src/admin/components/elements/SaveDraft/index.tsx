@@ -19,7 +19,7 @@ const SaveDraft: React.FC = () => {
   const modified = useFormModified();
   const locale = useLocale();
   const { t } = useTranslation('version');
-  const { getFields } = useWatchForm();
+  const { getFields, setModified } = useWatchForm();
 
   //console.log(getField('/api/posts/6414e0f2a2c3c8d208b64b47'));
   const canSaveDraft = modified;
@@ -312,13 +312,13 @@ const SaveDraft: React.FC = () => {
   
   if (initialValuesArrJoin === currentValuesArrJoin) {
     console.log(`state hasn't changed`)
-    
-    canSave = modified;
+    setModified(false)
+    //canSave = modified;
   }
   else {
     console.log(`state has changed`)
-    
-    canSave = !modified;
+    setModified(true)
+    //canSave = !modified;
   }
   // //console.log(getFields())
 
@@ -372,7 +372,7 @@ const SaveDraft: React.FC = () => {
       type="button"
       buttonStyle="secondary"
       onClick={saveDraft}
-      disabled={canSave}
+      disabled={!modified}
     >
       {t('saveDraft')}
     </FormSubmit>
