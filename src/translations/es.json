@@ -5,7 +5,7 @@
     "accountOfCurrentUser": "Cuenta del usuario actual",
     "alreadyActivated": "Ya Activado",
     "alreadyLoggedIn": "Sesión iniciada",
-    "apiKey": "API Key",
+    "apiKey": "Clave API",
     "backToLogin": "Regresar al inicio de sesión",
     "beginCreateFirstUser": "Para empezar, crea tu primer usuario.",
     "changePassword": "Cambiar contraseña",
@@ -24,7 +24,7 @@
     "generate": "Generar",
     "generateNewAPIKey": "Generar Nueva Clave de API",
     "generatingNewAPIKeyWillInvalidate": "Generar una nueva clave de API <1>invalidará</1> la clave anterior. ¿Deseas continuar?",
-    "lockUntil": "Lock Until",
+    "lockUntil": "Bloquear Hasta",
     "logBackIn": "Volver a iniciar sesión",
     "logOut": "Cerrar sesión",
     "loggedIn": "Para iniciar sesión con otro usuario, primero <0>cierra tu sesión</0>.",
@@ -38,11 +38,11 @@
     "logout": "Cerrar sesión",
     "logoutUser": "Cerrar sesión de usuario",
     "newAPIKeyGenerated": "Nueva Clave de API Generada.",
-    "newAccountCreated": "A new account has just been created for you to access <a href=\"{{serverURL}}\">{{serverURL}}</a> Please click on the following link or paste the URL below into your browser to verify your email: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> After verifying your email, you will be able to log in successfully.",
+    "newAccountCreated": "Se ha creado una nueva cuenta para que puedas acceder a <a href=\"{{serverURL}}\">{{serverURL}}</a>. Por favor, haz click o copia el siguiente enlace a tu navegador para verificar tu correo: <a href=\"{{verificationURL}}\">{{verificationURL}}</a>.<br> Una vez hayas verificado tu correo, podrás iniciar sesión.",
     "newPassword": "Nueva Contraseña",
     "resetPassword": "Restablecer Contraseña",
-    "resetPasswordExpiration": "Reset Password Expiration",
-    "resetPasswordToken": "Reset Password Token",
+    "resetPasswordExpiration": "Restablecer Caducidad de la Contraseña",
+    "resetPasswordToken": "Restablecer Token de la Contraseña",
     "resetYourPassword": "Restablecer tu Contraseña",
     "stayLoggedIn": "Mantener sesión abierta",
     "successfullyUnlocked": "Desbloqueado correctamente",
@@ -51,7 +51,7 @@
     "verifiedSuccessfully": "Verificación Correcta",
     "verify": "Verificar",
     "verifyUser": "Verificar Usuario",
-    "verifyYourEmail": "Verify your email",
+    "verifyYourEmail": "Verifica tu correo",
     "youAreInactive": "Has estado inactivo por un tiempo y por tu seguridad se cerrará tu sesión automáticamente. ¿Deseas mantener tu sesión activa?",
     "youAreReceivingResetPassword": "Estás recibiendo esto porque tú (o alguien más) ha solicitado restablecer la contraseña de tu cuenta. Por favor haz click en el siguiente enlace o pégalo en tu navegador para completar el proceso:",
     "youDidNotRequestPassword": "Si tú no solicitaste esto, por favor ignora este correo y tu contraseña no se cambiará."
@@ -321,8 +321,8 @@
     "versionID": "ID de Versión",
     "versions": "Versiones",
     "viewingVersion": "Viendo versión para {{entityLabel}} {{documentTitle}}",
-    "viewingVersionGlobal": "`Viendo versión para el global {{entityLabel}}",
+    "viewingVersionGlobal": "Viendo versión para el global {{entityLabel}}",
     "viewingVersions": "Viendo versiones para {{entityLabel}} {{documentTitle}}",
-    "viewingVersionsGlobal": "`Viendo versiones para el global {{entityLabel}}"
+    "viewingVersionsGlobal": "Viendo versiones para el global {{entityLabel}}"
   }
 }
