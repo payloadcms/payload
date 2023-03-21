@@ -128,7 +128,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         <h1>
                           <RenderTitle
                             data={data}
-                            collection={collection.slug}
+                            collection={collection}
                             useAsTitle={useAsTitle}
                             fallback={`[${t('untitled')}]`}
                           />

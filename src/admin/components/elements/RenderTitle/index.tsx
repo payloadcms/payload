@@ -7,13 +7,12 @@ const baseClass = 'render-title';
 
 const RenderTitle: React.FC<Props> = (props) => {
   const {
-    useAsTitle,
     collection,
     title: titleFromProps,
     data,
     fallback = '[untitled]',
   } = props;
-  const titleFromForm = useTitle(useAsTitle, collection);
+  const titleFromForm = useTitle(collection);
 
   let title = titleFromForm;
   if (!title) title = data?.id;

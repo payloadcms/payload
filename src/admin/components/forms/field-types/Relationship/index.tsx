@@ -56,13 +56,15 @@ const Relationship: React.FC<Props> = (props) => {
     } = {},
   } = props;
 
+  const config = useConfig();
+
   const {
     serverURL,
     routes: {
       api,
     },
     collections,
-  } = useConfig();
+  } = config;
 
   const { t, i18n } = useTranslation('fields');
   const { permissions } = useAuth();
@@ -172,9 +174,19 @@ const Relationship: React.FC<Props> = (props) => {
 
           if (response.ok) {
             const data: PaginatedDocs<unknown> = await response.json();
+
             if (data.docs.length > 0) {
               resultsFetched += data.docs.length;
-              dispatchOptions({ type: 'ADD', docs: data.docs, collection, sort, i18n });
+
+              dispatchOptions({
+                type: 'ADD',
+                docs: data.docs,
+                collection,
+                sort,
+                i18n,
+                config,
+              });
+
               setLastLoadedPage(data.page);
 
               if (!data.nextPage) {
@@ -190,7 +202,15 @@ const Relationship: React.FC<Props> = (props) => {
           } else if (response.status === 403) {
             setLastFullyLoadedRelation(relations.indexOf(relation));
             lastLoadedPageToUse = 1;
-            dispatchOptions({ type: 'ADD', docs: [], collection, sort, ids: relationMap[relation], i18n });
+            dispatchOptions({
+              type: 'ADD',
+              docs: [],
+              collection,
+              sort,
+              ids: relationMap[relation],
+              i18n,
+              config,
+            });
           } else {
             setErrorLoading(t('error:unspecific'));
           }
@@ -211,6 +231,7 @@ const Relationship: React.FC<Props> = (props) => {
     t,
     i18n,
     locale,
+    config,
   ]);
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
@@ -261,13 +282,24 @@ const Relationship: React.FC<Props> = (props) => {
               'Accept-Language': i18n.language,
             },
           });
+
           const collection = collections.find((coll) => coll.slug === relation);
+          let docs = [];
+
           if (response.ok) {
             const data = await response.json();
-            dispatchOptions({ type: 'ADD', docs: data.docs, collection, sort: true, ids: idsToLoad, i18n });
-          } else if (response.status === 403) {
-            dispatchOptions({ type: 'ADD', docs: [], collection, sort: true, ids: idsToLoad, i18n });
+            docs = data.docs;
           }
+
+          dispatchOptions({
+            type: 'ADD',
+            docs,
+            collection,
+            sort: true,
+            ids: idsToLoad,
+            i18n,
+            config,
+          });
         }
       }
     }, Promise.resolve());
@@ -283,6 +315,7 @@ const Relationship: React.FC<Props> = (props) => {
     i18n,
     relationTo,
     locale,
+    config,
   ]);
 
   // Determine if we should switch to word boundary search
@@ -311,8 +344,8 @@ const Relationship: React.FC<Props> = (props) => {
   }, [relationTo, filterOptionsResult, locale]);
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
-    dispatchOptions({ type: 'UPDATE', doc: args.doc, collection: args.collectionConfig, i18n });
-  }, [i18n]);
+    dispatchOptions({ type: 'UPDATE', doc: args.doc, collection: args.collectionConfig, i18n, config });
+  }, [i18n, config]);
 
   const classes = [
     'field-type',
