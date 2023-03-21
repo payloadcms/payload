@@ -1,8 +1,6 @@
 import { Option, Action, OptionGroup } from './types';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { formatUseAsTitle } from '../../../../hooks/useTitle';
-import { getObjectDotNotation } from '../../../../../utilities/getObjectDotNotation';
-import { Field } from '../../Form/types';
 
 const reduceToIDs = (options) => options.reduce((ids, option) => {
   if (option.options) {
@@ -38,7 +36,7 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
       const newOptions = [...state];
 
       const docTitle = formatUseAsTitle({
-        field: getObjectDotNotation<Field>(doc, collection.admin.useAsTitle),
+        doc,
         collection,
         i18n,
         config,
@@ -67,7 +65,7 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
           loadedIDs.push(doc.id);
 
           const docTitle = formatUseAsTitle({
-            field: getObjectDotNotation<Field>(doc, collection.admin.useAsTitle),
+            doc,
             collection,
             i18n,
             config,

@@ -5,7 +5,6 @@ import useIntersect from '../../../../../../../hooks/useIntersect';
 import { useListRelationships } from '../../../RelationshipProvider';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 import { formatUseAsTitle } from '../../../../../../../hooks/useTitle';
-import { getObjectDotNotation } from '../../../../../../../../utilities/getObjectDotNotation';
 import { Props as DefaultCellProps } from '../../types';
 
 import './index.scss';
@@ -61,7 +60,7 @@ const RelationshipCell: React.FC<{
         const relatedCollection = collections.find(({ slug }) => slug === relationTo);
 
         const label = formatUseAsTitle({
-          field: getObjectDotNotation(document || {}, relatedCollection.admin.useAsTitle),
+          doc: document === false ? null : document,
           collection: relatedCollection,
           i18n,
           config,

@@ -6,15 +6,19 @@ import { useFormFields } from '../components/forms/Form/context';
 import { Field } from '../components/forms/Form/types';
 import { useConfig } from '../components/utilities/Config';
 import { formatDate } from '../utilities/formatDate';
+import { getObjectDotNotation } from '../../utilities/getObjectDotNotation';
 
+// either send a `field` or an entire `doc`
 export const formatUseAsTitle = (args: {
-  field: Field
+  field?: Field
+  doc?: Record<string, any>
   collection: SanitizedCollectionConfig
   i18n: typeof i18next
   config: SanitizedConfig
 }): string => {
   const {
-    field,
+    field: fieldFromProps,
+    doc,
     collection,
     collection: {
       admin: { useAsTitle },
@@ -26,6 +30,12 @@ export const formatUseAsTitle = (args: {
       },
     },
   } = args;
+
+  if (!fieldFromProps && !doc) {
+    return '';
+  }
+
+  const field = fieldFromProps || getObjectDotNotation<Field>(doc, collection.admin.useAsTitle);
 
   let title = typeof field === 'string' ? field : field?.value as string;
 
