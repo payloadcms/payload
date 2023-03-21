@@ -4,7 +4,7 @@ import FormData from 'form-data';
 import { promisify } from 'util';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
-import configPromise, { mediaSlug, relationSlug } from './config';
+import configPromise, { jsonSlug, mediaSlug, relationSlug } from './config';
 import payload from '../../src';
 import getFileByPath from '../../src/uploads/getFileByPath';
 
@@ -53,6 +53,46 @@ describe('Collections - Uploads', () => {
         expect(doc.sizes).toHaveProperty('tablet');
         expect(doc.sizes).toHaveProperty('mobile');
         expect(doc.sizes).toHaveProperty('icon');
+      });
+
+      it('creates from form data given a JSON file using client.create', async () => {
+        const formData = new FormData();
+        formData.append('file', fs.createReadStream(path.join(__dirname, './json-file.json')));
+
+        const { status, doc } = await client.create({
+          slug: jsonSlug,
+          file: true,
+          data: formData,
+          auth: true,
+          headers: {},
+        });
+
+        expect(status).toBe(201);
+        expect(doc.filename).toBeDefined();
+
+        // Check for files
+        expect(await fileExists(path.join(__dirname, './media', doc.filename))).toBe(true);
+
+        // Check api response
+        expect(doc.mimeType).toEqual('application/json');
+      });
+
+      it('creates from form data given a JSON file using payload.create', async () => {
+        const file = await getFileByPath(path.resolve(__dirname, './json-file.json'));
+
+        const jsonDoc = await payload.create({
+          collection: jsonSlug,
+          data: {},
+          file,
+        });
+
+        expect(jsonDoc.filename).toBeDefined();
+
+        // Check for files
+        expect(await fileExists(path.join(__dirname, './media', jsonDoc.filename))).toBe(true);
+
+        // Check api response
+        expect(jsonDoc.mimeType).toEqual('application/json');
       });
 
       it('creates from form data given an svg', async () => {

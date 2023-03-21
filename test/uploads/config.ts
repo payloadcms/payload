@@ -12,6 +12,8 @@ export const relationSlug = 'relation';
 
 export const audioSlug = 'audio';
 
+export const jsonSlug = 'json';
+
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js');
 
 export default buildConfig({
@@ -52,6 +54,15 @@ export default buildConfig({
           },
         },
       ],
+    },
+    {
+      slug: jsonSlug,
+      upload: {
+        staticURL: '/media',
+        staticDir: './media',
+        mimeTypes: ['application/json'],
+      },
+      fields: [],
     },
     {
       slug: mediaSlug,
