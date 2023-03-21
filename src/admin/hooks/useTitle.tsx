@@ -8,7 +8,8 @@ import { useConfig } from '../components/utilities/Config';
 import { formatDate } from '../utilities/formatDate';
 import { getObjectDotNotation } from '../../utilities/getObjectDotNotation';
 
-// either send a `field` or an entire `doc`
+// either send the `useAsTitle` field itself
+// or an object to dynamically extract the `useAsTitle` field from
 export const formatUseAsTitle = (args: {
   field?: Field
   doc?: Record<string, any>
