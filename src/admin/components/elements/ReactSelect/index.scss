@@ -36,6 +36,7 @@
     border-radius: 0;
     @include shadow-lg;
     background: var(--theme-input-bg);
+    position: unset;
   }
 
   .rs__group-heading {

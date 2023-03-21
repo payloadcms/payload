@@ -34,10 +34,7 @@
     z-index: 1;
     overflow: auto;
     height: 100%;
-
-    @include mid-break {
-      max-height: calc(100% - #{base(4)});
-    }
+    padding-bottom: base(4);
   }
 
   &--is-open {

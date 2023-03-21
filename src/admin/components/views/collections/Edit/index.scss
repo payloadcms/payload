@@ -75,7 +75,7 @@
     top: 0;
     z-index: var(--z-nav);
 
-    > * {
+    >* {
       position: relative;
       z-index: 1;
     }
@@ -234,6 +234,12 @@
 
     &__sidebar {
       padding-bottom: base(3.5);
+    }
+  }
+
+  @include small-break {
+    &__sidebar {
+      padding: 0 base(1);
     }
   }
 }
