@@ -39,6 +39,20 @@ const RelationshipFields: CollectionConfig = {
         value: user.id,
       }),
     },
+    {
+      name: 'relationshipWithMin',
+      type: 'relationship',
+      relationTo: 'text-fields',
+      hasMany: true,
+      min: 2,
+    },
+    {
+      name: 'relationshipWithMax',
+      type: 'relationship',
+      relationTo: 'text-fields',
+      hasMany: true,
+      max: 2,
+    },
   ],
 };
 

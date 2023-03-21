@@ -80,6 +80,13 @@ If you are using a [persistent filesystem-based cloud host](#persistent-vs-ephem
 
 Alternatively, you can rely on a third-party MongoDB host such as [MongoDB Atlas](https://www.mongodb.com/). With Atlas or a similar cloud provider, you can trust them to take care of your database's availability, security, redundancy, and backups.
 
+<Banner type="warning">
+  <strong>Note:</strong>
+  <br />
+  If versions are enabled and a collection has many documents you may need a minimum of an m10 mongoDB atlas cluster if you reach a sorting `exceeded memory limit` error to view a collection list in the admin UI. The limitations of the m2 and m5 tier clusters are here:
+  <a href="https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/?_ga=2.176267877.1329169847.1677683154-860992573.1647438381#operational-limitations">Atlas M0 (Free Cluster), M2, and M5 Limitations</a>
+</Banner>
+
 ##### DocumentDB
 When using AWS DocumentDB, you will need to configure connection options for authentication in the `mongoOptions` passed to `payload.init`. You also need to set `mongoOptions.useFacet` to `false` to disable use of the unsupported `$facet` aggregation.
 

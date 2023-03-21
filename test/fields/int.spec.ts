@@ -12,11 +12,14 @@ import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSl
 import { defaultNumber, numberDoc } from './collections/Number';
 
 let client;
+let serverURL;
+let config;
 
 describe('Fields', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
-    const config = await configPromise;
+    ({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }));
+    config = await configPromise;
+
     client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
     await client.login();
   });
@@ -526,7 +529,7 @@ describe('Fields', () => {
     });
 
     it('should save empty json objects', async () => {
-      const createdJSON = await payload.create({
+      const jsonFieldsDoc = await payload.create({
         collection: 'json-fields',
         data: {
           json: {
@@ -535,7 +538,19 @@ describe('Fields', () => {
         },
       });
 
-      expect(createdJSON.json.state).toEqual({});
+      expect(jsonFieldsDoc.json.state).toEqual({});
+
+      const updatedJsonFieldsDoc = await payload.update({
+        collection: 'json-fields',
+        id: jsonFieldsDoc.id,
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(updatedJsonFieldsDoc.json.state).toEqual({});
     });
   });
 

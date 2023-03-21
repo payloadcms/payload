@@ -27,7 +27,7 @@ const expressApp = express();
 const startDev = async () => {
   await payload.init({
     secret: uuid(),
-    mongoURL: process.env.MONGO_URL || 'mongodb://localhost/payload',
+    mongoURL: process.env.MONGO_URL || 'mongodb://127.0.0.1/payload',
     express: expressApp,
     email: {
       logMockCredentials: true,

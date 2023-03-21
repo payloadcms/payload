@@ -130,6 +130,8 @@ export const promise = async ({
       const pointDoc = siblingDoc[field.name] as Record<string, unknown>;
       if (Array.isArray(pointDoc?.coordinates) && pointDoc.coordinates.length === 2) {
         siblingDoc[field.name] = pointDoc.coordinates;
+      } else {
+        siblingDoc[field.name] = undefined;
       }
 
       break;

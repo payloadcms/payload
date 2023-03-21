@@ -321,7 +321,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                     />
                     <RenderFields
                       className={`${baseClass}__fields`}
-                      forceRender
                       readOnly={readOnly}
                       fieldTypes={fieldTypes}
                       permissions={permissions?.fields}

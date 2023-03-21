@@ -4,3 +4,4 @@ exports.useDocumentInfo = require('../dist/admin/components/utilities/DocumentIn
 exports.useConfig = require('../dist/admin/components/utilities/Config').useConfig;
 exports.useAuth = require('../dist/admin/components/utilities/Auth').useAuth;
 exports.useEditDepth = require('../dist/admin/components/utilities/EditDepth').useEditDepth;
+exports.useTheme = require('../dist/admin/components/utilities/Theme').useTheme;
