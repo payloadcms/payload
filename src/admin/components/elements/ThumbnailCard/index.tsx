@@ -44,6 +44,7 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
 
   return (
     <div
+      title={title}
       className={classes}
       onClick={typeof onClick === 'function' ? onClick : undefined}
       onKeyDown={typeof onKeyDown === 'function' ? onKeyDown : undefined}
