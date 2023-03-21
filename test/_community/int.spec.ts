@@ -68,6 +68,6 @@ describe('_Community Tests', () => {
       }),
     }).then((res) => res.json());
 
-    expect(newPost.text).toEqual('REST API EXAMPLE');
+    expect(newPost.doc.text).toEqual('REST API EXAMPLE');
   });
 });
