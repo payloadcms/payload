@@ -105,13 +105,59 @@ export default buildConfig({
           type: 'number',
         },
         {
-          name: 'richText',
+          name: 'richText1',
           type: 'richText',
           admin: {
             elements: [
               'relationship',
             ],
           },
+        },
+        {
+          name: 'richText2',
+          type: 'richText',
+          admin: {
+            elements: [
+              'relationship',
+            ],
+          },
+        },
+        {
+          name: 'richText3',
+          type: 'richText',
+          admin: {
+            elements: [
+              'relationship',
+            ],
+          },
+        },
+        {
+          name: 'richText4',
+          type: 'richText',
+          admin: {
+            elements: [
+              'relationship',
+            ],
+          },
+        },
+        {
+          name: 'richText5',
+          type: 'richText',
+          admin: {
+            elements: [
+              'relationship',
+            ],
+          },
+        },
+        {
+          name: 'array1',
+          type: 'array',
+          fields: [
+            {
+              name: 'title1',
+              type: 'text',
+            }
+          ],
         },
         {
           type: 'ui',
