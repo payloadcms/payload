@@ -1,5 +1,24 @@
 
 
+## [1.6.23](https://github.com/payloadcms/payload/compare/v1.6.22...v1.6.23) (2023-03-22)
+
+
+### Bug Fixes
+
+* [#2315](https://github.com/payloadcms/payload/issues/2315) - deleting files if overwriteExistingFiles is true ([4d578f1](https://github.com/payloadcms/payload/commit/4d578f1bfd05efab5cc8db95895eabb776b2d9d1))
+* [#2363](https://github.com/payloadcms/payload/issues/2363) version tabs and select field comparisons ([#2364](https://github.com/payloadcms/payload/issues/2364)) ([21b8da7](https://github.com/payloadcms/payload/commit/21b8da7f415cdace9f7d5898c98f9c7a6bb39107))
+* allows base64 thumbnails ([#2361](https://github.com/payloadcms/payload/issues/2361)) ([e09ebff](https://github.com/payloadcms/payload/commit/e09ebfffa0a7a7fdb3469f272de0e6930d97a336))
+* DateField admin type ([#2256](https://github.com/payloadcms/payload/issues/2256)) ([fb2fd3e](https://github.com/payloadcms/payload/commit/fb2fd3e9b7e302d8069bfcb6f3cb698ac7abf0ca))
+* fallback to default locale showing on non-localized fields ([#2316](https://github.com/payloadcms/payload/issues/2316)) ([e1a6e08](https://github.com/payloadcms/payload/commit/e1a6e08aa140cf21597d6009b811f7fdd2106f4f))
+* Fix missing Spanish translations ([#2372](https://github.com/payloadcms/payload/issues/2372)) ([c0ff75c](https://github.com/payloadcms/payload/commit/c0ff75c1647a36219549e20fc081883f8cf1d7e4))
+* relationship field useAsTitle [#2333](https://github.com/payloadcms/payload/issues/2333) ([#2350](https://github.com/payloadcms/payload/issues/2350)) ([10dd819](https://github.com/payloadcms/payload/commit/10dd819863ecac4a5cea2e13f820df2224ac57f4))
+
+
+### Features
+
+* adds title attribute to ThumbnailCard ([#2368](https://github.com/payloadcms/payload/issues/2368)) ([a8766d0](https://github.com/payloadcms/payload/commit/a8766d00a8365c8e6ffe507944fbe49aaa39d4bd))
+* exposes defaultSort property for collection list view ([#2382](https://github.com/payloadcms/payload/issues/2382)) ([1f480c4](https://github.com/payloadcms/payload/commit/1f480c4cd5673a6fe08360183fe1c7c1d4e05de0))
+
 ## [1.6.22](https://github.com/payloadcms/payload/compare/v1.6.21...v1.6.22) (2023-03-15)
 
 ## [1.6.21](https://github.com/payloadcms/payload/compare/v1.6.20...v1.6.21) (2023-03-15)
