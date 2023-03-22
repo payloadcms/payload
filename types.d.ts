@@ -1,6 +1,7 @@
 export * from './dist/types';
 
 export {
+  AccessArgs,
   Access,
 } from './dist/config/types';
 
