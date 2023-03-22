@@ -18,7 +18,6 @@ export interface ITableColumns {
     toIndex: number
   }) => void
   toggleColumn: (column: string) => void
-  defaultSort?: string
 }
 
 export const TableColumnContext = createContext<ITableColumns>({} as ITableColumns);
@@ -35,7 +34,6 @@ export const TableColumnsProvider: React.FC<{
   collection,
   collection: {
     fields,
-    defaultSort,
     admin: {
       useAsTitle,
       defaultColumns,
@@ -182,7 +180,6 @@ export const TableColumnsProvider: React.FC<{
         setActiveColumns,
         moveColumn,
         toggleColumn,
-        defaultSort,
       }}
     >
       {children}
