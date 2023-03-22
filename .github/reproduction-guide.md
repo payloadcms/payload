@@ -1,14 +1,10 @@
-# Reporting an issue
+# Reproduction Guide
 
-To report an issue, please follow the steps below:
-
-1. Fork this repository
-2. Add necessary collections/globals/fields to the `test/_community` directory to recreate the issue you are experiencing
-3. Create an issue and add a link to your forked repo
+Add the necessary collections/globals/fields to the `test/_community` directory to recreate the issue you are experiencing.
 
 **The goal is to isolate the problem by reducing the number of fields/collections you add to the test/_community folder. This folder is not meant for you to copy your project into, but to recreate the issue you are experiencing with minimal config.**
 
-## Test directory file tree explanation
+## Example test directory file tree
 ```text
 .
 ├── config.ts
@@ -24,7 +20,7 @@ To report an issue, please follow the steps below:
 
 The directory split up in this way specifically to reduce friction when creating tests and to add the ability to boot up Payload with that specific config. You should modify the files in `test/_community` to get started.
 
-## How to start test collection admin UI
+## How to start the test collection admin UI
 To start the admin panel so you can manually recreate your issue, you can run the following command:
 
   ```bash
