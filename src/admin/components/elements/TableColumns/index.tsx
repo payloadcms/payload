@@ -35,10 +35,10 @@ export const TableColumnsProvider: React.FC<{
   collection,
   collection: {
     fields,
+    defaultSort,
     admin: {
       useAsTitle,
       defaultColumns,
-      defaultSort,
     },
   },
 }) => {

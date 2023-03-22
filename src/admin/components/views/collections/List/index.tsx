@@ -98,7 +98,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
 
       const search = {
         ...params,
-        sort: defaultSort || params?.sort || currentPreferences?.sort,
+        sort: params?.sort || currentPreferences?.sort || defaultSort,
         limit: params?.limit || currentPreferences?.limit || defaultLimit,
       };
 
