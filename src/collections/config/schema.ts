@@ -39,6 +39,7 @@ const collectionSchema = joi.object().keys({
   admin: joi.object({
     useAsTitle: joi.string(),
     defaultColumns: joi.array().items(joi.string()),
+    defaultSort: joi.string(),
     listSearchableFields: joi.array().items(joi.string()),
     group: joi.alternatives().try(
       joi.string(),

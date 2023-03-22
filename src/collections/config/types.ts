@@ -161,6 +161,10 @@ export type CollectionAdminOptions = {
    */
   defaultColumns?: string[];
   /**
+  * Default field to sort by in list view
+  */
+  defaultSort?: string;
+  /**
    * Additional fields to be searched via the full text search
    */
   listSearchableFields?: string[];

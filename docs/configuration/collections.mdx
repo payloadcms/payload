@@ -68,6 +68,7 @@ You can customize the way that the Admin panel behaves on a collection-by-collec
 | `useAsTitle`                | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title. |
 | `description`               | Text or React component to display below the Collection label in the List view to give editors more information. |
 | `defaultColumns`            | Array of field names that correspond to which columns to show by default in this collection's List view. |
+| `defaultSort`               | Pass a top-level field to sort by default in collection's List view. Prefix the name of the field with a minus symbol ("-") to sort in descending order. |
 | `disableDuplicate `         | Disables the "Duplicate" button while editing documents within this collection. |
 | `enableRichTextRelationship` | The [Rich Text](/docs/fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default. |
 | `preview`                   | Function to generate preview URLS within the Admin panel that can point to your app. [More](#preview). |
