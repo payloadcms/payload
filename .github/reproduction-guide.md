@@ -1,8 +1,12 @@
 # Reproduction Guide
 
-Add the necessary collections/globals/fields to the `test/_community` directory to recreate the issue you are experiencing.
+1. [fork](https://github.com/payloadcms/payload/fork) this repo
+2. run `yarn` to install dependencies
+3. open up the `test/_community` directory
+4. add any necessary `collections/globals/fields` in this directory to recreate the issue you are experiencing
+5. run `yarn dev _community` to start the admin panel
 
-**The goal is to isolate the problem by reducing the number of fields/collections you add to the test/_community folder. This folder is not meant for you to copy your project into, but to recreate the issue you are experiencing with minimal config.**
+**NOTE:** The goal is to isolate the problem by reducing the number of `collections/globals/fields` you add to the `test/_community` folder. This folder is _not_ meant for you to copy your project into, but rather recreate the issue you are experiencing with minimal config.
 
 ## Example test directory file tree
 ```text
@@ -20,15 +24,7 @@ Add the necessary collections/globals/fields to the `test/_community` directory 
 
 The directory split up in this way specifically to reduce friction when creating tests and to add the ability to boot up Payload with that specific config. You should modify the files in `test/_community` to get started.
 
-## How to start the test collection admin UI
-To start the admin panel so you can manually recreate your issue, you can run the following command:
-
-  ```bash
-  # This command will start up Payload using your config
-  # NOTE: it will wipe the test database on restart
-  yarn dev _community
-  ```
-
+<hr />
 
 ## Testing is optional but encouraged
 An issue does not need to have failing tests — reproduction steps with your forked repo are enough at this point. Some people like to dive deeper and we want to give you the guidance/tools to do so. Read more below.
