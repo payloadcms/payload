@@ -156,7 +156,15 @@ export default buildConfig({
             {
               name: 'title1',
               type: 'text',
-            }
+            },
+            {
+              name: 'checkbox',
+              type: 'checkbox'
+            },
+            {
+              name: 'nestedRichText',
+              type: 'richText'
+            },
           ],
         },
         {
