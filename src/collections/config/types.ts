@@ -214,6 +214,10 @@ export type CollectionConfig = {
     plural?: Record<string, string> | string;
   };
   /**
+  * Default field to sort by in collection list view
+  */
+  defaultSort?: string;
+  /**
    * GraphQL configuration
    */
   graphQL?: {

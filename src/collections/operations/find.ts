@@ -133,7 +133,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // /////////////////////////////////////
 
   const [sortProperty, sortOrder] = buildSortParam({
-    sort: args.sort,
+    sort: args.sort ?? collectionConfig.defaultSort,
     config: payload.config,
     fields: collectionConfig.fields,
     timestamps: collectionConfig.timestamps,
