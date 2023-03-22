@@ -13,7 +13,6 @@ import { ListIndexProps, ListPreferences } from './types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { useSearchParams } from '../../../utilities/SearchParams';
 import { Field } from '../../../../../fields/config/types';
-import { useTableColumns } from '../../../elements/TableColumns';
 
 const ListView: React.FC<ListIndexProps> = (props) => {
   const {
@@ -50,7 +49,6 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const hasCreatePermission = collectionPermissions?.create?.permission;
   const newDocumentURL = `${admin}/collections/${slug}/create`;
   const [{ data }, { setParams: setFetchParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } });
-  const { defaultSort } = useTableColumns();
 
   useEffect(() => {
     setStepNav([
@@ -98,7 +96,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
 
       const search = {
         ...params,
-        sort: params?.sort || currentPreferences?.sort || defaultSort,
+        sort: params?.sort || currentPreferences?.sort,
         limit: params?.limit || currentPreferences?.limit || defaultLimit,
       };
 
@@ -110,7 +108,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         });
       }
     })();
-  }, [collection, getPreference, preferenceKey, history, t, defaultLimit, defaultSort]);
+  }, [collection, getPreference, preferenceKey, history, t, defaultLimit]);
 
   // /////////////////////////////////////
   // Set preferences on change
