@@ -170,7 +170,6 @@ export type DateField = FieldBase & {
   admin?: Admin & {
     placeholder?: Record<string, string> | string
     date?: ConditionalDateProps
-    displayFormat?: string
   }
 }
 
