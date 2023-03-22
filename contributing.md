@@ -49,8 +49,6 @@ The directory split up in this way specifically to reduce friction when creating
 
 The following command will start Payload with your config: `yarn dev my-test-dir`. This command will start up Payload using your config and refresh a test database on every restart.
 
-When switching between test directories, you will want to remove your `node_modules/.cache ` manually or by running `yarn clean:cache`.
-
 NOTE: It is recommended to add the test credentials (located in `test/credentials.ts`) to your autofill for `localhost:3000/admin` as this will be required on every nodemon restart. The default credentials are `dev@payloadcms.com` as E-Mail and `test` as password.
 
 ## Pull Requests
