@@ -129,7 +129,7 @@ export type InitOptions = {
  */
 export type AccessResult = boolean | Where;
 
-type AccessArgs<T = any, U = any> = {
+export type AccessArgs<T = any, U = any> = {
   /** The original request that requires an access check */
   req: PayloadRequest<U>;
   /** ID of the resource being accessed */
