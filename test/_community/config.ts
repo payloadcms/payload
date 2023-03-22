@@ -26,7 +26,7 @@ export default buildConfig({
     await payload.create({
       collection: postsSlug,
       data: {
-        text: 'Hello World',
+        text: 'example post',
       },
     });
   },

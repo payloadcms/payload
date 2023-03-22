@@ -27,6 +27,6 @@ describe('Admin Panel', () => {
     await page.goto(url.list);
 
     const textCell = page.locator('.row-1 .cell-text');
-    await expect(textCell).toHaveText('test');
+    await expect(textCell).toHaveText('example post');
   });
 });
