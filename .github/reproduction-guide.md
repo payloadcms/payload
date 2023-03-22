@@ -24,13 +24,15 @@
 
 The directory split up in this way specifically to reduce friction when creating tests and to add the ability to boot up Payload with that specific config. You should modify the files in `test/_community` to get started.
 
-<hr />
+<br />
 
 ## Testing is optional but encouraged
-An issue does not need to have failing tests — reproduction steps with your forked repo are enough at this point. Some people like to dive deeper and we want to give you the guidance/tools to do so. Read more below.
+An issue does not need to have failing tests — reproduction steps with your forked repo are enough at this point. Some people like to dive deeper and we want to give you the guidance/tools to do so. Read more below:
 
-### How to run integration tests (Payload API tests)
-There are a couple ways to do this:
+### Running integration tests (Payload API tests)
+First install [Jest Runner for VSVode](https://marketplace.visualstudio.com/items?itemName=firsttris.vscode-jest-runner).
+
+There are a couple ways run integration tests:
 
 - **Granularly** - you can run individual tests in vscode by installing the Jest Runner plugin and using that to run individual tests. Clicking the `debug` button will run the test in debug mode allowing you to set break points.
 
@@ -42,7 +44,7 @@ There are a couple ways to do this:
   yarn test:int _community
   ```
 
-### How to run E2E tests (Admin Panel UI tests)
+### Running E2E tests (Admin Panel UI tests)
 The easiest way to run E2E tests is to install
 - [Playwright Test for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright)
 - [Playwright Runner](https://marketplace.visualstudio.com/items?itemName=ortoni.ortoni)
