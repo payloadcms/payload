@@ -50,7 +50,8 @@ const DateTime: React.FC<Props> = (props) => {
     else dateTimeFormat = 'MMM d, yyy';
   }
 
-  const years = Array.from({ length: getYear(new Date()) - 1990 + 1 }, (_, i) => i + 1990);
+  const minYear = minDate?.getFullYear() ?? 1990;
+  const years = Array.from({ length: getYear(maxDate ?? new Date()) - minYear + 1 }, (_, i) => i + minYear);
   const months = [
     'January',
     'February',
