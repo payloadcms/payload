@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import * as Locales from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
-import { getMonth, getYear } from 'date-fns';
+import { getMonth, getYear, add, sub } from 'date-fns';
 import CalendarIcon from '../../icons/Calendar';
 import XIcon from '../../icons/X';
 import { Props } from './types';
@@ -50,8 +50,11 @@ const DateTime: React.FC<Props> = (props) => {
     else dateTimeFormat = 'MMM d, yyy';
   }
 
-  const minYear = minDate?.getFullYear() ?? 1990;
-  const years = Array.from({ length: getYear(maxDate ?? new Date()) - minYear + 1 }, (_, i) => i + minYear);
+  const defaultMinYear = 1990;
+  let minYear = minDate?.getFullYear() ?? defaultMinYear;
+  // Years state:
+  const [years, setYears] = useState(Array.from({ length: getYear(maxDate ?? new Date()) - minYear + 1 }, (_, i) => i + minYear));
+
   const months = [
     'January',
     'February',
@@ -103,7 +106,15 @@ const DateTime: React.FC<Props> = (props) => {
 
         <button
           type="button"
-          onClick={decreaseMonth}
+          onClick={() => {
+            const futureDate = sub(date, { months: 1 }); // This is necessary, because increaseMonth() doesn't update the date immediately
+            decreaseMonth();
+            if (!minDate && getYear(futureDate) < minYear) {
+              minYear = getYear(futureDate);
+              const newYears = Array.from({ length: getYear(maxDate ?? new Date()) - minYear + 1 }, (_, i) => i + minYear);
+              setYears(newYears);
+            }
+          }}
           disabled={prevMonthButtonDisabled}
           aria-label="Previous Month"
           className="react-datepicker__navigation react-datepicker__navigation--previous"
@@ -153,7 +164,14 @@ const DateTime: React.FC<Props> = (props) => {
 
         <button
           type="button"
-          onClick={increaseMonth}
+          onClick={() => {
+            const futureDate = add(date, { months: 1 }); // This is necessary, because increaseMonth() doesn't update the date immediately
+            increaseMonth();
+            if (!maxDate && getYear(futureDate) > getYear(new Date())) {
+              const newYears = Array.from({ length: getYear(futureDate) - minYear + 1 }, (_, i) => i + minYear);
+              setYears(newYears);
+            }
+          }}
           disabled={nextMonthButtonDisabled}
           aria-label="Next Month"
           className="react-datepicker__navigation react-datepicker__navigation--next"
