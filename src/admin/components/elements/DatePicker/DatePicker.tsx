@@ -154,7 +154,7 @@ const DateTime: React.FC<Props> = (props) => {
           type="button"
           onClick={increaseMonth}
           disabled={nextMonthButtonDisabled}
-          aria-label="Previous Month"
+          aria-label="Next Month"
           className="react-datepicker__navigation react-datepicker__navigation--next"
         >
           <span
