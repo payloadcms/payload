@@ -38,7 +38,6 @@ const DateFields: CollectionConfig = {
       admin: {
         date: {
           pickerAppearance: 'dayAndTime',
-          minDate: new Date('1922-08-12T10:00:00.000+00:00'),
         },
       },
     },
