@@ -22,6 +22,7 @@ const baseVersionFields: Field[] = [
     options: statuses,
     defaultValue: 'draft',
     admin: {
+      disableBulkEdit: true,
       components: {
         Field: () => null,
       },

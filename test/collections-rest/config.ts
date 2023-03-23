@@ -32,6 +32,7 @@ export const relationSlug = 'relation';
 export const pointSlug = 'point';
 export const customIdSlug = 'custom-id';
 export const customIdNumberSlug = 'custom-id-number';
+export const errorOnHookSlug = 'error-on-hooks';
 
 export default buildConfig({
   collections: [
@@ -121,6 +122,36 @@ export default buildConfig({
         {
           name: 'name',
           type: 'text',
+        },
+      ],
+    },
+    {
+      slug: errorOnHookSlug,
+      access: openAccess,
+      hooks: {
+        beforeChange: [({ originalDoc }) => {
+          if (originalDoc?.errorBeforeChange) {
+            throw new Error('Error Before Change Thrown');
+          }
+        }],
+        afterDelete: [({ doc }) => {
+          if (doc?.errorAfterDelete) {
+            throw new Error('Error After Delete Thrown');
+          }
+        }],
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'errorBeforeChange',
+          type: 'checkbox',
+        },
+        {
+          name: 'errorAfterDelete',
+          type: 'checkbox',
         },
       ],
     },

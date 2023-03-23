@@ -318,6 +318,12 @@
         "unspecific": {
           "type": "string"
         },
+        "unableToDeleteCount": {
+          "type": "string"
+        },
+        "unableToUpdateCount": {
+          "type": "string"
+        },
         "userLocked": {
           "type": "string"
         },
@@ -357,6 +363,8 @@
         "unauthorized",
         "unknown",
         "unspecific",
+        "unableToDeleteCount",
+        "unableToUpdateCount",
         "userLocked",
         "valueMustBeUnique",
         "verificationTokenInvalid"
@@ -477,6 +485,9 @@
         "selectExistingLabel": {
           "type": "string"
         },
+        "selectFieldsToEdit": {
+          "type": "string"
+        },
         "showAll": {
           "type": "string"
         },
@@ -528,6 +539,7 @@
         "saveChanges",
         "searchForBlock",
         "selectExistingLabel",
+        "selectFieldsToEdit",
         "showAll",
         "swapUpload",
         "toggleBlock",
@@ -539,6 +551,15 @@
       "additionalProperties": false,
       "properties": {
         "aboutToDelete": {
+          "type": "string"
+        },
+        "aboutToDeleteCount_many": {
+          "type": "string"
+        },
+        "aboutToDeleteCount_one": {
+          "type": "string"
+        },
+        "aboutToDeleteCount_other": {
           "type": "string"
         },
         "addBelow": {
@@ -622,6 +643,9 @@
         "delete": {
           "type": "string"
         },
+        "deletedCountSuccessfully": {
+          "type": "string"
+        },
         "deletedSuccessfully": {
           "type": "string"
         },
@@ -644,6 +668,15 @@
           "type": "string"
         },
         "editing": {
+          "type": "string"
+        },
+        "editingLabel_many": {
+          "type": "string"
+        },
+        "editingLabel_one": {
+          "type": "string"
+        },
+        "editingLabel_other": {
           "type": "string"
         },
         "email": {
@@ -760,7 +793,13 @@
         "searchBy": {
           "type": "string"
         },
+        "selectAll": {
+          "type": "string"
+        },
         "selectValue": {
+          "type": "string"
+        },
+        "selectedCount": {
           "type": "string"
         },
         "sorryNotFound": {
@@ -802,6 +841,9 @@
         "updatedAt": {
           "type": "string"
         },
+        "updatedCountSuccessfully": {
+          "type": "string"
+        },
         "updatedSuccessfully": {
           "type": "string"
         },
@@ -823,6 +865,9 @@
       },
       "required": [
         "aboutToDelete",
+        "aboutToDeleteCount_many",
+        "aboutToDeleteCount_one",
+        "aboutToDeleteCount_other",
         "addBelow",
         "addFilter",
         "adminTheme",
@@ -849,6 +894,7 @@
         "dark",
         "dashboard",
         "delete",
+        "deletedCountSuccessfully",
         "deletedSuccessfully",
         "deleting",
         "descending",
@@ -856,6 +902,9 @@
         "duplicateWithoutSaving",
         "editLabel",
         "editing",
+        "editingLabel_many",
+        "editingLabel_one",
+        "editingLabel_other",
         "email",
         "emailAddress",
         "enterAValue",
@@ -893,7 +942,9 @@
         "save",
         "saving",
         "searchBy",
+        "selectAll",
         "selectValue",
+        "selectedCount",
         "sorryNotFound",
         "sort",
         "stayOnThisPage",
@@ -907,6 +958,7 @@
         "unsavedChangesDuplicate",
         "untitled",
         "updatedAt",
+        "updatedCountSuccessfully",
         "updatedSuccessfully",
         "user",
         "users",
@@ -1101,6 +1153,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "aboutToPublishSelection": {
+          "type": "string"
+        },
         "aboutToRestore": {
           "type": "string"
         },
@@ -1111,6 +1166,9 @@
           "type": "string"
         },
         "aboutToUnpublish": {
+          "type": "string"
+        },
+        "aboutToUnpublishSelection": {
           "type": "string"
         },
         "autosave": {
@@ -1126,6 +1184,9 @@
           "type": "string"
         },
         "compareVersion": {
+          "type": "string"
+        },
+        "confirmPublish": {
           "type": "string"
         },
         "confirmRevertToSaved": {
@@ -1162,6 +1223,9 @@
           "type": "string"
         },
         "publishChanges": {
+          "type": "string"
+        },
+        "publish": {
           "type": "string"
         },
         "published": {
@@ -1247,15 +1311,18 @@
         }
       },
       "required": [
+        "aboutToPublishSelection",
         "aboutToRestore",
         "aboutToRestoreGlobal",
         "aboutToRevertToPublished",
         "aboutToUnpublish",
+        "aboutToUnpublishSelection",
         "autosave",
         "autosavedSuccessfully",
         "autosavedVersion",
         "changed",
         "compareVersion",
+        "confirmPublish",
         "confirmRevertToSaved",
         "confirmUnpublish",
         "confirmVersionRestoration",
@@ -1268,6 +1335,7 @@
         "preview",
         "problemRestoringVersion",
         "publishChanges",
+        "publish",
         "published",
         "restoreThisVersion",
         "restoredSuccessfully",

@@ -2,10 +2,10 @@ import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
 import { initPayloadTest } from '../helpers/configHelpers';
 import type { Relation } from './config';
-import config, { customIdNumberSlug, customIdSlug, slug, relationSlug, pointSlug } from './config';
+import config, { customIdNumberSlug, customIdSlug, slug, relationSlug, pointSlug, errorOnHookSlug } from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
-import type { Post } from './payload-types';
+import type { ErrorOnHook, Post } from './payload-types';
 import { mapAsync } from '../../src/utilities/mapAsync';
 
 let client: RESTClient;
@@ -13,7 +13,7 @@ let client: RESTClient;
 describe('collections-rest', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
-    client = new RESTClient(config, { serverURL, defaultSlug: slug });
+    client = new RESTClient(await config, { serverURL, defaultSlug: slug });
   });
 
   afterAll(async () => {
@@ -60,6 +60,100 @@ describe('collections-rest', () => {
       expect(status).toEqual(200);
       expect(updated.title).toEqual(updatedTitle);
       expect(updated.description).toEqual(description); // Check was not modified
+    });
+
+    it('should bulk update', async () => {
+      await mapAsync([...Array(11)], async (_, i) => {
+        await createPost({ description: `desc ${i}` });
+      });
+
+      const description = 'updated';
+      const { status, docs } = await client.updateMany<Post>({
+        query: { title: { equals: 'title' } },
+        data: { description },
+      });
+
+      expect(status).toEqual(200);
+      expect(docs[0].title).toEqual('title'); // Check was not modified
+      expect(docs[0].description).toEqual(description);
+      expect(docs.pop().description).toEqual(description);
+    });
+
+    it('should return formatted errors for bulk updates', async () => {
+      const text = 'bulk-update-test-errors';
+      const errorDoc = await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          text,
+          errorBeforeChange: true,
+        },
+      });
+      const successDoc = await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          text,
+          errorBeforeChange: false,
+        },
+      });
+
+      const update = 'update';
+
+      const result = await client.updateMany<ErrorOnHook>({
+        slug: errorOnHookSlug,
+        query: { text: { equals: text } },
+        data: { text: update },
+      });
+
+      expect(result.status).toEqual(400);
+      expect(result.docs).toHaveLength(1);
+      expect(result.docs[0].id).toEqual(successDoc.id);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].message).toBeDefined();
+      expect(result.errors[0].id).toEqual(errorDoc.id);
+      expect(result.docs[0].text).toEqual(update);
+    });
+
+    it('should bulk delete', async () => {
+      const count = 11;
+      await mapAsync([...Array(count)], async (_, i) => {
+        await createPost({ description: `desc ${i}` });
+      });
+
+      const { status, docs } = await client.deleteMany<Post>({
+        query: { title: { eq: 'title' } },
+      });
+
+      expect(status).toEqual(200);
+      expect(docs[0].title).toEqual('title'); // Check was not modified
+      expect(docs).toHaveLength(count);
+    });
+
+    it('should return formatted errors for bulk deletes', async () => {
+      await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          text: 'test',
+          errorAfterDelete: true,
+        },
+      });
+      await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          text: 'test',
+          errorAfterDelete: false,
+        },
+      });
+
+      const result = await client.deleteMany({
+        slug: errorOnHookSlug,
+        query: { text: { equals: 'test' } },
+      });
+
+      expect(result.status).toEqual(400);
+      expect(result.docs).toHaveLength(1);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].message).toBeDefined();
+      expect(result.errors[0].id).toBeDefined();
     });
 
     describe('Custom ID', () => {
@@ -697,7 +791,7 @@ async function createPosts(count: number) {
 }
 
 async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find<Post>({ collection: slug, limit: 100 });
+  const allDocs = await payload.find({ collection: slug, limit: 100 });
   const ids = allDocs.docs.map((doc) => doc.id);
   await mapAsync(ids, async (id) => {
     await payload.delete({ collection: slug, id });

@@ -1,3 +1,4 @@
+import { Where } from '../../../../../types';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
 import { Props as ListControlsProps } from '../../../elements/ListControls/types';
@@ -11,15 +12,16 @@ export type Props = {
   setListControls: (controls: unknown) => void
   setSort: (sort: string) => void
   toggleColumn: (column: string) => void
+  resetParams: (overrides?: { page?: number, sort?: string, where?: Where }) => void
   hasCreatePermission: boolean
   setLimit: (limit: number) => void
   limit: number
   disableEyebrow?: boolean
   modifySearchParams?: boolean
   onCardClick?: (doc: any) => void
-  disableCardLink?: boolean
   handleSortChange?: ListControlsProps['handleSortChange']
   handleWhereChange?: ListControlsProps['handleWhereChange']
+  handleDelete?: () => void
   handlePageChange?: PaginatorProps['onChange']
   handlePerPageChange?: PerPageProps['handleChange']
   onCreateNewClick?: () => void

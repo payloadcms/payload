@@ -74,6 +74,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     admin: {
       readOnly: true,
       hidden: true,
+      disableBulkEdit: true,
     },
   };
 

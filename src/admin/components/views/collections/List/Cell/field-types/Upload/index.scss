@@ -1,0 +1,17 @@
+@import '../../../../../../../scss/styles.scss';
+
+.upload-cell {
+  display: flex;
+  flex-wrap: nowrap;
+  margin: base(-.25) 0;
+
+  .thumbnail {
+    max-width: base(3);
+    height: base(3);
+  }
+
+  &__filename {
+    align-self: center;
+    margin-left: base(1);
+  }
+}

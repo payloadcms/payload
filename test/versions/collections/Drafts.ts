@@ -1,10 +1,11 @@
 import type { CollectionConfig } from '../../../src/collections/config/types';
+import { draftSlug } from '../shared';
 
 const DraftPosts: CollectionConfig = {
-  slug: 'draft-posts',
+  slug: draftSlug,
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'description', 'createdAt'],
+    defaultColumns: ['title', 'description', 'createdAt', '_status'],
     preview: () => 'https://payloadcms.com',
   },
   versions: {

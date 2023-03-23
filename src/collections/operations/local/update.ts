@@ -1,6 +1,6 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Payload } from '../../../payload';
-import { Document } from '../../../types';
+import { Document, Where } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import update from '../update';
 import { PayloadRequest } from '../../../express/types';
@@ -8,10 +8,11 @@ import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
+import updateByID from '../updateByID';
+import { BulkOperationResult } from '../../config/types';
 
-export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
+export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
-  id: string | number
   data: Partial<GeneratedTypes['collections'][TSlug]>
   depth?: number
   locale?: string
@@ -26,17 +27,28 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   autosave?: boolean
 }
 
-export default async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
-  options: Options<TSlug>,
-): Promise<GeneratedTypes['collections'][TSlug]> {
+export type ByIDOptions<TSlug extends keyof GeneratedTypes['collections']> = BaseOptions<TSlug> & {
+  id: string | number
+  where?: never
+}
+
+export type ManyOptions<TSlug extends keyof GeneratedTypes['collections']> = BaseOptions<TSlug> & {
+  where: Where
+  id?: never
+}
+
+export type Options<TSlug extends keyof GeneratedTypes['collections']> = ByIDOptions<TSlug> | ManyOptions<TSlug>
+
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ByIDOptions<TSlug>): Promise<GeneratedTypes['collections'][TSlug]>
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ManyOptions<TSlug>): Promise<BulkOperationResult<TSlug>>
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>>
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>> {
   const {
     collection: collectionSlug,
     depth,
     locale = null,
     fallbackLocale = null,
     data,
-    id,
     user,
     overrideAccess = true,
     showHiddenFields,
@@ -45,6 +57,8 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['co
     overwriteExistingFiles = false,
     draft,
     autosave,
+    id,
+    where,
   } = options;
 
   const collection = payload.collections[collectionSlug];
@@ -76,14 +90,20 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['co
     data,
     collection,
     overrideAccess,
-    id,
     showHiddenFields,
     overwriteExistingFiles,
     draft,
     autosave,
     payload,
     req,
+    id,
+    where,
   };
 
+  if (options.id) {
+    return updateByID<TSlug>(args);
+  }
   return update<TSlug>(args);
 }
+
+export default updateLocal;
