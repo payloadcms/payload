@@ -1,5 +1,12 @@
 
 
+## [1.6.24](https://github.com/payloadcms/payload/compare/v1.6.23...v1.6.24) (2023-03-23)
+
+
+### Features
+
+* bulk-operations ([#2346](https://github.com/payloadcms/payload/issues/2346)) ([0fedbab](https://github.com/payloadcms/payload/commit/0fedbabe9e975f375dc12447fcdab4119bc6a4c4))
+
 ## [1.6.23](https://github.com/payloadcms/payload/compare/v1.6.22...v1.6.23) (2023-03-22)
 
 
