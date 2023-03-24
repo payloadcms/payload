@@ -2,10 +2,9 @@ import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import FormSubmit from '../../forms/Submit';
-import { useForm, useFormModified, useWatchForm } from '../../forms/Form/context';
+import { useForm, useFormModified } from '../../forms/Form/context';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useLocale } from '../../utilities/Locale';
-import { Field, Fields } from '../../forms/Form/types';
 
 import './index.scss';
 
@@ -13,7 +12,7 @@ const baseClass = 'save-draft';
 
 const SaveDraft: React.FC = () => {
   const { serverURL, routes: { api } } = useConfig();
-  const { submit, setModified } = useForm();
+  const { submit } = useForm();
   const { collection, global, id } = useDocumentInfo();
   const modified = useFormModified();
   const locale = useLocale();
