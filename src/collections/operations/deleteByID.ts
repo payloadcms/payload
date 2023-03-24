@@ -145,17 +145,6 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   }
 
   // /////////////////////////////////////
-  // afterDelete - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result = await hook({ req, id, doc: result }) || result;
-  }, Promise.resolve());
-
-
-  // /////////////////////////////////////
   // afterRead - Fields
   // /////////////////////////////////////
 
@@ -179,6 +168,16 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
       req,
       doc: result,
     }) || result;
+  }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterDelete - Collection
+  // /////////////////////////////////////
+
+  await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    result = await hook({ req, id, doc: result }) || result;
   }, Promise.resolve());
 
   // /////////////////////////////////////
