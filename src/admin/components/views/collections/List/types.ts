@@ -18,7 +18,6 @@ export type Props = {
   limit: number
   disableEyebrow?: boolean
   modifySearchParams?: boolean
-  onCardClick?: (doc: any) => void
   handleSortChange?: ListControlsProps['handleSortChange']
   handleWhereChange?: ListControlsProps['handleWhereChange']
   handleDelete?: () => void

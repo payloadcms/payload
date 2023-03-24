@@ -30,10 +30,14 @@ const buildColumns = ({
 
   const firstActiveColumn = sortedFields.find((field) => columns.find((column) => column.accessor === field.name)?.active);
 
-  const cols: Column[] = sortedFields.map((field, colIndex) => {
+  let colIndex = -1;
+  const cols: Column[] = sortedFields.map((field) => {
     const isActive = columns.find((column) => column.accessor === field.name)?.active || false;
     const isFirstActive = firstActiveColumn?.name === field.name;
-
+    if (isActive) {
+      colIndex += 1;
+    }
+    const props = cellProps?.[colIndex] || {};
     return {
       active: isActive,
       accessor: field.name,
@@ -61,7 +65,7 @@ const buildColumns = ({
               rowData={rowData}
               cellData={cellData}
               link={isFirstActive}
-              {...(cellProps?.[colIndex] || {})}
+              {...(props)}
             />
           );
         },
@@ -69,22 +73,24 @@ const buildColumns = ({
     };
   });
 
-  cols.unshift({
-    active: true,
-    label: null,
-    name: '',
-    accessor: '_select',
-    components: {
-      Heading: (
-        <SelectAll />
-      ),
-      renderCell: (rowData) => (
-        <SelectRow
-          id={rowData.id}
-        />
-      ),
-    },
-  });
+  if (cellProps?.[0]?.link !== false) {
+    cols.unshift({
+      active: true,
+      label: null,
+      name: '',
+      accessor: '_select',
+      components: {
+        Heading: (
+          <SelectAll />
+        ),
+        renderCell: (rowData) => (
+          <SelectRow
+            id={rowData.id}
+          />
+        ),
+      },
+    });
+  }
 
   return cols;
 };
