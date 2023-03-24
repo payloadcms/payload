@@ -8,9 +8,6 @@ import { useLocale } from '../../utilities/Locale';
 import { Field, Fields } from '../../forms/Form/types';
 
 import './index.scss';
-//import fields from '../../views/Version/RenderFieldsToDiff/fields';
-//import { Path } from 'slate';
-
 
 const baseClass = 'save-draft';
 

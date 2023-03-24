@@ -6,7 +6,7 @@ import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useForm, useFormModified, useWatchForm } from '../../forms/Form/context';
 
 // --- imported
-import { publishButton } from '../../forms/Form/compareStatesPublish';
+import { publishButton } from '../../forms/Form/compareStates';
 // --- by eustachio
 
 const Publish: React.FC<Props> = () => {
@@ -21,7 +21,7 @@ const Publish: React.FC<Props> = () => {
 
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0;
   // --- modified
-  // const canPublish = stateHasChanged(getFields()) || modified || hasNewerVersions || !publishedDoc;
+  // original code // const canPublish = stateHasChanged(getFields()) || modified || hasNewerVersions || !publishedDoc;
   const canPublish = () => {
     if (publishButton(getFields()) === false) {
       return false;
