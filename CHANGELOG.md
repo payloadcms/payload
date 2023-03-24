@@ -1,5 +1,12 @@
 
 
+## [1.6.25](https://github.com/payloadcms/payload/compare/v1.6.24...v1.6.25) (2023-03-24)
+
+
+### Bug Fixes
+
+* upload field select existing file ([#2392](https://github.com/payloadcms/payload/issues/2392)) ([38e917a](https://github.com/payloadcms/payload/commit/38e917a3dfa70ac3234915a6c8f7424eb22cb000))
+
 ## [1.6.24](https://github.com/payloadcms/payload/compare/v1.6.23...v1.6.24) (2023-03-23)
 
 
