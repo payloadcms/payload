@@ -44,7 +44,6 @@ const SaveDraft: React.FC = () => {
     });
   }, [submit, collection, global, serverURL, api, locale, id]);
 
-
   return (
     <FormSubmit
       className={baseClass}
