@@ -22,9 +22,13 @@ import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
 import { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types';
-import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
+import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext, useWatchForm } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
+
+// --- import stateHasChange function
+import { stateHasChanged } from './compareStates';
+// --- by eustachio
 
 const baseClass = 'form';
 
@@ -51,6 +55,7 @@ const Form: React.FC<Props> = (props) => {
   const { refreshCookie, user } = useAuth();
   const { id } = useDocumentInfo();
   const operation = useOperation();
+
 
   const [modified, setModified] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -158,11 +163,12 @@ const Form: React.FC<Props> = (props) => {
         ...overrides,
       };
 
+      
       onSubmit(fields, data);
     }
-
+    
     const formData = contextRef.current.createFormData(overrides);
-
+    
     try {
       const res = await requests[methodToUse.toLowerCase()](actionToUse, {
         body: formData,
@@ -170,34 +176,34 @@ const Form: React.FC<Props> = (props) => {
           'Accept-Language': i18n.language,
         },
       });
-
+      
       setModified(false);
-
+      
       if (typeof handleResponse === 'function') {
         handleResponse(res);
         return;
       }
-
+      
       setProcessing(false);
-
+      
       const contentType = res.headers.get('content-type');
       const isJSON = contentType && contentType.indexOf('application/json') !== -1;
-
+      
       let json: any = {};
-
+      
       if (isJSON) json = await res.json();
-
+      
       if (res.status < 400) {
         setSubmitted(false);
-
+        
         if (typeof onSuccess === 'function') onSuccess(json);
-
+        
         if (redirect) {
           const destination = {
             pathname: redirect,
             state: {},
           };
-
+          
           if (typeof json === 'object' && json.message && !disableSuccessStatus) {
             destination.state = {
               status: [
@@ -208,30 +214,30 @@ const Form: React.FC<Props> = (props) => {
               ],
             };
           }
-
+          
           history.push(destination);
         } else if (!disableSuccessStatus) {
           toast.success(json.message || t('submissionSuccessful'), { autoClose: 3000 });
         }
       } else {
         contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form
-
+        
         if (json.message) {
           toast.error(json.message);
-
+          
           return;
         }
-
+        
         if (Array.isArray(json.errors)) {
           const [fieldErrors, nonFieldErrors] = json.errors.reduce(
             ([fieldErrs, nonFieldErrs], err) => {
               const newFieldErrs = [];
               const newNonFieldErrs = [];
-
+              
               if (err?.message) {
                 newNonFieldErrs.push(err);
               }
-
+              
               if (Array.isArray(err?.data)) {
                 err.data.forEach((dataError) => {
                   if (dataError?.field) {
@@ -241,7 +247,7 @@ const Form: React.FC<Props> = (props) => {
                   }
                 });
               }
-
+              
               return [
                 [
                   ...fieldErrs,
@@ -254,32 +260,32 @@ const Form: React.FC<Props> = (props) => {
               ];
             },
             [[], []],
-          );
-
-          fieldErrors.forEach((err) => {
-            dispatchFields({
-              type: 'UPDATE',
-              ...(contextRef.current?.fields?.[err.field] || {}),
-              valid: false,
-              errorMessage: err.message,
-              path: err.field,
+            );
+            
+            fieldErrors.forEach((err) => {
+              dispatchFields({
+                type: 'UPDATE',
+                ...(contextRef.current?.fields?.[err.field] || {}),
+                valid: false,
+                errorMessage: err.message,
+                path: err.field,
+              });
             });
-          });
-
-          nonFieldErrors.forEach((err) => {
-            toast.error(err.message || t('error:unknown'));
-          });
-
-          return;
+            
+            nonFieldErrors.forEach((err) => {
+              toast.error(err.message || t('error:unknown'));
+            });
+            
+            return;
+          }
+          
+          const message = errorMessages[res.status] || t('error:unknown');
+          
+          toast.error(message);
         }
-
-        const message = errorMessages[res.status] || t('error:unknown');
-
-        toast.error(message);
-      }
-
-      return;
-    } catch (err) {
+        
+        return;
+      } catch (err) {
       setProcessing(false);
 
       toast.error(err);
@@ -381,6 +387,13 @@ const Form: React.FC<Props> = (props) => {
     className,
     baseClass,
   ].filter(Boolean).join(' ');
+
+
+  // --- this useEffect will setModified true or false depending on the comparison of the states using the stateHasChanged function
+  useEffect(() => {
+    setModified(stateHasChanged(getFields()));
+  },[getFields()]);
+  // --- by eustachio
 
   return (
     <form
