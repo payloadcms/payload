@@ -8,6 +8,7 @@ import relationship from './Relationship';
 import richText from './Richtext';
 import select from './Select';
 import textarea from './Textarea';
+import File from './File';
 
 
 export default {
@@ -23,4 +24,5 @@ export default {
   radio: select,
   textarea,
   upload: relationship,
+  File,
 };

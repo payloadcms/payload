@@ -1,11 +1,12 @@
 @import '../../../../../../../scss/styles.scss';
 
-.upload-cell {
+.file {
   display: flex;
   flex-wrap: nowrap;
   margin: base(-.25) 0;
 
-  .thumbnail {
+  &__thumbnail {
+    display: inline-block;
     max-width: base(3);
     height: base(3);
   }
