@@ -177,3 +177,246 @@
     }
   }
 }
+
+// new added from here
+
+.collapse-sidebar-button {
+  position: sticky;
+  width: 29px;
+  height: 26px;
+  top: 72px;
+  left: calc(var(--nav-width) + 13px);
+  // margin-left: var(--nav-width);
+  background-color: var(--theme-elevation-0);
+  border-radius: 100%;
+  border: 1px solid var(--theme-elevation-150);
+  z-index: 100;
+}
+.collapse-sidebar-button::before {
+  content: '>';
+  position: relative;
+  margin-left: 1px;
+  width: 10px;
+  height: 10px;
+  font-weight: 800;
+  color: var(--theme-elevation-250)!important;
+}
+.collapse-sidebar-button:hover {
+  rotate: 180deg;
+  margin-left: 0px;
+  // color: var(--theme-elevation-400);
+  cursor: pointer;
+}
+
+.expand-sidebar-button {
+  position: fixed;
+  width: 26px;
+  height: 26px;
+  top: 72px;
+  left: 37px;
+  // margin-left: var(--nav-width);
+  background-color: var(--theme-elevation-0);
+  z-index: 100;
+  border-radius: 100%;
+  border: 1px solid var(--theme-elevation-150);
+}
+.expand-sidebar-button::before {
+  content: '<';
+  position: relative;
+  width: 10px;
+  height: 10px;
+  // margin-left: -1px;
+  font-weight: 800;
+  color: var(--theme-elevation-250)!important;
+}
+.expand-sidebar-button:hover {
+  rotate: 180deg;
+  margin-left: 0px;
+  // color: var(--theme-elevation-400);
+  cursor: pointer;
+}
+
+
+.collapse {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 50px;
+  overflow: hidden;
+  border-right: 1px solid var(--theme-elevation-100);
+  // background-color: darkslategray;
+
+  header {
+    width: 100%;
+    display: block;
+    margin-bottom: base(1.5);
+    margin-left: -12px;
+
+    a,
+    button {
+      display: block;
+      padding: 0;
+
+      svg {
+        display: block;
+      }
+    }
+  }
+
+  &__brand {
+    margin-right: base(1);
+  }
+
+  &__mobile-menu-btn {
+    background: none;
+    border: 0;
+    opacity: 0;
+    visibility: hidden;
+    cursor: pointer;
+
+    &:active,
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &__scroll {
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    padding: base(1.5) base(1);
+    width: calc(100% + #{base(1)});
+    overflow-y: hidden !important;
+  }
+
+  &__wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
+  }
+
+  &__label {
+    color: var(--theme-elevation-400);
+  }
+
+  &__controls {
+    margin-top: auto;
+    margin-bottom: 0;
+    
+    >* {
+      margin-top: base(1);
+    }
+  }
+
+  &__log-out {
+    &:hover {
+      g {
+        transform: translateX(- #{base(.125)});
+      }
+    }
+  }
+
+  nav {
+    margin-left: -15px;
+    display: none;
+    a {
+      position: relative;
+      padding: base(.125) base(1.5) base(.125) 0;
+      display: block;
+      text-decoration: none;
+
+      &:focus {
+        box-shadow: none;
+        font-weight: 600;
+        background-color: purple !important;
+      }
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      &.active {
+        font-weight: normal;
+        padding-left: base(.6);
+        font-weight: 600;
+      }
+    }
+  }
+
+  &__link {
+    svg {
+      opacity: 0;
+      position: absolute;
+      left: - base(.5);
+      transform: rotate(-90deg);
+    }
+
+    &.active {
+      background-color: red;
+      svg {
+        opacity: 1;
+      }
+    }
+  }
+
+  @include mid-break {
+    @include blur-bg;
+    position: fixed;
+    width: 100%;
+    height: base(3);
+    z-index: var(--z-modal);
+
+    &__scroll {
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      display: block;
+    }
+
+    header,
+    &__wrap {
+      position: relative;
+      z-index: 1;
+      padding: $baseline var(--gutter-h);
+    }
+
+    header {
+      justify-content: space-between;
+      margin: 0;
+    }
+
+    &__mobile-menu-btn {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    &__wrap {
+      padding-top: 0;
+      visibility: hidden;
+      opacity: 0;
+      overflow-y: scroll;
+      position: fixed;
+      top: base(4);
+      bottom: 0;
+    }
+
+    &.nav--menu-active {
+      height: 100vh;
+
+      .nav__wrap {
+        visibility: visible;
+        opacity: 1;
+      }
+    }
+
+    nav a {
+      font-size: base(.875);
+      line-height: base(1.25);
+      font-weight: 600;
+    }
+  }
+}

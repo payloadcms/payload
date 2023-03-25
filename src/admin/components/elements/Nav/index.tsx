@@ -70,10 +70,31 @@ const DefaultNav = () => {
     setMenuActive(false);
   }), [history]);
 
+  const collapseLeftSidebar = (e) => {
+    e.preventDefault
+
+    console.log(e.target.nextSibling);
+    if (e.target.nextSibling.className === 'nav') {
+      e.target.nextSibling.className = 'collapse'
+      e.target.className = 'expand-sidebar-button'
+    }
+    else {
+      e.target.nextSibling.className = 'nav'
+      e.target.className = 'collapse-sidebar-button'
+    }
+  }
+
   return (
+    <>
+    <button 
+      className='collapse-sidebar-button'
+      onClick={collapseLeftSidebar}
+    >
+    </button>
     <aside className={classes}>
       <div className={`${baseClass}__scroll`}>
         <header>
+          {/* button to hide the left side bar */}
           <Link
             to={admin}
             className={`${baseClass}__brand`}
@@ -145,6 +166,7 @@ const DefaultNav = () => {
         </nav>
       </div>
     </aside>
+    </>
   );
 };
 
