@@ -212,9 +212,13 @@
       padding-right: var(--gutter-h);
     }
 
+    &__sidebar-wrap {
+      border-left: 0;
+    }
+
     &__sidebar-fields {
-      margin-bottom: base(1);
-      padding-top: base(1);
+      margin-bottom: 0;
+      padding-top: 0;
       padding-right: var(--gutter-h);
 
       .preview-btn {
@@ -234,6 +238,7 @@
 
     &__sidebar {
       padding-bottom: base(3.5);
+      overflow: visible;
     }
   }
 }
