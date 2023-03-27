@@ -18,10 +18,8 @@ const buildColumns = ({
   columns: Pick<Column, 'accessor' | 'active'>[],
   cellProps: Partial<CellProps>[]
 }): Column[] => {
-  const filteredFields = collection.fields.filter((field) => fieldIsPresentationalOnly(field) || !field.admin?.hidden);
-
   // sort the fields to the order of activeColumns
-  const sortedFields = flattenFields(filteredFields, true).sort((a, b) => {
+  const sortedFields = flattenFields(collection.fields, true).sort((a, b) => {
     const aIndex = columns.findIndex((column) => column.accessor === a.name);
     const bIndex = columns.findIndex((column) => column.accessor === b.name);
     if (aIndex === -1 && bIndex === -1) return 0;
