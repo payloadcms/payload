@@ -28,6 +28,7 @@ It's often best practice to write your Collections in separate files and then im
 | **`graphQL`**      | An object with `singularName` and `pluralName` strings used in schema generation. Auto-generated from slug if not defined.                                                                                               |
 | **`typescript`**   | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                      |
 | **`defaultSort`**  | Pass a top-level field to sort by default in the collection List view. Prefix the name of the field with a minus symbol ("-") to sort in descending order.                                                                |
+| **`pagination`**   | Set pagination-specific options for this collection. [More](#pagination) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -111,6 +112,15 @@ const Posts: CollectionConfig = {
 	},
 };
 ```
+
+### Pagination
+
+Here are a few options that you can specify options for pagination on a collection-by-collection basis:
+
+| Option                      | Description  |
+| --------------------------- | -------------|
+| `defaultLimit`              | Integer that specifies the default per-page limit that should be used. Defaults to 10. |
+| `limits`                    | Provide an array of integers to use as per-page options for admins to choose from in the List view. |
 
 ### Access control
 
