@@ -1,5 +1,17 @@
 
 
+## [1.6.27](https://github.com/payloadcms/payload/compare/v1.6.26...v1.6.27) (2023-03-27)
+
+
+### Bug Fixes
+
+* [#2355](https://github.com/payloadcms/payload/issues/2355), select field not fully visible on small screens in certain scenarios ([07eb8dd](https://github.com/payloadcms/payload/commit/07eb8dd7d252043c00b79d532736896134204c4c))
+* [#2384](https://github.com/payloadcms/payload/issues/2384), preserves manually set verified from admin UI ([72a8b1e](https://github.com/payloadcms/payload/commit/72a8b1eebe6c3b45663a14fa7488772ad13f975d))
+* hide fields with admin.hidden attribute ([ad25b09](https://github.com/payloadcms/payload/commit/ad25b096b6efa7e0cba647e82e29e36f7a95934a))
+* make update typing a deep partial ([#2407](https://github.com/payloadcms/payload/issues/2407)) ([e8dc7d4](https://github.com/payloadcms/payload/commit/e8dc7d462e21d1021275a95fbf62094f290e37ce))
+* restoring version did not correctly create new version from result ([6ca12b1](https://github.com/payloadcms/payload/commit/6ca12b1cc06554b04f3055df8f01d7eee1c09169))
+* textarea field overlap in UI ([1c8cf24](https://github.com/payloadcms/payload/commit/1c8cf24ba623746c160007d7c09b3160f2aae8d3))
+
 ## [1.6.25](https://github.com/payloadcms/payload/compare/v1.6.24...v1.6.25) (2023-03-24)
 
 
