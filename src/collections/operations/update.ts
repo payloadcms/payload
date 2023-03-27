@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { DeepPartial } from 'ts-essentials';
 import { Document, Where } from '../../types';
 import { BulkOperationResult, Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -23,7 +24,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   collection: Collection
   req: PayloadRequest
   where: Where
-  data: Partial<T>
+  data: DeepPartial<T>
   depth?: number
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
@@ -174,7 +175,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       // beforeValidate - Fields
       // /////////////////////////////////////
 
-      data = await beforeValidate<GeneratedTypes['collections'][TSlug]>({
+      data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
         data,
         doc: originalDoc,
         entityConfig: collectionConfig,
