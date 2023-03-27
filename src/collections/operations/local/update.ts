@@ -1,4 +1,5 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { DeepPartial } from 'ts-essentials';
 import { Payload } from '../../../payload';
 import { Document, Where } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
@@ -13,7 +14,7 @@ import { BulkOperationResult } from '../../config/types';
 
 export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
-  data: Partial<GeneratedTypes['collections'][TSlug]>
+  data: DeepPartial<GeneratedTypes['collections'][TSlug]>
   depth?: number
   locale?: string
   fallbackLocale?: string

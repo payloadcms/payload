@@ -1,4 +1,5 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { DeepPartial } from 'ts-essentials';
 import { Where } from '../../types';
 import { SanitizedGlobalConfig } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
@@ -21,7 +22,7 @@ type Args<T extends { [field: string | number | symbol]: unknown }> = {
   showHiddenFields?: boolean
   draft?: boolean
   autosave?: boolean
-  data: Omit<T, 'id'>
+  data: DeepPartial<Omit<T, 'id'>>
 }
 
 async function update<TSlug extends keyof GeneratedTypes['globals']>(

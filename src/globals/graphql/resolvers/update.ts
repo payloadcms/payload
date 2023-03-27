@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { DeepPartial } from 'ts-essentials';
 import { PayloadRequest } from '../../../express/types';
 import { SanitizedGlobalConfig } from '../../config/types';
 import update from '../../operations/update';
@@ -9,7 +10,7 @@ type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
   args: {
     locale?: string
     fallbackLocale?: string
-    data?: GeneratedTypes['globals'][TSlug]
+    data?: DeepPartial<Omit<GeneratedTypes['globals'][TSlug], 'id'>>
     draft?: boolean
   },
   context: {
