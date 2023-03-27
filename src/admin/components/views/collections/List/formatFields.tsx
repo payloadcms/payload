@@ -6,7 +6,7 @@ import { Field, fieldAffectsData, fieldIsPresentationalOnly } from '../../../../
 const formatFields = (config: SanitizedCollectionConfig, t: TFunction): Field[] => {
   const hasID = config.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') > -1;
   const fields: Field[] = config.fields.reduce((formatted, field) => {
-    if (!fieldIsPresentationalOnly(field) && (field.hidden === true || field?.admin?.disabled === true)) {
+    if (!fieldIsPresentationalOnly(field) && (field.hidden === true || field.admin?.hidden === true || field.admin?.disabled === true)) {
       return formatted;
     }
 
