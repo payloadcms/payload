@@ -14,7 +14,7 @@
       ],
       "args": [
         "${workspaceFolder}/test/dev.ts",
-        "versions"
+        "fields"
       ]
     },
   ]
