@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer'
 import { Resend } from 'resend'
 import payload from 'payload'
+import type { EmailOptions } from 'payload/config'
 
 type TransportArgs = Parameters<typeof nodemailer.createTransport>[0]
 
@@ -9,7 +10,7 @@ interface Args {
   fromAddress?: string
 }
 
-export const emailTransport = (args?: Args): nodemailer.Transporter<unknown> => {
+export const payloadCloudEmail = (args?: Args): EmailOptions => {
   const resend = new Resend(process.env.PAYLOAD_CLOUD_RESEND_API_KEY)
 
   const defaultFromAddress = args?.fromAddress || `cms@${process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN}`
@@ -62,5 +63,9 @@ export const emailTransport = (args?: Args): nodemailer.Transporter<unknown> => 
     },
   }
 
-  return nodemailer.createTransport(transportConfig)
+  return {
+    fromName: args?.fromName || defaultFromName,
+    fromAddress: args?.fromAddress || defaultFromAddress,
+    transport: nodemailer.createTransport(transportConfig),
+  }
 }
