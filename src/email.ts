@@ -10,7 +10,11 @@ interface Args {
   fromAddress?: string
 }
 
-export const payloadCloudEmail = (args?: Args): EmailOptions => {
+export const payloadCloudEmail = (args?: Args): EmailOptions | undefined => {
+  if (process.env.PAYLOAD_CLOUD !== 'true') {
+    return undefined
+  }
+
   const resend = new Resend(process.env.PAYLOAD_CLOUD_RESEND_API_KEY)
 
   const defaultFromAddress = args?.fromAddress || `cms@${process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN}`
