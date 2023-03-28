@@ -8,21 +8,15 @@
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}/dev",
-      "name": "Debug Cloud Storage - S3",
-      "program": "${workspaceFolder}/dev/src/server.ts",
-      "env": {
-        "PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER": "s3"
-      }
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/dev",
-      "name": "Debug Cloud Storage - Azure",
-      "program": "${workspaceFolder}/dev/src/server.ts",
-      "env": {
-        "PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER": "azure"
-      }
+      "runtimeArgs": [
+        "-r",
+        "./node_modules/ts-node/register"
+      ],
+      "name": "Debug Cloud Plugin",
+      "args": [
+        "${workspaceFolder}/dev/src/server.ts",
+      ],
+      "outputCapture": "std",
     },
   ]
 }
