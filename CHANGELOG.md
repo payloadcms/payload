@@ -1,5 +1,12 @@
 
 
+## [1.6.28](https://github.com/payloadcms/payload/compare/v1.6.27...v1.6.28) (2023-03-28)
+
+
+### Bug Fixes
+
+* potential memory leak with `probe-image-size` ([8eea0d6](https://github.com/payloadcms/payload/commit/8eea0d6cf41dd6360d713f463ad1b48ba253a9e7))
+
 ## [1.6.27](https://github.com/payloadcms/payload/compare/v1.6.26...v1.6.27) (2023-03-27)
 
 
