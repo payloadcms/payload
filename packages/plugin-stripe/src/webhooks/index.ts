@@ -9,7 +9,7 @@ export const handleWebhooks: StripeWebhookHandler = async (args) => {
     stripeConfig
   } = args;
 
-  payload.logger.info(`🪝 Received Stripe '${event.type}' webhook event with ID: '${event.id}'.`);
+  if (stripeConfig?.logs) payload.logger.info(`🪝 Received Stripe '${event.type}' webhook event with ID: '${event.id}'.`);
 
   // could also traverse into event.data.object.object to get the type, but that seems unreliable
   // use cli: `stripe resources` to see all available resources
