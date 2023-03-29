@@ -19,6 +19,7 @@ export const extendWebpackConfig =
           fs: path.resolve(__dirname, './mocks/fileStub.js'),
           '@aws-sdk/client-s3': path.resolve(__dirname, './mocks/s3.js'),
           '@aws-sdk/lib-storage': path.resolve(__dirname, './mocks/s3.js'),
+          [path.resolve(__dirname, './email')]: path.resolve(__dirname, './mocks/email.js'),
           [path.resolve(__dirname, './utilities/getStorageClient')]: path.resolve(
             __dirname,
             './mocks/storageClient.js',
