@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
-import { Model, PaginateModel, AggregatePaginateModel } from 'mongoose';
+import { AggregatePaginateModel, Model, PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
-import { Access, GeneratePreviewURL, EntityDescription, Endpoint } from '../../config/types';
+import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
-import { IncomingAuthType, Auth } from '../../auth/types';
+import { Auth, IncomingAuthType } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 import { Config as GeneratedTypes } from '../../generated-types';
