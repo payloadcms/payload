@@ -10,7 +10,7 @@ import './index.scss';
 
 export const baseClass = 'list-drawer';
 
-const formatListDrawerSlug = ({
+export const formatListDrawerSlug = ({
   depth,
   uuid,
 }: {
