@@ -1,5 +1,12 @@
 
 
+## [1.6.29](https://github.com/payloadcms/payload/compare/v1.6.28...v1.6.29) (2023-03-31)
+
+
+### Bug Fixes
+
+* update and delete local API return types ([#2434](https://github.com/payloadcms/payload/issues/2434)) ([02410a0](https://github.com/payloadcms/payload/commit/02410a0be38004b90d19207071569294fd104a66))
+
 ## [1.6.28](https://github.com/payloadcms/payload/compare/v1.6.27...v1.6.28) (2023-03-28)
 
 
