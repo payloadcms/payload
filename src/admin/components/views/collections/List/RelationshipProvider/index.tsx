@@ -67,7 +67,6 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
         });
         if (result.ok) {
           const json = await result.json();
-          console.log('RESULT', json);
           if (json.docs) {
             dispatchDocuments({ type: 'ADD_LOADED', docs: json.docs, relationTo: slug, idsToLoad });
           }
