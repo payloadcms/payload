@@ -13,6 +13,9 @@
         "./node_modules/ts-node/register"
       ],
       "name": "Debug Cloud Plugin",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "${workspaceFolder}/dev/src/payload.config.ts"
+      },
       "args": [
         "${workspaceFolder}/dev/src/server.ts",
       ],
