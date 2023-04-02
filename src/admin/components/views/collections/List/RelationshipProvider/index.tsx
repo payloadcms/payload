@@ -5,6 +5,7 @@ import { useConfig } from '../../../../utilities/Config';
 import { TypeWithID } from '../../../../../../collections/config/types';
 import { reducer } from './reducer';
 import useDebounce from '../../../../../hooks/useDebounce';
+import { useLocale } from '../../../../utilities/Locale';
 
 // documents are first set to null when requested
 // set to false when no doc is returned
@@ -30,6 +31,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
   const debouncedDocuments = useDebounce(documents, 100);
   const config = useConfig();
   const { i18n } = useTranslation();
+  const locale = useLocale();
   const {
     serverURL,
     routes: { api },
@@ -50,7 +52,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
         const params = {
           depth: 0,
           'where[id][in]': idsToLoad,
-          locale: i18n.language,
+          locale,
           limit: 250,
         };
 
@@ -58,11 +60,12 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
         const result = await fetch(`${url}${query}`, {
           credentials: 'include',
           headers: {
-            'Accept-Language': i18n.language,
+            'Accept-Language': locale,
           },
         });
         if (result.ok) {
           const json = await result.json();
+          console.log('RESULT', json);
           if (json.docs) {
             dispatchDocuments({ type: 'ADD_LOADED', docs: json.docs, relationTo: slug, idsToLoad });
           }
