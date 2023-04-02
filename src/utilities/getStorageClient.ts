@@ -42,6 +42,7 @@ export const getStorageClient: GetStorageClient = async () => {
   identityID = credentials.identityId
 
   storageClient = new AWS.S3({
+    region: process.env.PAYLOAD_CLOUD_BUCKET_REGION,
     credentials,
   })
 
