@@ -18,7 +18,7 @@ This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepic
 | Option             | Description                                                                                                                                                                                         |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
-| **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                                    |
+| **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
 | **`index`**        | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
 | **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
@@ -28,7 +28,8 @@ This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepic
 | **`defaultValue`** | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                                |
 | **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
 | **`required`**     | Require this field to have a value.                                                                                                                                                                 |
-| **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                                  |
+| **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                           |
+| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
 
 _\* An asterisk denotes that a property is required._
 

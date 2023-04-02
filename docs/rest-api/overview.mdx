@@ -91,6 +91,7 @@ Each endpoint object needs to have:
 | **`method`**   | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options' |
 | **`handler`**  | A function or array of functions to be called with **req**, **res** and **next** arguments. [Express](https://expressjs.com/en/guide/routing.html#route-handlers) |
 | **`root`**     | When `true`, defines the endpoint on the root Express app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload config, endpoints defined on `collections` or `globals` cannot be root. |
+| **`custom`**   | Extension point for adding custom data (e.g. for plugins) |
 
 Example:
 
