@@ -104,6 +104,8 @@ export type GlobalConfig = {
   }
   fields: Field[];
   admin?: GlobalAdminOptions
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 }
 
 export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions'> {

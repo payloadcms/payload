@@ -299,6 +299,8 @@ export type CollectionConfig = {
    * @default true
    */
   timestamps?: boolean
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
 export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions'> {
