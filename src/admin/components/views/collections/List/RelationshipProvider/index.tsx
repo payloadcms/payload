@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react';
+import React, {createContext, useCallback, useContext, useEffect, useReducer, useRef, useState} from 'react';
 import querystring from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../utilities/Config';
@@ -32,6 +32,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
   const config = useConfig();
   const { i18n } = useTranslation();
   const locale = useLocale();
+  const [oldLocale, setOldLocale] = useState(locale);
   const {
     serverURL,
     routes: { api },
@@ -42,10 +43,11 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
       const idsToLoad: (string | number)[] = [];
 
       Object.entries(docs).forEach(([id, value]) => {
-        if (value === null) {
+        if (value === null || locale !== oldLocale) {
           idsToLoad.push(id);
         }
       });
+      setOldLocale(locale);
 
       if (idsToLoad.length > 0) {
         const url = `${serverURL}${api}/${slug}`;
@@ -74,11 +76,12 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
         }
       }
     });
-  }, [i18n, serverURL, api, debouncedDocuments]);
+  }, [i18n, serverURL, api, debouncedDocuments, locale]);
 
   const getRelationships = useCallback(async (relationships: { relationTo: string, value: number | string }[]) => {
     dispatchDocuments({ type: 'REQUEST', docs: relationships });
-  }, []);
+    setOldLocale(locale);
+  }, [locale]);
 
   return (
     <Context.Provider value={{ getRelationships, documents }}>
