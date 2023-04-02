@@ -62,7 +62,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
         const result = await fetch(`${url}${query}`, {
           credentials: 'include',
           headers: {
-            'Accept-Language': locale,
+            'Accept-Language': i18n.language,
           },
         });
         if (result.ok) {
