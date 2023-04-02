@@ -1,4 +1,4 @@
-import React, {createContext, useCallback, useContext, useEffect, useReducer, useRef, useState} from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useReducer, useState } from 'react';
 import querystring from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../utilities/Config';
