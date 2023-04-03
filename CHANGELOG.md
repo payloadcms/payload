@@ -1,5 +1,13 @@
 
 
+## [1.6.30](https://github.com/payloadcms/payload/compare/v1.6.29...v1.6.30) (2023-04-03)
+
+
+### Bug Fixes
+
+* incorrect type local api using delete with where ([de5ceb2](https://github.com/payloadcms/payload/commit/de5ceb2aca624f702ea39556ffe2f689701615c1))
+* originalDoc being mutated in beforeChange field hooks ([888bbf2](https://github.com/payloadcms/payload/commit/888bbf28e0b793a2298e27a7e1df235d78b0a718))
+
 ## [1.6.29](https://github.com/payloadcms/payload/compare/v1.6.28...v1.6.29) (2023-03-31)
 
 
