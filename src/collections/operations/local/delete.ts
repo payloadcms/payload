@@ -11,7 +11,6 @@ import { BulkOperationResult } from '../../config/types';
 
 export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   collection: T
-  id: string | number
   depth?: number
   locale?: string
   fallbackLocale?: string
@@ -21,6 +20,7 @@ export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
 }
 
 export type ByIDOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {
+  id: string | number
   where?: never
 }
 
