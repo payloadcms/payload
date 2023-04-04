@@ -121,6 +121,7 @@ export interface FieldBase {
     read?: FieldAccess;
     update?: FieldAccess;
   };
+  extra?: unknown;
 }
 
 export type NumberField = FieldBase & {
