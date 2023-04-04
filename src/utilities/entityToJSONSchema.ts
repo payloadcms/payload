@@ -8,9 +8,19 @@ import deepCopyObject from './deepCopyObject';
 import { toWords } from './formatLabels';
 import { SanitizedConfig } from '../config/types';
 
+const propertyIsRequired = (field: Field) => {
+  if (fieldAffectsData(field) && (('required' in field && field.required === true))) return true;
 
-const propertyIsOptional = (field: Field) => {
-  return fieldAffectsData(field) && (('required' in field && field.required === true));
+  if ('fields' in field) {
+    if (field.admin?.condition || field.access?.read) return false;
+    return field.fields.find((subField) => propertyIsRequired(subField));
+  }
+
+  if (field.type === 'tabs') {
+    return field.tabs.some((tab) => 'name' in tab && tab.fields.find((subField) => propertyIsRequired(subField)));
+  }
+
+  return false;
 };
 
 function getCollectionIDType(collections: SanitizedCollectionConfig[], slug: string): 'string' | 'number' {
@@ -371,7 +381,7 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
     ),
     required: [
       ...fields
-        .filter(propertyIsOptional)
+        .filter(propertyIsRequired)
         .map((field) => (fieldAffectsData(field) ? field.name : '')),
       ...requiredTopLevelProps,
     ],
