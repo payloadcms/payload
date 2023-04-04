@@ -1,5 +1,17 @@
 
 
+## [1.6.31](https://github.com/payloadcms/payload/compare/v1.6.30...v1.6.31) (2023-04-04)
+
+
+### Bug Fixes
+
+* ensures select hasMany does not get mutated on patch operations ([3a6acf3](https://github.com/payloadcms/payload/commit/3a6acf322b5546ca3cd1d4dcb093af6e3b6ed086))
+
+
+### Features
+
+* improves required type accuracy ([a9cd23a](https://github.com/payloadcms/payload/commit/a9cd23a883d89c8deb3c1b5386decd50516d69fd))
+
 ## [1.6.30](https://github.com/payloadcms/payload/compare/v1.6.29...v1.6.30) (2023-04-03)
 
 
