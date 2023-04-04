@@ -8,9 +8,6 @@ export const PostsCollection: CollectionConfig = {
     {
       name: 'text',
       type: 'text',
-      extra: {
-        test: true,
-      },
     },
   ],
 };
