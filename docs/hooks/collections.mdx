@@ -79,7 +79,13 @@ const beforeOperationHook: CollectionBeforeOperationHook = async ({
 
 ### beforeValidate
 
-Runs before the `create` and `update` operations. This hook allows you to add or format data before the incoming data is validated.
+Runs before the `create` and `update` operations. This hook allows you to add or format data before the incoming data is validated server-side.
+
+Please do note that this does not run before the client-side validation. If you added a `validate` function, this would be the lifecycle:
+
+1. `validate` runs on the client
+2. if successful, `beforeValidate` runs on the server
+3. `validate` runs on the server
 
 ```ts
 import { CollectionBeforeOperationHook } from 'payload/types';
