@@ -62,7 +62,7 @@ export const saveVersion = async ({
         const data: Record<string, unknown> = {
           version: versionData,
           createdAt: new Date(latestVersion.createdAt).toISOString(),
-          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+          updatedAt: draft ? now : new Date(docWithLocales.updatedAt).toISOString(),
         };
 
         result = await VersionModel.findByIdAndUpdate(
@@ -79,8 +79,8 @@ export const saveVersion = async ({
       const data: Record<string, unknown> = {
         autosave: Boolean(autosave),
         version: versionData,
-        createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
-        updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+        createdAt: docWithLocales?.createdAt ? new Date(docWithLocales.createdAt).toISOString() : now,
+        updatedAt: draft ? now : new Date(docWithLocales.updatedAt).toISOString(),
       };
       if (collection) data.parent = id;
       result = await VersionModel.create(data);
