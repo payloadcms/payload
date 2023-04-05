@@ -1,5 +1,12 @@
 
 
+## [1.6.32](https://github.com/payloadcms/payload/compare/v1.6.31...v1.6.32) (2023-04-05)
+
+
+### Features
+
+* only uses sharp if required ([f9f6ec4](https://github.com/payloadcms/payload/commit/f9f6ec47d9a4f9ed94b7f7a4d50f13a8ee881ad0))
+
 ## [1.6.31](https://github.com/payloadcms/payload/compare/v1.6.30...v1.6.31) (2023-04-04)
 
 
