@@ -101,12 +101,12 @@ export const saveVersion = async ({
 
   if (max > 0) {
     await enforceMaxVersions({
-      id,
       payload,
-      Model: VersionModel,
-      slug: entityConfig.slug,
-      entityType,
+      VersionModel,
       max,
+      entityConfig.slug,
+      entityType,
+      id,
     });
   }
 
