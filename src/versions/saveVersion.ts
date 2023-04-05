@@ -22,7 +22,7 @@ export const saveVersion = async ({
   collection,
   global,
   id,
-  docWithLocales: doc,
+  docWithLocales,
   autosave,
   draft,
 }: Args): Promise<TypeWithID> => {
@@ -42,7 +42,7 @@ export const saveVersion = async ({
 
   const VersionModel = payload.versions[entityConfig.slug];
 
-  const versionData = { ...doc };
+  const versionData = { ...docWithLocales };
   if (draft) versionData._status = 'draft';
   if (versionData._id) delete versionData._id;
 
