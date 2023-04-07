@@ -4,7 +4,7 @@
   "version": "1.0.14",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "license": "SEE LICENSE IN LICENSE.MD",
+  "license": "MIT",
   "scripts": {
     "build": "tsc",
     "lint": "eslint src",
