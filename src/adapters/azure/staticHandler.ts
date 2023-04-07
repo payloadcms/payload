@@ -20,8 +20,6 @@ export const getHandler = ({ getStorageClient, collection }: Args): StaticHandle
 
       const { start, end } = await getRangeFromHeader(blockBlobClient, req.headers.range)
 
-      console.log({ start, end })
-
       const blob = await blockBlobClient.download(start, end)
       // eslint-disable-next-line no-underscore-dangle
       const response = blob._response
