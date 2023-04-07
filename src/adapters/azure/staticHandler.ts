@@ -1,8 +1,9 @@
-import path from 'path'
 import type { ContainerClient } from '@azure/storage-blob'
+import path from 'path'
 import type { CollectionConfig } from 'payload/types'
 import type { StaticHandler } from '../../types'
 import { getFilePrefix } from '../../utilities/getFilePrefix'
+import getRangeFromHeader from '../../utilities/getRangeFromHeader'
 
 interface Args {
   getStorageClient: () => ContainerClient
@@ -17,13 +18,13 @@ export const getHandler = ({ getStorageClient, collection }: Args): StaticHandle
         path.posix.join(prefix, req.params.filename),
       )
 
-      const blob = await blockBlobClient.download(0)
+      const { start, end } = await getRangeFromHeader(blockBlobClient, req.headers.range)
 
-      res.set({
-        'Content-Length': blob.contentLength,
-        'Content-Type': blob.contentType,
-        ETag: blob.etag,
-      })
+      const blob = await blockBlobClient.download(start, end)
+      // eslint-disable-next-line no-underscore-dangle
+      const response = blob._response
+      res.header(response.headers.rawHeaders())
+      res.status(response.status)
 
       if (blob?.readableStreamBody) {
         return blob.readableStreamBody.pipe(res)
