@@ -308,11 +308,12 @@ export type CollectionConfig = {
   custom?: Record<string, any>;
 };
 
-export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions'> {
+export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions'| 'endpoints'> {
   auth: Auth;
   upload: Upload;
   fields: Field[];
-  versions: SanitizedCollectionVersions
+  versions: SanitizedCollectionVersions;
+  endpoints: Omit<Endpoint, 'root'>[];
 }
 
 export type Collection = {

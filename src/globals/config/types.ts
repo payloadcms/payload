@@ -113,8 +113,9 @@ export type GlobalConfig = {
   custom?: Record<string, any>;
 }
 
-export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions'> {
+export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions' | 'endpoints'> {
   fields: Field[]
+  endpoints: Omit<Endpoint, 'root'>[],
   versions: SanitizedGlobalVersions
 }
 

@@ -535,10 +535,11 @@ export type Config = {
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'globals'
+  'collections' | 'globals' | 'endpoint'
 > & {
   collections: SanitizedCollectionConfig[];
   globals: SanitizedGlobalConfig[];
+  endpoints: Endpoint[];
   paths: {
     configDir: string
     config: string
