@@ -1,0 +1,17 @@
+@import '../../../scss/styles';
+
+.create-first-user {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  min-height: 100vh;
+
+  &__wrap {
+    width: 100%;
+    margin: 0 auto base(1);
+
+    svg {
+      width: 100%;
+    }
+  }
+}

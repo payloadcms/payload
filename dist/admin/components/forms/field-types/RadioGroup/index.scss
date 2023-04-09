@@ -1,0 +1,27 @@
+@import '../../../../scss/styles.scss';
+
+.radio-group {
+  margin-bottom: $baseline;
+
+  &__error-wrap {
+    position: relative;
+  }
+
+  &--layout-horizontal {
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    li {
+      padding-right: $baseline;
+      flex-shrink: 0;
+    }
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+}

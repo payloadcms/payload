@@ -1,0 +1,11 @@
+@import '../../../scss/styles.scss';
+
+.icon--logout {
+  height: $baseline;
+  width: $baseline;
+
+  .stroke {
+    stroke: var(--theme-elevation-800);
+    stroke-width: 2px;
+  }
+}

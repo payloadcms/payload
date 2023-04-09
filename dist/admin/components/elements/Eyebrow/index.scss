@@ -1,0 +1,27 @@
+@import '../../../scss/styles.scss';
+
+.eyebrow {
+  @include blur-bg;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav);
+  padding: base(1.5) 0;
+
+  &__wrap {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  @include mid-break {
+    padding: base(1) 0;
+    position: relative;
+    display: block;
+  }
+
+  @include small-break {
+    padding: 0 0 base(1);
+  }
+}

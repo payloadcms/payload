@@ -1,0 +1,1 @@
+{"version":3,"file":"FileUploadError.js","sourceRoot":"","sources":["../../src/errors/FileUploadError.ts"],"names":[],"mappings":";;;;;AAAA,8DAAqC;AAErC,0DAAkC;AAElC,MAAM,eAAgB,SAAQ,kBAAQ;IACpC,YAAY,CAAa;QACvB,KAAK,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,4BAA4B,CAAC,CAAC,CAAC,CAAC,+CAA+C,EAAE,qBAAU,CAAC,WAAW,CAAC,CAAC;IACvH,CAAC;CACF;AAED,kBAAe,eAAe,CAAC"}

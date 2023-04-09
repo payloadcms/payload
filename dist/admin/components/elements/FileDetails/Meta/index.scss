@@ -1,0 +1,23 @@
+@import '../../../../scss/styles.scss';
+
+.file-meta {
+  &__url {
+    display: flex;
+
+    a {
+      font-weight: 600;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &__size-type,
+  &__url a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

@@ -1,0 +1,23 @@
+@import '../../../../scss/styles.scss';
+
+.clickable-arrow {
+  cursor: pointer;
+
+  &--right {
+    .icon {
+      transform: rotate(-90deg);
+    }
+  }
+
+  &--left .icon {
+    transform: rotate(90deg);
+  }
+
+  &--is-disabled {
+    cursor: default;
+
+    .icon .stroke {
+      stroke: var(--theme-elevation-400);
+    }
+  }
+}

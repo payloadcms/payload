@@ -1,0 +1,1 @@
+{"version":3,"file":"bindCollection.js","sourceRoot":"","sources":["../../src/collections/bindCollection.ts"],"names":[],"mappings":";;AAGA,MAAM,wBAAwB,GAAG,CAAC,UAAsB,EAAE,EAAE,CAAC,CAAC,GAAyC,EAAE,GAAa,EAAE,IAAkB,EAAQ,EAAE;IAClJ,GAAG,CAAC,UAAU,GAAG,UAAU,CAAC;IAC5B,IAAI,EAAE,CAAC;AACT,CAAC,CAAC;AAEF,kBAAe,wBAAwB,CAAC"}
