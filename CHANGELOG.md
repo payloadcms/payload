@@ -1,5 +1,32 @@
 
 
+## [1.6.32](https://github.com/payloadcms/payload/compare/v1.6.31...v1.6.32) (2023-04-05)
+
+
+### Features
+
+* only uses sharp if required ([f9f6ec4](https://github.com/payloadcms/payload/commit/f9f6ec47d9a4f9ed94b7f7a4d50f13a8ee881ad0))
+
+## [1.6.31](https://github.com/payloadcms/payload/compare/v1.6.30...v1.6.31) (2023-04-04)
+
+
+### Bug Fixes
+
+* ensures select hasMany does not get mutated on patch operations ([3a6acf3](https://github.com/payloadcms/payload/commit/3a6acf322b5546ca3cd1d4dcb093af6e3b6ed086))
+
+
+### Features
+
+* improves required type accuracy ([a9cd23a](https://github.com/payloadcms/payload/commit/a9cd23a883d89c8deb3c1b5386decd50516d69fd))
+
+## [1.6.30](https://github.com/payloadcms/payload/compare/v1.6.29...v1.6.30) (2023-04-03)
+
+
+### Bug Fixes
+
+* incorrect type local api using delete with where ([de5ceb2](https://github.com/payloadcms/payload/commit/de5ceb2aca624f702ea39556ffe2f689701615c1))
+* originalDoc being mutated in beforeChange field hooks ([888bbf2](https://github.com/payloadcms/payload/commit/888bbf28e0b793a2298e27a7e1df235d78b0a718))
+
 ## [1.6.29](https://github.com/payloadcms/payload/compare/v1.6.28...v1.6.29) (2023-03-31)
 
 
