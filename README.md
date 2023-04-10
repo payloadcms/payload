@@ -12,7 +12,11 @@ This repository contains the officially supported Payload Cloud Storage plugin. 
 
 ## Usage
 
-Install this plugin within your Payload as follows:
+Add this package into your dependencies executing this code in your command line:
+
+`yarn add @payloadcms/plugin-cloud-storage`
+
+Now install this plugin within your Payload as follows:
 
 ```ts
 import { buildConfig } from 'payload/config';
