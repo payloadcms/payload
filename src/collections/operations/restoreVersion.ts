@@ -135,7 +135,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   await VersionModel.create({
     parent: parentDocID,
-    version: prevVersion,
+    version: rawVersion.version,
     autosave: false,
     createdAt: prevVersion.createdAt,
     updatedAt: new Date().toISOString(),

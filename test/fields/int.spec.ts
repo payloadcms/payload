@@ -61,6 +61,26 @@ describe('Fields', () => {
     it('creates with hasMany localized', () => {
       expect(doc.selectHasManyLocalized.en).toEqual(['one', 'two']);
     });
+
+    it('retains hasMany updates', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two'],
+        },
+      });
+
+      const updatedDoc = await payload.update({
+        collection: 'select-fields',
+        id,
+        data: {
+          select: 'one',
+        },
+      });
+
+      expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true);
+      expect(updatedDoc.selectHasMany).toEqual(['one', 'two']);
+    });
   });
 
   describe('number', () => {

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer, createContext, useContext, useRef } from 'react';
+import React, { useCallback, useEffect, useReducer, createContext, useContext, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { usePreferences } from '../../utilities/Preferences';
@@ -8,6 +8,8 @@ import buildColumns from './buildColumns';
 import { Action, columnReducer } from './columnReducer';
 import getInitialColumnState from './getInitialColumns';
 import { Props as CellProps } from '../../views/collections/List/Cell/types';
+import formatFields from '../../views/collections/List/formatFields';
+import { Field } from '../../../../fields/config/types';
 
 export interface ITableColumns {
   columns: Column[]
@@ -33,21 +35,22 @@ export const TableColumnsProvider: React.FC<{
   cellProps,
   collection,
   collection: {
-    fields,
     admin: {
       useAsTitle,
       defaultColumns,
     },
   },
 }) => {
-  const { t } = useTranslation('general');
   const preferenceKey = `${collection.slug}-list`;
   const prevCollection = useRef<SanitizedCollectionConfig['slug']>();
   const hasInitialized = useRef(false);
   const { getPreference, setPreference } = usePreferences();
+  const { t } = useTranslation();
+  const [formattedFields] = useState<Field[]>(() => formatFields(collection, t));
 
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
-    const initialColumns = getInitialColumnState(fields, useAsTitle, defaultColumns);
+    const initialColumns = getInitialColumnState(formattedFields, useAsTitle, defaultColumns);
+
     return buildColumns({
       collection,
       columns: initialColumns.map((column) => ({
@@ -55,7 +58,6 @@ export const TableColumnsProvider: React.FC<{
         active: true,
       })),
       cellProps,
-      t,
     });
   });
 
@@ -72,7 +74,7 @@ export const TableColumnsProvider: React.FC<{
 
         const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
         prevCollection.current = collection.slug;
-        const initialColumns = getInitialColumnState(fields, useAsTitle, defaultColumns);
+        const initialColumns = getInitialColumnState(formattedFields, useAsTitle, defaultColumns);
         const newCols = currentPreferences?.columns || initialColumns;
 
         dispatchTableColumns({
@@ -89,8 +91,7 @@ export const TableColumnsProvider: React.FC<{
               }
               return column;
             }),
-            t,
-            collection,
+            collection: { ...collection, fields: formatFields(collection, t) },
             cellProps,
           },
         });
@@ -100,7 +101,7 @@ export const TableColumnsProvider: React.FC<{
     };
 
     sync();
-  }, [preferenceKey, setPreference, fields, tableColumns, getPreference, useAsTitle, defaultColumns, t, collection, cellProps]);
+  }, [preferenceKey, setPreference, tableColumns, getPreference, useAsTitle, defaultColumns, collection, cellProps, formattedFields, t]);
 
   // /////////////////////////////////////
   // Set preferences on column change
@@ -130,12 +131,11 @@ export const TableColumnsProvider: React.FC<{
     dispatchTableColumns({
       type: 'set',
       payload: {
-        collection,
+        collection: { ...collection, fields: formatFields(collection, t) },
         columns: columns.map((column) => ({
           accessor: column,
           active: true,
         })),
-        t,
         // onSelect,
         cellProps,
       },
@@ -153,8 +153,7 @@ export const TableColumnsProvider: React.FC<{
       payload: {
         fromIndex,
         toIndex,
-        collection,
-        t,
+        collection: { ...collection, fields: formatFields(collection, t) },
         cellProps,
       },
     });
@@ -165,8 +164,7 @@ export const TableColumnsProvider: React.FC<{
       type: 'toggle',
       payload: {
         column,
-        collection,
-        t,
+        collection: { ...collection, fields: formatFields(collection, t) },
         cellProps,
       },
     });

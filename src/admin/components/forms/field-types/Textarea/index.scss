@@ -3,6 +3,7 @@
 .field-type.textarea {
   position: relative;
   margin-bottom: $baseline;
+  padding-bottom: base(2.5);
 
   .textarea-outer {
     @include formInput();
@@ -81,5 +82,9 @@
   .textarea-clone::after {
     content: attr(data-after);
     opacity: 0.5;
+  }
+
+  @include mid-break {
+    padding: 0;
   }
 }

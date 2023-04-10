@@ -162,6 +162,53 @@ describe('admin', () => {
       expect(page.url()).toContain(url.list);
     });
 
+    test('should bulk delete', async () => {
+      createPost();
+      createPost();
+      createPost();
+
+      await page.goto(url.list);
+
+      await page.locator('.select-all__input').click();
+
+      await page.locator('.delete-documents__toggle').click();
+
+      await page.locator('#confirm-delete').click();
+
+      await expect(page.locator('.Toastify__toast--success')).toHaveText('Deleted 3 Posts en successfully.');
+      await expect(page.locator('.collection-list__no-results')).toBeVisible();
+    });
+
+    test('should bulk update', async () => {
+      createPost();
+      createPost();
+      createPost();
+
+      const bulkTitle = 'Bulk update title';
+      await page.goto(url.list);
+
+      await page.locator('.select-all__input').click();
+      await page.locator('.edit-many__toggle').click();
+      await page.locator('.field-select .rs__control').click();
+      const options = page.locator('.rs__option');
+      const titleOption = await options.locator('text=Title en');
+
+      await expect(titleOption).toHaveText('Title en');
+
+      await titleOption.click();
+      const titleInput = await page.locator('#field-title');
+
+      await expect(titleInput).toBeVisible();
+
+      await titleInput.fill(bulkTitle);
+
+      await page.locator('.form-submit button[type="submit"]').click();
+      await expect(page.locator('.Toastify__toast--success')).toContainText('Updated 3 Posts en successfully.');
+      await expect(page.locator('.row-1 .cell-title')).toContainText(bulkTitle);
+      await expect(page.locator('.row-2 .cell-title')).toContainText(bulkTitle);
+      await expect(page.locator('.row-3 .cell-title')).toContainText(bulkTitle);
+    });
+
     test('should save globals', async () => {
       await page.goto(url.global(globalSlug));
 
@@ -230,11 +277,12 @@ describe('admin', () => {
       test('toggle columns', async () => {
         const columnCountLocator = 'table >> thead >> tr >> th';
         await createPost();
+
         await page.locator('.list-controls__toggle-columns').click();
         await wait(500); // Wait for column toggle UI, should probably use waitForSelector
 
         const numberOfColumns = await page.locator(columnCountLocator).count();
-        await expect(await page.locator('table >> thead >> tr >> th:first-child')).toHaveText('ID');
+        await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
 
         const idButton = await page.locator('.column-selector >> text=ID');
 
@@ -242,19 +290,19 @@ describe('admin', () => {
         await idButton.click();
         await wait(100);
         await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1);
-        await expect(await page.locator('table >> thead >> tr >> th:first-child')).toHaveText('Number');
+        await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('Number');
 
         // Add back ID column
         await idButton.click();
         await wait(100);
         await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns);
-        await expect(await page.locator('table >> thead >> tr >> th:first-child')).toHaveText('ID');
+        await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
       });
 
-      test('first cell is a link', async () => {
+      test('2nd cell is a link', async () => {
         const { id } = await createPost();
-        const firstCell = await page.locator(`${tableRowLocator} td`).first().locator('a');
-        await expect(firstCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
+        const linkCell = await page.locator(`${tableRowLocator} td`).nth(1).locator('a');
+        await expect(linkCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click();
@@ -264,8 +312,8 @@ describe('admin', () => {
         page.locator('.column-selector >> text=ID').click();
         await wait(200);
 
-        // recheck that the first cell is still a link
-        await expect(firstCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
+        // recheck that the 2nd cell is still a link
+        await expect(linkCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
       });
 
       test('filter rows', async () => {
@@ -303,8 +351,7 @@ describe('admin', () => {
         await wait(1000);
 
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
-        const firstId = await page.locator(tableRowLocator).first().locator('td').first()
-          .innerText();
+        const firstId = await page.locator(tableRowLocator).first().locator('.cell-id').innerText();
         expect(firstId).toEqual(id);
 
         // Remove filter
@@ -339,15 +386,17 @@ describe('admin', () => {
 
         // ensure the "number" column is now first
         await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
-        await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
+        await expect(await page.locator('table thead tr th').nth(1)).toHaveText('Number');
+        // await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
 
         // reload to ensure the preferred order was stored in the database
         await page.reload();
         await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
-        await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
+        await expect(await page.locator('table thead tr th').nth(1)).toHaveText('Number');
       });
 
       test('should render drawer columns in order', async () => {
+        await createPost();
         await page.goto(url.create);
 
         // Open the drawer
@@ -356,13 +405,13 @@ describe('admin', () => {
         await expect(listDrawer).toBeVisible();
 
         const collectionSelector = await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select');
-        const columnSelector = await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns');
 
         // select the "Post en" collection
         await collectionSelector.click();
         await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"').click();
 
         // open the column controls
+        const columnSelector = await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns');
         await columnSelector.click();
         await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
 
@@ -414,6 +463,46 @@ describe('admin', () => {
         await createPost();
         await page.goto(url.list);
         await expect(await page.locator('table >> thead >> tr >> th >> text=Demo UI Field')).toBeVisible();
+      });
+    });
+
+    describe('multi-select', () => {
+      beforeEach(async () => {
+        await mapAsync([...Array(3)], async () => {
+          await createPost();
+        });
+      });
+
+      test('should select multiple rows', async () => {
+        const selectAll = page.locator('.select-all');
+        await page.locator('.row-1 .select-row button').click();
+
+        const indeterminateSelectAll = selectAll.locator('.icon--line');
+        expect(indeterminateSelectAll).toBeDefined();
+
+        await selectAll.locator('button').click();
+        const emptySelectAll = selectAll.locator('.icon');
+        await expect(emptySelectAll).toHaveCount(0);
+
+        await selectAll.locator('button').click();
+        const checkSelectAll = selectAll.locator('.icon .icon--check');
+        expect(checkSelectAll).toBeDefined();
+      });
+
+      test('should delete many', async () => {
+        // delete should not appear without selection
+        await expect(page.locator('#confirm-delete')).toHaveCount(0);
+        // select one row
+        await page.locator('.row-1 .select-row button').click();
+
+        // delete button should be present
+        await expect(page.locator('#confirm-delete')).toHaveCount(1);
+
+        await page.locator('.row-2 .select-row button').click();
+
+        await page.locator('.delete-documents__toggle').click();
+        await page.locator('#confirm-delete').click();
+        await expect(await page.locator('.select-row')).toHaveCount(1);
       });
     });
 

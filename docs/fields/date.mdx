@@ -36,22 +36,31 @@ _\* An asterisk denotes that a property is required._
 
 In addition to the default [field admin config](/docs/fields/overview#admin-config), you can customize the following fields that will adjust how the component displays in the admin panel via the `date` property.
 
-| Option                 | Description                                                                                                                                         |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`pickerAppearance`** | Determines the appearance of the datepicker: `dayAndTime` `timeOnly` `dayOnly` `monthOnly`. Defaults to a calendar day picker - see `displayFormat`.                                           |
-| **`displayFormat`**    | Determines how the date is presented. dayAndTime default to `MMM d, yyy h:mm a` timeOnly defaults to `h:mm a` dayOnly defaults to `dd` and monthOnly defaults to `MMMM`. Defaults to `MMM d, yyy` when `pickerAppearance` is not set. |
-| **`placeholder`**      | Placeholder text for the field.                                                                                                                     |
-| **`monthsToShow`**     | Number of months to display max is 2. Defaults to 1.                                                                                                |
-| **`minDate`**          | Passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md).                               |
-| **`maxDate`**          | Passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md).                               |
-| **`minTime`**          | Passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md).                               |
-| **`maxTime`**          | Passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md).                               |
-| **`timeIntervals`**    | Passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md). Defaults to 30 minutes.       |
-| **`timeFormat`**       | Passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md). Defaults to `'h:mm aa'`.      |
+| Property               |  Option                    | Description                                                                                                                             |
+| ---------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **`placeholder`**      |                            | Placeholder text for the field.                                                                                                         |
+| **`date`**             |                            | Pass options to customize date field appearance.                                                                                        |
+|                        | **`displayFormat`**        | Format date to be shown in field **cell**.                 |
+|                        | **`pickerAppearance`** \*  | Determines the appearance of the datepicker: `dayAndTime` `timeOnly` `dayOnly` `monthOnly`.                                             |
+|                        | **`monthsToShow`**     \*  | Number of months to display max is 2. Defaults to 1.                                                                                    |
+|                        | **`minDate`**          \*  | Min date value to allow.                               |
+|                        | **`maxDate`**          \*  | Max date value to allow.                               |
+|                        | **`minTime`**          \*  | Min time value to allow.                               |
+|                        | **`maxTime`**          \*  | Max date value to allow.                               |
+|                        | **`timeIntervals`**    \*  | Time intervals to display. Defaults to 30 minutes.     |
+|                        | **`timeFormat`**       \*  | Determines time format. Defaults to `'h:mm aa'`.       |
 
-_\* An asterisk denotes that a property is required._
+_\* This property is passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md). ._
 
-Common use cases for customizing the `date` property are to restrict your field to only show time or day input—but lots more can be done.
+#### Display Format and Picker Appearance
+
+These properties only affect how the date is displayed in the UI. The full date is always stored in the format `YYYY-MM-DDTHH:mm:ss.SSSZ` (e.g. `1999-01-01T8:00:00.000+05:00`).
+
+`displayFormat` determines how the date is presented in the field **cell**, you can pass any valid (unicode date format)[https://date-fns.org/v2.29.3/docs/format].
+
+`pickerAppearance` sets the appearance of the **react datepicker**, the options available are `dayAndTime`, `dayOnly`, `timeOnly`, and `monthOnly`. By default, the datepicker will display `dayOnly`.
+
+When only `pickerAppearance`, an equivalent format will be rendered in the date field cell. To overwrite this format, set `displayFormat`.
 
 ### Example
 
@@ -63,18 +72,36 @@ import { CollectionConfig } from 'payload/types';
 const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
-    {
-      name: 'time', // required
-      type: 'date', // required
-      label: 'Event Start Time',
-      defaultValue: '1988-11-05T8:00:00.000+05:00',
+      {
+      name: 'dateOnly',
+      type: 'date',
       admin: {
         date: {
-          // All config options above should be placed here
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'd MMM yyy',
+        },
+      },
+    },
+    {
+      name: 'timeOnly',
+      type: 'date',
+      admin: {
+        date: {
           pickerAppearance: 'timeOnly',
-        }
-      }
-    }
+          displayFormat: 'h:mm:ss a',
+        },
+      },
+    },
+    {
+      name: 'monthOnly',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'monthOnly',
+          displayFormat: 'MMMM yyyy',
+        },
+      },
+    },
   ]
 };
 ```

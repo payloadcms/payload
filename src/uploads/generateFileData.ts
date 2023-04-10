@@ -67,15 +67,15 @@ export const generateFileData = async <T>({
     mkdirp.sync(staticPath);
   }
 
-
   let newData = data;
   const filesToSave: FileToSave[] = [];
   const fileData: Partial<FileData> = {};
   const fileIsAnimated = (file.mimetype === 'image/gif') || (file.mimetype === 'image/webp');
+
   try {
     const fileSupportsResize = canResizeImage(file.mimetype);
     let fsSafeName: string;
-    let originalFile: Sharp | undefined;
+    let sharpFile: Sharp | undefined;
     let dimensions: ProbedImageSize | undefined;
     let fileBuffer;
     let ext;
@@ -85,19 +85,19 @@ export const generateFileData = async <T>({
 
     if (fileIsAnimated) sharpOptions.animated = true;
 
-    if (fileSupportsResize) {
+    if (fileSupportsResize && (resizeOptions || formatOptions)) {
       if (file.tempFilePath) {
-        originalFile = sharp(file.tempFilePath, sharpOptions);
+        sharpFile = sharp(file.tempFilePath, sharpOptions);
       } else {
-        originalFile = sharp(file.data, sharpOptions);
+        sharpFile = sharp(file.data, sharpOptions);
       }
 
       if (resizeOptions) {
-        originalFile = originalFile
+        sharpFile = sharpFile
           .resize(resizeOptions);
       }
       if (formatOptions) {
-        originalFile = originalFile.toFormat(formatOptions.format, formatOptions.options);
+        sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options);
       }
     }
 
@@ -107,8 +107,8 @@ export const generateFileData = async <T>({
       fileData.height = dimensions.height;
     }
 
-    if (originalFile) {
-      fileBuffer = await originalFile.toBuffer({ resolveWithObject: true });
+    if (sharpFile) {
+      fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true });
       ({ mime, ext } = await fromBuffer(fileBuffer.data));
       fileData.width = fileBuffer.info.width;
       fileData.height = fileBuffer.info.height;

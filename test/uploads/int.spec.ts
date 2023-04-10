@@ -181,6 +181,39 @@ describe('Collections - Uploads', () => {
     expect(await fileExists(path.join(__dirname, './media', mediaDoc.sizes.icon.filename))).toBe(true);
   });
 
+  it('update - update many', async () => {
+    // Create image
+    const filePath = path.resolve(__dirname, './image.png');
+    const file = await getFileByPath(filePath);
+    file.name = 'renamed.png';
+
+    const mediaDoc = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file,
+    });
+
+    const formData = new FormData();
+    formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')));
+
+    const { status } = await client.updateMany({
+      // id: mediaDoc.id,
+      query: {
+        id: { equals: mediaDoc.id },
+      },
+      file: true,
+      data: formData,
+      auth: true,
+      headers: {},
+    });
+
+    expect(status).toBe(200);
+
+    // Check that previously existing files were removed
+    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(true);
+    expect(await fileExists(path.join(__dirname, './media', mediaDoc.sizes.icon.filename))).toBe(true);
+  });
+
   it('should remove existing media on re-upload', async () => {
     // Create temp file
     const filePath = path.resolve(__dirname, './temp.png');
@@ -213,6 +246,40 @@ describe('Collections - Uploads', () => {
     expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(false);
   });
 
+  it('should remove existing media on re-upload - update many', async () => {
+    // Create temp file
+    const filePath = path.resolve(__dirname, './temp.png');
+    const file = await getFileByPath(filePath);
+    file.name = 'temp.png';
+
+    const mediaDoc = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file,
+    });
+
+    // Check that the temp file was created
+    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(true);
+
+    // Replace the temp file with a new one
+    const newFilePath = path.resolve(__dirname, './temp-renamed.png');
+    const newFile = await getFileByPath(newFilePath);
+    newFile.name = 'temp-renamed.png';
+
+    const updatedMediaDoc = await payload.update({
+      collection: mediaSlug,
+      where: {
+        id: { equals: mediaDoc.id },
+      },
+      file: newFile,
+      data: {},
+    });
+
+    // Check that the replacement file was created and the old one was removed
+    expect(await fileExists(path.join(__dirname, './media', updatedMediaDoc.docs[0].filename))).toBe(true);
+    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(false);
+  });
+
   it('should remove extra sizes on update', async () => {
     const filePath = path.resolve(__dirname, './image.png');
     const file = await getFileByPath(filePath);
@@ -233,6 +300,30 @@ describe('Collections - Uploads', () => {
 
     expect(doc.sizes.icon).toBeDefined();
     expect(doc.sizes.tablet.width).toBeNull();
+  });
+
+  it('should remove extra sizes on update - update many', async () => {
+    const filePath = path.resolve(__dirname, './image.png');
+    const file = await getFileByPath(filePath);
+    const small = await getFileByPath(path.resolve(__dirname, './small.png'));
+
+    const { id } = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file,
+    });
+
+    const doc = await payload.update({
+      collection: mediaSlug,
+      where: {
+        id: { equals: id },
+      },
+      data: {},
+      file: small,
+    });
+
+    expect(doc.docs[0].sizes.icon).toBeDefined();
+    expect(doc.docs[0].sizes.tablet.width).toBeNull();
   });
 
   it('should allow update removing a relationship', async () => {
@@ -264,6 +355,37 @@ describe('Collections - Uploads', () => {
     expect(doc.image).toBeNull();
   });
 
+  it('should allow update removing a relationship - update many', async () => {
+    const filePath = path.resolve(__dirname, './image.png');
+    const file = await getFileByPath(filePath);
+    file.name = 'renamed.png';
+
+    const { id } = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file,
+    });
+
+    const related = await payload.create({
+      collection: relationSlug,
+      data: {
+        image: id,
+      },
+    });
+
+    const doc = await payload.update({
+      collection: relationSlug,
+      where: {
+        id: { equals: related.id },
+      },
+      data: {
+        image: null,
+      },
+    });
+
+    expect(doc.docs[0].image).toBeNull();
+  });
+
   it('delete', async () => {
     const formData = new FormData();
     formData.append('file', fs.createReadStream(path.join(__dirname, './image.png')));
@@ -280,6 +402,30 @@ describe('Collections - Uploads', () => {
     });
 
     expect(status).toBe(200);
+
+    expect(await fileExists(path.join(__dirname, doc.filename))).toBe(false);
+  });
+
+  it('delete - update many', async () => {
+    const formData = new FormData();
+    formData.append('file', fs.createReadStream(path.join(__dirname, './image.png')));
+
+    const { doc } = await client.create({
+      file: true,
+      data: formData,
+      auth: true,
+      headers: {},
+    });
+
+    const { errors } = await client.deleteMany({
+      slug: mediaSlug,
+      query: {
+        id: { equals: doc.id },
+      },
+      auth: true,
+    });
+
+    expect(errors).toHaveLength(0);
 
     expect(await fileExists(path.join(__dirname, doc.filename))).toBe(false);
   });
