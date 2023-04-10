@@ -5,3 +5,9 @@ exports.BlobServiceClient = {
     }),
   }),
 }
+
+exports.AbortController = {
+  timeout: () => null,
+}
+
+exports.Readable = { from: () => null }
