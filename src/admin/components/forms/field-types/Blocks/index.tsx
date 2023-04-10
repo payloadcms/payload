@@ -65,13 +65,12 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const { preferencesKey } = useDocumentInfo();
+  const { preferencesKey, id } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { setPreference } = usePreferences();
   const [rows, dispatchRows] = useReducer(reducer, undefined);
   const formContext = useForm();
   const { user } = useAuth();
-  const { id } = useDocumentInfo();
   const locale = useLocale();
   const operation = useOperation();
   const { dispatchFields, setModified } = formContext;
