@@ -22,8 +22,8 @@
   }
 
   &.error {
-    textarea {
-      background-color: var(--theme-error-200);
+    .textarea-outer {
+      background: var(--theme-error-200);
     }
   }
 
