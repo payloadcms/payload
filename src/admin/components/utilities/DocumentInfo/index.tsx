@@ -5,7 +5,7 @@ import qs from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../Config';
 import { PaginatedDocs } from '../../../../mongoose/types';
-import { ContextType, DocumentPermissions, EntityType, Props, Version } from './types';
+import { ContextType, DocumentPermissions, Props, Version } from './types';
 import { TypeWithID } from '../../../../globals/config/types';
 import { TypeWithTimestamps } from '../../../../collections/config/types';
 import { Where } from '../../../../types';
@@ -14,6 +14,8 @@ import { usePreferences } from '../Preferences';
 import { useAuth } from '../Auth';
 
 const Context = createContext({} as ContextType);
+
+export const useDocumentInfo = (): ContextType => useContext(Context);
 
 export const DocumentInfoProvider: React.FC<Props> = ({
   children,
@@ -32,7 +34,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
   const baseURL = `${serverURL}${api}`;
   let slug: string;
-  let type: EntityType;
+  let type: 'global' | 'collection';
   let pluralType: 'globals' | 'collections';
   let preferencesKey: string;
 
@@ -233,5 +235,3 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     </Context.Provider>
   );
 };
-
-export const useDocumentInfo = (): ContextType => useContext(Context);

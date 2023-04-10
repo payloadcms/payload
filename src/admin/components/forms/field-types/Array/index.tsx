@@ -63,13 +63,12 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const CustomRowLabel = components?.RowLabel || undefined;
 
-  const { preferencesKey } = useDocumentInfo();
+  const { preferencesKey, id } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { setPreference } = usePreferences();
   const [rows, dispatchRows] = useReducer(reducer, undefined);
   const formContext = useForm();
   const { user } = useAuth();
-  const { id } = useDocumentInfo();
   const locale = useLocale();
   const operation = useOperation();
   const { t, i18n } = useTranslation('fields');
