@@ -34,6 +34,29 @@ export const customIdSlug = 'custom-id';
 export const customIdNumberSlug = 'custom-id-number';
 
 export default buildConfig({
+  endpoints: [
+    {
+      path: '/send-test-email',
+      method: 'get',
+      handler: async (req, res) => {
+        await req.payload.sendEmail({
+          from: 'dev@payloadcms.com',
+          to: devUser.email,
+          subject: 'Test Email',
+          html: 'This is a test email.',
+          // to recreate a failing email transport, add the following credentials
+          // to the `email` property of `payload.init()` in `../dev.ts`
+          // the app should fail to send the email, but the error should be handled without crashing the app
+          // transportOptions: {
+          //   host: 'smtp.ethereal.email',
+          //   port: 587,
+          // },
+        });
+
+        res.status(200).send('Email sent');
+      },
+    },
+  ],
   collections: [
     {
       slug,
