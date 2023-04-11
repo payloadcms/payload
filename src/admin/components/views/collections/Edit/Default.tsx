@@ -198,7 +198,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           )}
                         </ul>
                       )}
-                      <div className={`${baseClass}__document-actions${((collection.versions?.drafts && !collection.versions?.drafts?.autosave) || (isEditing && preview)) ? ` ${baseClass}__document-actions--has-2` : ''}`}>
+                      <div className={`${baseClass}__document-actions${((collection.versions?.drafts && !collection.versions?.drafts?.autosave) || preview) ? ` ${baseClass}__document-actions--has-2` : ''}`}>
                         {(preview && (!collection.versions?.drafts || collection.versions?.drafts?.autosave)) && (
                           <PreviewButton
                             generatePreviewURL={preview}
