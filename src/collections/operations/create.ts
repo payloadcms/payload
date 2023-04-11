@@ -191,8 +191,9 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     if (data.email) {
       resultWithLocales.email = (data.email as string).toLowerCase();
     }
+
     if (collectionConfig.auth.verify) {
-      resultWithLocales._verified = false;
+      resultWithLocales._verified = Boolean(resultWithLocales._verified) || false;
       resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex');
     }
 

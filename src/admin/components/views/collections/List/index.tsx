@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { v4 as uuid } from 'uuid';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { useTranslation } from 'react-i18next';
@@ -9,10 +10,11 @@ import DefaultList from './Default';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import { useStepNav } from '../../../elements/StepNav';
 import formatFields from './formatFields';
-import { ListIndexProps, ListPreferences } from './types';
+import { Props, ListIndexProps, ListPreferences } from './types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { useSearchParams } from '../../../utilities/SearchParams';
-import { Field } from '../../../../../fields/config/types';
+import { TableColumnsProvider } from '../../../elements/TableColumns';
+import type { Field } from '../../../../../fields/config/types';
 
 const ListView: React.FC<ListIndexProps> = (props) => {
   const {
@@ -48,7 +50,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const collectionPermissions = permissions?.collections?.[slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
   const newDocumentURL = `${admin}/collections/${slug}/create`;
-  const [{ data }, { setParams: setFetchParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } });
+  const [{ data }, { setParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } });
 
   useEffect(() => {
     setStepNav([
@@ -62,27 +64,31 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   // Set up Payload REST API query params
   // /////////////////////////////////////
 
-  useEffect(() => {
-    const params = {
+  const resetParams = useCallback<Props['resetParams']>((overrides = {}) => {
+    const params: Record<string, unknown> = {
       depth: 0,
       draft: 'true',
-      page: undefined,
-      sort: undefined,
-      where: undefined,
+      page: overrides?.page,
+      sort: overrides?.sort,
+      where: overrides?.where,
       limit,
     };
 
     if (page) params.page = page;
     if (sort) params.sort = sort;
     if (where) params.where = where;
+    params.invoke = uuid();
 
+    setParams(params);
+  }, [limit, page, setParams, sort, where]);
+
+  useEffect(() => {
     // Performance enhancement
     // Setting the Fetch URL this way
     // prevents a double-fetch
     setFetchURL(`${serverURL}${api}/${slug}`);
-
-    setFetchParams(params);
-  }, [setFetchParams, page, sort, where, collection, limit, serverURL, api, slug]);
+    resetParams();
+  }, [api, resetParams, serverURL, slug]);
 
   // /////////////////////////////////////
   // Fetch preferences on first load
@@ -128,18 +134,41 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     })();
   }, [sort, limit, preferenceKey, setPreference, getPreference]);
 
+  // /////////////////////////////////////
+  // Prevent going beyond page limit
+  // /////////////////////////////////////
+
+  useEffect(() => {
+    if (data?.totalDocs && data.pagingCounter > data.totalDocs) {
+      const params = queryString.parse(history.location.search, {
+        ignoreQueryPrefix: true,
+        depth: 0,
+      });
+      const newSearchQuery = queryString.stringify({
+        ...params,
+        page: data.totalPages,
+      }, { addQueryPrefix: true });
+      history.replace({
+        search: newSearchQuery,
+      });
+    }
+  }, [data, history, resetParams]);
+
   return (
-    <RenderCustomComponent
-      DefaultComponent={DefaultList}
-      CustomComponent={CustomList}
-      componentProps={{
-        collection: { ...collection, fields },
-        newDocumentURL,
-        hasCreatePermission,
-        data,
-        limit: limit || defaultLimit,
-      }}
-    />
+    <TableColumnsProvider collection={collection}>
+      <RenderCustomComponent
+        DefaultComponent={DefaultList}
+        CustomComponent={CustomList}
+        componentProps={{
+          collection: { ...collection, fields },
+          newDocumentURL,
+          hasCreatePermission,
+          data,
+          limit: limit || defaultLimit,
+          resetParams,
+        }}
+      />
+    </TableColumnsProvider>
   );
 };
 

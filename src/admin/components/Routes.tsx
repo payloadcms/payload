@@ -14,7 +14,6 @@ import Version from './views/Version';
 import { DocumentInfoProvider } from './utilities/DocumentInfo';
 import { useLocale } from './utilities/Locale';
 import { LoadingOverlayToggle } from './elements/Loading';
-import { TableColumnsProvider } from './elements/TableColumns';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
@@ -189,12 +188,10 @@ const Routes = () => {
                                     render={(routeProps) => {
                                       if (permissions?.collections?.[collection.slug]?.read?.permission) {
                                         return (
-                                          <TableColumnsProvider collection={collection}>
-                                            <List
-                                              {...routeProps}
-                                              collection={collection}
-                                            />
-                                          </TableColumnsProvider>
+                                          <List
+                                            {...routeProps}
+                                            collection={collection}
+                                          />
                                         );
                                       }
 
@@ -276,10 +273,15 @@ const Routes = () => {
                                       render={(routeProps) => {
                                         if (permissions?.collections?.[collection.slug]?.readVersions?.permission) {
                                           return (
-                                            <Version
-                                              {...routeProps}
+                                            <DocumentInfoProvider
                                               collection={collection}
-                                            />
+                                              id={routeProps.match.params.id}
+                                            >
+                                              <Version
+                                                {...routeProps}
+                                                collection={collection}
+                                              />
+                                            </DocumentInfoProvider>
                                           );
                                         }
 

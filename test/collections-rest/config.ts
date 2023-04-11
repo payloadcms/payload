@@ -32,8 +32,32 @@ export const relationSlug = 'relation';
 export const pointSlug = 'point';
 export const customIdSlug = 'custom-id';
 export const customIdNumberSlug = 'custom-id-number';
+export const errorOnHookSlug = 'error-on-hooks';
 
 export default buildConfig({
+  endpoints: [
+    {
+      path: '/send-test-email',
+      method: 'get',
+      handler: async (req, res) => {
+        await req.payload.sendEmail({
+          from: 'dev@payloadcms.com',
+          to: devUser.email,
+          subject: 'Test Email',
+          html: 'This is a test email.',
+          // to recreate a failing email transport, add the following credentials
+          // to the `email` property of `payload.init()` in `../dev.ts`
+          // the app should fail to send the email, but the error should be handled without crashing the app
+          // transportOptions: {
+          //   host: 'smtp.ethereal.email',
+          //   port: 587,
+          // },
+        });
+
+        res.status(200).send('Email sent');
+      },
+    },
+  ],
   collections: [
     {
       slug,
@@ -121,6 +145,36 @@ export default buildConfig({
         {
           name: 'name',
           type: 'text',
+        },
+      ],
+    },
+    {
+      slug: errorOnHookSlug,
+      access: openAccess,
+      hooks: {
+        beforeChange: [({ originalDoc }) => {
+          if (originalDoc?.errorBeforeChange) {
+            throw new Error('Error Before Change Thrown');
+          }
+        }],
+        afterDelete: [({ doc }) => {
+          if (doc?.errorAfterDelete) {
+            throw new Error('Error After Delete Thrown');
+          }
+        }],
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'errorBeforeChange',
+          type: 'checkbox',
+        },
+        {
+          name: 'errorAfterDelete',
+          type: 'checkbox',
         },
       ],
     },

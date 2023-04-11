@@ -5,15 +5,8 @@ import crypto from 'crypto';
 import path from 'path';
 import mongoose from 'mongoose';
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import {
-  Collection,
-  CollectionModel,
-} from './collections/config/types';
-import {
-  SanitizedConfig,
-  EmailOptions,
-  InitOptions,
-} from './config/types';
+import { BulkOperationResult, Collection, CollectionModel } from './collections/config/types';
+import { EmailOptions, InitOptions, SanitizedConfig } from './config/types';
 import { TypeWithVersion } from './versions/types';
 import { PaginatedDocs } from './mongoose/types';
 
@@ -22,15 +15,23 @@ import { Globals } from './globals/config/types';
 import { ErrorHandler } from './express/middleware/errorHandler';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
-import { encrypt, decrypt } from './auth/crypto';
+import { decrypt, encrypt } from './auth/crypto';
 import { BuildEmailResult, Message } from './email/types';
 import { Preferences } from './preferences/types';
 
 import { Options as CreateOptions } from './collections/operations/local/create';
 import { Options as FindOptions } from './collections/operations/local/find';
+import {
+  ByIDOptions as UpdateByIDOptions,
+  ManyOptions as UpdateManyOptions,
+  Options as UpdateOptions,
+} from './collections/operations/local/update';
+import {
+  ByIDOptions as DeleteByIDOptions,
+  ManyOptions as DeleteManyOptions,
+  Options as DeleteOptions,
+} from './collections/operations/local/delete';
 import { Options as FindByIDOptions } from './collections/operations/local/findByID';
-import { Options as UpdateOptions } from './collections/operations/local/update';
-import { Options as DeleteOptions } from './collections/operations/local/delete';
 import { Options as FindVersionsOptions } from './collections/operations/local/findVersions';
 import { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID';
 import { Options as RestoreVersionOptions } from './collections/operations/local/restoreVersion';
@@ -249,22 +250,31 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   }
 
   /**
-   * @description Update document
+   * @description Update one or more documents
    * @param options
-   * @returns Updated document
+   * @returns Updated document(s)
    */
-  update = async <T extends keyof TGeneratedTypes['collections']>(
-    options: UpdateOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateByIDOptions<T>):Promise<TGeneratedTypes['collections'][T]>
+
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateManyOptions<T>):Promise<BulkOperationResult<T>>
+
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>):Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
     const { update } = localOperations;
     return update<T>(this, options);
   }
 
-  delete = async <T extends keyof TGeneratedTypes['collections']>(
-    options: DeleteOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
-    const { localDelete } = localOperations;
-    return localDelete<T>(this, options);
+  /**
+   * @description delete one or more documents
+   * @param options
+   * @returns Updated document(s)
+   */
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteByIDOptions<T>):Promise<TGeneratedTypes['collections'][T]>
+
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteManyOptions<T>):Promise<BulkOperationResult<T>>
+
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>):Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
+    const { deleteLocal } = localOperations;
+    return deleteLocal<T>(this, options);
   }
 
   /**

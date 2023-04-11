@@ -142,9 +142,22 @@ export default buildConfig({
     {
       slug: relationWithTitleSlug,
       admin: {
-        useAsTitle: 'name',
+        useAsTitle: 'meta.title',
       },
-      fields: baseRelationshipFields,
+      fields: [
+        ...baseRelationshipFields,
+        {
+          name: 'meta',
+          type: 'group',
+          fields: [
+            {
+              name: 'title',
+              label: 'Meta Title',
+              type: 'text',
+            },
+          ],
+        },
+      ],
     },
     {
       slug: relationUpdatedExternallySlug,
@@ -297,6 +310,9 @@ export default buildConfig({
         collection: relationWithTitleSlug,
         data: {
           name: title,
+          meta: {
+            title,
+          },
         },
       });
       relationsWithTitle.push(id);

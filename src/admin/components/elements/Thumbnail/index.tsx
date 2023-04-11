@@ -15,6 +15,7 @@ const Thumbnail: React.FC<Props> = (props) => {
     },
     collection,
     size,
+    className = '',
   } = props;
 
   const thumbnailSRC = useThumbnail(collection, doc);
@@ -22,6 +23,7 @@ const Thumbnail: React.FC<Props> = (props) => {
   const classes = [
     baseClass,
     `${baseClass}--size-${size || 'medium'}`,
+    className,
   ].join(' ');
 
   return (

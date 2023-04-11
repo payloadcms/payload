@@ -21,8 +21,8 @@ const Tabs: React.FC<Props & { field: TabsField }> = ({
           return (
             <Nested
               key={i}
-              version={version[tab.name]}
-              comparison={comparison[tab.name]}
+              version={version?.[tab.name]}
+              comparison={comparison?.[tab.name]}
               permissions={permissions}
               field={tab}
               locales={locales}

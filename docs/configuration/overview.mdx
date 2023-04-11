@@ -104,6 +104,8 @@ require('dotenv').config()
 // the rest of your `server.js` file goes here
 ```
 
+Note that if you rely on any environment variables in your config itself, you should also call `dotenv()` at the top of your config itself as well. There's no harm in calling it in both your server and your config itself!
+
 **Here is an example project structure w/ `dotenv` and an `.env` file:**
 
 ```

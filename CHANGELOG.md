@@ -1,5 +1,93 @@
 
 
+## [1.6.32](https://github.com/payloadcms/payload/compare/v1.6.31...v1.6.32) (2023-04-05)
+
+
+### Features
+
+* only uses sharp if required ([f9f6ec4](https://github.com/payloadcms/payload/commit/f9f6ec47d9a4f9ed94b7f7a4d50f13a8ee881ad0))
+
+## [1.6.31](https://github.com/payloadcms/payload/compare/v1.6.30...v1.6.31) (2023-04-04)
+
+
+### Bug Fixes
+
+* ensures select hasMany does not get mutated on patch operations ([3a6acf3](https://github.com/payloadcms/payload/commit/3a6acf322b5546ca3cd1d4dcb093af6e3b6ed086))
+
+
+### Features
+
+* improves required type accuracy ([a9cd23a](https://github.com/payloadcms/payload/commit/a9cd23a883d89c8deb3c1b5386decd50516d69fd))
+
+## [1.6.30](https://github.com/payloadcms/payload/compare/v1.6.29...v1.6.30) (2023-04-03)
+
+
+### Bug Fixes
+
+* incorrect type local api using delete with where ([de5ceb2](https://github.com/payloadcms/payload/commit/de5ceb2aca624f702ea39556ffe2f689701615c1))
+* originalDoc being mutated in beforeChange field hooks ([888bbf2](https://github.com/payloadcms/payload/commit/888bbf28e0b793a2298e27a7e1df235d78b0a718))
+
+## [1.6.29](https://github.com/payloadcms/payload/compare/v1.6.28...v1.6.29) (2023-03-31)
+
+
+### Bug Fixes
+
+* update and delete local API return types ([#2434](https://github.com/payloadcms/payload/issues/2434)) ([02410a0](https://github.com/payloadcms/payload/commit/02410a0be38004b90d19207071569294fd104a66))
+
+## [1.6.28](https://github.com/payloadcms/payload/compare/v1.6.27...v1.6.28) (2023-03-28)
+
+
+### Bug Fixes
+
+* potential memory leak with `probe-image-size` ([8eea0d6](https://github.com/payloadcms/payload/commit/8eea0d6cf41dd6360d713f463ad1b48ba253a9e7))
+
+## [1.6.27](https://github.com/payloadcms/payload/compare/v1.6.26...v1.6.27) (2023-03-27)
+
+
+### Bug Fixes
+
+* [#2355](https://github.com/payloadcms/payload/issues/2355), select field not fully visible on small screens in certain scenarios ([07eb8dd](https://github.com/payloadcms/payload/commit/07eb8dd7d252043c00b79d532736896134204c4c))
+* [#2384](https://github.com/payloadcms/payload/issues/2384), preserves manually set verified from admin UI ([72a8b1e](https://github.com/payloadcms/payload/commit/72a8b1eebe6c3b45663a14fa7488772ad13f975d))
+* hide fields with admin.hidden attribute ([ad25b09](https://github.com/payloadcms/payload/commit/ad25b096b6efa7e0cba647e82e29e36f7a95934a))
+* make update typing a deep partial ([#2407](https://github.com/payloadcms/payload/issues/2407)) ([e8dc7d4](https://github.com/payloadcms/payload/commit/e8dc7d462e21d1021275a95fbf62094f290e37ce))
+* restoring version did not correctly create new version from result ([6ca12b1](https://github.com/payloadcms/payload/commit/6ca12b1cc06554b04f3055df8f01d7eee1c09169))
+* textarea field overlap in UI ([1c8cf24](https://github.com/payloadcms/payload/commit/1c8cf24ba623746c160007d7c09b3160f2aae8d3))
+
+## [1.6.25](https://github.com/payloadcms/payload/compare/v1.6.24...v1.6.25) (2023-03-24)
+
+
+### Bug Fixes
+
+* upload field select existing file ([#2392](https://github.com/payloadcms/payload/issues/2392)) ([38e917a](https://github.com/payloadcms/payload/commit/38e917a3dfa70ac3234915a6c8f7424eb22cb000))
+
+## [1.6.24](https://github.com/payloadcms/payload/compare/v1.6.23...v1.6.24) (2023-03-23)
+
+
+### Features
+
+* bulk-operations ([#2346](https://github.com/payloadcms/payload/issues/2346)) ([0fedbab](https://github.com/payloadcms/payload/commit/0fedbabe9e975f375dc12447fcdab4119bc6a4c4))
+
+## [1.6.23](https://github.com/payloadcms/payload/compare/v1.6.22...v1.6.23) (2023-03-22)
+
+
+### Bug Fixes
+
+* [#2315](https://github.com/payloadcms/payload/issues/2315) - deleting files if overwriteExistingFiles is true ([4d578f1](https://github.com/payloadcms/payload/commit/4d578f1bfd05efab5cc8db95895eabb776b2d9d1))
+* [#2363](https://github.com/payloadcms/payload/issues/2363) version tabs and select field comparisons ([#2364](https://github.com/payloadcms/payload/issues/2364)) ([21b8da7](https://github.com/payloadcms/payload/commit/21b8da7f415cdace9f7d5898c98f9c7a6bb39107))
+* allows base64 thumbnails ([#2361](https://github.com/payloadcms/payload/issues/2361)) ([e09ebff](https://github.com/payloadcms/payload/commit/e09ebfffa0a7a7fdb3469f272de0e6930d97a336))
+* DateField admin type ([#2256](https://github.com/payloadcms/payload/issues/2256)) ([fb2fd3e](https://github.com/payloadcms/payload/commit/fb2fd3e9b7e302d8069bfcb6f3cb698ac7abf0ca))
+* fallback to default locale showing on non-localized fields ([#2316](https://github.com/payloadcms/payload/issues/2316)) ([e1a6e08](https://github.com/payloadcms/payload/commit/e1a6e08aa140cf21597d6009b811f7fdd2106f4f))
+* Fix missing Spanish translations ([#2372](https://github.com/payloadcms/payload/issues/2372)) ([c0ff75c](https://github.com/payloadcms/payload/commit/c0ff75c1647a36219549e20fc081883f8cf1d7e4))
+* relationship field useAsTitle [#2333](https://github.com/payloadcms/payload/issues/2333) ([#2350](https://github.com/payloadcms/payload/issues/2350)) ([10dd819](https://github.com/payloadcms/payload/commit/10dd819863ecac4a5cea2e13f820df2224ac57f4))
+
+
+### Features
+
+* adds title attribute to ThumbnailCard ([#2368](https://github.com/payloadcms/payload/issues/2368)) ([a8766d0](https://github.com/payloadcms/payload/commit/a8766d00a8365c8e6ffe507944fbe49aaa39d4bd))
+* exposes defaultSort property for collection list view ([#2382](https://github.com/payloadcms/payload/issues/2382)) ([1f480c4](https://github.com/payloadcms/payload/commit/1f480c4cd5673a6fe08360183fe1c7c1d4e05de0))
+
+## [1.6.22](https://github.com/payloadcms/payload/compare/v1.6.21...v1.6.22) (2023-03-15)
+
 ## [1.6.21](https://github.com/payloadcms/payload/compare/v1.6.20...v1.6.21) (2023-03-15)
 
 
