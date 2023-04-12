@@ -1,10 +1,11 @@
 import pino from 'pino';
 import type { Express, Router } from 'express';
-import { GraphQLError, GraphQLFormattedError, GraphQLSchema } from 'graphql';
+import { GraphQLSchema, ValidationRule } from 'graphql';
 import crypto from 'crypto';
 import path from 'path';
 import mongoose from 'mongoose';
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { OperationArgs } from 'graphql-http/lib/handler';
 import { BulkOperationResult, Collection, CollectionModel } from './collections/config/types';
 import { EmailOptions, InitOptions, SanitizedConfig } from './config/types';
 import { TypeWithVersion } from './versions/types';
@@ -124,13 +125,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   extensions: (info: any) => Promise<any>;
 
-  customFormatErrorFn: (error: GraphQLError) => GraphQLFormattedError;
-
-  validationRules: any;
-
-  errorResponses: GraphQLFormattedError[] = [];
-
-  errorIndex: number;
+  validationRules: (args: OperationArgs<any>) => ValidationRule[];
 
   getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`;
 

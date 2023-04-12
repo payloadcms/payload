@@ -10,7 +10,6 @@ import initGlobals from '../globals/graphql/init';
 import initPreferences from '../preferences/graphql/init';
 import buildPoliciesType from './schema/buildPoliciesType';
 import accessResolver from '../auth/graphql/resolvers/access';
-import errorHandler from './errorHandler';
 
 export default function registerSchema(payload: Payload): void {
   payload.types = {
@@ -73,26 +72,6 @@ export default function registerSchema(payload: Payload): void {
   };
 
   payload.schema = new GraphQLSchema(schema);
-
-  payload.extensions = async (info) => {
-    const { result } = info;
-    if (result.errors) {
-      payload.errorIndex = 0;
-      const afterErrorHook = typeof payload.config.hooks.afterError === 'function' ? payload.config.hooks.afterError : null;
-      payload.errorResponses = await errorHandler(payload, info, payload.config.debug, afterErrorHook);
-    }
-    return null;
-  };
-
-  payload.customFormatErrorFn = (error) => {
-    if (payload.errorResponses && payload.errorResponses[payload.errorIndex]) {
-      const response = payload.errorResponses[payload.errorIndex];
-      payload.errorIndex += 1;
-      return response;
-    }
-
-    return error;
-  };
 
   payload.validationRules = (variables) => ([
     queryComplexity({
