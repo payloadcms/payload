@@ -161,7 +161,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       throw new Error('Error: missing MongoDB connection URL.');
     }
 
-    this.emailOptions = { ...(options.email) };
     this.secret = crypto
       .createHash('sha256')
       .update(options.secret)
@@ -189,6 +188,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     }
 
     // Configure email service
+    this.emailOptions = options.email ? { ...(options.email) } : this.config.email;
     this.email = buildEmail(this.emailOptions, this.logger);
     this.sendEmail = sendEmail.bind(this);
 
