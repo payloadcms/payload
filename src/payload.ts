@@ -1,11 +1,11 @@
 import pino from 'pino';
 import type { Express, Router } from 'express';
-import { GraphQLSchema, ValidationRule } from 'graphql';
+import { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql';
 import crypto from 'crypto';
 import path from 'path';
 import mongoose from 'mongoose';
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { OperationArgs } from 'graphql-http/lib/handler';
+import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
 import { BulkOperationResult, Collection, CollectionModel } from './collections/config/types';
 import { EmailOptions, InitOptions, SanitizedConfig } from './config/types';
 import { TypeWithVersion } from './versions/types';
@@ -123,7 +123,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   schema: GraphQLSchema;
 
-  extensions: (info: any) => Promise<any>;
+  extensions: (args: {
+    req: graphQLRequest<unknown, unknown>,
+    args: OperationArgs<any>,
+    result: ExecutionResult
+  }) => Promise<any>;
 
   validationRules: (args: OperationArgs<any>) => ValidationRule[];
 

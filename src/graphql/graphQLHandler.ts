@@ -13,17 +13,22 @@ const graphQLHandler = (req: PayloadRequest, res: Response) => {
     {
       schema: payload.schema,
       onOperation: async (request, args, result) => {
-        if (result.errors) {
+        const response = typeof payload.extensions === 'function' ? await payload.extensions({
+          req: request,
+          args,
+          result,
+        }) : result;
+        if (response.errors) {
           const errors = await Promise.all(result.errors.map((error) => {
             return errorHandler(payload, error, payload.config.debug, afterErrorHook);
           })) as GraphQLError[];
           // errors type should be FormattedGraphQLError[] but onOperation has a return type of ExecutionResult instead of FormattedExecutionResult
-          return { ...result, errors };
+          return { ...response, errors };
         }
-        return result;
+        return response;
       },
       context: { req, res },
-      validationRules: (request, variables, defaultRules) => defaultRules.concat(payload.validationRules(variables)),
+      validationRules: (request, args, defaultRules) => defaultRules.concat(payload.validationRules(args)),
     },
   );
 };
