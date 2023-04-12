@@ -27,11 +27,23 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
   const { t, i18n } = useTranslation('fields');
 
   useEffect(() => {
-    const matchingBlocks = blocks.reduce((matchedBlocks, block) => {
-      if (block.slug.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) matchedBlocks.push(block);
-      return matchedBlocks;
-    }, []);
-
+    const searchText = searchTerm.toLowerCase();
+    const matchingBlocks = blocks.filter((block) => {
+      const slugMatch = block.slug.toLowerCase().includes(searchText);
+      const labelMatch = Object.values(block.labels).some((label) => {
+        if (typeof label === "string") {
+          return label.toLowerCase().includes(searchText);
+        }
+        if (typeof label === "object") {
+          return Object.values(label).some((value) =>
+            value.toLowerCase().includes(searchText)
+          );
+        }
+        return false;
+      });
+      return slugMatch || labelMatch;
+    });
+    
     setFilteredBlocks(matchingBlocks);
   }, [searchTerm, blocks]);
 
