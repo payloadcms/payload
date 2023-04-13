@@ -18,7 +18,7 @@ This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepic
 | Option             | Description                                                                                                                                                                                         |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
-| **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                                    |
+| **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
 | **`index`**        | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
 | **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
@@ -28,7 +28,7 @@ This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepic
 | **`defaultValue`** | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                                |
 | **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
 | **`required`**     | Require this field to have a value.                                                                                                                                                                 |
-| **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                                  |
+| **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                           |
 
 _\* An asterisk denotes that a property is required._
 
@@ -36,19 +36,19 @@ _\* An asterisk denotes that a property is required._
 
 In addition to the default [field admin config](/docs/fields/overview#admin-config), you can customize the following fields that will adjust how the component displays in the admin panel via the `date` property.
 
-| Property               |  Option                    | Description                                                                                                                             |
-| ---------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| **`placeholder`**      |                            | Placeholder text for the field.                                                                                                         |
-| **`date`**             |                            | Pass options to customize date field appearance.                                                                                        |
-|                        | **`displayFormat`**        | Format date to be shown in field **cell**.                 |
-|                        | **`pickerAppearance`** \*  | Determines the appearance of the datepicker: `dayAndTime` `timeOnly` `dayOnly` `monthOnly`.                                             |
-|                        | **`monthsToShow`**     \*  | Number of months to display max is 2. Defaults to 1.                                                                                    |
-|                        | **`minDate`**          \*  | Min date value to allow.                               |
-|                        | **`maxDate`**          \*  | Max date value to allow.                               |
-|                        | **`minTime`**          \*  | Min time value to allow.                               |
-|                        | **`maxTime`**          \*  | Max date value to allow.                               |
-|                        | **`timeIntervals`**    \*  | Time intervals to display. Defaults to 30 minutes.     |
-|                        | **`timeFormat`**       \*  | Determines time format. Defaults to `'h:mm aa'`.       |
+| Property                       | Description                                                                                 |
+| ------------------------------ | ------------------------------------------------------------------------------------------- |
+| **`placeholder`**              | Placeholder text for the field.                                                             |
+| **`date`**                     | Pass options to customize date field appearance.                                            |
+| **`date.displayFormat`**       | Format date to be shown in field **cell**.                                                  |
+| **`date.pickerAppearance`** \* | Determines the appearance of the datepicker: `dayAndTime` `timeOnly` `dayOnly` `monthOnly`. |
+| **`date.monthsToShow`** \*     | Number of months to display max is 2. Defaults to 1.                                        |
+| **`date.minDate`** \*          | Min date value to allow.                                                                    |
+| **`date.maxDate`** \*          | Max date value to allow.                                                                    |
+| **`date.minTime`** \*          | Min time value to allow.                                                                    |
+| **`date.maxTime`** \*          | Max date value to allow.                                                                    |
+| **`date.timeIntervals`** \*    | Time intervals to display. Defaults to 30 minutes.                                          |
+| **`date.timeFormat`** \*       | Determines time format. Defaults to `'h:mm aa'`.                                            |
 
 _\* This property is passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md). ._
 
@@ -60,48 +60,48 @@ These properties only affect how the date is displayed in the UI. The full date 
 
 `pickerAppearance` sets the appearance of the **react datepicker**, the options available are `dayAndTime`, `dayOnly`, `timeOnly`, and `monthOnly`. By default, the datepicker will display `dayOnly`.
 
-When only `pickerAppearance`, an equivalent format will be rendered in the date field cell. To overwrite this format, set `displayFormat`.
+When only `pickerAppearance` is set, an equivalent format will be rendered in the date field cell. To overwrite this format, set `displayFormat`.
 
 ### Example
 
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from "payload/types";
 
 const ExampleCollection: CollectionConfig = {
-  slug: 'example-collection',
+  slug: "example-collection",
   fields: [
-      {
-      name: 'dateOnly',
-      type: 'date',
+    {
+      name: "dateOnly",
+      type: "date",
       admin: {
         date: {
-          pickerAppearance: 'dayOnly',
-          displayFormat: 'd MMM yyy',
+          pickerAppearance: "dayOnly",
+          displayFormat: "d MMM yyy",
         },
       },
     },
     {
-      name: 'timeOnly',
-      type: 'date',
+      name: "timeOnly",
+      type: "date",
       admin: {
         date: {
-          pickerAppearance: 'timeOnly',
-          displayFormat: 'h:mm:ss a',
+          pickerAppearance: "timeOnly",
+          displayFormat: "h:mm:ss a",
         },
       },
     },
     {
-      name: 'monthOnly',
-      type: 'date',
+      name: "monthOnly",
+      type: "date",
       admin: {
         date: {
-          pickerAppearance: 'monthOnly',
-          displayFormat: 'MMMM yyyy',
+          pickerAppearance: "monthOnly",
+          displayFormat: "MMMM yyyy",
         },
       },
     },
-  ]
+  ],
 };
 ```

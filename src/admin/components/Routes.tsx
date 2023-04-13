@@ -273,10 +273,15 @@ const Routes = () => {
                                       render={(routeProps) => {
                                         if (permissions?.collections?.[collection.slug]?.readVersions?.permission) {
                                           return (
-                                            <Version
-                                              {...routeProps}
+                                            <DocumentInfoProvider
                                               collection={collection}
-                                            />
+                                              id={routeProps.match.params.id}
+                                            >
+                                              <Version
+                                                {...routeProps}
+                                                collection={collection}
+                                              />
+                                            </DocumentInfoProvider>
                                           );
                                         }
 
