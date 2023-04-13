@@ -2,6 +2,7 @@ import React from 'react';
 import { Document, Model } from 'mongoose';
 import { DeepRequired } from 'ts-essentials';
 import { GraphQLNonNull, GraphQLObjectType } from 'graphql';
+import { User } from '../../auth/types';
 import { PayloadRequest } from '../../express/types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
@@ -49,7 +50,7 @@ export type GlobalAdminOptions = {
   /**
    * Exclude the global from the admin nav and routes
    */
-  hidden?: boolean;
+  hidden?: ((args: { user: User }) => boolean) | boolean;
   /**
    * Place globals into a navigational group
    * */

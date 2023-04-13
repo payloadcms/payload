@@ -71,7 +71,7 @@ export default buildConfig({
     {
       slug: 'hidden-collection',
       admin: {
-        hidden: true,
+        hidden: () => true,
       },
       fields: [
         {
@@ -191,7 +191,7 @@ export default buildConfig({
     {
       slug: 'hidden-global',
       admin: {
-        hidden: true,
+        hidden: () => true,
       },
       fields: [
         {

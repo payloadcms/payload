@@ -177,7 +177,7 @@ const Routes = () => {
                               </Route>
 
                               {collections
-                                .filter((collection) => !collection.admin.hidden)
+                                .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
                                 .reduce((collectionRoutes, collection) => {
                                   const routesToReturn = [
                                     ...collectionRoutes,
@@ -295,7 +295,7 @@ const Routes = () => {
                                 }, [])}
 
                               {globals && globals
-                                .filter((global) => !global.admin.hidden)
+                                .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
                                 .reduce((globalRoutes, global) => {
                                   const routesToReturn = [
                                     ...globalRoutes,

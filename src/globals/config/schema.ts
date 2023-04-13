@@ -9,7 +9,10 @@ const globalSchema = joi.object().keys({
     joi.object().pattern(joi.string(), [joi.string()]),
   ),
   admin: joi.object({
-    hidden: joi.boolean(),
+    hidden: joi.alternatives().try(
+      joi.boolean(),
+      joi.func(),
+    ),
     group: joi.alternatives().try(
       joi.string(),
       joi.object().pattern(joi.string(), [joi.string()]),

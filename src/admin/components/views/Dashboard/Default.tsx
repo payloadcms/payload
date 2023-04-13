@@ -20,6 +20,7 @@ const Dashboard: React.FC<Props> = (props) => {
     collections,
     globals,
     permissions,
+    user,
   } = props;
 
   const { push } = useHistory();
@@ -41,7 +42,8 @@ const Dashboard: React.FC<Props> = (props) => {
 
   useEffect(() => {
     setGroups(groupNavItems([
-      ...collections.filter((collection) => !collection.admin.hidden)
+      ...collections
+        .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
         .map((collection) => {
           const entityToGroup: EntityToGroup = {
             type: EntityType.collection,
@@ -50,7 +52,8 @@ const Dashboard: React.FC<Props> = (props) => {
 
           return entityToGroup;
         }),
-      ...globals.filter((global) => !global.admin.hidden)
+      ...globals
+        .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
         .map((global) => {
           const entityToGroup: EntityToGroup = {
             type: EntityType.global,
@@ -60,7 +63,7 @@ const Dashboard: React.FC<Props> = (props) => {
           return entityToGroup;
         }),
     ], permissions, i18n));
-  }, [collections, globals, i18n, permissions]);
+  }, [collections, globals, i18n, permissions, user]);
 
   return (
     <div className={baseClass}>

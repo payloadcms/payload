@@ -20,7 +20,7 @@ import './index.scss';
 const baseClass = 'nav';
 
 const DefaultNav = () => {
-  const { permissions } = useAuth();
+  const { permissions, user } = useAuth();
   const [menuActive, setMenuActive] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const history = useHistory();
@@ -47,7 +47,8 @@ const DefaultNav = () => {
 
   useEffect(() => {
     setGroups(groupNavItems([
-      ...collections.filter((collection) => !collection.admin.hidden)
+      ...collections
+        .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
         .map((collection) => {
           const entityToGroup: EntityToGroup = {
             type: EntityType.collection,
@@ -56,7 +57,8 @@ const DefaultNav = () => {
 
           return entityToGroup;
         }),
-      ...globals.filter((global) => !global.admin.hidden)
+      ...globals
+        .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
         .map((global) => {
           const entityToGroup: EntityToGroup = {
             type: EntityType.global,
@@ -66,7 +68,7 @@ const DefaultNav = () => {
           return entityToGroup;
         }),
     ], permissions, i18n));
-  }, [collections, globals, permissions, i18n, i18n.language]);
+  }, [collections, globals, permissions, i18n, i18n.language, user]);
 
   useEffect(() => history.listen(() => {
     setMenuActive(false);
