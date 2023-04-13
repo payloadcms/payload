@@ -3,7 +3,8 @@
 .field-type.textarea {
   position: relative;
   margin-bottom: $baseline;
-  padding-bottom: base(2.5);
+  display: flex;
+  flex-direction: column;
 
   .textarea-outer {
     @include formInput();
