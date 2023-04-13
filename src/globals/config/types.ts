@@ -1,5 +1,5 @@
 import React from 'react';
-import { Model, Document } from 'mongoose';
+import { Document, Model } from 'mongoose';
 import { DeepRequired } from 'ts-essentials';
 import { GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { PayloadRequest } from '../../express/types';
@@ -46,6 +46,10 @@ export interface GlobalModel extends Model<Document> {
 }
 
 export type GlobalAdminOptions = {
+  /**
+   * Exclude the global from the admin nav and routes
+   */
+  hidden?: boolean;
   /**
    * Place globals into a navigational group
    * */

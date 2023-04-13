@@ -8,7 +8,7 @@ import Card from '../../elements/Card';
 import Button from '../../elements/Button';
 import { Props } from './types';
 import { Gutter } from '../../elements/Gutter';
-import { groupNavItems, Group, EntityToGroup, EntityType } from '../../../utilities/groupNavItems';
+import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems';
 import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
@@ -41,22 +41,24 @@ const Dashboard: React.FC<Props> = (props) => {
 
   useEffect(() => {
     setGroups(groupNavItems([
-      ...collections.map((collection) => {
-        const entityToGroup: EntityToGroup = {
-          type: EntityType.collection,
-          entity: collection,
-        };
+      ...collections.filter((collection) => !collection.admin.hidden)
+        .map((collection) => {
+          const entityToGroup: EntityToGroup = {
+            type: EntityType.collection,
+            entity: collection,
+          };
 
-        return entityToGroup;
-      }),
-      ...globals.map((global) => {
-        const entityToGroup: EntityToGroup = {
-          type: EntityType.global,
-          entity: global,
-        };
+          return entityToGroup;
+        }),
+      ...globals.filter((global) => !global.admin.hidden)
+        .map((global) => {
+          const entityToGroup: EntityToGroup = {
+            type: EntityType.global,
+            entity: global,
+          };
 
-        return entityToGroup;
-      }),
+          return entityToGroup;
+        }),
     ], permissions, i18n));
   }, [collections, globals, i18n, permissions]);
 

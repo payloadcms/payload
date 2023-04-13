@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink, Link, useHistory } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, NavLink, useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
@@ -12,7 +12,7 @@ import Account from '../../graphics/Account';
 import Localizer from '../Localizer';
 import NavGroup from '../NavGroup';
 import Logout from '../Logout';
-import { groupNavItems, Group, EntityToGroup, EntityType } from '../../../utilities/groupNavItems';
+import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems';
 import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
@@ -47,22 +47,24 @@ const DefaultNav = () => {
 
   useEffect(() => {
     setGroups(groupNavItems([
-      ...collections.map((collection) => {
-        const entityToGroup: EntityToGroup = {
-          type: EntityType.collection,
-          entity: collection,
-        };
+      ...collections.filter((collection) => !collection.admin.hidden)
+        .map((collection) => {
+          const entityToGroup: EntityToGroup = {
+            type: EntityType.collection,
+            entity: collection,
+          };
 
-        return entityToGroup;
-      }),
-      ...globals.map((global) => {
-        const entityToGroup: EntityToGroup = {
-          type: EntityType.global,
-          entity: global,
-        };
+          return entityToGroup;
+        }),
+      ...globals.filter((global) => !global.admin.hidden)
+        .map((global) => {
+          const entityToGroup: EntityToGroup = {
+            type: EntityType.global,
+            entity: global,
+          };
 
-        return entityToGroup;
-      }),
+          return entityToGroup;
+        }),
     ], permissions, i18n));
   }, [collections, globals, permissions, i18n, i18n.language]);
 

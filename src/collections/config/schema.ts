@@ -38,6 +38,7 @@ const collectionSchema = joi.object().keys({
   }),
   timestamps: joi.boolean(),
   admin: joi.object({
+    hidden: joi.boolean(),
     useAsTitle: joi.string(),
     defaultColumns: joi.array().items(joi.string()),
     listSearchableFields: joi.array().items(joi.string()),

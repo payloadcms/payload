@@ -154,6 +154,10 @@ export type BeforeDuplicate<T = any> = (args: BeforeDuplicateArgs<T>) => T | Pro
 
 export type CollectionAdminOptions = {
   /**
+   * Exclude the collection from the admin nav and routes
+   */
+  hidden?: boolean;
+  /**
    * Field to use as title in Edit view and first column in List view
    */
   useAsTitle?: string;
