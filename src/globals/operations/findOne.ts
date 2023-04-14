@@ -40,16 +40,14 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
   // Retrieve and execute access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {
-    where: {
-      and: [
-        {
-          globalType: {
-            equals: slug,
-          },
+  const queryToBuild: Where = {
+    and: [
+      {
+        globalType: {
+          equals: slug,
         },
-      ],
-    },
+      },
+    ],
   };
 
   let accessResult: AccessResult;
@@ -58,11 +56,15 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     accessResult = await executeAccess({ req }, globalConfig.access.read);
 
     if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.where.and.push(accessResult);
+      queryToBuild.and.push(accessResult);
     }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    where: queryToBuild,
+    req,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Perform database operation
@@ -91,7 +93,8 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
       entity: globalConfig,
       entityType: 'global',
       doc,
-      locale,
+      req,
+      overrideAccess,
       accessResult,
     });
   }

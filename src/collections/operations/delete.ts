@@ -74,21 +74,19 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {
-    where: {
-      and: [],
-    },
+  let queryToBuild: Where = {
+    and: [],
   };
 
   if (where) {
-    queryToBuild.where = {
+    queryToBuild = {
       and: [],
       ...where,
     };
 
     if (Array.isArray(where.AND)) {
-      queryToBuild.where.and = [
-        ...queryToBuild.where.and,
+      queryToBuild.and = [
+        ...queryToBuild.and,
         ...where.AND,
       ];
     }
@@ -100,11 +98,15 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     accessResult = await executeAccess({ req }, collectionConfig.access.delete);
 
     if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.where.and.push(accessResult);
+      queryToBuild.and.push(accessResult);
     }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    where: queryToBuild,
+    req,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Retrieve documents

@@ -7,6 +7,7 @@ import { CollectionModel } from '../collections/config/types';
 import { getSchemaTypeOptions } from './getSchemaTypeOptions';
 import { operatorMap } from './operatorMap';
 import { sanitizeQueryValue } from './sanitizeFormattedValue';
+import { PayloadRequest, Where } from '../types';
 
 const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
 
@@ -35,11 +36,19 @@ type SearchParam = {
 }
 
 class ParamParser {
-  locale: string;
+  collectionSlug?: string
 
-  queryHiddenFields: boolean
+  globalSlug?: string
 
-  rawParams: any;
+  isGlobalModel?: boolean
+
+  isVersionsModel?: boolean
+
+  overrideAccess: boolean
+
+  req: PayloadRequest
+
+  where: Where;
 
   model: any;
 
@@ -50,12 +59,25 @@ class ParamParser {
     sort: boolean;
   };
 
-  constructor(model, rawParams, locale: string, queryHiddenFields?: boolean) {
+  constructor({
+    req,
+    collectionSlug,
+    globalSlug,
+    isGlobalModel,
+    isVersionsModel,
+    model,
+    where,
+    overrideAccess,
+  }) {
+    this.req = req;
+    this.collectionSlug = collectionSlug;
+    this.globalSlug = globalSlug;
+    this.isGlobalModel = isGlobalModel;
+    this.isVersionsModel = isVersionsModel;
     this.parse = this.parse.bind(this);
     this.model = model;
-    this.rawParams = rawParams;
-    this.locale = locale;
-    this.queryHiddenFields = queryHiddenFields;
+    this.where = where;
+    this.overrideAccess = overrideAccess;
     this.query = {
       searchParams: {},
       sort: false,
@@ -65,14 +87,8 @@ class ParamParser {
   // Entry point to the ParamParser class
 
   async parse(): Promise<ParseType> {
-    if (typeof this.rawParams === 'object') {
-      for (const key of Object.keys(this.rawParams)) {
-        if (key === 'where') {
-          this.query.searchParams = await this.parsePathOrRelation(this.rawParams.where);
-        } else if (key === 'sort') {
-          this.query.sort = this.rawParams[key];
-        }
-      }
+    if (typeof this.where === 'object') {
+      this.query.searchParams = await this.parsePathOrRelation(this.where);
       return this.query;
     }
     return {};
@@ -174,7 +190,7 @@ class ParamParser {
             return true;
           }
 
-          const localePath = `${currentPath}.${this.locale}`;
+          const localePath = `${currentPath}.${this.req.locale}`;
           const localizedSchemaType = schema.path(localePath);
 
           if (localizedSchemaType || operator === 'near') {
@@ -231,7 +247,7 @@ class ParamParser {
       const schemaOptions = getSchemaTypeOptions(schemaType);
       const formattedValue = sanitizeQueryValue(schemaType, path, operator, val);
 
-      if (!this.queryHiddenFields && (['salt', 'hash'].includes(path) || schemaType?.options?.hidden)) {
+      if (!this.overrideAccess && (['salt', 'hash'].includes(path) || schemaType?.options?.hidden)) {
         return undefined;
       }
 
@@ -258,7 +274,9 @@ class ParamParser {
                   [operator]: val,
                 },
               },
-            }, this.locale);
+              req: this.req,
+              overrideAccess: this.overrideAccess,
+            });
 
             const result = await SubModel.find(subQuery, subQueryOptions);
 
@@ -360,15 +378,46 @@ class ParamParser {
     return undefined;
   }
 }
+
+type GetBuildQueryPluginArgs = {
+  collectionSlug?: string
+  globalSlug?: string
+  isGlobalModel?: boolean
+  isVersionsModel?: boolean
+}
+
+export type BuildQueryArgs = {
+  req: PayloadRequest
+  where: Where
+  overrideAccess: boolean
+}
+
 // This plugin asynchronously builds a list of Mongoose query constraints
 // which can then be used in subsequent Mongoose queries.
-function buildQueryPlugin(schema) {
-  const modifiedSchema = schema;
-  async function buildQuery(rawParams, locale, queryHiddenFields = false) {
-    const paramParser = new ParamParser(this, rawParams, locale, queryHiddenFields);
-    const params = await paramParser.parse();
-    return params.searchParams;
-  }
-  modifiedSchema.statics.buildQuery = buildQuery;
-}
-export default buildQueryPlugin;
+const getBuildQueryPlugin = ({
+  collectionSlug,
+  globalSlug,
+  isGlobalModel,
+  isVersionsModel,
+}: GetBuildQueryPluginArgs) => {
+  return function buildQueryPlugin(schema) {
+    const modifiedSchema = schema;
+    async function buildQuery({ req, where, overrideAccess = false }: BuildQueryArgs) {
+      const paramParser = new ParamParser({
+        req,
+        collectionSlug,
+        globalSlug,
+        isGlobalModel,
+        isVersionsModel,
+        model: this,
+        where,
+        overrideAccess,
+      });
+      const params = await paramParser.parse();
+      return params.searchParams;
+    }
+    modifiedSchema.statics.buildQuery = buildQuery;
+  };
+};
+
+export default getBuildQueryPlugin;

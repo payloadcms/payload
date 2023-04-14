@@ -24,7 +24,6 @@ export type Arguments = {
   disableErrors?: boolean
   pagination?: boolean
   showHiddenFields?: boolean
-  queryHiddenFields?: boolean
   draft?: boolean
 }
 
@@ -66,7 +65,6 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     overrideAccess,
     disableErrors,
     showHiddenFields,
-    queryHiddenFields,
     pagination = true,
   } = args;
 
@@ -74,23 +72,21 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {
-    where: {
-      and: [],
-    },
+  let queryToBuild: Where = {
+    and: [],
   };
 
   let useEstimatedCount = false;
 
   if (where) {
-    queryToBuild.where = {
+    queryToBuild = {
       and: [],
       ...where,
     };
 
     if (Array.isArray(where.AND)) {
-      queryToBuild.where.and = [
-        ...queryToBuild.where.and,
+      queryToBuild.and = [
+        ...queryToBuild.and,
         ...where.AND,
       ];
     }
@@ -122,11 +118,15 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     }
 
     if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.where.and.push(accessResult);
+      queryToBuild.and.push(accessResult);
     }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale, queryHiddenFields);
+  const query = await Model.buildQuery({
+    req,
+    where: queryToBuild,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Find
@@ -166,7 +166,8 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     result = await queryDrafts<T>({
       accessResult,
       collection,
-      locale,
+      req,
+      overrideAccess,
       paginationOptions,
       payload,
       where,
