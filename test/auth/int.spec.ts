@@ -307,6 +307,8 @@ describe('Auth', () => {
         },
       });
 
+      const body = await response.json();
+
       // expect(mailSpy).toHaveBeenCalled();
 
       expect(response.status).toBe(200);

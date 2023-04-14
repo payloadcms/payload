@@ -61,6 +61,8 @@ import Logger from './utilities/logger';
 import PreferencesModel from './preferences/model';
 import findConfig from './config/find';
 
+import { defaults as emailDefaults } from './email/defaults';
+
 /**
  * @description Payload
  */
@@ -188,7 +190,8 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     }
 
     // Configure email service
-    this.emailOptions = options.email ? { ...(options.email) } : this.config.email;
+    const emailOptions = options.email ? { ...(options.email) } : this.config.email;
+    this.emailOptions = emailOptions ?? emailDefaults;
     this.email = buildEmail(this.emailOptions, this.logger);
     this.sendEmail = sendEmail.bind(this);
 
