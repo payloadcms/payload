@@ -32,6 +32,10 @@
     .textarea-outer {
       background: var(--theme-elevation-200);
       color: var(--theme-elevation-450);
+      &:hover {
+        border-color: var(--theme-elevation-150);
+        @include shadow-sm;
+      }
     }
   }
 
