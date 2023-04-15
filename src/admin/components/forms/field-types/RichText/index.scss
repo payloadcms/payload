@@ -102,7 +102,7 @@
 
   &--read-only {
     .rich-text__editor {
-      background-color: var(--theme-elevation-200);
+      background: var(--theme-elevation-200);
       color: var(--theme-elevation-450);
       padding: base(.5);
 
