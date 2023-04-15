@@ -103,20 +103,7 @@ const fieldToSchemaMap = {
         });
     },
     point: (field, schema, config, buildSchemaOptions) => {
-        const baseSchema = {
-            type: {
-                type: String,
-                enum: ['Point'],
-            },
-            coordinates: {
-                type: [Number],
-                required: false,
-                default: field.defaultValue || undefined,
-            },
-        };
-        if (buildSchemaOptions.disableUnique && field.unique && field.localized) {
-            baseSchema.coordinates.sparse = true;
-        }
+        const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Number };
         schema.add({
             [field.name]: localizeSchema(field, baseSchema, config.localization),
         });
