@@ -21,7 +21,15 @@ function initAdmin(ctx: Payload): void {
       });
 
       router.use(compression(ctx.config.express.compression));
-      router.use(express.static(ctx.config.admin.buildPath, { redirect: false }));
+      router.use(express.static(ctx.config.admin.buildPath, {
+        redirect: false,
+        setHeaders: (res, path) => {
+          const staticFilesRegex = new RegExp('\.(svg|css|js|jp(e)?g|png|avif|webp|webm|gif|ico|woff|woff2|ttf|otf)$', 'ig');
+          if (path.match(staticFilesRegex)) {
+            res.set('Cache-Control', `public, max-age=${60 * 60 * 24 * 365}, immutable`);
+          }
+        },
+      }));
 
       ctx.express.use(ctx.config.routes.admin, router);
     } else {

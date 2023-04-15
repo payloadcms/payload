@@ -37,7 +37,7 @@ export default (payloadConfig: SanitizedConfig): Configuration => {
     plugins: [
       ...baseConfig.plugins,
       new MiniCSSExtractPlugin({
-        filename: '[name].css',
+        filename: '[name].[contenthash].css',
         ignoreOrder: true,
       }),
     ],
