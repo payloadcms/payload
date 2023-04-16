@@ -295,6 +295,7 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
                       },
                     },
                     required: [
+                      'id',
                       'blockType',
                       ...blockSchema.required,
                     ],
