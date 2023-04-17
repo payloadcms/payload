@@ -23,8 +23,19 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredBlocks, setFilteredBlocks] = useState(blocks);
-  const { closeModal } = useModal();
+  const { closeModal, modalState } = useModal();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { t, i18n } = useTranslation('fields');
+
+  useEffect(() => {
+    setIsModalOpen(Boolean(modalState[drawerSlug]?.isOpen));
+  }, [modalState, drawerSlug]);
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      setSearchTerm('');
+    }
+  }, [isModalOpen]);
 
   useEffect(() => {
     const matchingBlocks = blocks.reduce((matchedBlocks, block) => {
