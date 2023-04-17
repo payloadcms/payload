@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "Nemate dopuštenje pristupiti ovoj stranici.",
     "notAllowedToPerformAction": "Nemate dopuštenje izvršiti ovu radnju.",
     "notFound": "Traženi resurs nije pronađen.",
+    "previewing": "Pojavio se problem pri pregledavanju ovog dokumenta.",
     "problemUploadingFile": "Pojavio se problem pri učitavanju datoteke.",
     "tokenInvalidOrExpired": "Token je nevaljan ili je istekao.",
     "unPublishingDocument": "Pojavio se problem pri poništavanju objave ovog dokumenta.",

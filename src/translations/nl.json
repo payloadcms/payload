@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "U hebt geen toegang tot deze pagina.",
     "notAllowedToPerformAction": "U mag deze actie niet uitvoeren.",
     "notFound": "De gevraagde resource werd niet gevonden.",
+    "previewing": "Er was een probleem met het voorvertonen van dit document.",
     "problemUploadingFile": "Er was een probleem bij het uploaden van het bestand.",
     "tokenInvalidOrExpired": "Token is ongeldig of verlopen.",
     "unPublishingDocument": "Er was een probleem met het depubliceren van dit document.",

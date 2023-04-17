@@ -37,7 +37,7 @@ type GeneratePreviewURLOptions = {
 export type GeneratePreviewURL = (
   doc: Record<string, unknown>,
   options: GeneratePreviewURLOptions
-) => Promise<string> | string;
+) => Promise<string | null> | string | null;
 
 export type EmailTransport = Email & {
   transport: Transporter;

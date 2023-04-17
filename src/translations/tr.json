@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "Bu sayfaya erişim izniniz yok.",
     "notAllowedToPerformAction": "Bu işlemi gerçekleştirmek için izniniz yok.",
     "notFound": "Sayfa bulunamadı.",
+    "previewing": "Önizleme başarısız oldu",
     "problemUploadingFile": "Dosya yüklenirken bir sorun oluştu.",
     "tokenInvalidOrExpired": "Geçersiz veya süresi dolmuş token.",
     "unPublishingDocument": "Geçerli döküman yayından kaldırılırken bir sorun oluştu.",

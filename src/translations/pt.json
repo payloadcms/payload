@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "Você não tem permissão para acessar essa página.",
     "notAllowedToPerformAction": "Você não tem permissão para realizar essa ação.",
     "notFound": "O recurso requisitado não foi encontrado.",
+    "previewing": "Ocorreu um problema ao visualizar esse documento.",
     "problemUploadingFile": "Ocorreu um problema ao carregar o arquivo.",
     "tokenInvalidOrExpired": "Token expirado ou inválido.",
     "unPublishingDocument": "Ocorreu um problema ao despublicar esse documento",

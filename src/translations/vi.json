@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "Lỗi - Bạn không có quyền truy cập trang này.",
     "notAllowedToPerformAction": "Lỗi - Bạn không có quyền thực hiện lệnh này.",
     "notFound": "Lỗi - Không thể tìm thấy.",
+    "previewing": "Lỗi - Đã xảy ra vấn đề khi xem trước bản tài liệu này.",
     "problemUploadingFile": "Lỗi - Đã xảy ra vấn để khi tải lên file sau.",
     "tokenInvalidOrExpired": "Lỗi - Token không hợp lệ hoặc đã hết hạn.",
     "unPublishingDocument": "Lỗi - Đã xảy ra vấn để khi ẩn bản tài liệu.",
