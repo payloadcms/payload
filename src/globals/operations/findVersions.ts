@@ -88,6 +88,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     where: queryToBuild,
     req,
     overrideAccess,
+    globalSlug: globalConfig.slug,
   });
 
   // /////////////////////////////////////

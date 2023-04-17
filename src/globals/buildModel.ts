@@ -8,7 +8,7 @@ const buildModel = (config: SanitizedConfig): GlobalModel | null => {
   if (config.globals && config.globals.length > 0) {
     const globalsSchema = new mongoose.Schema({}, { discriminatorKey: 'globalType', timestamps: true, minimize: false });
 
-    globalsSchema.plugin(getBuildQueryPlugin({ isGlobalModel: true }));
+    globalsSchema.plugin(getBuildQueryPlugin());
 
     const Globals = mongoose.model('globals', globalsSchema) as unknown as GlobalModel;
 

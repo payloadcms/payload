@@ -78,7 +78,7 @@ export default function initCollectionsLocal(ctx: Payload): void {
       );
 
       versionSchema.plugin(paginate, { useEstimatedCount: true })
-        .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug, isVersionsModel: true }));
+        .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug, versionsFields: versionCollectionFields }));
 
       if (collection.versions?.drafts) {
         versionSchema.plugin(mongooseAggregatePaginate);

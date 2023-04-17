@@ -35,7 +35,7 @@ export default function initGlobalsLocal(ctx: Payload): void {
         );
 
         versionSchema.plugin(paginate, { useEstimatedCount: true })
-          .plugin(getBuildQueryPlugin({ globalSlug: global.slug, isVersionsModel: true }));
+          .plugin(getBuildQueryPlugin({ versionsFields: versionGlobalFields }));
 
         ctx.versions[global.slug] = mongoose.model(versionModelName, versionSchema) as CollectionModel;
       }

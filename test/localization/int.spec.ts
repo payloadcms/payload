@@ -5,11 +5,7 @@ import payload from '../../src';
 import type {
   LocalizedPost,
   WithLocalizedRelationship,
-  LocalizedRequired,
-  RelationshipLocalized,
-  GlobalArray,
 } from './payload-types';
-import type { LocalizedPostAllLocale } from './config';
 import configPromise, { relationshipLocalizedSlug, slug, withLocalizedRelSlug, withRequiredLocalizedFields } from './config';
 import {
   defaultLocale,

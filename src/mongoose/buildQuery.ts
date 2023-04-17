@@ -1,13 +1,17 @@
+/* eslint-disable no-continue */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import deepmerge from 'deepmerge';
-import mongoose, { FilterQuery } from 'mongoose';
+import { FilterQuery } from 'mongoose';
 import { combineMerge } from '../utilities/combineMerge';
-import { CollectionModel } from '../collections/config/types';
-import { getSchemaTypeOptions } from './getSchemaTypeOptions';
 import { operatorMap } from './operatorMap';
-import { sanitizeQueryValue } from './sanitizeFormattedValue';
+import { sanitizeQueryValue } from './sanitizeQueryValue';
 import { PayloadRequest, Where } from '../types';
+import { Field, FieldAffectingData, TabAsField, UIField, fieldAffectsData } from '../fields/config/types';
+import { CollectionPermission, FieldPermissions, GlobalPermission } from '../auth';
+import flattenFields from '../utilities/flattenTopLevelFields';
+import { getEntityPolicies } from '../utilities/getEntityPolicies';
+import { SanitizedConfig } from '../config/types';
 
 const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
 
@@ -16,18 +20,15 @@ const subQueryOptions = {
   lean: true,
 };
 
-type ParseType = {
-  searchParams?:
-  {
-    [key: string]: any;
-  };
-  sort?: boolean;
-};
-
 type PathToQuery = {
   complete: boolean
+  collectionSlug?: string
   path: string
-  Model: CollectionModel
+  field: Field | TabAsField
+  fields?: (FieldAffectingData | UIField | TabAsField)[]
+  fieldPolicies?: {
+    [field: string]: FieldPermissions
+  }
 }
 
 type SearchParam = {
@@ -35,14 +36,22 @@ type SearchParam = {
   value: unknown,
 }
 
-class ParamParser {
+type ParamParserArgs = {
+  req: PayloadRequest
+  collectionSlug?: string
+  globalSlug?: string
+  versionsFields?: Field[]
+  model: any
+  where: Where
+  overrideAccess?: boolean
+}
+
+type QueryError = { path: string }
+
+export class ParamParser {
   collectionSlug?: string
 
   globalSlug?: string
-
-  isGlobalModel?: boolean
-
-  isVersionsModel?: boolean
 
   overrideAccess: boolean
 
@@ -52,49 +61,68 @@ class ParamParser {
 
   model: any;
 
-  query: {
-    searchParams: {
-      [key: string]: any;
+  fields: Field[]
+
+  localizationConfig: SanitizedConfig['localization']
+
+  policies: {
+    collections?: {
+      [collectionSlug: string]: CollectionPermission;
     };
-    sort: boolean;
-  };
+    globals?: {
+      [globalSlug: string]: GlobalPermission;
+    };
+  }
+
+  errors: QueryError[]
 
   constructor({
     req,
     collectionSlug,
     globalSlug,
-    isGlobalModel,
-    isVersionsModel,
+    versionsFields,
     model,
     where,
     overrideAccess,
-  }) {
+  }: ParamParserArgs) {
     this.req = req;
     this.collectionSlug = collectionSlug;
     this.globalSlug = globalSlug;
-    this.isGlobalModel = isGlobalModel;
-    this.isVersionsModel = isVersionsModel;
     this.parse = this.parse.bind(this);
     this.model = model;
     this.where = where;
     this.overrideAccess = overrideAccess;
-    this.query = {
-      searchParams: {},
-      sort: false,
+    this.localizationConfig = req.payload.config.localization;
+    this.policies = {
+      collections: {},
+      globals: {},
     };
+    this.errors = [];
+
+    // Get entity fields
+    if (globalSlug) {
+      const globalConfig = req.payload.globals.config.find(({ slug }) => slug === globalSlug);
+      this.fields = versionsFields || globalConfig.fields;
+    }
+
+    if (collectionSlug) {
+      const collectionConfig = req.payload.collections[collectionSlug].config;
+      this.fields = versionsFields || collectionConfig.fields;
+    }
   }
 
   // Entry point to the ParamParser class
 
-  async parse(): Promise<ParseType> {
+  async parse(): Promise<Record<string, unknown>> {
     if (typeof this.where === 'object') {
-      this.query.searchParams = await this.parsePathOrRelation(this.where);
-      return this.query;
+      const query = await this.parsePathOrRelation(this.where);
+      return query;
     }
+
     return {};
   }
 
-  async parsePathOrRelation(object) {
+  async parsePathOrRelation(object: Where): Promise<Record<string, unknown>> {
     let result = {} as FilterQuery<any>;
     // We need to determine if the whereKey is an AND, OR, or a schema path
     for (const relationOrPath of Object.keys(object)) {
@@ -114,7 +142,12 @@ class ParamParser {
         if (typeof pathOperators === 'object') {
           for (const operator of Object.keys(pathOperators)) {
             if (validOperators.includes(operator)) {
-              const searchParam = await this.buildSearchParam(this.model.schema, relationOrPath, pathOperators[operator], operator);
+              const searchParam = await this.buildSearchParam({
+                fields: this.fields,
+                incomingPath: relationOrPath,
+                val: pathOperators[operator],
+                operator,
+              });
 
               if (searchParam?.value && searchParam?.path) {
                 result = {
@@ -148,122 +181,84 @@ class ParamParser {
     return completedConditions;
   }
 
-  // Build up an array of auto-localized paths to search on
-  // Multiple paths may be possible if searching on properties of relationship fields
-
-  getLocalizedPaths(Model: CollectionModel, incomingPath: string, operator): PathToQuery[] {
-    const { schema } = Model;
-    const pathSegments = incomingPath.split('.');
-
-    let paths: PathToQuery[] = [
-      {
-        path: '',
-        complete: false,
-        Model,
-      },
-    ];
-
-    pathSegments.every((segment, i) => {
-      const lastIncompletePath = paths.find(({ complete }) => !complete);
-      const { path } = lastIncompletePath;
-
-      const currentPath = path ? `${path}.${segment}` : segment;
-      const currentSchemaType = schema.path(currentPath);
-      const currentSchemaPathType = schema.pathType(currentPath);
-
-      if (currentSchemaPathType === 'nested') {
-        lastIncompletePath.path = currentPath;
-        return true;
-      }
-
-      const upcomingSegment = pathSegments[i + 1];
-
-      if (currentSchemaType && currentSchemaPathType !== 'adhocOrUndefined') {
-        const currentSchemaTypeOptions = getSchemaTypeOptions(currentSchemaType);
-
-        if (currentSchemaTypeOptions.localized) {
-          const upcomingLocalizedPath = `${currentPath}.${upcomingSegment}`;
-          const upcomingSchemaTypeWithLocale = schema.path(upcomingLocalizedPath);
-
-          if (upcomingSchemaTypeWithLocale) {
-            lastIncompletePath.path = currentPath;
-            return true;
-          }
-
-          const localePath = `${currentPath}.${this.req.locale}`;
-          const localizedSchemaType = schema.path(localePath);
-
-          if (localizedSchemaType || operator === 'near') {
-            lastIncompletePath.path = localePath;
-            return true;
-          }
-        }
-
-        lastIncompletePath.path = currentPath;
-        return true;
-      }
-
-      const priorSchemaType = schema.path(path);
-
-      if (priorSchemaType) {
-        const priorSchemaTypeOptions = getSchemaTypeOptions(priorSchemaType);
-        if (typeof priorSchemaTypeOptions.ref === 'string') {
-          const RefModel = mongoose.model(priorSchemaTypeOptions.ref) as any;
-
-          lastIncompletePath.complete = true;
-
-          const remainingPath = pathSegments.slice(i).join('.');
-
-          paths = [
-            ...paths,
-            ...this.getLocalizedPaths(RefModel, remainingPath, operator),
-          ];
-
-          return false;
-        }
-      }
-
-      if (operator === 'near' || currentSchemaPathType === 'adhocOrUndefined') {
-        lastIncompletePath.path = currentPath;
-      }
-
-      return true;
-    });
-
-    return paths;
-  }
-
   // Convert the Payload key / value / operator into a MongoDB query
-  async buildSearchParam(schema, incomingPath, val, operator): Promise<SearchParam> {
+  async buildSearchParam({
+    fields,
+    incomingPath,
+    val,
+    operator,
+  }: {
+    fields: Field[],
+    incomingPath: string,
+    val: unknown,
+    operator: string
+  }): Promise<SearchParam> {
     // Replace GraphQL nested field double underscore formatting
     let sanitizedPath = incomingPath.replace(/__/gi, '.');
     if (sanitizedPath === 'id') sanitizedPath = '_id';
 
-    const collectionPaths = this.getLocalizedPaths(this.model, sanitizedPath, operator);
-    const [{ path }] = collectionPaths;
+    let paths: PathToQuery[] = [];
+
+    let hasCustomID = false;
+
+    if (sanitizedPath === '_id') {
+      const customIDfield = this.req.payload.collections[this.collectionSlug]?.config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+
+      let idFieldType: 'text' | 'number' = 'text';
+
+      if (customIDfield) {
+        if (customIDfield?.type === 'text' || customIDfield?.type === 'number') {
+          idFieldType = customIDfield.type;
+        }
+
+        hasCustomID = true;
+      }
+
+      paths.push({
+        path: '_id',
+        field: {
+          name: 'id',
+          type: idFieldType,
+        },
+        complete: true,
+        collectionSlug: this.collectionSlug,
+      });
+    } else {
+      paths = await this.getLocalizedPaths({
+        collectionSlug: this.collectionSlug,
+        globalSlug: this.globalSlug,
+        fields,
+        incomingPath: sanitizedPath,
+      });
+    }
+
+    const [{ path, field }] = paths;
 
     if (path) {
-      const schemaType = schema.path(path);
-      const schemaOptions = getSchemaTypeOptions(schemaType);
-      const formattedValue = sanitizeQueryValue(schemaType, path, operator, val);
-
-      if (!this.overrideAccess && (['salt', 'hash'].includes(path) || schemaType?.options?.hidden)) {
-        return undefined;
-      }
+      const formattedValue = sanitizeQueryValue({
+        ctx: this,
+        field,
+        path,
+        operator,
+        val,
+        hasCustomID,
+      });
 
       // If there are multiple collections to search through,
       // Recursively build up a list of query constraints
-      if (collectionPaths.length > 1) {
+      if (paths.length > 1) {
         // Remove top collection and reverse array
         // to work backwards from top
-        const collectionPathsToSearch = collectionPaths.slice(1).reverse();
+        const pathsToQuery = paths.slice(1).reverse();
 
         const initialRelationshipQuery = {
           value: {},
         } as SearchParam;
 
-        const relationshipQuery = await collectionPathsToSearch.reduce(async (priorQuery, { Model: SubModel, path: subPath }, i) => {
+        const relationshipQuery = await pathsToQuery.reduce(async (priorQuery, { path: subPath, collectionSlug }, i) => {
           const priorQueryResult = await priorQuery;
+
+          const SubModel = this.req.payload.collections[collectionSlug].Model;
 
           // On the "deepest" collection,
           // Search on the value passed through the query
@@ -282,9 +277,9 @@ class ParamParser {
 
             const $in = result.map((doc) => doc._id.toString());
 
-            if (collectionPathsToSearch.length === 1) return { path, value: { $in } };
+            if (pathsToQuery.length === 1) return { path, value: { $in } };
 
-            const nextSubPath = collectionPathsToSearch[i + 1].path;
+            const nextSubPath = pathsToQuery[i + 1].path;
 
             return {
               value: { [nextSubPath]: { $in } },
@@ -298,7 +293,7 @@ class ParamParser {
 
           // If it is the last recursion
           // then pass through the search param
-          if (i + 1 === collectionPathsToSearch.length) {
+          if (i + 1 === pathsToQuery.length) {
             return { path, value: { $in } };
           }
 
@@ -314,51 +309,6 @@ class ParamParser {
 
       if (operator && validOperators.includes(operator)) {
         const operatorKey = operatorMap[operator];
-
-        let overrideQuery = false;
-        let query;
-
-        // If there is a ref, this is a relationship or upload field
-        // IDs can be either string, number, or ObjectID
-        // So we need to build an `or` query for all these types
-        if (schemaOptions && (schemaOptions.ref || schemaOptions.refPath)) {
-          overrideQuery = true;
-
-          query = {
-            $or: [
-              {
-                [path]: {
-                  [operatorKey]: formattedValue,
-                },
-              },
-            ],
-          };
-
-          if (typeof formattedValue === 'number' || (typeof formattedValue === 'string' && mongoose.Types.ObjectId.isValid(formattedValue))) {
-            query.$or.push({
-              [path]: {
-                [operatorKey]: formattedValue.toString(),
-              },
-            });
-          }
-
-          if (typeof formattedValue === 'string') {
-            if (!Number.isNaN(formattedValue)) {
-              query.$or.push({
-                [path]: {
-                  [operatorKey]: parseFloat(formattedValue),
-                },
-              });
-            }
-          }
-        }
-
-        // If forced query
-        if (overrideQuery) {
-          return {
-            value: query,
-          };
-        }
 
         // Some operators like 'near' need to define a full query
         // so if there is no operator key, just return the value
@@ -377,44 +327,247 @@ class ParamParser {
     }
     return undefined;
   }
+
+  // Build up an array of auto-localized paths to search on
+  // Multiple paths may be possible if searching on properties of relationship fields
+
+  async getLocalizedPaths({
+    collectionSlug,
+    globalSlug,
+    fields,
+    incomingPath,
+  }: {
+    collectionSlug?: string
+    globalSlug?: string
+    fields: Field[]
+    incomingPath: string
+  }): Promise<PathToQuery[]> {
+    const pathSegments = incomingPath.split('.');
+
+    let paths: PathToQuery[] = [
+      {
+        path: '',
+        complete: false,
+        field: undefined,
+        fields: flattenFields(fields, false),
+        fieldPolicies: undefined,
+        collectionSlug,
+      },
+    ];
+
+    if (!this.overrideAccess) {
+      if (collectionSlug) {
+        const collection = { ...this.req.payload.collections[collectionSlug].config };
+        collection.fields = fields;
+
+        if (!this.policies.collections[collectionSlug]) {
+          const [policy, promises] = getEntityPolicies({
+            req: this.req,
+            entity: collection,
+            operations: ['read'],
+            type: 'collection',
+          });
+
+          await Promise.all(promises);
+          this.policies.collections[collectionSlug] = policy;
+        }
+
+        paths[0].fieldPolicies = this.policies.collections[collectionSlug].fields;
+
+        if (['salt', 'hash'].includes(incomingPath) && collection.auth && !collection.auth?.disableLocalStrategy) {
+          this.errors.push({ path: incomingPath });
+          return [];
+        }
+      }
+
+      if (globalSlug) {
+        if (!this.policies.globals[globalSlug]) {
+          const global = { ...this.req.payload.globals.config.find(({ slug }) => slug === globalSlug) };
+          global.fields = fields;
+
+          const [policy, promises] = getEntityPolicies({
+            req: this.req,
+            entity: global,
+            operations: ['read'],
+            type: 'global',
+          });
+
+          await Promise.all(promises);
+          this.policies.globals[globalSlug] = policy;
+        }
+
+        paths[0].fieldPolicies = this.policies.globals[globalSlug].fields;
+      }
+    }
+
+    // Use a 'some' so that we can bail out
+    // if a relationship query is found
+    // or if Rich Text / JSON
+
+    let done = false;
+
+    for (let i = 0; i < pathSegments.length; i += 1) {
+      if (done) continue;
+
+      const segment = pathSegments[i];
+
+      const lastIncompletePath = paths.find(({ complete }) => !complete);
+
+      if (lastIncompletePath) {
+        const { path } = lastIncompletePath;
+        let currentPath = path ? `${path}.${segment}` : segment;
+
+        const matchedField = lastIncompletePath.fields.find((field) => fieldAffectsData(field) && field.name === segment);
+        lastIncompletePath.field = matchedField;
+
+        if (currentPath === 'globalType' && this.globalSlug) {
+          lastIncompletePath.path = currentPath;
+          lastIncompletePath.complete = true;
+          lastIncompletePath.field = {
+            name: 'globalType',
+            type: 'text',
+          };
+
+          done = true;
+          continue;
+        }
+
+        if (matchedField) {
+          if (!this.overrideAccess) {
+            const fieldAccess = lastIncompletePath.fieldPolicies[matchedField.name].read.permission;
+
+            if (!fieldAccess || ('hidden' in matchedField && matchedField.hidden)) {
+              this.errors.push({ path: currentPath });
+              done = true;
+              continue;
+            }
+          }
+
+          const nextSegment = pathSegments[i + 1];
+          const nextSegmentIsLocale = this.localizationConfig && this.localizationConfig.locales.includes(nextSegment);
+
+          if (nextSegmentIsLocale) {
+            // Skip the next iteration, because it's a locale
+            i += 1;
+            currentPath = `${currentPath}.${nextSegment}`;
+          } else if ('localized' in matchedField && matchedField.localized) {
+            currentPath = `${currentPath}.${this.req.locale}`;
+          }
+
+          switch (matchedField.type) {
+            case 'blocks':
+            case 'richText':
+            case 'json': {
+              const upcomingSegments = pathSegments.slice(i + 1).join('.');
+              lastIncompletePath.complete = true;
+              lastIncompletePath.path = upcomingSegments ? `${currentPath}.${upcomingSegments}` : currentPath;
+              done = true;
+              continue;
+            }
+
+            case 'relationship':
+            case 'upload': {
+              // If this is a polymorphic relation,
+              // We only support querying directly (no nested querying)
+              if (typeof matchedField.relationTo !== 'string') {
+                const lastSegmentIsValid = ['value', 'relationTo'].includes(pathSegments[pathSegments.length - 1]);
+
+                if (lastSegmentIsValid) {
+                  lastIncompletePath.complete = true;
+                  lastIncompletePath.path = pathSegments.join('.');
+                } else {
+                  this.errors.push({ path: currentPath });
+                  done = true;
+                  continue;
+                }
+              } else {
+                lastIncompletePath.complete = true;
+                lastIncompletePath.collectionSlug = matchedField.relationTo;
+                lastIncompletePath.path = currentPath;
+
+                const nestedPathToQuery = pathSegments.slice(nextSegmentIsLocale ? i + 2 : i + 1).join('.');
+
+                if (nestedPathToQuery) {
+                  const relatedCollection = this.req.payload.collections[matchedField.relationTo as string].config;
+
+                  const remainingPaths = await this.getLocalizedPaths({
+                    collectionSlug: relatedCollection.slug,
+                    fields: relatedCollection.fields,
+                    incomingPath: nestedPathToQuery,
+                  });
+
+                  paths = [
+                    ...paths,
+                    ...remainingPaths,
+                  ];
+                }
+
+                done = true;
+                continue;
+              }
+
+              break;
+            }
+
+            default: {
+              if ('fields' in lastIncompletePath.field) {
+                lastIncompletePath.fields = flattenFields(lastIncompletePath.field.fields, false);
+              }
+
+              if (!this.overrideAccess && 'fields' in lastIncompletePath.fieldPolicies[lastIncompletePath.field.name]) {
+                lastIncompletePath.fieldPolicies = lastIncompletePath.fieldPolicies[lastIncompletePath.field.name].fields;
+              }
+
+              if (i + 1 === pathSegments.length) lastIncompletePath.complete = true;
+              lastIncompletePath.path = currentPath;
+              continue;
+            }
+          }
+        } else {
+          this.errors.push({ path: currentPath });
+          done = true;
+          continue;
+        }
+      }
+    }
+
+    return paths;
+  }
 }
 
 type GetBuildQueryPluginArgs = {
   collectionSlug?: string
-  globalSlug?: string
-  isGlobalModel?: boolean
-  isVersionsModel?: boolean
+  versionsFields?: Field[]
 }
 
 export type BuildQueryArgs = {
   req: PayloadRequest
   where: Where
   overrideAccess: boolean
+  globalSlug?: string
 }
 
 // This plugin asynchronously builds a list of Mongoose query constraints
 // which can then be used in subsequent Mongoose queries.
 const getBuildQueryPlugin = ({
   collectionSlug,
-  globalSlug,
-  isGlobalModel,
-  isVersionsModel,
-}: GetBuildQueryPluginArgs) => {
+  versionsFields,
+}: GetBuildQueryPluginArgs = {}) => {
   return function buildQueryPlugin(schema) {
     const modifiedSchema = schema;
-    async function buildQuery({ req, where, overrideAccess = false }: BuildQueryArgs) {
+    async function buildQuery({ req, where, overrideAccess = false, globalSlug }: BuildQueryArgs): Promise<Record<string, unknown>> {
       const paramParser = new ParamParser({
         req,
         collectionSlug,
         globalSlug,
-        isGlobalModel,
-        isVersionsModel,
+        versionsFields,
         model: this,
         where,
         overrideAccess,
       });
-      const params = await paramParser.parse();
-      return params.searchParams;
+      const result = await paramParser.parse();
+      // TODO: throw errors here
+      return result;
     }
     modifiedSchema.statics.buildQuery = buildQuery;
   };

@@ -33,7 +33,6 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     slug,
     req,
     req: {
-      locale,
       payload,
       payload: {
         globals: {
@@ -80,6 +79,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     where: queryToBuild,
     req,
     overrideAccess,
+    globalSlug: slug,
   });
 
   // /////////////////////////////////////

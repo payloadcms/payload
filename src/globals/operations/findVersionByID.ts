@@ -29,7 +29,6 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     req: {
       t,
       payload,
-      locale,
     },
     disableErrors,
     currentDepth,
@@ -68,6 +67,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     where: queryToBuild,
     req,
     overrideAccess,
+    globalSlug: globalConfig.slug,
   });
 
   // /////////////////////////////////////

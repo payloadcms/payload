@@ -63,6 +63,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     where: queryToBuild,
     req,
     overrideAccess,
+    globalSlug: entityType === 'global' ? entity.slug : undefined,
   });
 
   let draft = await VersionModel.findOne(query, {}, {

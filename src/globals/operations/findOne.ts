@@ -64,6 +64,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     where: queryToBuild,
     req,
     overrideAccess,
+    globalSlug: slug,
   });
 
   // /////////////////////////////////////
