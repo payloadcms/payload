@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useReducer, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react';
 import querystring from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../utilities/Config';
@@ -32,22 +32,23 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
   const config = useConfig();
   const { i18n } = useTranslation();
   const locale = useLocale();
-  const [oldLocale, setOldLocale] = useState(locale);
+  const prevLocale = useRef(locale);
+
   const {
     serverURL,
     routes: { api },
   } = config;
 
-  useEffect(() => {
+  const loadRelationshipDocs = useCallback(async (reloadAll = false) => {
     Object.entries(debouncedDocuments).forEach(async ([slug, docs]) => {
       const idsToLoad: (string | number)[] = [];
 
       Object.entries(docs).forEach(([id, value]) => {
-        if (value === null || locale !== oldLocale) {
+        if (value === null || reloadAll) {
           idsToLoad.push(id);
         }
       });
-      setOldLocale(locale);
+
 
       if (idsToLoad.length > 0) {
         const url = `${serverURL}${api}/${slug}`;
@@ -65,6 +66,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
             'Accept-Language': i18n.language,
           },
         });
+
         if (result.ok) {
           const json = await result.json();
           if (json.docs) {
@@ -75,12 +77,16 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
         }
       }
     });
-  }, [i18n, serverURL, api, debouncedDocuments, locale]);
+  }, [debouncedDocuments, serverURL, api, i18n, locale]);
+
+  useEffect(() => {
+    loadRelationshipDocs(locale && prevLocale.current !== locale);
+    prevLocale.current = locale;
+  }, [locale, loadRelationshipDocs]);
 
   const getRelationships = useCallback(async (relationships: { relationTo: string, value: number | string }[]) => {
     dispatchDocuments({ type: 'REQUEST', docs: relationships });
-    setOldLocale(locale);
-  }, [locale]);
+  }, []);
 
   return (
     <Context.Provider value={{ getRelationships, documents }}>
