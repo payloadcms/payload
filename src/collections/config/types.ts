@@ -6,7 +6,7 @@ import { Response } from 'express';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
-import { Auth, IncomingAuthType } from '../../auth/types';
+import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 import { Config as GeneratedTypes } from '../../generated-types';
@@ -154,6 +154,10 @@ type BeforeDuplicateArgs<T> = {
 export type BeforeDuplicate<T = any> = (args: BeforeDuplicateArgs<T>) => T | Promise<T>
 
 export type CollectionAdminOptions = {
+  /**
+   * Exclude the collection from the admin nav and routes
+   */
+  hidden?: ((args: { user: User }) => boolean) | boolean;
   /**
    * Field to use as title in Edit view and first column in List view
    */

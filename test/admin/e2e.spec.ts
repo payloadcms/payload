@@ -111,6 +111,24 @@ describe('admin', () => {
       await page.locator(`.step-nav >> text=${slug}`).click();
       expect(page.url()).toContain(url.list);
     });
+
+    test('should not show hidden collections and globals', async () => {
+      await page.goto(url.admin);
+
+      // nav menu
+      await expect(await page.locator('#nav-hidden-collection')).toBeHidden();
+      await expect(await page.locator('#nav-hidden-global')).toBeHidden();
+
+      // dashboard
+      await expect(await page.locator('#card-hidden-collection')).toBeHidden();
+      await expect(await page.locator('#card-hidden-global')).toBeHidden();
+
+      // routing
+      await page.goto(url.collection('hidden-collection'));
+      await expect(await page.locator('.not-found')).toContainText('Nothing found');
+      await page.goto(url.global('hidden-global'));
+      await expect(await page.locator('.not-found')).toContainText('Nothing found');
+    });
   });
 
   describe('CRUD', () => {

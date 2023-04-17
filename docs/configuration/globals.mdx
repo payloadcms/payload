@@ -64,10 +64,11 @@ You can find an [example Global config](https://github.com/payloadcms/public-dem
 
 You can customize the way that the Admin panel behaves on a Global-by-Global basis by defining the `admin` property on a Global's config.
 
-| Option       | Description                                                                                                             |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `components` | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals)                 |
-| `preview`    | Function to generate a preview URL within the Admin panel for this global that can point to your app. [More](#preview). |
+| Option       | Description                                                                                                                       |
+|--------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `hidden`     | Set to true or a function, called with the current user, returning true to exclude this global from navigation and admin routing. |
+| `components` | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals)                           |
+| `preview`    | Function to generate a preview URL within the Admin panel for this global that can point to your app. [More](#preview).           |
 
 ### Preview
 
