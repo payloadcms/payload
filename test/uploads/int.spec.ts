@@ -198,7 +198,7 @@ describe('Collections - Uploads', () => {
 
     const { status } = await client.updateMany({
       // id: mediaDoc.id,
-      query: {
+      where: {
         id: { equals: mediaDoc.id },
       },
       file: true,
@@ -419,7 +419,7 @@ describe('Collections - Uploads', () => {
 
     const { errors } = await client.deleteMany({
       slug: mediaSlug,
-      query: {
+      where: {
         id: { equals: doc.id },
       },
       auth: true,
