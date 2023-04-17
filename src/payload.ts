@@ -191,6 +191,10 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     // Configure email service
     const emailOptions = options.email ? { ...(options.email) } : this.config.email;
+    if (options.email && this.config.email) {
+      this.logger.warn('Email options provided in both init options and config. Using init options.');
+    }
+
     this.emailOptions = emailOptions ?? emailDefaults;
     this.email = buildEmail(this.emailOptions, this.logger);
     this.sendEmail = sendEmail.bind(this);
