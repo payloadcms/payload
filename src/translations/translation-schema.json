@@ -300,6 +300,9 @@
         "notFound": {
           "type": "string"
         },
+        "previewing": {
+          "type": "string"
+        },
         "problemUploadingFile": {
           "type": "string"
         },

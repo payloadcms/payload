@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "No tienes permiso para acceder a esta página.",
     "notAllowedToPerformAction": "No tienes permiso para realizar esta acción.",
     "notFound": "No se encontró el recurso solicitado.",
+    "previewing": "Ocurrió un problema al previsualizar este documento.",
     "problemUploadingFile": "Ocurrió un problema al subir el archivo.",
     "tokenInvalidOrExpired": "El token es inválido o ya expiró.",
     "unPublishingDocument": "Ocurrió un error al despublicar este documento.",

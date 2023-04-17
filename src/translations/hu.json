@@ -79,6 +79,7 @@
         "notAllowedToAccessPage": "Ehhez az oldalhoz nem férhet hozzá.",
         "notAllowedToPerformAction": "Ezt a műveletet nem hajthatja végre.",
         "notFound": "A kért erőforrás nem található.",
+        "previewing": "Hiba történt a dokumentum előnézetének megtekintése közben.",
         "problemUploadingFile": "Hiba történt a fájl feltöltése közben.",
         "tokenInvalidOrExpired": "A token érvénytelen vagy lejárt.",
         "unPublishingDocument": "Hiba történt a dokumentum közzétételének visszavonása közben.",

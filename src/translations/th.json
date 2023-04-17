@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "คุณไม่ได้รับอนุญาตให้เข้าถึงหน้านี้",
     "notAllowedToPerformAction": "คุณไม่ได้รับอนุญาตให้ดำเนินการสิ่งนี้",
     "notFound": "ไม่พบหน้าที่คุณต้องการ",
+    "previewing": "เกิดปัญหาระหว่างการแสดงตัวอย่างเอกสาร",
     "problemUploadingFile": "เกิดปัญหาระหว่างการอัปโหลดไฟล์",
     "tokenInvalidOrExpired": "Token ไม่ถูกต้องหรือหมดอายุ",
     "unPublishingDocument": "เกิดปัญหาระหว่างการยกเลิกการเผยแพร่เอกสารนี้",

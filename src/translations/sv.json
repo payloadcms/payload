@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "Du får inte komma åt den här sidan.",
     "notAllowedToPerformAction": "Du får inte utföra denna åtgärd.",
     "notFound": "Den begärda resursen hittades inte.",
+    "previewing": "Det uppstod ett problem när det här dokumentet skulle förhandsgranskas.",
     "problemUploadingFile": "Det uppstod ett problem när filen laddades upp.",
     "tokenInvalidOrExpired": "Token är antingen ogiltig eller har löpt ut.",
     "unPublishingDocument": "Det uppstod ett problem när det här dokumentet skulle avpubliceras.",
