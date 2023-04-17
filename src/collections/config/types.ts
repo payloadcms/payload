@@ -10,6 +10,7 @@ import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 import { Config as GeneratedTypes } from '../../generated-types';
+import { BuildQueryArgs } from '../../mongoose/buildQuery';
 
 type Register<T = any> = (doc: T, password: string) => T;
 
@@ -19,7 +20,7 @@ interface PassportLocalModel {
 }
 
 export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {
-  buildQuery: (query: unknown, locale: string, queryHiddenFields?: boolean) => Record<string, unknown>
+  buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>>
 }
 
 export interface AuthCollectionModel extends CollectionModel {

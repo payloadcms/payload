@@ -219,7 +219,7 @@ describe('access control', () => {
 
 async function createDoc(data: any): Promise<{ id: string }> {
   return payload.create({
-    collection: docLevelAccessSlug,
+    collection: slug,
     data,
   });
 }

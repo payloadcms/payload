@@ -10,7 +10,6 @@ import getBaseUploadFields from '../../uploads/getBaseFields';
 import { formatLabels } from '../../utilities/formatLabels';
 import { defaults, authDefaults } from './defaults';
 import { Config } from '../../config/types';
-import { versionCollectionDefaults } from '../../versions/defaults';
 import baseVersionFields from '../../versions/baseFields';
 import TimestampsRequired from '../../errors/TimestampsRequired';
 import mergeBaseFields from '../../fields/mergeBaseFields';
@@ -40,12 +39,14 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
         };
       }
 
-      if (sanitized.versions.drafts.autosave === true) sanitized.versions.drafts.autosave = {};
+      if (sanitized.versions.drafts.autosave === true) {
+        sanitized.versions.drafts.autosave = {
+          interval: 2000,
+        };
+      }
 
       sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields);
     }
-
-    sanitized.versions = merge(versionCollectionDefaults, sanitized.versions);
   }
 
   if (sanitized.upload) {
