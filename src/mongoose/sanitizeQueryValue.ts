@@ -51,7 +51,7 @@ export const sanitizeQueryValue = ({ ctx, field, path, operator, val, hasCustomI
     formattedValue = Number(val);
   }
 
-  if (['relationship', 'upload'].includes(field.type) && val === 'null') {
+  if (['relationship', 'upload'].includes(field.type)) {
     if (val === 'null') {
       formattedValue = null;
     }
