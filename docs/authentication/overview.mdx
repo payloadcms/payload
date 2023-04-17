@@ -83,6 +83,45 @@ Successfully logging in returns a `JWT` (JSON web token) which is how a user wil
   You can access the logged in user from access control functions and hooks via the Express <strong>req</strong>. The logged in user is automatically added as the <strong>user</strong> property.
 </Banner>
 
+## Decrypt the user token
+
+The user token is generated from the secret key provided in your `payload.config.ts` and encrypted using SHA-256.
+
+Here is a sample function that can be used to decrypt and verify the token:
+
+```ts
+  const decryptAndVerify = (
+    req: express.Request,
+    res: express.Response,
+  ): string | false => {
+    if (req.cookies['payload-token']) {
+      const hash = crypto
+        .createHash('sha256')
+        .update(process.env.PAYLOAD_SECRET)
+        .digest('hex')
+        .slice(0, 32);
+
+      try {
+        const decoded = jwt.verify(req.cookies['payload-token'], hash, {
+          algorithms: ['HS256'],
+        });
+
+        if (!decoded) return false;
+
+        const { repid } = decoded as jwtResponse;
+
+        return repid;
+      } catch (err) {
+        console.log('Invalid token request.', err);
+        return false;
+      }
+    } else {
+      console.log('Missing token in request.');
+      return false;
+    }
+  };
+```
+
 ### HTTP-only cookies
 
 Payload `login`, `logout`, and `refresh` operations make use of HTTP-only cookies for authentication purposes. HTTP-only cookies are a highly secure method of storing identifiable data on a user's device so that Payload can automatically recognize a returning user until their cookie expires. They are totally protected from common XSS attacks and cannot be read at all via JavaScript in the browser.
