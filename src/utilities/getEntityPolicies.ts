@@ -146,7 +146,7 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
         }
       } else if (field.fields) {
         executeFieldPolicies({
-          policiesObj: mutablePolicies,
+          policiesObj,
           fields: field.fields,
           operation,
           entityAccessPromise,
@@ -156,14 +156,14 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
           if (tabHasName(tab)) {
             if (!mutablePolicies[tab.name]) mutablePolicies[tab.name] = { fields: {} };
             executeFieldPolicies({
-              policiesObj: mutablePolicies[tab.name].fields,
+              policiesObj: mutablePolicies[tab.name],
               fields: tab.fields,
               operation,
               entityAccessPromise,
             });
           } else {
             executeFieldPolicies({
-              policiesObj: mutablePolicies,
+              policiesObj,
               fields: tab.fields,
               operation,
               entityAccessPromise,

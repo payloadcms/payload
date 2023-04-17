@@ -58,6 +58,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const getVersions = useCallback(async () => {
     let versionFetchURL;
     let publishedFetchURL;
+    let draftsEnabled = false;
     let shouldFetchVersions = false;
     let unpublishedVersionJSON = null;
     let versionJSON = null;
@@ -93,12 +94,14 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     };
 
     if (global) {
+      draftsEnabled = Boolean(global?.versions?.drafts);
       shouldFetchVersions = Boolean(global?.versions);
       versionFetchURL = `${baseURL}/globals/${global.slug}/versions`;
       publishedFetchURL = `${baseURL}/globals/${global.slug}?${qs.stringify(publishedVersionParams)}`;
     }
 
     if (collection) {
+      draftsEnabled = Boolean(collection?.versions?.drafts);
       shouldFetchVersions = Boolean(collection?.versions);
       versionFetchURL = `${baseURL}/${collection.slug}/versions`;
 
@@ -122,15 +125,19 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
 
     if (shouldFetch) {
-      let publishedJSON = await fetch(publishedFetchURL, {
-        credentials: 'include',
-        headers: {
-          'Accept-Language': i18n.language,
-        },
-      }).then((res) => res.json());
+      let publishedJSON;
 
-      if (collection) {
-        publishedJSON = publishedJSON?.docs?.[0];
+      if (draftsEnabled) {
+        publishedJSON = await fetch(publishedFetchURL, {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        }).then((res) => res.json());
+
+        if (collection) {
+          publishedJSON = publishedJSON?.docs?.[0];
+        }
       }
 
       if (shouldFetchVersions) {
