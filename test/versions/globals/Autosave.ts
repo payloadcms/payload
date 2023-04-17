@@ -4,7 +4,9 @@ import { autoSaveGlobalSlug } from '../shared';
 const AutosaveGlobal: GlobalConfig = {
   slug: autoSaveGlobalSlug,
   label: 'Autosave Global',
-  preview: () => 'https://payloadcms.com',
+  admin: {
+    preview: () => 'https://payloadcms.com',
+  },
   versions: {
     max: 20,
     drafts: {
@@ -12,13 +14,25 @@ const AutosaveGlobal: GlobalConfig = {
     },
   },
   access: {
-    read: ({ draft, req: { user } }) => {
-      // To read a draft of this global, you need to be authenticated
-      if (draft) {
-        return Boolean(user);
+    read: ({ req: { user } }) => {
+      if (user) {
+        return true;
       }
 
-      return true;
+      return {
+        or: [
+          {
+            _status: {
+              equals: 'published',
+            },
+          },
+          {
+            _status: {
+              exists: false,
+            },
+          },
+        ],
+      };
     },
   },
   fields: [
