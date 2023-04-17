@@ -106,6 +106,8 @@ Here is a list of all properties available to pass through `payload.init`:
 
 **Required**. This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess. Often, it's smart to store this value in an `env` and set different values for each of your environments (local, stage, prod, etc). The `dotenv` package is very handy and works well alongside of Payload.
 
+Payload uses the secret key to generate a secure user token (JWT). Behind the scenes, we first take the secret key and create an encrypted string using the SHA-256 hash function. Then, we reduce the encrypted string to its first 32 characters. This final value gets assigned to the user object as `token`.  
+
 ##### `mongoURL`
 
 **Required**. This is a fully qualified MongoDB connection string that points to your Mongo database. If you don't have Mongo installed locally, you can [follow these steps for Mac OSX](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/) and [these steps](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/) for Windows 10. If you want to use a local database and you know you have MongoDB installed locally, a typical connection string will look like this:
