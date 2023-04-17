@@ -62,6 +62,8 @@ import Logger from './utilities/logger';
 import PreferencesModel from './preferences/model';
 import findConfig from './config/find';
 
+import { defaults as emailDefaults } from './email/defaults';
+
 /**
  * @description Payload
  */
@@ -160,7 +162,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       throw new Error('Error: missing MongoDB connection URL.');
     }
 
-    this.emailOptions = { ...(options.email) };
     this.secret = crypto
       .createHash('sha256')
       .update(options.secret)
@@ -188,6 +189,12 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     }
 
     // Configure email service
+    const emailOptions = options.email ? { ...(options.email) } : this.config.email;
+    if (options.email && this.config.email) {
+      this.logger.warn('Email options provided in both init options and config. Using init options.');
+    }
+
+    this.emailOptions = emailOptions ?? emailDefaults;
     this.email = buildEmail(this.emailOptions, this.logger);
     this.sendEmail = sendEmail.bind(this);
 
