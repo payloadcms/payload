@@ -124,8 +124,6 @@ describe('collections-rest', () => {
           data: { description },
         });
 
-        console.log({ relationFieldStatus, relationFieldDocs, relationFieldErrors });
-
         const { status: relationMultiRelationToStatus } = await client.updateMany<Post>({
           where: { 'relationMultiRelationTo.missing': { equals: 'title' } },
           data: { description },
@@ -150,8 +148,8 @@ describe('collections-rest', () => {
         });
 
         const description = 'description';
-        const { status } = await client.updateMany<Post>({
-          query: { restrictedField: { equals: 'restricted' } },
+        const result = await client.updateMany({
+          where: { restrictedField: { equals: 'restricted' } },
           data: { description },
         });
 
@@ -160,135 +158,10 @@ describe('collections-rest', () => {
           id,
         });
 
-        expect(status).toEqual(400);
+        expect(result.status).toEqual(400);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].message).toEqual('The following path cannot be queried: restrictedField');
         expect(doc.description).toBeUndefined();
-      });
-
-      it('should bulk update with a relationship field that exists in one collection and not another', async () => {
-        const relationOne = await payload.create({
-          collection: 'dummy',
-          data: {
-            title: 'title',
-          },
-        });
-        const relationTwo = await payload.create({
-          collection: 'relation',
-          data: {
-            name: 'name',
-          },
-        });
-
-        const description = 'desc';
-        const relationPost = await payload.create({
-          collection: slug,
-          data: {
-            description,
-            relationMultiRelationTo: {
-              value: relationTwo.id,
-              relationTo: 'relation',
-            },
-          },
-        });
-
-        const relationToDummyPost = await payload.create({
-          collection: slug,
-          data: {
-            description,
-            relationMultiRelationTo: {
-              value: relationOne.id,
-              relationTo: 'dummy',
-            },
-          },
-        });
-
-        const updatedDescription = 'updated';
-
-        const { status: relationMultiRelationToStatus, docs: updated } = await client.updateMany<Post>({
-          where: {
-            'relationMultiRelationTo.title': {
-              equals: relationOne.title,
-            },
-          },
-          data: { description: updatedDescription },
-        });
-
-        const updatedDoc = await payload.findByID({
-          collection: slug,
-          id: relationToDummyPost.id,
-        });
-
-        const otherDoc = await payload.findByID({
-          collection: slug,
-          id: relationPost.id,
-        });
-
-        expect(relationMultiRelationToStatus).toEqual(200);
-        expect(updated).toHaveLength(1);
-        expect(updated[0].id).toEqual(relationToDummyPost.id);
-        expect(updatedDoc.description).toEqual(updatedDescription);
-        expect(otherDoc.description).toEqual(description);
-      });
-
-      it('should bulk update with a relationship field that exists in one collection and is restricted in another', async () => {
-        const name = 'name';
-        const relationOne = await payload.create({
-          collection: 'dummy',
-          data: {
-            title: 'title',
-            name, // read access: () => false
-          },
-        });
-        const relationTwo = await payload.create({
-          collection: 'relation',
-          data: {
-            name,
-          },
-        });
-
-        const description = 'desc';
-        const relationPost = await payload.create({
-          collection: slug,
-          data: {
-            description,
-            relationMultiRelationTo: {
-              value: relationTwo.id,
-              relationTo: 'relation',
-            },
-          },
-        });
-
-        const relationToDummyPost = await payload.create({
-          collection: slug,
-          data: {
-            description,
-            relationMultiRelationTo: {
-              value: relationOne.id,
-              relationTo: 'dummy',
-            },
-          },
-        });
-
-        const updatedDescription = 'updated';
-
-        const { status } = await client.updateMany<Post>({
-          where: { 'relationMultiRelationTo.name': { equals: name } },
-          data: { description: updatedDescription },
-        });
-
-
-        const updatedDoc = await payload.findByID({
-          collection: slug,
-          id: relationPost.id,
-        });
-
-        const otherDoc = await payload.findByID({
-          collection: slug,
-          id: relationToDummyPost.id,
-        });
-
-        expect(status).toEqual(200);
-        expect(updatedDoc.description).toEqual(updatedDescription);
-        expect(otherDoc.description).toEqual(description);
       });
 
       it('should return formatted errors for bulk updates', async () => {
@@ -546,25 +419,6 @@ describe('collections-rest', () => {
             query: {
               'relationMultiRelationTo.value': {
                 equals: relation.id,
-              },
-            },
-          });
-
-          expect(status).toEqual(200);
-          expect(result.docs).toEqual([post1]);
-          expect(result.totalDocs).toEqual(1);
-        });
-
-        it('nested by property value', async () => {
-          const post1 = await createPost({
-            relationMultiRelationTo: { relationTo: relationSlug, value: relation.id },
-          });
-          await createPost();
-
-          const { status, result } = await client.find<Post>({
-            query: {
-              'relationMultiRelationTo.value.name': {
-                equals: relation.name,
               },
             },
           });

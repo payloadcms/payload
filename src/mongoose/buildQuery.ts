@@ -7,7 +7,7 @@ import { combineMerge } from '../utilities/combineMerge';
 import { operatorMap } from './operatorMap';
 import { sanitizeQueryValue } from './sanitizeQueryValue';
 import { PayloadRequest, Where } from '../types';
-import { Field, FieldAffectingData, TabAsField, UIField, fieldAffectsData } from '../fields/config/types';
+import { Field, FieldAffectingData, fieldAffectsData, TabAsField, UIField } from '../fields/config/types';
 import { CollectionPermission, FieldPermissions, GlobalPermission } from '../auth';
 import flattenFields from '../utilities/flattenTopLevelFields';
 import { getEntityPolicies } from '../utilities/getEntityPolicies';
@@ -566,8 +566,8 @@ const getBuildQueryPlugin = ({
       });
       const result = await paramParser.parse();
 
-      if (this.errors.length > 0) {
-        throw new QueryError(this.errors);
+      if (paramParser.errors.length > 0) {
+        throw new QueryError(paramParser.errors);
       }
 
       return result;
