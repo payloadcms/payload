@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
 import { initPayloadTest } from '../helpers/configHelpers';
 import type { Relation } from './config';
-import config, { customIdNumberSlug, customIdSlug, slug, relationSlug, pointSlug, errorOnHookSlug } from './config';
+import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug } from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
 import type { ErrorOnHook, Post } from './payload-types';
@@ -49,10 +49,16 @@ describe('collections-rest', () => {
     });
 
     it('should update existing', async () => {
-      const { id, description } = await createPost({ description: 'desc' });
+      const {
+        id,
+        description,
+      } = await createPost({ description: 'desc' });
       const updatedTitle = 'updated-title';
 
-      const { status, doc: updated } = await client.update<Post>({
+      const {
+        status,
+        doc: updated,
+      } = await client.update<Post>({
         id,
         data: { title: updatedTitle },
       });
@@ -62,98 +68,305 @@ describe('collections-rest', () => {
       expect(updated.description).toEqual(description); // Check was not modified
     });
 
-    it('should bulk update', async () => {
-      await mapAsync([...Array(11)], async (_, i) => {
-        await createPost({ description: `desc ${i}` });
+    describe('Bulk operations', () => {
+      it('should bulk update', async () => {
+        await mapAsync([...Array(11)], async (_, i) => {
+          await createPost({ description: `desc ${i}` });
+        });
+
+        const description = 'updated';
+        const {
+          status,
+          docs,
+        } = await client.updateMany<Post>({
+          where: { title: { equals: 'title' } },
+          data: { description },
+        });
+
+        expect(status).toEqual(200);
+        expect(docs[0].title).toEqual('title'); // Check was not modified
+        expect(docs[0].description).toEqual(description);
+        expect(docs.pop().description).toEqual(description);
       });
 
-      const description = 'updated';
-      const { status, docs } = await client.updateMany<Post>({
-        query: { title: { equals: 'title' } },
-        data: { description },
+      it('should not bulk update with a bad query', async () => {
+        await mapAsync([...Array(2)], async (_, i) => {
+          await createPost({ description: `desc ${i}` });
+        });
+
+        const description = 'updated';
+
+        const { status, docs: noDocs, errors } = await client.updateMany<Post>({
+          where: { missing: { equals: 'title' } },
+          data: { description },
+        });
+
+        expect(status).toEqual(400);
+        expect(noDocs).toBeUndefined();
+        expect(errors).toHaveLength(1);
+
+        const { docs } = await payload.find({
+          collection: slug,
+        });
+
+        expect(docs[0].description).not.toEqual(description);
+        expect(docs.pop().description).not.toEqual(description);
       });
 
-      expect(status).toEqual(200);
-      expect(docs[0].title).toEqual('title'); // Check was not modified
-      expect(docs[0].description).toEqual(description);
-      expect(docs.pop().description).toEqual(description);
-    });
+      it('should not bulk update with a bad relationship query', async () => {
+        await mapAsync([...Array(2)], async (_, i) => {
+          await createPost({ description: `desc ${i}` });
+        });
 
-    it('should return formatted errors for bulk updates', async () => {
-      const text = 'bulk-update-test-errors';
-      const errorDoc = await payload.create({
-        collection: errorOnHookSlug,
-        data: {
-          text,
-          errorBeforeChange: true,
-        },
-      });
-      const successDoc = await payload.create({
-        collection: errorOnHookSlug,
-        data: {
-          text,
-          errorBeforeChange: false,
-        },
-      });
+        const description = 'updated';
+        const { status: relationFieldStatus, docs: relationFieldDocs, errors: relationFieldErrors } = await client.updateMany<Post>({
+          where: { 'relationField.missing': { equals: 'title' } },
+          data: { description },
+        });
 
-      const update = 'update';
+        console.log({ relationFieldStatus, relationFieldDocs, relationFieldErrors });
 
-      const result = await client.updateMany<ErrorOnHook>({
-        slug: errorOnHookSlug,
-        query: { text: { equals: text } },
-        data: { text: update },
+        const { status: relationMultiRelationToStatus } = await client.updateMany<Post>({
+          where: { 'relationMultiRelationTo.missing': { equals: 'title' } },
+          data: { description },
+        });
+
+        const { docs } = await payload.find({
+          collection: slug,
+        });
+
+        expect(relationFieldStatus).toEqual(400);
+        expect(relationMultiRelationToStatus).toEqual(400);
+        expect(docs[0].description).not.toEqual(description);
+        expect(docs.pop().description).not.toEqual(description);
       });
 
-      expect(result.status).toEqual(400);
-      expect(result.docs).toHaveLength(1);
-      expect(result.docs[0].id).toEqual(successDoc.id);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].message).toBeDefined();
-      expect(result.errors[0].id).toEqual(errorDoc.id);
-      expect(result.docs[0].text).toEqual(update);
-    });
+      it('should not bulk update with a read restricted field query', async () => {
+        const { id } = await payload.create({
+          collection: slug,
+          data: {
+            restrictedField: 'restricted',
+          },
+        });
 
-    it('should bulk delete', async () => {
-      const count = 11;
-      await mapAsync([...Array(count)], async (_, i) => {
-        await createPost({ description: `desc ${i}` });
+        const description = 'description';
+        const { status } = await client.updateMany<Post>({
+          query: { restrictedField: { equals: 'restricted' } },
+          data: { description },
+        });
+
+        const doc = await payload.findByID({
+          collection: slug,
+          id,
+        });
+
+        expect(status).toEqual(400);
+        expect(doc.description).toBeUndefined();
       });
 
-      const { status, docs } = await client.deleteMany<Post>({
-        query: { title: { eq: 'title' } },
+      it('should bulk update with a relationship field that exists in one collection and not another', async () => {
+        const relationOne = await payload.create({
+          collection: 'dummy',
+          data: {
+            title: 'title',
+          },
+        });
+        const relationTwo = await payload.create({
+          collection: 'relation',
+          data: {
+            name: 'name',
+          },
+        });
+
+        const description = 'desc';
+        const relationPost = await payload.create({
+          collection: slug,
+          data: {
+            description,
+            relationMultiRelationTo: {
+              value: relationTwo.id,
+              relationTo: 'relation',
+            },
+          },
+        });
+
+        const relationToDummyPost = await payload.create({
+          collection: slug,
+          data: {
+            description,
+            relationMultiRelationTo: {
+              value: relationOne.id,
+              relationTo: 'dummy',
+            },
+          },
+        });
+
+        const updatedDescription = 'updated';
+
+        const { status: relationMultiRelationToStatus, docs: updated } = await client.updateMany<Post>({
+          where: {
+            'relationMultiRelationTo.title': {
+              equals: relationOne.title,
+            },
+          },
+          data: { description: updatedDescription },
+        });
+
+        const updatedDoc = await payload.findByID({
+          collection: slug,
+          id: relationToDummyPost.id,
+        });
+
+        const otherDoc = await payload.findByID({
+          collection: slug,
+          id: relationPost.id,
+        });
+
+        expect(relationMultiRelationToStatus).toEqual(200);
+        expect(updated).toHaveLength(1);
+        expect(updated[0].id).toEqual(relationToDummyPost.id);
+        expect(updatedDoc.description).toEqual(updatedDescription);
+        expect(otherDoc.description).toEqual(description);
       });
 
-      expect(status).toEqual(200);
-      expect(docs[0].title).toEqual('title'); // Check was not modified
-      expect(docs).toHaveLength(count);
-    });
+      it('should bulk update with a relationship field that exists in one collection and is restricted in another', async () => {
+        const name = 'name';
+        const relationOne = await payload.create({
+          collection: 'dummy',
+          data: {
+            title: 'title',
+            name, // read access: () => false
+          },
+        });
+        const relationTwo = await payload.create({
+          collection: 'relation',
+          data: {
+            name,
+          },
+        });
 
-    it('should return formatted errors for bulk deletes', async () => {
-      await payload.create({
-        collection: errorOnHookSlug,
-        data: {
-          text: 'test',
-          errorAfterDelete: true,
-        },
-      });
-      await payload.create({
-        collection: errorOnHookSlug,
-        data: {
-          text: 'test',
-          errorAfterDelete: false,
-        },
+        const description = 'desc';
+        const relationPost = await payload.create({
+          collection: slug,
+          data: {
+            description,
+            relationMultiRelationTo: {
+              value: relationTwo.id,
+              relationTo: 'relation',
+            },
+          },
+        });
+
+        const relationToDummyPost = await payload.create({
+          collection: slug,
+          data: {
+            description,
+            relationMultiRelationTo: {
+              value: relationOne.id,
+              relationTo: 'dummy',
+            },
+          },
+        });
+
+        const updatedDescription = 'updated';
+
+        const { status } = await client.updateMany<Post>({
+          where: { 'relationMultiRelationTo.name': { equals: name } },
+          data: { description: updatedDescription },
+        });
+
+
+        const updatedDoc = await payload.findByID({
+          collection: slug,
+          id: relationPost.id,
+        });
+
+        const otherDoc = await payload.findByID({
+          collection: slug,
+          id: relationToDummyPost.id,
+        });
+
+        expect(status).toEqual(200);
+        expect(updatedDoc.description).toEqual(updatedDescription);
+        expect(otherDoc.description).toEqual(description);
       });
 
-      const result = await client.deleteMany({
-        slug: errorOnHookSlug,
-        query: { text: { equals: 'test' } },
+      it('should return formatted errors for bulk updates', async () => {
+        const text = 'bulk-update-test-errors';
+        const errorDoc = await payload.create({
+          collection: errorOnHookSlug,
+          data: {
+            text,
+            errorBeforeChange: true,
+          },
+        });
+        const successDoc = await payload.create({
+          collection: errorOnHookSlug,
+          data: {
+            text,
+            errorBeforeChange: false,
+          },
+        });
+
+        const update = 'update';
+
+        const result = await client.updateMany<ErrorOnHook>({
+          slug: errorOnHookSlug,
+          where: { text: { equals: text } },
+          data: { text: update },
+        });
+
+        expect(result.status).toEqual(400);
+        expect(result.docs).toHaveLength(1);
+        expect(result.docs[0].id).toEqual(successDoc.id);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].message).toBeDefined();
+        expect(result.errors[0].id).toEqual(errorDoc.id);
+        expect(result.docs[0].text).toEqual(update);
       });
 
-      expect(result.status).toEqual(400);
-      expect(result.docs).toHaveLength(1);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].message).toBeDefined();
-      expect(result.errors[0].id).toBeDefined();
+      it('should bulk delete', async () => {
+        const count = 11;
+        await mapAsync([...Array(count)], async (_, i) => {
+          await createPost({ description: `desc ${i}` });
+        });
+
+        const { status, docs } = await client.deleteMany<Post>({
+          where: { title: { eq: 'title' } },
+        });
+
+        expect(status).toEqual(200);
+        expect(docs[0].title).toEqual('title'); // Check was not modified
+        expect(docs).toHaveLength(count);
+      });
+
+      it('should return formatted errors for bulk deletes', async () => {
+        await payload.create({
+          collection: errorOnHookSlug,
+          data: {
+            text: 'test',
+            errorAfterDelete: true,
+          },
+        });
+        await payload.create({
+          collection: errorOnHookSlug,
+          data: {
+            text: 'test',
+            errorAfterDelete: false,
+          },
+        });
+
+        const result = await client.deleteMany({
+          slug: errorOnHookSlug,
+          where: { text: { equals: 'test' } },
+        });
+
+        expect(result.status).toEqual(400);
+        expect(result.docs).toHaveLength(1);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].message).toBeDefined();
+        expect(result.errors[0].id).toBeDefined();
+      });
     });
 
     describe('Custom ID', () => {
@@ -342,7 +555,24 @@ describe('collections-rest', () => {
           expect(result.totalDocs).toEqual(1);
         });
 
-        it.todo('nested by property value');
+        it('nested by property value', async () => {
+          const post1 = await createPost({
+            relationMultiRelationTo: { relationTo: relationSlug, value: relation.id },
+          });
+          await createPost();
+
+          const { status, result } = await client.find<Post>({
+            query: {
+              'relationMultiRelationTo.value.name': {
+                equals: relation.name,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toEqual([post1]);
+          expect(result.totalDocs).toEqual(1);
+        });
       });
 
       describe('relationTo multi hasMany', () => {

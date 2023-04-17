@@ -12,6 +12,7 @@ import { CollectionPermission, FieldPermissions, GlobalPermission } from '../aut
 import flattenFields from '../utilities/flattenTopLevelFields';
 import { getEntityPolicies } from '../utilities/getEntityPolicies';
 import { SanitizedConfig } from '../config/types';
+import QueryError from '../errors/QueryError';
 
 const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
 
@@ -46,8 +47,6 @@ type ParamParserArgs = {
   overrideAccess?: boolean
 }
 
-type QueryError = { path: string }
-
 export class ParamParser {
   collectionSlug?: string
 
@@ -74,7 +73,7 @@ export class ParamParser {
     };
   }
 
-  errors: QueryError[]
+  errors: { path: string }[]
 
   constructor({
     req,
@@ -566,7 +565,11 @@ const getBuildQueryPlugin = ({
         overrideAccess,
       });
       const result = await paramParser.parse();
-      // TODO: throw errors here
+
+      if (this.errors.length > 0) {
+        throw new QueryError(this.errors);
+      }
+
       return result;
     }
     modifiedSchema.statics.buildQuery = buildQuery;
