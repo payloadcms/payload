@@ -7,7 +7,7 @@ import CustomMinimalRoute from './components/views/CustomMinimal';
 import CustomDefaultRoute from './components/views/CustomDefault';
 import BeforeLogin from './components/BeforeLogin';
 import AfterNavLinks from './components/AfterNavLinks';
-import { slug, globalSlug } from './shared';
+import { globalSlug, slug } from './shared';
 import Logout from './components/Logout';
 import DemoUIFieldField from './components/DemoUIField/Field';
 import DemoUIFieldCell from './components/DemoUIField/Cell';
@@ -67,6 +67,18 @@ export default buildConfig({
       slug: 'users',
       auth: true,
       fields: [],
+    },
+    {
+      slug: 'hidden-collection',
+      admin: {
+        hidden: () => true,
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
     },
     {
       slug,
@@ -176,6 +188,18 @@ export default buildConfig({
     },
   ],
   globals: [
+    {
+      slug: 'hidden-global',
+      admin: {
+        hidden: () => true,
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
     {
       slug: globalSlug,
       label: {
