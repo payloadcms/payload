@@ -189,6 +189,8 @@ export type Endpoint = {
    * @default false
    */
   root?: boolean;
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
 export type AdminView = React.ComponentType<{
@@ -527,14 +529,17 @@ export type Config = {
   telemetry?: boolean;
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void;
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'globals'
+  'collections' | 'globals' | 'endpoint'
 > & {
   collections: SanitizedCollectionConfig[];
   globals: SanitizedGlobalConfig[];
+  endpoints: Endpoint[];
   paths: {
     configDir: string
     config: string

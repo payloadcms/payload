@@ -27,8 +27,9 @@ It's often best practice to write your Collections in separate files and then im
 | **`endpoints`**    | Add custom routes to the REST API. [More](/docs/rest-api/overview#custom-endpoints)                                                                                                                                      |
 | **`graphQL`**      | An object with `singularName` and `pluralName` strings used in schema generation. Auto-generated from slug if not defined.                                                                                               |
 | **`typescript`**   | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                      |
-| **`defaultSort`**  | Pass a top-level field to sort by default in the collection List view. Prefix the name of the field with a minus symbol ("-") to sort in descending order.                                                                |
-| **`pagination`**   | Set pagination-specific options for this collection. [More](#pagination) |
+| **`defaultSort`**  | Pass a top-level field to sort by default in the collection List view. Prefix the name of the field with a minus symbol ("-") to sort in descending order.                                                               |
+| **`pagination`**   | Set pagination-specific options for this collection. [More](#pagination)                                                                                                                                                 |
+| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                |
 
 *\* An asterisk denotes that a property is required.*
 

@@ -13,6 +13,7 @@ export const endpointsSchema = joi.array().items(joi.object({
     joi.array().items(joi.func()),
     joi.func(),
   ),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 }));
 
 export default joi.object({
@@ -162,4 +163,5 @@ export default joi.object({
   ),
   onInit: joi.func(),
   debug: joi.boolean(),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 });

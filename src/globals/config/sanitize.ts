@@ -49,6 +49,8 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
 
         sanitizedGlobal.fields = mergeBaseFields(sanitizedGlobal.fields, baseVersionFields);
       }
+
+      if (!sanitizedGlobal.custom) sanitizedGlobal.custom = {};
     }
 
     // /////////////////////////////////
