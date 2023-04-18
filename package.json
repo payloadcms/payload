@@ -48,7 +48,6 @@
     "test:components": "cross-env jest --config=jest.components.config.js",
     "clean:cache": "rimraf node_modules/.cache",
     "clean": "rimraf dist",
-    "release": "release-it",
     "release:patch": "release-it patch",
     "release:minor": "release-it minor",
     "release:major": "release-it major",
