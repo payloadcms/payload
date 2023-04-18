@@ -334,6 +334,7 @@ const Form: React.FC<Props> = (props) => {
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
     const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation, locale, t });
     contextRef.current = { ...initContextState } as FormContextType;
+    setModified(false);
     dispatchFields({ type: 'REPLACE_STATE', state });
   }, [id, user, operation, locale, t, dispatchFields]);
 
