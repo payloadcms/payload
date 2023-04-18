@@ -1,1 +1,0 @@
-{"version":3,"file":"serverInit.js","sourceRoot":"","sources":["../../../../src/utilities/telemetry/events/serverInit.ts"],"names":[],"mappings":";;;AAAA,0BAA+B;AAOxB,MAAM,UAAU,GAAG,CAAC,OAAgB,EAAQ,EAAE;IACnD,IAAA,aAAS,EAAC;QACR,OAAO;QACP,KAAK,EAAE;YACL,IAAI,EAAE,aAAa;SACpB;KACF,CAAC,CAAC;AACL,CAAC,CAAC;AAPW,QAAA,UAAU,cAOrB"}

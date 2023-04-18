@@ -52,7 +52,6 @@ export const baseField = joi.object().keys({
       afterRead: joi.array().items(joi.func()).default([]),
     }).default(),
   admin: baseAdminFields.default(),
-  custom: joi.object().pattern(joi.string(), joi.any()),
 }).default();
 
 export const idField = baseField.keys({

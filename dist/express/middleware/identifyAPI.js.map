@@ -1,1 +1,0 @@
-{"version":3,"file":"identifyAPI.js","sourceRoot":"","sources":["../../../src/express/middleware/identifyAPI.ts"],"names":[],"mappings":";;AAAA,MAAM,WAAW,GAAG,CAAC,GAAG,EAAE,EAAE;IAC1B,OAAO,CAAC,GAAG,EAAE,CAAC,EAAE,IAAI,EAAE,EAAE;QACtB,GAAG,CAAC,UAAU,GAAG,GAAG,CAAC;QACrB,IAAI,EAAE,CAAC;IACT,CAAC,CAAC;AACJ,CAAC,CAAC;AAEF,kBAAe,WAAW,CAAC"}

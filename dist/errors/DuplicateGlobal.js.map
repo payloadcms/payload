@@ -1,1 +1,0 @@
-{"version":3,"file":"DuplicateGlobal.js","sourceRoot":"","sources":["../../src/errors/DuplicateGlobal.ts"],"names":[],"mappings":";;;;;AACA,0DAAkC;AAElC,MAAM,eAAgB,SAAQ,kBAAQ;IACpC,YAAY,MAAoB;QAC9B,KAAK,CAAC,iBAAiB,MAAM,CAAC,KAAK,qBAAqB,CAAC,CAAC;IAC5D,CAAC;CACF;AAED,kBAAe,eAAe,CAAC"}

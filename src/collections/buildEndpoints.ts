@@ -64,7 +64,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
           method: 'post',
           handler: resetPassword,
         },
-      ]) as typeof endpoints;
+      ]);
     }
 
     endpoints = endpoints.concat([
@@ -88,7 +88,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         method: 'post',
         handler: refreshHandler,
       },
-    ]) as typeof endpoints;
+    ]);
   }
 
   if (collection.versions) {
@@ -108,7 +108,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         method: 'post',
         handler: restoreVersion,
       },
-    ]) as typeof endpoints;
+    ]);
   }
 
   return endpoints.concat([
