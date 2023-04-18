@@ -73,14 +73,14 @@ export default function registerSchema(payload: Payload): void {
 
   payload.schema = new GraphQLSchema(schema);
 
-  payload.validationRules = (variables) => ([
+  payload.validationRules = ({ variableValues }) => ([
     queryComplexity({
       estimators: [
         fieldExtensionsEstimator(),
         simpleEstimator({ defaultComplexity: 1 }), // Fallback if complexity not set
       ],
       maximumComplexity: payload.config.graphQL.maxComplexity,
-      variables,
+      variables: variableValues,
       // onComplete: (complexity) => { console.log('Query Complexity:', complexity); },
     }),
   ]);
