@@ -21,7 +21,7 @@ import wait from '../../../../utilities/wait';
 import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types';
+import { Fields, Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types';
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
@@ -337,6 +337,12 @@ const Form: React.FC<Props> = (props) => {
     dispatchFields({ type: 'REPLACE_STATE', state });
   }, [id, user, operation, locale, t, dispatchFields]);
 
+  const replaceState = useCallback((state: Fields) => {
+    contextRef.current = { ...initContextState } as FormContextType;
+    setModified(false);
+    dispatchFields({ type: 'REPLACE_STATE', state });
+  }, [dispatchFields]);
+
   contextRef.current.submit = submit;
   contextRef.current.getFields = getFields;
   contextRef.current.getField = getField;
@@ -351,6 +357,7 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.disabled = disabled;
   contextRef.current.formRef = formRef;
   contextRef.current.reset = reset;
+  contextRef.current.replaceState = replaceState;
 
   useEffect(() => {
     if (initialState) {
