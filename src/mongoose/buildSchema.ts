@@ -161,7 +161,20 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     });
   },
   point: (field: PointField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
-    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Number };
+    const baseSchema: SchemaTypeOptions<unknown> = {
+      type: {
+        type: String,
+        enum: ['Point'],
+      },
+      coordinates: {
+        type: [Number],
+        required: false,
+        default: field.defaultValue || undefined,
+      },
+    };
+    if (buildSchemaOptions.disableUnique && field.unique && field.localized) {
+      baseSchema.coordinates.sparse = true;
+    }
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
