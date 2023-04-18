@@ -121,7 +121,9 @@ const Routes = () => {
                                                 react_1.default.createElement(react_router_dom_1.Route, { path: `${match.url}/account` },
                                                     react_1.default.createElement(DocumentInfo_1.DocumentInfoProvider, { collection: collections.find(({ slug }) => slug === userSlug), id: user.id },
                                                         react_1.default.createElement(Account, null))),
-                                                collections.reduce((collectionRoutes, collection) => {
+                                                collections
+                                                    .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
+                                                    .reduce((collectionRoutes, collection) => {
                                                     const routesToReturn = [
                                                         ...collectionRoutes,
                                                         react_1.default.createElement(react_router_dom_1.Route, { key: `${collection.slug}-list`, path: `${match.url}/collections/${collection.slug}`, exact: true, render: (routeProps) => {
@@ -168,7 +170,9 @@ const Routes = () => {
                                                     }
                                                     return routesToReturn;
                                                 }, []),
-                                                globals && globals.reduce((globalRoutes, global) => {
+                                                globals && globals
+                                                    .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
+                                                    .reduce((globalRoutes, global) => {
                                                     const routesToReturn = [
                                                         ...globalRoutes,
                                                         react_1.default.createElement(react_router_dom_1.Route, { key: `${global.slug}`, path: `${match.url}/globals/${global.slug}`, exact: true, render: (routeProps) => {

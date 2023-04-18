@@ -47,7 +47,6 @@ exports.baseField = joi_1.default.object().keys({
         afterRead: joi_1.default.array().items(joi_1.default.func()).default([]),
     }).default(),
     admin: exports.baseAdminFields.default(),
-    custom: joi_1.default.object().pattern(joi_1.default.string(), joi_1.default.any()),
 }).default();
 exports.idField = exports.baseField.keys({
     name: joi_1.default.string().valid('id'),

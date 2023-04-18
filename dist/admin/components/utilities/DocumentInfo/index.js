@@ -65,9 +65,10 @@ const DocumentInfoProvider = ({ children, global, collection, id, }) => {
         }
     }
     const getVersions = (0, react_1.useCallback)(async () => {
-        var _a;
+        var _a, _b, _c;
         let versionFetchURL;
         let publishedFetchURL;
+        let draftsEnabled = false;
         let shouldFetchVersions = false;
         let unpublishedVersionJSON = null;
         let versionJSON = null;
@@ -100,11 +101,13 @@ const DocumentInfoProvider = ({ children, global, collection, id, }) => {
             depth: 0,
         };
         if (global) {
+            draftsEnabled = Boolean((_a = global === null || global === void 0 ? void 0 : global.versions) === null || _a === void 0 ? void 0 : _a.drafts);
             shouldFetchVersions = Boolean(global === null || global === void 0 ? void 0 : global.versions);
             versionFetchURL = `${baseURL}/globals/${global.slug}/versions`;
             publishedFetchURL = `${baseURL}/globals/${global.slug}?${qs_1.default.stringify(publishedVersionParams)}`;
         }
         if (collection) {
+            draftsEnabled = Boolean((_b = collection === null || collection === void 0 ? void 0 : collection.versions) === null || _b === void 0 ? void 0 : _b.drafts);
             shouldFetchVersions = Boolean(collection === null || collection === void 0 ? void 0 : collection.versions);
             versionFetchURL = `${baseURL}/${collection.slug}/versions`;
             publishedVersionParams.where.and.push({
@@ -123,14 +126,17 @@ const DocumentInfoProvider = ({ children, global, collection, id, }) => {
             });
         }
         if (shouldFetch) {
-            let publishedJSON = await fetch(publishedFetchURL, {
-                credentials: 'include',
-                headers: {
-                    'Accept-Language': i18n.language,
-                },
-            }).then((res) => res.json());
-            if (collection) {
-                publishedJSON = (_a = publishedJSON === null || publishedJSON === void 0 ? void 0 : publishedJSON.docs) === null || _a === void 0 ? void 0 : _a[0];
+            let publishedJSON;
+            if (draftsEnabled) {
+                publishedJSON = await fetch(publishedFetchURL, {
+                    credentials: 'include',
+                    headers: {
+                        'Accept-Language': i18n.language,
+                    },
+                }).then((res) => res.json());
+                if (collection) {
+                    publishedJSON = (_c = publishedJSON === null || publishedJSON === void 0 ? void 0 : publishedJSON.docs) === null || _c === void 0 ? void 0 : _c[0];
+                }
             }
             if (shouldFetchVersions) {
                 versionJSON = await fetch(`${versionFetchURL}?${qs_1.default.stringify(versionParams)}`, {
