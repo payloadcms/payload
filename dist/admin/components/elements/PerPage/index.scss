@@ -1,0 +1,37 @@
+@import '../../../scss/styles.scss';
+
+.per-page {
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .popup-button--default {
+    @extend %btn-reset;
+    position: relative;
+    cursor: pointer;
+  }
+
+  &__button {
+    @extend %btn-reset;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__button-active {
+    font-weight: bold;
+
+    svg {
+      @include color-svg(var(--theme-elevation-1000));
+      margin-left: base(-.25);
+      margin-right: base(-.125);
+      transform: rotate(-90deg);
+    }
+  }
+}

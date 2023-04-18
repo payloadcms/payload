@@ -299,13 +299,16 @@ export type CollectionConfig = {
    * @default true
    */
   timestamps?: boolean
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
-export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions'> {
+export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions' | 'endpoints'> {
   auth: Auth;
   upload: Upload;
   fields: Field[];
-  versions: SanitizedCollectionVersions
+  versions: SanitizedCollectionVersions;
+  endpoints?: DeepRequired<Omit<CollectionConfig['endpoints'], 'custom'>>
 }
 
 export type Collection = {

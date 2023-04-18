@@ -1,0 +1,1 @@
+{"version":3,"file":"docAccess.js","sourceRoot":"","sources":["../../../../src/globals/graphql/resolvers/docAccess.ts"],"names":[],"mappings":";;;AAGA,0DAAuD;AAUvD,SAAgB,iBAAiB,CAAC,MAA6B;IAC7D,KAAK,UAAU,QAAQ,CAAC,CAAC,EAAE,OAAO;QAChC,OAAO,IAAA,qBAAS,EAAC;YACf,GAAG,EAAE,OAAO,CAAC,GAAG;YAChB,YAAY,EAAE,MAAM;SACrB,CAAC,CAAC;IACL,CAAC;IAED,OAAO,QAAQ,CAAC;AAClB,CAAC;AATD,8CASC"}

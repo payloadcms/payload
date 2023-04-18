@@ -1,0 +1,11 @@
+@import '../../../scss/styles';
+
+.icon--line {
+  width: $baseline;
+  height: $baseline;
+
+  .stroke {
+    stroke: var(--theme-elevation-800);
+    stroke-width: $style-stroke-width;
+  }
+}

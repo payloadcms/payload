@@ -1,0 +1,5 @@
+@import '../../../../../scss/styles.scss';
+
+.condition-value-text {
+  @include formInput;
+}

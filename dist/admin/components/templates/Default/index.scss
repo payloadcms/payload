@@ -1,0 +1,23 @@
+@import '../../../scss/styles.scss';
+
+.template-default {
+  min-height: 100vh;
+  display: flex;
+
+  &__wrap {
+    min-width: 0;
+    width: 100%;
+    flex-grow: 1;
+  }
+
+  @include mid-break {
+    display: block;
+    width: 100%;
+    margin-left: 0;
+    padding-top: base(3);
+
+    &__wrap {
+      padding: 0 0 $baseline;
+    }
+  }
+}

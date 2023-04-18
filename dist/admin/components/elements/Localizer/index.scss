@@ -1,0 +1,42 @@
+@import '../../../scss/styles.scss';
+
+.localizer {
+  position: relative;
+
+  button {
+    color: currentColor;
+    padding: base(.25) 0;
+    font-size: 1rem;
+    line-height: base(1);
+    background: transparent;
+    border: 0;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:active,
+    &:focus {
+      outline: none;
+    }
+  }
+
+  span {
+    color: var(--theme-elevation-400);
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    margin: 0;
+
+    a {
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

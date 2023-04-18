@@ -1,0 +1,1 @@
+{"version":3,"file":"defaultOptions.js","sourceRoot":"","sources":["../../src/translations/defaultOptions.ts"],"names":[],"mappings":";;;;;;AACA,oDAAmC;AAEtB,QAAA,cAAc,GAAgB;IACzC,WAAW,EAAE,IAAI;IACjB,KAAK,EAAE,KAAK;IACZ,aAAa,EAAE,MAAM,CAAC,IAAI,CAAC,eAAY,CAAC;IACxC,SAAS,EAAE,eAAY;IACvB,aAAa,EAAE;QACb,WAAW,EAAE,KAAK;KACnB;CACF,CAAC"}

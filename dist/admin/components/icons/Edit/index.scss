@@ -1,0 +1,12 @@
+@import '../../../scss/styles';
+
+.icon--edit {
+  height: $baseline;
+  width: $baseline;
+  shape-rendering: auto;
+
+  .fill {
+    fill: var(--theme-elevation-800);
+    stroke: none;
+  }
+}
