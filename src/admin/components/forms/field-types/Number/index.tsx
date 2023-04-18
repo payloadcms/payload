@@ -70,6 +70,7 @@ const NumberField: React.FC<Props> = (props) => {
     className,
     showError && 'error',
     readOnly && 'read-only',
+    hasMany && 'has-many',
   ].filter(Boolean).join(' ');
 
   const [valueToRender, setValueToRender] = useState<{label: any, value: any}[]>([]);
