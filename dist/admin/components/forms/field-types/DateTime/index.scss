@@ -1,0 +1,15 @@
+@import '../../../../scss/styles';
+
+.date-time-field {
+  margin-bottom: $baseline;
+
+  &__error-wrap {
+    position: relative;
+  }
+
+  &--has-error {
+    .react-datepicker__input-container input {
+      background-color: var(--theme-error-200);
+    }
+  }
+}

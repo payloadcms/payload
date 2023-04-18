@@ -1,0 +1,42 @@
+@import '../../../../scss/styles';
+
+.upload {
+  position: relative;
+  margin-bottom: $baseline;
+
+  &__wrap {
+    background: var(--theme-elevation-50);
+    padding: base(1);
+  }
+
+  &__buttons {
+    margin: base(-0.25);
+    width: calc(100% + #{base(0.5)});
+    flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+
+    .btn {
+      margin: 0
+    }
+  }
+
+  &__toggler {
+    margin: base(0.25);
+    min-width: base(7);
+  }
+
+  @include mid-break {
+    &__wrap {
+      padding: base(0.75);
+    }
+
+    &__buttons {
+      display: block;
+    }
+
+    &__toggler {
+      width: calc(100% - #{base(0.5)});
+    }
+  }
+}

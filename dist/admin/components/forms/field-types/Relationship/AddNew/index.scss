@@ -1,0 +1,48 @@
+@import '../../../../../scss/styles.scss';
+
+.relationship-add-new {
+  display: flex;
+  align-items: stretch;
+
+  .popup__wrapper {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+  }
+
+  &__add-button,
+  &__add-button.doc-drawer__toggler {
+    @include formInput;
+    position: relative;
+    height: 100%;
+    margin-left: -1px;
+    display: flex;
+    padding: 0 base(0.5);
+    align-items: center;
+    display: flex;
+    cursor: pointer;
+  }
+
+  &__relations {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li:not(:last-child) {
+      margin-bottom: base(.375);
+    }
+  }
+
+  &__relation-button {
+    @extend %btn-reset;
+    cursor: pointer;
+    display: block;
+    padding: base(.125) 0;
+    text-align: center;
+    width: 100%;
+
+    &:hover {
+      opacity: .7;
+    }
+  }
+}

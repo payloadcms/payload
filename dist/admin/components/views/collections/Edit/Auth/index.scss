@@ -1,0 +1,38 @@
+@import '../../../../../scss/styles.scss';
+
+.auth-fields {
+  margin: base(1.5) 0 base(2);
+  padding: base(2) base(2) base(1.5);
+  background: var(--theme-elevation-50);
+
+  .btn {
+    margin-top: 0;
+    margin-right: base(.5);
+  }
+
+  &__api-key-label {
+    position: relative;
+  }
+}
+
+.field-type.api-key {
+  margin-bottom: $baseline;
+
+  input {
+    @include formInput;
+  }
+}
+
+@keyframes highlight {
+  0% {
+    background: var(--theme-success-500);
+  }
+
+  100% {
+    background: none;
+  }
+}
+
+.highlight {
+  animation: highlight 10s;
+}

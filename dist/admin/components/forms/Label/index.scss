@@ -1,0 +1,15 @@
+@import '../../../scss/styles.scss';
+
+label.field-label {
+  @extend %body;
+  display: flex;
+  padding-bottom: base(.25);
+  color: var(--theme-elevation-800);
+  font-family: var(--font-body);
+
+  .required {
+    color: var(--theme-error-500);
+    margin-left: base(.25);
+    margin-right: auto;
+  }
+}

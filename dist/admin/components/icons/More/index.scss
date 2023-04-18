@@ -1,0 +1,10 @@
+@import '../../../scss/styles';
+
+.icon--more {
+  height: $baseline;
+  width: $baseline;
+
+  .fill {
+    fill: var(--theme-elevation-800);
+  }
+}

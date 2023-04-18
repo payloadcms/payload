@@ -1,0 +1,1 @@
+{"version":3,"file":"InvalidConfiguration.js","sourceRoot":"","sources":["../../src/errors/InvalidConfiguration.ts"],"names":[],"mappings":";;;;;AAAA,8DAAqC;AACrC,0DAAkC;AAElC,MAAM,oBAAqB,SAAQ,kBAAQ;IACzC,YAAY,OAAe;QACzB,KAAK,CAAC,OAAO,EAAE,qBAAU,CAAC,qBAAqB,CAAC,CAAC;IACnD,CAAC;CACF;AAED,kBAAe,oBAAoB,CAAC"}

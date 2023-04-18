@@ -1,0 +1,59 @@
+@import '../../../../../scss/styles.scss';
+
+.blocks-drawer {
+  &__blocks-wrapper {
+    padding: base(0.5);
+    margin-top: base(1.5);
+  }
+
+  &__blocks {
+    position: relative;
+    margin: -#{base(1)};
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__block {
+    margin: base(0.5);
+    width: calc((100% / 6) - #{base(1)});
+  }
+
+  &__default-image {
+    width: 100%;
+    overflow: hidden;
+    padding-top: base(0.75);
+  }
+
+  @include large-break {
+    &__block {
+      width: calc(20% - #{base(1)});
+    }
+  }
+
+  @include mid-break {
+    &__blocks-wrapper {
+      padding: base(0.25);
+    }
+
+    &__blocks {
+      margin: -#{base(0.5)};
+    }
+
+    &__block {
+      margin: base(0.25);
+      width: calc(33.33% - #{base(0.5)});
+    }
+  }
+
+  @include small-break {
+    &__blocks-wrapper {
+      margin-top: base(0.75);
+    }
+
+    &__block {
+      width: calc(50% - #{base(0.5)});
+    }
+  }
+}

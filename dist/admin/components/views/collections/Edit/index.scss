@@ -1,0 +1,252 @@
+@import '../../../../scss/styles.scss';
+
+.collection-edit {
+  width: 100%;
+
+  &__form {
+    height: 100%;
+  }
+
+  &__main {
+    width: calc(100% - #{base(15)});
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+
+  &__header {
+    h1 {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.25;
+    }
+  }
+
+  &__collection-actions {
+    list-style: none;
+    margin: 0;
+    padding: base(1.5) 0 base(.5);
+    display: flex;
+
+    li {
+      margin-right: base(.75);
+    }
+  }
+
+  &__edit {
+    padding-top: base(1);
+    padding-bottom: base(2);
+    flex-grow: 1;
+  }
+
+  &__sidebar-wrap {
+    position: fixed;
+    width: base(15);
+    height: 100%;
+    top: 0;
+    right: 0;
+    overflow: visible;
+    border-left: 1px solid var(--theme-elevation-100);
+  }
+
+  &__sidebar {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  &__sidebar-sticky-wrap {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+
+  &__collection-actions,
+  &__document-actions,
+  &__meta,
+  &__sidebar-fields {
+    padding-left: base(1.5);
+  }
+
+  &__document-actions {
+    padding-right: $baseline;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-nav);
+
+    > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    @include mid-break {
+      @include blur-bg;
+    }
+  }
+
+  &__document-actions--has-2 {
+    display: flex;
+
+    >* {
+      width: calc(50% - #{base(.5)});
+    }
+
+    >*:first-child {
+      margin-right: base(.5);
+    }
+
+    >*:last-child {
+      margin-left: base(.5);
+    }
+
+    .form-submit {
+      .btn {
+        width: 100%;
+        padding-left: base(.5);
+        padding-right: base(.5);
+      }
+    }
+  }
+
+  &__api-url {
+    margin-bottom: base(1.5);
+
+    a {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &__sidebar-fields {
+    padding-right: $baseline;
+    display: flex;
+    flex-direction: column;
+    gap: $baseline;
+
+    .preview-btn {
+      display: inline-block;
+      margin: 0;
+      width: calc(50% - #{base(.5)});
+    }
+
+    .render-fields {
+      & > *:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  &__meta {
+    margin: auto 0 $baseline 0;
+    padding-top: $baseline;
+    padding-right: $baseline;
+    list-style: none;
+
+    li {
+      margin-bottom: base(.5);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  &__label {
+    color: var(--theme-elevation-400);
+  }
+
+  &__collection-actions,
+  &__api-url {
+
+    a,
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &--is-editing {
+    .collection-edit__sidebar {
+      padding-top: 0;
+    }
+  }
+
+  @include mid-break {
+    &__main {
+      width: 100%;
+      min-height: initial;
+    }
+
+    &__sidebar-wrap {
+      position: static;
+      width: 100%;
+      height: initial;
+    }
+
+    &__meta {
+      border-top: 1px solid var(--theme-elevation-100);
+      padding-right: var(--gutter-h);
+    }
+
+    &__form {
+      display: block;
+    }
+
+    &__edit {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    &__document-actions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: auto;
+      z-index: var(--z-nav);
+    }
+
+    &__document-actions,
+    &__meta,
+    &__sidebar-fields {
+      padding-left: var(--gutter-h);
+      padding-right: var(--gutter-h);
+    }
+
+    &__sidebar-wrap {
+      border-left: 0;
+    }
+
+    &__sidebar-fields {
+      padding-top: 0;
+      padding-right: var(--gutter-h);
+      gap: base(0.5);
+
+      .preview-btn {
+        width: 100%;
+      }
+    }
+
+    &__collection-actions {
+      border-top: 1px solid var(--theme-elevation-100);
+      padding: base(1) 0 0 var(--gutter-h);
+      order: 1;
+
+      li {
+        margin: 0 base(.5) 0 0;
+      }
+    }
+
+    &__sidebar {
+      padding-bottom: base(3.5);
+      overflow: visible;
+    }
+  }
+}

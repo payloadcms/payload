@@ -1,0 +1,1 @@
+{"version":3,"file":"LockedAuth.js","sourceRoot":"","sources":["../../src/errors/LockedAuth.ts"],"names":[],"mappings":";;;;;AAAA,8DAAqC;AAErC,0DAAkC;AAElC,MAAM,UAAW,SAAQ,kBAAQ;IAC/B,YAAY,CAAa;QACvB,KAAK,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,kBAAkB,CAAC,CAAC,CAAC,CAAC,mEAAmE,EAAE,qBAAU,CAAC,YAAY,CAAC,CAAC;IAClI,CAAC;CACF;AAED,kBAAe,UAAU,CAAC"}

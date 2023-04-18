@@ -1,0 +1,35 @@
+@import '../../../scss/styles.scss';
+
+.status {
+  &__label {
+    color: gray;
+  }
+
+  &__value {
+    font-weight: 600;
+  }
+
+  &__action {
+    text-decoration: underline;
+  }
+
+  &__modal {
+    @include blur-bg;
+    display: flex;
+    align-items: center;
+    height: 100%;
+
+    &__toggle {
+      @extend %btn-reset;
+    }
+
+    .btn {
+      margin-right: $baseline;
+    }
+  }
+
+  &__modal-template {
+    position: relative;
+    z-index: 1;
+  }
+}
