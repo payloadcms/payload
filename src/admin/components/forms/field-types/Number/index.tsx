@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useField from '../../useField';
 import Label from '../../Label';
@@ -104,12 +104,11 @@ const NumberField: React.FC<Props> = (props) => {
         };
       }));
     } else if (value) {
-      setValueToRender({
+      setValueToRender([{
         label: value,
         value,
-      });
+      }]);
     }
-    console.log('valueToRender', valueToRender);
   }, [value, hasMany]);
 
 
@@ -133,7 +132,7 @@ const NumberField: React.FC<Props> = (props) => {
       {hasMany ? (
         <ReactSelect
           onChange={onMultiTextChange}
-          value={valueToRender as Option}
+          value={valueToRender as Option[]}
           showError={showError}
           isDisabled={readOnly}
           options={[]}

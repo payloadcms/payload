@@ -14,6 +14,7 @@ import { ClearIndicator } from './ClearIndicator';
 import { MultiValueRemove } from './MultiValueRemove';
 import { Control } from './Control';
 import DraggableSortable from '../DraggableSortable';
+import type { Option } from './types';
 
 import './index.scss';
 
@@ -56,7 +57,7 @@ const SelectAdapter: React.FC<Props> = (props) => {
     switch (event.key) {
       case 'Enter':
       case 'Tab':
-        onChange([...value, createOption(inputValue)]);
+        onChange([...value as Option[], createOption(inputValue)]);
         setInputValue('');
         event.preventDefault();
         break;
