@@ -77,6 +77,7 @@ exports.number = exports.baseField.keys({
         autoComplete: joi_1.default.string(),
         step: joi_1.default.number(),
     }),
+    hasMany: joi_1.default.boolean().default(false),
 });
 exports.textarea = exports.baseField.keys({
     type: joi_1.default.string().valid('textarea').required(),

@@ -119,6 +119,7 @@ export type NumberField = FieldBase & {
     };
     min?: number;
     max?: number;
+    hasMany?: boolean;
 };
 export type TextField = FieldBase & {
     type: 'text';

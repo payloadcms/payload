@@ -61,7 +61,7 @@ const buildSchema = (config, configFields, buildSchemaOptions = {}) => {
 };
 const fieldToSchemaMap = {
     number: (field, schema, config, buildSchemaOptions) => {
-        const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Number };
+        const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: field.hasMany ? [Number] : Number };
         schema.add({
             [field.name]: localizeSchema(field, baseSchema, config.localization),
         });

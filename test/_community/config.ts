@@ -15,7 +15,7 @@ export default buildConfig({
   ],
 
   onInit: async (payload) => {
-    await payload.create({
+    /*await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
@@ -28,6 +28,6 @@ export default buildConfig({
       data: {
         text: 'example post',
       },
-    });
+    });*/
   },
 });

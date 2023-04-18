@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const react_1 = __importDefault(require("react"));
 const react_select_1 = __importDefault(require("react-select"));
+const creatable_1 = __importDefault(require("react-select/creatable"));
 const react_i18next_1 = require("react-i18next");
 const sortable_1 = require("@dnd-kit/sortable");
 const Chevron_1 = __importDefault(require("../../icons/Chevron"));
@@ -18,15 +19,49 @@ const MultiValueRemove_1 = require("./MultiValueRemove");
 const Control_1 = require("./Control");
 const DraggableSortable_1 = __importDefault(require("../DraggableSortable"));
 require("./index.scss");
+const createOption = (label) => ({
+    label,
+    value: label,
+});
 const SelectAdapter = (props) => {
     const { t, i18n } = (0, react_i18next_1.useTranslation)();
-    const { className, showError, options, onChange, value, disabled = false, placeholder = t('general:selectValue'), isSearchable = true, isClearable = true, filterOption = undefined, isLoading, onMenuOpen, components, selectProps, } = props;
+    const { className, showError, options, onChange, value, disabled = false, placeholder = t('general:selectValue'), isSearchable = true, isClearable = true, filterOption = undefined, isLoading, onMenuOpen, components, selectProps, isMultiText, } = props;
     const classes = [
         className,
         'react-select',
         showError && 'react-select--error',
     ].filter(Boolean).join(' ');
-    return (react_1.default.createElement(react_select_1.default, { isLoading: isLoading, placeholder: (0, getTranslation_1.getTranslation)(placeholder, i18n), captureMenuScroll: true, ...props, value: value, onChange: onChange, disabled: disabled ? 'disabled' : undefined, className: classes, classNamePrefix: "rs", options: options, isSearchable: isSearchable, isClearable: isClearable, filterOption: filterOption, onMenuOpen: onMenuOpen, menuPlacement: "auto", selectProps: {
+    const [inputValue, setInputValue] = react_1.default.useState('');
+    const handleKeyDown = (event) => {
+        if (!value)
+            return;
+        switch (event.key) {
+            case 'Enter':
+            case 'Tab':
+                onChange([...value, createOption(inputValue)]);
+                setInputValue('');
+                event.preventDefault();
+                break;
+            default:
+                break;
+        }
+    };
+    if (!isMultiText) {
+        return (react_1.default.createElement(react_select_1.default, { isLoading: isLoading, placeholder: (0, getTranslation_1.getTranslation)(placeholder, i18n), captureMenuScroll: true, ...props, value: value, onChange: onChange, disabled: disabled ? 'disabled' : undefined, className: classes, classNamePrefix: "rs", options: options, isSearchable: isSearchable, isClearable: isClearable, filterOption: filterOption, onMenuOpen: onMenuOpen, menuPlacement: "auto", selectProps: {
+                ...selectProps,
+            }, components: {
+                ValueContainer: ValueContainer_1.ValueContainer,
+                SingleValue: SingleValue_1.SingleValue,
+                MultiValue: MultiValue_1.MultiValue,
+                MultiValueLabel: MultiValueLabel_1.MultiValueLabel,
+                MultiValueRemove: MultiValueRemove_1.MultiValueRemove,
+                DropdownIndicator: Chevron_1.default,
+                ClearIndicator: ClearIndicator_1.ClearIndicator,
+                Control: Control_1.Control,
+                ...components,
+            } }));
+    }
+    return (react_1.default.createElement(creatable_1.default, { isLoading: isLoading, placeholder: (0, getTranslation_1.getTranslation)(placeholder, i18n), captureMenuScroll: true, ...props, value: value, onChange: onChange, disabled: disabled ? 'disabled' : undefined, className: classes, classNamePrefix: "rs", options: options, isSearchable: isSearchable, isClearable: isClearable, filterOption: filterOption, onMenuOpen: onMenuOpen, menuPlacement: "auto", inputValue: inputValue, onInputChange: (newValue) => setInputValue(newValue), onKeyDown: handleKeyDown, selectProps: {
             ...selectProps,
         }, components: {
             ValueContainer: ValueContainer_1.ValueContainer,

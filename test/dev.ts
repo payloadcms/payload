@@ -20,7 +20,7 @@ if (!fs.existsSync(configPath)) {
 
 process.env.PAYLOAD_CONFIG_PATH = configPath;
 
-process.env.PAYLOAD_DROP_DATABASE = 'true';
+process.env.PAYLOAD_DROP_DATABASE = 'false';
 
 const expressApp = express();
 
@@ -29,11 +29,6 @@ const startDev = async () => {
     secret: uuid(),
     mongoURL: process.env.MONGO_URL || 'mongodb://127.0.0.1/payload',
     express: expressApp,
-    email: {
-      logMockCredentials: true,
-      fromName: 'Payload',
-      fromAddress: 'hello@payloadcms.com',
-    },
     onInit: async () => {
       payload.logger.info('Payload Dev Server Initialized');
     },

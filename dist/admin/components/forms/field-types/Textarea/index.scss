@@ -3,7 +3,8 @@
 .field-type.textarea {
   position: relative;
   margin-bottom: $baseline;
-  padding-bottom: base(2.5);
+  display: flex;
+  flex-direction: column;
 
   .textarea-outer {
     @include formInput();
@@ -14,7 +15,7 @@
 
     // Scrollbar for giant content
     max-height: calc(100vh - $top-header-offset - calc(#{base(5)}));
-    overflow: auto;
+    overflow: hidden;
 
     @include mid-break {
       max-height: 60vh;
@@ -22,8 +23,8 @@
   }
 
   &.error {
-    textarea {
-      background-color: var(--theme-error-200);
+    .textarea-outer {
+      background: var(--theme-error-200);
     }
   }
 

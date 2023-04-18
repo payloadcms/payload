@@ -64,13 +64,12 @@ const ArrayFieldType = (props) => {
     // eslint-disable-next-line react/destructuring-assignment
     const label = (_a = props === null || props === void 0 ? void 0 : props.label) !== null && _a !== void 0 ? _a : (_b = props === null || props === void 0 ? void 0 : props.labels) === null || _b === void 0 ? void 0 : _b.singular;
     const CustomRowLabel = (components === null || components === void 0 ? void 0 : components.RowLabel) || undefined;
-    const { preferencesKey } = (0, DocumentInfo_1.useDocumentInfo)();
+    const { preferencesKey, id } = (0, DocumentInfo_1.useDocumentInfo)();
     const { getPreference } = (0, Preferences_1.usePreferences)();
     const { setPreference } = (0, Preferences_1.usePreferences)();
     const [rows, dispatchRows] = (0, react_1.useReducer)(rowReducer_1.default, undefined);
     const formContext = (0, context_1.useForm)();
     const { user } = (0, Auth_1.useAuth)();
-    const { id } = (0, DocumentInfo_1.useDocumentInfo)();
     const locale = (0, Locale_1.useLocale)();
     const operation = (0, OperationProvider_1.useOperation)();
     const { t, i18n } = (0, react_i18next_1.useTranslation)('fields');

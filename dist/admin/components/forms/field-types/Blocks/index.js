@@ -65,13 +65,12 @@ const BlocksField = (props) => {
     const { t, i18n } = (0, react_i18next_1.useTranslation)('fields');
     const { label, name, path: pathFromProps, blocks, labels: labelsFromProps, fieldTypes, maxRows, minRows, required, validate = validations_1.blocks, permissions, indexPath, localized, admin: { readOnly, description, condition, initCollapsed, className, }, } = props;
     const path = pathFromProps || name;
-    const { preferencesKey } = (0, DocumentInfo_1.useDocumentInfo)();
+    const { preferencesKey, id } = (0, DocumentInfo_1.useDocumentInfo)();
     const { getPreference } = (0, Preferences_1.usePreferences)();
     const { setPreference } = (0, Preferences_1.usePreferences)();
     const [rows, dispatchRows] = (0, react_1.useReducer)(rowReducer_1.default, undefined);
     const formContext = (0, context_1.useForm)();
     const { user } = (0, Auth_1.useAuth)();
-    const { id } = (0, DocumentInfo_1.useDocumentInfo)();
     const locale = (0, Locale_1.useLocale)();
     const operation = (0, OperationProvider_1.useOperation)();
     const { dispatchFields, setModified } = formContext;

@@ -36,8 +36,9 @@ const withCondition_1 = __importDefault(require("../../withCondition"));
 const validations_1 = require("../../../../../fields/validations");
 const getTranslation_1 = require("../../../../../utilities/getTranslation");
 require("./index.scss");
+const ReactSelect_1 = __importDefault(require("../../../elements/ReactSelect"));
 const NumberField = (props) => {
-    const { name, path: pathFromProps, required, validate = validations_1.number, label, max, min, admin: { readOnly, style, className, width, step, placeholder, description, condition, } = {}, } = props;
+    const { name, path: pathFromProps, required, validate = validations_1.number, label, max, min, hasMany, admin: { readOnly, style, className, width, step, placeholder, description, condition, } = {}, } = props;
     const { i18n } = (0, react_i18next_1.useTranslation)();
     const path = pathFromProps || name;
     const memoizedValidate = (0, react_1.useCallback)((value, options) => {
@@ -63,18 +64,57 @@ const NumberField = (props) => {
         className,
         showError && 'error',
         readOnly && 'read-only',
+        hasMany && 'has-many',
     ].filter(Boolean).join(' ');
+    const [valueToRender, setValueToRender] = (0, react_1.useState)([]);
+    const onMultiTextChange = (0, react_1.useCallback)((selectedOption) => {
+        console.log('selectedOption', selectedOption);
+        if (!readOnly) {
+            let newValue;
+            if (!selectedOption) {
+                newValue = [];
+            }
+            else if (Array.isArray(selectedOption)) {
+                newValue = selectedOption.map((option) => option.value);
+            }
+            else {
+                newValue = [selectedOption.value];
+            }
+            console.log('newValue', newValue);
+            setValue(newValue);
+        }
+    }, [
+        readOnly,
+        setValue,
+    ]);
+    // useeffect update valueToRender:
+    (0, react_1.useEffect)(() => {
+        if (hasMany && Array.isArray(value)) {
+            setValueToRender(value.map((val) => {
+                return {
+                    label: val,
+                    value: val,
+                };
+            }));
+        }
+        else if (value) {
+            setValueToRender([{
+                    label: value,
+                    value,
+                }]);
+        }
+    }, [value, hasMany]);
     return (react_1.default.createElement("div", { className: classes, style: {
             ...style,
             width,
         } },
         react_1.default.createElement(Error_1.default, { showError: showError, message: errorMessage }),
         react_1.default.createElement(Label_1.default, { htmlFor: `field-${path.replace(/\./gi, '__')}`, label: label, required: required }),
-        react_1.default.createElement("input", { id: `field-${path.replace(/\./gi, '__')}`, value: typeof value === 'number' ? value : '', onChange: handleChange, disabled: readOnly, placeholder: (0, getTranslation_1.getTranslation)(placeholder, i18n), type: "number", name: path, step: step, onWheel: (e) => {
+        hasMany ? (react_1.default.createElement(ReactSelect_1.default, { onChange: onMultiTextChange, value: valueToRender, showError: showError, isDisabled: readOnly, options: [], isMultiText: true, isMulti: true, isSortable: true, isClearable: true })) : (react_1.default.createElement("input", { id: `field-${path.replace(/\./gi, '__')}`, value: typeof value === 'number' ? value : '', onChange: handleChange, disabled: readOnly, placeholder: (0, getTranslation_1.getTranslation)(placeholder, i18n), type: "number", name: path, step: step, onWheel: (e) => {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 e.target.blur();
-            } }),
+            } })),
         react_1.default.createElement(FieldDescription_1.default, { value: value, description: description })));
 };
 exports.default = (0, withCondition_1.default)(NumberField);

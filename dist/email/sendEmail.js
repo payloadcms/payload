@@ -4,7 +4,7 @@ async function sendEmail(message) {
     let result;
     try {
         const email = await this.email;
-        result = email.transport.sendMail(message);
+        result = await email.transport.sendMail(message);
     }
     catch (err) {
         this.logger.error(`Failed to send mail to ${message.to}, subject: ${message.subject}`, err);

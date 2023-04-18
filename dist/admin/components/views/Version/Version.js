@@ -31,6 +31,7 @@ const react_router_dom_1 = require("react-router-dom");
 const react_i18next_1 = require("react-i18next");
 const Config_1 = require("../../utilities/Config");
 const Auth_1 = require("../../utilities/Auth");
+const DocumentInfo_1 = require("../../utilities/DocumentInfo");
 const usePayloadAPI_1 = __importDefault(require("../../../hooks/usePayloadAPI"));
 const Eyebrow_1 = __importDefault(require("../../elements/Eyebrow"));
 const StepNav_1 = require("../../elements/StepNav");
@@ -49,7 +50,7 @@ const formatDate_1 = require("../../../utilities/formatDate");
 require("./index.scss");
 const baseClass = 'view-version';
 const VersionView = ({ collection, global }) => {
-    var _a;
+    var _a, _b;
     const { serverURL, routes: { admin, api }, admin: { dateFormat }, localization } = (0, Config_1.useConfig)();
     const { setStepNav } = (0, StepNav_1.useStepNav)();
     const { params: { id, versionID } } = (0, react_router_dom_1.useRouteMatch)();
@@ -59,6 +60,7 @@ const VersionView = ({ collection, global }) => {
     const { permissions } = (0, Auth_1.useAuth)();
     const locale = (0, Locale_1.useLocale)();
     const { t, i18n } = (0, react_i18next_1.useTranslation)('version');
+    const { docPermissions } = (0, DocumentInfo_1.useDocumentInfo)();
     let originalDocFetchURL;
     let versionFetchURL;
     let entityLabel;
@@ -170,6 +172,7 @@ const VersionView = ({ collection, global }) => {
     if ((compareValue === null || compareValue === void 0 ? void 0 : compareValue.value) === 'published') {
         comparison = publishedDoc;
     }
+    const canUpdate = (_b = docPermissions === null || docPermissions === void 0 ? void 0 : docPermissions.update) === null || _b === void 0 ? void 0 : _b.permission;
     return (react_1.default.createElement(react_1.default.Fragment, null,
         react_1.default.createElement("div", { className: baseClass },
             react_1.default.createElement(Meta_1.default, { title: metaTitle, description: metaDesc }),
@@ -178,7 +181,7 @@ const VersionView = ({ collection, global }) => {
                 react_1.default.createElement("div", { className: `${baseClass}__intro` }, t('versionCreatedOn', { version: t((doc === null || doc === void 0 ? void 0 : doc.autosave) ? 'autosavedVersion' : 'version') })),
                 react_1.default.createElement("header", { className: `${baseClass}__header` },
                     react_1.default.createElement("h2", null, formattedCreatedAt),
-                    react_1.default.createElement(Restore_1.default, { className: `${baseClass}__restore`, collection: collection, global: global, originalDocID: id, versionID: versionID, versionDate: formattedCreatedAt })),
+                    canUpdate && (react_1.default.createElement(Restore_1.default, { className: `${baseClass}__restore`, collection: collection, global: global, originalDocID: id, versionID: versionID, versionDate: formattedCreatedAt }))),
                 react_1.default.createElement("div", { className: `${baseClass}__controls` },
                     react_1.default.createElement(Compare_1.default, { publishedDoc: publishedDoc, versionID: versionID, baseURL: compareBaseURL, parentID: parentID, value: compareValue, onChange: setCompareValue }),
                     localization && (react_1.default.createElement(SelectLocales_1.default, { onChange: setLocales, options: localeOptions, value: locales }))),

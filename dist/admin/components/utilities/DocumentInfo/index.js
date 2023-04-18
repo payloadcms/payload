@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useDocumentInfo = exports.DocumentInfoProvider = void 0;
+exports.DocumentInfoProvider = exports.useDocumentInfo = void 0;
 const react_1 = __importStar(require("react"));
 const qs_1 = __importDefault(require("qs"));
 const react_i18next_1 = require("react-i18next");
@@ -34,6 +34,8 @@ const Config_1 = require("../Config");
 const Preferences_1 = require("../Preferences");
 const Auth_1 = require("../Auth");
 const Context = (0, react_1.createContext)({});
+const useDocumentInfo = () => (0, react_1.useContext)(Context);
+exports.useDocumentInfo = useDocumentInfo;
 const DocumentInfoProvider = ({ children, global, collection, id, }) => {
     const { serverURL, routes: { api } } = (0, Config_1.useConfig)();
     const { getPreference } = (0, Preferences_1.usePreferences)();
@@ -219,6 +221,4 @@ const DocumentInfoProvider = ({ children, global, collection, id, }) => {
     return (react_1.default.createElement(Context.Provider, { value: value }, children));
 };
 exports.DocumentInfoProvider = DocumentInfoProvider;
-const useDocumentInfo = () => (0, react_1.useContext)(Context);
-exports.useDocumentInfo = useDocumentInfo;
 //# sourceMappingURL=index.js.map

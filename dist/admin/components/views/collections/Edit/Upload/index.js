@@ -28,6 +28,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const react_1 = __importStar(require("react"));
 const react_i18next_1 = require("react-i18next");
+const DocumentInfo_1 = require("../../../../utilities/DocumentInfo");
 const useField_1 = __importDefault(require("../../../../forms/useField"));
 const Button_1 = __importDefault(require("../../../../elements/Button"));
 const FileDetails_1 = __importDefault(require("../../../../elements/FileDetails"));
@@ -46,7 +47,7 @@ const validate = (value) => {
     return true;
 };
 const Upload = (props) => {
-    var _a, _b;
+    var _a, _b, _c, _d;
     const { collection, internalState, } = props;
     const inputRef = (0, react_1.useRef)(null);
     const dropRef = (0, react_1.useRef)(null);
@@ -56,6 +57,7 @@ const Upload = (props) => {
     const [replacingFile, setReplacingFile] = (0, react_1.useState)(false);
     const { t } = (0, react_i18next_1.useTranslation)('upload');
     const [doc, setDoc] = (0, react_1.useState)((0, reduceFieldsToValues_1.default)(internalState || {}, true));
+    const { docPermissions } = (0, DocumentInfo_1.useDocumentInfo)();
     const { value, setValue, showError, errorMessage, } = (0, useField_1.default)({
         path: 'file',
         validate,
@@ -129,12 +131,13 @@ const Upload = (props) => {
         dragging && `${baseClass}--dragging`,
         'field-type',
     ].filter(Boolean).join(' ');
+    const canRemoveUpload = ((_a = docPermissions === null || docPermissions === void 0 ? void 0 : docPermissions.update) === null || _a === void 0 ? void 0 : _a.permission) && 'delete' in docPermissions && ((_b = docPermissions === null || docPermissions === void 0 ? void 0 : docPermissions.delete) === null || _b === void 0 ? void 0 : _b.permission);
     return (react_1.default.createElement("div", { className: classes },
         react_1.default.createElement(Error_1.default, { showError: showError, message: errorMessage }),
-        (doc.filename && !replacingFile) && (react_1.default.createElement(FileDetails_1.default, { doc: doc, collection: collection, handleRemove: () => {
+        (doc.filename && !replacingFile) && (react_1.default.createElement(FileDetails_1.default, { doc: doc, collection: collection, handleRemove: canRemoveUpload ? () => {
                 setReplacingFile(true);
                 setValue(null);
-            } })),
+            } : undefined })),
         (!doc.filename || replacingFile) && (react_1.default.createElement("div", { className: `${baseClass}__upload` },
             value && (react_1.default.createElement("div", { className: `${baseClass}__file-selected` },
                 react_1.default.createElement("span", { className: `${baseClass}__filename` }, value.name),
@@ -156,7 +159,7 @@ const Upload = (props) => {
                         t('general:or'),
                         ' ',
                         t('dragAndDrop'))))),
-            react_1.default.createElement("input", { ref: inputRef, type: "file", accept: (_b = (_a = collection === null || collection === void 0 ? void 0 : collection.upload) === null || _a === void 0 ? void 0 : _a.mimeTypes) === null || _b === void 0 ? void 0 : _b.join(','), onChange: handleInputChange })))));
+            react_1.default.createElement("input", { ref: inputRef, type: "file", accept: (_d = (_c = collection === null || collection === void 0 ? void 0 : collection.upload) === null || _c === void 0 ? void 0 : _c.mimeTypes) === null || _d === void 0 ? void 0 : _d.join(','), onChange: handleInputChange })))));
 };
 exports.default = Upload;
 //# sourceMappingURL=index.js.map

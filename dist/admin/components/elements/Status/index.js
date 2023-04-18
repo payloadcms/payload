@@ -40,8 +40,8 @@ const Locale_1 = require("../../utilities/Locale");
 require("./index.scss");
 const baseClass = 'status';
 const Status = () => {
-    var _a, _b;
-    const { publishedDoc, unpublishedVersions, collection, global, id, getVersions, } = (0, DocumentInfo_1.useDocumentInfo)();
+    var _a, _b, _c;
+    const { publishedDoc, unpublishedVersions, collection, global, id, getVersions, docPermissions, } = (0, DocumentInfo_1.useDocumentInfo)();
     const { toggleModal } = (0, modal_1.useModal)();
     const { serverURL, routes: { api }, } = (0, Config_1.useConfig)();
     const [processing, setProcessing] = (0, react_1.useState)(false);
@@ -115,11 +115,12 @@ const Status = () => {
             toggleModal(unPublishModalSlug);
         }
     }, [collection, global, publishedDoc, serverURL, api, id, i18n, locale, resetForm, getVersions, t, toggleModal, revertModalSlug, unPublishModalSlug]);
+    const canUpdate = (_c = docPermissions === null || docPermissions === void 0 ? void 0 : docPermissions.update) === null || _c === void 0 ? void 0 : _c.permission;
     if (statusToRender) {
         return (react_1.default.createElement("div", { className: baseClass },
             react_1.default.createElement("div", { className: `${baseClass}__value-wrap` },
                 react_1.default.createElement("span", { className: `${baseClass}__value` }, t(statusToRender)),
-                statusToRender === 'published' && (react_1.default.createElement(react_1.default.Fragment, null,
+                canUpdate && statusToRender === 'published' && (react_1.default.createElement(react_1.default.Fragment, null,
                     "\u00A0\u2014\u00A0",
                     react_1.default.createElement(Button_1.default, { onClick: () => toggleModal(unPublishModalSlug), className: `${baseClass}__action`, buttonStyle: "none" }, t('unpublish')),
                     react_1.default.createElement(modal_1.Modal, { slug: unPublishModalSlug, className: `${baseClass}__modal` },
@@ -128,7 +129,7 @@ const Status = () => {
                             react_1.default.createElement("p", null, t('aboutToUnpublish')),
                             react_1.default.createElement(Button_1.default, { buttonStyle: "secondary", type: "button", onClick: processing ? undefined : () => toggleModal(unPublishModalSlug) }, t('general:cancel')),
                             react_1.default.createElement(Button_1.default, { onClick: processing ? undefined : () => performAction('unpublish') }, t(processing ? 'unpublishing' : 'general:confirm')))))),
-                statusToRender === 'changed' && (react_1.default.createElement(react_1.default.Fragment, null,
+                canUpdate && statusToRender === 'changed' && (react_1.default.createElement(react_1.default.Fragment, null,
                     "\u00A0\u2014\u00A0",
                     react_1.default.createElement(Button_1.default, { onClick: () => toggleModal(revertModalSlug), className: `${baseClass}__action`, buttonStyle: "none" }, t('revertToPublished')),
                     react_1.default.createElement(modal_1.Modal, { slug: revertModalSlug, className: `${baseClass}__modal` },

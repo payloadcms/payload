@@ -160,7 +160,8 @@ const Routes = () => {
                                                         routesToReturn.push(react_1.default.createElement(react_router_dom_1.Route, { key: `${collection.slug}-view-version`, path: `${match.url}/collections/${collection.slug}/:id/versions/:versionID`, exact: true, render: (routeProps) => {
                                                                 var _a, _b, _c;
                                                                 if ((_c = (_b = (_a = permissions === null || permissions === void 0 ? void 0 : permissions.collections) === null || _a === void 0 ? void 0 : _a[collection.slug]) === null || _b === void 0 ? void 0 : _b.readVersions) === null || _c === void 0 ? void 0 : _c.permission) {
-                                                                    return (react_1.default.createElement(Version_1.default, { ...routeProps, collection: collection }));
+                                                                    return (react_1.default.createElement(DocumentInfo_1.DocumentInfoProvider, { collection: collection, id: routeProps.match.params.id },
+                                                                        react_1.default.createElement(Version_1.default, { ...routeProps, collection: collection })));
                                                                 }
                                                                 return react_1.default.createElement(Unauthorized, null);
                                                             } }));
