@@ -33,7 +33,6 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     slug,
     req,
     req: {
-      locale,
       payload,
       payload: {
         globals: {
@@ -62,23 +61,26 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: { where: Where } = {
-    where: {
-      and: [
-        {
-          globalType: {
-            equals: slug,
-          },
+  const queryToBuild: Where = {
+    and: [
+      {
+        globalType: {
+          equals: slug,
         },
-      ],
-    },
+      },
+    ],
   };
 
   if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
+    queryToBuild.and.push(accessResults);
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    where: queryToBuild,
+    req,
+    overrideAccess,
+    globalSlug: slug,
+  });
 
   // /////////////////////////////////////
   // 2. Retrieve document

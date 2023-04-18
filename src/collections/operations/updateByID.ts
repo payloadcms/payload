@@ -96,23 +96,25 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: { where: Where } = {
-    where: {
-      and: [
-        {
-          id: {
-            equals: id,
-          },
+  const queryToBuild: Where = {
+    and: [
+      {
+        id: {
+          equals: id,
         },
-      ],
-    },
+      },
+    ],
   };
 
   if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
+    queryToBuild.and.push(accessResults);
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    where: queryToBuild,
+    req,
+    overrideAccess,
+  });
 
   const doc = await getLatestCollectionVersion({
     payload,

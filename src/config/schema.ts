@@ -100,6 +100,7 @@ export default joi.object({
       }),
     webpack: joi.func(),
   }),
+  email: joi.object(),
   i18n: joi.object(),
   defaultDepth: joi.number()
     .min(0)

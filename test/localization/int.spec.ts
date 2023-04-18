@@ -5,12 +5,8 @@ import payload from '../../src';
 import type {
   LocalizedPost,
   WithLocalizedRelationship,
-  LocalizedRequired,
-  RelationshipLocalized,
-  GlobalArray,
 } from './payload-types';
-import type { LocalizedPostAllLocale } from './config';
-import configPromise, { relationshipLocalizedSlug, slug, withLocalizedRelSlug, withRequiredLocalizedFields } from './config';
+import configPromise, { relationshipLocalizedSlug, localizedPostsSlug, withLocalizedRelSlug, withRequiredLocalizedFields } from './config';
 import {
   defaultLocale,
   englishTitle,
@@ -25,7 +21,7 @@ import type { Where } from '../../src/types';
 import { arrayCollectionSlug } from './collections/Array';
 import type { Config } from '../../src/config/types';
 
-const collection = slug;
+const collection = localizedPostsSlug;
 let config: Config;
 
 let serverURL;
@@ -250,10 +246,10 @@ describe('Localization', () => {
         data: {
           localizedRelationship: localizedRelation.id,
           localizedRelationHasManyField: [localizedRelation.id, localizedRelation2.id],
-          localizedRelationMultiRelationTo: { relationTo: slug, value: localizedRelation.id },
+          localizedRelationMultiRelationTo: { relationTo: localizedPostsSlug, value: localizedRelation.id },
           localizedRelationMultiRelationToHasMany: [
-            { relationTo: slug, value: localizedRelation.id },
-            { relationTo: slug, value: localizedRelation2.id },
+            { relationTo: localizedPostsSlug, value: localizedRelation.id },
+            { relationTo: localizedPostsSlug, value: localizedRelation2.id },
           ],
         },
       });
@@ -666,7 +662,7 @@ describe('Localization', () => {
       });
 
       const result = await payload.findByID({
-        collection: slug,
+        collection: localizedPostsSlug,
         id: createResult.id,
         locale: 'all',
       });

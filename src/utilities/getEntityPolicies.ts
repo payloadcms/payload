@@ -1,23 +1,20 @@
 import { Access } from '../config/types';
-import { AllOperations, Where, Document } from '../types';
+import { AllOperations, Document, Where } from '../types';
 import { FieldAccess, tabHasName } from '../fields/config/types';
-import type { CollectionConfig } from '../collections/config/types';
-import type { GlobalConfig } from '../globals/config/types';
+import type { SanitizedCollectionConfig } from '../collections/config/types';
+import { TypeWithID } from '../collections/config/types';
+import type { SanitizedGlobalConfig } from '../globals/config/types';
 import type { PayloadRequest } from '../express/types';
 import type { CollectionPermission, GlobalPermission } from '../auth/types';
-import { TypeWithID } from '../collections/config/types';
 
-type Args = ({
+type Args = {
   req: PayloadRequest
   operations: AllOperations[]
   id?: string
-} & ({
-  type: 'collection'
-  entity: CollectionConfig
-} | {
-  type: 'global'
-  entity: GlobalConfig
-}))
+  type: 'collection' | 'global'
+  entity: SanitizedCollectionConfig | SanitizedGlobalConfig
+}
+
 type ReturnType<T extends Args> = T['type'] extends 'global' ? [GlobalPermission, Promise<void>[]] : [CollectionPermission, Promise<void>[]]
 
 type CreateAccessPromise = (args: {
@@ -111,14 +108,15 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
     }
   };
 
-  const executeFieldPolicies = ({
-    policiesObj = {},
+  const executeFieldPolicies = async ({
+    policiesObj,
     fields,
     operation,
+    entityAccessPromise,
   }) => {
-    const mutablePolicies = policiesObj;
+    const mutablePolicies = policiesObj.fields;
 
-    fields.forEach((field) => {
+    fields.forEach(async (field) => {
       if (field.name) {
         if (!mutablePolicies[field.name]) mutablePolicies[field.name] = {};
 
@@ -131,39 +129,44 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
             accessLevel: 'field',
           }));
         } else {
+          if (entityAccessPromise) await entityAccessPromise;
           mutablePolicies[field.name][operation] = {
-            permission: isLoggedIn,
+            permission: policiesObj[operation]?.permission,
           };
         }
 
         if (field.fields) {
           if (!mutablePolicies[field.name].fields) mutablePolicies[field.name].fields = {};
           executeFieldPolicies({
-            policiesObj: mutablePolicies[field.name].fields,
+            policiesObj: mutablePolicies[field.name],
             fields: field.fields,
             operation,
+            entityAccessPromise,
           });
         }
       } else if (field.fields) {
         executeFieldPolicies({
-          policiesObj: mutablePolicies,
+          policiesObj,
           fields: field.fields,
           operation,
+          entityAccessPromise,
         });
       } else if (field.type === 'tabs') {
         field.tabs.forEach((tab) => {
           if (tabHasName(tab)) {
             if (!mutablePolicies[tab.name]) mutablePolicies[tab.name] = { fields: {} };
             executeFieldPolicies({
-              policiesObj: mutablePolicies[tab.name].fields,
+              policiesObj: mutablePolicies[tab.name],
               fields: tab.fields,
               operation,
+              entityAccessPromise,
             });
           } else {
             executeFieldPolicies({
-              policiesObj: mutablePolicies,
+              policiesObj,
               fields: tab.fields,
               operation,
+              entityAccessPromise,
             });
           }
         });
@@ -172,24 +175,28 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
   };
 
   operations.forEach((operation) => {
-    executeFieldPolicies({
-      policiesObj: policies.fields,
-      fields: entity.fields,
-      operation,
-    });
+    let entityAccessPromise: Promise<void>;
 
     if (typeof entity.access[operation] === 'function') {
-      promises.push(createAccessPromise({
+      entityAccessPromise = createAccessPromise({
         policiesObj: policies,
         access: entity.access[operation],
         operation,
         accessLevel: 'entity',
-      }));
+      });
+      promises.push(entityAccessPromise);
     } else {
       policies[operation] = {
         permission: isLoggedIn,
       };
     }
+
+    executeFieldPolicies({
+      policiesObj: policies,
+      fields: entity.fields,
+      operation,
+      entityAccessPromise,
+    });
   });
 
   return [policies, promises] as ReturnType<T>;
