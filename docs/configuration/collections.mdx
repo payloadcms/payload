@@ -63,18 +63,19 @@ You can find an assortment of [example collection configs](https://github.com/pa
 
 You can customize the way that the Admin panel behaves on a collection-by-collection basis by defining the `admin` property on a collection's config.
 
-| Option                      | Description  |
-| --------------------------- | -------------|
-| `group`                     | Text used as a label for grouping collection links together in the navigation. |
-| `hooks`                     | Admin-specific hooks for this collection. [More](#admin-hooks) |
-| `useAsTitle`                | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title. |
-| `description`               | Text or React component to display below the Collection label in the List view to give editors more information. |
-| `defaultColumns`            | Array of field names that correspond to which columns to show by default in this collection's List view. |
-| `disableDuplicate `         | Disables the "Duplicate" button while editing documents within this collection. |
+| Option                       | Description                                                                                                                                                                                           |
+|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `group`                      | Text used as a label for grouping collection links together in the navigation.                                                                                                                        |
+| `hidden`                     | Set to true or a function, called with the current user, returning true to exclude this collection from navigation and admin routing.                                                                 |
+| `hooks`                      | Admin-specific hooks for this collection. [More](#admin-hooks)                                                                                                                                        |
+| `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title.                                                |
+| `description`                | Text or React component to display below the Collection label in the List view to give editors more information.                                                                                      |
+| `defaultColumns`             | Array of field names that correspond to which columns to show by default in this collection's List view.                                                                                              |
+| `disableDuplicate `          | Disables the "Duplicate" button while editing documents within this collection.                                                                                                                       |
 | `enableRichTextRelationship` | The [Rich Text](/docs/fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default. |
-| `preview`                   | Function to generate preview URLS within the Admin panel that can point to your app. [More](#preview). |
-| `components`                | Swap in your own React components to be used within this collection. [More](/docs/admin/components#collections) |
-| `listSearchableFields`      | Specify which fields should be searched in the List search view. [More](#list-searchable-fields) |
+| `preview`                    | Function to generate preview URLS within the Admin panel that can point to your app. [More](#preview).                                                                                                |
+| `components`                 | Swap in your own React components to be used within this collection. [More](/docs/admin/components#collections)                                                                                       |
+| `listSearchableFields`       | Specify which fields should be searched in the List search view. [More](#list-searchable-fields)                                                                                                      |
 
 ### Preview
 

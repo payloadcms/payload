@@ -1,27 +1,40 @@
-import mongoose, { SchemaType } from 'mongoose';
+import mongoose from 'mongoose';
 import { createArrayFromCommaDelineated } from './createArrayFromCommaDelineated';
-import { getSchemaTypeOptions } from './getSchemaTypeOptions';
 import wordBoundariesRegex from '../utilities/wordBoundariesRegex';
+import { Field, TabAsField } from '../fields/config/types';
+import { ParamParser } from './buildQuery';
 
-export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operator: string, val: any): unknown => {
+type SanitizeQueryValueArgs = {
+  ctx: ParamParser,
+  field: Field | TabAsField,
+  path: string,
+  operator: string,
+  val: any
+  hasCustomID: boolean
+}
+
+export const sanitizeQueryValue = ({ ctx, field, path, operator, val, hasCustomID }: SanitizeQueryValueArgs): unknown => {
   let formattedValue = val;
-  const schemaOptions = getSchemaTypeOptions(schemaType);
 
   // Disregard invalid _ids
 
   if (path === '_id' && typeof val === 'string' && val.split(',').length === 1) {
-    if (schemaType?.instance === 'ObjectID') {
+    if (!hasCustomID) {
       const isValid = mongoose.Types.ObjectId.isValid(val);
 
+      formattedValue = new mongoose.Types.ObjectId(val);
+
       if (!isValid) {
+        ctx.errors.push({ path });
         return undefined;
       }
     }
 
-    if (schemaType?.instance === 'Number') {
+    if (field.type === 'number') {
       const parsedNumber = parseFloat(val);
 
       if (Number.isNaN(parsedNumber)) {
+        ctx.errors.push({ path });
         return undefined;
       }
     }
@@ -29,17 +42,34 @@ export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operato
 
   // Cast incoming values as proper searchable types
 
-  if (schemaType?.instance === 'Boolean' && typeof val === 'string') {
+  if (field.type === 'checkbox' && typeof val === 'string') {
     if (val.toLowerCase() === 'true') formattedValue = true;
     if (val.toLowerCase() === 'false') formattedValue = false;
   }
 
-  if (schemaType?.instance === 'Number' && typeof val === 'string') {
+  if (field.type === 'number' && typeof val === 'string') {
     formattedValue = Number(val);
   }
 
-  if ((schemaOptions?.ref || schemaOptions?.refPath) && val === 'null') {
-    formattedValue = null;
+  if (['relationship', 'upload'].includes(field.type)) {
+    if (val === 'null') {
+      formattedValue = null;
+    }
+
+    if (operator === 'in' && Array.isArray(formattedValue)) {
+      formattedValue = formattedValue.reduce((formattedValues, inVal) => {
+        const newValues = [inVal];
+        if (mongoose.Types.ObjectId.isValid(inVal)) newValues.push(new mongoose.Types.ObjectId(inVal));
+
+        const parsedNumber = parseFloat(inVal);
+        if (!Number.isNaN(parsedNumber)) newValues.push(parsedNumber);
+
+        return [
+          ...formattedValues,
+          ...newValues,
+        ];
+      }, []);
+    }
   }
 
   // Set up specific formatting necessary by operators
@@ -72,23 +102,6 @@ export const sanitizeQueryValue = (schemaType: SchemaType, path: string, operato
 
   if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
     formattedValue = createArrayFromCommaDelineated(formattedValue);
-  }
-
-  if (schemaOptions && (schemaOptions.ref || schemaOptions.refPath) && operator === 'in') {
-    if (Array.isArray(formattedValue)) {
-      formattedValue = formattedValue.reduce((formattedValues, inVal) => {
-        const newValues = [inVal];
-        if (mongoose.Types.ObjectId.isValid(inVal)) newValues.push(new mongoose.Types.ObjectId(inVal));
-
-        const parsedNumber = parseFloat(inVal);
-        if (!Number.isNaN(parsedNumber)) newValues.push(parsedNumber);
-
-        return [
-          ...formattedValues,
-          ...newValues,
-        ];
-      }, []);
-    }
   }
 
   if (path !== '_id') {

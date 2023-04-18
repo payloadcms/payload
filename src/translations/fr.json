@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "Vous n'êtes pas autorisé à accéder à cette page.",
     "notAllowedToPerformAction": "Vous n'êtes pas autorisé à effectuer cette action.",
     "notFound": "La ressource demandée n'a pas été trouvée.",
+    "previewing": "Un problème est survenu lors de l'aperçu de ce document.",
     "problemUploadingFile": "Il y a eu un problème lors du téléversement du fichier.",
     "tokenInvalidOrExpired": "Le jeton n'est soit pas valide ou a expiré.",
     "unPublishingDocument": "Un problème est survenu lors de l'annulation de la publication de ce document.",

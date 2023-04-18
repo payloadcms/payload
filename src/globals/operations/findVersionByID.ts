@@ -29,7 +29,6 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     req: {
       t,
       payload,
-      locale,
     },
     disableErrors,
     currentDepth,
@@ -50,23 +49,26 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
   const hasWhereAccess = typeof accessResults === 'object';
 
-  const queryToBuild: { where: Where } = {
-    where: {
-      and: [
-        {
-          _id: {
-            equals: id,
-          },
+  const queryToBuild: Where = {
+    and: [
+      {
+        _id: {
+          equals: id,
         },
-      ],
-    },
+      },
+    ],
   };
 
   if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
+    queryToBuild.and.push(accessResults);
   }
 
-  const query = await VersionsModel.buildQuery(queryToBuild, locale);
+  const query = await VersionsModel.buildQuery({
+    where: queryToBuild,
+    req,
+    overrideAccess,
+    globalSlug: globalConfig.slug,
+  });
 
   // /////////////////////////////////////
   // Find by ID

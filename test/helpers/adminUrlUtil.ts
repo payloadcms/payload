@@ -18,6 +18,10 @@ export class AdminUrlUtil {
     return `${this.list}/${id}`;
   }
 
+  collection(slug: string): string {
+    return `${this.admin}/collections/${slug}`;
+  }
+
   global(slug: string): string {
     return `${this.admin}/globals/${slug}`;
   }

@@ -6,7 +6,6 @@ import { GlobalConfig, SanitizedGlobalConfig } from './types';
 import defaultAccess from '../../auth/defaultAccess';
 import baseVersionFields from '../../versions/baseFields';
 import mergeBaseFields from '../../fields/mergeBaseFields';
-import { versionGlobalDefaults } from '../../versions/defaults';
 
 const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[]): SanitizedGlobalConfig[] => {
   const sanitizedGlobals = globals.map((global) => {
@@ -42,12 +41,14 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
           };
         }
 
-        if (sanitizedGlobal.versions.drafts.autosave === true) sanitizedGlobal.versions.drafts.autosave = {};
+        if (sanitizedGlobal.versions.drafts.autosave === true) {
+          sanitizedGlobal.versions.drafts.autosave = {
+            interval: 2000,
+          };
+        }
 
         sanitizedGlobal.fields = mergeBaseFields(sanitizedGlobal.fields, baseVersionFields);
       }
-
-      sanitizedGlobal.versions = merge(versionGlobalDefaults, sanitizedGlobal.versions);
     }
 
     // /////////////////////////////////

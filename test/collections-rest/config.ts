@@ -101,6 +101,13 @@ export default buildConfig({
           relationTo: [relationSlug, 'dummy'],
           hasMany: true,
         },
+        {
+          name: 'restrictedField',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
       ],
     },
     {
@@ -114,7 +121,23 @@ export default buildConfig({
       ],
     },
     collectionWithName(relationSlug),
-    collectionWithName('dummy'),
+    {
+      slug: 'dummy',
+      access: openAccess,
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          type: 'text',
+          name: 'name',
+          access: {
+            read: () => false,
+          },
+        },
+      ],
+    },
     {
       slug: customIdSlug,
       access: openAccess,

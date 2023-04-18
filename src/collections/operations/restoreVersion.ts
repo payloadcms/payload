@@ -73,23 +73,25 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: { where: Where } = {
-    where: {
-      and: [
-        {
-          id: {
-            equals: parentDocID,
-          },
+  const queryToBuild: Where = {
+    and: [
+      {
+        id: {
+          equals: parentDocID,
         },
-      ],
-    },
+      },
+    ],
   };
 
   if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
+    queryToBuild.and.push(accessResults);
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    where: queryToBuild,
+    req,
+    overrideAccess,
+  });
 
   const doc = await Model.findOne(query);
 

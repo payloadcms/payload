@@ -32,6 +32,12 @@ export const relationSlug = 'relation';
 export default buildConfig({
   collections: [
     {
+      slug: 'users',
+      auth: true,
+      access: openAccess,
+      fields: [],
+    },
+    {
       slug,
       access: openAccess,
       fields: [
@@ -46,6 +52,11 @@ export default buildConfig({
         {
           name: 'number',
           type: 'number',
+        },
+        {
+          name: 'min',
+          type: 'number',
+          min: 10,
         },
         // Relationship
         {

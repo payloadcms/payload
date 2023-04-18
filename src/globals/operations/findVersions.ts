@@ -47,7 +47,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {};
+  let queryToBuild: Where = {};
   let useEstimatedCount = false;
 
   if (where) {
@@ -56,7 +56,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     if (Array.isArray(where.and)) and = where.and;
     if (Array.isArray(where.AND)) and = where.AND;
 
-    queryToBuild.where = {
+    queryToBuild = {
       ...where,
       and: [
         ...and,
@@ -73,18 +73,23 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
     if (hasWhereAccessResult(accessResults)) {
       if (!where) {
-        queryToBuild.where = {
+        queryToBuild = {
           and: [
             accessResults,
           ],
         };
       } else {
-        (queryToBuild.where.and as Where[]).push(accessResults);
+        queryToBuild.and.push(accessResults);
       }
     }
   }
 
-  const query = await VersionsModel.buildQuery(queryToBuild, locale);
+  const query = await VersionsModel.buildQuery({
+    where: queryToBuild,
+    req,
+    overrideAccess,
+    globalSlug: globalConfig.slug,
+  });
 
   // /////////////////////////////////////
   // Find

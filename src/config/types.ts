@@ -37,7 +37,7 @@ type GeneratePreviewURLOptions = {
 export type GeneratePreviewURL = (
   doc: Record<string, unknown>,
   options: GeneratePreviewURLOptions
-) => Promise<string> | string;
+) => Promise<string | null> | string | null;
 
 export type EmailTransport = Email & {
   transport: Transporter;
@@ -346,6 +346,14 @@ export type Config = {
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
   globals?: GlobalConfig[];
+
+  /**
+   * Email configuration options. This value is overridden by `email` in Payload.init if passed.
+   *
+   * @see https://payloadcms.com/docs/email/overview
+   */
+  email?: EmailOptions;
+
   /**
    * Control the behaviour of the admin internationalisation.
    *
