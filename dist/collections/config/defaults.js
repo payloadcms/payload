@@ -44,6 +44,7 @@ exports.defaults = {
     auth: false,
     upload: false,
     versions: false,
+    custom: {},
 };
 exports.authDefaults = {
     tokenExpiration: 7200,

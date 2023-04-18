@@ -47,6 +47,7 @@ export declare const defaults: {
     auth: boolean;
     upload: boolean;
     versions: boolean;
+    custom: {};
 };
 export declare const authDefaults: {
     tokenExpiration: number;

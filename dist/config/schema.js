@@ -11,6 +11,7 @@ exports.endpointsSchema = joi_1.default.array().items(joi_1.default.object({
     method: joi_1.default.string().valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
     root: joi_1.default.bool(),
     handler: joi_1.default.alternatives().try(joi_1.default.array().items(joi_1.default.func()), joi_1.default.func()),
+    custom: joi_1.default.object().pattern(joi_1.default.string(), joi_1.default.any()),
 }));
 exports.default = joi_1.default.object({
     serverURL: joi_1.default.string()
@@ -146,5 +147,6 @@ exports.default = joi_1.default.object({
     plugins: joi_1.default.array().items(joi_1.default.func()),
     onInit: joi_1.default.func(),
     debug: joi_1.default.boolean(),
+    custom: joi_1.default.object().pattern(joi_1.default.string(), joi_1.default.any()),
 });
 //# sourceMappingURL=schema.js.map

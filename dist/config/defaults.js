@@ -59,5 +59,6 @@ exports.defaults = {
     hooks: {},
     localization: false,
     telemetry: true,
+    custom: {},
 };
 //# sourceMappingURL=defaults.js.map

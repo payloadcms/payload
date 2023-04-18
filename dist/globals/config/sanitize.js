@@ -53,6 +53,8 @@ const sanitizeGlobals = (collections, globals) => {
                 }
                 sanitizedGlobal.fields = (0, mergeBaseFields_1.default)(sanitizedGlobal.fields, baseFields_1.default);
             }
+            if (!sanitizedGlobal.custom)
+                sanitizedGlobal.custom = {};
         }
         // /////////////////////////////////
         // Sanitize fields

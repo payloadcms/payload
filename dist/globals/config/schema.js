@@ -49,6 +49,7 @@ const globalSchema = joi_1.default.object().keys({
             })),
         }), joi_1.default.boolean()),
     }), joi_1.default.boolean()),
+    custom: joi_1.default.object().pattern(joi_1.default.string(), joi_1.default.any()),
 }).unknown();
 exports.default = globalSchema;
 //# sourceMappingURL=schema.js.map
