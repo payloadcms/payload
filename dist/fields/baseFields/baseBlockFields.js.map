@@ -1,1 +1,0 @@
-{"version":3,"file":"baseBlockFields.js","sourceRoot":"","sources":["../../../src/fields/baseFields/baseBlockFields.ts"],"names":[],"mappings":";;;AACA,+CAA4C;AAE/B,QAAA,eAAe,GAAY;IACtC,yBAAW;IACX;QACE,IAAI,EAAE,WAAW;QACjB,KAAK,EAAE,YAAY;QACnB,IAAI,EAAE,MAAM;QACZ,QAAQ,EAAE,KAAK;QACf,KAAK,EAAE;YACL,QAAQ,EAAE,IAAI;SACf;KACF;CACF,CAAC"}

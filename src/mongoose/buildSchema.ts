@@ -112,7 +112,7 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
 
 const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   number: (field: NumberField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
-    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Number };
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: field.hasMany ? [Number] : Number };
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),

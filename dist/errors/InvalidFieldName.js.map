@@ -1,1 +1,0 @@
-{"version":3,"file":"InvalidFieldName.js","sourceRoot":"","sources":["../../src/errors/InvalidFieldName.ts"],"names":[],"mappings":";;;;;AACA,0DAAkC;AAElC,MAAM,gBAAiB,SAAQ,kBAAQ;IACrC,YAAY,KAAyB,EAAE,SAAiB;QACtD,KAAK,CAAC,SAAS,KAAK,CAAC,KAAK,sBAAsB,SAAS,sEAAsE,CAAC,CAAC;IACnI,CAAC;CACF;AAED,kBAAe,gBAAgB,CAAC"}

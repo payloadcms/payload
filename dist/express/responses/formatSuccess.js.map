@@ -1,1 +1,0 @@
-{"version":3,"file":"formatSuccess.js","sourceRoot":"","sources":["../../../src/express/responses/formatSuccess.ts"],"names":[],"mappings":";;AAAA,MAAM,qBAAqB,GAAG,CAAC,QAAQ,EAAE,IAAI,EAAE,EAAE;IAC/C,QAAQ,IAAI,EAAE;QACZ,KAAK,SAAS;YACZ,OAAO;gBACL,OAAO,EAAE,QAAQ;aAClB,CAAC;QAEJ;YACE,OAAO,QAAQ,CAAC;KACnB;AACH,CAAC,CAAC;AAEF,kBAAe,qBAAqB,CAAC"}
