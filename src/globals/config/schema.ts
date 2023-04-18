@@ -66,6 +66,7 @@ const globalSchema = joi.object().keys({
     }),
     joi.boolean(),
   ),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 }).unknown();
 
 export default globalSchema;
