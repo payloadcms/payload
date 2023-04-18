@@ -93,6 +93,7 @@ export const number = baseField.keys({
     autoComplete: joi.string(),
     step: joi.number(),
   }),
+  hasMany: joi.boolean().default(false),
 });
 
 export const textarea = baseField.keys({
