@@ -1,3 +1,18 @@
+
+
+## [1.7.1](https://github.com/payloadcms/payload/compare/v1.7.0...v1.7.1) (2023-04-18)
+
+
+### Bug Fixes
+
+* adds 'use client' for next 13 compatibility ([5e02985](https://github.com/payloadcms/payload/commit/5e029852060d6475eccada35ffbcdd0178d5e690))
+* graphql variables not being passed properly ([72be80a](https://github.com/payloadcms/payload/commit/72be80abc4082013e052aef1152a5de749a6f3c4))
+
+
+### Features
+
+* configuration extension points ([023719d](https://github.com/payloadcms/payload/commit/023719d77554a70493d779ba94bf55058d4caf98))
+
 ## [1.7.0](https://github.com/payloadcms/payload/compare/v1.6.32...v1.7.0) (2023-04-17)
 
 ### Features
