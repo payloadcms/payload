@@ -10,11 +10,6 @@ export async function writeCommonFiles(
 ): Promise<void> {
   const commonFilesDir = path.resolve(__dirname, 'common-files')
 
-  // .npmrc
-  const npmrc = path.resolve(commonFilesDir, 'npmrc.template')
-  const npmrcDest = path.resolve(projectDir, '.npmrc')
-  await fse.copy(npmrc, npmrcDest)
-
   // .gitignore
   const gi = path.resolve(commonFilesDir, 'gitignore.template')
   const giDest = path.resolve(projectDir, '.gitignore')

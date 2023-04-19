@@ -48,7 +48,6 @@ describe('createProject', () => {
       expect(packageJson.description).toContain(templateName)
 
       // Check all common files are create
-      assertProjectFileExists('.npmrc')
       assertProjectFileExists('.gitignore')
       assertProjectFileExists('nodemon.json')
       assertProjectFileExists('README.md')
