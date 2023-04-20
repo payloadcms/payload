@@ -25,6 +25,12 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
     schema.index({ createdAt: 1 });
   }
 
+  if (collection.indexes && collection.indexes.length > 0) {
+   for (const index of collection.indexes) {
+      schema.index(index.fields, index.options);
+    }
+  }
+
   schema.plugin(paginate, { useEstimatedCount: true })
     .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug }));
 
