@@ -114,7 +114,7 @@ const serialize = (children: Children): React.ReactElement[] => children.map((no
           {serialize(node.children)}
         </h6>
       );
-    case 'quote':
+    case 'blockquote':
       return (
         <blockquote key={i}>
           {serialize(node.children)}

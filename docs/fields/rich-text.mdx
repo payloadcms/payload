@@ -271,7 +271,7 @@ const serialize = (children) => children.map((node, i) => {
           {serialize(node.children)}
         </h6>
       );
-    case 'quote':
+    case 'blockquote':
       return (
         <blockquote key={i}>
           {serialize(node.children)}
