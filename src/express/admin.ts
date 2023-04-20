@@ -25,7 +25,7 @@ function initAdmin(ctx: Payload): void {
 
       ctx.express.use(ctx.config.routes.admin, router);
     } else {
-      ctx.express.use(ctx.config.routes.admin, history());
+      // ctx.express.use(ctx.config.routes.admin, history());
       ctx.express.use(initWebpack(ctx.config));
     }
   }
