@@ -5,6 +5,7 @@ import { FieldBase } from '../../../../fields/config/types';
 import { useAllFormFields } from '../Form/context';
 import getSiblingData from '../Form/getSiblingData';
 import reduceFieldsToValues from '../Form/reduceFieldsToValues';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
 
 const withCondition = <P extends Record<string, unknown>>(Field: React.ComponentType<P>): React.FC<P> => {
   const CheckForCondition: React.FC<P> = (props) => {
@@ -35,13 +36,19 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
     const path = typeof pathFromProps === 'string' ? pathFromProps : name;
 
     const [fields, dispatchFields] = useAllFormFields();
+    const { id } = useDocumentInfo();
 
     const data = reduceFieldsToValues(fields, true);
     const siblingData = getSiblingData(fields, path);
+
+    // Manually provide ID to `data`
+    data.id = id;
+
     const hasCondition = Boolean(condition);
     const currentlyPassesCondition = hasCondition ? condition(data, siblingData) : true;
     const field = fields[path];
     const existingConditionPasses = field?.passesCondition;
+
 
     useEffect(() => {
       if (hasCondition) {
