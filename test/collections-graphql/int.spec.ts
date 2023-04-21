@@ -44,6 +44,20 @@ describe('collections-graphql', () => {
       expect(doc.id.length).toBeGreaterThan(0);
     });
 
+    it('should create using graphql variables', async () => {
+      const query = `mutation Create($title: String!) {
+          createPost(data: {title: $title}) {
+          id
+          title
+        }
+      }`;
+      const response = await client.request(query, { title });
+      const doc: Post = response.createPost;
+
+      expect(doc).toMatchObject({ title });
+      expect(doc.id.length).toBeGreaterThan(0);
+    });
+
     it('should read', async () => {
       const query = `query {
         Post(id: "${existingDoc.id}") {

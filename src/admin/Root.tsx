@@ -1,3 +1,5 @@
+'use client';
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - need to do this because this file doesn't actually exist
 import config from 'payload-config';
