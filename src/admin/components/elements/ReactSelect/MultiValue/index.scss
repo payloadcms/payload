@@ -3,9 +3,13 @@
 .multi-value {
   &.rs__multi-value {
     padding: 0;
-    background: transparent;
+    background: var(--theme-input-bg);
     border: $style-stroke-width-s solid var(--theme-elevation-800);
     line-height: calc(#{$baseline} - #{$style-stroke-width-s * 2});
     margin: base(.25) base(.5) base(.25) 0;
+  }
+
+  &--is-dragging {
+    z-index: 2;
   }
 }
