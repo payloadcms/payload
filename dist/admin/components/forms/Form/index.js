@@ -289,6 +289,11 @@ const Form = (props) => {
         setModified(false);
         dispatchFields({ type: 'REPLACE_STATE', state });
     }, [id, user, operation, locale, t, dispatchFields]);
+    const replaceState = (0, react_1.useCallback)((state) => {
+        contextRef.current = { ...initContextState_1.default };
+        setModified(false);
+        dispatchFields({ type: 'REPLACE_STATE', state });
+    }, [dispatchFields]);
     contextRef.current.submit = submit;
     contextRef.current.getFields = getFields;
     contextRef.current.getField = getField;
@@ -303,6 +308,7 @@ const Form = (props) => {
     contextRef.current.disabled = disabled;
     contextRef.current.formRef = formRef;
     contextRef.current.reset = reset;
+    contextRef.current.replaceState = replaceState;
     (0, react_1.useEffect)(() => {
         if (initialState) {
             contextRef.current = { ...initContextState_1.default };

@@ -88,14 +88,14 @@ function registerSchema(payload) {
         mutation,
     };
     payload.schema = new graphql_1.GraphQLSchema(schema);
-    payload.validationRules = (variables) => ([
+    payload.validationRules = ({ variableValues }) => ([
         (0, graphql_query_complexity_1.default)({
             estimators: [
                 (0, graphql_query_complexity_1.fieldExtensionsEstimator)(),
                 (0, graphql_query_complexity_1.simpleEstimator)({ defaultComplexity: 1 }), // Fallback if complexity not set
             ],
             maximumComplexity: payload.config.graphQL.maxComplexity,
-            variables,
+            variables: variableValues,
             // onComplete: (complexity) => { console.log('Query Complexity:', complexity); },
         }),
     ]);

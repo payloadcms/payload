@@ -26,6 +26,7 @@ const initialContextState = {
     disabled: false,
     formRef: null,
     reset,
+    replaceState: () => undefined,
 };
 exports.default = initialContextState;
 //# sourceMappingURL=initContextState.js.map
