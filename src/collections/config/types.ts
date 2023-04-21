@@ -241,7 +241,7 @@ export type CollectionConfig = {
   }
   fields: Field[];
   /**
-   * Custom collection indexes
+   * Array of database indexes to create, including compound indexes that have multiple fields
    */
   indexes?: TypeOfIndex[];
   /**
