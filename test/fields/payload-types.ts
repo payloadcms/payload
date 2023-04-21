@@ -15,6 +15,7 @@ export interface Config {
     'date-fields': DateField;
     'radio-fields': RadioField;
     'group-fields': GroupField;
+    'row-fields': RowField;
     'indexed-fields': IndexedField;
     'json-fields': JsonField;
     'number-fields': NumberField;
@@ -45,19 +46,19 @@ export interface ArrayField {
     text: string;
     id?: string;
   }[];
-  readOnly: {
+  readOnly?: {
     text?: string;
     id?: string;
   }[];
-  potentiallyEmptyArray: {
+  potentiallyEmptyArray?: {
     text?: string;
     id?: string;
   }[];
-  rowLabelAsFunction: {
+  rowLabelAsFunction?: {
     title?: string;
     id?: string;
   }[];
-  rowLabelAsComponent: {
+  rowLabelAsComponent?: {
     title?: string;
     id?: string;
   }[];
@@ -83,7 +84,7 @@ export interface BlockField {
         blockType: 'number';
       }
     | {
-        subBlocks: (
+        subBlocks?: (
           | {
               text: string;
               id?: string;
@@ -126,7 +127,7 @@ export interface BlockField {
         blockType: 'number';
       }
     | {
-        subBlocks: (
+        subBlocks?: (
           | {
               text: string;
               id?: string;
@@ -169,7 +170,7 @@ export interface BlockField {
         blockType: 'number';
       }
     | {
-        subBlocks: (
+        subBlocks?: (
           | {
               text: string;
               id?: string;
@@ -195,7 +196,7 @@ export interface BlockField {
         blockType: 'tabs';
       }
   )[];
-  i18nBlocks: {
+  i18nBlocks?: {
     text?: string;
     id?: string;
     blockName?: string;
@@ -217,9 +218,9 @@ export interface CodeField {
 export interface CollapsibleField {
   id: string;
   text: string;
-  group: {
+  group?: {
     textWithinGroup?: string;
-    subGroup: {
+    subGroup?: {
       textWithinSubGroup?: string;
     };
   };
@@ -227,7 +228,7 @@ export interface CollapsibleField {
   functionTitleField?: string;
   componentTitleField?: string;
   nestedTitle?: string;
-  arrayWithCollapsibles: {
+  arrayWithCollapsibles?: {
     innerCollapsible?: string;
     id?: string;
   }[];
@@ -264,28 +265,34 @@ export interface GroupField {
     text: string;
     defaultParent?: string;
     defaultChild?: string;
-    subGroup: {
+    subGroup?: {
       textWithinGroup?: string;
-      arrayWithinGroup: {
+      arrayWithinGroup?: {
         textWithinArray?: string;
         id?: string;
       }[];
     };
   };
-  potentiallyEmptyGroup: {
+  potentiallyEmptyGroup?: {
     text?: string;
   };
-  groupInRow: {
+  groupInRow?: {
     field?: string;
     secondField?: string;
     thirdField?: string;
   };
-  secondGroupInRow: {
+  secondGroupInRow?: {
     field?: string;
-    nestedGroup: {
+    nestedGroup?: {
       nestedField?: string;
     };
   };
+  createdAt: string;
+  updatedAt: string;
+}
+export interface RowField {
+  id: string;
+  title: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -298,7 +305,7 @@ export interface IndexedField {
    * @maxItems 2
    */
   point?: [number, number];
-  group: {
+  group?: {
     localizedUnique?: string;
     /**
      * @minItems 2
@@ -308,6 +315,8 @@ export interface IndexedField {
   };
   collapsibleLocalizedUnique?: string;
   collapsibleTextUnique?: string;
+  partOne?: string;
+  partTwo?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -350,7 +359,7 @@ export interface PointField {
    * @maxItems 2
    */
   localized?: [number, number];
-  group: {
+  group?: {
     /**
      * @minItems 2
      * @maxItems 2
@@ -378,6 +387,8 @@ export interface RelationshipField {
     value: string | User;
     relationTo: 'users';
   };
+  relationshipWithMin?: string[] | TextField[];
+  relationshipWithMax?: string[] | TextField[];
   createdAt: string;
   updatedAt: string;
 }
@@ -450,7 +461,7 @@ export interface TabsField {
         blockType: 'number';
       }
     | {
-        subBlocks: (
+        subBlocks?: (
           | {
               text: string;
               id?: string;

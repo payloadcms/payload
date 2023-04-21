@@ -10,6 +10,7 @@ import { defaultText } from './collections/Text';
 import { blocksFieldSeedData } from './collections/Blocks';
 import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
 import { defaultNumber, numberDoc } from './collections/Number';
+import {IndexedField} from './payload-types';
 
 let client;
 let serverURL;
@@ -200,7 +201,10 @@ describe('Fields', () => {
       expect(definitions.collapsibleTextUnique).toEqual(1);
       expect(options.collapsibleTextUnique).toMatchObject({ unique: true });
     });
-
+    it('should have unique compound indexes', () => {
+      expect(definitions['partOne']).toEqual(1);
+      expect(options['partOne']).toMatchObject({ unique: true, name: 'compound-index', sparse: true });      
+    });
     it('should throw validation error saving on unique fields', async () => {
       const data = {
         text: 'a',
@@ -214,6 +218,32 @@ describe('Fields', () => {
         const result = await payload.create({
           collection: 'indexed-fields',
           data,
+        });
+        return result.error;
+      }).toBeDefined();
+    });
+    it('should throw validation error saving on unique combined fields', async () => {
+      await payload.delete({collection: 'indexed-fields', where: {}});
+      const data1 = {
+        text: 'a',
+        uniqueText: 'a',
+        partOne: 'u',
+        partTwo: 'u',
+      };
+      const data2 = {
+        text: 'b',
+        uniqueText: 'b',
+        partOne: 'u',
+        partTwo: 'u',
+      };
+      await payload.create({
+        collection: 'indexed-fields',
+        data: data1,
+      });
+      expect(async () => {
+        const result = await payload.create({
+          collection: 'indexed-fields',
+          data: data2,
         });
         return result.error;
       }).toBeDefined();

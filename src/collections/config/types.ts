@@ -243,7 +243,7 @@ export type CollectionConfig = {
   /**
    * Custom collection indexes
    */
-  indexes: TypeOfIndex[];
+  indexes?: TypeOfIndex[];
   /**
    * Collection admin options
    */
