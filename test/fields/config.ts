@@ -40,6 +40,18 @@ export default buildConfig({
     }),
   },
   collections: [
+    {
+      slug: 'users',
+      auth: true,
+      fields: [
+        {
+          name: 'canViewConditionalField',
+          type: 'checkbox',
+          defaultValue: true,
+          saveToJWT: true,
+        },
+      ],
+    },
     ArrayFields,
     BlockFields,
     CodeFields,
