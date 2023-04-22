@@ -23,6 +23,7 @@ export interface Post {
   title?: string;
   description?: string;
   number?: number;
+  fakeLocalization?: string;
   relationField?: string | Relation;
   relationHasManyField?: string[] | Relation[];
   relationMultiRelationTo?:
@@ -55,6 +56,7 @@ export interface Post {
             relationTo: 'dummy';
           }
       )[];
+  restrictedField?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -66,6 +68,7 @@ export interface Relation {
 }
 export interface Dummy {
   id: string;
+  title?: string;
   name?: string;
   createdAt: string;
   updatedAt: string;
