@@ -43,6 +43,9 @@ export default buildConfig({
     {
       slug: 'users',
       auth: true,
+      admin: {
+        useAsTitle: 'email',
+      },
       fields: [
         {
           name: 'canViewConditionalField',
