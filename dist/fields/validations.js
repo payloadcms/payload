@@ -11,7 +11,6 @@ const isValidID_1 = require("../utilities/isValidID");
 const getIDType_1 = require("../utilities/getIDType");
 const number = (value, { t, required, min, max, hasMany }) => {
     if (hasMany) {
-        console.log('hasMany', value);
         return true;
     }
     const parsedValue = parseFloat(value);

@@ -29,7 +29,6 @@ export const number: Validate<unknown, unknown, NumberField> = (
   { t, required, min, max, hasMany },
 ) => {
   if (hasMany) {
-    console.log('hasMany', value);
     return true;
   }
   const parsedValue = parseFloat(value);
