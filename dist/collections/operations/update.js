@@ -175,6 +175,7 @@ async function update(incomingArgs) {
                 }
                 catch (error) {
                     // Handle uniqueness error from MongoDB
+                    console.log('ERROR:', error);
                     throw error.code === 11000 && error.keyValue
                         ? new errors_1.ValidationError([{
                                 message: 'Value must be unique',

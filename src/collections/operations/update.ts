@@ -254,6 +254,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           );
         } catch (error) {
           // Handle uniqueness error from MongoDB
+          console.log('ERROR:', error);
           throw error.code === 11000 && error.keyValue
             ? new ValidationError([{
               message: 'Value must be unique',

@@ -86,6 +86,7 @@ export const number = baseField.keys({
   defaultValue: joi.alternatives().try(
     joi.number(),
     joi.func(),
+    joi.any(),
   ),
   min: joi.number(),
   max: joi.number(),

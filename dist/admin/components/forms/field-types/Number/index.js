@@ -42,8 +42,8 @@ const NumberField = (props) => {
     const { i18n } = (0, react_i18next_1.useTranslation)();
     const path = pathFromProps || name;
     const memoizedValidate = (0, react_1.useCallback)((value, options) => {
-        return validate(value, { ...options, min, max, required });
-    }, [validate, min, max, required]);
+        return validate(value, { ...options, min, max, required, hasMany });
+    }, [validate, min, max, required, hasMany]);
     const { value, showError, setValue, errorMessage, } = (0, useField_1.default)({
         path,
         validate: memoizedValidate,

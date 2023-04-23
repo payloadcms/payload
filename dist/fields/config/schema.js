@@ -69,7 +69,7 @@ exports.text = exports.baseField.keys({
 exports.number = exports.baseField.keys({
     type: joi_1.default.string().valid('number').required(),
     name: joi_1.default.string().required(),
-    defaultValue: joi_1.default.alternatives().try(joi_1.default.number(), joi_1.default.func()),
+    defaultValue: joi_1.default.alternatives().try(joi_1.default.number(), joi_1.default.func(), joi_1.default.any()),
     min: joi_1.default.number(),
     max: joi_1.default.number(),
     admin: exports.baseAdminFields.keys({

@@ -9,9 +9,15 @@ const types_1 = require("./config/types");
 const canUseDOM_1 = __importDefault(require("../utilities/canUseDOM"));
 const isValidID_1 = require("../utilities/isValidID");
 const getIDType_1 = require("../utilities/getIDType");
-const number = (value, { t, required, min, max }) => {
+const number = (value, { t, required, min, max, hasMany }) => {
+    if (hasMany) {
+        console.log('hasMany', value);
+        return true;
+    }
     const parsedValue = parseFloat(value);
-    if ((value && typeof parsedValue !== 'number') || (required && Number.isNaN(parsedValue)) || (value && Number.isNaN(parsedValue))) {
+    if ((value && typeof parsedValue !== 'number')
+        || (required && Number.isNaN(parsedValue))
+        || (value && Number.isNaN(parsedValue))) {
         return t('validation:enterNumber');
     }
     if (typeof max === 'number' && parsedValue > max) {
@@ -29,8 +35,9 @@ exports.number = number;
 const text = (value, { t, minLength, maxLength: fieldMaxLength, required, payload }) => {
     var _a;
     let maxLength;
-    if (typeof ((_a = payload === null || payload === void 0 ? void 0 : payload.config) === null || _a === void 0 ? void 0 : _a.defaultMaxTextLength) === 'number')
+    if (typeof ((_a = payload === null || payload === void 0 ? void 0 : payload.config) === null || _a === void 0 ? void 0 : _a.defaultMaxTextLength) === 'number') {
         maxLength = payload.config.defaultMaxTextLength;
+    }
     if (typeof fieldMaxLength === 'number')
         maxLength = fieldMaxLength;
     if (value && maxLength && value.length > maxLength) {
@@ -50,8 +57,9 @@ exports.text = text;
 const password = (value, { t, required, maxLength: fieldMaxLength, minLength, payload }) => {
     var _a;
     let maxLength;
-    if (typeof ((_a = payload === null || payload === void 0 ? void 0 : payload.config) === null || _a === void 0 ? void 0 : _a.defaultMaxTextLength) === 'number')
+    if (typeof ((_a = payload === null || payload === void 0 ? void 0 : payload.config) === null || _a === void 0 ? void 0 : _a.defaultMaxTextLength) === 'number') {
         maxLength = payload.config.defaultMaxTextLength;
+    }
     if (typeof fieldMaxLength === 'number')
         maxLength = fieldMaxLength;
     if (value && maxLength && value.length > maxLength) {
@@ -67,18 +75,18 @@ const password = (value, { t, required, maxLength: fieldMaxLength, minLength, pa
 };
 exports.password = password;
 const email = (value, { t, required }) => {
-    if ((value && !/\S+@\S+\.\S+/.test(value))
-        || (!value && required)) {
+    if ((value && !/\S+@\S+\.\S+/.test(value)) || (!value && required)) {
         return t('validation:emailAddress');
     }
     return true;
 };
 exports.email = email;
-const textarea = (value, { t, required, maxLength: fieldMaxLength, minLength, payload, }) => {
+const textarea = (value, { t, required, maxLength: fieldMaxLength, minLength, payload }) => {
     var _a;
     let maxLength;
-    if (typeof ((_a = payload === null || payload === void 0 ? void 0 : payload.config) === null || _a === void 0 ? void 0 : _a.defaultMaxTextLength) === 'number')
+    if (typeof ((_a = payload === null || payload === void 0 ? void 0 : payload.config) === null || _a === void 0 ? void 0 : _a.defaultMaxTextLength) === 'number') {
         maxLength = payload.config.defaultMaxTextLength;
+    }
     if (typeof fieldMaxLength === 'number')
         maxLength = fieldMaxLength;
     if (value && maxLength && value.length > maxLength) {
@@ -100,7 +108,7 @@ const code = (value, { t, required }) => {
     return true;
 };
 exports.code = code;
-const json = (value, { t, required, jsonError, }) => {
+const json = (value, { t, required, jsonError }) => {
     if (required && !value) {
         return t('validation:required');
     }
@@ -129,7 +137,8 @@ const checkbox = (value, { t, required }) => {
 };
 exports.checkbox = checkbox;
 const date = (value, { t, required }) => {
-    if (value && !isNaN(Date.parse(value.toString()))) { /* eslint-disable-line */
+    if (value && !isNaN(Date.parse(value.toString()))) {
+        /* eslint-disable-line */
         return true;
     }
     if (value) {
@@ -147,13 +156,15 @@ const validateFilterOptions = async (value, { t, filterOptions, id, user, data, 
         const collections = typeof relationTo === 'string' ? [relationTo] : relationTo;
         const values = Array.isArray(value) ? value : [value];
         await Promise.all(collections.map(async (collection) => {
-            const optionFilter = typeof filterOptions === 'function' ? filterOptions({
-                id,
-                data,
-                siblingData,
-                user,
-                relationTo: collection,
-            }) : filterOptions;
+            const optionFilter = typeof filterOptions === 'function'
+                ? filterOptions({
+                    id,
+                    data,
+                    siblingData,
+                    user,
+                    relationTo: collection,
+                })
+                : filterOptions;
             const valueIDs = [];
             values.forEach((val) => {
                 if (typeof val === 'object' && (val === null || val === void 0 ? void 0 : val.value)) {
@@ -167,10 +178,7 @@ const validateFilterOptions = async (value, { t, filterOptions, id, user, data, 
                 collection,
                 depth: 0,
                 where: {
-                    and: [
-                        { id: { in: valueIDs } },
-                        optionFilter,
-                    ],
+                    and: [{ id: { in: valueIDs } }, optionFilter],
                 },
             });
             options[collection] = result.docs.map((doc) => doc.id);
@@ -184,7 +192,9 @@ const validateFilterOptions = async (value, { t, filterOptions, id, user, data, 
                     requestedID = val;
                 }
             }
-            if (Array.isArray(relationTo) && typeof val === 'object' && (val === null || val === void 0 ? void 0 : val.relationTo)) {
+            if (Array.isArray(relationTo)
+                && typeof val === 'object'
+                && (val === null || val === void 0 ? void 0 : val.relationTo)) {
                 collection = val.relationTo;
                 requestedID = val.value;
             }
@@ -214,7 +224,7 @@ const upload = (value, options) => {
 };
 exports.upload = upload;
 const relationship = async (value, options) => {
-    const { required, min, max, relationTo, payload, t, } = options;
+    const { required, min, max, relationTo, payload, t } = options;
     if ((!value || (Array.isArray(value) && value.length === 0)) && required) {
         return options.t('validation:required');
     }
@@ -238,7 +248,9 @@ const relationship = async (value, options) => {
                     requestedID = val;
                 }
             }
-            if (Array.isArray(relationTo) && typeof val === 'object' && (val === null || val === void 0 ? void 0 : val.relationTo)) {
+            if (Array.isArray(relationTo)
+                && typeof val === 'object'
+                && (val === null || val === void 0 ? void 0 : val.relationTo)) {
                 collection = val.relationTo;
                 requestedID = val.value;
             }
@@ -253,9 +265,11 @@ const relationship = async (value, options) => {
             return !(0, isValidID_1.isValidID)(requestedID, type);
         });
         if (invalidRelationships.length > 0) {
-            return `This field has the following invalid selections: ${invalidRelationships.map((err, invalid) => {
+            return `This field has the following invalid selections: ${invalidRelationships
+                .map((err, invalid) => {
                 return `${err} ${JSON.stringify(invalid)}`;
-            }).join(', ')}`;
+            })
+                .join(', ')}`;
         }
     }
     return validateFilterOptions(value, options);
@@ -263,10 +277,16 @@ const relationship = async (value, options) => {
 exports.relationship = relationship;
 const array = (value, { t, minRows, maxRows, required }) => {
     if (minRows && value < minRows) {
-        return t('validation:requiresAtLeast', { count: minRows, label: t('rows') });
+        return t('validation:requiresAtLeast', {
+            count: minRows,
+            label: t('rows'),
+        });
     }
     if (maxRows && value > maxRows) {
-        return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') });
+        return t('validation:requiresNoMoreThan', {
+            count: maxRows,
+            label: t('rows'),
+        });
     }
     if (!value && required) {
         return t('validation:requiresAtLeast', { count: 1, label: t('row') });
@@ -275,13 +295,20 @@ const array = (value, { t, minRows, maxRows, required }) => {
 };
 exports.array = array;
 const select = (value, { t, options, hasMany, required }) => {
-    if (Array.isArray(value) && value.some((input) => !options.some((option) => (option === input || (typeof option !== 'string' && (option === null || option === void 0 ? void 0 : option.value) === input))))) {
+    if (Array.isArray(value)
+        && value.some((input) => !options.some((option) => option === input
+            || (typeof option !== 'string' && (option === null || option === void 0 ? void 0 : option.value) === input)))) {
         return t('validation:invalidSelection');
     }
-    if (typeof value === 'string' && !options.some((option) => (option === value || (typeof option !== 'string' && option.value === value)))) {
+    if (typeof value === 'string'
+        && !options.some((option) => option === value
+            || (typeof option !== 'string' && option.value === value))) {
         return t('validation:invalidSelection');
     }
-    if (required && ((typeof value === 'undefined' || value === null) || (hasMany && Array.isArray(value) && (value === null || value === void 0 ? void 0 : value.length) === 0))) {
+    if (required
+        && (typeof value === 'undefined'
+            || value === null
+            || (hasMany && Array.isArray(value) && (value === null || value === void 0 ? void 0 : value.length) === 0))) {
         return t('validation:required');
     }
     return true;
@@ -289,7 +316,8 @@ const select = (value, { t, options, hasMany, required }) => {
 exports.select = select;
 const radio = (value, { t, options, required }) => {
     if (value) {
-        const valueMatchesOption = options.some((option) => (option === value || (typeof option !== 'string' && option.value === value)));
+        const valueMatchesOption = options.some((option) => option === value
+            || (typeof option !== 'string' && option.value === value));
         return valueMatchesOption || t('validation:invalidSelection');
     }
     return required ? t('validation:required') : true;
@@ -297,10 +325,16 @@ const radio = (value, { t, options, required }) => {
 exports.radio = radio;
 const blocks = (value, { t, maxRows, minRows, required }) => {
     if (minRows && value < minRows) {
-        return t('validation:requiresAtLeast', { count: minRows, label: t('rows') });
+        return t('validation:requiresAtLeast', {
+            count: minRows,
+            label: t('rows'),
+        });
     }
     if (maxRows && value > maxRows) {
-        return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') });
+        return t('validation:requiresNoMoreThan', {
+            count: maxRows,
+            label: t('rows'),
+        });
     }
     if (!value && required) {
         return t('validation:requiresAtLeast', { count: 1, label: t('row') });
@@ -311,9 +345,14 @@ exports.blocks = blocks;
 const point = (value = ['', ''], { t, required }) => {
     const lng = parseFloat(String(value[0]));
     const lat = parseFloat(String(value[1]));
-    if (required && ((value[0] && value[1] && typeof lng !== 'number' && typeof lat !== 'number')
-        || (Number.isNaN(lng) || Number.isNaN(lat))
-        || (Array.isArray(value) && value.length !== 2))) {
+    if (required
+        && ((value[0]
+            && value[1]
+            && typeof lng !== 'number'
+            && typeof lat !== 'number')
+            || Number.isNaN(lng)
+            || Number.isNaN(lat)
+            || (Array.isArray(value) && value.length !== 2))) {
         return t('validation:requiresTwoNumbers');
     }
     if ((value[1] && Number.isNaN(lng)) || (value[0] && Number.isNaN(lat))) {
