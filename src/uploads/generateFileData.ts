@@ -56,7 +56,7 @@ export const generateFileData = async <T>({
     };
   }
 
-  const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions } = collectionConfig.upload;
+  const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions, trimOptions } = collectionConfig.upload;
 
   let staticPath = staticDir;
   if (staticDir.indexOf('/') !== 0) {
@@ -85,7 +85,7 @@ export const generateFileData = async <T>({
 
     if (fileIsAnimated) sharpOptions.animated = true;
 
-    if (fileSupportsResize && (resizeOptions || formatOptions)) {
+    if (fileSupportsResize && (resizeOptions || formatOptions || trimOptions)) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions);
       } else {
@@ -98,6 +98,9 @@ export const generateFileData = async <T>({
       }
       if (formatOptions) {
         sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options);
+      }
+      if (trimOptions) {
+        sharpFile = sharpFile.trim(trimOptions);
       }
     }
 
