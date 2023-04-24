@@ -4,8 +4,8 @@ import { RESTClient } from '../helpers/rest';
 import configPromise from '../uploads/config';
 import payload from '../../src';
 import { pointDoc } from './collections/Point';
-import { arrayFieldsSlug, arrayDefaultValue, arrayDoc } from './collections/Array';
-import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
+import { arrayDefaultValue, arrayDoc, arrayFieldsSlug } from './collections/Array';
+import { groupDefaultChild, groupDefaultValue, groupDoc, groupFieldsSlug } from './collections/Group';
 import { defaultText } from './collections/Text';
 import { blocksFieldSeedData } from './collections/Blocks';
 import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
@@ -153,6 +153,50 @@ describe('Fields', () => {
           decimalMax: 1.5,
         },
       })).rejects.toThrow('The following field is invalid: decimalMax');
+    });
+
+    it('should validate an array of numbers', async () => {
+      await expect(async () => payload.create({
+        collection: 'number-fields',
+        data: {
+          hasMany: 3,
+        },
+      })).rejects.toThrow('The following field is invalid: hasMany');
+    });
+    it('should validate an array of numbers using min', async () => {
+      await expect(async () => payload.create({
+        collection: 'number-fields',
+        data: {
+          hasMany: [3],
+        },
+      })).rejects.toThrow('The following field is invalid: hasMany');
+    });
+    it('should validate an array of numbers using max', async () => {
+      await expect(async () => payload.create({
+        collection: 'number-fields',
+        data: {
+          hasMany: [1000],
+        },
+      })).rejects.toThrow('The following field is invalid: hasMany');
+    });
+    it('should localize an array of numbers using hasMany', async () => {
+      const localizedHasMany = [5, 10];
+      const { id } = await payload.create({
+        collection: 'number-fields',
+        locale: 'en',
+        data: {
+          localizedHasMany,
+        },
+      });
+      const localizedDoc = await payload.findByID({
+        collection: 'number-fields',
+        locale: 'all',
+        id,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany);
     });
   });
 

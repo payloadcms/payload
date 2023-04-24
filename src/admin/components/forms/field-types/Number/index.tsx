@@ -9,9 +9,9 @@ import { number } from '../../../../../fields/validations';
 import { Props } from './types';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { Option } from '../../../elements/ReactSelect/types';
+import ReactSelect from '../../../elements/ReactSelect';
 
 import './index.scss';
-import ReactSelect from '../../../elements/ReactSelect';
 
 const NumberField: React.FC<Props> = (props) => {
   const {
@@ -35,7 +35,7 @@ const NumberField: React.FC<Props> = (props) => {
     } = {},
   } = props;
 
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const path = pathFromProps || name;
 
@@ -132,6 +132,7 @@ const NumberField: React.FC<Props> = (props) => {
       />
       {hasMany ? (
         <ReactSelect
+          placeholder={t('general:enterAValue')}
           onChange={onMultiTextChange}
           value={valueToRender as Option[]}
           showError={showError}
