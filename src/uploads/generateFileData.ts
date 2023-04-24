@@ -85,7 +85,7 @@ export const generateFileData = async <T>({
 
     if (fileIsAnimated) sharpOptions.animated = true;
 
-    if (fileSupportsResize && (resizeOptions || formatOptions)) {
+    if (fileSupportsResize && (resizeOptions || formatOptions || trimOptions)) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions);
       } else {
@@ -100,7 +100,7 @@ export const generateFileData = async <T>({
         sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options);
       }
       if (trimOptions) {
-        originalFile = originalFile.trim(trimOptions);
+        sharpFile = sharpFile.trim(trimOptions);
       }
     }
 
