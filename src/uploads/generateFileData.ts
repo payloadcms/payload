@@ -56,7 +56,7 @@ export const generateFileData = async <T>({
     };
   }
 
-  const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions } = collectionConfig.upload;
+  const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions, trimOptions } = collectionConfig.upload;
 
   let staticPath = staticDir;
   if (staticDir.indexOf('/') !== 0) {
@@ -93,6 +93,9 @@ export const generateFileData = async <T>({
       }
       if (formatOptions) {
         originalFile = originalFile.toFormat(formatOptions.format, formatOptions.options);
+      }
+      if (trimOptions) {
+        originalFile = originalFile.trim(trimOptions);
       }
     }
 

@@ -71,6 +71,7 @@ export type IncomingUploadType = {
   resizeOptions?: ResizeOptions
   /** Options for original upload file only. For sizes, set each formatOptions individually. */
   formatOptions?: ImageUploadFormatOptions
+  trimOptions?: ImageUploadTrimOptions
 }
 
 export type Upload = {
@@ -84,6 +85,7 @@ export type Upload = {
   handlers?: any[]
   resizeOptions?: ResizeOptions;
   formatOptions?: ImageUploadFormatOptions
+  trimOptions?: ImageUploadTrimOptions
 }
 
 export type File = {

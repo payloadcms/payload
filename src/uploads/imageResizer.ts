@@ -77,7 +77,7 @@ export default async function resizeAndSave({
         resized = resized.toFormat(desiredSize.formatOptions.format, desiredSize.formatOptions.options);
       }
 
-      if ('trimOptions' in desiredSize) {
+      if (desiredSize.trimOptions) {
         resized = resized.trim(desiredSize.trimOptions);
       }
 
