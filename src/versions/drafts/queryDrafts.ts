@@ -1,5 +1,6 @@
+import { PaginateOptions } from 'mongoose';
 import { AccessResult } from '../../config/types';
-import { Where } from '../../types';
+import { PayloadRequest, Where } from '../../types';
 import { Payload } from '../../payload';
 import { PaginatedDocs } from '../../mongoose/types';
 import { Collection, CollectionModel, TypeWithID } from '../../collections/config/types';
@@ -16,8 +17,9 @@ type AggregateVersion<T> = {
 type Args = {
   accessResult: AccessResult
   collection: Collection
-  locale: string
-  paginationOptions: any
+  req: PayloadRequest
+  overrideAccess: boolean
+  paginationOptions?: PaginateOptions
   payload: Payload
   where: Where
 }
@@ -25,7 +27,8 @@ type Args = {
 export const queryDrafts = async <T extends TypeWithID>({
   accessResult,
   collection,
-  locale,
+  req,
+  overrideAccess,
   payload,
   paginationOptions,
   where: incomingWhere,
@@ -34,21 +37,23 @@ export const queryDrafts = async <T extends TypeWithID>({
 
   const where = appendVersionToQueryKey(incomingWhere || {});
 
-  const versionQueryToBuild: { where: Where } = {
-    where: {
-      ...where,
-      and: [
-        ...where?.and || [],
-      ],
-    },
+  const versionQueryToBuild: Where = {
+    ...where,
+    and: [
+      ...where?.and || [],
+    ],
   };
 
   if (hasWhereAccessResult(accessResult)) {
     const versionAccessResult = appendVersionToQueryKey(accessResult);
-    versionQueryToBuild.where.and.push(versionAccessResult);
+    versionQueryToBuild.and.push(versionAccessResult);
   }
 
-  const versionQuery = await VersionModel.buildQuery(versionQueryToBuild, locale);
+  const versionQuery = await VersionModel.buildQuery({
+    where: versionQueryToBuild,
+    req,
+    overrideAccess,
+  });
 
   const aggregate = VersionModel.aggregate<AggregateVersion<T>>([
     // Sort so that newest are first
@@ -64,19 +69,35 @@ export const queryDrafts = async <T extends TypeWithID>({
     },
     // Filter based on incoming query
     { $match: versionQuery },
-  ]);
-
-  const paginationSort = Object.entries(paginationOptions.sort).reduce((sort, [key, order]) => {
-    return {
-      ...sort,
-      [key]: order === 'asc' ? 1 : -1,
-    };
-  }, {});
-
-  const result = await VersionModel.aggregatePaginate(aggregate, {
-    ...paginationOptions,
-    sort: paginationSort,
+  ], {
+    allowDiskUse: true,
   });
+
+  let result;
+
+  if (paginationOptions) {
+    const aggregatePaginateOptions = {
+      ...paginationOptions,
+      useFacet: payload.mongoOptions?.useFacet,
+      sort: Object.entries(paginationOptions.sort)
+        .reduce((sort, [incomingSortKey, order]) => {
+          let key = incomingSortKey;
+
+          if (!['createdAt', 'updatedAt', '_id'].includes(incomingSortKey)) {
+            key = `version.${incomingSortKey}`;
+          }
+
+          return {
+            ...sort,
+            [key]: order === 'asc' ? 1 : -1,
+          };
+        }, {}),
+    };
+
+    result = await VersionModel.aggregatePaginate(aggregate, aggregatePaginateOptions);
+  } else {
+    result = aggregate.exec();
+  }
 
   return {
     ...result,

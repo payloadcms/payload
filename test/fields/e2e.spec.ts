@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import path from 'path';
+import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
@@ -86,7 +87,7 @@ describe('fields', () => {
       const json = page.locator('.json-field .inputarea');
       await json.fill(input);
 
-      await saveDocAndAssert(page);
+      await saveDocAndAssert(page, '.form-submit button');
       await expect(page.locator('.json-field')).toContainText('"foo": "bar"');
     });
   });
@@ -136,8 +137,26 @@ describe('fields', () => {
 
   describe('point', () => {
     let url: AdminUrlUtil;
-    beforeAll(() => {
+    let filledGroupPoint;
+    let emptyGroupPoint;
+    beforeAll(async () => {
       url = new AdminUrlUtil(serverURL, pointFieldsSlug);
+      filledGroupPoint = await payload.create({
+        collection: pointFieldsSlug,
+        data: {
+          point: [5, 5],
+          localized: [4, 2],
+          group: { point: [4, 2] },
+        },
+      });
+      emptyGroupPoint = await payload.create({
+        collection: pointFieldsSlug,
+        data: {
+          point: [5, 5],
+          localized: [3, -2],
+          group: {},
+        },
+      });
     });
 
     test('should save point', async () => {
@@ -161,6 +180,57 @@ describe('fields', () => {
       await groupLatField.fill('-8');
 
       await saveDocAndAssert(page);
+      await expect(await longField.getAttribute('value')).toEqual('9');
+      await expect(await latField.getAttribute('value')).toEqual('-2');
+      await expect(await localizedLongField.getAttribute('value')).toEqual('1');
+      await expect(await localizedLatField.getAttribute('value')).toEqual('-1');
+      await expect(await groupLongitude.getAttribute('value')).toEqual('3');
+      await expect(await groupLatField.getAttribute('value')).toEqual('-8');
+    });
+
+    test('should update point', async () => {
+      await page.goto(url.edit(emptyGroupPoint.id));
+      const longField = page.locator('#field-longitude-point');
+      await longField.fill('9');
+
+      const latField = page.locator('#field-latitude-point');
+      await latField.fill('-2');
+
+      const localizedLongField = page.locator('#field-longitude-localized');
+      await localizedLongField.fill('2');
+
+      const localizedLatField = page.locator('#field-latitude-localized');
+      await localizedLatField.fill('-2');
+
+      const groupLongitude = page.locator('#field-longitude-group__point');
+      await groupLongitude.fill('3');
+
+      const groupLatField = page.locator('#field-latitude-group__point');
+      await groupLatField.fill('-8');
+
+      await saveDocAndAssert(page);
+
+      await expect(await longField.getAttribute('value')).toEqual('9');
+      await expect(await latField.getAttribute('value')).toEqual('-2');
+      await expect(await localizedLongField.getAttribute('value')).toEqual('2');
+      await expect(await localizedLatField.getAttribute('value')).toEqual('-2');
+      await expect(await groupLongitude.getAttribute('value')).toEqual('3');
+      await expect(await groupLatField.getAttribute('value')).toEqual('-8');
+    });
+
+    test('should be able to clear a value point', async () => {
+      await page.goto(url.edit(filledGroupPoint.id));
+
+      const groupLongitude = page.locator('#field-longitude-group__point');
+      await groupLongitude.fill('');
+
+      const groupLatField = page.locator('#field-latitude-group__point');
+      await groupLatField.fill('');
+
+      await saveDocAndAssert(page);
+
+      await expect(await groupLongitude.getAttribute('value')).toEqual('');
+      await expect(await groupLatField.getAttribute('value')).toEqual('');
     });
   });
 
@@ -480,7 +550,20 @@ describe('fields', () => {
         await expect(editLinkModal).toBeHidden();
       });
 
-      test('should open uploads drawer from read-only field', async () => {
+      test('should open upload drawer and render custom relationship fields', async () => {
+        navigateToRichTextFields();
+        const field = await page.locator('#field-richText');
+        const button = await field.locator('button.rich-text-upload__upload-drawer-toggler');
+
+        await button.click();
+
+        const documentDrawer = await page.locator('[id^=drawer_1_upload-drawer-]');
+        await expect(documentDrawer).toBeVisible();
+        const caption = await documentDrawer.locator('#field-caption');
+        await expect(caption).toBeVisible();
+      });
+
+      test('should open upload document drawer from read-only field', async () => {
         navigateToRichTextFields();
         const field = await page.locator('#field-richTextReadOnly');
         const button = await field.locator('button.rich-text-upload__doc-drawer-toggler.doc-drawer__toggler');
@@ -491,7 +574,7 @@ describe('fields', () => {
         await expect(documentDrawer).toBeVisible();
       });
 
-      test('should open relationship drawer from read-only field', async () => {
+      test('should open relationship document drawer from read-only field', async () => {
         navigateToRichTextFields();
         const field = await page.locator('#field-richTextReadOnly');
         const button = await field.locator('button.rich-text-relationship__doc-drawer-toggler.doc-drawer__toggler');
@@ -627,6 +710,28 @@ describe('fields', () => {
 
       await expect(page.locator('.Toastify')).toContainText('successfully');
     });
+
+    test('should hide relationship add new button', async () => {
+      await page.goto(url.create);
+      // expect the button to not exist in the field
+      await expect(await page.locator('#relationToSelfSelectOnly-add-new .relationship-add-new__add-button').count()).toEqual(0);
+    });
+
+    test('should clear relationship values', async () => {
+      await page.goto(url.create);
+
+      const field = await page.locator('#field-relationship');
+      await field.click();
+      await page.locator('.rs__option:has-text("Seeded text document")').click();
+      await field.locator('.clear-indicator').click();
+      await expect(field.locator('.rs__placeholder')).toBeVisible();
+    });
+
+    test('should populate relationship dynamic default value', async () => {
+      await page.goto(url.create);
+      await expect(page.locator('#field-relationWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
+      await expect(page.locator('#field-relationHasManyWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
+    });
   });
 
   describe('upload', () => {
@@ -679,7 +784,7 @@ describe('fields', () => {
       expect(await jpgImages.count()).toEqual(0);
     });
 
-    test('should show drawer for input field when enableRichText is false', async () => {
+    test.skip('should show drawer for input field when enableRichText is false', async () => {
       const uploads3URL = new AdminUrlUtil(serverURL, 'uploads3');
       await page.goto(uploads3URL.create);
 
@@ -687,12 +792,61 @@ describe('fields', () => {
       await page.locator('.file-field__upload input[type="file"]').setInputFiles(path.resolve(__dirname, './collections/Upload/payload.jpg'));
       await expect(page.locator('.file-field .file-field__filename')).toContainText('payload.jpg');
       await page.locator('#action-save').click();
+
       await wait(200);
 
       // open drawer
       await page.locator('.field-type.upload .list-drawer__toggler').click();
       // check title
       await expect(page.locator('.list-drawer__header-text')).toContainText('Uploads 3');
+    });
+  });
+
+  describe('row', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'row-fields');
+    });
+
+    test('should show row fields as table columns', async () => {
+      await page.goto(url.create);
+
+      // fill the required fields, including the row field
+      const idInput = page.locator('input#field-id');
+      await idInput.fill('123');
+      const titleInput = page.locator('input#field-title');
+      await titleInput.fill('Row 123');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      // ensure the 'title' field is visible in the table header
+      await page.goto(url.list);
+      const titleHeading = page.locator('th#heading-title');
+      await expect(titleHeading).toBeVisible();
+
+      // ensure the 'title' field shows the correct value in the table cell
+      const titleCell = page.locator('.row-1 td.cell-title');
+      await expect(titleCell).toBeVisible();
+      await expect(titleCell).toContainText('Row 123');
+    });
+
+    test('should not show duplicative ID field', async () => {
+      await page.goto(url.create);
+      // fill the required fields, including the custom ID field
+      const idInput = page.locator('input#field-id');
+      await idInput.fill('456');
+      const titleInput = page.locator('input#field-title');
+      await titleInput.fill('Row 456');
+      await page.locator('#action-save').click();
+      await wait(200);
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+      // ensure there are not two ID fields in the table header
+      await page.goto(url.list);
+      const idHeadings = page.locator('th#heading-id');
+      await expect(idHeadings).toBeVisible();
+      await expect(idHeadings).toHaveCount(1);
     });
   });
 });

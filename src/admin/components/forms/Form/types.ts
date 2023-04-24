@@ -144,4 +144,5 @@ export type Context = {
   setSubmitted: SetSubmitted
   formRef: React.MutableRefObject<HTMLFormElement>
   reset: Reset
+  replaceState: (state: Fields) => void
 }

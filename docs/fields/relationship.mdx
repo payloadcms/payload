@@ -6,8 +6,9 @@ desc: The Relationship field provides the ability to relate documents together. 
 keywords: relationship, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-<Banner >
-  The Relationship field is one of the most powerful fields Payload features. It provides for the ability to easily relate documents together.
+<Banner>
+  The Relationship field is one of the most powerful fields Payload features. It
+  provides for the ability to easily relate documents together.
 </Banner>
 
 **Example uses:**
@@ -18,31 +19,36 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 
 ### Config
 
-| Option           | Description |
-| ---------------- | ----------- |
-| **`name`** *         | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names) |
-| **`relationTo`** *   | Provide one or many collection `slug`s to be able to assign relationships to. |
-| **`filterOptions`**  | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options). |
-| **`hasMany`**        | Boolean when, if set to `true`, allows this field to have many relations instead of only one. |
-| **`maxDepth`**       | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth) |
-| **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language. |
-| **`unique`**         | Enforce that each entry in the Collection has a unique value for this field. |
-| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
-| **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
-| **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
-| **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
-| **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |
-| **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel. |
-| **`defaultValue`**   | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values) |
-| **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
-| **`required`**       | Require this field to have a value. |
-| **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
+| Option              | Description                                                                                                                                                                                         |
+|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`name`** \*       | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
+| **`relationTo`** \* | Provide one or many collection `slug`s to be able to assign relationships to.                                                                                                                       |
+| **`filterOptions`** | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options).                                                                                     |
+| **`hasMany`**       | Boolean when, if set to `true`, allows this field to have many relations instead of only one.                                                                                                       |
+| **`min`**           | A number for the fewest allowed items during validation when a value is present. Used with `hasMany`.                                                                                               |
+| **`max`**           | A number for the most allowed items during validation when a value is present. Used with `hasMany`.                                                                                                 |
+| **`maxDepth`**      | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth)                                                                      |
+| **`label`**         | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
+| **`unique`**        | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                        |
+| **`validate`**      | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
+| **`index`**         | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
+| **`saveToJWT`**     | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
+| **`hooks`**         | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
+| **`access`**        | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
+| **`hidden`**        | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                                                    |
+| **`defaultValue`**  | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                                |
+| **`localized`**     | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
+| **`required`**      | Require this field to have a value.                                                                                                                                                                 |
+| **`admin`**         | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                                            |
+| **`custom`**        | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
 <Banner type="success">
-  <strong>Tip:</strong><br/>
-  The <a href="/docs/getting-started/concepts#depth">Depth</a> parameter can be used to automatically populate related documents that are returned by the API.
+  <strong>Tip:</strong>
+  <br />
+  The <a href="/docs/getting-started/concepts#depth">Depth</a> parameter can be
+  used to automatically populate related documents that are returned by the API.
 </Banner>
 
 ### Admin config
@@ -51,7 +57,11 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 
 **`isSortable`**
 
-Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop. (Only works when `hasMany` is set to `true`)
+Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop (only works when `hasMany` is set to `true`).
+
+**`allowCreate`**
+
+Set to `false` if you'd like to disable the ability to create new documents from within the relationship field (hides the "Add new" button in the admin UI).
 
 ### Filtering relationship options
 
@@ -59,33 +69,33 @@ Options can be dynamically limited by supplying a [query constraint](/docs/queri
 
 The `filterOptions` property can either be a `Where` query directly, or a function that returns one. When using a function, it will be called with an argument object with the following properties:
 
-| Property      | Description  |
-| ------------- | -------------|
-| `relationTo`       | The `relationTo` to filter against (as defined on the field) |
-| `data`             | An object of the full collection or global document currently being edited |
-| `siblingData`      | An object of the document data limited to fields within the same parent to the field |
-| `id`               | The value of the collection `id`, will be `undefined` on create request |
-| `user`             | The currently authenticated user object |
+| Property      | Description                                                                          |
+| ------------- | ------------------------------------------------------------------------------------ |
+| `relationTo`  | The `relationTo` to filter against (as defined on the field)                         |
+| `data`        | An object of the full collection or global document currently being edited           |
+| `siblingData` | An object of the document data limited to fields within the same parent to the field |
+| `id`          | The value of the collection `id`, will be `undefined` on create request              |
+| `user`        | The currently authenticated user object                                              |
 
 **Example:**
 
 ```ts
 const relationshipField = {
-  name: 'purchase',
-  type: 'relationship',
-  relationTo: ['products', 'services'],
+  name: "purchase",
+  type: "relationship",
+  relationTo: ["products", "services"],
   filterOptions: ({ relationTo, siblingData }) => {
     // returns a Where query dynamically by the type of relationship
-    if (relationTo === 'products') {
+    if (relationTo === "products") {
       return {
-        'stock': { greater_than: siblingData.quantity }
-      }
+        stock: { greater_than: siblingData.quantity },
+      };
     }
 
-    if (relationTo === 'services') {
+    if (relationTo === "services") {
       return {
-        'isAvailable': { equals: true }
-      }
+        isAvailable: { equals: true },
+      };
     }
   },
 };
@@ -94,8 +104,13 @@ const relationshipField = {
 You can learn more about writing queries [here](/docs/queries/overview).
 
 <Banner type="warning">
-  <strong>Note:</strong><br/>
-  When a relationship field has both <strong>filterOptions</strong> and a custom <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong> unless you call the default relationship field validation function imported from <strong>payload/fields/validations</strong> in your validate function.
+  <strong>Note:</strong>
+  <br />
+  When a relationship field has both <strong>filterOptions</strong> and a custom{" "}
+  <strong>validate</strong> function, the api will not validate{" "}
+  <strong>filterOptions</strong> unless you call the default relationship field
+  validation function imported from <strong>payload/fields/validations</strong>{" "}
+  in your validate function.
 </Banner>
 
 ### How the data is saved
@@ -123,10 +138,10 @@ The most simple pattern of a relationship is to use `hasMany: false` with a `rel
 The shape of the data to save for a document with the field configured this way would be:
 
 ```json
-  {
-     // Mongo ObjectID of the related user
-    "owner": "6031ac9e1289176380734024"
-  }
+{
+  // Mongo ObjectID of the related user
+  "owner": "6031ac9e1289176380734024"
+}
 ```
 
 When querying documents in this collection via REST API, you could query as follows:
@@ -154,12 +169,12 @@ Also known as **dynamic references**, in this configuration, the `relationTo` fi
 The shape of the data to save for a document with more than one relationship type would be:
 
 ```json
-  {
-    "owner": {
-      "relationTo": "organizations",
-      "value": "6031ac9e1289176380734024"
-    }
+{
+  "owner": {
+    "relationTo": "organizations",
+    "value": "6031ac9e1289176380734024"
   }
+}
 ```
 
 Here is an example for how to query documents by this data (note the difference in referencing the `owner.value`):
@@ -193,9 +208,9 @@ The `hasMany` tells Payload that there may be more than one collection saved to 
 To save the to `hasMany` relationship field we need to send an array of IDs:
 
 ```json
-  {
-    "owners": [ "6031ac9e1289176380734024", "602c3c327b811235943ee12b" ]
-  }
+{
+  "owners": ["6031ac9e1289176380734024", "602c3c327b811235943ee12b"]
+}
 ```
 
 When querying documents, the format does not change for arrays:
@@ -227,7 +242,8 @@ Relationship fields with `hasMany` set to more than one kind of collections save
     {
       "relationTo": "users",
       "value": "6031ac9e1289176380734024"
-    }, {
+    },
+    {
       "relationTo": "organizations",
       "value": "602c3c327b811235943ee12b"
     }

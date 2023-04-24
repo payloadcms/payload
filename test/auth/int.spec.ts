@@ -312,4 +312,32 @@ describe('Auth', () => {
       expect(response.status).toBe(200);
     });
   });
+
+  describe('API Key', () => {
+    it('should authenticate via the correct API key user', async () => {
+      const usersQuery = await payload.find({
+        collection: 'api-keys',
+      });
+
+      const [user1, user2] = usersQuery.docs;
+
+      const success = await fetch(`${apiUrl}/api-keys/${user2.id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `api-keys API-Key ${user2.apiKey}`,
+        },
+      }).then((res) => res.json());
+
+      expect(success.apiKey).toStrictEqual(user2.apiKey);
+
+      const fail = await fetch(`${apiUrl}/api-keys/${user1.id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `api-keys API-Key ${user2.apiKey}`,
+        },
+      });
+
+      expect(fail.status).toStrictEqual(404);
+    });
+  });
 });

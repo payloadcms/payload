@@ -18,7 +18,7 @@ import errorHandler from './express/middleware/errorHandler';
 import { PayloadRequest } from './express/types';
 import { getDataLoader } from './collections/dataloader';
 import mountEndpoints from './express/mountEndpoints';
-import { Payload, getPayload } from './payload';
+import { getPayload, Payload } from './payload';
 
 export const initHTTP = async (options: InitOptions): Promise<Payload> => {
   if (typeof options.local === 'undefined') options.local = false;
@@ -64,7 +64,7 @@ export const initHTTP = async (options: InitOptions): Promise<Payload> => {
           }
         },
         identifyAPI('GraphQL'),
-        (req: PayloadRequest, res: Response) => graphQLHandler(req, res)(req, res),
+        (req: PayloadRequest, res: Response, next) => graphQLHandler(req, res)(req, res, next),
       );
       initGraphQLPlayground(payload);
     }

@@ -17,8 +17,8 @@ async function handleTransport(transport: Transporter, email: EmailTransport, lo
   return { ...email, transport };
 }
 
-const ensureConfigHasFrom = (emailConfig) => {
-  if (!emailConfig.fromName || !emailConfig.fromAddress) {
+const ensureConfigHasFrom = (emailConfig: EmailOptions) => {
+  if (!emailConfig?.fromName || !emailConfig?.fromAddress) {
     throw new InvalidConfiguration('Email fromName and fromAddress must be configured when transport is configured');
   }
 };
@@ -28,19 +28,23 @@ const handleMockAccount = async (emailConfig: EmailOptions, logger: Logger) => {
   try {
     mockAccount = await mockHandler(emailConfig);
     const { account: { web, user, pass } } = mockAccount;
-    if (emailConfig.logMockCredentials) {
+    if (emailConfig?.logMockCredentials) {
       logger.info('E-mail configured with mock configuration');
       logger.info(`Log into mock email provider at ${web}`);
       logger.info(`Mock email account username: ${user}`);
       logger.info(`Mock email account password: ${pass}`);
     }
   } catch (err) {
-    logger.error('There was a problem setting up the mock email handler', err);
+    logger.error({ msg: 'There was a problem setting up the mock email handler', err });
   }
   return mockAccount;
 };
 
-export default async function buildEmail(emailConfig: EmailOptions, logger: Logger): BuildEmailResult {
+export default async function buildEmail(emailConfig: EmailOptions | undefined, logger: Logger): BuildEmailResult {
+  if (!emailConfig) {
+    return handleMockAccount(emailConfig, logger);
+  }
+
   if (hasTransport(emailConfig) && emailConfig.transport) {
     ensureConfigHasFrom(emailConfig);
     const email = { ...emailConfig };

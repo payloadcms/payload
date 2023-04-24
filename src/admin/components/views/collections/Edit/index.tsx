@@ -49,10 +49,12 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const [{ data, isLoading: isLoadingData, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
-    { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
+    { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' }, initialData: null },
   );
 
-  const onSave = useCallback(async (json: any) => {
+  const onSave = useCallback(async (json: {
+    doc
+  }) => {
     getVersions();
     getDocPermissions();
     setUpdatedAt(json?.doc?.updatedAt);
@@ -69,13 +71,13 @@ const EditView: React.FC<IndexProps> = (props) => {
   useEffect(() => {
     const awaitInternalState = async () => {
       setUpdatedAt(dataToRender?.updatedAt);
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: isEditing ? 'update' : 'create', id, locale, t });
+      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender || {}, user, operation: isEditing ? 'update' : 'create', id, locale, t });
       await getPreference(preferencesKey);
       setInternalState(state);
     };
 
-    awaitInternalState();
-  }, [dataToRender, fields, isEditing, id, user, locale, isLoadingData, preferencesKey, getPreference, t]);
+    if (!isEditing || dataToRender) awaitInternalState();
+  }, [dataToRender, fields, isEditing, id, user, locale, preferencesKey, getPreference, t]);
 
   useEffect(() => {
     if (redirect) {

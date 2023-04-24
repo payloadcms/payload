@@ -1,18 +1,18 @@
-import { WhereField } from '../types';
+import { WhereField, Where } from '../types';
 
-const flattenWhereConstraints = (query): WhereField[] => {
-  if (!query.where && !query.and && !query.or) {
-    return Object.keys(query).map((key) => query[key]);
+// Take a where query and flatten it to all top-level operators
+const flattenWhereConstraints = (query: Where): WhereField[] => Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
+  if ((key === 'and' || key === 'or') && Array.isArray(val)) {
+    return [
+      ...flattenedConstraints,
+      ...val.map((subVal) => flattenWhereConstraints(subVal)),
+    ];
   }
-  if (query.where) {
-    const whereResult = flattenWhereConstraints(query.where);
-    return Object.keys(whereResult).map((key) => whereResult[key]);
-  }
-  const nested = [...query.or || [], ...query.and || []];
-  if (nested.length > 0) {
-    return nested.flatMap((nest) => flattenWhereConstraints(nest));
-  }
-  return query;
-};
+
+  return [
+    ...flattenedConstraints,
+    val,
+  ];
+}, []);
 
 export default flattenWhereConstraints;

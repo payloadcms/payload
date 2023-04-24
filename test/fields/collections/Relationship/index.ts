@@ -16,6 +16,43 @@ const RelationshipFields: CollectionConfig = {
       type: 'relationship',
       relationTo: relationshipFieldsSlug,
     },
+    {
+      name: 'relationToSelfSelectOnly',
+      type: 'relationship',
+      relationTo: relationshipFieldsSlug,
+      admin: {
+        allowCreate: false,
+      },
+    },
+    {
+      name: 'relationWithDynamicDefault',
+      type: 'relationship',
+      relationTo: 'users',
+      defaultValue: ({ user }) => user.id,
+    },
+    {
+      name: 'relationHasManyWithDynamicDefault',
+      type: 'relationship',
+      relationTo: ['users'],
+      defaultValue: ({ user }) => ({
+        relationTo: 'users',
+        value: user.id,
+      }),
+    },
+    {
+      name: 'relationshipWithMin',
+      type: 'relationship',
+      relationTo: 'text-fields',
+      hasMany: true,
+      min: 2,
+    },
+    {
+      name: 'relationshipWithMax',
+      type: 'relationship',
+      relationTo: 'text-fields',
+      hasMany: true,
+      max: 2,
+    },
   ],
 };
 

@@ -1,5 +1,4 @@
 import React, { Fragment, useCallback, useEffect, useReducer } from 'react';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../utilities/Auth';
 import { usePreferences } from '../../../utilities/Preferences';
@@ -27,10 +26,12 @@ import { getTranslation } from '../../../../../utilities/getTranslation';
 import { NullifyLocaleField } from '../../NullifyField';
 import { useConfig } from '../../../utilities/Config';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
-import { DrawerToggler } from '../../../elements/Drawer';
+import DraggableSortable from '../../../elements/DraggableSortable';
+import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
 import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug';
 import Button from '../../../elements/Button';
 import { RowActions } from './RowActions';
+import { DrawerToggler } from '../../../elements/Drawer';
 
 import './index.scss';
 
@@ -52,6 +53,7 @@ const BlocksField: React.FC<Props> = (props) => {
     validate = blocksValidator,
     permissions,
     indexPath,
+    localized,
     admin: {
       readOnly,
       description,
@@ -63,13 +65,12 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const { preferencesKey } = useDocumentInfo();
+  const { preferencesKey, id } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { setPreference } = usePreferences();
   const [rows, dispatchRows] = useReducer(reducer, undefined);
   const formContext = useForm();
   const { user } = useAuth();
-  const { id } = useDocumentInfo();
   const locale = useLocale();
   const operation = useOperation();
   const { dispatchFields, setModified } = formContext;
@@ -141,13 +142,6 @@ const BlocksField: React.FC<Props> = (props) => {
     setModified(true);
   }, [dispatchRows, dispatchFields, path, setModified]);
 
-  const onDragEnd = useCallback((result) => {
-    if (!result.destination) return;
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-    moveRow(sourceIndex, destinationIndex);
-  }, [moveRow]);
-
   const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
     dispatchRows({ type: 'SET_COLLAPSE', id: rowID, collapsed });
 
@@ -203,6 +197,7 @@ const BlocksField: React.FC<Props> = (props) => {
   useEffect(() => {
     const initializeRowState = async () => {
       const data = formContext.getDataByPath<Row[]>(path);
+
       const preferences = (await getPreference(preferencesKey)) || { fields: {} };
       dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed, initCollapsed });
     };
@@ -221,190 +216,187 @@ const BlocksField: React.FC<Props> = (props) => {
   if (!rows) return null;
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div
-        id={`field-${path.replace(/\./gi, '__')}`}
-        className={classes}
-      >
-        <div className={`${baseClass}__error-wrap`}>
-          <Error
-            showError={showError}
-            message={errorMessage}
-          />
-        </div>
-        <header className={`${baseClass}__header`}>
-          <div className={`${baseClass}__header-wrap`}>
-            <h3>{getTranslation(label || name, i18n)}</h3>
-            <ul className={`${baseClass}__header-actions`}>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => toggleCollapseAll(true)}
-                  className={`${baseClass}__header-action`}
-                >
-                  {t('collapseAll')}
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => toggleCollapseAll(false)}
-                  className={`${baseClass}__header-action`}
-                >
-                  {t('showAll')}
-                </button>
-              </li>
-            </ul>
-          </div>
-          <FieldDescription
-            value={value}
-            description={description}
-          />
-        </header>
-        <NullifyLocaleField
-          path={path}
-          fieldValue={value}
+    <div
+      id={`field-${path.replace(/\./gi, '__')}`}
+      className={classes}
+    >
+      <div className={`${baseClass}__error-wrap`}>
+        <Error
+          showError={showError}
+          message={errorMessage}
         />
-        <Droppable
-          droppableId="blocks-drop"
-          isDropDisabled={readOnly}
-        >
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-            >
-              {rows.length > 0 && rows.map((row, i) => {
-                const { blockType } = row;
-                const blockToRender = blocks.find((block) => block.slug === blockType);
+      </div>
+      <header className={`${baseClass}__header`}>
+        <div className={`${baseClass}__header-wrap`}>
+          <h3>{getTranslation(label || name, i18n)}</h3>
+          <ul className={`${baseClass}__header-actions`}>
+            <li>
+              <button
+                type="button"
+                onClick={() => toggleCollapseAll(true)}
+                className={`${baseClass}__header-action`}
+              >
+                {t('collapseAll')}
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                onClick={() => toggleCollapseAll(false)}
+                className={`${baseClass}__header-action`}
+              >
+                {t('showAll')}
+              </button>
+            </li>
+          </ul>
+        </div>
+        <FieldDescription
+          value={value}
+          description={description}
+        />
+      </header>
 
-                const rowNumber = i + 1;
+      <NullifyLocaleField
+        localized={localized}
+        path={path}
+        fieldValue={value}
+      />
 
-                if (blockToRender) {
-                  return (
-                    <Draggable
+      <DraggableSortable
+        ids={rows.map((row) => row.id)}
+        onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
+      >
+        {rows.length > 0 && rows.map((row, i) => {
+          const { blockType } = row;
+          const blockToRender = blocks.find((block) => block.slug === blockType);
+
+          const rowNumber = i + 1;
+
+          if (blockToRender) {
+            return (
+              <DraggableSortableItem
+                key={row.id}
+                id={row.id}
+                disabled={readOnly}
+              >
+                {({ setNodeRef, transform, attributes, listeners }) => (
+                  <div
+                    id={`${path}-row-${i}`}
+                    ref={setNodeRef}
+                    style={{
+                      transform,
+                    }}
+                  >
+                    <Collapsible
+                      collapsed={row.collapsed}
+                      onToggle={(collapsed) => setCollapse(row.id, collapsed)}
+                      className={`${baseClass}__row`}
                       key={row.id}
-                      draggableId={row.id}
-                      index={i}
-                      isDragDisabled={readOnly}
-                    >
-                      {(providedDrag) => (
-                        <div
-                          id={`${path}-row-${i}`}
-                          ref={providedDrag.innerRef}
-                          {...providedDrag.draggableProps}
-                        >
-                          <Collapsible
-                            collapsed={row.collapsed}
-                            onToggle={(collapsed) => setCollapse(row.id, collapsed)}
-                            className={`${baseClass}__row`}
-                            key={row.id}
-                            dragHandleProps={providedDrag.dragHandleProps}
-                            header={(
-                              <div className={`${baseClass}__block-header`}>
-                                <span className={`${baseClass}__block-number`}>
-                                  {rowNumber >= 10 ? rowNumber : `0${rowNumber}`}
-                                </span>
-                                <Pill
-                                  pillStyle="white"
-                                  className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
-                                >
-                                  {getTranslation(blockToRender.labels.singular, i18n)}
-                                </Pill>
-                                <SectionTitle
-                                  path={`${path}.${i}.blockName`}
-                                  readOnly={readOnly}
-                                />
-                              </div>
-                            )}
-                            actions={!readOnly ? (
-                              <RowActions
-                                addRow={addRow}
-                                removeRow={removeRow}
-                                duplicateRow={duplicateRow}
-                                moveRow={moveRow}
-                                rows={rows}
-                                blockType={blockType}
-                                blocks={blocks}
-                                labels={labels}
-                                rowIndex={i}
-                              />
-                            ) : undefined}
+                      dragHandleProps={{
+                        id: row.id,
+                        attributes,
+                        listeners,
+                      }}
+                      header={(
+                        <div className={`${baseClass}__block-header`}>
+                          <span className={`${baseClass}__block-number`}>
+                            {rowNumber >= 10 ? rowNumber : `0${rowNumber}`}
+                          </span>
+                          <Pill
+                            pillStyle="white"
+                            className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
                           >
-                            <HiddenInput
-                              name={`${path}.${i}.id`}
-                              value={row.id}
-                            />
-                            <RenderFields
-                              className={`${baseClass}__fields`}
-                              forceRender
-                              readOnly={readOnly}
-                              fieldTypes={fieldTypes}
-                              permissions={permissions?.fields}
-                              fieldSchema={blockToRender.fields.map((field) => ({
-                                ...field,
-                                path: createNestedFieldPath(`${path}.${i}`, field),
-                              }))}
-                              indexPath={indexPath}
-                            />
-
-                          </Collapsible>
+                            {getTranslation(blockToRender.labels.singular, i18n)}
+                          </Pill>
+                          <SectionTitle
+                            path={`${path}.${i}.blockName`}
+                            readOnly={readOnly}
+                          />
                         </div>
                       )}
-                    </Draggable>
-                  );
-                }
+                      actions={!readOnly ? (
+                        <RowActions
+                          addRow={addRow}
+                          removeRow={removeRow}
+                          duplicateRow={duplicateRow}
+                          moveRow={moveRow}
+                          rows={rows}
+                          blockType={blockType}
+                          blocks={blocks}
+                          labels={labels}
+                          rowIndex={i}
+                        />
+                      ) : undefined}
+                    >
+                      <HiddenInput
+                        name={`${path}.${i}.id`}
+                        value={row.id}
+                      />
+                      <RenderFields
+                        className={`${baseClass}__fields`}
+                        readOnly={readOnly}
+                        fieldTypes={fieldTypes}
+                        permissions={permissions?.fields}
+                        fieldSchema={blockToRender.fields.map((field) => ({
+                          ...field,
+                          path: createNestedFieldPath(`${path}.${i}`, field),
+                        }))}
+                        indexPath={indexPath}
+                      />
 
-                return null;
-              })}
-              {!checkSkipValidation(value) && (
-                <React.Fragment>
-                  {(rows.length < minRows || (required && rows.length === 0)) && (
-                    <Banner type="error">
-                      {t('validation:requiresAtLeast', {
-                        count: minRows,
-                        label: getTranslation(minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural, i18n),
-                      })}
-                    </Banner>
-                  )}
-                  {(rows.length === 0 && readOnly) && (
-                    <Banner>
-                      {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
-                    </Banner>
-                  )}
-                </React.Fragment>
-              )}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-        {(!readOnly && !hasMaxRows) && (
-          <Fragment>
-            <DrawerToggler
-              slug={drawerSlug}
-              className={`${baseClass}__drawer-toggler`}
-            >
-              <Button
-                el="span"
-                icon="plus"
-                buttonStyle="icon-label"
-                iconPosition="left"
-                iconStyle="with-border"
-              >
-                {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
-              </Button>
-            </DrawerToggler>
-            <BlocksDrawer
-              drawerSlug={drawerSlug}
-              blocks={blocks}
-              addRow={addRow}
-              addRowIndex={value}
-              labels={labels}
-            />
-          </Fragment>
+                    </Collapsible>
+                  </div>
+                )}
+              </DraggableSortableItem>
+            );
+          }
+
+          return null;
+        })}
+        {!checkSkipValidation(value) && (
+          <React.Fragment>
+            {(rows.length < minRows || (required && rows.length === 0)) && (
+              <Banner type="error">
+                {t('validation:requiresAtLeast', {
+                  count: minRows,
+                  label: getTranslation(minRows === 1 || typeof minRows === 'undefined' ? labels.singular : labels.plural, i18n),
+                })}
+              </Banner>
+            )}
+            {(rows.length === 0 && readOnly) && (
+              <Banner>
+                {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
+              </Banner>
+            )}
+          </React.Fragment>
         )}
-      </div>
-    </DragDropContext>
+      </DraggableSortable>
+      {(!readOnly && !hasMaxRows) && (
+        <Fragment>
+          <DrawerToggler
+            slug={drawerSlug}
+            className={`${baseClass}__drawer-toggler`}
+          >
+            <Button
+              el="span"
+              icon="plus"
+              buttonStyle="icon-label"
+              iconPosition="left"
+              iconStyle="with-border"
+            >
+              {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
+            </Button>
+          </DrawerToggler>
+          <BlocksDrawer
+            drawerSlug={drawerSlug}
+            blocks={blocks}
+            addRow={addRow}
+            addRowIndex={value}
+            labels={labels}
+          />
+        </Fragment>
+      )}
+    </div>
   );
 };
 

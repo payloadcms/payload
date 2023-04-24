@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
 import payload from '../../src';
-import type { Options as CreateOptions } from '../../src/collections/operations/local/create';
 import { Forbidden } from '../../src/errors';
 import type { PayloadRequest } from '../../src/types';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { relyOnRequestHeadersSlug, requestHeaders, restrictedSlug, siblingDataSlug, slug } from './config';
-import type { Restricted, Post, SiblingDatum, RelyOnRequestHeader } from './payload-types';
+import { hiddenFieldsSlug, relyOnRequestHeadersSlug, requestHeaders, restrictedSlug, siblingDataSlug, slug } from './config';
+import type { Restricted, Post, RelyOnRequestHeader } from './payload-types';
 import { firstArrayText, secondArrayText } from './shared';
 
 describe('Access Control', () => {
@@ -17,12 +16,12 @@ describe('Access Control', () => {
   });
 
   beforeEach(async () => {
-    post1 = await payload.create<Post>({
+    post1 = await payload.create({
       collection: slug,
       data: { name: 'name' },
     });
 
-    restricted = await payload.create<Restricted>({
+    restricted = await payload.create({
       collection: restrictedSlug,
       data: { name: 'restricted' },
     });
@@ -34,10 +33,76 @@ describe('Access Control', () => {
     await payload.mongoMemoryServer.stop();
   });
 
-  it.todo('should properly prevent / allow public users from reading a restricted field');
+  it('should not affect hidden fields when patching data', async () => {
+    const doc = await payload.create({
+      collection: hiddenFieldsSlug,
+      data: {
+        partiallyHiddenArray: [{
+          name: 'public_name',
+          value: 'private_value',
+        }],
+        partiallyHiddenGroup: {
+          name: 'public_name',
+          value: 'private_value',
+        },
+      },
+    });
+
+    await payload.update({
+      collection: hiddenFieldsSlug,
+      id: doc.id,
+      data: {
+        title: 'Doc Title',
+      },
+    });
+
+    const updatedDoc = await payload.findByID({
+      collection: hiddenFieldsSlug,
+      id: doc.id,
+      showHiddenFields: true,
+    });
+
+    expect(updatedDoc.partiallyHiddenGroup.value).toEqual('private_value');
+    expect(updatedDoc.partiallyHiddenArray[0].value).toEqual('private_value');
+  });
+
+  it('should not affect hidden fields when patching data - update many', async () => {
+    const docsMany = await payload.create({
+      collection: hiddenFieldsSlug,
+      data: {
+        partiallyHiddenArray: [{
+          name: 'public_name',
+          value: 'private_value',
+        }],
+        partiallyHiddenGroup: {
+          name: 'public_name',
+          value: 'private_value',
+        },
+      },
+    });
+
+    await payload.update({
+      collection: hiddenFieldsSlug,
+      where: {
+        id: { equals: docsMany.id },
+      },
+      data: {
+        title: 'Doc Title',
+      },
+    });
+
+    const updatedMany = await payload.findByID({
+      collection: hiddenFieldsSlug,
+      id: docsMany.id,
+      showHiddenFields: true,
+    });
+
+    expect(updatedMany.partiallyHiddenGroup.value).toEqual('private_value');
+    expect(updatedMany.partiallyHiddenArray[0].value).toEqual('private_value');
+  });
 
   it('should be able to restrict access based upon siblingData', async () => {
-    const { id } = await payload.create<SiblingDatum>({
+    const { id } = await payload.create({
       collection: siblingDataSlug,
       data: {
         array: [
@@ -53,7 +118,7 @@ describe('Access Control', () => {
       },
     });
 
-    const doc = await payload.findByID<SiblingDatum>({
+    const doc = await payload.findByID({
       id,
       collection: siblingDataSlug,
       overrideAccess: false,
@@ -64,7 +129,7 @@ describe('Access Control', () => {
     expect(doc.array?.[1].text).toBeUndefined();
 
     // Retrieve with default of overriding access
-    const docOverride = await payload.findByID<SiblingDatum>({
+    const docOverride = await payload.findByID({
       id,
       collection: siblingDataSlug,
     });
@@ -150,7 +215,7 @@ describe('Access Control', () => {
   describe('Override Access', () => {
     describe('Fields', () => {
       it('should allow overrideAccess: false', async () => {
-        const req = async () => payload.update<Post>({
+        const req = async () => payload.update({
           collection: slug,
           id: post1.id,
           data: { restrictedField: restricted.id },
@@ -161,7 +226,7 @@ describe('Access Control', () => {
       });
 
       it('should allow overrideAccess: true', async () => {
-        const doc = await payload.update<Post>({
+        const doc = await payload.update({
           collection: slug,
           id: post1.id,
           data: { restrictedField: restricted.id },
@@ -172,13 +237,51 @@ describe('Access Control', () => {
       });
 
       it('should allow overrideAccess by default', async () => {
-        const doc = await payload.update<Post>({
+        const doc = await payload.update({
           collection: slug,
           id: post1.id,
           data: { restrictedField: restricted.id },
         });
 
         expect(doc).toMatchObject({ id: post1.id });
+      });
+
+      it('should allow overrideAccess: false - update many', async () => {
+        const req = async () => payload.update({
+          collection: slug,
+          where: {
+            id: { equals: post1.id },
+          },
+          data: { restrictedField: restricted.id },
+          overrideAccess: false, // this should respect access control
+        });
+
+        await expect(req).rejects.toThrow(Forbidden);
+      });
+
+      it('should allow overrideAccess: true - update many', async () => {
+        const doc = await payload.update({
+          collection: slug,
+          where: {
+            id: { equals: post1.id },
+          },
+          data: { restrictedField: restricted.id },
+          overrideAccess: true, // this should override access control
+        });
+
+        expect(doc.docs[0]).toMatchObject({ id: post1.id });
+      });
+
+      it('should allow overrideAccess by default - update many', async () => {
+        const doc = await payload.update({
+          collection: slug,
+          where: {
+            id: { equals: post1.id },
+          },
+          data: { restrictedField: restricted.id },
+        });
+
+        expect(doc.docs[0]).toMatchObject({ id: post1.id });
       });
     });
 
@@ -216,12 +319,50 @@ describe('Access Control', () => {
 
         expect(doc).toMatchObject({ id: restricted.id, name: updatedName });
       });
+
+      it('should allow overrideAccess: false - update many', async () => {
+        const req = async () => payload.update({
+          collection: restrictedSlug,
+          where: {
+            id: { equals: restricted.id },
+          },
+          data: { name: updatedName },
+          overrideAccess: false, // this should respect access control
+        });
+
+        await expect(req).rejects.toThrow(Forbidden);
+      });
+
+      it('should allow overrideAccess: true - update many', async () => {
+        const doc = await payload.update({
+          collection: restrictedSlug,
+          where: {
+            id: { equals: restricted.id },
+          },
+          data: { name: updatedName },
+          overrideAccess: true, // this should override access control
+        });
+
+        expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName });
+      });
+
+      it('should allow overrideAccess by default - update many', async () => {
+        const doc = await payload.update({
+          collection: restrictedSlug,
+          where: {
+            id: { equals: restricted.id },
+          },
+          data: { name: updatedName },
+        });
+
+        expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName });
+      });
     });
   });
 });
 
-async function createDoc<Collection>(data: Partial<Collection>, overrideSlug = slug, options?: Partial<CreateOptions<Collection>>): Promise<Collection> {
-  return payload.create<Collection>({
+async function createDoc<Collection>(data: Partial<Collection>, overrideSlug = slug, options?: Partial<Collection>): Promise<Collection> {
+  return payload.create({
     ...options,
     collection: overrideSlug,
     data: data ?? {},

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import buildQueryPlugin from '../mongoose/buildQuery';
+import getBuildQueryPlugin from '../mongoose/buildQuery';
 import buildModel from './buildModel';
 import { Payload } from '../payload';
 import { getVersionsModelName } from '../versions/getVersionsModelName';
@@ -19,20 +19,23 @@ export default function initGlobalsLocal(ctx: Payload): void {
       if (global.versions) {
         const versionModelName = getVersionsModelName(global);
 
+        const versionGlobalFields = buildVersionGlobalFields(global);
+
         const versionSchema = buildSchema(
           ctx.config,
-          buildVersionGlobalFields(global),
+          versionGlobalFields,
           {
             disableUnique: true,
             draftsEnabled: true,
             options: {
               timestamps: false,
+              minimize: false,
             },
           },
         );
 
         versionSchema.plugin(paginate, { useEstimatedCount: true })
-          .plugin(buildQueryPlugin);
+          .plugin(getBuildQueryPlugin({ versionsFields: versionGlobalFields }));
 
         ctx.versions[global.slug] = mongoose.model(versionModelName, versionSchema) as CollectionModel;
       }

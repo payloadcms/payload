@@ -70,6 +70,7 @@ type Admin = {
     Cell?: React.ComponentType<any>;
     Field?: React.ComponentType<any>;
   }
+  disableBulkEdit?: boolean
   hidden?: boolean
 }
 
@@ -78,17 +79,17 @@ export type Labels = {
   plural: Record<string, string> | string;
 };
 
-export type ValidateOptions<T, S, F> = {
-  data: Partial<T>
-  siblingData: Partial<S>
+export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
+  data: Partial<TData>
+  siblingData: Partial<TSiblingData>
   id?: string | number
   user?: Partial<User>
   operation?: Operation
   payload?: Payload
   t: TFunction
-} & F;
+} & TFieldConfig;
 
-export type Validate<T = any, S = any, F = any> = (value?: T, options?: ValidateOptions<F, S, Partial<F>>) => string | true | Promise<string | true>;
+export type Validate<TValue = any, TData = any, TSiblingData = any, TFieldConfig = any> = (value: TValue, options: ValidateOptions<TData, TSiblingData, TFieldConfig>) => string | true | Promise<string | true>;
 
 export type OptionObject = {
   label: Record<string, string> | string
@@ -120,6 +121,8 @@ export interface FieldBase {
     read?: FieldAccess;
     update?: FieldAccess;
   };
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 }
 
 export type NumberField = FieldBase & {
@@ -170,7 +173,6 @@ export type DateField = FieldBase & {
   admin?: Admin & {
     placeholder?: Record<string, string> | string
     date?: ConditionalDateProps
-    displayFormat?: string
   }
 }
 
@@ -233,6 +235,7 @@ export type UIField = {
     position?: string
     width?: string
     condition?: Condition
+    disableBulkEdit?: boolean
     components?: {
       Filter?: React.ComponentType<any>;
       Cell?: React.ComponentType<any>;
@@ -240,6 +243,8 @@ export type UIField = {
     }
   }
   type: 'ui';
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 }
 
 export type UploadField = FieldBase & {
@@ -288,8 +293,17 @@ export type RelationshipField = FieldBase & {
   filterOptions?: FilterOptions;
   admin?: Admin & {
     isSortable?: boolean;
+    allowCreate?: boolean;
   }
-}
+} & ({
+  hasMany: true
+  min?: number
+  max?: number
+} | {
+  hasMany?: false | undefined
+  min?: undefined
+  max?: undefined
+})
 
 export type ValueWithRelation = {
   relationTo: string

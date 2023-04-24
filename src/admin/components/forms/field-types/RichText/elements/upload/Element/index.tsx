@@ -13,6 +13,9 @@ import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
 import { Props as RichTextProps } from '../../../types';
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
+import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
+import { UploadDrawer } from './UploadDrawer';
+import { DrawerToggler } from '../../../../../../elements/Drawer';
 
 import './index.scss';
 
@@ -22,7 +25,7 @@ const initialParams = {
   depth: 0,
 };
 
-type ElementProps = {
+export type ElementProps = {
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
   element: any
@@ -47,6 +50,8 @@ const Element: React.FC<ElementProps> = (props) => {
   const { t, i18n } = useTranslation('fields');
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
   const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
+
+  const drawerSlug = useDrawerSlug('upload-drawer');
 
   const [
     ListDrawer,
@@ -142,6 +147,8 @@ const Element: React.FC<ElementProps> = (props) => {
     closeListDrawer();
   }, [closeListDrawer, editor, element, collections]);
 
+  const customFields = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields;
+
   return (
     <div
       className={[
@@ -168,8 +175,12 @@ const Element: React.FC<ElementProps> = (props) => {
               {getTranslation(relatedCollection.labels.singular, i18n)}
             </div>
             <div className={`${baseClass}__actions`}>
-              {value?.id && (
-                <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
+              {customFields?.length > 0 && (
+                <DrawerToggler
+                  slug={drawerSlug}
+                  className={`${baseClass}__upload-drawer-toggler`}
+                  disabled={fieldProps?.admin?.readOnly}
+                >
                   <Button
                     icon="edit"
                     round
@@ -178,9 +189,9 @@ const Element: React.FC<ElementProps> = (props) => {
                     onClick={(e) => {
                       e.preventDefault();
                     }}
-                    tooltip={t('general:editLabel', { label: relatedCollection.labels.singular })}
+                    tooltip={t('fields:editRelationship')}
                   />
-                </DocumentDrawerToggler>
+                </DrawerToggler>
               )}
               <ListDrawerToggler
                 className={`${baseClass}__list-drawer-toggler`}
@@ -214,9 +225,11 @@ const Element: React.FC<ElementProps> = (props) => {
           </div>
         </div>
         <div className={`${baseClass}__bottomRow`}>
-          <strong>
-            {data?.filename}
-          </strong>
+          <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
+            <strong>
+              {data?.filename}
+            </strong>
+          </DocumentDrawerToggler>
         </div>
       </div>
       {children}
@@ -224,6 +237,11 @@ const Element: React.FC<ElementProps> = (props) => {
         <DocumentDrawer onSave={updateUpload} />
       )}
       <ListDrawer onSelect={swapUpload} />
+      <UploadDrawer
+        drawerSlug={drawerSlug}
+        relatedCollection={relatedCollection}
+        {...props}
+      />
     </div>
   );
 };

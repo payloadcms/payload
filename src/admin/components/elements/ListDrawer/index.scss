@@ -20,15 +20,11 @@
     flex-grow: 1;
     align-items: flex-start;
 
-    .pill {
+    button .pill {
       pointer-events: none;
       margin: 0;
       margin-top: base(0.25);
       margin-left: base(0.5);
-
-      @include mid-break {
-        margin-top: 0;
-      }
     }
   }
 

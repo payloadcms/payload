@@ -3,6 +3,7 @@ import { SanitizedCollectionConfig } from '../../collections/config/types';
 import isImage from '../../uploads/isImage';
 
 const absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i');
+const base64Pattern = new RegExp(/^data:image\/[a-z]+;base64,/);
 
 const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string, unknown>): string | false => {
   const {
@@ -29,7 +30,7 @@ const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string,
     if (typeof adminThumbnail === 'function') {
       const thumbnailURL = adminThumbnail({ doc });
 
-      if (absoluteURLPattern.test(thumbnailURL)) {
+      if (absoluteURLPattern.test(thumbnailURL) || base64Pattern.test(thumbnailURL)) {
         return thumbnailURL;
       }
 

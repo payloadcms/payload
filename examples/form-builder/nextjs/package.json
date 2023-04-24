@@ -1,0 +1,33 @@
+{
+  "name": "form-builder-example-website",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.7.0",
+    "@faceless-ui/css-grid": "^1.2.0",
+    "@faceless-ui/modal": "^2.0.1",
+    "escape-html": "^1.0.3",
+    "graphql": "^16.6.0",
+    "next": "12.3.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-hook-form": "^7.41.0",
+    "react-select": "^5.7.0",
+    "sass": "^1.55.0",
+    "slate": "^0.84.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.11.3",
+    "@types/react": "18.0.21",
+    "eslint": "8.25.0",
+    "eslint-config-next": "12.3.1",
+    "payload-plugin-form-builder": "^1.0.8",
+    "typescript": "4.8.4"
+  }
+}

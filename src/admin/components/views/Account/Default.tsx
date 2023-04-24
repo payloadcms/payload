@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import format from 'date-fns/format';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import Eyebrow from '../../elements/Eyebrow';
@@ -22,6 +21,7 @@ import ReactSelect from '../../elements/ReactSelect';
 import Label from '../../forms/Label';
 import type { Translation } from '../../../../translations/type';
 import { LoadingOverlayToggle } from '../../elements/Loading';
+import { formatDate } from '../../../utilities/formatDate';
 
 import './index.scss';
 
@@ -96,7 +96,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
                     <h1>
                       <RenderTitle
                         data={data}
-                        collection={collection.slug}
+                        collection={collection}
                         useAsTitle={useAsTitle}
                         fallback={`[${t('general:untitled')}]`}
                       />
@@ -186,13 +186,13 @@ const DefaultAccount: React.FC<Props> = (props) => {
                           {data.updatedAt && (
                             <li>
                               <div className={`${baseClass}__label`}>{t('general:lastModified')}</div>
-                              <div>{format(new Date(data.updatedAt), dateFormat)}</div>
+                              <div>{formatDate(data.updatedAt, dateFormat, i18n?.language)}</div>
                             </li>
                           )}
                           {data.createdAt && (
                             <li>
                               <div className={`${baseClass}__label`}>{t('general:created')}</div>
-                              <div>{format(new Date(data.createdAt), dateFormat)}</div>
+                              <div>{formatDate(data.createdAt, dateFormat, i18n?.language)}</div>
                             </li>
                           )}
                         </React.Fragment>

@@ -21,7 +21,7 @@ import wait from '../../../../utilities/wait';
 import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types';
+import { Fields, Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types';
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
@@ -141,7 +141,7 @@ const Form: React.FC<Props> = (props) => {
 
     const isValid = skipValidation ? true : await contextRef.current.validateForm();
 
-    setSubmitted(true);
+    if (!skipValidation) setSubmitted(true);
 
     // If not valid, prevent submission
     if (!isValid) {
@@ -154,7 +154,7 @@ const Form: React.FC<Props> = (props) => {
     // If submit handler comes through via props, run that
     if (onSubmit) {
       const data = {
-        ...reduceFieldsToValues(fields),
+        ...reduceFieldsToValues(fields, true),
         ...overrides,
       };
 
@@ -334,8 +334,15 @@ const Form: React.FC<Props> = (props) => {
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
     const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation, locale, t });
     contextRef.current = { ...initContextState } as FormContextType;
+    setModified(false);
     dispatchFields({ type: 'REPLACE_STATE', state });
   }, [id, user, operation, locale, t, dispatchFields]);
+
+  const replaceState = useCallback((state: Fields) => {
+    contextRef.current = { ...initContextState } as FormContextType;
+    setModified(false);
+    dispatchFields({ type: 'REPLACE_STATE', state });
+  }, [dispatchFields]);
 
   contextRef.current.submit = submit;
   contextRef.current.getFields = getFields;
@@ -351,6 +358,7 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.disabled = disabled;
   contextRef.current.formRef = formRef;
   contextRef.current.reset = reset;
+  contextRef.current.replaceState = replaceState;
 
   useEffect(() => {
     if (initialState) {

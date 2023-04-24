@@ -60,6 +60,10 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
   user.resetPasswordExpiration = Date.now();
 
+  if (collectionConfig.auth.verify) {
+    user._verified = true;
+  }
+
   await user.save();
 
   await user.authenticate(data.password);

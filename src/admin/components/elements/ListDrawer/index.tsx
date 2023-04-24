@@ -4,12 +4,13 @@ import { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types';
 import { Drawer, DrawerToggler } from '../Drawer';
 import { useEditDepth } from '../../utilities/EditDepth';
 import { ListDrawerContent } from './DrawerContent';
+import { useConfig } from '../../utilities/Config';
 
 import './index.scss';
 
 export const baseClass = 'list-drawer';
 
-const formatListDrawerSlug = ({
+export const formatListDrawerSlug = ({
   depth,
   uuid,
 }: {
@@ -49,21 +50,26 @@ export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
       header={false}
       gutter={false}
     >
-      <ListDrawerContent {...props} />
+      <ListDrawerContent
+        {...props}
+      />
     </Drawer>
   );
 };
 
 export const useListDrawer: UseListDrawer = ({
-  collectionSlugs,
+  collectionSlugs: collectionSlugsFromProps,
   uploads,
   selectedCollection,
   filterOptions,
 }) => {
+  const { collections } = useConfig();
   const drawerDepth = useEditDepth();
   const uuid = useId();
   const { modalState, toggleModal, closeModal, openModal } = useModal();
   const [isOpen, setIsOpen] = useState(false);
+  const [collectionSlugs, setCollectionSlugs] = useState(collectionSlugsFromProps);
+
   const drawerSlug = formatListDrawerSlug({
     depth: drawerDepth,
     uuid,
@@ -73,6 +79,18 @@ export const useListDrawer: UseListDrawer = ({
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen));
   }, [modalState, drawerSlug]);
 
+  useEffect(() => {
+    if (!collectionSlugs || collectionSlugs.length === 0) {
+      const filteredCollectionSlugs = collections.filter(({ upload }) => {
+        if (uploads) {
+          return Boolean(upload) === true;
+        }
+        return true;
+      });
+
+      setCollectionSlugs(filteredCollectionSlugs.map(({ slug }) => slug));
+    }
+  }, [collectionSlugs, uploads, collections]);
   const toggleDrawer = useCallback(() => {
     toggleModal(drawerSlug);
   }, [toggleModal, drawerSlug]);

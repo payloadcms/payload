@@ -1,22 +1,16 @@
 import React from 'react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import * as Locales from 'date-fns/locale';
-import { useLocale } from '../../utilities/Locale';
+import { useTranslation } from 'react-i18next';
 import CalendarIcon from '../../icons/Calendar';
 import XIcon from '../../icons/X';
 import { Props } from './types';
+import { getSupportedDateLocale } from '../../../utilities/formatDate/getSupportedDateLocale';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import './index.scss';
 
 const baseClass = 'date-time-picker';
-
-const formattedLocales = {
-  en: 'enUS',
-  my: 'enUS', // Burmese is not currently supported
-  ua: 'uk',
-  zh: 'zhCN',
-};
 
 const DateTime: React.FC<Props> = (props) => {
   const {
@@ -35,14 +29,14 @@ const DateTime: React.FC<Props> = (props) => {
     placeholder: placeholderText,
   } = props;
 
-  let currentLocale = useLocale();
-  currentLocale = formattedLocales[currentLocale] || currentLocale;
+  // Use the user's AdminUI language preference for the locale
+  const { i18n } = useTranslation();
+  const locale = getSupportedDateLocale(i18n.language);
 
   try {
-    const locale = Locales[currentLocale];
-    registerLocale(currentLocale, locale);
+    registerLocale(locale, Locales[locale]);
   } catch (e) {
-    console.warn(`Could not find DatePicker locale for ${currentLocale}`);
+    console.warn(`Could not find DatePicker locale for ${locale}`);
   }
 
   let dateTimeFormat = displayFormat;
@@ -97,7 +91,7 @@ const DateTime: React.FC<Props> = (props) => {
         <DatePicker
           {...dateTimePickerProps}
           onChange={(val) => onChange(val as Date)}
-          locale={currentLocale || 'en-US'}
+          locale={locale}
           popperModifiers={[
             {
               name: 'preventOverflow',

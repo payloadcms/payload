@@ -1,19 +1,13 @@
 import pino from 'pino';
 import type { Express, Router } from 'express';
-import { GraphQLError, GraphQLFormattedError, GraphQLSchema } from 'graphql';
+import { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql';
 import crypto from 'crypto';
 import path from 'path';
 import mongoose from 'mongoose';
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import {
-  Collection,
-  CollectionModel,
-} from './collections/config/types';
-import {
-  SanitizedConfig,
-  EmailOptions,
-  InitOptions,
-} from './config/types';
+import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
+import { BulkOperationResult, Collection, CollectionModel } from './collections/config/types';
+import { EmailOptions, InitOptions, SanitizedConfig } from './config/types';
 import { TypeWithVersion } from './versions/types';
 import { PaginatedDocs } from './mongoose/types';
 
@@ -22,15 +16,23 @@ import { Globals } from './globals/config/types';
 import { ErrorHandler } from './express/middleware/errorHandler';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
-import { encrypt, decrypt } from './auth/crypto';
+import { decrypt, encrypt } from './auth/crypto';
 import { BuildEmailResult, Message } from './email/types';
 import { Preferences } from './preferences/types';
 
 import { Options as CreateOptions } from './collections/operations/local/create';
 import { Options as FindOptions } from './collections/operations/local/find';
+import {
+  ByIDOptions as UpdateByIDOptions,
+  ManyOptions as UpdateManyOptions,
+  Options as UpdateOptions,
+} from './collections/operations/local/update';
+import {
+  ByIDOptions as DeleteByIDOptions,
+  ManyOptions as DeleteManyOptions,
+  Options as DeleteOptions,
+} from './collections/operations/local/delete';
 import { Options as FindByIDOptions } from './collections/operations/local/findByID';
-import { Options as UpdateOptions } from './collections/operations/local/update';
-import { Options as DeleteOptions } from './collections/operations/local/delete';
 import { Options as FindVersionsOptions } from './collections/operations/local/findVersions';
 import { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID';
 import { Options as RestoreVersionOptions } from './collections/operations/local/restoreVersion';
@@ -59,6 +61,8 @@ import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/
 import Logger from './utilities/logger';
 import PreferencesModel from './preferences/model';
 import findConfig from './config/find';
+
+import { defaults as emailDefaults } from './email/defaults';
 
 /**
  * @description Payload
@@ -90,6 +94,8 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   mongoURL: string | false;
 
+  mongoOptions: InitOptions['mongoOptions'];
+
   mongoMemoryServer: any
 
   local: boolean;
@@ -119,15 +125,13 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   schema: GraphQLSchema;
 
-  extensions: (info: any) => Promise<any>;
+  extensions: (args: {
+    req: graphQLRequest<unknown, unknown>,
+    args: OperationArgs<any>,
+    result: ExecutionResult
+  }) => Promise<any>;
 
-  customFormatErrorFn: (error: GraphQLError) => GraphQLFormattedError;
-
-  validationRules: any;
-
-  errorResponses: GraphQLFormattedError[] = [];
-
-  errorIndex: number;
+  validationRules: (args: OperationArgs<any>) => ValidationRule[];
 
   getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`;
 
@@ -140,6 +144,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   async init(options: InitOptions): Promise<Payload> {
     this.logger = Logger('payload', options.loggerOptions);
     this.mongoURL = options.mongoURL;
+    this.mongoOptions = options.mongoOptions;
 
     if (this.mongoURL) {
       mongoose.set('strictQuery', false);
@@ -157,7 +162,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       throw new Error('Error: missing MongoDB connection URL.');
     }
 
-    this.emailOptions = { ...(options.email) };
     this.secret = crypto
       .createHash('sha256')
       .update(options.secret)
@@ -167,11 +171,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.local = options.local;
 
     if (options.config) {
-      this.config = options.config;
+      this.config = await options.config;
       const configPath = findConfig();
 
       this.config = {
-        ...options.config,
+        ...this.config,
         paths: {
           configDir: path.dirname(configPath),
           config: configPath,
@@ -181,10 +185,16 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     } else {
       // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
       const loadConfig = require('./config/load').default;
-      this.config = loadConfig(this.logger);
+      this.config = await loadConfig(this.logger);
     }
 
     // Configure email service
+    const emailOptions = options.email ? { ...(options.email) } : this.config.email;
+    if (options.email && this.config.email) {
+      this.logger.warn('Email options provided in both init options and config. Using init options.');
+    }
+
+    this.emailOptions = emailOptions ?? emailDefaults;
     this.email = buildEmail(this.emailOptions, this.logger);
     this.sendEmail = sendEmail.bind(this);
 
@@ -246,22 +256,31 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   }
 
   /**
-   * @description Update document
+   * @description Update one or more documents
    * @param options
-   * @returns Updated document
+   * @returns Updated document(s)
    */
-  update = async <T extends keyof TGeneratedTypes['collections']>(
-    options: UpdateOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateByIDOptions<T>):Promise<TGeneratedTypes['collections'][T]>
+
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateManyOptions<T>):Promise<BulkOperationResult<T>>
+
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>):Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
     const { update } = localOperations;
     return update<T>(this, options);
   }
 
-  delete = async <T extends keyof TGeneratedTypes['collections']>(
-    options: DeleteOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
-    const { localDelete } = localOperations;
-    return localDelete<T>(this, options);
+  /**
+   * @description delete one or more documents
+   * @param options
+   * @returns Updated document(s)
+   */
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteByIDOptions<T>):Promise<TGeneratedTypes['collections'][T]>
+
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteManyOptions<T>):Promise<BulkOperationResult<T>>
+
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>):Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
+    const { deleteLocal } = localOperations;
+    return deleteLocal<T>(this, options);
   }
 
   /**

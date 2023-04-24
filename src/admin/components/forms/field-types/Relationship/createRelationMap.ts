@@ -1,13 +1,13 @@
-import { ValueWithRelation } from './types';
+import { Value } from './types';
 
 type RelationMap = {
-  [relation: string]: unknown[]
+  [relation: string]: (string | number)[]
 }
 
 type CreateRelationMap = (args: {
   hasMany: boolean
   relationTo: string | string[]
-  value: unknown
+  value: Value | Value[] | null // really needs to be `ValueWithRelation`
 }) => RelationMap;
 
 export const createRelationMap: CreateRelationMap = ({
@@ -25,23 +25,34 @@ export const createRelationMap: CreateRelationMap = ({
     relationMap = { [relationTo]: [] };
   }
 
+  if (value === null) {
+    return relationMap;
+  }
+
   const add = (relation: string, id: unknown) => {
     if (((typeof id === 'string') || typeof id === 'number') && typeof relation === 'string') {
-      relationMap[relation].push(id);
+      if (relationMap[relation]) {
+        relationMap[relation].push(id);
+      } else {
+        relationMap[relation] = [id];
+      }
     }
   };
 
   if (hasMany && Array.isArray(value)) {
     value.forEach((val) => {
-      if (hasMultipleRelations) {
+      if (hasMultipleRelations && typeof val === 'object' && 'relationTo' in val && 'value' in val) {
         add(val.relationTo, val.value);
-      } else {
+      }
+
+      if (!hasMultipleRelations && typeof relationTo === 'string') {
         add(relationTo, val);
       }
     });
-  } else if (hasMultipleRelations) {
-    const valueWithRelation = value as ValueWithRelation;
-    add(valueWithRelation?.relationTo, valueWithRelation?.value);
+  } else if (hasMultipleRelations && Array.isArray(relationTo)) {
+    if (typeof value === 'object' && 'relationTo' in value && 'value' in value) {
+      add(value.relationTo, value.value);
+    }
   } else {
     add(relationTo, value);
   }
