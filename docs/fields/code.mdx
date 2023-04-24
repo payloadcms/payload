@@ -32,6 +32,7 @@ This field uses the `monaco-react` editor syntax highlighting.
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 _\* An asterisk denotes that a property is required._
 
@@ -42,7 +43,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 | Option                 | Description                                                                                                                                                                         |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`language`**         | This property can be set to any language listed [here](https://github.com/microsoft/monaco-editor/tree/main/src/basic-languages).                                           |
-| **`editorOptions`**    | Options that can be passed to the monaco editor, [view the full list](https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.IDiffEditorConstructionOptions.html).  |
+| **`editorOptions`**    | Options that can be passed to the monaco editor, [view the full list](https://microsoft.github.io/monaco-editor/typedoc/interfaces/editor.IDiffEditorConstructionOptions.html).  |
 
 ### Example
 

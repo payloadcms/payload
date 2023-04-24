@@ -76,7 +76,7 @@ describe('access control', () => {
     let existingDoc: ReadOnlyCollection;
 
     beforeAll(async () => {
-      existingDoc = await payload.create<ReadOnlyCollection>({
+      existingDoc = await payload.create({
         collection: readOnlySlug,
         data: {
           name: 'name',
@@ -114,7 +114,7 @@ describe('access control', () => {
     let existingDoc: ReadOnlyCollection;
 
     beforeAll(async () => {
-      existingDoc = await payload.create<ReadOnlyCollection>({
+      existingDoc = await payload.create({
         collection: readOnlySlug,
         data: {
           name: 'name',
@@ -162,7 +162,7 @@ describe('access control', () => {
     let existingDoc: RestrictedVersion;
 
     beforeAll(async () => {
-      existingDoc = await payload.create<RestrictedVersion>({
+      existingDoc = await payload.create({
         collection: restrictedVersionsSlug,
         data: {
           name: 'name',
@@ -172,7 +172,7 @@ describe('access control', () => {
 
     test('versions sidebar should not show', async () => {
       await page.goto(restrictedVersionsUrl.edit(existingDoc.id));
-      await expect(page.locator('.versions-count')).not.toBeVisible();
+      await expect(page.locator('.versions-count')).toBeHidden();
     });
   });
 
@@ -219,7 +219,7 @@ describe('access control', () => {
 
 async function createDoc(data: any): Promise<{ id: string }> {
   return payload.create({
-    collection: docLevelAccessSlug,
+    collection: slug,
     data,
   });
 }

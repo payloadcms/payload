@@ -24,8 +24,8 @@ keywords: group, fields, config, configuration, documentation, Content Managemen
 | **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel. |
 | **`defaultValue`**   | Provide an object of data to be used for this field's default value. [More](/docs/fields/overview#default-values) |
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. If enabled, a separate, localized set of all data within this Group will be kept, so there is no need to specify each nested field as `localized`. |
-| **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 

@@ -2,6 +2,7 @@ import React, {
   useState, useRef, useEffect, useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
 import useField from '../../../../forms/useField';
 import Button from '../../../../elements/Button';
 import FileDetails from '../../../../elements/FileDetails';
@@ -40,6 +41,7 @@ const Upload: React.FC<Props> = (props) => {
   const [replacingFile, setReplacingFile] = useState(false);
   const { t } = useTranslation('upload');
   const [doc, setDoc] = useState(reduceFieldsToValues(internalState || {}, true));
+  const { docPermissions } = useDocumentInfo();
 
   const {
     value,
@@ -129,6 +131,8 @@ const Upload: React.FC<Props> = (props) => {
     'field-type',
   ].filter(Boolean).join(' ');
 
+  const canRemoveUpload = docPermissions?.update?.permission && 'delete' in docPermissions && docPermissions?.delete?.permission;
+
   return (
     <div className={classes}>
       <Error
@@ -139,10 +143,10 @@ const Upload: React.FC<Props> = (props) => {
         <FileDetails
           doc={doc}
           collection={collection}
-          handleRemove={() => {
+          handleRemove={canRemoveUpload ? () => {
             setReplacingFile(true);
             setValue(null);
-          }}
+          } : undefined}
         />
       )}
       {(!doc.filename || replacingFile) && (

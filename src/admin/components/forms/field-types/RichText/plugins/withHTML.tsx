@@ -12,7 +12,7 @@ const ELEMENT_TAGS = {
   H6: () => ({ type: 'h6' }),
   LI: () => ({ type: 'li' }),
   OL: () => ({ type: 'ol' }),
-  P: () => ({ type: 'p' }),
+  P: () => ({}),
   PRE: () => ({ type: 'code' }),
   UL: () => ({ type: 'ul' }),
 };

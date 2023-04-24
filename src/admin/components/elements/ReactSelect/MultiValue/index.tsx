@@ -3,7 +3,7 @@ import {
   MultiValueProps,
   components as SelectComponents,
 } from 'react-select';
-import { useSortable } from '@dnd-kit/sortable';
+import { useDraggableSortable } from '../../DraggableSortable/useDraggableSortable';
 import { Option as OptionType } from '../types';
 
 import './index.scss';
@@ -26,14 +26,21 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
     },
   } = props;
 
-  const { attributes, listeners, setNodeRef, transform } = useSortable({
-    id: value as string,
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging,
+  } = useDraggableSortable({
+    id: value.toString(),
   });
 
   const classes = [
     baseClass,
     className,
     !isDisabled && 'draggable',
+    isDragging && `${baseClass}--is-dragging`,
   ].filter(Boolean).join(' ');
 
   return (
@@ -51,9 +58,7 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
           }
         },
         style: {
-          ...transform ? {
-            transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-          } : {},
+          transform,
         },
       }}
       selectProps={{

@@ -82,11 +82,11 @@ export const promise = async ({
             data,
             doc,
             previousDoc,
-            previousSiblingDoc: previousDoc[field.name]?.[i] || {} as Record<string, unknown>,
+            previousSiblingDoc: previousDoc?.[field.name]?.[i] || {} as Record<string, unknown>,
             fields: field.fields,
             operation,
             req,
-            siblingData: siblingData[field.name]?.[i] || {},
+            siblingData: siblingData?.[field.name]?.[i] || {},
             siblingDoc: { ...row } || {},
           }));
         });
@@ -108,11 +108,11 @@ export const promise = async ({
               data,
               doc,
               previousDoc,
-              previousSiblingDoc: previousDoc[field.name]?.[i] || {} as Record<string, unknown>,
+              previousSiblingDoc: previousDoc?.[field.name]?.[i] || {} as Record<string, unknown>,
               fields: block.fields,
               operation,
               req,
-              siblingData: siblingData[field.name]?.[i] || {},
+              siblingData: siblingData?.[field.name]?.[i] || {},
               siblingDoc: { ...row } || {},
             }));
           }

@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { ListDrawerProps } from './types';
@@ -16,37 +16,11 @@ import { useDocumentDrawer } from '../DocumentDrawer';
 import Pill from '../Pill';
 import X from '../../icons/X';
 import ViewDescription from '../ViewDescription';
-import { Column } from '../Table/types';
-import getInitialColumnState from '../../views/collections/List/getInitialColumns';
-import buildListColumns from '../../views/collections/List/buildColumns';
 import formatFields from '../../views/collections/List/formatFields';
-import { ListPreferences } from '../../views/collections/List/types';
 import { usePreferences } from '../../utilities/Preferences';
 import { Field } from '../../../../fields/config/types';
 import { baseClass } from '.';
-
-const buildColumns = ({
-  collectionConfig,
-  columns,
-  onSelect,
-  t,
-}) => buildListColumns({
-  collection: collectionConfig,
-  columns,
-  t,
-  cellProps: [{
-    link: false,
-    onClick: ({ collection, rowData }) => {
-      if (typeof onSelect === 'function') {
-        onSelect({
-          docID: rowData.id,
-          collectionConfig: collection,
-        });
-      }
-    },
-    className: `${baseClass}__first-cell`,
-  }],
-});
+import { TableColumnsProvider } from '../TableColumns';
 
 export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   drawerSlug,
@@ -58,7 +32,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 }) => {
   const { t, i18n } = useTranslation(['upload', 'general']);
   const { permissions } = useAuth();
-  const { getPreference, setPreference } = usePreferences();
+  const { setPreference } = usePreferences();
   const { isModalOpen, closeModal } = useModal();
   const [limit, setLimit] = useState<number>();
   const [sort, setSort] = useState(null);
@@ -78,15 +52,9 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig, t));
 
-  const [tableColumns, setTableColumns] = useState<Column[]>(() => {
-    const initialColumns = getInitialColumnState(fields, selectedCollectionConfig.admin.useAsTitle, selectedCollectionConfig.admin.defaultColumns);
-    return buildColumns({
-      collectionConfig: selectedCollectionConfig,
-      columns: initialColumns,
-      t,
-      onSelect,
-    });
-  });
+  useEffect(() => {
+    setFields(formatFields(selectedCollectionConfig, t));
+  }, [selectedCollectionConfig, t]);
 
   // allow external control of selected collection, same as the initial state logic above
   useEffect(() => {
@@ -97,8 +65,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     }
   }, [selectedCollection, enabledCollectionConfigs, onSelect, t]);
 
-  const activeColumnNames = tableColumns.map(({ accessor }) => accessor);
-  const stringifiedActiveColumns = JSON.stringify(activeColumnNames);
   const preferenceKey = `${selectedCollectionConfig.slug}-list`;
 
   // this is the 'create new' drawer
@@ -154,40 +120,13 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   }, [setParams, page, sort, where, limit, cacheBust, filterOptions, selectedCollectionConfig]);
 
   useEffect(() => {
-    const syncColumnsFromPrefs = async () => {
-      const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
-      const newFields = formatFields(selectedCollectionConfig, t);
-      setFields(newFields);
-      const initialColumns = getInitialColumnState(newFields, selectedCollectionConfig.admin.useAsTitle, selectedCollectionConfig.admin.defaultColumns);
-      setTableColumns(buildColumns({
-        collectionConfig: selectedCollectionConfig,
-        columns: currentPreferences?.columns || initialColumns,
-        t,
-        onSelect,
-      }));
-    };
-
-    syncColumnsFromPrefs();
-  }, [t, getPreference, preferenceKey, onSelect, selectedCollectionConfig]);
-
-  useEffect(() => {
     const newPreferences = {
       limit,
       sort,
-      columns: JSON.parse(stringifiedActiveColumns),
     };
 
     setPreference(preferenceKey, newPreferences);
-  }, [sort, limit, stringifiedActiveColumns, setPreference, preferenceKey]);
-
-  const setActiveColumns = useCallback((columns: string[]) => {
-    setTableColumns(buildColumns({
-      collectionConfig: selectedCollectionConfig,
-      columns,
-      t,
-      onSelect,
-    }));
-  }, [selectedCollectionConfig, t, onSelect]);
+  }, [sort, limit, setPreference, preferenceKey]);
 
   const onCreateNew = useCallback(({ doc }) => {
     if (typeof onSelect === 'function') {
@@ -206,7 +145,21 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   }
 
   return (
-    <Fragment>
+    <TableColumnsProvider
+      collection={selectedCollectionConfig}
+      cellProps={[{
+        link: false,
+        onClick: ({ collection: rowColl, rowData }) => {
+          if (typeof onSelect === 'function') {
+            onSelect({
+              docID: rowData.id,
+              collectionConfig: rowColl,
+            });
+          }
+        },
+        className: `${baseClass}__first-cell`,
+      }]}
+    >
       <DocumentInfoProvider collection={selectedCollectionConfig}>
         <RenderCustomComponent
           DefaultComponent={DefaultList}
@@ -264,24 +217,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             data,
             limit: limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit,
             setLimit,
-            tableColumns,
-            setColumns: setActiveColumns,
             setSort,
             newDocumentURL: null,
             hasCreatePermission,
-            columnNames: activeColumnNames,
             disableEyebrow: true,
             modifySearchParams: false,
-            onCardClick: (doc) => {
-              if (typeof onSelect === 'function') {
-                onSelect({
-                  docID: doc.id,
-                  collectionConfig: selectedCollectionConfig,
-                });
-              }
-              closeModal(drawerSlug);
-            },
-            disableCardLink: true,
             handleSortChange: setSort,
             handleWhereChange: setWhere,
             handlePageChange: setPage,
@@ -290,6 +230,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         />
       </DocumentInfoProvider>
       <DocumentDrawer onSave={onCreateNew} />
-    </Fragment>
+    </TableColumnsProvider>
   );
 };

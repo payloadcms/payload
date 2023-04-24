@@ -20,7 +20,7 @@ export default [
     name: '_verified',
     type: 'checkbox',
     access: {
-      create: () => false,
+      create: ({ req: { user } }) => Boolean(user),
       update: ({ req: { user } }) => Boolean(user),
       read: ({ req: { user } }) => Boolean(user),
     },

@@ -93,21 +93,21 @@ const Pagination: React.FC<Props> = (props) => {
   }
 
   // Add prev and next arrows based on necessity
-  nodes.push({
-    type: 'ClickableArrow',
-    props: {
-      updatePage: () => updatePage(prevPage),
-      isDisabled: !hasPrevPage,
-      direction: 'left',
-    },
-  });
-
-  nodes.push({
+  nodes.unshift({
     type: 'ClickableArrow',
     props: {
       updatePage: () => updatePage(nextPage),
       isDisabled: !hasNextPage,
       direction: 'right',
+    },
+  });
+
+  nodes.unshift({
+    type: 'ClickableArrow',
+    props: {
+      updatePage: () => updatePage(prevPage),
+      isDisabled: !hasPrevPage,
+      direction: 'left',
     },
   });
 

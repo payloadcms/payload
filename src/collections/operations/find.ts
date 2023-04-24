@@ -72,23 +72,21 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {
-    where: {
-      and: [],
-    },
+  let queryToBuild: Where = {
+    and: [],
   };
 
   let useEstimatedCount = false;
 
   if (where) {
-    queryToBuild.where = {
+    queryToBuild = {
       and: [],
       ...where,
     };
 
     if (Array.isArray(where.AND)) {
-      queryToBuild.where.and = [
-        ...queryToBuild.where.and,
+      queryToBuild.and = [
+        ...queryToBuild.and,
         ...where.AND,
       ];
     }
@@ -120,18 +118,22 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     }
 
     if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.where.and.push(accessResult);
+      queryToBuild.and.push(accessResult);
     }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    req,
+    where: queryToBuild,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
 
   const [sortProperty, sortOrder] = buildSortParam({
-    sort: args.sort,
+    sort: args.sort ?? collectionConfig.defaultSort,
     config: payload.config,
     fields: collectionConfig.fields,
     timestamps: collectionConfig.timestamps,
@@ -164,7 +166,8 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     result = await queryDrafts<T>({
       accessResult,
       collection,
-      locale,
+      req,
+      overrideAccess,
       paginationOptions,
       payload,
       where,
@@ -231,7 +234,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef = await hook({ req, query, doc, findMany: true }) || doc;
+        docRef = await hook({ req, query, doc: docRef, findMany: true }) || doc;
       }, Promise.resolve());
 
       return docRef;

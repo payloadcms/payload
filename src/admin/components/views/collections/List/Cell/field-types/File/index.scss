@@ -1,0 +1,18 @@
+@import '../../../../../../../scss/styles.scss';
+
+.file {
+  display: flex;
+  flex-wrap: nowrap;
+  margin: base(-.25) 0;
+
+  &__thumbnail {
+    display: inline-block;
+    max-width: base(3);
+    height: base(3);
+  }
+
+  &__filename {
+    align-self: center;
+    margin-left: base(1);
+  }
+}

@@ -111,7 +111,7 @@ export const promise = async ({
     }
 
     case 'richText': {
-      if (((field.admin?.elements?.includes('relationship') || field.admin?.elements?.includes('upload')) || !field?.admin?.elements)) {
+      if (((field.admin?.elements?.includes('relationship') || field.admin?.elements?.includes('upload') || field.admin?.elements?.includes('link')) || !field?.admin?.elements)) {
         populationPromises.push(richTextRelationshipPromise({
           currentDepth,
           depth,
@@ -130,6 +130,8 @@ export const promise = async ({
       const pointDoc = siblingDoc[field.name] as Record<string, unknown>;
       if (Array.isArray(pointDoc?.coordinates) && pointDoc.coordinates.length === 2) {
         siblingDoc[field.name] = pointDoc.coordinates;
+      } else {
+        siblingDoc[field.name] = undefined;
       }
 
       break;

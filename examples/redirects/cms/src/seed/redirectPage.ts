@@ -1,30 +1,30 @@
-import { Page } from "../payload-types";
+import type { Page } from '../payload-types'
 
 export const redirectPage: Partial<Page> = {
-  "title": "Redirect Page",
-  "slug": "redirected",
-  "richText": [
+  title: 'Redirect Page',
+  slug: 'redirected',
+  richText: [
     {
-      "children": [
+      children: [
         {
-          "text": "You have been successfully redirected to this page if you navigated from "
+          text: 'You have been successfully redirected to this page if you navigated from ',
         },
         {
-          "text": "http://localhost:3000/redirect-to-internal",
-          "bold": true
+          text: 'http://localhost:3000/redirect-to-internal',
+          bold: true,
         },
         {
-          "text": "."
-        }
-      ]
+          text: '.',
+        },
+      ],
     },
     {
-      "children": [
+      children: [
         {
-          "text": ""
-        }
-      ]
+          text: '',
+        },
+      ],
     },
   ],
-  "_status": "published",
-};
+  _status: 'published',
+}

@@ -1,4 +1,5 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { DeepPartial } from 'ts-essentials';
 import { Where } from '../../types';
 import { SanitizedGlobalConfig } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
@@ -10,7 +11,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { PayloadRequest } from '../../express/types';
 import { saveVersion } from '../../versions/saveVersion';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
+import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion';
 
 type Args<T extends { [field: string | number | symbol]: unknown }> = {
   globalConfig: SanitizedGlobalConfig
@@ -21,7 +22,7 @@ type Args<T extends { [field: string | number | symbol]: unknown }> = {
   showHiddenFields?: boolean
   draft?: boolean
   autosave?: boolean
-  data: Omit<T, 'id'>
+  data: DeepPartial<Omit<T, 'id'>>
 }
 
 async function update<TSlug extends keyof GeneratedTypes['globals']>(
@@ -32,7 +33,6 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     slug,
     req,
     req: {
-      locale,
       payload,
       payload: {
         globals: {
@@ -61,38 +61,38 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: { where: Where } = {
-    where: {
-      and: [
-        {
-          globalType: {
-            equals: slug,
-          },
+  const queryToBuild: Where = {
+    and: [
+      {
+        globalType: {
+          equals: slug,
         },
-      ],
-    },
+      },
+    ],
   };
 
   if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
+    queryToBuild.and.push(accessResults);
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    where: queryToBuild,
+    req,
+    overrideAccess,
+    globalSlug: slug,
+  });
 
   // /////////////////////////////////////
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  let global = await getLatestEntityVersion({
+  const { global, globalExists } = await getLatestGlobalVersion({
     payload,
     Model,
     config: globalConfig,
     query,
     lean: true,
-    entityType: 'global',
   });
-
-  const globalExists = Boolean(global);
 
   let globalJSON: Record<string, unknown> = {};
 
@@ -158,7 +158,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  const result = await beforeChange({
+  let result = await beforeChange({
     data,
     doc: originalDoc,
     docWithLocales: globalJSON,
@@ -174,33 +174,33 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
   if (!shouldSaveDraft) {
     if (globalExists) {
-      global = await Model.findOneAndUpdate(
+      result = await Model.findOneAndUpdate(
         { globalType: slug },
         result,
         { new: true },
       );
     } else {
       result.globalType = slug;
-      global = await Model.create(result);
+      result = await Model.create(result);
     }
   }
 
-  global = JSON.parse(JSON.stringify(global));
-  global = sanitizeInternalFields(global);
+  result = JSON.parse(JSON.stringify(result));
+  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // Create version
   // /////////////////////////////////////
 
   if (globalConfig.versions) {
-    global = await saveVersion({
+    result = await saveVersion({
       payload,
       global: globalConfig,
       req,
       docWithLocales: {
         ...result,
-        createdAt: global.createdAt,
-        updatedAt: global.updatedAt,
+        createdAt: result.createdAt,
+        updatedAt: result.updatedAt,
       },
       autosave,
       draft: shouldSaveDraft,
@@ -211,9 +211,9 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // afterRead - Fields
   // /////////////////////////////////////
 
-  global = await afterRead({
+  result = await afterRead({
     depth,
-    doc: global,
+    doc: result,
     entityConfig: globalConfig,
     req,
     overrideAccess,
@@ -227,19 +227,19 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    global = await hook({
-      doc: global,
+    result = await hook({
+      doc: result,
       req,
-    }) || global;
+    }) || result;
   }, Promise.resolve());
 
   // /////////////////////////////////////
   // afterChange - Fields
   // /////////////////////////////////////
 
-  global = await afterChange({
+  result = await afterChange({
     data,
-    doc: global,
+    doc: result,
     previousDoc: originalDoc,
     entityConfig: globalConfig,
     operation: 'update',
@@ -253,18 +253,18 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    global = await hook({
-      doc: global,
+    result = await hook({
+      doc: result,
       previousDoc: originalDoc,
       req,
-    }) || global;
+    }) || result;
   }, Promise.resolve());
 
   // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
 
-  return global;
+  return result;
 }
 
 export default update;

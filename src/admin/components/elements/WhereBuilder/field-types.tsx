@@ -4,7 +4,7 @@ const boolean = [
     value: 'equals',
   },
   {
-    label: 'is not equal to',
+    label: 'isNotEqualTo',
     value: 'not_equals',
   },
 ];
@@ -12,11 +12,11 @@ const boolean = [
 const base = [
   ...boolean,
   {
-    label: 'is in',
+    label: 'isIn',
     value: 'in',
   },
   {
-    label: 'is not in',
+    label: 'isNotIn',
     value: 'not_in',
   },
   {
@@ -28,19 +28,19 @@ const base = [
 const numeric = [
   ...base,
   {
-    label: 'is greater than',
+    label: 'isGreaterThan',
     value: 'greater_than',
   },
   {
-    label: 'is less than',
+    label: 'isLessThan',
     value: 'less_than',
   },
   {
-    label: 'is less than or equal to',
+    label: 'isLessThanOrEqualTo',
     value: 'less_than_equal',
   },
   {
-    label: 'is greater than or equal to',
+    label: 'isGreaterThanOrEqualTo',
     value: 'greater_than_equals',
   },
 ];
@@ -58,7 +58,7 @@ const geo = [
 ];
 
 const like = {
-  label: 'is like',
+  label: 'isLike',
   value: 'like',
 };
 

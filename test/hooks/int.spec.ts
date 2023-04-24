@@ -5,6 +5,7 @@ import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
 import { transformSlug } from './collections/Transform';
 import { hooksSlug } from './collections/Hook';
+import { chainingHooksSlug } from './collections/ChainingHooks';
 import { generatedAfterReadText, nestedAfterReadHooksSlug } from './collections/NestedAfterReadHooks';
 import { relationsSlug } from './collections/Relations';
 import type { NestedAfterReadHook } from './payload-types';
@@ -119,7 +120,39 @@ describe('Hooks', () => {
       expect(retrievedDoc.group.array[0].shouldPopulate.title).toEqual(relation.title);
       expect(retrievedDoc.group.subGroup.shouldPopulate.title).toEqual(relation.title);
     });
+
+    it('should pass result from previous hook into next hook with findByID', async () => {
+      const document = await payload.create({
+        collection: chainingHooksSlug,
+        data: {
+          text: 'ok',
+        },
+      });
+
+      const retrievedDoc = await payload.findByID({
+        collection: chainingHooksSlug,
+        id: document.id,
+      });
+
+      expect(retrievedDoc.text).toEqual('ok!!');
+    });
+
+    it('should pass result from previous hook into next hook with find', async () => {
+      const document = await payload.create({
+        collection: chainingHooksSlug,
+        data: {
+          text: 'ok',
+        },
+      });
+
+      const { docs: retrievedDocs } = await payload.find({
+        collection: chainingHooksSlug,
+      });
+
+      expect(retrievedDocs[0].text).toEqual('ok!!');
+    });
   });
+
   describe('auth collection hooks', () => {
     it('allow admin login', async () => {
       const { user } = await payload.login({

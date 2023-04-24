@@ -25,10 +25,11 @@ keywords: textarea, fields, config, configuration, documentation, Content Manage
 | **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
 | **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |
 | **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel. |
-| **`defaultValue`**   | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values) [More](/docs/fields/overview#default-values) |
+| **`defaultValue`**   | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)|
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 

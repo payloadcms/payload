@@ -24,6 +24,11 @@ const reduceFields = (fields, i18n) => flattenTopLevelFields(fields).reduce((red
       label: getTranslation(field.label || field.name, i18n),
       value: field.name,
       ...fieldTypes[field.type],
+      operators: fieldTypes[field.type].operators.map((operator) => ({
+        ...operator,
+        label: i18n.t(`operators:${operator.label}`),
+      }
+      )),
       props: {
         ...field,
       },

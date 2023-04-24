@@ -1,10 +1,9 @@
 import type { IndexDirection, IndexOptions } from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
-import config from '../uploads/config';
+import configPromise from '../uploads/config';
 import payload from '../../src';
 import { pointDoc } from './collections/Point';
-import type { ArrayField, GroupField, TabsField } from './payload-types';
 import { arrayFieldsSlug, arrayDefaultValue, arrayDoc } from './collections/Array';
 import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
 import { defaultText } from './collections/Text';
@@ -13,10 +12,14 @@ import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSl
 import { defaultNumber, numberDoc } from './collections/Number';
 
 let client;
+let serverURL;
+let config;
 
 describe('Fields', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
+    ({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }));
+    config = await configPromise;
+
     client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
     await client.login();
   });
@@ -57,6 +60,26 @@ describe('Fields', () => {
 
     it('creates with hasMany localized', () => {
       expect(doc.selectHasManyLocalized.en).toEqual(['one', 'two']);
+    });
+
+    it('retains hasMany updates', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two'],
+        },
+      });
+
+      const updatedDoc = await payload.update({
+        collection: 'select-fields',
+        id,
+        data: {
+          select: 'one',
+        },
+      });
+
+      expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true);
+      expect(updatedDoc.selectHasMany).toEqual(['one', 'two']);
     });
   });
 
@@ -268,14 +291,14 @@ describe('Fields', () => {
     const collection = arrayFieldsSlug;
 
     beforeAll(async () => {
-      doc = await payload.create<ArrayField>({
+      doc = await payload.create({
         collection,
         data: {},
       });
     });
 
     it('should return undefined arrays when no data present', async () => {
-      const document = await payload.create<ArrayField>({
+      const document = await payload.create({
         collection: arrayFieldsSlug,
         data: arrayDoc,
       });
@@ -284,7 +307,7 @@ describe('Fields', () => {
     });
 
     it('should create with ids and nested ids', async () => {
-      const docWithIDs = await payload.create<GroupField>({
+      const docWithIDs = await payload.create({
         collection: groupFieldsSlug,
         data: groupDoc,
       });
@@ -300,14 +323,14 @@ describe('Fields', () => {
       const localized = [{ text: 'unique' }];
       const enText = 'english';
       const esText = 'spanish';
-      const { id } = await payload.create<ArrayField>({
+      const { id } = await payload.create({
         collection,
         data: {
           localized,
         },
       });
 
-      const enDoc = await payload.update<ArrayField>({
+      const enDoc = await payload.update({
         collection,
         id,
         locale: 'en',
@@ -316,7 +339,7 @@ describe('Fields', () => {
         },
       });
 
-      const esDoc = await payload.update<ArrayField>({
+      const esDoc = await payload.update({
         collection,
         id,
         locale: 'es',
@@ -342,7 +365,7 @@ describe('Fields', () => {
     let document;
 
     beforeAll(async () => {
-      document = await payload.create<GroupField>({
+      document = await payload.create({
         collection: groupFieldsSlug,
         data: {},
       });
@@ -358,7 +381,7 @@ describe('Fields', () => {
     let document;
 
     beforeAll(async () => {
-      document = await payload.create<TabsField>({
+      document = await payload.create({
         collection: tabsSlug,
         data: tabsDoc,
       });
@@ -395,7 +418,7 @@ describe('Fields', () => {
     });
 
     it('should allow hooks on a named tab', async () => {
-      const newDocument = await payload.create<TabsField>({
+      const newDocument = await payload.create({
         collection: tabsSlug,
         data: tabsDoc,
       });
@@ -406,7 +429,7 @@ describe('Fields', () => {
     });
 
     it('should return empty object for groups when no data present', async () => {
-      const doc = await payload.create<GroupField>({
+      const doc = await payload.create({
         collection: groupFieldsSlug,
         data: groupDoc,
       });
@@ -523,6 +546,31 @@ describe('Fields', () => {
           json: '{ bad input: true }',
         },
       })).rejects.toThrow('The following field is invalid: json');
+    });
+
+    it('should save empty json objects', async () => {
+      const jsonFieldsDoc = await payload.create({
+        collection: 'json-fields',
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(jsonFieldsDoc.json.state).toEqual({});
+
+      const updatedJsonFieldsDoc = await payload.update({
+        collection: 'json-fields',
+        id: jsonFieldsDoc.id,
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(updatedJsonFieldsDoc.json.state).toEqual({});
     });
   });
 

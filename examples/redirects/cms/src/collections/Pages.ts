@@ -1,6 +1,7 @@
-import { CollectionConfig } from 'payload/types';
-import { slugField } from '../fields/slug';
-import richText from '../fields/richText';
+import type { CollectionConfig } from 'payload/types'
+
+import richText from '../fields/richText'
+import { slugField } from '../fields/slug'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -23,4 +24,4 @@ export const Pages: CollectionConfig = {
     richText(),
     slugField(),
   ],
-};
+}

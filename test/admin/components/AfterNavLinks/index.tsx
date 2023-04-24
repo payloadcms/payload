@@ -1,12 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useConfig } from '../../../../src/admin/components/utilities/Config';
 
 // As this is the demo project, we import our dependencies from the `src` directory.
 import Chevron from '../../../../src/admin/components/icons/Chevron';
+import { useConfig } from '../../../../src/admin/components/utilities/Config';
 
 // In your projects, you can import as follows:
 // import { Chevron } from 'payload/components';
+// import { useConfig } from 'payload/components/utilities';
 
 
 const baseClass = 'after-nav-links';

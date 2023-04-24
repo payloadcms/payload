@@ -9,7 +9,7 @@ import { Where } from '../../types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { getLatestEntityVersion } from '../../versions/getLatestCollectionVersion';
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 
 export type Arguments = {
   collection: Collection
@@ -73,23 +73,25 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: { where: Where } = {
-    where: {
-      and: [
-        {
-          id: {
-            equals: parentDocID,
-          },
+  const queryToBuild: Where = {
+    and: [
+      {
+        id: {
+          equals: parentDocID,
         },
-      ],
-    },
+      },
+    ],
   };
 
   if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
+    queryToBuild.and.push(accessResults);
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    where: queryToBuild,
+    req,
+    overrideAccess,
+  });
 
   const doc = await Model.findOne(query);
 
@@ -100,7 +102,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // fetch previousDoc
   // /////////////////////////////////////
 
-  const prevDocWithLocales = await getLatestEntityVersion({
+  const prevDocWithLocales = await getLatestCollectionVersion({
     payload,
     id: parentDocID,
     query,
@@ -135,7 +137,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   await VersionModel.create({
     parent: parentDocID,
-    version: prevVersion,
+    version: rawVersion.version,
     autosave: false,
     createdAt: prevVersion.createdAt,
     updatedAt: new Date().toISOString(),

@@ -27,7 +27,7 @@ type Email = {
 };
 
 // eslint-disable-next-line no-use-before-define
-export type Plugin = (config: Config) => Config;
+export type Plugin = (config: Config) => Promise<Config> | Config;
 
 type GeneratePreviewURLOptions = {
   locale: string;
@@ -37,7 +37,7 @@ type GeneratePreviewURLOptions = {
 export type GeneratePreviewURL = (
   doc: Record<string, unknown>,
   options: GeneratePreviewURLOptions
-) => Promise<string> | string;
+) => Promise<string | null> | string | null;
 
 export type EmailTransport = Email & {
   transport: Transporter;
@@ -77,7 +77,10 @@ export type InitOptions = {
   /** Mongo connection URL, starts with `mongo` */
   mongoURL: string | false;
   /** Extra configuration options that will be passed to Mongo */
-  mongoOptions?: ConnectOptions;
+  mongoOptions?: ConnectOptions & {
+    /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
+    useFacet?: boolean
+  };
 
   /** Secure string that Payload will use for any encryption workflows */
   secret: string;
@@ -108,7 +111,7 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions;
-  config?: SanitizedConfig
+  config?: Promise<SanitizedConfig>
 };
 
 /**
@@ -126,7 +129,7 @@ export type InitOptions = {
  */
 export type AccessResult = boolean | Where;
 
-type AccessArgs<T = any, U = any> = {
+export type AccessArgs<T = any, U = any> = {
   /** The original request that requires an access check */
   req: PayloadRequest<U>;
   /** ID of the resource being accessed */
@@ -186,6 +189,8 @@ export type Endpoint = {
    * @default false
    */
   root?: boolean;
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
 export type AdminView = React.ComponentType<{
@@ -250,6 +255,8 @@ export type Config = {
        */
       favicon?: string;
     };
+    /** Specify an absolute path for where to store the built Admin panel bundle used in production. */
+    buildPath?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean;
     /** Replace the entirety of the index.html file used by the Admin panel. Reference the base index.html file to ensure your replacement has the appropriate HTML elements. */
@@ -326,25 +333,6 @@ export type Config = {
         Dashboard?: React.ComponentType<any>;
       };
     };
-    /**
-     * Control pagination when querying collections.
-     *
-     * @see https://payloadcms.com/docs/queries/overview
-    */
-    pagination?: {
-      /**
-       * Limit the number of documents that are displayed on 1 page in the list view
-       *
-       * @default 10
-       */
-      defaultLimit?: number;
-      /**
-       * Suggest alternative options for the limit of documents on the list view
-       *
-       * @default [5, 10, 25, 50, 100]
-       */
-      limits?: number[]
-    };
     /** Customize the Webpack config that's used to generate the Admin panel. */
     webpack?: (config: Configuration) => Configuration;
   };
@@ -360,6 +348,14 @@ export type Config = {
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
   globals?: GlobalConfig[];
+
+  /**
+   * Email configuration options. This value is overridden by `email` in Payload.init if passed.
+   *
+   * @see https://payloadcms.com/docs/email/overview
+   */
+  email?: EmailOptions;
+
   /**
    * Control the behaviour of the admin internationalisation.
    *
@@ -533,14 +529,17 @@ export type Config = {
   telemetry?: boolean;
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void;
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'globals'
+  'collections' | 'globals' | 'endpoint'
 > & {
   collections: SanitizedCollectionConfig[];
   globals: SanitizedGlobalConfig[];
+  endpoints: Endpoint[];
   paths: {
     configDir: string
     config: string

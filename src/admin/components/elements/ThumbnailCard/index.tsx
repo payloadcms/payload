@@ -1,7 +1,9 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Props } from './types';
 import Thumbnail from '../Thumbnail';
+import { useConfig } from '../../utilities/Config';
+import { formatUseAsTitle } from '../../../hooks/useTitle';
 
 import './index.scss';
 
@@ -14,12 +16,13 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
     doc,
     collection,
     thumbnail,
-    label,
+    label: labelFromProps,
     alignLabel,
     onKeyDown,
   } = props;
 
-  const { t } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
+  const config = useConfig();
 
   const classes = [
     baseClass,
@@ -28,8 +31,20 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
     alignLabel && `${baseClass}--align-label-${alignLabel}`,
   ].filter(Boolean).join(' ');
 
+  let title = labelFromProps;
+
+  if (!title) {
+    title = formatUseAsTitle({
+      doc,
+      collection,
+      i18n,
+      config,
+    }) || doc?.filename as string || `[${t('untitled')}]`;
+  }
+
   return (
     <div
+      title={title}
       className={classes}
       onClick={typeof onClick === 'function' ? onClick : undefined}
       onKeyDown={typeof onKeyDown === 'function' ? onKeyDown : undefined}
@@ -45,12 +60,7 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
         )}
       </div>
       <div className={`${baseClass}__label`}>
-        {label && label}
-        {!label && doc && (
-          <Fragment>
-            {typeof doc?.filename === 'string' ? doc?.filename : `[${t('untitled')}]`}
-          </Fragment>
-        )}
+        {title}
       </div>
     </div>
   );

@@ -1,20 +1,51 @@
-import React from 'react';
+import React, { ElementType } from 'react';
 import { Link } from 'react-router-dom';
 import { Props, RenderedTypeProps } from './types';
+import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable';
 
 import './index.scss';
 
 const baseClass = 'pill';
 
-const Pill: React.FC<Props> = ({
-  children,
-  className,
-  to,
-  icon,
-  alignIcon = 'right',
-  onClick,
-  pillStyle = 'light',
-}) => {
+const DraggablePill: React.FC<Props> = (props) => {
+  const { className, id } = props;
+
+  const { attributes, listeners, transform, setNodeRef, isDragging } = useDraggableSortable({
+    id,
+  });
+
+  return (
+    <StaticPill
+      {...props}
+      className={[
+        isDragging && `${baseClass}--is-dragging`,
+        className,
+      ].filter(Boolean).join(' ')}
+      elementProps={{
+        ...listeners,
+        ...attributes,
+        style: {
+          transform,
+        },
+        ref: setNodeRef,
+      }}
+    />
+  );
+};
+
+const StaticPill: React.FC<Props> = (props) => {
+  const {
+    className,
+    to,
+    icon,
+    alignIcon = 'right',
+    onClick,
+    pillStyle = 'light',
+    draggable,
+    children,
+    elementProps,
+  } = props;
+
   const classes = [
     baseClass,
     `${baseClass}--style-${pillStyle}`,
@@ -23,19 +54,21 @@ const Pill: React.FC<Props> = ({
     (to || onClick) && `${baseClass}--has-action`,
     icon && `${baseClass}--has-icon`,
     icon && `${baseClass}--align-icon-${alignIcon}`,
+    draggable && `${baseClass}--draggable`,
   ].filter(Boolean).join(' ');
 
-  let RenderedType: string | React.FC<RenderedTypeProps> = 'div';
+  let Element: ElementType | React.FC<RenderedTypeProps> = 'div';
 
-  if (onClick && !to) RenderedType = 'button';
-  if (to) RenderedType = Link;
+  if (onClick && !to) Element = 'button';
+  if (to) Element = Link;
 
   return (
-    <RenderedType
+    <Element
+      {...elementProps}
       className={classes}
-      onClick={onClick}
-      type={RenderedType === 'button' ? 'button' : undefined}
+      type={Element === 'button' ? 'button' : undefined}
       to={to || undefined}
+      onClick={onClick}
     >
       {(icon && alignIcon === 'left') && (
         <React.Fragment>
@@ -48,8 +81,15 @@ const Pill: React.FC<Props> = ({
           {icon}
         </React.Fragment>
       )}
-    </RenderedType>
+    </Element>
   );
+};
+
+const Pill: React.FC<Props> = (props) => {
+  const { draggable } = props;
+
+  if (draggable) return <DraggablePill {...props} />;
+  return <StaticPill {...props} />;
 };
 
 export default Pill;

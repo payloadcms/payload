@@ -1,7 +1,7 @@
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import path from 'path';
-import { Configuration } from 'webpack';
+import { Configuration, WebpackPluginInstance } from 'webpack';
 import { SanitizedConfig } from '../config/types';
 import getBaseConfig from './getBaseConfig';
 
@@ -15,7 +15,7 @@ export default (payloadConfig: SanitizedConfig): Configuration => {
     ...baseConfig,
     output: {
       publicPath: `${payloadConfig.routes.admin}/`,
-      path: path.resolve(process.cwd(), 'build'),
+      path: payloadConfig.admin.buildPath,
       filename: '[name].[chunkhash].js',
       chunkFilename: '[name].[chunkhash].js',
     },
@@ -67,7 +67,7 @@ export default (payloadConfig: SanitizedConfig): Configuration => {
   });
 
   if (process.env.PAYLOAD_ANALYZE_BUNDLE) {
-    config.plugins.push(new BundleAnalyzerPlugin());
+    config.plugins.push(new BundleAnalyzerPlugin() as unknown as WebpackPluginInstance);
   }
 
   if (payloadConfig.admin.webpack && typeof payloadConfig.admin.webpack === 'function') {

@@ -67,6 +67,7 @@ Field Hooks receive one `args` argument that contains the following properties:
 | **`previousSiblingDoc`** | The sibling data from the previous document in `afterChange` hook.                                                                                                                                                    |
 | **`req`**                | The Express `request` object. It is mocked for Local API operations.                                                                                                                                                  |
 | **`value`**              | The value of the field.                                                                                                                                                                                               |
+| **`previousValue`**      | The previous value of the field, before changes were applied, only in `afterChange` hooks.                                                                                                                            |
 
 #### Return value
 

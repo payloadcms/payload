@@ -67,32 +67,37 @@ export const generateFileData = async <T>({
     mkdirp.sync(staticPath);
   }
 
-
   let newData = data;
   const filesToSave: FileToSave[] = [];
   const fileData: Partial<FileData> = {};
+  const fileIsAnimated = (file.mimetype === 'image/gif') || (file.mimetype === 'image/webp');
+
   try {
     const fileSupportsResize = canResizeImage(file.mimetype);
     let fsSafeName: string;
-    let originalFile: Sharp | undefined;
+    let sharpFile: Sharp | undefined;
     let dimensions: ProbedImageSize | undefined;
     let fileBuffer;
     let ext;
     let mime: string;
 
-    if (fileSupportsResize) {
+    const sharpOptions: sharp.SharpOptions = {};
+
+    if (fileIsAnimated) sharpOptions.animated = true;
+
+    if (fileSupportsResize && (resizeOptions || formatOptions)) {
       if (file.tempFilePath) {
-        originalFile = sharp(file.tempFilePath);
+        sharpFile = sharp(file.tempFilePath, sharpOptions);
       } else {
-        originalFile = sharp(file.data);
+        sharpFile = sharp(file.data, sharpOptions);
       }
 
       if (resizeOptions) {
-        originalFile = originalFile
+        sharpFile = sharpFile
           .resize(resizeOptions);
       }
       if (formatOptions) {
-        originalFile = originalFile.toFormat(formatOptions.format, formatOptions.options);
+        sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options);
       }
     }
 
@@ -102,11 +107,14 @@ export const generateFileData = async <T>({
       fileData.height = dimensions.height;
     }
 
-    if (originalFile) {
-      fileBuffer = await originalFile.toBuffer({ resolveWithObject: true });
-      ({ mime, ext } = await fromBuffer(fileBuffer.data));
+    if (sharpFile) {
+      const metadata = await sharpFile.metadata();
+      fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true });
+      ({ mime, ext } = await fromBuffer(fileBuffer.data)); // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width;
-      fileData.height = fileBuffer.info.height;
+
+      // Animated GIFs aggregate the height from every frame, so we need to use divide by number of pages
+      fileData.height = sharpOptions.animated ? (fileBuffer.info.height / metadata.pages) : fileBuffer.info.height;
       fileData.filesize = fileBuffer.data.length;
     } else {
       mime = file.mimetype;
