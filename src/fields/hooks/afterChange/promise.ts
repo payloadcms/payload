@@ -65,7 +65,7 @@ export const promise = async ({
         fields: field.fields,
         operation,
         req,
-        siblingData: (siblingData && siblingData[field.name] as Record<string, unknown>) || {},
+        siblingData: siblingData?.[field.name] as Record<string, unknown> || {},
         siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
       });
 
