@@ -50,7 +50,6 @@ async function findByID<T extends TypeWithID>(
     req,
     req: {
       t,
-      locale,
       payload,
     },
     disableErrors,
@@ -69,23 +68,25 @@ async function findByID<T extends TypeWithID>(
   // If errors are disabled, and access returns false, return null
   if (accessResult === false) return null;
 
-  const queryToBuild: { where: Where } = {
-    where: {
-      and: [
-        {
-          _id: {
-            equals: id,
-          },
+  const queryToBuild: Where = {
+    and: [
+      {
+        _id: {
+          equals: id,
         },
-      ],
-    },
+      },
+    ],
   };
 
   if (hasWhereAccessResult(accessResult)) {
-    queryToBuild.where.and.push(accessResult);
+    queryToBuild.and.push(accessResult);
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    where: queryToBuild,
+    req,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Find by ID
@@ -132,7 +133,8 @@ async function findByID<T extends TypeWithID>(
       entityType: 'collection',
       doc: result,
       accessResult,
-      locale,
+      req,
+      overrideAccess,
     });
   }
 

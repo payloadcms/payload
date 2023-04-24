@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "Nemáte povolení přistupovat k této stránce.",
     "notAllowedToPerformAction": "Nemáte povolení provádět tuto akci.",
     "notFound": "Požadovaný zdroj nebyl nalezen.",
+    "previewing": "Při náhledu tohoto dokumentu došlo k chybě.",
     "problemUploadingFile": "Při nahrávání souboru došlo k chybě.",
     "tokenInvalidOrExpired": "Token je neplatný nebo vypršel.",
     "unPublishingDocument": "Při zrušení publikování tohoto dokumentu došlo k chybě.",

@@ -45,7 +45,6 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     req,
     req: {
       t,
-      locale,
       payload,
       payload: {
         config,
@@ -80,25 +79,25 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: {
-    where: Where
-  } = {
-    where: {
-      and: [
-        {
-          id: {
-            equals: id,
-          },
+  const queryToBuild: Where = {
+    and: [
+      {
+        id: {
+          equals: id,
         },
-      ],
-    },
+      },
+    ],
   };
 
   if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
+    queryToBuild.and.push(accessResults);
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    req,
+    where: queryToBuild,
+    overrideAccess,
+  });
 
   const docToDelete = await Model.findOne(query);
 

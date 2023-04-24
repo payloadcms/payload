@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "Du har ikke tilgang til denne siden.",
     "notAllowedToPerformAction": "Du har ikke tillatelse til å utføre denne handlingen.",
     "notFound": "Den forespurte ressursen ble ikke funnet.",
+    "previewing": "Det oppstod et problem under forhåndsvisning av dokumentet.",
     "problemUploadingFile": "Det oppstod et problem under opplasting av filen.",
     "tokenInvalidOrExpired": "Token er enten ugyldig eller har utløpt.",
     "unPublishingDocument": "Det oppstod et problem under avpublisering av dokumentet.",

@@ -84,21 +84,19 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {
-    where: {
-      and: [],
-    },
+  let queryToBuild: Where = {
+    and: [],
   };
 
   if (where) {
-    queryToBuild.where = {
+    queryToBuild = {
       and: [],
       ...where,
     };
 
     if (Array.isArray(where.AND)) {
-      queryToBuild.where.and = [
-        ...queryToBuild.where.and,
+      queryToBuild.and = [
+        ...queryToBuild.and,
         ...where.AND,
       ];
     }
@@ -110,11 +108,15 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     accessResult = await executeAccess({ req }, collectionConfig.access.update);
 
     if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.where.and.push(accessResult);
+      queryToBuild.and.push(accessResult);
     }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    where: queryToBuild,
+    req,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Retrieve documents
@@ -125,7 +127,8 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     docs = await queryDrafts<GeneratedTypes['collections'][TSlug]>({
       accessResult,
       collection,
-      locale,
+      req,
+      overrideAccess,
       payload,
       where: query,
     });

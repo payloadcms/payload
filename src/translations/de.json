@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "Du hast keine Berechtigung, auf diese Seite zuzugreifen.",
     "notAllowedToPerformAction": "Du hast keine Berechtigung, diese Aktion auszuführen.",
     "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
+    "previewing": "Es gab ein Problem beim Vorschauen dieses Dokuments.",
     "problemUploadingFile": "Es gab ein Problem während des Hochladens der Datei.",
     "tokenInvalidOrExpired": "Token ist entweder ungültig oder abgelaufen.",
     "unPublishingDocument": "Es gab ein Problem, dieses Dokument auf Entwurf zu setzen.",

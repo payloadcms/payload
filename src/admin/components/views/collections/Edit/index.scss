@@ -121,12 +121,20 @@
 
   &__sidebar-fields {
     padding-right: $baseline;
-    margin-bottom: base(1);
+    display: flex;
+    flex-direction: column;
+    gap: $baseline;
 
     .preview-btn {
       display: inline-block;
-      margin-top: 0;
+      margin: 0;
       width: calc(50% - #{base(.5)});
+    }
+
+    .render-fields {
+      & > *:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 
@@ -217,9 +225,9 @@
     }
 
     &__sidebar-fields {
-      margin-bottom: 0;
       padding-top: 0;
       padding-right: var(--gutter-h);
+      gap: base(0.5);
 
       .preview-btn {
         width: 100%;
