@@ -60,7 +60,7 @@ _An asterisk denotes that a property above is required._
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Media: CollectionConfig = {
+export const Media: CollectionConfig = {
   slug: 'media',
   upload: {
     staticURL: '/media',
@@ -92,6 +92,12 @@ const Media: CollectionConfig = {
     adminThumbnail: 'thumbnail',
     mimeTypes: ['image/*'],
   },
+  fields: [
+    {
+      name: 'alt',
+      type: 'text',
+    },
+  ],
 };
 ```
 
