@@ -1,5 +1,6 @@
 /* eslint-disable no-shadow */
 import { useCallback, useEffect } from 'react';
+import { setsAreEqual } from '../utilities/setsAreEqual';
 
 // Required to be outside of hook, else debounce would be necessary
 // and then one could not prevent the default behaviour.
