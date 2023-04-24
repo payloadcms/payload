@@ -215,8 +215,8 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
           />
         </React.Fragment>
       )}
-      <DocumentDrawer onSave={onSave} />
-      <ListDrawer onSelect={onSelect} />
+      {!readOnly && <DocumentDrawer onSave={onSave} />}
+      {!readOnly && <ListDrawer onSelect={onSelect} />}
     </div>
   );
 };
