@@ -1,10 +1,9 @@
 /* eslint-disable no-shadow */
-import _ from 'lodash';
 import { useCallback, useEffect } from 'react';
 
 // Required to be outside of hook, else debounce would be necessary
 // and then one could not prevent the default behaviour.
-const pressedKeys = new Set([]);
+const pressedKeys = new Set<string>([]);
 
 const map = {
   MetaLeft: 'meta',
@@ -73,7 +72,7 @@ const useHotkey = (options: {
 
     // Check whether arrays contain the same values (regardless of number of occurrences)
     if (
-      _.isEmpty(_.xor(pressedWithoutMeta, keyCodes))
+      setsAreEqual(new Set(pressedWithoutMeta), new Set(keyCodes))
       && (!cmdCtrlKey || (hasCmd && pressedKeys.has('meta')) || (!hasCmd && e.ctrlKey))
     ) {
       func(e, deps);
