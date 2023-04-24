@@ -159,8 +159,8 @@ const collectionSchema = joi.object().keys({
       imageSizes: joi.array().items(
         joi.object().keys({
           name: joi.string(),
-          width: joi.number().allow(null),
-          height: joi.number().allow(null),
+          width: joi.number().integer().allow(null),
+          height: joi.number().integer().allow(null),
           crop: joi.string(), // TODO: add further specificity with joi.xor
         }).unknown(),
       ),
