@@ -136,6 +136,39 @@ export default buildConfig({
       fields: [],
     },
     {
+      slug: 'media-trim',
+      upload: {
+        staticURL: '/media-trim',
+        staticDir: './media-trim',
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        trimOptions: 0,
+        imageSizes: [
+          {
+            name: 'trimNumber',
+            width: 1024,
+            height: undefined,
+            trimOptions: 0,
+          },
+          {
+            name: 'trimString',
+            width: 1024,
+            height: undefined,
+            trimOptions: 0,
+          },
+          {
+            name: 'trimOptions',
+            width: 1024,
+            height: undefined,
+            trimOptions: {
+              background: '#000000',
+              threshold: 50,
+            },
+          },
+        ],
+      },
+      fields: [],
+    },
+    {
       slug: 'unstored-media',
       upload: {
         staticURL: '/media',

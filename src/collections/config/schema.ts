@@ -184,6 +184,14 @@ const collectionSchema = joi.object().keys({
         format: joi.string(),
         options: joi.object(),
       }),
+      trimOptions: joi.alternatives().try(
+        joi.object().keys({
+          format: joi.string(),
+          options: joi.object(),
+        }),
+        joi.string(),
+        joi.number(),
+      ),
     }),
     joi.boolean(),
   ),
