@@ -23,7 +23,6 @@ import { CollectionPermission } from '../../../../auth';
 
 const Content: React.FC<DocumentDrawerProps> = ({
   collectionSlug,
-  id,
   drawerSlug,
   customHeader,
   onSave,
@@ -37,12 +36,14 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const hasInitializedState = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [collectionConfig] = useRelatedCollections(collectionSlug);
-  const { docPermissions } = useDocumentInfo();
+  const { docPermissions, id } = useDocumentInfo();
 
   const [fields, setFields] = useState(() => formatFields(collectionConfig, true));
 
+  // no need to an additional requests when creating new documents
+  const initialID = useRef(id);
   const [{ data, isLoading: isLoadingDocument, isError }] = usePayloadAPI(
-    (id ? `${serverURL}${api}/${collectionSlug}/${id}` : null),
+    (initialID.current ? `${serverURL}${api}/${collectionSlug}/${initialID.current}` : null),
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
   );
 
@@ -51,7 +52,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   }, [collectionSlug, collectionConfig]);
 
   useEffect(() => {
-    if (isLoadingDocument) {
+    if (isLoadingDocument || hasInitializedState.current) {
       return;
     }
 
@@ -127,7 +128,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
               </Button>
             </div>
             {id && (
-              <IDLabel id={id} />
+              <IDLabel id={id.toString()} />
             )}
           </div>
         ),
@@ -163,7 +164,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
     >
       <Content
         {...props}
-        id={id}
         onSave={onSave}
       />
     </DocumentInfoProvider>
