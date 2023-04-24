@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const json: Permissions = await request.json();
       setPermissions(json);
     } else {
-      throw new Error("Fetching permissions failed with status code " + request.status);
+      throw new Error(`Fetching permissions failed with status code ${request.status}`);
     }
   }, [serverURL, api, i18n]);
 
@@ -135,7 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (id) {
       refreshPermissions();
     }
-  }, [i18n, id, api, serverURL]);
+  }, [i18n, id, api, serverURL, refreshPermissions]);
 
   useEffect(() => {
     let reminder: ReturnType<typeof setTimeout>;

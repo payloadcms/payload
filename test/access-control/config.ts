@@ -1,11 +1,13 @@
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
 import { FieldAccess } from '../../src/fields/config/types';
-import { SiblingDatum } from './payload-types';
 import { firstArrayText, secondArrayText } from './shared';
 
 export const slug = 'posts';
+export const unrestrictedSlug = 'unrestricted';
 export const readOnlySlug = 'read-only-collection';
+
+export const userRestrictedSlug = 'user-restricted';
 export const restrictedSlug = 'restricted';
 export const restrictedVersionsSlug = 'restricted-versions';
 export const siblingDataSlug = 'sibling-data';
@@ -111,6 +113,21 @@ export default buildConfig({
       ],
     },
     {
+      slug: unrestrictedSlug,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'userRestrictedDocs',
+          type: 'relationship',
+          relationTo: userRestrictedSlug,
+          hasMany: true,
+        },
+      ],
+    },
+    {
       slug: restrictedSlug,
       fields: [
         {
@@ -137,6 +154,28 @@ export default buildConfig({
         create: () => false,
         read: () => true,
         update: () => false,
+        delete: () => false,
+      },
+    },
+    {
+      slug: userRestrictedSlug,
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      access: {
+        create: () => true,
+        read: () => true,
+        update: ({ req }) => ({
+          name: {
+            equals: req.user?.email,
+          },
+        }),
         delete: () => false,
       },
     },
@@ -314,7 +353,7 @@ export default buildConfig({
       },
     });
 
-    await payload.create<SiblingDatum>({
+    await payload.create({
       collection: siblingDataSlug,
       data: {
         array: [
