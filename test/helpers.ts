@@ -42,7 +42,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
   if (isMac) {
     await page.keyboard.down('Meta');
   } else {
-    await page.keyboard.down('Ctrl');
+    await page.keyboard.down('Control');
   }
   await page.keyboard.down('s');
   await expect(page.locator('.Toastify')).toContainText('successfully');
