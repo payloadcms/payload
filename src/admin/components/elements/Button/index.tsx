@@ -7,6 +7,7 @@ import x from '../../icons/X';
 import chevron from '../../icons/Chevron';
 import edit from '../../icons/Edit';
 import swap from '../../icons/Swap';
+import linkIcon from '../../icons/Link';
 import Tooltip from '../Tooltip';
 
 import './index.scss';
@@ -17,6 +18,7 @@ const icons = {
   chevron,
   edit,
   swap,
+  link: linkIcon,
 };
 
 const baseClass = 'btn';

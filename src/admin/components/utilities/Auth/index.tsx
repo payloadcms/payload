@@ -81,6 +81,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     requests.post(`${serverURL}${api}/${userSlug}/logout`);
   }, [serverURL, api, userSlug]);
 
+  const refreshPermissions = useCallback(async () => {
+    const request = await requests.get(`${serverURL}${api}/access`, {
+      headers: {
+        'Accept-Language': i18n.language,
+      },
+    });
+
+    if (request.status === 200) {
+      const json: Permissions = await request.json();
+      setPermissions(json);
+    } else {
+      throw new Error("Fetching permissions failed with status code " + request.status);
+    }
+  }, [serverURL, api, i18n]);
+
   // On mount, get user and set
   useEffect(() => {
     const fetchMe = async () => {
@@ -117,21 +132,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // When user changes, get new access
   useEffect(() => {
-    async function getPermissions() {
-      const request = await requests.get(`${serverURL}${api}/access`, {
-        headers: {
-          'Accept-Language': i18n.language,
-        },
-      });
-
-      if (request.status === 200) {
-        const json: Permissions = await request.json();
-        setPermissions(json);
-      }
-    }
-
     if (id) {
-      getPermissions();
+      refreshPermissions();
     }
   }, [i18n, id, api, serverURL]);
 
@@ -174,6 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user,
       logOut,
       refreshCookie,
+      refreshPermissions,
       permissions,
       setToken,
       token: tokenInMemory,

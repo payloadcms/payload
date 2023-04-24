@@ -17,7 +17,6 @@ import wait from '../../src/utilities/wait';
 
 const { beforeAll, beforeEach, describe } = test;
 
-
 describe('fields - relationship', () => {
   let url: AdminUrlUtil;
   let page: Page;
@@ -46,21 +45,21 @@ describe('fields - relationship', () => {
     await clearAllDocs();
 
     // Create docs to relate to
-    relationOneDoc = await payload.create<RelationOne>({
+    relationOneDoc = await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'relation',
       },
     });
 
-    anotherRelationOneDoc = await payload.create<RelationOne>({
+    anotherRelationOneDoc = await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'relation',
       },
     });
 
-    relationTwoDoc = await payload.create<RelationTwo>({
+    relationTwoDoc = await payload.create({
       collection: relationTwoSlug,
       data: {
         name: 'second-relation',
@@ -68,7 +67,7 @@ describe('fields - relationship', () => {
     });
 
     // Create restricted doc
-    restrictedRelation = await payload.create<RelationRestricted>({
+    restrictedRelation = await payload.create({
       collection: relationRestrictedSlug,
       data: {
         name: 'restricted',
@@ -76,29 +75,36 @@ describe('fields - relationship', () => {
     });
 
     // Doc with useAsTitle
-    relationWithTitle = await payload.create<RelationWithTitle>({
+    relationWithTitle = await payload.create({
       collection: relationWithTitleSlug,
       data: {
         name: 'relation-title',
+        meta: {
+          title: 'relation-title',
+        },
       },
     });
 
     // Doc with useAsTitle for word boundary test
-    await payload.create<RelationWithTitle>({
+    await payload.create({
       collection: relationWithTitleSlug,
       data: {
         name: 'word boundary search',
+        meta: {
+          title: 'word boundary search',
+        },
       },
     });
 
     // Add restricted doc as relation
-    docWithExistingRelations = await payload.create<CollectionWithRelationships>({
+    docWithExistingRelations = await payload.create({
       collection: slug,
       data: {
         name: 'with-existing-relations',
         relationship: relationOneDoc.id,
         relationshipRestricted: restrictedRelation.id,
         relationshipWithTitle: relationWithTitle.id,
+        relationshipReadOnly: relationOneDoc.id,
       },
     });
   });
@@ -216,13 +222,13 @@ describe('fields - relationship', () => {
   });
 
   test('should allow usage of relationTo in filterOptions', async () => {
-    const { id: include } = await payload.create<RelationOne>({
+    const { id: include } = await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'include',
       },
     });
-    const { id: exclude } = await payload.create<RelationOne>({
+    const { id: exclude } = await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'exclude',
@@ -240,7 +246,7 @@ describe('fields - relationship', () => {
   });
 
   test('should allow usage of siblingData in filterOptions', async () => {
-    await payload.create<RelationOne>({
+    await payload.create({
       collection: relationWithTitleSlug,
       data: {
         name: 'exclude',
@@ -257,6 +263,18 @@ describe('fields - relationship', () => {
 
     const options = await page.locator('#field-relationshipManyFiltered .rs__menu');
     await expect(options).not.toContainText('exclude');
+  });
+
+  test('should open document drawer from read-only relationships', async () => {
+    await page.goto(url.edit(docWithExistingRelations.id));
+
+    const field = page.locator('#field-relationshipReadOnly');
+
+    const button = await field.locator('button.relationship--single-value__drawer-toggler.doc-drawer__toggler');
+    await button.click();
+
+    const documentDrawer = await page.locator('[id^=doc-drawer_relation-one_1_]');
+    await expect(documentDrawer).toBeVisible();
   });
 
   describe('existing relationships', () => {
@@ -296,7 +314,7 @@ describe('fields - relationship', () => {
       const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option');
       await expect(options).toHaveCount(1);
 
-      await input.fill('non-occuring-string');
+      await input.fill('non-occurring-string');
       await expect(options).toHaveCount(0);
     });
 

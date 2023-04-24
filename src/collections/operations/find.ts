@@ -9,7 +9,7 @@ import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { buildDraftMergeAggregate } from '../../versions/drafts/buildDraftMergeAggregate';
+import { queryDrafts } from '../../versions/drafts/queryDrafts';
 
 export type Arguments = {
   collection: Collection
@@ -27,8 +27,9 @@ export type Arguments = {
   draft?: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<PaginatedDocs<T>> {
+async function find<T extends TypeWithID & Record<string, unknown>>(
+  incomingArgs: Arguments,
+): Promise<PaginatedDocs<T>> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -51,6 +52,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     depth,
     currentDepth,
     draft: draftsEnabled,
+    collection,
     collection: {
       Model,
       config: collectionConfig,
@@ -70,23 +72,21 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {
-    where: {
-      and: [],
-    },
+  let queryToBuild: Where = {
+    and: [],
   };
 
   let useEstimatedCount = false;
 
   if (where) {
-    queryToBuild.where = {
+    queryToBuild = {
       and: [],
       ...where,
     };
 
     if (Array.isArray(where.AND)) {
-      queryToBuild.where.and = [
-        ...queryToBuild.where.and,
+      queryToBuild.and = [
+        ...queryToBuild.and,
         ...where.AND,
       ];
     }
@@ -118,18 +118,22 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     }
 
     if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.where.and.push(accessResult);
+      queryToBuild.and.push(accessResult);
     }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    req,
+    where: queryToBuild,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
 
   const [sortProperty, sortOrder] = buildSortParam({
-    sort: args.sort,
+    sort: args.sort ?? collectionConfig.defaultSort,
     config: payload.config,
     fields: collectionConfig.fields,
     timestamps: collectionConfig.timestamps,
@@ -159,12 +163,15 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   };
 
   if (collectionConfig.versions?.drafts && draftsEnabled) {
-    const aggregate = Model.aggregate(buildDraftMergeAggregate({
-      config: collectionConfig,
-      query,
-    }));
-
-    result = await Model.aggregatePaginate(aggregate, paginationOptions);
+    result = await queryDrafts<T>({
+      accessResult,
+      collection,
+      req,
+      overrideAccess,
+      paginationOptions,
+      payload,
+      where,
+    });
   } else {
     result = await Model.paginate(query, paginationOptions);
   }
@@ -227,7 +234,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef = await hook({ req, query, doc, findMany: true }) || doc;
+        docRef = await hook({ req, query, doc: docRef, findMany: true }) || doc;
       }, Promise.resolve());
 
       return docRef;

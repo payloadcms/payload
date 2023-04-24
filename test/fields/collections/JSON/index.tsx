@@ -10,6 +10,9 @@ type JSONField = {
 
 const JSON: CollectionConfig = {
   slug: 'json-fields',
+  versions: {
+    maxPerDoc: 1,
+  },
   fields: [
     {
       name: 'json',

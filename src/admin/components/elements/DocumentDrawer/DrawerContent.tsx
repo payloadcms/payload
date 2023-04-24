@@ -31,7 +31,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const { toggleModal, modalState, closeModal } = useModal();
   const locale = useLocale();
   const { permissions, user } = useAuth();
-  const [initialState, setInitialState] = useState<Fields>();
+  const [internalState, setInternalState] = useState<Fields>();
   const { t, i18n } = useTranslation(['fields', 'general']);
   const hasInitializedState = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -63,7 +63,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
         locale,
         t,
       });
-      setInitialState(state);
+      setInternalState(state);
     };
 
     awaitInitialState();
@@ -93,12 +93,15 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   if (isError) return null;
 
   return (
-    <DocumentInfoProvider collection={collectionConfig}>
+    <DocumentInfoProvider
+      collection={collectionConfig}
+      id={id}
+    >
       <RenderCustomComponent
         DefaultComponent={DefaultEdit}
         CustomComponent={collectionConfig.admin?.components?.views?.Edit}
         componentProps={{
-          isLoading: !initialState,
+          isLoading: !internalState,
           data,
           id,
           collection: collectionConfig,
@@ -106,7 +109,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
           isEditing: Boolean(id),
           apiURL: id ? `${serverURL}${api}/${collectionSlug}/${id}` : null,
           onSave,
-          initialState,
+          internalState,
           hasSavePermission: true,
           action: `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`,
           disableEyebrow: true,

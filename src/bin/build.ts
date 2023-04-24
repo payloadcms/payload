@@ -9,7 +9,7 @@ const rawConfigPath = findConfig();
 
 export const build = async (): Promise<void> => {
   try {
-    const config = loadConfig();
+    const config = await loadConfig();
 
     const webpackProdConfig = getWebpackProdConfig(config);
 

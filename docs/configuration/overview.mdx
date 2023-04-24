@@ -6,82 +6,86 @@ desc: The Payload config is central to everything that Payload does, from adding
 keywords: overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Payload is a *config-based*, code-first CMS and application framework. The Payload config is central to everything that Payload does. It scaffolds the data that Payload stores as well as maintains custom React components, hook logic, custom validations, and much more. The config itself and all of its dependencies are run through Babel, so you can take full advantage of newer JavaScript features and even directly import React components containing JSX.
+Payload is a _config-based_, code-first CMS and application framework. The Payload config is central to everything that Payload does. It scaffolds the data that Payload stores as well as maintains custom React components, hook logic, custom validations, and much more.
 
-**Also, because the Payload source code is fully written in TypeScript, its configs are strongly typed—meaning that even if you aren't using TypeScript to build your project, your IDE (such as VSCode) may still provide helpful information like type-ahead suggestions while you write your config.**
+**Also, because the Payload source code is fully written in TypeScript, its configs are strongly typed—meaning that even if you aren't using TypeScript, your IDE (such as VSCode) may still provide helpful information like type-ahead suggestions while you write your config.**
 
 <Banner type="warning">
-	<strong>Important:</strong><br />This file is included in the Payload admin bundle, so make sure you do not embed any sensitive information.
+  <strong>Important:</strong>
+  <br />
+  This file is included in the Payload admin bundle, so make sure you do not
+  embed any sensitive information.
 </Banner>
 
 ## Options
 
-| Option               | Description  |
-| -------------------- | -------------|
-| `serverURL`          | A string used to define the absolute URL of your app including the protocol, for example `https://example.com`. No paths allowed, only protocol, domain and (optionally) port |
-| `collections`        | An array of all Collections that Payload will manage. To read more about how to define your collection configs, [click here](/docs/configuration/collections). |
-| `cors`               | Either a whitelist array of URLS to allow CORS requests from, or a wildcard string (`'*'`) to accept incoming requests from any domain. |
-| `globals`            | An array of all Globals that Payload will manage. For more on Globals and their configs, [click here](/docs/configuration/globals). |
-| `admin`              | Base Payload admin configuration. Specify custom components, control metadata, set the Admin user collection, and [more](/docs/admin/overview#admin-options). |
-| `localization`       | Opt-in and control how Payload handles the translation of your content into multiple locales. [More](/docs/configuration/localization) |
-| `graphQL`            | Manage GraphQL-specific functionality here. Define your own queries and mutations, manage query complexity limits, and [more](/docs/graphql/overview#graphql-options). |
-| `cookiePrefix`       | A string that will be prefixed to all cookies that Payload sets. |
-| `csrf`               | A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. [More](/docs/authentication/overview#csrf-protection) |
-| `defaultDepth`       | If a user does not specify `depth` while requesting a resource, this depth will be used. [More](/docs/getting-started/concepts#depth) |
-| `maxDepth`           | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`. |
-| `indexSortableFields`| Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. |
-| `upload`             | Base Payload upload configuration. [More](/docs/upload/overview#payload-wide-upload-options). |
-| `routes`             | Control the routing structure that Payload binds itself to. Specify `admin`, `api`, `graphQL`, and `graphQLPlayground`. |
-| `email`              | Base email settings to allow Payload to generate email such as Forgot Password requests and other requirements. [More](/docs/email/overview#configuration) |
-| `express`            | Express-specific middleware options such as compression and JSON parsing. [More](/docs/configuration/express) |
-| `debug`              | Enable to expose more detailed error information. |
-| `telemetry`          | Disable Payload telemetry by passing `false`. [More](/docs/configuration/overview#telemetry) |
-| `rateLimit`          | Control IP-based rate limiting for all Payload resources. Used to prevent DDoS attacks and [more](/docs/production/preventing-abuse#rate-limiting-requests). |
-| `hooks`              | Tap into Payload-wide hooks. [More](/docs/hooks/overview) |
-| `plugins`            | An array of Payload plugins. [More](/docs/plugins/overview) |
-| `endpoints`          | An array of custom API endpoints added to the Payload router. [More](/docs/rest-api/overview#custom-endpoints) |
+| Option                | Description                                                                                                                                                                   |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `serverURL`           | A string used to define the absolute URL of your app including the protocol, for example `https://example.com`. No paths allowed, only protocol, domain and (optionally) port |
+| `collections`         | An array of all Collections that Payload will manage. To read more about how to define your collection configs, [click here](/docs/configuration/collections).                |
+| `cors`                | Either a whitelist array of URLS to allow CORS requests from, or a wildcard string (`'*'`) to accept incoming requests from any domain.                                       |
+| `globals`             | An array of all Globals that Payload will manage. For more on Globals and their configs, [click here](/docs/configuration/globals).                                           |
+| `admin`               | Base Payload admin configuration. Specify custom components, control metadata, set the Admin user collection, and [more](/docs/admin/overview#admin-options).                 |
+| `localization`        | Opt-in and control how Payload handles the translation of your content into multiple locales. [More](/docs/configuration/localization)                                        |
+| `graphQL`             | Manage GraphQL-specific functionality here. Define your own queries and mutations, manage query complexity limits, and [more](/docs/graphql/overview#graphql-options).        |
+| `cookiePrefix`        | A string that will be prefixed to all cookies that Payload sets.                                                                                                              |
+| `csrf`                | A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. [More](/docs/authentication/overview#csrf-protection)                    |
+| `defaultDepth`        | If a user does not specify `depth` while requesting a resource, this depth will be used. [More](/docs/getting-started/concepts#depth)                                         |
+| `maxDepth`            | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`.                                           |
+| `indexSortableFields` | Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar.                    |
+| `upload`              | Base Payload upload configuration. [More](/docs/upload/overview#payload-wide-upload-options).                                                                                 |
+| `routes`              | Control the routing structure that Payload binds itself to. Specify `admin`, `api`, `graphQL`, and `graphQLPlayground`.                                                       |
+| `email`               | Base email settings to allow Payload to generate email such as Forgot Password requests and other requirements. [More](/docs/email/overview#configuration)                    |
+| `express`             | Express-specific middleware options such as compression and JSON parsing. [More](/docs/configuration/express)                                                                 |
+| `debug`               | Enable to expose more detailed error information.                                                                                                                             |
+| `telemetry`           | Disable Payload telemetry by passing `false`. [More](/docs/configuration/overview#telemetry)                                                                                  |
+| `rateLimit`           | Control IP-based rate limiting for all Payload resources. Used to prevent DDoS attacks and [more](/docs/production/preventing-abuse#rate-limiting-requests).                  |
+| `hooks`               | Tap into Payload-wide hooks. [More](/docs/hooks/overview)                                                                                                                     |
+| `plugins`             | An array of Payload plugins. [More](/docs/plugins/overview)                                                                                                                   |
+| `endpoints`           | An array of custom API endpoints added to the Payload router. [More](/docs/rest-api/overview#custom-endpoints)                                                                |
+| `custom`              | Extension point for adding custom data (e.g. for plugins)                                                                                                                     |
 
 #### Simple example
 
 ```ts
-import { buildConfig } from 'payload/config';
+import { buildConfig } from "payload/config";
 
 export default buildConfig({
-	collections: [
-		{
-			slug: 'pages',
-			fields: [
-				{
-					name: 'title',
-					type: 'text',
-					required: true,
-				},
-				{
-					name: 'content',
-					type: 'richText',
-					required: true,
-				}
-			]
-		}
-	],
-	globals: [
-		{
-			slug: 'header',
-			fields: [
-				{
-					name: 'nav',
-					type: 'array',
-					fields: [
-						{
-							name: 'page',
-							type: 'relationship',
-							relationTo: 'pages',
-						},
-					]
-				}
-			]
-		}
-	]
+  collections: [
+    {
+      slug: "pages",
+      fields: [
+        {
+          name: "title",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "content",
+          type: "richText",
+          required: true,
+        },
+      ],
+    },
+  ],
+  globals: [
+    {
+      slug: "header",
+      fields: [
+        {
+          name: "nav",
+          type: "array",
+          fields: [
+            {
+              name: "page",
+              type: "relationship",
+              relationTo: "pages",
+            },
+          ],
+        },
+      ],
+    },
+  ],
 });
 ```
 
@@ -94,11 +98,14 @@ You can see a full [example config](https://github.com/payloadcms/public-demo/bl
 We suggest using the `dotenv` package to handle environment variables alongside of Payload. All that's necessary to do is to require the package as high up in your application as possible (for example, at the top of your `server.js` file), and ensure that it can find an `.env` file that you create.
 
 **Add this line to the top of your server:**
+
 ```
 require('dotenv').config()
 // ...
 // the rest of your `server.js` file goes here
 ```
+
+Note that if you rely on any environment variables in your config itself, you should also call `dotenv()` at the top of your config itself as well. There's no harm in calling it in both your server and your config itself!
 
 **Here is an example project structure w/ `dotenv` and an `.env` file:**
 
@@ -111,8 +118,13 @@ project-name
 ```
 
 <Banner type="warning">
-	<strong>Important:</strong><br />
-	If you use an environment variable to configure any properties that are required for the Admin panel to function (ex. serverURL or any routes), you need to make sure that your Admin panel code can access it. <a href="/docs/admin/webpack#admin-environment-vars">Click here</a> for more info.
+  <strong>Important:</strong>
+  <br />
+  If you use an environment variable to configure any properties that are
+  required for the Admin panel to function (ex. serverURL or any routes), you
+  need to make sure that your Admin panel code can access it.{" "}
+  <a href="/docs/admin/webpack#admin-environment-vars">Click here</a> for more
+  info.
 </Banner>
 
 ### Customizing & overriding the config location
@@ -133,53 +145,21 @@ But, you can specify where your Payload config is located as well as what it's n
 
 ### Developing within the Config
 
-The Payload config itself, as well as all files that it requires or imports, are run through Babel. TypeScript and all common ES6 features are fully supported. To see the Babel config that is used to parse Payload configs, check out the Payload source code [here](https://github.com/payloadcms/payload/blob/master/src/babel.config.js).
-
 Payload comes with `isomorphic-fetch` installed which means that even in Node, you can use the `fetch` API just as you would within the browser. No need to import `axios` or similar, unless you want to!
-
-#### Payload Config and Babel
-
-The entire Payload config is transpiled automatically by Payload via `babel`.
-
-If for any reason you need to re-use the built-in Payload `babel.config.js`, you can do so by importing it as follows:
-
-```
-import { config } from 'payload/babel';
-```
-
-<Banner type="warning">
-  <strong>Note:</strong><br/>
-  Because the Payload config is transpiled internally, if you want to import it to share or reuse any of its properties within your own Node server's code, you need to make sure that <em>you manually transpile it</em> using <strong>babel-register</strong> or similar. For example, if you try to import your config directly into your server, your Node process will likely crash because the Payload config supports React components, TypeScript, and new ES6+ features.
-</Banner>
-
-However, you can share code, like for example your config's `serverURL` property by "hoisting" your shared properties above your config and writing any "shared" code in a module that is compatible with your Node environment.
-
-For example, to share your `serverURL`, you could create a file like the following:
-
-`serverURL.js`:
-
-```js
-const serverURL = 'http://localhost:3000';
-
-module.exports = serverURL;
-```
-
-Then, you could import this file into both your Payload config and your server, in an effort to avoid importing your full Payload config directly into your server.
-
 
 ### TypeScript
 
 You can import config types as follows:
 
 ```ts
-import { Config } from 'payload/config';
+import { Config } from "payload/config";
 
 // This is the type used for an incoming Payload config.
 // Only the bare minimum properties are marked as required.
 ```
 
 ```ts
-import { SanitizedConfig } from 'payload/config';
+import { SanitizedConfig } from "payload/config";
 
 // This is the type used after an incoming Payload config is fully sanitized.
 // Generally, this is only used internally by Payload.

@@ -6,6 +6,7 @@ import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
 import { useCollapsible } from '../../../elements/Collapsible/provider';
 import { GroupProvider, useGroup } from './provider';
+import { useRow } from '../Row/provider';
 import { useTabs } from '../Tabs/provider';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
@@ -35,6 +36,7 @@ const Group: React.FC<Props> = (props) => {
 
   const isWithinCollapsible = useCollapsible();
   const isWithinGroup = useGroup();
+  const isWithinRow = useRow();
   const isWithinTab = useTabs();
   const { i18n } = useTranslation();
 
@@ -48,6 +50,7 @@ const Group: React.FC<Props> = (props) => {
         baseClass,
         isWithinCollapsible && `${baseClass}--within-collapsible`,
         isWithinGroup && `${baseClass}--within-group`,
+        isWithinRow && `${baseClass}--within-row`,
         isWithinTab && `${baseClass}--within-tab`,
         (!hideGutter && isWithinGroup) && `${baseClass}--gutter`,
         className,

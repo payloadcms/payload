@@ -2,11 +2,13 @@ import React, {
   useState, useRef, useEffect, useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
 import useField from '../../../../forms/useField';
 import Button from '../../../../elements/Button';
 import FileDetails from '../../../../elements/FileDetails';
 import Error from '../../../../forms/Error';
-import { Props, Data } from './types';
+import { Props } from './types';
+import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues';
 
 import './index.scss';
 
@@ -26,6 +28,11 @@ const validate = (value) => {
 };
 
 const Upload: React.FC<Props> = (props) => {
+  const {
+    collection,
+    internalState,
+  } = props;
+
   const inputRef = useRef(null);
   const dropRef = useRef(null);
   const [selectingFile, setSelectingFile] = useState(false);
@@ -33,13 +40,8 @@ const Upload: React.FC<Props> = (props) => {
   const [dragCounter, setDragCounter] = useState(0);
   const [replacingFile, setReplacingFile] = useState(false);
   const { t } = useTranslation('upload');
-
-  const {
-    data = {} as Data,
-    collection,
-  } = props;
-
-  const { filename } = data;
+  const [doc, setDoc] = useState(reduceFieldsToValues(internalState || {}, true));
+  const { docPermissions } = useDocumentInfo();
 
   const {
     value,
@@ -100,6 +102,11 @@ const Upload: React.FC<Props> = (props) => {
   }, [selectingFile, inputRef, setSelectingFile]);
 
   useEffect(() => {
+    setDoc(reduceFieldsToValues(internalState || {}, true));
+    setReplacingFile(false);
+  }, [internalState]);
+
+  useEffect(() => {
     const div = dropRef.current;
     if (div) {
       div.addEventListener('dragenter', handleDragIn);
@@ -118,15 +125,13 @@ const Upload: React.FC<Props> = (props) => {
     return () => null;
   }, [handleDragIn, handleDragOut, handleDrop, value]);
 
-  useEffect(() => {
-    setReplacingFile(false);
-  }, [data]);
-
   const classes = [
     baseClass,
     dragging && `${baseClass}--dragging`,
     'field-type',
   ].filter(Boolean).join(' ');
+
+  const canRemoveUpload = docPermissions?.update?.permission && 'delete' in docPermissions && docPermissions?.delete?.permission;
 
   return (
     <div className={classes}>
@@ -134,17 +139,17 @@ const Upload: React.FC<Props> = (props) => {
         showError={showError}
         message={errorMessage}
       />
-      {(filename && !replacingFile) && (
+      {(doc.filename && !replacingFile) && (
         <FileDetails
-          doc={data}
+          doc={doc}
           collection={collection}
-          handleRemove={() => {
+          handleRemove={canRemoveUpload ? () => {
             setReplacingFile(true);
             setValue(null);
-          }}
+          } : undefined}
         />
       )}
-      {(!filename || replacingFile) && (
+      {(!doc.filename || replacingFile) && (
         <div className={`${baseClass}__upload`}>
           {value && (
             <div className={`${baseClass}__file-selected`}>

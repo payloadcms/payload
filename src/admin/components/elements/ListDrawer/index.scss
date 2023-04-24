@@ -20,15 +20,11 @@
     flex-grow: 1;
     align-items: flex-start;
 
-    .pill {
+    button .pill {
       pointer-events: none;
       margin: 0;
       margin-top: base(0.25);
       margin-left: base(0.5);
-
-      @include mid-break {
-        margin-top: 0;
-      }
     }
   }
 
@@ -41,6 +37,7 @@
     border: 0;
     padding: 0;
     cursor: pointer;
+    color: inherit;
 
     &:focus,
     &:focus-within {
@@ -56,6 +53,7 @@
     border: 0;
     background-color: transparent;
     padding: 0;
+    margin: 0;
     cursor: pointer;
     overflow: hidden;
     width: base(1);

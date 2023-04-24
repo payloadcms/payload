@@ -1,0 +1,19 @@
+@import '../../../scss/styles.scss';
+
+.list-selection {
+  margin-left: auto;
+  color: var(--theme-elevation-500);
+
+  &__button {
+    color: var(--theme-elevation-500);
+    background: unset;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+
+  @include small-break {
+    margin-bottom: base(.5);
+  }
+}

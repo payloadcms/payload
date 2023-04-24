@@ -1,5 +1,9 @@
-import crypto from 'crypto';
+import fs from 'fs';
+import { promisify } from 'util';
 
+import crypto from 'crypto';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { MarkOptional } from 'ts-essentials';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
@@ -16,20 +20,27 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
+import { saveVersion } from '../../versions/saveVersion';
+import { mapAsync } from '../../utilities/mapAsync';
 
-export type Arguments = {
+const unlinkFile = promisify(fs.unlink);
+
+export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
   req: PayloadRequest
   depth?: number
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  data: Record<string, unknown>
+  data: MarkOptional<T, 'id' | 'updatedAt' | 'createdAt' | 'sizes'>
   overwriteExistingFiles?: boolean
   draft?: boolean
+  autosave?: boolean
 }
 
-async function create(incomingArgs: Arguments): Promise<Document> {
+async function create<TSlug extends keyof GeneratedTypes['collections']>(
+  incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
+): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -65,6 +76,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
     showHiddenFields,
     overwriteExistingFiles = false,
     draft = false,
+    autosave = false,
   } = args;
 
   let { data } = args;
@@ -159,7 +171,7 @@ async function create(incomingArgs: Arguments): Promise<Document> {
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  const resultWithLocales = await beforeChange({
+  const resultWithLocales = await beforeChange<Record<string, unknown>>({
     data,
     doc: {},
     docWithLocales: {},
@@ -179,8 +191,9 @@ async function create(incomingArgs: Arguments): Promise<Document> {
     if (data.email) {
       resultWithLocales.email = (data.email as string).toLowerCase();
     }
+
     if (collectionConfig.auth.verify) {
-      resultWithLocales._verified = false;
+      resultWithLocales._verified = Boolean(resultWithLocales._verified) || false;
       resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex');
     }
 
@@ -209,9 +222,23 @@ async function create(incomingArgs: Arguments): Promise<Document> {
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
+  result = JSON.parse(JSON.stringify(result));
   result = sanitizeInternalFields(result);
+
+  // /////////////////////////////////////
+  // Create version
+  // /////////////////////////////////////
+
+  if (collectionConfig.versions) {
+    await saveVersion({
+      payload,
+      collection: collectionConfig,
+      req,
+      id: result.id,
+      docWithLocales: result,
+      autosave,
+    });
+  }
 
   // /////////////////////////////////////
   // Send verification email if applicable
@@ -283,6 +310,18 @@ async function create(incomingArgs: Arguments): Promise<Document> {
       operation: 'create',
     }) || result;
   }, Promise.resolve());
+
+  // Remove temp files if enabled, as express-fileupload does not do this automatically
+  if (config.upload?.useTempFiles && collectionConfig.upload) {
+    const { files } = req;
+    const fileArray = Array.isArray(files) ? files : [files];
+    await mapAsync(fileArray, async ({ file }) => {
+      // Still need this check because this will not be populated if using local API
+      if (file.tempFilePath) {
+        await unlinkFile(file.tempFilePath);
+      }
+    });
+  }
 
   // /////////////////////////////////////
   // Return results

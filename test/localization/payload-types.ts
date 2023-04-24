@@ -5,11 +5,20 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
-export interface Config {}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
+export interface Config {
+  collections: {
+    users: User;
+    'localized-posts': LocalizedPost;
+    'array-fields': ArrayField;
+    'localized-required': LocalizedRequired;
+    'with-localized-relationship': WithLocalizedRelationship;
+    'relationship-localized': RelationshipLocalized;
+    dummy: Dummy;
+  };
+  globals: {
+    'global-array': GlobalArray;
+  };
+}
 export interface User {
   id: string;
   relation?: string | LocalizedPost;
@@ -20,11 +29,8 @@ export interface User {
   lockUntil?: string;
   createdAt: string;
   updatedAt: string;
+  password?: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized-posts".
- */
 export interface LocalizedPost {
   id: string;
   title?: string;
@@ -32,10 +38,15 @@ export interface LocalizedPost {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized-required".
- */
+export interface ArrayField {
+  id: string;
+  items?: {
+    text: string;
+    id?: string;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+}
 export interface LocalizedRequired {
   id: string;
   title: string;
@@ -56,10 +67,6 @@ export interface LocalizedRequired {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "with-localized-relationship".
- */
 export interface WithLocalizedRelationship {
   id: string;
   localizedRelationship?: string | LocalizedPost;
@@ -97,20 +104,12 @@ export interface WithLocalizedRelationship {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "dummy".
- */
 export interface Dummy {
   id: string;
   name?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationship-localized".
- */
 export interface RelationshipLocalized {
   id: string;
   relationship?: string | LocalizedPost;
@@ -147,4 +146,11 @@ export interface RelationshipLocalized {
       )[];
   createdAt: string;
   updatedAt: string;
+}
+export interface GlobalArray {
+  id: string;
+  array?: {
+    text?: string;
+    id?: string;
+  }[];
 }

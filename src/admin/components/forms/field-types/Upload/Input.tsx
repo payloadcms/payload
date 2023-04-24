@@ -14,6 +14,8 @@ import { useListDrawer } from '../../../elements/ListDrawer';
 import Button from '../../../elements/Button';
 import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
 import { ListDrawerProps } from '../../../elements/ListDrawer/types';
+import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
+import { FilterOptionsResult } from '../Relationship/types';
 
 import './index.scss';
 
@@ -57,6 +59,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     api = '/api',
     collection,
     errorMessage,
+    filterOptions,
   } = props;
 
   const { t, i18n } = useTranslation('fields');
@@ -64,6 +67,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   const [file, setFile] = useState(undefined);
   const [missingFile, setMissingFile] = useState(false);
   const [collectionSlugs] = useState([collection?.slug]);
+  const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>();
 
   const [
     DocumentDrawer,
@@ -83,6 +87,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     },
   ] = useListDrawer({
     collectionSlugs,
+    filterOptions: filterOptionsResult,
   });
 
   const classes = [
@@ -145,6 +150,15 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
         width,
       }}
     >
+      <GetFilterOptions
+        {...{
+          filterOptionsResult,
+          setFilterOptionsResult,
+          filterOptions,
+          path,
+          relationTo,
+        }}
+      />
       <Error
         showError={showError}
         message={errorMessage}

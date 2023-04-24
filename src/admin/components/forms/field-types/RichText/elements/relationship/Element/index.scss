@@ -49,20 +49,10 @@
     outline: none;
   }
 
-  &__toggler {
-    background: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-
-    &:focus,
-    &:focus-within {
-      outline: none;
-    }
-
-    &:disabled {
-      pointer-events: none;
-    }
+  .rich-text-relationship__doc-drawer-toggler {
+    text-decoration: underline;
+    pointer-events: all;
+    line-height: inherit;
   }
 
   &__actions {
@@ -76,19 +66,27 @@
     }
   }
 
-  &__actionButton {
+  &__removeButton {
     margin: 0;
-    border-radius: 0;
-    flex-shrink: 0;
-    width: base(1);
-    height: base(1);
 
     line {
       stroke-width: $style-stroke-width-m;
     }
 
     &:disabled {
-      opacity: 0.5;
+      color: var(--theme-elevation-300);
+      pointer-events: none;
+    }
+  }
+
+  &__doc-drawer-toggler,
+  &__list-drawer-toggler {
+    & > * {
+      margin: 0;
+    }
+
+    &:disabled {
+      color: var(--theme-elevation-300);
       pointer-events: none;
     }
   }

@@ -12,9 +12,15 @@ keywords: deployment, production, config, configuration, documentation, Content 
 
 There are many ways to deploy Payload to a production environment. When evaluating how you will deploy Payload, you need to consider these main aspects:
 
+1. [Basics](#basics)
 1. [Security](#security)
 1. [Your MongoDB](#mongodb)
 1. [Permanent File Storage](#file-storage)
+1. [Docker](#docker)
+
+## Basics
+
+In order for Payload to run, it requires both the server code and the built admin panel. These will be the `dist` and `build` directories by default. If you've used `create-payload-app` to create your project, executing the `build` npm script will build both and output these directories.
 
 ## Security
 
@@ -41,7 +47,7 @@ Before running in Production, you need to have built a production-ready copy of 
 {
   "name": "project-name-here",
   "scripts": {
-    "build": "payload build",
+    "build": "payload build"
   },
   "dependencies": {
     // your dependencies
@@ -64,6 +70,8 @@ Payload comes with a robust set of built-in anti-abuse measures, such as locking
 
 ## MongoDB
 
+Payload can be used with any MongoDB compatible database including AWS DocumentDB or Azure Cosmos DB.
+
 ##### Managing MongoDB yourself
 
 If you are using a [persistent filesystem-based cloud host](#persistent-vs-ephemeral-filesystems) such as a [DigitalOcean Droplet](https://www.digitalocean.com/products/droplets/) or an [Amazon EC2](https://aws.amazon.com/ec2/?ec2-whats-new.sort-by=item.additionalFields.postDateTime&ec2-whats-new.sort-order=desc) server, you might opt to install MongoDB directly on that server itself so that Node can communicate with it locally. With this approach, you can benefit from faster response times, but scaling can become more involved as your app's user base grows.
@@ -73,9 +81,17 @@ If you are using a [persistent filesystem-based cloud host](#persistent-vs-ephem
 Alternatively, you can rely on a third-party MongoDB host such as [MongoDB Atlas](https://www.mongodb.com/). With Atlas or a similar cloud provider, you can trust them to take care of your database's availability, security, redundancy, and backups.
 
 <Banner type="warning">
-  <strong>Note regarding Azure Cosmos:</strong><br/>
-  When using Azure Cosmos, MongoDB requires an index on any field being sorted on. To make this easier, see the <a href="/docs/configuration/overview">indexSortableFields</a> configuration option.
+  <strong>Note:</strong>
+  <br />
+  If versions are enabled and a collection has many documents you may need a minimum of an m10 mongoDB atlas cluster if you reach a sorting `exceeded memory limit` error to view a collection list in the admin UI. The limitations of the m2 and m5 tier clusters are here:
+  <a href="https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/?_ga=2.176267877.1329169847.1677683154-860992573.1647438381#operational-limitations">Atlas M0 (Free Cluster), M2, and M5 Limitations</a>
 </Banner>
+
+##### DocumentDB
+When using AWS DocumentDB, you will need to configure connection options for authentication in the `mongoOptions` passed to `payload.init`. You also need to set `mongoOptions.useFacet` to `false` to disable use of the unsupported `$facet` aggregation.
+
+##### CosmosDB
+When using Azure Cosmos DB, an index is needed for any field you may want to sort on. To add the sort index for all fields that may be sorted in the admin UI use the <a href="/docs/configuration/overview">indexSortableFields</a> configuration option.
 
 ## File storage
 

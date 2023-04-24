@@ -1,18 +1,19 @@
 import { Where } from '../../../../types';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import { Column } from '../Table/types';
+import type { Props as ListProps } from '../../views/collections/List/types';
 
 export type Props = {
-  enableColumns?: boolean,
-  enableSort?: boolean,
+  enableColumns?: boolean
+  enableSort?: boolean
   modifySearchQuery?: boolean
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
-  columns?: string[]
-  setColumns?: (columns: string[]) => void,
-  collection: SanitizedCollectionConfig,
+  collection: SanitizedCollectionConfig
+  resetParams?: ListProps['resetParams']
 }
 
 export type ListControls = {
   where?: unknown
-  columns?: string[]
+  columns?: Partial<Column>[]
 }

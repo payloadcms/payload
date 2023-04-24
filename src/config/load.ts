@@ -1,7 +1,6 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 // eslint-disable-next-line import/no-extraneous-dependencies
-import swcRegister from '@swc/register';
 import path from 'path';
 import pino from 'pino';
 import Logger from '../utilities/logger';
@@ -10,46 +9,28 @@ import findConfig from './find';
 import validate from './validate';
 import { clientFiles } from './clientFiles';
 
-const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
+const loadConfig = async (logger?: pino.Logger): Promise<SanitizedConfig> => {
   const localLogger = logger ?? Logger();
 
   const configPath = findConfig();
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  swcRegister({
-    sourceMaps: 'inline',
-    jsc: {
-      parser: {
-        syntax: 'typescript',
-        tsx: true,
-      },
-    },
-    ignore: [
-      /node_modules[\\/](?!.pnpm[\\/].*[\\/]node_modules[\\/])(?!payload[\\/]dist[\\/]admin|payload[\\/]components).*/,
-    ],
-    module: {
-      type: 'commonjs',
-    },
-  });
 
   clientFiles.forEach((ext) => {
     require.extensions[ext] = () => null;
   });
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let config = require(configPath);
+  const configPromise = require(configPath);
 
-  if (config.default) config = config.default;
+  let config = await configPromise;
 
-  let validatedConfig = config;
+  if (config.default) config = await config.default;
 
   if (process.env.NODE_ENV !== 'production') {
-    validatedConfig = validate(config, localLogger);
+    config = await validate(config, localLogger);
   }
 
   return {
-    ...validatedConfig,
+    ...config,
     paths: {
       configDir: path.dirname(configPath),
       config: configPath,

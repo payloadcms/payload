@@ -75,7 +75,7 @@ The above example demonstrates a simple query but you can get much more complex.
 
 ### And / Or Logic
 
-In addition to defining simple queries, you can join multiple queries together using simple AND / OR logic. Let's take the above `Post` collection for example and write a more complex query usnig AND / OR:
+In addition to defining simple queries, you can join multiple queries together using simple AND / OR logic. Let's take the above `Post` collection for example and write a more complex query using AND / OR:
 
 ```js
 const query = {
@@ -104,6 +104,18 @@ const query = {
 ```
 
 Written in plain English, if the above query were passed to a `find` operation, it would translate to finding posts where either the `color` is `mint` OR the `color` is `white` AND `featured` is set to false.
+
+### Nested properties
+
+When working with nested properties, which can happen when using relational fields, it is possible to use the dot notation to access the nested property. For example, when working with a `Song` collection that has a `artists` field which is related to an `Artists` collection using the `name: 'artists'`. You can access a property within the collection `Artists` like so:
+
+```js
+const query = {
+  'artists.featured': { // nested property name to filter on
+    exists: true, // operator to use and boolean value that needs to be true
+  },
+}
+```
 
 ### GraphQL Find Queries
 

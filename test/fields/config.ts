@@ -23,6 +23,8 @@ import JSONFields, { jsonDoc } from './collections/JSON';
 import RelationshipFields from './collections/Relationship';
 import RadioFields, { radiosDoc } from './collections/Radio';
 import Uploads2 from './collections/Upload2';
+import Uploads3 from './collections/Uploads3';
+import RowFields from './collections/Row';
 
 export default buildConfig({
   admin: {
@@ -46,6 +48,7 @@ export default buildConfig({
     DateFields,
     RadioFields,
     GroupFields,
+    RowFields,
     IndexedFields,
     JSONFields,
     NumberFields,
@@ -57,10 +60,12 @@ export default buildConfig({
     TextFields,
     Uploads,
     Uploads2,
+    Uploads3,
   ],
   localization: {
     defaultLocale: 'en',
     locales: ['en', 'es'],
+    fallback: true,
   },
   onInit: async (payload) => {
     await payload.create({
@@ -89,20 +94,31 @@ export default buildConfig({
 
     if (fs.existsSync(uploadsDir)) fs.readdirSync(uploadsDir).forEach((f) => fs.rmSync(`${uploadsDir}/${f}`));
 
-    const filePath = path.resolve(__dirname, './collections/Upload/payload.jpg');
-    const file = await getFileByPath(filePath);
+    const pngPath = path.resolve(__dirname, './uploads/payload.png');
+    const pngFile = await getFileByPath(pngPath);
+    const createdPNGDoc = await payload.create({ collection: 'uploads', data: {}, file: pngFile });
 
-    const createdUploadDoc = await payload.create({ collection: 'uploads', data: uploadsDoc, file });
+    const jpgPath = path.resolve(__dirname, './collections/Upload/payload.jpg');
+    const jpgFile = await getFileByPath(jpgPath);
+    const createdJPGDoc = await payload.create({
+      collection: 'uploads',
+      data: {
+        ...uploadsDoc,
+        media: createdPNGDoc.id,
+      },
+      file: jpgFile,
+    });
 
-    const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace('{{ARRAY_DOC_ID}}', createdArrayDoc.id));
+    const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace(/{{ARRAY_DOC_ID}}/g, createdArrayDoc.id));
     const richTextDocWithRelationship = { ...richTextDocWithRelId };
 
     const richTextRelationshipIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'relationship');
     richTextDocWithRelationship.richText[richTextRelationshipIndex].value = { id: createdTextDoc.id };
+    richTextDocWithRelationship.richTextReadOnly[richTextRelationshipIndex].value = { id: createdTextDoc.id };
 
     const richTextUploadIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'upload');
-    richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdUploadDoc.id };
-    richTextDocWithRelationship.richTextReadOnly[richTextUploadIndex].value = { id: createdUploadDoc.id };
+    richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdJPGDoc.id };
+    richTextDocWithRelationship.richTextReadOnly[richTextUploadIndex].value = { id: createdJPGDoc.id };
 
     await payload.create({ collection: 'rich-text-fields', data: richTextBulletsDoc });
     await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship });

@@ -1,11 +1,11 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { ReactEditor, useSlate } from 'slate-react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../../../utilities/Config';
 import ElementButton from '../../Button';
 import RelationshipIcon from '../../../../../../icons/Relationship';
 import { injectVoidElement } from '../../injectVoid';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
 
 import './index.scss';
 
@@ -28,11 +28,13 @@ const insertRelationship = (editor, { value, relationTo }) => {
   ReactEditor.focus(editor);
 };
 
-const RelationshipButton: React.FC<{ path: string }> = () => {
-  const { collections } = useConfig();
+type Props = {
+  path: string
+  enabledCollectionSlugs: string[]
+}
+const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   const { t } = useTranslation('fields');
   const editor = useSlate();
-  const [enabledCollectionSlugs] = useState(() => collections.filter(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship).map(({ slug }) => slug));
   const [selectedCollectionSlug, setSelectedCollectionSlug] = useState(() => enabledCollectionSlugs[0]);
   const [
     ListDrawer,
@@ -62,8 +64,6 @@ const RelationshipButton: React.FC<{ path: string }> = () => {
     setSelectedCollectionSlug(enabledCollectionSlugs[0]);
   }, [isDrawerOpen, enabledCollectionSlugs]);
 
-  if (!enabledCollectionSlugs || enabledCollectionSlugs.length === 0) return null;
-
   return (
     <Fragment>
       <ListDrawerToggler>
@@ -84,4 +84,10 @@ const RelationshipButton: React.FC<{ path: string }> = () => {
   );
 };
 
-export default RelationshipButton;
+export default (props: Props): React.ReactNode => {
+  return (
+    <EnabledRelationshipsCondition {...props}>
+      <RelationshipButton {...props} />
+    </EnabledRelationshipsCondition>
+  );
+};

@@ -26,13 +26,15 @@ Note: Collection slugs must be formatted in kebab-case
 
 **All CRUD operations are exposed as follows:**
 
-| Method   | Path                        | Description                            |
-| -------- | --------------------------- | -------------------------------------- |
-| `GET`    | `/api/{collection-slug}`     | Find paginated documents               |
-| `GET`    | `/api/{collection-slug}/:id` | Find a specific document by ID         |
-| `POST`   | `/api/{collection-slug}`     | Create a new document                  |
-| `PATCH`  | `/api/{collection-slug}/:id` | Update a document by ID                |
-| `DELETE` | `/api/{collection-slug}/:id` | Delete an existing document by ID      |
+| Method   | Path                          | Description                                      |
+|----------|-------------------------------|--------------------------------------------------|
+| `GET`    | `/api/{collection-slug}`      | Find paginated documents                         |
+| `GET`    | `/api/{collection-slug}/:id`  | Find a specific document by ID                   |
+| `POST`   | `/api/{collection-slug}`      | Create a new document                            |
+| `PATCH`  | `/api/{collection-slug}`      | Update all documents matching the `where` query  |
+| `PATCH`  | `/api/{collection-slug}/:id`  | Update a document by ID                          |
+| `DELETE` | `/api/{collection-slug}`      | Delete all documents matching the `where` query  |
+| `DELETE` | `/api/{collection-sldug}/:id` | Delete an existing document by ID                |
 
 ##### Additional `find` query parameters
 
@@ -89,6 +91,7 @@ Each endpoint object needs to have:
 | **`method`**   | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options' |
 | **`handler`**  | A function or array of functions to be called with **req**, **res** and **next** arguments. [Express](https://expressjs.com/en/guide/routing.html#route-handlers) |
 | **`root`**     | When `true`, defines the endpoint on the root Express app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload config, endpoints defined on `collections` or `globals` cannot be root. |
+| **`custom`**   | Extension point for adding custom data (e.g. for plugins) |
 
 Example:
 

@@ -23,7 +23,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<PaginatedDocs<T>> {
+async function findVersions<T extends TypeWithVersion<T>>(
+  args: Arguments,
+): Promise<PaginatedDocs<T>> {
   const {
     where,
     page,
@@ -47,7 +49,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {};
+  let queryToBuild: Where = {};
   let useEstimatedCount = false;
 
   if (where) {
@@ -56,7 +58,7 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
     if (Array.isArray(where.and)) and = where.and;
     if (Array.isArray(where.AND)) and = where.AND;
 
-    queryToBuild.where = {
+    queryToBuild = {
       ...where,
       and: [
         ...and,
@@ -73,18 +75,22 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
 
     if (hasWhereAccessResult(accessResults)) {
       if (!where) {
-        queryToBuild.where = {
+        queryToBuild = {
           and: [
             accessResults,
           ],
         };
       } else {
-        (queryToBuild.where.and as Where[]).push(accessResults);
+        queryToBuild.and.push(accessResults);
       }
     }
   }
 
-  const query = await VersionsModel.buildQuery(queryToBuild, locale);
+  const query = await VersionsModel.buildQuery({
+    where: queryToBuild,
+    req,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Find

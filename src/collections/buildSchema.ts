@@ -1,9 +1,7 @@
 import paginate from 'mongoose-paginate-v2';
-import aggregatePaginate from 'mongoose-aggregate-paginate-v2';
-
 import { Schema } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
-import buildQueryPlugin from '../mongoose/buildQuery';
+import getBuildQueryPlugin from '../mongoose/buildQuery';
 import buildSchema from '../mongoose/buildSchema';
 import { SanitizedCollectionConfig } from './config/types';
 
@@ -13,7 +11,11 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
     collection.fields,
     {
       draftsEnabled: Boolean(typeof collection?.versions === 'object' && collection.versions.drafts),
-      options: { timestamps: collection.timestamps !== false, ...schemaOptions },
+      options: {
+        timestamps: collection.timestamps !== false,
+        minimize: false,
+        ...schemaOptions,
+      },
       indexSortableFields: config.indexSortableFields,
     },
   );
@@ -24,11 +26,7 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
   }
 
   schema.plugin(paginate, { useEstimatedCount: true })
-    .plugin(buildQueryPlugin);
-
-  if (collection.versions?.drafts) {
-    schema.plugin(aggregatePaginate);
-  }
+    .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug }));
 
   return schema;
 };

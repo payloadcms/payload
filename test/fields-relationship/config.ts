@@ -110,6 +110,14 @@ export default buildConfig({
           type: 'text',
           name: 'filter',
         },
+        {
+          name: 'relationshipReadOnly',
+          type: 'relationship',
+          relationTo: relationOneSlug,
+          admin: {
+            readOnly: true,
+          },
+        },
       ],
     },
     {
@@ -134,9 +142,22 @@ export default buildConfig({
     {
       slug: relationWithTitleSlug,
       admin: {
-        useAsTitle: 'name',
+        useAsTitle: 'meta.title',
       },
-      fields: baseRelationshipFields,
+      fields: [
+        ...baseRelationshipFields,
+        {
+          name: 'meta',
+          type: 'group',
+          fields: [
+            {
+              name: 'title',
+              label: 'Meta Title',
+              type: 'text',
+            },
+          ],
+        },
+      ],
     },
     {
       slug: relationUpdatedExternallySlug,
@@ -245,7 +266,7 @@ export default buildConfig({
       },
     });
     // Create docs to relate to
-    const { id: relationOneDocId } = await payload.create<RelationOne>({
+    const { id: relationOneDocId } = await payload.create({
       collection: relationOneSlug,
       data: {
         name: relationOneSlug,
@@ -254,7 +275,7 @@ export default buildConfig({
 
     const relationOneIDs: string[] = [];
     await mapAsync([...Array(11)], async () => {
-      const doc = await payload.create<RelationOne>({
+      const doc = await payload.create({
         collection: relationOneSlug,
         data: {
           name: relationOneSlug,
@@ -265,7 +286,7 @@ export default buildConfig({
 
     const relationTwoIDs: string[] = [];
     await mapAsync([...Array(11)], async () => {
-      const doc = await payload.create<RelationTwo>({
+      const doc = await payload.create({
         collection: relationTwoSlug,
         data: {
           name: relationTwoSlug,
@@ -275,23 +296,29 @@ export default buildConfig({
     });
 
     // Existing relationships
-    const { id: restrictedDocId } = await payload.create<RelationRestricted>({
+    const { id: restrictedDocId } = await payload.create({
       collection: relationRestrictedSlug,
       data: {
         name: 'relation-restricted',
       },
     });
+
     const relationsWithTitle: string[] = [];
+
     await mapAsync(['relation-title', 'word boundary search'], async (title) => {
-      const { id } = await payload.create<RelationWithTitle>({
+      const { id } = await payload.create({
         collection: relationWithTitleSlug,
         data: {
           name: title,
+          meta: {
+            title,
+          },
         },
       });
       relationsWithTitle.push(id);
     });
-    await payload.create<FieldsRelationship>({
+
+    await payload.create({
       collection: slug,
       data: {
         relationship: relationOneDocId,
@@ -300,7 +327,7 @@ export default buildConfig({
       },
     });
     await mapAsync([...Array(11)], async () => {
-      await payload.create<FieldsRelationship>({
+      await payload.create({
         collection: slug,
         data: {
           relationship: relationOneDocId,
@@ -312,16 +339,18 @@ export default buildConfig({
         },
       });
     });
+
     await mapAsync([...Array(15)], async () => {
       const relationOneID = relationOneIDs[Math.floor(Math.random() * 10)];
       const relationTwoID = relationTwoIDs[Math.floor(Math.random() * 10)];
-      await payload.create<FieldsRelationship>({
+      await payload.create({
         collection: slug,
         data: {
           relationship: relationOneDocId,
           relationshipRestricted: restrictedDocId,
           relationshipHasMany: [relationOneID],
           relationshipHasManyMultiple: [{ relationTo: relationTwoSlug, value: relationTwoID }],
+          relationshipReadOnly: relationOneID,
         },
       });
     });
