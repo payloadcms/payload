@@ -121,6 +121,8 @@ export interface FieldBase {
     read?: FieldAccess;
     update?: FieldAccess;
   };
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 }
 
 export type NumberField = FieldBase & {
@@ -241,6 +243,8 @@ export type UIField = {
     }
   }
   type: 'ui';
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 }
 
 export type UploadField = FieldBase & {

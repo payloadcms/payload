@@ -6,10 +6,11 @@ import { Response } from 'express';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
-import { Auth, IncomingAuthType } from '../../auth/types';
+import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 import { Config as GeneratedTypes } from '../../generated-types';
+import { BuildQueryArgs } from '../../mongoose/buildQuery';
 
 type Register<T = any> = (doc: T, password: string) => T;
 
@@ -19,7 +20,7 @@ interface PassportLocalModel {
 }
 
 export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {
-  buildQuery: (query: unknown, locale: string, queryHiddenFields?: boolean) => Record<string, unknown>
+  buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>>
 }
 
 export interface AuthCollectionModel extends CollectionModel {
@@ -153,6 +154,10 @@ type BeforeDuplicateArgs<T> = {
 export type BeforeDuplicate<T = any> = (args: BeforeDuplicateArgs<T>) => T | Promise<T>
 
 export type CollectionAdminOptions = {
+  /**
+   * Exclude the collection from the admin nav and routes
+   */
+  hidden?: ((args: { user: User }) => boolean) | boolean;
   /**
    * Field to use as title in Edit view and first column in List view
    */
@@ -299,13 +304,16 @@ export type CollectionConfig = {
    * @default true
    */
   timestamps?: boolean
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
-export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions'> {
+export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions'| 'endpoints'> {
   auth: Auth;
   upload: Upload;
   fields: Field[];
-  versions: SanitizedCollectionVersions
+  versions: SanitizedCollectionVersions;
+  endpoints: Omit<Endpoint, 'root'>[];
 }
 
 export type Collection = {

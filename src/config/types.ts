@@ -37,7 +37,7 @@ type GeneratePreviewURLOptions = {
 export type GeneratePreviewURL = (
   doc: Record<string, unknown>,
   options: GeneratePreviewURLOptions
-) => Promise<string> | string;
+) => Promise<string | null> | string | null;
 
 export type EmailTransport = Email & {
   transport: Transporter;
@@ -189,6 +189,8 @@ export type Endpoint = {
    * @default false
    */
   root?: boolean;
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
 export type AdminView = React.ComponentType<{
@@ -346,6 +348,14 @@ export type Config = {
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
   globals?: GlobalConfig[];
+
+  /**
+   * Email configuration options. This value is overridden by `email` in Payload.init if passed.
+   *
+   * @see https://payloadcms.com/docs/email/overview
+   */
+  email?: EmailOptions;
+
   /**
    * Control the behaviour of the admin internationalisation.
    *
@@ -519,14 +529,17 @@ export type Config = {
   telemetry?: boolean;
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void;
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'globals'
+  'collections' | 'globals' | 'endpoint'
 > & {
   collections: SanitizedCollectionConfig[];
   globals: SanitizedGlobalConfig[];
+  endpoints: Endpoint[];
   paths: {
     configDir: string
     config: string

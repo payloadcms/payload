@@ -75,6 +75,12 @@ export default buildConfig({
           name: 'number',
           type: 'number',
         },
+        {
+          name: 'fakeLocalization',
+          type: 'text',
+          // field is localized even though the config localization is not on
+          localized: true,
+        },
         // Relationship
         {
           name: 'relationField',
@@ -101,6 +107,13 @@ export default buildConfig({
           relationTo: [relationSlug, 'dummy'],
           hasMany: true,
         },
+        {
+          name: 'restrictedField',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
       ],
     },
     {
@@ -114,7 +127,23 @@ export default buildConfig({
       ],
     },
     collectionWithName(relationSlug),
-    collectionWithName('dummy'),
+    {
+      slug: 'dummy',
+      access: openAccess,
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          type: 'text',
+          name: 'name',
+          access: {
+            read: () => false,
+          },
+        },
+      ],
+    },
     {
       slug: customIdSlug,
       access: openAccess,

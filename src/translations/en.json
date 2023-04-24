@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "You are not allowed to access this page.",
     "notAllowedToPerformAction": "You are not allowed to perform this action.",
     "notFound": "The requested resource was not found.",
+    "previewing": "There was a problem previewing this document.",
     "problemUploadingFile": "There was a problem while uploading the file.",
     "tokenInvalidOrExpired": "Token is either invalid or has expired.",
     "unPublishingDocument": "There was a problem while un-publishing this document.",

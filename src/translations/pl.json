@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "Nie masz dostępu do tej strony.",
     "notAllowedToPerformAction": "Nie możesz wykonać tej akcji.",
     "notFound": "Żądany zasób nie został znaleziony.",
+    "previewing": "Wystąpił problem podczas podglądu tego dokumentu.",
     "problemUploadingFile": "Wystąpił problem podczas przesyłania pliku.",
     "tokenInvalidOrExpired": "Token jest nieprawidłowy lub wygasł.",
     "unPublishingDocument": "Wystąpił problem podczas cofania publikacji tego dokumentu.",

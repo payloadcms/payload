@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "この画面へのアクセスは許可されていません。",
     "notAllowedToPerformAction": "このアクションは許可されていません。",
     "notFound": "リクエストされたリソースは見つかりませんでした。",
+    "previewing": "このデータをプレビューする際に問題が発生しました。",
     "problemUploadingFile": "ファイルのアップロード中に問題が発生しました。",
     "tokenInvalidOrExpired": "トークンが無効、または、有効期限が切れています。",
     "unPublishingDocument": "このデータを非公開する際に問題が発生しました。",

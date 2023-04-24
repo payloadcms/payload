@@ -79,6 +79,7 @@
     "notAllowedToAccessPage": "您无权访问此页面。",
     "notAllowedToPerformAction": "您不被允许执行此操作。",
     "notFound": "没有找到请求的资源。",
+    "previewing": "预览文件时出现了问题。",
     "problemUploadingFile": "上传文件时出现了问题。",
     "tokenInvalidOrExpired": "令牌无效或已过期。",
     "unPublishingDocument": "取消发布此文件时出现了问题。",

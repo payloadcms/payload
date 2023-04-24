@@ -300,6 +300,9 @@
         "notFound": {
           "type": "string"
         },
+        "previewing": {
+          "type": "string"
+        },
         "problemUploadingFile": {
           "type": "string"
         },
@@ -357,6 +360,7 @@
         "notAllowedToAccessPage",
         "notAllowedToPerformAction",
         "notFound",
+        "previewing",
         "problemUploadingFile",
         "tokenInvalidOrExpired",
         "unPublishingDocument",
