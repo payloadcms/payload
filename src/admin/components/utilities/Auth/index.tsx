@@ -1,11 +1,9 @@
-import React, {
-  useState, createContext, useContext, useEffect, useCallback,
-} from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import jwtDecode from 'jwt-decode';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
-import { User, Permissions } from '../../../../auth/types';
+import { Permissions, User } from '../../../../auth/types';
 import { useConfig } from '../Config';
 import { requests } from '../../../api';
 import useDebounce from '../../../hooks/useDebounce';

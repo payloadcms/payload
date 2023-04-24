@@ -23,6 +23,15 @@ const ConditionalLogic: CollectionConfig = {
         condition: ({ toggleField }) => Boolean(toggleField),
       },
     },
+    {
+      name: 'userConditional',
+      type: 'text',
+      admin: {
+        condition: (_data, _siblingData, { user }) => {
+          return Boolean(user?.canViewConditionalField);
+        },
+      },
+    },
   ],
 };
 

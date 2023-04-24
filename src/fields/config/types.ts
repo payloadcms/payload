@@ -44,7 +44,7 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
   doc?: T
 }) => Promise<boolean> | boolean;
 
-export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>) => boolean;
+export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>, { user }: { user: User }) => boolean;
 
 export type FilterOptionsProps<T = any> = {
   id: string | number,

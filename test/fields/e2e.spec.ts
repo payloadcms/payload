@@ -849,4 +849,27 @@ describe('fields', () => {
       await expect(idHeadings).toHaveCount(1);
     });
   });
+
+  describe('conditional logic', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'conditional-logic');
+    });
+
+    test('should toggle conditional field when data changes', async () => {
+      await page.goto(url.create);
+      const toggleField = page.locator('label[for=field-toggleField]');
+      await toggleField.click();
+
+      const fieldToToggle = page.locator('input#field-fieldToToggle');
+
+      await expect(fieldToToggle).toBeVisible();
+    });
+
+    test('should show conditionl field based on user data', async () => {
+      await page.goto(url.create);
+      const userConditional = page.locator('input#field-userConditional');
+      await expect(userConditional).toBeVisible();
+    });
+  });
 });
