@@ -12,6 +12,14 @@ import './index.scss';
 
 const baseClass = 'blocks-drawer';
 
+const getBlockLabel = (block, i18n) => {
+  if (typeof block.labels.singular === 'string') return block.labels.singular.toLowerCase();
+  if (typeof block.labels.singular === 'object') {
+    return getTranslation(block.labels.singular, i18n).toLowerCase();
+  }
+  return '';
+};
+
 export const BlocksDrawer: React.FC<Props> = (props) => {
   const {
     blocks,
@@ -27,25 +35,15 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
   const { t, i18n } = useTranslation('fields');
 
   useEffect(() => {
-    const searchText = searchTerm.toLowerCase();
-    const matchingBlocks = blocks.filter((block) => {
-      const slugMatch = block.slug.toLowerCase().includes(searchText);
-      const labelMatch = Object.values(block.labels).some((label) => {
-        if (typeof label === "string") {
-          return label.toLowerCase().includes(searchText);
-        }
-        if (typeof label === "object") {
-          return Object.values(label).some((value) =>
-            value.toLowerCase().includes(searchText)
-          );
-        }
-        return false;
-      });
-      return slugMatch || labelMatch;
-    });
-    
+    const searchTermToUse = searchTerm.toLowerCase();
+    const matchingBlocks = blocks.reduce((matchedBlocks, block) => {
+      const blockLabel = getBlockLabel(block, i18n);
+      if (blockLabel.includes(searchTermToUse)) matchedBlocks.push(block);
+      return matchedBlocks;
+    }, []);
+
     setFilteredBlocks(matchingBlocks);
-  }, [searchTerm, blocks]);
+  }, [searchTerm, blocks, i18n]);
 
   return (
     <Drawer
