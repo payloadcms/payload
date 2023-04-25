@@ -11,6 +11,7 @@ import nb from './nb.json';
 import nl from './nl.json';
 import pl from './pl.json';
 import pt from './pt.json';
+import ro from "./ro.json";
 import ru from './ru.json';
 import sv from './sv.json';
 import th from './th.json';
