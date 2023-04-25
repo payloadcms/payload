@@ -450,7 +450,7 @@ export const richTextDoc = {
   selectHasMany: ['one', 'five'],
   richText: generateRichText(),
   richTextReadOnly: generateRichText(),
-  richTextBulletsDoc: generateRichText(),
+  richTextCustomFields: generateRichText(),
 };
 
 export default RichTextFields;
