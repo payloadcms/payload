@@ -132,6 +132,7 @@ const NumberField: React.FC<Props> = (props) => {
       />
       {hasMany ? (
         <ReactSelect
+          className={`field-${path.replace(/\./gi, '__')}`}
           placeholder={t('general:enterAValue')}
           onChange={onMultiTextChange}
           value={valueToRender as Option[]}
