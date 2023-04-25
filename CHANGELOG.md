@@ -1,5 +1,25 @@
 
 
+## [1.7.2](https://github.com/payloadcms/payload/compare/v1.7.1...v1.7.2) (2023-04-25)
+
+
+### Bug Fixes
+
+* [#2521](https://github.com/payloadcms/payload/issues/2521), graphql AND not working with drafts ([e67ca20](https://github.com/payloadcms/payload/commit/e67ca2010831c14938d3f639fcb5374ca62747ba))
+* document drawer access control [#2545](https://github.com/payloadcms/payload/issues/2545) ([439caf8](https://github.com/payloadcms/payload/commit/439caf815fc99538f14b3a59835dcf49185759dc))
+* prevent floating point number in image sizes ([#1935](https://github.com/payloadcms/payload/issues/1935)) ([7fcde11](https://github.com/payloadcms/payload/commit/7fcde11fa0b232537de606e44c0af68b122daed2))
+* prevent sharp toFormat settings fallthrough by using clone ([#2547](https://github.com/payloadcms/payload/issues/2547)) ([90dab3c](https://github.com/payloadcms/payload/commit/90dab3c445d4bdbab0eff286a2b66861d04f2a93))
+* query localized fields without localization configured ([12edb1c](https://github.com/payloadcms/payload/commit/12edb1cc4b2675d9b0948fb7f3439f61c6e2015d))
+* read-only styles ([823d022](https://github.com/payloadcms/payload/commit/823d0228c949fe58a7e0f11f95354b240c3ea876))
+
+
+### Features
+
+* add rich-text blockquote element, change quote node type to blockquote ([ed230a4](https://github.com/payloadcms/payload/commit/ed230a42e0315dc2492b4a26e3bf8b5334e89380))
+* add user to field conditional logic ([274edc7](https://github.com/payloadcms/payload/commit/274edc74a70202e8c771c5111507b585c3f69377))
+* exposes id in conditional logic ([c117b32](https://github.com/payloadcms/payload/commit/c117b321474b8318c3a0ddf544e49568e461f0d8))
+* **imageresizer:** add trim options ([#2073](https://github.com/payloadcms/payload/issues/2073)) ([0406548](https://github.com/payloadcms/payload/commit/0406548fe6127e091db9926ee42e59f9158eff5a))
+
 ## [1.7.1](https://github.com/payloadcms/payload/compare/v1.7.0...v1.7.1) (2023-04-18)
 
 
