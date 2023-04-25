@@ -63,6 +63,7 @@ import PreferencesModel from './preferences/model';
 import findConfig from './config/find';
 
 import { defaults as emailDefaults } from './email/defaults';
+import { initHTTP } from './initHTTP';
 
 /**
  * @description Payload
@@ -210,10 +211,10 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     serverInitTelemetry(this);
 
-    if (options.local !== false) {
-      if (typeof options.onInit === 'function') await options.onInit(this);
-      if (typeof this.config.onInit === 'function') await this.config.onInit(this);
-    }
+    await initHTTP(this, options);
+
+    if (typeof options.onInit === 'function') await options.onInit(this);
+    if (typeof this.config.onInit === 'function') await this.config.onInit(this);
 
     return this;
   }
@@ -402,33 +403,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   ): Promise<TGeneratedTypes['globals'][T]> => {
     const { restoreVersion } = localGlobalOperations;
     return restoreVersion<T>(this, options);
-  }
+  };
 }
 
-export type Payload = BasePayload<GeneratedTypes>
-
-let cached = global._payload;
-
-if (!cached) {
-  // eslint-disable-next-line no-multi-assign
-  cached = global._payload = { payload: null, promise: null };
-}
-
-export const getPayload = async (options: InitOptions): Promise<Payload> => {
-  if (cached.payload) {
-    return cached.payload;
-  }
-
-  if (!cached.promise) {
-    cached.promise = new BasePayload<GeneratedTypes>().init(options);
-  }
-
-  try {
-    cached.payload = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
-  }
-
-  return cached.payload;
-};
+export type Payload = BasePayload<GeneratedTypes>;

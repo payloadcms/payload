@@ -18,11 +18,10 @@ import errorHandler from './express/middleware/errorHandler';
 import { PayloadRequest } from './express/types';
 import { getDataLoader } from './collections/dataloader';
 import mountEndpoints from './express/mountEndpoints';
-import { getPayload, Payload } from './payload';
+import { Payload } from './payload';
 
-export const initHTTP = async (options: InitOptions): Promise<Payload> => {
+export const initHTTP = async (payload: Payload, options: InitOptions): Promise<Payload> => {
   if (typeof options.local === 'undefined') options.local = false;
-  const payload = await getPayload(options);
 
   if (!options.local) {
     payload.router = express.Router();
