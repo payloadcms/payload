@@ -42,7 +42,7 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 
 | Option                    | Description                                                                                                                                     |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`staticURL`** \*        | The base URL path to use to access your uploads. Example: `/media`                                                                              |
+| **`staticURL`** \*        | The URL path to use to access your uploads. Relative path like `/media` will be served by payload. Full path like `https://example.com/media` needs to be served by another web server. |
 | **`staticDir`** \*        | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config.           |
 | **`imageSizes`**          | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                              |
 | **`formatOptions`**       | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat) |
