@@ -56,4 +56,12 @@ const connectMongoose = async (
   return mongoMemoryServer;
 };
 
+export const disconnectMongoose = async (mongoMemoryServer: unknown): Promise<void> => {
+  if (typeof mongoMemoryServer === 'object' && 'stop' in mongoMemoryServer && typeof mongoMemoryServer.stop === 'function') {
+    await mongoMemoryServer.stop();
+  }
+
+  await mongoose.disconnect();
+};
+
 export default connectMongoose;

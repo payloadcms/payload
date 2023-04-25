@@ -6,6 +6,7 @@ import path from 'path';
 import mongoose from 'mongoose';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
+import isDeepEqual from 'deep-equal';
 import { BulkOperationResult, Collection, CollectionModel } from './collections/config/types';
 import { EmailOptions, InitOptions, SanitizedConfig } from './config/types';
 import { TypeWithVersion } from './versions/types';
@@ -50,7 +51,7 @@ import { Result as LoginResult } from './auth/operations/login';
 import { Options as FindGlobalOptions } from './globals/operations/local/findOne';
 import { Options as UpdateGlobalOptions } from './globals/operations/local/update';
 
-import connectMongoose from './mongoose/connect';
+import connectMongoose, { disconnectMongoose } from './mongoose/connect';
 import initCollections from './collections/initLocal';
 import initGlobals from './globals/initLocal';
 import registerSchema from './graphql/registerSchema';
@@ -138,18 +139,64 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`;
 
+  ready: Promise<Payload>;
+
+  #state: 'uninitialized' | 'initializing' | 'reload_queued' | 'ready' = 'uninitialized';
+
+  #nextOptions: InitOptions;
+
   /**
    * @description Initializes Payload
    * @param options
    */
   async init(options: InitOptions): Promise<Payload> {
-    this.logger = Logger('payload', options.loggerOptions);
-    this.mongoURL = options.mongoURL;
-    this.mongoOptions = options.mongoOptions;
+    // First time init
+    if (this.#state === 'uninitialized') {
+      this.#state = 'initializing';
+      this.ready = this.#init(options);
+    } else if (this.#state === 'ready') {
+      // Reload now
+      this.#state = 'initializing';
+      this.ready = this.#reload(options);
+    } else {
+      // Already reloading, so queue this one up
+      this.logger.info('Reloading Payload config...');
+      this.#state = 'reload_queued';
+      this.#nextOptions = options;
+    }
 
-    if (this.mongoURL) {
-      mongoose.set('strictQuery', false);
-      this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, this.logger);
+    return this.ready;
+  }
+
+  async #reload(options: InitOptions): Promise<Payload> {
+    this.logger.info('Reloading Payload configuration...');
+
+    // Forget mongoose models
+    Object.keys(mongoose.models).map((model) => mongoose.deleteModel(model));
+
+    // Disconnect from the previous Mongo instance
+    if (this.mongoURL !== options.mongoURL) {
+      await disconnectMongoose(this.mongoMemoryServer);
+      this.mongoMemoryServer = undefined;
+      this.mongoURL = undefined;
+      this.mongoOptions = undefined;
+    }
+
+    // TODO: replace endpoints from Express
+
+    return this.#init(options);
+  }
+
+  async #init(options: InitOptions): Promise<Payload> {
+    this.logger = Logger('payload', options.loggerOptions);
+
+    if (!isDeepEqual(this.mongoURL, options.mongoURL) || !isDeepEqual(this.mongoOptions, options.mongoOptions)) {
+      this.mongoURL = options.mongoURL;
+      this.mongoOptions = options.mongoOptions;
+      if (options.mongoURL) {
+        mongoose.set('strictQuery', false);
+        this.mongoMemoryServer = await connectMongoose(options.mongoURL, options.mongoOptions, this.logger);
+      }
     }
 
     this.logger.info('Starting Payload...');
@@ -216,6 +263,16 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     if (typeof options.onInit === 'function') await options.onInit(this);
     if (typeof this.config.onInit === 'function') await this.config.onInit(this);
 
+    //
+    if (this.#state === 'reload_queued') {
+      const nextOptions = this.#nextOptions;
+      this.#state = 'initializing';
+      this.#nextOptions = undefined;
+      return this.#reload(nextOptions);
+    }
+
+    this.#state = 'ready';
+    this.#nextOptions = undefined;
     return this;
   }
 
@@ -261,11 +318,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns Updated document(s)
    */
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateByIDOptions<T>):Promise<TGeneratedTypes['collections'][T]>
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateByIDOptions<T>): Promise<TGeneratedTypes['collections'][T]>
 
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateManyOptions<T>):Promise<BulkOperationResult<T>>
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateManyOptions<T>): Promise<BulkOperationResult<T>>
 
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>):Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>): Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
     const { update } = localOperations;
     return update<T>(this, options);
   }
@@ -275,11 +332,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns Updated document(s)
    */
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteByIDOptions<T>):Promise<TGeneratedTypes['collections'][T]>
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteByIDOptions<T>): Promise<TGeneratedTypes['collections'][T]>
 
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteManyOptions<T>):Promise<BulkOperationResult<T>>
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteManyOptions<T>): Promise<BulkOperationResult<T>>
 
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>):Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>): Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
     const { deleteLocal } = localOperations;
     return deleteLocal<T>(this, options);
   }
