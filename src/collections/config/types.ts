@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
-import { AggregatePaginateModel, Model, PaginateModel, IndexDefinition, IndexOptions} from 'mongoose';
+import { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';

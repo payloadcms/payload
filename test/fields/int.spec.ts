@@ -4,13 +4,12 @@ import { RESTClient } from '../helpers/rest';
 import configPromise from '../uploads/config';
 import payload from '../../src';
 import { pointDoc } from './collections/Point';
-import { arrayFieldsSlug, arrayDefaultValue, arrayDoc } from './collections/Array';
-import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
+import { arrayDefaultValue, arrayDoc, arrayFieldsSlug } from './collections/Array';
+import { groupDefaultChild, groupDefaultValue, groupDoc, groupFieldsSlug } from './collections/Group';
 import { defaultText } from './collections/Text';
 import { blocksFieldSeedData } from './collections/Blocks';
 import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
 import { defaultNumber, numberDoc } from './collections/Number';
-import {IndexedField} from './payload-types';
 
 let client;
 let serverURL;
@@ -163,9 +162,6 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
-      // mongoose model schema indexes do not always create indexes in the actual database
-      // see: https://github.com/payloadcms/payload/issues/571
-
       indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
 
       indexes.forEach((index) => {
@@ -202,8 +198,8 @@ describe('Fields', () => {
       expect(options.collapsibleTextUnique).toMatchObject({ unique: true });
     });
     it('should have unique compound indexes', () => {
-      expect(definitions['partOne']).toEqual(1);
-      expect(options['partOne']).toMatchObject({ unique: true, name: 'compound-index', sparse: true });      
+      expect(definitions.partOne).toEqual(1);
+      expect(options.partOne).toMatchObject({ unique: true, name: 'compound-index', sparse: true });
     });
     it('should throw validation error saving on unique fields', async () => {
       const data = {
@@ -223,7 +219,7 @@ describe('Fields', () => {
       }).toBeDefined();
     });
     it('should throw validation error saving on unique combined fields', async () => {
-      await payload.delete({collection: 'indexed-fields', where: {}});
+      await payload.delete({ collection: 'indexed-fields', where: {} });
       const data1 = {
         text: 'a',
         uniqueText: 'a',
@@ -247,6 +243,30 @@ describe('Fields', () => {
         });
         return result.error;
       }).toBeDefined();
+    });
+  });
+
+  describe('version indexes', () => {
+    let indexes;
+    const definitions: Record<string, IndexDirection> = {};
+    const options: Record<string, IndexOptions> = {};
+
+    beforeAll(() => {
+      indexes = payload.versions['indexed-fields'].schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+      indexes.forEach((index) => {
+        const field = Object.keys(index[0])[0];
+        definitions[field] = index[0][field];
+        // eslint-disable-next-line prefer-destructuring
+        options[field] = index[1];
+      });
+    });
+
+    it('should have versions indexes', () => {
+      expect(definitions['version.text']).toEqual(1);
+    });
+    it('should have version indexes from collection indexes', () => {
+      expect(definitions['version.partOne']).toEqual(1);
+      expect(options['version.partOne']).toMatchObject({ unique: true, name: 'compound-index', sparse: true });
     });
   });
 

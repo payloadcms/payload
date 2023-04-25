@@ -25,7 +25,7 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
     schema.index({ createdAt: 1 });
   }
   if (collection.indexes) {
-    collection.indexes.forEach(index => {
+    collection.indexes.forEach((index) => {
       schema.index(index.fields, index.options);
     });
   }

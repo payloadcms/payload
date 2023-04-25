@@ -18,6 +18,8 @@ const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
 
 const IndexedFields: CollectionConfig = {
   slug: 'indexed-fields',
+  // used to assert that versions also get indexes
+  versions: true,
   admin: {
     hooks: {
       beforeDuplicate,
@@ -75,18 +77,19 @@ const IndexedFields: CollectionConfig = {
     },
     {
       name: 'partOne',
-      type: 'text'
+      type: 'text',
     },
     {
       name: 'partTwo',
-      type: 'text'
-    }
+      type: 'text',
+    },
   ],
   indexes: [
     {
-      fields: { partOne: 1, partTwo: 1 }, options: { unique: true, name: 'compound-index', sparse: true }
-    }
-  ]
+      fields: { partOne: 1, partTwo: 1 },
+      options: { unique: true, name: 'compound-index', sparse: true },
+    },
+  ],
 };
 
 export default IndexedFields;
