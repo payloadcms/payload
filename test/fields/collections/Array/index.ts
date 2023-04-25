@@ -10,6 +10,9 @@ export const arrayFieldsSlug = 'array-fields';
 
 const ArrayFields: CollectionConfig = {
   slug: arrayFieldsSlug,
+  admin: {
+    enableRichTextRelationship: false,
+  },
   fields: [
     {
       name: 'items',
