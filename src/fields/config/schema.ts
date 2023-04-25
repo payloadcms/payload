@@ -413,7 +413,10 @@ export const richText = baseField.keys({
       })),
     }),
     link: joi.object({
-      fields: joi.array().items(joi.link('#field')),
+      fields: joi.alternatives(
+        joi.array().items(joi.link('#field')),
+        joi.func(),
+      ),
     }),
   }),
 });

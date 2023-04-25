@@ -68,11 +68,11 @@ export const LinkButton: React.FC<{
   const config = useConfig();
 
   const [fieldSchema] = useState(() => {
-    const fields: Field[] = [
-      ...getBaseFields(config),
-    ];
+    const baseFields: Field[] = getBaseFields(config);
 
-    if (customFieldSchema) {
+    const fields = typeof customFieldSchema === 'function' ? customFieldSchema(baseFields) : baseFields;
+
+    if (Array.isArray(customFieldSchema)) {
       fields.push({
         name: 'fields',
         type: 'group',

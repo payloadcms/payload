@@ -353,7 +353,7 @@ export type RichTextField = FieldBase & {
       }
     }
     link?: {
-      fields?: Field[];
+      fields?: Field[] | ((defaultFields: Field[]) => Field[]);
     }
   }
 }
