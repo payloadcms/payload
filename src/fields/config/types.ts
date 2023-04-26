@@ -1,9 +1,10 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
-import type { TFunction } from 'i18next';
+import type { TFunction, i18n as Ii18n } from 'i18next';
 import type { EditorProps } from '@monaco-editor/react';
 import { Operation, Where } from '../../types';
+import { SanitizedConfig } from "../../config/types";
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
@@ -353,7 +354,7 @@ export type RichTextField = FieldBase & {
       }
     }
     link?: {
-      fields?: Field[];
+      fields?: Field[] | ((args: {defaultFields: Field[], config: SanitizedConfig, i18n: Ii18n}) => Field[]);
     }
   }
 }

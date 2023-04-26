@@ -446,7 +446,7 @@ describe('fields', () => {
         await navigateToRichTextFields();
 
         // Open link drawer
-        await page.locator('.rich-text__toolbar button:not([disabled]) .link').click();
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
 
         // find the drawer
         const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
@@ -479,7 +479,7 @@ describe('fields', () => {
         await navigateToRichTextFields();
 
         // Open link drawer
-        await page.locator('.rich-text__toolbar button:not([disabled]) .upload-rich-text-button').click();
+        await page.locator('.rich-text__toolbar button:not([disabled]) .upload-rich-text-button').first().click();
 
         // open the list select menu
         await page.locator('.list-drawer__select-collection-wrap .rs__control').click();
@@ -493,7 +493,7 @@ describe('fields', () => {
         await navigateToRichTextFields();
 
         // Open link drawer
-        await page.locator('.rich-text__toolbar button:not([disabled]) .relationship-rich-text-button').click();
+        await page.locator('.rich-text__toolbar button:not([disabled]) .relationship-rich-text-button').first().click();
 
         // open the list select menu
         await page.locator('.list-drawer__select-collection-wrap .rs__control').click();
@@ -501,11 +501,24 @@ describe('fields', () => {
         const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu');
         await expect(menu).not.toContainText('Uploads');
       });
+
+      test('should respect customizing the default fields', async () => {
+        await navigateToRichTextFields();
+        const field = page.locator('.rich-text', { has: page.locator('#field-richTextCustomFields') });
+        const button = await field.locator('button.rich-text__button.link');
+
+        await button.click();
+
+        const linkDrawer = await page.locator('[id^=drawer_1_rich-text-link-]');
+        await expect(linkDrawer).toBeVisible();
+        const fieldCount = await linkDrawer.locator('.render-fields > .field-type').count();
+        await expect(fieldCount).toEqual(1);
+      });
     });
 
     describe('editor', () => {
       test('should populate url link', async () => {
-        navigateToRichTextFields();
+        await navigateToRichTextFields();
 
         // Open link popup
         await page.locator('#field-richText span >> text="render links"').click();
@@ -528,7 +541,7 @@ describe('fields', () => {
       });
 
       test('should populate relationship link', async () => {
-        navigateToRichTextFields();
+        await navigateToRichTextFields();
 
         // Open link popup
         await page.locator('#field-richText span >> text="link to relationships"').click();
@@ -551,7 +564,7 @@ describe('fields', () => {
       });
 
       test('should open upload drawer and render custom relationship fields', async () => {
-        navigateToRichTextFields();
+        await navigateToRichTextFields();
         const field = await page.locator('#field-richText');
         const button = await field.locator('button.rich-text-upload__upload-drawer-toggler');
 
@@ -564,7 +577,7 @@ describe('fields', () => {
       });
 
       test('should open upload document drawer from read-only field', async () => {
-        navigateToRichTextFields();
+        await navigateToRichTextFields();
         const field = await page.locator('#field-richTextReadOnly');
         const button = await field.locator('button.rich-text-upload__doc-drawer-toggler.doc-drawer__toggler');
 
@@ -575,7 +588,7 @@ describe('fields', () => {
       });
 
       test('should open relationship document drawer from read-only field', async () => {
-        navigateToRichTextFields();
+        await navigateToRichTextFields();
         const field = await page.locator('#field-richTextReadOnly');
         const button = await field.locator('button.rich-text-relationship__doc-drawer-toggler.doc-drawer__toggler');
 
@@ -586,14 +599,14 @@ describe('fields', () => {
       });
 
       test('should populate new links', async () => {
-        navigateToRichTextFields();
+        await navigateToRichTextFields();
 
         // Highlight existing text
         const headingElement = await page.locator('#field-richText h1 >> text="Hello, I\'m a rich text field."');
         await headingElement.selectText();
 
         // click the toolbar link button
-        await page.locator('.rich-text__toolbar button:not([disabled]) .link').click();
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
 
         // find the drawer and confirm the values
         const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');

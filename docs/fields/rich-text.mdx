@@ -83,6 +83,8 @@ Set this property to `true` to hide this field's gutter within the admin panel. 
 
 This allows [fields](/docs/fields/overview) to be saved as extra fields on a link inside the Rich Text Editor. When this is present, the fields will render inside a modal that can be opened by clicking the "edit" button on the link element.
 
+`link.fields` may either be an array of fields (in which case all fields defined in it will be appended below the default fields) or a function that accepts the default fields as only argument and returns an array defining the entirety of fields to be used (thus providing a mechanism of overriding the default fields).
+
 ![RichText link fields](https://payloadcms.com/images/docs/fields/richText/rte-link-fields-modal.jpg)
 *RichText link with custom fields*
 
