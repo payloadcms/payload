@@ -81,7 +81,7 @@ export const LinkElement: React.FC<{
   const [fieldSchema] = useState(() => {
     const baseFields: Field[] = getBaseFields(config);
 
-    const fields = typeof customFieldSchema === 'function' ? customFieldSchema(baseFields) : baseFields;
+    const fields = typeof customFieldSchema === 'function' ? customFieldSchema({ defaultFields: baseFields, config, i18n }) : baseFields;
 
     if (Array.isArray(customFieldSchema)) {
       fields.push({
