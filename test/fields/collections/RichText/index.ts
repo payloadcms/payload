@@ -1,4 +1,5 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
+import { markdownElement } from './CustomElements/Markdown';
 import { loremIpsum } from './loremIpsum';
 
 const RichTextFields: CollectionConfig = {
@@ -142,6 +143,15 @@ const RichTextFields: CollectionConfig = {
             },
           },
         },
+      },
+    },
+    {
+      name: 'richTextWithCustomElement',
+      type: 'richText',
+      admin: {
+        elements: [
+          markdownElement,
+        ],
       },
     },
   ],
