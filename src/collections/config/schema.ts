@@ -72,6 +72,12 @@ const collectionSchema = joi.object().keys({
     hideAPIURL: joi.bool(),
   }),
   fields: joi.array(),
+  indexes: joi.array().items(
+    joi.object().keys({
+      fields: joi.object().required(),
+      options: joi.object(),
+    }),
+  ),
   hooks: joi.object({
     beforeOperation: joi.array().items(joi.func()),
     beforeValidate: joi.array().items(joi.func()),

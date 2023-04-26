@@ -328,6 +328,8 @@ export interface IndexedField {
   };
   collapsibleLocalizedUnique?: string;
   collapsibleTextUnique?: string;
+  partOne?: string;
+  partTwo?: string;
   createdAt: string;
   updatedAt: string;
 }
