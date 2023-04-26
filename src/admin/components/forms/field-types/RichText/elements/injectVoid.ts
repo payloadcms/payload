@@ -8,7 +8,12 @@ export const injectVoidElement = (editor: Editor, element: Element): void => {
 
   if (lastSelectedElementIsEmpty) {
     // If previous node is void
-    if (Editor.isVoid(editor, previous?.[0])) {
+    if (!previous) {
+      // If first element, insert a blank element above
+      // so user can place cursor above the inserted node
+      Transforms.insertNodes(editor, { children: [{ text: '' }] });
+      Transforms.setNodes(editor, element);
+    } else if (Editor.isVoid(editor, previous[0])) {
       // Insert a blank element between void nodes
       // so user can place cursor between void nodes
       Transforms.insertNodes(editor, { children: [{ text: '' }] });
