@@ -179,7 +179,7 @@
     "slate-react": "^0.92.0",
     "style-loader": "^2.0.0",
     "swc-loader": "^0.2.3",
-    "swc-minify-webpack-plugin": "^1.0.1",
+    "swc-minify-webpack-plugin": "^2.1.0",
     "terser-webpack-plugin": "^5.3.6",
     "ts-essentials": "^7.0.3",
     "url-loader": "^4.1.1",
