@@ -21,7 +21,7 @@ export const cloudStorage =
 
     const webpack = extendWebpackConfig({ options: pluginOptions, config })
 
-    const initFunctions: (() => void)[] = []
+    const initFunctions: Array<() => void> = []
 
     return {
       ...config,

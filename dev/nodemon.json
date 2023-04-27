@@ -1,6 +1,6 @@
 {
   "ext": "ts",
-  "exec": "ts-node src/server.ts",
+  "exec": "node  --trace-warnings -r ts-node/register -r ./src/server.ts",
   "watch": [
     "src/**/*.ts",
     "../src/**/*.ts"

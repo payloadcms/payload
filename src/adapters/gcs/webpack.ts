@@ -6,6 +6,10 @@ export const extendWebpackConfig = (existingWebpackConfig: WebpackConfig): Webpa
     ...existingWebpackConfig,
     resolve: {
       ...(existingWebpackConfig.resolve || {}),
+      fallback: {
+        ...(existingWebpackConfig.resolve?.fallback ? existingWebpackConfig.resolve.fallback : {}),
+        stream: false,
+      },
       alias: {
         ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
         '@google-cloud/storage': path.resolve(__dirname, './mock.js'),
