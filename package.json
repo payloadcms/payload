@@ -17,7 +17,7 @@
     "@aws-sdk/lib-storage": "^3.267.0",
     "@azure/storage-blob": "^12.11.0",
     "@google-cloud/storage": "^6.4.1",
-    "payload": "^1.0.27"
+    "payload": "^1.7.2"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/client-s3": {
@@ -55,7 +55,7 @@
     "eslint-plugin-import": "2.25.4",
     "eslint-plugin-prettier": "^4.0.0",
     "nodemon": "^2.0.6",
-    "payload": "^1.6.6",
+    "payload": "^1.7.2",
     "prettier": "^2.7.1",
     "rimraf": "^4.1.2",
     "ts-node": "^9.1.1",

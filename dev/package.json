@@ -21,7 +21,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "image-size": "^1.0.2",
-    "payload": "^1.6.6",
+    "payload": "^1.7.2",
     "probe-image-size": "^7.2.3"
   },
   "devDependencies": {
