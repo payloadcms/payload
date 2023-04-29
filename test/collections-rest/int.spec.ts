@@ -48,6 +48,20 @@ describe('collections-rest', () => {
       expect(result.docs).toEqual(expect.arrayContaining(expectedDocs));
     });
 
+    it('should find where id', async () => {
+      const post1 = await createPost();
+      await createPost();
+      const { status, result } = await client.find<Post>({
+        query: {
+          id: { equals: post1.id },
+        },
+      });
+
+      expect(status).toEqual(200);
+      expect(result.totalDocs).toEqual(1);
+      expect(result.docs[0].id).toEqual(post1.id);
+    });
+
     it('should update existing', async () => {
       const {
         id,

@@ -22,10 +22,7 @@ export const sanitizeQueryValue = ({ ctx, field, path, operator, val, hasCustomI
     if (!hasCustomID) {
       const isValid = mongoose.Types.ObjectId.isValid(val);
 
-      formattedValue = new mongoose.Types.ObjectId(val);
-
       if (!isValid) {
-        ctx.errors.push({ path });
         return undefined;
       }
     }
