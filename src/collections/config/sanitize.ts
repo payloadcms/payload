@@ -1,6 +1,6 @@
 import merge from 'deepmerge';
 import { isPlainObject } from 'is-plain-object';
-import { SanitizedCollectionConfig, CollectionConfig } from './types';
+import { CollectionConfig, SanitizedCollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
 import baseAuthFields from '../../auth/baseFields/auth';
 import baseAPIKeyFields from '../../auth/baseFields/apiKey';
@@ -8,11 +8,18 @@ import baseVerificationFields from '../../auth/baseFields/verification';
 import baseAccountLockFields from '../../auth/baseFields/accountLock';
 import getBaseUploadFields from '../../uploads/getBaseFields';
 import { formatLabels } from '../../utilities/formatLabels';
-import { defaults, authDefaults } from './defaults';
+import { authDefaults, defaults } from './defaults';
 import { Config } from '../../config/types';
 import baseVersionFields from '../../versions/baseFields';
 import TimestampsRequired from '../../errors/TimestampsRequired';
 import mergeBaseFields from '../../fields/mergeBaseFields';
+import { extractTranslations } from '../../translations/extractTranslations';
+import { fieldAffectsData } from '../../fields/config/types';
+
+const translations = extractTranslations([
+  'general:createdAt',
+  'general:updatedAt',
+]);
 
 const sanitizeCollection = (config: Config, collection: CollectionConfig): SanitizedCollectionConfig => {
   // /////////////////////////////////
@@ -22,6 +29,40 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
   const sanitized: CollectionConfig = merge(defaults, collection, {
     isMergeableObject: isPlainObject,
   });
+
+  if (sanitized.timestamps !== false) {
+    let hasUpdatedAt = null;
+    let hasCreatedAt = null;
+    let i = 0;
+    while (hasCreatedAt === null && hasUpdatedAt === null && i < sanitized.fields.length) {
+      const field = sanitized.fields[i];
+      i += 1;
+      if (fieldAffectsData(field)) {
+        if (field.name === 'updatedAt') hasUpdatedAt = true;
+        if (field.name === 'createdAt') hasCreatedAt = true;
+      }
+    }
+    if (!hasCreatedAt) {
+      sanitized.fields.push({
+        name: 'createdAt',
+        label: translations['general:createdAt'],
+        type: 'date',
+        admin: {
+          disableBulkEdit: true,
+        },
+      });
+    }
+    if (!hasUpdatedAt) {
+      sanitized.fields.push({
+        name: 'updatedAt',
+        label: translations['general:updatedAt'],
+        type: 'date',
+        admin: {
+          disableBulkEdit: true,
+        },
+      });
+    }
+  }
 
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
 

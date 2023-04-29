@@ -1,12 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { DateTimeResolver } from 'graphql-scalars';
-import {
-  GraphQLString,
-  GraphQLObjectType,
-  GraphQLBoolean,
-  GraphQLNonNull,
-  GraphQLInt,
-} from 'graphql';
+import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
 
 import formatName from '../../graphql/utilities/formatName';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
@@ -33,7 +26,7 @@ import { Field, fieldAffectsData } from '../../fields/config/types';
 import buildObjectType, { ObjectTypeConfig } from '../../graphql/schema/buildObjectType';
 import buildWhereInputType from '../../graphql/schema/buildWhereInputType';
 import getDeleteResolver from './resolvers/delete';
-import { toWords, formatNames } from '../../utilities/formatLabels';
+import { formatNames, toWords } from '../../utilities/formatLabels';
 import { Collection, SanitizedCollectionConfig } from '../config/types';
 import { buildPolicyType } from '../../graphql/schema/buildPoliciesType';
 import { docAccessResolver } from './resolvers/docAccess';
@@ -45,7 +38,6 @@ function initCollectionsGraphQL(payload: Payload): void {
       config: {
         graphQL = {} as SanitizedCollectionConfig['graphQL'],
         fields,
-        timestamps,
         versions,
       },
     } = collection;
@@ -88,28 +80,6 @@ function initCollectionsGraphQL(payload: Payload): void {
       whereInputFields.push({
         name: 'id',
         type: 'text',
-      });
-    }
-
-    if (timestamps) {
-      baseFields.createdAt = {
-        type: new GraphQLNonNull(DateTimeResolver),
-      };
-
-      baseFields.updatedAt = {
-        type: new GraphQLNonNull(DateTimeResolver),
-      };
-
-      whereInputFields.push({
-        name: 'createdAt',
-        label: 'Created At',
-        type: 'date',
-      });
-
-      whereInputFields.push({
-        name: 'updatedAt',
-        label: 'Updated At',
-        type: 'date',
       });
     }
 

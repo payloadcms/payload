@@ -23,27 +23,6 @@ const formatFields = (config: SanitizedCollectionConfig, t: TFunction): Field[] 
     },
   }]);
 
-  if (config.timestamps) {
-    fields.push(
-      {
-        name: 'createdAt',
-        label: t('general:createdAt'),
-        type: 'date',
-        admin: {
-          disableBulkEdit: true,
-        },
-      },
-      {
-        name: 'updatedAt',
-        label: t('general:updatedAt'),
-        type: 'date',
-        admin: {
-          disableBulkEdit: true,
-        },
-      },
-    );
-  }
-
   return fields;
 };
 
