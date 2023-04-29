@@ -48,6 +48,13 @@ export const sanitizeQueryValue = ({ ctx, field, path, operator, val, hasCustomI
     formattedValue = Number(val);
   }
 
+  if (field.type === 'date' && typeof val === 'string') {
+    formattedValue = new Date(val);
+    if (Number.isNaN(Date.parse(formattedValue))) {
+      return undefined;
+    }
+  }
+
   if (['relationship', 'upload'].includes(field.type)) {
     if (val === 'null') {
       formattedValue = null;

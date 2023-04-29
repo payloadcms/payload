@@ -482,7 +482,7 @@ describe('fields', () => {
         await editLinkModal.locator('#field-text').fill('link text');
         await editLinkModal.locator('label[for="field-linkType-internal"]').click();
         await editLinkModal.locator('#field-doc .rs__control').click();
-        await page.keyboard.type('dev');
+        await page.keyboard.type('dev@');
         await editLinkModal.locator('#field-doc .rs__menu .rs__option:has-text("dev@payloadcms.com")').click();
         // await wait(200);
         await editLinkModal.locator('button[type="submit"]').click();
@@ -770,9 +770,9 @@ describe('fields', () => {
 
     test('should filter relationship options', async () => {
       await page.goto(url.create);
-      page.locator('#field-relationship .rs__control');
+      await page.locator('#field-relationship .rs__control').click();
       await page.keyboard.type('seeded');
-      await page.locator('#field-v .rs__menu .rs__option:has-text("Seeded text document")').click();
+      await page.locator('.rs__option:has-text("Seeded text document")').click();
       await saveDocAndAssert(page);
     });
   });
