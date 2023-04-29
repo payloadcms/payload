@@ -48,6 +48,7 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
         label: translations['general:createdAt'],
         type: 'date',
         admin: {
+          hidden: true,
           disableBulkEdit: true,
         },
       });
@@ -58,6 +59,7 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
         label: translations['general:updatedAt'],
         type: 'date',
         admin: {
+          hidden: true,
           disableBulkEdit: true,
         },
       });

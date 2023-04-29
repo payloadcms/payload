@@ -1,9 +1,8 @@
-import { TFunction } from 'react-i18next';
 import React from 'react';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { Field, fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../fields/config/types';
 
-const formatFields = (config: SanitizedCollectionConfig, t: TFunction): Field[] => {
+const formatFields = (config: SanitizedCollectionConfig): Field[] => {
   const hasID = config.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') > -1;
   const fields: Field[] = config.fields.reduce((formatted, field) => {
     if (!fieldIsPresentationalOnly(field) && (field.hidden === true || field?.admin?.disabled === true)) {

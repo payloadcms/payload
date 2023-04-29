@@ -35,12 +35,13 @@ function initCollectionsGraphQL(payload: Payload): void {
   Object.keys(payload.collections).forEach((slug) => {
     const collection: Collection = payload.collections[slug];
     const {
+      config,
       config: {
         graphQL = {} as SanitizedCollectionConfig['graphQL'],
-        fields,
         versions,
       },
     } = collection;
+    const { fields } = config;
 
     let singularName;
     let pluralName;
@@ -67,7 +68,7 @@ function initCollectionsGraphQL(payload: Payload): void {
     collection.graphQL = {} as Collection['graphQL'];
 
     const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id');
-    const idType = getCollectionIDType(collection.config);
+    const idType = getCollectionIDType(config);
 
     const baseFields: ObjectTypeConfig = {};
 
@@ -100,7 +101,7 @@ function initCollectionsGraphQL(payload: Payload): void {
       singularName,
     );
 
-    if (collection.config.auth && !collection.config.auth.disableLocalStrategy) {
+    if (config.auth && !config.auth.disableLocalStrategy) {
       fields.push({
         name: 'password',
         label: 'Password',
@@ -156,7 +157,7 @@ function initCollectionsGraphQL(payload: Payload): void {
     payload.Query.fields[`docAccess${singularName}`] = {
       type: buildPolicyType({
         typeSuffix: 'DocAccess',
-        entity: collection.config,
+        entity: config,
         type: 'collection',
         scope: 'docAccess',
       }),
@@ -200,9 +201,9 @@ function initCollectionsGraphQL(payload: Payload): void {
       resolve: getDeleteResolver(collection),
     };
 
-    if (collection.config.versions) {
+    if (config.versions) {
       const versionCollectionFields: Field[] = [
-        ...buildVersionCollectionFields(collection.config),
+        ...buildVersionCollectionFields(config),
         {
           name: 'id',
           type: 'text',
@@ -267,8 +268,8 @@ function initCollectionsGraphQL(payload: Payload): void {
       };
     }
 
-    if (collection.config.auth) {
-      const authFields: Field[] = collection.config.auth.disableLocalStrategy ? [] : [{
+    if (config.auth) {
+      const authFields: Field[] = config.auth.disableLocalStrategy ? [] : [{
         name: 'email',
         type: 'email',
         required: true,
@@ -277,7 +278,7 @@ function initCollectionsGraphQL(payload: Payload): void {
         payload,
         name: formatName(`${slug}JWT`),
         fields: [
-          ...collection.config.fields.filter((field) => fieldAffectsData(field) && field.saveToJWT),
+          ...config.fields.filter((field) => fieldAffectsData(field) && field.saveToJWT),
           ...authFields,
           {
             name: 'collection',
@@ -340,8 +341,8 @@ function initCollectionsGraphQL(payload: Payload): void {
         resolve: logout(collection),
       };
 
-      if (!collection.config.auth.disableLocalStrategy) {
-        if (collection.config.auth.maxLoginAttempts > 0) {
+      if (!config.auth.disableLocalStrategy) {
+        if (config.auth.maxLoginAttempts > 0) {
           payload.Mutation.fields[`unlock${singularName}`] = {
             type: new GraphQLNonNull(GraphQLBoolean),
             args: {
