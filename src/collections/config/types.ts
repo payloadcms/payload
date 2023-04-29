@@ -3,13 +3,13 @@ import { DeepRequired } from 'ts-essentials';
 import { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
 import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
-import { Config as GeneratedTypes } from '../../generated-types';
 import { BuildQueryArgs } from '../../mongoose/buildQuery';
 
 type Register<T = any> = (doc: T, password: string) => T;
