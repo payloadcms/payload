@@ -156,15 +156,20 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
   // /////////////////////////////////////
   // beforeChange - Collection
   // /////////////////////////////////////
-
+  let collectionAfterChangeFromBeforeChange;
   await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    data = (await hook({
+    const beforeChangeResult = (await hook({
       data,
       req,
       operation: 'create',
     })) || data;
+    collectionAfterChangeFromBeforeChange = beforeChangeResult.afterChange;
+
+    delete beforeChangeResult.afterChange;
+
+    data = beforeChangeResult as any;
   }, Promise.resolve());
 
   // /////////////////////////////////////
@@ -299,6 +304,17 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
   // /////////////////////////////////////
   // afterChange - Collection
   // /////////////////////////////////////
+
+
+  if (collectionAfterChangeFromBeforeChange) {
+    result = await collectionAfterChangeFromBeforeChange({
+      doc: result,
+      previousDoc: {},
+      req: args.req,
+      operation: 'create',
+    }) || result;
+  }
+
 
   await collectionConfig.hooks.afterChange.reduce(async (priorHook: AfterChangeHook | Promise<void>, hook: AfterChangeHook) => {
     await priorHook;
