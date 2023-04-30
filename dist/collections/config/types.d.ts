@@ -60,9 +60,11 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
      * `undefined` on 'create' operation
      */
     originalDoc?: T;
-}) => {
+}) => ({
     afterChange?: AfterChangeHook<T>;
-} & unknown;
+} | Promise<{
+    afterChange?: AfterChangeHook<T>;
+}>) & unknown;
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
     doc: T;
     req: PayloadRequest;
