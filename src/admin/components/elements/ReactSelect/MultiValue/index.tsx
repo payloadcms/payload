@@ -26,20 +26,22 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
     },
   } = props;
 
-  const classes = [
-    baseClass,
-    className,
-    !isDisabled && 'draggable',
-  ].filter(Boolean).join(' ');
-
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
+    isDragging,
   } = useDraggableSortable({
     id: value.toString(),
   });
+
+  const classes = [
+    baseClass,
+    className,
+    !isDisabled && 'draggable',
+    isDragging && `${baseClass}--is-dragging`,
+  ].filter(Boolean).join(' ');
 
   return (
     <SelectComponents.MultiValue

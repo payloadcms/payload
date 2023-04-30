@@ -77,6 +77,17 @@ export default function initCollectionsLocal(ctx: Payload): void {
         },
       );
 
+      if (collection.indexes) {
+        collection.indexes.forEach((index) => {
+          // prefix 'version.' to each field in the index
+          const versionIndex = { fields: {}, options: index.options };
+          Object.entries(index.fields).forEach(([key, value]) => {
+            versionIndex.fields[`version.${key}`] = value;
+          });
+          versionSchema.index(versionIndex.fields, versionIndex.options);
+        });
+      }
+
       versionSchema.plugin(paginate, { useEstimatedCount: true })
         .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug, versionsFields: versionCollectionFields }));
 

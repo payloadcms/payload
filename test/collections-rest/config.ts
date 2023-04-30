@@ -75,6 +75,12 @@ export default buildConfig({
           name: 'number',
           type: 'number',
         },
+        {
+          name: 'fakeLocalization',
+          type: 'text',
+          // field is localized even though the config localization is not on
+          localized: true,
+        },
         // Relationship
         {
           name: 'relationField',

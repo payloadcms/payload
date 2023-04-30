@@ -28,6 +28,17 @@
     }
   }
 
+  &.read-only {
+    .textarea-outer {
+      background: var(--theme-elevation-200);
+      color: var(--theme-elevation-450);
+      &:hover {
+        border-color: var(--theme-elevation-150);
+        @include shadow-sm;
+      }
+    }
+  }
+
   // This element takes exactly the same dimensions as the clone
   .textarea-inner {
     display: block;

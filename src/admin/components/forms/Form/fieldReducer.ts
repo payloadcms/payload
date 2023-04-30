@@ -134,7 +134,7 @@ function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'MODIFY_CONDITION': {
-      const { path, result } = action;
+      const { path, result, user } = action;
 
       return Object.entries(state).reduce((newState, [fieldPath, field]) => {
         if (fieldPath === path || fieldPath.indexOf(`${path}.`) === 0) {
@@ -145,7 +145,7 @@ function fieldReducer(state: Fields, action: FieldAction): Fields {
           // Besides those who still fail their own conditions
 
           if (passesCondition && field.condition) {
-            passesCondition = field.condition(reduceFieldsToValues(state), getSiblingData(state, path));
+            passesCondition = field.condition(reduceFieldsToValues(state), getSiblingData(state, path), { user });
           }
 
           return {

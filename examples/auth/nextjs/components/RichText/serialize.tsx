@@ -69,7 +69,7 @@ const serialize = (children: Children): React.ReactElement[] =>
         return <h5 key={i}>{serialize(node.children)}</h5>
       case 'h6':
         return <h6 key={i}>{serialize(node.children)}</h6>
-      case 'quote':
+      case 'blockquote':
         return <blockquote key={i}>{serialize(node.children)}</blockquote>
       case 'ul':
         return <ul key={i}>{serialize(node.children)}</ul>

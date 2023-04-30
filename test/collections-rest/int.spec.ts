@@ -469,6 +469,24 @@ describe('collections-rest', () => {
       });
     });
 
+    describe('Edge cases', () => {
+      it('should query a localized field without localization configured', async () => {
+        const test = 'test';
+        await createPost({ fakeLocalization: test });
+
+        const { status, result } = await client.find({
+          query: {
+            fakeLocalization: {
+              equals: test,
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.docs).toHaveLength(1);
+      });
+    });
+
     describe('Operators', () => {
       it('equals', async () => {
         const valueToQuery = 'valueToQuery';

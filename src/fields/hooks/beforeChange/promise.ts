@@ -50,7 +50,7 @@ export const promise = async ({
   siblingDocWithLocales,
   skipValidation,
 }: Args): Promise<void> => {
-  const passesCondition = (field.admin?.condition) ? field.admin.condition(data, siblingData) : true;
+  const passesCondition = (field.admin?.condition) ? field.admin.condition(data, siblingData, { user: req.user }) : true;
   let skipValidationFromHere = skipValidation || !passesCondition;
 
   const defaultLocale = req.payload.config?.localization ? req.payload.config.localization?.defaultLocale : 'en';

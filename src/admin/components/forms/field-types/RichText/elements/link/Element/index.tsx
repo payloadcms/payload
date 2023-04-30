@@ -79,11 +79,11 @@ export const LinkElement: React.FC<{
   const [renderPopup, setRenderPopup] = useState(false);
   const [initialState, setInitialState] = useState<Fields>({});
   const [fieldSchema] = useState(() => {
-    const fields: Field[] = [
-      ...getBaseFields(config),
-    ];
+    const baseFields: Field[] = getBaseFields(config);
 
-    if (customFieldSchema) {
+    const fields = typeof customFieldSchema === 'function' ? customFieldSchema({ defaultFields: baseFields, config, i18n }) : baseFields;
+
+    if (Array.isArray(customFieldSchema)) {
       fields.push({
         name: 'fields',
         type: 'group',
