@@ -76,7 +76,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T;
-}) => any;
+}) => {afterChange?: AfterChangeHook<T>} & unknown;
 
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   doc: T;
