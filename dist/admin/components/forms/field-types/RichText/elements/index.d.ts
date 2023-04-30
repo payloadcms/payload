@@ -56,6 +56,13 @@ declare const elements: {
         }>;
         plugins: ((incomingEditor: import("slate").BaseEditor & import("slate-react").ReactEditor & import("slate-history").HistoryEditor) => import("slate").BaseEditor & import("slate-react").ReactEditor & import("slate-history").HistoryEditor)[];
     };
+    blockquote: {
+        Button: () => JSX.Element;
+        Element: ({ attributes, children }: {
+            attributes: any;
+            children: any;
+        }) => JSX.Element;
+    };
     ol: {
         Button: () => JSX.Element;
         Element: ({ attributes, children }: {

@@ -93,7 +93,7 @@ const AuthProvider = ({ children }) => {
             setPermissions(json);
         }
         else {
-            throw new Error("Fetching permissions failed with status code " + request.status);
+            throw new Error(`Fetching permissions failed with status code ${request.status}`);
         }
     }, [serverURL, api, i18n]);
     // On mount, get user and set
@@ -128,7 +128,7 @@ const AuthProvider = ({ children }) => {
         if (id) {
             refreshPermissions();
         }
-    }, [i18n, id, api, serverURL]);
+    }, [i18n, id, api, serverURL, refreshPermissions]);
     (0, react_1.useEffect)(() => {
         let reminder;
         const now = Math.round((new Date()).getTime() / 1000);

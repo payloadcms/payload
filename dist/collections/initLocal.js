@@ -59,6 +59,16 @@ function initCollectionsLocal(ctx) {
                     minimize: false,
                 },
             });
+            if (collection.indexes) {
+                collection.indexes.forEach((index) => {
+                    // prefix 'version.' to each field in the index
+                    const versionIndex = { fields: {}, options: index.options };
+                    Object.entries(index.fields).forEach(([key, value]) => {
+                        versionIndex.fields[`version.${key}`] = value;
+                    });
+                    versionSchema.index(versionIndex.fields, versionIndex.options);
+                });
+            }
             versionSchema.plugin(mongoose_paginate_v2_1.default, { useEstimatedCount: true })
                 .plugin((0, buildQuery_1.default)({ collectionSlug: collection.slug, versionsFields: versionCollectionFields }));
             if ((_a = collection.versions) === null || _a === void 0 ? void 0 : _a.drafts) {

@@ -1,0 +1,9 @@
+@import '../../../../../../scss/styles.scss';
+
+.rich-text-blockquote {
+  &[data-slate-node=element] {
+    margin: base(.625) 0;
+    padding-left: base(0.625);
+    border-left: 1px solid var(--theme-elevation-200);
+  }
+}

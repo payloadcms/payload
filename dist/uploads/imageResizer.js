@@ -22,7 +22,7 @@ async function resizeAndSave({ req, file, dimensions, staticPath, config, savedF
     const { imageSizes } = config.upload;
     const sizesToSave = [];
     const sizeData = {};
-    const sharpInstance = (0, sharp_1.default)(file.tempFilePath || file.data);
+    const sharpBase = (0, sharp_1.default)(file.tempFilePath || file.data);
     const promises = imageSizes
         .map(async (desiredSize) => {
         if (!needsResize(desiredSize, dimensions)) {
@@ -36,9 +36,12 @@ async function resizeAndSave({ req, file, dimensions, staticPath, config, savedF
             };
             return;
         }
-        let resized = sharpInstance.resize(desiredSize);
+        let resized = sharpBase.clone().resize(desiredSize);
         if (desiredSize.formatOptions) {
             resized = resized.toFormat(desiredSize.formatOptions.format, desiredSize.formatOptions.options);
+        }
+        if (desiredSize.trimOptions) {
+            resized = resized.trim(desiredSize.trimOptions);
         }
         const bufferObject = await resized.toBuffer({
             resolveWithObject: true,

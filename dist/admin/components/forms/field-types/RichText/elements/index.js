@@ -10,6 +10,7 @@ const h4_1 = __importDefault(require("./h4"));
 const h5_1 = __importDefault(require("./h5"));
 const h6_1 = __importDefault(require("./h6"));
 const link_1 = __importDefault(require("./link"));
+const blockquote_1 = __importDefault(require("./blockquote"));
 const ol_1 = __importDefault(require("./ol"));
 const ul_1 = __importDefault(require("./ul"));
 const li_1 = __importDefault(require("./li"));
@@ -24,6 +25,7 @@ const elements = {
     h5: h5_1.default,
     h6: h6_1.default,
     link: link_1.default,
+    blockquote: blockquote_1.default,
     ol: ol_1.default,
     ul: ul_1.default,
     li: li_1.default,

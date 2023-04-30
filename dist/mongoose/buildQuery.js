@@ -318,7 +318,7 @@ class ParamParser {
                         i += 1;
                         currentPath = `${currentPath}.${nextSegment}`;
                     }
-                    else if ('localized' in matchedField && matchedField.localized) {
+                    else if (this.localizationConfig && 'localized' in matchedField && matchedField.localized) {
                         currentPath = `${currentPath}.${this.req.locale}`;
                     }
                     switch (matchedField.type) {

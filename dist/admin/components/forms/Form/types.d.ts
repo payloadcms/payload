@@ -1,5 +1,6 @@
 import React, { Dispatch } from 'react';
-import { Field as FieldConfig, Condition, Validate } from '../../../../fields/config/types';
+import { Condition, Field as FieldConfig, Validate } from '../../../../fields/config/types';
+import { User } from '../../../../auth/types';
 export type Field = {
     value: unknown;
     initialValue: unknown;
@@ -90,6 +91,7 @@ export type MODIFY_CONDITION = {
     type: 'MODIFY_CONDITION';
     path: string;
     result: boolean;
+    user: User;
 };
 export type UPDATE = {
     type: 'UPDATE';

@@ -102,7 +102,8 @@
 
   &--read-only {
     .rich-text__editor {
-      background-color: var(--theme-elevation-150);
+      background: var(--theme-elevation-200);
+      color: var(--theme-elevation-450);
       padding: base(.5);
 
       .popup button {
@@ -122,7 +123,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: var(--theme-elevation-150);
+        background-color: var(--theme-elevation-200);
         opacity: .85;
         z-index: 2;
         backdrop-filter: unset;

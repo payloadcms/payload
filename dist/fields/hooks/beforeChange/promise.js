@@ -21,7 +21,7 @@ const cloneDataFromOriginalDoc_1 = require("./cloneDataFromOriginalDoc");
 // - Unflatten locales
 const promise = async ({ data, doc, docWithLocales, errors, field, id, mergeLocaleActions, operation, path, req, siblingData, siblingDoc, siblingDocWithLocales, skipValidation, }) => {
     var _a, _b, _c, _d;
-    const passesCondition = ((_a = field.admin) === null || _a === void 0 ? void 0 : _a.condition) ? field.admin.condition(data, siblingData) : true;
+    const passesCondition = ((_a = field.admin) === null || _a === void 0 ? void 0 : _a.condition) ? field.admin.condition(data, siblingData, { user: req.user }) : true;
     let skipValidationFromHere = skipValidation || !passesCondition;
     const defaultLocale = ((_b = req.payload.config) === null || _b === void 0 ? void 0 : _b.localization) ? (_c = req.payload.config.localization) === null || _c === void 0 ? void 0 : _c.defaultLocale : 'en';
     const operationLocale = req.locale || defaultLocale;

@@ -1,7 +1,7 @@
 /// <reference types="mongoose-aggregate-paginate-v2" />
 /// <reference types="react" />
 import { DeepRequired } from 'ts-essentials';
-import { AggregatePaginateModel, Model, PaginateModel } from 'mongoose';
+import { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
@@ -60,7 +60,9 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
      * `undefined` on 'create' operation
      */
     originalDoc?: T;
-}) => any;
+}) => {
+    afterChange?: AfterChangeHook<T>;
+} & unknown;
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
     doc: T;
     req: PayloadRequest;
@@ -197,8 +199,8 @@ export type CollectionConfig = {
         plural?: Record<string, string> | string;
     };
     /**
-    * Default field to sort by in collection list view
-    */
+     * Default field to sort by in collection list view
+     */
     defaultSort?: string;
     /**
      * GraphQL configuration
@@ -217,6 +219,10 @@ export type CollectionConfig = {
         interface?: string;
     };
     fields: Field[];
+    /**
+     * Array of database indexes to create, including compound indexes that have multiple fields
+     */
+    indexes?: TypeOfIndex[];
     /**
      * Collection admin options
      */
@@ -322,5 +328,9 @@ export type TypeWithTimestamps = {
     createdAt: string;
     updatedAt: string;
     [key: string]: unknown;
+};
+export type TypeOfIndex = {
+    fields: IndexDefinition;
+    options?: IndexOptions;
 };
 export {};

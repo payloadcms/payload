@@ -135,14 +135,18 @@ async function updateByID(incomingArgs) {
     // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
+    let collectionAfterChangeFromBeforeChange;
     await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
         await priorHook;
-        data = (await hook({
+        const beforeChangeResult = (await hook({
             data,
             req,
             originalDoc,
             operation: 'update',
         })) || data;
+        collectionAfterChangeFromBeforeChange = beforeChangeResult.afterChange;
+        delete beforeChangeResult.afterChange;
+        data = beforeChangeResult;
     }, Promise.resolve());
     // /////////////////////////////////////
     // beforeChange - Fields
@@ -235,6 +239,14 @@ async function updateByID(incomingArgs) {
     // /////////////////////////////////////
     // afterChange - Collection
     // /////////////////////////////////////
+    if (collectionAfterChangeFromBeforeChange) {
+        result = await collectionAfterChangeFromBeforeChange({
+            doc: result,
+            previousDoc: originalDoc,
+            req,
+            operation: 'update',
+        }) || result;
+    }
     await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
         await priorHook;
         result = await hook({

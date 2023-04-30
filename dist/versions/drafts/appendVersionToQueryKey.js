@@ -3,10 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.appendVersionToQueryKey = void 0;
 const appendVersionToQueryKey = (query) => {
     return Object.entries(query).reduce((res, [key, val]) => {
-        if (['and', 'or'].includes(key) && Array.isArray(val)) {
+        if (['and', 'or', 'AND', 'OR'].includes(key) && Array.isArray(val)) {
             return {
                 ...res,
-                [key]: val.map((subQuery) => (0, exports.appendVersionToQueryKey)(subQuery)),
+                [key.toLowerCase()]: val.map((subQuery) => (0, exports.appendVersionToQueryKey)(subQuery)),
             };
         }
         if (key !== 'id') {

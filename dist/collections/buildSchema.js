@@ -20,6 +20,11 @@ const buildCollectionSchema = (collection, config, schemaOptions = {}) => {
         schema.index({ updatedAt: 1 });
         schema.index({ createdAt: 1 });
     }
+    if (collection.indexes) {
+        collection.indexes.forEach((index) => {
+            schema.index(index.fields, index.options);
+        });
+    }
     schema.plugin(mongoose_paginate_v2_1.default, { useEstimatedCount: true })
         .plugin((0, buildQuery_1.default)({ collectionSlug: collection.slug }));
     return schema;

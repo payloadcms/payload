@@ -82,14 +82,13 @@ const LinkButton = ({ fieldProps }) => {
     const { user } = (0, Auth_1.useAuth)();
     const locale = (0, Locale_1.useLocale)();
     const [initialState, setInitialState] = (0, react_1.useState)({});
-    const { t } = (0, react_i18next_1.useTranslation)(['upload', 'general']);
+    const { t, i18n } = (0, react_i18next_1.useTranslation)(['upload', 'general']);
     const editor = (0, slate_react_1.useSlate)();
     const config = (0, Config_1.useConfig)();
     const [fieldSchema] = (0, react_1.useState)(() => {
-        const fields = [
-            ...(0, baseFields_1.getBaseFields)(config),
-        ];
-        if (customFieldSchema) {
+        const baseFields = (0, baseFields_1.getBaseFields)(config);
+        const fields = typeof customFieldSchema === 'function' ? customFieldSchema({ defaultFields: baseFields, config, i18n }) : baseFields;
+        if (Array.isArray(customFieldSchema)) {
             fields.push({
                 name: 'fields',
                 type: 'group',

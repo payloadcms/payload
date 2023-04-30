@@ -9,7 +9,7 @@ const iterateFields = async ({ fields, data, parentPassesCondition, path = '', f
         var _a, _b;
         const initialData = data;
         if (!(0, types_1.fieldIsPresentationalOnly)(field) && !((_a = field === null || field === void 0 ? void 0 : field.admin) === null || _a === void 0 ? void 0 : _a.disabled)) {
-            const passesCondition = Boolean((((_b = field === null || field === void 0 ? void 0 : field.admin) === null || _b === void 0 ? void 0 : _b.condition) ? field.admin.condition(fullData || {}, initialData || {}) : true) && parentPassesCondition);
+            const passesCondition = Boolean((((_b = field === null || field === void 0 ? void 0 : field.admin) === null || _b === void 0 ? void 0 : _b.condition) ? field.admin.condition(fullData || {}, initialData || {}, { user }) : true) && parentPassesCondition);
             promises.push((0, addFieldStatePromise_1.addFieldStatePromise)({
                 fullData,
                 id,

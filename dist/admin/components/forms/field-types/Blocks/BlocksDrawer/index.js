@@ -37,30 +37,35 @@ const ThumbnailCard_1 = require("../../../../elements/ThumbnailCard");
 const DefaultBlockImage_1 = __importDefault(require("../../../../graphics/DefaultBlockImage"));
 require("./index.scss");
 const baseClass = 'blocks-drawer';
+const getBlockLabel = (block, i18n) => {
+    if (typeof block.labels.singular === 'string')
+        return block.labels.singular.toLowerCase();
+    if (typeof block.labels.singular === 'object') {
+        return (0, getTranslation_1.getTranslation)(block.labels.singular, i18n).toLowerCase();
+    }
+    return '';
+};
 const BlocksDrawer = (props) => {
     const { blocks, addRow, addRowIndex, drawerSlug, labels, } = props;
     const [searchTerm, setSearchTerm] = (0, react_1.useState)('');
     const [filteredBlocks, setFilteredBlocks] = (0, react_1.useState)(blocks);
-    const { closeModal, modalState } = (0, modal_1.useModal)();
-    const [isModalOpen, setIsModalOpen] = (0, react_1.useState)(false);
+    const { closeModal, isModalOpen } = (0, modal_1.useModal)();
     const { t, i18n } = (0, react_i18next_1.useTranslation)('fields');
-    (0, react_1.useEffect)(() => {
-        var _a;
-        setIsModalOpen(Boolean((_a = modalState[drawerSlug]) === null || _a === void 0 ? void 0 : _a.isOpen));
-    }, [modalState, drawerSlug]);
     (0, react_1.useEffect)(() => {
         if (!isModalOpen) {
             setSearchTerm('');
         }
     }, [isModalOpen]);
     (0, react_1.useEffect)(() => {
+        const searchTermToUse = searchTerm.toLowerCase();
         const matchingBlocks = blocks.reduce((matchedBlocks, block) => {
-            if (block.slug.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1)
+            const blockLabel = getBlockLabel(block, i18n);
+            if (blockLabel.includes(searchTermToUse))
                 matchedBlocks.push(block);
             return matchedBlocks;
         }, []);
         setFilteredBlocks(matchingBlocks);
-    }, [searchTerm, blocks]);
+    }, [searchTerm, blocks, i18n]);
     return (react_1.default.createElement(Drawer_1.Drawer, { slug: drawerSlug, title: t('addLabel', { label: (0, getTranslation_1.getTranslation)(labels.singular, i18n) }) },
         react_1.default.createElement(BlockSearch_1.default, { setSearchTerm: setSearchTerm }),
         react_1.default.createElement("div", { className: `${baseClass}__blocks-wrapper` },

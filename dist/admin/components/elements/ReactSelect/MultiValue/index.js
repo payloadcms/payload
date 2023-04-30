@@ -11,14 +11,15 @@ require("./index.scss");
 const baseClass = 'multi-value';
 const MultiValue = (props) => {
     const { className, isDisabled, innerProps, data: { value, }, selectProps: { selectProps, selectProps: { disableMouseDown, }, }, } = props;
+    const { attributes, listeners, setNodeRef, transform, isDragging, } = (0, useDraggableSortable_1.useDraggableSortable)({
+        id: value.toString(),
+    });
     const classes = [
         baseClass,
         className,
         !isDisabled && 'draggable',
+        isDragging && `${baseClass}--is-dragging`,
     ].filter(Boolean).join(' ');
-    const { attributes, listeners, setNodeRef, transform, } = (0, useDraggableSortable_1.useDraggableSortable)({
-        id: value.toString(),
-    });
     return (react_1.default.createElement(react_select_1.components.MultiValue, { ...props, className: classes, innerProps: {
             ...innerProps,
             ref: setNodeRef,

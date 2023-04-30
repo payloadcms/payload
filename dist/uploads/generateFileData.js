@@ -31,7 +31,7 @@ const generateFileData = async ({ config, collection: { config: collectionConfig
             files: [],
         };
     }
-    const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions } = collectionConfig.upload;
+    const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions, trimOptions } = collectionConfig.upload;
     let staticPath = staticDir;
     if (staticDir.indexOf('/') !== 0) {
         staticPath = path_1.default.resolve(config.paths.configDir, staticDir);
@@ -54,7 +54,7 @@ const generateFileData = async ({ config, collection: { config: collectionConfig
         const sharpOptions = {};
         if (fileIsAnimated)
             sharpOptions.animated = true;
-        if (fileSupportsResize && (resizeOptions || formatOptions)) {
+        if (fileSupportsResize && (resizeOptions || formatOptions || trimOptions)) {
             if (file.tempFilePath) {
                 sharpFile = (0, sharp_1.default)(file.tempFilePath, sharpOptions);
             }
@@ -67,6 +67,9 @@ const generateFileData = async ({ config, collection: { config: collectionConfig
             }
             if (formatOptions) {
                 sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options);
+            }
+            if (trimOptions) {
+                sharpFile = sharpFile.trim(trimOptions);
             }
         }
         if ((0, isImage_1.default)(file.mimetype)) {

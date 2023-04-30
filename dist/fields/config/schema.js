@@ -276,7 +276,7 @@ exports.richText = exports.baseField.keys({
             })),
         }),
         link: joi_1.default.object({
-            fields: joi_1.default.array().items(joi_1.default.link('#field')),
+            fields: joi_1.default.alternatives(joi_1.default.array().items(joi_1.default.link('#field')), joi_1.default.func()),
         }),
     }),
 });

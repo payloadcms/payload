@@ -116,18 +116,18 @@ const UploadInput = (props) => {
         react_1.default.createElement(Error_1.default, { showError: showError, message: errorMessage }),
         react_1.default.createElement(Label_1.default, { htmlFor: `field-${path.replace(/\./gi, '__')}`, label: label, required: required }),
         (collection === null || collection === void 0 ? void 0 : collection.upload) && (react_1.default.createElement(react_1.default.Fragment, null,
-            (file && !missingFile) && (react_1.default.createElement(FileDetails_1.default, { collection: collection, doc: file, handleRemove: () => {
+            (file && !missingFile) && (react_1.default.createElement(FileDetails_1.default, { collection: collection, doc: file, handleRemove: readOnly ? undefined : () => {
                     onChange(null);
                 } })),
             (!file || missingFile) && (react_1.default.createElement("div", { className: `${baseClass}__wrap` },
                 react_1.default.createElement("div", { className: `${baseClass}__buttons` },
-                    react_1.default.createElement(DocumentDrawerToggler, { className: `${baseClass}__toggler` },
-                        react_1.default.createElement(Button_1.default, { buttonStyle: "secondary", el: "div" }, t('uploadNewLabel', { label: (0, getTranslation_1.getTranslation)(collection.labels.singular, i18n) }))),
-                    react_1.default.createElement(ListDrawerToggler, { className: `${baseClass}__toggler` },
-                        react_1.default.createElement(Button_1.default, { buttonStyle: "secondary", el: "div" }, t('chooseFromExisting')))))),
+                    react_1.default.createElement(DocumentDrawerToggler, { className: `${baseClass}__toggler`, disabled: readOnly },
+                        react_1.default.createElement(Button_1.default, { buttonStyle: "secondary", el: "div", disabled: readOnly }, t('uploadNewLabel', { label: (0, getTranslation_1.getTranslation)(collection.labels.singular, i18n) }))),
+                    react_1.default.createElement(ListDrawerToggler, { className: `${baseClass}__toggler`, disabled: readOnly },
+                        react_1.default.createElement(Button_1.default, { buttonStyle: "secondary", el: "div", disabled: readOnly }, t('chooseFromExisting')))))),
             react_1.default.createElement(FieldDescription_1.default, { value: file, description: description }))),
-        react_1.default.createElement(DocumentDrawer, { onSave: onSave }),
-        react_1.default.createElement(ListDrawer, { onSelect: onSelect })));
+        !readOnly && react_1.default.createElement(DocumentDrawer, { onSave: onSave }),
+        !readOnly && react_1.default.createElement(ListDrawer, { onSelect: onSelect })));
 };
 exports.default = UploadInput;
 //# sourceMappingURL=Input.js.map

@@ -50,6 +50,9 @@ const richTextToHTML = (content) => {
                     case 'h6':
                         nodeHTML = `<h6>${(0, exports.richTextToHTML)(node.children)}</h6>`;
                         break;
+                    case 'blockquote':
+                        nodeHTML = `<blockquote>${(0, exports.richTextToHTML)(node.children)}</blockquote>`;
+                        break;
                     case 'ul':
                         nodeHTML = `<ul>${(0, exports.richTextToHTML)(node.children)}</ul>`;
                         break;

@@ -60,6 +60,10 @@ const collectionSchema = joi_1.default.object().keys({
         hideAPIURL: joi_1.default.bool(),
     }),
     fields: joi_1.default.array(),
+    indexes: joi_1.default.array().items(joi_1.default.object().keys({
+        fields: joi_1.default.object().required(),
+        options: joi_1.default.object(),
+    })),
     hooks: joi_1.default.object({
         beforeOperation: joi_1.default.array().items(joi_1.default.func()),
         beforeValidate: joi_1.default.array().items(joi_1.default.func()),
@@ -124,8 +128,8 @@ const collectionSchema = joi_1.default.object().keys({
         adminThumbnail: joi_1.default.alternatives().try(joi_1.default.string(), joi_1.default.func()),
         imageSizes: joi_1.default.array().items(joi_1.default.object().keys({
             name: joi_1.default.string(),
-            width: joi_1.default.number().allow(null),
-            height: joi_1.default.number().allow(null),
+            width: joi_1.default.number().integer().allow(null),
+            height: joi_1.default.number().integer().allow(null),
             crop: joi_1.default.string(), // TODO: add further specificity with joi.xor
         }).unknown()),
         mimeTypes: joi_1.default.array().items(joi_1.default.string()),
@@ -145,6 +149,10 @@ const collectionSchema = joi_1.default.object().keys({
             format: joi_1.default.string(),
             options: joi_1.default.object(),
         }),
+        trimOptions: joi_1.default.alternatives().try(joi_1.default.object().keys({
+            format: joi_1.default.string(),
+            options: joi_1.default.object(),
+        }), joi_1.default.string(), joi_1.default.number()),
     }), joi_1.default.boolean()),
     custom: joi_1.default.object().pattern(joi_1.default.string(), joi_1.default.any()),
 });

@@ -31,6 +31,8 @@ const react_1 = __importStar(require("react"));
 const context_1 = require("../Form/context");
 const getSiblingData_1 = __importDefault(require("../Form/getSiblingData"));
 const reduceFieldsToValues_1 = __importDefault(require("../Form/reduceFieldsToValues"));
+const DocumentInfo_1 = require("../../utilities/DocumentInfo");
+const Auth_1 = require("../../utilities/Auth");
 const withCondition = (Field) => {
     const CheckForCondition = (props) => {
         const { admin: { condition, } = {}, } = props;
@@ -42,23 +44,27 @@ const withCondition = (Field) => {
     const WithCondition = (props) => {
         const { name, path: pathFromProps, admin: { condition, } = {}, } = props;
         const path = typeof pathFromProps === 'string' ? pathFromProps : name;
+        const { user } = (0, Auth_1.useAuth)();
         const [fields, dispatchFields] = (0, context_1.useAllFormFields)();
+        const { id } = (0, DocumentInfo_1.useDocumentInfo)();
         const data = (0, reduceFieldsToValues_1.default)(fields, true);
         const siblingData = (0, getSiblingData_1.default)(fields, path);
+        // Manually provide ID to `data`
+        data.id = id;
         const hasCondition = Boolean(condition);
-        const currentlyPassesCondition = hasCondition ? condition(data, siblingData) : true;
+        const currentlyPassesCondition = hasCondition ? condition(data, siblingData, { user }) : true;
         const field = fields[path];
         const existingConditionPasses = field === null || field === void 0 ? void 0 : field.passesCondition;
         (0, react_1.useEffect)(() => {
             if (hasCondition) {
                 if (!existingConditionPasses && currentlyPassesCondition) {
-                    dispatchFields({ type: 'MODIFY_CONDITION', path, result: true });
+                    dispatchFields({ type: 'MODIFY_CONDITION', path, result: true, user });
                 }
                 if (!currentlyPassesCondition && (existingConditionPasses || typeof existingConditionPasses === 'undefined')) {
-                    dispatchFields({ type: 'MODIFY_CONDITION', path, result: false });
+                    dispatchFields({ type: 'MODIFY_CONDITION', path, result: false, user });
                 }
             }
-        }, [currentlyPassesCondition, existingConditionPasses, dispatchFields, path, hasCondition]);
+        }, [currentlyPassesCondition, existingConditionPasses, dispatchFields, path, hasCondition, user]);
         if (currentlyPassesCondition) {
             return react_1.default.createElement(Field, { ...props });
         }

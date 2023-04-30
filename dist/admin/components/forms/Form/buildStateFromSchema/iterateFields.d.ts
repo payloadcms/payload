@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next';
 import { User } from '../../../../../auth';
 import { Field as FieldSchema } from '../../../../../fields/config/types';
-import { Fields, Data } from '../types';
+import { Data, Fields } from '../types';
 type Args = {
     state: Fields;
     fields: FieldSchema[];

@@ -95,13 +95,17 @@ async function create(incomingArgs) {
     // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
+    let collectionAfterChangeFromBeforeChange;
     await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
         await priorHook;
-        data = (await hook({
+        const beforeChangeResult = (await hook({
             data,
             req,
             operation: 'create',
         })) || data;
+        collectionAfterChangeFromBeforeChange = beforeChangeResult.afterChange;
+        delete beforeChangeResult.afterChange;
+        data = beforeChangeResult;
     }, Promise.resolve());
     // /////////////////////////////////////
     // beforeChange - Fields
@@ -218,6 +222,14 @@ async function create(incomingArgs) {
     // /////////////////////////////////////
     // afterChange - Collection
     // /////////////////////////////////////
+    if (collectionAfterChangeFromBeforeChange) {
+        result = await collectionAfterChangeFromBeforeChange({
+            doc: result,
+            previousDoc: {},
+            req: args.req,
+            operation: 'create',
+        }) || result;
+    }
     await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
         await priorHook;
         result = await hook({
