@@ -1,5 +1,25 @@
 
 
+## [1.7.3](https://github.com/payloadcms/payload/compare/v1.7.2...v1.7.3) (2023-05-01)
+
+
+### Bug Fixes
+
+* [#2592](https://github.com/payloadcms/payload/issues/2592), allows usage of hidden fields within access query constraints ([#2599](https://github.com/payloadcms/payload/issues/2599)) ([a0bb13a](https://github.com/payloadcms/payload/commit/a0bb13a4123b51d770b364ddaee3dde1c5a3da53))
+* addds workaround for slate isBlock function issue ([#2596](https://github.com/payloadcms/payload/issues/2596)) ([8f6f13d](https://github.com/payloadcms/payload/commit/8f6f13dc93f49f5ba5384a9168ced5baec85e1fb))
+* bulk operations result type ([#2588](https://github.com/payloadcms/payload/issues/2588)) ([8382faa](https://github.com/payloadcms/payload/commit/8382faa0afc8118f4fb873c657a52c48abb2a6ad))
+* query on id throws 500 ([#2587](https://github.com/payloadcms/payload/issues/2587)) ([0ba22c3](https://github.com/payloadcms/payload/commit/0ba22c3aafca67be78814357edc668ed11ec4a97))
+* timestamp queries ([#2583](https://github.com/payloadcms/payload/issues/2583)) ([9c5107e](https://github.com/payloadcms/payload/commit/9c5107e86d70e36ac181c9d3ad51edacf9fc529a))
+
+
+### Features
+
+* Add new translation for romanian language ([#2556](https://github.com/payloadcms/payload/issues/2556)) ([fbf3a2a](https://github.com/payloadcms/payload/commit/fbf3a2a1b4633e704e467d9aec05f3ae0b900bae))
+* add persian translations ([#2553](https://github.com/payloadcms/payload/issues/2553)) ([c80f68a](https://github.com/payloadcms/payload/commit/c80f68af943c730996c9cdad87cf84d4d06a5777))
+* adjust stack trace for api error ([#2598](https://github.com/payloadcms/payload/issues/2598)) ([870838e](https://github.com/payloadcms/payload/commit/870838e7563b6767c53f4dc0288119087e3f9486))
+* allow customizing the link fields ([#2559](https://github.com/payloadcms/payload/issues/2559)) ([bf65228](https://github.com/payloadcms/payload/commit/bf6522898db353e75db11525ea5a1b58243333d8))
+* supports collection compound indexes ([#2529](https://github.com/payloadcms/payload/issues/2529)) ([85b3d57](https://github.com/payloadcms/payload/commit/85b3d579d3054aad2de793957cf6454332361327))
+
 ## [1.7.2](https://github.com/payloadcms/payload/compare/v1.7.1...v1.7.2) (2023-04-25)
 
 
