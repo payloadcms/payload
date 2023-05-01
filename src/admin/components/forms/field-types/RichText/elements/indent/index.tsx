@@ -9,6 +9,7 @@ import listTypes from '../listTypes';
 import { getCommonBlock } from '../getCommonBlock';
 import { unwrapList } from '../unwrapList';
 import { ElementNode } from '../../types';
+import { isBlockElement } from '../isBlockElement';
 
 const indentType = 'indent';
 
@@ -33,7 +34,7 @@ const indent = {
 
           const matchedParentList = Editor.above(editor, {
             at: listPath,
-            match: (n: ElementNode) => !Editor.isEditor(n) && Editor.isBlock(editor, n),
+            match: (n: ElementNode) => !Editor.isEditor(n) && isBlockElement(editor, n),
           });
 
           if (matchedParentList) {
