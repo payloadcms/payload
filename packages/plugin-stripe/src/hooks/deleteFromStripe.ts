@@ -36,8 +36,14 @@ export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async (args) 
 
     if (syncConfig) {
       try {
-        await stripe?.[syncConfig.stripeResourceType]?.del(doc.stripeID);
-        if (logs) payload.logger.info(`✅ Successfully deleted Stripe document with ID: '${doc.stripeID}'.`);
+        const found = await stripe?.[syncConfig.stripeResourceType]?.retrieve(doc.stripeID);
+
+        if (found) {
+          await stripe?.[syncConfig.stripeResourceType]?.del(doc.stripeID);
+          if (logs) payload.logger.info(`✅ Successfully deleted Stripe document with ID: '${doc.stripeID}'.`);
+        } else {
+          if (logs) payload.logger.info(`- Stripe document with ID: '${doc.stripeID}' not found, skipping...`);
+        }
       } catch (error: any) {
         throw new APIError(`Failed to delete Stripe document with ID: '${doc.stripeID}': ${error?.message || ''}`)
       }
