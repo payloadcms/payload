@@ -1,7 +1,6 @@
-
 import { singular } from 'pluralize';
 import type { JSONSchema4 } from 'json-schema';
-import { fieldAffectsData, Field, Option, FieldAffectingData, tabHasName } from '../fields/config/types';
+import { Field, FieldAffectingData, fieldAffectsData, Option, tabHasName } from '../fields/config/types';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 import deepCopyObject from './deepCopyObject';
@@ -401,19 +400,17 @@ export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: Sani
     entity.fields.unshift(idField);
   }
 
+  // mark timestamp fields required
   if ('timestamps' in entity && entity.timestamps !== false) {
-    entity.fields.push(
-      {
-        type: 'text',
-        name: 'createdAt',
-        required: true,
-      },
-      {
-        type: 'text',
-        name: 'updatedAt',
-        required: true,
-      },
-    );
+    entity.fields = entity.fields.map((field) => {
+      if (fieldAffectsData(field) && (field.name === 'createdAt' || field.name === 'updatedAt')) {
+        return {
+          ...field,
+          required: true,
+        };
+      }
+      return field;
+    });
   }
 
   if ('auth' in entity && entity.auth && !entity.auth?.disableLocalStrategy) {
