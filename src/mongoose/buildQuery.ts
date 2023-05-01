@@ -235,7 +235,6 @@ export class ParamParser {
 
     if (path) {
       const formattedValue = sanitizeQueryValue({
-        ctx: this,
         field,
         path,
         operator,
