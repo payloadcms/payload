@@ -189,9 +189,31 @@ export default buildConfig({
           name: 'name',
           type: 'text',
         },
+        {
+          name: 'hidden',
+          type: 'checkbox',
+          hidden: true,
+        },
       ],
       access: {
-        readVersions: () => false,
+        read: ({ req: { user } }) => {
+          if (user) return true;
+
+          return {
+            hidden: {
+              not_equals: true,
+            },
+          };
+        },
+        readVersions: ({ req: { user } }) => {
+          if (user) return true;
+
+          return {
+            'version.hidden': {
+              not_equals: true,
+            },
+          };
+        },
       },
     },
     {
