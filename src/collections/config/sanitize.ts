@@ -31,21 +31,20 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
   });
 
   if (sanitized.timestamps !== false) {
+    // add default timestamps fields only as needed
     let hasUpdatedAt = null;
     let hasCreatedAt = null;
-    let i = 0;
-    while (hasCreatedAt === null && hasUpdatedAt === null && i < sanitized.fields.length) {
-      const field = sanitized.fields[i];
-      i += 1;
+    sanitized.fields.some((field) => {
       if (fieldAffectsData(field)) {
         if (field.name === 'updatedAt') hasUpdatedAt = true;
         if (field.name === 'createdAt') hasCreatedAt = true;
       }
-    }
-    if (!hasCreatedAt) {
+      return hasCreatedAt && hasUpdatedAt;
+    });
+    if (!hasUpdatedAt) {
       sanitized.fields.push({
-        name: 'createdAt',
-        label: translations['general:createdAt'],
+        name: 'updatedAt',
+        label: translations['general:updatedAt'],
         type: 'date',
         admin: {
           hidden: true,
@@ -53,10 +52,10 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
         },
       });
     }
-    if (!hasUpdatedAt) {
+    if (!hasCreatedAt) {
       sanitized.fields.push({
-        name: 'updatedAt',
-        label: translations['general:updatedAt'],
+        name: 'createdAt',
+        label: translations['general:createdAt'],
         type: 'date',
         admin: {
           hidden: true,
