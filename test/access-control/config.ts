@@ -15,6 +15,8 @@ export const relyOnRequestHeadersSlug = 'rely-on-request-headers';
 export const docLevelAccessSlug = 'doc-level-access';
 export const hiddenFieldsSlug = 'hidden-fields';
 
+export const hiddenAccessSlug = 'hidden-access';
+
 const openAccess = {
   create: () => true,
   read: () => true,
@@ -319,6 +321,37 @@ export default buildConfig({
               hidden: true,
             },
           ],
+        },
+        {
+          name: 'hidden',
+          type: 'checkbox',
+          hidden: true,
+        },
+      ],
+    },
+    {
+      slug: hiddenAccessSlug,
+      access: {
+        read: ({ req: { user } }) => {
+          if (user) return true;
+
+          return {
+            hidden: {
+              not_equals: true,
+            },
+          };
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'hidden',
+          type: 'checkbox',
+          hidden: true,
         },
       ],
     },

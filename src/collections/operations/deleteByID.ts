@@ -79,23 +79,14 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: Where = {
-    and: [
-      {
-        id: {
-          equals: id,
-        },
-      },
-    ],
-  };
-
-  if (hasWhereAccessResult(accessResults)) {
-    queryToBuild.and.push(accessResults);
-  }
-
   const query = await Model.buildQuery({
     req,
-    where: queryToBuild,
+    where: {
+      id: {
+        equals: id,
+      },
+    },
+    access: accessResults,
     overrideAccess,
   });
 

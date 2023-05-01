@@ -4,7 +4,6 @@ import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection, TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
-import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { AccessResult } from '../../config/types';
@@ -72,27 +71,10 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // Access
   // /////////////////////////////////////
 
-  let queryToBuild: Where = {
-    and: [],
-  };
-
   let useEstimatedCount = false;
 
   if (where) {
-    queryToBuild = {
-      and: [],
-      ...where,
-    };
-
-    if (Array.isArray(where.AND)) {
-      queryToBuild.and = [
-        ...queryToBuild.and,
-        ...where.AND,
-      ];
-    }
-
-    const constraints = flattenWhereConstraints(queryToBuild);
-
+    const constraints = flattenWhereConstraints(where);
     useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
@@ -116,16 +98,13 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         limit,
       };
     }
-
-    if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.and.push(accessResult);
-    }
   }
 
   const query = await Model.buildQuery({
     req,
-    where: queryToBuild,
+    where,
     overrideAccess,
+    access: accessResult,
   });
 
   // /////////////////////////////////////

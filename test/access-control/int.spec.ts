@@ -3,7 +3,7 @@ import payload from '../../src';
 import { Forbidden } from '../../src/errors';
 import type { PayloadRequest } from '../../src/types';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { hiddenFieldsSlug, relyOnRequestHeadersSlug, requestHeaders, restrictedSlug, siblingDataSlug, slug } from './config';
+import { hiddenAccessSlug, hiddenFieldsSlug, relyOnRequestHeadersSlug, requestHeaders, restrictedSlug, siblingDataSlug, slug } from './config';
 import type { Restricted, Post, RelyOnRequestHeader } from './payload-types';
 import { firstArrayText, secondArrayText } from './shared';
 
@@ -357,6 +357,32 @@ describe('Access Control', () => {
 
         expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName });
       });
+    });
+  });
+
+  describe('Querying', () => {
+    it('should respect query constraint using hidden field', async () => {
+      await payload.create({
+        collection: hiddenAccessSlug,
+        data: {
+          title: 'hello',
+        },
+      });
+
+      await payload.create({
+        collection: hiddenAccessSlug,
+        data: {
+          title: 'hello',
+          hidden: true,
+        },
+      });
+
+      const { docs } = await payload.find({
+        collection: hiddenAccessSlug,
+        overrideAccess: false,
+      });
+
+      expect(docs).toHaveLength(1);
     });
   });
 });
