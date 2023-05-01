@@ -48,21 +48,21 @@ type ParamParserArgs = {
 }
 
 export class ParamParser {
-  collectionSlug?: string
+  collectionSlug?: string;
 
-  globalSlug?: string
+  globalSlug?: string;
 
-  overrideAccess: boolean
+  overrideAccess: boolean;
 
-  req: PayloadRequest
+  req: PayloadRequest;
 
   where: Where;
 
   model: any;
 
-  fields: Field[]
+  fields: Field[];
 
-  localizationConfig: SanitizedConfig['localization']
+  localizationConfig: SanitizedConfig['localization'];
 
   policies: {
     collections?: {
@@ -71,9 +71,9 @@ export class ParamParser {
     globals?: {
       [globalSlug: string]: GlobalPermission;
     };
-  }
+  };
 
-  errors: { path: string }[]
+  errors: { path: string }[];
 
   constructor({
     req,
@@ -235,7 +235,6 @@ export class ParamParser {
 
     if (path) {
       const formattedValue = sanitizeQueryValue({
-        ctx: this,
         field,
         path,
         operator,

@@ -442,7 +442,7 @@ describe('fields', () => {
     }
 
     describe('toolbar', () => {
-      test('should create new url link', async () => {
+      test('should create new url custom link', async () => {
         await navigateToRichTextFields();
 
         // Open link drawer
@@ -458,6 +458,7 @@ describe('fields', () => {
         await editLinkModal.locator('#field-url').fill('https://payloadcms.com');
         await wait(200);
         await editLinkModal.locator('button[type="submit"]').click();
+        await saveDocAndAssert(page);
 
         // Remove link from editor body
         await page.locator('span >> text="link text"').click();
@@ -465,6 +466,27 @@ describe('fields', () => {
         await expect(popup.locator('.rich-text-link__link-label')).toBeVisible();
         await popup.locator('.rich-text-link__link-close').click();
         await expect(page.locator('span >> text="link text"')).toHaveCount(0);
+      });
+
+      test('should create new internal link', async () => {
+        await navigateToRichTextFields();
+
+        // Open link drawer
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
+
+        // find the drawer
+        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        await expect(editLinkModal).toBeVisible();
+
+        // Fill values and click Confirm
+        await editLinkModal.locator('#field-text').fill('link text');
+        await editLinkModal.locator('label[for="field-linkType-internal"]').click();
+        await editLinkModal.locator('#field-doc .rs__control').click();
+        await page.keyboard.type('dev@');
+        await editLinkModal.locator('#field-doc .rs__menu .rs__option:has-text("dev@payloadcms.com")').click();
+        // await wait(200);
+        await editLinkModal.locator('button[type="submit"]').click();
+        await saveDocAndAssert(page);
       });
 
       test('should not create new url link when read only', async () => {
@@ -744,6 +766,14 @@ describe('fields', () => {
       await page.goto(url.create);
       await expect(page.locator('#field-relationWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
       await expect(page.locator('#field-relationHasManyWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
+    });
+
+    test('should filter relationship options', async () => {
+      await page.goto(url.create);
+      await page.locator('#field-relationship .rs__control').click();
+      await page.keyboard.type('seeded');
+      await page.locator('.rs__option:has-text("Seeded text document")').click();
+      await saveDocAndAssert(page);
     });
   });
 
