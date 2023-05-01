@@ -12,7 +12,9 @@ While Payload's built-in features come translated, you may want to also translat
 
 Here is an example of a simple collection supporting both English and Spanish editors:
 ```ts
-const Articles: CollectionConfig = {
+import { CollectionConfig } from 'payload/types';
+
+export const Articles: CollectionConfig = {
   slug: 'articles',
   labels: {
     singular: {

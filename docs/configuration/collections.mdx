@@ -39,7 +39,7 @@ It's often best practice to write your Collections in separate files and then im
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Orders: CollectionConfig = {
+export const Orders: CollectionConfig = {
 	slug: 'orders',
 	fields: [
 		{
@@ -95,7 +95,7 @@ If the function is specified, a Preview button will automatically appear in the 
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Posts: CollectionConfig = {
+export const Posts: CollectionConfig = {
 	slug: 'posts',
 	fields: [
 		{
