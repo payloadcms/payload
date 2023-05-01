@@ -20,7 +20,7 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 ### Config
 
 | Option              | Description                                                                                                                                                                                         |
-|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`name`** \*       | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
 | **`relationTo`** \* | Provide one or many collection `slug`s to be able to assign relationships to.                                                                                                                       |
 | **`filterOptions`** | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options).                                                                                     |
@@ -77,27 +77,34 @@ The `filterOptions` property can either be a `Where` query directly, or a functi
 | `id`          | The value of the collection `id`, will be `undefined` on create request              |
 | `user`        | The currently authenticated user object                                              |
 
-**Example:**
+### Example
 
 ```ts
-const relationshipField = {
-  name: "purchase",
-  type: "relationship",
-  relationTo: ["products", "services"],
-  filterOptions: ({ relationTo, siblingData }) => {
-    // returns a Where query dynamically by the type of relationship
-    if (relationTo === "products") {
-      return {
-        stock: { greater_than: siblingData.quantity },
-      };
-    }
+import { CollectionConfig } from "payload/types";
 
-    if (relationTo === "services") {
-      return {
-        isAvailable: { equals: true },
-      };
-    }
-  },
+export const ExampleCollection: CollectionConfig = {
+  slug: "example-collection",
+  fields: [
+    {
+      name: "purchase",
+      type: "relationship",
+      relationTo: ["products", "services"],
+      filterOptions: ({ relationTo, siblingData }) => {
+        // returns a Where query dynamically by the type of relationship
+        if (relationTo === "products") {
+          return {
+            stock: { greater_than: siblingData.quantity },
+          };
+        }
+
+        if (relationTo === "services") {
+          return {
+            isAvailable: { equals: true },
+          };
+        }
+      },
+    },
+  ],
 };
 ```
 
