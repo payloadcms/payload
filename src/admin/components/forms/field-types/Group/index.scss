@@ -35,6 +35,10 @@
     border-bottom: 0;
   }
 
+  &--within-tab {
+    align-self: baseline;
+  }
+
   &--within-tab:first-child {
     margin-top: 0;
     border-top: 0;
