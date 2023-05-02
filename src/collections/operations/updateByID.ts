@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
-import { Where, Document } from '../../types';
+import { Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
@@ -96,22 +96,13 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: Where = {
-    and: [
-      {
-        id: {
-          equals: id,
-        },
-      },
-    ],
-  };
-
-  if (hasWhereAccessResult(accessResults)) {
-    queryToBuild.and.push(accessResults);
-  }
-
   const query = await Model.buildQuery({
-    where: queryToBuild,
+    where: {
+      id: {
+        equals: id,
+      },
+    },
+    access: accessResults,
     req,
     overrideAccess,
   });

@@ -1,12 +1,9 @@
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
-import path from 'path';
 import { Configuration, WebpackPluginInstance } from 'webpack';
+import { SwcMinifyWebpackPlugin } from 'swc-minify-webpack-plugin';
 import { SanitizedConfig } from '../config/types';
 import getBaseConfig from './getBaseConfig';
-
-// eslint-disable-next-line import/no-extraneous-dependencies, @typescript-eslint/no-var-requires
-const SwcMinifyWebpackPlugin = require('swc-minify-webpack-plugin');
 
 export default (payloadConfig: SanitizedConfig): Configuration => {
   const baseConfig = getBaseConfig(payloadConfig) as any;

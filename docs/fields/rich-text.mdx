@@ -141,7 +141,7 @@ Custom `Leaf` objects follow a similar pattern but require you to define the `Le
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
@@ -371,5 +371,4 @@ import type {
   RichTextCustomElement,
   RichTextCustomLeaf,
 } from 'payload/types';
-
 ```

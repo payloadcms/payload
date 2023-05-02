@@ -60,7 +60,7 @@ _An asterisk denotes that a property above is required._
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Media: CollectionConfig = {
+export const Media: CollectionConfig = {
   slug: 'media',
   upload: {
     staticURL: '/media',
@@ -165,7 +165,7 @@ You can specify how Payload retrieves admin thumbnails for your upload-enabled C
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Media: CollectionConfig = {
+export const Media: CollectionConfig = {
   slug: 'media',
   upload: {
     staticURL: '/media',
@@ -200,7 +200,7 @@ Some example values are: `image/*`, `audio/*`, `video/*`, `image/png`, `applicat
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Media: CollectionConfig = {
+export const Media: CollectionConfig = {
   slug: 'media',
   upload: {
     staticURL: '/media',

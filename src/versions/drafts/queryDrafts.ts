@@ -37,20 +37,15 @@ export const queryDrafts = async <T extends TypeWithID>({
 
   const where = appendVersionToQueryKey(incomingWhere || {});
 
-  const versionQueryToBuild: Where = {
-    ...where,
-    and: [
-      ...where?.and || [],
-    ],
-  };
+  let versionAccessResult;
 
   if (hasWhereAccessResult(accessResult)) {
-    const versionAccessResult = appendVersionToQueryKey(accessResult);
-    versionQueryToBuild.and.push(versionAccessResult);
+    versionAccessResult = appendVersionToQueryKey(accessResult);
   }
 
   const versionQuery = await VersionModel.buildQuery({
-    where: versionQueryToBuild,
+    where,
+    access: versionAccessResult,
     req,
     overrideAccess,
   });
