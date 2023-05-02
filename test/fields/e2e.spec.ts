@@ -524,7 +524,7 @@ describe('fields', () => {
 
         const menu = page.locator('.relationship__wrap .rs__menu');
 
-        // array-fields has enableRichTextRelationship set to false
+        // array-fields has enableRichTextLink set to false
         await expect(menu).not.toContainText('Array Fields');
       });
 
