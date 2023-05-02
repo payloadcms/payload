@@ -1,4 +1,6 @@
-@import '../../../../scss/styles.scss';
+@import "../../../../scss/styles.scss";
+
+//  WHEN EXPANDED
 
 .collection-edit {
   width: 100%;
@@ -8,10 +10,12 @@
   }
 
   &__main {
-    width: calc(100% - #{base(15)});
+    width: calc(100% - #{base(2.6)}); // width: calc(100% - #{base(15)});
     display: flex;
     flex-direction: column;
     min-height: 100%;
+    //added
+    //margin-top: 10px;
   }
 
   &__header {
@@ -23,14 +27,17 @@
     }
   }
 
+  // right sidebar header
   &__collection-actions {
+    //background-color: red;
     list-style: none;
     margin: 0;
-    padding: base(1.5) 0 base(.5);
+    padding: base(0.5) base(0.5);
+    //padding: base(1.5) base(0.5);
     display: flex;
 
     li {
-      margin-right: base(.75);
+      margin-right: base(0.75);
     }
   }
 
@@ -40,20 +47,30 @@
     flex-grow: 1;
   }
 
+  // right sidebar body
   &__sidebar-wrap {
+    background-color: blue;
     position: fixed;
-    width: base(15);
+    width: base(
+      2.6
+    ); // width base(15); // this should be the same of the base in the main
     height: 100%;
     top: 0;
     right: 0;
     overflow: visible;
     border-left: 1px solid var(--theme-elevation-100);
+    // added line
+    padding-top: 10px;
   }
 
   &__sidebar {
     width: 100%;
     height: 100%;
     overflow-y: auto;
+    // added
+    background-color: purple;
+    margin-top: 75px;
+    //margin-left: 10px;
   }
 
   &__sidebar-sticky-wrap {
@@ -69,15 +86,30 @@
     padding-left: base(1.5);
   }
 
+  // where buttons are
   &__document-actions {
     padding-right: $baseline;
-    position: sticky;
+    position: absolute; // position: sticky;
     top: 0;
-    z-index: var(--z-nav);
+    // z-index: var(--z-nav);
+    // added lines
+    //background-color: red;
+    //@include blur-bg;
+    //background-color: pink;
+    background-color: var(--theme-elevation-0);
+    // backdrop-filter: blur(5px) contrast(50%) brightness(28%);
+    width: base(15);
+    //backdrop-filter: ;
+    // margin-left: -326px;
+    transform: translateX(-295px);
+    height: 6.58rem;
+    border-bottom: 1px solid var(--theme-elevation-100);
 
     > * {
       position: relative;
       z-index: 1;
+      //
+      margin-top: -6px;
     }
 
     @include mid-break {
@@ -88,23 +120,25 @@
   &__document-actions--has-2 {
     display: flex;
 
-    >* {
-      width: calc(50% - #{base(.5)});
+    > * {
+      width: calc(50% - #{base(0.5)});
     }
 
-    >*:first-child {
-      margin-right: base(.5);
+    > *:first-child {
+      margin-right: base(0.5); //margin-right: base(0.5);
+      // added line
+      margin-left: -15px;
     }
 
-    >*:last-child {
-      margin-left: base(.5);
+    > *:last-child {
+      margin-left: base(0.5); // margin-left: base(0.5);
     }
 
     .form-submit {
       .btn {
         width: 100%;
-        padding-left: base(.5);
-        padding-right: base(.5);
+        padding-left: base(0.5);
+        padding-right: base(0.5);
       }
     }
   }
@@ -126,7 +160,7 @@
     .preview-btn {
       display: inline-block;
       margin-top: 0;
-      width: calc(50% - #{base(.5)});
+      width: calc(50% - #{base(0.5)});
     }
   }
 
@@ -137,7 +171,7 @@
     list-style: none;
 
     li {
-      margin-bottom: base(.5);
+      margin-bottom: base(0.5);
 
       &:last-child {
         margin-bottom: 0;
@@ -151,7 +185,6 @@
 
   &__collection-actions,
   &__api-url {
-
     a,
     button {
       cursor: pointer;
@@ -228,7 +261,7 @@
       order: 1;
 
       li {
-        margin: 0 base(.5) 0 0;
+        margin: 0 base(0.5) 0 0;
       }
     }
 

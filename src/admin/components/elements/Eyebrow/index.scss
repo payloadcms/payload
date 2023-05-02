@@ -1,13 +1,20 @@
-@import '../../../scss/styles.scss';
+@import "../../../scss/styles.scss";
 
 .eyebrow {
-  @include blur-bg;
+  //@include blur-bg;
   position: sticky;
   top: 0;
   z-index: var(--z-nav);
-  padding: base(1.5) 0;
+  padding: base(1.2) 0px; // padding: base(1.5) 0px;
+  //
+  margin-right: 293px;
+  //background-color: yellow;
+  //box-shadow: none !important;
+  background-color: var(--theme-elevation-0);
+  border-bottom: 1px solid var(--theme-elevation-100);
 
   &__wrap {
+    //background-color: red;
     position: relative;
     z-index: 1;
     display: flex;
