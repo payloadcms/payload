@@ -202,9 +202,14 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           originalDoc,
           operation: 'update',
         })) || data;
-        collectionAfterChangeFromBeforeChange = beforeChangeResult.afterChange;
+        if (beforeChangeResult
+          && typeof beforeChangeResult === 'object'
+          && 'afterChange' in beforeChangeResult) {
+          collectionAfterChangeFromBeforeChange = beforeChangeResult.afterChange;
 
-        delete beforeChangeResult.afterChange;
+          delete beforeChangeResult.afterChange;
+        }
+
 
         data = beforeChangeResult as any;
       }, Promise.resolve());

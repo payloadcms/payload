@@ -63,6 +63,11 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
   originalDoc?: T;
 }) => any;
 
+type AfterChangeOrAny<T extends TypeWithID = any> = {
+  afterChange?: AfterChangeHook<T>;
+} | number | string | boolean | symbol | null | undefined;
+
+
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
   data: Partial<T>;
   req: PayloadRequest;
@@ -76,7 +81,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T;
-}) => ({afterChange?: AfterChangeHook<T>}|Promise<{afterChange?: AfterChangeHook<T>}>) & unknown;
+}) => AfterChangeOrAny<T> | Promise<AfterChangeOrAny<T>>;
 
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   doc: T;
