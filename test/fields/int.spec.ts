@@ -10,6 +10,7 @@ import { defaultText } from './collections/Text';
 import { blocksFieldSeedData } from './collections/Blocks';
 import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
 import { defaultNumber, numberDoc } from './collections/Number';
+import { dateDoc } from './collections/Date';
 
 let client;
 let serverURL;
@@ -38,6 +39,45 @@ describe('Fields', () => {
       expect(doc.text).toEqual(text);
       expect(doc.defaultFunction).toEqual(defaultText);
       expect(doc.defaultAsync).toEqual(defaultText);
+    });
+  });
+
+  describe('timestamps', () => {
+    const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10);
+    let doc;
+    beforeAll(async () => {
+      doc = await payload.create({
+        collection: 'date-fields',
+        data: dateDoc,
+      });
+    });
+
+    it('should query updatedAt', async () => {
+      const { docs } = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          updatedAt: {
+            greater_than_equal: tenMinutesAgo,
+          },
+        },
+      });
+
+      expect(docs.map(({ id }) => id)).toContain(doc.id);
+    });
+
+    it('should query createdAt', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            greater_than_equal: tenMinutesAgo,
+          },
+        },
+      });
+
+      expect(result.docs[0].id).toEqual(doc.id);
     });
   });
 

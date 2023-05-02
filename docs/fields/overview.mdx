@@ -19,7 +19,7 @@ The required `type` property on a field determines what values it can accept, ho
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Page: CollectionConfig = {
+export const Page: CollectionConfig = {
 	slug: 'pages',
 	fields: [
 		{
@@ -90,7 +90,7 @@ Example:
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Orders: CollectionConfig = {
+export const Orders: CollectionConfig = {
   slug: 'orders',
   fields: [
     {

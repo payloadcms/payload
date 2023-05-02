@@ -5,8 +5,6 @@ import { Collection, TypeWithID } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import { Where } from '../../types';
-import { hasWhereAccessResult } from '../../auth/types';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
 
@@ -68,22 +66,13 @@ async function findByID<T extends TypeWithID>(
   // If errors are disabled, and access returns false, return null
   if (accessResult === false) return null;
 
-  const queryToBuild: Where = {
-    and: [
-      {
-        _id: {
-          equals: id,
-        },
-      },
-    ],
-  };
-
-  if (hasWhereAccessResult(accessResult)) {
-    queryToBuild.and.push(accessResult);
-  }
-
   const query = await Model.buildQuery({
-    where: queryToBuild,
+    where: {
+      _id: {
+        equals: id,
+      },
+    },
+    access: accessResult,
     req,
     overrideAccess,
   });

@@ -1,9 +1,7 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
-import { Where } from '../../types';
 import { SanitizedGlobalConfig } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
-import { hasWhereAccessResult } from '../../auth';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
@@ -61,22 +59,13 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: Where = {
-    and: [
-      {
-        globalType: {
-          equals: slug,
-        },
-      },
-    ],
-  };
-
-  if (hasWhereAccessResult(accessResults)) {
-    queryToBuild.and.push(accessResults);
-  }
-
   const query = await Model.buildQuery({
-    where: queryToBuild,
+    where: {
+      globalType: {
+        equals: slug,
+      },
+    },
+    access: accessResults,
     req,
     overrideAccess,
     globalSlug: slug,

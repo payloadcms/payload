@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +10,7 @@ import DefaultList from './Default';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import { useStepNav } from '../../../elements/StepNav';
 import formatFields from './formatFields';
-import { Props, ListIndexProps, ListPreferences } from './types';
+import { ListIndexProps, ListPreferences, Props } from './types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { useSearchParams } from '../../../utilities/SearchParams';
 import { TableColumnsProvider } from '../../../elements/TableColumns';
@@ -46,7 +46,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const history = useHistory();
   const { t } = useTranslation('general');
   const [fetchURL, setFetchURL] = useState<string>('');
-  const [fields] = useState<Field[]>(() => formatFields(collection, t));
+  const [fields] = useState<Field[]>(() => formatFields(collection));
   const collectionPermissions = permissions?.collections?.[slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
   const newDocumentURL = `${admin}/collections/${slug}/create`;
