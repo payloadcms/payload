@@ -1,0 +1,1 @@
+{"version":3,"file":"getCookieExpiration.js","sourceRoot":"","sources":["../../src/utilities/getCookieExpiration.ts"],"names":[],"mappings":";;AAAA,MAAM,mBAAmB,GAAG,CAAC,OAAO,GAAG,IAAI,EAAE,EAAE;IAC7C,MAAM,WAAW,GAAG,IAAI,IAAI,EAAE,CAAC;IAC/B,WAAW,CAAC,UAAU,CAAC,WAAW,CAAC,UAAU,EAAE,GAAG,OAAO,CAAC,CAAC;IAC3D,OAAO,WAAW,CAAC;AACrB,CAAC,CAAC;AAEF,kBAAe,mBAAmB,CAAC"}

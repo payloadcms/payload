@@ -86,6 +86,7 @@ export const number = baseField.keys({
   defaultValue: joi.alternatives().try(
     joi.number(),
     joi.func(),
+    joi.any(),
   ),
   min: joi.number(),
   max: joi.number(),
@@ -94,6 +95,7 @@ export const number = baseField.keys({
     autoComplete: joi.string(),
     step: joi.number(),
   }),
+  hasMany: joi.boolean().default(false),
 });
 
 export const textarea = baseField.keys({

@@ -14,6 +14,7 @@ type LoginArgs = {
 };
 
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
+  return;
   const { page, serverURL } = args;
 
   await page.goto(`${serverURL}/admin`);

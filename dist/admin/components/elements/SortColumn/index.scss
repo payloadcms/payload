@@ -1,0 +1,51 @@
+@import '../../../scss/styles.scss';
+
+.sort-column {
+  &__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__buttons {
+    flex-shrink: 0;
+  }
+
+  &__label,
+  &__buttons,
+  .btn {
+    vertical-align: middle;
+    display: inline-block;
+  }
+
+  &__label {
+    cursor: default;
+  }
+
+  button.btn {
+    margin: 0;
+    opacity: .3;
+
+    &.sort-column--active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    &:hover {
+      opacity: .7;
+    }
+  }
+
+  &__asc {
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  &:hover {
+    .btn {
+      opacity: .4;
+      visibility: visible;
+    }
+  }
+}

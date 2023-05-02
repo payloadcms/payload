@@ -165,6 +165,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       req,
       operation: 'create',
     })) || data;
+
     if (beforeChangeResult
       && typeof beforeChangeResult === 'object'
       && 'afterChange' in beforeChangeResult) {
@@ -172,6 +173,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
       delete beforeChangeResult.afterChange;
     }
+
 
     data = beforeChangeResult as any;
   }, Promise.resolve());

@@ -1,0 +1,1 @@
+{"version":3,"file":"InvalidSchema.js","sourceRoot":"","sources":["../../src/errors/InvalidSchema.ts"],"names":[],"mappings":";;;;;AAAA,8DAAqC;AACrC,0DAAkC;AAElC,MAAM,aAAc,SAAQ,kBAAQ;IAClC,YAAY,OAAe,EAAE,OAAY;QACvC,KAAK,CAAC,OAAO,EAAE,qBAAU,CAAC,qBAAqB,EAAE,OAAO,CAAC,CAAC;IAC5D,CAAC;CACF;AAED,kBAAe,aAAa,CAAC"}

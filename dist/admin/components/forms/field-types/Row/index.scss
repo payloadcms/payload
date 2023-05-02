@@ -1,0 +1,31 @@
+@import '../../../../scss/styles.scss';
+
+.field-type.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: - base(.5);
+  margin-right: - base(.5);
+  width: calc(100% + #{$baseline});
+  margin-bottom: 0;
+
+  > * {
+    padding-left: base(.5);
+    padding-right: base(.5);
+    flex-grow: 1;
+  }
+
+  @include mid-break {
+    display: block;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+
+    > * {
+      margin-left: 0;
+      margin-right: 0;
+      width: 100% !important;
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+}

@@ -1,0 +1,95 @@
+@import '../../../../scss/styles.scss';
+
+.checkbox {
+  position: relative;
+  margin-bottom: $baseline;
+
+  input[type=checkbox] {
+    display: none;
+  }
+
+  .tooltip {
+    right: auto;
+    position: relative;
+    margin-bottom: .2em;
+    max-width: fit-content;
+  }
+
+  &__error-wrap {
+    position: relative;
+  }
+}
+
+
+.custom-checkbox {
+  label {
+    padding-bottom: 0;
+  }
+
+  input {
+    // hidden HTML checkbox
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+  }
+
+  &__input {
+    // visible checkbox
+    @include formInput;
+    padding: 0;
+    line-height: 0;
+    position: relative;
+    width: $baseline;
+    height: $baseline;
+    margin-right: base(.5);
+
+    svg {
+      opacity: 0;
+    }
+  }
+
+  &--read-only {
+    .custom-checkbox__input {
+      background-color: var(--theme-elevation-100);
+    }
+
+    label {
+      color: var(--theme-elevation-400);
+    }
+  }
+
+  button {
+    @extend %btn-reset;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    &:focus,
+    &:active {
+      outline: none;
+    }
+
+    &:focus {
+      .custom-checkbox__input {
+        box-shadow: 0 0 3px 3px var(--theme-success-400);
+      }
+    }
+
+    &:hover {
+      svg {
+        opacity: .2;
+      }
+    }
+  }
+
+  &--checked {
+    button {
+      .custom-checkbox__input {
+        svg {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}

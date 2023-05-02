@@ -1,0 +1,24 @@
+import React from 'react';
+import { OptionObject, SelectField } from '../../../../../fields/config/types';
+import { Description } from '../../FieldDescription/types';
+import { Option } from '../../../elements/ReactSelect/types';
+import './index.scss';
+export type SelectInputProps = Omit<SelectField, 'type' | 'value' | 'options'> & {
+    showError?: boolean;
+    errorMessage?: string;
+    readOnly?: boolean;
+    path: string;
+    required?: boolean;
+    value?: string | string[];
+    description?: Description;
+    onChange?: (value: Option) => void;
+    style?: React.CSSProperties;
+    className?: string;
+    width?: string;
+    hasMany?: boolean;
+    isSortable?: boolean;
+    options?: OptionObject[];
+    isClearable?: boolean;
+};
+declare const SelectInput: React.FC<SelectInputProps>;
+export default SelectInput;

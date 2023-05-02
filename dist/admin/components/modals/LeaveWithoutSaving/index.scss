@@ -1,0 +1,20 @@
+@import '../../../scss/styles.scss';
+
+.leave-without-saving {
+  @include blur-bg;
+  position: fixed;
+  z-index: calc(var(--z-modal) + 1);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  &__template {
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn {
+    margin-right: $baseline;
+  }
+}

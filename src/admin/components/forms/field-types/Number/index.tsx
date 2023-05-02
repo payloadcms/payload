@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useField from '../../useField';
 import Label from '../../Label';
@@ -8,8 +8,10 @@ import withCondition from '../../withCondition';
 import { number } from '../../../../../fields/validations';
 import { Props } from './types';
 import { getTranslation } from '../../../../../utilities/getTranslation';
+import { Option } from '../../../elements/ReactSelect/types';
 
 import './index.scss';
+import ReactSelect from '../../../elements/ReactSelect';
 
 const NumberField: React.FC<Props> = (props) => {
   const {
@@ -20,6 +22,7 @@ const NumberField: React.FC<Props> = (props) => {
     label,
     max,
     min,
+    hasMany,
     admin: {
       readOnly,
       style,
@@ -37,8 +40,8 @@ const NumberField: React.FC<Props> = (props) => {
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, min, max, required });
-  }, [validate, min, max, required]);
+    return validate(value, { ...options, min, max, required, hasMany });
+  }, [validate, min, max, required, hasMany]);
 
   const {
     value,
@@ -67,7 +70,48 @@ const NumberField: React.FC<Props> = (props) => {
     className,
     showError && 'error',
     readOnly && 'read-only',
+    hasMany && 'has-many',
   ].filter(Boolean).join(' ');
+
+  const [valueToRender, setValueToRender] = useState<{label: any, value: any}[]>([]);
+
+  const onMultiTextChange = useCallback((selectedOption) => {
+    console.log('selectedOption', selectedOption);
+    if (!readOnly) {
+      let newValue;
+      if (!selectedOption) {
+        newValue = [];
+      } else if (Array.isArray(selectedOption)) {
+        newValue = selectedOption.map((option) => option.value);
+      } else {
+        newValue = [selectedOption.value];
+      }
+
+      console.log('newValue', newValue);
+      setValue(newValue);
+    }
+  }, [
+    readOnly,
+    setValue,
+  ]);
+
+  // useeffect update valueToRender:
+  useEffect(() => {
+    if (hasMany && Array.isArray(value)) {
+      setValueToRender(value.map((val) => {
+        return {
+          label: val,
+          value: val,
+        };
+      }));
+    } else if (value) {
+      setValueToRender([{
+        label: value,
+        value,
+      }]);
+    }
+  }, [value, hasMany]);
+
 
   return (
     <div
@@ -86,21 +130,36 @@ const NumberField: React.FC<Props> = (props) => {
         label={label}
         required={required}
       />
-      <input
-        id={`field-${path.replace(/\./gi, '__')}`}
-        value={typeof value === 'number' ? value : ''}
-        onChange={handleChange}
-        disabled={readOnly}
-        placeholder={getTranslation(placeholder, i18n)}
-        type="number"
-        name={path}
-        step={step}
-        onWheel={(e) => {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          e.target.blur();
-        }}
-      />
+      {hasMany ? (
+        <ReactSelect
+          onChange={onMultiTextChange}
+          value={valueToRender as Option[]}
+          showError={showError}
+          isDisabled={readOnly}
+          options={[]}
+          isMultiText
+          isMulti
+          isSortable
+          isClearable
+        />
+      ) : (
+        <input
+          id={`field-${path.replace(/\./gi, '__')}`}
+          value={typeof value === 'number' ? value : ''}
+          onChange={handleChange}
+          disabled={readOnly}
+          placeholder={getTranslation(placeholder, i18n)}
+          type="number"
+          name={path}
+          step={step}
+          onWheel={(e) => {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            e.target.blur();
+          }}
+        />
+      )}
+
       <FieldDescription
         value={value}
         description={description}

@@ -1,0 +1,1 @@
+{"version":3,"file":"getIDType.js","sourceRoot":"","sources":["../../src/utilities/getIDType.ts"],"names":[],"mappings":";;;AAEO,MAAM,SAAS,GAAG,CAAC,OAAqB,EAAkC,EAAE;IACjF,IAAI,OAAO,EAAE;QACX,OAAO,OAAO,CAAC,IAAI,KAAK,QAAQ,CAAC,CAAC,CAAC,QAAQ,CAAC,CAAC,CAAC,MAAM,CAAC;KACtD;IACD,OAAO,UAAU,CAAC;AACpB,CAAC,CAAC;AALW,QAAA,SAAS,aAKpB"}

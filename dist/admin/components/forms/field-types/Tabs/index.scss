@@ -1,0 +1,115 @@
+@import '../../../../scss/styles.scss';
+
+.tabs-field {
+  margin-top: base(2);
+  margin-left: calc(var(--gutter-h) * -1);
+  margin-right: calc(var(--gutter-h) * -1);
+  margin-bottom: base(2);
+
+  &__content-wrap {
+    padding-left: var(--gutter-h);
+    padding-right: var(--gutter-h);
+  }
+
+  &--within-collapsible {
+    margin: 0 calc(#{$baseline} * -1);
+
+    .tabs-field__content-wrap {
+      padding-left: $baseline;
+      padding-right: $baseline;
+    }
+
+    .tabs-field__tabs {
+
+      &:before,
+      &:after {
+        content: ' ';
+        display: block;
+        width: $baseline,
+      }
+    }
+  }
+
+  &__tabs-wrap {
+    overflow: auto;
+    margin-bottom: $baseline;
+  }
+
+  &__tabs {
+    border-bottom: 1px solid var(--theme-elevation-100);
+    display: inline-flex;
+    min-width: 100%;
+    vertical-align: bottom;
+
+    &:before,
+    &:after {
+      content: ' ';
+      display: block;
+      width: var(--gutter-h);
+      flex-shrink: 0;
+    }
+  }
+
+  &__tab-button {
+    @extend %btn-reset;
+    @extend %h4;
+    padding-bottom: base(.75);
+    margin: 0 $baseline 0 0;
+    cursor: pointer;
+    opacity: .5;
+    position: relative;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &:last-child {
+      margin: 0;
+    }
+
+    &:after {
+      content: ' ';
+      position: absolute;
+      right: 0;
+      bottom: -1px;
+      left: 0;
+      height: 1px;
+      background: var(--theme-elevation-800);
+      opacity: 0;
+    }
+
+    &:hover {
+      opacity: .75;
+
+      &:after {
+        opacity: .2;
+      }
+    }
+  }
+
+  &__tab-button--active {
+    opacity: 1 !important;
+
+    &:after {
+      opacity: 1 !important;
+      height: 2px;
+    }
+  }
+
+  &__description {
+    margin-bottom: $baseline;
+  }
+
+  @include small-break {
+    &--within-collapsible {
+      margin-left: calc(var(--gutter-h) * -1);
+      margin-right: calc(var(--gutter-h) * -1);
+    }
+
+    &__tab-button {
+      margin: 0 base(.75) 0 0;
+
+      &:last-child {
+        margin: 0;
+      }
+    }
+  }
+}

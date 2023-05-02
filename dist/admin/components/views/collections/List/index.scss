@@ -1,0 +1,134 @@
+@import '../../../../scss/styles';
+
+.collection-list {
+  width: 100%;
+  margin-bottom: base(2);
+
+  &__wrap {
+    padding-top: $baseline;
+    padding-bottom: $baseline;
+  }
+
+  &__header {
+    margin-bottom: $baseline;
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+
+    h1 {
+      margin: 0 base(.75) 0 0;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .pill {
+      margin: base(.5) 0 base(.25);
+    }
+  }
+
+  &__sub-header {
+    flex-basis: 100%;
+    margin-top: base(.25);
+  }
+
+  .table {
+    table {
+      width: 100%;
+      overflow: auto;
+
+      #heading-_select,
+      .cell-_select {
+        min-width: unset;
+        width: auto;
+      }
+    }
+  }
+
+  &__page-controls {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .paginator {
+    margin-bottom: 0;
+  }
+
+  &__page-info {
+    margin-right: base(1);
+    margin-left: auto;
+  }
+
+  &__list-selection {
+    position: fixed;
+    bottom: 0;
+    z-index: 10;
+    padding: base(.75) 0;
+    width: 100%;
+    background-color: var(--theme-bg);
+
+    .btn {
+      margin: 0 0 0 base(.5);
+    }
+
+    .btn {
+      background-color: var(--theme-elevation-100);
+      cursor: pointer;
+      padding: 0 base(.25);
+      border-radius: $style-radius-s;
+
+      &:hover {
+        background-color: var(--theme-elevation-200);
+      }
+    }
+  }
+
+  &__list-selection-actions {
+    display: flex;
+    gap: base(.25);
+  }
+
+  &__shimmer {
+    margin-top: base(1.75);
+    width: 100%;
+    >div {
+      margin-top: 8px;
+    }
+  }
+
+  @include mid-break {
+    &__wrap {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    &__header {
+      .pill {
+        margin-bottom: base(.0625);
+      }
+    }
+
+    &__search-input {
+      margin: 0;
+    }
+
+    &__page-controls {
+      flex-wrap: wrap;
+    }
+
+    &__page-info {
+      margin-left: 0;
+    }
+
+    .paginator {
+      width: 100%;
+      margin-bottom: $baseline;
+    }
+  }
+
+  @include small-break {
+    margin-bottom: base(3);
+  }
+}

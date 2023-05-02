@@ -20,8 +20,28 @@ export const PostsCollection: CollectionConfig = {
   },
   fields: [
     {
-      name: 'text',
-      type: 'text',
+      name: 'multinumber',
+      type: 'number',
+      hasMany: true,
+    },
+    {
+      name: 'select',
+      type: 'select',
+      hasMany: true,
+      options: [
+        { label: 'One', value: 'one' },
+        { label: 'Two', value: 'two' },
+      ],
+    },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'number',
+          type: 'number',
+        },
+      ],
     },
     {
       name: 'associatedMedia',

@@ -1,0 +1,60 @@
+@import '../../../scss/styles';
+
+.dashboard {
+  width: 100%;
+
+  &__wrap {
+    padding-bottom: base(2);
+  }
+
+  &__card-list {
+    width: calc(100% + #{$baseline});
+    margin: 0 - base(.5);
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+
+    li {
+      width: 20%;
+      margin-bottom: $baseline;
+    }
+
+    .card {
+      height: 100%;
+      margin: 0 base(.5);
+    }
+  }
+
+  @include large-break {
+    li {
+      width: 25%;
+    }
+  }
+
+  @include mid-break {
+    &__wrap {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    li {
+      width: 33.33%;
+    }
+  }
+
+  @include small-break {
+    &__card-list {
+      width: calc(100% + #{base(.5)});
+      margin: 0 - base(.25);
+    }
+
+    li {
+      width: 50%;
+    }
+
+    .card {
+      margin: 0 base(.25) base(.5);
+    }
+  }
+}
