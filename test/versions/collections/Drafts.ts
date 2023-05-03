@@ -1,5 +1,5 @@
 import type { CollectionConfig } from '../../../src/collections/config/types';
-import { CustomSaveButton } from '../elements/CustomSaveButton';
+import { CustomPublishButton } from '../elements/CustomSaveButton';
 import { draftSlug } from '../shared';
 
 const DraftPosts: CollectionConfig = {
@@ -10,7 +10,7 @@ const DraftPosts: CollectionConfig = {
     preview: () => 'https://payloadcms.com',
     components: {
       elements: {
-        PublishButton: CustomSaveButton,
+        PublishButton: CustomPublishButton,
       },
     },
   },

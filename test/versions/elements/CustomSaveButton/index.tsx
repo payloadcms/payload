@@ -3,7 +3,7 @@ import { CustomPublishButtonProps } from '../../../../src/admin/components/eleme
 
 import classes from './index.module.scss';
 
-export const CustomSaveButton: CustomPublishButtonProps = ({ DefaultButton, ...rest }) => {
+export const CustomPublishButton: CustomPublishButtonProps = ({ DefaultButton, ...rest }) => {
   return (
     <div className={classes.customButton}>
       <DefaultButton {...rest} />
