@@ -11,6 +11,9 @@ import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 import { BuildQueryArgs } from '../../mongoose/buildQuery';
+import { CustomSaveButtonProps } from '../../admin/components/elements/Save';
+import { CustomSaveDraftButtonProps } from '../../admin/components/elements/SaveDraft';
+import { CustomPublishButtonProps } from '../../admin/components/elements/Publish';
 
 type Register<T = any> = (doc: T, password: string) => T;
 
@@ -193,6 +196,24 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
+    elements?: {
+      /**
+       * Replaces the "Save" button
+       * + drafts must be disabled
+       */
+      SaveButton?: CustomSaveButtonProps
+      /**
+       * Replaces the "Publish" button
+       * + drafts must be enabled
+       */
+      PublishButton?: CustomPublishButtonProps
+      /**
+       * Replaces the "Save Draft" button
+       * + drafts must be enabled
+       * + autosave must be disabled
+       */
+      SaveDraftButton?: CustomSaveDraftButtonProps
+    },
     views?: {
       Edit?: React.ComponentType<any>
       List?: React.ComponentType<any>
@@ -312,7 +333,7 @@ export type CollectionConfig = {
   custom?: Record<string, any>;
 };
 
-export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions'| 'endpoints'> {
+export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions' | 'endpoints'> {
   auth: Auth;
   upload: Upload;
   fields: Field[];

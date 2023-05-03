@@ -7,6 +7,9 @@ import { PayloadRequest } from '../../express/types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types';
+import { CustomSaveButtonProps } from '../../admin/components/elements/Save';
+import { CustomSaveDraftButtonProps } from '../../admin/components/elements/SaveDraft';
+import { CustomPublishButtonProps } from '../../admin/components/elements/Publish';
 
 export type TypeWithID = {
   id: string | number
@@ -70,6 +73,24 @@ export type GlobalAdminOptions = {
     views?: {
       Edit?: React.ComponentType<any>
     }
+    elements?: {
+      /**
+       * Replaces the "Save" button
+       * + drafts must be disabled
+       */
+      SaveButton?: CustomSaveButtonProps
+      /**
+       * Replaces the "Publish" button
+       * + drafts must be enabled
+       */
+      PublishButton?: CustomPublishButtonProps
+      /**
+       * Replaces the "Save Draft" button
+       * + drafts must be enabled
+       * + autosave must be disabled
+       */
+      SaveDraftButton?: CustomSaveDraftButtonProps
+    },
   };
   /**
    * Function to generate custom preview URL

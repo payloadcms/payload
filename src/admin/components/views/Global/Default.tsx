@@ -4,7 +4,6 @@ import { useConfig } from '../../utilities/Config';
 import Eyebrow from '../../elements/Eyebrow';
 import Form from '../../forms/Form';
 import PreviewButton from '../../elements/PreviewButton';
-import FormSubmit from '../../forms/Submit';
 import RenderFields from '../../forms/RenderFields';
 import CopyToClipboard from '../../elements/CopyToClipboard';
 import Meta from '../../utilities/Meta';
@@ -14,8 +13,9 @@ import VersionsCount from '../../elements/VersionsCount';
 import { Props } from './types';
 import ViewDescription from '../../elements/ViewDescription';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import SaveDraft from '../../elements/SaveDraft';
-import Publish from '../../elements/Publish';
+import { SaveDraft } from '../../elements/SaveDraft';
+import { Publish } from '../../elements/Publish';
+import { Save } from '../../elements/Save';
 import Status from '../../elements/Status';
 import Autosave from '../../elements/Autosave';
 import { OperationContext } from '../../utilities/OperationProvider';
@@ -108,18 +108,26 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                           generatePreviewURL={preview}
                         />
                       )}
+
                       {hasSavePermission && (
                         <React.Fragment>
                           {global.versions?.drafts && (
                             <React.Fragment>
                               {!global.versions.drafts.autosave && (
-                                <SaveDraft />
+                                <SaveDraft
+                                  CustomComponent={global?.admin?.components?.elements?.SaveDraftButton}
+                                />
                               )}
-                              <Publish />
+
+                              <Publish
+                                CustomComponent={global?.admin?.components?.elements?.PublishButton}
+                              />
                             </React.Fragment>
                           )}
                           {!global.versions?.drafts && (
-                            <FormSubmit buttonId="action-save">{t('save')}</FormSubmit>
+                            <Save
+                              CustomComponent={global?.admin?.components?.elements?.SaveButton}
+                            />
                           )}
                         </React.Fragment>
                       )}
