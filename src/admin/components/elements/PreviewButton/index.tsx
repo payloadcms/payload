@@ -1,22 +1,45 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
+import { GeneratePreviewURL } from '../../../../config/types';
 import { useAuth } from '../../utilities/Auth';
 import Button from '../Button';
-import { Props } from './types';
 import { useLocale } from '../../utilities/Locale';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useConfig } from '../../utilities/Config';
-
-import './index.scss';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 const baseClass = 'preview-btn';
 
-const PreviewButton: React.FC<Props> = (props) => {
-  const {
-    generatePreviewURL,
-  } = props;
+export type CustomPreviewButtonProps = React.ComponentType<DefaultPreviewButtonProps & {
+  DefaultButton: React.ComponentType<DefaultPreviewButtonProps>;
+}>
+export type DefaultPreviewButtonProps = {
+  preview: () => void;
+  disabled: boolean;
+  label: string;
+};
+const DefaultPreviewButton: React.FC<DefaultPreviewButtonProps> = ({ preview, disabled, label }) => {
+  return (
+    <Button
+      className={baseClass}
+      buttonStyle="secondary"
+      onClick={preview}
+      disabled={disabled}
+    >
+      {label}
+    </Button>
+  );
+};
 
+type Props = {
+  CustomComponent?: CustomPreviewButtonProps
+  generatePreviewURL?: GeneratePreviewURL
+}
+const PreviewButton: React.FC<Props> = ({
+  CustomComponent,
+  generatePreviewURL,
+}) => {
   const { id, collection, global } = useDocumentInfo();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +52,7 @@ const PreviewButton: React.FC<Props> = (props) => {
   // we need to regenerate the preview URL every time the button is clicked
   // to do this we need to fetch the document data fresh from the API
   // this will ensure the latest data is used when generating the preview URL
-  const handleClick = useCallback(async () => {
+  const preview = useCallback(async () => {
     if (!generatePreviewURL || isGeneratingPreviewURL.current) return;
     isGeneratingPreviewURL.current = true;
 
@@ -54,14 +77,16 @@ const PreviewButton: React.FC<Props> = (props) => {
   }, [serverURL, api, collection, global, id, generatePreviewURL, locale, token, t]);
 
   return (
-    <Button
-      className={baseClass}
-      buttonStyle="secondary"
-      onClick={handleClick}
-      disabled={isLoading || !generatePreviewURL}
-    >
-      {isLoading ? t('general:loading') : t('preview')}
-    </Button>
+    <RenderCustomComponent
+      CustomComponent={CustomComponent}
+      DefaultComponent={DefaultPreviewButton}
+      componentProps={{
+        preview,
+        disabled: isLoading || !generatePreviewURL,
+        label: isLoading ? t('general:loading') : t('preview'),
+        DefaultButton: DefaultPreviewButton,
+      }}
+    />
   );
 };
 
