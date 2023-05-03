@@ -7,7 +7,6 @@ import Button from '../Button';
 import { useLocale } from '../../utilities/Locale';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useConfig } from '../../utilities/Config';
-
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 const baseClass = 'preview-btn';
