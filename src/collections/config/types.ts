@@ -11,9 +11,7 @@ import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 import { BuildQueryArgs } from '../../mongoose/buildQuery';
-import { CustomSaveButtonProps } from '../../admin/components/elements/Save';
-import { CustomSaveDraftButtonProps } from '../../admin/components/elements/SaveDraft';
-import { CustomPublishButtonProps } from '../../admin/components/elements/Publish';
+import { CustomPreviewButtonProps, CustomPublishButtonProps, CustomSaveButtonProps, CustomSaveDraftButtonProps } from '../../admin/components/elements/types';
 
 type Register<T = any> = (doc: T, password: string) => T;
 
@@ -213,6 +211,10 @@ export type CollectionAdminOptions = {
        * + autosave must be disabled
        */
       SaveDraftButton?: CustomSaveDraftButtonProps
+      /**
+       * Replaces the "Preview" button
+       */
+      PreviewButton?: CustomPreviewButtonProps
     },
     views?: {
       Edit?: React.ComponentType<any>

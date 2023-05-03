@@ -30,6 +30,7 @@ const globalSchema = joi.object().keys({
         SaveButton: componentSchema,
         PublishButton: componentSchema,
         SaveDraftButton: componentSchema,
+        PreviewButton: componentSchema,
       }),
     }),
     preview: joi.func(),

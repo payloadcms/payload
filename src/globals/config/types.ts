@@ -7,9 +7,7 @@ import { PayloadRequest } from '../../express/types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types';
-import { CustomSaveButtonProps } from '../../admin/components/elements/Save';
-import { CustomSaveDraftButtonProps } from '../../admin/components/elements/SaveDraft';
-import { CustomPublishButtonProps } from '../../admin/components/elements/Publish';
+import { CustomSaveButtonProps, CustomSaveDraftButtonProps, CustomPublishButtonProps, CustomPreviewButtonProps } from '../../admin/components/elements/types';
 
 export type TypeWithID = {
   id: string | number
@@ -90,6 +88,10 @@ export type GlobalAdminOptions = {
        * + autosave must be disabled
        */
       SaveDraftButton?: CustomSaveDraftButtonProps
+      /**
+       * Replaces the "Preview" button
+       */
+      PreviewButton?: CustomPreviewButtonProps
     },
   };
   /**

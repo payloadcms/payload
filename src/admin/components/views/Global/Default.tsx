@@ -106,6 +106,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                       {(preview && (!global.versions?.drafts || global.versions?.drafts?.autosave)) && (
                         <PreviewButton
                           generatePreviewURL={preview}
+                          CustomComponent={global?.admin?.components?.elements?.PreviewButton}
                         />
                       )}
 
@@ -136,6 +137,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                       {(preview && (global.versions?.drafts && !global.versions?.drafts?.autosave)) && (
                         <PreviewButton
                           generatePreviewURL={preview}
+                          CustomComponent={global?.admin?.components?.elements?.PreviewButton}
                         />
                       )}
                       {global.versions?.drafts && (

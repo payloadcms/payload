@@ -66,6 +66,7 @@ const collectionSchema = joi.object().keys({
         SaveButton: componentSchema,
         PublishButton: componentSchema,
         SaveDraftButton: componentSchema,
+        PreviewButton: componentSchema,
       }),
     }),
     pagination: joi.object({

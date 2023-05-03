@@ -216,6 +216,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         {(isEditing && preview && (!collection.versions?.drafts || collection.versions?.drafts?.autosave)) && (
                           <PreviewButton
                             generatePreviewURL={preview}
+                            CustomComponent={collection?.admin?.components?.elements?.PreviewButton}
                           />
                         )}
 
@@ -244,6 +245,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         {(isEditing && preview && (collection.versions?.drafts && !collection.versions?.drafts?.autosave)) && (
                           <PreviewButton
                             generatePreviewURL={preview}
+                            CustomComponent={collection?.admin?.components?.elements?.PreviewButton}
                           />
                         )}
 

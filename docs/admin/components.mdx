@@ -84,6 +84,7 @@ You can override components on a Collection-by-Collection basis via each Collect
 | **`elements.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
 | **`elements.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
 | **`elements.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
+| **`elements.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
 
 #### Examples
 
@@ -95,6 +96,7 @@ import {
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
   CustomPublishButtonProps,
+  CustomPreviewButtonProps,
 } from "payload/types";
 
 export const CustomSaveButton: CustomSaveButtonProps = ({
@@ -123,6 +125,15 @@ export const CustomPublishButton: CustomPublishButtonProps = ({
 }) => {
   return <DefaultButton label={label} disabled={disabled} publish={publish} />;
 };
+
+export const CustomPreviewButton: CustomPreviewButtonProps = ({
+  DefaultButton,
+  disabled,
+  label,
+  preview,
+}) => {
+  return <DefaultButton label={label} disabled={disabled} preview={preview} />;
+};
 ```
 
 ### Globals
@@ -135,6 +146,7 @@ As with Collections, You can override components on a global-by-global basis via
 | **`elements.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
 | **`elements.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
 | **`elements.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
+| **`elements.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
 
 ### Fields
 
