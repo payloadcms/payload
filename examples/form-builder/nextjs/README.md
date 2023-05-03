@@ -6,9 +6,9 @@ This example repo was made explicitly to demonstrate the power and convenience o
 
 ## Getting Started
 
-### Payload CMS
+### Payload
 
-First you'll need a running CMS. If you have not done so already, open up the `cms` folder and follow the setup instructions. Take note of your server URL, you'll need this in the next step.
+First you'll need a running Payload app. If you have not done so already, open up the `cms` folder and follow the setup instructions. Take note of your server URL, you'll need this in the next step.
 
 ### Next.js App
 
