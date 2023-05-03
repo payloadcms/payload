@@ -49,11 +49,6 @@ export type EmailTransportOptions = Email & {
   transportOptions: SMTPConnection.Options;
 };
 
-export type GraphQLExtension = (
-  graphQL: typeof GraphQL,
-  payload: Payload
-) => Record<string, unknown>;
-
 export type EmailOptions = EmailTransport | EmailTransportOptions | Email;
 
 /**
@@ -75,6 +70,11 @@ export function hasTransportOptions(
 ): emailConfig is EmailTransportOptions {
   return (emailConfig as EmailTransportOptions).transportOptions !== undefined;
 }
+
+export type GraphQLExtension = (
+  graphQL: typeof GraphQL,
+  payload: Payload
+) => Record<string, unknown>;
 
 export type InitOptions = {
   /** Express app for Payload to use */
@@ -261,7 +261,7 @@ export type Config = {
       favicon?: string;
     };
     /** Specify an absolute path for where to store the built Admin panel bundle used in production. */
-    buildPath?: string;
+    buildPath?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean;
     /** Replace the entirety of the index.html file used by the Admin panel. Reference the base index.html file to ensure your replacement has the appropriate HTML elements. */
@@ -271,7 +271,7 @@ export type Config = {
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string;
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
-    avatar?: "default" | "gravatar" | React.ComponentType<any>;
+    avatar?: 'default' | 'gravatar' | React.ComponentType<any>;
     /** The route for the logout page. */
     logoutRoute?: string;
     /** The route the user will be redirected to after being inactive for too long. */
@@ -299,8 +299,8 @@ export type Config = {
        */
       afterDashboard?: React.ComponentType<any>[];
       /**
-       * Add custom components before the email/password field
-       */
+      * Add custom components before the email/password field
+      */
       beforeLogin?: React.ComponentType<any>[];
       /**
        * Add custom components after the email/password field
@@ -391,7 +391,7 @@ export type Config = {
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[];
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */
-  cors?: string[] | "*";
+  cors?: string[] | '*';
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
     /** Defaults to /api  */
@@ -464,7 +464,7 @@ export type Config = {
    *   window: 15 * 60 * 100, // 1.5 minutes,
    *   max: 500,
    * }
-   */
+  */
   rateLimit?: {
     window?: number;
     max?: number;
