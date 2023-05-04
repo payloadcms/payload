@@ -216,7 +216,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         {(isEditing && preview && (!collection.versions?.drafts || collection.versions?.drafts?.autosave)) && (
                           <PreviewButton
                             generatePreviewURL={preview}
-                            CustomComponent={collection?.admin?.components?.elements?.PreviewButton}
+                            CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
                           />
                         )}
 
@@ -225,17 +225,15 @@ const DefaultEditView: React.FC<Props> = (props) => {
                             {collection.versions?.drafts ? (
                               <React.Fragment>
                                 {!collection.versions.drafts.autosave && (
-                                  <SaveDraft CustomComponent={collection?.admin?.components?.elements?.SaveDraftButton} />
+                                  <SaveDraft CustomComponent={collection?.admin?.components?.edit?.SaveDraftButton} />
                                 )}
 
                                 <Publish
-                                  CustomComponent={collection?.admin?.components?.elements?.PublishButton}
+                                  CustomComponent={collection?.admin?.components?.edit?.PublishButton}
                                 />
                               </React.Fragment>
                             ) : (
-                              <Save
-                                CustomComponent={collection?.admin?.components?.elements?.SaveButton}
-                              />
+                              <Save CustomComponent={collection?.admin?.components?.edit?.SaveButton} />
                             )}
                           </React.Fragment>
                         )}
@@ -245,7 +243,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         {(isEditing && preview && (collection.versions?.drafts && !collection.versions?.drafts?.autosave)) && (
                           <PreviewButton
                             generatePreviewURL={preview}
-                            CustomComponent={collection?.admin?.components?.elements?.PreviewButton}
+                            CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
                           />
                         )}
 

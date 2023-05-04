@@ -77,14 +77,14 @@ _For more examples regarding how to customize components, look at the following 
 
 You can override components on a Collection-by-Collection basis via each Collection's `admin` property.
 
-| Path                           | Description                                                                                                            |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| **`views.Edit`**               | Used while a document within this Collection is being edited.                                                          |
-| **`views.List`**               | The `List` view is used to render a paginated, filterable table of Documents in this Collection.                       |
-| **`elements.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
-| **`elements.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
-| **`elements.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
-| **`elements.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
+| Path                       | Description                                                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **`views.Edit`**           | Used while a document within this Collection is being edited.                                                          |
+| **`views.List`**           | The `List` view is used to render a paginated, filterable table of Documents in this Collection.                       |
+| **`edit.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
+| **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
+| **`edit.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
+| **`edit.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
 
 #### Examples
 
@@ -140,13 +140,13 @@ export const CustomPreviewButton: CustomPreviewButtonProps = ({
 
 As with Collections, You can override components on a global-by-global basis via their `admin` property.
 
-| Path                           | Description                                                                                                            |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| **`views.Edit`**               | Used while this Global is being edited.                                                                                |
-| **`elements.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
-| **`elements.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
-| **`elements.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
-| **`elements.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
+| Path                       | Description                                                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **`views.Edit`**           | Used while this Global is being edited.                                                                                |
+| **`edit.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
+| **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
+| **`edit.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
+| **`edit.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
 
 ### Fields
 

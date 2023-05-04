@@ -147,12 +147,12 @@ const DefaultAccount: React.FC<Props> = (props) => {
                       {(preview && (!collection.versions?.drafts || collection.versions?.drafts?.autosave)) && (
                         <PreviewButton
                           generatePreviewURL={preview}
-                          CustomComponent={collection?.admin?.components?.elements?.PreviewButton}
+                          CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
                         />
                       )}
                       {hasSavePermission && (
                         <Save
-                          CustomComponent={collection?.admin?.components?.elements?.SaveButton}
+                          CustomComponent={collection?.admin?.components?.edit?.SaveButton}
                         />
                       )}
                     </div>
