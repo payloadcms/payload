@@ -56,6 +56,7 @@ const collectionSchema = joi.object().keys({
     hooks: joi.object({
       beforeDuplicate: joi.func(),
     }),
+    enableRichTextLink: joi.boolean(),
     enableRichTextRelationship: joi.boolean(),
     components: joi.object({
       views: joi.object({

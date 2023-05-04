@@ -228,6 +228,7 @@ export type CollectionAdminOptions = {
     defaultLimit?: number
     limits?: number[]
   }
+  enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
    * Function to generate custom preview URL
