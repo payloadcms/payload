@@ -194,7 +194,10 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
-    elements?: {
+    /**
+       * Components within the edit view
+       */
+    edit?: {
       /**
        * Replaces the "Save" button
        * + drafts must be disabled

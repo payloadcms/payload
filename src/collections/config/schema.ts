@@ -62,7 +62,7 @@ const collectionSchema = joi.object().keys({
         List: componentSchema,
         Edit: componentSchema,
       }),
-      elements: joi.object({
+      edit: joi.object({
         SaveButton: componentSchema,
         PublishButton: componentSchema,
         SaveDraftButton: componentSchema,
