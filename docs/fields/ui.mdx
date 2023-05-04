@@ -6,8 +6,11 @@ desc: UI fields are purely presentational and allow developers to customize the 
 keywords: custom field, react component, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-<Banner >
-  The UI (user interface) field gives you a ton of power to add your own React components directly into the Admin panel, nested directly within your other fields. It has absolutely no effect on the data of your documents. It is presentational-only.
+<Banner>
+  The UI (user interface) field gives you a ton of power to add your own React
+  components directly into the Admin panel, nested directly within your other
+  fields. It has absolutely no effect on the data of your documents. It is
+  presentational-only.
 </Banner>
 
 This field is helpful if you need to build in custom functionality via React components within the Admin panel. Think of it as a way for you to "plug in" your own React components directly within your other fields, so you can provide your editors with new controls exactly where you want them to go.
@@ -23,35 +26,36 @@ With this field, you can also inject custom `Cell` components that appear as add
 
 ### Config
 
-| Option                       | Description                                                                                                       |
-| ---------------------------- |-------------------------------------------------------------------------------------------------------------------|
-| **`name`** *                 | A unique identifier for this field.                                                                               |
-| **`label`**                  | Human-readable label for this UI field.                                                                           |
+| Option                       | Description                                                                                                            |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*                | A unique identifier for this field.                                                                                    |
+| **`label`**                  | Human-readable label for this UI field.                                                                                |
 | **`admin.components.Field`** | React component to be rendered for this field within the Edit view. [More](/docs/admin/components/#field-component)    |
 | **`admin.components.Cell`**  | React component to be rendered as a Cell within collection List views. [More](/docs/admin/components/#field-component) |
-| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
+| **`custom`**                 | Extension point for adding custom data (e.g. for plugins)                                                              |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
 ### Example
 
 `collections/ExampleCollection.ts`
+
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from "payload/types";
 
 export const ExampleCollection: CollectionConfig = {
-  slug: 'example-collection',
+  slug: "example-collection",
   fields: [
     {
-      type: 'ui', // required
+      name: "myCustomUIField", // required
+      type: "ui", // required
       admin: {
         components: {
           Field: MyCustomUIField,
           Cell: MyCustomUICell,
-        }
-      }
-    }
-  ]
-}
-
+        },
+      },
+    },
+  ],
+};
 ```
