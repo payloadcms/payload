@@ -9,7 +9,7 @@ const DraftPosts: CollectionConfig = {
     defaultColumns: ['title', 'description', 'createdAt', '_status'],
     preview: () => 'https://payloadcms.com',
     components: {
-      elements: {
+      edit: {
         PublishButton: CustomPublishButton,
       },
     },
