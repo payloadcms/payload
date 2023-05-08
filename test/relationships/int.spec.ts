@@ -343,6 +343,7 @@ describe('Relationships', () => {
         });
 
         expect(query.docs).toHaveLength(1);
+        expect(query.docs[0].id).toStrictEqual(director.id);
       });
     });
   });
