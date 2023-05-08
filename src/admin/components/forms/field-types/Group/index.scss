@@ -35,10 +35,6 @@
     border-bottom: 0;
   }
 
-  &--within-tab {
-    align-self: baseline;
-  }
-
   &--within-tab:first-child {
     margin-top: 0;
     border-top: 0;
@@ -94,4 +90,8 @@
 
 .group-field--within-row+.group-field--within-row {
   margin-top: 0;
+}
+
+.group-field--within-tab+.group-field--within-row {
+  padding-top: 0;
 }
