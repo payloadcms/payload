@@ -111,7 +111,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
     );
   }
 
-  endpoints.push(
+  return endpoints.concat([
     {
       path: '/',
       method: 'get',
@@ -157,9 +157,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
       method: 'delete',
       handler: deleteHandler,
     },
-  );
-
-  return endpoints;
+  ]);
 };
 
 export default buildEndpoints;
