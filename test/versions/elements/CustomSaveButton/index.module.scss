@@ -1,0 +1,16 @@
+.customButton {
+  :global(.btn) {
+    background-color: var(--theme-success-500);
+    color: var(--theme-success-900);
+
+    &:hover {
+      background-color: var(--theme-success-550) !important;
+      color: var(--theme-success-900) !important;
+    }
+
+    &:disabled {
+      background-color: var(--theme-success-750);
+      color: var(--theme-success-500);
+    }
+  }
+}
