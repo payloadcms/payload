@@ -858,6 +858,183 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual([post1]);
       });
 
+      describe('every - select', () => {
+        let post1: Post;
+        let post2: Post;
+        let post3: Post;
+
+        beforeEach(async () => {
+          post1 = await createPost({ title: 'post1', multiSelect: ['option1', 'option2'] });
+          post2 = await createPost({ title: 'post2', multiSelect: ['option1'] });
+          post3 = await createPost({ title: 'post3', multiSelect: ['option3'] });
+          await createPost({ title: 'post4', multiSelect: ['option1', 'option2', 'option3'] });
+        });
+
+        it('every_in', async () => {
+          const filterOptions = ['option1', 'option2'];
+
+          const { status, result } = await client.find<Post>({
+            slug: 'posts',
+            query: {
+              multiSelect: {
+                every_in: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(2);
+          expect(result.docs).toContainEqual(post1);
+          expect(result.docs).toContainEqual(post2);
+        });
+
+        it('every_not_in', async () => {
+          const filterOptions = ['option2'];
+
+          const { status, result } = await client.find<Post>({
+            slug: 'posts',
+            query: {
+              multiSelect: {
+                every_not_in: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(2);
+          expect(result.docs).toContainEqual(post2);
+          expect(result.docs).toContainEqual(post3);
+        });
+
+        it('every_equals', async () => {
+          const filterOptions = 'option1';
+
+          const { status, result } = await client.find<Post>({
+            slug: 'posts',
+            query: {
+              multiSelect: {
+                every_equals: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(1);
+          expect(result.docs).toContainEqual(post2);
+        });
+
+        it('every_not_equals', async () => {
+          const filterOptions = 'option1';
+
+          const { status, result } = await client.find<Post>({
+            slug: 'posts',
+            query: {
+              multiSelect: {
+                every_not_equals: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(1);
+          expect(result.docs).toContainEqual(post3);
+        });
+      });
+
+      describe('every - relationship', () => {
+        let post2: Post;
+        let post3: Post;
+        let post4: Post;
+        let rel1: Relation;
+        let rel2: Relation;
+        let rel3: Relation;
+
+        beforeEach(async () => {
+          rel1 = await createRelation({ name: 're1' });
+          rel2 = await createRelation({ name: 're2' });
+          rel3 = await createRelation({ name: 're3' });
+
+          await createPost({ title: 'post1', relationHasManyField: [rel1.id, rel2.id, rel3.id] });
+          post2 = await createPost({ title: 'post2', relationHasManyField: [rel1.id, rel2.id] });
+          post3 = await createPost({ title: 'post3', relationHasManyField: [rel1.id] });
+          post4 = await createPost({ title: 'post4', relationHasManyField: [] });
+        });
+
+        it('every_in', async () => {
+          const filterOptions = [rel1.id, rel2.id];
+
+          const { status, result } = await client.find<Post>({
+            slug: 'posts',
+            query: {
+              relationHasManyField: {
+                every_in: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(3);
+          expect(result.docs).toContainEqual(post2);
+          expect(result.docs).toContainEqual(post3);
+          expect(result.docs).toContainEqual(post4);
+        });
+
+        it('every_not_in', async () => {
+          const filterOptions = [rel2.id];
+
+          const { status, result } = await client.find<Post>({
+            slug: 'posts',
+            query: {
+              relationHasManyField: {
+                every_not_in: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(2);
+          expect(result.docs).toContainEqual(post3);
+          expect(result.docs).toContainEqual(post4);
+        });
+
+        it('every_equals', async () => {
+          const filterOptions = rel1.id;
+
+          const { status, result } = await client.find<Post>({
+            slug: 'posts',
+            query: {
+              relationHasManyField: {
+                every_equals: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(2);
+          expect(result.docs).toContainEqual(post3);
+          expect(result.docs).toContainEqual(post4);
+        });
+
+        it('every_not_equals', async () => {
+          const filterOptions = rel3.id;
+
+          const { status, result } = await client.find<Post>({
+            slug: 'posts',
+            query: {
+              relationHasManyField: {
+                every_not_equals: filterOptions,
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(3);
+          expect(result.docs).toContainEqual(post2);
+          expect(result.docs).toContainEqual(post3);
+          expect(result.docs).toContainEqual(post4);
+        });
+      });
+
       describe('limit', () => {
         beforeEach(async () => {
           await mapAsync([...Array(50)], async (_, i) => createPost({ title: 'limit-test', number: i }));
@@ -897,6 +1074,11 @@ describe('collections-rest', () => {
 
 async function createPost(overrides?: Partial<Post>) {
   const { doc } = await client.create<Post>({ data: { title: 'title', ...overrides } });
+  return doc;
+}
+
+async function createRelation(overrides?: Partial<Relation>) {
+  const { doc } = await client.create<Relation>({ slug: 'relation', data: { name: 'name', ...overrides } });
   return doc;
 }
 

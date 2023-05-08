@@ -58,6 +58,26 @@ export default buildConfig({
           type: 'number',
           min: 10,
         },
+        // multi-select
+        {
+          name: 'multiSelect',
+          type: 'select',
+          hasMany: true,
+          options: [
+            {
+              label: 'Option 1',
+              value: 'option1',
+            },
+            {
+              label: 'Option 2',
+              value: 'option2',
+            },
+            {
+              label: 'Option 3',
+              value: 'option3',
+            },
+          ],
+        },
         // Relationship
         {
           name: 'relationField',
@@ -190,6 +210,39 @@ export default buildConfig({
             value: rel2.id,
           },
         ],
+      },
+    });
+
+
+    await payload.create({
+      collection: slug,
+      data: {
+        title: 'multi select',
+        multiSelect: ['option1', 'option2'],
+      },
+    });
+
+    await payload.create({
+      collection: slug,
+      data: {
+        title: 'multi select empty',
+        multiSelect: [],
+      },
+    });
+
+    await payload.create({
+      collection: slug,
+      data: {
+        title: 'multi select 1',
+        multiSelect: ['option1'],
+      },
+    });
+
+    await payload.create({
+      collection: slug,
+      data: {
+        title: 'multi select 3',
+        multiSelect: ['option3'],
       },
     });
   },

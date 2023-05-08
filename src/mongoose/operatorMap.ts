@@ -10,4 +10,8 @@ export const operatorMap = {
   exists: '$exists',
   equals: '$eq',
   near: '$near',
+  every_in: ['$not', '$elemMatch', '$nin'],
+  every_not_in: ['$not', '$elemMatch', '$in'],
+  every_equals: ['$not', '$elemMatch', '$ne'],
+  every_not_equals: ['$not', '$elemMatch', '$eq'],
 };
