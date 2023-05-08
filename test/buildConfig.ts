@@ -12,8 +12,6 @@ export function buildConfig(config?: Partial<Config>): Promise<SanitizedConfig> 
     ...config,
   };
 
-  baseConfig.serverURL = baseConfig.serverURL || 'http://localhost:3000';
-
   baseConfig.admin = {
     ...(baseConfig.admin || {}),
     webpack: (webpackConfig) => {

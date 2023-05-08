@@ -49,8 +49,8 @@ const startDev = async () => {
   externalRouter.use(payload.authenticate);
 
   expressApp.listen(3000, async () => {
-    payload.logger.info(`Admin URL on ${payload.getAdminURL()}`);
-    payload.logger.info(`API URL on ${payload.getAPIURL()}`);
+    payload.logger.info(`Admin URL on http://localhost:3000${payload.getAdminURL()}`);
+    payload.logger.info(`API URL on http://localhost:3000${payload.getAPIURL()}`);
   });
 };
 
