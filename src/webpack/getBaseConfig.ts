@@ -63,7 +63,7 @@ export default (config: SanitizedConfig): Configuration => ({
   },
   plugins: [
     new webpack.ProvidePlugin(
-      { process: 'process/browser' },
+      { process: require.resolve('process/browser') },
     ),
     new webpack.DefinePlugin(
       Object.entries(process.env).reduce(
