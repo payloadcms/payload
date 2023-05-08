@@ -530,6 +530,5 @@ const Form: React.FC<Props> = (props) => {
 };
 
 export default Form;
-function generateArrFromObj(arg0: { [key: string]: any }, initialArr: any) {
-  throw new Error("Function not implemented.");
-}
+import { createArray } from "./generateArray";
+import { compareStateArrs } from "./compareStates";
