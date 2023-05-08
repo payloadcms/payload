@@ -502,7 +502,6 @@ export class ParamParser {
                 }
               } else {
                 lastIncompletePath.complete = true;
-                lastIncompletePath.collectionSlug = matchedField.relationTo;
                 lastIncompletePath.path = currentPath;
 
                 const nestedPathToQuery = pathSegments.slice(nextSegmentIsLocale ? i + 2 : i + 1).join('.');
