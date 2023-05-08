@@ -287,6 +287,10 @@ export const upload = baseField.keys({
     joi.object(),
     joi.func(),
   ),
+  defaultValue: joi.alternatives().try(
+    joi.object(),
+    joi.func(),
+  ),
 });
 
 export const checkbox = baseField.keys({
