@@ -1,0 +1,30 @@
+@import '../../../../../scss/styles.scss';
+
+.select-all {
+  button {
+    @extend %btn-reset;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    &:focus,
+    &:active {
+      outline: none;
+    }
+
+    &:hover {
+      svg {
+        opacity: .2;
+      }
+    }
+  }
+
+  &__input {
+    @include formInput;
+    padding: 0;
+    line-height: 0;
+    position: relative;
+    width: $baseline;
+    height: $baseline;
+  }
+}

@@ -55,4 +55,5 @@ export const defaults: Config = {
   hooks: {},
   localization: false,
   telemetry: true,
+  custom: {},
 };

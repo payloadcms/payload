@@ -1,8 +1,6 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
-import type { CustomIdNumberRelation, CustomIdRelation, Post, Relation } from './payload-types';
-import { ChainedRelation } from './payload-types';
 
 const openAccess = {
   create: () => true,
@@ -17,6 +15,9 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
   return {
     slug: collectionSlug,
     access: openAccess,
+    admin: {
+      useAsTitle: 'name',
+    },
     fields: [
       {
         name: 'name',
@@ -154,6 +155,43 @@ export default buildConfig({
         },
       ],
     },
+    {
+      slug: 'screenings',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'movie',
+          type: 'relationship',
+          relationTo: 'movies',
+        },
+      ],
+    },
+    {
+      slug: 'movies',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'director',
+          type: 'relationship',
+          relationTo: 'directors',
+        },
+      ],
+    },
+    {
+      slug: 'directors',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -164,35 +202,35 @@ export default buildConfig({
       },
     });
 
-    const rel1 = await payload.create<Relation>({
+    const rel1 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name',
       },
     });
 
-    const filteredRelation = await payload.create<Relation>({
+    const filteredRelation = await payload.create({
       collection: relationSlug,
       data: {
         name: 'filtered',
       },
     });
 
-    const defaultAccessRelation = await payload.create<Relation>({
+    const defaultAccessRelation = await payload.create({
       collection: defaultAccessRelSlug,
       data: {
         name: 'name',
       },
     });
 
-    const chained3 = await payload.create<ChainedRelation>({
+    const chained3 = await payload.create({
       collection: chainedRelSlug,
       data: {
         name: 'chain3',
       },
     });
 
-    const chained2 = await payload.create<ChainedRelation>({
+    const chained2 = await payload.create({
       collection: chainedRelSlug,
       data: {
         name: 'chain2',
@@ -200,7 +238,7 @@ export default buildConfig({
       },
     });
 
-    const chained = await payload.create<ChainedRelation>({
+    const chained = await payload.create({
       collection: chainedRelSlug,
       data: {
         name: 'chain1',
@@ -208,7 +246,7 @@ export default buildConfig({
       },
     });
 
-    await payload.update<ChainedRelation>({
+    await payload.update({
       collection: chainedRelSlug,
       id: chained3.id,
       data: {
@@ -217,7 +255,7 @@ export default buildConfig({
       },
     });
 
-    const customIdRelation = await payload.create<CustomIdRelation>({
+    const customIdRelation = await payload.create({
       collection: customIdSlug,
       data: {
         id: 'custommmm',
@@ -225,7 +263,7 @@ export default buildConfig({
       },
     });
 
-    const customIdNumberRelation = await payload.create<CustomIdNumberRelation>({
+    const customIdNumberRelation = await payload.create({
       collection: customIdNumberSlug,
       data: {
         id: 908234892340,
@@ -233,9 +271,8 @@ export default buildConfig({
       },
     });
 
-
     // Relationship
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'with relationship',

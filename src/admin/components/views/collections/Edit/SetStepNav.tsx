@@ -26,7 +26,7 @@ export const SetStepNav: React.FC<{
   const { t, i18n } = useTranslation('general');
   const { routes: { admin } } = useConfig();
 
-  const title = useTitle(useAsTitle, collection.slug);
+  const title = useTitle(collection);
 
   useEffect(() => {
     const nav: StepNavItem[] = [{

@@ -26,6 +26,7 @@ import { Field } from "../../../../fields/config/types";
 import buildInitialState from "./buildInitialState";
 import errorMessages from "./errorMessages";
 import {
+  Fields,
   Context as FormContextType,
   GetDataByPath,
   Props,
@@ -41,10 +42,6 @@ import {
 } from "./context";
 import buildStateFromSchema from "./buildStateFromSchema";
 import { useOperation } from "../../utilities/OperationProvider";
-
-// --- import compareStates function
-import { compareStateArrs } from "./compareStates";
-import { createArray } from "./generateArray";
 
 const baseClass = "form";
 
@@ -391,9 +388,19 @@ const Form: React.FC<Props> = (props) => {
         t,
       });
       contextRef.current = { ...initContextState } as FormContextType;
+      setModified(false);
       dispatchFields({ type: "REPLACE_STATE", state });
     },
     [id, user, operation, locale, t, dispatchFields]
+  );
+
+  const replaceState = useCallback(
+    (state: Fields) => {
+      contextRef.current = { ...initContextState } as FormContextType;
+      setModified(false);
+      dispatchFields({ type: "REPLACE_STATE", state });
+    },
+    [dispatchFields]
   );
 
   contextRef.current.submit = submit;
@@ -410,6 +417,7 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.disabled = disabled;
   contextRef.current.formRef = formRef;
   contextRef.current.reset = reset;
+  contextRef.current.replaceState = replaceState;
 
   useEffect(() => {
     if (initialState) {

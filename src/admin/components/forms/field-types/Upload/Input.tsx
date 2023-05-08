@@ -174,7 +174,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
             <FileDetails
               collection={collection}
               doc={file}
-              handleRemove={() => {
+              handleRemove={readOnly ? undefined : () => {
                 onChange(null);
               }}
             />
@@ -184,20 +184,24 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
               <div className={`${baseClass}__buttons`}>
                 <DocumentDrawerToggler
                   className={`${baseClass}__toggler`}
+                  disabled={readOnly}
                 >
                   <Button
                     buttonStyle="secondary"
                     el="div"
+                    disabled={readOnly}
                   >
                     {t('uploadNewLabel', { label: getTranslation(collection.labels.singular, i18n) })}
                   </Button>
                 </DocumentDrawerToggler>
                 <ListDrawerToggler
                   className={`${baseClass}__toggler`}
+                  disabled={readOnly}
                 >
                   <Button
                     buttonStyle="secondary"
                     el="div"
+                    disabled={readOnly}
                   >
                     {t('chooseFromExisting')}
                   </Button>
@@ -211,8 +215,8 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
           />
         </React.Fragment>
       )}
-      <DocumentDrawer onSave={onSave} />
-      <ListDrawer onSelect={onSelect} />
+      {!readOnly && <DocumentDrawer onSave={onSave} />}
+      {!readOnly && <ListDrawer onSelect={onSelect} />}
     </div>
   );
 };

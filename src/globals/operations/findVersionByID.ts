@@ -3,8 +3,6 @@ import { PayloadRequest } from '../../express/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import { Where } from '../../types';
-import { hasWhereAccessResult } from '../../auth/types';
 import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
@@ -29,7 +27,6 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     req: {
       t,
       payload,
-      locale,
     },
     disableErrors,
     currentDepth,
@@ -50,23 +47,17 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
   const hasWhereAccess = typeof accessResults === 'object';
 
-  const queryToBuild: { where: Where } = {
+  const query = await VersionsModel.buildQuery({
     where: {
-      and: [
-        {
-          _id: {
-            equals: id,
-          },
-        },
-      ],
+      _id: {
+        equals: id,
+      },
     },
-  };
-
-  if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
-  }
-
-  const query = await VersionsModel.buildQuery(queryToBuild, locale);
+    access: accessResults,
+    req,
+    overrideAccess,
+    globalSlug: globalConfig.slug,
+  });
 
   // /////////////////////////////////////
   // Find by ID

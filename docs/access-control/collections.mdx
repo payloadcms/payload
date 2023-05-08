@@ -30,7 +30,7 @@ If a Collection supports [`Authentication`](/docs/authentication/overview), the 
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Posts: CollectionConfig = {
+export const Posts: CollectionConfig = {
   slug: "posts",
   // highlight-start
   access: {
@@ -42,8 +42,6 @@ const Posts: CollectionConfig = {
   },
   // highlight-end
 };
-
-export default Categories;
 ```
 
 ### Create

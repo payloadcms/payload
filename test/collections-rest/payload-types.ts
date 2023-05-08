@@ -5,16 +5,25 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
-export interface Config {}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
+export interface Config {
+  collections: {
+    posts: Post;
+    point: Point;
+    relation: Relation;
+    dummy: Dummy;
+    'custom-id': CustomId;
+    'custom-id-number': CustomIdNumber;
+    'error-on-hooks': ErrorOnHook;
+    users: User;
+  };
+  globals: {};
+}
 export interface Post {
   id: string;
   title?: string;
   description?: string;
   number?: number;
+  fakeLocalization?: string;
   relationField?: string | Relation;
   relationHasManyField?: string[] | Relation[];
   relationMultiRelationTo?:
@@ -47,33 +56,23 @@ export interface Post {
             relationTo: 'dummy';
           }
       )[];
+  restrictedField?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation".
- */
 export interface Relation {
   id: string;
   name?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "dummy".
- */
 export interface Dummy {
   id: string;
+  title?: string;
   name?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "point".
- */
 export interface Point {
   id: string;
   /**
@@ -84,30 +83,26 @@ export interface Point {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-id".
- */
 export interface CustomId {
   id: string;
   name?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-id-number".
- */
 export interface CustomIdNumber {
   id: number;
   name?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
+export interface ErrorOnHook {
+  id: string;
+  text?: string;
+  errorBeforeChange?: boolean;
+  errorAfterDelete?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 export interface User {
   id: string;
   email?: string;
@@ -117,4 +112,5 @@ export interface User {
   lockUntil?: string;
   createdAt: string;
   updatedAt: string;
+  password?: string;
 }

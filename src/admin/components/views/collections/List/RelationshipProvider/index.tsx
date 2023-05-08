@@ -5,6 +5,7 @@ import { useConfig } from '../../../../utilities/Config';
 import { TypeWithID } from '../../../../../../collections/config/types';
 import { reducer } from './reducer';
 import useDebounce from '../../../../../hooks/useDebounce';
+import { useLocale } from '../../../../utilities/Locale';
 
 // documents are first set to null when requested
 // set to false when no doc is returned
@@ -30,27 +31,31 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
   const debouncedDocuments = useDebounce(documents, 100);
   const config = useConfig();
   const { i18n } = useTranslation();
+  const locale = useLocale();
+  const prevLocale = useRef(locale);
+
   const {
     serverURL,
     routes: { api },
   } = config;
 
-  useEffect(() => {
+  const loadRelationshipDocs = useCallback(async (reloadAll = false) => {
     Object.entries(debouncedDocuments).forEach(async ([slug, docs]) => {
       const idsToLoad: (string | number)[] = [];
 
       Object.entries(docs).forEach(([id, value]) => {
-        if (value === null) {
+        if (value === null || reloadAll) {
           idsToLoad.push(id);
         }
       });
+
 
       if (idsToLoad.length > 0) {
         const url = `${serverURL}${api}/${slug}`;
         const params = {
           depth: 0,
           'where[id][in]': idsToLoad,
-          locale: i18n.language,
+          locale,
           limit: 250,
         };
 
@@ -61,6 +66,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
             'Accept-Language': i18n.language,
           },
         });
+
         if (result.ok) {
           const json = await result.json();
           if (json.docs) {
@@ -71,7 +77,12 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
         }
       }
     });
-  }, [i18n, serverURL, api, debouncedDocuments]);
+  }, [debouncedDocuments, serverURL, api, i18n, locale]);
+
+  useEffect(() => {
+    loadRelationshipDocs(locale && prevLocale.current !== locale);
+    prevLocale.current = locale;
+  }, [locale, loadRelationshipDocs]);
 
   const getRelationships = useCallback(async (relationships: { relationTo: string, value: number | string }[]) => {
     dispatchDocuments({ type: 'REQUEST', docs: relationships });

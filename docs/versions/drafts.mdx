@@ -84,7 +84,7 @@ Here is an example that utilizes the `_status` field to require a user to be log
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Pages: CollectionConfig = {
+export const Pages: CollectionConfig = {
   slug: 'pages',
   access: {
     read: ({ req }) => {
@@ -119,7 +119,7 @@ Here is an example for how to write an access control function that grants acces
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Pages: CollectionConfig = {
+export const Pages: CollectionConfig = {
   slug: 'pages',
   access: {
     read: ({ req }) => {

@@ -442,11 +442,11 @@ describe('fields', () => {
     }
 
     describe('toolbar', () => {
-      test('should create new url link', async () => {
+      test('should create new url custom link', async () => {
         await navigateToRichTextFields();
 
         // Open link drawer
-        await page.locator('.rich-text__toolbar button:not([disabled]) .link').click();
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
 
         // find the drawer
         const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
@@ -458,6 +458,7 @@ describe('fields', () => {
         await editLinkModal.locator('#field-url').fill('https://payloadcms.com');
         await wait(200);
         await editLinkModal.locator('button[type="submit"]').click();
+        await saveDocAndAssert(page);
 
         // Remove link from editor body
         await page.locator('span >> text="link text"').click();
@@ -465,6 +466,27 @@ describe('fields', () => {
         await expect(popup.locator('.rich-text-link__link-label')).toBeVisible();
         await popup.locator('.rich-text-link__link-close').click();
         await expect(page.locator('span >> text="link text"')).toHaveCount(0);
+      });
+
+      test('should create new internal link', async () => {
+        await navigateToRichTextFields();
+
+        // Open link drawer
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
+
+        // find the drawer
+        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        await expect(editLinkModal).toBeVisible();
+
+        // Fill values and click Confirm
+        await editLinkModal.locator('#field-text').fill('link text');
+        await editLinkModal.locator('label[for="field-linkType-internal"]').click();
+        await editLinkModal.locator('#field-doc .rs__control').click();
+        await page.keyboard.type('dev@');
+        await editLinkModal.locator('#field-doc .rs__menu .rs__option:has-text("dev@payloadcms.com")').click();
+        // await wait(200);
+        await editLinkModal.locator('button[type="submit"]').click();
+        await saveDocAndAssert(page);
       });
 
       test('should not create new url link when read only', async () => {
@@ -479,7 +501,7 @@ describe('fields', () => {
         await navigateToRichTextFields();
 
         // Open link drawer
-        await page.locator('.rich-text__toolbar button:not([disabled]) .upload-rich-text-button').click();
+        await page.locator('.rich-text__toolbar button:not([disabled]) .upload-rich-text-button').first().click();
 
         // open the list select menu
         await page.locator('.list-drawer__select-collection-wrap .rs__control').click();
@@ -489,11 +511,28 @@ describe('fields', () => {
         await expect(menu).not.toContainText('Uploads3');
       });
 
+      test('should only list RTE enabled collections in link drawer', async () => {
+        await navigateToRichTextFields();
+
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
+
+        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        await expect(editLinkModal).toBeVisible();
+
+        await editLinkModal.locator('label[for="field-linkType-internal"]').click();
+        await editLinkModal.locator('.relationship__wrap .rs__control').click();
+
+        const menu = page.locator('.relationship__wrap .rs__menu');
+
+        // array-fields has enableRichTextLink set to false
+        await expect(menu).not.toContainText('Array Fields');
+      });
+
       test('should only list non-upload collections in relationship drawer', async () => {
         await navigateToRichTextFields();
 
         // Open link drawer
-        await page.locator('.rich-text__toolbar button:not([disabled]) .relationship-rich-text-button').click();
+        await page.locator('.rich-text__toolbar button:not([disabled]) .relationship-rich-text-button').first().click();
 
         // open the list select menu
         await page.locator('.list-drawer__select-collection-wrap .rs__control').click();
@@ -501,11 +540,24 @@ describe('fields', () => {
         const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu');
         await expect(menu).not.toContainText('Uploads');
       });
+
+      test('should respect customizing the default fields', async () => {
+        await navigateToRichTextFields();
+        const field = page.locator('.rich-text', { has: page.locator('#field-richTextCustomFields') });
+        const button = await field.locator('button.rich-text__button.link');
+
+        await button.click();
+
+        const linkDrawer = await page.locator('[id^=drawer_1_rich-text-link-]');
+        await expect(linkDrawer).toBeVisible();
+        const fieldCount = await linkDrawer.locator('.render-fields > .field-type').count();
+        await expect(fieldCount).toEqual(1);
+      });
     });
 
     describe('editor', () => {
       test('should populate url link', async () => {
-        navigateToRichTextFields();
+        await navigateToRichTextFields();
 
         // Open link popup
         await page.locator('#field-richText span >> text="render links"').click();
@@ -528,7 +580,7 @@ describe('fields', () => {
       });
 
       test('should populate relationship link', async () => {
-        navigateToRichTextFields();
+        await navigateToRichTextFields();
 
         // Open link popup
         await page.locator('#field-richText span >> text="link to relationships"').click();
@@ -551,7 +603,7 @@ describe('fields', () => {
       });
 
       test('should open upload drawer and render custom relationship fields', async () => {
-        navigateToRichTextFields();
+        await navigateToRichTextFields();
         const field = await page.locator('#field-richText');
         const button = await field.locator('button.rich-text-upload__upload-drawer-toggler');
 
@@ -564,7 +616,7 @@ describe('fields', () => {
       });
 
       test('should open upload document drawer from read-only field', async () => {
-        navigateToRichTextFields();
+        await navigateToRichTextFields();
         const field = await page.locator('#field-richTextReadOnly');
         const button = await field.locator('button.rich-text-upload__doc-drawer-toggler.doc-drawer__toggler');
 
@@ -575,7 +627,7 @@ describe('fields', () => {
       });
 
       test('should open relationship document drawer from read-only field', async () => {
-        navigateToRichTextFields();
+        await navigateToRichTextFields();
         const field = await page.locator('#field-richTextReadOnly');
         const button = await field.locator('button.rich-text-relationship__doc-drawer-toggler.doc-drawer__toggler');
 
@@ -586,14 +638,14 @@ describe('fields', () => {
       });
 
       test('should populate new links', async () => {
-        navigateToRichTextFields();
+        await navigateToRichTextFields();
 
         // Highlight existing text
         const headingElement = await page.locator('#field-richText h1 >> text="Hello, I\'m a rich text field."');
         await headingElement.selectText();
 
         // click the toolbar link button
-        await page.locator('.rich-text__toolbar button:not([disabled]) .link').click();
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
 
         // find the drawer and confirm the values
         const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
@@ -732,6 +784,14 @@ describe('fields', () => {
       await expect(page.locator('#field-relationWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
       await expect(page.locator('#field-relationHasManyWithDynamicDefault .relationship--single-value__text')).toContainText('dev@payloadcms.com');
     });
+
+    test('should filter relationship options', async () => {
+      await page.goto(url.create);
+      await page.locator('#field-relationship .rs__control').click();
+      await page.keyboard.type('seeded');
+      await page.locator('.rs__option:has-text("Seeded text document")').click();
+      await saveDocAndAssert(page);
+    });
   });
 
   describe('upload', () => {
@@ -847,6 +907,29 @@ describe('fields', () => {
       const idHeadings = page.locator('th#heading-id');
       await expect(idHeadings).toBeVisible();
       await expect(idHeadings).toHaveCount(1);
+    });
+  });
+
+  describe('conditional logic', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'conditional-logic');
+    });
+
+    test('should toggle conditional field when data changes', async () => {
+      await page.goto(url.create);
+      const toggleField = page.locator('label[for=field-toggleField]');
+      await toggleField.click();
+
+      const fieldToToggle = page.locator('input#field-fieldToToggle');
+
+      await expect(fieldToToggle).toBeVisible();
+    });
+
+    test('should show conditionl field based on user data', async () => {
+      await page.goto(url.create);
+      const userConditional = page.locator('input#field-userConditional');
+      await expect(userConditional).toBeVisible();
     });
   });
 });

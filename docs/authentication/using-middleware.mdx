@@ -11,38 +11,46 @@ Because Payload uses your existing Express server, you are free to add whatever 
 This approach has a ton of benefits - it's great for isolation of concerns and limiting scope, but it also means that your additional routes won't have access to Payload's user authentication.
 
 <Banner type="success">
-  You can make full use of Payload's built-in authentication within your own custom Express endpoints by adding Payload's authentication middleware.
+  You can make full use of Payload's built-in authentication within your own
+  custom Express endpoints by adding Payload's authentication middleware.
+</Banner>
+
+<Banner type="warning">
+  Payload must be initialized before the `payload.authenticate` middleware can
+  be used. This is done by calling `payload.init()` prior to adding the
+  middleware.
 </Banner>
 
 Example in `server.js`:
+
 ```ts
-import express from 'express';
-import payload from 'payload';
+import express from "express";
+import payload from "payload";
 
 const app = express();
 
 payload.init({
-  secret: 'PAYLOAD_SECRET_KEY',
-  mongoURL: 'mongodb://localhost/payload',
+  secret: "PAYLOAD_SECRET_KEY",
+  mongoURL: "mongodb://localhost/payload",
   express: app,
 });
 
 const router = express.Router();
 
+// Note: Payload must be initialized before the `payload.authenticate` middleware can be used
 router.use(payload.authenticate); // highlight-line
 
-router.get('/', (req, res) => {
+router.get("/", (req, res) => {
   if (req.user) {
     return res.send(`Authenticated successfully as ${req.user.email}.`);
   }
 
-  return res.send('Not authenticated');
+  return res.send("Not authenticated");
 });
 
-app.use('/some-route-here', router);
+app.use("/some-route-here", router);
 
 app.listen(3000, async () => {
   payload.logger.info(`listening on ${3000}...`);
 });
-
 ```

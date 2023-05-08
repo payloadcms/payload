@@ -1,4 +1,5 @@
 {
+  "verbose": true,
   "git": {
     "commitMessage": "chore(release): v${version}",
     "requireCleanWorkingDir": true

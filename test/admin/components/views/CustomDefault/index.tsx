@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
-import { useConfig } from '../../../../../src/admin/components/utilities/Config';
 
 // As this is the demo project, we import our dependencies from the `src` directory.
 import DefaultTemplate from '../../../../../src/admin/components/templates/Default';
@@ -8,6 +7,7 @@ import Button from '../../../../../src/admin/components/elements/Button';
 import Eyebrow from '../../../../../src/admin/components/elements/Eyebrow';
 import { AdminView } from '../../../../../src/config/types';
 import { useStepNav } from '../../../../../src/admin/components/elements/StepNav';
+import { useConfig } from '../../../../../src/admin/components/utilities/Config';
 import Meta from '../../../../../src/admin/components/utilities/Meta';
 
 // In your projects, you can import as follows:
@@ -15,7 +15,7 @@ import Meta from '../../../../../src/admin/components/utilities/Meta';
 // import { Button, Eyebrow } from 'payload/components/elements';
 // import { AdminView } from 'payload/config';
 // import { useStepNav } from 'payload/components/hooks';
-// import { Meta } from 'payload/components/utilities';
+// import { useConfig, Meta } from 'payload/components/utilities';
 
 const CustomDefaultRoute: AdminView = ({ user, canAccessAdmin }) => {
   const { routes: { admin: adminRoute } } = useConfig();

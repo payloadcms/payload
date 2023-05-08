@@ -5,94 +5,88 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
-export interface Config {}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global".
- */
-export interface Global {
-  id: string;
-  title?: string;
+export interface Config {
+  collections: {
+    users: User;
+    'hidden-collection': HiddenCollection;
+    posts: Post;
+    'group-one-collection-ones': GroupOneCollectionOne;
+    'group-one-collection-twos': GroupOneCollectionTwo;
+    'group-two-collection-ones': GroupTwoCollectionOne;
+    'group-two-collection-twos': GroupTwoCollectionTwo;
+  };
+  globals: {
+    'hidden-global': HiddenGlobal;
+    global: Global;
+    'group-globals-one': GroupGlobalsOne;
+    'group-globals-two': GroupGlobalsTwo;
+  };
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "group-globals-one".
- */
-export interface GroupGlobalsOne {
-  id: string;
-  title?: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "group-globals-two".
- */
-export interface GroupGlobalsTwo {
-  id: string;
-  title?: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
 export interface User {
   id: string;
+  createdAt: string;
+  updatedAt: string;
   email?: string;
   resetPasswordToken?: string;
   resetPasswordExpiration?: string;
   loginAttempts?: number;
   lockUntil?: string;
+  password?: string;
+}
+export interface HiddenCollection {
+  id: string;
+  title?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
 export interface Post {
   id: string;
   title?: string;
   description?: string;
   number?: number;
+  richText?: {
+    [k: string]: unknown;
+  }[];
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "group-one-collection-ones".
- */
 export interface GroupOneCollectionOne {
   id: string;
   title?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "group-one-collection-twos".
- */
 export interface GroupOneCollectionTwo {
   id: string;
   title?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "group-two-collection-ones".
- */
 export interface GroupTwoCollectionOne {
   id: string;
   title?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "group-two-collection-twos".
- */
 export interface GroupTwoCollectionTwo {
   id: string;
   title?: string;
   createdAt: string;
   updatedAt: string;
+}
+export interface HiddenGlobal {
+  id: string;
+  title?: string;
+}
+export interface Global {
+  id: string;
+  title?: string;
+}
+export interface GroupGlobalsOne {
+  id: string;
+  title?: string;
+}
+export interface GroupGlobalsTwo {
+  id: string;
+  title?: string;
 }
