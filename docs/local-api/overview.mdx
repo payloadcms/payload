@@ -66,18 +66,17 @@ const afterChangeHook: CollectionAfterChangeHook = async ({
 
 You can specify more options within the Local API vs. REST or GraphQL due to the server-only context that they are executed in.
 
-| Local Option        | Description                                                                                                          |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `collection`        | Required for Collection operations. Specifies the Collection slug to operate against.                                |
-| `data`              | The data to use within the operation. Required for `create`, `update`.                                               |
-| `depth`             | [Control auto-population](/docs/getting-started/concepts#depth) of nested relationship and upload fields.            |
-| `locale`            | Specify [locale](/docs/configuration/localization) for any returned documents.                                       |
-| `fallbackLocale`    | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents.                     |
-| `overrideAccess`    | Skip access control. By default, this property is set to true within all Local API operations.                       |
-| `user`              | If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.                |
-| `showHiddenFields`  | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config. |
-| `queryHiddenFields` | Allow querying by hidden fields. By default, hidden fields are not allowed to be queried on.                         |
-| `pagination`        | Set to false to return all documents and avoid querying for document counts.                                         |
+| Local Option       | Description                                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `collection`       | Required for Collection operations. Specifies the Collection slug to operate against.                                |
+| `data`             | The data to use within the operation. Required for `create`, `update`.                                               |
+| `depth`            | [Control auto-population](/docs/getting-started/concepts#depth) of nested relationship and upload fields.            |
+| `locale`           | Specify [locale](/docs/configuration/localization) for any returned documents.                                       |
+| `fallbackLocale`   | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents.                     |
+| `overrideAccess`   | Skip access control. By default, this property is set to true within all Local API operations.                       |
+| `user`             | If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.                |
+| `showHiddenFields` | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config. |
+| `pagination`       | Set to false to return all documents and avoid querying for document counts.                                         |
 
 _There are more options available on an operation by operation basis outlined below._
 
@@ -205,7 +204,7 @@ const result = await payload.update({
   collection: "posts", // required
   where: {
     // required
-    fieldName: { equals: 'value' },
+    fieldName: { equals: "value" },
   },
   data: {
     // required
@@ -259,7 +258,7 @@ const result = await payload.delete({
   collection: "posts", // required
   where: {
     // required
-    fieldName: { equals: 'value' },
+    fieldName: { equals: "value" },
   },
   depth: 0,
   locale: "en",
