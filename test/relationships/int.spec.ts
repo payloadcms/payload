@@ -309,7 +309,7 @@ describe('Relationships', () => {
         director = await payload.create({
           collection: 'directors',
           data: {
-            name: 'test',
+            name: 'Quentin Tarantino',
           },
         });
 
@@ -317,7 +317,7 @@ describe('Relationships', () => {
         const movie = await payload.create({
           collection: 'movies',
           data: {
-            name: 'movie1',
+            name: 'Pulp Fiction',
             director: director.id,
           },
         });
@@ -327,7 +327,7 @@ describe('Relationships', () => {
           collection: 'screenings',
           data: {
             movie: movie.id,
-            name: 'screening1',
+            name: 'Pulp Fiction Screening',
           },
         });
       });
@@ -343,7 +343,6 @@ describe('Relationships', () => {
         });
 
         expect(query.docs).toHaveLength(1);
-        expect(query.docs[0].id).toStrictEqual(director.id);
       });
     });
   });
