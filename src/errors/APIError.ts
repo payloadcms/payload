@@ -1,9 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import httpStatus from 'http-status';
 
-/**
- * @extends Error
- */
 class ExtendableError extends Error {
   status: number;
 
@@ -21,9 +18,7 @@ class ExtendableError extends Error {
     this.data = data;
     this.isPublic = isPublic;
     this.isOperational = true; // This is required since bluebird 4 doesn't append it anymore.
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore Couldn't get the compiler to love me
-    Error.captureStackTrace(this, this.constructor.name);
+    Error.captureStackTrace(this, this.constructor);
   }
 }
 

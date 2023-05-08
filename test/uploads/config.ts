@@ -54,11 +54,42 @@ export default buildConfig({
       ],
     },
     {
+      slug: 'gif-resize',
+      upload: {
+        staticURL: '/media-gif',
+        staticDir: './media-gif',
+        mimeTypes: ['image/gif'],
+        resizeOptions: {
+          position: 'center',
+          width: 200,
+          height: 200,
+        },
+        formatOptions: {
+          format: 'gif',
+        },
+        imageSizes: [
+          {
+            name: 'small',
+            width: 100,
+            height: 100,
+            formatOptions: { format: 'gif', options: { quality: 90 } },
+          },
+          {
+            name: 'large',
+            width: 1000,
+            height: 1000,
+            formatOptions: { format: 'gif', options: { quality: 90 } },
+          },
+        ],
+      },
+      fields: [],
+    },
+    {
       slug: mediaSlug,
       upload: {
         staticURL: '/media',
         staticDir: './media',
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg', 'image/svg+xml', 'audio/mpeg'],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg', 'image/gif', 'image/svg+xml', 'audio/mpeg'],
         resizeOptions: {
           width: 1280,
           height: 720,
@@ -99,6 +130,39 @@ export default buildConfig({
             name: 'icon',
             width: 16,
             height: 16,
+          },
+        ],
+      },
+      fields: [],
+    },
+    {
+      slug: 'media-trim',
+      upload: {
+        staticURL: '/media-trim',
+        staticDir: './media-trim',
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        trimOptions: 0,
+        imageSizes: [
+          {
+            name: 'trimNumber',
+            width: 1024,
+            height: undefined,
+            trimOptions: 0,
+          },
+          {
+            name: 'trimString',
+            width: 1024,
+            height: undefined,
+            trimOptions: 0,
+          },
+          {
+            name: 'trimOptions',
+            width: 1024,
+            height: undefined,
+            trimOptions: {
+              background: '#000000',
+              threshold: 50,
+            },
           },
         ],
       },

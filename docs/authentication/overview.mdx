@@ -35,8 +35,8 @@ Simple example collection:
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Admins: CollectionConfig = {
-  slug:
+export const Admins: CollectionConfig = {
+  slug: 'admins',
   // highlight-start
   auth: {
     tokenExpiration: 7200, // How many seconds to keep the user logged in

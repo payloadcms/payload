@@ -1,16 +1,21 @@
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
 import { FieldAccess } from '../../src/fields/config/types';
-import { SiblingDatum } from './payload-types';
 import { firstArrayText, secondArrayText } from './shared';
 
 export const slug = 'posts';
+export const unrestrictedSlug = 'unrestricted';
 export const readOnlySlug = 'read-only-collection';
+
+export const userRestrictedSlug = 'user-restricted';
 export const restrictedSlug = 'restricted';
 export const restrictedVersionsSlug = 'restricted-versions';
 export const siblingDataSlug = 'sibling-data';
 export const relyOnRequestHeadersSlug = 'rely-on-request-headers';
 export const docLevelAccessSlug = 'doc-level-access';
+export const hiddenFieldsSlug = 'hidden-fields';
+
+export const hiddenAccessSlug = 'hidden-access';
 
 const openAccess = {
   create: () => true,
@@ -110,6 +115,21 @@ export default buildConfig({
       ],
     },
     {
+      slug: unrestrictedSlug,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'userRestrictedDocs',
+          type: 'relationship',
+          relationTo: userRestrictedSlug,
+          hasMany: true,
+        },
+      ],
+    },
+    {
       slug: restrictedSlug,
       fields: [
         {
@@ -140,8 +160,10 @@ export default buildConfig({
       },
     },
     {
-      slug: restrictedVersionsSlug,
-      versions: true,
+      slug: userRestrictedSlug,
+      admin: {
+        useAsTitle: 'name',
+      },
       fields: [
         {
           name: 'name',
@@ -149,7 +171,49 @@ export default buildConfig({
         },
       ],
       access: {
-        readVersions: () => false,
+        create: () => true,
+        read: () => true,
+        update: ({ req }) => ({
+          name: {
+            equals: req.user?.email,
+          },
+        }),
+        delete: () => false,
+      },
+    },
+    {
+      slug: restrictedVersionsSlug,
+      versions: true,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'hidden',
+          type: 'checkbox',
+          hidden: true,
+        },
+      ],
+      access: {
+        read: ({ req: { user } }) => {
+          if (user) return true;
+
+          return {
+            hidden: {
+              not_equals: true,
+            },
+          };
+        },
+        readVersions: ({ req: { user } }) => {
+          if (user) return true;
+
+          return {
+            'version.hidden': {
+              not_equals: true,
+            },
+          };
+        },
       },
     },
     {
@@ -242,6 +306,77 @@ export default buildConfig({
         },
       ],
     },
+    {
+      slug: hiddenFieldsSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'partiallyHiddenGroup',
+          type: 'group',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+            },
+            {
+              name: 'value',
+              type: 'text',
+              hidden: true,
+            },
+          ],
+        },
+        {
+          name: 'partiallyHiddenArray',
+          type: 'array',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+            },
+            {
+              name: 'value',
+              type: 'text',
+              hidden: true,
+            },
+          ],
+        },
+        {
+          name: 'hidden',
+          type: 'checkbox',
+          hidden: true,
+        },
+      ],
+    },
+    {
+      slug: hiddenAccessSlug,
+      access: {
+        read: ({ req: { user } }) => {
+          if (user) return true;
+
+          return {
+            hidden: {
+              not_equals: true,
+            },
+          };
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'hidden',
+          type: 'checkbox',
+          hidden: true,
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -273,7 +408,7 @@ export default buildConfig({
       },
     });
 
-    await payload.create<SiblingDatum>({
+    await payload.create({
       collection: siblingDataSlug,
       data: {
         array: [

@@ -41,6 +41,7 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
 | **`required`**       | Require this field to have a value.                                                                                                                                                                 |
 | **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                                            |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -50,7 +51,7 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

@@ -204,7 +204,7 @@ describe('Versions', () => {
           draft: true,
         });
 
-        expect(latestDraft.title).toBe(versions.docs[0].version.title);
+        expect(latestDraft.title).toBe(versions.docs[1].version.title);
       });
     });
 

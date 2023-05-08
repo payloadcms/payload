@@ -3,7 +3,7 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Response } from 'express';
 import { PayloadRequest } from '../../../express/types';
 import { Collection } from '../../config/types';
-import deleteOperation from '../../operations/delete';
+import deleteByID from '../../operations/deleteByID';
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   _: unknown,
@@ -31,7 +31,7 @@ export default function getDeleteResolver<TSlug extends keyof GeneratedTypes['co
       depth: 0,
     };
 
-    const result = await deleteOperation(options);
+    const result = await deleteByID(options);
 
     return result;
   }

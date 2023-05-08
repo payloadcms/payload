@@ -1,7 +1,7 @@
 import paginate from 'mongoose-paginate-v2';
 import { Schema } from 'mongoose';
 import { SanitizedConfig } from '../config/types';
-import buildQueryPlugin from '../mongoose/buildQuery';
+import getBuildQueryPlugin from '../mongoose/buildQuery';
 import buildSchema from '../mongoose/buildSchema';
 import { SanitizedCollectionConfig } from './config/types';
 
@@ -24,9 +24,13 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
     schema.index({ updatedAt: 1 });
     schema.index({ createdAt: 1 });
   }
-
+  if (collection.indexes) {
+    collection.indexes.forEach((index) => {
+      schema.index(index.fields, index.options);
+    });
+  }
   schema.plugin(paginate, { useEstimatedCount: true })
-    .plugin(buildQueryPlugin);
+    .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug }));
 
   return schema;
 };

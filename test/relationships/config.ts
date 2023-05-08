@@ -17,6 +17,9 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
   return {
     slug: collectionSlug,
     access: openAccess,
+    admin: {
+      useAsTitle: 'name',
+    },
     fields: [
       {
         name: 'name',

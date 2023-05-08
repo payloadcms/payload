@@ -17,7 +17,7 @@
 
   &__block {
     margin: base(0.5);
-    width: calc(12.5% - #{base(1)});
+    width: calc((100% / 6) - #{base(1)});
   }
 
   &__default-image {

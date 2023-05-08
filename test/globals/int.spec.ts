@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
-import configPromise, { arraySlug, englishLocale, slug, spanishLocale } from './config';
+import configPromise, { accessControlSlug, arraySlug, englishLocale, slug, spanishLocale } from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
 
@@ -143,6 +143,29 @@ describe('globals', () => {
 
       expect(en).toMatchObject(localized.en);
       expect(es).toMatchObject(localized.es);
+    });
+
+    it('should respect valid access query constraint', async () => {
+      const emptyGlobal = await payload.findGlobal({
+        slug: accessControlSlug,
+        overrideAccess: false,
+      });
+
+      expect(Object.keys(emptyGlobal)).toHaveLength(0);
+
+      await payload.updateGlobal({
+        slug: accessControlSlug,
+        data: {
+          enabled: true,
+        },
+      });
+
+      const hasAccess = await payload.findGlobal({
+        slug: accessControlSlug,
+        overrideAccess: false,
+      });
+
+      expect(hasAccess.title).toBeDefined();
     });
   });
 

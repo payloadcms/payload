@@ -41,9 +41,16 @@ export type ImageUploadFormatOptions = {
   options?: Parameters<Sharp['toFormat']>[1]
 }
 
+/**
+ * Params sent to the sharp trim() function
+ * @link https://sharp.pixelplumbing.com/api-resize#trim
+ */
+export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
+
 export type ImageSize = ResizeOptions & {
   name: string
   formatOptions?: ImageUploadFormatOptions
+  trimOptions?: ImageUploadTrimOptions
   /**
    * @deprecated prefer position
    */
@@ -64,6 +71,7 @@ export type IncomingUploadType = {
   resizeOptions?: ResizeOptions
   /** Options for original upload file only. For sizes, set each formatOptions individually. */
   formatOptions?: ImageUploadFormatOptions
+  trimOptions?: ImageUploadTrimOptions
 }
 
 export type Upload = {
@@ -77,6 +85,7 @@ export type Upload = {
   handlers?: any[]
   resizeOptions?: ResizeOptions;
   formatOptions?: ImageUploadFormatOptions
+  trimOptions?: ImageUploadTrimOptions
 }
 
 export type File = {

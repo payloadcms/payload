@@ -3,7 +3,6 @@ import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection, CollectionModel } from '../config/types';
-import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { PaginatedDocs } from '../../mongoose/types';
@@ -49,44 +48,26 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {};
   let useEstimatedCount = false;
 
   if (where) {
-    let and = [];
-
-    if (Array.isArray(where.and)) and = where.and;
-    if (Array.isArray(where.AND)) and = where.AND;
-
-    queryToBuild.where = {
-      ...where,
-      and: [
-        ...and,
-      ],
-    };
-
-    const constraints = flattenWhereConstraints(queryToBuild);
+    const constraints = flattenWhereConstraints(where);
 
     useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
-  if (!overrideAccess) {
-    const accessResults = await executeAccess({ req }, collectionConfig.access.readVersions);
+  let accessResults;
 
-    if (hasWhereAccessResult(accessResults)) {
-      if (!where) {
-        queryToBuild.where = {
-          and: [
-            accessResults,
-          ],
-        };
-      } else {
-        (queryToBuild.where.and as Where[]).push(accessResults);
-      }
-    }
+  if (!overrideAccess) {
+    accessResults = await executeAccess({ req }, collectionConfig.access.readVersions);
   }
 
-  const query = await VersionsModel.buildQuery(queryToBuild, locale);
+  const query = await VersionsModel.buildQuery({
+    where,
+    access: accessResults,
+    req,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Find

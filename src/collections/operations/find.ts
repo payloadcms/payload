@@ -4,7 +4,6 @@ import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection, TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
-import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { AccessResult } from '../../config/types';
@@ -24,7 +23,6 @@ export type Arguments = {
   disableErrors?: boolean
   pagination?: boolean
   showHiddenFields?: boolean
-  queryHiddenFields?: boolean
   draft?: boolean
 }
 
@@ -66,7 +64,6 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     overrideAccess,
     disableErrors,
     showHiddenFields,
-    queryHiddenFields,
     pagination = true,
   } = args;
 
@@ -74,29 +71,10 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {
-    where: {
-      and: [],
-    },
-  };
-
   let useEstimatedCount = false;
 
   if (where) {
-    queryToBuild.where = {
-      and: [],
-      ...where,
-    };
-
-    if (Array.isArray(where.AND)) {
-      queryToBuild.where.and = [
-        ...queryToBuild.where.and,
-        ...where.AND,
-      ];
-    }
-
-    const constraints = flattenWhereConstraints(queryToBuild);
-
+    const constraints = flattenWhereConstraints(where);
     useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
@@ -120,20 +98,21 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         limit,
       };
     }
-
-    if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.where.and.push(accessResult);
-    }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale, queryHiddenFields);
+  const query = await Model.buildQuery({
+    req,
+    where,
+    overrideAccess,
+    access: accessResult,
+  });
 
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
 
   const [sortProperty, sortOrder] = buildSortParam({
-    sort: args.sort,
+    sort: args.sort ?? collectionConfig.defaultSort,
     config: payload.config,
     fields: collectionConfig.fields,
     timestamps: collectionConfig.timestamps,
@@ -166,7 +145,8 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     result = await queryDrafts<T>({
       accessResult,
       collection,
-      locale,
+      req,
+      overrideAccess,
       paginationOptions,
       payload,
       where,

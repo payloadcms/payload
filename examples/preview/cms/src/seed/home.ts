@@ -32,7 +32,7 @@ export const home: Partial<Page> = {
           url: 'https://github.com/payloadcms/payload/tree/master/examples/preview/cms',
           children: [{ text: 'Preview Example' }],
         },
-        { text: '. This example demonstrates how to implement preview into Payload CMS using ' },
+        { text: '. This example demonstrates how to implement preview into Payload using ' },
         {
           type: 'link',
           newTab: true,
