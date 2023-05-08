@@ -1,7 +1,7 @@
 import { Fields, Field } from "./types";
 
 // function to generate arrays
-const generateArrFromObj = (obj: any, arr: any) => {
+const generateArrFromObj = (obj: Fields | Field, arr: any) => {
   for (const val in obj as Field) {
     if (obj[val] instanceof Array || obj[val] instanceof Object) {
       generateArrFromObj(obj[val], arr);
@@ -17,7 +17,7 @@ const generateArrFromObj = (obj: any, arr: any) => {
 };
 
 // function to compare states
-export const createArray = (obj: any, arr: any) => {
+export const createArray = (obj: Fields | Field, arr: any) => {
   //arrays to store states values
   arr = [];
 

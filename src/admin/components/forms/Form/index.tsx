@@ -5,7 +5,6 @@ import React, {
   useRef,
   useState,
   useCallback,
-  useMemo,
 } from "react";
 import isDeepEqual from "deep-equal";
 import { serialize } from "object-to-formdata";
@@ -44,7 +43,7 @@ import buildStateFromSchema from "./buildStateFromSchema";
 import { useOperation } from "../../utilities/OperationProvider";
 
 // --- import compareStates function
-import { compareStateArrs, compareStates } from "./compareStates";
+import { compareStateArrs } from "./compareStates";
 import { createArray } from "./generateArray";
 
 const baseClass = "form";
@@ -443,118 +442,7 @@ const Form: React.FC<Props> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(" ");
 
-  // // TESTING 1
-  // // to cache/store the initial state of the getData() object
-  // const [getInitialData, setGetInitialData] = useState({});
-
-  // // only runs when initial state change and it is used to set the initial state from the getData() object
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setGetInitialData({ ...getData() });
-  //     //console.log("getData Object");
-  //   }, 200);
-  // }, [initialState]);
-
-  // // this is comparing states
-  // const stateHasChanged = useMemo(() => {
-  //   //console.log("useMemo");
-  //   return compareStates({ ...getInitialData }, { ...getData() });
-  // }, [getData()]);
-
-  // // using a function
-  // // const stateHasChanged = () => {
-  // //   console.log("a function");
-  // //   return compareStates({ ...getInitialData }, { ...getData() });
-  // // };
-
-  // // this will run only when stateHasChanged changes
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setModified((s) => (s = stateHasChanged));
-  //     //console.log(modified);
-  //   }, 250);
-  // }, [stateHasChanged]);
-  // // end of testing 1
-
-  // // TESTING 2
-  // // objects from getData()
-  // const [initialObj, setInitialObj] = useState({});
-  // // arrays
-  // const [initialArr, setInitialArr] = useState([]);
-  // const [currentArr, setCurrentArr] = useState([]);
-
-  // // set initialObj
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setInitialObj({ ...getData() });
-  //     //console.log("get the initial object");
-  //   }, 250);
-  // }, [initialState]);
-
-  // // initial array
-  // useEffect(() => {
-  //   setInitialArr(createArray({ ...initialObj }, initialArr));
-  //   console.log(`initial state: ${initialArr}`);
-  // }, [initialObj, initialArr]);
-
-  // //current array
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setCurrentArr(createArray({ ...getData() }, currentArr));
-  //     console.log(`current state: ${currentArr}`);
-  //   }, 250);
-  // }, [{ ...getData() }]);
-
-  // //compare states - setModified
-  // // this is comparing states
-  // const stateIsChanged = useMemo(() => {
-  //   //console.log("useMemo");
-  //   return compareStateArrs(initialArr, currentArr);
-  // }, [currentArr]);
-
-  // // this will run only when stateHasChanged changes
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setModified(stateIsChanged);
-  //     //console.log(modified);
-  //   }, 250);
-  // }, [stateIsChanged]);
-
-  // // END OF TESTING 2
-
-  // // TESTING 3
-  // const initialArr = useRef(null);
-  // const currentArr = useRef(null);
-
-  // // create initial data
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     const arr = [];
-  //     initialArr.current = createArray({ ...getData() }, arr);
-  //     //console.log(`initial: ${initialArr.current}`);
-  //   }, 100);
-  // }, [initialState]);
-
-  // // create current data
-  // useEffect(() => {
-  //   const arr = [];
-  //   currentArr.current = createArray({ ...(getData() as Field) }, arr);
-  // }, [getData()]);
-
-  // const stateHasChanged = useMemo(() => {
-  //   return compareStateArrs(
-  //     initialArr.current as string,
-  //     currentArr.current as string
-  //   );
-  // }, [initialArr.current, currentArr.current]);
-
-  // useEffect(() => {
-  //   setModified(stateHasChanged);
-  // }, [stateHasChanged]);
-
-  // // END OF TESTING 3
-
-  // TESTING 4
+  // PROPOSAL TO DISABLE DRAFT BUTTON
   const initialStateString = useRef(null);
   const currentStateString = useRef(null);
 
@@ -600,7 +488,7 @@ const Form: React.FC<Props> = (props) => {
       clearTimeout(timeout);
     };
   }, [getData()]);
-  // END OF TESTING 4
+  // END OF PROPOSAL
 
   return (
     <form
