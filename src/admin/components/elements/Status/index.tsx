@@ -3,7 +3,6 @@ import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
-import { Props } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import Button from '../Button';
 import { MinimalTemplate } from '../..';
@@ -16,7 +15,7 @@ import './index.scss';
 
 const baseClass = 'status';
 
-const Status: React.FC<Props> = () => {
+const Status: React.FC = () => {
   const {
     publishedDoc,
     unpublishedVersions,
