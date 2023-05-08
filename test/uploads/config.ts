@@ -176,6 +176,15 @@ export default buildConfig({
       },
       fields: [],
     },
+    {
+      slug: 'externally-served-media',
+      upload: {
+        // Either use another web server like `npx serve -l 4000` (http://localhost:4000) or use the static server from the previous collection to serve the media folder (http://localhost:3000/media)
+        staticURL: 'http://localhost:3000/media',
+        staticDir: './media',
+      },
+      fields: [],
+    },
     Uploads1,
     Uploads2,
   ],
