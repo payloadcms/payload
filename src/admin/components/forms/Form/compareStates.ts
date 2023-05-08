@@ -1,57 +1,82 @@
 import { Fields, Field } from "./types";
-import { generateArray } from "./generateArray";
 
-// function to compare states
-export const stateHasChanged = (obj: Fields | Field) => {
-
-// --- comment: I wanted to create the two arrays somewhere and use them in the two functions within this file, but because I'm using useWatchForm hook it throws and error 'invalid hook call' and I haven't yet figured this out. So, I'm creating the arrays inside each exported function
-  //arrays to store states values
-  let initialValuesArr = [];
-  let currentValuesArr = [];
-  
-  // generate arrays using the generate array function
-  generateArray(obj, 'initialValue', initialValuesArr);
-  generateArray(obj, 'value', currentValuesArr);
-  
-  // reduce each array into a single string
-  let initialValuesArrJoin = initialValuesArr.join("").trim();
-  let currentValuesArrJoin = currentValuesArr.join("").trim();
-// --- end of comment
-
-  // compare the two strings - to be used to change the modified variable
-  if (initialValuesArrJoin === currentValuesArrJoin) {
-    // console.log(`state hasn't changed`)
-    return false;
-  }
-  else  {
-    // console.log(`state has changed`)
-    return true;
+// function to generate arrays
+const generateArray = (obj: Fields | Field, arr: any) => {
+  for (const val in obj as Field) {
+    if (obj[val] instanceof Array || obj[val] instanceof Object) {
+      generateArray(obj[val], arr);
+    } else {
+      arr.push(obj[val]);
+    }
   }
 };
 
+// function to compare states
+export const compareStates = (
+  initialObj: Fields | Field,
+  currentObj: Fields | Field
+) => {
+  //arrays to store states values
+  let initialValuesArr = [];
+  let currentValuesArr = [];
+
+  // generate arrays using the generate array function
+  generateArray(initialObj, initialValuesArr);
+  generateArray(currentObj, currentValuesArr);
+
+  //console.log(initialValuesArr);
+  //console.log(currentValuesArr);
+
+  // reduce each array into a single string
+  let initialValuesArrJoin = initialValuesArr.join("").trim();
+  //console.log(`initial: ${initialValuesArrJoin}`);
+  let currentValuesArrJoin = currentValuesArr.join("").trim();
+  //console.log(`current: ${currentValuesArrJoin}`);
+
+  // compare the two strings - to be used to change the modified variable
+  if (initialValuesArr.length !== 0) {
+    if (initialValuesArrJoin === currentValuesArrJoin) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+};
 
 // function to disable the publish button when creating a new doc
-export const publishButton = (obj: Fields | Field) => {
-
-// --- comment: this block is similar to the block in the previous function, I will find a way to simplify this.
+export const publishButton = (
+  initialObj: Fields | Field,
+  currentObj: Fields | Field
+) => {
+  // --- comment: this block is similar to the block in the previous function, I will find a way to simplify this.
   //arrays to store states values
   let initialValuesArr = [];
   let currentValuesArr = [];
 
   // function to generate arrays
-  generateArray(obj, 'initialValue', initialValuesArr);
-  generateArray(obj, 'value', currentValuesArr);
+  generateArray(initialObj, initialValuesArr);
+  generateArray(currentObj, currentValuesArr);
 
   // reduce each array into a single string
   let initialValuesArrJoin = initialValuesArr.join("").trim();
   let currentValuesArrJoin = currentValuesArr.join("").trim();
-// --- end of comment
+  // --- end of comment
 
   // compare the two strings
-  if (initialValuesArrJoin === 'draft' && currentValuesArrJoin === 'draft') {
+  if (initialValuesArrJoin === "draft" && currentValuesArrJoin === "draft") {
     // console.log(`empty doc - can't publish`)
     return false;
   }
 };
 
-// code by eustachio
+// function to compare states
+export const compareStateArrs = (initialArr: string, currentArr: string) => {
+  // compare the two strings - to be used to change the modified variable
+  if (initialArr !== null) {
+    if (initialArr === currentArr) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+};
