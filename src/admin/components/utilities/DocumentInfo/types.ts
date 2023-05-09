@@ -27,5 +27,6 @@ export type Props = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
   id?: string | number
+  idFromParams?: boolean
   children?: React.ReactNode
 }
