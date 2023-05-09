@@ -4,7 +4,7 @@ import path from 'path';
 import Users from './collections/Users';
 
 export default buildConfig({
-  serverURL: 'http://localhost:3000',
+  serverURL: 'http://127.0.0.1:3000',
   admin: {
     user: Users.slug,
   },
@@ -19,4 +19,4 @@ export default buildConfig({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
   },
-});
+})

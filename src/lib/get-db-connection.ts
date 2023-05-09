@@ -13,7 +13,7 @@ export async function getDatabaseConnection(
       type: 'text',
       name: 'value',
       message: 'Enter MongoDB connection',
-      initial: `mongodb://localhost/${
+      initial: `mongodb://127.0.0.1/${
         projectName === '.'
           ? `payload-${getRandomDigitSuffix()}`
           : slugify(projectName)
