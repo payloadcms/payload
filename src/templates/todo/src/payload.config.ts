@@ -4,7 +4,7 @@ import TodoLists from './collections/TodoLists';
 import Users from './collections/Users';
 
 export default buildConfig({
-  serverURL: 'http://127.0.0.1:3000',
+  serverURL: 'http://localhost:3000',
   admin: {
     user: Users.slug,
   },
