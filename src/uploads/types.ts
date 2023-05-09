@@ -49,7 +49,6 @@ export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
 
 export type ImageSize = ResizeOptions & {
   name: string
-  keepSize?: boolean
   formatOptions?: ImageUploadFormatOptions
   trimOptions?: ImageUploadTrimOptions
   /**

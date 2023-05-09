@@ -71,12 +71,7 @@ export default async function resizeAndSave({
         };
         return;
       }
-
-      let resized = sharpBase.clone();
-
-      if (!desiredSize.keepSize) {
-        resized = resized.resize(desiredSize);
-      }
+      let resized = sharpBase.clone().resize(desiredSize);
 
       if (desiredSize.formatOptions) {
         resized = resized.toFormat(desiredSize.formatOptions.format, desiredSize.formatOptions.options);
@@ -134,5 +129,5 @@ function createImageName(
 function needsResize(desiredSize: ImageSize, dimensions: Dimensions): boolean {
   return (typeof desiredSize.width === 'number' && desiredSize.width <= dimensions.width)
     || (typeof desiredSize.height === 'number' && desiredSize.height <= dimensions.height)
-    || (typeof desiredSize.keepSize === 'boolean' && desiredSize.keepSize === true);
+    || (!desiredSize.height && !desiredSize.width);
 }
