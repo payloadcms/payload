@@ -103,7 +103,7 @@ function initCollectionsGraphQL(payload: Payload): void {
     collection.graphQL.whereInputType = buildWhereInputType(
       singularName,
       whereInputFields,
-      singularName
+      singularName,
     );
 
     if (config.auth && !config.auth.disableLocalStrategy) {
