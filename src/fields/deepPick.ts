@@ -31,7 +31,7 @@ export type DeepPickKeys<Type> = Type extends Array<unknown>
     }[keyof Type];
 
 export type DeepPick<Type, Query extends DeepPickKeys<Type>> = RemoveNever<{
-  [Key in keyof Type]: Type extends Array<any>
+  [Key in keyof Type]: Type extends Array<unknown>
     ? Query extends DeepPickKeys<Type[Key]>
       ? RemoveNever<DeepPick<Type[Key], Query>>
       : never
@@ -49,7 +49,7 @@ export type DeepPick<Type, Query extends DeepPickKeys<Type>> = RemoveNever<{
 export function deepPick<T, U extends DeepPickKeys<T>>(
   obj: T,
   paths: Array<U>,
-): DeepPick<T, typeof paths[number]> {
+): DeepPick<T, (typeof paths)[number]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result: any = {};
   paths.forEach((path) => {
@@ -60,7 +60,7 @@ export function deepPick<T, U extends DeepPickKeys<T>>(
   return result;
 }
 
-function deepPickTo<T>(obj: T, path: Array<string>, result: any): boolean {
+function deepPickTo<T>(obj: T, path: Array<string>, result: unknown): boolean {
   if (typeof result !== 'object' || typeof obj !== 'object') {
     return false;
   }

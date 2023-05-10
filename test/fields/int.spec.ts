@@ -11,6 +11,7 @@ import { defaultText } from './collections/Text';
 import { blocksFieldSeedData } from './collections/Blocks';
 import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
 import { defaultNumber, numberDoc } from './collections/Number';
+import { deepPick } from '../../src/fields/deepPick';
 
 let client;
 
@@ -557,5 +558,91 @@ describe('Fields', () => {
         ]),
       });
     });
+  });
+});
+
+
+describe('deepPick', () => {
+  const testData = {
+    a: 'value a',
+    b: 42,
+    c: {
+      d: true,
+      e: {
+        f: 'value f',
+        g: [1, 2, 3],
+      },
+      h: [
+        {
+          i: 'value i',
+          j: 'value j',
+        },
+        {
+          i: 'value i2',
+          j: 'value j2',
+        },
+      ],
+    },
+  };
+
+  it('should pick a single top-level property', () => {
+    const result = deepPick(testData, ['a']);
+    expect(result).toStrictEqual({ a: 'value a' });
+  });
+
+  it('should pick multiple top-level properties', () => {
+    const result = deepPick(testData, ['a', 'c']);
+    expect(result).toStrictEqual({
+      a: 'value a',
+      c: {
+        d: true,
+        e: {
+          f: 'value f',
+          g: [1, 2, 3],
+        },
+        h: [
+          {
+            i: 'value i',
+            j: 'value j',
+          },
+          {
+            i: 'value i2',
+            j: 'value j2',
+          },
+        ],
+      },
+    });
+  });
+
+  it('should pick deep properties', () => {
+    const result = deepPick(testData, ['c.e.f']);
+    expect(result).toStrictEqual({
+      c: {
+        e: { f: 'value f' },
+      },
+    });
+  });
+
+  it('should pick properties inside arrays', () => {
+    const result = deepPick(testData, ['c.h.i', 'c.e.g']);
+    expect(result).toStrictEqual({
+      c: { e: { g: [1, 2, 3] }, h: [{ i: 'value i' }, { i: 'value i2' }] },
+    });
+  });
+
+  it('should handle non-existent properties', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = deepPick(testData, ['x' as any]);
+    expect(result).toStrictEqual({});
+  });
+
+  it('should handle non-existent deep properties', () => {
+    const result = deepPick(testData, ['c.e.x']);
+    expect(result).toStrictEqual({});
+  });
+
+  it('should handle empty paths array', () => {
+    const result = deepPick(testData, []);
+    expect(result).toStrictEqual({});
   });
 });
