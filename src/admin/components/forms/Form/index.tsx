@@ -47,7 +47,6 @@ import { useOperation } from "../../utilities/OperationProvider";
 const baseClass = "form";
 
 import { generateStrFromObj } from "./generateArray";
-//import { compareStateArrs } from "./compareStates";
 
 const Form: React.FC<Props> = (props) => {
   const {
