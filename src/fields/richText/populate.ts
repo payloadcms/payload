@@ -45,7 +45,7 @@ export const populate = async ({
   ]));
 
   if (doc) {
-    if (field.type === 'richText' && field.select && req.payloadAPI !== 'graphQL') {
+    if (field.type === 'richText' && field.select && req.payloadAPI !== 'GraphQL') {
       const fieldsOrTrue = field.select({
         data: doc,
         collection: collection.config,
@@ -53,7 +53,7 @@ export const populate = async ({
         req,
       });
       if (fieldsOrTrue !== true) {
-        dataRef[key] = deepPick(doc, ['id', ...fieldsOrTrue]);
+        dataRef[key] = deepPick(doc, ['id', ...(fieldsOrTrue as Array<any>)]);
       } else {
         dataRef[key] = doc;
       }

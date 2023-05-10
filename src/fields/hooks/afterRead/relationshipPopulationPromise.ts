@@ -56,7 +56,7 @@ const populate = async ({
     if (!relationshipValue) {
       // ids are visible regardless of access controls
       relationshipValue = id;
-    } else if (field.select && req.payloadAPI !== 'graphQL') {
+    } else if (field.select && req.payloadAPI !== 'GraphQL') {
       const fieldsOrTrue = Array.isArray(field.select)
         ? field.select
         : field.select({
