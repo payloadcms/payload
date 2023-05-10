@@ -11,7 +11,7 @@ module.exports = {
     '@typescript-eslint',
   ],
   extends: [
-    '@trbl',
+    './eslint-config',
   ],
   settings: {
     'import/resolver': {
@@ -57,6 +57,7 @@ module.exports = {
           {
             ignore: [
               'payload-config',
+              'payload/generated-types',
             ],
           },
         ],

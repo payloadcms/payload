@@ -14,7 +14,7 @@ keywords: checkbox, fields, config, configuration, documentation, Content Manage
 
 | Option           | Description |
 | ---------------- | ----------- |
-| **`name`** *         | To be used as the property name when stored and retrieved from the database. |
+| **`name`** *         | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names) |
 | **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language. |
 | **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
 | **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
@@ -26,6 +26,7 @@ keywords: checkbox, fields, config, configuration, documentation, Content Manage
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -35,7 +36,7 @@ keywords: checkbox, fields, config, configuration, documentation, Content Manage
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

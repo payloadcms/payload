@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { useTranslation } from 'react-i18next';
+import { useWindowInfo } from '@faceless-ui/window-info';
 import { fieldAffectsData } from '../../../../fields/config/types';
 import SearchFilter from '../SearchFilter';
 import ColumnSelector from '../ColumnSelector';
@@ -10,8 +11,15 @@ import Button from '../Button';
 import { Props } from './types';
 import { useSearchParams } from '../../utilities/SearchParams';
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery';
+import flattenFields from '../../../../utilities/flattenTopLevelFields';
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched';
 import { getTranslation } from '../../../../utilities/getTranslation';
+import Pill from '../Pill';
+import Chevron from '../../icons/Chevron';
+import EditMany from '../EditMany';
+import DeleteMany from '../DeleteMany';
+import PublishMany from '../PublishMany';
+import UnpublishMany from '../UnpublishMany';
 
 import './index.scss';
 
@@ -22,11 +30,10 @@ const ListControls: React.FC<Props> = (props) => {
     collection,
     enableColumns = true,
     enableSort = false,
-    columns,
-    setColumns,
     handleSortChange,
     handleWhereChange,
     modifySearchQuery = true,
+    resetParams,
     collection: {
       fields,
       admin: {
@@ -39,10 +46,14 @@ const ListControls: React.FC<Props> = (props) => {
   const params = useSearchParams();
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where);
 
-  const [titleField] = useState(() => fields.find((field) => fieldAffectsData(field) && field.name === useAsTitle));
+  const [titleField] = useState(() => {
+    const topLevelFields = flattenFields(fields);
+    return topLevelFields.find((field) => fieldAffectsData(field) && field.name === useAsTitle);
+  });
   const [textFieldsToBeSearched] = useState(getTextFieldsToBeSearched(listSearchableFields, fields));
   const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
   const { t, i18n } = useTranslation('general');
+  const { breakpoints: { s: smallBreak } } = useWindowInfo();
 
   return (
     <div className={baseClass}>
@@ -56,26 +67,44 @@ const ListControls: React.FC<Props> = (props) => {
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
+            { !smallBreak && (
+              <React.Fragment>
+                <EditMany
+                  collection={collection}
+                  resetParams={resetParams}
+                />
+                <PublishMany
+                  collection={collection}
+                  resetParams={resetParams}
+                />
+                <UnpublishMany
+                  collection={collection}
+                  resetParams={resetParams}
+                />
+                <DeleteMany
+                  collection={collection}
+                  resetParams={resetParams}
+                />
+              </React.Fragment>
+            )}
             {enableColumns && (
-              <Button
-                className={`${baseClass}__toggle-columns`}
-                buttonStyle={visibleDrawer === 'columns' ? undefined : 'secondary'}
+              <Pill
+                pillStyle="light"
+                className={`${baseClass}__toggle-columns ${visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''}`}
                 onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
-                icon="chevron"
-                iconStyle="none"
+                icon={<Chevron />}
               >
                 {t('columns')}
-              </Button>
+              </Pill>
             )}
-            <Button
-              className={`${baseClass}__toggle-where`}
-              buttonStyle={visibleDrawer === 'where' ? undefined : 'secondary'}
+            <Pill
+              pillStyle="light"
+              className={`${baseClass}__toggle-where ${visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''}`}
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-              icon="chevron"
-              iconStyle="none"
+              icon={<Chevron />}
             >
               {t('filters')}
-            </Button>
+            </Pill>
             {enableSort && (
               <Button
                 className={`${baseClass}__toggle-sort`}
@@ -95,11 +124,7 @@ const ListControls: React.FC<Props> = (props) => {
           className={`${baseClass}__columns`}
           height={visibleDrawer === 'columns' ? 'auto' : 0}
         >
-          <ColumnSelector
-            collection={collection}
-            columns={columns}
-            setColumns={setColumns}
-          />
+          <ColumnSelector collection={collection} />
         </AnimateHeight>
       )}
       <AnimateHeight

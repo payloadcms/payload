@@ -6,18 +6,23 @@ import RenderCustomComponent from '../../../../utilities/RenderCustomComponent';
 import cellComponents from './field-types';
 import { Props } from './types';
 import { getTranslation } from '../../../../../../utilities/getTranslation';
+import { fieldAffectsData } from '../../../../../../fields/config/types';
 
 const DefaultCell: React.FC<Props> = (props) => {
   const {
     field,
-    colIndex,
+    collection,
     collection: {
       slug,
     },
     cellData,
+    rowData,
     rowData: {
       id,
     } = {},
+    link = true,
+    onClick,
+    className,
   } = props;
 
   const { routes: { admin } } = useConfig();
@@ -27,24 +32,41 @@ const DefaultCell: React.FC<Props> = (props) => {
 
   const wrapElementProps: {
     to?: string
-  } = {};
+    onClick?: () => void
+    type?: 'button'
+    className?: string
+  } = {
+    className,
+  };
 
-  if (colIndex === 0) {
+  if (link) {
     WrapElement = Link;
     wrapElementProps.to = `${admin}/collections/${slug}/${id}`;
   }
 
-  const CellComponent = cellData && cellComponents[field.type];
+  if (typeof onClick === 'function') {
+    WrapElement = 'button';
+    wrapElementProps.type = 'button';
+    wrapElementProps.onClick = () => {
+      onClick(props);
+    };
+  }
+
+  let CellComponent = cellData && cellComponents[field.type];
 
   if (!CellComponent) {
-    return (
-      <WrapElement {...wrapElementProps}>
-        {(cellData === '' || typeof cellData === 'undefined') && t('noLabel', { label: getTranslation(typeof field.label === 'function' ? 'data' : field.label || 'data', i18n) })}
-        {typeof cellData === 'string' && cellData}
-        {typeof cellData === 'number' && cellData}
-        {typeof cellData === 'object' && JSON.stringify(cellData)}
-      </WrapElement>
-    );
+    if (collection.upload && fieldAffectsData(field) && field.name === 'filename') {
+      CellComponent = cellComponents.File;
+    } else {
+      return (
+        <WrapElement {...wrapElementProps}>
+          {((cellData === '' || typeof cellData === 'undefined') && 'label' in field) && t('noLabel', { label: getTranslation(typeof field.label === 'function' ? 'data' : field.label || 'data', i18n) })}
+          {typeof cellData === 'string' && cellData}
+          {typeof cellData === 'number' && cellData}
+          {typeof cellData === 'object' && JSON.stringify(cellData)}
+        </WrapElement>
+      );
+    }
   }
 
   return (
@@ -52,6 +74,8 @@ const DefaultCell: React.FC<Props> = (props) => {
       <CellComponent
         field={field}
         data={cellData}
+        collection={collection}
+        rowData={rowData}
       />
     </WrapElement>
   );
@@ -71,6 +95,9 @@ const Cell: React.FC<Props> = (props) => {
         } = {},
       } = {},
     },
+    link,
+    onClick,
+    className,
   } = props;
 
   return (
@@ -81,6 +108,9 @@ const Cell: React.FC<Props> = (props) => {
         cellData,
         collection,
         field,
+        link,
+        onClick,
+        className,
       }}
       CustomComponent={CustomCell}
       DefaultComponent={DefaultCell}

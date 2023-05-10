@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useModal } from '@faceless-ui/modal';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from '../../../elements/Button';
 import Label from '../../Label';
 import Error from '../../Error';
 import FileDetails from '../../../elements/FileDetails';
@@ -9,11 +7,15 @@ import FieldDescription from '../../FieldDescription';
 import { FilterOptions, UploadField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
 import { FieldTypes } from '..';
-import AddModal from './Add';
-import SelectExistingModal from './SelectExisting';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { useEditDepth, EditDepthContext } from '../../../utilities/EditDepth';
 import { getTranslation } from '../../../../../utilities/getTranslation';
+import { useDocumentDrawer } from '../../../elements/DocumentDrawer';
+import { useListDrawer } from '../../../elements/ListDrawer';
+import Button from '../../../elements/Button';
+import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
+import { ListDrawerProps } from '../../../elements/ListDrawer/types';
+import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
+import { FilterOptionsResult } from '../Relationship/types';
 
 import './index.scss';
 
@@ -50,7 +52,6 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     description,
     label,
     relationTo,
-    fieldTypes,
     value,
     onChange,
     showError,
@@ -61,16 +62,33 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     filterOptions,
   } = props;
 
-  const { toggleModal, modalState } = useModal();
   const { t, i18n } = useTranslation('fields');
-  const editDepth = useEditDepth();
-
-  const addModalSlug = `${path}-add-depth-${editDepth}`;
-  const selectExistingModalSlug = `${path}-select-existing-depth-${editDepth}`;
 
   const [file, setFile] = useState(undefined);
   const [missingFile, setMissingFile] = useState(false);
-  const [modalToRender, setModalToRender] = useState<string>();
+  const [collectionSlugs] = useState([collection?.slug]);
+  const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>();
+
+  const [
+    DocumentDrawer,
+    DocumentDrawerToggler,
+    {
+      closeDrawer,
+    },
+  ] = useDocumentDrawer({
+    collectionSlug: collectionSlugs[0],
+  });
+
+  const [
+    ListDrawer,
+    ListDrawerToggler,
+    {
+      closeDrawer: closeListDrawer,
+    },
+  ] = useListDrawer({
+    collectionSlugs,
+    filterOptions: filterOptionsResult,
+  });
 
   const classes = [
     'field-type',
@@ -110,11 +128,19 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     i18n,
   ]);
 
-  useEffect(() => {
-    if (!modalState[addModalSlug]?.isOpen && !modalState[selectExistingModalSlug]?.isOpen) {
-      setModalToRender(undefined);
-    }
-  }, [modalState, addModalSlug, selectExistingModalSlug]);
+  const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
+    setMissingFile(false);
+    onChange(args.doc);
+    closeDrawer();
+  }, [onChange, closeDrawer]);
+
+  const onSelect = useCallback<ListDrawerProps['onSelect']>((args) => {
+    setMissingFile(false);
+    onChange({
+      id: args.docID,
+    });
+    closeListDrawer();
+  }, [onChange, closeListDrawer]);
 
   return (
     <div
@@ -124,6 +150,15 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
         width,
       }}
     >
+      <GetFilterOptions
+        {...{
+          filterOptionsResult,
+          setFilterOptionsResult,
+          filterOptions,
+          path,
+          relationTo,
+        }}
+      />
       <Error
         showError={showError}
         message={errorMessage}
@@ -139,66 +174,49 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
             <FileDetails
               collection={collection}
               doc={file}
-              handleRemove={() => {
+              handleRemove={readOnly ? undefined : () => {
                 onChange(null);
               }}
             />
           )}
           {(!file || missingFile) && (
             <div className={`${baseClass}__wrap`}>
-              <Button
-                buttonStyle="secondary"
-                onClick={() => {
-                  toggleModal(addModalSlug);
-                  setModalToRender(addModalSlug);
-                }}
-              >
-                {t('uploadNewLabel', { label: getTranslation(collection.labels.singular, i18n) })}
-              </Button>
-              <Button
-                buttonStyle="secondary"
-                onClick={() => {
-                  toggleModal(selectExistingModalSlug);
-                  setModalToRender(selectExistingModalSlug);
-                }}
-              >
-                {t('chooseFromExisting')}
-              </Button>
+              <div className={`${baseClass}__buttons`}>
+                <DocumentDrawerToggler
+                  className={`${baseClass}__toggler`}
+                  disabled={readOnly}
+                >
+                  <Button
+                    buttonStyle="secondary"
+                    el="div"
+                    disabled={readOnly}
+                  >
+                    {t('uploadNewLabel', { label: getTranslation(collection.labels.singular, i18n) })}
+                  </Button>
+                </DocumentDrawerToggler>
+                <ListDrawerToggler
+                  className={`${baseClass}__toggler`}
+                  disabled={readOnly}
+                >
+                  <Button
+                    buttonStyle="secondary"
+                    el="div"
+                    disabled={readOnly}
+                  >
+                    {t('chooseFromExisting')}
+                  </Button>
+                </ListDrawerToggler>
+              </div>
             </div>
           )}
-          <EditDepthContext.Provider value={editDepth + 1}>
-            {modalToRender === addModalSlug && (
-              <AddModal
-                {...{
-                  collection,
-                  slug: addModalSlug,
-                  fieldTypes,
-                  setValue: (e) => {
-                    setMissingFile(false);
-                    onChange(e);
-                  },
-                }}
-              />
-            )}
-            {modalToRender === selectExistingModalSlug && (
-              <SelectExistingModal
-                {...{
-                  collection,
-                  slug: selectExistingModalSlug,
-                  setValue: onChange,
-                  addModalSlug,
-                  filterOptions,
-                  path,
-                }}
-              />
-            )}
-          </EditDepthContext.Provider>
           <FieldDescription
             value={file}
             description={description}
           />
         </React.Fragment>
       )}
+      {!readOnly && <DocumentDrawer onSave={onSave} />}
+      {!readOnly && <ListDrawer onSelect={onSelect} />}
     </div>
   );
 };

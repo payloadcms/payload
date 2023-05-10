@@ -32,7 +32,7 @@ const validateFields = (context: string, entity: SanitizedCollectionConfig | San
   return errors;
 };
 
-const validateCollections = (collections: SanitizedCollectionConfig[]): string[] => {
+const validateCollections = async (collections: SanitizedCollectionConfig[]): Promise<string[]> => {
   const errors: string[] = [];
   collections.forEach((collection) => {
     const result = collectionSchema.validate(collection, { abortEarly: false });
@@ -62,13 +62,13 @@ const validateGlobals = (globals: SanitizedGlobalConfig[]): string[] => {
   return errors;
 };
 
-const validateSchema = (config: SanitizedConfig, logger: Logger): SanitizedConfig => {
+const validateSchema = async (config: SanitizedConfig, logger: Logger): Promise<SanitizedConfig> => {
   const result = schema.validate(config, {
     abortEarly: false,
   });
 
   const nestedErrors = [
-    ...validateCollections(config.collections),
+    ...await validateCollections(config.collections),
     ...validateGlobals(config.globals),
   ];
 

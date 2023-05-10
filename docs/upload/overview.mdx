@@ -42,7 +42,7 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 
 | Option                    | Description                                                                                                                                     |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`staticURL`** \*        | The base URL path to use to access your uploads. Example: `/media`                                                                              |
+| **`staticURL`** \*        | The URL path to use to access your uploads. Relative path like `/media` will be served by payload. Full path like `https://example.com/media` needs to be served by another web server. |
 | **`staticDir`** \*        | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config.           |
 | **`imageSizes`**          | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                              |
 | **`formatOptions`**       | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat) |
@@ -60,7 +60,7 @@ _An asterisk denotes that a property above is required._
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Media: CollectionConfig = {
+export const Media: CollectionConfig = {
   slug: 'media',
   upload: {
     staticURL: '/media',
@@ -81,17 +81,23 @@ const Media: CollectionConfig = {
       {
         name: 'tablet',
         width: 1024,
-        // By specifying `null` or leaving a height undefined,
+        // By specifying `undefined` or leaving a height undefined,
         // the image will be sized to a certain width,
         // but it will retain its original aspect ratio
         // and calculate a height automatically.
-        height: null,
+        height: undefined,
         position: 'centre',
       },
     ],
     adminThumbnail: 'thumbnail',
     mimeTypes: ['image/*'],
   },
+  fields: [
+    {
+      name: 'alt',
+      type: 'text',
+    },
+  ],
 };
 ```
 
@@ -165,7 +171,7 @@ You can specify how Payload retrieves admin thumbnails for your upload-enabled C
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Media: CollectionConfig = {
+export const Media: CollectionConfig = {
   slug: 'media',
   upload: {
     staticURL: '/media',
@@ -200,7 +206,7 @@ Some example values are: `image/*`, `audio/*`, `video/*`, `image/png`, `applicat
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Media: CollectionConfig = {
+export const Media: CollectionConfig = {
   slug: 'media',
   upload: {
     staticURL: '/media',

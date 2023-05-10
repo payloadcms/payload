@@ -1,20 +1,25 @@
 import merge from 'deepmerge';
 import { isPlainObject } from 'is-plain-object';
-import { SanitizedCollectionConfig, CollectionConfig } from './types';
+import { CollectionConfig, SanitizedCollectionConfig } from './types';
 import sanitizeFields from '../../fields/config/sanitize';
-import toKebabCase from '../../utilities/toKebabCase';
 import baseAuthFields from '../../auth/baseFields/auth';
 import baseAPIKeyFields from '../../auth/baseFields/apiKey';
 import baseVerificationFields from '../../auth/baseFields/verification';
 import baseAccountLockFields from '../../auth/baseFields/accountLock';
 import getBaseUploadFields from '../../uploads/getBaseFields';
 import { formatLabels } from '../../utilities/formatLabels';
-import { defaults, authDefaults } from './defaults';
+import { authDefaults, defaults } from './defaults';
 import { Config } from '../../config/types';
-import { versionCollectionDefaults } from '../../versions/defaults';
 import baseVersionFields from '../../versions/baseFields';
 import TimestampsRequired from '../../errors/TimestampsRequired';
 import mergeBaseFields from '../../fields/mergeBaseFields';
+import { extractTranslations } from '../../translations/extractTranslations';
+import { fieldAffectsData } from '../../fields/config/types';
+
+const translations = extractTranslations([
+  'general:createdAt',
+  'general:updatedAt',
+]);
 
 const sanitizeCollection = (config: Config, collection: CollectionConfig): SanitizedCollectionConfig => {
   // /////////////////////////////////
@@ -25,7 +30,41 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
     isMergeableObject: isPlainObject,
   });
 
-  sanitized.slug = toKebabCase(sanitized.slug);
+  if (sanitized.timestamps !== false) {
+    // add default timestamps fields only as needed
+    let hasUpdatedAt = null;
+    let hasCreatedAt = null;
+    sanitized.fields.some((field) => {
+      if (fieldAffectsData(field)) {
+        if (field.name === 'updatedAt') hasUpdatedAt = true;
+        if (field.name === 'createdAt') hasCreatedAt = true;
+      }
+      return hasCreatedAt && hasUpdatedAt;
+    });
+    if (!hasUpdatedAt) {
+      sanitized.fields.push({
+        name: 'updatedAt',
+        label: translations['general:updatedAt'],
+        type: 'date',
+        admin: {
+          hidden: true,
+          disableBulkEdit: true,
+        },
+      });
+    }
+    if (!hasCreatedAt) {
+      sanitized.fields.push({
+        name: 'createdAt',
+        label: translations['general:createdAt'],
+        type: 'date',
+        admin: {
+          hidden: true,
+          disableBulkEdit: true,
+        },
+      });
+    }
+  }
+
   sanitized.labels = sanitized.labels || formatLabels(sanitized.slug);
 
   if (sanitized.versions) {
@@ -42,12 +81,14 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
         };
       }
 
-      if (sanitized.versions.drafts.autosave === true) sanitized.versions.drafts.autosave = {};
+      if (sanitized.versions.drafts.autosave === true) {
+        sanitized.versions.drafts.autosave = {
+          interval: 2000,
+        };
+      }
 
       sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields);
     }
-
-    sanitized.versions = merge(versionCollectionDefaults, sanitized.versions);
   }
 
   if (sanitized.upload) {

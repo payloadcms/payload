@@ -17,7 +17,6 @@ import wait from '../../src/utilities/wait';
 
 const { beforeAll, beforeEach, describe } = test;
 
-
 describe('fields - relationship', () => {
   let url: AdminUrlUtil;
   let page: Page;
@@ -46,21 +45,21 @@ describe('fields - relationship', () => {
     await clearAllDocs();
 
     // Create docs to relate to
-    relationOneDoc = await payload.create<RelationOne>({
+    relationOneDoc = await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'relation',
       },
     });
 
-    anotherRelationOneDoc = await payload.create<RelationOne>({
+    anotherRelationOneDoc = await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'relation',
       },
     });
 
-    relationTwoDoc = await payload.create<RelationTwo>({
+    relationTwoDoc = await payload.create({
       collection: relationTwoSlug,
       data: {
         name: 'second-relation',
@@ -68,7 +67,7 @@ describe('fields - relationship', () => {
     });
 
     // Create restricted doc
-    restrictedRelation = await payload.create<RelationRestricted>({
+    restrictedRelation = await payload.create({
       collection: relationRestrictedSlug,
       data: {
         name: 'restricted',
@@ -76,29 +75,36 @@ describe('fields - relationship', () => {
     });
 
     // Doc with useAsTitle
-    relationWithTitle = await payload.create<RelationWithTitle>({
+    relationWithTitle = await payload.create({
       collection: relationWithTitleSlug,
       data: {
         name: 'relation-title',
+        meta: {
+          title: 'relation-title',
+        },
       },
     });
 
     // Doc with useAsTitle for word boundary test
-    await payload.create<RelationWithTitle>({
+    await payload.create({
       collection: relationWithTitleSlug,
       data: {
         name: 'word boundary search',
+        meta: {
+          title: 'word boundary search',
+        },
       },
     });
 
     // Add restricted doc as relation
-    docWithExistingRelations = await payload.create<CollectionWithRelationships>({
+    docWithExistingRelations = await payload.create({
       collection: slug,
       data: {
         name: 'with-existing-relations',
         relationship: relationOneDoc.id,
         relationshipRestricted: restrictedRelation.id,
         relationshipWithTitle: relationWithTitle.id,
+        relationshipReadOnly: relationOneDoc.id,
       },
     });
   });
@@ -131,15 +137,17 @@ describe('fields - relationship', () => {
 
     await expect(options).toHaveCount(2); // Two relationship options
 
+    const values = page.locator('#field-relationshipHasMany .relationship--multi-value-label__text');
+
     // Add one relationship
     await options.locator(`text=${relationOneDoc.id}`).click();
-    await expect(field).toContainText(relationOneDoc.id);
-    await expect(field).not.toContainText(anotherRelationOneDoc.id);
+    await expect(values).toHaveText([relationOneDoc.id]);
+    await expect(values).not.toHaveText([anotherRelationOneDoc.id]);
 
     // Add second relationship
     await field.click({ delay: 100 });
     await options.locator(`text=${anotherRelationOneDoc.id}`).click();
-    await expect(field).toContainText(anotherRelationOneDoc.id);
+    await expect(values).toHaveText([relationOneDoc.id, anotherRelationOneDoc.id]);
 
     // No options left
     await field.locator('.rs__input').click({ delay: 100 });
@@ -152,6 +160,7 @@ describe('fields - relationship', () => {
     await page.goto(url.create);
 
     const field = page.locator('#field-relationshipMultiple');
+    const value = page.locator('#field-relationshipMultiple .relationship--single-value__text');
 
     await field.click({ delay: 100 });
 
@@ -161,12 +170,12 @@ describe('fields - relationship', () => {
 
     // Add one relationship
     await options.locator(`text=${relationOneDoc.id}`).click();
-    await expect(field).toContainText(relationOneDoc.id);
+    await expect(value).toContainText(relationOneDoc.id);
 
     // Add relationship of different collection
     await field.click({ delay: 100 });
     await options.locator(`text=${relationTwoDoc.id}`).click();
-    await expect(field).toContainText(relationTwoDoc.id);
+    await expect(value).toContainText(relationTwoDoc.id);
 
     await saveDocAndAssert(page);
   });
@@ -176,7 +185,7 @@ describe('fields - relationship', () => {
 
     await page.locator('.btn.duplicate').first().click();
     await expect(page.locator('.Toastify')).toContainText('successfully');
-    const field = page.locator('#field-relationship .rs__value-container');
+    const field = page.locator('#field-relationship .relationship--single-value__text');
 
     await expect(field).toHaveText(relationOneDoc.id);
   });
@@ -210,6 +219,62 @@ describe('fields - relationship', () => {
     await expect(filteredOptions).toHaveCount(2); // two options because the currently selected option is still there
     await filteredOptions.nth(1).click();
     await expect(filteredField).toContainText(anotherRelationOneDoc.id);
+  });
+
+  test('should allow usage of relationTo in filterOptions', async () => {
+    const { id: include } = await payload.create({
+      collection: relationOneSlug,
+      data: {
+        name: 'include',
+      },
+    });
+    const { id: exclude } = await payload.create({
+      collection: relationOneSlug,
+      data: {
+        name: 'exclude',
+      },
+    });
+
+    await page.goto(url.create);
+
+    // select relationshipMany field that relies on siblingData field above
+    await page.locator('#field-relationshipManyFiltered .rs__control').click();
+
+    const options = await page.locator('#field-relationshipManyFiltered .rs__menu');
+    await expect(options).toContainText(include);
+    await expect(options).not.toContainText(exclude);
+  });
+
+  test('should allow usage of siblingData in filterOptions', async () => {
+    await payload.create({
+      collection: relationWithTitleSlug,
+      data: {
+        name: 'exclude',
+      },
+    });
+
+    await page.goto(url.create);
+
+    // enter a filter for relationshipManyFiltered to use
+    await page.locator('#field-filter').fill('include');
+
+    // select relationshipMany field that relies on siblingData field above
+    await page.locator('#field-relationshipManyFiltered .rs__control').click();
+
+    const options = await page.locator('#field-relationshipManyFiltered .rs__menu');
+    await expect(options).not.toContainText('exclude');
+  });
+
+  test('should open document drawer from read-only relationships', async () => {
+    await page.goto(url.edit(docWithExistingRelations.id));
+
+    const field = page.locator('#field-relationshipReadOnly');
+
+    const button = await field.locator('button.relationship--single-value__drawer-toggler.doc-drawer__toggler');
+    await button.click();
+
+    const documentDrawer = await page.locator('[id^=doc-drawer_relation-one_1_]');
+    await expect(documentDrawer).toBeVisible();
   });
 
   describe('existing relationships', () => {
@@ -249,7 +314,7 @@ describe('fields - relationship', () => {
       const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option');
       await expect(options).toHaveCount(1);
 
-      await input.fill('non-occuring-string');
+      await input.fill('non-occurring-string');
       await expect(options).toHaveCount(0);
     });
 
@@ -264,7 +329,7 @@ describe('fields - relationship', () => {
     test('should show useAsTitle on relation', async () => {
       await page.goto(url.edit(docWithExistingRelations.id));
 
-      const field = page.locator('#field-relationshipWithTitle .react-select');
+      const field = page.locator('#field-relationshipWithTitle .relationship--single-value__text');
 
       // Check existing relationship for correct title
       await expect(field).toHaveText(relationWithTitle.name);

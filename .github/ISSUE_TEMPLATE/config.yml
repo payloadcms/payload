@@ -1,8 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Security Vulnerability
-    url: https://github.com/payloadcms/payload/blob/master/SECURITY.md
-    about: See instructions to privately disclose any security concerns
   - name: Feature Request
     url: https://github.com/payloadcms/payload/discussions
     about: Suggest an idea to improve Payload in our GitHub Discussions

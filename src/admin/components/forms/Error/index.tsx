@@ -14,7 +14,10 @@ const Error: React.FC<Props> = (props) => {
 
   if (showError) {
     return (
-      <Tooltip className={baseClass}>
+      <Tooltip
+        className={baseClass}
+        delay={0}
+      >
         {message}
       </Tooltip>
     );

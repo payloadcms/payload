@@ -15,7 +15,7 @@ export type Props = IndexProps & {
   id?: string
   permissions: CollectionPermission
   isLoading: boolean
-  initialState?: Fields
+  internalState?: Fields
   apiURL: string
   action: string
   hasSavePermission: boolean
@@ -24,4 +24,5 @@ export type Props = IndexProps & {
   disableActions?: boolean
   disableLeaveWithoutSaving?: boolean
   customHeader?: React.ReactNode
+  updatedAt?: string
 }

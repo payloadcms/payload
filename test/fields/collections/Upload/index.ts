@@ -15,6 +15,15 @@ const Uploads: CollectionConfig = {
       type: 'upload',
       name: 'media',
       relationTo: 'uploads',
+      filterOptions: {
+        mimeType: {
+          equals: 'image/png',
+        },
+      },
+    },
+    {
+      type: 'richText',
+      name: 'richText',
     },
   ],
 };

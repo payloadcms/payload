@@ -1,3 +1,5 @@
+import { Ref } from 'react';
+
 export type Option = {
   [key: string]: unknown
   value: unknown
@@ -26,7 +28,16 @@ export type Props = {
   placeholder?: string
   isSearchable?: boolean
   isClearable?: boolean
+  blurInputOnSelect?: boolean
   filterOption?:
   | (({ label, value, data }: { label: string, value: string, data: Option }, search: string) => boolean)
   | undefined,
+  components?: {
+    [key: string]: React.FC<any>
+  }
+  selectProps?: {
+    disableMouseDown?: boolean
+    disableKeyDown?: boolean
+    [key: string]: unknown
+  }
 }

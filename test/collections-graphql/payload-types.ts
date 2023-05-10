@@ -5,18 +5,23 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
-export interface Config {}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
+export interface Config {
+  collections: {
+    posts: Post;
+    relation: Relation;
+    dummy: Dummy;
+    users: User;
+  };
+  globals: {};
+}
 export interface Post {
   id: string;
   title?: string;
   description?: string;
-  number?: number;
+  min?: number;
+  max?: number;
   relationField?: string | Relation;
-  relationHasManyField?: (string | Relation)[];
+  relationHasManyField?: string[] | Relation[];
   relationMultiRelationTo?:
     | {
         value: string | Relation;
@@ -26,43 +31,42 @@ export interface Post {
         value: string | Dummy;
         relationTo: 'dummy';
       };
-  relationMultiRelationToHasMany?: (
-    | {
-        value: string | Relation;
-        relationTo: 'relation';
-      }
-    | {
-        value: string | Dummy;
-        relationTo: 'dummy';
-      }
-  )[];
+  relationMultiRelationToHasMany?:
+    | (
+        | {
+            value: string;
+            relationTo: 'relation';
+          }
+        | {
+            value: string;
+            relationTo: 'dummy';
+          }
+      )[]
+    | (
+        | {
+            value: Relation;
+            relationTo: 'relation';
+          }
+        | {
+            value: Dummy;
+            relationTo: 'dummy';
+          }
+      )[];
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation".
- */
 export interface Relation {
   id: string;
   name?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "dummy".
- */
 export interface Dummy {
   id: string;
   name?: string;
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
 export interface User {
   id: string;
   email?: string;
@@ -72,4 +76,5 @@ export interface User {
   lockUntil?: string;
   createdAt: string;
   updatedAt: string;
+  password?: string;
 }

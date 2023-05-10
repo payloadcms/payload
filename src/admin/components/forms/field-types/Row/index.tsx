@@ -2,7 +2,8 @@ import React from 'react';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
-import { getFieldPath } from '../getFieldPath';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
+import { RowProvider } from './provider';
 
 import './index.scss';
 
@@ -26,17 +27,19 @@ const Row: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   return (
-    <RenderFields
-      readOnly={readOnly}
-      className={classes}
-      permissions={permissions}
-      fieldTypes={fieldTypes}
-      indexPath={indexPath}
-      fieldSchema={fields.map((field) => ({
-        ...field,
-        path: getFieldPath(path, field),
-      }))}
-    />
+    <RowProvider>
+      <RenderFields
+        readOnly={readOnly}
+        className={classes}
+        permissions={permissions}
+        fieldTypes={fieldTypes}
+        indexPath={indexPath}
+        fieldSchema={fields.map((field) => ({
+          ...field,
+          path: createNestedFieldPath(path, field),
+        }))}
+      />
+    </RowProvider>
   );
 };
 export default withCondition(Row);

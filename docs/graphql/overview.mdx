@@ -32,7 +32,7 @@ Everything that can be done to a Collection via the REST or Local API can be don
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const PublicUser: CollectionConfig = {
+export const PublicUser: CollectionConfig = {
   slug: 'public-users',
   auth: true, // Auth is enabled
   fields: [
@@ -116,7 +116,7 @@ You can even log in using the `login[collection-singular-label-here]` mutation t
 
 <Banner type="success">
   <strong>Tip:</strong><br/>
-  To see more regarding how the above queries and mutations are used, visit your GraphQL playground (by default at <a href="http://localhost:3000/api/graphql-playground">(http://localhost:3000/api/graphql-playground)</a> while your server is running. There, you can use the "Schema" and "Docs" buttons on the right to see a ton of detail about how GraphQL operates within Payload.
+  To see more regarding how the above queries and mutations are used, visit your GraphQL playground (by default at <a href="http://localhost:3000/api/graphql-playground">(http://localhost:3000/api/graphql-playground</a>) while your server is running. There, you can use the "Schema" and "Docs" buttons on the right to see a ton of detail about how GraphQL operates within Payload.
 </Banner>
 
 ## Query complexity limits

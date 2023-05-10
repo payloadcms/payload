@@ -1,0 +1,23 @@
+.input {
+  margin-bottom: 15px;
+}
+
+.input input {
+  width: 100%;
+  font-family: system-ui;
+  border-radius: 0;
+  box-shadow: 0;
+  border: 1px solid #d8d8d8;
+  height: 30px;
+  line-height: 30px;
+}
+
+.label {
+  margin-bottom: 10px;
+  display: block;
+}
+
+.error {
+  margin-top: 5px;
+  color: red;
+}

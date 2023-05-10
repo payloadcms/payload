@@ -36,7 +36,8 @@ export const PreferencesProvider: React.FC<{children?: React.ReactNode}> = ({ ch
   }, [user]);
 
   const getPreference = useCallback(async <T = any>(key: string): Promise<T> => {
-    if (typeof preferencesRef.current[key] !== 'undefined') return preferencesRef.current[key];
+    const prefs = preferencesRef.current;
+    if (typeof prefs[key] !== 'undefined') return prefs[key];
     const promise = new Promise((resolve: (value: T) => void) => {
       (async () => {
         const request = await requests.get(`${serverURL}${api}/_preferences/${key}`, {
@@ -53,7 +54,7 @@ export const PreferencesProvider: React.FC<{children?: React.ReactNode}> = ({ ch
         resolve(value);
       })();
     });
-    preferencesRef.current[key] = promise;
+    prefs[key] = promise;
     return promise;
   }, [i18n.language, api, preferencesRef, serverURL]);
 

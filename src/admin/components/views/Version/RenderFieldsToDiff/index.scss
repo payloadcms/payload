@@ -3,6 +3,7 @@
 .render-field-diffs {
   &__field {
     margin-bottom: $baseline;
+    overflow-wrap: anywhere;
   }
 
   &__locale {

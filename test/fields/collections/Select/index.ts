@@ -81,6 +81,22 @@ const SelectFields: CollectionConfig = {
       ],
     },
     {
+      name: 'selectHasManyLocalized',
+      type: 'select',
+      hasMany: true,
+      localized: true,
+      options: [
+        {
+          label: 'Value One',
+          value: 'one',
+        },
+        {
+          label: 'Value Two',
+          value: 'two',
+        },
+      ],
+    },
+    {
       name: 'selectI18n',
       type: 'select',
       admin: {

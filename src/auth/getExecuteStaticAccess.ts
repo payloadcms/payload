@@ -16,26 +16,24 @@ const getExecuteStaticAccess = ({ config, Model }) => async (req: PayloadRequest
       if (typeof accessResult === 'object') {
         const filename = decodeURI(req.path).replace(/^\/|\/$/g, '');
 
-        const queryToBuild: { where: Where } = {
-          where: {
-            and: [
-              {
-                or: [
-                  {
-                    filename: {
-                      equals: filename,
-                    },
+        const queryToBuild: Where = {
+          and: [
+            {
+              or: [
+                {
+                  filename: {
+                    equals: filename,
                   },
-                ],
-              },
-              accessResult,
-            ],
-          },
+                },
+              ],
+            },
+            accessResult,
+          ],
         };
 
         if (config.upload.imageSizes) {
           config.upload.imageSizes.forEach(({ name }) => {
-            queryToBuild.where.and[0].or.push({
+            queryToBuild.and[0].or.push({
               [`sizes.${name}.filename`]: {
                 equals: filename,
               },
@@ -43,7 +41,12 @@ const getExecuteStaticAccess = ({ config, Model }) => async (req: PayloadRequest
           });
         }
 
-        const query = await Model.buildQuery(queryToBuild, req.locale);
+        const query = await Model.buildQuery({
+          where: queryToBuild,
+          req,
+          overrideAccess: true,
+        });
+
         const doc = await Model.findOne(query);
 
         if (!doc) {

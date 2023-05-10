@@ -1,56 +1,157 @@
-import type { IndexDirection, IndexOptions } from 'mongoose';
-import { initPayloadTest } from '../helpers/configHelpers';
-import { RESTClient } from '../helpers/rest';
-import config from '../uploads/config';
-import payload from '../../src';
-import { pointDoc } from './collections/Point';
-import type { ArrayField, GroupField, TabsField } from './payload-types';
-import { arrayFieldsSlug, arrayDefaultValue, arrayDoc } from './collections/Array';
-import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
-import { defaultText } from './collections/Text';
-import { blocksFieldSeedData } from './collections/Blocks';
-import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
-import { defaultNumber, numberDoc } from './collections/Number';
-import { deepPick } from '../../src/fields/deepPick';
+import type { IndexDirection, IndexOptions } from "mongoose";
+import { initPayloadTest } from "../helpers/configHelpers";
+import { RESTClient } from "../helpers/rest";
+import configPromise from "../uploads/config";
+import payload from "../../src";
+import { pointDoc } from "./collections/Point";
+import {
+  arrayDefaultValue,
+  arrayDoc,
+  arrayFieldsSlug,
+} from "./collections/Array";
+import {
+  groupDefaultChild,
+  groupDefaultValue,
+  groupDoc,
+  groupFieldsSlug,
+} from "./collections/Group";
+import { defaultText } from "./collections/Text";
+import { blocksFieldSeedData } from "./collections/Blocks";
+import {
+  localizedTextValue,
+  namedTabDefaultValue,
+  namedTabText,
+  tabsDoc,
+  tabsSlug,
+} from "./collections/Tabs";
+import { defaultNumber, numberDoc } from "./collections/Number";
+import { dateDoc } from "./collections/Date";
+import { deepPick } from "../../src/fields/deepPick";
 
 let client;
+let serverURL;
+let config;
 
-describe('Fields', () => {
-  beforeAll(async (done) => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
-    client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
+describe("Fields", () => {
+  beforeAll(async () => {
+    ({ serverURL } = await initPayloadTest({
+      __dirname,
+      init: { local: false },
+    }));
+    config = await configPromise;
+
+    client = new RESTClient(config, { serverURL, defaultSlug: "point-fields" });
     await client.login();
-
-    done();
   });
 
-  describe('text', () => {
+  describe("text", () => {
     let doc;
-    const text = 'text field';
+    const text = "text field";
     beforeAll(async () => {
       doc = await payload.create({
-        collection: 'text-fields',
+        collection: "text-fields",
         data: { text },
       });
     });
 
-    it('creates with default values', () => {
+    it("creates with default values", () => {
       expect(doc.text).toEqual(text);
       expect(doc.defaultFunction).toEqual(defaultText);
       expect(doc.defaultAsync).toEqual(defaultText);
     });
   });
 
-  describe('number', () => {
+  describe("timestamps", () => {
+    const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10);
     let doc;
     beforeAll(async () => {
       doc = await payload.create({
-        collection: 'number-fields',
+        collection: "date-fields",
+        data: dateDoc,
+      });
+    });
+
+    it("should query updatedAt", async () => {
+      const { docs } = await payload.find({
+        collection: "date-fields",
+        depth: 0,
+        where: {
+          updatedAt: {
+            greater_than_equal: tenMinutesAgo,
+          },
+        },
+      });
+
+      expect(docs.map(({ id }) => id)).toContain(doc.id);
+    });
+
+    it("should query createdAt", async () => {
+      const result = await payload.find({
+        collection: "date-fields",
+        depth: 0,
+        where: {
+          createdAt: {
+            greater_than_equal: tenMinutesAgo,
+          },
+        },
+      });
+
+      expect(result.docs[0].id).toEqual(doc.id);
+    });
+  });
+
+  describe("select", () => {
+    let doc;
+    beforeAll(async () => {
+      const { id } = await payload.create({
+        collection: "select-fields",
+        locale: "en",
+        data: {
+          selectHasManyLocalized: ["one", "two"],
+        },
+      });
+      doc = await payload.findByID({
+        collection: "select-fields",
+        locale: "all",
+        id,
+      });
+    });
+
+    it("creates with hasMany localized", () => {
+      expect(doc.selectHasManyLocalized.en).toEqual(["one", "two"]);
+    });
+
+    it("retains hasMany updates", async () => {
+      const { id } = await payload.create({
+        collection: "select-fields",
+        data: {
+          selectHasMany: ["one", "two"],
+        },
+      });
+
+      const updatedDoc = await payload.update({
+        collection: "select-fields",
+        id,
+        data: {
+          select: "one",
+        },
+      });
+
+      expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true);
+      expect(updatedDoc.selectHasMany).toEqual(["one", "two"]);
+    });
+  });
+
+  describe("number", () => {
+    let doc;
+    beforeAll(async () => {
+      doc = await payload.create({
+        collection: "number-fields",
         data: numberDoc,
       });
     });
 
-    it('creates with default values', async () => {
+    it("creates with default values", async () => {
       expect(doc.number).toEqual(numberDoc.number);
       expect(doc.min).toEqual(numberDoc.min);
       expect(doc.max).toEqual(numberDoc.max);
@@ -61,69 +162,83 @@ describe('Fields', () => {
       expect(doc.defaultNumber).toEqual(defaultNumber);
     });
 
-    it('should not create number below minimum', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          min: 5,
-        },
-      })).rejects.toThrow('The following field is invalid: min');
+    it("should not create number below minimum", async () => {
+      await expect(async () =>
+        payload.create({
+          collection: "number-fields",
+          data: {
+            min: 5,
+          },
+        })
+      ).rejects.toThrow("The following field is invalid: min");
     });
-    it('should not create number above max', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          max: 15,
-        },
-      })).rejects.toThrow('The following field is invalid: max');
-    });
-
-    it('should not create number below 0', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          positiveNumber: -5,
-        },
-      })).rejects.toThrow('The following field is invalid: positiveNumber');
+    it("should not create number above max", async () => {
+      await expect(async () =>
+        payload.create({
+          collection: "number-fields",
+          data: {
+            max: 15,
+          },
+        })
+      ).rejects.toThrow("The following field is invalid: max");
     });
 
-    it('should not create number above 0', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          negativeNumber: 5,
-        },
-      })).rejects.toThrow('The following field is invalid: negativeNumber');
-    });
-    it('should not create a decimal number below min', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          decimalMin: -0.25,
-        },
-      })).rejects.toThrow('The following field is invalid: decimalMin');
+    it("should not create number below 0", async () => {
+      await expect(async () =>
+        payload.create({
+          collection: "number-fields",
+          data: {
+            positiveNumber: -5,
+          },
+        })
+      ).rejects.toThrow("The following field is invalid: positiveNumber");
     });
 
-    it('should not create a decimal number above max', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          decimalMax: 1.5,
-        },
-      })).rejects.toThrow('The following field is invalid: decimalMax');
+    it("should not create number above 0", async () => {
+      await expect(async () =>
+        payload.create({
+          collection: "number-fields",
+          data: {
+            negativeNumber: 5,
+          },
+        })
+      ).rejects.toThrow("The following field is invalid: negativeNumber");
+    });
+    it("should not create a decimal number below min", async () => {
+      await expect(async () =>
+        payload.create({
+          collection: "number-fields",
+          data: {
+            decimalMin: -0.25,
+          },
+        })
+      ).rejects.toThrow("The following field is invalid: decimalMin");
+    });
+
+    it("should not create a decimal number above max", async () => {
+      await expect(async () =>
+        payload.create({
+          collection: "number-fields",
+          data: {
+            decimalMax: 1.5,
+          },
+        })
+      ).rejects.toThrow("The following field is invalid: decimalMax");
     });
   });
 
-  describe('indexes', () => {
+  describe("indexes", () => {
     let indexes;
     const definitions: Record<string, IndexDirection> = {};
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
-      // mongoose model schema indexes do not always create indexes in the actual database
-      // see: https://github.com/payloadcms/payload/issues/571
-
-      indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+      indexes = payload.collections[
+        "indexed-fields"
+      ].Model.schema.indexes() as [
+        Record<string, IndexDirection>,
+        IndexOptions
+      ];
 
       indexes.forEach((index) => {
         const field = Object.keys(index[0])[0];
@@ -133,52 +248,125 @@ describe('Fields', () => {
       });
     });
 
-    it('should have indexes', () => {
+    it("should have indexes", () => {
       expect(definitions.text).toEqual(1);
     });
-    it('should have unique indexes', () => {
+    it("should have unique indexes", () => {
       expect(definitions.uniqueText).toEqual(1);
       expect(options.uniqueText).toMatchObject({ unique: true });
     });
-    it('should have 2dsphere indexes on point fields', () => {
-      expect(definitions.point).toEqual('2dsphere');
+    it("should have 2dsphere indexes on point fields", () => {
+      expect(definitions.point).toEqual("2dsphere");
     });
-    it('should have 2dsphere indexes on point fields in groups', () => {
-      expect(definitions['group.point']).toEqual('2dsphere');
+    it("should have 2dsphere indexes on point fields in groups", () => {
+      expect(definitions["group.point"]).toEqual("2dsphere");
     });
-    it('should have a sparse index on a unique localized field in a group', () => {
-      expect(definitions['group.localizedUnique.en']).toEqual(1);
-      expect(options['group.localizedUnique.en']).toMatchObject({ unique: true, sparse: true });
-      expect(definitions['group.localizedUnique.es']).toEqual(1);
-      expect(options['group.localizedUnique.es']).toMatchObject({ unique: true, sparse: true });
+    it("should have a sparse index on a unique localized field in a group", () => {
+      expect(definitions["group.localizedUnique.en"]).toEqual(1);
+      expect(options["group.localizedUnique.en"]).toMatchObject({
+        unique: true,
+        sparse: true,
+      });
+      expect(definitions["group.localizedUnique.es"]).toEqual(1);
+      expect(options["group.localizedUnique.es"]).toMatchObject({
+        unique: true,
+        sparse: true,
+      });
     });
-    it('should have unique indexes in a collapsible', () => {
-      expect(definitions['collapsibleLocalizedUnique.en']).toEqual(1);
-      expect(options['collapsibleLocalizedUnique.en']).toMatchObject({ unique: true, sparse: true });
+    it("should have unique indexes in a collapsible", () => {
+      expect(definitions["collapsibleLocalizedUnique.en"]).toEqual(1);
+      expect(options["collapsibleLocalizedUnique.en"]).toMatchObject({
+        unique: true,
+        sparse: true,
+      });
       expect(definitions.collapsibleTextUnique).toEqual(1);
       expect(options.collapsibleTextUnique).toMatchObject({ unique: true });
     });
-
-    it('should throw validation error saving on unique fields', async () => {
+    it("should have unique compound indexes", () => {
+      expect(definitions.partOne).toEqual(1);
+      expect(options.partOne).toMatchObject({
+        unique: true,
+        name: "compound-index",
+        sparse: true,
+      });
+    });
+    it("should throw validation error saving on unique fields", async () => {
       const data = {
-        text: 'a',
-        uniqueText: 'a',
+        text: "a",
+        uniqueText: "a",
       };
       await payload.create({
-        collection: 'indexed-fields',
+        collection: "indexed-fields",
         data,
       });
       expect(async () => {
         const result = await payload.create({
-          collection: 'indexed-fields',
+          collection: "indexed-fields",
           data,
+        });
+        return result.error;
+      }).toBeDefined();
+    });
+    it("should throw validation error saving on unique combined fields", async () => {
+      await payload.delete({ collection: "indexed-fields", where: {} });
+      const data1 = {
+        text: "a",
+        uniqueText: "a",
+        partOne: "u",
+        partTwo: "u",
+      };
+      const data2 = {
+        text: "b",
+        uniqueText: "b",
+        partOne: "u",
+        partTwo: "u",
+      };
+      await payload.create({
+        collection: "indexed-fields",
+        data: data1,
+      });
+      expect(async () => {
+        const result = await payload.create({
+          collection: "indexed-fields",
+          data: data2,
         });
         return result.error;
       }).toBeDefined();
     });
   });
 
-  describe('point', () => {
+  describe("version indexes", () => {
+    let indexes;
+    const definitions: Record<string, IndexDirection> = {};
+    const options: Record<string, IndexOptions> = {};
+
+    beforeAll(() => {
+      indexes = payload.versions["indexed-fields"].schema.indexes() as [
+        Record<string, IndexDirection>,
+        IndexOptions
+      ];
+      indexes.forEach((index) => {
+        const field = Object.keys(index[0])[0];
+        definitions[field] = index[0][field];
+        // eslint-disable-next-line prefer-destructuring
+        options[field] = index[1];
+      });
+    });
+
+    it("should have versions indexes", () => {
+      expect(definitions["version.text"]).toEqual(1);
+    });
+    it("should have version indexes from collection indexes", () => {
+      expect(definitions["version.partOne"]).toEqual(1);
+      expect(options["version.partOne"]).toMatchObject({
+        unique: true,
+        name: "compound-index",
+        sparse: true,
+      });
+    });
+  });
+
+  describe("point", () => {
     let doc;
     const point = [7, -7];
     const localized = [5, -2];
@@ -186,15 +374,15 @@ describe('Fields', () => {
 
     beforeAll(async () => {
       const findDoc = await payload.find({
-        collection: 'point-fields',
+        collection: "point-fields",
         pagination: false,
       });
       [doc] = findDoc.docs;
     });
 
-    it('should read', async () => {
+    it("should read", async () => {
       const find = await payload.find({
-        collection: 'point-fields',
+        collection: "point-fields",
         pagination: false,
       });
 
@@ -205,9 +393,9 @@ describe('Fields', () => {
       expect(doc.group).toMatchObject(pointDoc.group);
     });
 
-    it('should create', async () => {
+    it("should create", async () => {
       doc = await payload.create({
-        collection: 'point-fields',
+        collection: "point-fields",
         data: {
           point,
           localized,
@@ -220,97 +408,99 @@ describe('Fields', () => {
       expect(doc.group).toMatchObject(group);
     });
 
-    it('should not create duplicate point when unique', async () => {
-      await expect(() => payload.create({
-        collection: 'point-fields',
-        data: {
-          point,
-          localized,
-          group,
-        },
-      }))
-        .rejects
-        .toThrow(Error);
+    it("should not create duplicate point when unique", async () => {
+      await expect(() =>
+        payload.create({
+          collection: "point-fields",
+          data: {
+            point,
+            localized,
+            group,
+          },
+        })
+      ).rejects.toThrow(Error);
 
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          min: 5,
-        },
-      })).rejects.toThrow('The following field is invalid: min');
+      await expect(async () =>
+        payload.create({
+          collection: "number-fields",
+          data: {
+            min: 5,
+          },
+        })
+      ).rejects.toThrow("The following field is invalid: min");
 
       expect(doc.point).toEqual(point);
       expect(doc.localized).toEqual(localized);
       expect(doc.group).toMatchObject(group);
     });
   });
-  describe('array', () => {
+  describe("array", () => {
     let doc;
     const collection = arrayFieldsSlug;
 
     beforeAll(async () => {
-      doc = await payload.create<ArrayField>({
+      doc = await payload.create({
         collection,
         data: {},
       });
     });
 
-    it('should return empty array for arrays when no data present', async () => {
-      const document = await payload.create<ArrayField>({
+    it("should return undefined arrays when no data present", async () => {
+      const document = await payload.create({
         collection: arrayFieldsSlug,
         data: arrayDoc,
       });
 
-      expect(document.potentiallyEmptyArray).toEqual([]);
+      expect(document.potentiallyEmptyArray).toBeUndefined();
     });
 
-    it('should create with ids and nested ids', async () => {
-      const docWithIDs = await payload.create<GroupField>({
+    it("should create with ids and nested ids", async () => {
+      const docWithIDs = await payload.create({
         collection: groupFieldsSlug,
         data: groupDoc,
       });
       expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined();
     });
 
-    it('should create with defaultValue', async () => {
+    it("should create with defaultValue", async () => {
       expect(doc.items).toMatchObject(arrayDefaultValue);
       expect(doc.localized).toMatchObject(arrayDefaultValue);
     });
 
-    it('should update without overwriting other locales with defaultValue', async () => {
-      const localized = [{ text: 'unique' }];
-      const enText = 'english';
-      const esText = 'spanish';
-      const { id } = await payload.create<ArrayField>({
+    it("should update without overwriting other locales with defaultValue", async () => {
+      const localized = [{ text: "unique" }];
+      const enText = "english";
+      const esText = "spanish";
+      const { id } = await payload.create({
         collection,
         data: {
           localized,
         },
       });
 
-      const enDoc = await payload.update<ArrayField>({
+      const enDoc = await payload.update({
         collection,
         id,
-        locale: 'en',
+        locale: "en",
         data: {
           localized: [{ text: enText }],
         },
       });
 
-      const esDoc = await payload.update<ArrayField>({
+      const esDoc = await payload.update({
         collection,
         id,
-        locale: 'es',
+        locale: "es",
         data: {
           localized: [{ text: esText }],
         },
       });
 
-      const allLocales = await payload.findByID({
+      const allLocales = (await payload.findByID({
         collection,
         id,
-        locale: 'all',
-      }) as unknown as { localized: { en: unknown, es: unknown } };
+        locale: "all",
+      })) as unknown as { localized: { en: unknown; es: unknown } };
 
       expect(enDoc.localized[0].text).toStrictEqual(enText);
       expect(esDoc.localized[0].text).toStrictEqual(esText);
@@ -319,54 +509,56 @@ describe('Fields', () => {
     });
   });
 
-  describe('group', () => {
+  describe("group", () => {
     let document;
 
     beforeAll(async () => {
-      document = await payload.create<GroupField>({
+      document = await payload.create({
         collection: groupFieldsSlug,
         data: {},
       });
     });
 
-    it('should create with defaultValue', async () => {
+    it("should create with defaultValue", async () => {
       expect(document.group.defaultParent).toStrictEqual(groupDefaultValue);
       expect(document.group.defaultChild).toStrictEqual(groupDefaultChild);
     });
   });
 
-  describe('tabs', () => {
+  describe("tabs", () => {
     let document;
 
     beforeAll(async () => {
-      document = await payload.create<TabsField>({
+      document = await payload.create({
         collection: tabsSlug,
         data: tabsDoc,
       });
     });
 
-    it('should create with fields inside a named tab', async () => {
+    it("should create with fields inside a named tab", async () => {
       expect(document.tab.text).toStrictEqual(namedTabText);
     });
 
-    it('should create with defaultValue inside a named tab', async () => {
+    it("should create with defaultValue inside a named tab", async () => {
       expect(document.tab.defaultValue).toStrictEqual(namedTabDefaultValue);
     });
 
-    it('should create with defaultValue inside a named tab with no other values', async () => {
-      expect(document.namedTabWithDefaultValue.defaultValue).toStrictEqual(namedTabDefaultValue);
+    it("should create with defaultValue inside a named tab with no other values", async () => {
+      expect(document.namedTabWithDefaultValue.defaultValue).toStrictEqual(
+        namedTabDefaultValue
+      );
     });
 
-    it('should create with localized text inside a named tab', async () => {
+    it("should create with localized text inside a named tab", async () => {
       document = await payload.findByID({
         collection: tabsSlug,
         id: document.id,
-        locale: 'all',
+        locale: "all",
       });
       expect(document.localizedTab.en.text).toStrictEqual(localizedTextValue);
     });
 
-    it('should allow access control on a named tab', async () => {
+    it("should allow access control on a named tab", async () => {
       document = await payload.findByID({
         collection: tabsSlug,
         id: document.id,
@@ -375,8 +567,8 @@ describe('Fields', () => {
       expect(document.accessControlTab).toBeUndefined();
     });
 
-    it('should allow hooks on a named tab', async () => {
-      const newDocument = await payload.create<TabsField>({
+    it("should allow hooks on a named tab", async () => {
+      const newDocument = await payload.create({
         collection: tabsSlug,
         data: tabsDoc,
       });
@@ -386,8 +578,8 @@ describe('Fields', () => {
       expect(newDocument.hooksTab.afterRead).toBe(true);
     });
 
-    it('should return empty object for groups when no data present', async () => {
-      const doc = await payload.create<GroupField>({
+    it("should return empty object for groups when no data present", async () => {
+      const doc = await payload.create({
         collection: groupFieldsSlug,
         data: groupDoc,
       });
@@ -396,27 +588,39 @@ describe('Fields', () => {
     });
   });
 
-  describe('blocks', () => {
-    it('should retrieve doc with blocks', async () => {
+  describe("blocks", () => {
+    it("should retrieve doc with blocks", async () => {
       const blockFields = await payload.find({
-        collection: 'block-fields',
+        collection: "block-fields",
       });
 
-      expect(blockFields.docs[0].blocks[0].blockType).toEqual(blocksFieldSeedData[0].blockType);
-      expect(blockFields.docs[0].blocks[0].text).toEqual(blocksFieldSeedData[0].text);
+      expect(blockFields.docs[0].blocks[0].blockType).toEqual(
+        blocksFieldSeedData[0].blockType
+      );
+      expect(blockFields.docs[0].blocks[0].text).toEqual(
+        blocksFieldSeedData[0].text
+      );
 
-      expect(blockFields.docs[0].blocks[2].blockType).toEqual(blocksFieldSeedData[2].blockType);
-      expect(blockFields.docs[0].blocks[2].blockName).toEqual(blocksFieldSeedData[2].blockName);
-      expect(blockFields.docs[0].blocks[2].subBlocks[0].number).toEqual(blocksFieldSeedData[2].subBlocks[0].number);
-      expect(blockFields.docs[0].blocks[2].subBlocks[1].text).toEqual(blocksFieldSeedData[2].subBlocks[1].text);
+      expect(blockFields.docs[0].blocks[2].blockType).toEqual(
+        blocksFieldSeedData[2].blockType
+      );
+      expect(blockFields.docs[0].blocks[2].blockName).toEqual(
+        blocksFieldSeedData[2].blockName
+      );
+      expect(blockFields.docs[0].blocks[2].subBlocks[0].number).toEqual(
+        blocksFieldSeedData[2].subBlocks[0].number
+      );
+      expect(blockFields.docs[0].blocks[2].subBlocks[1].text).toEqual(
+        blocksFieldSeedData[2].subBlocks[1].text
+      );
     });
 
-    it('should query based on richtext data within a block', async () => {
+    it("should query based on richtext data within a block", async () => {
       const blockFieldsSuccess = await payload.find({
-        collection: 'block-fields',
+        collection: "block-fields",
         where: {
-          'blocks.richText.children.text': {
-            like: 'fun',
+          "blocks.richText.children.text": {
+            like: "fun",
           },
         },
       });
@@ -424,10 +628,10 @@ describe('Fields', () => {
       expect(blockFieldsSuccess.docs).toHaveLength(1);
 
       const blockFieldsFail = await payload.find({
-        collection: 'block-fields',
+        collection: "block-fields",
         where: {
-          'blocks.richText.children.text': {
-            like: 'funny',
+          "blocks.richText.children.text": {
+            like: "funny",
           },
         },
       });
@@ -435,12 +639,12 @@ describe('Fields', () => {
       expect(blockFieldsFail.docs).toHaveLength(0);
     });
 
-    it('should query based on richtext data within a localized block, specifying locale', async () => {
+    it("should query based on richtext data within a localized block, specifying locale", async () => {
       const blockFieldsSuccess = await payload.find({
-        collection: 'block-fields',
+        collection: "block-fields",
         where: {
-          'localizedBlocks.en.richText.children.text': {
-            like: 'fun',
+          "localizedBlocks.en.richText.children.text": {
+            like: "fun",
           },
         },
       });
@@ -448,10 +652,10 @@ describe('Fields', () => {
       expect(blockFieldsSuccess.docs).toHaveLength(1);
 
       const blockFieldsFail = await payload.find({
-        collection: 'block-fields',
+        collection: "block-fields",
         where: {
-          'localizedBlocks.en.richText.children.text': {
-            like: 'funny',
+          "localizedBlocks.en.richText.children.text": {
+            like: "funny",
           },
         },
       });
@@ -459,12 +663,12 @@ describe('Fields', () => {
       expect(blockFieldsFail.docs).toHaveLength(0);
     });
 
-    it('should query based on richtext data within a localized block, without specifying locale', async () => {
+    it("should query based on richtext data within a localized block, without specifying locale", async () => {
       const blockFieldsSuccess = await payload.find({
-        collection: 'block-fields',
+        collection: "block-fields",
         where: {
-          'localizedBlocks.richText.children.text': {
-            like: 'fun',
+          "localizedBlocks.richText.children.text": {
+            like: "fun",
           },
         },
       });
@@ -472,10 +676,10 @@ describe('Fields', () => {
       expect(blockFieldsSuccess.docs).toHaveLength(1);
 
       const blockFieldsFail = await payload.find({
-        collection: 'block-fields',
+        collection: "block-fields",
         where: {
-          'localizedBlocks.richText.children.text': {
-            like: 'funny',
+          "localizedBlocks.richText.children.text": {
+            like: "funny",
           },
         },
       });
@@ -484,13 +688,63 @@ describe('Fields', () => {
     });
   });
 
-  describe('richText', () => {
-    it('should allow querying on rich text content', async () => {
+  describe("json", () => {
+    it("should save json data", async () => {
+      const json = { foo: "bar" };
+      const doc = await payload.create({
+        collection: "json-fields",
+        data: {
+          json,
+        },
+      });
+
+      expect(doc.json).toStrictEqual({ foo: "bar" });
+    });
+
+    it("should validate json", async () => {
+      await expect(async () =>
+        payload.create({
+          collection: "json-fields",
+          data: {
+            json: "{ bad input: true }",
+          },
+        })
+      ).rejects.toThrow("The following field is invalid: json");
+    });
+
+    it("should save empty json objects", async () => {
+      const jsonFieldsDoc = await payload.create({
+        collection: "json-fields",
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(jsonFieldsDoc.json.state).toEqual({});
+
+      const updatedJsonFieldsDoc = await payload.update({
+        collection: "json-fields",
+        id: jsonFieldsDoc.id,
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(updatedJsonFieldsDoc.json.state).toEqual({});
+    });
+  });
+
+  describe("richText", () => {
+    it("should allow querying on rich text content", async () => {
       const emptyRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
+        collection: "rich-text-fields",
         where: {
-          'richText.children.text': {
-            like: 'doesnt exist',
+          "richText.children.text": {
+            like: "doesnt exist",
           },
         },
       });
@@ -498,10 +752,10 @@ describe('Fields', () => {
       expect(emptyRichTextQuery.docs).toHaveLength(0);
 
       const workingRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
+        collection: "rich-text-fields",
         where: {
-          'richText.children.text': {
-            like: 'hello',
+          "richText.children.text": {
+            like: "hello",
           },
         },
       });
@@ -509,34 +763,33 @@ describe('Fields', () => {
       expect(workingRichTextQuery.docs).toHaveLength(1);
     });
 
-    it('should populate link relationship', async () => {
+    it("should populate link relationship", async () => {
       const query = await payload.find({
-        collection: 'rich-text-fields',
+        collection: "rich-text-fields",
         where: {
-          'richText.children.linkType': {
-            equals: 'internal',
+          "richText.children.linkType": {
+            equals: "internal",
           },
         },
       });
 
       const nodes = query.docs[0].richText;
       expect(nodes).toBeDefined();
-      const child = nodes.flatMap((n) => n.children)
-        .find((c) => c.doc);
+      const child = nodes.flatMap((n) => n.children).find((c) => c.doc);
       expect(child).toMatchObject({
-        type: 'link',
-        linkType: 'internal',
+        type: "link",
+        linkType: "internal",
       });
-      expect(child.doc.relationTo).toEqual('array-fields');
-      expect(typeof child.doc.value.id).toBe('string');
+      expect(child.doc.relationTo).toEqual("array-fields");
+      expect(typeof child.doc.value.id).toBe("string");
       expect(child.doc.value.items).toHaveLength(6);
     });
-    it('should only return selected fields of the relationship', async () => {
+    it("should only return selected fields of the relationship", async () => {
       const query = await payload.find({
-        collection: 'rich-text-fields',
+        collection: "rich-text-fields",
         where: {
-          'richText.children.linkType': {
-            equals: 'internal',
+          "richText.children.linkType": {
+            equals: "internal",
           },
         },
       });
@@ -547,7 +800,7 @@ describe('Fields', () => {
         children: expect.arrayContaining([
           expect.objectContaining({
             doc: expect.objectContaining({
-              relationTo: 'array-fields',
+              relationTo: "array-fields",
               value: {
                 id: expect.any(String),
                 items: expect.any(Array),
@@ -561,87 +814,86 @@ describe('Fields', () => {
   });
 });
 
-
-describe('deepPick', () => {
+describe("deepPick", () => {
   const testData = {
-    a: 'value a',
+    a: "value a",
     b: 42,
     c: {
       d: true,
       e: {
-        f: 'value f',
+        f: "value f",
         g: [1, 2, 3],
       },
       h: [
         {
-          i: 'value i',
-          j: 'value j',
+          i: "value i",
+          j: "value j",
         },
         {
-          i: 'value i2',
-          j: 'value j2',
+          i: "value i2",
+          j: "value j2",
         },
       ],
     },
   };
 
-  it('should pick a single top-level property', () => {
-    const result = deepPick(testData, ['a']);
-    expect(result).toStrictEqual({ a: 'value a' });
+  it("should pick a single top-level property", () => {
+    const result = deepPick(testData, ["a"]);
+    expect(result).toStrictEqual({ a: "value a" });
   });
 
-  it('should pick multiple top-level properties', () => {
-    const result = deepPick(testData, ['a', 'c']);
+  it("should pick multiple top-level properties", () => {
+    const result = deepPick(testData, ["a", "c"]);
     expect(result).toStrictEqual({
-      a: 'value a',
+      a: "value a",
       c: {
         d: true,
         e: {
-          f: 'value f',
+          f: "value f",
           g: [1, 2, 3],
         },
         h: [
           {
-            i: 'value i',
-            j: 'value j',
+            i: "value i",
+            j: "value j",
           },
           {
-            i: 'value i2',
-            j: 'value j2',
+            i: "value i2",
+            j: "value j2",
           },
         ],
       },
     });
   });
 
-  it('should pick deep properties', () => {
-    const result = deepPick(testData, ['c.e.f']);
+  it("should pick deep properties", () => {
+    const result = deepPick(testData, ["c.e.f"]);
     expect(result).toStrictEqual({
       c: {
-        e: { f: 'value f' },
+        e: { f: "value f" },
       },
     });
   });
 
-  it('should pick properties inside arrays', () => {
-    const result = deepPick(testData, ['c.h.i', 'c.e.g']);
+  it("should pick properties inside arrays", () => {
+    const result = deepPick(testData, ["c.h.i", "c.e.g"]);
     expect(result).toStrictEqual({
-      c: { e: { g: [1, 2, 3] }, h: [{ i: 'value i' }, { i: 'value i2' }] },
+      c: { e: { g: [1, 2, 3] }, h: [{ i: "value i" }, { i: "value i2" }] },
     });
   });
 
-  it('should handle non-existent properties', () => {
+  it("should handle non-existent properties", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = deepPick(testData, ['x' as any]);
+    const result = deepPick(testData, ["x" as any]);
     expect(result).toStrictEqual({});
   });
 
-  it('should handle non-existent deep properties', () => {
-    const result = deepPick(testData, ['c.e.x']);
+  it("should handle non-existent deep properties", () => {
+    const result = deepPick(testData, ["c.e.x"]);
     expect(result).toStrictEqual({});
   });
 
-  it('should handle empty paths array', () => {
+  it("should handle empty paths array", () => {
     const result = deepPick(testData, []);
     expect(result).toStrictEqual({});
   });

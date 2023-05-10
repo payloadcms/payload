@@ -2,6 +2,7 @@
 
 .step-nav {
   display: flex;
+  overflow: auto;
 
   * {
     display: block;

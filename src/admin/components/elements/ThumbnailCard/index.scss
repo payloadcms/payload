@@ -1,0 +1,28 @@
+@import '../../../scss/styles.scss';
+
+.thumbnail-card {
+  @include shadow;
+  background: var(--theme-input-bg);
+
+  &__label {
+    padding: base(.5);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  &--has-on-click {
+    cursor: pointer;
+  }
+
+  &--align-label-center {
+    text-align: center;
+  }
+
+  &__thumbnail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

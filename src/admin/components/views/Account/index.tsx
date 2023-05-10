@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
-
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import { useLocale } from '../../utilities/Locale';
 import DefaultAccount from './Default';
@@ -18,9 +17,9 @@ const AccountView: React.FC = () => {
   const { state: locationState } = useLocation<{ data: unknown }>();
   const locale = useLocale();
   const { setStepNav } = useStepNav();
-  const { user, permissions } = useAuth();
+  const { user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
-  const { id, preferencesKey } = useDocumentInfo();
+  const { id, preferencesKey, docPermissions, getDocPermissions, slug } = useDocumentInfo();
   const { getPreference } = usePreferences();
 
   const {
@@ -28,7 +27,6 @@ const AccountView: React.FC = () => {
     routes: { api },
     collections,
     admin: {
-      user: adminUser,
       components: {
         views: {
           Account: CustomAccount,
@@ -36,33 +34,36 @@ const AccountView: React.FC = () => {
           Account: undefined,
         },
       } = {},
-    } = {
-      user: 'users',
     },
   } = useConfig();
   const { t } = useTranslation('authentication');
 
-  const collection = collections.find((coll) => coll.slug === adminUser);
+  const collection = collections.find((coll) => coll.slug === slug);
 
   const { fields } = collection;
 
-  const collectionPermissions = permissions?.collections?.[adminUser];
-
-  const [{ data }] = usePayloadAPI(
-    `${serverURL}${api}/${collection?.slug}/${user?.id}`,
+  const [{ data, isLoading: isLoadingData }] = usePayloadAPI(
+    `${serverURL}${api}/${slug}/${id}`,
     {
       initialParams: {
         'fallback-locale': 'null',
         depth: 0,
       },
+      initialData: null,
     },
   );
 
-  const hasSavePermission = collectionPermissions?.update?.permission;
+  const hasSavePermission = docPermissions?.update?.permission;
   const dataToRender = locationState?.data || data;
-  const apiURL = `${serverURL}${api}/${user.collection}/${data?.id}`;
+  const apiURL = `${serverURL}${api}/${slug}/${data?.id}`;
 
-  const action = `${serverURL}${api}/${user.collection}/${data?.id}?locale=${locale}&depth=0`;
+  const action = `${serverURL}${api}/${slug}/${data?.id}?locale=${locale}&depth=0`;
+
+  const onSave = React.useCallback(async (json: any) => {
+    getDocPermissions();
+    const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc, user, id, operation: 'update', locale, t });
+    setInitialState(state);
+  }, [collection, user, id, t, locale, getDocPermissions]);
 
   useEffect(() => {
     const nav = [{
@@ -74,13 +75,23 @@ const AccountView: React.FC = () => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, operation: 'update', id, user, locale, t });
+      const state = await buildStateFromSchema({
+        fieldSchema: fields,
+        data: dataToRender,
+        operation: 'update',
+        id,
+        user,
+        locale,
+        t,
+      });
       await getPreference(preferencesKey);
       setInitialState(state);
     };
 
-    awaitInitialState();
+    if (dataToRender) awaitInitialState();
   }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, t]);
+
+  const isLoading = !initialState || !docPermissions || isLoadingData;
 
   return (
     <RenderCustomComponent
@@ -90,11 +101,12 @@ const AccountView: React.FC = () => {
         action,
         data,
         collection,
-        permissions: collectionPermissions,
+        permissions: docPermissions,
         hasSavePermission,
         initialState,
         apiURL,
-        isLoading: !initialState,
+        isLoading,
+        onSave,
       }}
     />
   );

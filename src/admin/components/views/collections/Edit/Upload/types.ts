@@ -1,13 +1,9 @@
 import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
-
-export type Data = {
-  filename: string
-  mimeType: string
-  filesize: number
-}
+import { Fields } from '../../../../forms/Form/types';
 
 export type Props = {
-  data?: Data
+  internalState?: Fields
+  data?: Fields
   collection: SanitizedCollectionConfig
   adminThumbnail?: string
   mimeTypes?: string[];

@@ -3,13 +3,12 @@ import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { PaginatedDocs } from '../../mongoose/types';
-import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
-import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
+import { TypeWithVersion } from '../../versions/types';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -23,7 +22,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<PaginatedDocs<T>> {
+async function findVersions<T extends TypeWithVersion<T>>(
+  args: Arguments,
+): Promise<PaginatedDocs<T>> {
   const {
     where,
     page,
@@ -45,44 +46,22 @@ async function findVersions<T extends TypeWithVersion<T> = any>(args: Arguments)
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {};
   let useEstimatedCount = false;
 
   if (where) {
-    let and = [];
-
-    if (Array.isArray(where.and)) and = where.and;
-    if (Array.isArray(where.AND)) and = where.AND;
-
-    queryToBuild.where = {
-      ...where,
-      and: [
-        ...and,
-      ],
-    };
-
-    const constraints = flattenWhereConstraints(queryToBuild);
-
+    const constraints = flattenWhereConstraints(where);
     useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
-  if (!overrideAccess) {
-    const accessResults = await executeAccess({ req }, globalConfig.access.readVersions);
+  const accessResults = !overrideAccess ? await executeAccess({ req }, globalConfig.access.readVersions) : true;
 
-    if (hasWhereAccessResult(accessResults)) {
-      if (!where) {
-        queryToBuild.where = {
-          and: [
-            accessResults,
-          ],
-        };
-      } else {
-        (queryToBuild.where.and as Where[]).push(accessResults);
-      }
-    }
-  }
-
-  const query = await VersionsModel.buildQuery(queryToBuild, locale);
+  const query = await VersionsModel.buildQuery({
+    where,
+    access: accessResults,
+    req,
+    overrideAccess,
+    globalSlug: globalConfig.slug,
+  });
 
   // /////////////////////////////////////
   // Find

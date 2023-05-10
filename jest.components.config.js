@@ -1,8 +1,12 @@
 module.exports = {
   verbose: true,
   testTimeout: 15000,
+  testEnvironment: 'jsdom',
   testRegex: '(/src/admin/.*\\.(test|spec))\\.[jt]sx?$',
   setupFilesAfterEnv: ['<rootDir>/test/componentsSetup.js'],
+  transform: {
+    '^.+\\.(t|j)sx?$': ['@swc/jest'],
+  },
   testPathIgnorePatterns: [
     'node_modules',
     'dist',

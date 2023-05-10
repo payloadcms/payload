@@ -1,11 +1,13 @@
 /* eslint-disable no-param-reassign */
 import { Response } from 'express';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { MarkOptional } from 'ts-essentials';
 import { PayloadRequest } from '../../../express/types';
 import { Collection } from '../../config/types';
 import create from '../../operations/create';
 
-export type Resolver = (_: unknown, args: {
-  data: Record<string, unknown>,
+export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (_: unknown, args: {
+  data: MarkOptional<GeneratedTypes['collections'][TSlug], 'id' | 'updatedAt' | 'createdAt' | 'sizes'>,
   locale?: string
   draft: boolean
 },
@@ -13,9 +15,11 @@ export type Resolver = (_: unknown, args: {
     req: PayloadRequest,
     res: Response
   }
-) => Promise<Document>
+) => Promise<GeneratedTypes['collections'][TSlug]>
 
-export default function createResolver(collection: Collection): Resolver {
+export default function createResolver<TSlug extends keyof GeneratedTypes['collections']>(
+  collection: Collection,
+): Resolver<TSlug> {
   return async function resolver(_, args, context) {
     if (args.locale) {
       context.req.locale = args.locale;

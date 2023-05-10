@@ -1,5 +1,6 @@
 import { Option, Action, OptionGroup } from './types';
 import { getTranslation } from '../../../../../utilities/getTranslation';
+import { formatUseAsTitle } from '../../../../hooks/useTitle';
 
 const reduceToIDs = (options) => options.reduce((ids, option) => {
   if (option.options) {
@@ -29,10 +30,32 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
       return [];
     }
 
-    case 'ADD': {
-      const { collection, docs, sort, ids = [], i18n } = action;
+    case 'UPDATE': {
+      const { collection, doc, i18n, config } = action;
       const relation = collection.slug;
-      const labelKey = collection.admin.useAsTitle || 'id';
+      const newOptions = [...state];
+
+      const docTitle = formatUseAsTitle({
+        doc,
+        collection,
+        i18n,
+        config,
+      });
+
+      const foundOptionGroup = newOptions.find((optionGroup) => optionGroup.label === collection.labels.plural);
+      const foundOption = foundOptionGroup?.options?.find((option) => option.value === doc.id);
+
+      if (foundOption) {
+        foundOption.label = docTitle || `${i18n.t('general:untitled')} - ID: ${doc.id}`;
+        foundOption.relationTo = relation;
+      }
+
+      return newOptions;
+    }
+
+    case 'ADD': {
+      const { collection, docs, sort, ids = [], i18n, config } = action;
+      const relation = collection.slug;
       const loadedIDs = reduceToIDs(state);
       const newOptions = [...state];
       const optionsToAddTo = newOptions.find((optionGroup) => optionGroup.label === collection.labels.plural);
@@ -41,10 +64,17 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
         if (loadedIDs.indexOf(doc.id) === -1) {
           loadedIDs.push(doc.id);
 
+          const docTitle = formatUseAsTitle({
+            doc,
+            collection,
+            i18n,
+            config,
+          });
+
           return [
             ...docSubOptions,
             {
-              label: doc[labelKey] || `${i18n.t('general:untitled')} - ID: ${doc.id}`,
+              label: docTitle || `${i18n.t('general:untitled')} - ID: ${doc.id}`,
               relationTo: relation,
               value: doc.id,
             },
@@ -58,7 +88,7 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
         if (!loadedIDs.includes(id)) {
           newSubOptions.push({
             relationTo: relation,
-            label: labelKey === 'id' ? id : `${i18n.t('general:untitled')} - ID: ${id}`,
+            label: `${i18n.t('general:untitled')} - ID: ${id}`,
             value: id,
           });
         }

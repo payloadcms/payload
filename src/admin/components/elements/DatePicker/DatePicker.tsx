@@ -1,8 +1,11 @@
 import React from 'react';
-import DatePicker from 'react-datepicker';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import * as Locales from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import CalendarIcon from '../../icons/Calendar';
 import XIcon from '../../icons/X';
 import { Props } from './types';
+import { getSupportedDateLocale } from '../../../utilities/formatDate/getSupportedDateLocale';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import './index.scss';
@@ -14,7 +17,7 @@ const DateTime: React.FC<Props> = (props) => {
     value,
     onChange,
     displayFormat,
-    pickerAppearance = 'dayAndTime',
+    pickerAppearance,
     minDate,
     maxDate,
     monthsToShow = 1,
@@ -26,12 +29,23 @@ const DateTime: React.FC<Props> = (props) => {
     placeholder: placeholderText,
   } = props;
 
+  // Use the user's AdminUI language preference for the locale
+  const { i18n } = useTranslation();
+  const locale = getSupportedDateLocale(i18n.language);
+
+  try {
+    registerLocale(locale, Locales[locale]);
+  } catch (e) {
+    console.warn(`Could not find DatePicker locale for ${locale}`);
+  }
+
   let dateTimeFormat = displayFormat;
 
-  if (dateTimeFormat === undefined) {
+  if (dateTimeFormat === undefined && pickerAppearance) {
     if (pickerAppearance === 'dayAndTime') dateTimeFormat = 'MMM d, yyy h:mm a';
     else if (pickerAppearance === 'timeOnly') dateTimeFormat = 'h:mm a';
-    else if (pickerAppearance === 'monthOnly') dateTimeFormat = 'MM/yyyy';
+    else if (pickerAppearance === 'dayOnly') dateTimeFormat = 'dd';
+    else if (pickerAppearance === 'monthOnly') dateTimeFormat = 'MMMM';
     else dateTimeFormat = 'MMM d, yyy';
   }
 
@@ -77,11 +91,13 @@ const DateTime: React.FC<Props> = (props) => {
         <DatePicker
           {...dateTimePickerProps}
           onChange={(val) => onChange(val as Date)}
-          popperModifiers={{
-            preventOverflow: {
+          locale={locale}
+          popperModifiers={[
+            {
+              name: 'preventOverflow',
               enabled: true,
             },
-          }}
+          ]}
         />
       </div>
     </div>

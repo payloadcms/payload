@@ -15,7 +15,7 @@ keywords: select, multi-select, fields, config, configuration, documentation, Co
 
 | Option             | Description                                                                                                                                                                                         |
 | ------------------ |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`name`** \*      | To be used as the property name when stored and retrieved from the database.                                                                                                                        |
+| **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
 | **`options`** \*   | Array of options to allow the field to store. Can either be an array of strings, or an array of objects containing a `label` string and a `value` string.                                           |
 | **`hasMany`**      | Boolean when, if set to `true`, allows this field to have many selections instead of only one.                                                                                                      |
 | **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
@@ -30,6 +30,7 @@ keywords: select, multi-select, fields, config, configuration, documentation, Co
 | **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
 | **`required`**     | Require this field to have a value.                                                                                                                                                                 |
 | **`admin`**        | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                                            |
+| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
 
 _\* An asterisk denotes that a property is required._
 
@@ -61,7 +62,7 @@ Set to `true` if you'd like this field to be sortable within the Admin UI using 
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

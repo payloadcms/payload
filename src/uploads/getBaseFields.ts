@@ -21,7 +21,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     type: 'text',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
@@ -31,7 +31,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     type: 'text',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
@@ -41,7 +41,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     type: 'number',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
@@ -51,7 +51,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     type: 'number',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
@@ -61,7 +61,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     type: 'number',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
@@ -73,7 +73,8 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     unique: true,
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
+      disableBulkEdit: true,
     },
   };
 
@@ -84,7 +85,10 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
         afterRead: [
           ({ data }) => {
             if (data?.filename) {
-              return `${config.serverURL}${uploadOptions.staticURL}/${data.filename}`;
+              if (uploadOptions.staticURL.startsWith('/')) {
+                return `${config.serverURL}${uploadOptions.staticURL}/${data.filename}`;
+              }
+              return `${uploadOptions.staticURL}/${data.filename}`;
             }
 
             return undefined;
@@ -110,14 +114,14 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
         label: labels['upload:Sizes'],
         type: 'group',
         admin: {
-          disabled: true,
+          hidden: true,
         },
         fields: uploadOptions.imageSizes.map((size) => ({
           label: size.name,
           name: size.name,
           type: 'group',
           admin: {
-            disabled: true,
+            hidden: true,
           },
           fields: [
             {
@@ -128,7 +132,10 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
                     const sizeFilename = data?.sizes?.[size.name]?.filename;
 
                     if (sizeFilename) {
-                      return `${config.serverURL}${uploadOptions.staticURL}/${sizeFilename}`;
+                      if (uploadOptions.staticURL.startsWith('/')) {
+                        return `${config.serverURL}${uploadOptions.staticURL}/${sizeFilename}`;
+                      }
+                      return `${uploadOptions.staticURL}/${sizeFilename}`;
                     }
 
                     return undefined;

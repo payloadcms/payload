@@ -1,36 +1,47 @@
-import { Payload } from '..';
-import { Document } from '../types';
-import { TypeWithID } from '../collections/config/types';
-import { SanitizedGlobalConfig } from '../globals/config/types';
+import { Payload } from '../payload';
+import { docHasTimestamps, Document } from '../types';
+import { GlobalModel, SanitizedGlobalConfig } from '../globals/config/types';
 
 type Args = {
   payload: Payload
-  config: SanitizedGlobalConfig
   query: Record<string, unknown>
+  lean?: boolean
+  Model: GlobalModel
+  config: SanitizedGlobalConfig
 }
 
-export const getLatestGlobalVersion = async <T extends TypeWithID = any>({
+export const getLatestGlobalVersion = async ({
   payload,
   config,
+  Model,
   query,
-}: Args): Promise<T> => {
-  let version;
+  lean = true,
+}: Args): Promise<{global: Document, globalExists: boolean}> => {
+  let latestVersion;
+
   if (config.versions?.drafts) {
-    version = payload.versions[config.slug].findOne({}, {}, {
-      sort: {
-        updatedAt: 'desc',
-      },
-      lean: true,
+    latestVersion = await payload.versions[config.slug].findOne({}, {}, {
+      sort: { updatedAt: 'desc' },
+      lean,
     });
   }
-  const global = await payload.globals.Model.findOne(query).lean() as Document;
-  version = await version;
-  if (!version || version.updatedAt < global.updatedAt) {
-    return global;
+
+  const global = await (Model as any).findOne(query, {}, { lean }) as Document;
+  const globalExists = Boolean(global);
+
+  if (!latestVersion || (docHasTimestamps(global) && latestVersion.updatedAt < global.updatedAt)) {
+    return {
+      global,
+      globalExists,
+    };
   }
+
   return {
-    ...version.version,
-    updatedAt: version.updatedAt,
-    createdAt: version.createdAt,
+    global: {
+      ...latestVersion.version,
+      updatedAt: latestVersion.updatedAt,
+      createdAt: latestVersion.createdAt,
+    },
+    globalExists,
   };
 };

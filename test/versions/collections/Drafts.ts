@@ -1,15 +1,21 @@
 import type { CollectionConfig } from '../../../src/collections/config/types';
+import { CustomPublishButton } from '../elements/CustomSaveButton';
+import { draftSlug } from '../shared';
 
 const DraftPosts: CollectionConfig = {
-  slug: 'draft-posts',
+  slug: draftSlug,
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'description', 'createdAt'],
+    defaultColumns: ['title', 'description', 'createdAt', '_status'],
     preview: () => 'https://payloadcms.com',
+    components: {
+      edit: {
+        PublishButton: CustomPublishButton,
+      },
+    },
   },
   versions: {
     maxPerDoc: 35,
-    retainDeleted: false,
     drafts: true,
   },
   access: {

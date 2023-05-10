@@ -1,10 +1,7 @@
 import type { TFunction } from 'i18next';
 import { User } from '../../../../../auth';
-import {
-  Field as FieldSchema,
-  fieldIsPresentationalOnly,
-} from '../../../../../fields/config/types';
-import { Fields, Data } from '../types';
+import { Field as FieldSchema, fieldIsPresentationalOnly } from '../../../../../fields/config/types';
+import { Data, Fields } from '../types';
 import { addFieldStatePromise } from './addFieldStatePromise';
 
 type Args = {
@@ -16,13 +13,12 @@ type Args = {
   path: string
   user: User
   locale: string
-  fieldPromises: Promise<void>[]
   id: string | number
   operation: 'create' | 'update'
   t: TFunction
 }
 
-export const iterateFields = ({
+export const iterateFields = async ({
   fields,
   data,
   parentPassesCondition,
@@ -31,18 +27,17 @@ export const iterateFields = ({
   user,
   locale,
   operation,
-  fieldPromises,
   id,
   state,
   t,
-}: Args): void => {
+}: Args): Promise<void> => {
+  const promises = [];
   fields.forEach((field) => {
     const initialData = data;
-
     if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
-      const passesCondition = Boolean((field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}) : true) && parentPassesCondition);
+      const passesCondition = Boolean((field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}, { user }) : true) && parentPassesCondition);
 
-      fieldPromises.push(addFieldStatePromise({
+      promises.push(addFieldStatePromise({
         fullData,
         id,
         locale,
@@ -50,7 +45,6 @@ export const iterateFields = ({
         path,
         state,
         user,
-        fieldPromises,
         field,
         passesCondition,
         data,
@@ -58,4 +52,5 @@ export const iterateFields = ({
       }));
     }
   });
+  await Promise.all(promises);
 };

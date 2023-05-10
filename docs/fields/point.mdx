@@ -17,7 +17,7 @@ The data structure in the database matches the GeoJSON structure to represent po
 
 | Option           | Description |
 | ---------------- | ----------- |
-| **`name`** *         | To be used as the property name when stored and retrieved from the database.  |
+| **`name`** *         | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names) |
 | **`label`**          | Used as a field label in the Admin panel and to name the generated GraphQL type. |
 | **`unique`**         | Enforce that each entry in the Collection has a unique value for this field. |
 | **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. To support location queries, point index defaults to `2dsphere`, to disable the index set to `false`. |
@@ -30,6 +30,7 @@ The data structure in the database matches the GeoJSON structure to represent po
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -39,7 +40,7 @@ The data structure in the database matches the GeoJSON structure to represent po
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

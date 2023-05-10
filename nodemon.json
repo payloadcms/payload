@@ -12,5 +12,5 @@
     "test/"
   ],
   "ext": "ts,js,json",
-  "exec": "node ./test/dev.js"
+  "exec": "ts-node ./test/dev.ts"
 }

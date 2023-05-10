@@ -16,8 +16,11 @@ import findVersionByID from './requestHandlers/findVersionByID';
 import restoreVersion from './requestHandlers/restoreVersion';
 import deleteHandler from './requestHandlers/delete';
 import findByID from './requestHandlers/findByID';
-import update, { deprecatedUpdate } from './requestHandlers/update';
+import update from './requestHandlers/update';
+import updateByID, { deprecatedUpdate } from './requestHandlers/updateByID';
 import logoutHandler from '../auth/requestHandlers/logout';
+import docAccessRequestHandler from './requestHandlers/docAccess';
+import deleteByID from './requestHandlers/deleteByID';
 
 const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
   let { endpoints } = collection;
@@ -120,14 +123,24 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
       handler: create,
     },
     {
+      path: '/access/:id',
+      method: 'get',
+      handler: docAccessRequestHandler,
+    },
+    {
       path: '/:id',
       method: 'put',
       handler: deprecatedUpdate,
     },
     {
-      path: '/:id',
+      path: '/',
       method: 'patch',
       handler: update,
+    },
+    {
+      path: '/:id',
+      method: 'patch',
+      handler: updateByID,
     },
     {
       path: '/:id',
@@ -136,6 +149,11 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
     },
     {
       path: '/:id',
+      method: 'delete',
+      handler: deleteByID,
+    },
+    {
+      path: '/',
       method: 'delete',
       handler: deleteHandler,
     },

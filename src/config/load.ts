@@ -1,51 +1,40 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
+// eslint-disable-next-line import/no-extraneous-dependencies
 import path from 'path';
 import pino from 'pino';
 import Logger from '../utilities/logger';
 import { SanitizedConfig } from './types';
 import findConfig from './find';
 import validate from './validate';
-import babelConfig from '../babel.config';
+import { clientFiles } from './clientFiles';
 
-const removedExtensions = ['.scss', '.css', '.svg', '.png', '.jpg', '.eot', '.ttf', '.woff', '.woff2'];
-
-const loadConfig = (logger?: pino.Logger): SanitizedConfig => {
+const loadConfig = async (logger?: pino.Logger): Promise<SanitizedConfig> => {
   const localLogger = logger ?? Logger();
+
   const configPath = findConfig();
 
-  removedExtensions.forEach((ext) => {
+  clientFiles.forEach((ext) => {
     require.extensions[ext] = () => null;
   });
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require('@babel/register')({
-    ...babelConfig,
-    extensions: ['.ts', '.tsx', '.js', '.jsx'],
-    env: {
-      development: {
-        sourceMaps: 'inline',
-        retainLines: true,
-      },
-    },
-    ignore: [
-      /node_modules[\\/](?!.pnpm[\\/].*[\\/]node_modules[\\/])(?!payload[\\/]dist[\\/]admin|payload[\\/]components).*/,
-    ],
-  });
+  const configPromise = require(configPath);
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let config = require(configPath);
+  let config = await configPromise;
 
-  if (config.default) config = config.default;
+  if (config.default) config = await config.default;
 
-  const validatedConfig = validate(config, localLogger);
+  if (process.env.NODE_ENV !== 'production') {
+    config = await validate(config, localLogger);
+  }
 
   return {
-    ...validatedConfig,
+    ...config,
     paths: {
-      ...(validatedConfig.paths || {}),
       configDir: path.dirname(configPath),
       config: configPath,
+      rawConfig: configPath,
     },
   };
 };

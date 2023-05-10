@@ -1,5 +1,6 @@
 import React, { Dispatch } from 'react';
-import { Field as FieldConfig, Condition, Validate } from '../../../../fields/config/types';
+import { Condition, Field as FieldConfig, Validate } from '../../../../fields/config/types';
+import { User } from '../../../../auth/types';
 
 export type Field = {
   value: unknown
@@ -28,7 +29,6 @@ export type Props = {
   disabled?: boolean
   onSubmit?: (fields: Fields, data: Data) => void
   method?: 'get' | 'patch' | 'delete' | 'post'
-  action?: string
   handleResponse?: (res: Response) => void
   onSuccess?: (json: unknown) => void
   className?: string
@@ -40,6 +40,7 @@ export type Props = {
   log?: boolean
   validationOperation?: 'create' | 'update'
   children?: React.ReactNode
+  action?: string
 }
 
 export type SubmitOptions = {
@@ -105,6 +106,7 @@ export type MODIFY_CONDITION = {
   type: 'MODIFY_CONDITION'
   path: string
   result: boolean
+  user: User
 }
 
 export type UPDATE = {
@@ -144,4 +146,5 @@ export type Context = {
   setSubmitted: SetSubmitted
   formRef: React.MutableRefObject<HTMLFormElement>
   reset: Reset
+  replaceState: (state: Fields) => void
 }

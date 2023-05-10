@@ -19,7 +19,6 @@ type Args = {
   state: Fields
   path: string
   passesCondition: boolean
-  fieldPromises: Promise<void>[]
   id: string | number
   operation: 'create' | 'update'
   data: Data
@@ -36,7 +35,6 @@ export const addFieldStatePromise = async ({
   passesCondition,
   fullData,
   data,
-  fieldPromises,
   id,
   operation,
   t,
@@ -81,7 +79,7 @@ export const addFieldStatePromise = async ({
       case 'array': {
         const arrayValue = Array.isArray(valueWithDefault) ? valueWithDefault : [];
 
-        arrayValue.forEach((row, i) => {
+        const promises = arrayValue.map((row, i) => {
           const rowPath = `${path}${field.name}.${i}.`;
           state[`${rowPath}id`] = {
             value: row.id,
@@ -89,14 +87,13 @@ export const addFieldStatePromise = async ({
             valid: true,
           };
 
-          iterateFields({
+          return iterateFields({
             state,
             fields: field.fields,
             data: row,
             parentPassesCondition: passesCondition,
             path: rowPath,
             user,
-            fieldPromises,
             fullData,
             id,
             locale,
@@ -105,12 +102,19 @@ export const addFieldStatePromise = async ({
           });
         });
 
-        // Add values to field state
-        fieldState.value = arrayValue.length;
-        fieldState.initialValue = arrayValue.length;
+        await Promise.all(promises);
 
-        if (arrayValue.length > 0) {
-          fieldState.disableFormData = true;
+        // Add values to field state
+        if (valueWithDefault === null) {
+          fieldState.value = null;
+          fieldState.initialValue = null;
+        } else {
+          fieldState.value = arrayValue.length;
+          fieldState.initialValue = arrayValue.length;
+
+          if (arrayValue.length > 0) {
+            fieldState.disableFormData = true;
+          }
         }
 
         // Add field to state
@@ -122,6 +126,7 @@ export const addFieldStatePromise = async ({
       case 'blocks': {
         const blocksValue = Array.isArray(valueWithDefault) ? valueWithDefault : [];
 
+        const promises = [];
         blocksValue.forEach((row, i) => {
           const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
           const rowPath = `${path}${field.name}.${i}.`;
@@ -145,7 +150,7 @@ export const addFieldStatePromise = async ({
               valid: true,
             };
 
-            iterateFields({
+            promises.push(iterateFields({
               state,
               fields: block.fields,
               data: row,
@@ -155,19 +160,23 @@ export const addFieldStatePromise = async ({
               user,
               locale,
               operation,
-              fieldPromises,
               id,
               t,
-            });
+            }));
           }
         });
-
+        await Promise.all(promises);
         // Add values to field state
-        fieldState.value = blocksValue.length;
-        fieldState.initialValue = blocksValue.length;
+        if (valueWithDefault === null) {
+          fieldState.value = null;
+          fieldState.initialValue = null;
+        } else {
+          fieldState.value = blocksValue.length;
+          fieldState.initialValue = blocksValue.length;
 
-        if (blocksValue.length > 0) {
-          fieldState.disableFormData = true;
+          if (blocksValue.length > 0) {
+            fieldState.disableFormData = true;
+          }
         }
 
         // Add field to state
@@ -177,13 +186,12 @@ export const addFieldStatePromise = async ({
       }
 
       case 'group': {
-        iterateFields({
+        await iterateFields({
           state,
           id,
           operation,
-          fieldPromises,
           fields: field.fields,
-          data: data?.[field.name],
+          data: data?.[field.name] || {},
           fullData,
           parentPassesCondition: passesCondition,
           path: `${path}${field.name}.`,
@@ -207,14 +215,13 @@ export const addFieldStatePromise = async ({
     }
   } else if (fieldHasSubFields(field)) {
     // Handle field types that do not use names (row, etc)
-    iterateFields({
+    await iterateFields({
       state,
       fields: field.fields,
       data,
       parentPassesCondition: passesCondition,
       path,
       user,
-      fieldPromises,
       fullData,
       id,
       locale,
@@ -222,21 +229,20 @@ export const addFieldStatePromise = async ({
       t,
     });
   } else if (field.type === 'tabs') {
-    field.tabs.forEach((tab) => {
-      iterateFields({
-        state,
-        fields: tab.fields,
-        data: tabHasName(tab) ? data?.[tab.name] : data,
-        parentPassesCondition: passesCondition,
-        path: tabHasName(tab) ? `${path}${tab.name}.` : path,
-        user,
-        fieldPromises,
-        fullData,
-        id,
-        locale,
-        operation,
-        t,
-      });
-    });
+    const promises = field.tabs.map((tab) => iterateFields({
+      state,
+      fields: tab.fields,
+      data: tabHasName(tab) ? data?.[tab.name] : data,
+      parentPassesCondition: passesCondition,
+      path: tabHasName(tab) ? `${path}${tab.name}.` : path,
+      user,
+      fullData,
+      id,
+      locale,
+      operation,
+      t,
+    }));
+
+    await Promise.all(promises);
   }
 };

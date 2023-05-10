@@ -1,0 +1,37 @@
+@import '../../../../../../scss/styles.scss';
+
+$icon-width: base(1);
+$icon-margin: base(.25);
+
+.block-search {
+  position: sticky;
+  top: 0;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  z-index: 1;
+
+  &__input {
+    @include formInput;
+    padding-right: calc(#{$icon-width} + #{$icon-margin} * 2);
+  }
+
+  .search {
+    position: absolute;
+    top: 50%;
+    transform: translate3d(0, -50%, 0);
+    right: base(.25);
+    width: $icon-width;
+    margin: 0 $icon-margin;
+
+    .stroke {
+      stroke: var(--theme-elevation-300);
+    }
+  }
+
+  @include mid-break {
+    &__input {
+      margin-bottom: 0;
+    }
+  }
+}

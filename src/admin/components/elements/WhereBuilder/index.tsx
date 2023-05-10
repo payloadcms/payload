@@ -24,6 +24,11 @@ const reduceFields = (fields, i18n) => flattenTopLevelFields(fields).reduce((red
       label: getTranslation(field.label || field.name, i18n),
       value: field.name,
       ...fieldTypes[field.type],
+      operators: fieldTypes[field.type].operators.map((operator) => ({
+        ...operator,
+        label: i18n.t(`operators:${operator.label}`),
+      }
+      )),
       props: {
         ...field,
       },
@@ -145,7 +150,9 @@ const WhereBuilder: React.FC<Props> = (props) => {
             buttonStyle="icon-label"
             iconPosition="left"
             iconStyle="with-border"
-            onClick={() => dispatchConditions({ type: 'add', field: reducedFields[0].value })}
+            onClick={() => {
+              if (reducedFields.length > 0) dispatchConditions({ type: 'add', field: reducedFields[0].value });
+            }}
           >
             {t('or')}
           </Button>
@@ -160,7 +167,9 @@ const WhereBuilder: React.FC<Props> = (props) => {
             buttonStyle="icon-label"
             iconPosition="left"
             iconStyle="with-border"
-            onClick={() => dispatchConditions({ type: 'add', field: reducedFields[0].value })}
+            onClick={() => {
+              if (reducedFields.length > 0) dispatchConditions({ type: 'add', field: reducedFields[0].value });
+            }}
           >
             {t('addFilter')}
           </Button>

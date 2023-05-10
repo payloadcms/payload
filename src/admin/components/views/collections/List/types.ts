@@ -1,6 +1,9 @@
+import { Where } from '../../../../../types';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
-import { Column } from '../../../elements/Table/types';
+import { Props as ListControlsProps } from '../../../elements/ListControls/types';
+import { Props as PerPageProps } from '../../../elements/PerPage';
+import { Props as PaginatorProps } from '../../../elements/Paginator/types';
 
 export type Props = {
   collection: SanitizedCollectionConfig
@@ -8,12 +11,20 @@ export type Props = {
   newDocumentURL: string
   setListControls: (controls: unknown) => void
   setSort: (sort: string) => void
-  tableColumns: Column[]
-  columnNames: string[]
-  setColumns: (columns: string[]) => void
+  toggleColumn: (column: string) => void
+  resetParams: (overrides?: { page?: number, sort?: string, where?: Where }) => void
   hasCreatePermission: boolean
   setLimit: (limit: number) => void
   limit: number
+  disableEyebrow?: boolean
+  modifySearchParams?: boolean
+  handleSortChange?: ListControlsProps['handleSortChange']
+  handleWhereChange?: ListControlsProps['handleWhereChange']
+  handleDelete?: () => void
+  handlePageChange?: PaginatorProps['onChange']
+  handlePerPageChange?: PerPageProps['handleChange']
+  onCreateNewClick?: () => void
+  customHeader?: React.ReactNode
 }
 
 export type ListIndexProps = {
@@ -21,7 +32,10 @@ export type ListIndexProps = {
 }
 
 export type ListPreferences = {
-  columns: string[]
+  columns: {
+    accessor: string
+    active: boolean
+  }[]
   limit: number
   sort: number
 }

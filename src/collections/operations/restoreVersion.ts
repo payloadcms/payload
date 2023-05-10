@@ -5,10 +5,10 @@ import { Collection, TypeWithID } from '../config/types';
 import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { hasWhereAccessResult } from '../../auth/types';
-import { Where } from '../../types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 
 export type Arguments = {
   collection: Collection
@@ -33,7 +33,6 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     depth,
     req: {
       t,
-      locale,
       payload,
     },
     req,
@@ -72,23 +71,16 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: { where: Where } = {
+  const query = await Model.buildQuery({
     where: {
-      and: [
-        {
-          id: {
-            equals: parentDocID,
-          },
-        },
-      ],
+      id: {
+        equals: parentDocID,
+      },
     },
-  };
-
-  if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
-  }
-
-  const query = await Model.buildQuery(queryToBuild, locale);
+    access: accessResults,
+    req,
+    overrideAccess,
+  });
 
   const doc = await Model.findOne(query);
 
@@ -99,10 +91,12 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // fetch previousDoc
   // /////////////////////////////////////
 
-  const previousDoc = await payload.findByID({
-    collection: collectionConfig.slug,
+  const prevDocWithLocales = await getLatestCollectionVersion({
+    payload,
     id: parentDocID,
-    depth,
+    query,
+    Model,
+    config: collectionConfig,
   });
 
   // /////////////////////////////////////
@@ -119,9 +113,24 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
+  result = JSON.parse(JSON.stringify(result));
   result = sanitizeInternalFields(result);
+
+  // /////////////////////////////////////
+  // Save `previousDoc` as a version after restoring
+  // /////////////////////////////////////
+
+  const prevVersion = { ...prevDocWithLocales };
+
+  delete prevVersion.id;
+
+  await VersionModel.create({
+    parent: parentDocID,
+    version: rawVersion.version,
+    autosave: false,
+    createdAt: prevVersion.createdAt,
+    updatedAt: new Date().toISOString(),
+  });
 
   // /////////////////////////////////////
   // afterRead - Fields
@@ -156,7 +165,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   result = await afterChange({
     data: result,
     doc: result,
-    previousDoc,
+    previousDoc: prevDocWithLocales,
     entityConfig: collectionConfig,
     operation: 'update',
     req,
@@ -172,7 +181,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     result = await hook({
       doc: result,
       req,
-      previousDoc,
+      previousDoc: prevDocWithLocales,
       operation: 'update',
     }) || result;
   }, Promise.resolve());

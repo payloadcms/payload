@@ -1,12 +1,11 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import payload from '../../src';
-import type { TypeWithTimestamps } from '../../src/collections/config/types';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
 import type { LocalizedPost } from './payload-types';
-import { slug } from './config';
+import { localizedPostsSlug } from './config';
 import { englishTitle, spanishLocale } from './shared';
 
 /**
@@ -36,7 +35,7 @@ describe('Localization', () => {
       },
     });
 
-    url = new AdminUrlUtil(serverURL, slug);
+    url = new AdminUrlUtil(serverURL, localizedPostsSlug);
 
     const context = await browser.newContext();
     page = await context.newPage();
@@ -100,15 +99,15 @@ describe('Localization', () => {
     let id;
 
     beforeAll(async () => {
-      const localizedPost = await payload.create<LocalizedPost>({
-        collection: slug,
+      const localizedPost = await payload.create({
+        collection: localizedPostsSlug,
         data: {
           title: englishTitle,
         },
       });
       id = localizedPost.id;
-      await payload.update<LocalizedPost>({
-        collection: slug,
+      await payload.update({
+        collection: localizedPostsSlug,
         id,
         locale: spanishLocale,
         data: {
@@ -131,7 +130,7 @@ describe('Localization', () => {
   });
 });
 
-async function fillValues(data: Partial<Omit<LocalizedPost, keyof TypeWithTimestamps>>) {
+async function fillValues(data: Partial<LocalizedPost>) {
   const { title: titleVal, description: descVal } = data;
 
   if (titleVal) await page.locator('#field-title').fill(titleVal);

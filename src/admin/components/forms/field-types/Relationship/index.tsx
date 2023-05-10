@@ -22,7 +22,11 @@ import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
 import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
 import { AddNewRelation } from './AddNew';
 import { findOptionsByValue } from './findOptionsByValue';
-import { GetFilterOptions } from './GetFilterOptions';
+import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
+import { SingleValue } from './select-components/SingleValue';
+import { MultiValueLabel } from './select-components/MultiValueLabel';
+import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
+import { useLocale } from '../../../utilities/Locale';
 
 import './index.scss';
 
@@ -48,8 +52,11 @@ const Relationship: React.FC<Props> = (props) => {
       description,
       condition,
       isSortable = true,
+      allowCreate = true,
     } = {},
   } = props;
+
+  const config = useConfig();
 
   const {
     serverURL,
@@ -57,10 +64,11 @@ const Relationship: React.FC<Props> = (props) => {
       api,
     },
     collections,
-  } = useConfig();
+  } = config;
 
   const { t, i18n } = useTranslation('fields');
   const { permissions } = useAuth();
+  const locale = useLocale();
   const formProcessing = useFormProcessing();
   const hasMultipleRelations = Array.isArray(relationTo);
   const [options, dispatchOptions] = useReducer(optionsReducer, []);
@@ -73,7 +81,6 @@ const Relationship: React.FC<Props> = (props) => {
   const [hasLoadedFirstPage, setHasLoadedFirstPage] = useState(false);
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false);
   const firstRun = useRef(true);
-
   const pathOrName = path || name;
 
   const memoizedValidate = useCallback((value, validationOptions) => {
@@ -91,6 +98,8 @@ const Relationship: React.FC<Props> = (props) => {
     validate: memoizedValidate,
     condition,
   });
+
+  const [drawerIsOpen, setDrawerIsOpen] = useState(false);
 
   const getResults: GetResults = useCallback(async ({
     lastFullyLoadedRelation: lastFullyLoadedRelationArg,
@@ -110,7 +119,11 @@ const Relationship: React.FC<Props> = (props) => {
     const relationsToFetch = lastFullyLoadedRelationToUse === -1 ? relations : relations.slice(lastFullyLoadedRelationToUse + 1);
 
     let resultsFetched = 0;
-    const relationMap = createRelationMap({ hasMany, relationTo, value: valueArg });
+    const relationMap = createRelationMap({
+      hasMany,
+      relationTo,
+      value: valueArg,
+    });
 
     if (!errorLoading) {
       relationsToFetch.reduce(async (priorRelation, relation) => {
@@ -136,6 +149,7 @@ const Relationship: React.FC<Props> = (props) => {
             limit: maxResultsPerRequest,
             page: lastLoadedPageToUse,
             sort: fieldToSearch,
+            locale,
             depth: 0,
           };
 
@@ -160,9 +174,19 @@ const Relationship: React.FC<Props> = (props) => {
 
           if (response.ok) {
             const data: PaginatedDocs<unknown> = await response.json();
+
             if (data.docs.length > 0) {
               resultsFetched += data.docs.length;
-              dispatchOptions({ type: 'ADD', docs: data.docs, collection, sort, i18n });
+
+              dispatchOptions({
+                type: 'ADD',
+                docs: data.docs,
+                collection,
+                sort,
+                i18n,
+                config,
+              });
+
               setLastLoadedPage(data.page);
 
               if (!data.nextPage) {
@@ -178,7 +202,15 @@ const Relationship: React.FC<Props> = (props) => {
           } else if (response.status === 403) {
             setLastFullyLoadedRelation(relations.indexOf(relation));
             lastLoadedPageToUse = 1;
-            dispatchOptions({ type: 'ADD', docs: [], collection, sort, ids: relationMap[relation], i18n });
+            dispatchOptions({
+              type: 'ADD',
+              docs: [],
+              collection,
+              sort,
+              ids: relationMap[relation],
+              i18n,
+              config,
+            });
           } else {
             setErrorLoading(t('error:unspecific'));
           }
@@ -198,14 +230,16 @@ const Relationship: React.FC<Props> = (props) => {
     api,
     t,
     i18n,
+    locale,
+    config,
   ]);
 
-  const updateSearch = useDebouncedCallback((searchArg: string, valueArg: unknown) => {
+  const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
     getResults({ search: searchArg, value: valueArg, sort: true });
     setSearch(searchArg);
   }, [getResults]);
 
-  const handleInputChange = useCallback((searchArg: string, valueArg: unknown) => {
+  const handleInputChange = useCallback((searchArg: string, valueArg: Value | Value[]) => {
     if (search !== searchArg) {
       updateSearch(searchArg, valueArg);
     }
@@ -237,6 +271,7 @@ const Relationship: React.FC<Props> = (props) => {
             },
           },
           depth: 0,
+          locale,
           limit: idsToLoad.length,
         };
 
@@ -247,13 +282,24 @@ const Relationship: React.FC<Props> = (props) => {
               'Accept-Language': i18n.language,
             },
           });
+
           const collection = collections.find((coll) => coll.slug === relation);
+          let docs = [];
+
           if (response.ok) {
             const data = await response.json();
-            dispatchOptions({ type: 'ADD', docs: data.docs, collection, sort: true, ids: idsToLoad, i18n });
-          } else if (response.status === 403) {
-            dispatchOptions({ type: 'ADD', docs: [], collection, sort: true, ids: idsToLoad, i18n });
+            docs = data.docs;
           }
+
+          dispatchOptions({
+            type: 'ADD',
+            docs,
+            collection,
+            sort: true,
+            ids: idsToLoad,
+            i18n,
+            config,
+          });
         }
       }
     }, Promise.resolve());
@@ -268,6 +314,8 @@ const Relationship: React.FC<Props> = (props) => {
     api,
     i18n,
     relationTo,
+    locale,
+    config,
   ]);
 
   // Determine if we should switch to word boundary search
@@ -281,7 +329,7 @@ const Relationship: React.FC<Props> = (props) => {
     setEnableWordBoundarySearch(!isIdOnly);
   }, [relationTo, collections]);
 
-  // When relationTo or filterOptionsResult changes, reset component
+  // When (`relationTo` || `filterOptionsResult` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useEffect(() => {
     if (firstRun.current) {
@@ -293,7 +341,11 @@ const Relationship: React.FC<Props> = (props) => {
     setLastFullyLoadedRelation(-1);
     setLastLoadedPage(1);
     setHasLoadedFirstPage(false);
-  }, [relationTo, filterOptionsResult]);
+  }, [relationTo, filterOptionsResult, locale]);
+
+  const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
+    dispatchOptions({ type: 'UPDATE', doc: args.doc, collection: args.collectionConfig, i18n, config });
+  }, [i18n, config]);
 
   const classes = [
     'field-type',
@@ -363,13 +415,23 @@ const Relationship: React.FC<Props> = (props) => {
                 sort: false,
               });
             }}
-            value={valueToRender}
+            value={valueToRender ?? null}
             showError={showError}
             disabled={formProcessing}
             options={options}
             isMulti={hasMany}
             isSortable={isSortable}
             isLoading={isLoading}
+            components={{
+              SingleValue,
+              MultiValueLabel,
+            }}
+            selectProps={{
+              disableMouseDown: drawerIsOpen,
+              disableKeyDown: drawerIsOpen,
+              setDrawerIsOpen,
+              onSave,
+            }}
             onMenuOpen={() => {
               if (!hasLoadedFirstPage) {
                 setIsLoading(true);
@@ -387,7 +449,7 @@ const Relationship: React.FC<Props> = (props) => {
               return r.test(item.label);
             } : undefined}
           />
-          {!readOnly && (
+          {!readOnly && allowCreate && (
             <AddNewRelation
               {...{ path: pathOrName, hasMany, relationTo, value, setValue, dispatchOptions }}
             />

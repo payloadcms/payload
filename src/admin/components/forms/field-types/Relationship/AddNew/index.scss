@@ -10,29 +10,18 @@
     height: 100%;
   }
 
-  &__add-button {
+  &__add-button,
+  &__add-button.doc-drawer__toggler {
     @include formInput;
+    position: relative;
     height: 100%;
     margin-left: -1px;
     display: flex;
-    padding: 0;
-
-    .btn__content,
-    .btn__label {
-      display: flex;
-    }
-
-    .btn__content,
-    .btn__label {
-      height: 100%;
-    }
-
-    .btn__label {
-      padding: 0 base(.5);
-      align-items: center;
-    }
+    padding: 0 base(0.5);
+    align-items: center;
+    display: flex;
+    cursor: pointer;
   }
-
 
   &__relations {
     list-style: none;
@@ -47,7 +36,6 @@
   &__relation-button {
     @extend %btn-reset;
     cursor: pointer;
-    @extend %btn-reset;
     display: block;
     padding: base(.125) 0;
     text-align: center;

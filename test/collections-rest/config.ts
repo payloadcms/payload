@@ -1,7 +1,6 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
-import type { Post } from './payload-types';
 
 export interface Relation {
   id: string;
@@ -38,8 +37,32 @@ export const relationSlug = 'relation';
 export const pointSlug = 'point';
 export const customIdSlug = 'custom-id';
 export const customIdNumberSlug = 'custom-id-number';
+export const errorOnHookSlug = 'error-on-hooks';
 
 export default buildConfig({
+  endpoints: [
+    {
+      path: '/send-test-email',
+      method: 'get',
+      handler: async (req, res) => {
+        await req.payload.sendEmail({
+          from: 'dev@payloadcms.com',
+          to: devUser.email,
+          subject: 'Test Email',
+          html: 'This is a test email.',
+          // to recreate a failing email transport, add the following credentials
+          // to the `email` property of `payload.init()` in `../dev.ts`
+          // the app should fail to send the email, but the error should be handled without crashing the app
+          // transportOptions: {
+          //   host: 'smtp.ethereal.email',
+          //   port: 587,
+          // },
+        });
+
+        res.status(200).send('Email sent');
+      },
+    },
+  ],
   collections: [
     {
       slug,
@@ -56,6 +79,12 @@ export default buildConfig({
         {
           name: 'number',
           type: 'number',
+        },
+        {
+          name: 'fakeLocalization',
+          type: 'text',
+          // field is localized even though the config localization is not on
+          localized: true,
         },
         // Relationship
         {
@@ -87,6 +116,13 @@ export default buildConfig({
           select: () => true,
           hasMany: true,
         },
+        {
+          name: 'restrictedField',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
       ],
     },
     {
@@ -100,7 +136,23 @@ export default buildConfig({
       ],
     },
     collectionWithName(relationSlug),
-    collectionWithName('dummy'),
+    {
+      slug: 'dummy',
+      access: openAccess,
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          type: 'text',
+          name: 'name',
+          access: {
+            read: () => false,
+          },
+        },
+      ],
+    },
     {
       slug: customIdSlug,
       access: openAccess,
@@ -134,6 +186,36 @@ export default buildConfig({
         },
       ],
     },
+    {
+      slug: errorOnHookSlug,
+      access: openAccess,
+      hooks: {
+        beforeChange: [({ originalDoc }) => {
+          if (originalDoc?.errorBeforeChange) {
+            throw new Error('Error Before Change Thrown');
+          }
+        }],
+        afterDelete: [({ doc }) => {
+          if (doc?.errorAfterDelete) {
+            throw new Error('Error After Delete Thrown');
+          }
+        }],
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'errorBeforeChange',
+          type: 'checkbox',
+        },
+        {
+          name: 'errorAfterDelete',
+          type: 'checkbox',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -144,13 +226,13 @@ export default buildConfig({
       },
     });
 
-    const rel1 = await payload.create<Relation>({
+    const rel1 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name',
       },
     });
-    const rel2 = await payload.create<Relation>({
+    const rel2 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name2',
@@ -165,14 +247,14 @@ export default buildConfig({
     });
 
     // Relation - hasMany
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'rel to hasMany',
         relationHasManyField: rel1.id,
       },
     });
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'rel to hasMany 2',
@@ -181,7 +263,7 @@ export default buildConfig({
     });
 
     // Relation - relationTo multi
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'rel to multi',
@@ -193,7 +275,7 @@ export default buildConfig({
     });
 
     // Relation - relationTo multi hasMany
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'rel to multi hasMany',

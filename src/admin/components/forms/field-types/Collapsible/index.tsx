@@ -7,8 +7,8 @@ import { usePreferences } from '../../../utilities/Preferences';
 import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import FieldDescription from '../../FieldDescription';
-import { getFieldPath } from '../getFieldPath';
 import { RowLabel } from '../../RowLabel';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 
 import './index.scss';
 
@@ -101,7 +101,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
           indexPath={indexPath}
           fieldSchema={fields.map((field) => ({
             ...field,
-            path: getFieldPath(path, field),
+            path: createNestedFieldPath(path, field),
           }))}
         />
       </Collapsible>

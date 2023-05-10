@@ -2,7 +2,7 @@ import { Strategy } from 'passport';
 import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../express/types';
 import { Where, PayloadMongooseDocument } from '../types';
-import { Payload } from '..';
+import { Payload } from '../payload';
 
 export type Permission = {
   permission: boolean
@@ -29,6 +29,7 @@ export type CollectionPermission = {
   read: Permission
   update: Permission
   delete: Permission
+  readVersions?: Permission
   fields: {
     [field: string]: FieldPermissions
   }
@@ -37,6 +38,7 @@ export type CollectionPermission = {
 export type GlobalPermission = {
   read: Permission
   update: Permission
+  readVersions?: Permission
   fields: {
     [field: string]: FieldPermissions
   }
@@ -44,8 +46,12 @@ export type GlobalPermission = {
 
 export type Permissions = {
   canAccessAdmin: boolean
-  collections: CollectionPermission[]
-  globals?: GlobalPermission[]
+  collections: {
+    [collectionSlug: string]: CollectionPermission
+  }
+  globals?: {
+    [globalSlug: string]: GlobalPermission
+  }
 }
 
 export type User = {
@@ -60,6 +66,7 @@ export interface UserDocument extends PayloadMongooseDocument {
   authenticate: (pass: string) => Promise<void>
   resetPasswordExpiration: number
   email: string
+  _verified?: boolean
 }
 
 type GenerateVerifyEmailHTML = (args: { req: PayloadRequest, token: string, user: any }) => Promise<string> | string

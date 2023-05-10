@@ -9,7 +9,7 @@ import { PayloadRequest } from '../../express/types';
 
 export type Result = {
   token: string
-  user: UserDocument
+  user: Record<string, unknown>
 }
 
 export type Arguments = {
@@ -59,6 +59,10 @@ async function resetPassword(args: Arguments): Promise<Result> {
   await user.setPassword(data.password);
 
   user.resetPasswordExpiration = Date.now();
+
+  if (collectionConfig.auth.verify) {
+    user._verified = true;
+  }
 
   await user.save();
 
