@@ -26,6 +26,7 @@ import { Field } from "../../../../fields/config/types";
 import buildInitialState from "./buildInitialState";
 import errorMessages from "./errorMessages";
 import {
+  Data,
   Fields,
   Context as FormContextType,
   GetDataByPath,
@@ -45,7 +46,7 @@ import { useOperation } from "../../utilities/OperationProvider";
 
 const baseClass = "form";
 
-import { createArray } from "./generateArray";
+import { generateStrFromObj } from "./generateArray";
 //import { compareStateArrs } from "./compareStates";
 
 const Form: React.FC<Props> = (props) => {
@@ -460,8 +461,8 @@ const Form: React.FC<Props> = (props) => {
   // generate and cache initial state string, only runs on first load and/or when initialStage changes (i.e when the Save Draft button is cliked)
   useEffect(() => {
     const timeout = setTimeout(() => {
-      initialStateString.current = createArray({ ...getData() });
-      console.log(`initial data: ${initialStateString.current}`);
+      initialStateString.current = generateStrFromObj({ ...getData() });
+      //console.log(`initial data: ${initialStateString.current}`);
     }, 500);
 
     return () => {
@@ -473,8 +474,8 @@ const Form: React.FC<Props> = (props) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       // generate current state string from array
-      currentStateString.current = createArray({ ...getData() });
-      console.log(`current data: ${currentStateString.current}`);
+      currentStateString.current = generateStrFromObj({ ...getData() });
+      //console.log(`current data: ${currentStateString.current}`);
 
       // function to compare state strings
       const stateHasChanged = () => {
@@ -494,7 +495,7 @@ const Form: React.FC<Props> = (props) => {
     return () => {
       clearTimeout(timeout);
     };
-  }, [getData()]);
+  }, [fields]);
 
   // END OF PROPOSAL
 

@@ -18,7 +18,7 @@ const generateArrFromObj = (obj: any, arr: any) => {
 };
 
 // function to compare states
-export const createArray = (obj: any) => {
+export const generateStrFromObj = (obj: any) => {
   //arrays to store states values
   let arr = [];
 
