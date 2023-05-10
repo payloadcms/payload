@@ -352,6 +352,7 @@ export type Collection = {
   config: SanitizedCollectionConfig;
   graphQL?: {
     type: GraphQLObjectType
+    paginatedType: GraphQLObjectType
     JWT: GraphQLObjectType
     versionType: GraphQLObjectType
     whereInputType: GraphQLInputObjectType
