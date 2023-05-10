@@ -5,11 +5,21 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
-export interface Config {}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
+export interface Config {
+  collections: {
+    posts: Post;
+    relation: Relation;
+    'strict-access': StrictAccess;
+    'chained-relation': ChainedRelation;
+    'custom-id-relation': CustomIdRelation;
+    'custom-id-number-relation': CustomIdNumberRelation;
+    screenings: Screening;
+    movies: Movie;
+    directors: Director;
+    users: User;
+  };
+  globals: {};
+}
 export interface Post {
   id: string;
   title?: string;
@@ -22,73 +32,70 @@ export interface Post {
   customIdRelation?: string | CustomIdRelation;
   customIdNumberRelation?: number | CustomIdNumberRelation;
   filteredRelation?: string | Relation;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation".
- */
 export interface Relation {
   id: string;
   name?: string;
   disableRelation: boolean;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "strict-access".
- */
 export interface StrictAccess {
   id: string;
   name?: string;
   disableRelation: boolean;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "chained-relation".
- */
 export interface ChainedRelation {
   id: string;
   name?: string;
   relation?: string | ChainedRelation;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-id-relation".
- */
 export interface CustomIdRelation {
   id: string;
   name?: string;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-id-number-relation".
- */
 export interface CustomIdNumberRelation {
   id: number;
   name?: string;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
+export interface Screening {
+  id: string;
+  name?: string;
+  movie?: string | Movie;
+  updatedAt: string;
+  createdAt: string;
+}
+export interface Movie {
+  id: string;
+  name?: string;
+  director?: string | Director;
+  updatedAt: string;
+  createdAt: string;
+}
+export interface Director {
+  id: string;
+  name?: string;
+  updatedAt: string;
+  createdAt: string;
+}
 export interface User {
   id: string;
+  updatedAt: string;
+  createdAt: string;
   email?: string;
   resetPasswordToken?: string;
   resetPasswordExpiration?: string;
   loginAttempts?: number;
   lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
+  password?: string;
 }

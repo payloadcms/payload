@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import React, { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Pill from '../Pill';
 import Plus from '../../icons/Plus';
@@ -48,6 +48,8 @@ const ColumnSelector: React.FC<Props> = (props) => {
           label,
           name,
         } = col;
+
+        if (col.accessor === '_select') return null;
 
         return (
           <Pill

@@ -3,8 +3,17 @@ import payload from '../../src';
 import { Forbidden } from '../../src/errors';
 import type { PayloadRequest } from '../../src/types';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { hiddenFieldsSlug, relyOnRequestHeadersSlug, requestHeaders, restrictedSlug, siblingDataSlug, slug } from './config';
-import type { Restricted, Post, RelyOnRequestHeader } from './payload-types';
+import {
+  hiddenAccessSlug,
+  hiddenFieldsSlug,
+  relyOnRequestHeadersSlug,
+  requestHeaders,
+  restrictedSlug,
+  restrictedVersionsSlug,
+  siblingDataSlug,
+  slug,
+} from './config';
+import type { Post, RelyOnRequestHeader, Restricted } from './payload-types';
 import { firstArrayText, secondArrayText } from './shared';
 
 describe('Access Control', () => {
@@ -64,6 +73,41 @@ describe('Access Control', () => {
 
     expect(updatedDoc.partiallyHiddenGroup.value).toEqual('private_value');
     expect(updatedDoc.partiallyHiddenArray[0].value).toEqual('private_value');
+  });
+
+  it('should not affect hidden fields when patching data - update many', async () => {
+    const docsMany = await payload.create({
+      collection: hiddenFieldsSlug,
+      data: {
+        partiallyHiddenArray: [{
+          name: 'public_name',
+          value: 'private_value',
+        }],
+        partiallyHiddenGroup: {
+          name: 'public_name',
+          value: 'private_value',
+        },
+      },
+    });
+
+    await payload.update({
+      collection: hiddenFieldsSlug,
+      where: {
+        id: { equals: docsMany.id },
+      },
+      data: {
+        title: 'Doc Title',
+      },
+    });
+
+    const updatedMany = await payload.findByID({
+      collection: hiddenFieldsSlug,
+      id: docsMany.id,
+      showHiddenFields: true,
+    });
+
+    expect(updatedMany.partiallyHiddenGroup.value).toEqual('private_value');
+    expect(updatedMany.partiallyHiddenArray[0].value).toEqual('private_value');
   });
 
   it('should be able to restrict access based upon siblingData', async () => {
@@ -210,6 +254,44 @@ describe('Access Control', () => {
 
         expect(doc).toMatchObject({ id: post1.id });
       });
+
+      it('should allow overrideAccess: false - update many', async () => {
+        const req = async () => payload.update({
+          collection: slug,
+          where: {
+            id: { equals: post1.id },
+          },
+          data: { restrictedField: restricted.id },
+          overrideAccess: false, // this should respect access control
+        });
+
+        await expect(req).rejects.toThrow(Forbidden);
+      });
+
+      it('should allow overrideAccess: true - update many', async () => {
+        const doc = await payload.update({
+          collection: slug,
+          where: {
+            id: { equals: post1.id },
+          },
+          data: { restrictedField: restricted.id },
+          overrideAccess: true, // this should override access control
+        });
+
+        expect(doc.docs[0]).toMatchObject({ id: post1.id });
+      });
+
+      it('should allow overrideAccess by default - update many', async () => {
+        const doc = await payload.update({
+          collection: slug,
+          where: {
+            id: { equals: post1.id },
+          },
+          data: { restrictedField: restricted.id },
+        });
+
+        expect(doc.docs[0]).toMatchObject({ id: post1.id });
+      });
     });
 
     describe('Collections', () => {
@@ -246,6 +328,97 @@ describe('Access Control', () => {
 
         expect(doc).toMatchObject({ id: restricted.id, name: updatedName });
       });
+
+      it('should allow overrideAccess: false - update many', async () => {
+        const req = async () => payload.update({
+          collection: restrictedSlug,
+          where: {
+            id: { equals: restricted.id },
+          },
+          data: { name: updatedName },
+          overrideAccess: false, // this should respect access control
+        });
+
+        await expect(req).rejects.toThrow(Forbidden);
+      });
+
+      it('should allow overrideAccess: true - update many', async () => {
+        const doc = await payload.update({
+          collection: restrictedSlug,
+          where: {
+            id: { equals: restricted.id },
+          },
+          data: { name: updatedName },
+          overrideAccess: true, // this should override access control
+        });
+
+        expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName });
+      });
+
+      it('should allow overrideAccess by default - update many', async () => {
+        const doc = await payload.update({
+          collection: restrictedSlug,
+          where: {
+            id: { equals: restricted.id },
+          },
+          data: { name: updatedName },
+        });
+
+        expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName });
+      });
+    });
+  });
+
+  describe('Querying', () => {
+    it('should respect query constraint using hidden field', async () => {
+      await payload.create({
+        collection: hiddenAccessSlug,
+        data: {
+          title: 'hello',
+        },
+      });
+
+      await payload.create({
+        collection: hiddenAccessSlug,
+        data: {
+          title: 'hello',
+          hidden: true,
+        },
+      });
+
+      const { docs } = await payload.find({
+        collection: hiddenAccessSlug,
+        overrideAccess: false,
+      });
+
+      expect(docs).toHaveLength(1);
+    });
+
+    it('should respect query constraint using hidden field on versions', async () => {
+      await payload.create({
+        collection: restrictedVersionsSlug,
+        data: {
+          name: 'match',
+          hidden: true,
+        },
+      });
+
+      await payload.create({
+        collection: restrictedVersionsSlug,
+        data: {
+          name: 'match',
+          hidden: false,
+        },
+      });
+      const { docs } = await payload.findVersions({
+        where: {
+          'version.name': { equals: 'match' },
+        },
+        collection: restrictedVersionsSlug,
+        overrideAccess: false,
+      });
+
+      expect(docs).toHaveLength(1);
     });
   });
 });

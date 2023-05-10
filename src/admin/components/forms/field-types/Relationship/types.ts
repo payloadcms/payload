@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { RelationshipField } from '../../../../../fields/config/types';
 import { Where } from '../../../../../types';
+import { SanitizedConfig } from '../../../../../config/types';
 
 export type Props = Omit<RelationshipField, 'type'> & {
   path?: string
@@ -35,6 +36,7 @@ type UPDATE = {
   doc: any
   collection: SanitizedCollectionConfig
   i18n: typeof i18n
+  config: SanitizedConfig
 }
 
 type ADD = {
@@ -42,8 +44,9 @@ type ADD = {
   docs: any[]
   collection: SanitizedCollectionConfig
   sort?: boolean
-  ids?: unknown[]
+  ids?: (string | number)[]
   i18n: typeof i18n
+  config: SanitizedConfig
 }
 
 export type Action = CLEAR | ADD | UPDATE

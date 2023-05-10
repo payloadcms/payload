@@ -27,7 +27,7 @@ export declare type PayloadRequest<U = any> = Request & {
    * */
   collection?: Collection;
   /** What triggered this request */
-  payloadAPI: 'REST' | 'local' | 'graphQL';
+  payloadAPI?: 'REST' | 'local' | 'GraphQL';
   /** Uploaded files */
   files?: {
     /**

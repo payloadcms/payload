@@ -1,16 +1,25 @@
-
 import { singular } from 'pluralize';
 import type { JSONSchema4 } from 'json-schema';
-import { fieldAffectsData, Field, Option, FieldAffectingData, tabHasName } from '../fields/config/types';
+import { Field, FieldAffectingData, fieldAffectsData, Option, tabHasName } from '../fields/config/types';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 import deepCopyObject from './deepCopyObject';
 import { toWords } from './formatLabels';
 import { SanitizedConfig } from '../config/types';
 
+const propertyIsRequired = (field: Field) => {
+  if (fieldAffectsData(field) && (('required' in field && field.required === true))) return true;
 
-const propertyIsOptional = (field: Field) => {
-  return fieldAffectsData(field) && (('required' in field && field.required === true));
+  if ('fields' in field) {
+    if (field.admin?.condition || field.access?.read) return false;
+    return field.fields.find((subField) => propertyIsRequired(subField));
+  }
+
+  if (field.type === 'tabs') {
+    return field.tabs.some((tab) => 'name' in tab && tab.fields.find((subField) => propertyIsRequired(subField)));
+  }
+
+  return false;
 };
 
 function getCollectionIDType(collections: SanitizedCollectionConfig[], slug: string): 'string' | 'number' {
@@ -371,7 +380,7 @@ function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
     ),
     required: [
       ...fields
-        .filter(propertyIsOptional)
+        .filter(propertyIsRequired)
         .map((field) => (fieldAffectsData(field) ? field.name : '')),
       ...requiredTopLevelProps,
     ],
@@ -391,19 +400,17 @@ export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: Sani
     entity.fields.unshift(idField);
   }
 
+  // mark timestamp fields required
   if ('timestamps' in entity && entity.timestamps !== false) {
-    entity.fields.push(
-      {
-        type: 'text',
-        name: 'createdAt',
-        required: true,
-      },
-      {
-        type: 'text',
-        name: 'updatedAt',
-        required: true,
-      },
-    );
+    entity.fields = entity.fields.map((field) => {
+      if (fieldAffectsData(field) && (field.name === 'createdAt' || field.name === 'updatedAt')) {
+        return {
+          ...field,
+          required: true,
+        };
+      }
+      return field;
+    });
   }
 
   if ('auth' in entity && entity.auth && !entity.auth?.disableLocalStrategy) {

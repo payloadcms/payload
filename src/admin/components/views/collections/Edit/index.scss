@@ -1,4 +1,4 @@
-@import '../../../../scss/styles.scss';
+@import "../../../../scss/styles.scss";
 
 .collection-edit {
   width: 100%;
@@ -26,11 +26,11 @@
   &__collection-actions {
     list-style: none;
     margin: 0;
-    padding: base(1.5) 0 base(.5);
+    padding: base(1.5) 0 base(0.5);
     display: flex;
 
     li {
-      margin-right: base(.75);
+      margin-right: base(0.75);
     }
   }
 
@@ -88,23 +88,23 @@
   &__document-actions--has-2 {
     display: flex;
 
-    >* {
-      width: calc(50% - #{base(.5)});
+    > * {
+      width: calc(50% - #{base(0.5)});
     }
 
-    >*:first-child {
-      margin-right: base(.5);
+    > *:first-child {
+      margin-right: base(0.5);
     }
 
-    >*:last-child {
-      margin-left: base(.5);
+    > *:last-child {
+      margin-left: base(0.5);
     }
 
     .form-submit {
       .btn {
         width: 100%;
-        padding-left: base(.5);
-        padding-right: base(.5);
+        padding-left: base(0.5);
+        padding-right: base(0.5);
       }
     }
   }
@@ -121,12 +121,20 @@
 
   &__sidebar-fields {
     padding-right: $baseline;
-    margin-bottom: base(1);
+    display: flex;
+    flex-direction: column;
+    gap: $baseline;
 
     .preview-btn {
       display: inline-block;
-      margin-top: 0;
-      width: calc(50% - #{base(.5)});
+      margin: 0;
+      width: calc(50% - #{base(0.5)});
+    }
+
+    .render-fields {
+      & > *:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 
@@ -137,7 +145,7 @@
     list-style: none;
 
     li {
-      margin-bottom: base(.5);
+      margin-bottom: base(0.5);
 
       &:last-child {
         margin-bottom: 0;
@@ -151,7 +159,6 @@
 
   &__collection-actions,
   &__api-url {
-
     a,
     button {
       cursor: pointer;
@@ -212,10 +219,14 @@
       padding-right: var(--gutter-h);
     }
 
+    &__sidebar-wrap {
+      border-left: 0;
+    }
+
     &__sidebar-fields {
-      margin-bottom: base(1);
-      padding-top: base(1);
+      padding-top: 0;
       padding-right: var(--gutter-h);
+      gap: base(0.5);
 
       .preview-btn {
         width: 100%;
@@ -228,12 +239,13 @@
       order: 1;
 
       li {
-        margin: 0 base(.5) 0 0;
+        margin: 0 base(0.5) 0 0;
       }
     }
 
     &__sidebar {
       padding-bottom: base(3.5);
+      overflow: visible;
     }
   }
 }

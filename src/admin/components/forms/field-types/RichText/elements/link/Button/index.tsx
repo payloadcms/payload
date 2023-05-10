@@ -63,16 +63,16 @@ export const LinkButton: React.FC<{
   const locale = useLocale();
   const [initialState, setInitialState] = useState<Fields>({});
 
-  const { t } = useTranslation(['upload', 'general']);
+  const { t, i18n } = useTranslation(['upload', 'general']);
   const editor = useSlate();
   const config = useConfig();
 
   const [fieldSchema] = useState(() => {
-    const fields: Field[] = [
-      ...getBaseFields(config),
-    ];
+    const baseFields: Field[] = getBaseFields(config);
 
-    if (customFieldSchema) {
+    const fields = typeof customFieldSchema === 'function' ? customFieldSchema({ defaultFields: baseFields, config, i18n }) : baseFields;
+
+    if (Array.isArray(customFieldSchema)) {
       fields.push({
         name: 'fields',
         type: 'group',

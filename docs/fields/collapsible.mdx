@@ -17,6 +17,7 @@ keywords: row, fields, config, configuration, documentation, Content Management 
 | **`label`** *  | A label to render within the header of the collapsible component. This can be a string, function or react component. Function/components receive `({ data, path })` as args. |
 | **`fields`** * | Array of field types to nest within this Collapsible.                     |
 | **`admin`**    | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**   | Extension point for adding custom data (e.g. for plugins)                 |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -34,7 +35,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

@@ -1,6 +1,7 @@
 import { Where } from '../../../../types';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { Column } from '../Table/types';
+import type { Props as ListProps } from '../../views/collections/List/types';
 
 export type Props = {
   enableColumns?: boolean
@@ -9,6 +10,7 @@ export type Props = {
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
   collection: SanitizedCollectionConfig
+  resetParams?: ListProps['resetParams']
 }
 
 export type ListControls = {

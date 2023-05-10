@@ -1,3 +1,5 @@
+import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+
 export type Props = {
   useAsTitle?: string
   data?: {
@@ -5,5 +7,5 @@ export type Props = {
   }
   title?: string
   fallback?: string
-  collection?: string
+  collection?: SanitizedCollectionConfig
 }

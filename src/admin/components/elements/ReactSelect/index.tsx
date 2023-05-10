@@ -58,6 +58,7 @@ const SelectAdapter: React.FC<Props> = (props) => {
       isClearable={isClearable}
       filterOption={filterOption}
       onMenuOpen={onMenuOpen}
+      menuPlacement="auto"
       selectProps={{
         ...selectProps,
       }}

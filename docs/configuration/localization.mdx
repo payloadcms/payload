@@ -72,6 +72,15 @@ All field types with a `name` property support the `localized` property—even t
   Enabling localization for field types that support nested fields will automatically create localized "sets" of all fields contained within the field. For example, if you have a page layout using a blocks field type, you have the choice of either localizing the full layout, by enabling localization on the top-level blocks field, or only certain fields within the layout.
 </Banner>
 
+<Banner type="warning">
+  <strong>Important:</strong>
+  <br />
+  When converting an existing field to or from `localized: true` the data
+  structure in the document will change for this field and so existing data for
+  this field will be lost. Before changing the localization setting on fields
+  with existing data, you may need to consider a field migration strategy.
+</Banner>
+
 ### Retrieving localized docs
 
 When retrieving documents, you can specify which locale you'd like to receive as well as which fallback locale should be used.

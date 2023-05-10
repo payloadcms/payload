@@ -3,6 +3,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import Eyebrow from '../../elements/Eyebrow';
 import { useStepNav } from '../../elements/StepNav';
@@ -36,6 +37,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const { permissions } = useAuth();
   const locale = useLocale();
   const { t, i18n } = useTranslation('version');
+  const { docPermissions } = useDocumentInfo();
 
   let originalDocFetchURL: string;
   let versionFetchURL: string;
@@ -163,6 +165,8 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     comparison = publishedDoc;
   }
 
+  const canUpdate = docPermissions?.update?.permission;
+
   return (
     <React.Fragment>
       <div className={baseClass}>
@@ -179,14 +183,16 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
             <h2>
               {formattedCreatedAt}
             </h2>
-            <Restore
-              className={`${baseClass}__restore`}
-              collection={collection}
-              global={global}
-              originalDocID={id}
-              versionID={versionID}
-              versionDate={formattedCreatedAt}
-            />
+            {canUpdate && (
+              <Restore
+                className={`${baseClass}__restore`}
+                collection={collection}
+                global={global}
+                originalDocID={id}
+                versionID={versionID}
+                versionDate={formattedCreatedAt}
+              />
+            )}
           </header>
           <div className={`${baseClass}__controls`}>
             <CompareVersion

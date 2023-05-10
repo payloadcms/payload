@@ -2,7 +2,7 @@
 import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Collection } from '../../config/types';
-import update from '../../operations/update';
+import updateByID from '../../operations/updateByID';
 import { PayloadRequest } from '../../../express/types';
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (_: unknown, args: {
@@ -35,7 +35,7 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['colle
       autosave: args.autosave,
     };
 
-    const result = await update<TSlug>(options);
+    const result = await updateByID<TSlug>(options);
 
     return result;
   }

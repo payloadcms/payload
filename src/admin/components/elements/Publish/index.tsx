@@ -1,57 +1,62 @@
-import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import FormSubmit from '../../forms/Submit';
-import { Props } from './types';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import { useForm, useFormModified, useWatchForm } from '../../forms/Form/context';
+import React, { useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import FormSubmit from "../../forms/Submit";
+import { useDocumentInfo } from "../../utilities/DocumentInfo";
+import { useForm, useFormModified } from "../../forms/Form/context";
+import RenderCustomComponent from "../../utilities/RenderCustomComponent";
 
-// --- imported
-import { publishButton } from '../../forms/Form/compareStates';
-// --- by eustachio
+export type CustomPublishButtonProps = React.ComponentType<
+  DefaultPublishButtonProps & {
+    DefaultButton: React.ComponentType<DefaultPublishButtonProps>;
+  }
+>;
+export type DefaultPublishButtonProps = {
+  publish: () => void;
+  disabled: boolean;
+  label: string;
+};
+const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
+  disabled,
+  publish,
+  label,
+}) => {
+  return (
+    <FormSubmit type="button" onClick={publish} disabled={disabled}>
+      {label}
+    </FormSubmit>
+  );
+};
 
-const Publish: React.FC<Props> = () => {
+type Props = {
+  CustomComponent?: CustomPublishButtonProps;
+};
+export const Publish: React.FC<Props> = ({ CustomComponent }) => {
   const { unpublishedVersions, publishedDoc } = useDocumentInfo();
   const { submit } = useForm();
   const modified = useFormModified();
-  const { t } = useTranslation('version');
-  
-  // --- line added
-  const { getFields } = useWatchForm();
-  // --- by eustachio
+  const { t } = useTranslation("version");
 
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0;
-  // --- modified
-  // original code // const canPublish = stateHasChanged(getFields()) || modified || hasNewerVersions || !publishedDoc;
-  const canPublish = () => {
-    if (publishButton(getFields()) === false) {
-      return false;
-    }
-    else {
-      if (modified || hasNewerVersions || !publishedDoc) {
-        return true;
-      }
-    }
-  }
-  // --- by eustachio
-  
-  
+  const canPublish = modified || hasNewerVersions || !publishedDoc;
+
   const publish = useCallback(() => {
     submit({
       overrides: {
-        _status: 'published',
+        _status: "published",
       },
     });
   }, [submit]);
 
   return (
-    <FormSubmit
-      type="button"
-      onClick={publish}
-      disabled={!canPublish()}
-    >
-      {t('publishChanges')}
-    </FormSubmit>
+    <RenderCustomComponent
+      CustomComponent={CustomComponent}
+      DefaultComponent={DefaultPublishButton}
+      componentProps={{
+        publish,
+        disabled: !canPublish,
+        label: t("publishChanges"),
+        DefaultButton: DefaultPublishButton,
+      }}
+    />
   );
 };
-
-export default Publish;

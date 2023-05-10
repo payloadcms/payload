@@ -7,10 +7,20 @@ import { Drawer } from '../../../../elements/Drawer';
 import { getTranslation } from '../../../../../../utilities/getTranslation';
 import { ThumbnailCard } from '../../../../elements/ThumbnailCard';
 import DefaultBlockImage from '../../../../graphics/DefaultBlockImage';
+import { i18n } from 'i18next';
+import { Block } from '../../../../../../fields/config/types';
 
 import './index.scss';
 
 const baseClass = 'blocks-drawer';
+
+const getBlockLabel = (block: Block, i18n: i18n) => {
+  if (typeof block.labels.singular === 'string') return block.labels.singular.toLowerCase();
+  if (typeof block.labels.singular === 'object') {
+    return getTranslation(block.labels.singular, i18n).toLowerCase();
+  }
+  return '';
+};
 
 export const BlocksDrawer: React.FC<Props> = (props) => {
   const {
@@ -23,17 +33,25 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredBlocks, setFilteredBlocks] = useState(blocks);
-  const { closeModal } = useModal();
+  const { closeModal, isModalOpen } = useModal();
   const { t, i18n } = useTranslation('fields');
 
   useEffect(() => {
+    if (!isModalOpen) {
+      setSearchTerm('');
+    }
+  }, [isModalOpen]);
+
+  useEffect(() => {
+    const searchTermToUse = searchTerm.toLowerCase();
     const matchingBlocks = blocks.reduce((matchedBlocks, block) => {
-      if (block.slug.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) matchedBlocks.push(block);
+      const blockLabel = getBlockLabel(block, i18n);
+      if (blockLabel.includes(searchTermToUse)) matchedBlocks.push(block);
       return matchedBlocks;
     }, []);
 
     setFilteredBlocks(matchingBlocks);
-  }, [searchTerm, blocks]);
+  }, [searchTerm, blocks, i18n]);
 
   return (
     <Drawer
