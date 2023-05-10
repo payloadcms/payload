@@ -462,7 +462,6 @@ const Form: React.FC<Props> = (props) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       initialStateString.current = generateStrFromObj({ ...getData() });
-      //console.log(`initial data: ${initialStateString.current}`);
     }, 500);
 
     return () => {
@@ -475,7 +474,6 @@ const Form: React.FC<Props> = (props) => {
     const timeout = setTimeout(() => {
       // generate current state string from array
       currentStateString.current = generateStrFromObj({ ...getData() });
-      //console.log(`current data: ${currentStateString.current}`);
 
       // function to compare state strings
       const stateHasChanged = () => {
@@ -486,7 +484,7 @@ const Form: React.FC<Props> = (props) => {
         }
       };
 
-      // only setModified to false when 'stateHasChanged()' result is different to the payloadcms modified variable value, currently payloadcms works this way: when on first load the modified variable will be false, when we start adding/changing fields modified will be true, but if we reverse all the changes, modified will still be true, at this point stateHasChanged() will be false so this 'if' statement will run and set the modified variable to false as its initial state again
+      // only setModified to false when 'stateHasChanged()' result is different to the payloadcms modified variable value, currently payloadcms works this way: when on first load the modified variable will be false, when we start adding/changing fields modified will be true, but if we reverse all the changes, modified will still be true, at this point stateHasChanged() will be false so this 'if' statement will run and set the modified variable to false as its initial state
       if (stateHasChanged() !== modified) {
         setModified(false);
       }

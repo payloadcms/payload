@@ -1,5 +1,3 @@
-// import { Fields, Field } from "./types";
-
 // function to generate arrays
 const generateArrFromObj = (obj: any, arr: any) => {
   for (const val in obj as any) {
@@ -27,7 +25,6 @@ export const generateStrFromObj = (obj: any) => {
 
   // reduce each array into a single string
   let arrJoin = arr.join("").trim();
-  //console.log(`arr: ${arrJoin}`);
 
   return arrJoin;
 };
