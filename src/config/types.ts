@@ -71,6 +71,11 @@ export function hasTransportOptions(
   return (emailConfig as EmailTransportOptions).transportOptions !== undefined;
 }
 
+export type GraphQLExtension = (
+  graphQL: typeof GraphQL,
+  payload: Payload
+) => Record<string, unknown>;
+
 export type InitOptions = {
   /** Express app for Payload to use */
   express?: Express;
@@ -489,19 +494,13 @@ export type Config = {
      *
      * @see https://payloadcms.com/docs/access-control/overview
      */
-    mutations?: (
-      graphQL: typeof GraphQL,
-      payload: Payload
-    ) => Record<string, unknown>;
+    mutations?: GraphQLExtension;
     /**
-    * Function that returns an object containing keys to custom GraphQL queries
-    *
-    * @see https://payloadcms.com/docs/access-control/overview
-    */
-    queries?: (
-      graphQL: typeof GraphQL,
-      payload: Payload
-    ) => Record<string, unknown>;
+     * Function that returns an object containing keys to custom GraphQL queries
+     *
+     * @see https://payloadcms.com/docs/access-control/overview
+     */
+    queries?: GraphQLExtension;
     maxComplexity?: number;
     disablePlaygroundInProduction?: boolean;
     disable?: boolean;

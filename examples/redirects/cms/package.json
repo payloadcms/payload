@@ -20,7 +20,7 @@
     "@payloadcms/plugin-redirects": "^1.0.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "^1.6.15"
+    "payload": "^1.7.5"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "^0.0.1",

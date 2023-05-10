@@ -115,6 +115,17 @@ export default buildConfig({
             formatOptions: { format: 'jpg', options: { quality: 90 } },
           },
           {
+            name: 'maintainedImageSize',
+            width: undefined,
+            height: undefined,
+          },
+          {
+            name: 'maintainedImageSizeWithNewFormat',
+            width: undefined,
+            height: undefined,
+            formatOptions: { format: 'jpg', options: { quality: 90 } },
+          },
+          {
             name: 'tablet',
             width: 640,
             height: 480,

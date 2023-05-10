@@ -95,6 +95,11 @@ function initCollectionsGraphQL(payload: Payload): void {
       forceNullable: forceNullableObjectType,
     });
 
+    collection.graphQL.paginatedType = buildPaginatedListType(
+      pluralName,
+      collection.graphQL.type
+    );
+
     collection.graphQL.whereInputType = buildWhereInputType(
       singularName,
       whereInputFields,
