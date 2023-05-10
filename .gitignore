@@ -87,6 +87,9 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
+# Yarn lock
+yarn.lock
+
 # Yarn Berry
 .yarn/*
 !.yarn/patches
