@@ -57,13 +57,12 @@ export default (config: SanitizedConfig): Configuration => ({
       payload$: mockModulePath,
       'payload-user-css': config.admin.css,
       dotenv: mockDotENVPath,
-      react: path.resolve(__dirname, '../../node_modules/react'),
     },
     extensions: ['.ts', '.tsx', '.js', '.json'],
   },
   plugins: [
     new webpack.ProvidePlugin(
-      { process: 'process/browser' },
+      { process: require.resolve('process/browser') },
     ),
     new webpack.DefinePlugin(
       Object.entries(process.env).reduce(
