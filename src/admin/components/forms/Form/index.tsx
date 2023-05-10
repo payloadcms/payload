@@ -45,6 +45,9 @@ import { useOperation } from "../../utilities/OperationProvider";
 
 const baseClass = "form";
 
+import { createArray } from "./generateArray";
+//import { compareStateArrs } from "./compareStates";
+
 const Form: React.FC<Props> = (props) => {
   const {
     disabled,
@@ -451,15 +454,14 @@ const Form: React.FC<Props> = (props) => {
   const classes = [className, baseClass].filter(Boolean).join(" ");
 
   // PROPOSAL TO DISABLE DRAFT BUTTON
-  const initialStateString = useRef(null);
-  const currentStateString = useRef(null);
+  const initialStateString = useRef<string>("");
+  const currentStateString = useRef<string>("");
 
-  // generate and cache initial state string
+  // generate and cache initial state string, only runs on first load and/or when initialStage changes (i.e when the Save Draft button is cliked)
   useEffect(() => {
     const timeout = setTimeout(() => {
-      const arr = [];
-      initialStateString.current = createArray({ ...getData() }, arr);
-      console.log(`initial: ${initialStateString.current}`);
+      initialStateString.current = createArray({ ...getData() });
+      console.log(`initial data: ${initialStateString.current}`);
     }, 500);
 
     return () => {
@@ -467,28 +469,25 @@ const Form: React.FC<Props> = (props) => {
     };
   }, [initialState]);
 
-  // generate current state string, compare states and setModified
+  // generate current state string | compare states | setModified to its initial state
   useEffect(() => {
     const timeout = setTimeout(() => {
-      // generate current state string
-      const arr = [];
-      currentStateString.current = createArray({ ...getData() }, arr);
-      console.log(`current: ${currentStateString.current}`);
+      // generate current state string from array
+      currentStateString.current = createArray({ ...getData() });
+      console.log(`current data: ${currentStateString.current}`);
 
-      // compare state strings
-      const stateHasChanged = compareStateArrs(
-        initialStateString.current as string,
-        currentStateString.current as string
-      );
+      // function to compare state strings
+      const stateHasChanged = () => {
+        if (initialStateString.current === currentStateString.current) {
+          return false;
+        } else {
+          return true;
+        }
+      };
 
-      console.log(`stateHasChanged outside: ${stateHasChanged}`);
-      console.log(`modified outside: ${stateHasChanged}`);
-      // setModified - it will only run when stateHasChanged() is equal to false
-      if (!stateHasChanged) {
-        console.log(`modified before: ${modified}`);
-        console.log(`has run: ${stateHasChanged}`);
-        setModified(stateHasChanged);
-        console.log(`modified after: ${modified}`);
+      // only setModified to false when 'stateHasChanged()' result is different to the payloadcms modified variable value, currently payloadcms works this way: when on first load the modified variable will be false, when we start adding/changing fields modified will be true, but if we reverse all the changes, modified will still be true, at this point stateHasChanged() will be false so this 'if' statement will run and set the modified variable to false as its initial state again
+      if (stateHasChanged() !== modified) {
+        setModified(false);
       }
     }, 500);
 
@@ -496,6 +495,7 @@ const Form: React.FC<Props> = (props) => {
       clearTimeout(timeout);
     };
   }, [getData()]);
+
   // END OF PROPOSAL
 
   return (
@@ -530,5 +530,3 @@ const Form: React.FC<Props> = (props) => {
 };
 
 export default Form;
-import { createArray } from "./generateArray";
-import { compareStateArrs } from "./compareStates";

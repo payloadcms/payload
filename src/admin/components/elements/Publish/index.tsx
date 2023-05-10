@@ -36,23 +36,8 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
   const modified = useFormModified();
   const { t } = useTranslation("version");
 
-  // --- line added
-  const { getFields } = useWatchForm();
-  // --- by eustachio
-
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0;
-  // --- modified
-  // original code // const canPublish = stateHasChanged(getFields()) || modified || hasNewerVersions || !publishedDoc;
-  const canPublish = () => {
-    if (publishButton(getFields()) === false) {
-      return false;
-    } else {
-      if (modified || hasNewerVersions || !publishedDoc) {
-        return true;
-      }
-    }
-  };
-  // --- by eustachio
+  const canPublish = modified || hasNewerVersions || !publishedDoc;
 
   const publish = useCallback(() => {
     submit({
