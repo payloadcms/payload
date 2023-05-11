@@ -4,7 +4,7 @@ import { loremIpsum } from './loremIpsum';
 
 const richtTextSelect: SelectFunction<any> = ({ collection }) => {
   if (collection.slug === 'array-fields') {
-    return ['items', 'localized'];
+    return { items: true, localized: true };
   }
   return true;
 };

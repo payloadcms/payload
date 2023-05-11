@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable no-param-reassign */
 
-type AllKeysOfType<T> = {
-  [P in keyof T]: T[P] extends never ? never : P;
-}[keyof T];
+import type { UnionToIntersection, AnyArray } from 'ts-essentials';
 
-type RemoveNever<T> = Pick<T, AllKeysOfType<T>>;
+type IsAny<Type> = 0 extends 1 & Type ? true : false;
 
 type Primitive =
   | string
@@ -18,82 +16,57 @@ type Primitive =
   | null
   | undefined;
 
-export type DeepPickKeys<Type> = Type extends Array<unknown>
-  ? {
-      [Key in keyof Type]: DeepPickKeys<Type[Key]>;
-    }[number]
+type NonEmptyObject<T> = {} extends T ? never : T;
+
+export type DeepPickQuery<Type> = IsAny<Type> extends true
+  ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any
+  : Type extends AnyArray<unknown>
+  ? DeepPickQuery<UnionToIntersection<Type[number]>>
   : {
-      [Key in keyof Type]: Key extends string
-        ? Type[Key] extends Primitive
-          ? `${Key}`
-          : `${Key}` | `${Key}.${DeepPickKeys<Type[Key]>}`
+      [Key in Exclude<keyof Type, symbol>]?: Type[Key] extends Primitive
+        ? true
+        : true | DeepPickQuery<Type[Key]>;
+    };
+
+export type DeepPick<T, K extends DeepPickQuery<T>> = T extends AnyArray<
+  infer Item
+>
+  ? K extends DeepPickQuery<Item>
+    ? AnyArray<DeepPick<Item, K>>
+    : never
+  : T extends unknown
+  ? NonEmptyObject<{
+      [P in Extract<keyof T, keyof K>]: K[P] extends true
+        ? T[P]
+        : K[P] extends DeepPickQuery<T[P]>
+        ? DeepPick<T[P], K[P]>
         : never;
-    }[keyof Type];
+    }>
+  : never;
 
-export type DeepPick<Type, Query extends DeepPickKeys<Type>> = RemoveNever<{
-  [Key in keyof Type]: Type extends Array<unknown>
-    ? Query extends DeepPickKeys<Type[Key]>
-      ? RemoveNever<DeepPick<Type[Key], Query>>
-      : never
-    : Key extends Query
-    ? Type[Key]
-    : Key extends string
-    ? Query extends `${Key}.${infer SubQuery}`
-      ? SubQuery extends DeepPickKeys<Type[Key]>
-        ? RemoveNever<DeepPick<Type[Key], SubQuery>>
-        : never
-      : never
-    : never;
-}>;
-
-export function deepPick<T, U extends DeepPickKeys<T>>(
+export function deepPick<T, U extends DeepPickQuery<T>>(
   obj: T,
-  paths: Array<U>,
-): DeepPick<T, (typeof paths)[number]> {
+  query: U | true,
+): DeepPick<T, U> {
+  if (typeof obj !== 'object' || obj === null) return {} as DeepPick<T, U>;
+  if (query === true) return obj as DeepPick<T, U>;
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => deepPick(item, query)) as DeepPick<T, U>;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result: any = {};
-  paths.forEach((path) => {
-    // not sure why this is necessary, but it is
-    const pathParts = (path as string).split('.');
-    deepPickTo(obj, pathParts, result);
-  });
-  return result;
-}
-
-function deepPickTo<T>(obj: T, path: Array<string>, result: unknown): boolean {
-  if (typeof result !== 'object' || typeof obj !== 'object') {
-    return false;
-  }
-  const pathPart = path[0];
-  if (!(pathPart in obj)) {
-    return false;
-  }
-  const value = obj[pathPart];
-  if (path.length === 1) {
-    result[pathPart] = obj[pathPart];
-    return true;
-  }
-  if (Array.isArray(value)) {
-    let someFound = false;
-    const newArray = value.map((subObj, idx) => {
-      const subResult = result[pathPart]?.[idx] ?? {};
-      if (deepPickTo(subObj, path.slice(1), subResult)) {
-        someFound = true;
-        return subResult;
-      }
-      return result[pathPart]?.[idx] ?? {};
-    });
-
-    if (someFound) {
-      result[pathPart] = newArray;
-      return true;
+  Object.entries(query).forEach(([key, value]) => {
+    if (value === true && obj[key]) {
+      result[key] = obj[key];
     }
-    return false;
-  }
-  const subResult = result[pathPart] ?? {};
-  if (deepPickTo(value, path.slice(1), subResult)) {
-    result[pathPart] = subResult;
-    return true;
-  }
-  return false;
+    const nestedResult = deepPick(obj[key], value);
+    if (Object.keys(nestedResult).length > 0) {
+      result[key] = nestedResult;
+    }
+  });
+
+  return result;
 }

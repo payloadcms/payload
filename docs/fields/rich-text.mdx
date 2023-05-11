@@ -392,7 +392,8 @@ The `select` property is a function that will be called with an argument object 
 | `siblingData` | An object of the document data limited to fields within the same parent to the field |
 | `req`         | The Express `request` object containing the currently authenticated `user`           |
 
-and should return an array of field names to select or `true` to select all fields.
+and should return an object were the key is the field name and the value is either a nested object
+or `true` to select or `true` to select all fields.
 
 **Example:**
 
@@ -404,7 +405,7 @@ const fields = {
   select: ({ data, collection, siblingData, req }) => {
     if (collection.slug === 'posts' && data.type === 'related-post') {
       // only select the title and slug field from the related collection
-      return ['title', 'slug'];
+      return { title: true, slug: true };
     }
     // select all fields
     return true;

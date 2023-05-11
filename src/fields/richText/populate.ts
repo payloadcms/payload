@@ -52,10 +52,10 @@ export const populate = async ({
         siblingData: dataRef,
         req,
       });
-      if (fieldsOrTrue !== true) {
-        dataRef[key] = deepPick(doc, ['id', ...(fieldsOrTrue as Array<any>)]);
-      } else {
+      if (fieldsOrTrue === true) {
         dataRef[key] = doc;
+      } else {
+        dataRef[key] = deepPick(doc, { id: true, ...fieldsOrTrue });
       }
     } else {
       dataRef[key] = doc;

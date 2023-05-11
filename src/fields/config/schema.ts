@@ -284,7 +284,7 @@ export const upload = baseField.keys({
   name: joi.string().required(),
   maxDepth: joi.number(),
   select: joi.alternatives().try(
-    joi.array().items(joi.string()),
+    joi.object(),
     joi.func(),
   ),
   filterOptions: joi.alternatives().try(
@@ -329,7 +329,7 @@ export const relationship = baseField.keys({
     joi.func(),
   ),
   select: joi.alternatives().try(
-    joi.array().items(joi.string()),
+    joi.object(),
     joi.func(),
   ),
   defaultValue: joi.alternatives().try(

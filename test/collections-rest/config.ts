@@ -91,7 +91,7 @@ export default buildConfig({
           name: 'relationField',
           type: 'relationship',
           relationTo: relationSlug,
-          select: ['name'],
+          select: { name: true },
         },
         // Relation hasMany
         {
@@ -99,14 +99,14 @@ export default buildConfig({
           type: 'relationship',
           relationTo: relationSlug,
           hasMany: true,
-          select: ['name'],
+          select: { name: true },
         },
         // Relation multiple relationTo
         {
           name: 'relationMultiRelationTo',
           type: 'relationship',
           relationTo: [relationSlug, 'dummy'],
-          select: () => ['name'],
+          select: () => ({ name: true }),
         },
         // Relation multiple relationTo hasMany
         {

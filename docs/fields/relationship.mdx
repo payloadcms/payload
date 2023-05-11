@@ -121,6 +121,58 @@ You can learn more about writing queries [here](/docs/queries/overview).
   in your validate function.
 </Banner>
 
+### Selecting fields
+
+By default, the entire related document is returned when querying for a 
+relationship field. You can limit the fields returned by using the `select` 
+property. This property can either be defined as a function returning an object 
+or as a direct object. The object mirrors the shape of the data it interacts 
+with, using field names as keys and true or nested objects as values, thus 
+giving fine-grained control over the data query and retrieval process. The 
+function will be called with an argument object with the following properties:
+
+| Property      | Description                                                                          |
+| ------------- | ------------------------------------------------------------------------------------ |
+| `data`        | An object of the full relationship value                                             |
+| `collection`  | The collection config of the related collection                                      |
+| `siblingData` | An object of the document data limited to fields within the same parent to the field |
+| `req`         | The Express `request` object containing the currently authenticated `user`           |
+
+and should return `true` or and object.
+
+**Example:**
+
+```js
+  const relationshipField = {
+    name: 'purchase',
+    type: 'relationship',
+    relationTo: ['products', 'services'],
+    select: { name: true, price: true },
+  };
+```
+
+**Example with function:**
+
+```js
+  const relationshipField = {
+    name: 'purchase',
+    type: 'relationship',
+    relationTo: ['products', 'services'],
+    select: ({ data, collection }) => {
+      if (collection.slug === 'products') {
+        return { name: true, price: { amount: true, currency: true } };
+      }
+      return { name: true price: true, duration: true };
+    },
+  };
+```
+
+<Banner type="warning">
+  <strong>Note:</strong><br/>
+  When a relationship field has a custom <strong>select</strong> property, the api will not return the entire related document unless you query the related collection with the provided <strong>id</strong>.
+  The select property is ignored when using <strong>GraphQL</strong>.
+</Banner>
+
 ### How the data is saved
 
 Given the variety of options possible within the `relationship` field type, the shape of the data needed for creating and updating these fields can vary. The following sections will describe the variety of data shapes that can arise from this field.

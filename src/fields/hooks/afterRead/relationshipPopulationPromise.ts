@@ -57,17 +57,17 @@ const populate = async ({
       // ids are visible regardless of access controls
       relationshipValue = id;
     } else if (field.select && req.payloadAPI !== 'GraphQL') {
-      const fieldsOrTrue = Array.isArray(field.select)
-        ? field.select
-        : field.select({
+      const fieldsOrTrue = typeof field.select === 'function'
+        ? field.select({
           data: relationshipValue,
           collection: relatedCollection.config,
           siblingData: dataToUpdate,
           req,
-        });
+        })
+        : field.select;
       if (fieldsOrTrue !== true) {
         // if fieldsOrTrue is true then we want to return the entire related document
-        relationshipValue = deepPick(relationshipValue, ['id', ...fieldsOrTrue]);
+        relationshipValue = deepPick(relationshipValue, { id: true, ...fieldsOrTrue });
       }
     }
 

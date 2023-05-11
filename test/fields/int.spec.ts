@@ -4,11 +4,26 @@ import { RESTClient } from '../helpers/rest';
 import configPromise from '../uploads/config';
 import payload from '../../src';
 import { pointDoc } from './collections/Point';
-import { arrayDefaultValue, arrayDoc, arrayFieldsSlug } from './collections/Array';
-import { groupDefaultChild, groupDefaultValue, groupDoc, groupFieldsSlug } from './collections/Group';
+import {
+  arrayDefaultValue,
+  arrayDoc,
+  arrayFieldsSlug,
+} from './collections/Array';
+import {
+  groupDefaultChild,
+  groupDefaultValue,
+  groupDoc,
+  groupFieldsSlug,
+} from './collections/Group';
 import { defaultText } from './collections/Text';
 import { blocksFieldSeedData } from './collections/Blocks';
-import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
+import {
+  localizedTextValue,
+  namedTabDefaultValue,
+  namedTabText,
+  tabsDoc,
+  tabsSlug,
+} from './collections/Tabs';
 import { defaultNumber, numberDoc } from './collections/Number';
 import { dateDoc } from './collections/Date';
 import { deepPick } from '../../src/fields/deepPick';
@@ -19,7 +34,10 @@ let config;
 
 describe('Fields', () => {
   beforeAll(async () => {
-    ({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }));
+    ({ serverURL } = await initPayloadTest({
+      __dirname,
+      init: { local: false },
+    }));
     config = await configPromise;
 
     client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
@@ -145,55 +163,67 @@ describe('Fields', () => {
     });
 
     it('should not create number below minimum', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          min: 5,
-        },
-      })).rejects.toThrow('The following field is invalid: min');
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            min: 5,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: min');
     });
     it('should not create number above max', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          max: 15,
-        },
-      })).rejects.toThrow('The following field is invalid: max');
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            max: 15,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: max');
     });
 
     it('should not create number below 0', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          positiveNumber: -5,
-        },
-      })).rejects.toThrow('The following field is invalid: positiveNumber');
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            positiveNumber: -5,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: positiveNumber');
     });
 
     it('should not create number above 0', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          negativeNumber: 5,
-        },
-      })).rejects.toThrow('The following field is invalid: negativeNumber');
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            negativeNumber: 5,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: negativeNumber');
     });
     it('should not create a decimal number below min', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          decimalMin: -0.25,
-        },
-      })).rejects.toThrow('The following field is invalid: decimalMin');
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            decimalMin: -0.25,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: decimalMin');
     });
 
     it('should not create a decimal number above max', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          decimalMax: 1.5,
-        },
-      })).rejects.toThrow('The following field is invalid: decimalMax');
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            decimalMax: 1.5,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: decimalMax');
     });
   });
 
@@ -203,7 +233,12 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
-      indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+      indexes = payload.collections[
+        'indexed-fields'
+      ].Model.schema.indexes() as [
+        Record<string, IndexDirection>,
+        IndexOptions,
+      ];
 
       indexes.forEach((index) => {
         const field = Object.keys(index[0])[0];
@@ -228,19 +263,32 @@ describe('Fields', () => {
     });
     it('should have a sparse index on a unique localized field in a group', () => {
       expect(definitions['group.localizedUnique.en']).toEqual(1);
-      expect(options['group.localizedUnique.en']).toMatchObject({ unique: true, sparse: true });
+      expect(options['group.localizedUnique.en']).toMatchObject({
+        unique: true,
+        sparse: true,
+      });
       expect(definitions['group.localizedUnique.es']).toEqual(1);
-      expect(options['group.localizedUnique.es']).toMatchObject({ unique: true, sparse: true });
+      expect(options['group.localizedUnique.es']).toMatchObject({
+        unique: true,
+        sparse: true,
+      });
     });
     it('should have unique indexes in a collapsible', () => {
       expect(definitions['collapsibleLocalizedUnique.en']).toEqual(1);
-      expect(options['collapsibleLocalizedUnique.en']).toMatchObject({ unique: true, sparse: true });
+      expect(options['collapsibleLocalizedUnique.en']).toMatchObject({
+        unique: true,
+        sparse: true,
+      });
       expect(definitions.collapsibleTextUnique).toEqual(1);
       expect(options.collapsibleTextUnique).toMatchObject({ unique: true });
     });
     it('should have unique compound indexes', () => {
       expect(definitions.partOne).toEqual(1);
-      expect(options.partOne).toMatchObject({ unique: true, name: 'compound-index', sparse: true });
+      expect(options.partOne).toMatchObject({
+        unique: true,
+        name: 'compound-index',
+        sparse: true,
+      });
     });
     it('should throw validation error saving on unique fields', async () => {
       const data = {
@@ -293,7 +341,10 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
-      indexes = payload.versions['indexed-fields'].schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+      indexes = payload.versions['indexed-fields'].schema.indexes() as [
+        Record<string, IndexDirection>,
+        IndexOptions,
+      ];
       indexes.forEach((index) => {
         const field = Object.keys(index[0])[0];
         definitions[field] = index[0][field];
@@ -307,7 +358,11 @@ describe('Fields', () => {
     });
     it('should have version indexes from collection indexes', () => {
       expect(definitions['version.partOne']).toEqual(1);
-      expect(options['version.partOne']).toMatchObject({ unique: true, name: 'compound-index', sparse: true });
+      expect(options['version.partOne']).toMatchObject({
+        unique: true,
+        name: 'compound-index',
+        sparse: true,
+      });
     });
   });
 
@@ -354,23 +409,25 @@ describe('Fields', () => {
     });
 
     it('should not create duplicate point when unique', async () => {
-      await expect(() => payload.create({
-        collection: 'point-fields',
-        data: {
-          point,
-          localized,
-          group,
-        },
-      }))
-        .rejects
-        .toThrow(Error);
+      await expect(() =>
+        payload.create({
+          collection: 'point-fields',
+          data: {
+            point,
+            localized,
+            group,
+          },
+        }),
+      ).rejects.toThrow(Error);
 
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          min: 5,
-        },
-      })).rejects.toThrow('The following field is invalid: min');
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            min: 5,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: min');
 
       expect(doc.point).toEqual(point);
       expect(doc.localized).toEqual(localized);
@@ -439,11 +496,11 @@ describe('Fields', () => {
         },
       });
 
-      const allLocales = await payload.findByID({
+      const allLocales = (await payload.findByID({
         collection,
         id,
         locale: 'all',
-      }) as unknown as { localized: { en: unknown, es: unknown } };
+      })) as unknown as { localized: { en: unknown; es: unknown } };
 
       expect(enDoc.localized[0].text).toStrictEqual(enText);
       expect(esDoc.localized[0].text).toStrictEqual(esText);
@@ -487,7 +544,9 @@ describe('Fields', () => {
     });
 
     it('should create with defaultValue inside a named tab with no other values', async () => {
-      expect(document.namedTabWithDefaultValue.defaultValue).toStrictEqual(namedTabDefaultValue);
+      expect(document.namedTabWithDefaultValue.defaultValue).toStrictEqual(
+        namedTabDefaultValue,
+      );
     });
 
     it('should create with localized text inside a named tab', async () => {
@@ -535,13 +594,25 @@ describe('Fields', () => {
         collection: 'block-fields',
       });
 
-      expect(blockFields.docs[0].blocks[0].blockType).toEqual(blocksFieldSeedData[0].blockType);
-      expect(blockFields.docs[0].blocks[0].text).toEqual(blocksFieldSeedData[0].text);
+      expect(blockFields.docs[0].blocks[0].blockType).toEqual(
+        blocksFieldSeedData[0].blockType,
+      );
+      expect(blockFields.docs[0].blocks[0].text).toEqual(
+        blocksFieldSeedData[0].text,
+      );
 
-      expect(blockFields.docs[0].blocks[2].blockType).toEqual(blocksFieldSeedData[2].blockType);
-      expect(blockFields.docs[0].blocks[2].blockName).toEqual(blocksFieldSeedData[2].blockName);
-      expect(blockFields.docs[0].blocks[2].subBlocks[0].number).toEqual(blocksFieldSeedData[2].subBlocks[0].number);
-      expect(blockFields.docs[0].blocks[2].subBlocks[1].text).toEqual(blocksFieldSeedData[2].subBlocks[1].text);
+      expect(blockFields.docs[0].blocks[2].blockType).toEqual(
+        blocksFieldSeedData[2].blockType,
+      );
+      expect(blockFields.docs[0].blocks[2].blockName).toEqual(
+        blocksFieldSeedData[2].blockName,
+      );
+      expect(blockFields.docs[0].blocks[2].subBlocks[0].number).toEqual(
+        blocksFieldSeedData[2].subBlocks[0].number,
+      );
+      expect(blockFields.docs[0].blocks[2].subBlocks[1].text).toEqual(
+        blocksFieldSeedData[2].subBlocks[1].text,
+      );
     });
 
     it('should query based on richtext data within a block', async () => {
@@ -631,12 +702,14 @@ describe('Fields', () => {
     });
 
     it('should validate json', async () => {
-      await expect(async () => payload.create({
-        collection: 'json-fields',
-        data: {
-          json: '{ bad input: true }',
-        },
-      })).rejects.toThrow('The following field is invalid: json');
+      await expect(async () =>
+        payload.create({
+          collection: 'json-fields',
+          data: {
+            json: '{ bad input: true }',
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: json');
     });
 
     it('should save empty json objects', async () => {
@@ -702,8 +775,7 @@ describe('Fields', () => {
 
       const nodes = query.docs[0].richText;
       expect(nodes).toBeDefined();
-      const child = nodes.flatMap((n) => n.children)
-        .find((c) => c.doc);
+      const child = nodes.flatMap((n) => n.children).find((c) => c.doc);
       expect(child).toMatchObject({
         type: 'link',
         linkType: 'internal',
@@ -766,12 +838,12 @@ describe('deepPick', () => {
   };
 
   it('should pick a single top-level property', () => {
-    const result = deepPick(testData, ['a']);
+    const result = deepPick(testData, { a: true });
     expect(result).toStrictEqual({ a: 'value a' });
   });
 
   it('should pick multiple top-level properties', () => {
-    const result = deepPick(testData, ['a', 'c']);
+    const result = deepPick(testData, { a: true, c: true });
     expect(result).toStrictEqual({
       a: 'value a',
       c: {
@@ -795,7 +867,7 @@ describe('deepPick', () => {
   });
 
   it('should pick deep properties', () => {
-    const result = deepPick(testData, ['c.e.f']);
+    const result = deepPick(testData, { c: { e: { f: true } } });
     expect(result).toStrictEqual({
       c: {
         e: { f: 'value f' },
@@ -804,7 +876,9 @@ describe('deepPick', () => {
   });
 
   it('should pick properties inside arrays', () => {
-    const result = deepPick(testData, ['c.h.i', 'c.e.g']);
+    const result = deepPick(testData, {
+      c: { h: { i: true }, e: { g: true } },
+    });
     expect(result).toStrictEqual({
       c: { e: { g: [1, 2, 3] }, h: [{ i: 'value i' }, { i: 'value i2' }] },
     });
@@ -812,17 +886,17 @@ describe('deepPick', () => {
 
   it('should handle non-existent properties', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = deepPick(testData, ['x' as any]);
+    const result = deepPick(testData, { x: true } as any);
     expect(result).toStrictEqual({});
   });
 
   it('should handle non-existent deep properties', () => {
-    const result = deepPick(testData, ['c.e.x']);
+    const result = deepPick(testData, { c: { x: true } } as any);
     expect(result).toStrictEqual({});
   });
 
   it('should handle empty paths array', () => {
-    const result = deepPick(testData, []);
+    const result = deepPick(testData, {});
     expect(result).toStrictEqual({});
   });
 });

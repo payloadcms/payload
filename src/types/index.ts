@@ -3,7 +3,7 @@ import { TypeWithTimestamps } from '../collections/config/types';
 import { FileData } from '../uploads/types';
 
 export { PayloadRequest } from '../express/types';
-export { DeepPick, DeepPickKeys } from '../fields/deepPick';
+export { DeepPick, DeepPickQuery } from '../fields/deepPick';
 
 export type Operator =
   | 'equals'
