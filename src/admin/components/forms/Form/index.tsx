@@ -25,6 +25,7 @@ import { Fields, Context as FormContextType, GetDataByPath, Props, SubmitOptions
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
+import { generateStrFromObj } from './generateArray';
 
 const baseClass = 'form';
 
