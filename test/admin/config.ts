@@ -126,24 +126,6 @@ export default buildConfig({
           },
         },
         {
-          name: 'array1',
-          type: 'array',
-          fields: [
-            {
-              name: 'title1',
-              type: 'text',
-            },
-            {
-              name: 'checkbox',
-              type: 'checkbox'
-            },
-            {
-              name: 'nestedRichText',
-              type: 'richText'
-            },
-          ],
-        },
-        {
           type: 'ui',
           name: 'demoUIField',
           label: 'Demo UI Field',
@@ -155,9 +137,6 @@ export default buildConfig({
           },
         },
       ],
-      versions: {
-        drafts: true,
-      }
     },
     {
       slug: 'group-one-collection-ones',
