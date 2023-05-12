@@ -199,7 +199,7 @@
     "@swc/jest": "^0.2.24",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
-    "@trbl/eslint-config": "^1.2.4",
+    "@trbl/eslint-config": "^3.0.1",
     "@types/asap": "^2.0.0",
     "@types/body-parser": "^1.19.2",
     "@types/compression": "^1.7.2",
