@@ -18,12 +18,10 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
       label,
     },
     children,
-    selectProps: {
-      selectProps: {
-        setDrawerIsOpen,
-        onSave,
-      },
-    },
+    customProps: {
+      setDrawerIsOpen,
+      onSave,
+    } = {},
   } = props;
 
   const [showTooltip, setShowTooltip] = useState(false);
