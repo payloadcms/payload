@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer';
+import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued';
 import { useTranslation } from 'react-i18next';
 import Label from '../../Label';
 import { diffStyles } from '../styles';
