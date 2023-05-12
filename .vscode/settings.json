@@ -1,0 +1,19 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "$(capture).js, $(capture).d.ts.map, $(capture).*.ts, $(capture)_*.js, $(capture)_*.ts",
+    "*.tsx": "$(capture).ts, $(capture).*.tsx, $(capture)_*.ts, $(capture)_*.tsx",
+    "*.js": "$(capture).js.map, $(capture).*.js, $(capture)_*.js",
+    "*.jsx": "$(capture).js, $(capture).*.jsx, $(capture)_*.js, $(capture)_*.jsx",
+    // Config
+    ".env": "*.env, .env.*, .envrc, env.d.ts",
+    ".gitignore": ".gitattributes, .gitmodules, .gitmessage, .mailmap, .git-blame*",
+    "package.json": ".editorconfig, .eslint*, .github*, .huskyrc*,.lintstagedrc*, .markdownlint*, .node-version, .nodemon*, .npm*, .nvmrc, .prettier*, .releaserc*, .release-it*.json, .tool-versions, .yarnrc*, nodemon*, package-lock.json, pm2.*, prettier*, yarn*",
+    "readme*": "authors, backers*, changelog*, citation*, code_of_conduct*, codeowners, contributing*, contributors, copying, credits, governance.md, history.md, license*, maintainers, readme*, security.md, sponsors*, ISSUE_GUIDE.md, github-stars.md",
+    // Testing
+    "jest.config.js": "jest.*config.js",
+    "playwright.config.ts": "playwright.*config.ts",
+    // Collapse top-level pointer js files
+    "*.d.ts": "$(capture).js",
+  },
+}
