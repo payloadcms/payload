@@ -1,2 +1,3 @@
 export { payloadCloud } from './plugin'
-export { payloadCloudEmail } from './email'
+export { getStorageClient } from './utilities/getStorageClient'
+export { createKey } from './utilities/createKey'

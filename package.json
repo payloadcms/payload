@@ -7,6 +7,7 @@
   "license": "SEE LICENSE IN LICENSE.MD",
   "scripts": {
     "build": "tsc",
+    "build:watch": "tsc -w",
     "lint": "eslint src",
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
     "clean": "rimraf dist && rimraf dev/yarn.lock",
