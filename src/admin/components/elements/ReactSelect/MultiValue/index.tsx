@@ -9,7 +9,6 @@ import { Option as OptionType } from '../types';
 import './index.scss';
 
 const baseClass = 'multi-value';
-
 export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
   const {
     className,

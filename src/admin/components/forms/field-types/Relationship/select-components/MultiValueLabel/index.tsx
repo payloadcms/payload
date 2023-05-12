@@ -43,6 +43,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
       <div className={`${baseClass}__content`}>
         <components.MultiValueLabel
           {...props}
+          selectProps={undefined}
           innerProps={{
             className: `${baseClass}__text`,
             ...draggableProps || {},

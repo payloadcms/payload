@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MultiValueRemoveProps } from 'react-select/src/components/MultiValue';
+import { MultiValueRemoveProps } from 'react-select';
 import X from '../../../icons/X';
 import Tooltip from '../../Tooltip';
 import { Option as OptionType } from '../types';
@@ -8,10 +8,13 @@ import './index.scss';
 
 const baseClass = 'multi-value-remove';
 
-export const MultiValueRemove: React.FC<MultiValueRemoveProps<OptionType>> = (props) => {
+export const MultiValueRemove: React.FC<MultiValueRemoveProps<OptionType> & {
+  innerProps: JSX.IntrinsicElements['button']
+}> = (props) => {
   const {
     innerProps,
   } = props;
+
   const [showTooltip, setShowTooltip] = React.useState(false);
   const { t } = useTranslation('general');
 

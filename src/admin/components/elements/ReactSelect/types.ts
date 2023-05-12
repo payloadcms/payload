@@ -1,4 +1,44 @@
-import { Ref } from 'react';
+import { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from "react-select";
+import { DocumentDrawerProps } from "../DocumentDrawer/types";
+
+type CustomSelectProps = {
+  disableMouseDown?: boolean
+  disableKeyDown?: boolean
+  droppableRef?: React.RefObject<HTMLDivElement>
+  setDrawerIsOpen?: (isOpen: boolean) => void
+  onSave?: DocumentDrawerProps['onSave']
+}
+
+// augment the types for the `Select` component from `react-select`
+// this is to include the `selectProps` prop at the top-level `Select` component
+declare module 'react-select/dist/declarations/src/Select' {
+  export interface Props<
+    Option,
+    IsMulti extends boolean,
+    Group extends GroupBase<Option>
+  > {
+    selectProps?: CustomSelectProps
+  }
+}
+
+// augment the types for the `CommonPropsAndClassName` from `react-select`
+// this will include the `selectProps` prop to every `react-select` component automatically
+declare module 'react-select/dist/declarations/src' {
+  export interface CommonPropsAndClassName<Option, IsMulti extends boolean, Group extends GroupBase<Option>> extends CommonProps<Option, IsMulti, Group> {
+    selectProps?: ReactSelectStateManagerProps<Option, IsMulti, Group> & {
+      draggableProps?: any
+    } & CustomSelectProps
+  }
+}
+
+// do the same for `MultiValueGenericProps`
+// TODO: this doesn't work, see the two `@ts-ignore` comments this component's code
+// import { Props as ReactSelectProps } from "react-select/dist/declarations/src/Select";
+// declare module 'react-select/dist/declarations/src/components/MultiValue' {
+//   export interface MultiValueGenericProps<Option = unknown, IsMulti extends boolean = boolean, Group extends GroupBase<Option> = GroupBase<Option>> {
+//     selectProps: ReactSelectProps<Option, IsMulti, Group> & CustomSelectProps
+//   }
+// }
 
 export type Option = {
   [key: string]: unknown
@@ -35,9 +75,5 @@ export type Props = {
   components?: {
     [key: string]: React.FC<any>
   }
-  selectProps?: {
-    disableMouseDown?: boolean
-    disableKeyDown?: boolean
-    [key: string]: unknown
-  }
+  selectProps?: CustomSelectProps
 }
