@@ -182,6 +182,7 @@
     "swc-minify-webpack-plugin": "^2.1.0",
     "terser-webpack-plugin": "^5.3.6",
     "ts-essentials": "^7.0.3",
+    "ts-morph": "^18.0.0",
     "url-loader": "^4.1.1",
     "use-context-selector": "^1.4.1",
     "uuid": "^8.3.2",

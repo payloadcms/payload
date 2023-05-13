@@ -22,7 +22,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   showHiddenFields?: boolean
   pagination?: boolean
   sort?: string
-  where?: Where
+  where?: T extends keyof GeneratedTypes['collectionWheres'] ? GeneratedTypes['collectionWheres'][T] : Where
   draft?: boolean
   req?: PayloadRequest
 }
