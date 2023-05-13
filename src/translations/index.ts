@@ -21,6 +21,7 @@ import ua from './ua.json';
 import vi from './vi.json';
 import zh from './zh.json';
 import hu from './hu.json';
+import ar from './ar.json';
 
 export default {
   cs,
@@ -46,4 +47,5 @@ export default {
   vi,
   zh,
   hu,
+  ar,
 };
