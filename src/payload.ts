@@ -3,7 +3,6 @@ import type { Express, Router } from 'express';
 import { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql';
 import crypto from 'crypto';
 import path from 'path';
-import mongoose from 'mongoose';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
 import { BulkOperationResult, Collection, CollectionModel } from './collections/config/types';
@@ -146,20 +145,13 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.mongoURL = options.mongoURL;
     this.mongoOptions = options.mongoOptions;
 
-    if (this.mongoURL) {
-      mongoose.set('strictQuery', false);
-      this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, this.logger);
-    }
+    await this.connectToDatabase();
 
     this.logger.info('Starting Payload...');
     if (!options.secret) {
       throw new Error(
         'Error: missing secret key. A secret key is needed to secure Payload.',
       );
-    }
-
-    if (options.mongoURL !== false && typeof options.mongoURL !== 'string') {
-      throw new Error('Error: missing MongoDB connection URL.');
     }
 
     this.secret = crypto
@@ -217,6 +209,37 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     return this;
   }
+
+  private connectToDatabase = async (): Promise<void> => {
+    const isTestEnv = process.env.NODE_ENV === 'test';
+    if (isTestEnv) {
+      await this.connectToTestDatabase();
+    } else {
+      await connectMongoose.connect(this.mongoURL, this.mongoOptions, this.logger);
+    }
+  };
+
+  private connectToTestDatabase = async (): Promise<void> => {
+    const envVarIsSet = process.env.PAYLOAD_USE_MONGODB_URL_FOR_TESTS !== undefined;
+    const useMongoDbUrlForTests = process.env.PAYLOAD_USE_MONGO_URL_FOR_TESTS === 'true';
+    if (useMongoDbUrlForTests) {
+      await connectMongoose.connect(this.mongoURL, this.mongoOptions, this.logger);
+    } else {
+      if (this.mongoURL && !envVarIsSet) {
+        process.emitWarning('MongoURL ignored during tests.', {
+          code: 'PAYLOAD_MONGOURL_IGNORED',
+          detail: (
+            'During tests (i.e. NODE_ENV === "test"), payload will automatically connect to an in-memory database and ignore your url setting.'
+            + '\nIn order to prevent this warning, explicitly tell payload what you want:'
+            + '\n To use your own MongoDB instance, set the environment variable PAYLOAD_USE_MONGODB_URL_FOR_TESTS to "true".'
+            + '\n To connect to the in-memory database, set PAYLOAD_USE_MONGO_URL_FOR_TESTS to "false" '
+            + 'or set mongoURL to false during tests.'
+          ),
+        });
+      }
+      this.mongoMemoryServer = await connectMongoose.connectInMemory(this.mongoOptions, this.logger);
+    }
+  };
 
   /**
    * @description Performs create operation
