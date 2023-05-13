@@ -9,4 +9,16 @@ export const defaultOptions: InitOptions = {
   interpolation: {
     escapeValue: false,
   },
+  detection: {
+    order: [
+      'cookie',
+      'localStorage',
+    ],
+    lookupCookie: 'lng',
+    lookupLocalStorage: 'lng',
+    caches: [
+      'cookie',
+      'localStorage',
+    ],
+  },
 };
