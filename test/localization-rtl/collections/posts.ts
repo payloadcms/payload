@@ -1,39 +1,46 @@
-import type { CollectionConfig } from "../../../src/collections/config/types";
+import type { CollectionConfig } from '../../../src/collections/config/types';
+
 export const Posts: CollectionConfig = {
-  slug: "posts",
+  slug: 'posts',
   labels: {
     singular: {
-      en: "Post",
-      ar: "منشور",
+      en: 'Post',
+      ar: 'منشور',
     },
     plural: {
-      en: "Posts",
-      ar: "منشورات",
+      en: 'Posts',
+      ar: 'منشورات',
     },
   },
   admin: {
-    description: { en: "Description", ar: "وصف" },
-    listSearchableFields: ["title", "description"],
-    useAsTitle: "title",
-    defaultColumns: ["id", "title", "description"],
+    description: { en: 'Description', ar: 'وصف' },
+    listSearchableFields: ['title', 'description'],
+    useAsTitle: 'title',
+    defaultColumns: ['id', 'title', 'description'],
   },
   fields: [
     {
-      name: "title",
+      name: 'title',
       label: {
-        en: "Title",
-        ar: "عنوان",
+        en: 'Title',
+        ar: 'عنوان',
       },
-      type: "text",
+      type: 'text',
+      admin: {
+        rtl: false,
+      },
     },
     {
-      name: "description",
-      type: "text",
+      name: 'description',
+      type: 'text',
       localized: true,
+      admin: {
+        rtl: true,
+      },
     },
     {
-      name: "content",
-      type: "richText",
+      name: 'content',
+      type: 'richText',
       localized: true,
     },
   ],

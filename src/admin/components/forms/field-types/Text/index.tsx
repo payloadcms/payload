@@ -4,6 +4,7 @@ import withCondition from '../../withCondition';
 import { text } from '../../../../../fields/validations';
 import { Props } from './types';
 import TextInput from './Input';
+import { useExtendedLocale } from '../../../utilities/Locale';
 
 const Text: React.FC<Props> = (props) => {
   const {
@@ -22,11 +23,15 @@ const Text: React.FC<Props> = (props) => {
       width,
       description,
       condition,
+      rtl,
     } = {},
     inputRef,
   } = props;
 
   const path = pathFromProps || name;
+  const extendedLocale = useExtendedLocale();
+  // field id rtl when current locale is rtl and admin.rtl is true also
+  const isRTL = (rtl && extendedLocale && extendedLocale.rtl) || false;
 
   const memoizedValidate = useCallback((value, options) => {
     return validate(value, { ...options, minLength, maxLength, required });
@@ -64,6 +69,7 @@ const Text: React.FC<Props> = (props) => {
       width={width}
       description={description}
       inputRef={inputRef}
+      rtl={isRTL}
     />
   );
 };
