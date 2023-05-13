@@ -77,6 +77,7 @@ export const text = baseField.keys({
       joi.string(),
     ),
     autoComplete: joi.string(),
+    rtl: joi.boolean(),
   }),
 });
 
@@ -108,6 +109,7 @@ export const textarea = baseField.keys({
   admin: baseAdminFields.keys({
     placeholder: joi.string(),
     rows: joi.number(),
+    rtl: joi.boolean(),
   }),
 });
 
@@ -418,6 +420,7 @@ export const richText = baseField.keys({
         joi.func(),
       ),
     }),
+    rtl: joi.boolean(),
   }),
 });
 
