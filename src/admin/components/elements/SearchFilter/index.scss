@@ -1,5 +1,14 @@
 @import '../../../scss/styles';
-
+[dir=rtl] .search-filter{
+  svg {
+    right: base(.5);
+    left:0
+  }
+  &__input {
+    padding-right: base(2);
+    padding-left: 0;
+  }
+}
 .search-filter {
   position: relative;
 

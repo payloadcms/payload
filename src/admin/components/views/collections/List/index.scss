@@ -4,6 +4,7 @@
   width: 100%;
   margin-bottom: base(2);
 
+
   &__wrap {
     padding-top: $baseline;
     padding-bottom: $baseline;
@@ -71,6 +72,8 @@
 
     .btn {
       margin: 0 0 0 base(.5);
+      margin-left: $baseline;
+
     }
 
     .btn {

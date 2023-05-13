@@ -10,6 +10,11 @@
     max-width: base(3);
     height: base(3);
   }
+  [dir=rtl] &__filename {
+    margin-left: 0;
+    margin-right: base(1);
+
+  }
 
   &__filename {
     align-self: center;

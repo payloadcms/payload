@@ -35,6 +35,12 @@
     padding-bottom: base(2);
     flex-grow: 1;
   }
+  
+  [dir=rtl] &__sidebar-wrap {
+    left: 0;
+    border-right: 1px solid var(--theme-elevation-100);
+    right:auto
+  }
 
   &__sidebar-wrap {
     position: fixed;

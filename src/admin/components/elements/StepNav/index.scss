@@ -1,5 +1,12 @@
 @import '../../../scss/styles.scss';
 
+[dir=rtl] .step-nav {
+  svg{
+    transform: rotate(90deg);
+
+  }
+}
+
 .step-nav {
   display: flex;
   overflow: auto;

@@ -13,3 +13,7 @@ label.field-label {
     margin-right: auto;
   }
 }
+[dir=rtl] .required{
+  margin-right: base(.25)!important;
+  margin-left: auto !important;
+}
