@@ -43,7 +43,7 @@ const connectInMemory = async (
 };
 
 const _connect = async (logger: pino.Logger, urlToConnectTo: string|false, options: InitOptions['mongoOptions']): Promise<void> => {
-  if (!urlToConnectTo) {
+  if (!urlToConnectTo || typeof urlToConnectTo !== 'string') {
     throw new Error('Error: missing MongoDB connection URL.');
   }
   const connectionOptions: ConnectOptions & { useFacet: undefined } = {
