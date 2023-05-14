@@ -2,6 +2,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import deepmerge from 'deepmerge';
+
 import { FilterQuery } from 'mongoose';
 import { combineMerge } from '../utilities/combineMerge';
 import { operatorMap } from './operatorMap';
@@ -14,7 +15,8 @@ import { getEntityPolicies } from '../utilities/getEntityPolicies';
 import { SanitizedConfig } from '../config/types';
 import QueryError from '../errors/QueryError';
 
-const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
+const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near', 'every_in', 'every_not_in', 'every_equals', 'every_not_equals'];
+const negativeEveryOperators = ['every_not_in', 'every_not_equals'];
 
 const subQueryOptions = {
   limit: 50,
@@ -116,7 +118,6 @@ export class ParamParser {
   }
 
   // Entry point to the ParamParser class
-
   async parse(): Promise<Record<string, unknown>> {
     const query = await this.parsePathOrRelation(this.where, this.overrideAccess);
 
@@ -339,7 +340,7 @@ export class ParamParser {
 
         return {
           path,
-          value: { [operatorKey]: formattedValue },
+          value: ParamParser.buildOperatorStructure(operatorKey, formattedValue),
         };
       }
     }
@@ -553,7 +554,22 @@ export class ParamParser {
 
     return paths;
   }
+
+  // converts a string or array of operator keys into a nested object
+  private static buildOperatorStructure(operatorKey: string | string[], formattedValue: unknown) {
+    // if operator key is array, nest each operator key under the previous one
+    if (Array.isArray(operatorKey)) {
+      if (operatorKey.length === 1) return ParamParser.buildOperatorStructure(operatorKey[0], formattedValue);
+      const [firstOperatorKey, ...restOperatorKeys] = operatorKey;
+      return {
+        [firstOperatorKey]: this.buildOperatorStructure(restOperatorKeys, formattedValue),
+      };
+    }
+
+    return { [operatorKey]: formattedValue };
+  }
 }
+
 
 type GetBuildQueryPluginArgs = {
   collectionSlug?: string

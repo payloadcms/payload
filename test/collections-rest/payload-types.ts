@@ -24,6 +24,7 @@ export interface Post {
   description?: string;
   number?: number;
   fakeLocalization?: string;
+  multiSelect?: ('option1' | 'option2' | 'option3')[];
   relationField?: string | Relation;
   relationHasManyField?: string[] | Relation[];
   relationMultiRelationTo?:
@@ -57,21 +58,21 @@ export interface Post {
           }
       )[];
   restrictedField?: string;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface Relation {
   id: string;
   name?: string;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface Dummy {
   id: string;
   title?: string;
   name?: string;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface Point {
   id: string;
@@ -80,37 +81,37 @@ export interface Point {
    * @maxItems 2
    */
   point?: [number, number];
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface CustomId {
   id: string;
   name?: string;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface CustomIdNumber {
   id: number;
   name?: string;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface ErrorOnHook {
   id: string;
   text?: string;
   errorBeforeChange?: boolean;
   errorAfterDelete?: boolean;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface User {
   id: string;
+  updatedAt: string;
+  createdAt: string;
   email?: string;
   resetPasswordToken?: string;
   resetPasswordExpiration?: string;
   loginAttempts?: number;
   lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
   password?: string;
 }

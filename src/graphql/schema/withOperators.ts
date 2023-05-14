@@ -4,7 +4,7 @@ import combineParentName from '../utilities/combineParentName';
 
 const withOperators = (field: FieldAffectingData, type: GraphQLType, parentName: string, operators: string[]): GraphQLInputObjectType => {
   const name = `${combineParentName(parentName, field.name)}_operator`;
-  const listOperators = ['in', 'not_in', 'all'];
+  const listOperators = ['in', 'not_in', 'all', 'every_in', 'every_not_in'];
 
   if (!('required' in field) || !field.required) operators.push('exists');
 
