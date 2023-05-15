@@ -9,6 +9,7 @@ import Popup from '../Popup';
 import { Props } from './types';
 import unifiedLocaleConfig from '../../../../utilities/unifiedLocaleConfig';
 
+
 import './index.scss';
 
 const baseClass = 'localizer';
@@ -16,6 +17,7 @@ const baseClass = 'localizer';
 const Localizer: React.FC<Props> = () => {
   const config = useConfig();
   const localization = config.localization ? unifiedLocaleConfig(config.localization) : undefined;
+
 
   const locale = useLocale();
   const searchParams = useSearchParams();

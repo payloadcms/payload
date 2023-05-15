@@ -89,7 +89,7 @@ const ListControls: React.FC<Props> = (props) => {
             )}
             {enableColumns && (
               <Pill
-                pillStyle="dark"
+                pillStyle="light"
                 className={`${baseClass}__toggle-columns ${visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''}`}
                 onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
                 icon={<Chevron />}
@@ -98,7 +98,7 @@ const ListControls: React.FC<Props> = (props) => {
               </Pill>
             )}
             <Pill
-              pillStyle="dark"
+              pillStyle="light"
               className={`${baseClass}__toggle-where ${visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''}`}
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
               icon={<Chevron />}

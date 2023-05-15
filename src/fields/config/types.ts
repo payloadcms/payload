@@ -4,7 +4,7 @@ import { Editor } from 'slate';
 import type { TFunction, i18n as Ii18n } from 'i18next';
 import type { EditorProps } from '@monaco-editor/react';
 import { Operation, Where } from '../../types';
-import { SanitizedConfig } from "../../config/types";
+import { SanitizedConfig } from '../../config/types';
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';

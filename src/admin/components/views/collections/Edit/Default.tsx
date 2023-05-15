@@ -5,7 +5,6 @@ import { useConfig } from '../../../utilities/Config';
 import Eyebrow from '../../../elements/Eyebrow';
 import Form from '../../../forms/Form';
 import PreviewButton from '../../../elements/PreviewButton';
-import FormSubmit from '../../../forms/Submit';
 import RenderFields from '../../../forms/RenderFields';
 import CopyToClipboard from '../../../elements/CopyToClipboard';
 import DuplicateDocument from '../../../elements/DuplicateDocument';
@@ -20,8 +19,9 @@ import Upload from './Upload';
 import { Props } from './types';
 import Autosave from '../../../elements/Autosave';
 import Status from '../../../elements/Status';
-import Publish from '../../../elements/Publish';
-import SaveDraft from '../../../elements/SaveDraft';
+import { Publish } from '../../../elements/Publish';
+import { SaveDraft } from '../../../elements/SaveDraft';
+import { Save } from '../../../elements/Save';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { OperationContext } from '../../../utilities/OperationProvider';
 import { Gutter } from '../../../elements/Gutter';
@@ -109,6 +109,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                     id={data?.id}
                   />
                 )}
+
                 <div className={`${baseClass}__main`}>
                   <Meta
                     title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(collection.labels.singular, i18n)}`}
@@ -118,9 +119,11 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   {!disableEyebrow && (
                     <Eyebrow />
                   )}
+
                   {(!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && !disableLeaveWithoutSaving) && (
                     <LeaveWithoutSaving />
                   )}
+
                   <Gutter className={`${baseClass}__edit`}>
                     <header className={`${baseClass}__header`}>
                       {customHeader && customHeader}
@@ -135,6 +138,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         </h1>
                       )}
                     </header>
+
                     {auth && (
                       <Auth
                         useAPIKey={auth.useAPIKey}
@@ -145,6 +149,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         operation={operation}
                       />
                     )}
+
                     {upload && (
                       <Upload
                         data={data}
@@ -152,6 +157,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         internalState={internalState}
                       />
                     )}
+
                     <RenderFields
                       readOnly={!hasSavePermission}
                       permissions={permissions.fields}
@@ -176,6 +182,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                                   {t('createNew')}
                                 </Link>
                               </li>
+
                               {!disableDuplicate && isEditing && (
                                 <li>
                                   <DuplicateDocument
@@ -187,6 +194,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                               )}
                             </React.Fragment>
                           )}
+
                           {permissions?.delete?.permission && (
                             <li>
                               <DeleteDocument
@@ -198,6 +206,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           )}
                         </ul>
                       )}
+
                       <div
                         className={[
                           `${baseClass}__document-actions`,
@@ -207,30 +216,37 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         {(isEditing && preview && (!collection.versions?.drafts || collection.versions?.drafts?.autosave)) && (
                           <PreviewButton
                             generatePreviewURL={preview}
+                            CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
                           />
                         )}
+
                         {hasSavePermission && (
                           <React.Fragment>
-                            {collection.versions?.drafts && (
+                            {collection.versions?.drafts ? (
                               <React.Fragment>
                                 {!collection.versions.drafts.autosave && (
-                                  <SaveDraft />
+                                  <SaveDraft CustomComponent={collection?.admin?.components?.edit?.SaveDraftButton} />
                                 )}
-                                <Publish />
+
+                                <Publish
+                                  CustomComponent={collection?.admin?.components?.edit?.PublishButton}
+                                />
                               </React.Fragment>
-                            )}
-                            {!collection.versions?.drafts && (
-                              <FormSubmit buttonId="action-save">{t('save')}</FormSubmit>
+                            ) : (
+                              <Save CustomComponent={collection?.admin?.components?.edit?.SaveButton} />
                             )}
                           </React.Fragment>
                         )}
                       </div>
+
                       <div className={`${baseClass}__sidebar-fields`}>
                         {(isEditing && preview && (collection.versions?.drafts && !collection.versions?.drafts?.autosave)) && (
                           <PreviewButton
                             generatePreviewURL={preview}
+                            CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
                           />
                         )}
+
                         {collection.versions?.drafts && (
                           <React.Fragment>
                             <Status />
@@ -243,6 +259,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                             )}
                           </React.Fragment>
                         )}
+
                         <RenderFields
                           readOnly={!hasSavePermission}
                           permissions={permissions.fields}
@@ -251,6 +268,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           fieldSchema={fields}
                         />
                       </div>
+
                       {
                         isEditing && (
                           <ul className={`${baseClass}__meta`}>
@@ -270,6 +288,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                                 </a>
                               </li>
                             )}
+
                             {versions && (
                               <li>
                                 <div className={`${baseClass}__label`}>{t('version:versions')}</div>
@@ -279,6 +298,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                                 />
                               </li>
                             )}
+
                             {timestamps && (
                               <React.Fragment>
                                 {updatedAt && (

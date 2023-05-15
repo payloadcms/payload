@@ -511,6 +511,23 @@ describe('fields', () => {
         await expect(menu).not.toContainText('Uploads3');
       });
 
+      test('should only list RTE enabled collections in link drawer', async () => {
+        await navigateToRichTextFields();
+
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
+
+        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        await expect(editLinkModal).toBeVisible();
+
+        await editLinkModal.locator('label[for="field-linkType-internal"]').click();
+        await editLinkModal.locator('.relationship__wrap .rs__control').click();
+
+        const menu = page.locator('.relationship__wrap .rs__menu');
+
+        // array-fields has enableRichTextLink set to false
+        await expect(menu).not.toContainText('Array Fields');
+      });
+
       test('should only list non-upload collections in relationship drawer', async () => {
         await navigateToRichTextFields();
 
