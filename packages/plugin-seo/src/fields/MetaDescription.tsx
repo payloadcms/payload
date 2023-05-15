@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useCallback } from 'react';
 import { useField, useAllFormFields } from 'payload/components/forms';
 import { useLocale } from 'payload/components/utilities';

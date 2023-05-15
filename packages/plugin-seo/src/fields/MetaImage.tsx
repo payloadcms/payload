@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useCallback } from 'react';
 import { useLocale, useConfig } from 'payload/components/utilities';
 import { Props as UploadFieldType } from 'payload/dist/admin/components/forms/field-types/Upload/types';

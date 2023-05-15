@@ -1,3 +1,5 @@
+'use client'
+
 // import { Button } from 'payload/components';
 import { useForm, useAllFormFields } from 'payload/components/forms';
 import { Field } from 'payload/dist/admin/components/forms/Form/types';

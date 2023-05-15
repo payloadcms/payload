@@ -1,3 +1,5 @@
+'use client'
+
 /* eslint-disable no-use-before-define */
 /* eslint-disable import/no-extraneous-dependencies */
 import React from 'react';

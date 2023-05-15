@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useCallback } from 'react';
 import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';
 import { useLocale } from 'payload/components/utilities';

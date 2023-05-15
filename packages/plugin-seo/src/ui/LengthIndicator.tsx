@@ -1,3 +1,5 @@
+'use client'
+
 /* eslint-disable react/require-default-props  */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-use-before-define */

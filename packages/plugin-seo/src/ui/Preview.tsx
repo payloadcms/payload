@@ -1,3 +1,5 @@
+'use client'
+
 import { useAllFormFields } from 'payload/components/forms';
 import React, { useEffect, useState } from 'react';
 import { Field } from 'payload/dist/admin/components/forms/Form/types';
