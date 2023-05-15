@@ -1,4 +1,4 @@
-import { CollectionConfig } from 'payload/types';
+import type { CollectionConfig } from 'payload/types'
 
 const Posts: CollectionConfig = {
   slug: 'posts',
@@ -9,30 +9,32 @@ const Posts: CollectionConfig = {
   fields: [
     {
       type: 'tabs',
-      tabs: [{
-        label: 'Content',
-        fields: [
-          {
-            name: 'title',
-            type: 'text',
-            required: true
-          },
-          {
-            name: 'excerpt',
-            type: 'text',
-          },
-          {
-            name: 'slug',
-            type: 'text',
-            required: true,
-            admin: {
-              position: 'sidebar',
-            }
-          },
-        ]
-      }]
-    }
+      tabs: [
+        {
+          label: 'Content',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+            },
+            {
+              name: 'excerpt',
+              type: 'text',
+            },
+            {
+              name: 'slug',
+              type: 'text',
+              required: true,
+              admin: {
+                position: 'sidebar',
+              },
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 
-export default Posts;
+export default Posts

@@ -1,91 +1,83 @@
 'use client'
 
-/* eslint-disable react/require-default-props  */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-use-before-define */
-import React, { useState, useEffect, Fragment } from 'react';
-import { Pill } from './Pill';
+import React, { Fragment, useEffect, useState } from 'react'
+
+import { Pill } from './Pill'
 
 export const LengthIndicator: React.FC<{
   text?: string
   minLength?: number
   maxLength?: number
-}> = (props) => {
-  const {
-    text,
-    minLength = 0,
-    maxLength = 0,
-  } = props;
+}> = props => {
+  const { text, minLength = 0, maxLength = 0 } = props
 
   const [labelStyle, setLabelStyle] = useState({
     color: '',
     backgroundColor: '',
-  });
+  })
 
-  const [label, setLabel] = useState('');
-  const [barWidth, setBarWidth] = useState<number>(0);
+  const [label, setLabel] = useState('')
+  const [barWidth, setBarWidth] = useState<number>(0)
 
   useEffect(() => {
-    const textLength = text?.length || 0;
+    const textLength = text?.length || 0
 
     if (textLength === 0) {
-      setLabel('Missing');
+      setLabel('Missing')
       setLabelStyle({
         backgroundColor: 'red',
         color: 'white',
-      });
-      setBarWidth(0);
+      })
+      setBarWidth(0)
     } else {
-      const progress = (textLength - minLength) / (maxLength - minLength);
+      const progress = (textLength - minLength) / (maxLength - minLength)
 
       if (progress < 0) {
-        const ratioUntilMin = textLength / minLength;
+        const ratioUntilMin = textLength / minLength
 
         if (ratioUntilMin > 0.9) {
-          setLabel('Almost there');
+          setLabel('Almost there')
           setLabelStyle({
             backgroundColor: 'orange',
             color: 'white',
-          });
+          })
         } else {
-          setLabel('Too short');
+          setLabel('Too short')
           setLabelStyle({
             backgroundColor: 'orangered',
             color: 'white',
-          });
+          })
         }
 
-        setBarWidth(ratioUntilMin);
+        setBarWidth(ratioUntilMin)
       }
 
       if (progress >= 0 && progress <= 1) {
-        setLabel('Good');
+        setLabel('Good')
         setLabelStyle({
           backgroundColor: 'green',
           color: 'white',
-        });
-        setBarWidth(progress);
+        })
+        setBarWidth(progress)
       }
 
       if (progress > 1) {
-        setLabel('Too long');
+        setLabel('Too long')
         setLabelStyle({
           backgroundColor: 'red',
           color: 'white',
-        });
-        setBarWidth(1);
+        })
+        setBarWidth(1)
       }
     }
-  }, [
-    minLength,
-    maxLength,
-    text,
-  ]);
+  }, [minLength, maxLength, text])
 
-  const textLength = text?.length || 0;
+  const textLength = text?.length || 0
 
-  const charsUntilMax = maxLength - textLength;
-  const charsUntilMin = minLength - textLength;
+  const charsUntilMax = maxLength - textLength
+  const charsUntilMin = minLength - textLength
 
   return (
     <div
@@ -95,36 +87,24 @@ export const LengthIndicator: React.FC<{
         alignItems: 'center',
       }}
     >
-      <Pill
-        label={label}
-        color={labelStyle.color}
-        backgroundColor={labelStyle.backgroundColor}
-      />
+      <Pill label={label} color={labelStyle.color} backgroundColor={labelStyle.backgroundColor} />
       <div
         style={{
           marginRight: '10px',
           whiteSpace: 'nowrap',
           flexShrink: 0,
-          lineHeight: 1
+          lineHeight: 1,
         }}
       >
         <small>
           {`${text?.length || 0}/${minLength}-${maxLength} chars, `}
           {(textLength === 0 || charsUntilMin > 0) && (
-            <Fragment>
-              {`${charsUntilMin} to go`}
-            </Fragment>
+            <Fragment>{`${charsUntilMin} to go`}</Fragment>
           )}
           {charsUntilMin <= 0 && charsUntilMax >= 0 && (
-            <Fragment>
-              {`${charsUntilMax} left over`}
-            </Fragment>
+            <Fragment>{`${charsUntilMax} left over`}</Fragment>
           )}
-          {charsUntilMax < 0 && (
-            <Fragment>
-              {`${charsUntilMax * -1} too many`}
-            </Fragment>
-          )}
+          {charsUntilMax < 0 && <Fragment>{`${charsUntilMax * -1} too many`}</Fragment>}
         </small>
       </div>
       <div
@@ -147,5 +127,5 @@ export const LengthIndicator: React.FC<{
         />
       </div>
     </div>
-  );
-};
+  )
+}

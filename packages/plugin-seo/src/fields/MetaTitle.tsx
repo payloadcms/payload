@@ -1,65 +1,49 @@
 'use client'
 
-import React, { useCallback } from 'react';
-import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';
-import { useLocale } from 'payload/components/utilities';
-import TextInputField from 'payload/dist/admin/components/forms/field-types/Text/Input';
-import { useAllFormFields, useField } from 'payload/components/forms';
-import { FieldType as FieldType, Options } from 'payload/dist/admin/components/forms/useField/types';
-import { LengthIndicator } from '../ui/LengthIndicator';
-import { defaults } from '../defaults';
-import { PluginConfig } from '../types';
+import React, { useCallback } from 'react'
+import { useAllFormFields, useField } from 'payload/components/forms'
+import { useLocale } from 'payload/components/utilities'
+import TextInputField from 'payload/dist/admin/components/forms/field-types/Text/Input'
+import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types'
+import { FieldType as FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
 
-const {
-  minLength,
-  maxLength,
-} = defaults.title;
+import { defaults } from '../defaults'
+import { PluginConfig } from '../types'
+import { LengthIndicator } from '../ui/LengthIndicator'
+
+const { minLength, maxLength } = defaults.title
 
 type TextFieldWithProps = TextFieldType & {
   path: string
   pluginConfig: PluginConfig
-};
+}
 
-export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
-  const {
-    label,
-    name,
-    path,
-    pluginConfig
-  } = props as TextFieldWithProps || {}; // TODO: this typing is temporary until payload types are updated for custom field props
+export const MetaTitle: React.FC<TextFieldWithProps | {}> = props => {
+  const { label, name, path, pluginConfig } = (props as TextFieldWithProps) || {} // TODO: this typing is temporary until payload types are updated for custom field props
 
   const field: FieldType<string> = useField({
     label,
     name,
-    path
-  } as Options);
+    path,
+  } as Options)
 
-  const locale = useLocale();
-  const [fields] = useAllFormFields();
+  const locale = useLocale()
+  const [fields] = useAllFormFields()
 
-  const {
-    value,
-    setValue,
-    showError
-  } = field;
+  const { value, setValue, showError } = field
 
   const regenerateTitle = useCallback(() => {
-    const { generateTitle } = pluginConfig;
+    const { generateTitle } = pluginConfig
 
     const getTitle = async () => {
-      let generatedTitle;
+      let generatedTitle
       if (typeof generateTitle === 'function') {
-        generatedTitle = await generateTitle({ doc: { ...fields }, locale });
+        generatedTitle = await generateTitle({ doc: { ...fields }, locale })
       }
-      setValue(generatedTitle);
+      setValue(generatedTitle)
     }
-    getTitle();
-  }, [
-    fields,
-    setValue,
-    pluginConfig,
-    locale,
-  ]);
+    getTitle()
+  }, [fields, setValue, pluginConfig, locale])
 
   return (
     <div
@@ -74,7 +58,7 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
         }}
       >
         <div>
-          {label}
+          {label && typeof label === 'string' && label}
           {typeof pluginConfig.generateTitle === 'function' && (
             <>
               &nbsp; &mdash; &nbsp;
@@ -125,7 +109,7 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
           value={value}
           showError={showError}
           style={{
-            marginBottom: 0
+            marginBottom: 0,
           }}
         />
       </div>
@@ -136,17 +120,10 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = (props) => {
           width: '100%',
         }}
       >
-        <LengthIndicator
-          text={value as string}
-          minLength={minLength}
-          maxLength={maxLength}
-        />
+        <LengthIndicator text={value as string} minLength={minLength} maxLength={maxLength} />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export const getMetaTitleField = (props: any) => (
-  <MetaTitle {...props} />
-)
-
+export const getMetaTitleField = (props: any) => <MetaTitle {...props} />

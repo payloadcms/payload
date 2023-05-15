@@ -1,73 +1,51 @@
 'use client'
 
-// import { Button } from 'payload/components';
-import { useForm, useAllFormFields } from 'payload/components/forms';
-import { Field } from 'payload/dist/admin/components/forms/Form/types';
-import React, { useCallback, useState, useEffect } from 'react';
-import { defaults } from '../defaults';
+import React, { useCallback, useEffect, useState } from 'react'
+import { useAllFormFields, useForm } from 'payload/components/forms'
+import { Field } from 'payload/dist/admin/components/forms/Form/types'
+
+import { defaults } from '../defaults'
 
 const {
-  title: {
-    minLength: minTitle,
-    maxLength: maxTitle,
-  },
-  description: {
-    minLength: minDesc,
-    maxLength: maxDesc,
-  },
-} = defaults;
+  title: { minLength: minTitle, maxLength: maxTitle },
+  description: { minLength: minDesc, maxLength: maxDesc },
+} = defaults
 
 export const Overview: React.FC = () => {
-  const {
-    dispatchFields,
-    getFields,
-  } = useForm();
+  const { dispatchFields, getFields } = useForm()
 
-  const [{
-    'meta.title': {
-      value: metaTitle,
-    } = {} as Field,
-    'meta.description': {
-      value: metaDesc,
-    } = {} as Field,
-    'meta.image': {
-      value: metaImage,
-    } = {} as Field,
-  }] = useAllFormFields();
+  const [
+    {
+      'meta.title': { value: metaTitle } = {} as Field,
+      'meta.description': { value: metaDesc } = {} as Field,
+      'meta.image': { value: metaImage } = {} as Field,
+    },
+  ] = useAllFormFields()
 
-  const [titleIsValid, setTitleIsValid] = useState<boolean | undefined>();
-  const [descIsValid, setDescIsValid] = useState<boolean | undefined>();
-  const [imageIsValid, setImageIsValid] = useState<boolean | undefined>();
+  const [titleIsValid, setTitleIsValid] = useState<boolean | undefined>()
+  const [descIsValid, setDescIsValid] = useState<boolean | undefined>()
+  const [imageIsValid, setImageIsValid] = useState<boolean | undefined>()
 
   const resetAll = useCallback(() => {
-    const fields = getFields();
-    const fieldsWithoutMeta = fields;
-    fieldsWithoutMeta['meta.title'].value = '';
-    fieldsWithoutMeta['meta.description'].value = '';
-    fieldsWithoutMeta['meta.image'].value = '';
+    const fields = getFields()
+    const fieldsWithoutMeta = fields
+    fieldsWithoutMeta['meta.title'].value = ''
+    fieldsWithoutMeta['meta.description'].value = ''
+    fieldsWithoutMeta['meta.image'].value = ''
     // dispatchFields(fieldsWithoutMeta);
-  }, [
-    dispatchFields,
-    getFields,
-  ]);
+  }, [dispatchFields, getFields])
 
   useEffect(() => {
-    if (typeof metaTitle === 'string') setTitleIsValid(metaTitle.length >= minTitle && metaTitle.length <= maxTitle);
-    if (typeof metaDesc === 'string') setDescIsValid(metaDesc.length >= minDesc && metaDesc.length <= maxDesc);
-    setImageIsValid(Boolean(metaImage));
-  }, [
-    metaTitle,
-    metaDesc,
-    metaImage,
-  ]);
+    if (typeof metaTitle === 'string')
+      setTitleIsValid(metaTitle.length >= minTitle && metaTitle.length <= maxTitle)
+    if (typeof metaDesc === 'string')
+      setDescIsValid(metaDesc.length >= minDesc && metaDesc.length <= maxDesc)
+    setImageIsValid(Boolean(metaImage))
+  }, [metaTitle, metaDesc, metaImage])
 
-  const testResults = [
-    titleIsValid,
-    descIsValid,
-    imageIsValid,
-  ];
+  const testResults = [titleIsValid, descIsValid, imageIsValid]
 
-  const numberOfPasses = testResults.filter(Boolean).length;
+  const numberOfPasses = testResults.filter(Boolean).length
 
   return (
     <div
@@ -75,9 +53,7 @@ export const Overview: React.FC = () => {
         marginBottom: '20px',
       }}
     >
-      <div>
-        {`${numberOfPasses}/${testResults.length} checks are passing`}
-      </div>
+      <div>{`${numberOfPasses}/${testResults.length} checks are passing`}</div>
     </div>
-  );
-};
+  )
+}

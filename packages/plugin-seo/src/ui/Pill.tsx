@@ -2,18 +2,14 @@
 
 /* eslint-disable no-use-before-define */
 /* eslint-disable import/no-extraneous-dependencies */
-import React from 'react';
+import React from 'react'
 
 export const Pill: React.FC<{
   backgroundColor: string
   color: string
   label: string
-}> = (props) => {
-  const {
-    backgroundColor,
-    color,
-    label,
-  } = props;
+}> = props => {
+  const { backgroundColor, color, label } = props
 
   return (
     <div
@@ -28,9 +24,7 @@ export const Pill: React.FC<{
         lineHeight: 1,
       }}
     >
-      <small>
-        {label}
-      </small>
+      <small>{label}</small>
     </div>
-  );
-};
+  )
+}

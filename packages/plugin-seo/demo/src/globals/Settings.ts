@@ -1,4 +1,4 @@
-import { GlobalConfig } from 'payload/types';
+import type { GlobalConfig } from 'payload/types'
 
 const Settings: GlobalConfig = {
   slug: 'settings',
@@ -6,7 +6,7 @@ const Settings: GlobalConfig = {
     {
       name: 'title',
       type: 'text',
-      required: true
+      required: true,
     },
     {
       name: 'excerpt',
@@ -15,4 +15,4 @@ const Settings: GlobalConfig = {
   ],
 }
 
-export default Settings;
+export default Settings

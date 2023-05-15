@@ -7,4 +7,4 @@ export const defaults = {
     minLength: 100,
     maxLength: 150,
   },
-};
+}

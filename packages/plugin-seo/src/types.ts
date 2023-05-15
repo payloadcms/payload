@@ -1,4 +1,4 @@
-import { Field } from 'payload/dist/fields/config/types';
+import type { Field } from 'payload/dist/fields/config/types'
 
 export type GenerateTitle = <T = any>(args: { doc: T; locale?: string }) => string | Promise<string>
 export type GenerateDescription = <T = any>(args: {
@@ -8,11 +8,11 @@ export type GenerateDescription = <T = any>(args: {
 export type GenerateImage = <T = any>(args: { doc: T; locale?: string }) => string | Promise<string>
 export type GenerateURL = <T = any>(args: { doc: T; locale?: string }) => string | Promise<string>
 
-export type PluginConfig = {
+export interface PluginConfig {
   collections?: string[]
   globals?: string[]
   uploadsCollection?: string
-  fields?: Partial<Field>[]
+  fields?: Array<Partial<Field>>
   tabbedUI?: boolean
   generateTitle?: GenerateTitle
   generateDescription?: GenerateDescription
@@ -20,7 +20,7 @@ export type PluginConfig = {
   generateURL?: GenerateURL
 }
 
-export type Meta = {
+export interface Meta {
   title?: string
   description?: string
   keywords?: string
