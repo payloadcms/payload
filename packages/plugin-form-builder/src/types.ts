@@ -52,7 +52,7 @@ export interface PluginConfig {
 export interface TextField {
   blockType: 'text'
   blockName?: string
-  width?: string
+  width?: number
   name: string
   label?: string
   defaultValue?: string
@@ -62,7 +62,7 @@ export interface TextField {
 export interface TextAreaField {
   blockType: 'textarea'
   blockName?: string
-  width?: string
+  width?: number
   name: string
   label?: string
   defaultValue?: string
@@ -77,7 +77,7 @@ export interface SelectFieldOption {
 export interface SelectField {
   blockType: 'select'
   blockName?: string
-  width?: string
+  width?: number
   name: string
   label?: string
   defaultValue?: string
@@ -97,7 +97,7 @@ export interface PriceCondition {
 export interface PaymentField {
   blockType: 'payment'
   blockName?: string
-  width?: string
+  width?: number
   name: string
   label?: string
   defaultValue?: string
@@ -110,7 +110,7 @@ export interface PaymentField {
 export interface EmailField {
   blockType: 'email'
   blockName?: string
-  width?: string
+  width?: number
   name: string
   label?: string
   defaultValue?: string
@@ -120,7 +120,7 @@ export interface EmailField {
 export interface StateField {
   blockType: 'state'
   blockName?: string
-  width?: string
+  width?: number
   name: string
   label?: string
   defaultValue?: string
@@ -130,7 +130,7 @@ export interface StateField {
 export interface CountryField {
   blockType: 'country'
   blockName?: string
-  width?: string
+  width?: number
   name: string
   label?: string
   defaultValue?: string
@@ -140,7 +140,7 @@ export interface CountryField {
 export interface CheckboxField {
   blockType: 'checkbox'
   blockName?: string
-  width?: string
+  width?: number
   name: string
   label?: string
   defaultValue?: boolean
