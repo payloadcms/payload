@@ -22,6 +22,10 @@ const colorField: Block = {
 
 export default buildConfig({
   serverURL: 'http://localhost:3000',
+  localization: {
+    locales: ['en', 'it'],
+    defaultLocale: 'en',
+  },
   admin: {
     user: Users.slug,
     webpack: (config) => {
