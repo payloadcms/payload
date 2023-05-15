@@ -1,24 +1,19 @@
-import { PluginConfig } from "../../../types";
+import type { PluginConfig } from '../../../types'
 
-const createCharge = async (beforeChangeData: any, formConfig: PluginConfig) => {
-  const {
-    operation,
-    data
-  } = beforeChangeData;
+const createCharge = async (beforeChangeData: any, formConfig: PluginConfig): Promise<any> => {
+  const { operation, data } = beforeChangeData
 
-  let dataWithPaymentDetails = data;
+  let dataWithPaymentDetails = data
 
   if (operation === 'create') {
-    const {
-      handlePayment
-    } = formConfig || {};
+    const { handlePayment } = formConfig || {}
 
     if (typeof handlePayment === 'function') {
-      dataWithPaymentDetails = await handlePayment(beforeChangeData);
+      dataWithPaymentDetails = await handlePayment(beforeChangeData)
     }
   }
 
-  return dataWithPaymentDetails;
-};
+  return dataWithPaymentDetails
+}
 
 export default createCharge

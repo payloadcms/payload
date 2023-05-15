@@ -1,33 +1,34 @@
-import { Block, Field } from 'payload/types';
-import { FieldConfig, PaymentFieldConfig, TextField } from '../../types';
-import { DynamicFieldSelector } from './DynamicFieldSelector';
-import { DynamicPriceSelector } from './DynamicPriceSelector';
+import type { Block, Field } from 'payload/types'
+
+import type { FieldConfig, PaymentFieldConfig } from '../../types'
+import { DynamicFieldSelector } from './DynamicFieldSelector'
+import { DynamicPriceSelector } from './DynamicPriceSelector'
 
 const name: Field = {
   name: 'name',
   label: 'Name (lowercase, no special characters)',
   type: 'text',
   required: true,
-};
+}
 
 const label: Field = {
   name: 'label',
   label: 'Label',
   type: 'text',
   localized: true,
-};
+}
 
 const required: Field = {
   name: 'required',
   label: 'Required',
   type: 'checkbox',
-};
+}
 
 const width: Field = {
   name: 'width',
   label: 'Field Width (percentage)',
   type: 'number',
-};
+}
 
 const Select: Block = {
   slug: 'select',
@@ -110,7 +111,7 @@ const Select: Block = {
     },
     required,
   ],
-};
+}
 
 const Text: Block = {
   slug: 'text',
@@ -158,7 +159,7 @@ const Text: Block = {
     },
     required,
   ],
-};
+}
 
 const TextArea: Block = {
   slug: 'textarea',
@@ -206,7 +207,7 @@ const TextArea: Block = {
     },
     required,
   ],
-};
+}
 
 const Number: Block = {
   slug: 'number',
@@ -253,7 +254,7 @@ const Number: Block = {
     },
     required,
   ],
-};
+}
 
 const Email: Block = {
   slug: 'email',
@@ -282,7 +283,7 @@ const Email: Block = {
     width,
     required,
   ],
-};
+}
 
 const State: Block = {
   slug: 'state',
@@ -311,7 +312,7 @@ const State: Block = {
     width,
     required,
   ],
-};
+}
 
 const Country: Block = {
   slug: 'country',
@@ -340,7 +341,7 @@ const Country: Block = {
     width,
     required,
   ],
-};
+}
 
 const Checkbox: Block = {
   slug: 'checkbox',
@@ -389,11 +390,10 @@ const Checkbox: Block = {
       type: 'checkbox',
     },
   ],
-};
+}
 
 const Payment = (fieldConfig: PaymentFieldConfig): Block => {
-
-  let paymentProcessorField = null;
+  let paymentProcessorField = null
   if (fieldConfig?.paymentProcessor) {
     paymentProcessorField = {
       type: 'select',
@@ -474,25 +474,26 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
             options: [
               {
                 value: 'hasValue',
-                label: 'Has Any Value'
+                label: 'Has Any Value',
               },
               {
                 value: 'equals',
-                label: 'Equals'
+                label: 'Equals',
               },
               {
                 value: 'notEquals',
-                label: 'Does Not Equal'
-              }
-            ]
+                label: 'Does Not Equal',
+              },
+            ],
           },
           {
             name: 'valueForCondition',
             label: 'Value',
             type: 'text',
             admin: {
-              condition: (_: any, { condition }: any) => condition === 'equals' || condition === 'notEquals'
-            }
+              condition: (_: any, { condition }: any) =>
+                condition === 'equals' || condition === 'notEquals',
+            },
           },
           {
             name: 'operator',
@@ -501,21 +502,21 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
             options: [
               {
                 value: 'add',
-                label: 'Add'
+                label: 'Add',
               },
               {
                 value: 'subtract',
-                label: 'Subtract'
+                label: 'Subtract',
               },
               {
                 value: 'multiply',
-                label: 'Multiply'
+                label: 'Multiply',
               },
               {
                 value: 'divide',
-                label: 'Divide'
-              }
-            ]
+                label: 'Divide',
+              },
+            ],
           },
           {
             name: 'valueType',
@@ -528,13 +529,13 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
             options: [
               {
                 label: 'Static Value',
-                value: 'static'
+                value: 'static',
               },
               {
                 label: 'Value Of Field',
-                value: 'valueOfField'
-              }
-            ]
+                value: 'valueOfField',
+              },
+            ],
           },
           {
             name: 'valueForOperator',
@@ -546,14 +547,14 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
               },
             },
           },
-        ]
+        ],
       },
       required,
-    ].filter(Boolean) as Field[]
+    ].filter(Boolean) as Field[],
   }
 
   return fields
-};
+}
 
 const Message: Block = {
   slug: 'message',
@@ -568,8 +569,9 @@ const Message: Block = {
       localized: true,
     },
   ],
-};
+}
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export default {
   select: Select,
   checkbox: Checkbox,
@@ -580,7 +582,7 @@ export default {
   number: Number,
   country: Country,
   state: State,
-  payment: Payment
+  payment: Payment,
 } as {
   [key: string]: Block | ((fieldConfig?: boolean | FieldConfig) => Block)
-};
+}

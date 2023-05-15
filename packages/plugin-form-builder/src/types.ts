@@ -1,17 +1,19 @@
-import { Block, CollectionConfig, Field } from 'payload/types';
+import type { Block, CollectionConfig, Field } from 'payload/types'
 
-export type BlockConfig = {
+export interface BlockConfig {
   block: Block
   validate?: (value: unknown) => boolean | string
 }
 
 export function isValidBlockConfig(blockConfig: BlockConfig | string): blockConfig is BlockConfig {
-  return typeof blockConfig !== 'string'
-    && typeof blockConfig?.block?.slug === 'string'
-    && Array.isArray(blockConfig?.block?.fields);
+  return (
+    typeof blockConfig !== 'string' &&
+    typeof blockConfig?.block?.slug === 'string' &&
+    Array.isArray(blockConfig?.block?.fields)
+  )
 }
 
-export type FieldValues = {
+export interface FieldValues {
   [key: string]: string | number | boolean | null | undefined
 }
 
@@ -19,9 +21,9 @@ export type PaymentFieldConfig = Partial<Field> & {
   paymentProcessor: Partial<SelectField>
 }
 
-export type FieldConfig = Partial<Field> | PaymentFieldConfig;
+export type FieldConfig = Partial<Field> | PaymentFieldConfig
 
-export type FieldsConfig = {
+export interface FieldsConfig {
   select?: boolean | FieldConfig
   text?: boolean | FieldConfig
   textarea?: boolean | FieldConfig
@@ -35,10 +37,10 @@ export type FieldsConfig = {
   [key: string]: boolean | FieldConfig | undefined
 }
 
-export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[] | Promise<FormattedEmail[]>;
-export type HandlePayment = (data: any) => void;
+export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[] | Promise<FormattedEmail[]>
+export type HandlePayment = (data: any) => void
 
-export type PluginConfig = {
+export interface PluginConfig {
   fields?: FieldsConfig
   formSubmissionOverrides?: Partial<CollectionConfig>
   formOverrides?: Partial<CollectionConfig>
@@ -47,7 +49,7 @@ export type PluginConfig = {
   redirectRelationships?: string[]
 }
 
-export type TextField = {
+export interface TextField {
   blockType: 'text'
   blockName?: string
   width?: string
@@ -57,7 +59,7 @@ export type TextField = {
   required?: boolean
 }
 
-export type TextAreaField = {
+export interface TextAreaField {
   blockType: 'textarea'
   blockName?: string
   width?: string
@@ -67,12 +69,12 @@ export type TextAreaField = {
   required?: boolean
 }
 
-export type SelectFieldOption = {
+export interface SelectFieldOption {
   label: string
   value: string
 }
 
-export type SelectField = {
+export interface SelectField {
   blockType: 'select'
   blockName?: string
   width?: string
@@ -83,7 +85,7 @@ export type SelectField = {
   options: SelectFieldOption[]
 }
 
-export type PriceCondition = {
+export interface PriceCondition {
   fieldToUse: string
   condition: 'equals' | 'notEquals' | 'hasValue'
   valueForCondition: string
@@ -92,7 +94,7 @@ export type PriceCondition = {
   valueForOperator: string | number // TODO: make this a number, see ./collections/Forms/DynamicPriceSelector.tsx
 }
 
-export type PaymentField = {
+export interface PaymentField {
   blockType: 'payment'
   blockName?: string
   width?: string
@@ -100,12 +102,12 @@ export type PaymentField = {
   label?: string
   defaultValue?: string
   required?: boolean
-  paymentProcessor: string,
+  paymentProcessor: string
   basePrice: number
   priceConditions: PriceCondition[]
 }
 
-export type EmailField = {
+export interface EmailField {
   blockType: 'email'
   blockName?: string
   width?: string
@@ -115,7 +117,7 @@ export type EmailField = {
   required?: boolean
 }
 
-export type StateField = {
+export interface StateField {
   blockType: 'state'
   blockName?: string
   width?: string
@@ -125,7 +127,7 @@ export type StateField = {
   required?: boolean
 }
 
-export type CountryField = {
+export interface CountryField {
   blockType: 'country'
   blockName?: string
   width?: string
@@ -135,7 +137,7 @@ export type CountryField = {
   required?: boolean
 }
 
-export type CheckboxField = {
+export interface CheckboxField {
   blockType: 'checkbox'
   blockName?: string
   width?: string
@@ -145,15 +147,24 @@ export type CheckboxField = {
   required?: boolean
 }
 
-export type MessageField = {
+export interface MessageField {
   blockType: 'message'
   blockName?: string
   message: unknown
 }
 
-export type FormFieldBlock = TextField | TextAreaField | SelectField | EmailField | StateField | CountryField | CheckboxField | MessageField | PaymentField
+export type FormFieldBlock =
+  | TextField
+  | TextAreaField
+  | SelectField
+  | EmailField
+  | StateField
+  | CountryField
+  | CheckboxField
+  | MessageField
+  | PaymentField
 
-export type Email = {
+export interface Email {
   emailTo: string
   emailFrom: string
   cc?: string
@@ -163,7 +174,7 @@ export type Email = {
   message?: any // TODO: configure rich text type
 }
 
-export type FormattedEmail = {
+export interface FormattedEmail {
   to: string
   cc?: string
   bcc?: string
@@ -173,7 +184,7 @@ export type FormattedEmail = {
   replyTo: string
 }
 
-export type Redirect = {
+export interface Redirect {
   type: 'reference' | 'custom'
   reference?: {
     relationTo: string
@@ -182,7 +193,7 @@ export type Redirect = {
   url: string
 }
 
-export type Form = {
+export interface Form {
   id: string
   title: string
   fields: FormFieldBlock[]
@@ -193,12 +204,12 @@ export type Form = {
   emails: Email[]
 }
 
-export type SubmissionValue = {
+export interface SubmissionValue {
   field: string
   value: unknown
 }
 
-export type FormSubmission = {
+export interface FormSubmission {
   form: string | Form
   submissionData: SubmissionValue[]
 }

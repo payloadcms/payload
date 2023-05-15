@@ -1,10 +1,12 @@
-import { buildConfig } from 'payload/config';
-import path from 'path';
+import path from 'path'
+import { buildConfig } from 'payload/config'
+import type { Block } from 'payload/types'
+
 // import formBuilderPlugin from '../../dist';
-import formBuilderPlugin from '../../src';
-import { Users } from './collections/Users';
-import { Pages } from './collections/Pages';
-import { Block } from 'payload/types';
+// eslint-disable-next-line import/no-relative-packages
+import formBuilderPlugin from '../../src'
+import { Pages } from './collections/Pages'
+import { Users } from './collections/Users'
 
 const colorField: Block = {
   slug: 'color',
@@ -16,8 +18,8 @@ const colorField: Block = {
     {
       name: 'value',
       type: 'text',
-    }
-  ]
+    },
+  ],
 }
 
 export default buildConfig({
@@ -28,34 +30,29 @@ export default buildConfig({
   },
   admin: {
     user: Users.slug,
-    webpack: (config) => {
+    webpack: config => {
       const newConfig = {
         ...config,
         resolve: {
           ...config.resolve,
           alias: {
             ...config.resolve.alias,
-            react: path.join(__dirname, "../node_modules/react"),
-            "react-dom": path.join(__dirname, "../node_modules/react-dom"),
-            "payload": path.join(__dirname, "../node_modules/payload"),
+            react: path.join(__dirname, '../node_modules/react'),
+            'react-dom': path.join(__dirname, '../node_modules/react-dom'),
+            payload: path.join(__dirname, '../node_modules/payload'),
           },
         },
-      };
+      }
 
-      return newConfig;
+      return newConfig
     },
   },
-  collections: [
-    Users,
-    Pages
-  ],
+  collections: [Users, Pages],
   plugins: [
     formBuilderPlugin({
       // handlePayment: handleFormPayments,
       // beforeEmail: prepareFormEmails,
-      redirectRelationships: [
-        'pages'
-      ],
+      redirectRelationships: ['pages'],
       formOverrides: {
         // labels: {
         //   singular: 'Contact Form',
@@ -65,8 +62,8 @@ export default buildConfig({
           {
             name: 'name',
             type: 'text',
-          }
-        ]
+          },
+        ],
       },
       fields: {
         payment: true,
@@ -86,6 +83,6 @@ export default buildConfig({
     }),
   ],
   typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts')
+    outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
-});
+})

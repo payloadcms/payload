@@ -1,15 +1,15 @@
-import { Payload } from 'payload';
+import type { Payload } from 'payload'
 
-export const seed = async (payload: Payload) => {
-  payload.logger.info('Seeding data...');
+export const seed = async (payload: Payload): Promise<any> => {
+  payload.logger.info('Seeding data...')
 
   await payload.create({
     collection: 'users',
     data: {
       email: 'dev@payloadcms.com',
       password: 'test',
-    }
-  });
+    },
+  })
 
   const { id: formID } = await payload.create({
     collection: 'forms',
@@ -33,8 +33,8 @@ export const seed = async (payload: Payload) => {
           label: 'Email',
           name: 'email',
           required: true,
-        }
-      ]
+        },
+      ],
     },
   })
 
@@ -42,7 +42,7 @@ export const seed = async (payload: Payload) => {
     collection: 'pages',
     data: {
       title: 'Contact',
-      form: formID
+      form: formID,
     },
   })
 }

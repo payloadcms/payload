@@ -1,30 +1,31 @@
-import { CollectionConfig } from 'payload/types';
-import { PluginConfig } from '../../types';
-import sendEmail from './hooks/sendEmail';
-import createCharge from './hooks/createCharge';
+import type { CollectionConfig } from 'payload/types'
+
+import type { PluginConfig } from '../../types'
+import createCharge from './hooks/createCharge'
+import sendEmail from './hooks/sendEmail'
 
 // all settings can be overridden by the config
 export const generateSubmissionCollection = (formConfig: PluginConfig): CollectionConfig => {
   const newConfig: CollectionConfig = {
-    ...formConfig?.formSubmissionOverrides || {},
+    ...(formConfig?.formSubmissionOverrides || {}),
     slug: formConfig?.formSubmissionOverrides?.slug || 'form-submissions',
     access: {
       create: () => true,
       update: () => false,
       read: ({ req: { user } }) => !!user, // logged-in users,
-      ...formConfig?.formSubmissionOverrides?.access || {}
+      ...(formConfig?.formSubmissionOverrides?.access || {}),
     },
     admin: {
-      ...formConfig?.formSubmissionOverrides?.admin || {},
-      enableRichTextRelationship: false
+      ...(formConfig?.formSubmissionOverrides?.admin || {}),
+      enableRichTextRelationship: false,
     },
     hooks: {
       beforeChange: [
-        (data) => createCharge(data, formConfig),
-        (data) => sendEmail(data, formConfig),
-        ...formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []
+        data => createCharge(data, formConfig),
+        data => sendEmail(data, formConfig),
+        ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],
-      ...formConfig?.formSubmissionOverrides?.hooks || {}
+      ...(formConfig?.formSubmissionOverrides?.hooks || {}),
     },
     fields: [
       {
@@ -33,14 +34,14 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
         relationTo: formConfig?.formOverrides?.slug || 'forms',
         required: true,
         admin: {
-          readOnly: true
+          readOnly: true,
         },
       },
       {
         name: 'submissionData',
         type: 'array',
         admin: {
-          readOnly: true
+          readOnly: true,
         },
         fields: [
           {
@@ -64,44 +65,44 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
               // Instead, might need to do all validation in a `beforeValidate` collection hook.
 
               if (typeof value !== 'undefined') {
-                return true;
+                return true
               }
 
-              return 'This field is required.';
+              return 'This field is required.'
             },
           },
         ],
       },
-      ...formConfig?.formSubmissionOverrides?.fields || []
+      ...(formConfig?.formSubmissionOverrides?.fields || []),
     ],
-  };
+  }
 
-  const paymentFieldConfig = formConfig?.fields?.payment;
+  const paymentFieldConfig = formConfig?.fields?.payment
 
   if (paymentFieldConfig) {
     newConfig.fields.push({
       name: 'payment',
       type: 'group',
       admin: {
-        readOnly: true
+        readOnly: true,
       },
       fields: [
         {
           name: 'field',
           label: 'Field',
-          type: 'text'
+          type: 'text',
         },
         {
           name: 'status',
           label: 'Status',
-          type: 'text'
+          type: 'text',
         },
         {
           name: 'amount',
           type: 'number',
           admin: {
-            description: 'Amount in cents'
-          }
+            description: 'Amount in cents',
+          },
         },
         {
           name: 'paymentProcessor',
@@ -115,23 +116,23 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
             {
               name: 'token',
               label: 'token',
-              type: 'text'
+              type: 'text',
             },
             {
               name: 'brand',
               label: 'Brand',
-              type: 'text'
+              type: 'text',
             },
             {
               name: 'number',
               label: 'Number',
-              type: 'text'
-            }
-          ]
-        }
-      ]
+              type: 'text',
+            },
+          ],
+        },
+      ],
     })
   }
 
-  return newConfig;
+  return newConfig
 }

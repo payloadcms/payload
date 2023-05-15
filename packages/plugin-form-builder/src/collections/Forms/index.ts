@@ -1,11 +1,11 @@
-import { Block, CollectionConfig, Field } from 'payload/types';
-import merge from 'deepmerge';
-import { FieldConfig, PluginConfig } from '../../types';
-import fields from './fields';
+import merge from 'deepmerge'
+import type { Block, CollectionConfig, Field } from 'payload/types'
+
+import type { FieldConfig, PluginConfig } from '../../types'
+import fields from './fields'
 
 // all settings can be overridden by the config
 export const generateFormCollection = (formConfig: PluginConfig): CollectionConfig => {
-
   const redirect: Field = {
     name: 'redirect',
     type: 'group',
@@ -21,7 +21,7 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
         required: true,
       },
     ],
-  };
+  }
 
   if (formConfig.redirectRelationships) {
     redirect.fields.unshift({
@@ -34,7 +34,7 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'reference',
       },
-    });
+    })
 
     redirect.fields.unshift({
       name: 'type',
@@ -53,26 +53,26 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
       admin: {
         layout: 'horizontal',
       },
-    });
+    })
 
-    if (redirect.fields[2].type !== 'row') redirect.fields[2].label = 'Custom URL';
+    if (redirect.fields[2].type !== 'row') redirect.fields[2].label = 'Custom URL'
 
     redirect.fields[2].admin = {
       condition: (_, siblingData) => siblingData?.type === 'custom',
-    };
+    }
   }
 
   const config: CollectionConfig = {
-    ...formConfig?.formOverrides || {},
+    ...(formConfig?.formOverrides || {}),
     slug: formConfig?.formOverrides?.slug || 'forms',
     admin: {
       useAsTitle: 'title',
       enableRichTextRelationship: false,
-      ...formConfig?.formOverrides?.admin || {},
+      ...(formConfig?.formOverrides?.admin || {}),
     },
     access: {
       read: () => true,
-      ...formConfig?.formOverrides?.access || {}
+      ...(formConfig?.formOverrides?.access || {}),
     },
     fields: [
       {
@@ -83,30 +83,32 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
       {
         name: 'fields',
         type: 'blocks',
-        blocks: Object.entries(formConfig?.fields || {}).map(([fieldKey, fieldConfig]) => {
-          // let the config enable/disable fields with either boolean values or objects
-          if (fieldConfig !== false) {
-            let block = fields[fieldKey];
+        blocks: Object.entries(formConfig?.fields || {})
+          .map(([fieldKey, fieldConfig]) => {
+            // let the config enable/disable fields with either boolean values or objects
+            if (fieldConfig !== false) {
+              let block = fields[fieldKey]
 
-            if (block === undefined && typeof fieldConfig === 'object') {
-              return fieldConfig
+              if (block === undefined && typeof fieldConfig === 'object') {
+                return fieldConfig
+              }
+
+              if (typeof block === 'object' && typeof fieldConfig === 'object') {
+                return merge<FieldConfig>(block, fieldConfig, {
+                  arrayMerge: (_, sourceArray) => sourceArray,
+                })
+              }
+
+              if (typeof block === 'function') {
+                return block(fieldConfig)
+              }
+
+              return block
             }
 
-            if (typeof block === 'object' && typeof fieldConfig === 'object') {
-              return merge<FieldConfig>(block, fieldConfig, {
-                arrayMerge: (_, sourceArray) => sourceArray
-              });
-            }
-
-            if (typeof block === 'function') {
-              return block(fieldConfig);
-            }
-
-            return block;
-          }
-
-          return null;
-        }).filter(Boolean) as Block[],
+            return null
+          })
+          .filter(Boolean) as Block[],
       },
       {
         name: 'submitButtonLabel',
@@ -117,7 +119,8 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
         name: 'confirmationType',
         type: 'radio',
         admin: {
-          description: 'Choose whether to display an on-page message or redirect to a different page after they submit the form.',
+          description:
+            'Choose whether to display an on-page message or redirect to a different page after they submit the form.',
           layout: 'horizontal',
         },
         options: [
@@ -146,7 +149,8 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
         name: 'emails',
         type: 'array',
         admin: {
-          description: 'Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field\'s name with double curly brackets, i.e. {{firstName}}.',
+          description:
+            "Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}.",
         },
         fields: [
           {
@@ -158,7 +162,7 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
                 label: 'Email To',
                 admin: {
                   width: '100%',
-                  placeholder: '"Email Sender" <sender@email.com>'
+                  placeholder: '"Email Sender" <sender@email.com>',
                 },
               },
               {
@@ -206,7 +210,7 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
             type: 'text',
             name: 'subject',
             label: 'Subject',
-            defaultValue: 'You\'ve received a new message.',
+            defaultValue: "You've received a new message.",
             required: true,
             localized: true,
           },
@@ -221,9 +225,9 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
           },
         ],
       },
-      ...formConfig?.formOverrides?.fields || []
+      ...(formConfig?.formOverrides?.fields || []),
     ],
   }
 
-  return config;
-};
+  return config
+}
