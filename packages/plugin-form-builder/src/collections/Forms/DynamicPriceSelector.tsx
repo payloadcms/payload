@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useEffect, useState } from 'react';
 import { Text, useWatchForm } from 'payload/components/forms';
 import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types';

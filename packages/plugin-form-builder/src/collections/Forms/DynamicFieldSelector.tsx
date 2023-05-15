@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useEffect, useState } from 'react'
 import { Select, useForm } from 'payload/components/forms'
 import { TextField } from 'payload/dist/fields/config/types'
