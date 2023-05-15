@@ -14,7 +14,7 @@ app.get('/', (_, res) => {
 
 // Initialize Payload
 const start = async (): Promise<any> => {
-  await payload.initAsync({
+  await payload.init({
     secret: process.env.PAYLOAD_SECRET,
     mongoURL: process.env.MONGODB_URI,
     express: app,

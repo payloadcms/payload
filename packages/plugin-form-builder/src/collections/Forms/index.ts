@@ -2,7 +2,7 @@ import merge from 'deepmerge'
 import type { Block, CollectionConfig, Field } from 'payload/types'
 
 import type { FieldConfig, PluginConfig } from '../../types'
-import fields from './fields'
+import { fields } from './fields'
 
 // all settings can be overridden by the config
 export const generateFormCollection = (formConfig: PluginConfig): CollectionConfig => {

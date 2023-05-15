@@ -4,7 +4,7 @@ import type { Block } from 'payload/types'
 
 // import formBuilderPlugin from '../../dist';
 // eslint-disable-next-line import/no-relative-packages
-import formBuilderPlugin from '../../src'
+import formBuilderPlugin, { fields } from '../../src'
 import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 
@@ -68,6 +68,13 @@ export default buildConfig({
       fields: {
         payment: true,
         colorField,
+        text: {
+          ...fields.text,
+          labels: {
+            singular: 'Custom Text Field',
+            plural: 'Custom Text Fields',
+          },
+        },
         // payment: {
         //     paymentProcessor: {
         //       options: [

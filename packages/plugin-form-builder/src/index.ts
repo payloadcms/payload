@@ -3,8 +3,8 @@ import type { Config } from 'payload/config'
 import { generateFormCollection } from './collections/Forms'
 import { generateSubmissionCollection } from './collections/FormSubmissions'
 import type { PluginConfig } from './types'
-// import path from 'path';
 
+export { fields } from './collections/Forms/fields'
 export { getPaymentTotal } from './utilities/getPaymentTotal'
 
 const FormBuilder =
