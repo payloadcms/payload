@@ -381,7 +381,7 @@ const Relationship: React.FC<Props> = (props) => {
       {!errorLoading && (
         <div className={`${baseClass}__wrap`}>
           <ReactSelect
-            isDisabled={readOnly}
+            disabled={readOnly || formProcessing}
             onInputChange={(newSearch) => handleInputChange(newSearch, value)}
             onChange={!readOnly ? (selected) => {
               if (selected === null) {
@@ -417,7 +417,6 @@ const Relationship: React.FC<Props> = (props) => {
             }}
             value={valueToRender ?? null}
             showError={showError}
-            disabled={formProcessing}
             options={options}
             isMulti={hasMany}
             isSortable={isSortable}

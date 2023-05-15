@@ -52,7 +52,6 @@ export type Props = {
   isLoading?: boolean
   isOptionSelected?: any
   isSortable?: boolean,
-  isDisabled?: boolean
   onInputChange?: (val: string) => void
   onMenuScrollToBottom?: () => void
   placeholder?: string
