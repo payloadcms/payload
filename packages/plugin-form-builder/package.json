@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "1.0.13",
+  "version": "1.0.14-canary.0",
   "homepage:": "https://payloadcms.com",
   "repository": "git@github.com:payloadcms/plugin-form-builder.git",
   "description": "Form builder plugin for Payload CMS",
