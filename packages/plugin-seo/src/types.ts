@@ -12,7 +12,7 @@ export interface PluginConfig {
   collections?: string[]
   globals?: string[]
   uploadsCollection?: string
-  fields?: Array<Partial<Field>>
+  fields?: Field[]
   tabbedUI?: boolean
   generateTitle?: GenerateTitle
   generateDescription?: GenerateDescription

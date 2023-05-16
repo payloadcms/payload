@@ -66,6 +66,7 @@ const seo =
                 } as Field,
               ]
             : []),
+          ...(pluginConfig?.fields || []),
           {
             name: 'preview',
             label: 'Preview',

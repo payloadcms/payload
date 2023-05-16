@@ -43,6 +43,13 @@ export default buildConfig({
       globals: ['settings'],
       tabbedUI: true,
       uploadsCollection: 'media',
+      fields: [
+        {
+          name: 'ogTitle',
+          type: 'text',
+          label: 'og:title',
+        },
+      ],
       generateTitle: ({ doc }: any) => `Website.com — ${doc?.title?.value}`,
       generateDescription: ({ doc }: any) => doc?.excerpt?.value,
       generateURL: ({ doc, locale }: any) =>
