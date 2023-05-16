@@ -7,12 +7,12 @@
     padding: base(.25) 0;
     min-height: base(1.5);
     overflow: visible;
-    display: flex;
 
     > * {
       margin: 0;
       padding-top: 0;
       padding-bottom: 0;
+      color: currentColor;
     }
 
     &--is-multi {

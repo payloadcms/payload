@@ -12,7 +12,11 @@ export const MultiValueRemove: React.FC<MultiValueRemoveProps<OptionType> & {
   innerProps: JSX.IntrinsicElements['button']
 }> = (props) => {
   const {
-    innerProps,
+    innerProps: {
+      className,
+      onClick,
+      onTouchEnd,
+    },
   } = props;
 
   const [showTooltip, setShowTooltip] = React.useState(false);
@@ -20,14 +24,17 @@ export const MultiValueRemove: React.FC<MultiValueRemoveProps<OptionType> & {
 
   return (
     <button
-      {...innerProps}
       type="button"
-      className={baseClass}
+      className={[
+        baseClass,
+        className,
+      ].filter(Boolean).join(' ')}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
+      onTouchEnd={onTouchEnd}
       onClick={(e) => {
         setShowTooltip(false);
-        innerProps.onClick(e);
+        onClick(e);
       }}
       aria-label={t('remove')}
     >
