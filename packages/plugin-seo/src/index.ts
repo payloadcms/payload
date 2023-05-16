@@ -123,7 +123,7 @@ const seo =
 
             return {
               ...collection,
-              fields: seoFields,
+              fields: [...(collection?.fields || []), ...seoFields],
             }
           }
 
