@@ -136,15 +136,14 @@ const seo =
 
           if (isEnabled) {
             if (pluginConfig?.tabbedUI) {
-              const seoFieldsAsTabs: TabsField[] = [
+              const seoTabs: TabsField[] = [
                 {
                   type: 'tabs',
                   tabs: [
-                    // if the global is already tab-enabled, spread them into this new tabs field
-                    // otherwise create a new tab to contain this global's fields
-                    // either way, append a new tab for the SEO fields
+                    // append a new tab onto the end of the tabs array, if there is one at the first index
+                    // if needed, create a new `Content` tab in the first index for this collection's base fields
                     ...(global?.fields?.[0].type === 'tabs'
-                      ? global?.fields?.[0]?.tabs
+                      ? global.fields[0]?.tabs
                       : [
                           {
                             label: global?.label || 'Content',
@@ -161,7 +160,10 @@ const seo =
 
               return {
                 ...global,
-                fields: seoFieldsAsTabs,
+                fields: [
+                  ...seoTabs,
+                  ...(global?.fields?.[0].type === 'tabs' ? global?.fields?.slice(1) : []),
+                ],
               }
             }
 
