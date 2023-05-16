@@ -33,7 +33,7 @@ export const Overview: React.FC = () => {
     fieldsWithoutMeta['meta.description'].value = ''
     fieldsWithoutMeta['meta.image'].value = ''
     // dispatchFields(fieldsWithoutMeta);
-  }, [dispatchFields, getFields])
+  }, [getFields])
 
   useEffect(() => {
     if (typeof metaTitle === 'string')

@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable no-use-before-define */
 import React, { Fragment, useEffect, useState } from 'react'
 
 import { Pill } from './Pill'

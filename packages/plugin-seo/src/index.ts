@@ -141,7 +141,7 @@ const seo =
                   type: 'tabs',
                   tabs: [
                     // append a new tab onto the end of the tabs array, if there is one at the first index
-                    // if needed, create a new `Content` tab in the first index for this collection's base fields
+                    // if needed, create a new `Content` tab in the first index for this global's base fields
                     ...(global?.fields?.[0].type === 'tabs'
                       ? global.fields[0]?.tabs
                       : [
