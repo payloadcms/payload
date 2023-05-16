@@ -74,7 +74,9 @@ export default config;
 
 - `tabbedUI` : boolean | optional
 
-  Displays meta fields as tabs using Payload's [Tabs Field](https://payloadcms.com/docs/fields/tabs). Defaults to `false`.
+  Appends an `SEO` tab onto your config using Payload's [Tabs Field](https://payloadcms.com/docs/fields/tabs). If your collection is not already tab-enabled, meaning the first field in your config is not of type `tabs`, then one will be created for you called `Content`. Defaults to `false`.
+
+  > If you wish to continue to use top-level or sidebar fields with `tabbedUI`, you  must not let the default `Content` tab get created for you (see the note above). Instead, you must define the first field of your config with type `tabs` and place all other fields adjacent to this one.
 
 - `generateTitle` : method | optional
 

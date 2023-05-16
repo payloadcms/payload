@@ -22,17 +22,18 @@ const Posts: CollectionConfig = {
               name: 'excerpt',
               type: 'text',
             },
-            {
-              name: 'slug',
-              type: 'text',
-              required: true,
-              admin: {
-                position: 'sidebar',
-              },
-            },
           ],
         },
       ],
+    },
+    {
+      name: 'slug',
+      label: 'Slug',
+      type: 'text',
+      required: true,
+      admin: {
+        position: 'sidebar',
+      },
     },
   ],
 }

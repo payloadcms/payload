@@ -89,15 +89,14 @@ const seo =
 
           if (isEnabled) {
             if (pluginConfig?.tabbedUI) {
-              const seoFieldsAsTabs: TabsField[] = [
+              const seoTabs: TabsField[] = [
                 {
                   type: 'tabs',
                   tabs: [
-                    // if the collection is already tab-enabled, spread them into this new tabs field
-                    // otherwise create a new tab to contain this collection's fields
-                    // either way, append a new tab for the SEO fields
+                    // append a new tab onto the end of the tabs array, if there is one at the first index
+                    // if needed, create a new `Content` tab in the first index for this collection's base fields
                     ...(collection?.fields?.[0].type === 'tabs'
-                      ? collection?.fields?.[0]?.tabs
+                      ? collection.fields[0]?.tabs
                       : [
                           {
                             label: collection?.labels?.singular || 'Content',
@@ -114,13 +113,16 @@ const seo =
 
               return {
                 ...collection,
-                fields: seoFieldsAsTabs,
+                fields: [
+                  ...seoTabs,
+                  ...(collection?.fields?.[0].type === 'tabs' ? collection?.fields?.slice(1) : []),
+                ],
               }
             }
 
             return {
               ...collection,
-              fields: [...(collection?.fields || []), ...seoFields],
+              fields: seoFields,
             }
           }
 
