@@ -6,12 +6,12 @@ A plugin for [Payload CMS](https://github.com/payloadcms/payload) to auto-genera
 
 Core features:
 
-- Adds a `meta` field to every SEO-enabled collection or global. It:
-  - includes title, description, and image subfields
-  - auto-generates meta data from your document's content
-  - displays hints and indicators to help content editors
-  - renders a snippet of what a search engine might display
-  - soon will support variable injection
+  - Adds a `meta` field group to every SEO-enabled collection or global
+  - Auto-generates meta data using your document's existing content
+  - Displays hints and indicators to help content editor write effective meta
+  - Renders a snippet of what a search engine might display
+  - Extendable so you can define custom fields like `og:title` or `json-ld`
+  - Soon will dynamic support variable injection
 
 ## Installation
 
@@ -68,6 +68,15 @@ export default config;
 
   An array of global slugs to enable SEO. Enabled globals receive a `meta` field which is an object of title, description, and image subfields.
 
+- `fields` Field[] | optional
+
+  Append your own custom fields onto the `meta` field group. The following fields are provided by default:
+
+    - `title`: text
+    - `description`: textarea
+    - `image`: upload (if an `uploadsCollection` is provided)
+    - `preview`: ui
+
 - `uploadsCollection` : string | optional
 
   An upload-enabled collection slug, for the meta image to access.
@@ -76,7 +85,7 @@ export default config;
 
   Appends an `SEO` tab onto your config using Payload's [Tabs Field](https://payloadcms.com/docs/fields/tabs). If your collection is not already tab-enabled, meaning the first field in your config is not of type `tabs`, then one will be created for you called `Content`. Defaults to `false`.
 
-  > If you wish to continue to use top-level or sidebar fields with `tabbedUI`, you  must not let the default `Content` tab get created for you (see the note above). Instead, you must define the first field of your config with type `tabs` and place all other fields adjacent to this one.
+  > If you wish to continue to use top-level or sidebar fields with `tabbedUI`, you must not let the default `Content` tab get created for you (see the note above). Instead, you must define the first field of your config with type `tabs` and place all other fields adjacent to this one.
 
 - `generateTitle` : method | optional
 
