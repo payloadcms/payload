@@ -47,7 +47,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "nodemon": "^2.0.6",
-    "payload": "^0.18.5",
+    "payload": "^1.8.2",
     "prettier": "^2.7.1",
     "react": "^18.0.0",
     "ts-node": "^9.1.1",

@@ -2,7 +2,7 @@
 
 [![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-search)](https://www.npmjs.com/package/@payloadcms/plugin-search)
 
-A plugin for [Payload CMS](https://github.com/payloadcms/payload) to create extremely fast search results from your existing documents.
+A plugin for [Payload](https://github.com/payloadcms/payload) to create extremely fast search results from your existing documents.
 
 Core features:
 
