@@ -20,8 +20,8 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
   const {
     routes: { admin },
     admin: {
-      logoutRoute
-    }
+      logoutRoute,
+    },
   } = config;
   const { toggleModal } = useModal();
   const { t } = useTranslation('authentication');
