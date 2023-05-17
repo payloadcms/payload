@@ -17,11 +17,11 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
       relationTo,
       label,
     },
-    selectProps: {
+    customProps: {
       setDrawerIsOpen,
       draggableProps,
       onSave,
-    },
+    } = {},
   } = props;
 
   const { permissions } = useAuth();
