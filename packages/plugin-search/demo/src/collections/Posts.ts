@@ -1,4 +1,4 @@
-import { CollectionConfig } from 'payload/types';
+import type { CollectionConfig } from 'payload/types'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -10,7 +10,7 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
   },
   versions: {
-    drafts: true
+    drafts: true,
   },
   fields: [
     {
@@ -23,6 +23,6 @@ export const Posts: CollectionConfig = {
       name: 'excerpt',
       label: 'Excerpt',
       type: 'text',
-    }
+    },
   ],
-};
+}

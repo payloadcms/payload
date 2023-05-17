@@ -1,28 +1,19 @@
-import { SearchConfig, SyncWithSearch } from '../../types';
+import type { SearchConfig, SyncWithSearch } from '../../types'
 
-const syncWithSearch: SyncWithSearch = async (args) => {
+const syncWithSearch: SyncWithSearch = async args => {
   const {
     req: { payload },
     doc,
     operation,
-    // @ts-ignore
+    // @ts-expect-error
     collection,
-    // @ts-ignore
-    searchConfig
-  } = args;
+    // @ts-expect-error
+    searchConfig,
+  } = args
 
-  const {
-    title,
-    id,
-    _status: status,
-  } = doc || {};
+  const { title, id, _status: status } = doc || {}
 
-  const {
-    beforeSync,
-    syncDrafts,
-    deleteDrafts,
-    defaultPriorities,
-  } = searchConfig as SearchConfig; // todo fix SyncWithSearch type, see note in ./types.ts
+  const { beforeSync, syncDrafts, deleteDrafts, defaultPriorities } = searchConfig as SearchConfig // todo fix SyncWithSearch type, see note in ./types.ts
 
   let dataToSave = {
     title,
@@ -30,35 +21,35 @@ const syncWithSearch: SyncWithSearch = async (args) => {
       relationTo: collection,
       value: id,
     },
-  };
+  }
 
   if (typeof beforeSync === 'function') {
     dataToSave = await beforeSync({
       originalDoc: doc,
       searchDoc: dataToSave,
-      payload
-    });
+      payload,
+    })
   }
 
-  let defaultPriority = 0;
+  let defaultPriority = 0
   if (defaultPriorities) {
-    const {
-      [collection]: priority,
-    } = defaultPriorities;
+    const { [collection]: priority } = defaultPriorities
 
     if (typeof priority === 'function') {
       try {
-        defaultPriority = await priority(doc);
-      } catch (err) {
-        payload.logger.error(err);
-        payload.logger.error(`Error gathering default priority for search documents related to ${collection}`);
+        defaultPriority = await priority(doc)
+      } catch (err: unknown) {
+        payload.logger.error(err)
+        payload.logger.error(
+          `Error gathering default priority for search documents related to ${collection}`,
+        )
       }
     } else {
-      defaultPriority = priority;
+      defaultPriority = priority
     }
   }
 
-  const doSync = syncDrafts || (!syncDrafts && status !== 'draft');
+  const doSync = syncDrafts || (!syncDrafts && status !== 'draft')
 
   try {
     if (operation === 'create') {
@@ -69,7 +60,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
             ...dataToSave,
             priority: defaultPriority,
           },
-        });
+        })
       }
     }
 
@@ -84,32 +75,34 @@ const syncWithSearch: SyncWithSearch = async (args) => {
             },
           },
           depth: 0,
-        }) as any;
+        })
 
-        const docs: {
+        const docs: Array<{
           id: string
           priority?: number
-        }[] = searchDocQuery?.docs || [];
+        }> = searchDocQuery?.docs || []
 
-        const [foundDoc, ...duplicativeDocs] = docs;
+        const [foundDoc, ...duplicativeDocs] = docs
 
         // delete all duplicative search docs (docs that reference the same page)
         // to ensure the same, out-of-date result does not appear twice (where only syncing the first found doc)
         if (duplicativeDocs.length > 0) {
           try {
-            Promise.all(duplicativeDocs.map(({ id: duplicativeDocID }) => payload.delete({
-              collection: 'search',
-              id: duplicativeDocID,
-            })));
-          } catch (err) {
-            payload.logger.error(`Error deleting duplicative search documents.`);
+            Promise.all(
+              duplicativeDocs.map(({ id: duplicativeDocID }) =>
+                payload.delete({
+                  collection: 'search',
+                  id: duplicativeDocID,
+                }),
+              ), // eslint-disable-line function-paren-newline
+            )
+          } catch (err: unknown) {
+            payload.logger.error(`Error deleting duplicative search documents.`)
           }
         }
 
         if (foundDoc) {
-          const {
-            id: searchDocID,
-          } = foundDoc;
+          const { id: searchDocID } = foundDoc
 
           if (doSync) {
             // update the doc normally
@@ -121,9 +114,9 @@ const syncWithSearch: SyncWithSearch = async (args) => {
                   ...dataToSave,
                   priority: foundDoc.priority || defaultPriority,
                 },
-              });
-            } catch (err) {
-              payload.logger.error(`Error updating search document.`);
+              })
+            } catch (err: unknown) {
+              payload.logger.error(`Error updating search document.`)
             }
           }
           if (deleteDrafts && status === 'draft') {
@@ -132,9 +125,9 @@ const syncWithSearch: SyncWithSearch = async (args) => {
               payload.delete({
                 collection: 'search',
                 id: searchDocID,
-              });
-            } catch (err) {
-              payload.logger.error(`Error deleting search document.`);
+              })
+            } catch (err: unknown) {
+              payload.logger.error(`Error deleting search document: ${err}`)
             }
           }
         } else if (doSync) {
@@ -145,22 +138,22 @@ const syncWithSearch: SyncWithSearch = async (args) => {
                 ...dataToSave,
                 priority: defaultPriority,
               },
-            });
-          } catch (err) {
-            payload.logger.error(err);
-            payload.logger.error(`Error creating search document.`);
+            })
+          } catch (err: unknown) {
+            payload.logger.error(`Error creating search document: ${err}`)
           }
         }
-      } catch (err) {
-        payload.logger.error(`Error finding search document.`);
+      } catch (err: unknown) {
+        payload.logger.error(`Error finding search document: ${err}`)
       }
     }
-  } catch (err) {
-    payload.logger.error(err);
-    payload.logger.error(`Error syncing search document related to ${collection} with id: '${id}'`);
+  } catch (err: unknown) {
+    payload.logger.error(
+      `Error syncing search document related to ${collection} with id: '${id}': ${err}`,
+    )
   }
 
-  return doc;
-};
+  return doc
+}
 
-export default syncWithSearch;
+export default syncWithSearch

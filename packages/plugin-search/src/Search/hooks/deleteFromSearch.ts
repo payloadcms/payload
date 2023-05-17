@@ -1,8 +1,8 @@
-import { CollectionAfterDeleteHook } from 'payload/types';
+import type { CollectionAfterDeleteHook } from 'payload/types'
 
 const deleteFromSearch: CollectionAfterDeleteHook = ({ req: { payload }, doc }) => {
   try {
-    const deleteSearchDoc = async () => {
+    const deleteSearchDoc = async (): Promise<any> => {
       const searchDocQuery = await payload.find({
         collection: 'search',
         where: {
@@ -11,22 +11,24 @@ const deleteFromSearch: CollectionAfterDeleteHook = ({ req: { payload }, doc }) 
           },
         },
         depth: 0,
-      }) as any;
+      })
 
       if (searchDocQuery?.docs?.[0]) {
         payload.delete({
           collection: 'search',
           id: searchDocQuery?.docs?.[0]?.id,
-        });
+        })
       }
-    };
+    }
 
-    deleteSearchDoc();
-  } catch (err) {
-    console.error(err);
+    deleteSearchDoc()
+  } catch (err: unknown) {
+    payload.logger.error({
+      err: `Error deleting search doc: ${err}`,
+    })
   }
 
-  return doc;
-};
+  return doc
+}
 
-export default deleteFromSearch;
+export default deleteFromSearch

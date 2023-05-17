@@ -1,43 +1,37 @@
-import { buildConfig } from 'payload/config';
-import path from 'path';
+import path from 'path'
+import { buildConfig } from 'payload/config'
+
 // import searchPlugin from '../../dist';
-import searchPlugin from '../../src';
-import { Users } from './collections/Users';
-import { Pages } from './collections/Pages';
-import { Posts } from './collections/Posts';
+import searchPlugin from '../../src'
+import { Pages } from './collections/Pages'
+import { Posts } from './collections/Posts'
+import { Users } from './collections/Users'
 
 export default buildConfig({
   serverURL: 'http://localhost:3000',
   admin: {
     user: Users.slug,
-    webpack: (config) => {
+    webpack: config => {
       const newConfig = {
         ...config,
         resolve: {
           ...config.resolve,
           alias: {
             ...config.resolve.alias,
-            react: path.join(__dirname, "../node_modules/react"),
-            "react-dom": path.join(__dirname, "../node_modules/react-dom"),
-            "payload": path.join(__dirname, "../node_modules/payload")
+            react: path.join(__dirname, '../node_modules/react'),
+            'react-dom': path.join(__dirname, '../node_modules/react-dom'),
+            payload: path.join(__dirname, '../node_modules/payload'),
           },
         },
-      };
+      }
 
-      return newConfig;
+      return newConfig
     },
   },
-  collections: [
-    Users,
-    Pages,
-    Posts
-  ],
+  collections: [Users, Pages, Posts],
   plugins: [
     searchPlugin({
-      collections: [
-        'pages',
-        'posts'
-      ],
+      collections: ['pages', 'posts'],
       searchOverrides: {
         fields: [
           {
@@ -46,21 +40,21 @@ export default buildConfig({
             type: 'text',
             admin: {
               readOnly: true,
-            }
-          }
-        ]
+            },
+          },
+        ],
       },
       beforeSync: ({ originalDoc, searchDoc }) => ({
         ...searchDoc,
-        excerpt: originalDoc?.excerpt || 'This is a fallback excerpt'
+        excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
       }),
       defaultPriorities: {
         pages: 10,
-        posts: ({ title }) => title === 'Hello, world!' ? 30 : 20
-      }
+        posts: ({ title }) => (title === 'Hello, world!' ? 30 : 20),
+      },
     }),
   ],
   typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts')
+    outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
-});
+})

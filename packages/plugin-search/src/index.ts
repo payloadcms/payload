@@ -1,66 +1,64 @@
-import { Config } from 'payload/config';
-import { generateSearchCollection } from './Search';
-import syncWithSearch from './Search/hooks/syncWithSearch';
-import deleteFromSearch from './Search/hooks/deleteFromSearch';
-import { SearchConfig } from './types';
+import type { Config } from 'payload/config'
 
-const Search = (incomingSearchConfig: SearchConfig) => (config: Config): Config => {
-  const {
-    collections
-  } = config;
+import { generateSearchCollection } from './Search'
+import deleteFromSearch from './Search/hooks/deleteFromSearch'
+import syncWithSearch from './Search/hooks/syncWithSearch'
+import type { SearchConfig } from './types'
 
-  if (collections) {
-    const searchConfig: SearchConfig = {
-      ...incomingSearchConfig,
-      syncDrafts: false,
-      deleteDrafts: true
-      // write any config defaults here
-    };
+const Search =
+  (incomingSearchConfig: SearchConfig) =>
+  (config: Config): Config => {
+    const { collections } = config
 
-    // add a beforeChange hook to every search-enabled collection
-    const collectionsWithSearchHooks = config?.collections?.map((collection) => {
-      const {
-        hooks: existingHooks
-      } = collection;
-
-      const enabledCollections = searchConfig.collections || [];
-      const isEnabled = enabledCollections.indexOf(collection.slug) > -1;
-      if (isEnabled) {
-        return {
-          ...collection,
-          hooks: {
-            ...collection.hooks,
-            afterChange: [
-              ...(existingHooks?.afterChange || []),
-              async (args: any) => {
-                syncWithSearch({
-                  ...args,
-                  collection: collection.slug,
-                  searchConfig
-                })
-              },
-            ],
-            afterDelete: [
-              ...(existingHooks?.afterDelete || []),
-              deleteFromSearch,
-            ],
-          },
-        };
+    if (collections) {
+      const searchConfig: SearchConfig = {
+        ...incomingSearchConfig,
+        syncDrafts: false,
+        deleteDrafts: true,
+        // write any config defaults here
       }
 
-      return collection;
-    }).filter(Boolean);
+      // add a beforeChange hook to every search-enabled collection
+      const collectionsWithSearchHooks = config?.collections
+        ?.map(collection => {
+          const { hooks: existingHooks } = collection
 
-    return {
-      ...config,
-      collections: [
-        ...collectionsWithSearchHooks || [],
-        generateSearchCollection(searchConfig),
-      ],
-    };
+          const enabledCollections = searchConfig.collections || []
+          const isEnabled = enabledCollections.indexOf(collection.slug) > -1
+          if (isEnabled) {
+            return {
+              ...collection,
+              hooks: {
+                ...collection.hooks,
+                afterChange: [
+                  ...(existingHooks?.afterChange || []),
+                  async (args: any) => {
+                    syncWithSearch({
+                      ...args,
+                      collection: collection.slug,
+                      searchConfig,
+                    })
+                  },
+                ],
+                afterDelete: [...(existingHooks?.afterDelete || []), deleteFromSearch],
+              },
+            }
+          }
+
+          return collection
+        })
+        .filter(Boolean)
+
+      return {
+        ...config,
+        collections: [
+          ...(collectionsWithSearchHooks || []),
+          generateSearchCollection(searchConfig),
+        ],
+      }
+    }
+
+    return config
   }
 
-  return config;
-};
-
-export default Search;
+export default Search
