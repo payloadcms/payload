@@ -589,7 +589,7 @@ If not already defined, add the following to your `compilerOptions`:
 
 #### ✋ Versions may need to be migrated
 
-This release includes a substantial simplification / optimization of how Versions work within Payload. They are now significantly more performant and easier to understand behind-the-scenes. We've removed ~600 lines of code and have ensured that Payload can be compatible with all flavors of Mongo - including versions earlier than 4.0, Azure Cosmos MongoDB, AWS' DocumentDB and more.
+This release includes a substantial simplification / optimization of how Versions work within Payload. They are now significantly more performant and easier to understand behind-the-scenes. We've removed ~600 lines of code and have ensured that Payload can be compatible with all flavors of MongoDB - including versions earlier than 4.0, Azure Cosmos MongoDB, AWS' DocumentDB and more.
 
 But, some of your draft-enabled documents may need to be migrated.
 

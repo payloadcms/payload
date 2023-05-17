@@ -11,7 +11,7 @@ const connectMongoose = async (
   logger: pino.Logger,
 ): Promise<void | any> => {
   let urlToConnect = url;
-  let successfulConnectionMessage = 'Connected to Mongo server successfully!';
+  let successfulConnectionMessage = 'Connected to MongoDB server successfully!';
 
   const connectionOptions: ConnectOptions & { useFacet: undefined } = {
     autoIndex: true,
@@ -35,7 +35,7 @@ const connectMongoose = async (
     });
 
     urlToConnect = mongoMemoryServer.getUri();
-    successfulConnectionMessage = 'Connected to in-memory Mongo server successfully!';
+    successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!';
   }
 
   try {
