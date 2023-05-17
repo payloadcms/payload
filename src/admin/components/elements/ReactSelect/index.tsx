@@ -33,7 +33,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     isLoading,
     onMenuOpen,
     components,
-    selectProps,
   } = props;
 
   const classes = [
@@ -48,7 +47,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       placeholder={getTranslation(placeholder, i18n)}
       captureMenuScroll
       {...props}
-      {...selectProps}
       value={value}
       onChange={onChange}
       isDisabled={disabled}

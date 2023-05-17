@@ -329,13 +329,14 @@ describe('fields - relationship', () => {
     test('should show useAsTitle on relation', async () => {
       await page.goto(url.edit(docWithExistingRelations.id));
 
-      const field = page.locator('#field-relationshipWithTitle .relationship--single-value__text');
+      const field = page.locator('#field-relationshipWithTitle');
+      const value = field.locator('.relationship--single-value__text');
 
       // Check existing relationship for correct title
-      await expect(field).toHaveText(relationWithTitle.name);
+      await expect(value).toHaveText(relationWithTitle.name);
 
       await field.click({ delay: 100 });
-      const options = page.locator('.rs__option');
+      const options = field.locator('.rs__option');
 
       await expect(options).toHaveCount(2);
     });
