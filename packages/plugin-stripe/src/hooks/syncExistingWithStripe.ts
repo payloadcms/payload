@@ -1,71 +1,69 @@
-import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types';
-import Stripe from 'stripe';
-import { StripeConfig } from '../types';
-import { APIError } from 'payload/errors';
-import { deepen } from '../utilities/deepen';
+import { APIError } from 'payload/errors'
+import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
+import Stripe from 'stripe'
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' });
+import type { StripeConfig } from '../types'
+import { deepen } from '../utilities/deepen'
 
-export type CollectionBeforeChangeHookWithArgs = (args: Parameters<CollectionBeforeChangeHook>[0] & {
-  collection?: CollectionConfig,
-  stripeConfig?: StripeConfig,
-}) => void;
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
-export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async (args) => {
-  const {
-    req,
-    operation,
-    data,
-    originalDoc,
-    collection,
-    stripeConfig
-  } = args;
+export type CollectionBeforeChangeHookWithArgs = (
+  args: Parameters<CollectionBeforeChangeHook>[0] & {
+    collection?: CollectionConfig
+    stripeConfig?: StripeConfig
+  },
+) => void
 
-  const {
-    logs,
-    sync
-  } = stripeConfig || {};
+export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async args => {
+  const { req, operation, data, originalDoc, collection, stripeConfig } = args
 
-  const { payload } = req;
+  const { logs, sync } = stripeConfig || {}
 
-  const { slug: collectionSlug } = collection || {};
+  const { payload } = req
+
+  const { slug: collectionSlug } = collection || {}
 
   if (process.env.NODE_ENV !== 'test' && !data.skipSync) {
-    const syncConfig = sync?.find((syncConfig) => syncConfig.collection === collectionSlug);
+    const syncConfig = sync?.find(conf => conf.collection === collectionSlug)
 
     if (syncConfig) {
       if (operation === 'update') {
         // combine all fields of this object and match their respective values within the document
         let syncedFields = syncConfig.fields.reduce((acc, field) => {
-          const {
-            fieldPath,
-            stripeProperty
-          } = field;
+          const { fieldPath, stripeProperty } = field
 
-          acc[stripeProperty] = data[fieldPath];
-          return acc;
-        }, {} as Record<string, any>);
+          acc[stripeProperty] = data[fieldPath]
+          return acc
+        }, {} as Record<string, any>)
 
-        syncedFields = deepen(syncedFields);
+        syncedFields = deepen(syncedFields)
 
-        if (logs) payload.logger.info(`A '${collectionSlug}' document has changed in Payload with ID: '${originalDoc?._id}', syncing with Stripe...`);
+        if (logs)
+          payload.logger.info(
+            `A '${collectionSlug}' document has changed in Payload with ID: '${originalDoc?._id}', syncing with Stripe...`,
+          )
 
         if (!data.stripeID) {
           // NOTE: the "beforeValidate" hook populates this
-          if (logs) payload.logger.error(`- There is no Stripe ID for this document, skipping.`);
+          if (logs) payload.logger.error(`- There is no Stripe ID for this document, skipping.`)
         } else {
-          if (logs) payload.logger.info(`- Syncing to Stripe resource with ID: '${data.stripeID}'...`);
+          if (logs)
+            payload.logger.info(`- Syncing to Stripe resource with ID: '${data.stripeID}'...`)
 
           try {
             const stripeResource = await stripe?.[syncConfig?.stripeResourceType]?.update(
               data.stripeID,
-              syncedFields
-            );
+              syncedFields,
+            )
 
-            if (logs) payload.logger.info(`✅ Successfully synced Stripe resource with ID: '${stripeResource.id}'.`);
-          } catch (error: any) {
-            throw new APIError(`Failed to sync document with ID: '${data.id}' to Stripe: ${error?.message || ''}`);
+            if (logs)
+              payload.logger.info(
+                `✅ Successfully synced Stripe resource with ID: '${stripeResource.id}'.`,
+              )
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : error
+            throw new APIError(`Failed to sync document with ID: '${data.id}' to Stripe: ${msg}`)
           }
         }
       }
@@ -73,7 +71,7 @@ export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async 
   }
 
   // Set back to 'false' so that all changes continue to sync to Stripe, see note in './createNewInStripe.ts'
-  data.skipSync = false;
+  data.skipSync = false
 
-  return data;
+  return data
 }

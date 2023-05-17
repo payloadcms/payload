@@ -1,10 +1,11 @@
-import type { Config } from 'payload/config'
 import path from 'path'
+import type { Config } from 'payload/config'
 import type { Configuration as WebpackConfig } from 'webpack'
 
-const mockModulePath = path.resolve(__dirname, 'mocks/serverModule.js');
+const mockModulePath = path.resolve(__dirname, 'mocks/serverModule.js')
 
-export const extendWebpackConfig = (config: Config): ((webpackConfig: WebpackConfig) => WebpackConfig) =>
+export const extendWebpackConfig =
+  (config: Config): ((webpackConfig: WebpackConfig) => WebpackConfig) =>
   webpackConfig => {
     const existingWebpackConfig =
       typeof config.admin?.webpack === 'function'
@@ -17,8 +18,8 @@ export const extendWebpackConfig = (config: Config): ((webpackConfig: WebpackCon
         ...(existingWebpackConfig.resolve || {}),
         alias: {
           ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
-          "stripe": mockModulePath,
-          "express": mockModulePath,
+          stripe: mockModulePath,
+          express: mockModulePath,
           [path.resolve(__dirname, './routes/rest')]: mockModulePath,
           [path.resolve(__dirname, './routes/webhooks')]: mockModulePath,
           [path.resolve(__dirname, './webhooks/handleWebhooks')]: mockModulePath,

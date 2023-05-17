@@ -1,145 +1,150 @@
-import { Config } from 'payload/config';
-import { stripeREST } from './routes/rest';
-import { stripeWebhooks } from './routes/webhooks';
-import express from 'express';
-import { SanitizedStripeConfig, StripeConfig } from './types';
-import { extendWebpackConfig } from './extendWebpackConfig';
-import { createNewInStripe } from './hooks/createNewInStripe';
-import { syncExistingWithStripe } from './hooks/syncExistingWithStripe';
-import { deleteFromStripe } from './hooks/deleteFromStripe';
-import { LinkToDoc } from './ui/LinkToDoc';
+import express from 'express'
+import type { Config } from 'payload/config'
 
-const stripePlugin = (incomingStripeConfig: StripeConfig) => (config: Config): Config => {
-  const { collections } = config;
+import { extendWebpackConfig } from './extendWebpackConfig'
+import { createNewInStripe } from './hooks/createNewInStripe'
+import { deleteFromStripe } from './hooks/deleteFromStripe'
+import { syncExistingWithStripe } from './hooks/syncExistingWithStripe'
+import { stripeREST } from './routes/rest'
+import { stripeWebhooks } from './routes/webhooks'
+import type { SanitizedStripeConfig, StripeConfig } from './types'
+import { LinkToDoc } from './ui/LinkToDoc'
 
-  // set config defaults here
-  const stripeConfig: SanitizedStripeConfig = {
-    ...incomingStripeConfig,
-    sync: incomingStripeConfig?.sync || []
-  }
+const stripePlugin =
+  (incomingStripeConfig: StripeConfig) =>
+  (config: Config): Config => {
+    const { collections } = config
 
-  // NOTE: env variables are never passed to the client, and bc we use theme in the admin panel
-  // so unfortunately we must set the 'isTestKey' property on the config instead of using the following code:
-  // const isTestKey = stripeConfig.stripeSecretKey?.startsWith('sk_test_');
+    // set config defaults here
+    const stripeConfig: SanitizedStripeConfig = {
+      ...incomingStripeConfig,
+      sync: incomingStripeConfig?.sync || [],
+    }
 
-  return ({
-    ...config,
-    admin: {
-      ...config.admin,
-      webpack: extendWebpackConfig(config),
-    },
-    endpoints: [
-      ...config?.endpoints || [],
-      {
-        path: '/stripe/webhooks',
-        method: 'post',
-        root: true,
-        handler: [
-          express.raw({ type: 'application/json' }),
-          (req, res, next) => {
-            stripeWebhooks({
+    // NOTE: env variables are never passed to the client, and bc we use theme in the admin panel
+    // so unfortunately we must set the 'isTestKey' property on the config instead of using the following code:
+    // const isTestKey = stripeConfig.stripeSecretKey?.startsWith('sk_test_');
+
+    return {
+      ...config,
+      admin: {
+        ...config.admin,
+        webpack: extendWebpackConfig(config),
+      },
+      endpoints: [
+        ...(config?.endpoints || []),
+        {
+          path: '/stripe/webhooks',
+          method: 'post',
+          root: true,
+          handler: [
+            express.raw({ type: 'application/json' }),
+            (req, res, next) => {
+              stripeWebhooks({
+                req,
+                res,
+                next,
+                config,
+                stripeConfig,
+              })
+            },
+          ],
+        },
+        {
+          path: '/stripe/rest',
+          method: 'post',
+          handler: (req, res, next) => {
+            stripeREST({
               req,
               res,
               next,
-              config,
-              stripeConfig
+              stripeConfig,
             })
-          }
-        ]
-      },
-      {
-        path: '/stripe/rest',
-        method: 'post',
-        handler: (req, res, next) => {
-          stripeREST({
-            req,
-            res,
-            next,
-            stripeConfig
-          })
-        }
-      },
-    ],
-    collections: collections?.map((collection) => {
-      const {
-        hooks: existingHooks
-      } = collection;
-
-      const syncConfig = stripeConfig.sync?.find((sync) => sync.collection === collection.slug);
-
-      if (syncConfig) {
-        return {
-          ...collection,
-          hooks: {
-            ...collection.hooks,
-            beforeValidate: [
-              ...(existingHooks?.beforeValidate || []),
-              async (args) => createNewInStripe({
-                ...args,
-                collection,
-                stripeConfig,
-              })
-            ],
-            beforeChange: [
-              ...(existingHooks?.beforeChange || []),
-              async (args) => syncExistingWithStripe({
-                ...args,
-                collection,
-                stripeConfig
-              })
-            ],
-            afterDelete: [
-              ...(existingHooks?.afterDelete || []),
-              async (args) => deleteFromStripe({
-                ...args,
-                collection,
-                stripeConfig
-              })
-            ],
           },
-          fields: [
-            ...collection.fields,
-            {
-              name: 'stripeID',
-              label: 'Stripe ID',
-              type: 'text',
-              saveToJWT: true,
-              admin: {
-                position: 'sidebar',
-                readOnly: true,
-              },
-            },
-            {
-              name: 'skipSync',
-              label: 'Skip Sync',
-              type: 'checkbox',
-              admin: {
-                position: 'sidebar',
-                readOnly: true,
-              },
-            },
-            {
-              name: 'docUrl',
-              type: 'ui',
-              admin: {
-                position: 'sidebar',
-                components: {
-                  Field: (args) => LinkToDoc({
+        },
+      ],
+      collections: collections?.map(collection => {
+        const { hooks: existingHooks } = collection
+
+        const syncConfig = stripeConfig.sync?.find(sync => sync.collection === collection.slug)
+
+        if (syncConfig) {
+          return {
+            ...collection,
+            hooks: {
+              ...collection.hooks,
+              beforeValidate: [
+                ...(existingHooks?.beforeValidate || []),
+                async args =>
+                  createNewInStripe({
                     ...args,
-                    isTestKey: stripeConfig.isTestKey,
-                    stripeResourceType: syncConfig.stripeResourceType,
-                    nameOfIDField: 'stripeID',
-                  })
+                    collection,
+                    stripeConfig,
+                  }),
+              ],
+              beforeChange: [
+                ...(existingHooks?.beforeChange || []),
+                async args =>
+                  syncExistingWithStripe({
+                    ...args,
+                    collection,
+                    stripeConfig,
+                  }),
+              ],
+              afterDelete: [
+                ...(existingHooks?.afterDelete || []),
+                async args =>
+                  deleteFromStripe({
+                    ...args,
+                    collection,
+                    stripeConfig,
+                  }),
+              ],
+            },
+            fields: [
+              ...collection.fields,
+              {
+                name: 'stripeID',
+                label: 'Stripe ID',
+                type: 'text',
+                saveToJWT: true,
+                admin: {
+                  position: 'sidebar',
+                  readOnly: true,
                 },
               },
-            },
-          ]
-        };
-      }
+              {
+                name: 'skipSync',
+                label: 'Skip Sync',
+                type: 'checkbox',
+                admin: {
+                  position: 'sidebar',
+                  readOnly: true,
+                },
+              },
+              {
+                name: 'docUrl',
+                type: 'ui',
+                admin: {
+                  position: 'sidebar',
+                  components: {
+                    Field: args =>
+                      LinkToDoc({
+                        ...args,
+                        isTestKey: stripeConfig.isTestKey,
+                        stripeResourceType: syncConfig.stripeResourceType,
+                        nameOfIDField: 'stripeID',
+                      }),
+                  },
+                },
+              },
+            ],
+          }
+        }
 
-      return collection;
-    })
-  })
-}
+        return collection
+      }),
+    }
+  }
 
-export default stripePlugin;
+export default stripePlugin
