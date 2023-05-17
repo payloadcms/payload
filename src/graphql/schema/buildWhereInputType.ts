@@ -23,7 +23,7 @@ import fieldToSchemaMap from './fieldToWhereInputSchemaMap';
 // 1. Everything needs to be a GraphQLInputObjectType or scalar / enum
 // 2. Relationships, groups, repeaters and flex content are not
 //    directly searchable. Instead, we need to build a chained pathname
-//    using dot notation so Mongo can properly search nested paths.
+//    using dot notation so MongoDB can properly search nested paths.
 const buildWhereInputType = (name: string, fields: Field[], parentName: string): GraphQLInputObjectType => {
   // This is the function that builds nested paths for all
   // field types with nested paths.

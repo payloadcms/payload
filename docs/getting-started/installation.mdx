@@ -12,7 +12,7 @@ Payload requires the following software:
 
 - Yarn or NPM
 - Node.js version 14+
-- A Mongo Database
+- A MongoDB Database
 
 <Banner type="warning">
   Before proceeding any further, please ensure that you have the above
@@ -110,15 +110,15 @@ Payload uses this secret key to generate secure user tokens (JWT). Behind the sc
 
 ##### `mongoURL`
 
-**Required**. This is a fully qualified MongoDB connection string that points to your Mongo database. If you don't have Mongo installed locally, you can [follow these steps for Mac OSX](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/) and [these steps](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/) for Windows 10. If you want to use a local database and you know you have MongoDB installed locally, a typical connection string will look like this:
+**Required**. This is a fully qualified MongoDB connection string that points to your MongoDB database. If you don't have MongoDB installed locally, you can [follow these steps for Mac OSX](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/) and [these steps](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/) for Windows 10. If you want to use a local database and you know you have MongoDB installed locally, a typical connection string will look like this:
 
 `mongodb://localhost/payload`
 
-In contrast to running Mongo locally, a popular option is to sign up for a free [MongoDB Atlas account](https://www.mongodb.com/cloud/atlas), which is a fully hosted and cloud-based installation of Mongo that you don't need to ever worry about.
+In contrast to running MongoDB locally, a popular option is to sign up for a free [MongoDB Atlas account](https://www.mongodb.com/cloud/atlas), which is a fully hosted and cloud-based installation of MongoDB that you don't need to ever worry about.
 
 ##### `mongoOptions`
 
-Customize Mongo connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.
+Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.
 
 ##### `email`
 

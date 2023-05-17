@@ -22,7 +22,7 @@ export declare type PayloadRequest<U = any> = Request & {
   fallbackLocale?: string;
   /** Information about the collection that is being accessed
    * - Configuration from payload-config.ts
-   * - Mongo model for this collection
+   * - MongoDB model for this collection
    * - GraphQL type metadata
    * */
   collection?: Collection;
