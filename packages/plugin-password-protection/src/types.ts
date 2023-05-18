@@ -1,8 +1,8 @@
-import { PayloadRequest } from 'payload/dist/express/types';
+import type { PayloadRequest } from 'payload/dist/express/types'
 
-export type AllowUsers = (req: PayloadRequest) => Promise<boolean> | boolean;
+export type AllowUsers = (req: PayloadRequest) => Promise<boolean> | boolean
 
-export type PasswordProtectionConfig = {
+export interface PasswordProtectionConfig {
   passwordFieldName?: string
   passwordProtectedFieldName?: string
   whitelistUsers?: AllowUsers
@@ -12,7 +12,7 @@ export type PasswordProtectionConfig = {
   collections?: string[]
 }
 
-export type PasswordProtectionOptions = {
+export interface PasswordProtectionOptions {
   collections?: string[]
   routePath: string
   expiration: number

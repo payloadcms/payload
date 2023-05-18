@@ -1,5 +1,5 @@
 // const payload = require('payload');
-import { CollectionConfig } from 'payload/types';
+import type { CollectionConfig } from 'payload/types'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -22,6 +22,6 @@ export const Pages: CollectionConfig = {
       label: 'Slug',
       type: 'text',
       required: true,
-    }
+    },
   ],
-};
+}
