@@ -1,4 +1,4 @@
-import { CollectionConfig } from 'payload/types';
+import type { CollectionConfig } from 'payload/types'
 
 const Pages: CollectionConfig = {
   slug: 'pages',
@@ -9,7 +9,7 @@ const Pages: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
-      required: true
+      required: true,
     },
     {
       name: 'excerpt',
@@ -21,9 +21,9 @@ const Pages: CollectionConfig = {
       required: true,
       admin: {
         position: 'sidebar',
-      }
+      },
     },
   ],
 }
 
-export default Pages;
+export default Pages

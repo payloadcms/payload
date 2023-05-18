@@ -1,15 +1,15 @@
-import { Payload } from 'payload';
+import type { Payload } from 'payload'
 
-export const seed = async (payload: Payload) => {
-  payload.logger.info('Seeding data...');
+export const seed = async (payload: Payload): Promise<void> => {
+  payload.logger.info('Seeding data...')
 
   await payload.create({
     collection: 'users',
     data: {
       email: 'dev@payloadcms.com',
       password: 'test',
-    }
-  });
+    },
+  })
 
   const { id: homePageID } = await payload.create({
     collection: 'pages',
@@ -28,9 +28,9 @@ export const seed = async (payload: Payload) => {
         type: 'reference',
         reference: {
           relationTo: 'pages',
-          value: homePageID
-        }
-      }
+          value: homePageID,
+        },
+      },
     },
   })
 
@@ -40,8 +40,8 @@ export const seed = async (payload: Payload) => {
       from: 'https://payloadcms.com/bad',
       to: {
         type: 'custom',
-        url: 'https://payloadcms.com/good'
-      }
+        url: 'https://payloadcms.com/good',
+      },
     },
   })
 }
