@@ -1,5 +1,5 @@
-import { RelationshipField } from 'payload/dist/fields/config/types';
-import { Field } from 'payload/types';
+import type { RelationshipField } from 'payload/dist/fields/config/types'
+import type { Field } from 'payload/types'
 
 const createParentField = (relationTo: string, overrides?: Partial<RelationshipField>): Field => ({
   name: 'parent',
@@ -12,9 +12,9 @@ const createParentField = (relationTo: string, overrides?: Partial<RelationshipF
   }),
   admin: {
     position: 'sidebar',
-    ...overrides?.admin || {},
+    ...(overrides?.admin || {}),
   },
-  ...overrides || {}
-});
+  ...(overrides || {}),
+})
 
-export default createParentField;
+export default createParentField

@@ -1,14 +1,20 @@
-export type Breadcrumb = {
+export interface Breadcrumb {
   url?: string
   label: string
   doc: string
 }
 
-export type GenerateURL = (docs: Record<string, unknown>[], currentDoc: Record<string, unknown>) => string;
+export type GenerateURL = (
+  docs: Array<Record<string, unknown>>,
+  currentDoc: Record<string, unknown>,
+) => string
 
-export type GenerateLabel = (docs: Record<string, unknown>[], currentDoc: Record<string, unknown>) => string;
+export type GenerateLabel = (
+  docs: Array<Record<string, unknown>>,
+  currentDoc: Record<string, unknown>,
+) => string
 
-export type PluginConfig = {
+export interface PluginConfig {
   collections: string[]
   generateURL?: GenerateURL
   generateLabel?: GenerateLabel
