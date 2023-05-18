@@ -1,7 +1,7 @@
-import { Payload } from 'payload';
-import { CollectionAfterChangeHook, CollectionConfig } from 'payload/types';
+import type { Payload } from 'payload'
+import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types'
 
-export type DocToSync = {
+export interface DocToSync {
   [key: string]: any
   title: string
   doc: {
@@ -16,9 +16,9 @@ export type BeforeSync = (args: {
   }
   searchDoc: DocToSync
   payload: Payload
-}) => DocToSync | Promise<DocToSync>;
+}) => DocToSync | Promise<DocToSync>
 
-export type SearchConfig = {
+export interface SearchConfig {
   searchOverrides?: Partial<CollectionConfig>
   collections?: string[]
   defaultPriorities?: {
@@ -32,4 +32,4 @@ export type SearchConfig = {
 // TODO: extend this hook with additional args
 // searchConfig: SearchConfig
 // collection: string
-export type SyncWithSearch = CollectionAfterChangeHook;
+export type SyncWithSearch = CollectionAfterChangeHook
