@@ -29,8 +29,8 @@
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
-    "@types/escape-html": "^1.0.1",
     "@payloadcms/eslint-config": "^0.0.1",
+    "@types/escape-html": "^1.0.1",
     "@types/express": "^4.17.9",
     "@types/node": "18.11.3",
     "@types/react": "18.0.21",
@@ -46,7 +46,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "nodemon": "^2.0.6",
-    "payload": "^1.0.6",
+    "payload": "^1.8.2",
     "prettier": "^2.7.1",
     "react": "^18.0.0",
     "ts-node": "^9.1.1",
