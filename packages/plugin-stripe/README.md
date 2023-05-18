@@ -2,7 +2,7 @@
 
 [![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-stripe)](https://www.npmjs.com/package/@payloadcms/plugin-stripe)
 
-A plugin for [Payload CMS](https://github.com/payloadcms/payload) to connect [Stripe](https://stripe.com) and Payload.
+A plugin for [Payload](https://github.com/payloadcms/payload) to connect [Stripe](https://stripe.com) and Payload.
 
 Core features:
 
