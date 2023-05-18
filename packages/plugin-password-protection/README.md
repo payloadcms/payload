@@ -2,11 +2,7 @@
 
 [![NPM](https://img.shields.io/npm/v/payload-plugin-password-protection)](https://www.npmjs.com/package/payload-plugin-password-protection)
 
-A plugin for [Payload CMS](https://github.com/payloadcms/payload) to easily allow for documents to be secured behind a layer of password protection.
-
-Core features:
-  - one
-  - two
+A plugin for [Payload](https://github.com/payloadcms/payload) to easily allow for documents to be secured behind a layer of password protection.
 
 ## Installation
 
@@ -40,15 +36,14 @@ export default config;
 
 #### `collections`
 
-  An array of collections slugs to enable password protection.
+An array of collections slugs to enable password protection.
 
 ## TypeScript
 
 All types can be directly imported:
+
 ```js
-import {
-  PasswordProtectionConfig,
-} from 'payload-plugin-password-protection/dist/types';
+import { PasswordProtectionConfig } from "payload-plugin-password-protection/dist/types";
 ```
 
 ## Screenshots

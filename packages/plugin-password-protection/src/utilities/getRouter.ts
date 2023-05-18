@@ -1,24 +1,19 @@
-import express, { Router } from 'express';
-import { Config as PayloadConfig } from 'payload/config';
-import { PayloadRequest } from 'payload/dist/express/types';
-import { PasswordProtectionOptions } from '../types';
-import operation from './operation';
+import type { Router } from 'express'
+import express from 'express'
+import type { Config as PayloadConfig } from 'payload/config'
+import type { PayloadRequest } from 'payload/dist/express/types'
+
+import type { PasswordProtectionOptions } from '../types'
+import operation from './operation'
 
 export default (config: PayloadConfig, options: PasswordProtectionOptions): Router => {
-  const router = express.Router();
+  const router = express.Router()
 
   // TODO: the second argument of router.post() needs to be typed correctly
-  // @ts-ignore
+  // @ts-expect-error
   router.post(options.routePath || '/validate-password', async (req: PayloadRequest, res) => {
     try {
-      const {
-        body: {
-          collection,
-          password,
-          id,
-        } = {},
-        payload,
-      } = req;
+      const { body: { collection, password, id } = {}, payload } = req
 
       await operation({
         config,
@@ -28,13 +23,13 @@ export default (config: PayloadConfig, options: PasswordProtectionOptions): Rout
         password,
         id,
         res,
-      });
+      })
 
-      res.status(200).send();
-    } catch (e) {
-      res.status(401).send();
+      res.status(200).send()
+    } catch (e: unknown) {
+      res.status(401).send()
     }
-  });
+  })
 
-  return router;
-};
+  return router
+}

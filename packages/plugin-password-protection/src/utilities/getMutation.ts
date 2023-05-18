@@ -1,19 +1,21 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { Payload } from 'payload';
-import { Config } from 'payload/config';
-import GraphQL, { GraphQLFieldConfig } from 'graphql';
-import { PayloadRequest } from 'payload/dist/express/types';
-import { Response } from 'express';
-import operation from './operation';
-import { PasswordProtectionOptions } from '../types';
+import type { Response } from 'express'
+import type { GraphQLFieldConfig } from 'graphql'
+import type GraphQL from 'graphql'
+import type { Payload } from 'payload'
+import type { Config } from 'payload/config'
+import type { PayloadRequest } from 'payload/dist/express/types'
 
-type Args = {
+import type { PasswordProtectionOptions } from '../types'
+import operation from './operation'
+
+interface Args {
   collection: string
   password: string
   id: string
 }
 
-type MutationType = GraphQLFieldConfig<void, { req: PayloadRequest, res: Response }, Args>
+type MutationType = GraphQLFieldConfig<void, { req: PayloadRequest; res: Response }, Args>
 
 const getMutation = (
   GraphQLArg: typeof GraphQL,
@@ -21,7 +23,7 @@ const getMutation = (
   config: Config,
   options: PasswordProtectionOptions,
 ): MutationType => {
-  const { GraphQLBoolean, GraphQLString, GraphQLNonNull } = GraphQLArg;
+  const { GraphQLBoolean, GraphQLString, GraphQLNonNull } = GraphQLArg
 
   return {
     type: GraphQLBoolean,
@@ -37,7 +39,7 @@ const getMutation = (
       },
     },
     resolve: async (_, args, context) => {
-      const { collection, password, id } = args;
+      const { collection, password, id } = args
 
       try {
         await operation({
@@ -48,14 +50,14 @@ const getMutation = (
           password,
           id,
           res: context.res,
-        });
+        })
 
-        return true;
+        return true
       } catch {
-        return false;
+        return false
       }
     },
-  };
-};
+  }
+}
 
-export default getMutation;
+export default getMutation
