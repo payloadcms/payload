@@ -1,7 +1,10 @@
-import { ArrayField } from 'payload/dist/fields/config/types';
-import { Field } from 'payload/types';
+import type { ArrayField } from 'payload/dist/fields/config/types'
+import type { Field } from 'payload/types'
 
-const createBreadcrumbsField = (relationTo: string, overrides: Partial<ArrayField> = {}): Field => ({
+const createBreadcrumbsField = (
+  relationTo: string,
+  overrides: Partial<ArrayField> = {},
+): Field => ({
   name: 'breadcrumbs',
   type: 'array',
   fields: [
@@ -34,13 +37,13 @@ const createBreadcrumbsField = (relationTo: string, overrides: Partial<ArrayFiel
         },
       ],
     },
-    ...overrides?.fields || []
+    ...(overrides?.fields || []),
   ],
   admin: {
     readOnly: true,
-    ...overrides?.admin || {}
+    ...(overrides?.admin || {}),
   },
-  ...overrides || {}
-});
+  ...(overrides || {}),
+})
 
-export default createBreadcrumbsField;
+export default createBreadcrumbsField
