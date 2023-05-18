@@ -2,7 +2,7 @@
 
 [![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-redirects)](https://www.npmjs.com/package/@payloadcms/plugin-redirects)
 
-A plugin for [Payload CMS](https://github.com/payloadcms/payload) to easily manage your redirects.
+A plugin for [Payload](https://github.com/payloadcms/payload) to easily manage your redirects.
 
 Core features:
 

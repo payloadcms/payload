@@ -1,6 +1,6 @@
-import { CollectionConfig } from "payload/types"
+import type { CollectionConfig } from 'payload/types'
 
-export type PluginConfig = {
+export interface PluginConfig {
   overrides?: Partial<CollectionConfig>
   collections?: string[]
 }
