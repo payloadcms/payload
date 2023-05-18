@@ -1,4 +1,3 @@
 module.exports = {
-  root: true,
-  extends: ['./eslint-config'],
+  extends: ['@payloadcms'],
 }

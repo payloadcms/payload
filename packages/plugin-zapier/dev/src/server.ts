@@ -1,8 +1,8 @@
+import dotenv from 'dotenv'
+dotenv.config()
+
 import express from 'express'
 import payload from 'payload'
-
-require('dotenv').config() // eslint-disable-line
-/* eslint-disable no-process-env */
 
 const app = express()
 

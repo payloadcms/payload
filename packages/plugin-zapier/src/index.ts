@@ -1,6 +1,7 @@
 import payload from 'payload'
 import type { Config } from 'payload/config'
 import type { CollectionConfig } from 'payload/dist/collections/config/types'
+
 import type { PluginConfig, ShouldSendZap, Zap } from './types'
 
 const zap: Zap = ({ collectionSlug, data, operation, webhookURL }) =>
