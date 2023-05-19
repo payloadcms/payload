@@ -13,8 +13,16 @@ const recursivelyBuildNestedPaths = (parentName: string, field: FieldWithSubFiel
       const nestedFieldName = fieldAffectsData(nestedField) ? `${field.name}__${nestedField.name}` : undefined;
 
       if (getFieldSchema) {
+        let maybeTransformedNestedField = nestedField;
+        if (nestedField.type === 'row') {
+          maybeTransformedNestedField = {
+            ...nestedField,
+            fields: nestedField.fields.map((item) => ({ ...item, name: fieldAffectsData(item) ? `${field.name}__${item.name}` : undefined })),
+          };
+        }
+
         const fieldSchema = getFieldSchema({
-          ...nestedField,
+          ...maybeTransformedNestedField,
           name: nestedFieldName,
         });
 
