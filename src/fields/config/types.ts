@@ -183,6 +183,13 @@ export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
   admin?: Admin & {
     hideGutter?: boolean
   }
+  /** Customize generated GraphQL and Typescript schema names.
+   * By default it is bound to the collection.
+   *
+   * This is useful if you would like to share a group field interface amongst collections.
+   * **Note**: These will become top level types, so make sure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interface?: string
 }
 
 export type RowAdmin = Omit<Admin, 'description'>;
@@ -207,13 +214,22 @@ export type TabsAdmin = Omit<Admin, 'description'>;
 type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
   fields: Field[]
   description?: Description
+  interface?: string
 }
 
-export type NamedTab = TabBase
+export type NamedTab = TabBase & {
+  /** Customize generated GraphQL and Typescript schema names.
+   * The slug is used by default.
+   *
+   * **Note**: These will become top level types, so make sure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interface?: string
+}
 
 export type UnnamedTab = Omit<TabBase, 'name'> & {
   label: Record<string, string> | string
   localized?: never
+  interface?: never
 }
 
 export type Tab = NamedTab | UnnamedTab
@@ -354,7 +370,7 @@ export type RichTextField = FieldBase & {
       }
     }
     link?: {
-      fields?: Field[] | ((args: {defaultFields: Field[], config: SanitizedConfig, i18n: Ii18n}) => Field[]);
+      fields?: Field[] | ((args: { defaultFields: Field[], config: SanitizedConfig, i18n: Ii18n }) => Field[]);
     }
   }
 }
@@ -371,6 +387,12 @@ export type ArrayField = FieldBase & {
       RowLabel?: RowLabel
     } & Admin['components']
   };
+  /** Customize generated GraphQL and Typescript schema names.
+   * By default it is bound to the collection.
+   *
+   * **Note**: These will become top level types, so make sure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interface?: string
 };
 
 export type RadioField = FieldBase & {
@@ -387,9 +409,17 @@ export type Block = {
   fields: Field[];
   imageURL?: string;
   imageAltText?: string;
+  /** @deprecated - please migrate to the interface property instead. */
   graphQL?: {
     singularName?: string
   }
+  /** Customize generated GraphQL and Typescript schema names.
+   * The slug is used by default.
+   *
+   * This is useful if your block slug collides with a collection slug.
+   * **Note**: These will become top level types, so make sure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interface?: string
 }
 
 export type BlockField = FieldBase & {

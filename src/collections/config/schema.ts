@@ -29,6 +29,13 @@ const collectionSchema = joi.object().keys({
     admin: joi.func(),
   }),
   defaultSort: joi.string(),
+  interface: joi.alternatives().try(
+    joi.string(),
+    joi.object({
+      singular: joi.string(),
+      plural: joi.string(),
+    }),
+  ),
   graphQL: joi.object().keys({
     singularName: joi.string(),
     pluralName: joi.string(),
