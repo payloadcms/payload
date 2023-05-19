@@ -7,7 +7,8 @@ keywords: rest, api, documentation, Content Management System, cms, headless, ja
 ---
 
 <Banner>
-  A fully functional REST API is automatically generated from your Collection and Global configs.
+  A fully functional REST API is automatically generated from your Collection
+  and Global configs.
 </Banner>
 
 All Payload API routes are mounted prefixed to your config's `routes.api` URL segment (default: `/api`).
@@ -26,15 +27,177 @@ Note: Collection slugs must be formatted in kebab-case
 
 **All CRUD operations are exposed as follows:**
 
-| Method   | Path                          | Description                                      |
-|----------|-------------------------------|--------------------------------------------------|
-| `GET`    | `/api/{collection-slug}`      | Find paginated documents                         |
-| `GET`    | `/api/{collection-slug}/:id`  | Find a specific document by ID                   |
-| `POST`   | `/api/{collection-slug}`      | Create a new document                            |
-| `PATCH`  | `/api/{collection-slug}`      | Update all documents matching the `where` query  |
-| `PATCH`  | `/api/{collection-slug}/:id`  | Update a document by ID                          |
-| `DELETE` | `/api/{collection-slug}`      | Delete all documents matching the `where` query  |
-| `DELETE` | `/api/{collection-slug}/:id`  | Delete an existing document by ID                |
+<RestExamples
+  data={[
+    {
+      operation: "Find",
+      method: "GET",
+      path: "/api/{collection-slug}",
+      description: "Find paginated documents",
+      example: {
+        slug: "getCollection",
+        req: true,
+        res: {
+          paginated: true,
+          data: {
+            id: "644a5c24cc1383022535fc7c",
+            title: "Home",
+            content: "REST API examples",
+            slug: "home",
+            createdAt: "2023-04-27T11:27:32.419Z",
+            updatedAt: "2023-04-27T11:27:32.419Z",
+          },
+        },
+      },
+    },
+    {
+      operation: "Find By ID",
+      method: "GET",
+      path: "/api/{collection-slug}/{id}",
+      description: "Find a specific document by ID",
+      example: {
+        slug: "findByID",
+        req: true,
+        res: {
+          id: "644a5c24cc1383022535fc7c",
+          title: "Home",
+          content: "REST API examples",
+          slug: "home",
+          createdAt: "2023-04-27T11:27:32.419Z",
+          updatedAt: "2023-04-27T11:27:32.419Z",
+        },
+      },
+    },
+    {
+      operation: "Create",
+      method: "POST",
+      path: "/api/{collection-slug}",
+      description: "Create a new document",
+      example: {
+        slug: "createDocument",
+        req: {
+          headers: true,
+          body: {
+            title: "New page",
+            content: "Here is some content",
+          },
+        },
+        res: {
+          message: "Page successfully created.",
+          doc: {
+            id: "644ba34c86359864f9535932",
+            title: "New page",
+            content: "Here is some content",
+            slug: "new-page",
+            createdAt: "2023-04-28T10:43:24.466Z",
+            updatedAt: "2023-04-28T10:43:24.466Z",
+          },
+        },
+      },
+    },
+    {
+      operation: "Update",
+      method: "PATCH",
+      path: "/api/{collection-slug}",
+      description: "Update all documents matching the where query",
+      example: {
+        slug: "updateDocument",
+        req: {
+          query: true,
+          headers: true,
+          body: {
+            title: "I have been updated!",
+          },
+        },
+        res: {
+          docs: [
+            {
+              id: "644ba34c86359864f9535932",
+              title: "I have been updated!",
+              content: "Here is some content",
+              slug: "new-page",
+              createdAt: "2023-04-28T10:43:24.466Z",
+              updatedAt: "2023-04-28T10:45:23.724Z",
+            },
+          ],
+          errors: [],
+        },
+      },
+    },
+    {
+      operation: "Update By ID",
+      method: "PATCH",
+      path: "/api/{collection-slug}/{id}",
+      description: "Update a document by ID",
+      example: {
+        slug: "updateDocumentByID",
+        req: {
+          headers: true,
+          body: {
+            title: "I have been updated by ID!",
+          },
+        },
+        res: {
+          message: "Updated successfully.",
+          doc: {
+            id: "644a5c24cc1383022535fc7c",
+            title: "I have been updated by ID!",
+            content: "REST API examples",
+            slug: "home",
+            createdAt: "2023-04-27T11:27:32.419Z",
+            updatedAt: "2023-04-28T10:47:59.259Z",
+          },
+        },
+      },
+    },
+    {
+      operation: "Delete",
+      method: "DELETE",
+      path: "/api/{collection-slug}",
+      description: "Delete all documents matching the where query",
+      example: {
+        slug: "deleteDocuments",
+        req: {
+          query: true,
+          headers: true,
+        },
+        res: {
+          docs: [
+            {
+              id: "644ba4cf86359864f953594b",
+              title: "New page",
+              content: "Here is some content",
+              slug: "new-page",
+              createdAt: "2023-04-28T10:49:51.359Z",
+              updatedAt: "2023-04-28T10:49:51.359Z",
+            },
+          ],
+          errors: [],
+        },
+      },
+    },
+    {
+      operation: "Delete by ID",
+      method: "DELETE",
+      path: "/api/{collection-slug}/{id}",
+      description: "Delete an existing document by ID",
+      example: {
+        slug: "deleteByID",
+        req: {
+          headers: true,
+        },
+        res: {
+          id: "644ba51786359864f9535954",
+          title: "New page",
+          content: "Here is some content",
+          slug: "new-page",
+          createdAt: "2023-04-28T10:51:03.028Z",
+          updatedAt: "2023-04-28T10:51:03.028Z",
+        },
+      },
+    },
+  ]}
+/>
 
 ##### Additional `find` query parameters
 
@@ -49,35 +212,300 @@ The `find` endpoint supports the following additional query parameters:
 
 Auth enabled collections are also given the following endpoints:
 
-| Method   | Path                        | Description |
-| -------- | --------------------------- | ----------- |
-| `POST`   | `/api/{collection-slug}/verify/:token`   | [Email verification](/docs/authentication/operations#verify-by-email), if enabled. |
-| `POST`   | `/api/{collection-slug}/unlock`          | [Unlock a user's account](/docs/authentication/operations#unlock), if enabled. |
-| `POST`   | `/api/{collection-slug}/login`           | [Logs in](/docs/authentication/operations#login) a user with email / password. |
-| `POST`   | `/api/{collection-slug}/logout`          | [Logs out](/docs/authentication/operations#logout) a user. |
-| `POST`   | `/api/{collection-slug}/refresh-token`   | [Refreshes a token](/docs/authentication/operations#refresh) that has not yet expired. |
-| `GET`    | `/api/{collection-slug}/me`              | [Returns the currently logged in user with token](/docs/authentication/operations#me). |
-| `POST`   | `/api/{collection-slug}/forgot-password` | [Password reset workflow](/docs/authentication/operations#forgot-password) entry point. |
-| `POST`   | `/api/{collection-slug}/reset-password`  | [To reset the user's password](/docs/authentication/operations#reset-password). |
+<RestExamples
+  data={[
+    {
+      operation: "Login",
+      method: "POST",
+      path: "/api/{user-collection}/login",
+      description: "Logs in a user with email / password",
+      example: {
+        slug: "login",
+        req: {
+          headers: true,
+          body: {
+            email: "dev@payloadcms.com",
+            password: "password",
+          },
+        },
+        res: {
+          message: "Auth Passed",
+          user: {
+            id: "644b8453cd20c7857da5a9b0",
+            email: "dev@payloadcms.com",
+            _verified: true,
+            createdAt: "2023-04-28T08:31:15.788Z",
+            updatedAt: "2023-04-28T11:11:03.716Z",
+          },
+          token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+          exp: 1682689147,
+        },
+      },
+    },
+    {
+      operation: "Logout",
+      method: "POST",
+      path: "/api/{user-collection}/logout",
+      description: "Logs out a user",
+      example: {
+        slug: "logout",
+        req: {
+          headers: true,
+        },
+        res: {
+          message: "You have been logged out successfully.",
+        },
+      },
+    },
+    {
+      operation: "Unlock",
+      method: "POST",
+      path: "/api/{user-collection}/unlock",
+      description: "Unlock a user account",
+      example: {
+        slug: "unlockCollection",
+        req: {
+          headers: true,
+          body: {
+            email: "dev@payloadcms.com",
+          },
+        },
+        res: {
+          message: "Success",
+        },
+      },
+    },
+    {
+      operation: "Refresh",
+      method: "POST",
+      path: "/api/{user-collection}/refresh-token",
+      description: "Refreshes a token that has not yet expired",
+      example: {
+        slug: "refreshToken",
+        req: {
+          headers: true,
+        },
+        res: {
+          message: "Token refresh successful",
+          refreshedToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+          exp: 1682689362,
+          user: {
+            email: "dev@payloadcms.com",
+            id: "644b8453cd20c7857da5a9b0",
+            collection: "users",
+          },
+        },
+      },
+    },
+    {
+      operation: "Verify User",
+      method: "POST",
+      path: "/api/{user-collection}/verify/{token}",
+      description: "User verification",
+      example: {
+        slug: "verifyUser",
+        req: {
+          prop: "token: string, user-collection: string",
+          headers: true,
+        },
+        res: {
+          message: "Email verified successfully.",
+        },
+      },
+    },
+    {
+      operation: "Current User",
+      method: "GET",
+      path: "/api/{user-collection}/me",
+      description: "Returns the currently logged in user with token",
+      example: {
+        slug: "currentUser",
+        req: {
+          headers: true,
+        },
+        res: {
+          user: {
+            id: "644b8453cd20c7857da5a9b0",
+            email: "dev@payloadcms.com",
+            _verified: true,
+            createdAt: "2023-04-28T08:31:15.788Z",
+            updatedAt: "2023-04-28T11:45:23.926Z",
+            _strategy: "local-jwt",
+          },
+          collection: "users",
+          token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+          exp: 1682689523,
+        },
+      },
+    },
+    {
+      operation: "Forgot Password",
+      method: "POST",
+      path: "/api/{user-collection}/forgot-password",
+      description: "Password reset workflow entry point",
+      example: {
+        slug: "forgotPassword",
+        req: {
+          headers: true,
+          body: {
+            email: "dev@payloadcms.com",
+          },
+        },
+        res: {
+          message: "Success",
+        },
+      },
+    },
+    {
+      operation: "Reset Password",
+      method: "POST",
+      path: "/api/{user-collection}/reset-password",
+      description: "Reset user password",
+      example: {
+        slug: "resetPassword",
+        req: {
+          headers: true,
+          body: {
+            token: "7eac3830ffcfc7f9f66c00315dabeb11575dba91",
+            password: "newPassword",
+          },
+        },
+        res: {
+          message: "Password reset successfully.",
+          token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+          user: {
+            id: "644baa473ea9538765cc30fc",
+            email: "dev@payloadcms.com",
+            _verified: true,
+            createdAt: "2023-04-28T11:13:11.569Z",
+            updatedAt: "2023-04-28T11:49:23.860Z",
+          },
+        },
+      },
+    },
+
+]}
+/>
 
 ## Globals
 
 Globals cannot be created or deleted, so there are only two REST endpoints opened:
 
-| Method   | Path                        | Description             |
-| -------- | --------------------------- | ----------------------- |
-| `GET`    | `/api/globals/{globalSlug}` | Get a global by slug    |
-| `POST`   | `/api/globals/{globalSlug}` | Update a global by slug |
+<RestExamples
+  data={[
+    {
+      operation: "Get Global",
+      method: "GET",
+      path: "/api/globals/{global-slug}",
+      description: "Get a global by slug",
+      example: {
+        slug: "getGlobal",
+        req: {
+          headers: true,
+        },
+        res: {
+          announcement: "Here is an announcement!",
+          globalType: "announcement",
+          createdAt: "2023-04-28T08:53:56.066Z",
+          updatedAt: "2023-04-28T08:53:56.066Z",
+          id: "644b89a496c64a833fe579c9",
+        },
+      },
+    },
+    {
+      operation: "Update Global",
+      method: "POST",
+      path: "/api/globals/{global-slug}",
+      description: "Update a global by slug",
+      example: {
+        slug: "updateGlobal",
+        req: {
+          headers: true,
+          body: {
+            announcement: "Paging Doctor Scrunt",
+          },
+        },
+        res: {
+          announcement: "Paging Doctor Scrunt",
+          globalType: "announcement",
+          createdAt: "2023-04-28T08:53:56.066Z",
+          updatedAt: "2023-04-28T08:53:56.066Z",
+          id: "644b89a496c64a833fe579c9",
+        },
+      },
+    },
+  ]}
+/>
 
 ## Preferences
 
 In addition to the dynamically generated endpoints above Payload also has REST endpoints to manage the admin user [preferences](/docs/admin/overview#preferences) for data specific to the authenticated user.
 
-| Method   | Path                        | Description             |
-| -------- | --------------------------- | ----------------------- |
-| `GET`    | `/api/_preferences/{key}` | Get a preference by key   |
-| `POST`   | `/api/_preferences/{key}` | Create or update by key   |
-| `DELETE` | `/api/_preferences/{key}` | Delete a user preference by key |
+<RestExamples
+  data={[
+    {
+      operation: "Get Preference",
+      method: "GET",
+      path: "/api/_preferences/{key}",
+      description: "Get a preference by key",
+      example: {
+        slug: "getPreference",
+        req: {
+          headers: true,
+        },
+        res: {
+          _id: "644bb7a8307b3d363c6edf2c",
+          key: "region",
+          user: "644b8453cd20c7857da5a9b0",
+          userCollection: "users",
+          __v: 0,
+          createdAt: "2023-04-28T12:10:16.689Z",
+          updatedAt: "2023-04-28T12:10:16.689Z",
+          value: "Europe/London",
+        },
+      },
+    },
+    {
+      operation: "Create Preference",
+      method: "POST",
+      path: "/api/_preferences/{key}",
+      description: "Create or update a preference by key",
+      example: {
+        slug: "createPreference",
+        req: {
+          headers: true,
+          body: {
+            value: "Europe/London",
+          },
+        },
+        res: {
+          message: "Updated successfully.",
+          doc: {
+            user: "644b8453cd20c7857da5a9b0",
+            key: "region",
+            userCollection: "users",
+            value: "Europe/London",
+          },
+        },
+      },
+    },
+    {
+      operation: "Delete Preference",
+      method: "DELETE",
+      path: "/api/_preferences/{key}",
+      description: "Delete a preference by key",
+      example: {
+        slug: "deletePreference",
+        req: {
+          headers: true,
+        },
+        res: {
+          message: "deletedSuccessfully",
+        },
+      },
+    },
+  ]}
+/>
 
 ## Custom Endpoints
 
@@ -85,43 +513,48 @@ Additional REST API endpoints can be added to your application by providing an a
 
 Each endpoint object needs to have:
 
-| Property   | Description                               |
-| ---------- | ----------------------------------------- |
-| **`path`**     | A string for the endpoint route after the collection or globals slug |
-| **`method`**   | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options' |
-| **`handler`**  | A function or array of functions to be called with **req**, **res** and **next** arguments. [Express](https://expressjs.com/en/guide/routing.html#route-handlers) |
-| **`root`**     | When `true`, defines the endpoint on the root Express app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload config, endpoints defined on `collections` or `globals` cannot be root. |
-| **`custom`**   | Extension point for adding custom data (e.g. for plugins) |
+| Property      | Description                                                                                                                                                                                                                                                |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`path`**    | A string for the endpoint route after the collection or globals slug                                                                                                                                                                                       |
+| **`method`**  | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                                             |
+| **`handler`** | A function or array of functions to be called with **req**, **res** and **next** arguments. [Express](https://expressjs.com/en/guide/routing.html#route-handlers)                                                                                          |
+| **`root`**    | When `true`, defines the endpoint on the root Express app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload config, endpoints defined on `collections` or `globals` cannot be root. |
+| **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                  |
 
 Example:
 
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from "payload/types";
 
 // a collection of 'orders' with an additional route for tracking details, reachable at /api/orders/:id/tracking
 export const Orders: CollectionConfig = {
-	slug: 'orders',
-	fields: [ /* ... */ ],
+  slug: "orders",
+  fields: [
+    /* ... */
+  ],
   // highlight-start
   endpoints: [
     {
-      path: '/:id/tracking',
-      method: 'get',
+      path: "/:id/tracking",
+      method: "get",
       handler: async (req, res, next) => {
         const tracking = await getTrackingInfo(req.params.id);
         if (tracking) {
           res.status(200).send({ tracking });
         } else {
-          res.status(404).send({ error: 'not found' });
+          res.status(404).send({ error: "not found" });
         }
-      }
-    }
+      },
+    },
   ],
   // highlight-end
-}
+};
 ```
 
 <Banner>
-  <strong>Note:</strong><br/>
-  **req** will have the **payload** object and can be used inside your endpoint handlers for making calls like req.payload.find() that will make use of access control and hooks.
+  <strong>Note:</strong>
+  <br />
+  **req** will have the **payload** object and can be used inside your endpoint
+  handlers for making calls like req.payload.find() that will make use of access
+  control and hooks.
 </Banner>
