@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { log } from 'console';
 import payload from '../../src';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { devUser } from '../credentials';
@@ -40,34 +41,35 @@ describe('_Community Tests', () => {
     await payload.mongoMemoryServer.stop();
   });
 
-  // --__--__--__--__--__--__--__--__--__
-  // You can run tests against the local API or the REST API
-  // use the tests below as a guide
-  // --__--__--__--__--__--__--__--__--__
+  describe('GRAPHQL', () => {
+    it('should query testGroup__textInRowInGroup', async () => {
+      const gqlQuery = await fetch(`${apiUrl}/graphql`, {
+        method: 'POST',
+        headers: {
+          ...headers,
+          Authorization: `JWT ${jwt}`,
+        },
+        body: JSON.stringify({
+          operationName: null,
+          variables: {},
+          query: '{\n  Posts(where: {testGroup__textInRowInGroup: {equals: "textInRowInGroup"}}) {\n    totalDocs\n    docs {\n      id\n      testGroup {\n        textInRowInGroup\n        textInGroup\n      }\n      text\n      textInRow\n    }\n  }\n}\n',
+        }),
+      }).then((res) => res.json());
 
-  it('local API example', async () => {
-    const newPost = await payload.create({
-      collection: postsSlug,
-      data: {
-        text: 'LOCAL API EXAMPLE',
-      },
+      expect(gqlQuery.data.Posts.totalDocs).toBeGreaterThan(0);
     });
-
-    expect(newPost.text).toEqual('LOCAL API EXAMPLE');
   });
+  describe('REST', () => {
+    it('should query testGroup.textInRowInGroup', async () => {
+      const restQuery = await fetch(`${apiUrl}/posts?where[testGroup.textInRowInGroup][equals]=textInRowInGroup`, {
+        method: 'GET',
+        headers: {
+          ...headers,
+          Authorization: `JWT ${jwt}`,
+        },
+      }).then((res) => res.json());
 
-  it('rest API example', async () => {
-    const newPost = await fetch(`${apiUrl}/${postsSlug}`, {
-      method: 'POST',
-      headers: {
-        ...headers,
-        Authorization: `JWT ${jwt}`,
-      },
-      body: JSON.stringify({
-        text: 'REST API EXAMPLE',
-      }),
-    }).then((res) => res.json());
-
-    expect(newPost.doc.text).toEqual('REST API EXAMPLE');
+      expect(restQuery.totalDocs).toBeGreaterThan(0);
+    });
   });
 });
