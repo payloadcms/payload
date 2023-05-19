@@ -11,6 +11,37 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      type: 'group',
+      name: 'testGroup',
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              type: 'text',
+              name: 'textInRowInGroup',
+              defaultValue: 'textInRowInGroup',
+            },
+          ],
+        },
+        {
+          type: 'text',
+          name: 'textInGroup',
+          defaultValue: 'textInGroup',
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          type: 'text',
+          name: 'textInRow',
+          defaultValue: 'textInRow',
+        },
+      ],
+    },
+    {
       name: 'associatedMedia',
       type: 'upload',
       relationTo: mediaSlug,
