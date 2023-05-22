@@ -12,12 +12,20 @@ import Tooltip from '../../../../elements/Tooltip';
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer';
 import { useConfig } from '../../../../utilities/Config';
 import { Props as EditViewProps } from '../../../../views/collections/Edit/types';
+import { Value } from '../types';
 
 import './index.scss';
 
 const baseClass = 'relationship-add-new';
 
-export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, value, setValue, dispatchOptions }) => {
+export const AddNewRelation: React.FC<Props> = ({
+  path,
+  hasMany,
+  relationTo,
+  value,
+  setValue,
+  dispatchOptions,
+}) => {
   const relatedCollections = useRelatedCollections(relationTo);
   const { permissions } = useAuth();
   const [show, setShow] = useState(false);
@@ -37,30 +45,43 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
     collectionSlug: collectionConfig?.slug,
   });
 
-  const onSave: EditViewProps['onSave'] = useCallback((json) => {
-    const newValue = Array.isArray(relationTo) ? {
-      relationTo: collectionConfig.slug,
-      value: json.doc.id,
-    } : json.doc.id;
+  const onSave: EditViewProps['onSave'] = useCallback(({
+    operation,
+    doc,
+  }) => {
+    if (operation === 'create') {
+      const newValue: Value = Array.isArray(relationTo) ? {
+        relationTo: collectionConfig.slug,
+        value: doc.id,
+      } : doc.id;
 
-    dispatchOptions({
-      type: 'ADD',
-      collection: collectionConfig,
-      docs: [
-        json.doc,
-      ],
-      sort: true,
-      i18n,
-      config,
-    });
+      // ensure the value is not already in the array
+      const isNewValue = Array.isArray(relationTo) && Array.isArray(value)
+        ? !value.some((v) => v && typeof v === 'object' && v.value === doc.id)
+        : value !== doc.id;
 
-    if (hasMany) {
-      setValue([...(Array.isArray(value) ? value : []), newValue]);
-    } else {
-      setValue(newValue);
+      if (isNewValue) {
+        dispatchOptions({
+          type: 'ADD',
+          collection: collectionConfig,
+          docs: [
+            doc,
+          ],
+          sort: true,
+          i18n,
+          config,
+        });
+
+
+        if (hasMany) {
+          setValue([...(Array.isArray(value) ? value : []), newValue]);
+        } else {
+          setValue(newValue);
+        }
+      }
+
+      setSelectedCollection(undefined);
     }
-
-    setSelectedCollection(undefined);
   }, [relationTo, collectionConfig, dispatchOptions, i18n, hasMany, setValue, value, config]);
 
   const onPopopToggle = useCallback((state) => {
