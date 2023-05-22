@@ -319,8 +319,11 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
         requestedID = val.value;
       }
 
-      const idField = payload.collections[collection].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+      if (requestedID === null) return false
+
+      const idField = payload.collections[collection]?.config?.fields?.find((field) => fieldAffectsData(field) && field.name === 'id');
       let type;
+
       if (idField) {
         type = idField.type === 'number' ? 'number' : 'text';
       } else {
