@@ -93,6 +93,9 @@ export default buildConfig({
     },
     {
       slug: 'custom-ids',
+      access: {
+        read: () => true,
+      },
       fields: [
         {
           name: 'id',
@@ -127,10 +130,18 @@ export default buildConfig({
     await payload.create({
       collection: slug,
       data: {
-        title: 'post1',
+        title: 'has custom ID relation',
         relationToCustomID: 1,
       },
     });
+
+    await payload.create({
+      collection: slug,
+      data: {
+        title: 'post1',
+      },
+    });
+
     await payload.create({
       collection: slug,
       data: {

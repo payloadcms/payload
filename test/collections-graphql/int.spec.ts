@@ -368,17 +368,17 @@ describe('collections-graphql', () => {
     describe('relationships', () => {
       it('should query on relationships with custom IDs', async () => {
         const query = `query {
-        Posts(where: { title: { equals: "post1" }}) {
-          docs {
-            id
-            title
-            relationToCustomID {
+          Posts(where: { title: { equals: "has custom ID relation" }}) {
+            docs {
               id
+              title
+              relationToCustomID {
+                id
+              }
             }
+            totalDocs
           }
-          totalDocs
-        }
-      }`;
+        }`;
 
         const response = await client.request(query);
         const { docs, totalDocs } = response.Posts;
