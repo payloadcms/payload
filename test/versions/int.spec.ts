@@ -510,6 +510,27 @@ describe('Versions', () => {
 
       expect(draftFindResults.docs).toHaveLength(0);
     });
+
+    it('should be able to query by id with draft=true', async () => {
+      const allDocs = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+      });
+
+      expect(allDocs.docs.length).toBeGreaterThan(1);
+
+      const byID = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+        where: {
+          id: {
+            equals: allDocs.docs[0].id,
+          },
+        },
+      });
+
+      expect(byID.docs).toHaveLength(1);
+    });
   });
 
   describe('Collections - GraphQL', () => {
