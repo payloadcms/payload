@@ -11,6 +11,7 @@ import { getTranslation } from '../../../../../../utilities/getTranslation';
 import Tooltip from '../../../../elements/Tooltip';
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer';
 import { useConfig } from '../../../../utilities/Config';
+import { Props as EditViewProps } from '../../../../views/collections/Edit/types';
 
 import './index.scss';
 
@@ -36,7 +37,7 @@ export const AddNewRelation: React.FC<Props> = ({ path, hasMany, relationTo, val
     collectionSlug: collectionConfig?.slug,
   });
 
-  const onSave = useCallback((json) => {
+  const onSave: EditViewProps['onSave'] = useCallback((json) => {
     const newValue = Array.isArray(relationTo) ? {
       relationTo: collectionConfig.slug,
       value: json.doc.id,

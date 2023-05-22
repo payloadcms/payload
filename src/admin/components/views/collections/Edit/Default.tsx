@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
@@ -43,7 +43,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
     collection,
     isEditing,
     data,
-    onSave,
+    onSave: onSaveFromProps,
     permissions,
     isLoading,
     internalState,
@@ -77,6 +77,15 @@ const DefaultEditView: React.FC<Props> = (props) => {
     baseClass,
     isEditing && `${baseClass}--is-editing`,
   ].filter(Boolean).join(' ');
+
+  const onSave = useCallback((json) => {
+    if (typeof onSaveFromProps === 'function') {
+      onSaveFromProps({
+        ...json,
+        operation: id ? 'update' : 'create',
+      });
+    }
+  }, [id, onSaveFromProps]);
 
   const operation = isEditing ? 'update' : 'create';
 
