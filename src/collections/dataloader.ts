@@ -54,12 +54,16 @@ const batchAndLoadDocs = (req: PayloadRequest): BatchLoadFn<string, TypeWithID> 
 
     const idField = payload.collections?.[collection].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
 
-    if (isValidID(id, getIDType(idField))) {
+    let sanitizedID: string | number = id
+
+    if (idField?.type === 'number') sanitizedID = parseFloat(id)
+
+    if (isValidID(sanitizedID, getIDType(idField))) {
       return {
         ...batches,
         [batchKey]: [
           ...batches[batchKey] || [],
-          id,
+          sanitizedID,
         ],
       };
     }
