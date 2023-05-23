@@ -16,7 +16,7 @@ import {
   TextareaField,
   TextField, UploadField,
 } from '../../fields/config/types';
-import withOperators from './withOperators';
+import { withOperators } from './withOperators';
 import combineParentName from '../utilities/combineParentName';
 import formatName from '../utilities/formatName';
 import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths';

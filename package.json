@@ -38,7 +38,7 @@
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"yarn build:tsc\"",
     "dev": "nodemon",
     "dev:generate-types": "ts-node -T ./test/generateTypes.ts",
-    "dev:generate-graphql-schema": "cross-env PAYLOAD_CONFIG_PATH=test/graphql-schema-gen/config.ts ts-node -T ./src/bin/generateGraphQLSchema.ts",
+    "dev:generate-graphql-schema": "ts-node -T ./test/generateGraphQLSchema.ts",
     "pretest": "yarn build",
     "test": "yarn test:int && yarn test:components && yarn test:e2e",
     "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",

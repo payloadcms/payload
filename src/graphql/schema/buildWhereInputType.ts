@@ -4,8 +4,6 @@ import {
   GraphQLInputObjectType, GraphQLList,
 } from 'graphql';
 
-import { GraphQLJSON } from 'graphql-type-json';
-
 import {
   Field,
   FieldAffectingData,
@@ -13,7 +11,7 @@ import {
   fieldIsPresentationalOnly,
 } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
-import withOperators from './withOperators';
+import { withOperators } from './withOperators';
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap';
 
 // buildWhereInputType is similar to buildObjectType and operates
@@ -56,7 +54,7 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
 
   fieldTypes.id = {
     type: withOperators(
-      { name: 'id', type: 'json' } as FieldAffectingData,
+      { name: 'id', type: 'text' } as FieldAffectingData,
       parentName,
     ),
   };
