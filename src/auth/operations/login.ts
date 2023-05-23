@@ -11,6 +11,7 @@ import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import unlock from './unlock';
+import { buildAfterOperation } from '../../collections/operations/utils';
 
 export type Result = {
   user?: User,
@@ -210,15 +211,24 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     }) || user;
   }, Promise.resolve());
 
-  // /////////////////////////////////////
-  // Return results
-  // /////////////////////////////////////
 
-  return {
+  let result = {
     token,
     user,
     exp: (jwt.decode(token) as jwt.JwtPayload).exp,
   };
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation(args, result, 'login');
+
+  // /////////////////////////////////////
+  // Return results
+  // /////////////////////////////////////
+
+  return result;
 }
 
 export default login;

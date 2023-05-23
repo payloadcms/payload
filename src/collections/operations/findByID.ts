@@ -7,6 +7,7 @@ import { NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   collection: Collection
@@ -168,6 +169,12 @@ async function findByID<T extends TypeWithID>(
       doc: result,
     }) || result;
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation(args, result, 'read');
 
   // /////////////////////////////////////
   // Return results

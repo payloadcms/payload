@@ -12,6 +12,7 @@ import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 import { BuildQueryArgs } from '../../mongoose/buildQuery';
 import { CustomPreviewButtonProps, CustomPublishButtonProps, CustomSaveButtonProps, CustomSaveDraftButtonProps } from '../../admin/components/elements/types';
+import { PaginatedDocs } from '../../mongoose/types';
 
 type Register<T = any> = (doc: T, password: string) => T;
 
@@ -113,14 +114,43 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   id: string | number;
 }) => any;
 
-export type AfterOperationHook = (args: {
-  args?: any;
-  /**
-   * Hook operation being performed
-   */
-  operation: HookOperationType;
-  docs: any[]; // todo: improve typing
-}) => any;
+export type AfterOperationHook<T extends TypeWithID = any> = {
+  args?: any
+} | {
+  operation: 'create'
+  result: T
+} | {
+  operation: 'autosave'
+  result: T
+} | {
+  operation: 'read'
+  result: T | PaginatedDocs<T>
+}
+// {
+//   operation: 'update'
+//   result: T | PaginatedDocs<T>
+// }| {
+//   operation: 'delete'
+//   result: T | PaginatedDocs<T>
+// }| {
+//   operation: 'refresh'
+//   result: T | PaginatedDocs<T>
+// }| {
+//   operation: 'login'
+//   result: T | PaginatedDocs<T>
+// }
+//   | {
+//   operation: 'forgotPassword'
+//   result: T | PaginatedDocs<T>
+// }
+// TODO: finish other operations - update, delete, refresh, login, forgotPassword
+
+// export type AfterOperationHook = (args: {
+//   args?: any;
+//   operation: HookOperationType;
+//   docs?: any[];
+//   doc?: any[];
+// }) => any;
 
 export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
 

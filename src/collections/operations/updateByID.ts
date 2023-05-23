@@ -18,6 +18,7 @@ import { generateFileData } from '../../uploads/generateFileData';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
+import { buildAfterOperation } from './utils';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -325,6 +326,12 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       operation: 'update',
     }) || result;
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation(args, result, 'update');
 
   await unlinkTempFiles({
     req,

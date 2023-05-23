@@ -22,6 +22,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { saveVersion } from '../../versions/saveVersion';
 import { mapAsync } from '../../utilities/mapAsync';
+import { buildAfterOperation } from './utils';
 
 const unlinkFile = promisify(fs.unlink);
 
@@ -310,6 +311,12 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       operation: 'create',
     }) || result;
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation(args, result, 'create'); // todo: or after cleaning files?
 
   // Remove temp files if enabled, as express-fileupload does not do this automatically
   if (config.upload?.useTempFiles && collectionConfig.upload) {

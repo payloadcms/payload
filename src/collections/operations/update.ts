@@ -18,6 +18,7 @@ import { AccessResult } from '../../config/types';
 import { queryDrafts } from '../../versions/drafts/queryDrafts';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
+import { buildAfterOperation } from './utils';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -339,10 +340,18 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
   const awaitedDocs = await Promise.all(promises);
 
-  return {
+  let result = {
     docs: awaitedDocs.filter(Boolean),
     errors,
   };
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation(args, result, 'update');
+
+  return result;
 }
 
 export default update;

@@ -9,6 +9,7 @@ import { hasWhereAccessResult } from '../../auth/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   depth?: number
@@ -169,6 +170,12 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
 
     result = await hook({ req, id, doc: result }) || result;
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation(args, result, 'delete');
 
   // /////////////////////////////////////
   // 8. Return results

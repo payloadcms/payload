@@ -3,6 +3,7 @@ import { Document } from 'mongoose';
 import { APIError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { Collection } from '../../collections/config/types';
+import { buildAfterOperation } from '../../collections/operations/utils';
 
 export type Arguments = {
   collection: Collection
@@ -120,6 +121,12 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     await priorHook;
     await hook({ args });
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  token = await buildAfterOperation(args, token, 'forgotPassword'); // todo: Fix error 'Type 'string | Buffer' is not assignable to type 'string'.'
 
   return token;
 }

@@ -10,6 +10,7 @@ import { Where } from '../../types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   depth?: number
@@ -207,10 +208,18 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   }
   preferences.Model.deleteMany({ key: { in: docs.map(({ id }) => `collection-${collectionConfig.slug}-${id}`) } });
 
-  return {
+  let result = {
     docs: awaitedDocs.filter(Boolean),
     errors,
   };
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation(args, result, 'delete');
+
+  return result;
 }
 
 export default deleteOperation;

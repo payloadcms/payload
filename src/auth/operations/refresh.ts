@@ -5,6 +5,7 @@ import { Forbidden } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import { Document } from '../../types';
 import { PayloadRequest } from '../../express/types';
+import { buildAfterOperation } from '../../collections/operations/utils';
 
 export type Result = {
   exp: number,
@@ -93,15 +94,24 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     })) || args;
   }, Promise.resolve());
 
-  // /////////////////////////////////////
-  // Return results
-  // /////////////////////////////////////
 
-  return {
+  let result = {
     refreshedToken,
     exp,
     user: payload,
   };
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation(args, result, 'refresh');
+
+  // /////////////////////////////////////
+  // Return results
+  // /////////////////////////////////////
+
+  return result;
 }
 
 export default refresh;
