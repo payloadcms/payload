@@ -77,12 +77,13 @@ To initialize Payload, update your `server.ts` file to reflect the following cod
 import express from "express";
 import payload from "payload";
 
+require("dotenv").config();
 const app = express();
 
 const start = async () => {
   await payload.init({
-    secret: "SECRET_KEY",
-    mongoURL: "mongodb://localhost/payload",
+    secret: process.env.PAYLOAD_SECRET,
+    mongoURL: process.env.MONGODB_URI,
     express: app,
   });
 
@@ -96,6 +97,13 @@ const start = async () => {
 start();
 ```
 
+A quick reminder: in this configuration, we're making use of two environmental variables, `process.env.PAYLOAD_SECRET` and `process.env.MONGODB_URI`. Often, it's smart to store these values in an `.env` file at the root of your directory and set different values for each of your environments (local, stage, prod, etc). The `dotenv` package is very handy and works well alongside of Payload. A typical `.env` file will look like this:
+
+```
+MONGODB_URI=mongodb://127.0.0.1/your-payload-app
+PAYLOAD_SECRET=your-payload-secret
+```
+
 Here is a list of all properties available to pass through `payload.init`:
 
 ##### `express`
@@ -104,7 +112,7 @@ Here is a list of all properties available to pass through `payload.init`:
 
 ##### `secret`
 
-**Required**. This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess. Often, it's smart to store this value in an `env` and set different values for each of your environments (local, stage, prod, etc). The `dotenv` package is very handy and works well alongside of Payload.
+**Required**. This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess.
 
 Payload uses this secret key to generate secure user tokens (JWT). Behind the scenes, we do not use your secret key to encrypt directly - instead, we first take the secret key and create an encrypted string using the SHA-256 hash function. Then, we reduce the encrypted string to its first 32 characters. This final value is what Payload uses for encryption.
 
@@ -112,7 +120,7 @@ Payload uses this secret key to generate secure user tokens (JWT). Behind the sc
 
 **Required**. This is a fully qualified MongoDB connection string that points to your MongoDB database. If you don't have MongoDB installed locally, you can [follow these steps for Mac OSX](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/) and [these steps](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/) for Windows 10. If you want to use a local database and you know you have MongoDB installed locally, a typical connection string will look like this:
 
-`mongodb://localhost/payload`
+`mongodb://127.0.0.1/payload`
 
 In contrast to running MongoDB locally, a popular option is to sign up for a free [MongoDB Atlas account](https://www.mongodb.com/cloud/atlas), which is a fully hosted and cloud-based installation of MongoDB that you don't need to ever worry about.
 
