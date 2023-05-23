@@ -34,12 +34,15 @@ const defaultOperators = {
   email: [...operators.equality, ...operators.partial, ...operators.contains],
   textarea: [...operators.equality, ...operators.partial],
   richText: [...operators.equality, ...operators.partial],
-  code: [...operators.equality, ...operators.partial],
   json: [...operators.equality, ...operators.partial],
   radio: [...operators.equality, operators.contains],
+  code: [...operators.equality, ...operators.partial],
   date: [...operators.equality, ...operators.comparison, 'like'],
   point: [...operators.equality, ...operators.comparison, ...operators.geo],
   relationship: [...operators.equality, ...operators.comparison],
+  upload: [...operators.equality],
+  checkbox: [...operators.equality],
+  select: [...operators.equality, ...operators.contains],
 };
 
 const listOperators = ['in', 'not_in', 'all'];
