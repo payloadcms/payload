@@ -1,27 +1,38 @@
 import nodemailer from 'nodemailer'
 import { Resend } from 'resend'
 import payload from 'payload'
-import type { EmailOptions } from 'payload/config'
+import type { EmailTransport } from 'payload/config'
+import type { PayloadCloudEmailOptions } from './types'
 
 type TransportArgs = Parameters<typeof nodemailer.createTransport>[0]
 
-interface Args {
-  fromName?: string
-  fromAddress?: string
-}
-
-export const payloadCloudEmail = (args?: Args): EmailOptions | undefined => {
-  if (process.env.PAYLOAD_CLOUD !== 'true') {
+export const payloadCloudEmail = (args: PayloadCloudEmailOptions): EmailTransport | undefined => {
+  if (process.env.PAYLOAD_CLOUD !== 'true' || !args) {
     return undefined
   }
 
-  const resend = new Resend(process.env.PAYLOAD_CLOUD_RESEND_API_KEY)
+  if (!args.apiKey) throw new Error('apiKey must be provided to use Payload Cloud Email ')
+  if (!args.defaultDomain)
+    throw new Error('defaultDomain must be provided to use Payload Cloud Email')
 
-  const defaultFromAddress = args?.fromAddress || `cms@${process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN}`
-  const defaultFromName = args?.fromName || 'Payload CMS'
+  const { apiKey, defaultDomain, config } = args
+
+  const resend = new Resend(apiKey)
+
+  const fromName = config.email?.fromName || 'Payload CMS'
+  const fromAddress = config.email?.fromAddress || `cms@${defaultDomain}`
+  const existingTransport = config.email && 'transport' in config.email && config.email?.transport
+
+  if (existingTransport) {
+    return {
+      fromName: fromName,
+      fromAddress: fromAddress,
+      transport: existingTransport,
+    }
+  }
 
   const transportConfig: TransportArgs = {
-    name: 'resend',
+    name: 'payload-cloud',
     version: '0.0.1',
     send: async mail => {
       const { from, to, subject, html, text } = mail.data
@@ -47,29 +58,31 @@ export const payloadCloudEmail = (args?: Args): EmailOptions | undefined => {
       } else if (typeof from === 'object' && 'name' in from && 'address' in from) {
         fromToUse = `${from.name} <${from.address}>`
       } else {
-        fromToUse = `${defaultFromName} <${defaultFromAddress}>`
+        fromToUse = `${fromName} <${fromAddress}>`
       }
 
       try {
-        await resend.sendEmail({
+        const sendResponse = await resend.sendEmail({
           from: fromToUse,
           to: cleanTo,
           subject: subject || '<No subject>',
           html: (html || text) as string,
         })
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          payload.logger.error(error.message)
+
+        if ('error' in sendResponse) {
+          payload.logger.error({ msg: 'Error sending email', err: sendResponse.error })
         } else {
-          payload.logger.error({ error })
+          payload.logger.info({ msg: 'Email sent', emailId: sendResponse.id })
         }
+      } catch (err: unknown) {
+        payload.logger.error({ msg: 'Unexpected error sending email', err })
       }
     },
   }
 
   return {
-    fromName: args?.fromName || defaultFromName,
-    fromAddress: args?.fromAddress || defaultFromAddress,
+    fromName: fromName,
+    fromAddress: fromAddress,
     transport: nodemailer.createTransport(transportConfig),
   }
 }
