@@ -77,22 +77,22 @@ To spin up this example locally, follow the [Quick Start](#quick-start).
 
 ### Seed
 
-On boot, a seed script is included to create a super-admin user with email `dev@payloadcms.com`, password `test`, the role `admin`. It will also create the following tenants:
+On boot, a seed script is included to scaffold a basic database for you to use as an example. This is done by setting the `PAYLOAD_DROP_DATABASE` and `PAYLOAD_SEED` environment variables which are included in the `.env.example` by default. You can remove these from your `.env` to prevent this behavior. You can also freshly seed your project at any time by running `yarn seed`. This seed creates a super-admin user with email `dev@payloadcms.com` and password `test` along with the following tenants:
 
 - `ABC`
   - Domains:
     - `abc.localhost.com:3000`
   - Users:
-    - `admin@abc.com` with role `admin`
-    - `user@abc.com` with role `user`
+    - `admin@abc.com` with role `admin` and password `test`
+    - `user@abc.com` with role `user` and password `test`
   - Pages:
     - `ABC Home` with content `Hello, ABC!`
 - `BBC`
   - Domains:
     - `bbc.localhost.com:3000`
   - Users:
-    - `admin@bbc.com` with role `admin`
-    - `user@bbc.com` with role `user`
+    - `admin@bbc.com` with role `admin` and password `test`
+    - `user@bbc.com` with role `user` and password `test`
   - Pages:
     - `BBC Home` with content `Hello, BBC!`
 
@@ -105,6 +105,7 @@ To fully experience the multi-tenancy of this example locally, your app must run
 ```bash
 # these domains were provided in the seed script
 # if needed, change them based on your own tenant settings
+# remember to specify the port number when browsing to these domains
 127.0.0.1 abc.localhost.com
 127.0.0.1 bbc.localhost.com
 ```
