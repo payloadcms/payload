@@ -45,7 +45,7 @@ jobs:
         run: yarn dev:generate-types fields
 
       - name: Generate GraphQL schema file
-        run: yarn dev:generate-graphql-schema
+        run: yarn dev:generate-graphql-schema graphql-schema-gen
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
