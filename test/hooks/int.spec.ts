@@ -12,6 +12,7 @@ import type { NestedAfterReadHook } from './payload-types';
 import { hooksUsersSlug } from './collections/Users';
 import { devUser, regularUser } from '../credentials';
 import { AuthenticationError } from '../../src/errors';
+import { afterOperationSlug } from './collections/AfterOperation';
 
 let client: RESTClient;
 
@@ -150,6 +151,28 @@ describe('Hooks', () => {
       });
 
       expect(retrievedDocs[0].text).toEqual('ok!!');
+    });
+
+    it('should execute collection AfterOperation hook', async () => {
+      await payload.create({
+        collection: afterOperationSlug,
+        data: {
+          boolean: false,
+        },
+      });
+      await payload.create({
+        collection: afterOperationSlug,
+        data: {
+          boolean: true,
+        },
+      });
+
+      const findResult = await payload.find({
+        collection: afterOperationSlug,
+      });
+
+      expect(findResult.docs).toHaveLength(1);
+      expect(findResult.docs[0].boolean).toEqual(true);
     });
   });
 

@@ -221,6 +221,21 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   };
 
   // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  await args.collection.config.hooks.afterOperation.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    result.docs = (await hook({
+      args,
+      operation: 'read',
+      docs: result.docs,
+    })) || result.docs;
+  }, Promise.resolve());
+
+
+  // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
 

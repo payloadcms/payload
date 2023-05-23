@@ -16,6 +16,7 @@ Collections feature the ability to define the following hooks:
 - [afterRead](#afterread)
 - [beforeDelete](#beforedelete)
 - [afterDelete](#afterdelete)
+- [afterOperation](#afterOperation)
 
 Additionally, `auth`-enabled collections feature the following hooks:
 
@@ -48,6 +49,7 @@ export const ExampleHooks: CollectionConfig = {
     afterChange: [(args) => {...}],
     afterRead: [(args) => {...}],
     afterDelete: [(args) => {...}],
+    afterOperation: [(args) => {...}],
 
     // Auth-enabled hooks
     beforeLogin: [(args) => {...}],
@@ -193,6 +195,27 @@ const afterDeleteHook: CollectionAfterDeleteHook = async ({
   doc, // deleted document
 }) => {...}
 ```
+
+### afterOperation
+
+The `afterOperation` Hook type can be used to modify the documents that are returned from the `find` operation.
+
+The difference to using `afterRead` would be that this hook fires once and includes all `docs` where `afterRead` fires for every doc separately.
+
+Available Collection operation is limited to `find`.
+
+```ts
+import { CollectionBeforeOperationHook } from 'payload/types';
+
+const afterOperationHook: CollectionAfterOperationHook = async ({
+  args, // arguments passed into the operation
+  operation, // name of the operation
+  docs; // documents returned from the operation
+}) => {
+  return docs; // Return documents as necessary
+}
+```
+
 
 ### beforeLogin
 

@@ -113,6 +113,15 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   id: string | number;
 }) => any;
 
+export type AfterOperationHook = (args: {
+  args?: any;
+  /**
+   * Hook operation being performed
+   */
+  operation: HookOperationType;
+  docs: any[]; // todo: improve typing
+}) => any;
+
 export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
