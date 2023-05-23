@@ -21,85 +21,67 @@ import combineParentName from '../utilities/combineParentName';
 import formatName from '../utilities/formatName';
 import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths';
 
-const fieldToSchemaMap: (parentName: string) => any = (parentName: string) => ({
-  number: (field: NumberField) => {
-    return {
-      type: withOperators(
-        field,
-        parentName,
-      ),
-    };
-  },
-  text: (field: TextField) => {
-    return {
-      type: withOperators(
-        field,
-        parentName,
-      ),
-    };
-  },
-  email: (field: EmailField) => {
-    return {
-      type: withOperators(
-        field,
-        parentName,
-      ),
-    };
-  },
-  textarea: (field: TextareaField) => {
-    return {
-      type: withOperators(
-        field,
-        parentName,
-      ),
-    };
-  },
-  richText: (field: RichTextField) => {
-    return {
-      type: withOperators(
-        field,
-        parentName,
-      ),
-    };
-  },
-  json: (field: JSONField) => {
-    return {
-      type: withOperators(
-        field,
-        parentName,
-      ),
-    };
-  },
-  code: (field: CodeField) => {
-    return {
-      type: withOperators(
-        field,
-        parentName,
-      ),
-    };
-  },
+const fieldToSchemaMap = (parentName: string): any => ({
+  number: (field: NumberField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
+  text: (field: TextField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
+  email: (field: EmailField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
+  textarea: (field: TextareaField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
+  richText: (field: RichTextField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
+  json: (field: JSONField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
+  code: (field: CodeField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
   radio: (field: RadioField) => ({
     type: withOperators(
       field,
       parentName,
     ),
   }),
-  date: (field: DateField) => {
-    return {
-      type: withOperators(
-        field,
-        parentName,
-      ),
-    };
-  },
-  point: (field: PointField) => {
-    return {
-      type: withOperators(
-        field,
-        parentName,
-      ),
-    };
-  },
+  date: (field: DateField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
+  point: (field: PointField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
   relationship: (field: RelationshipField) => {
     if (Array.isArray(field.relationTo)) {
       return {
