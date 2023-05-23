@@ -390,24 +390,21 @@ describe('fields - relationship', () => {
     });
   });
 
-  describe('externally update field', () => {
+  describe('externally update relationship field', () => {
     beforeAll(async () => {
-      await page.goto(url.create);
+      const externalRelationURL = new AdminUrlUtil(serverURL, relationUpdatedExternallySlug);
+      await page.goto(externalRelationURL.create);
     });
 
     test('has many, one collection', async () => {
-      await page.goto(url.create);
-
       await page.locator('#field-relationHasMany + .pre-populate-field-ui button').click();
       await wait(300);
-
       await expect(page.locator('#field-relationHasMany .rs__value-container > .rs__multi-value')).toHaveCount(15);
     });
 
     test('has many, many collections', async () => {
       await page.locator('#field-relationToManyHasMany + .pre-populate-field-ui button').click();
       await wait(300);
-
       await expect(page.locator('#field-relationToManyHasMany .rs__value-container > .rs__multi-value')).toHaveCount(15);
     });
   });
