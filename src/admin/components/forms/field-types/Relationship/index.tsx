@@ -450,7 +450,7 @@ const Relationship: React.FC<Props> = (props) => {
           />
           {!readOnly && allowCreate && (
             <AddNewRelation
-              {...{ path: pathOrName, hasMany, relationTo, value, setValue, dispatchOptions }}
+              {...{ path: pathOrName, hasMany, relationTo, value, setValue, dispatchOptions, options }}
             />
           )}
         </div>

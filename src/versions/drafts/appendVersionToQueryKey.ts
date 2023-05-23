@@ -16,6 +16,9 @@ export const appendVersionToQueryKey = (query: Where): Where => {
       };
     }
 
-    return res;
+    return {
+      ...res,
+      _id: val,
+    };
   }, {});
 };

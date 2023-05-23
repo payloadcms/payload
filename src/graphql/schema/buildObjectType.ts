@@ -389,8 +389,6 @@ function buildObjectType({
           }
 
           if (id) {
-            id = id.toString();
-
             const relatedDocument = await context.req.payloadDataLoader.load(JSON.stringify([
               relatedCollectionSlug,
               id,

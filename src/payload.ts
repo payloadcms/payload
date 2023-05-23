@@ -213,7 +213,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     serverInitTelemetry(this);
 
-    if (options.local !== false) {
+    if (options.local !== false && this.mongoURL) {
       if (typeof options.onInit === 'function') await options.onInit(this);
       if (typeof this.config.onInit === 'function') await this.config.onInit(this);
     }

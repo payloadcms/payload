@@ -7,7 +7,7 @@
     "tag": false
   },
   "github": {
-    "release": false
+    "release": true
   },
   "npm": {
     "skipChecks": true,

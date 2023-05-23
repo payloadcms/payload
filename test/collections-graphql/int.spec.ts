@@ -364,6 +364,29 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }));
       });
     });
+
+    describe('relationships', () => {
+      it('should query on relationships with custom IDs', async () => {
+        const query = `query {
+          Posts(where: { title: { equals: "has custom ID relation" }}) {
+            docs {
+              id
+              title
+              relationToCustomID {
+                id
+              }
+            }
+            totalDocs
+          }
+        }`;
+
+        const response = await client.request(query);
+        const { docs, totalDocs } = response.Posts;
+
+        expect(totalDocs).toStrictEqual(1);
+        expect(docs[0].relationToCustomID.id).toStrictEqual(1);
+      });
+    });
   });
 
   describe('Error Handler', () => {
