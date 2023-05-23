@@ -9,25 +9,28 @@ export interface Config {
   collections: {
     users: User;
     posts: Post;
+    unrestricted: Unrestricted;
     restricted: Restricted;
     'read-only-collection': ReadOnlyCollection;
+    'user-restricted': UserRestricted;
     'restricted-versions': RestrictedVersion;
     'sibling-data': SiblingDatum;
     'rely-on-request-headers': RelyOnRequestHeader;
     'doc-level-access': DocLevelAccess;
     'hidden-fields': HiddenField;
+    'hidden-access': HiddenAccess;
   };
   globals: {};
 }
 export interface User {
   id: string;
+  updatedAt: string;
+  createdAt: string;
   email?: string;
   resetPasswordToken?: string;
   resetPasswordExpiration?: string;
   loginAttempts?: number;
   lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
   password?: string;
 }
 export interface Post {
@@ -38,26 +41,44 @@ export interface Post {
   };
   restrictedRowText?: string;
   restrictedCollapsibleText?: string;
-  createdAt: string;
+  restrictedTab: {
+    test?: string;
+  };
+  test?: string;
   updatedAt: string;
+  createdAt: string;
+}
+export interface Unrestricted {
+  id: string;
+  name?: string;
+  userRestrictedDocs?: string[] | UserRestricted[];
+  updatedAt: string;
+  createdAt: string;
+}
+export interface UserRestricted {
+  id: string;
+  name?: string;
+  updatedAt: string;
+  createdAt: string;
 }
 export interface Restricted {
   id: string;
   name?: string;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface ReadOnlyCollection {
   id: string;
   name?: string;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface RestrictedVersion {
   id: string;
   name?: string;
-  createdAt: string;
+  hidden?: boolean;
   updatedAt: string;
+  createdAt: string;
 }
 export interface SiblingDatum {
   id: string;
@@ -66,22 +87,22 @@ export interface SiblingDatum {
     text?: string;
     id?: string;
   }[];
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface RelyOnRequestHeader {
   id: string;
   name?: string;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface DocLevelAccess {
   id: string;
   approvedForRemoval?: boolean;
   approvedTitle?: string;
   lockTitle?: boolean;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface HiddenField {
   id: string;
@@ -95,6 +116,14 @@ export interface HiddenField {
     value?: string;
     id?: string;
   }[];
-  createdAt: string;
+  hidden?: boolean;
   updatedAt: string;
+  createdAt: string;
+}
+export interface HiddenAccess {
+  id: string;
+  title: string;
+  hidden?: boolean;
+  updatedAt: string;
+  createdAt: string;
 }

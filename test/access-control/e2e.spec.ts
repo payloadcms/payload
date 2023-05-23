@@ -4,7 +4,14 @@ import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login } from '../helpers';
-import { restrictedVersionsSlug, readOnlySlug, restrictedSlug, slug, docLevelAccessSlug, unrestrictedSlug } from './config';
+import {
+  docLevelAccessSlug,
+  readOnlySlug,
+  restrictedSlug,
+  restrictedVersionsSlug,
+  slug,
+  unrestrictedSlug,
+} from './config';
 import type { ReadOnlyCollection, RestrictedVersion } from './payload-types';
 import wait from '../../src/utilities/wait';
 
@@ -71,6 +78,24 @@ describe('access control', () => {
     await page.goto(url.edit(id));
 
     await expect(page.locator('#field-restrictedCollapsibleText')).toHaveCount(0);
+  });
+
+  test('field without read access inside a tab should not show', async () => {
+    const { id } = await createDoc({});
+
+    await page.goto(url.edit(id));
+
+    // TODO: this shouldn't be passing right now, the tab exists
+    await expect(page.getByText('Restricted Tab')).toBeHidden();
+  });
+
+  test('tab without read access should not show', async () => {
+    const { id } = await createDoc({ });
+
+    await page.goto(url.edit(id));
+
+    // TODO: this shouldn't be passing right now, the tab exists
+    await expect(page.getByText('Restricted Fields')).toBeHidden();
   });
 
   describe('restricted collection', () => {

@@ -155,6 +155,15 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
         field.tabs.forEach((tab) => {
           if (tabHasName(tab)) {
             if (!mutablePolicies[tab.name]) mutablePolicies[tab.name] = { fields: {} };
+            if (tab.access && typeof tab.access[operation] === 'function') {
+              promises.push(createAccessPromise({
+                policiesObj: mutablePolicies[tab.name],
+                access: tab.access[operation],
+                operation,
+                disableWhere: true,
+                accessLevel: 'field',
+              }));
+            }
             executeFieldPolicies({
               policiesObj: mutablePolicies[tab.name],
               fields: tab.fields,

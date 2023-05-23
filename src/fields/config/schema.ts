@@ -215,7 +215,9 @@ export const collapsible = baseField.keys({
 });
 
 const tab = baseField.keys({
-  name: joi.string().when('localized', { is: joi.exist(), then: joi.required() }),
+  name: joi.string()
+    .when('localized', { is: joi.exist(), then: joi.required() })
+    .when('access', { is: joi.exist(), then: joi.required() }),
   localized: joi.boolean(),
   label: joi.alternatives().try(
     joi.string(),

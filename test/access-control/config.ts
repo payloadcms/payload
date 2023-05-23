@@ -112,6 +112,44 @@ export default buildConfig({
             },
           ],
         },
+        {
+          type: 'tabs',
+          tabs: [
+            // this tab should not be visible in the admin ui
+            {
+              name: 'restrictedTab',
+              label: 'Restricted Tab',
+              // access should work the same as a group field
+              access: {
+                create: () => false,
+                read: () => false,
+                update: () => false,
+              },
+              fields: [
+                // the field will be visible even though the parent tab should restrict it
+                {
+                  name: 'test',
+                  type: 'text',
+                },
+              ],
+            },
+            {
+              // this tab is visible and can be clicked, even though there isn't a field available
+              label: 'Restricted Fields',
+              fields: [
+                {
+                  name: 'tabText',
+                  type: 'text',
+                  access: {
+                    create: () => false,
+                    read: () => false,
+                    update: () => false,
+                  },
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {

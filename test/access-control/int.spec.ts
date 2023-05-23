@@ -157,6 +157,34 @@ describe('Access Control', () => {
         expect(retrievedDoc.restrictedField).toBeUndefined();
       });
 
+      it('field within restricted tab should not show', async () => {
+        const { id } = await payload.create({
+          collection: slug,
+          overrideAccess: true,
+          data: {
+            restrictedTab: { test: 'restricted' },
+          },
+        });
+
+        const retrievedDoc = await payload.findByID({ collection: slug, id, overrideAccess: false });
+
+        expect(retrievedDoc.restrictedTab).toBeUndefined();
+      });
+
+      it('field within tab should not show', async () => {
+        const { id } = await payload.create({
+          collection: slug,
+          overrideAccess: true,
+          data: {
+            tabText: 'restricted',
+          },
+        });
+
+        const retrievedDoc = await payload.findByID({ collection: slug, id, overrideAccess: false });
+
+        expect(retrievedDoc.tabText).toBeUndefined();
+      });
+
       it('field without read access should not show when overrideAccess: true', async () => {
         const { id, restrictedField } = await createDoc<Post>({ restrictedField: 'restricted' });
 
