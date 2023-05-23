@@ -7,28 +7,28 @@ import { Collection } from '../collections/config/types';
 import { SanitizedConfig } from '../config/types';
 import { FileUploadError, MissingFile } from '../errors';
 import { PayloadRequest } from '../express/types';
-import getImageSize, { ProbedImageSize } from './getImageSize';
+import getImageSize from './getImageSize';
 import getSafeFileName from './getSafeFilename';
 import resizeAndSave from './imageResizer';
-import { FileData, FileToSave } from './types';
+import { FileData, FileToSave, ProbedImageSize } from './types';
 import canResizeImage from './canResizeImage';
 import isImage from './isImage';
 
-type Args = {
+type Args<T> = {
   config: SanitizedConfig,
   collection: Collection
   throwOnMissingFile?: boolean
   req: PayloadRequest
-  data: Record<string, unknown>
+  data: T
   overwriteExistingFiles?: boolean
 }
 
-type Result = Promise<{
-  data: Record<string, unknown>
+type Result<T> = Promise<{
+  data: T
   files: FileToSave[]
 }>
 
-export const generateFileData = async ({
+export const generateFileData = async <T>({
   config,
   collection: {
     config: collectionConfig,
@@ -38,116 +38,140 @@ export const generateFileData = async ({
   data,
   throwOnMissingFile,
   overwriteExistingFiles,
-}: Args): Result => {
+}: Args<T>): Result<T> => {
+  if (!collectionConfig.upload) {
+    return {
+      data,
+      files: [],
+    };
+  }
+
+  const { file } = req.files || {};
+  if (!file) {
+    if (throwOnMissingFile) throw new MissingFile(req.t);
+
+    return {
+      data,
+      files: [],
+    };
+  }
+
+  const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions, trimOptions } = collectionConfig.upload;
+
+  let staticPath = staticDir;
+  if (staticDir.indexOf('/') !== 0) {
+    staticPath = path.resolve(config.paths.configDir, staticDir);
+  }
+
+  if (!disableLocalStorage) {
+    mkdirp.sync(staticPath);
+  }
+
   let newData = data;
   const filesToSave: FileToSave[] = [];
+  const fileData: Partial<FileData> = {};
+  const fileIsAnimated = (file.mimetype === 'image/gif') || (file.mimetype === 'image/webp');
 
-  if (collectionConfig.upload) {
-    const fileData: Partial<FileData> = {};
+  try {
+    const fileSupportsResize = canResizeImage(file.mimetype);
+    let fsSafeName: string;
+    let sharpFile: Sharp | undefined;
+    let dimensions: ProbedImageSize | undefined;
+    let fileBuffer;
+    let ext;
+    let mime: string;
 
-    const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions } = collectionConfig.upload;
+    const sharpOptions: sharp.SharpOptions = {};
 
-    const { file } = req.files || {};
+    if (fileIsAnimated) sharpOptions.animated = true;
 
-    if (throwOnMissingFile && !file) {
-      throw new MissingFile(req.t);
-    }
-
-    let staticPath = staticDir;
-
-    if (staticDir.indexOf('/') !== 0) {
-      staticPath = path.resolve(config.paths.configDir, staticDir);
-    }
-
-    if (!disableLocalStorage) {
-      mkdirp.sync(staticPath);
-    }
-
-    if (file) {
-      try {
-        const shouldResize = canResizeImage(file.mimetype);
-        let fsSafeName: string;
-        let resized: Sharp | undefined;
-        let dimensions;
-        let fileBuffer;
-        let bufferInfo;
-        let ext;
-        let mime;
-
-        if (shouldResize) {
-          if (resizeOptions) {
-            resized = sharp(file.data)
-              .resize(resizeOptions);
-          }
-          if (formatOptions) {
-            resized = (resized ?? sharp(file.data)).toFormat(formatOptions.format, formatOptions.options);
-          }
-        }
-
-        if (isImage(file.mimetype)) {
-          dimensions = await getImageSize(file);
-          fileData.width = dimensions.width;
-          fileData.height = dimensions.height;
-        }
-
-        if (resized) {
-          fileBuffer = await resized.toBuffer({ resolveWithObject: true });
-          bufferInfo = await fromBuffer(fileBuffer.data);
-
-          mime = bufferInfo.mime;
-          ext = bufferInfo.ext;
-          fileData.width = fileBuffer.info.width;
-          fileData.height = fileBuffer.info.height;
-          fileData.filesize = fileBuffer.data.length;
-        } else {
-          mime = file.mimetype;
-          fileData.filesize = file.size;
-          ext = file.name.split('.').pop();
-        }
-
-        if (mime === 'application/xml' && ext === 'svg') mime = 'image/svg+xml';
-        fileData.mimeType = mime;
-
-        const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
-        fsSafeName = `${baseFilename}.${ext}`;
-
-        if (!overwriteExistingFiles) {
-          fsSafeName = await getSafeFileName(Model, staticPath, `${baseFilename}.${ext}`);
-        }
-
-        fileData.filename = fsSafeName;
-
-        filesToSave.push({
-          path: `${staticPath}/${fsSafeName}`,
-          buffer: fileBuffer?.data || file.data,
-        });
-
-        if (Array.isArray(imageSizes) && shouldResize) {
-          req.payloadUploadSizes = {};
-          const { sizeData, sizesToSave } = await resizeAndSave({
-            req,
-            file: file.data,
-            dimensions,
-            staticPath,
-            config: collectionConfig,
-            savedFilename: fsSafeName || file.name,
-            mimeType: fileData.mimeType,
-          });
-
-          fileData.sizes = sizeData;
-          filesToSave.push(...sizesToSave);
-        }
-      } catch (err) {
-        console.error(err);
-        throw new FileUploadError(req.t);
+    if (fileSupportsResize && (resizeOptions || formatOptions || trimOptions)) {
+      if (file.tempFilePath) {
+        sharpFile = sharp(file.tempFilePath, sharpOptions);
+      } else {
+        sharpFile = sharp(file.data, sharpOptions);
       }
 
-      newData = {
-        ...newData,
-        ...fileData,
-      };
+      if (resizeOptions) {
+        sharpFile = sharpFile
+          .resize(resizeOptions);
+      }
+      if (formatOptions) {
+        sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options);
+      }
+      if (trimOptions) {
+        sharpFile = sharpFile.trim(trimOptions);
+      }
     }
+
+    if (isImage(file.mimetype)) {
+      dimensions = await getImageSize(file);
+      fileData.width = dimensions.width;
+      fileData.height = dimensions.height;
+    }
+
+    if (sharpFile) {
+      const metadata = await sharpFile.metadata();
+      fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true });
+      ({ mime, ext } = await fromBuffer(fileBuffer.data)); // This is getting an incorrect gif height back.
+      fileData.width = fileBuffer.info.width;
+      fileData.filesize = fileBuffer.info.size;
+
+      // Animated GIFs + WebP aggregate the height from every frame, so we need to use divide by number of pages
+      if (metadata.pages) {
+        fileData.height = fileBuffer.info.height / metadata.pages;
+        fileData.filesize = fileBuffer.data.length;
+      }
+    } else {
+      mime = file.mimetype;
+      fileData.filesize = file.size;
+      ext = file.name.split('.').pop();
+    }
+
+    // Adust SVG mime type. fromBuffer modifies it.
+    if (mime === 'application/xml' && ext === 'svg') mime = 'image/svg+xml';
+    fileData.mimeType = mime;
+
+    const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
+    fsSafeName = `${baseFilename}.${ext}`;
+
+    if (!overwriteExistingFiles) {
+      fsSafeName = await getSafeFileName(Model, staticPath, `${baseFilename}.${ext}`);
+    }
+
+    fileData.filename = fsSafeName;
+
+    // Original file
+    filesToSave.push({
+      path: `${staticPath}/${fsSafeName}`,
+      buffer: fileBuffer?.data || file.data,
+    });
+
+    if (Array.isArray(imageSizes) && fileSupportsResize) {
+      req.payloadUploadSizes = {};
+
+      const { sizeData, sizesToSave } = await resizeAndSave({
+        req,
+        file,
+        dimensions,
+        staticPath,
+        config: collectionConfig,
+        savedFilename: fsSafeName || file.name,
+        mimeType: fileData.mimeType,
+      });
+
+      fileData.sizes = sizeData;
+      filesToSave.push(...sizesToSave);
+    }
+  } catch (err) {
+    console.error(err);
+    throw new FileUploadError(req.t);
   }
+
+  newData = {
+    ...newData,
+    ...fileData,
+  };
 
   return {
     data: newData,

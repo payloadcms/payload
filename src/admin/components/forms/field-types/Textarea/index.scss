@@ -3,6 +3,8 @@
 .field-type.textarea {
   position: relative;
   margin-bottom: $baseline;
+  display: flex;
+  flex-direction: column;
 
   .textarea-outer {
     @include formInput();
@@ -13,7 +15,7 @@
 
     // Scrollbar for giant content
     max-height: calc(100vh - $top-header-offset - calc(#{base(5)}));
-    overflow: auto;
+    overflow: hidden;
 
     @include mid-break {
       max-height: 60vh;
@@ -21,8 +23,19 @@
   }
 
   &.error {
-    textarea {
-      background-color: var(--theme-error-200);
+    .textarea-outer {
+      background: var(--theme-error-200);
+    }
+  }
+
+  &.read-only {
+    .textarea-outer {
+      background: var(--theme-elevation-200);
+      color: var(--theme-elevation-450);
+      &:hover {
+        border-color: var(--theme-elevation-150);
+        @include shadow-sm;
+      }
     }
   }
 
@@ -81,5 +94,9 @@
   .textarea-clone::after {
     content: attr(data-after);
     opacity: 0.5;
+  }
+
+  @include mid-break {
+    padding: 0;
   }
 }

@@ -5,29 +5,18 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
-export interface Config {}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-global".
- */
-export interface AutosaveGlobal {
-  id: string;
-  title: string;
-  _status?: 'draft' | 'published';
+export interface Config {
+  collections: {
+    'autosave-posts': AutosavePost;
+    'draft-posts': DraftPost;
+    'version-posts': VersionPost;
+    users: User;
+  };
+  globals: {
+    'autosave-global': AutosaveGlobal;
+    'draft-global': DraftGlobal;
+  };
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-global".
- */
-export interface DraftGlobal {
-  id: string;
-  title: string;
-  _status?: 'draft' | 'published';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-posts".
- */
 export interface AutosavePost {
   id: string;
   title: string;
@@ -36,10 +25,6 @@ export interface AutosavePost {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-posts".
- */
 export interface DraftPost {
   id: string;
   title: string;
@@ -50,10 +35,13 @@ export interface DraftPost {
   createdAt: string;
   updatedAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
+export interface VersionPost {
+  id: string;
+  title: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
 export interface User {
   id: string;
   email?: string;
@@ -63,4 +51,15 @@ export interface User {
   lockUntil?: string;
   createdAt: string;
   updatedAt: string;
+  password?: string;
+}
+export interface AutosaveGlobal {
+  id: string;
+  title: string;
+  _status?: 'draft' | 'published';
+}
+export interface DraftGlobal {
+  id: string;
+  title: string;
+  _status?: 'draft' | 'published';
 }

@@ -24,8 +24,10 @@
   &__toggler {
     background: transparent;
     border: 0;
+    margin: 0;
     padding: 0;
     cursor: pointer;
+    color: inherit;
 
     &:focus,
     &:focus-within {

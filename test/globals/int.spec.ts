@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
-import config, { arraySlug, englishLocale, slug, spanishLocale } from './config';
+import configPromise, { accessControlSlug, arraySlug, englishLocale, slug, spanishLocale } from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
 
@@ -13,6 +13,7 @@ describe('globals', () => {
   describe('REST', () => {
     let client: RESTClient;
     beforeAll(async () => {
+      const config = await configPromise;
       client = new RESTClient(config, { serverURL, defaultSlug: slug });
     });
     it('should create', async () => {
@@ -59,6 +60,19 @@ describe('globals', () => {
   });
 
   describe('local', () => {
+    it('should save empty json objects', async () => {
+      const createdJSON = await payload.updateGlobal({
+        slug,
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(createdJSON.json.state).toEqual({});
+    });
+
     it('should create', async () => {
       const data = {
         title: 'title',
@@ -130,11 +144,35 @@ describe('globals', () => {
       expect(en).toMatchObject(localized.en);
       expect(es).toMatchObject(localized.es);
     });
+
+    it('should respect valid access query constraint', async () => {
+      const emptyGlobal = await payload.findGlobal({
+        slug: accessControlSlug,
+        overrideAccess: false,
+      });
+
+      expect(Object.keys(emptyGlobal)).toHaveLength(0);
+
+      await payload.updateGlobal({
+        slug: accessControlSlug,
+        data: {
+          enabled: true,
+        },
+      });
+
+      const hasAccess = await payload.findGlobal({
+        slug: accessControlSlug,
+        overrideAccess: false,
+      });
+
+      expect(hasAccess.title).toBeDefined();
+    });
   });
 
   describe('graphql', () => {
     let client: GraphQLClient;
     beforeAll(async () => {
+      const config = await configPromise;
       const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
       client = new GraphQLClient(url);
     });

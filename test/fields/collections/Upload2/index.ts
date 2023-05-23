@@ -6,6 +6,10 @@ const Uploads2: CollectionConfig = {
   upload: {
     staticDir: path.resolve(__dirname, './uploads2'),
   },
+  labels: {
+    singular: 'Upload 2',
+    plural: 'Uploads 2',
+  },
   fields: [
     {
       type: 'text',

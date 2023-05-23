@@ -1,7 +1,8 @@
 import type { CollectionConfig } from '../../../src/collections/config/types';
+import { autosaveSlug } from '../shared';
 
 const AutosavePosts: CollectionConfig = {
-  slug: 'autosave-posts',
+  slug: autosaveSlug,
   labels: {
     singular: 'Autosave Post',
     plural: 'Autosave Posts',
@@ -13,7 +14,6 @@ const AutosavePosts: CollectionConfig = {
   },
   versions: {
     maxPerDoc: 35,
-    retainDeleted: false,
     drafts: {
       autosave: {
         interval: 2000,

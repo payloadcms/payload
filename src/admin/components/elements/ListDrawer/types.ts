@@ -9,8 +9,7 @@ export type ListDrawerProps = {
   }) => void
   customHeader?: React.ReactNode
   drawerSlug?: string
-  collectionSlugs?: string[]
-  uploads?: boolean
+  collectionSlugs: string[]
   selectedCollection?: string
   filterOptions?: FilterOptionsResult
 }
@@ -28,14 +27,14 @@ export type UseListDrawer = (args: {
   uploads?: boolean // finds all collections with upload: true
   filterOptions?: FilterOptionsResult
 }) => [
-  React.FC<Omit<ListDrawerProps, 'collectionSlug' | 'id'>>, // drawer
-  React.FC<Omit<ListTogglerProps, 'collectionSlug' | 'id'>>, // toggler
-  {
-    drawerSlug: string,
-    drawerDepth: number
-    isDrawerOpen: boolean
-    toggleDrawer: () => void
-    closeDrawer: () => void
-    openDrawer: () => void
-  }
-]
+    React.FC<Pick<ListDrawerProps, 'onSelect'>>, // drawer
+    React.FC<Pick<ListTogglerProps, 'disabled' | 'className' | 'children'>>, // toggler
+    {
+      drawerSlug: string,
+      drawerDepth: number
+      isDrawerOpen: boolean
+      toggleDrawer: () => void
+      closeDrawer: () => void
+      openDrawer: () => void
+    }
+  ]

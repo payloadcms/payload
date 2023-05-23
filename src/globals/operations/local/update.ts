@@ -1,25 +1,29 @@
-import { Payload } from '../../..';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { DeepPartial } from 'ts-essentials';
+import { Payload } from '../../../payload';
 import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
-import { TypeWithID } from '../../config/types';
 import update from '../update';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
 
-export type Options = {
-  slug: string
+export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
+  slug: TSlug
   depth?: number
   locale?: string
   fallbackLocale?: string
-  data: Record<string, unknown>
+  data: DeepPartial<Omit<GeneratedTypes['globals'][TSlug], 'id'>>
   user?: Document
   overrideAccess?: boolean
   showHiddenFields?: boolean
   draft?: boolean
 }
 
-export default async function updateLocal<T extends TypeWithID = any>(payload: Payload, options: Options): Promise<T> {
+export default async function updateLocal<TSlug extends keyof GeneratedTypes['globals']>(
+  payload: Payload,
+  options: Options<TSlug>,
+): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
     slug: globalSlug,
     depth,
@@ -36,7 +40,7 @@ export default async function updateLocal<T extends TypeWithID = any>(payload: P
   const i18n = i18nInit(payload.config.i18n);
 
   if (!globalConfig) {
-    throw new APIError(`The global with slug ${globalSlug} can't be found.`);
+    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);
   }
 
   const req = {
@@ -51,7 +55,7 @@ export default async function updateLocal<T extends TypeWithID = any>(payload: P
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
-  return update({
+  return update<TSlug>({
     slug: globalSlug,
     data,
     depth,

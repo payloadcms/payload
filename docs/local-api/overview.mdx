@@ -9,8 +9,14 @@ keywords: local api, config, configuration, documentation, Content Management Sy
 The Payload Local API gives you the ability to execute the same operations that are available through REST and GraphQL within Node, directly on your server. Here, you don't need to deal with server latency or network speed whatsoever and can interact directly with your database.
 
 <Banner type="success">
-  <strong>Tip:</strong><br/>
-  The Local API is incredibly powerful when used with server-side rendering app frameworks like NextJS. With other headless CMS, you need to request your data from third-party servers which can add significant loading time to your server-rendered pages. With Payload, you don't have to leave your server to gather the data you need. It can be incredibly fast and is definitely a game changer.
+  <strong>Tip:</strong>
+  <br />
+  The Local API is incredibly powerful when used with server-side rendering app
+  frameworks like NextJS. With other headless CMS, you need to request your data
+  from third-party servers which can add significant loading time to your
+  server-rendered pages. With Payload, you don't have to leave your server to
+  gather the data you need. It can be incredibly fast and is definitely a game
+  changer.
 </Banner>
 
 Here are some common examples of how you can use the Local API:
@@ -28,15 +34,16 @@ You can gain access to the currently running `payload` object via two ways:
 You can import or require `payload` into your own files after it's been initialized, but you need to make sure that your `import` / `require` statements come **after** you call `payload.init()`—otherwise Payload won't have been initialized yet. That might be obvious. To us, it's usually not.
 
 Example:
+
 ```ts
-import payload from 'payload';
-import { CollectionAfterChangeHook } from 'payload/types';
+import payload from "payload";
+import { CollectionAfterChangeHook } from "payload/types";
 
 const afterChangeHook: CollectionAfterChangeHook = async () => {
   const posts = await payload.find({
-    collection: 'posts',
+    collection: "posts",
   });
-}
+};
 ```
 
 ##### Accessing from the `req`
@@ -44,35 +51,41 @@ const afterChangeHook: CollectionAfterChangeHook = async () => {
 Payload is available anywhere you have access to the Express `req` - including within your access control and hook functions.
 
 Example:
+
 ```ts
-const afterChangeHook: CollectionAfterChangeHook = async ({ req: { payload }}) => {
+const afterChangeHook: CollectionAfterChangeHook = async ({
+  req: { payload },
+}) => {
   const posts = await payload.find({
-    collection: 'posts',
+    collection: "posts",
   });
-}
+};
 ```
 
 ### Local options available
 
 You can specify more options within the Local API vs. REST or GraphQL due to the server-only context that they are executed in.
 
-| Local Option         | Description  |
-| -------------------- | ------------ |
-| `collection`         | Required for Collection operations. Specifies the Collection slug to operate against. |
-| `data`               | The data to use within the operation. Required for `create`, `update`. |
-| `depth`              | [Control auto-population](/docs/getting-started/concepts#depth) of nested relationship and upload fields. |
-| `locale`             | Specify [locale](/docs/configuration/localization) for any returned documents. |
-| `fallbackLocale`     | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents. |
-| `overrideAccess`     | Skip access control. By default, this property is set to true within all Local API operations.  |
-| `user`               | If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks. |
-| `showHiddenFields`   | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config. |
-| `pagination`         | Set to false to return all documents and avoid querying for document counts. |
+| Local Option       | Description                                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `collection`       | Required for Collection operations. Specifies the Collection slug to operate against.                                |
+| `data`             | The data to use within the operation. Required for `create`, `update`.                                               |
+| `depth`            | [Control auto-population](/docs/getting-started/concepts#depth) of nested relationship and upload fields.            |
+| `locale`           | Specify [locale](/docs/configuration/localization) for any returned documents.                                       |
+| `fallbackLocale`   | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents.                     |
+| `overrideAccess`   | Skip access control. By default, this property is set to true within all Local API operations.                       |
+| `user`             | If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.                |
+| `showHiddenFields` | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config. |
+| `pagination`       | Set to false to return all documents and avoid querying for document counts.                                         |
 
-*There are more options available on an operation by operation basis outlined below.*
+_There are more options available on an operation by operation basis outlined below._
 
 <Banner type="warning">
-  <strong>Note:</strong><br/>
-  By default, all access control checks are disabled in the Local API, but you can re-enable them if you'd like, as well as pass a specific user to run the operation with.
+  <strong>Note:</strong>
+  <br />
+  By default, all access control checks are disabled in the Local API, but you
+  can re-enable them if you'd like, as well as pass a specific user to run the
+  operation with.
 </Banner>
 
 ## Collections
@@ -84,12 +97,13 @@ The following Collection operations are available through the Local API:
 ```js
 // The created Post document is returned
 const post = await payload.create({
-  collection: 'posts', // required
-  data: { // required
-    title: 'sure',
-    description: 'maybe',
+  collection: "posts", // required
+  data: {
+    // required
+    title: "sure",
+    description: "maybe",
   },
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUserDoc,
   overrideAccess: true,
@@ -102,12 +116,12 @@ const post = await payload.create({
   // If your collection supports uploads, you can upload
   // a file directly through the Local API by providing
   // its full, absolute file path.
-  filePath: path.resolve(__dirname, './path-to-image.jpg'),
+  filePath: path.resolve(__dirname, "./path-to-image.jpg"),
 
   // Alternatively, you can directly pass a File,
   // if file is provided, filePath will be omitted
   file: uploadedFile,
-})
+});
 ```
 
 #### Find
@@ -116,18 +130,18 @@ const post = await payload.create({
 // Result will be a paginated set of Posts.
 // See /docs/queries/pagination for more.
 const result = await payload.find({
-  collection: 'posts', // required
+  collection: "posts", // required
   depth: 2,
   page: 1,
   limit: 10,
   where: {}, // pass a `where` query here
-  sort: '-title',
-  locale: 'en',
+  sort: "-title",
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 #### Find by ID
@@ -135,30 +149,31 @@ const result = await payload.find({
 ```js
 // Result will be a Post document.
 const result = await payload.findByID({
-  collection: 'posts', // required
-  id: '507f1f77bcf86cd799439011', // required
+  collection: "posts", // required
+  id: "507f1f77bcf86cd799439011", // required
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
-#### Update
+#### Update by ID
 
 ```js
 // Result will be the updated Post document.
 const result = await payload.update({
-  collection: 'posts', // required
-  id: '507f1f77bcf86cd799439011', // required
-  data: { // required
-    title: 'sure',
-    description: 'maybe',
+  collection: "posts", // required
+  id: "507f1f77bcf86cd799439011", // required
+  data: {
+    // required
+    title: "sure",
+    description: "maybe",
   },
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
@@ -167,13 +182,51 @@ const result = await payload.update({
   // If your collection supports uploads, you can upload
   // a file directly through the Local API by providing
   // its full, absolute file path.
-  filePath: path.resolve(__dirname, './path-to-image.jpg'),
+  filePath: path.resolve(__dirname, "./path-to-image.jpg"),
 
   // If you are uploading a file and would like to replace
   // the existing file instead of generating a new filename,
   // you can set the following property to `true`
   overwriteExistingFiles: true,
-})
+});
+```
+
+#### Update Many
+
+```js
+// Result will be an object with:
+// {
+//   docs: [], // each document that was updated
+//   errors: [], // each error also includes the id of the document
+// }
+const result = await payload.update({
+  collection: "posts", // required
+  where: {
+    // required
+    fieldName: { equals: "value" },
+  },
+  data: {
+    // required
+    title: "sure",
+    description: "maybe",
+  },
+  depth: 0,
+  locale: "en",
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+
+  // If your collection supports uploads, you can upload
+  // a file directly through the Local API by providing
+  // its full, absolute file path.
+  filePath: path.resolve(__dirname, "./path-to-image.jpg"),
+
+  // If you are uploading a file and would like to replace
+  // the existing file instead of generating a new filename,
+  // you can set the following property to `true`
+  overwriteExistingFiles: true,
+});
 ```
 
 #### Delete
@@ -181,15 +234,38 @@ const result = await payload.update({
 ```js
 // Result will be the now-deleted Post document.
 const result = await payload.delete({
-  collection: 'posts', // required
-  id: '507f1f77bcf86cd799439011', // required
+  collection: "posts", // required
+  id: "507f1f77bcf86cd799439011", // required
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
+```
+
+#### Delete Many
+
+```js
+// Result will be an object with:
+// {
+//   docs: [], // each document that is now deleted
+//   errors: [], // any errors that occurred, including the id of the errored on document
+// }
+const result = await payload.delete({
+  collection: "posts", // required
+  where: {
+    // required
+    fieldName: { equals: "value" },
+  },
+  depth: 0,
+  locale: "en",
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+});
 ```
 
 ## Auth Operations
@@ -207,19 +283,20 @@ If a collection has [`Authentication`](/docs/authentication/overview) enabled, a
 // }
 
 const result = await payload.login({
-  collection: 'users', // required
-  data: { // required
-    email: 'dev@payloadcms.com',
-    password: 'rip',
+  collection: "users", // required
+  data: {
+    // required
+    email: "dev@payloadcms.com",
+    password: "rip",
   },
   req: req, // pass an Express `req` which will be provided to all hooks
   res: res, // used to automatically set an HTTP-only auth cookie
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 #### Forgot Password
@@ -227,12 +304,13 @@ const result = await payload.login({
 ```js
 // Returned token will allow for a password reset
 const token = await payload.forgotPassword({
-  collection: 'users', // required
-  data: { // required
-    email: 'dev@payloadcms.com',
+  collection: "users", // required
+  data: {
+    // required
+    email: "dev@payloadcms.com",
   },
   req: req, // pass an Express `req` which will be provided to all hooks
-})
+});
 ```
 
 #### Reset Password
@@ -244,13 +322,14 @@ const token = await payload.forgotPassword({
 //   user: { ... } // the user document that just logged in
 // }
 const result = await payload.forgotPassword({
-  collection: 'users', // required
-  data: { // required
-    token: 'afh3o2jf2p3f...', // the token generated from the forgotPassword operation
+  collection: "users", // required
+  data: {
+    // required
+    token: "afh3o2jf2p3f...", // the token generated from the forgotPassword operation
   },
   req: req, // pass an Express `req` which will be provided to all hooks
   res: res, // used to automatically set an HTTP-only auth cookie
-})
+});
 ```
 
 #### Unlock
@@ -258,13 +337,14 @@ const result = await payload.forgotPassword({
 ```js
 // Returned result will be a boolean representing success or failure
 const result = await payload.unlock({
-  collection: 'users', // required
-  data: { // required
-    email: 'dev@payloadcms.com',
+  collection: "users", // required
+  data: {
+    // required
+    email: "dev@payloadcms.com",
   },
   req: req, // pass an Express `req` which will be provided to all hooks
   overrideAccess: true,
-})
+});
 ```
 
 #### Verify
@@ -272,9 +352,9 @@ const result = await payload.unlock({
 ```js
 // Returned result will be a boolean representing success or failure
 const result = await payload.verify({
-  collection: 'users', // required
-  token: 'afh3o2jf2p3f...', // the token saved on the user as `_verificationToken`
-})
+  collection: "users", // required
+  token: "afh3o2jf2p3f...", // the token saved on the user as `_verificationToken`
+});
 ```
 
 ## Globals
@@ -286,14 +366,14 @@ The following Global operations are available through the Local API:
 ```js
 // Result will be the Header Global.
 const result = await payload.findGlobal({
-  slug: 'header', // required
+  slug: "header", // required
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
 ```
 
 #### Update
@@ -301,44 +381,79 @@ const result = await payload.findGlobal({
 ```js
 // Result will be the updated Header Global.
 const result = await payload.updateGlobal({
-  slug: 'header', // required
-  data: { // required
+  slug: "header", // required
+  data: {
+    // required
     nav: [
       {
-        url: 'https://google.com',
+        url: "https://google.com",
       },
       {
-        url: 'https://payloadcms.com',
+        url: "https://payloadcms.com",
       },
     ],
   },
   depth: 2,
-  locale: 'en',
+  locale: "en",
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-})
+});
+```
+
+## Example Script using Local API
+
+The Local API is especially useful for running scripts
+
+```ts
+import payload from "payload";
+import path from "path";
+import dotenv from "dotenv";
+
+dotenv.config({
+  path: path.resolve(__dirname, "../.env"),
+});
+
+const { PAYLOAD_SECRET, MONGODB_URI } = process.env;
+
+const doAction = async (): Promise<void> => {
+  await payload.init({
+    secret: PAYLOAD_SECRET,
+    mongoURL: MONGODB_URI,
+    local: true, // Enables local mode, doesn't spin up a server or frontend
+  });
+
+  // Perform any Local API operations here
+  await payload.find({
+    collection: "posts",
+    // where: {} // optional
+  });
+
+  await payload.create({
+    collection: "posts",
+    data: {},
+  });
+};
+
+doAction();
 ```
 
 ## TypeScript
 
-Local API calls also support passing in a generic. This is especially useful if you generate your TS types using a [generate types script](/docs/typescript/generating-types).
+Local API calls will automatically infer your [generated types](/docs/typescript/generating-types).
 
 Here is an example of usage:
 
 ```ts
-// Our generated types
-import { Post } from './payload-types'
-
-// Add Post types as generic to create function
-const post: Post = await payload.create<Post>({
-  collection: 'posts',
+// Properly inferred as `Post` type
+const post = await payload.create({
+  collection: "posts",
 
   // Data will now be typed as Post and give you type hints
   data: {
-    title: 'my title',
-    description: 'my description',
+    title: "my title",
+    description: "my description",
   },
-})
+});
 ```

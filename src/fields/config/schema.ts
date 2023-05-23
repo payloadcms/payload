@@ -21,6 +21,7 @@ export const baseAdminFields = joi.object().keys({
   initCollapsed: joi.boolean().default(false),
   hidden: joi.boolean().default(false),
   disabled: joi.boolean().default(false),
+  disableBulkEdit: joi.boolean().default(false),
   condition: joi.func(),
   components: baseAdminComponentFields,
 });
@@ -51,6 +52,7 @@ export const baseField = joi.object().keys({
       afterRead: joi.array().items(joi.func()).default([]),
     }).default(),
   admin: baseAdminFields.default(),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 }).default();
 
 export const idField = baseField.keys({
@@ -285,6 +287,10 @@ export const upload = baseField.keys({
     joi.object(),
     joi.func(),
   ),
+  defaultValue: joi.alternatives().try(
+    joi.object(),
+    joi.func(),
+  ),
 });
 
 export const checkbox = baseField.keys({
@@ -323,7 +329,12 @@ export const relationship = baseField.keys({
   ),
   admin: baseAdminFields.keys({
     isSortable: joi.boolean().default(false),
+    allowCreate: joi.boolean().default(true),
   }),
+  min: joi.number()
+    .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
+  max: joi.number()
+    .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
 });
 
 export const blocks = baseField.keys({
@@ -406,7 +417,10 @@ export const richText = baseField.keys({
       })),
     }),
     link: joi.object({
-      fields: joi.array().items(joi.link('#field')),
+      fields: joi.alternatives(
+        joi.array().items(joi.link('#field')),
+        joi.func(),
+      ),
     }),
   }),
 });

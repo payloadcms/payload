@@ -1,7 +1,6 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
 import { buildConfig } from '../buildConfig';
-import type { Post } from './payload-types';
 
 export interface Relation {
   id: string;
@@ -33,6 +32,12 @@ export const relationSlug = 'relation';
 export default buildConfig({
   collections: [
     {
+      slug: 'users',
+      auth: true,
+      access: openAccess,
+      fields: [],
+    },
+    {
       slug,
       access: openAccess,
       fields: [
@@ -48,11 +53,21 @@ export default buildConfig({
           name: 'number',
           type: 'number',
         },
+        {
+          name: 'min',
+          type: 'number',
+          min: 10,
+        },
         // Relationship
         {
           name: 'relationField',
           type: 'relationship',
           relationTo: relationSlug,
+        },
+        {
+          name: 'relationToCustomID',
+          type: 'relationship',
+          relationTo: 'custom-ids',
         },
         // Relation hasMany
         {
@@ -76,10 +91,26 @@ export default buildConfig({
         },
       ],
     },
+    {
+      slug: 'custom-ids',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'id',
+          type: 'number',
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
     collectionWithName(relationSlug),
     collectionWithName('dummy'),
   ],
-  onInit: async (payload) => {
+  onInit: async payload => {
     await payload.create({
       collection: 'users',
       data: {
@@ -88,20 +119,37 @@ export default buildConfig({
       },
     });
 
-    await payload.create<Post>({
+    await payload.create({
+      collection: 'custom-ids',
+      data: {
+        id: 1,
+        title: 'hello',
+      },
+    });
+
+    await payload.create({
+      collection: slug,
+      data: {
+        title: 'has custom ID relation',
+        relationToCustomID: 1,
+      },
+    });
+
+    await payload.create({
       collection: slug,
       data: {
         title: 'post1',
       },
     });
-    await payload.create<Post>({
+
+    await payload.create({
       collection: slug,
       data: {
         title: 'post2',
       },
     });
 
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'with-description',
@@ -109,14 +157,14 @@ export default buildConfig({
       },
     });
 
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'numPost1',
         number: 1,
       },
     });
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'numPost2',
@@ -124,13 +172,13 @@ export default buildConfig({
       },
     });
 
-    const rel1 = await payload.create<Relation>({
+    const rel1 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name',
       },
     });
-    const rel2 = await payload.create<Relation>({
+    const rel2 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name2',
@@ -138,14 +186,14 @@ export default buildConfig({
     });
 
     // Relation - hasMany
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'rel to hasMany',
         relationHasManyField: rel1.id,
       },
     });
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'rel to hasMany 2',
@@ -154,7 +202,7 @@ export default buildConfig({
     });
 
     // Relation - relationTo multi
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'rel to multi',
@@ -166,7 +214,7 @@ export default buildConfig({
     });
 
     // Relation - relationTo multi hasMany
-    await payload.create<Post>({
+    await payload.create({
       collection: slug,
       data: {
         title: 'rel to multi hasMany',

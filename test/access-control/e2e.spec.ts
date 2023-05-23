@@ -4,8 +4,9 @@ import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login } from '../helpers';
-import { restrictedVersionsSlug, readOnlySlug, restrictedSlug, slug, docLevelAccessSlug } from './config';
+import { restrictedVersionsSlug, readOnlySlug, restrictedSlug, slug, docLevelAccessSlug, unrestrictedSlug } from './config';
 import type { ReadOnlyCollection, RestrictedVersion } from './payload-types';
+import wait from '../../src/utilities/wait';
 
 /**
  * TODO: Access Control
@@ -76,7 +77,7 @@ describe('access control', () => {
     let existingDoc: ReadOnlyCollection;
 
     beforeAll(async () => {
-      existingDoc = await payload.create<ReadOnlyCollection>({
+      existingDoc = await payload.create({
         collection: readOnlySlug,
         data: {
           name: 'name',
@@ -114,7 +115,7 @@ describe('access control', () => {
     let existingDoc: ReadOnlyCollection;
 
     beforeAll(async () => {
-      existingDoc = await payload.create<ReadOnlyCollection>({
+      existingDoc = await payload.create({
         collection: readOnlySlug,
         data: {
           name: 'name',
@@ -162,7 +163,7 @@ describe('access control', () => {
     let existingDoc: RestrictedVersion;
 
     beforeAll(async () => {
-      existingDoc = await payload.create<RestrictedVersion>({
+      existingDoc = await payload.create({
         collection: restrictedVersionsSlug,
         data: {
           name: 'name',
@@ -172,7 +173,7 @@ describe('access control', () => {
 
     test('versions sidebar should not show', async () => {
       await page.goto(restrictedVersionsUrl.edit(existingDoc.id));
-      await expect(page.locator('.versions-count')).not.toBeVisible();
+      await expect(page.locator('.versions-count')).toBeHidden();
     });
   });
 
@@ -183,7 +184,7 @@ describe('access control', () => {
     beforeAll(async () => {
       docLevelAccessURL = new AdminUrlUtil(serverURL, docLevelAccessSlug);
 
-      existingDoc = await payload.create<any>({
+      existingDoc = await payload.create({
         collection: docLevelAccessSlug,
         data: {
           approvedTitle: 'Title',
@@ -215,11 +216,49 @@ describe('access control', () => {
       await expect(deleteAction).toContainText('Delete');
     });
   });
+
+  test('maintain access control in document drawer', async () => {
+    const unrestrictedDoc = await payload.create({
+      collection: unrestrictedSlug,
+      data: {
+        name: 'unrestricted-123',
+      },
+    });
+
+    // navigate to the `unrestricted` document and open the drawers to test access
+    const unrestrictedURL = new AdminUrlUtil(serverURL, unrestrictedSlug);
+    await page.goto(unrestrictedURL.edit(unrestrictedDoc.id));
+
+    const button = await page.locator('#userRestrictedDocs-add-new button.relationship-add-new__add-button.doc-drawer__toggler');
+    await button.click();
+    const documentDrawer = await page.locator('[id^=doc-drawer_user-restricted_1_]');
+    await expect(documentDrawer).toBeVisible();
+    await documentDrawer.locator('#field-name').fill('anonymous@email.com');
+    await documentDrawer.locator('#action-save').click();
+    await wait(200);
+    await expect(page.locator('.Toastify')).toContainText('successfully');
+
+    // ensure user is not allowed to edit this document
+    await expect(await documentDrawer.locator('#field-name')).toBeDisabled();
+    await documentDrawer.locator('button.doc-drawer__header-close').click();
+    await wait(200);
+
+    await button.click();
+    const documentDrawer2 = await page.locator('[id^=doc-drawer_user-restricted_1_]');
+    await expect(documentDrawer2).toBeVisible();
+    await documentDrawer2.locator('#field-name').fill('dev@payloadcms.com');
+    await documentDrawer2.locator('#action-save').click();
+    await wait(200);
+    await expect(page.locator('.Toastify')).toContainText('successfully');
+
+    // ensure user is allowed to edit this document
+    await expect(await documentDrawer2.locator('#field-name')).toBeEnabled();
+  });
 });
 
 async function createDoc(data: any): Promise<{ id: string }> {
   return payload.create({
-    collection: docLevelAccessSlug,
+    collection: slug,
     data,
   });
 }

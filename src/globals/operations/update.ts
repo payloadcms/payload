@@ -1,37 +1,36 @@
-import { docHasTimestamps, Where } from '../../types';
-import { SanitizedGlobalConfig, TypeWithID } from '../config/types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { DeepPartial } from 'ts-essentials';
+import { SanitizedGlobalConfig } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { saveGlobalVersion } from '../../versions/saveGlobalVersion';
-import { saveGlobalDraft } from '../../versions/drafts/saveGlobalDraft';
-import { ensurePublishedGlobalVersion } from '../../versions/ensurePublishedGlobalVersion';
-import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
-import { hasWhereAccessResult } from '../../auth';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { PayloadRequest } from '../../express/types';
+import { saveVersion } from '../../versions/saveVersion';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
+import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion';
 
-type Args = {
+type Args<T extends { [field: string | number | symbol]: unknown }> = {
   globalConfig: SanitizedGlobalConfig
-  slug: string
+  slug: string | number | symbol
   req: PayloadRequest
   depth?: number
   overrideAccess?: boolean
   showHiddenFields?: boolean
   draft?: boolean
   autosave?: boolean
-  data: Record<string, unknown>
+  data: DeepPartial<Omit<T, 'id'>>
 }
 
-async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
+async function update<TSlug extends keyof GeneratedTypes['globals']>(
+  args: Args<GeneratedTypes['globals'][TSlug]>,
+): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
     globalConfig,
     slug,
     req,
     req: {
-      locale,
       payload,
       payload: {
         globals: {
@@ -60,58 +59,34 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: { where: Where } = {
+  const query = await Model.buildQuery({
     where: {
-      and: [
-        {
-          globalType: {
-            equals: slug,
-          },
-        },
-      ],
+      globalType: {
+        equals: slug,
+      },
     },
-  };
-
-  if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
-  }
-
-  const query = await Model.buildQuery(queryToBuild, locale);
+    access: accessResults,
+    req,
+    overrideAccess,
+    globalSlug: slug,
+  });
 
   // /////////////////////////////////////
   // 2. Retrieve document
   // /////////////////////////////////////
 
-  let version;
-  let global;
-
-  if (globalConfig.versions?.drafts) {
-    version = payload.versions[globalConfig.slug].findOne({}, {}, {
-      sort: {
-        updatedAt: 'desc',
-      },
-      lean: true,
-    });
-  }
-
-  const existingGlobal = await payload.globals.Model.findOne(query).lean();
-  version = await version;
-
-  if (!version || (existingGlobal && docHasTimestamps(existingGlobal) && version.updatedAt < existingGlobal.updatedAt)) {
-    global = existingGlobal;
-  } else {
-    global = {
-      ...version.version,
-      updatedAt: version.updatedAt,
-      createdAt: version.createdAt,
-    };
-  }
+  const { global, globalExists } = await getLatestGlobalVersion({
+    payload,
+    Model,
+    config: globalConfig,
+    query,
+    lean: true,
+  });
 
   let globalJSON: Record<string, unknown> = {};
 
   if (global) {
-    const globalJSONString = JSON.stringify(global);
-    globalJSON = JSON.parse(globalJSONString);
+    globalJSON = JSON.parse(JSON.stringify(global));
 
     if (globalJSON._id) {
       delete globalJSON._id;
@@ -172,7 +147,7 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   // beforeChange - Fields
   // /////////////////////////////////////
 
-  const result = await beforeChange({
+  let result = await beforeChange({
     data,
     doc: originalDoc,
     docWithLocales: globalJSON,
@@ -183,70 +158,51 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   });
 
   // /////////////////////////////////////
-  // Create version from existing doc
-  // /////////////////////////////////////
-
-  let createdVersion;
-
-  if (globalConfig.versions && !shouldSaveDraft) {
-    createdVersion = await saveGlobalVersion({
-      payload,
-      config: globalConfig,
-      req,
-      docWithLocales: result,
-    });
-  }
-
-  // /////////////////////////////////////
   // Update
   // /////////////////////////////////////
 
-  if (shouldSaveDraft) {
-    await ensurePublishedGlobalVersion({
-      payload,
-      config: globalConfig,
-      req,
-      docWithLocales: result,
-    });
-
-    global = await saveGlobalDraft({
-      payload,
-      config: globalConfig,
-      data: result,
-      autosave,
-    });
-  } else {
-    try {
-      if (existingGlobal) {
-        global = await Model.findOneAndUpdate(
-          { globalType: slug },
-          result,
-          { new: true },
-        );
-      } else {
-        result.globalType = slug;
-        global = await Model.create(result);
-      }
-    } catch (error) {
-      cleanUpFailedVersion({
-        payload,
-        entityConfig: globalConfig,
-        version: createdVersion,
-      });
+  if (!shouldSaveDraft) {
+    if (globalExists) {
+      result = await Model.findOneAndUpdate(
+        { globalType: slug },
+        result,
+        { new: true },
+      );
+    } else {
+      result.globalType = slug;
+      result = await Model.create(result);
     }
   }
 
-  global = JSON.stringify(global);
-  global = JSON.parse(global);
-  global = sanitizeInternalFields(global);
+  result = JSON.parse(JSON.stringify(result));
+  result = sanitizeInternalFields(result);
+
+  // /////////////////////////////////////
+  // Create version
+  // /////////////////////////////////////
+
+  if (globalConfig.versions) {
+    result = await saveVersion({
+      payload,
+      global: globalConfig,
+      req,
+      docWithLocales: {
+        ...result,
+        createdAt: result.createdAt,
+        updatedAt: result.updatedAt,
+      },
+      autosave,
+      draft: shouldSaveDraft,
+    });
+  }
 
   // /////////////////////////////////////
   // afterRead - Fields
   // /////////////////////////////////////
 
-  global = await afterRead({
+  result = await afterRead({
     depth,
-    doc: global,
+    doc: result,
     entityConfig: globalConfig,
     req,
     overrideAccess,
@@ -260,19 +216,19 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    global = await hook({
-      doc: global,
+    result = await hook({
+      doc: result,
       req,
-    }) || global;
+    }) || result;
   }, Promise.resolve());
 
   // /////////////////////////////////////
   // afterChange - Fields
   // /////////////////////////////////////
 
-  global = await afterChange({
+  result = await afterChange({
     data,
-    doc: global,
+    doc: result,
     previousDoc: originalDoc,
     entityConfig: globalConfig,
     operation: 'update',
@@ -286,18 +242,18 @@ async function update<T extends TypeWithID = any>(args: Args): Promise<T> {
   await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    global = await hook({
-      doc: global,
+    result = await hook({
+      doc: result,
       previousDoc: originalDoc,
       req,
-    }) || global;
+    }) || result;
   }, Promise.resolve());
 
   // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
 
-  return global;
+  return result;
 }
 
 export default update;

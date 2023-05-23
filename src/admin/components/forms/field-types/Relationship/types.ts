@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { RelationshipField } from '../../../../../fields/config/types';
 import { Where } from '../../../../../types';
+import { SanitizedConfig } from '../../../../../config/types';
 
 export type Props = Omit<RelationshipField, 'type'> & {
   path?: string
@@ -19,10 +20,12 @@ export type OptionGroup = {
   options: Option[]
 }
 
-export type Value = {
+export type ValueWithRelation = {
   relationTo: string
   value: string | number
-} | string | number
+}
+
+export type Value = ValueWithRelation | string | number
 
 type CLEAR = {
   type: 'CLEAR'
@@ -33,6 +36,7 @@ type UPDATE = {
   doc: any
   collection: SanitizedCollectionConfig
   i18n: typeof i18n
+  config: SanitizedConfig
 }
 
 type ADD = {
@@ -40,22 +44,18 @@ type ADD = {
   docs: any[]
   collection: SanitizedCollectionConfig
   sort?: boolean
-  ids?: unknown[]
+  ids?: (string | number)[]
   i18n: typeof i18n
+  config: SanitizedConfig
 }
 
 export type Action = CLEAR | ADD | UPDATE
-
-export type ValueWithRelation = {
-  relationTo: string
-  value: string
-}
 
 export type GetResults = (args: {
   lastFullyLoadedRelation?: number
   lastLoadedPage?: number
   search?: string
-  value?: unknown
+  value?: Value | Value[]
   sort?: boolean
   onSuccess?: () => void
 }) => Promise<void>

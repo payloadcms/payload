@@ -46,7 +46,7 @@ import withNullableType from './withNullableType';
 import { toWords } from '../../utilities/formatLabels';
 import createRichTextRelationshipPromise from '../../fields/richText/richTextRelationshipPromise';
 import formatOptions from '../utilities/formatOptions';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import buildWhereInputType from './buildWhereInputType';
 import buildBlockType from './buildBlockType';
 import isFieldNullable from './isFieldNullable';
@@ -389,8 +389,6 @@ function buildObjectType({
           }
 
           if (id) {
-            id = id.toString();
-
             const relatedDocument = await context.req.payloadDataLoader.load(JSON.stringify([
               relatedCollectionSlug,
               id,

@@ -6,6 +6,7 @@ import {
   CodeField,
   DateField,
   EmailField,
+  fieldAffectsData,
   JSONField,
   NumberField,
   PointField,
@@ -18,9 +19,7 @@ import {
   TextField,
   UploadField,
   Validate,
-  fieldAffectsData,
 } from './config/types';
-import { TypeWithID } from '../collections/config/types';
 import canUseDOM from '../utilities/canUseDOM';
 import { isValidID } from '../utilities/isValidID';
 import { getIDType } from '../utilities/getIDType';
@@ -212,7 +211,7 @@ const validateFilterOptions: Validate = async (value, { t, filterOptions, id, us
         }
       });
 
-      const result = await payload.find<TypeWithID>({
+      const result = await payload.find({
         collection,
         depth: 0,
         where: {
@@ -276,8 +275,27 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
 };
 
 export const relationship: Validate<unknown, unknown, RelationshipField> = async (value: RelationshipValue, options) => {
-  if ((!value || (Array.isArray(value) && value.length === 0)) && options.required) {
+  const {
+    required,
+    min,
+    max,
+    relationTo,
+    payload,
+    t,
+  } = options;
+
+  if ((!value || (Array.isArray(value) && value.length === 0)) && required) {
     return options.t('validation:required');
+  }
+
+  if (Array.isArray(value)) {
+    if (min && value.length < min) {
+      return t('validation:lessThanMin', { count: min, label: t('rows') });
+    }
+
+    if (max && value.length > max) {
+      return t('validation:greaterThanMax', { count: max, label: t('rows') });
+    }
   }
 
   if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
@@ -287,8 +305,8 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
       let collection: string;
       let requestedID: string | number;
 
-      if (typeof options.relationTo === 'string') {
-        collection = options.relationTo;
+      if (typeof relationTo === 'string') {
+        collection = relationTo;
 
         // custom id
         if (typeof val === 'string' || typeof val === 'number') {
@@ -296,13 +314,16 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
         }
       }
 
-      if (Array.isArray(options.relationTo) && typeof val === 'object' && val?.relationTo) {
+      if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
         collection = val.relationTo;
         requestedID = val.value;
       }
 
-      const idField = options.payload.collections[collection].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+      if (requestedID === null) return false;
+
+      const idField = payload.collections[collection]?.config?.fields?.find((field) => fieldAffectsData(field) && field.name === 'id');
       let type;
+
       if (idField) {
         type = idField.type === 'number' ? 'number' : 'text';
       } else {

@@ -96,10 +96,73 @@ const RichTextFields: CollectionConfig = {
       },
     },
     {
+      name: 'richTextCustomFields',
+      type: 'richText',
+      admin: {
+        elements: [
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6',
+          'ul',
+          'ol',
+          'indent',
+          'link',
+          'relationship',
+          'upload',
+        ],
+        link: {
+          fields: () => [
+            {
+              required: false,
+              name: 'rel',
+              label: 'Rel Attribute',
+              type: 'select',
+              hasMany: true,
+              options: [
+                'noopener', 'noreferrer', 'nofollow',
+              ],
+              admin: {
+                description: 'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+              },
+            },
+          ],
+        },
+        upload: {
+          collections: {
+            uploads: {
+              fields: [
+                {
+                  name: 'caption',
+                  type: 'richText',
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
+    {
       name: 'richTextReadOnly',
       type: 'richText',
       admin: {
         readOnly: true,
+        elements: [
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6',
+          'ul',
+          'ol',
+          'indent',
+          'link',
+          'relationship',
+          'upload',
+        ],
         link: {
           fields: [
             {
@@ -387,6 +450,7 @@ export const richTextDoc = {
   selectHasMany: ['one', 'five'],
   richText: generateRichText(),
   richTextReadOnly: generateRichText(),
+  richTextCustomFields: generateRichText(),
 };
 
 export default RichTextFields;

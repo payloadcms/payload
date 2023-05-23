@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import qs from 'qs';
-import format from 'date-fns/format';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import { Props } from './types';
@@ -8,6 +7,7 @@ import ReactSelect from '../../../elements/ReactSelect';
 import { PaginatedDocs } from '../../../../../mongoose/types';
 import { Where } from '../../../../../types';
 import { mostRecentVersionOption, publishedVersionOption } from '../shared';
+import { formatDate } from '../../../../utilities/formatDate';
 
 import './index.scss';
 
@@ -76,7 +76,7 @@ const CompareVersion: React.FC<Props> = (props) => {
         setOptions((existingOptions) => [
           ...existingOptions,
           ...data.docs.map((doc) => ({
-            label: format(new Date(doc.createdAt), dateFormat),
+            label: formatDate(doc.createdAt, dateFormat, i18n?.language),
             value: doc.id,
           })),
         ]);

@@ -2,11 +2,10 @@ import { Request } from 'express';
 import type { i18n as Ii18n, TFunction } from 'i18next';
 import DataLoader from 'dataloader';
 import { UploadedFile } from 'express-fileupload';
-import { Payload } from '../index';
-import { Collection } from '../collections/config/types';
+import { Payload } from '../payload';
+import { Collection, TypeWithID } from '../collections/config/types';
 import { User } from '../auth/types';
 import { Document } from '../types';
-import { TypeWithID } from '../globals/config/types';
 
 /** Express request with some Payload related context added */
 export declare type PayloadRequest<U = any> = Request & {
@@ -23,12 +22,12 @@ export declare type PayloadRequest<U = any> = Request & {
   fallbackLocale?: string;
   /** Information about the collection that is being accessed
    * - Configuration from payload-config.ts
-   * - Mongo model for this collection
+   * - MongoDB model for this collection
    * - GraphQL type metadata
    * */
   collection?: Collection;
   /** What triggered this request */
-  payloadAPI: 'REST' | 'local' | 'graphQL';
+  payloadAPI?: 'REST' | 'local' | 'GraphQL';
   /** Uploaded files */
   files?: {
     /**

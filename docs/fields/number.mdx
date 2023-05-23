@@ -29,6 +29,7 @@ keywords: number, fields, config, configuration, documentation, Content Manageme
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -54,7 +55,7 @@ Set this property to a string that will be used for browser autocomplete.
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

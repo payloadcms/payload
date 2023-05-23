@@ -53,17 +53,104 @@ export default buildConfig({
                 type: GraphQL.GraphQLFloat,
               },
             },
-            args: {
-              argNameHere: {
-                type: new GraphQL.GraphQLNonNull(GraphQLString),
-              }
-            },
-            resolve: myCustomQueryResolver,
-          })
+          }),
+          args: {
+            argNameHere: {
+              type: new GraphQL.GraphQLNonNull(GraphQLString),
+            }
+          },
+          resolve: myCustomQueryResolver,
         }
       }
     }
     // highlight-end
   }
 })
+```
+
+### Resolver function
+
+In your resolver, make sure you set `depth: 0` if you're returning data directly from the local API so that GraphQL can correctly resolve queries to nested values such as relationship data.
+
+Your function will receive four arguments you can make use of:
+
+Example
+
+```ts
+async (obj, args, context, info) => { }
+```
+
+**`obj`** 
+
+The previous object. Not very often used and usually discarded.
+
+**`args`**
+
+The available arguments from your query or mutation will be available to you here, these must be configured via the custom operation first.
+
+**`context`**
+
+An object containing the `req` and `res` objects that will provide you with the `payload`, `user` instances and more, like any other Payload API handler.
+
+**`info`**
+
+Contextual information about the currently running GraphQL operation. You can get schema information from this as well as contextual information about where this resolver function is being run.
+
+### Types
+
+We've exposed a few types and utilities to help you extend the API further. Payload uses the GraphQL.js package for which you can view the full list of available types in the [official documentation](https://graphql.org/graphql-js/type/).
+
+**`GraphQL`**
+
+You can directly import the GraphQL package used by Payload, most useful for typing. For queries, mutations and handlers make sure you use the `GraphQL` and `payload` instances provided via arguments.
+
+**`buildPaginatedListType`**
+
+This is a utility function that allows you to build a new GraphQL type for a paginated result similar to the Payload's generated schema.
+It takes in two arguments, the first for the name of this new schema type and the second for the GraphQL type to be used in the docs parameter.
+
+Example
+
+```ts
+export const getMyPosts = (GraphQL, payload) => {
+  return {
+    args: {},
+    resolve: Resolver,
+    // The name of your new type has to be unique
+    type: buildPaginatedListType('AuthorPosts', payload.collections['posts'].graphQL?.type),
+  }
+}
+```
+
+**`payload.collections.slug.graphQL`**
+
+If you want to extend more of the provided API then the `graphQL` object on your collection slug will contain additional types to help you re-use code for types, mutations and queries.
+
+```ts
+graphQL?: {
+  type: GraphQLObjectType
+  paginatedType: GraphQLObjectType
+  JWT: GraphQLObjectType
+  versionType: GraphQLObjectType
+  whereInputType: GraphQLInputObjectType
+  mutationInputType: GraphQLNonNull<any>
+  updateMutationInputType: GraphQLNonNull<any>
+}
+```
+
+### Best practices
+
+There are a few ways to structure your code, we recommend using a dedicated `graphql` directory so you can keep all of your logic in one place. You have total freedom of how you want to structure this but a common pattern is to group functions by type and with their resolver.
+
+Example
+
+```
+src/graphql
+---- queries/
+     index.ts
+    -- myCustomQuery/
+       index.ts
+       resolver.ts
+
+---- mutations/
 ```

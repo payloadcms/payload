@@ -6,6 +6,7 @@ import { PayloadRequest } from '../../../express/types';
 import getValueWithDefault from '../../getDefaultValue';
 import { traverseFields } from './traverseFields';
 import { getExistingRowDoc } from './getExistingRowDoc';
+import { cloneDataFromOriginalDoc } from './cloneDataFromOriginalDoc';
 
 type Args = {
   data: Record<string, unknown>
@@ -49,7 +50,7 @@ export const promise = async ({
   siblingDocWithLocales,
   skipValidation,
 }: Args): Promise<void> => {
-  const passesCondition = (field.admin?.condition) ? field.admin.condition(data, siblingData) : true;
+  const passesCondition = (field.admin?.condition) ? field.admin.condition(data, siblingData, { user: req.user }) : true;
   let skipValidationFromHere = skipValidation || !passesCondition;
 
   const defaultLocale = req.payload.config?.localization ? req.payload.config.localization?.defaultLocale : 'en';
@@ -60,9 +61,9 @@ export const promise = async ({
       // If no incoming data, but existing document data is found, merge it in
       if (typeof siblingDoc[field.name] !== 'undefined') {
         if (field.localized && typeof siblingDocWithLocales[field.name] === 'object' && siblingDocWithLocales[field.name] !== null) {
-          siblingData[field.name] = siblingDocWithLocales[field.name][req.locale];
+          siblingData[field.name] = cloneDataFromOriginalDoc(siblingDocWithLocales[field.name][req.locale]);
         } else {
-          siblingData[field.name] = siblingDoc[field.name];
+          siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name]);
         }
 
         // Otherwise compute default value

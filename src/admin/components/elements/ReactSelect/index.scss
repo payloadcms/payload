@@ -1,5 +1,9 @@
 @import '../../../scss/styles';
 
+.react-select-container {
+  width: 100%;
+}
+
 .react-select {
   .rs__control {
     @include formInput;
@@ -18,13 +22,13 @@
     display: none;
   }
 
-  .rs__input {
+  .rs__input-container {
     color: var(--theme-elevation-1000);
+  }
 
-    input {
-      font-family: var(--font-body);
-      width: 10px;
-    }
+  .rs__input {
+    font-family: var(--font-body);
+    width: 10px;
   }
 
   .rs__menu {

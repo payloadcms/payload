@@ -22,7 +22,15 @@ export type FileData = {
   width: number;
   height: number;
   sizes: FileSizes;
+  tempFilePath?: string;
 };
+
+export type ProbedImageSize = {
+  width: number,
+  height: number,
+  type: string,
+  mime: string,
+}
 
 /**
  * Params sent to the sharp toFormat() function
@@ -33,9 +41,16 @@ export type ImageUploadFormatOptions = {
   options?: Parameters<Sharp['toFormat']>[1]
 }
 
+/**
+ * Params sent to the sharp trim() function
+ * @link https://sharp.pixelplumbing.com/api-resize#trim
+ */
+export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
+
 export type ImageSize = ResizeOptions & {
   name: string
   formatOptions?: ImageUploadFormatOptions
+  trimOptions?: ImageUploadTrimOptions
   /**
    * @deprecated prefer position
    */
@@ -54,7 +69,9 @@ export type IncomingUploadType = {
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
   handlers?: any[]
   resizeOptions?: ResizeOptions
+  /** Options for original upload file only. For sizes, set each formatOptions individually. */
   formatOptions?: ImageUploadFormatOptions
+  trimOptions?: ImageUploadTrimOptions
 }
 
 export type Upload = {
@@ -68,6 +85,7 @@ export type Upload = {
   handlers?: any[]
   resizeOptions?: ResizeOptions;
   formatOptions?: ImageUploadFormatOptions
+  trimOptions?: ImageUploadTrimOptions
 }
 
 export type File = {

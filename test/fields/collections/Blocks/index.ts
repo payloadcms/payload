@@ -6,7 +6,9 @@ export const blocksFieldSeedData = [
     blockName: 'First block',
     blockType: 'text',
     text: 'first block',
-    richText: [],
+    richText: [{
+      children: [{ text: '' }],
+    }],
   },
   {
     blockName: 'Second block',

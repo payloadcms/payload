@@ -19,6 +19,7 @@ keywords: tabs, fields, config, configuration, documentation, Content Management
 | ---------------- | ----------- |
 | **`tabs`** *     | Array of tabs to render within this Tabs field. |
 | **`admin`**      | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
+| **`custom`**     | Extension point for adding custom data (e.g. for plugins) |
 
 #### Tab-specific Config
 
@@ -39,7 +40,7 @@ Each tab has its own required `label` and `fields` array. You can also optionall
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

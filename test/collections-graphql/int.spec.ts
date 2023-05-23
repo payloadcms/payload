@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
 import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
-import config from './config';
+import configPromise, { slug } from './config';
 import payload from '../../src';
 import type { Post } from './payload-types';
 
-const slug = config.collections[0]?.slug;
 const title = 'title';
 
 let client: GraphQLClient;
@@ -13,6 +12,7 @@ let client: GraphQLClient;
 describe('collections-graphql', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
+    const config = await configPromise;
     const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
     client = new GraphQLClient(url);
   });
@@ -38,6 +38,20 @@ describe('collections-graphql', () => {
         }
       }`;
       const response = await client.request(query);
+      const doc: Post = response.createPost;
+
+      expect(doc).toMatchObject({ title });
+      expect(doc.id.length).toBeGreaterThan(0);
+    });
+
+    it('should create using graphql variables', async () => {
+      const query = `mutation Create($title: String!) {
+          createPost(data: {title: $title}) {
+          id
+          title
+        }
+      }`;
+      const response = await client.request(query, { title });
       const doc: Post = response.createPost;
 
       expect(doc).toMatchObject({ title });
@@ -350,11 +364,108 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }));
       });
     });
+
+    describe('relationships', () => {
+      it('should query on relationships with custom IDs', async () => {
+        const query = `query {
+          Posts(where: { title: { equals: "has custom ID relation" }}) {
+            docs {
+              id
+              title
+              relationToCustomID {
+                id
+              }
+            }
+            totalDocs
+          }
+        }`;
+
+        const response = await client.request(query);
+        const { docs, totalDocs } = response.Posts;
+
+        expect(totalDocs).toStrictEqual(1);
+        expect(docs[0].relationToCustomID.id).toStrictEqual(1);
+      });
+    });
+  });
+
+  describe('Error Handler', () => {
+    it('should return have an array of errors when making a bad request', async () => {
+      let error;
+
+      // language=graphQL
+      const query = `query {
+        Posts(where: { title: { exists: true }}) {
+          docs {
+            badFieldName
+          }
+        }
+      }`;
+      await client.request(query).catch((err) => {
+        error = err;
+      });
+      expect(Array.isArray(error.response.errors)).toBe(true);
+      expect(typeof error.response.errors[0].message).toBe('string');
+    });
+
+    it('should return have an array of errors when failing to pass validation', async () => {
+      let error;
+      // language=graphQL
+      const query = `mutation {
+        createPost(data: {min: 1}) {
+          id
+          min
+          createdAt
+          updatedAt
+        }
+      }`;
+
+      await client.request(query).catch((err) => {
+        error = err;
+      });
+      expect(Array.isArray(error.response.errors)).toBe(true);
+      expect(error.response.errors[0].message).toEqual('The following field is invalid: min');
+      expect(typeof error.response.errors[0].locations).toBeDefined();
+    });
+
+    it('should return have an array of errors when failing multiple mutations', async () => {
+      let error;
+      // language=graphQL
+      const query = `mutation createTest {
+        test1:createUser(data: { email: "test@test.com", password: "test" }) {
+          email
+        }
+
+        test2:createUser(data: { email: "test2@test.com", password: "" }) {
+          email
+        }
+
+        test3:createUser(data: { email: "test@test.com", password: "test" }) {
+          email
+        }
+      }`;
+
+      await client.request(query).catch((err) => {
+        error = err;
+      });
+
+      expect(Array.isArray(error.response.errors)).toBe(true);
+      expect(error.response.errors[0].message).toEqual('No password was given');
+      expect(Array.isArray(error.response.errors[0].locations)).toEqual(true);
+      expect(error.response.errors[0].path[0]).toEqual('test2');
+      expect(error.response.errors[0].extensions.name).toEqual('MissingPasswordError');
+
+      expect(error.response.errors[1].message).toEqual('The following field is invalid: email');
+      expect(error.response.errors[1].path[0]).toEqual('test3');
+      expect(error.response.errors[1].extensions.name).toEqual('ValidationError');
+      expect(error.response.errors[1].extensions.data[0].message).toEqual('A user with the given username is already registered');
+      expect(error.response.errors[1].extensions.data[0].field).toEqual('email');
+    });
   });
 });
 
 async function createPost(overrides?: Partial<Post>) {
-  const doc = await payload.create<Post>({
+  const doc = await payload.create({
     collection: slug,
     data: { title: 'title', ...overrides },
   });

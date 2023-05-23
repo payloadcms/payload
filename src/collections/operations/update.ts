@@ -1,38 +1,39 @@
 import httpStatus from 'http-status';
-import { Where, Document } from '../../types';
-import { Collection } from '../config/types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { DeepPartial } from 'ts-essentials';
+import { Document, Where } from '../../types';
+import { BulkOperationResult, Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
-import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
+import { APIError, ValidationError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
-import { hasWhereAccessResult } from '../../auth/types';
-import { saveCollectionDraft } from '../../versions/drafts/saveCollectionDraft';
-import { saveCollectionVersion } from '../../versions/saveCollectionVersion';
+import { saveVersion } from '../../versions/saveVersion';
 import { uploadFiles } from '../../uploads/uploadFiles';
-import cleanUpFailedVersion from '../../versions/cleanUpFailedVersion';
-import { ensurePublishedCollectionVersion } from '../../versions/ensurePublishedCollectionVersion';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
-import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
+import { AccessResult } from '../../config/types';
+import { queryDrafts } from '../../versions/drafts/queryDrafts';
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 
-export type Arguments = {
+export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
   req: PayloadRequest
-  id: string | number
-  data: Record<string, unknown>
+  where: Where
+  data: DeepPartial<T>
   depth?: number
   disableVerificationEmail?: boolean
   overrideAccess?: boolean
   showHiddenFields?: boolean
   overwriteExistingFiles?: boolean
   draft?: boolean
-  autosave?: boolean
 }
-
-async function update(incomingArgs: Arguments): Promise<Document> {
+async function update<TSlug extends keyof GeneratedTypes['collections']>(
+  incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
+): Promise<BulkOperationResult<TSlug>> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -55,7 +56,7 @@ async function update(incomingArgs: Arguments): Promise<Document> {
       Model,
       config: collectionConfig,
     },
-    id,
+    where,
     req,
     req: {
       t,
@@ -69,70 +70,58 @@ async function update(incomingArgs: Arguments): Promise<Document> {
     showHiddenFields,
     overwriteExistingFiles = false,
     draft: draftArg = false,
-    autosave = false,
   } = args;
 
-  if (!id) {
-    throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST);
+  if (!where) {
+    throw new APIError('Missing \'where\' query of documents to update.', httpStatus.BAD_REQUEST);
   }
 
   let { data } = args;
-  const { password } = data;
   const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
-  const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft);
-  const lean = !shouldSavePassword;
 
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
 
-  const accessResults = !overrideAccess ? await executeAccess({ req, id, data }, collectionConfig.access.update) : true;
-  const hasWherePolicy = hasWhereAccessResult(accessResults);
+  let accessResult: AccessResult;
 
-  // /////////////////////////////////////
-  // Retrieve document
-  // /////////////////////////////////////
-
-  const queryToBuild: { where: Where } = {
-    where: {
-      and: [
-        {
-          id: {
-            equals: id,
-          },
-        },
-      ],
-    },
-  };
-
-  if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
+  if (!overrideAccess) {
+    accessResult = await executeAccess({ req }, collectionConfig.access.update);
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
-
-  const doc = await getLatestCollectionVersion({ payload, collection, id, query, lean });
-
-  if (!doc && !hasWherePolicy) throw new NotFound(t);
-  if (!doc && hasWherePolicy) throw new Forbidden(t);
-
-  let docWithLocales: Document = JSON.stringify(lean ? doc : doc.toJSON({ virtuals: true }));
-  docWithLocales = JSON.parse(docWithLocales);
-
-  const originalDoc = await afterRead({
-    depth: 0,
-    doc: docWithLocales,
-    entityConfig: collectionConfig,
+  const query = await Model.buildQuery({
+    where,
+    access: accessResult,
     req,
-    overrideAccess: true,
-    showHiddenFields,
+    overrideAccess,
   });
+
+  // /////////////////////////////////////
+  // Retrieve documents
+  // /////////////////////////////////////
+  let docs;
+
+  if (collectionConfig.versions?.drafts && shouldSaveDraft) {
+    docs = await queryDrafts<GeneratedTypes['collections'][TSlug]>({
+      accessResult,
+      collection,
+      req,
+      overrideAccess,
+      payload,
+      where: query,
+    });
+  } else {
+    docs = await Model.find(query, {}, { lean: true });
+  }
 
   // /////////////////////////////////////
   // Generate data for all files and sizes
   // /////////////////////////////////////
 
-  const { data: newFileData, files: filesToUpload } = await generateFileData({
+  const {
+    data: newFileData,
+    files: filesToUpload,
+  } = await generateFileData({
     config,
     collection,
     req,
@@ -143,209 +132,217 @@ async function update(incomingArgs: Arguments): Promise<Document> {
 
   data = newFileData;
 
-  // /////////////////////////////////////
-  // beforeValidate - Fields
-  // /////////////////////////////////////
+  const errors = [];
 
-  data = await beforeValidate({
-    data,
-    doc: originalDoc,
-    entityConfig: collectionConfig,
-    id,
-    operation: 'update',
-    overrideAccess,
-    req,
-  });
+  const promises = docs.map(async (doc) => {
+    let docWithLocales: Document = JSON.stringify(doc);
+    docWithLocales = JSON.parse(docWithLocales);
 
-  // /////////////////////////////////////
-  // beforeValidate - Collection
-  // /////////////////////////////////////
+    const id = docWithLocales._id;
 
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    data = (await hook({
-      data,
-      req,
-      operation: 'update',
-      originalDoc,
-    })) || data;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // Write files to local storage
-  // /////////////////////////////////////
-
-  if (!collectionConfig.upload.disableLocalStorage) {
-    await uploadFiles(payload, filesToUpload, t);
-  }
-
-  // /////////////////////////////////////
-  // beforeChange - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    data = (await hook({
-      data,
-      req,
-      originalDoc,
-      operation: 'update',
-    })) || data;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // beforeChange - Fields
-  // /////////////////////////////////////
-
-  let result = await beforeChange({
-    data,
-    doc: originalDoc,
-    docWithLocales,
-    entityConfig: collectionConfig,
-    id,
-    operation: 'update',
-    req,
-    skipValidation: shouldSaveDraft || data._status === 'draft',
-  });
-
-  // /////////////////////////////////////
-  // Handle potential password update
-  // /////////////////////////////////////
-
-  if (shouldSavePassword) {
-    await doc.setPassword(password as string);
-    await doc.save();
-    delete data.password;
-    delete result.password;
-  }
-
-  // /////////////////////////////////////
-  // Create version from existing doc
-  // /////////////////////////////////////
-
-  let createdVersion;
-
-  if (collectionConfig.versions && !shouldSaveDraft) {
-    createdVersion = await saveCollectionVersion({
-      payload,
-      config: collectionConfig,
-      req,
-      docWithLocales,
-      id,
-    });
-  }
-
-  // /////////////////////////////////////
-  // Update
-  // /////////////////////////////////////
-
-  if (shouldSaveDraft) {
-    await ensurePublishedCollectionVersion({
-      payload,
-      config: collectionConfig,
-      req,
-      docWithLocales,
-      id,
-    });
-
-    result = await saveCollectionDraft({
-      payload,
-      config: collectionConfig,
-      req,
-      data: result,
-      id,
-      autosave,
-    });
-  } else {
     try {
-      result = await Model.findByIdAndUpdate(
-        { _id: id },
-        result,
-        { new: true },
-      );
-    } catch (error) {
-      cleanUpFailedVersion({
-        payload,
+      const originalDoc = await afterRead({
+        depth: 0,
+        doc: docWithLocales,
         entityConfig: collectionConfig,
-        version: createdVersion,
+        req,
+        overrideAccess: true,
+        showHiddenFields: true,
       });
 
-      // Handle uniqueness error from MongoDB
-      throw error.code === 11000 && error.keyValue
-        ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }], t)
-        : error;
+      await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc: docWithLocales, t, overrideDelete: false });
+
+      // /////////////////////////////////////
+      // beforeValidate - Fields
+      // /////////////////////////////////////
+
+      data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+        data,
+        doc: originalDoc,
+        entityConfig: collectionConfig,
+        id,
+        operation: 'update',
+        overrideAccess,
+        req,
+      });
+
+      // /////////////////////////////////////
+      // beforeValidate - Collection
+      // /////////////////////////////////////
+
+      await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+        await priorHook;
+
+        data = (await hook({
+          data,
+          req,
+          operation: 'update',
+          originalDoc,
+        })) || data;
+      }, Promise.resolve());
+
+      // /////////////////////////////////////
+      // Write files to local storage
+      // /////////////////////////////////////
+
+      if (!collectionConfig.upload.disableLocalStorage) {
+        await uploadFiles(payload, filesToUpload, t);
+      }
+
+      // /////////////////////////////////////
+      // beforeChange - Collection
+      // /////////////////////////////////////
+
+      await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+        await priorHook;
+
+        data = (await hook({
+          data,
+          req,
+          originalDoc,
+          operation: 'update',
+        })) || data;
+      }, Promise.resolve());
+
+      // /////////////////////////////////////
+      // beforeChange - Fields
+      // /////////////////////////////////////
+
+      let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+        data,
+        doc: originalDoc,
+        docWithLocales,
+        entityConfig: collectionConfig,
+        id,
+        operation: 'update',
+        req,
+        skipValidation: shouldSaveDraft || data._status === 'draft',
+      });
+
+      // /////////////////////////////////////
+      // Update
+      // /////////////////////////////////////
+
+      if (!shouldSaveDraft) {
+        try {
+          result = await Model.findByIdAndUpdate(
+            { _id: id },
+            result,
+            { new: true },
+          );
+        } catch (error) {
+          // Handle uniqueness error from MongoDB
+          throw error.code === 11000 && error.keyValue
+            ? new ValidationError([{
+              message: 'Value must be unique',
+              field: Object.keys(error.keyValue)[0],
+            }], t)
+            : error;
+        }
+      }
+
+      result = JSON.parse(JSON.stringify(result));
+      result.id = result._id as string | number;
+      result = sanitizeInternalFields(result);
+
+      // /////////////////////////////////////
+      // Create version
+      // /////////////////////////////////////
+
+      if (collectionConfig.versions) {
+        result = await saveVersion({
+          payload,
+          collection: collectionConfig,
+          req,
+          docWithLocales: {
+            ...result,
+            createdAt: docWithLocales.createdAt,
+          },
+          id,
+          draft: shouldSaveDraft,
+        });
+      }
+
+      // /////////////////////////////////////
+      // afterRead - Fields
+      // /////////////////////////////////////
+
+      result = await afterRead({
+        depth,
+        doc: result,
+        entityConfig: collectionConfig,
+        req,
+        overrideAccess,
+        showHiddenFields,
+      });
+
+      // /////////////////////////////////////
+      // afterRead - Collection
+      // /////////////////////////////////////
+
+      await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+        await priorHook;
+
+        result = await hook({
+          req,
+          doc: result,
+        }) || result;
+      }, Promise.resolve());
+
+      // /////////////////////////////////////
+      // afterChange - Fields
+      // /////////////////////////////////////
+
+      result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+        data,
+        doc: result,
+        previousDoc: originalDoc,
+        entityConfig: collectionConfig,
+        operation: 'update',
+        req,
+      });
+
+      // /////////////////////////////////////
+      // afterChange - Collection
+      // /////////////////////////////////////
+
+      await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+        await priorHook;
+
+        result = await hook({
+          doc: result,
+          previousDoc: originalDoc,
+          req,
+          operation: 'update',
+        }) || result;
+      }, Promise.resolve());
+
+      await unlinkTempFiles({
+        req,
+        config,
+        collectionConfig,
+      });
+
+      // /////////////////////////////////////
+      // Return results
+      // /////////////////////////////////////
+
+      return result;
+    } catch (error) {
+      errors.push({
+        message: error.message,
+        id,
+      });
     }
-
-    const resultString = JSON.stringify(result);
-    result = JSON.parse(resultString);
-
-    // custom id type reset
-    result.id = result._id;
-  }
-
-  result = sanitizeInternalFields(result);
-
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
-
-  result = await afterRead({
-    depth,
-    doc: result,
-    entityConfig: collectionConfig,
-    req,
-    overrideAccess,
-    showHiddenFields,
+    return null;
   });
 
-  // /////////////////////////////////////
-  // afterRead - Collection
-  // /////////////////////////////////////
+  const awaitedDocs = await Promise.all(promises);
 
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result = await hook({
-      req,
-      doc: result,
-    }) || result;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // afterChange - Fields
-  // /////////////////////////////////////
-
-  result = await afterChange({
-    data,
-    doc: result,
-    previousDoc: originalDoc,
-    entityConfig: collectionConfig,
-    operation: 'update',
-    req,
-  });
-
-  // /////////////////////////////////////
-  // afterChange - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result = await hook({
-      doc: result,
-      previousDoc: originalDoc,
-      req,
-      operation: 'update',
-    }) || result;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // Return results
-  // /////////////////////////////////////
-
-  return result;
+  return {
+    docs: awaitedDocs.filter(Boolean),
+    errors,
+  };
 }
 
 export default update;

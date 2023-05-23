@@ -9,6 +9,7 @@ import Button from '../../../../../../elements/Button';
 import { useListDrawer } from '../../../../../../elements/ListDrawer';
 import { Props as RichTextProps } from '../../../types';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
 
 import './index.scss';
 
@@ -18,19 +19,24 @@ const initialParams = {
   depth: 0,
 };
 
-const Element: React.FC<{
+type Props = {
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
   element: any
   fieldProps: RichTextProps
-}> = (props) => {
+}
+const Element: React.FC<Props> = (props) => {
   const {
     attributes,
     children,
     element,
+    element: {
+      relationTo,
+      value,
+    },
     fieldProps,
   } = props;
-  const { relationTo, value } = element;
+
   const { collections, serverURL, routes: { api } } = useConfig();
   const [enabledCollectionSlugs] = useState(() => collections.filter(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship).map(({ slug }) => slug));
   const [relatedCollection, setRelatedCollection] = useState(() => collections.find((coll) => coll.slug === relationTo));
@@ -140,38 +146,23 @@ const Element: React.FC<{
         <p className={`${baseClass}__label`}>
           {t('labelRelationship', { label: getTranslation(relatedCollection.labels.singular, i18n) })}
         </p>
-        <p className={`${baseClass}__title`}>
-          {data[relatedCollection?.admin?.useAsTitle || 'id']}
-        </p>
+        <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
+          <p className={`${baseClass}__title`}>
+            {data[relatedCollection?.admin?.useAsTitle || 'id']}
+          </p>
+        </DocumentDrawerToggler>
       </div>
       <div className={`${baseClass}__actions`}>
-        {value?.id && (
-          <DocumentDrawerToggler
-            className={`${baseClass}__toggler`}
-            disabled={fieldProps?.admin?.readOnly}
-          >
-            <Button
-              icon="edit"
-              round
-              buttonStyle="icon-label"
-              el="div"
-              className={`${baseClass}__actionButton`}
-              onClick={(e) => {
-                e.preventDefault();
-              }}
-              tooltip={t('general:editLabel', { label: getTranslation(relatedCollection.labels.singular, i18n) })}
-              disabled={fieldProps?.admin?.readOnly}
-            />
-          </DocumentDrawerToggler>
-        )}
-        <ListDrawerToggler disabled={fieldProps?.admin?.readOnly}>
+        <ListDrawerToggler
+          disabled={fieldProps?.admin?.readOnly}
+          className={`${baseClass}__list-drawer-toggler`}
+        >
           <Button
             icon="swap"
             round
             buttonStyle="icon-label"
-            className={`${baseClass}__actionButton`}
             onClick={() => {
-            // do nothing
+              // do nothing
             }}
             el="div"
             tooltip={t('swapRelationship')}
@@ -182,7 +173,7 @@ const Element: React.FC<{
           icon="x"
           round
           buttonStyle="icon-label"
-          className={`${baseClass}__actionButton`}
+          className={`${baseClass}__removeButton`}
           onClick={(e) => {
             e.preventDefault();
             removeRelationship();
@@ -200,4 +191,10 @@ const Element: React.FC<{
   );
 };
 
-export default Element;
+export default (props: Props): React.ReactNode => {
+  return (
+    <EnabledRelationshipsCondition {...props}>
+      <Element {...props} />
+    </EnabledRelationshipsCondition>
+  );
+};

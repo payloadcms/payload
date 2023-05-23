@@ -3,9 +3,10 @@ import React, {
 } from 'react';
 import qs from 'qs';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import { useConfig } from '../Config';
 import { PaginatedDocs } from '../../../../mongoose/types';
-import { ContextType, DocumentPermissions, EntityType, Props, Version } from './types';
+import { ContextType, DocumentPermissions, Props, Version } from './types';
 import { TypeWithID } from '../../../../globals/config/types';
 import { TypeWithTimestamps } from '../../../../collections/config/types';
 import { Where } from '../../../../types';
@@ -15,12 +16,18 @@ import { useAuth } from '../Auth';
 
 const Context = createContext({} as ContextType);
 
+export const useDocumentInfo = (): ContextType => useContext(Context);
+
 export const DocumentInfoProvider: React.FC<Props> = ({
   children,
   global,
   collection,
-  id,
+  id: idFromProps,
+  idFromParams: getIDFromParams,
 }) => {
+  const { id: idFromParams } = useParams<{id: string}>();
+  const id = idFromProps || (getIDFromParams ? idFromParams : null);
+
   const { serverURL, routes: { api } } = useConfig();
   const { getPreference } = usePreferences();
   const { i18n } = useTranslation();
@@ -32,7 +39,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
   const baseURL = `${serverURL}${api}`;
   let slug: string;
-  let type: EntityType;
+  let type: 'global' | 'collection';
   let pluralType: 'globals' | 'collections';
   let preferencesKey: string;
 
@@ -56,6 +63,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const getVersions = useCallback(async () => {
     let versionFetchURL;
     let publishedFetchURL;
+    let draftsEnabled = false;
     let shouldFetchVersions = false;
     let unpublishedVersionJSON = null;
     let versionJSON = null;
@@ -91,12 +99,14 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     };
 
     if (global) {
+      draftsEnabled = Boolean(global?.versions?.drafts);
       shouldFetchVersions = Boolean(global?.versions);
       versionFetchURL = `${baseURL}/globals/${global.slug}/versions`;
       publishedFetchURL = `${baseURL}/globals/${global.slug}?${qs.stringify(publishedVersionParams)}`;
     }
 
     if (collection) {
+      draftsEnabled = Boolean(collection?.versions?.drafts);
       shouldFetchVersions = Boolean(collection?.versions);
       versionFetchURL = `${baseURL}/${collection.slug}/versions`;
 
@@ -120,15 +130,19 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
 
     if (shouldFetch) {
-      let publishedJSON = await fetch(publishedFetchURL, {
-        credentials: 'include',
-        headers: {
-          'Accept-Language': i18n.language,
-        },
-      }).then((res) => res.json());
+      let publishedJSON;
 
-      if (collection) {
-        publishedJSON = publishedJSON?.docs?.[0];
+      if (draftsEnabled) {
+        publishedJSON = await fetch(publishedFetchURL, {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        }).then((res) => res.json());
+
+        if (collection) {
+          publishedJSON = publishedJSON?.docs?.[0];
+        }
       }
 
       if (shouldFetchVersions) {
@@ -233,5 +247,3 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     </Context.Provider>
   );
 };
-
-export const useDocumentInfo = (): ContextType => useContext(Context);

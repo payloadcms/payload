@@ -2,19 +2,21 @@
 /* eslint-disable global-require */
 import mongoose, { ConnectOptions } from 'mongoose';
 import pino from 'pino';
+import { InitOptions } from '../config/types';
 import { connection } from './testCredentials';
 
 const connectMongoose = async (
   url: string,
-  options: ConnectOptions,
+  options: InitOptions['mongoOptions'],
   logger: pino.Logger,
 ): Promise<void | any> => {
   let urlToConnect = url;
-  let successfulConnectionMessage = 'Connected to Mongo server successfully!';
-  const connectionOptions = {
+  let successfulConnectionMessage = 'Connected to MongoDB server successfully!';
+
+  const connectionOptions: ConnectOptions & { useFacet: undefined } = {
     autoIndex: true,
     ...options,
-    useNewUrlParser: true,
+    useFacet: undefined,
   };
 
   let mongoMemoryServer;
@@ -33,7 +35,7 @@ const connectMongoose = async (
     });
 
     urlToConnect = mongoMemoryServer.getUri();
-    successfulConnectionMessage = 'Connected to in-memory Mongo server successfully!';
+    successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!';
   }
 
   try {

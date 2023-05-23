@@ -1,7 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
+    "$schema": {
+      "type": "string"
+    },
     "authentication": {
       "type": "object",
       "additionalProperties": false,
@@ -296,6 +300,9 @@
         "notFound": {
           "type": "string"
         },
+        "previewing": {
+          "type": "string"
+        },
         "problemUploadingFile": {
           "type": "string"
         },
@@ -312,6 +319,12 @@
           "type": "string"
         },
         "unspecific": {
+          "type": "string"
+        },
+        "unableToDeleteCount": {
+          "type": "string"
+        },
+        "unableToUpdateCount": {
           "type": "string"
         },
         "userLocked": {
@@ -347,12 +360,15 @@
         "notAllowedToAccessPage",
         "notAllowedToPerformAction",
         "notFound",
+        "previewing",
         "problemUploadingFile",
         "tokenInvalidOrExpired",
         "unPublishingDocument",
         "unauthorized",
         "unknown",
         "unspecific",
+        "unableToDeleteCount",
+        "unableToUpdateCount",
         "userLocked",
         "valueMustBeUnique",
         "verificationTokenInvalid"
@@ -378,6 +394,9 @@
           "type": "string"
         },
         "editLink": {
+          "type": "string"
+        },
+        "editRelationship": {
           "type": "string"
         },
         "enterURL": {
@@ -470,6 +489,9 @@
         "selectExistingLabel": {
           "type": "string"
         },
+        "selectFieldsToEdit": {
+          "type": "string"
+        },
         "showAll": {
           "type": "string"
         },
@@ -493,6 +515,7 @@
         "chooseDocumentToLink",
         "customURL",
         "editLink",
+        "editRelationship",
         "enterURL",
         "internalLink",
         "linkType",
@@ -520,6 +543,7 @@
         "saveChanges",
         "searchForBlock",
         "selectExistingLabel",
+        "selectFieldsToEdit",
         "showAll",
         "swapUpload",
         "toggleBlock",
@@ -531,6 +555,15 @@
       "additionalProperties": false,
       "properties": {
         "aboutToDelete": {
+          "type": "string"
+        },
+        "aboutToDeleteCount_many": {
+          "type": "string"
+        },
+        "aboutToDeleteCount_one": {
+          "type": "string"
+        },
+        "aboutToDeleteCount_other": {
           "type": "string"
         },
         "addBelow": {
@@ -614,6 +647,9 @@
         "delete": {
           "type": "string"
         },
+        "deletedCountSuccessfully": {
+          "type": "string"
+        },
         "deletedSuccessfully": {
           "type": "string"
         },
@@ -636,6 +672,15 @@
           "type": "string"
         },
         "editing": {
+          "type": "string"
+        },
+        "editingLabel_many": {
+          "type": "string"
+        },
+        "editingLabel_one": {
+          "type": "string"
+        },
+        "editingLabel_other": {
           "type": "string"
         },
         "email": {
@@ -752,7 +797,13 @@
         "searchBy": {
           "type": "string"
         },
+        "selectAll": {
+          "type": "string"
+        },
         "selectValue": {
+          "type": "string"
+        },
+        "selectedCount": {
           "type": "string"
         },
         "sorryNotFound": {
@@ -794,7 +845,16 @@
         "updatedAt": {
           "type": "string"
         },
+        "updatedCountSuccessfully": {
+          "type": "string"
+        },
         "updatedSuccessfully": {
+          "type": "string"
+        },
+        "updating": {
+          "type": "string"
+        },
+        "uploading": {
           "type": "string"
         },
         "user": {
@@ -809,6 +869,9 @@
       },
       "required": [
         "aboutToDelete",
+        "aboutToDeleteCount_many",
+        "aboutToDeleteCount_one",
+        "aboutToDeleteCount_other",
         "addBelow",
         "addFilter",
         "adminTheme",
@@ -835,6 +898,7 @@
         "dark",
         "dashboard",
         "delete",
+        "deletedCountSuccessfully",
         "deletedSuccessfully",
         "deleting",
         "descending",
@@ -842,6 +906,9 @@
         "duplicateWithoutSaving",
         "editLabel",
         "editing",
+        "editingLabel_many",
+        "editingLabel_one",
+        "editingLabel_other",
         "email",
         "emailAddress",
         "enterAValue",
@@ -879,7 +946,9 @@
         "save",
         "saving",
         "searchBy",
+        "selectAll",
         "selectValue",
+        "selectedCount",
         "sorryNotFound",
         "sort",
         "stayOnThisPage",
@@ -893,10 +962,67 @@
         "unsavedChangesDuplicate",
         "untitled",
         "updatedAt",
+        "updatedCountSuccessfully",
         "updatedSuccessfully",
         "user",
         "users",
         "welcome"
+      ]
+    },
+    "operators": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "equals": {
+          "type": "string"
+        },
+        "isNotEqualTo":{
+          "type": "string"
+        },
+        "isIn": {
+          "type": "string"
+        },
+        "isNotIn":{
+          "type": "string"
+        },
+        "exists": {
+          "type": "string"
+        },
+        "isGreaterThan":{
+          "type": "string"
+        },
+        "isLessThan": {
+          "type": "string"
+        },
+        "isLessThanOrEqualTo":{
+          "type": "string"
+        },
+        "isGreaterThanOrEqualTo": {
+          "type": "string"
+        },
+        "near":{
+          "type": "string"
+        },
+        "isLike": {
+          "type": "string"
+        },
+        "contains":{
+          "type": "string"
+        }
+      },
+      "required": [
+        "equals",
+        "isNotEqualTo",
+        "isIn",
+        "isNotIn",
+        "exists",
+        "isGreaterThan",
+        "isLessThan",
+        "isLessThanOrEqualTo",
+        "isGreaterThanOrEqualTo",
+        "near",
+        "isLike",
+        "contains"
       ]
     },
     "upload": {
@@ -1031,6 +1157,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "aboutToPublishSelection": {
+          "type": "string"
+        },
         "aboutToRestore": {
           "type": "string"
         },
@@ -1041,6 +1170,9 @@
           "type": "string"
         },
         "aboutToUnpublish": {
+          "type": "string"
+        },
+        "aboutToUnpublishSelection": {
           "type": "string"
         },
         "autosave": {
@@ -1056,6 +1188,9 @@
           "type": "string"
         },
         "compareVersion": {
+          "type": "string"
+        },
+        "confirmPublish": {
           "type": "string"
         },
         "confirmRevertToSaved": {
@@ -1092,6 +1227,9 @@
           "type": "string"
         },
         "publishChanges": {
+          "type": "string"
+        },
+        "publish": {
           "type": "string"
         },
         "published": {
@@ -1177,15 +1315,18 @@
         }
       },
       "required": [
+        "aboutToPublishSelection",
         "aboutToRestore",
         "aboutToRestoreGlobal",
         "aboutToRevertToPublished",
         "aboutToUnpublish",
+        "aboutToUnpublishSelection",
         "autosave",
         "autosavedSuccessfully",
         "autosavedVersion",
         "changed",
         "compareVersion",
+        "confirmPublish",
         "confirmRevertToSaved",
         "confirmUnpublish",
         "confirmVersionRestoration",
@@ -1198,6 +1339,7 @@
         "preview",
         "problemRestoringVersion",
         "publishChanges",
+        "publish",
         "published",
         "restoreThisVersion",
         "restoredSuccessfully",
@@ -1233,6 +1375,7 @@
     "error",
     "fields",
     "general",
+    "operators",
     "upload",
     "validation",
     "version"

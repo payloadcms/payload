@@ -1,7 +1,7 @@
 import { Express, NextFunction, Response } from 'express';
 import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
-import { Options } from 'express-fileupload';
+import { Options as ExpressFileUploadOptions } from 'express-fileupload';
 import { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
@@ -9,7 +9,7 @@ import { ConnectOptions } from 'mongoose';
 import React from 'react';
 import { LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
-import { Payload } from '..';
+import { Payload } from '../payload';
 import {
   AfterErrorHook,
   CollectionConfig,
@@ -27,7 +27,7 @@ type Email = {
 };
 
 // eslint-disable-next-line no-use-before-define
-export type Plugin = (config: Config) => Config;
+export type Plugin = (config: Config) => Promise<Config> | Config;
 
 type GeneratePreviewURLOptions = {
   locale: string;
@@ -37,7 +37,7 @@ type GeneratePreviewURLOptions = {
 export type GeneratePreviewURL = (
   doc: Record<string, unknown>,
   options: GeneratePreviewURLOptions
-) => Promise<string> | string;
+) => Promise<string | null> | string | null;
 
 export type EmailTransport = Email & {
   transport: Transporter;
@@ -71,13 +71,21 @@ export function hasTransportOptions(
   return (emailConfig as EmailTransportOptions).transportOptions !== undefined;
 }
 
+export type GraphQLExtension = (
+  graphQL: typeof GraphQL,
+  payload: Payload
+) => Record<string, unknown>;
+
 export type InitOptions = {
   /** Express app for Payload to use */
   express?: Express;
-  /** Mongo connection URL, starts with `mongo` */
+  /** MongoDB connection URL, starts with `mongo` */
   mongoURL: string | false;
-  /** Extra configuration options that will be passed to Mongo */
-  mongoOptions?: ConnectOptions;
+  /** Extra configuration options that will be passed to MongoDB */
+  mongoOptions?: ConnectOptions & {
+    /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
+    useFacet?: boolean
+  };
 
   /** Secure string that Payload will use for any encryption workflows */
   secret: string;
@@ -108,7 +116,7 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions;
-  config?: SanitizedConfig
+  config?: Promise<SanitizedConfig>
 };
 
 /**
@@ -116,7 +124,7 @@ export type InitOptions = {
  * and then sent to the client allowing the dashboard to show accessible data and actions.
  *
  * If the result is `true`, the user has access.
- * If the result is an object, it is interpreted as a Mongo query.
+ * If the result is an object, it is interpreted as a MongoDB query.
  *
  * @example `{ createdBy: { equals: id } }`
  *
@@ -126,7 +134,7 @@ export type InitOptions = {
  */
 export type AccessResult = boolean | Where;
 
-type AccessArgs<T = any, U = any> = {
+export type AccessArgs<T = any, U = any> = {
   /** The original request that requires an access check */
   req: PayloadRequest<U>;
   /** ID of the resource being accessed */
@@ -186,6 +194,8 @@ export type Endpoint = {
    * @default false
    */
   root?: boolean;
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
 export type AdminView = React.ComponentType<{
@@ -250,6 +260,8 @@ export type Config = {
        */
       favicon?: string;
     };
+    /** Specify an absolute path for where to store the built Admin panel bundle used in production. */
+    buildPath?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean;
     /** Replace the entirety of the index.html file used by the Admin panel. Reference the base index.html file to ensure your replacement has the appropriate HTML elements. */
@@ -326,25 +338,6 @@ export type Config = {
         Dashboard?: React.ComponentType<any>;
       };
     };
-    /**
-     * Control pagination when querying collections.
-     *
-     * @see https://payloadcms.com/docs/queries/overview
-    */
-    pagination?: {
-      /**
-       * Limit the number of documents that are displayed on 1 page in the list view
-       *
-       * @default 10
-       */
-      defaultLimit?: number;
-      /**
-       * Suggest alternative options for the limit of documents on the list view
-       *
-       * @default [5, 10, 25, 50, 100]
-       */
-      limits?: number[]
-    };
     /** Customize the Webpack config that's used to generate the Admin panel. */
     webpack?: (config: Configuration) => Configuration;
   };
@@ -360,6 +353,14 @@ export type Config = {
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
   globals?: GlobalConfig[];
+
+  /**
+   * Email configuration options. This value is overridden by `email` in Payload.init if passed.
+   *
+   * @see https://payloadcms.com/docs/email/overview
+   */
+  email?: EmailOptions;
+
   /**
    * Control the behaviour of the admin internationalisation.
    *
@@ -473,7 +474,7 @@ export type Config = {
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
    */
-  upload?: Options;
+  upload?: ExpressFileUploadOptions;
   /**
    * Translate your content to different languages/locales.
    *
@@ -493,19 +494,13 @@ export type Config = {
      *
      * @see https://payloadcms.com/docs/access-control/overview
      */
-    mutations?: (
-      graphQL: typeof GraphQL,
-      payload: Payload
-    ) => Record<string, unknown>;
+    mutations?: GraphQLExtension;
     /**
-    * Function that returns an object containing keys to custom GraphQL queries
-    *
-    * @see https://payloadcms.com/docs/access-control/overview
-    */
-    queries?: (
-      graphQL: typeof GraphQL,
-      payload: Payload
-    ) => Record<string, unknown>;
+     * Function that returns an object containing keys to custom GraphQL queries
+     *
+     * @see https://payloadcms.com/docs/access-control/overview
+     */
+    queries?: GraphQLExtension;
     maxComplexity?: number;
     disablePlaygroundInProduction?: boolean;
     disable?: boolean;
@@ -533,14 +528,17 @@ export type Config = {
   telemetry?: boolean;
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void;
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'globals'
+  'collections' | 'globals' | 'endpoint'
 > & {
   collections: SanitizedCollectionConfig[];
   globals: SanitizedGlobalConfig[];
+  endpoints: Endpoint[];
   paths: {
     configDir: string
     config: string

@@ -1,5 +1,5 @@
 ---
-title: Radio Field
+title: Radio Group Field
 label: Radio Group
 order: 120
 desc: The Radio field type allows for the selection of one value from a predefined set of possible values. Learn how to use Radio fields, see examples and options.
@@ -7,7 +7,7 @@ keywords: radio, fields, config, configuration, documentation, Content Managemen
 ---
 
 <Banner >
-  The Radio field type allows for the selection of one value from a predefined set of possible values and presents a radio group-style set of inputs to the Admin panel.
+  The Radio Group field type allows for the selection of one value from a predefined set of possible values and presents a radio group-style set of inputs to the Admin panel.
 </Banner>
 
 ### Config
@@ -27,6 +27,7 @@ keywords: radio, fields, config, configuration, documentation, Content Managemen
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -37,7 +38,7 @@ keywords: radio, fields, config, configuration, documentation, Content Managemen
 
 ### Admin config
 
-In addition to the default [field admin config](/docs/fields/overview#admin-config), the Radio field type allows for the specification of the following `admin` properties:
+In addition to the default [field admin config](/docs/fields/overview#admin-config), the Radio Group field type allows for the specification of the following `admin` properties:
 
 **`layout`**
 
@@ -49,7 +50,7 @@ The `layout` property allows for the radio group to be styled as a horizonally o
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
@@ -72,5 +73,4 @@ const ExampleCollection: CollectionConfig = {
     }
   ]
 }
-
 ```

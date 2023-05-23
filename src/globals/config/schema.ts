@@ -9,6 +9,10 @@ const globalSchema = joi.object().keys({
     joi.object().pattern(joi.string(), [joi.string()]),
   ),
   admin: joi.object({
+    hidden: joi.alternatives().try(
+      joi.boolean(),
+      joi.func(),
+    ),
     group: joi.alternatives().try(
       joi.string(),
       joi.object().pattern(joi.string(), [joi.string()]),
@@ -22,7 +26,14 @@ const globalSchema = joi.object().keys({
       views: joi.object({
         Edit: componentSchema,
       }),
+      elements: joi.object({
+        SaveButton: componentSchema,
+        PublishButton: componentSchema,
+        SaveDraftButton: componentSchema,
+        PreviewButton: componentSchema,
+      }),
     }),
+    preview: joi.func(),
   }),
   typescript: joi.object().keys({
     interface: joi.string(),
@@ -61,6 +72,7 @@ const globalSchema = joi.object().keys({
     }),
     joi.boolean(),
   ),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 }).unknown();
 
 export default globalSchema;

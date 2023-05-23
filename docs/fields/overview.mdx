@@ -19,7 +19,7 @@ The required `type` property on a field determines what values it can accept, ho
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Page: CollectionConfig = {
+export const Page: CollectionConfig = {
 	slug: 'pages',
 	fields: [
 		{
@@ -90,7 +90,7 @@ Example:
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Orders: CollectionConfig = {
+export const Orders: CollectionConfig = {
   slug: 'orders',
   fields: [
     {
@@ -155,18 +155,19 @@ Example:
 
 In addition to each field's base configuration, you can define specific traits and properties for fields that only have effect on how they are rendered in the Admin panel. The following properties are available for all fields within the `admin` property:
 
-| Option        | Description  |
-| ------------- | -------------|
-| `condition`   | You can programmatically show / hide fields based on what other fields are doing. [Click here](#conditional-logic) for more info. |
-| `components`  | All field components can be completely and easily swapped out for custom components that you define. [Click here](#custom-components) for more info. |
-| `description` | Helper text to display with the field to provide more information for the editor user. [Click here](#description) for more info. |
-| `position`    | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`. |
-| `width`       | Restrict the width of a field. you can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
-| `style`       | Attach raw CSS style properties to the root DOM element of a field. |
-| `className`   | Attach a CSS class name to the root DOM element of a field. |
-| `readOnly`    | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value. |
-| `disabled`    | If a field is `disabled`, it is completely omitted from the Admin panel. |
-| `hidden`      | Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors. |
+| Option            | Description                                                                                                                                                                                                                     |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `condition`       | You can programmatically show / hide fields based on what other fields are doing. [Click here](#conditional-logic) for more info.                                                                                               |
+| `components`      | All field components can be completely and easily swapped out for custom components that you define. [Click here](#custom-components) for more info.                                                                            |
+| `description`     | Helper text to display with the field to provide more information for the editor user. [Click here](#description) for more info.                                                                                                |
+| `position`        | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                       |
+| `width`           | Restrict the width of a field. you can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
+| `style`           | Attach raw CSS style properties to the root DOM element of a field.                                                                                                                                                             |
+| `className`       | Attach a CSS class name to the root DOM element of a field.                                                                                                                                                                     |
+| `readOnly`        | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.                                                           |
+| `disabled`        | If a field is `disabled`, it is completely omitted from the Admin panel.                                                                                                                                                        |
+| `disableBulkEdit` | Set `disableBulkEdit` to `true` to prevent fields from appearing in the select options when making edits for multiple documents.                                                                                                |
+| `hidden`          | Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors.       |
 
 ### Custom components
 
@@ -174,10 +175,11 @@ All Payload fields support the ability to swap in your own React components with
 
 ### Conditional logic
 
-You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes two arguments:
+You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes three arguments:
 
 - `data` - the entire document's data that is currently being edited
 - `siblingData` - only the fields that are direct siblings to the field with the condition
+- `{ user }` - the final argument is an object containing the currently authenticated user
 
 The `condition` function should return a boolean that will control if the field should be displayed or not.
 
@@ -196,7 +198,7 @@ The `condition` function should return a boolean that will control if the field 
       type: 'text',
       admin: {
         // highlight-start
-        condition: (data, siblingData) => {
+        condition: (data, siblingData, { user }) => {
           if (data.enableGreeting) {
             return true;
           } else {

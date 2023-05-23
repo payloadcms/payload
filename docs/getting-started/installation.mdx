@@ -11,11 +11,12 @@ keywords: documentation, getting started, guide, Content Management System, cms,
 Payload requires the following software:
 
 - Yarn or NPM
-- NodeJS version 10+
-- A Mongo Database
+- Node.js version 14+
+- A MongoDB Database
 
 <Banner type="warning">
-	Before proceeding any further, please ensure that you have the above requirements met.
+  Before proceeding any further, please ensure that you have the above
+  requirements met.
 </Banner>
 
 ## Quickstart with create-payload-app
@@ -26,16 +27,16 @@ To quickly scaffold a new Payload app in the fastest way possible, you can use [
 npx create-payload-app
 ```
 
-Then just follow the prompts! You can choose between a TypeScript project, which is fully supported by Payload, or a JavaScript project. You'll get set up with a new folder and a functioning Payload app inside.
+Then just follow the prompts! You'll get set up with a new folder and a functioning Payload app inside.
 
-## From scratch
+## Adding to an existing app
 
-Adding Payload to either a new or existing app is super straightforward. To add to an existing Node + Express app, just run `npm install --save --legacy-peer-deps payload`. Or, to start a new project from scratch, run `npm init` and then `npm install --save --legacy-peer-deps payload express`.
+Adding Payload to either a new or existing TypeScript + Express app is super straightforward. To add to an existing app, just run `npm install --save --legacy-peer-deps payload`.
 
-From there, the first step is writing a baseline config. Create a new `payload.config.js` in the root of your project. The simplest config contains the following:
+From there, the first step is writing a baseline config. Create a new `payload.config.ts` in your project's `/src` directory (or whatever your root TS dir is). The simplest config contains the following:
 
 ```js
-import { buildConfig } from 'payload/config';
+import { buildConfig } from "payload/config";
 
 export default buildConfig({
   // By default, Payload will boot up normally
@@ -46,46 +47,61 @@ export default buildConfig({
 
 Write the above code into your newly created config file. This baseline config will automatically provide you with a default `User` collection. For more information about users and authentication, including how to provide your own user config, jump to the [Authentication](/docs/authentication/config) section.
 
-Although this is just the bare minimum config, there are *many* more options that you can control here. To reference the full config and all of its options, [click here](/docs/configuration/overview).
+Although this is just the bare minimum config, there are _many_ more options that you can control here. To reference the full config and all of its options, [click here](/docs/configuration/overview).
 
 ### Server
 
 Now that you've got a baseline Payload config, it's time to initialize Payload. It requires an Express server that you provide, so if you're not familiar with how to set up a baseline Express server, please read up on exactly what Express is and why to use it. Express' own [Documentation](https://expressjs.com/en/starter/hello-world.html) is a good place to start. Otherwise, follow along below for how to build your own Express server to use with Payload.
 
 1. Run `npm install --save --legacy-peer-deps express` if you have not done so already
-1. Create a new `server.js` file in the root folder of your app
-1. Add the following code to `server.js`:
+1. Create a new `server.ts` file in the root directory of your app
+1. Add the following code to `server.ts`:
 
-```js
-const express = require('express');
+```ts
+import express from "express";
 
 const app = express();
 
 app.listen(3000, async () => {
-	console.log('Express is now listening for incoming connections on port 3000.')
+  console.log(
+    "Express is now listening for incoming connections on port 3000."
+  );
 });
 ```
 
-This server doesn't do anything just yet. But, after you have this in place, we can initialize Payload via its `init()` method, which accepts a small set of arguments to tell it how to operate. For a full list of `init` arguments, please consult the [main configuration](/docs/configuration/overview#init) docs.
+This server doesn't do anything just yet. But, after you have this in place, we can initialize Payload via its asynchronous `init()` method, which accepts a small set of arguments to tell it how to operate.
 
-To initialize Payload, update your `server.js` file to reflect the following code:
+To initialize Payload, update your `server.ts` file to reflect the following code:
 
-```js
-const express = require('express');
-const payload = require('payload');
+```ts
+import express from "express";
+import payload from "payload";
 
+require("dotenv").config();
 const app = express();
 
-payload.init({
-  secret: 'SECRET_KEY',
-  mongoURL: 'mongodb://localhost/payload',
-  express: app,
-})
+const start = async () => {
+  await payload.init({
+    secret: process.env.PAYLOAD_SECRET,
+    mongoURL: process.env.MONGODB_URI,
+    express: app,
+  });
 
-app.listen(3000, async () => {
-	console.log('Express is now listening for incoming connections on port 3000.')
-});
+  app.listen(3000, async () => {
+    console.log(
+      "Express is now listening for incoming connections on port 3000."
+    );
+  });
+};
 
+start();
+```
+
+A quick reminder: in this configuration, we're making use of two environmental variables, `process.env.PAYLOAD_SECRET` and `process.env.MONGODB_URI`. Often, it's smart to store these values in an `.env` file at the root of your directory and set different values for each of your environments (local, stage, prod, etc). The `dotenv` package is very handy and works well alongside of Payload. A typical `.env` file will look like this:
+
+```
+MONGODB_URI=mongodb://127.0.0.1/your-payload-app
+PAYLOAD_SECRET=your-payload-secret
 ```
 
 Here is a list of all properties available to pass through `payload.init`:
@@ -96,19 +112,21 @@ Here is a list of all properties available to pass through `payload.init`:
 
 ##### `secret`
 
-**Required**. This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess. Often, it's smart to store this value in an `env` and set different values for each of your environments (local, stage, prod, etc). The `dotenv` package is very handy and works well alongside of Payload.
+**Required**. This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess.
+
+Payload uses this secret key to generate secure user tokens (JWT). Behind the scenes, we do not use your secret key to encrypt directly - instead, we first take the secret key and create an encrypted string using the SHA-256 hash function. Then, we reduce the encrypted string to its first 32 characters. This final value is what Payload uses for encryption.
 
 ##### `mongoURL`
 
-**Required**. This is a fully qualified MongoDB connection string that points to your Mongo database. If you don't have Mongo installed locally, you can [follow these steps for Mac OSX](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/) and [these steps](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/) for Windows 10. If you want to use a local database and you know you have MongoDB installed locally, a typical connection string will look like this:
+**Required**. This is a fully qualified MongoDB connection string that points to your MongoDB database. If you don't have MongoDB installed locally, you can [follow these steps for Mac OSX](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/) and [these steps](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/) for Windows 10. If you want to use a local database and you know you have MongoDB installed locally, a typical connection string will look like this:
 
-`mongodb://localhost/payload`
+`mongodb://127.0.0.1/payload`
 
-In contrast to running Mongo locally, a popular option is to sign up for a free [MongoDB Atlas account](https://www.mongodb.com/cloud/atlas), which is a fully hosted and cloud-based installation of Mongo that you don't need to ever worry about.
+In contrast to running MongoDB locally, a popular option is to sign up for a free [MongoDB Atlas account](https://www.mongodb.com/cloud/atlas), which is a fully hosted and cloud-based installation of MongoDB that you don't need to ever worry about.
 
 ##### `mongoOptions`
 
-Customize Mongo connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.
+Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.
 
 ##### `email`
 
@@ -128,10 +146,10 @@ A function that is called immediately following startup that receives the Payloa
 
 ### Test it out
 
-After you've gotten this far, it's time to boot up Payload. At the command line, run `npm install` and then `node server.js` in your application's folder to start up your app and initialize Payload.
+After you've gotten this far, it's time to boot up Payload. Start your project in your application's folder to get going.
 
 After it starts, you can go to `http://localhost:3000/admin` to create your first Payload user!
 
 ### Docker
 
-Looking to deploy Payload with Docker? New projects with `create-payload-app` come with a Dockerfile and docker-compose.yml file ready to go. Examples of these files can be seen in our [Deployment docs](/docs/deployment#Docker).
+Looking to deploy Payload with Docker? New projects with `create-payload-app` come with a Dockerfile and docker-compose.yml file ready to go. Examples of these files can be seen in our [Deployment docs](/docs/production/deployment#docker).

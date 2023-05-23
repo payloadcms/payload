@@ -1,7 +1,7 @@
 import { request, GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
 import payload from '../../src';
-import config from './config';
+import configPromise from './config';
 import AutosavePosts from './collections/Autosave';
 import AutosaveGlobal from './globals/Autosave';
 import { devUser } from '../credentials';
@@ -27,6 +27,8 @@ const globalGraphQLOriginalTitle = 'updated global title';
 
 describe('Versions', () => {
   beforeAll(async () => {
+    const config = await configPromise;
+
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
 
@@ -47,7 +49,7 @@ describe('Versions', () => {
 
   describe('Collections - Local', () => {
     describe('Create', () => {
-      it('should allow a new version to be created', async () => {
+      it('should allow a new version to be created and updated', async () => {
         const autosavePost = await payload.create({
           collection,
           data: {
@@ -56,9 +58,9 @@ describe('Versions', () => {
           },
         });
 
-        const updatedTitle = 'Here is an updated post title in EN';
-
         collectionLocalPostID = autosavePost.id;
+
+        const updatedTitle = 'Here is an updated post title in EN';
 
         const updatedPost: {
           title: string
@@ -71,14 +73,14 @@ describe('Versions', () => {
           },
         });
 
+        expect(updatedPost.title).toBe(updatedTitle);
+        expect(updatedPost._status).toStrictEqual('draft');
+
         const versions = await payload.findVersions({
           collection,
         });
 
         collectionLocalVersionID = versions.docs[0].id;
-
-        expect(updatedPost.title).toBe(updatedTitle);
-        expect(updatedPost._status).toStrictEqual('draft');
 
         expect(collectionLocalVersionID).toBeDefined();
       });
@@ -99,6 +101,7 @@ describe('Versions', () => {
             description: 'description 2',
           },
         });
+
         const finalDescription = 'final description';
 
         const secondUpdate = await payload.update({
@@ -157,9 +160,14 @@ describe('Versions', () => {
         const versions = await payload.findVersions({
           collection,
           locale: 'all',
+          where: {
+            parent: {
+              equals: collectionLocalPostID,
+            },
+          },
         });
 
-        expect(versions.docs[0].version.title.en).toStrictEqual(englishTitle);
+        expect(versions.docs[0].version.title.en).toStrictEqual(newEnglishTitle);
         expect(versions.docs[0].version.title.es).toStrictEqual(spanishTitle);
       });
     });
@@ -182,20 +190,21 @@ describe('Versions', () => {
           collection,
         });
 
-        const restore = await payload.restoreVersion({
+        // restore to latest version
+        const restoredVersion = await payload.restoreVersion({
           collection,
-          id: versions.docs[0].id,
+          id: versions.docs[1].id,
         });
 
-        expect(restore.title).toBeDefined();
+        expect(restoredVersion.title).toBeDefined();
 
-        const restoredPost = await payload.findByID({
+        const latestDraft = await payload.findByID({
           collection,
           id: collectionLocalPostID,
           draft: true,
         });
 
-        expect(restoredPost.title).toBe(restore.title);
+        expect(latestDraft.title).toBe(versions.docs[1].version.title);
       });
     });
 
@@ -226,13 +235,15 @@ describe('Versions', () => {
           draft: true,
         });
 
+        const spanishTitle = 'es title';
+
         // second update to existing draft
         await payload.update({
           id: collectionLocalPostID,
           collection,
           locale: 'es',
           data: {
-            title: updatedTitle,
+            title: spanishTitle,
           },
           draft: true,
         });
@@ -251,7 +262,157 @@ describe('Versions', () => {
 
         expect(publishedPost.title).toBe(originalTitle);
         expect(draftPost.title.en).toBe(updatedTitle);
-        expect(draftPost.title.es).toBe(updatedTitle);
+        expect(draftPost.title.es).toBe(spanishTitle);
+      });
+    });
+
+    describe('Draft Count', () => {
+      it('creates proper number of drafts', async () => {
+        const originalDraft = await payload.create({
+          collection: 'draft-posts',
+          draft: true,
+          data: {
+            title: 'A',
+            description: 'A',
+            _status: 'draft',
+          },
+        });
+
+        await payload.update({
+          collection: 'draft-posts',
+          id: originalDraft.id,
+          draft: true,
+          data: {
+            title: 'B',
+            description: 'B',
+            _status: 'draft',
+          },
+        });
+
+        await payload.update({
+          collection: 'draft-posts',
+          id: originalDraft.id,
+          draft: true,
+          data: {
+            title: 'C',
+            description: 'C',
+            _status: 'draft',
+          },
+        });
+
+        const mostRecentDraft = await payload.findByID({
+          collection: 'draft-posts',
+          id: originalDraft.id,
+          draft: true,
+        });
+
+        expect(mostRecentDraft.title).toStrictEqual('C');
+
+        const versions = await payload.findVersions({
+          collection: 'draft-posts',
+          where: {
+            parent: {
+              equals: originalDraft.id,
+            },
+          },
+        });
+
+        expect(versions.docs).toHaveLength(3);
+      });
+    });
+
+    describe('Max Versions', () => {
+      // create 2 documents with 3 versions each
+      // expect 2 documents with 2 versions each
+      it('retains correct versions', async () => {
+        const doc1 = await payload.create({
+          collection: 'version-posts',
+          data: {
+            title: 'A',
+            description: 'A',
+          },
+        });
+
+        await payload.update({
+          collection: 'version-posts',
+          id: doc1.id,
+          data: {
+            title: 'B',
+            description: 'B',
+          },
+        });
+
+        await payload.update({
+          collection: 'version-posts',
+          id: doc1.id,
+          data: {
+            title: 'C',
+            description: 'C',
+          },
+        });
+
+        const doc2 = await payload.create({
+          collection: 'version-posts',
+          data: {
+            title: 'D',
+            description: 'D',
+          },
+        });
+
+        await payload.update({
+          collection: 'version-posts',
+          id: doc2.id,
+          data: {
+            title: 'E',
+            description: 'E',
+          },
+        });
+
+        await payload.update({
+          collection: 'version-posts',
+          id: doc2.id,
+          data: {
+            title: 'F',
+            description: 'F',
+          },
+        });
+
+        const doc1Versions = await payload.findVersions({
+          collection: 'version-posts',
+          sort: '-updatedAt',
+          where: {
+            parent: {
+              equals: doc1.id,
+            },
+          },
+        });
+
+        const doc2Versions = await payload.findVersions({
+          collection: 'version-posts',
+          sort: '-updatedAt',
+          where: {
+            parent: {
+              equals: doc2.id,
+            },
+          },
+        });
+
+        // correctly retains 2 documents in the versions collection
+        expect(doc1Versions.totalDocs).toStrictEqual(2);
+        // correctly retains the most recent 2 versions
+        expect(doc1Versions.docs[1].version.title).toStrictEqual('B');
+
+        // correctly retains 2 documents in the versions collection
+        expect(doc2Versions.totalDocs).toStrictEqual(2);
+        // correctly retains the most recent 2 versions
+        expect(doc2Versions.docs[1].version.title).toStrictEqual('E');
+
+        const docs = await payload.find({
+          collection: 'version-posts',
+        });
+
+        // correctly retains 2 documents in the actual collection
+        expect(docs.totalDocs).toStrictEqual(2);
       });
     });
   });
@@ -349,6 +510,27 @@ describe('Versions', () => {
 
       expect(draftFindResults.docs).toHaveLength(0);
     });
+
+    it('should be able to query by id with draft=true', async () => {
+      const allDocs = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+      });
+
+      expect(allDocs.docs.length).toBeGreaterThan(1);
+
+      const byID = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+        where: {
+          id: {
+            equals: allDocs.docs[0].id,
+          },
+        },
+      });
+
+      expect(byID.docs).toHaveLength(1);
+    });
   });
 
   describe('Collections - GraphQL', () => {
@@ -385,13 +567,15 @@ describe('Versions', () => {
         const update = `mutation {
           updateAutosavePost(id: "${collectionGraphQLPostID}", data: {title: "${updatedTitle}"}) {
             title
+            updatedAt
+            createdAt
           }
         }`;
         await graphQLClient.request(update);
 
         // language=graphQL
         const query = `query {
-            versionsAutosavePosts(where: { parent: { equals: "${collectionGraphQLPostID}" } }) {
+          versionsAutosavePosts(where: { parent: { equals: "${collectionGraphQLPostID}" } }) {
             docs {
               id
             }
@@ -423,18 +607,18 @@ describe('Versions', () => {
 
         expect(data.id).toBeDefined();
         expect(data.parent.id).toStrictEqual(collectionGraphQLPostID);
-        expect(data.version.title).toStrictEqual(collectionGraphQLOriginalTitle);
+        expect(data.version.title).toStrictEqual(updatedTitle);
       });
 
       it('should allow read of versions by querying version content', async () => {
         // language=graphQL
         const query = `query {
-            versionsAutosavePosts(where: { version__title: {equals: "${collectionGraphQLOriginalTitle}" } }) {
+          versionsAutosavePosts(where: { version__title: {equals: "${collectionGraphQLOriginalTitle}" } }) {
             docs {
               id
               parent {
-              id
-            }
+                id
+              }
               version {
                 title
               }
@@ -642,6 +826,31 @@ describe('Versions', () => {
         expect(publishedGlobal.title).toBe(originalTitle);
         expect(updatedGlobal.title.en).toBe(updatedTitle);
         expect(updatedGlobal.title.es).toBe(updatedTitle);
+      });
+
+      it('should allow a draft to be published', async () => {
+        const originalTitle = 'Here is a draft';
+
+        await payload.updateGlobal({
+          slug: globalSlug,
+          data: {
+            title: originalTitle,
+            _status: 'draft',
+          },
+          draft: true,
+        });
+
+        const updatedTitle = 'Now try to publish';
+
+        const result = await payload.updateGlobal({
+          slug: globalSlug,
+          data: {
+            title: updatedTitle,
+            _status: 'published',
+          },
+        });
+
+        expect(result.title).toBe(updatedTitle);
       });
     });
   });

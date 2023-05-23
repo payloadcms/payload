@@ -6,11 +6,12 @@ import { useLocale } from '../../utilities/Locale';
 import { useConfig } from '../../utilities/Config';
 import { useForm } from '../Form/context';
 
-type NullifyFieldProps = {
+type NullifyLocaleFieldProps = {
+  localized: boolean
   path: string
   fieldValue?: null | [] | number
 }
-export const NullifyField: React.FC<NullifyFieldProps> = ({ path, fieldValue }) => {
+export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({ localized, path, fieldValue }) => {
   const { dispatchFields, setModified } = useForm();
   const currentLocale = useLocale();
   const { localization } = useConfig();
@@ -30,8 +31,8 @@ export const NullifyField: React.FC<NullifyFieldProps> = ({ path, fieldValue }) 
     setChecked(useFallback);
   };
 
-  if (currentLocale === defaultLocale) {
-    // hide when editing default locale
+  if (!localized || currentLocale === defaultLocale || (localization && !localization.fallback)) {
+    // hide when field is not localized or editing default locale or when fallback is disabled
     return null;
   }
 

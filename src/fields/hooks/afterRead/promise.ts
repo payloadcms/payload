@@ -46,22 +46,50 @@ export const promise = async ({
     delete siblingDoc[field.name];
   }
 
-  const hasLocalizedValue = flattenLocales
+  const shouldHoistLocalizedValue = flattenLocales
     && fieldAffectsData(field)
     && (typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null)
     && field.localized
-    && req.locale !== 'all';
+    && req.locale !== 'all'
+    && req.payload.config.localization;
 
-  if (hasLocalizedValue) {
-    let localizedValue = siblingDoc[field.name][req.locale];
-    if (typeof localizedValue === 'undefined' && req.fallbackLocale) localizedValue = siblingDoc[field.name][req.fallbackLocale];
-    if (localizedValue === null && (field.type === 'array' || field.type === 'blocks')) localizedValue = siblingDoc[field.name][req.fallbackLocale];
-    if (typeof localizedValue === 'undefined' && (field.type === 'group' || field.type === 'tab')) localizedValue = {};
-    if (typeof localizedValue === 'undefined') localizedValue = null;
-    siblingDoc[field.name] = localizedValue;
+  if (shouldHoistLocalizedValue) {
+    // replace actual value with localized value before sanitizing
+    // { [locale]: fields } -> fields
+    const { locale } = req;
+    const value = siblingDoc[field.name][locale];
+    const fallbackLocale = req.payload.config.localization && req.payload.config.localization?.fallback && req.fallbackLocale;
+
+    let hoistedValue = value;
+
+    if (fallbackLocale && fallbackLocale !== locale) {
+      const fallbackValue = siblingDoc[field.name][fallbackLocale];
+      const isNullOrUndefined = typeof value === 'undefined' || value === null;
+
+      if (fallbackValue) {
+        switch (field.type) {
+          case 'text':
+          case 'textarea': {
+            if (value === '' || isNullOrUndefined) {
+              hoistedValue = fallbackValue;
+            }
+            break;
+          }
+
+          default: {
+            if (isNullOrUndefined) {
+              hoistedValue = fallbackValue;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    siblingDoc[field.name] = hoistedValue;
   }
 
-  // Sanitize outgoing data
+  // Sanitize outgoing field value
   switch (field.type) {
     case 'group': {
       // Fill groups with empty objects so fields with hooks within groups can populate
@@ -74,7 +102,7 @@ export const promise = async ({
     }
     case 'tabs': {
       field.tabs.forEach((tab) => {
-        if (tabHasName(tab) && typeof siblingDoc[tab.name] === 'undefined') {
+        if (tabHasName(tab) && (typeof siblingDoc[tab.name] === 'undefined' || siblingDoc[tab.name] === null)) {
           siblingDoc[tab.name] = {};
         }
       });
@@ -83,7 +111,7 @@ export const promise = async ({
     }
 
     case 'richText': {
-      if (((field.admin?.elements?.includes('relationship') || field.admin?.elements?.includes('upload')) || !field?.admin?.elements)) {
+      if (((field.admin?.elements?.includes('relationship') || field.admin?.elements?.includes('upload') || field.admin?.elements?.includes('link')) || !field?.admin?.elements)) {
         populationPromises.push(richTextRelationshipPromise({
           currentDepth,
           depth,
@@ -102,6 +130,8 @@ export const promise = async ({
       const pointDoc = siblingDoc[field.name] as Record<string, unknown>;
       if (Array.isArray(pointDoc?.coordinates) && pointDoc.coordinates.length === 2) {
         siblingDoc[field.name] = pointDoc.coordinates;
+      } else {
+        siblingDoc[field.name] = undefined;
       }
 
       break;

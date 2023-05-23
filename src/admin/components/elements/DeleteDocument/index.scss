@@ -16,6 +16,12 @@
   }
 
   .btn {
-    margin-right: $baseline;
+    margin: 0;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $baseline;
   }
 }

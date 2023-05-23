@@ -4,9 +4,9 @@ import { PayloadRequest } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import deepCopyObject from '../../../utilities/deepCopyObject';
 
-type Args = {
-  data: Record<string, unknown>
-  doc: Record<string, unknown>
+type Args<T> = {
+  data: T | Record<string, unknown>
+  doc?: T | Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   id?: string | number
   operation: 'create' | 'update'
@@ -14,7 +14,7 @@ type Args = {
   req: PayloadRequest
 }
 
-export const beforeValidate = async ({
+export const beforeValidate = async <T extends Record<string, unknown>>({
   data: incomingData,
   doc,
   entityConfig,
@@ -22,7 +22,7 @@ export const beforeValidate = async ({
   operation,
   overrideAccess,
   req,
-}: Args): Promise<Record<string, unknown>> => {
+}: Args<T>): Promise<T> => {
   const data = deepCopyObject(incomingData);
 
   await traverseFields({

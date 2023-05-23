@@ -1,4 +1,3 @@
-import { JSONDefinition } from 'graphql-scalars';
 import joi from 'joi';
 
 const component = joi.alternatives().try(
@@ -14,6 +13,7 @@ export const endpointsSchema = joi.array().items(joi.object({
     joi.array().items(joi.func()),
     joi.func(),
   ),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 }));
 
 export default joi.object({
@@ -48,6 +48,7 @@ export default joi.object({
   globals: joi.array(),
   admin: joi.object({
     user: joi.string(),
+    buildPath: joi.string(),
     meta: joi.object()
       .keys({
         titleSuffix: joi.string(),
@@ -99,6 +100,7 @@ export default joi.object({
       }),
     webpack: joi.func(),
   }),
+  email: joi.object(),
   i18n: joi.object(),
   defaultDepth: joi.number()
     .min(0)
@@ -161,4 +163,5 @@ export default joi.object({
   ),
   onInit: joi.func(),
   debug: joi.boolean(),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 });

@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { v4 as uuid } from 'uuid';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { useTranslation } from 'react-i18next';
@@ -9,13 +10,11 @@ import DefaultList from './Default';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import { useStepNav } from '../../../elements/StepNav';
 import formatFields from './formatFields';
-import buildColumns from './buildColumns';
-import { ListIndexProps, ListPreferences } from './types';
+import { ListIndexProps, ListPreferences, Props } from './types';
 import { usePreferences } from '../../../utilities/Preferences';
 import { useSearchParams } from '../../../utilities/SearchParams';
-import { Column } from '../../../elements/Table/types';
-import { Field } from '../../../../../fields/config/types';
-import getInitialColumns from './getInitialColumns';
+import { TableColumnsProvider } from '../../../elements/TableColumns';
+import type { Field } from '../../../../../fields/config/types';
 
 const ListView: React.FC<ListIndexProps> = (props) => {
   const {
@@ -26,8 +25,6 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         plural,
       },
       admin: {
-        useAsTitle,
-        defaultColumns,
         pagination: {
           defaultLimit,
         },
@@ -48,21 +45,12 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const { page, sort, limit, where } = useSearchParams();
   const history = useHistory();
   const { t } = useTranslation('general');
-
   const [fetchURL, setFetchURL] = useState<string>('');
-  const [fields] = useState<Field[]>(() => formatFields(collection, t));
-  const [tableColumns, setTableColumns] = useState<Column[]>(() => {
-    const initialColumns = getInitialColumns(fields, useAsTitle, defaultColumns);
-    return buildColumns({ collection, columns: initialColumns, t });
-  });
-
+  const [fields] = useState<Field[]>(() => formatFields(collection));
   const collectionPermissions = permissions?.collections?.[slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
   const newDocumentURL = `${admin}/collections/${slug}/create`;
-  const [{ data }, { setParams: setFetchParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } });
-
-  const activeColumnNames = tableColumns.map(({ accessor }) => accessor);
-  const stringifiedActiveColumns = JSON.stringify(activeColumnNames);
+  const [{ data }, { setParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } });
 
   useEffect(() => {
     setStepNav([
@@ -76,27 +64,31 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   // Set up Payload REST API query params
   // /////////////////////////////////////
 
-  useEffect(() => {
-    const params = {
+  const resetParams = useCallback<Props['resetParams']>((overrides = {}) => {
+    const params: Record<string, unknown> = {
       depth: 0,
       draft: 'true',
-      page: undefined,
-      sort: undefined,
-      where: undefined,
+      page: overrides?.page,
+      sort: overrides?.sort,
+      where: overrides?.where,
       limit,
     };
 
     if (page) params.page = page;
     if (sort) params.sort = sort;
     if (where) params.where = where;
+    params.invoke = uuid();
 
+    setParams(params);
+  }, [limit, page, setParams, sort, where]);
+
+  useEffect(() => {
     // Performance enhancement
     // Setting the Fetch URL this way
     // prevents a double-fetch
     setFetchURL(`${serverURL}${api}/${slug}`);
-
-    setFetchParams(params);
-  }, [setFetchParams, page, sort, where, collection, getPreference, limit, serverURL, api, slug]);
+    resetParams();
+  }, [api, resetParams, serverURL, slug]);
 
   // /////////////////////////////////////
   // Fetch preferences on first load
@@ -105,16 +97,13 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   useEffect(() => {
     (async () => {
       const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
-      if (currentPreferences?.columns) {
-        setTableColumns(buildColumns({ collection, columns: currentPreferences?.columns, t }));
-      }
 
       const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 0 });
 
       const search = {
         ...params,
         sort: params?.sort || currentPreferences?.sort,
-        limit: params?.limit || currentPreferences?.limit,
+        limit: params?.limit || currentPreferences?.limit || defaultLimit,
       };
 
       const newSearchQuery = queryString.stringify(search, { addQueryPrefix: true });
@@ -125,42 +114,61 @@ const ListView: React.FC<ListIndexProps> = (props) => {
         });
       }
     })();
-  }, [collection, getPreference, preferenceKey, history, t]);
+  }, [collection, getPreference, preferenceKey, history, t, defaultLimit]);
 
   // /////////////////////////////////////
-  // When any preference-enabled values are updated,
-  // Set preferences
+  // Set preferences on change
   // /////////////////////////////////////
 
   useEffect(() => {
-    const newPreferences = {
-      limit,
-      sort,
-      columns: JSON.parse(stringifiedActiveColumns),
-    };
+    (async () => {
+      const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
 
-    setPreference(preferenceKey, newPreferences);
-  }, [sort, limit, stringifiedActiveColumns, preferenceKey, setPreference]);
+      const newPreferences = {
+        ...currentPreferences,
+        limit,
+        sort,
+      };
 
-  const setActiveColumns = useCallback((columns: string[]) => {
-    setTableColumns(buildColumns({ collection, columns, t }));
-  }, [collection, t]);
+      setPreference(preferenceKey, newPreferences);
+    })();
+  }, [sort, limit, preferenceKey, setPreference, getPreference]);
+
+  // /////////////////////////////////////
+  // Prevent going beyond page limit
+  // /////////////////////////////////////
+
+  useEffect(() => {
+    if (data?.totalDocs && data.pagingCounter > data.totalDocs) {
+      const params = queryString.parse(history.location.search, {
+        ignoreQueryPrefix: true,
+        depth: 0,
+      });
+      const newSearchQuery = queryString.stringify({
+        ...params,
+        page: data.totalPages,
+      }, { addQueryPrefix: true });
+      history.replace({
+        search: newSearchQuery,
+      });
+    }
+  }, [data, history, resetParams]);
 
   return (
-    <RenderCustomComponent
-      DefaultComponent={DefaultList}
-      CustomComponent={CustomList}
-      componentProps={{
-        collection: { ...collection, fields },
-        newDocumentURL,
-        hasCreatePermission,
-        data,
-        tableColumns,
-        columnNames: activeColumnNames,
-        setColumns: setActiveColumns,
-        limit: limit || defaultLimit,
-      }}
-    />
+    <TableColumnsProvider collection={collection}>
+      <RenderCustomComponent
+        DefaultComponent={DefaultList}
+        CustomComponent={CustomList}
+        componentProps={{
+          collection: { ...collection, fields },
+          newDocumentURL,
+          hasCreatePermission,
+          data,
+          limit: limit || defaultLimit,
+          resetParams,
+        }}
+      />
+    </TableColumnsProvider>
   );
 };
 

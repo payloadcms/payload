@@ -1,44 +1,18 @@
-import React from 'react';
-import Editor from '@monaco-editor/react';
-import type { Props } from './types';
-import { useTheme } from '../../utilities/Theme';
+import React, { Suspense, lazy } from 'react';
+import { ShimmerEffect } from '../ShimmerEffect';
+import { Props } from './types';
 
-import './index.scss';
+const LazyEditor = lazy(() => import('./CodeEditor'));
 
-const baseClass = 'code-editor';
-
-const CodeEditor: React.FC<Props> = (props) => {
-  const { readOnly, className, options, ...rest } = props;
-
-  const { theme } = useTheme();
-
-  const classes = [
-    baseClass,
-    className,
-    rest?.defaultLanguage ? `language--${rest.defaultLanguage}` : '',
-  ].filter(Boolean).join(' ');
+export const CodeEditor: React.FC<Props> = (props) => {
+  const { height = '35vh' } = props;
 
   return (
-    <Editor
-      height="35vh"
-      className={classes}
-      theme={theme === 'dark' ? 'vs-dark' : 'vs'}
-      options={
-        {
-          detectIndentation: true,
-          minimap: {
-            enabled: false,
-          },
-          readOnly: Boolean(readOnly),
-          scrollBeyondLastLine: false,
-          tabSize: 2,
-          wordWrap: 'on',
-          ...options,
-        }
-      }
-      {...rest}
-    />
+    <Suspense fallback={<ShimmerEffect height={height} />}>
+      <LazyEditor
+        {...props}
+        height={height}
+      />
+    </Suspense>
   );
 };
-
-export default CodeEditor;

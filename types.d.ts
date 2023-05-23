@@ -1,6 +1,7 @@
 export * from './dist/types';
 
 export {
+  AccessArgs,
   Access,
 } from './dist/config/types';
 
@@ -61,3 +62,13 @@ export {
   UIField,
   Validate,
 } from './dist/fields/config/types';
+
+export {
+  RowLabel,
+} from './dist/admin/components/forms/RowLabel/types';
+
+export {
+  CustomSaveButtonProps,
+  CustomSaveDraftButtonProps,
+  CustomPublishButtonProps,
+} from './dist/admin/components/elements/types';

@@ -1,4 +1,4 @@
-import React, { Fragment, useId, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactEditor, useSlate } from 'slate-react';
 import { Transforms, Range, Editor } from 'slate';
@@ -9,8 +9,6 @@ import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues';
 import { useConfig } from '../../../../../../utilities/Config';
 import isElementActive from '../../isActive';
 import { unwrapLink } from '../utilities';
-import { useEditDepth } from '../../../../../../utilities/EditDepth';
-import { formatDrawerSlug } from '../../../../../../elements/Drawer';
 import { getBaseFields } from '../LinkDrawer/baseFields';
 import { LinkDrawer } from '../LinkDrawer';
 import { Field } from '../../../../../../../../fields/config/types';
@@ -19,6 +17,7 @@ import buildStateFromSchema from '../../../../../Form/buildStateFromSchema';
 import { useAuth } from '../../../../../../utilities/Auth';
 import { Fields } from '../../../../../Form/types';
 import { useLocale } from '../../../../../../utilities/Locale';
+import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
 
 const insertLink = (editor, fields) => {
   const isCollapsed = editor.selection && Range.isCollapsed(editor.selection);
@@ -64,16 +63,16 @@ export const LinkButton: React.FC<{
   const locale = useLocale();
   const [initialState, setInitialState] = useState<Fields>({});
 
-  const { t } = useTranslation(['upload', 'general']);
+  const { t, i18n } = useTranslation(['upload', 'general']);
   const editor = useSlate();
   const config = useConfig();
 
   const [fieldSchema] = useState(() => {
-    const fields: Field[] = [
-      ...getBaseFields(config),
-    ];
+    const baseFields: Field[] = getBaseFields(config);
 
-    if (customFieldSchema) {
+    const fields = typeof customFieldSchema === 'function' ? customFieldSchema({ defaultFields: baseFields, config, i18n }) : baseFields;
+
+    if (Array.isArray(customFieldSchema)) {
       fields.push({
         name: 'fields',
         type: 'group',
@@ -93,12 +92,7 @@ export const LinkButton: React.FC<{
   });
 
   const { openModal, closeModal } = useModal();
-  const uuid = useId();
-  const editDepth = useEditDepth();
-  const drawerSlug = formatDrawerSlug({
-    slug: `rich-text-link-${uuid}`,
-    depth: editDepth,
-  });
+  const drawerSlug = useDrawerSlug('rich-text-link');
 
   return (
     <Fragment>

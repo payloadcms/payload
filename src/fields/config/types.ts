@@ -1,15 +1,16 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
-import type { TFunction } from 'i18next';
+import type { TFunction, i18n as Ii18n } from 'i18next';
 import type { EditorProps } from '@monaco-editor/react';
 import { Operation, Where } from '../../types';
+import { SanitizedConfig } from '../../config/types';
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import { RowLabel } from '../../admin/components/forms/RowLabel/types';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
@@ -44,7 +45,7 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
   doc?: T
 }) => Promise<boolean> | boolean;
 
-export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>) => boolean;
+export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>, { user }: { user: User }) => boolean;
 
 export type FilterOptionsProps<T = any> = {
   id: string | number,
@@ -70,6 +71,7 @@ type Admin = {
     Cell?: React.ComponentType<any>;
     Field?: React.ComponentType<any>;
   }
+  disableBulkEdit?: boolean
   hidden?: boolean
 }
 
@@ -78,17 +80,17 @@ export type Labels = {
   plural: Record<string, string> | string;
 };
 
-export type ValidateOptions<T, S, F> = {
-  data: Partial<T>
-  siblingData: Partial<S>
+export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
+  data: Partial<TData>
+  siblingData: Partial<TSiblingData>
   id?: string | number
   user?: Partial<User>
   operation?: Operation
   payload?: Payload
   t: TFunction
-} & F;
+} & TFieldConfig;
 
-export type Validate<T = any, S = any, F = any> = (value?: T, options?: ValidateOptions<F, S, Partial<F>>) => string | true | Promise<string | true>;
+export type Validate<TValue = any, TData = any, TSiblingData = any, TFieldConfig = any> = (value: TValue, options: ValidateOptions<TData, TSiblingData, TFieldConfig>) => string | true | Promise<string | true>;
 
 export type OptionObject = {
   label: Record<string, string> | string
@@ -120,6 +122,8 @@ export interface FieldBase {
     read?: FieldAccess;
     update?: FieldAccess;
   };
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 }
 
 export type NumberField = FieldBase & {
@@ -170,11 +174,10 @@ export type DateField = FieldBase & {
   admin?: Admin & {
     placeholder?: Record<string, string> | string
     date?: ConditionalDateProps
-    displayFormat?: string
   }
 }
 
-export type GroupField = FieldBase & {
+export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
   type: 'group';
   fields: Field[];
   admin?: Admin & {
@@ -201,14 +204,14 @@ export type CollapsibleField = Omit<FieldBase, 'name' | 'label'> & {
 
 export type TabsAdmin = Omit<Admin, 'description'>;
 
-type TabBase = {
+type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
   fields: Field[]
   description?: Description
 }
 
-export type NamedTab = TabBase & FieldBase
+export type NamedTab = TabBase
 
-export type UnnamedTab = TabBase & Omit<FieldBase, 'name'> & {
+export type UnnamedTab = Omit<TabBase, 'name'> & {
   label: Record<string, string> | string
   localized?: never
 }
@@ -233,6 +236,7 @@ export type UIField = {
     position?: string
     width?: string
     condition?: Condition
+    disableBulkEdit?: boolean
     components?: {
       Filter?: React.ComponentType<any>;
       Cell?: React.ComponentType<any>;
@@ -240,6 +244,8 @@ export type UIField = {
     }
   }
   type: 'ui';
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
 }
 
 export type UploadField = FieldBase & {
@@ -288,8 +294,17 @@ export type RelationshipField = FieldBase & {
   filterOptions?: FilterOptions;
   admin?: Admin & {
     isSortable?: boolean;
+    allowCreate?: boolean;
   }
-}
+} & ({
+  hasMany: true
+  min?: number
+  max?: number
+} | {
+  hasMany?: false | undefined
+  min?: undefined
+  max?: undefined
+})
 
 export type ValueWithRelation = {
   relationTo: string
@@ -339,7 +354,7 @@ export type RichTextField = FieldBase & {
       }
     }
     link?: {
-      fields?: Field[];
+      fields?: Field[] | ((args: {defaultFields: Field[], config: SanitizedConfig, i18n: Ii18n}) => Field[]);
     }
   }
 }

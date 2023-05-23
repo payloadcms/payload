@@ -2,6 +2,7 @@ import { buildConfig } from '../buildConfig';
 import TransformHooks from './collections/Transform';
 import Hooks, { hooksSlug } from './collections/Hook';
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks';
+import ChainingHooks from './collections/ChainingHooks';
 import Relations from './collections/Relations';
 import Users, { seedHooksUsers } from './collections/Users';
 
@@ -10,6 +11,7 @@ export default buildConfig({
     TransformHooks,
     Hooks,
     NestedAfterReadHooks,
+    ChainingHooks,
     Relations,
     Users,
   ],

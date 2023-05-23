@@ -1,12 +1,13 @@
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../../express/types';
-import { Payload } from '../../..';
+import { Payload } from '../../../payload';
 import unlock from '../unlock';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
 
-export type Options = {
-  collection: string
+export type Options<T extends keyof GeneratedTypes['collections']> = {
+  collection: T
   data: {
     email
   }
@@ -14,7 +15,10 @@ export type Options = {
   overrideAccess: boolean
 }
 
-async function localUnlock(payload: Payload, options: Options): Promise<boolean> {
+async function localUnlock<T extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<T>,
+): Promise<boolean> {
   const {
     collection: collectionSlug,
     data,
@@ -25,7 +29,7 @@ async function localUnlock(payload: Payload, options: Options): Promise<boolean>
   const collection = payload.collections[collectionSlug];
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${collectionSlug} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
   req.payload = payload;

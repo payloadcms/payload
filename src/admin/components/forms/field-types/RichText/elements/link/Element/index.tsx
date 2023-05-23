@@ -1,4 +1,4 @@
-import React, { HTMLAttributes, useCallback, useEffect, useId, useState } from 'react';
+import React, { HTMLAttributes, useCallback, useEffect, useState } from 'react';
 import { ReactEditor, useSlate } from 'slate-react';
 import { Transforms, Node, Editor } from 'slate';
 import { useModal } from '@faceless-ui/modal';
@@ -17,10 +17,9 @@ import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues';
 import deepCopyObject from '../../../../../../../../utilities/deepCopyObject';
 import Button from '../../../../../../elements/Button';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
-import { useEditDepth } from '../../../../../../utilities/EditDepth';
-import { formatDrawerSlug } from '../../../../../../elements/Drawer';
 import { Props as RichTextFieldProps } from '../../../types';
 import './index.scss';
+import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
 
 const baseClass = 'rich-text-link';
 
@@ -80,11 +79,11 @@ export const LinkElement: React.FC<{
   const [renderPopup, setRenderPopup] = useState(false);
   const [initialState, setInitialState] = useState<Fields>({});
   const [fieldSchema] = useState(() => {
-    const fields: Field[] = [
-      ...getBaseFields(config),
-    ];
+    const baseFields: Field[] = getBaseFields(config);
 
-    if (customFieldSchema) {
+    const fields = typeof customFieldSchema === 'function' ? customFieldSchema({ defaultFields: baseFields, config, i18n }) : baseFields;
+
+    if (Array.isArray(customFieldSchema)) {
       fields.push({
         name: 'fields',
         type: 'group',
@@ -103,13 +102,7 @@ export const LinkElement: React.FC<{
     return fields;
   });
 
-  const uuid = useId();
-  const editDepth = useEditDepth();
-
-  const drawerSlug = formatDrawerSlug({
-    slug: `rich-text-link-${uuid}`,
-    depth: editDepth,
-  });
+  const drawerSlug = useDrawerSlug('rich-text-link');
 
   const handleTogglePopup = useCallback((render) => {
     if (!render) {

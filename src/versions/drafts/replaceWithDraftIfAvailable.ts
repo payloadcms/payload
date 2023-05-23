@@ -1,9 +1,8 @@
-import { Payload } from '../..';
-import { docHasTimestamps, Where } from '../../types';
+import { Payload } from '../../payload';
+import { docHasTimestamps, PayloadRequest, Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth';
 import { AccessResult } from '../../config/types';
 import { CollectionModel, SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types';
-import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
@@ -13,7 +12,8 @@ type Arguments<T> = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
   doc: T
-  locale: string
+  req: PayloadRequest
+  overrideAccess: boolean
   accessResult: AccessResult
 }
 
@@ -22,25 +22,24 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   entity,
   entityType,
   doc,
-  locale,
+  req,
+  overrideAccess,
   accessResult,
 }: Arguments<T>): Promise<T> => {
   const VersionModel = payload.versions[entity.slug] as CollectionModel;
 
-  const queryToBuild: { where: Where } = {
-    where: {
-      and: [
-        {
-          'version._status': {
-            equals: 'draft',
-          },
+  const queryToBuild: Where = {
+    and: [
+      {
+        'version._status': {
+          equals: 'draft',
         },
-      ],
-    },
+      },
+    ],
   };
 
   if (entityType === 'collection') {
-    queryToBuild.where.and.push({
+    queryToBuild.and.push({
       parent: {
         equals: doc.id,
       },
@@ -48,19 +47,26 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   }
 
   if (docHasTimestamps(doc)) {
-    queryToBuild.where.and.push({
+    queryToBuild.and.push({
       updatedAt: {
         greater_than: doc.updatedAt,
       },
     });
   }
 
+  let versionAccessResult;
+
   if (hasWhereAccessResult(accessResult)) {
-    const versionAccessResult = appendVersionToQueryKey(accessResult);
-    queryToBuild.where.and.push(versionAccessResult);
+    versionAccessResult = appendVersionToQueryKey(accessResult);
   }
 
-  const query = await VersionModel.buildQuery(queryToBuild, locale);
+  const query = await VersionModel.buildQuery({
+    where: queryToBuild,
+    access: versionAccessResult,
+    req,
+    overrideAccess,
+    globalSlug: entityType === 'global' ? entity.slug : undefined,
+  });
 
   let draft = await VersionModel.findOne(query, {}, {
     lean: true,

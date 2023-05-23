@@ -1,11 +1,8 @@
 @import '../../../../../../scss/styles.scss';
 
-.relationship--single-value {
-  display: flex;
-  align-items: center;
 
-  .rs__single-value {
-    color: currentColor;
+.relationship--single-value {
+  &__label-text {
     max-width: unset;
     display: flex;
     align-items: center;
@@ -25,6 +22,7 @@
     align-items: center;
     justify-content: center;
     margin-left: base(0.25);
+    pointer-events: all;
 
     .icon {
       width: base(0.75);

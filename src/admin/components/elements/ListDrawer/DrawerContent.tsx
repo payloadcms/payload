@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { ListDrawerProps } from './types';
@@ -16,63 +16,23 @@ import { useDocumentDrawer } from '../DocumentDrawer';
 import Pill from '../Pill';
 import X from '../../icons/X';
 import ViewDescription from '../ViewDescription';
-import { Column } from '../Table/types';
-import getInitialColumnState from '../../views/collections/List/getInitialColumns';
-import buildListColumns from '../../views/collections/List/buildColumns';
 import formatFields from '../../views/collections/List/formatFields';
-import { ListPreferences } from '../../views/collections/List/types';
 import { usePreferences } from '../../utilities/Preferences';
 import { Field } from '../../../../fields/config/types';
 import { baseClass } from '.';
+import { TableColumnsProvider } from '../TableColumns';
 
-const buildColumns = ({
-  collectionConfig,
-  columns,
-  onSelect,
-  t,
-}) => buildListColumns({
-  collection: collectionConfig,
-  columns,
-  t,
-  cellProps: [{
-    link: false,
-    onClick: ({ collection, rowData }) => {
-      if (typeof onSelect === 'function') {
-        onSelect({
-          docID: rowData.id,
-          collectionConfig: collection,
-        });
-      }
-    },
-    className: `${baseClass}__first-cell`,
-  }],
-});
-
-const shouldIncludeCollection = ({
-  coll: {
-    admin: { enableRichTextRelationship },
-    upload,
-    slug,
-  },
-  uploads,
-  collectionSlugs,
-}) => (enableRichTextRelationship && ((uploads && Boolean(upload)) || collectionSlugs?.includes(slug)));
-
-const DrawerContent: React.FC<ListDrawerProps & {
-  enabledCollectionConfigs: SanitizedCollectionConfig[]
-}> = ({
+export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   drawerSlug,
   onSelect,
   customHeader,
   collectionSlugs,
-  uploads,
   selectedCollection,
-  enabledCollectionConfigs,
   filterOptions,
 }) => {
   const { t, i18n } = useTranslation(['upload', 'general']);
   const { permissions } = useAuth();
-  const { getPreference, setPreference } = usePreferences();
+  const { setPreference } = usePreferences();
   const { isModalOpen, closeModal } = useModal();
   const [limit, setLimit] = useState<number>();
   const [sort, setSort] = useState(null);
@@ -80,53 +40,31 @@ const DrawerContent: React.FC<ListDrawerProps & {
   const [where, setWhere] = useState(null);
   const { serverURL, routes: { api }, collections } = useConfig();
 
+  const enabledCollectionConfigs = collections.filter(({ slug }) => {
+    return collectionSlugs.includes(slug);
+  });
+
   const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<SanitizedCollectionConfig>(() => {
-    let initialSelection: SanitizedCollectionConfig;
-    if (selectedCollection) {
-      // if passed a selection, find it and check if it's enabled
-      const foundSelection = collections.find(({ slug }) => slug === selectedCollection);
-      if (foundSelection && shouldIncludeCollection({ coll: foundSelection, uploads, collectionSlugs })) {
-        initialSelection = foundSelection;
-      }
-    } else {
-      // return the first one that is enabled
-      initialSelection = collections.find((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs }));
-    }
-    return initialSelection;
+    return enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) || enabledCollectionConfigs?.[0];
   });
 
   const [selectedOption, setSelectedOption] = useState<{ label: string, value: string }>(() => (selectedCollectionConfig ? { label: getTranslation(selectedCollectionConfig.labels.singular, i18n), value: selectedCollectionConfig.slug } : undefined));
 
-  const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig, t));
+  const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig));
 
-  const [tableColumns, setTableColumns] = useState<Column[]>(() => {
-    const initialColumns = getInitialColumnState(fields, selectedCollectionConfig.admin.useAsTitle, selectedCollectionConfig.admin.defaultColumns);
-    return buildColumns({
-      collectionConfig: selectedCollectionConfig,
-      columns: initialColumns,
-      t,
-      onSelect,
-    });
-  });
+  useEffect(() => {
+    setFields(formatFields(selectedCollectionConfig));
+  }, [selectedCollectionConfig]);
 
   // allow external control of selected collection, same as the initial state logic above
   useEffect(() => {
-    let newSelection: SanitizedCollectionConfig;
     if (selectedCollection) {
       // if passed a selection, find it and check if it's enabled
-      const foundSelection = collections.find(({ slug }) => slug === selectedCollection);
-      if (foundSelection && shouldIncludeCollection({ coll: foundSelection, uploads, collectionSlugs })) {
-        newSelection = foundSelection;
-      }
-    } else {
-      // return the first one that is enabled
-      newSelection = collections.find((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs }));
+      const selectedConfig = enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) || enabledCollectionConfigs?.[0];
+      setSelectedCollectionConfig(selectedConfig);
     }
-    setSelectedCollectionConfig(newSelection);
-  }, [selectedCollection, collectionSlugs, uploads, collections, onSelect, t]);
+  }, [selectedCollection, enabledCollectionConfigs, onSelect, t]);
 
-  const activeColumnNames = tableColumns.map(({ accessor }) => accessor);
-  const stringifiedActiveColumns = JSON.stringify(activeColumnNames);
   const preferenceKey = `${selectedCollectionConfig.slug}-list`;
 
   // this is the 'create new' drawer
@@ -142,9 +80,9 @@ const DrawerContent: React.FC<ListDrawerProps & {
 
   useEffect(() => {
     if (selectedOption) {
-      setSelectedCollectionConfig(collections.find(({ slug }) => selectedOption.value === slug));
+      setSelectedCollectionConfig(enabledCollectionConfigs.find(({ slug }) => selectedOption.value === slug));
     }
-  }, [selectedOption, collections]);
+  }, [selectedOption, enabledCollectionConfigs]);
 
   const collectionPermissions = permissions?.collections?.[selectedCollectionConfig?.slug];
   const hasCreatePermission = collectionPermissions?.create?.permission;
@@ -182,40 +120,13 @@ const DrawerContent: React.FC<ListDrawerProps & {
   }, [setParams, page, sort, where, limit, cacheBust, filterOptions, selectedCollectionConfig]);
 
   useEffect(() => {
-    const syncColumnsFromPrefs = async () => {
-      const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
-      const newFields = formatFields(selectedCollectionConfig, t);
-      setFields(newFields);
-      const initialColumns = getInitialColumnState(newFields, selectedCollectionConfig.admin.useAsTitle, selectedCollectionConfig.admin.defaultColumns);
-      setTableColumns(buildColumns({
-        collectionConfig: selectedCollectionConfig,
-        columns: currentPreferences?.columns || initialColumns,
-        t,
-        onSelect,
-      }));
-    };
-
-    syncColumnsFromPrefs();
-  }, [t, getPreference, preferenceKey, onSelect, selectedCollectionConfig]);
-
-  useEffect(() => {
     const newPreferences = {
       limit,
       sort,
-      columns: JSON.parse(stringifiedActiveColumns),
     };
 
     setPreference(preferenceKey, newPreferences);
-  }, [sort, limit, stringifiedActiveColumns, setPreference, preferenceKey]);
-
-  const setActiveColumns = useCallback((columns: string[]) => {
-    setTableColumns(buildColumns({
-      collectionConfig: selectedCollectionConfig,
-      columns,
-      t,
-      onSelect,
-    }));
-  }, [selectedCollectionConfig, t, onSelect]);
+  }, [sort, limit, setPreference, preferenceKey]);
 
   const onCreateNew = useCallback(({ doc }) => {
     if (typeof onSelect === 'function') {
@@ -234,7 +145,21 @@ const DrawerContent: React.FC<ListDrawerProps & {
   }
 
   return (
-    <Fragment>
+    <TableColumnsProvider
+      collection={selectedCollectionConfig}
+      cellProps={[{
+        link: false,
+        onClick: ({ collection: rowColl, rowData }) => {
+          if (typeof onSelect === 'function') {
+            onSelect({
+              docID: rowData.id,
+              collectionConfig: rowColl,
+            });
+          }
+        },
+        className: `${baseClass}__first-cell`,
+      }]}
+    >
       <DocumentInfoProvider collection={selectedCollectionConfig}>
         <RenderCustomComponent
           DefaultComponent={DefaultList}
@@ -252,13 +177,13 @@ const DrawerContent: React.FC<ListDrawerProps & {
                       {!customHeader ? getTranslation(selectedCollectionConfig?.labels?.plural, i18n) : customHeader}
                     </h2>
                     {hasCreatePermission && (
-                    <DocumentDrawerToggler
-                      className={`${baseClass}__create-new-button`}
-                    >
-                      <Pill>
-                        {t('general:createNew')}
-                      </Pill>
-                    </DocumentDrawerToggler>
+                      <DocumentDrawerToggler
+                        className={`${baseClass}__create-new-button`}
+                      >
+                        <Pill>
+                          {t('general:createNew')}
+                        </Pill>
+                      </DocumentDrawerToggler>
                     )}
                   </div>
                   <button
@@ -272,44 +197,31 @@ const DrawerContent: React.FC<ListDrawerProps & {
                   </button>
                 </div>
                 {selectedCollectionConfig?.admin?.description && (
-                <div className={`${baseClass}__sub-header`}>
-                  <ViewDescription description={selectedCollectionConfig.admin.description} />
-                </div>
+                  <div className={`${baseClass}__sub-header`}>
+                    <ViewDescription description={selectedCollectionConfig.admin.description} />
+                  </div>
                 )}
                 {moreThanOneAvailableCollection && (
-                <div className={`${baseClass}__select-collection-wrap`}>
-                  <Label label={t('selectCollectionToBrowse')} />
-                  <ReactSelect
-                    className={`${baseClass}__select-collection`}
-                    value={selectedOption}
-                    onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
-                    options={enabledCollectionConfigs.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
-                  />
-                </div>
+                  <div className={`${baseClass}__select-collection-wrap`}>
+                    <Label label={t('selectCollectionToBrowse')} />
+                    <ReactSelect
+                      className={`${baseClass}__select-collection`}
+                      value={selectedOption}
+                      onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
+                      options={enabledCollectionConfigs.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
+                    />
+                  </div>
                 )}
               </header>
             ),
             data,
             limit: limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit,
             setLimit,
-            tableColumns,
-            setColumns: setActiveColumns,
             setSort,
             newDocumentURL: null,
             hasCreatePermission,
-            columnNames: activeColumnNames,
             disableEyebrow: true,
             modifySearchParams: false,
-            onCardClick: (doc) => {
-              if (typeof onSelect === 'function') {
-                onSelect({
-                  docID: doc.id,
-                  collectionConfig: selectedCollectionConfig,
-                });
-              }
-              closeModal(drawerSlug);
-            },
-            disableCardLink: true,
             handleSortChange: setSort,
             handleWhereChange: setWhere,
             handlePageChange: setPage,
@@ -318,28 +230,6 @@ const DrawerContent: React.FC<ListDrawerProps & {
         />
       </DocumentInfoProvider>
       <DocumentDrawer onSave={onCreateNew} />
-    </Fragment>
-  );
-};
-
-export const ListDrawerContent: React.FC<ListDrawerProps> = (props) => {
-  const {
-    collectionSlugs,
-    uploads,
-  } = props;
-
-  const { collections } = useConfig();
-
-  const [enabledCollectionConfigs] = useState(() => collections.filter((coll) => shouldIncludeCollection({ coll, uploads, collectionSlugs })));
-
-  if (enabledCollectionConfigs.length === 0) {
-    return null;
-  }
-
-  return (
-    <DrawerContent
-      {...props}
-      enabledCollectionConfigs={enabledCollectionConfigs}
-    />
+    </TableColumnsProvider>
   );
 };

@@ -6,9 +6,9 @@ import { traverseFields } from './traverseFields';
 import { ValidationError } from '../../../errors';
 import deepCopyObject from '../../../utilities/deepCopyObject';
 
-type Args = {
-  data: Record<string, unknown>
-  doc: Record<string, unknown>
+type Args<T> = {
+  data: T | Record<string, unknown>
+  doc: T | Record<string, unknown>
   docWithLocales: Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   id?: string | number
@@ -17,7 +17,7 @@ type Args = {
   skipValidation?: boolean
 }
 
-export const beforeChange = async ({
+export const beforeChange = async <T extends Record<string, unknown>>({
   data: incomingData,
   doc,
   docWithLocales,
@@ -26,7 +26,7 @@ export const beforeChange = async ({
   operation,
   req,
   skipValidation,
-}: Args): Promise<Record<string, unknown>> => {
+}: Args<T>): Promise<T> => {
   const data = deepCopyObject(incomingData);
   const mergeLocaleActions = [];
   const errors: { message: string, field: string }[] = [];

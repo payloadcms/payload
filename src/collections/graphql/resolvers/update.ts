@@ -1,12 +1,13 @@
 /* eslint-disable no-param-reassign */
 import { Response } from 'express';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Collection } from '../../config/types';
-import update from '../../operations/update';
+import updateByID from '../../operations/updateByID';
 import { PayloadRequest } from '../../../express/types';
 
-export type Resolver = (_: unknown, args: {
+export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (_: unknown, args: {
   id: string | number
-  data: Record<string, unknown>,
+  data: GeneratedTypes['collections'][TSlug]
   locale?: string
   draft: boolean
   autosave: boolean
@@ -15,9 +16,11 @@ export type Resolver = (_: unknown, args: {
     req: PayloadRequest,
     res: Response
   }
-) => Promise<Document>
+) => Promise<GeneratedTypes['collections'][TSlug]>
 
-export default function updateResolver(collection: Collection): Resolver {
+export default function updateResolver<TSlug extends keyof GeneratedTypes['collections']>(
+  collection: Collection,
+): Resolver<TSlug> {
   async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
@@ -32,7 +35,7 @@ export default function updateResolver(collection: Collection): Resolver {
       autosave: args.autosave,
     };
 
-    const result = await update(options);
+    const result = await updateByID<TSlug>(options);
 
     return result;
   }

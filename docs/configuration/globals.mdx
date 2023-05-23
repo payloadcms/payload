@@ -25,6 +25,7 @@ As with Collection configs, it's often best practice to write your Globals in se
 | **`endpoints`**    | Add custom routes to the REST API. [More](/docs/rest-api/overview#custom-endpoints)                                                                                                                                  |
 | **`graphQL.name`** | Text used in schema generation. Auto-generated from slug if not defined.                                                                                                                                             |
 | **`typescript`**   | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                  |
+| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                            |
 
 _\* An asterisk denotes that a property is required._
 
@@ -64,10 +65,13 @@ You can find an [example Global config](https://github.com/payloadcms/public-dem
 
 You can customize the way that the Admin panel behaves on a Global-by-Global basis by defining the `admin` property on a Global's config.
 
-| Option       | Description                                                                                                             |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `components` | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals)                 |
-| `preview`    | Function to generate a preview URL within the Admin panel for this global that can point to your app. [More](#preview). |
+| Option       | Description                                                                                                                       |
+|--------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `group`      | Text used as a label for grouping collection and global links together in the navigation.                                                    |
+| `hidden`     | Set to true or a function, called with the current user, returning true to exclude this global from navigation and admin routing. |
+| `components` | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals)                           |
+| `preview`    | Function to generate a preview URL within the Admin panel for this global that can point to your app. [More](#preview).           |
+| `hideAPIURL` | Hides the "API URL" meta field while editing documents within this collection.                                                    |
 
 ### Preview
 
@@ -85,7 +89,7 @@ If the function is specified, a Preview button will automatically appear in the 
 ```ts
 import { GlobalConfig } from "payload/types";
 
-const MyGlobal: CollectionConfig = {
+export const MyGlobal: GlobalConfig = {
   slug: "my-global",
   fields: [
     {
