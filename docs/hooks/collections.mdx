@@ -205,7 +205,7 @@ The difference to using `afterRead` would be that this hook fires once and inclu
 Available Collection operation is limited to `find`.
 
 ```ts
-import { CollectionBeforeOperationHook } from 'payload/types';
+import { CollectionAfterOperationHook } from 'payload/types';
 
 const afterOperationHook: CollectionAfterOperationHook = async ({
   args, // arguments passed into the operation
