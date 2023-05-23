@@ -7,6 +7,7 @@ import {
 import {
   Field,
   FieldAffectingData,
+  fieldAffectsData,
   fieldHasSubFields,
   fieldIsPresentationalOnly,
 } from '../../fields/config/types';
@@ -25,7 +26,11 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
   // This is the function that builds nested paths for all
   // field types with nested paths.
 
+  let idField: FieldAffectingData | undefined;
+
   const fieldTypes = fields.reduce((schema, field) => {
+    if (fieldAffectsData(field) && field.name === 'id') idField = field;
+
     if (!fieldIsPresentationalOnly(field) && !field.hidden) {
       const getFieldSchema = fieldToSchemaMap(parentName)[field.type];
 
@@ -52,12 +57,14 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
     return schema;
   }, {});
 
-  fieldTypes.id = {
-    type: withOperators(
-      { name: 'id', type: 'text' } as FieldAffectingData,
-      parentName,
-    ),
-  };
+  if (!idField) {
+    fieldTypes.id = {
+      type: withOperators(
+        { name: 'id', type: 'text' } as FieldAffectingData,
+        parentName,
+      ),
+    };
+  }
 
   const fieldName = formatName(name);
 
