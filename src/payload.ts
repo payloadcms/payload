@@ -210,7 +210,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     serverInitTelemetry(this);
 
-    if (options.local !== false) {
+    if (options.local !== false && this.mongoURL) {
       if (typeof options.onInit === 'function') await options.onInit(this);
       if (typeof this.config.onInit === 'function') await this.config.onInit(this);
     }
@@ -260,11 +260,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns Updated document(s)
    */
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateByIDOptions<T>):Promise<TGeneratedTypes['collections'][T]>
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateByIDOptions<T>): Promise<TGeneratedTypes['collections'][T]>
 
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateManyOptions<T>):Promise<BulkOperationResult<T>>
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateManyOptions<T>): Promise<BulkOperationResult<T>>
 
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>):Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>): Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
     const { update } = localOperations;
     return update<T>(this, options);
   }
@@ -274,11 +274,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns Updated document(s)
    */
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteByIDOptions<T>):Promise<TGeneratedTypes['collections'][T]>
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteByIDOptions<T>): Promise<TGeneratedTypes['collections'][T]>
 
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteManyOptions<T>):Promise<BulkOperationResult<T>>
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteManyOptions<T>): Promise<BulkOperationResult<T>>
 
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>):Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>): Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
     const { deleteLocal } = localOperations;
     return deleteLocal<T>(this, options);
   }

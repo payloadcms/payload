@@ -4,17 +4,15 @@ import {
   GraphQLInputObjectType, GraphQLList,
 } from 'graphql';
 
-import { GraphQLJSON } from 'graphql-type-json';
-
 import {
   Field,
   FieldAffectingData,
+  fieldAffectsData,
   fieldHasSubFields,
   fieldIsPresentationalOnly,
 } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
-import withOperators from './withOperators';
-import operators from './operators';
+import { withOperators } from './withOperators';
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap';
 
 // buildWhereInputType is similar to buildObjectType and operates
@@ -28,7 +26,11 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
   // This is the function that builds nested paths for all
   // field types with nested paths.
 
+  let idField: FieldAffectingData | undefined;
+
   const fieldTypes = fields.reduce((schema, field) => {
+    if (fieldAffectsData(field) && field.name === 'id') idField = field;
+
     if (!fieldIsPresentationalOnly(field) && !field.hidden) {
       const getFieldSchema = fieldToSchemaMap(parentName)[field.type];
 
@@ -55,14 +57,14 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
     return schema;
   }, {});
 
-  fieldTypes.id = {
-    type: withOperators(
-      { name: 'id' } as FieldAffectingData,
-      GraphQLJSON,
-      parentName,
-      [...operators.equality, ...operators.contains],
-    ),
-  };
+  if (!idField) {
+    fieldTypes.id = {
+      type: withOperators(
+        { name: 'id', type: 'text' } as FieldAffectingData,
+        parentName,
+      ),
+    };
+  }
 
   const fieldName = formatName(name);
 
