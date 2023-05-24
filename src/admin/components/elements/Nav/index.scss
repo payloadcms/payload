@@ -104,13 +104,7 @@
       }
     }
   }
-[dir=rtl]   &__link {
-    svg {
-      transform: rotate(90deg);
-      right: - base(.1);
-      left:0
-    }
-  }
+
   &__link {
     svg {
       opacity: 0;
