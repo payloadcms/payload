@@ -5,30 +5,25 @@ export default buildConfig({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
   },
+  typescript: {
+    outputFile: path.resolve(__dirname, 'schema.ts'),
+  },
   collections: [
     {
       slug: 'collection1',
       fields: [
         {
+          type: 'row',
+          fields: [{ type: 'text', required: true, name: 'testing' }],
+        },
+        {
           type: 'tabs',
           tabs: [
             {
               label: 'Tab 1',
-              name: 'tab1',
-              interface: 'SpecialTabName',
               fields: [
                 {
-                  type: 'text',
-                  name: 'title',
-                },
-              ],
-            },
-            {
-              label: 'Tab 2',
-              name: 'tab2',
-              interface: 'SpecialTabName',
-              fields: [
-                {
+                  required: true,
                   type: 'text',
                   name: 'title',
                 },
@@ -48,6 +43,43 @@ export default buildConfig({
             {
               name: 'description',
               type: 'text',
+            },
+          ],
+        },
+        {
+          type: 'blocks',
+          name: 'blocks',
+          required: true,
+          blocks: [
+            {
+              slug: 'block1',
+              interface: 'SharedMetaBlock',
+              fields: [
+                {
+                  required: true,
+                  name: 'b1title',
+                  type: 'text',
+                },
+                {
+                  name: 'b1description',
+                  type: 'text',
+                },
+              ],
+            },
+            {
+              slug: 'block2',
+              interface: 'AnotherSharedBlock',
+              fields: [
+                {
+                  name: 'b2title',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'b2description',
+                  type: 'text',
+                },
+              ],
             },
           ],
         },
