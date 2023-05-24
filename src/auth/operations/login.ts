@@ -11,6 +11,7 @@ import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import unlock from './unlock';
+import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts';
 
 export type Result = {
   user?: User,
@@ -92,7 +93,13 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
   const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0;
 
   if (!authResult.user) {
-    if (maxLoginAttemptsEnabled) await userDoc.incLoginAttempts();
+    if (maxLoginAttemptsEnabled) await incrementLoginAttempts({
+      payload: req.payload,
+      doc: userDoc,
+      collection: collectionConfig.slug,
+      lockTime: collectionConfig.auth.lockTime
+    });
+
     throw new AuthenticationError(req.t);
   }
 
