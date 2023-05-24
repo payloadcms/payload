@@ -96,8 +96,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     if (maxLoginAttemptsEnabled) await incrementLoginAttempts({
       payload: req.payload,
       doc: userDoc,
-      collection: collectionConfig.slug,
-      lockTime: collectionConfig.auth.lockTime
+      collection: collectionConfig,
     });
 
     throw new AuthenticationError(req.t);
