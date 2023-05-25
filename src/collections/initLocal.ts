@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import passportLocalMongoose from 'passport-local-mongoose';
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
 import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
 import getBuildQueryPlugin from '../mongoose/buildQuery';
@@ -15,12 +14,6 @@ export default function initCollectionsLocal(ctx: Payload): void {
     const formattedCollection = collection;
 
     const schema = buildCollectionSchema(formattedCollection, ctx.config);
-
-    if (collection.auth && !collection.auth.disableLocalStrategy) {
-      schema.plugin(passportLocalMongoose, {
-        usernameField: 'email',
-      });
-    }
 
     if (collection.versions) {
       const versionModelName = getVersionsModelName(collection);
