@@ -11,11 +11,6 @@
 * prevents add new relationship modal from adding duplicative values to the parent doc [#2688](https://github.com/payloadcms/payload/issues/2688) ([a2a8ac9](https://github.com/payloadcms/payload/commit/a2a8ac9549bd67e6ab578772689684fd2bc64872))
 * unable to clear relationships or open relationship drawer on mobile [#2691](https://github.com/payloadcms/payload/issues/2691) [#2692](https://github.com/payloadcms/payload/issues/2692) ([782f8ca](https://github.com/payloadcms/payload/commit/782f8ca047178cadb4214702854a0e0cb2d9eaab))
 
-
-### Features
-
-* builds multi-tenant example ([#2689](https://github.com/payloadcms/payload/issues/2689)) ([2fc9288](https://github.com/payloadcms/payload/commit/2fc92888700c95cc212e6c1ad1ff7d87a8560ec6))
-
 ## [1.8.2](https://github.com/payloadcms/payload/compare/v1.8.1...v1.8.2) (2023-05-10)
 
 
