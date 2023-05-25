@@ -66,15 +66,15 @@ Blocks are defined as separate configs of their own.
   trivializes their reusability.
 </Banner>
 
-| Option                     | Description                                                                                                                              |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                 |
-| **`fields`** \*            | Array of fields to be stored in this block.                                                                                              |
-| **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined.                                  |
-| **`imageURL`**             | Provide a custom image thumbnail to help editors identify this block in the Admin UI.                                                    |
-| **`imageAltText`**         | Customize this block's image thumbnail alt text.                                                                                         |
-| **`interface`**            | Create a top level, reusable typescript interface & GraphQL type.                                                                        |
-| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interface`. |
+| Option                     | Description                                                                                                                                                                         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                            |
+| **`fields`** \*            | Array of fields to be stored in this block.                                                                                                                                         |
+| **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined.                                                                             |
+| **`imageURL`**             | Provide a custom image thumbnail to help editors identify this block in the Admin UI.                                                                                               |
+| **`imageAltText`**         | Customize this block's image thumbnail alt text.                                                                                                                                    |
+| **`interface`**            | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). |
+| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interface`.                                            |
 
 #### Auto-generated data per block
 
