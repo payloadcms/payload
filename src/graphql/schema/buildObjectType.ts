@@ -48,7 +48,6 @@ import createRichTextRelationshipPromise from '../../fields/richText/richTextRel
 import formatOptions from '../utilities/formatOptions';
 import { Payload } from '../../payload';
 import buildWhereInputType from './buildWhereInputType';
-import buildBlockType from './buildBlockType';
 import isFieldNullable from './isFieldNullable';
 
 type LocaleInputType = {
