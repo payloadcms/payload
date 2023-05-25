@@ -15,6 +15,9 @@ export default function registerSchema(payload: Payload): void {
   payload.types = {
     blockTypes: {},
     blockInputTypes: {},
+    groupTypes: {},
+    arrayTypes: {},
+    tabTypes: {},
   };
 
   if (payload.config.localization) {

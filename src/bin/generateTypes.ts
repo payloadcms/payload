@@ -5,30 +5,27 @@ import { compile } from 'json-schema-to-typescript';
 import Logger from '../utilities/logger';
 import { SanitizedConfig } from '../config/types';
 import loadConfig from '../config/load';
-import { entityToJSONSchema, generateEntityObject } from '../utilities/entityToJSONSchema';
+import { entityToJSONSchema, generateEntitySchemas } from '../utilities/entityToJSONSchema';
+
+type DefinitionsType = { [k: string]: JSONSchema4 };
 
 function configToJsonSchema(config: SanitizedConfig): JSONSchema4 {
+  const fieldDefinitionsMap: Map<string, JSONSchema4> = new Map(); // mutable
+  const entityDefinitions: DefinitionsType = [...config.globals, ...config.collections].reduce((acc, entity) => {
+    acc[entity.slug] = entityToJSONSchema(config, entity, fieldDefinitionsMap);
+    return acc;
+  }, {});
+
   return {
     title: 'Config',
     type: 'object',
     additionalProperties: false,
     properties: {
-      collections: generateEntityObject(config, 'collections'),
-      globals: generateEntityObject(config, 'globals'),
+      collections: generateEntitySchemas(config.collections),
+      globals: generateEntitySchemas(config.globals),
     },
     required: ['collections', 'globals'],
-    definitions: Object.fromEntries(
-      [
-        ...config.globals.map((global) => [
-          global.slug,
-          entityToJSONSchema(config, global),
-        ]),
-        ...config.collections.map((collection) => [
-          collection.slug,
-          entityToJSONSchema(config, collection),
-        ]),
-      ],
-    ),
+    definitions: { ...entityDefinitions, ...Object.fromEntries(fieldDefinitionsMap) },
   };
 }
 
