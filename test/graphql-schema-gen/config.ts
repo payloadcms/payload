@@ -34,7 +34,7 @@ export default buildConfig({
         {
           type: 'array',
           name: 'meta',
-          interface: 'SharedMetaArray',
+          interfaceName: 'SharedMetaArray',
           fields: [
             {
               name: 'title',
@@ -53,7 +53,7 @@ export default buildConfig({
           blocks: [
             {
               slug: 'block1',
-              interface: 'SharedMetaBlock',
+              interfaceName: 'SharedMetaBlock',
               fields: [
                 {
                   required: true,
@@ -68,7 +68,7 @@ export default buildConfig({
             },
             {
               slug: 'block2',
-              interface: 'AnotherSharedBlock',
+              interfaceName: 'AnotherSharedBlock',
               fields: [
                 {
                   name: 'b2title',
@@ -91,7 +91,7 @@ export default buildConfig({
         {
           type: 'array',
           name: 'meta',
-          interface: 'SharedMetaArray',
+          interfaceName: 'SharedMetaArray',
           fields: [
             {
               name: 'title',
@@ -106,7 +106,7 @@ export default buildConfig({
         {
           type: 'group',
           name: 'meta',
-          interface: 'SharedMeta',
+          interfaceName: 'SharedMeta',
           fields: [
             {
               name: 'title',
@@ -125,7 +125,7 @@ export default buildConfig({
             {
               type: 'group',
               name: 'meta',
-              interface: 'SharedMeta',
+              interfaceName: 'SharedMeta',
               fields: [
                 {
                   name: 'title',

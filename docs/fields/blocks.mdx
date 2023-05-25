@@ -73,8 +73,8 @@ Blocks are defined as separate configs of their own.
 | **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined.                                                                             |
 | **`imageURL`**             | Provide a custom image thumbnail to help editors identify this block in the Admin UI.                                                                                               |
 | **`imageAltText`**         | Customize this block's image thumbnail alt text.                                                                                                                                    |
-| **`interface`**            | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). |
-| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interface`.                                            |
+| **`interfaceName`**        | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). |
+| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                        |
 
 #### Auto-generated data per block
 
@@ -99,7 +99,7 @@ const QuoteBlock: Block = {
   slug: "Quote", // required
   imageURL: "https://google.com/path/to/image.jpg",
   imageAltText: "A nice thumbnail image to show what this block looks like",
-  interface: "QuoteBlock", // optional
+  interfaceName: "QuoteBlock", // optional
   fields: [
     // required
     {

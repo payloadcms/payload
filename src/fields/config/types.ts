@@ -186,10 +186,10 @@ export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
   /** Customize generated GraphQL and Typescript schema names.
    * By default it is bound to the collection.
    *
-   * This is useful if you would like to share a group field interface amongst collections.
-   * **Note**: These will become top level types, so make sure they are unique among collections, arrays, groups, blocks, tabs.
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
    */
-  interface?: string
+  interfaceName?: string
 }
 
 export type RowAdmin = Omit<Admin, 'description'>;
@@ -214,22 +214,23 @@ export type TabsAdmin = Omit<Admin, 'description'>;
 type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
   fields: Field[]
   description?: Description
-  interface?: string
+  interfaceName?: string
 }
 
 export type NamedTab = TabBase & {
   /** Customize generated GraphQL and Typescript schema names.
    * The slug is used by default.
    *
-   * **Note**: These will become top level types, so make sure they are unique among collections, arrays, groups, blocks, tabs.
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
    */
-  interface?: string
+  interfaceName?: string
 }
 
 export type UnnamedTab = Omit<TabBase, 'name'> & {
   label: Record<string, string> | string
   localized?: never
-  interface?: never
+  interfaceName?: never
 }
 
 export type Tab = NamedTab | UnnamedTab
@@ -390,9 +391,10 @@ export type ArrayField = FieldBase & {
   /** Customize generated GraphQL and Typescript schema names.
    * By default it is bound to the collection.
    *
-   * **Note**: These will become top level types, so make sure they are unique among collections, arrays, groups, blocks, tabs.
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
    */
-  interface?: string
+  interfaceName?: string
 };
 
 export type RadioField = FieldBase & {
@@ -409,17 +411,17 @@ export type Block = {
   fields: Field[];
   imageURL?: string;
   imageAltText?: string;
-  /** @deprecated - please migrate to the interface property instead. */
+  /** @deprecated - please migrate to the interfaceName property instead. */
   graphQL?: {
     singularName?: string
   }
   /** Customize generated GraphQL and Typescript schema names.
    * The slug is used by default.
    *
-   * This is useful if your block slug collides with a collection slug.
-   * **Note**: These will become top level types, so make sure they are unique among collections, arrays, groups, blocks, tabs.
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
    */
-  interface?: string
+  interfaceName?: string
 }
 
 export type BlockField = FieldBase & {

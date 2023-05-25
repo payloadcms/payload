@@ -426,7 +426,7 @@ function buildObjectType({
       };
     },
     array: (objectTypeConfig: ObjectTypeConfig, field: ArrayField) => {
-      const interfaceName = field?.interface || combineParentName(parentName, toWords(field.name, true));
+      const interfaceName = field?.interfaceName || combineParentName(parentName, toWords(field.name, true));
 
       if (!payload.types.arrayTypes[interfaceName]) {
         // eslint-disable-next-line no-param-reassign
@@ -447,7 +447,7 @@ function buildObjectType({
       };
     },
     group: (objectTypeConfig: ObjectTypeConfig, field: GroupField) => {
-      const interfaceName = field?.interface || combineParentName(parentName, toWords(field.name, true));
+      const interfaceName = field?.interfaceName || combineParentName(parentName, toWords(field.name, true));
 
       if (!payload.types.groupTypes[interfaceName]) {
         // eslint-disable-next-line no-param-reassign
@@ -468,7 +468,7 @@ function buildObjectType({
     blocks: (objectTypeConfig: ObjectTypeConfig, field: BlockField) => {
       const blockTypes = field.blocks.map((block) => {
         if (!payload.types.blockTypes[block.slug]) {
-          const interfaceName = block?.interface || block.graphQL?.singularName || toWords(block.slug, true);
+          const interfaceName = block?.interfaceName || block?.graphQL?.singularName || toWords(block.slug, true);
           // eslint-disable-next-line no-param-reassign
           payload.types.blockTypes[block.slug] = buildObjectType({
             payload,
@@ -513,7 +513,7 @@ function buildObjectType({
     }, objectTypeConfig),
     tabs: (objectTypeConfig: ObjectTypeConfig, field: TabsField) => field.tabs.reduce((tabSchema, tab) => {
       if (tabHasName(tab)) {
-        const interfaceName = tab?.interface || combineParentName(parentName, toWords(tab.name, true));
+        const interfaceName = tab?.interfaceName || combineParentName(parentName, toWords(tab.name, true));
 
         if (!payload.types.tabTypes[interfaceName]) {
           // eslint-disable-next-line no-param-reassign

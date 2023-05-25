@@ -16,21 +16,36 @@ type Query {
 
 type Collection1 {
   id: String
-  tab1: SpecialTabName
-  tab2: SpecialTabName
+  testing: String!
+  title: String!
   meta: [SharedMetaArray!]
+  blocks: [Collection1_Blocks!]!
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-type SpecialTabName {
-  title: String
 }
 
 type SharedMetaArray {
   title: String
   description: String
   id: String
+}
+
+union Collection1_Blocks = SharedMetaBlock | AnotherSharedBlock
+
+type SharedMetaBlock {
+  b1title: String!
+  b1description: String
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type AnotherSharedBlock {
+  b2title: String!
+  b2description: String
+  id: String
+  blockName: String
+  blockType: String
 }
 
 """
@@ -53,6 +68,7 @@ type Collection1s {
 }
 
 input Collection1_where {
+  testing: Collection1_testing_operator
   title: Collection1_title_operator
   meta__title: Collection1_meta__title_operator
   meta__description: Collection1_meta__description_operator
@@ -64,15 +80,24 @@ input Collection1_where {
   AND: [Collection1_where_and]
 }
 
+input Collection1_testing_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [[String]]
+  all: [[[String]]]
+}
+
 input Collection1_title_operator {
   equals: String
   not_equals: String
   like: String
   contains: String
   in: [String]
-  not_in: [String]
-  all: [String]
-  exists: Boolean
+  not_in: [[String]]
+  all: [[[String]]]
 }
 
 input Collection1_meta__title_operator {
@@ -81,8 +106,8 @@ input Collection1_meta__title_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [String]
-  all: [String]
+  not_in: [[String]]
+  all: [[[String]]]
   exists: Boolean
 }
 
@@ -92,8 +117,8 @@ input Collection1_meta__description_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [String]
-  all: [String]
+  not_in: [[String]]
+  all: [[[String]]]
   exists: Boolean
 }
 
@@ -103,8 +128,8 @@ input Collection1_meta__id_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [String]
-  all: [String]
+  not_in: [[String]]
+  all: [[[String]]]
   exists: Boolean
 }
 
@@ -131,20 +156,18 @@ input Collection1_createdAt_operator {
 }
 
 input Collection1_id_operator {
-  equals: JSON
-  not_equals: JSON
-  in: [JSON]
-  not_in: [JSON]
-  all: [JSON]
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [[String]]
+  all: [[[String]]]
   exists: Boolean
 }
 
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON
-
 input Collection1_where_or {
+  testing: Collection1_testing_operator
   title: Collection1_title_operator
   meta__title: Collection1_meta__title_operator
   meta__description: Collection1_meta__description_operator
@@ -155,6 +178,7 @@ input Collection1_where_or {
 }
 
 input Collection1_where_and {
+  testing: Collection1_testing_operator
   title: Collection1_title_operator
   meta__title: Collection1_meta__title_operator
   meta__description: Collection1_meta__description_operator
@@ -173,10 +197,35 @@ type collection1DocAccess {
 }
 
 type Collection1DocAccessFields {
+  testing: Collection1DocAccessFields_testing
   title: Collection1DocAccessFields_title
   meta: Collection1DocAccessFields_meta
+  blocks: Collection1DocAccessFields_blocks
   updatedAt: Collection1DocAccessFields_updatedAt
   createdAt: Collection1DocAccessFields_createdAt
+}
+
+type Collection1DocAccessFields_testing {
+  create: Collection1DocAccessFields_testing_Create
+  read: Collection1DocAccessFields_testing_Read
+  update: Collection1DocAccessFields_testing_Update
+  delete: Collection1DocAccessFields_testing_Delete
+}
+
+type Collection1DocAccessFields_testing_Create {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_testing_Read {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_testing_Update {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_testing_Delete {
+  permission: Boolean!
 }
 
 type Collection1DocAccessFields_title {
@@ -301,6 +350,29 @@ type Collection1DocAccessFields_meta_id_Delete {
   permission: Boolean!
 }
 
+type Collection1DocAccessFields_blocks {
+  create: Collection1DocAccessFields_blocks_Create
+  read: Collection1DocAccessFields_blocks_Read
+  update: Collection1DocAccessFields_blocks_Update
+  delete: Collection1DocAccessFields_blocks_Delete
+}
+
+type Collection1DocAccessFields_blocks_Create {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_blocks_Read {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_blocks_Update {
+  permission: Boolean!
+}
+
+type Collection1DocAccessFields_blocks_Delete {
+  permission: Boolean!
+}
+
 type Collection1DocAccessFields_updatedAt {
   create: Collection1DocAccessFields_updatedAt_Create
   read: Collection1DocAccessFields_updatedAt_Read
@@ -422,8 +494,8 @@ input Collection2_meta__title_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [String]
-  all: [String]
+  not_in: [[String]]
+  all: [[[String]]]
   exists: Boolean
 }
 
@@ -433,8 +505,8 @@ input Collection2_meta__description_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [String]
-  all: [String]
+  not_in: [[String]]
+  all: [[[String]]]
   exists: Boolean
 }
 
@@ -444,8 +516,8 @@ input Collection2_meta__id_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [String]
-  all: [String]
+  not_in: [[String]]
+  all: [[[String]]]
   exists: Boolean
 }
 
@@ -455,8 +527,8 @@ input Collection2_nestedGroup__meta__title_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [String]
-  all: [String]
+  not_in: [[String]]
+  all: [[[String]]]
   exists: Boolean
 }
 
@@ -466,8 +538,8 @@ input Collection2_nestedGroup__meta__description_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [String]
-  all: [String]
+  not_in: [[String]]
+  all: [[[String]]]
   exists: Boolean
 }
 
@@ -494,11 +566,13 @@ input Collection2_createdAt_operator {
 }
 
 input Collection2_id_operator {
-  equals: JSON
-  not_equals: JSON
-  in: [JSON]
-  not_in: [JSON]
-  all: [JSON]
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [[String]]
+  all: [[[String]]]
   exists: Boolean
 }
 
@@ -851,17 +925,19 @@ input User_email_operator {
   like: EmailAddress
   contains: EmailAddress
   in: [EmailAddress]
-  not_in: [EmailAddress]
-  all: [EmailAddress]
+  not_in: [[EmailAddress]]
+  all: [[[EmailAddress]]]
   exists: Boolean
 }
 
 input User_id_operator {
-  equals: JSON
-  not_equals: JSON
-  in: [JSON]
-  not_in: [JSON]
-  all: [JSON]
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [[String]]
+  all: [[[String]]]
   exists: Boolean
 }
 
@@ -1026,6 +1102,11 @@ type Preference {
   updatedAt: DateTime!
 }
 
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
 type Access {
   canAccessAdmin: Boolean!
   collection1: collection1Access
@@ -1042,10 +1123,35 @@ type collection1Access {
 }
 
 type Collection1Fields {
+  testing: Collection1Fields_testing
   title: Collection1Fields_title
   meta: Collection1Fields_meta
+  blocks: Collection1Fields_blocks
   updatedAt: Collection1Fields_updatedAt
   createdAt: Collection1Fields_createdAt
+}
+
+type Collection1Fields_testing {
+  create: Collection1Fields_testing_Create
+  read: Collection1Fields_testing_Read
+  update: Collection1Fields_testing_Update
+  delete: Collection1Fields_testing_Delete
+}
+
+type Collection1Fields_testing_Create {
+  permission: Boolean!
+}
+
+type Collection1Fields_testing_Read {
+  permission: Boolean!
+}
+
+type Collection1Fields_testing_Update {
+  permission: Boolean!
+}
+
+type Collection1Fields_testing_Delete {
+  permission: Boolean!
 }
 
 type Collection1Fields_title {
@@ -1167,6 +1273,29 @@ type Collection1Fields_meta_id_Update {
 }
 
 type Collection1Fields_meta_id_Delete {
+  permission: Boolean!
+}
+
+type Collection1Fields_blocks {
+  create: Collection1Fields_blocks_Create
+  read: Collection1Fields_blocks_Read
+  update: Collection1Fields_blocks_Update
+  delete: Collection1Fields_blocks_Delete
+}
+
+type Collection1Fields_blocks_Create {
+  permission: Boolean!
+}
+
+type Collection1Fields_blocks_Read {
+  permission: Boolean!
+}
+
+type Collection1Fields_blocks_Update {
+  permission: Boolean!
+}
+
+type Collection1Fields_blocks_Delete {
   permission: Boolean!
 }
 
@@ -1650,14 +1779,12 @@ type Mutation {
 }
 
 input mutationCollection1Input {
-  tab2: mutationCollection1_Tab2Input
+  testing: String!
+  title: String!
   meta: [mutationCollection1_MetaInput]
+  blocks: JSON
   updatedAt: String
   createdAt: String
-}
-
-input mutationCollection1_Tab2Input {
-  title: String
 }
 
 input mutationCollection1_MetaInput {
@@ -1667,14 +1794,12 @@ input mutationCollection1_MetaInput {
 }
 
 input mutationCollection1UpdateInput {
-  tab2: mutationCollection1Update_Tab2Input
+  testing: String
+  title: String
   meta: [mutationCollection1Update_MetaInput]
+  blocks: JSON
   updatedAt: String
   createdAt: String
-}
-
-input mutationCollection1Update_Tab2Input {
-  title: String
 }
 
 input mutationCollection1Update_MetaInput {

@@ -297,11 +297,11 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
                   ],
                 };
 
-                if (block.interface) {
-                  fieldDefinitionsMap.set(block.interface, blockSchema);
+                if (block.interfaceName) {
+                  fieldDefinitionsMap.set(block.interfaceName, blockSchema);
 
                   return {
-                    $ref: `#/definitions/${block.interface}`,
+                    $ref: `#/definitions/${block.interfaceName}`,
                   };
                 }
 
@@ -322,11 +322,11 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
             },
           };
 
-          if (field.interface) {
-            fieldDefinitionsMap.set(field.interface, fieldSchema);
+          if (field.interfaceName) {
+            fieldDefinitionsMap.set(field.interfaceName, fieldSchema);
 
             fieldSchema = {
-              $ref: `#/definitions/${field.interface}`,
+              $ref: `#/definitions/${field.interfaceName}`,
             };
           }
           break;
@@ -374,11 +374,11 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
             ...entityFieldsToJSONSchema(config, field.fields, fieldDefinitionsMap),
           };
 
-          if (field.interface) {
-            fieldDefinitionsMap.set(field.interface, fieldSchema);
+          if (field.interfaceName) {
+            fieldDefinitionsMap.set(field.interfaceName, fieldSchema);
 
             fieldSchema = {
-              $ref: `#/definitions/${field.interface}`,
+              $ref: `#/definitions/${field.interfaceName}`,
             };
           }
           break;
