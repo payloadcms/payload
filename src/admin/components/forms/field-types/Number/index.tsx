@@ -137,7 +137,7 @@ const NumberField: React.FC<Props> = (props) => {
           onChange={onMultiTextChange}
           value={valueToRender as Option[]}
           showError={showError}
-          isDisabled={readOnly}
+          disabled={readOnly}
           options={[]}
           isMultiText
           isMulti
