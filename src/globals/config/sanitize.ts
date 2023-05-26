@@ -51,6 +51,8 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
       }
     }
 
+    if (!sanitizedGlobal.custom) sanitizedGlobal.custom = {};
+
     // /////////////////////////////////
     // Sanitize fields
     // /////////////////////////////////

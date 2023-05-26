@@ -50,11 +50,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const [selectedOption, setSelectedOption] = useState<{ label: string, value: string }>(() => (selectedCollectionConfig ? { label: getTranslation(selectedCollectionConfig.labels.singular, i18n), value: selectedCollectionConfig.slug } : undefined));
 
-  const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig, t));
+  const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig));
 
   useEffect(() => {
-    setFields(formatFields(selectedCollectionConfig, t));
-  }, [selectedCollectionConfig, t]);
+    setFields(formatFields(selectedCollectionConfig));
+  }, [selectedCollectionConfig]);
 
   // allow external control of selected collection, same as the initial state logic above
   useEffect(() => {

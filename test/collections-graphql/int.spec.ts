@@ -44,6 +44,20 @@ describe('collections-graphql', () => {
       expect(doc.id.length).toBeGreaterThan(0);
     });
 
+    it('should create using graphql variables', async () => {
+      const query = `mutation Create($title: String!) {
+          createPost(data: {title: $title}) {
+          id
+          title
+        }
+      }`;
+      const response = await client.request(query, { title });
+      const doc: Post = response.createPost;
+
+      expect(doc).toMatchObject({ title });
+      expect(doc.id.length).toBeGreaterThan(0);
+    });
+
     it('should read', async () => {
       const query = `query {
         Post(id: "${existingDoc.id}") {
@@ -350,6 +364,29 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }));
       });
     });
+
+    describe('relationships', () => {
+      it('should query on relationships with custom IDs', async () => {
+        const query = `query {
+          Posts(where: { title: { equals: "has custom ID relation" }}) {
+            docs {
+              id
+              title
+              relationToCustomID {
+                id
+              }
+            }
+            totalDocs
+          }
+        }`;
+
+        const response = await client.request(query);
+        const { docs, totalDocs } = response.Posts;
+
+        expect(totalDocs).toStrictEqual(1);
+        expect(docs[0].relationToCustomID.id).toStrictEqual(1);
+      });
+    });
   });
 
   describe('Error Handler', () => {
@@ -421,7 +458,7 @@ describe('collections-graphql', () => {
       expect(error.response.errors[1].message).toEqual('The following field is invalid: email');
       expect(error.response.errors[1].path[0]).toEqual('test3');
       expect(error.response.errors[1].extensions.name).toEqual('ValidationError');
-      expect(error.response.errors[1].extensions.data[0].message).toEqual('A user with the given username is already registered');
+      expect(error.response.errors[1].extensions.data[0].message).toEqual('A user with the given email is already registered');
       expect(error.response.errors[1].extensions.data[0].field).toEqual('email');
     });
   });

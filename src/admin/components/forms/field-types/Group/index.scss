@@ -91,3 +91,7 @@
 .group-field--within-row+.group-field--within-row {
   margin-top: 0;
 }
+
+.group-field--within-tab+.group-field--within-row {
+  padding-top: 0;
+}

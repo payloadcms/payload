@@ -30,6 +30,7 @@ This field uses the `monaco-react` editor syntax highlighting.
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 _\* An asterisk denotes that a property is required._
 
@@ -47,7 +48,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

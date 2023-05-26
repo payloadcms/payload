@@ -21,22 +21,22 @@ To swap in your own React component, first, consult the list of available compon
 
 You can override a set of admin panel-wide components by providing a component to your base Payload config's `admin.components` property. The following options are available:
 
-| Path                         | Description                                                                                                                                                                                                 |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`Nav`**                    | Contains the sidebar and mobile Nav in its entirety.                                                                                                                                                        |
-| **`logout.Button`**          | A custom React component.
-| **`BeforeDashboard`**        | Array of components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                         |
-| **`AfterDashboard`**         | Array of components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/master/test/admin/components/AfterDashboard/index.tsx) |
-| **`BeforeLogin`**            | Array of components to inject into the built-in Login, _before_ the default login form.                                                                                                                     |
-| **`AfterLogin`**             | Array of components to inject into the built-in Login, _after_ the default login form.                                                                                                                      |
-| **`BeforeNavLinks`**         | Array of components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                         |
-| **`AfterNavLinks`**          | Array of components to inject into the built-in Nav, _after_ the links.                                                                                                                                     |
-| **`views.Account`**          | The Account view is used to show the currently logged in user's Account page.                                                                                                                               |
-| **`views.Dashboard`**        | The main landing page of the Admin panel.                                                                                                                                                                   |
-| **`graphics.Icon`**          | Used as a graphic within the `Nav` component. Often represents a condensed version of a full logo.                                                                                                          |
-| **`graphics.Logo`**          | The full logo to be used in contexts like the `Login` view.                                                                                                                                                 |
-| **`routes`**                 | Define your own routes to add to the Payload Admin UI. [More](#custom-routes)                                                                                                                               |
-| **`providers`**              | Define your own provider components that will wrap the Payload Admin UI. [More](#custom-providers)                                                                                                          |
+| Path                  | Description                                                                                                                                                                                                 |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Nav`**             | Contains the sidebar and mobile Nav in its entirety.                                                                                                                                                        |
+| **`logout.Button`**   | A custom React component.                                                                                                                                                                                   |
+| **`BeforeDashboard`** | Array of components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                         |
+| **`AfterDashboard`**  | Array of components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/master/test/admin/components/AfterDashboard/index.tsx) |
+| **`BeforeLogin`**     | Array of components to inject into the built-in Login, _before_ the default login form.                                                                                                                     |
+| **`AfterLogin`**      | Array of components to inject into the built-in Login, _after_ the default login form.                                                                                                                      |
+| **`BeforeNavLinks`**  | Array of components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                         |
+| **`AfterNavLinks`**   | Array of components to inject into the built-in Nav, _after_ the links.                                                                                                                                     |
+| **`views.Account`**   | The Account view is used to show the currently logged in user's Account page.                                                                                                                               |
+| **`views.Dashboard`** | The main landing page of the Admin panel.                                                                                                                                                                   |
+| **`graphics.Icon`**   | Used as a graphic within the `Nav` component. Often represents a condensed version of a full logo.                                                                                                          |
+| **`graphics.Logo`**   | The full logo to be used in contexts like the `Login` view.                                                                                                                                                 |
+| **`routes`**          | Define your own routes to add to the Payload Admin UI. [More](#custom-routes)                                                                                                                               |
+| **`providers`**       | Define your own provider components that will wrap the Payload Admin UI. [More](#custom-providers)                                                                                                          |
 
 #### Full example:
 
@@ -77,18 +77,76 @@ _For more examples regarding how to customize components, look at the following 
 
 You can override components on a Collection-by-Collection basis via each Collection's `admin` property.
 
-| Path             | Description                                                                                      |
-| ---------------- | ------------------------------------------------------------------------------------------------ |
-| **`views.Edit`** | Used while a document within this Collection is being edited.                                    |
-| **`views.List`** | The `List` view is used to render a paginated, filterable table of Documents in this Collection. |
+| Path                       | Description                                                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **`views.Edit`**           | Used while a document within this Collection is being edited.                                                          |
+| **`views.List`**           | The `List` view is used to render a paginated, filterable table of Documents in this Collection.                       |
+| **`edit.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
+| **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
+| **`edit.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
+| **`edit.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
+
+#### Examples
+
+```tsx
+// Custom Buttons
+
+import * as React from "react";
+import {
+  CustomSaveButtonProps,
+  CustomSaveDraftButtonProps,
+  CustomPublishButtonProps,
+  CustomPreviewButtonProps,
+} from "payload/types";
+
+export const CustomSaveButton: CustomSaveButtonProps = ({
+  DefaultButton,
+  label,
+}) => {
+  return <DefaultButton label={label} />;
+};
+
+export const CustomSaveDraftButton: CustomSaveDraftButtonProps = ({
+  DefaultButton,
+  disabled,
+  label,
+  saveDraft,
+}) => {
+  return (
+    <DefaultButton label={label} disabled={disabled} saveDraft={saveDraft} />
+  );
+};
+
+export const CustomPublishButton: CustomPublishButtonProps = ({
+  DefaultButton,
+  disabled,
+  label,
+  publish,
+}) => {
+  return <DefaultButton label={label} disabled={disabled} publish={publish} />;
+};
+
+export const CustomPreviewButton: CustomPreviewButtonProps = ({
+  DefaultButton,
+  disabled,
+  label,
+  preview,
+}) => {
+  return <DefaultButton label={label} disabled={disabled} preview={preview} />;
+};
+```
 
 ### Globals
 
 As with Collections, You can override components on a global-by-global basis via their `admin` property.
 
-| Path             | Description                             |
-| ---------------- | --------------------------------------- |
-| **`views.Edit`** | Used while this Global is being edited. |
+| Path                       | Description                                                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **`views.Edit`**           | Used while this Global is being edited.                                                                                |
+| **`edit.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
+| **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
+| **`edit.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
+| **`edit.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
 
 ### Fields
 
@@ -163,7 +221,11 @@ const CustomTextField: React.FC<Props> = ({ path }) => {
 
 <Banner type="success">
   For more information regarding the hooks that are available to you while you
-  build custom components, including the <strong>useField</strong> hook, <a href="/docs/admin/hooks" style={{ color: "black" }}>click here</a>.
+  build custom components, including the <strong>useField</strong> hook,{" "}
+  <a href="/docs/admin/hooks" style={{ color: "black" }}>
+    click here
+  </a>
+  .
 </Banner>
 
 ## Custom routes
@@ -232,19 +294,20 @@ To make use of Payload SCSS variables / mixins to use directly in your own compo
 When developing custom components you can support multiple languages to be consistent with Payload's i18n support. The best way to do this is to add your translation resources to the [i18n configuration](https://payloadcms.com/docs/configuration/i18n) and import `useTranslation` from `react-i18next` in your components.
 
 For example:
+
 ```tsx
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 const CustomComponent: React.FC = () => {
   // highlight-start
-  const { t, i18n } = useTranslation('namespace1');
+  const { t, i18n } = useTranslation("namespace1");
   // highlight-end
 
   return (
     <ul>
-      <li>{ t('key', { variable: 'value' }) }</li>
-      <li>{ t('namespace2:key', { variable: 'value' }) }</li>
-      <li>{ i18n.language }</li>
+      <li>{t("key", { variable: "value" })}</li>
+      <li>{t("namespace2:key", { variable: "value" })}</li>
+      <li>{i18n.language}</li>
     </ul>
   );
 };

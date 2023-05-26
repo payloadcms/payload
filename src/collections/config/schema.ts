@@ -56,11 +56,18 @@ const collectionSchema = joi.object().keys({
     hooks: joi.object({
       beforeDuplicate: joi.func(),
     }),
+    enableRichTextLink: joi.boolean(),
     enableRichTextRelationship: joi.boolean(),
     components: joi.object({
       views: joi.object({
         List: componentSchema,
         Edit: componentSchema,
+      }),
+      edit: joi.object({
+        SaveButton: componentSchema,
+        PublishButton: componentSchema,
+        SaveDraftButton: componentSchema,
+        PreviewButton: componentSchema,
       }),
     }),
     pagination: joi.object({
@@ -72,6 +79,12 @@ const collectionSchema = joi.object().keys({
     hideAPIURL: joi.bool(),
   }),
   fields: joi.array(),
+  indexes: joi.array().items(
+    joi.object().keys({
+      fields: joi.object().required(),
+      options: joi.object(),
+    }),
+  ),
   hooks: joi.object({
     beforeOperation: joi.array().items(joi.func()),
     beforeValidate: joi.array().items(joi.func()),
@@ -159,8 +172,8 @@ const collectionSchema = joi.object().keys({
       imageSizes: joi.array().items(
         joi.object().keys({
           name: joi.string(),
-          width: joi.number().allow(null),
-          height: joi.number().allow(null),
+          width: joi.number().integer().allow(null),
+          height: joi.number().integer().allow(null),
           crop: joi.string(), // TODO: add further specificity with joi.xor
         }).unknown(),
       ),
@@ -184,9 +197,18 @@ const collectionSchema = joi.object().keys({
         format: joi.string(),
         options: joi.object(),
       }),
+      trimOptions: joi.alternatives().try(
+        joi.object().keys({
+          format: joi.string(),
+          options: joi.object(),
+        }),
+        joi.string(),
+        joi.number(),
+      ),
     }),
     joi.boolean(),
   ),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 });
 
 export default collectionSchema;

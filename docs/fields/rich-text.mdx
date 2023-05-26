@@ -31,6 +31,7 @@ The Admin component is built on the powerful [`slatejs`](https://docs.slatejs.or
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -54,6 +55,7 @@ The default `elements` available in Payload are:
 - `h4`
 - `h5`
 - `h6`
+- `blockquote`
 - `link`
 - `ol`
 - `ul`
@@ -81,6 +83,8 @@ Set this property to `true` to hide this field's gutter within the admin panel. 
 
 This allows [fields](/docs/fields/overview) to be saved as extra fields on a link inside the Rich Text Editor. When this is present, the fields will render inside a modal that can be opened by clicking the "edit" button on the link element.
 
+`link.fields` may either be an array of fields (in which case all fields defined in it will be appended below the default fields) or a function that accepts the default fields as only argument and returns an array defining the entirety of fields to be used (thus providing a mechanism of overriding the default fields).
+
 ![RichText link fields](https://payloadcms.com/images/docs/fields/richText/rte-link-fields-modal.jpg)
 *RichText link with custom fields*
 
@@ -104,7 +108,7 @@ Similar to the `relationship` element, the `upload` element is a user-friendly w
 
 <Banner type="success">
   <strong>Tip:</strong><br/>
-  Collections are automatically allowed to be selected within the Rich Text relationship and upload elements by default. If you want to disable a collection from being able to be referenced in Rich Text fields, set the collection admin option of <strong>enableRichTextRelationship</strong> to false.
+  Collections are automatically allowed to be selected within the Rich Text relationship and upload elements by default. If you want to disable a collection from being able to be referenced in Rich Text fields, set the collection admin options of <strong>enableRichTextLink</strong> and <strong>enableRichTextRelationship</strong> to false.
 </Banner>
 
 Relationship and Upload elements are populated dynamically into your Rich Text field' content. Within the REST and Local APIs, any present RichText `relationship` or `upload` elements will respect the `depth` option that you pass, and will be populated accordingly. In GraphQL, each `richText` field accepts an argument of `depth` for you to utilize.
@@ -137,7 +141,7 @@ Custom `Leaf` objects follow a similar pattern but require you to define the `Le
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
@@ -153,6 +157,7 @@ const ExampleCollection: CollectionConfig = {
           'h3',
           'h4',
           'link',
+          'blockquote',
           {
             name: 'cta',
             Button: CustomCallToActionButton,
@@ -270,7 +275,7 @@ const serialize = (children) => children.map((node, i) => {
           {serialize(node.children)}
         </h6>
       );
-    case 'quote':
+    case 'blockquote':
       return (
         <blockquote key={i}>
           {serialize(node.children)}
@@ -366,5 +371,4 @@ import type {
   RichTextCustomElement,
   RichTextCustomLeaf,
 } from 'payload/types';
-
 ```

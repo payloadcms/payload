@@ -5,6 +5,7 @@ import h4 from './h4';
 import h5 from './h5';
 import h6 from './h6';
 import link from './link';
+import blockquote from './blockquote';
 import ol from './ol';
 import ul from './ul';
 import li from './li';
@@ -20,6 +21,7 @@ const elements = {
   h5,
   h6,
   link,
+  blockquote,
   ol,
   ul,
   li,

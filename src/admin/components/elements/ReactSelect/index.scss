@@ -22,13 +22,13 @@
     display: none;
   }
 
-  .rs__input {
+  .rs__input-container {
     color: var(--theme-elevation-1000);
+  }
 
-    input {
-      font-family: var(--font-body);
-      width: 10px;
-    }
+  .rs__input {
+    font-family: var(--font-body);
+    width: 10px;
   }
 
   .rs__menu {

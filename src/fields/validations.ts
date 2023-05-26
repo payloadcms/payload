@@ -6,6 +6,7 @@ import {
   CodeField,
   DateField,
   EmailField,
+  fieldAffectsData,
   JSONField,
   NumberField,
   PointField,
@@ -18,7 +19,6 @@ import {
   TextField,
   UploadField,
   Validate,
-  fieldAffectsData,
 } from './config/types';
 import canUseDOM from '../utilities/canUseDOM';
 import { isValidID } from '../utilities/isValidID';
@@ -319,8 +319,11 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
         requestedID = val.value;
       }
 
-      const idField = payload.collections[collection].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+      if (requestedID === null) return false;
+
+      const idField = payload.collections[collection]?.config?.fields?.find((field) => fieldAffectsData(field) && field.name === 'id');
       let type;
+
       if (idField) {
         type = idField.type === 'number' ? 'number' : 'text';
       } else {

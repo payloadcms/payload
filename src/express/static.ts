@@ -10,7 +10,7 @@ function initStatic(ctx: Payload): void {
   Object.entries(ctx.collections).forEach(([_, collection]) => {
     const { config } = collection;
 
-    if (config.upload) {
+    if (config.upload && config.upload.staticURL.startsWith('/')) {
       const router = express.Router();
 
       router.use(corsHeaders(ctx.config));

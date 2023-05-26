@@ -164,7 +164,7 @@ GitHub.sublime-settings
 # CMake
 cmake-build-debug/
 
-# Mongo Explorer plugin:
+# MongoDB Explorer plugin:
 .idea/**/mongoSettings.xml
 
 ## File-based project format:

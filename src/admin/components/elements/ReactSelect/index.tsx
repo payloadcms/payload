@@ -3,7 +3,7 @@ import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import { useTranslation } from 'react-i18next';
 import { arrayMove } from '@dnd-kit/sortable';
-import { Props } from './types';
+import { Props as ReactSelectAdapterProps } from './types';
 import Chevron from '../../icons/Chevron';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { SingleValue } from './SingleValue';
@@ -18,13 +18,16 @@ import type { Option } from './types';
 
 import './index.scss';
 
+
 const createOption = (label: string) => ({
   label,
   value: label,
 });
 
 
-const SelectAdapter: React.FC<Props> = (props) => {
+
+const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
+
   const { t, i18n } = useTranslation();
 
   const {
@@ -41,8 +44,6 @@ const SelectAdapter: React.FC<Props> = (props) => {
     isLoading,
     onMenuOpen,
     components,
-    selectProps,
-    isMultiText,
   } = props;
 
   const classes = [
@@ -110,7 +111,7 @@ const SelectAdapter: React.FC<Props> = (props) => {
       {...props}
       value={value}
       onChange={onChange}
-      disabled={disabled ? 'disabled' : undefined}
+      isDisabled={disabled}
       className={classes}
       classNamePrefix="rs"
       options={options}
@@ -122,9 +123,6 @@ const SelectAdapter: React.FC<Props> = (props) => {
       inputValue={inputValue}
       onInputChange={(newValue) => setInputValue(newValue)}
       onKeyDown={handleKeyDown}
-      selectProps={{
-        ...selectProps,
-      }}
       components={{
         ValueContainer,
         SingleValue,
@@ -140,7 +138,7 @@ const SelectAdapter: React.FC<Props> = (props) => {
   );
 };
 
-const SortableSelect: React.FC<Props> = (props) => {
+const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
   const {
     onChange,
     value,
@@ -166,7 +164,7 @@ const SortableSelect: React.FC<Props> = (props) => {
   );
 };
 
-const ReactSelect: React.FC<Props> = (props) => {
+const ReactSelect: React.FC<ReactSelectAdapterProps> = (props) => {
   const {
     isMulti,
     isSortable,

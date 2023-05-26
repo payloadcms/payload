@@ -54,13 +54,15 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     });
   }
 
+  let versionAccessResult;
+
   if (hasWhereAccessResult(accessResult)) {
-    const versionAccessResult = appendVersionToQueryKey(accessResult);
-    queryToBuild.and.push(versionAccessResult);
+    versionAccessResult = appendVersionToQueryKey(accessResult);
   }
 
   const query = await VersionModel.buildQuery({
     where: queryToBuild,
+    access: versionAccessResult,
     req,
     overrideAccess,
     globalSlug: entityType === 'global' ? entity.slug : undefined,

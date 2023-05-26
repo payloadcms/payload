@@ -7,6 +7,7 @@
 
 export interface Config {
   collections: {
+    users: User;
     'array-fields': ArrayField;
     'block-fields': BlockField;
     'code-fields': CodeField;
@@ -28,9 +29,20 @@ export interface Config {
     uploads: Upload;
     uploads2: Uploads2;
     uploads3: Uploads3;
-    users: User;
   };
   globals: {};
+}
+export interface User {
+  id: string;
+  canViewConditionalField?: boolean;
+  email?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpiration?: string;
+  loginAttempts?: number;
+  lockUntil?: string;
+  createdAt: string;
+  updatedAt: string;
+  password?: string;
 }
 export interface ArrayField {
   id: string;
@@ -240,6 +252,7 @@ export interface ConditionalLogic {
   text: string;
   toggleField?: boolean;
   fieldToToggle: string;
+  userConditional?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -315,6 +328,8 @@ export interface IndexedField {
   };
   collapsibleLocalizedUnique?: string;
   collapsibleTextUnique?: string;
+  partOne?: string;
+  partTwo?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -403,17 +418,6 @@ export interface TextField {
   overrideLength?: string;
   createdAt: string;
   updatedAt: string;
-}
-export interface User {
-  id: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
-  password?: string;
 }
 export interface RichTextField {
   id: string;

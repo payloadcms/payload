@@ -28,7 +28,7 @@ Collections and Globals both support the same options for configuring autosave. 
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Pages: CollectionConfig = {
+export const Pages: CollectionConfig = {
   slug: 'pages',
   access: {
     read: ({ req }) => {

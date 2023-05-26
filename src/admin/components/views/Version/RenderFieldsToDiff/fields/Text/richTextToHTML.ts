@@ -70,6 +70,10 @@ export const richTextToHTML = (content: unknown): string => {
             nodeHTML = `<h6>${richTextToHTML(node.children)}</h6>`;
             break;
 
+          case 'blockquote':
+            nodeHTML = `<blockquote>${richTextToHTML(node.children)}</blockquote>`;
+            break;
+
           case 'ul':
             nodeHTML = `<ul>${richTextToHTML(node.children)}</ul>`;
             break;
