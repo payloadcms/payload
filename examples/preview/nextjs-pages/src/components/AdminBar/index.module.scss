@@ -2,9 +2,8 @@
   z-index: 10;
   width: 100%;
   background-color: var(--color-dark-gray);
-  color: var(--color-white);
+  color: white;
   padding: calc(var(--base) * 0.25) 0;
-  font-size: calc(#{var(--html-font-size)} * 1px);
   display: none;
 }
 
@@ -14,7 +13,7 @@
 
 .controls {
   & > *:not(:last-child) {
-    margin-right:calc(var(--base) * 0.5) !important;
+    margin-right: calc(var(--base) * 0.5) !important;
   }
 }
 

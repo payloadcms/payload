@@ -1,7 +1,7 @@
 import React from 'react'
 import { PayloadAdminBar, PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
 
-import { Gutter } from '../../Gutter'
+import { Gutter } from '../Gutter'
 
 import classes from './index.module.scss'
 

@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
 
 import { MainMenu } from '../../payload-types'
+import { AdminBar } from '../AdminBar'
 import { CMSLink } from '../CMSLink'
 import { Gutter } from '../Gutter'
-import { Logo } from '../Logo'
-import { AdminBar } from './AdminBar'
 
 import classes from './index.module.scss'
 
@@ -18,8 +18,13 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
   return (
     <header className={classes.header}>
       <Gutter className={classes.wrap}>
-        <Link href="/">
-          <Logo />
+        <Link href="/" className={classes.logo}>
+          <Image
+            width={150}
+            height={30}
+            alt="payload cms logo"
+            src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-dark.svg"
+          />
         </Link>
         {children}
       </Gutter>

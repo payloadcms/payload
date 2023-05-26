@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 // eslint-disable-next-line consistent-return
-const preview = (req: NextApiRequest, res: NextApiResponse): void => {
+const preview = async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
   const {
     cookies: { 'payload-token': payloadToken },
     query: { url },
@@ -15,6 +15,21 @@ const preview = (req: NextApiRequest, res: NextApiResponse): void => {
 
   if (!payloadToken) {
     return res.status(403).json({
+      message: 'You are not allowed to preview this page',
+    })
+  }
+
+  // validate the Payload token
+  const userReq = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/me`, {
+    headers: {
+      Authorization: `JWT ${payloadToken}`,
+    },
+  })
+
+  const userRes = await userReq.json()
+
+  if (!userReq.ok || !userRes?.user) {
+    return res.status(401).json({
       message: 'You are not allowed to preview this page',
     })
   }

@@ -30,7 +30,7 @@ export const CMSLink: React.FC<CMSLinkType> = ({
 }) => {
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
-      ? `/${reference.value.slug}`
+      ? `/${reference.value.slug === 'home' ? '' : reference.value.slug}`
       : url
 
   if (!appearance) {
@@ -47,7 +47,7 @@ export const CMSLink: React.FC<CMSLinkType> = ({
 
     if (href) {
       return (
-        <Link href={href} {...newTabProps} className={className}>
+        <Link href={href} {...newTabProps} className={className} prefetch={false}>
           {label && label}
           {children && children}
         </Link>

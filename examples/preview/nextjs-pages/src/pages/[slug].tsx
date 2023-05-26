@@ -7,8 +7,6 @@ import { Gutter } from '../components/Gutter'
 import RichText from '../components/RichText'
 import type { MainMenu, Page as PageType } from '../payload-types'
 
-import classes from './index.module.scss'
-
 const Page: React.FC<
   PageType & {
     mainMenu: MainMenu
@@ -20,7 +18,7 @@ const Page: React.FC<
   return (
     <main>
       <Gutter>
-        <h1 className={classes.hero}>{title}</h1>
+        <h1>{title}</h1>
         <RichText content={richText} />
       </Gutter>
     </main>

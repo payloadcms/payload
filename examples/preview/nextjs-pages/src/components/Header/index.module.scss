@@ -1,0 +1,34 @@
+@import '../../css/queries.scss';
+
+.header {
+  padding: var(--base) 0;
+}
+
+.wrap {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(var(--base) / 2);
+  flex-wrap: wrap;
+}
+
+.logo {
+  flex-shrink: 0;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--base);
+  white-space: nowrap;
+  overflow: hidden;
+  flex-wrap: wrap;
+
+  a {
+    display: block;
+    text-decoration: none;
+  }
+
+  @include mid-break {
+    gap: 0 calc(var(--base) / 2);
+  }
+}
