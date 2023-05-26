@@ -19,6 +19,9 @@ export default function initCollectionsLocal(ctx: Payload): void {
     if (collection.auth && !collection.auth.disableLocalStrategy) {
       schema.plugin(passportLocalMongoose, {
         usernameField: 'email',
+        errorMessages: {
+          UserExistsError: 'A user with the given email is already registered',
+        },
       });
 
 
