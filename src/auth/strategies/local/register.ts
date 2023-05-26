@@ -27,7 +27,7 @@ export const registerLocalStrategy = async ({
   })
 
   if (existingUser.docs.length > 0) {
-    throw new ValidationError([{ message: 'A user with the given username is already registered', field: 'email' }])
+    throw new ValidationError([{ message: 'A user with the given email is already registered', field: 'email' }])
   }
 
   const { salt, hash } = await generatePasswordSaltHash({ password })
