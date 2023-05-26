@@ -3,33 +3,35 @@ import scmp from 'scmp'
 import { TypeWithID } from "../../../collections/config/types"
 import { AuthenticationError } from "../../../errors"
 
+type Doc = TypeWithID & Record<string, unknown>
+
 type Args = {
-  doc: TypeWithID & Record<string, unknown>
+  doc: Doc
   password: string
 }
 
 export const authenticateLocalStrategy = async ({
   doc,
   password,
-}: Args): Promise<TypeWithID & Record<string, unknown>> => {
+}: Args): Promise<Doc | null> => {
   try {
     const salt = doc.salt
     const hash = doc.hash
 
     if (typeof salt === 'string' && typeof hash === 'string') {
-      await new Promise((resolve) => {
+      const res = await new Promise<Doc | null>((resolve, reject) => {
         crypto.pbkdf2(password, salt, 25000, 512, 'sha256', (e, hashBuffer) => {
-          if (e) throw e
+          if (e) reject(null)
 
           if (scmp(hashBuffer, Buffer.from(hash, 'hex'))) {
             resolve(doc)
           } else {
-            return null
+            reject(null)
           }
         });
       })
 
-      return doc
+      return res
     }
 
     return null

@@ -93,14 +93,18 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
   const authResult = await authenticateLocalStrategy({ password, doc: user });
 
+  user = sanitizeInternalFields(user);
+
   const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0;
 
   if (!authResult) {
-    if (maxLoginAttemptsEnabled) await incrementLoginAttempts({
-      payload: req.payload,
-      doc: user,
-      collection: collectionConfig,
-    });
+    if (maxLoginAttemptsEnabled) {
+      await incrementLoginAttempts({
+        payload: req.payload,
+        doc: user,
+        collection: collectionConfig,
+      });
+    }
 
     throw new AuthenticationError(req.t);
   }
@@ -116,8 +120,6 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       overrideAccess: true,
     });
   }
-
-  user = sanitizeInternalFields(user);
 
   const fieldsToSign = collectionConfig.fields.reduce((signedFields, field: Field) => {
     const result = {
