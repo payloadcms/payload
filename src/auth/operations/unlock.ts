@@ -2,6 +2,7 @@ import { APIError } from '../../errors';
 import executeAccess from '../executeAccess';
 import { Collection } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
+import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts';
 
 export type Args = {
   collection: Collection
@@ -46,7 +47,11 @@ async function unlock(args: Args): Promise<boolean> {
 
   if (!user) return null;
 
-  await user.resetLoginAttempts();
+  await resetLoginAttempts({
+    payload: req.payload,
+    collection: collectionConfig,
+    doc: user,
+  });
 
   return true;
 }

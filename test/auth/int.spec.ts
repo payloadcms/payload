@@ -290,7 +290,7 @@ describe('Auth', () => {
           const { loginAttempts, lockUntil } = userResult;
 
           expect(loginAttempts).toBe(0);
-          expect(lockUntil).toBeUndefined();
+          expect(lockUntil).toBeNull();
         });
       });
     });
