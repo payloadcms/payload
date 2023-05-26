@@ -17,7 +17,7 @@ export const examplePageDraft: Partial<Page> = {
         {
           type: 'link',
           linkType: 'custom',
-          url: 'http://localhost:8000/admin/logout',
+          url: 'http://localhost:3000/admin/logout',
           newTab: true,
           children: [{ text: 'Log out' }],
         },

@@ -20,7 +20,7 @@ export const examplePage: Partial<Page> = {
         {
           type: 'link',
           linkType: 'custom',
-          url: 'http://localhost:8000/admin',
+          url: 'http://localhost:3000/admin',
           newTab: true,
           children: [{ text: 'Log in' }],
         },

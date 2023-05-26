@@ -1,0 +1,66 @@
+@use './queries.scss' as *;
+
+:root {
+  --color-dark-gray: #333;
+  --color-light-gray: #ccc;
+  --base: 24px;
+  --gutter-h: 180px;
+  --breakpoint-m: $breakpoint-m-width;
+  --breakpoint-l: $breakpoint-l-width;
+  --font-body: system-ui;
+
+  @include large-break {
+    --gutter-h: 75px;
+  }
+
+  @include mid-break {
+    --gutter-h: 24px;
+    --base: 16px;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  background: white;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--color-dark-gray);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 32px;
+
+  @media (max-width: $breakpoint-m-width) {
+    font-size: 14px;
+    line-height: 24px;
+  }
+}
+
+a {
+  color: inherit;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:active {
+    outline: none;
+  }
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}

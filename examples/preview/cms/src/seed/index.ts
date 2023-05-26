@@ -1,7 +1,8 @@
 import type { Payload } from 'payload'
+
+import { home } from './home'
 import { examplePage } from './page'
 import { examplePageDraft } from './pageDraft'
-import { home } from './home'
 
 export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
@@ -26,7 +27,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   const homepageJSON = JSON.parse(JSON.stringify(home).replace('{{DRAFT_PAGE_ID}}', examplePageID))
 
-  await payload.create({
+  const { id: homePageID } = await payload.create({
     collection: 'pages',
     data: homepageJSON,
   })
@@ -37,10 +38,13 @@ export const seed = async (payload: Payload): Promise<void> => {
       navItems: [
         {
           link: {
-            type: 'custom',
-            reference: null,
-            label: 'Dashboard',
-            url: 'http://localhost:8000/admin',
+            type: 'reference',
+            reference: {
+              relationTo: 'pages',
+              value: homePageID,
+            },
+            label: 'Home',
+            url: '',
           },
         },
         {
@@ -52,6 +56,14 @@ export const seed = async (payload: Payload): Promise<void> => {
             },
             label: 'Example Page',
             url: '',
+          },
+        },
+        {
+          link: {
+            type: 'custom',
+            reference: null,
+            label: 'Dashboard',
+            url: 'http://localhost:3000/admin',
           },
         },
       ],
