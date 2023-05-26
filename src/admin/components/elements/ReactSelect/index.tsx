@@ -25,9 +25,7 @@ const createOption = (label: string) => ({
 });
 
 
-
 const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
-
   const { t, i18n } = useTranslation();
 
   const {
@@ -44,6 +42,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     isLoading,
     onMenuOpen,
     components,
+    isMultiText,
   } = props;
 
   const classes = [
@@ -77,7 +76,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         {...props}
         value={value}
         onChange={onChange}
-        disabled={disabled ? 'disabled' : undefined}
+        isDisabled={disabled}
         className={classes}
         classNamePrefix="rs"
         options={options}
@@ -86,9 +85,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         filterOption={filterOption}
         onMenuOpen={onMenuOpen}
         menuPlacement="auto"
-        selectProps={{
-          ...selectProps,
-        }}
         components={{
           ValueContainer,
           SingleValue,
