@@ -1,18 +1,9 @@
 import { Field, fieldAffectsData } from '../fields/config/types';
 import flattenFields from '../utilities/flattenTopLevelFields';
 import { getEntityPolicies } from '../utilities/getEntityPolicies';
-import { PathToQuery } from './buildQuery';
+import { EntityPolicies, PathToQuery } from './buildQuery';
 import { PayloadRequest } from '../express/types';
-import { CollectionPermission, GlobalPermission } from '../auth';
 
-type EntityPolicies = {
-  collections?: {
-    [collectionSlug: string]: CollectionPermission;
-  };
-  globals?: {
-    [globalSlug: string]: GlobalPermission;
-  };
-};
 export async function getLocalizedPaths({
   req,
   policies,
@@ -30,7 +21,7 @@ export async function getLocalizedPaths({
   fields: Field[]
   incomingPath: string
   overrideAccess: boolean
-  errors
+  errors: {path: string}[]
 }): Promise<PathToQuery[]> {
   const pathSegments = incomingPath.split('.');
   const localizationConfig = req.payload.config.localization;
