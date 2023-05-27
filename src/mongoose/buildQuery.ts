@@ -2,7 +2,7 @@ import { PayloadRequest, Where } from '../types';
 import { Field, FieldAffectingData, TabAsField, UIField } from '../fields/config/types';
 import { CollectionPermission, FieldPermissions, GlobalPermission } from '../auth';
 import QueryError from '../errors/QueryError';
-import { parsePathOrRelation } from './parsePathOrRelation';
+import { parseParams } from './parseParams';
 
 export const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
 
@@ -23,119 +23,6 @@ export type PathToQuery = {
   fields?: (FieldAffectingData | UIField | TabAsField)[]
   fieldPolicies?: {
     [field: string]: FieldPermissions
-  }
-}
-
-type ParamParserArgs = {
-  req: PayloadRequest
-  collectionSlug?: string
-  globalSlug?: string
-  versionsFields?: Field[]
-  model: any
-  where: Where
-  access?: Where | boolean
-  overrideAccess?: boolean
-}
-
-export class ParamParser {
-  collectionSlug?: string;
-
-  globalSlug?: string;
-
-  overrideAccess: boolean;
-
-  req: PayloadRequest;
-
-  access?: Where | boolean;
-
-  where: Where;
-
-  model: any;
-
-  fields: Field[];
-
-  policies: {
-    collections?: {
-      [collectionSlug: string]: CollectionPermission;
-    };
-    globals?: {
-      [globalSlug: string]: GlobalPermission;
-    };
-  };
-
-  errors: { path: string }[];
-
-  constructor({
-    req,
-    collectionSlug,
-    globalSlug,
-    versionsFields,
-    model,
-    where,
-    access,
-    overrideAccess,
-  }: ParamParserArgs) {
-    this.req = req;
-    this.collectionSlug = collectionSlug;
-    this.globalSlug = globalSlug;
-    this.parse = this.parse.bind(this);
-    this.model = model;
-    this.where = where;
-    this.access = access;
-    this.overrideAccess = overrideAccess;
-    this.policies = {
-      collections: {},
-      globals: {},
-    };
-    this.errors = [];
-
-    // Get entity fields
-    if (globalSlug) {
-      const globalConfig = req.payload.globals.config.find(({ slug }) => slug === globalSlug);
-      this.fields = versionsFields || globalConfig.fields;
-    }
-
-    if (collectionSlug) {
-      const collectionConfig = req.payload.collections[collectionSlug].config;
-      this.fields = versionsFields || collectionConfig.fields;
-    }
-  }
-
-  // Entry point to the ParamParser class
-
-  async parse(): Promise<Record<string, unknown>> {
-    const query = await parsePathOrRelation({
-      collectionSlug: this.collectionSlug,
-      errors: this.errors,
-      fields: this.fields,
-      globalSlug: this.globalSlug,
-      policies: this.policies,
-      req: this.req,
-      where: this.where,
-      overrideAccess: this.overrideAccess,
-    });
-
-    const result = {
-      $and: [],
-    };
-
-    if (query) result.$and.push(query);
-
-    if (typeof this.access === 'object') {
-      const accessQuery = await parsePathOrRelation({
-        where: this.access,
-        overrideAccess: true,
-        collectionSlug: this.collectionSlug,
-        errors: this.errors,
-        fields: this.fields,
-        globalSlug: this.globalSlug,
-        policies: this.policies,
-        req: this.req,
-      });
-      if (accessQuery) result.$and.push(accessQuery);
-    }
-
-    return result;
   }
 }
 
@@ -161,20 +48,35 @@ const getBuildQueryPlugin = ({
   return function buildQueryPlugin(schema) {
     const modifiedSchema = schema;
     async function buildQuery({ req, where, overrideAccess = false, access, globalSlug }: BuildQueryArgs): Promise<Record<string, unknown>> {
-      const paramParser = new ParamParser({
-        req,
+      let fields = versionsFields;
+      if (!fields) {
+        if (globalSlug) {
+          const globalConfig = req.payload.globals.config.find(({ slug }) => slug === globalSlug);
+          fields = globalConfig.fields;
+        }
+        if (collectionSlug) {
+          const collectionConfig = req.payload.collections[collectionSlug].config;
+          fields = collectionConfig.fields;
+        }
+      }
+      const errors = [];
+      const result = await parseParams({
+        policies: {
+          collections: {},
+          globals: {},
+        },
         collectionSlug,
-        globalSlug,
-        versionsFields,
-        model: this,
-        where,
         access,
+        errors,
+        fields,
+        globalSlug,
+        req,
+        where,
         overrideAccess,
       });
-      const result = await paramParser.parse();
 
-      if (paramParser.errors.length > 0) {
-        throw new QueryError(paramParser.errors);
+      if (errors.length > 0) {
+        throw new QueryError(errors);
       }
 
       return result;
