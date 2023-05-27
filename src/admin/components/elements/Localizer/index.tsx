@@ -6,7 +6,6 @@ import { useConfig } from '../../utilities/Config';
 import { useLocale } from '../../utilities/Locale';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
-import { Props } from './types';
 import unifiedLocaleConfig from '../../../../utilities/unifiedLocaleConfig';
 
 
@@ -14,7 +13,7 @@ import './index.scss';
 
 const baseClass = 'localizer';
 
-const Localizer: React.FC<Props> = () => {
+const Localizer: React.FC = () => {
   const config = useConfig();
   const localization = config.localization ? unifiedLocaleConfig(config.localization) : undefined;
 
