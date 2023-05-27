@@ -34,8 +34,14 @@ export async function parsePathOrRelation({
   // We need to determine if the whereKey is an AND, OR, or a schema path
     for (const relationOrPath of Object.keys(where)) {
       const condition = where[relationOrPath];
-      if (relationOrPath.toLowerCase() === 'and' && Array.isArray(condition)) {
-        const builtAndConditions = await buildAndOrConditions({
+      let conditionOperator: '$and' | '$or';
+      if (relationOrPath.toLowerCase() === 'and') {
+        conditionOperator = '$and';
+      } else if (relationOrPath.toLowerCase() === 'or') {
+        conditionOperator = '$or';
+      }
+      if (Array.isArray(condition)) {
+        const builtConditions = await buildAndOrConditions({
           collectionSlug,
           errors,
           fields,
@@ -45,19 +51,7 @@ export async function parsePathOrRelation({
           where: condition,
           overrideAccess,
         });
-        if (builtAndConditions.length > 0) result.$and = builtAndConditions;
-      } else if (relationOrPath.toLowerCase() === 'or' && Array.isArray(condition)) {
-        const builtOrConditions = await buildAndOrConditions({
-          collectionSlug,
-          errors,
-          fields,
-          globalSlug,
-          policies,
-          req,
-          where: condition,
-          overrideAccess,
-        });
-        if (builtOrConditions.length > 0) result.$or = builtOrConditions;
+        if (builtConditions.length > 0) result[conditionOperator] = builtConditions;
       } else {
       // It's a path - and there can be multiple comparisons on a single path.
       // For example - title like 'test' and title not equal to 'tester'
