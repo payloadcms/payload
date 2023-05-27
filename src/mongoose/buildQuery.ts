@@ -2,6 +2,7 @@ import { PayloadRequest, Where } from '../types';
 import { Field, FieldAffectingData, TabAsField, UIField } from '../fields/config/types';
 import { CollectionPermission, FieldPermissions, GlobalPermission } from '../auth';
 import QueryError from '../errors/QueryError';
+import { getLocalizedPaths } from './getLocalizedPaths';
 import { parseParams } from './parseParams';
 
 export const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
