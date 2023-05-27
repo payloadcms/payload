@@ -9,10 +9,8 @@ import { sanitizeQueryValue } from './sanitizeQueryValue';
 import { PayloadRequest, Where } from '../types';
 import { Field, FieldAffectingData, fieldAffectsData, TabAsField, UIField } from '../fields/config/types';
 import { CollectionPermission, FieldPermissions, GlobalPermission } from '../auth';
-import flattenFields from '../utilities/flattenTopLevelFields';
-import { getEntityPolicies } from '../utilities/getEntityPolicies';
-import { SanitizedConfig } from '../config/types';
 import QueryError from '../errors/QueryError';
+import { getLocalizedPaths } from './getLocalizedPaths';
 
 const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
 
@@ -21,7 +19,7 @@ const subQueryOptions = {
   lean: true,
 };
 
-type PathToQuery = {
+export type PathToQuery = {
   complete: boolean
   collectionSlug?: string
   path: string
@@ -65,8 +63,6 @@ export class ParamParser {
 
   fields: Field[];
 
-  localizationConfig: SanitizedConfig['localization'];
-
   policies: {
     collections?: {
       [collectionSlug: string]: CollectionPermission;
@@ -96,7 +92,6 @@ export class ParamParser {
     this.where = where;
     this.access = access;
     this.overrideAccess = overrideAccess;
-    this.localizationConfig = req.payload.config.localization;
     this.policies = {
       collections: {},
       globals: {},
@@ -242,7 +237,10 @@ export class ParamParser {
         collectionSlug: this.collectionSlug,
       });
     } else {
-      paths = await this.getLocalizedPaths({
+      paths = await getLocalizedPaths({
+        errors: this.errors,
+        policies: this.policies,
+        req: this.req,
         collectionSlug: this.collectionSlug,
         globalSlug: this.globalSlug,
         fields,
@@ -344,212 +342,6 @@ export class ParamParser {
       }
     }
     return undefined;
-  }
-
-  // Build up an array of auto-localized paths to search on
-  // Multiple paths may be possible if searching on properties of relationship fields
-
-  async getLocalizedPaths({
-    collectionSlug,
-    globalSlug,
-    fields,
-    incomingPath,
-    overrideAccess,
-  }: {
-    collectionSlug?: string
-    globalSlug?: string
-    fields: Field[]
-    incomingPath: string
-    overrideAccess: boolean
-  }): Promise<PathToQuery[]> {
-    const pathSegments = incomingPath.split('.');
-
-    let paths: PathToQuery[] = [
-      {
-        path: '',
-        complete: false,
-        field: undefined,
-        fields: flattenFields(fields, false),
-        fieldPolicies: undefined,
-        collectionSlug,
-      },
-    ];
-
-    if (!overrideAccess) {
-      if (collectionSlug) {
-        const collection = { ...this.req.payload.collections[collectionSlug].config };
-        collection.fields = fields;
-
-        if (!this.policies.collections[collectionSlug]) {
-          const policy = await getEntityPolicies({
-            req: this.req,
-            entity: collection,
-            operations: ['read'],
-            type: 'collection',
-          });
-
-          this.policies.collections[collectionSlug] = policy;
-        }
-
-        paths[0].fieldPolicies = this.policies.collections[collectionSlug].fields;
-
-        if (['salt', 'hash'].includes(incomingPath) && collection.auth && !collection.auth?.disableLocalStrategy) {
-          this.errors.push({ path: incomingPath });
-          return [];
-        }
-      }
-
-      if (globalSlug) {
-        if (!this.policies.globals[globalSlug]) {
-          const global = { ...this.req.payload.globals.config.find(({ slug }) => slug === globalSlug) };
-          global.fields = fields;
-
-          const policy = await getEntityPolicies({
-            req: this.req,
-            entity: global,
-            operations: ['read'],
-            type: 'global',
-          });
-
-          this.policies.globals[globalSlug] = policy;
-        }
-
-        paths[0].fieldPolicies = this.policies.globals[globalSlug].fields;
-      }
-    }
-
-    // Use a 'some' so that we can bail out
-    // if a relationship query is found
-    // or if Rich Text / JSON
-
-    let done = false;
-
-    for (let i = 0; i < pathSegments.length; i += 1) {
-      if (done) continue;
-
-      const segment = pathSegments[i];
-
-      const lastIncompletePath = paths.find(({ complete }) => !complete);
-
-      if (lastIncompletePath) {
-        const { path } = lastIncompletePath;
-        let currentPath = path ? `${path}.${segment}` : segment;
-
-        const matchedField = lastIncompletePath.fields.find((field) => fieldAffectsData(field) && field.name === segment);
-        lastIncompletePath.field = matchedField;
-
-        if (currentPath === 'globalType' && this.globalSlug) {
-          lastIncompletePath.path = currentPath;
-          lastIncompletePath.complete = true;
-          lastIncompletePath.field = {
-            name: 'globalType',
-            type: 'text',
-          };
-
-          done = true;
-          continue;
-        }
-
-        if (matchedField) {
-          if (!overrideAccess) {
-            const fieldAccess = lastIncompletePath.fieldPolicies[matchedField.name].read.permission;
-
-            if (!fieldAccess || ('hidden' in matchedField && matchedField.hidden)) {
-              this.errors.push({ path: currentPath });
-              done = true;
-              continue;
-            }
-          }
-
-          const nextSegment = pathSegments[i + 1];
-          const nextSegmentIsLocale = this.localizationConfig && this.localizationConfig.locales.includes(nextSegment);
-
-          if (nextSegmentIsLocale) {
-            // Skip the next iteration, because it's a locale
-            i += 1;
-            currentPath = `${currentPath}.${nextSegment}`;
-          } else if (this.localizationConfig && 'localized' in matchedField && matchedField.localized) {
-            currentPath = `${currentPath}.${this.req.locale}`;
-          }
-
-          switch (matchedField.type) {
-            case 'blocks':
-            case 'richText':
-            case 'json': {
-              const upcomingSegments = pathSegments.slice(i + 1).join('.');
-              lastIncompletePath.complete = true;
-              lastIncompletePath.path = upcomingSegments ? `${currentPath}.${upcomingSegments}` : currentPath;
-              done = true;
-              continue;
-            }
-
-            case 'relationship':
-            case 'upload': {
-              // If this is a polymorphic relation,
-              // We only support querying directly (no nested querying)
-              if (typeof matchedField.relationTo !== 'string') {
-                const lastSegmentIsValid = ['value', 'relationTo'].includes(pathSegments[pathSegments.length - 1]);
-
-                if (lastSegmentIsValid) {
-                  lastIncompletePath.complete = true;
-                  lastIncompletePath.path = pathSegments.join('.');
-                } else {
-                  this.errors.push({ path: currentPath });
-                  done = true;
-                  continue;
-                }
-              } else {
-                lastIncompletePath.complete = true;
-                lastIncompletePath.path = currentPath;
-
-                const nestedPathToQuery = pathSegments.slice(nextSegmentIsLocale ? i + 2 : i + 1).join('.');
-
-                if (nestedPathToQuery) {
-                  const relatedCollection = this.req.payload.collections[matchedField.relationTo as string].config;
-
-                  const remainingPaths = await this.getLocalizedPaths({
-                    collectionSlug: relatedCollection.slug,
-                    fields: relatedCollection.fields,
-                    incomingPath: nestedPathToQuery,
-                    overrideAccess,
-                  });
-
-                  paths = [
-                    ...paths,
-                    ...remainingPaths,
-                  ];
-                }
-
-                done = true;
-                continue;
-              }
-
-              break;
-            }
-
-            default: {
-              if ('fields' in lastIncompletePath.field) {
-                lastIncompletePath.fields = flattenFields(lastIncompletePath.field.fields, false);
-              }
-
-              if (!overrideAccess && 'fields' in lastIncompletePath.fieldPolicies[lastIncompletePath.field.name]) {
-                lastIncompletePath.fieldPolicies = lastIncompletePath.fieldPolicies[lastIncompletePath.field.name].fields;
-              }
-
-              if (i + 1 === pathSegments.length) lastIncompletePath.complete = true;
-              lastIncompletePath.path = currentPath;
-              continue;
-            }
-          }
-        } else {
-          this.errors.push({ path: currentPath });
-          done = true;
-          continue;
-        }
-      }
-    }
-
-    return paths;
   }
 }
 
