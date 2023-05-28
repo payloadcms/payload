@@ -498,6 +498,27 @@ describe('collections-graphql', () => {
       expect(error.response.errors[2].extensions.data[0].message).toEqual('Please enter a valid email address.');
       expect(error.response.errors[2].extensions.data[0].field).toEqual('email');
     });
+
+    it('should return the minimum allowed information about internal errors', async () => {
+      let error;
+      // language=graphQL
+      const query = `query {
+        QueryWithInternalError {
+            text
+        }
+      }`;
+
+      await client.request(query).catch((err) => {
+        error = err;
+      });
+
+      expect(Array.isArray(error.response.errors)).toBe(true);
+      expect(Array.isArray(error.response.errors[0].locations)).toEqual(true);
+      expect(error.response.errors[0].message).toEqual('Something went wrong.');
+      expect(error.response.errors[0].path[0]).toEqual('QueryWithInternalError');
+      expect(error.response.errors[0].extensions.statusCode).toEqual(500);
+      expect(error.response.errors[0].extensions.name).toEqual('Error');
+    });
   });
 });
 

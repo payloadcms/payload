@@ -57,6 +57,18 @@ export default buildConfig({
         res.status(200).send('Email sent');
       },
     },
+    {
+      path: '/internal-error-here',
+      method: 'get',
+      handler: async (req, res, next) => {
+        try {
+          // Throwing an internal error with potentially sensitive data
+          throw new Error('Lost connection to the Pentagon. Secret data: ******');
+        } catch (err) {
+          next(err);
+        }
+      },
+    },
   ],
   collections: [
     {

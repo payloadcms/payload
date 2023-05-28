@@ -33,6 +33,24 @@ export const relationSlug = 'relation';
 export default buildConfig({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
+    queries: (GraphQL) => {
+      return {
+        QueryWithInternalError: {
+          type: new GraphQL.GraphQLObjectType({
+            name: 'QueryWithInternalError',
+            fields: {
+              text: {
+                type: GraphQL.GraphQLString,
+              },
+            },
+          }),
+          resolve: () => {
+            // Throwing an internal error with potentially sensitive data
+            throw new Error('Lost connection to the Pentagon. Secret data: ******');
+          },
+        },
+      };
+    },
   },
   collections: [
     {

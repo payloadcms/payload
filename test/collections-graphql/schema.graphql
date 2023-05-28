@@ -18,6 +18,7 @@ type Query {
   docAccessDummy(id: String!): dummyDocAccess
   Preference(key: String): Preference
   Access: Access
+  QueryWithInternalError: QueryWithInternalError
 }
 
 type User {
@@ -2840,6 +2841,10 @@ type DummyUpdateAccess {
 type DummyDeleteAccess {
   permission: Boolean!
   where: JSONObject
+}
+
+type QueryWithInternalError {
+  text: String
 }
 
 type Mutation {

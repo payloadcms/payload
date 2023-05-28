@@ -916,6 +916,15 @@ describe('collections-rest', () => {
       });
     });
   });
+
+  describe('Error Handler', () => {
+    it('should return the minimum allowed information about internal errors', async () => {
+      const { status, data } = await client.endpoint('/api/internal-error-here');
+      expect(status).toBe(500);
+      expect(Array.isArray(data.errors)).toEqual(true);
+      expect(data.errors[0].message).toStrictEqual('Something went wrong.');
+    });
+  });
 });
 
 async function createPost(overrides?: Partial<Post>) {
