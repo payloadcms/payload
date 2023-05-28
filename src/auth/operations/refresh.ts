@@ -98,7 +98,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
   // /////////////////////////////////////
 
   return {
-    refreshedToken,
+    refreshedToken: collectionConfig.auth.removeTokenFromResponses ? undefined : refreshedToken,
     exp,
     user: payload,
   };

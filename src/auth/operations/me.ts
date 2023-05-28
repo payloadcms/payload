@@ -44,9 +44,9 @@ async function me({
     const token = extractJWT(req);
 
     if (token) {
-      response.token = token;
       const decoded = jwt.decode(token) as jwt.JwtPayload;
       if (decoded) response.exp = decoded.exp;
+      if (!collection.config.auth.removeTokenFromResponses) response.token = token;
     }
   }
 

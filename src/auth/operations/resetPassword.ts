@@ -10,7 +10,7 @@ import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSa
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
 export type Result = {
-  token: string
+  token?: string
   user: Record<string, unknown>
 }
 
@@ -120,7 +120,11 @@ async function resetPassword(args: Arguments): Promise<Result> {
   }
 
   const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess });
-  return { token, user: fullUser };
+
+  return {
+    token: collectionConfig.auth.removeTokenFromResponses ? undefined : token,
+    user: fullUser,
+  };
 }
 
 export default resetPassword;

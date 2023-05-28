@@ -130,6 +130,7 @@ const collectionSchema = joi.object().keys({
       }),
       maxLoginAttempts: joi.number(),
       disableLocalStrategy: joi.boolean().valid(true),
+      removeTokenFromResponses: joi.boolean().valid(true),
       strategies: joi.array().items(joi.alternatives().try(
         strategyBaseSchema.keys({
           name: joi.string().required(),

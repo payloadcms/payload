@@ -224,7 +224,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
   // /////////////////////////////////////
 
   return {
-    token,
+    token: collectionConfig.auth.removeTokenFromResponses ? undefined : token,
     user,
     exp: (jwt.decode(token) as jwt.JwtPayload).exp,
   };

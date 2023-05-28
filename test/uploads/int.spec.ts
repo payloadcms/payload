@@ -31,7 +31,6 @@ describe('Collections - Uploads', () => {
         const { status, doc } = await client.create({
           file: true,
           data: formData,
-          auth: true,
           headers: {},
         });
 
@@ -62,7 +61,6 @@ describe('Collections - Uploads', () => {
         const { status, doc } = await client.create({
           file: true,
           data: formData,
-          auth: true,
           headers: {},
         });
 
@@ -86,7 +84,6 @@ describe('Collections - Uploads', () => {
       const { status, doc } = await client.create({
         file: true,
         data: formData,
-        auth: true,
         headers: {},
       });
 
@@ -109,7 +106,6 @@ describe('Collections - Uploads', () => {
       const { status, doc } = await client.create({
         file: true,
         data: formData,
-        auth: true,
         headers: {},
       });
 
@@ -137,7 +133,6 @@ describe('Collections - Uploads', () => {
         slug: 'unstored-media',
         file: true,
         data: formData,
-        auth: true,
         headers: {},
       });
 
@@ -170,7 +165,6 @@ describe('Collections - Uploads', () => {
       id: mediaDoc.id,
       file: true,
       data: formData,
-      auth: true,
       headers: {},
     });
 
@@ -203,7 +197,6 @@ describe('Collections - Uploads', () => {
       },
       file: true,
       data: formData,
-      auth: true,
       headers: {},
     });
 
@@ -393,12 +386,10 @@ describe('Collections - Uploads', () => {
     const { doc } = await client.create({
       file: true,
       data: formData,
-      auth: true,
       headers: {},
     });
 
     const { status } = await client.delete(doc.id, {
-      auth: true,
     });
 
     expect(status).toBe(200);
@@ -413,7 +404,6 @@ describe('Collections - Uploads', () => {
     const { doc } = await client.create({
       file: true,
       data: formData,
-      auth: true,
       headers: {},
     });
 
@@ -422,7 +412,6 @@ describe('Collections - Uploads', () => {
       where: {
         id: { equals: doc.id },
       },
-      auth: true,
     });
 
     expect(errors).toHaveLength(0);
