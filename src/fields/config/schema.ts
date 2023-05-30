@@ -135,6 +135,7 @@ export const code = baseField.keys({
   ),
   admin: baseAdminFields.keys({
     language: joi.string(),
+    editorOptions: joi.object().unknown(), // Editor['options'] @monaco-editor/react
   }),
 });
 
