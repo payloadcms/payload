@@ -21,6 +21,7 @@ import EditMany from '../../../elements/EditMany';
 import DeleteMany from '../../../elements/DeleteMany';
 import PublishMany from '../../../elements/PublishMany';
 import UnpublishMany from '../../../elements/UnpublishMany';
+import formatFilesize from '../../../../../uploads/formatFilesize';
 
 import './index.scss';
 
@@ -54,6 +55,16 @@ const DefaultList: React.FC<Props> = (props) => {
 
   const { breakpoints: { s: smallBreak } } = useWindowInfo();
   const { t, i18n } = useTranslation('general');
+  let formattedDocs = data.docs || [];
+
+  if (collection.upload) {
+    formattedDocs = formattedDocs?.map((doc) => {
+      return {
+        ...doc,
+        filesize: formatFilesize(doc.filesize),
+      };
+    });
+  }
 
   return (
     <div className={baseClass}>
@@ -108,7 +119,7 @@ const DefaultList: React.FC<Props> = (props) => {
           )}
           {(data.docs && data.docs.length > 0) && (
             <RelationshipProvider>
-              <Table data={data.docs} />
+              <Table data={formattedDocs} />
             </RelationshipProvider>
           )}
           {data.docs && data.docs.length === 0 && (
