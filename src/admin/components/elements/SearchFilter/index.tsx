@@ -85,8 +85,10 @@ const SearchFilter: React.FC<Props> = (props) => {
         }
         return `${prev}, ${getTranslation(curr.label || curr.name, i18n)}`;
       }, placeholder.current);
+    } else {
+      placeholder.current = t('searchBy', { label: getTranslation(fieldLabel, i18n) });
     }
-  }, [t, listSearchableFields, i18n]);
+  }, [t, listSearchableFields, i18n, fieldLabel]);
 
   return (
     <div className={baseClass}>
