@@ -114,6 +114,33 @@ export default buildConfig({
             read: () => false,
           },
         },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'textInRowInGroup',
+                  defaultValue: 'textInRowInGroup',
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: 'Collapsible',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'textInCollapsibleInGroup',
+                  defaultValue: 'textInCollapsibleInGroup',
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {

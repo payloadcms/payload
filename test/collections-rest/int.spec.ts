@@ -899,6 +899,38 @@ describe('collections-rest', () => {
           expect(result.totalDocs).toEqual(50);
         });
       });
+
+      it('can query group > row > field', async () => {
+        const post = await createPost({ group: { textInRowInGroup: 'textInRowInGroup' } });
+
+        const { status, result } = await client.find<Post>({
+          query: {
+            'group.textInRowInGroup': {
+              equals: 'textInRowInGroup',
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.totalDocs).toEqual(1);
+        expect(result.docs).toEqual([post]);
+      });
+
+      it('can query group > collapsible > field', async () => {
+        const post = await createPost({ group: { textInCollapsibleInGroup: 'textInCollapsibleInGroup' } });
+
+        const { status, result } = await client.find<Post>({
+          query: {
+            'group.textInCollapsibleInGroup': {
+              equals: 'textInCollapsibleInGroup',
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.totalDocs).toEqual(1);
+        expect(result.docs).toEqual([post]);
+      });
     });
   });
 });
