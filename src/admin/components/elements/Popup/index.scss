@@ -25,12 +25,19 @@
     overflow: hidden;
   }
 
-  &__scroll {
+  .popup__scroll {
     padding: $baseline;
-    padding-right: calc(var(--scrollbar-width) + #{$baseline});
     overflow-y: auto;
-    width: calc(100% + var(--scrollbar-width));
     white-space: nowrap;
+    padding-right: calc(var(--scrollbar-width) + #{$baseline});
+    width: calc(100% + var(--scrollbar-width));
+  }
+
+  &--show-scrollbar {
+    .popup__scroll {
+      padding-right: 0;
+      width: 100%;
+    }
   }
 
   &:focus,

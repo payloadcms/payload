@@ -30,13 +30,23 @@
   ul {
     list-style: none;
     padding: 0;
-    text-align: left;
+    max-height: base(8);
     margin: 0;
 
-    a {
+    li a {
+      all: unset;
+      cursor: pointer;
+      padding-right: 0;
+
       &:hover {
         text-decoration: underline;
       }
+    }
+  }
+
+  @include mid-break {
+    .popup__content {
+      width: calc(100vw - calc(var(--gutter-h) * 2));
     }
   }
 }
