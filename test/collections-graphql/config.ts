@@ -84,6 +84,33 @@ export default buildConfig({
           relationTo: [relationSlug, 'dummy'],
           hasMany: true,
         },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'textInRowInGroup',
+                  defaultValue: 'textInRowInGroup',
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: 'Collapsible',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'textInCollapsibleInGroup',
+                  defaultValue: 'textInCollapsibleInGroup',
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     collectionWithName(relationSlug),

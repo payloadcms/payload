@@ -7,19 +7,30 @@
 
 export interface Config {
   collections: {
+    users: User;
     posts: Post;
     relation: Relation;
     dummy: Dummy;
-    users: User;
   };
   globals: {};
+}
+export interface User {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpiration?: string;
+  loginAttempts?: number;
+  lockUntil?: string;
+  password?: string;
 }
 export interface Post {
   id: string;
   title?: string;
   description?: string;
+  number?: number;
   min?: number;
-  max?: number;
   relationField?: string | Relation;
   relationHasManyField?: string[] | Relation[];
   relationMultiRelationTo?:
@@ -52,29 +63,22 @@ export interface Post {
             relationTo: 'dummy';
           }
       )[];
-  createdAt: string;
+  group?: {
+    textInRowInGroup?: string;
+    textInCollapsibleInGroup?: string;
+  };
   updatedAt: string;
+  createdAt: string;
 }
 export interface Relation {
   id: string;
   name?: string;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface Dummy {
   id: string;
   name?: string;
-  createdAt: string;
   updatedAt: string;
-}
-export interface User {
-  id: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
   createdAt: string;
-  updatedAt: string;
-  password?: string;
 }

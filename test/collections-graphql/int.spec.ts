@@ -363,6 +363,42 @@ describe('collections-graphql', () => {
 
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }));
       });
+
+      it('can query group > row > field', async () => {
+        const withNestedField = await createPost({ group: { textInRowInGroup: 'textInRowInGroup' } });
+        const query = `{
+          Posts(where: {group__textInRowInGroup: {equals: "textInRowInGroup"}}) {
+            docs {
+              id
+              group {
+                textInRowInGroup
+              }
+            }
+          }
+        }`;
+        const response = await client.request(query);
+        const { docs } = response.Posts;
+
+        expect(docs).toContainEqual(expect.objectContaining({ id: withNestedField.id, group: { textInRowInGroup: 'textInRowInGroup' } }));
+      });
+
+      it('can query group > collapsible > field', async () => {
+        const withNestedField = await createPost({ group: { textInCollapsibleInGroup: 'textInCollapsibleInGroup' } });
+        const query = `{
+          Posts(where: {group__textInCollapsibleInGroup: {equals: "textInCollapsibleInGroup"}}) {
+            docs {
+              id
+              group  {
+                textInCollapsibleInGroup
+              }
+            }
+          }
+        }`;
+        const response = await client.request(query);
+        const { docs } = response.Posts;
+
+        expect(docs).toContainEqual(expect.objectContaining({ id: withNestedField.id, group: { textInCollapsibleInGroup: 'textInCollapsibleInGroup' } }));
+      });
     });
   });
 
