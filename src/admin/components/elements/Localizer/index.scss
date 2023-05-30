@@ -23,20 +23,41 @@
     }
   }
 
+  .wrap {
+    position: relative;
+  }
+
   span {
+    position: absolute;
     color: var(--theme-elevation-400);
   }
 
   ul {
     list-style: none;
-    padding: 0;
+    padding: base(1) 0 0 0;
     text-align: left;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    max-height: base(8);
 
     a {
       &:hover {
         text-decoration: underline;
       }
+    }
+  }
+
+  @include mid-break {
+    .popup__content {
+      margin-left: base(0.5);
+    }
+  }
+
+  @include small-break {
+    .popup__content {
+      width: calc(100vw - base(2.25));
     }
   }
 }

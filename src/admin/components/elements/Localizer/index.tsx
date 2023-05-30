@@ -26,7 +26,7 @@ const Localizer: React.FC = () => {
           horizontalAlign="left"
           button={locale}
           render={({ close }) => (
-            <div>
+            <div className={`${baseClass}__wrap`}>
               <span>{t('locales')}</span>
               <ul>
                 {locales.map((localeOption) => {
