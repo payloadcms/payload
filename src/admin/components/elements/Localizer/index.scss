@@ -23,26 +23,21 @@
     }
   }
 
-  .wrap {
-    position: relative;
-  }
-
   span {
-    position: absolute;
     color: var(--theme-elevation-400);
   }
 
   ul {
     list-style: none;
-    padding: base(1) 0 0 0;
-    text-align: left;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
+    padding: 0;
     max-height: base(8);
+    margin: 0;
 
-    a {
+    li a {
+      all: unset;
+      cursor: pointer;
+      padding-right: 0;
+
       &:hover {
         text-decoration: underline;
       }
@@ -51,13 +46,7 @@
 
   @include mid-break {
     .popup__content {
-      margin-left: base(0.5);
-    }
-  }
-
-  @include small-break {
-    .popup__content {
-      width: calc(100vw - base(2.25));
+      width: calc(100vw - calc(var(--gutter-h) * 2));
     }
   }
 }

@@ -23,10 +23,11 @@ const Localizer: React.FC = () => {
     return (
       <div className={baseClass}>
         <Popup
+          showScrollbar
           horizontalAlign="left"
           button={locale}
           render={({ close }) => (
-            <div className={`${baseClass}__wrap`}>
+            <div>
               <span>{t('locales')}</span>
               <ul>
                 {locales.map((localeOption) => {
@@ -35,7 +36,7 @@ const Localizer: React.FC = () => {
                   const localeClasses = [
                     baseLocaleClass,
                     locale === localeOption && `${baseLocaleClass}--active`,
-                  ];
+                  ].filter(Boolean).join('');
 
                   const newParams = {
                     ...searchParams,
@@ -48,7 +49,7 @@ const Localizer: React.FC = () => {
                     return (
                       <li
                         key={localeOption}
-                        className={localeClasses.join(' ')}
+                        className={localeClasses}
                       >
                         <Link
                           to={{ search }}

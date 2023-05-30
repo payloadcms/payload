@@ -26,6 +26,7 @@ const Popup: React.FC<Props> = (props) => {
     padding,
     forceOpen,
     boundingRef,
+    showScrollbar = false,
   } = props;
 
   const { width: windowWidth, height: windowHeight } = useWindowInfo();
@@ -125,7 +126,8 @@ const Popup: React.FC<Props> = (props) => {
     `${baseClass}--color-${color}`,
     `${baseClass}--v-align-${verticalAlign}`,
     `${baseClass}--h-align-${horizontalAlign}`,
-    (active) && `${baseClass}--active`,
+    active && `${baseClass}--active`,
+    showScrollbar && `${baseClass}--show-scrollbar`,
   ].filter(Boolean).join(' ');
 
   return (
