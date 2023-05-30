@@ -1008,6 +1008,8 @@ type usersMe {
 
 type Menu {
   globalText: String
+  updatedAt: DateTime
+  createdAt: DateTime
 }
 
 type menuDocAccess {
@@ -1018,6 +1020,8 @@ type menuDocAccess {
 
 type MenuDocAccessFields {
   globalText: MenuDocAccessFields_globalText
+  updatedAt: MenuDocAccessFields_updatedAt
+  createdAt: MenuDocAccessFields_createdAt
 }
 
 type MenuDocAccessFields_globalText {
@@ -1040,6 +1044,52 @@ type MenuDocAccessFields_globalText_Update {
 }
 
 type MenuDocAccessFields_globalText_Delete {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_updatedAt {
+  create: MenuDocAccessFields_updatedAt_Create
+  read: MenuDocAccessFields_updatedAt_Read
+  update: MenuDocAccessFields_updatedAt_Update
+  delete: MenuDocAccessFields_updatedAt_Delete
+}
+
+type MenuDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_createdAt {
+  create: MenuDocAccessFields_createdAt_Create
+  read: MenuDocAccessFields_createdAt_Read
+  update: MenuDocAccessFields_createdAt_Update
+  delete: MenuDocAccessFields_createdAt_Delete
+}
+
+type MenuDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type MenuDocAccessFields_createdAt_Delete {
   permission: Boolean!
 }
 
@@ -1564,6 +1614,8 @@ type menuAccess {
 
 type MenuFields {
   globalText: MenuFields_globalText
+  updatedAt: MenuFields_updatedAt
+  createdAt: MenuFields_createdAt
 }
 
 type MenuFields_globalText {
@@ -1586,6 +1638,52 @@ type MenuFields_globalText_Update {
 }
 
 type MenuFields_globalText_Delete {
+  permission: Boolean!
+}
+
+type MenuFields_updatedAt {
+  create: MenuFields_updatedAt_Create
+  read: MenuFields_updatedAt_Read
+  update: MenuFields_updatedAt_Update
+  delete: MenuFields_updatedAt_Delete
+}
+
+type MenuFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type MenuFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type MenuFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type MenuFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type MenuFields_createdAt {
+  create: MenuFields_createdAt_Create
+  read: MenuFields_createdAt_Read
+  update: MenuFields_createdAt_Update
+  delete: MenuFields_createdAt_Delete
+}
+
+type MenuFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type MenuFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type MenuFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type MenuFields_createdAt_Delete {
   permission: Boolean!
 }
 
@@ -1703,4 +1801,6 @@ type usersResetPassword {
 
 input mutationMenuInput {
   globalText: String
+  updatedAt: String
+  createdAt: String
 }
