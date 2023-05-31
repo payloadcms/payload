@@ -52,7 +52,7 @@ describe('_Community Tests', () => {
         body: JSON.stringify({
           operationName: null,
           variables: {},
-          query: '{\n  Posts(where: {testGroup__textInRowInGroup: {equals: \"textInRowInGroup\"}}) {\n    totalDocs\n  }\n}\n',
+          query: '{\n  Posts(where: {testGroup__textInRowInGroup: {equals: "textInRowInGroup"}}) {\n    totalDocs\n    docs {\n      id\n      testGroup {\n        textInRowInGroup\n        textInGroup\n      }\n      text\n      textInRow\n    }\n  }\n}\n',
         }),
       }).then((res) => res.json());
 
