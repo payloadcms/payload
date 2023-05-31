@@ -16,7 +16,6 @@ import { SanitizedConfig } from '../config/types';
 import QueryError from '../errors/QueryError';
 
 const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near', 'every_in', 'every_not_in', 'every_equals', 'every_not_equals'];
-const negativeEveryOperators = ['every_not_in', 'every_not_equals'];
 
 const subQueryOptions = {
   limit: 50,
@@ -559,10 +558,9 @@ export class ParamParser {
   private static buildOperatorStructure(operatorKey: string | string[], formattedValue: unknown) {
     // if operator key is array, nest each operator key under the previous one
     if (Array.isArray(operatorKey)) {
-      if (operatorKey.length === 1) return ParamParser.buildOperatorStructure(operatorKey[0], formattedValue);
       const [firstOperatorKey, ...restOperatorKeys] = operatorKey;
       return {
-        [firstOperatorKey]: this.buildOperatorStructure(restOperatorKeys, formattedValue),
+        [firstOperatorKey]: !restOperatorKeys.length ? formattedValue : this.buildOperatorStructure(restOperatorKeys, formattedValue),
       };
     }
 
