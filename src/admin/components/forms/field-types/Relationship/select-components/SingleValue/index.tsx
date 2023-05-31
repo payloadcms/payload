@@ -18,12 +18,10 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
       label,
     },
     children,
-    selectProps: {
-      selectProps: {
-        setDrawerIsOpen,
-        onSave,
-      },
-    },
+    customProps: {
+      setDrawerIsOpen,
+      onSave,
+    } = {},
   } = props;
 
   const [showTooltip, setShowTooltip] = useState(false);
@@ -41,9 +39,12 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
   }, [isDrawerOpen, setDrawerIsOpen]);
 
   return (
-    <div className={baseClass}>
+    <SelectComponents.SingleValue
+      {...props}
+      className={baseClass}
+    >
       <div className={`${baseClass}__label`}>
-        <SelectComponents.SingleValue {...props}>
+        <div className={`${baseClass}__label-text`}>
           <div className={`${baseClass}__text`}>
             {children}
           </div>
@@ -52,6 +53,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
               <DocumentDrawerToggler
                 className={`${baseClass}__drawer-toggler`}
                 aria-label={t('editLabel', { label })}
+                onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
                 onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
@@ -67,11 +69,11 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
               </DocumentDrawerToggler>
             </Fragment>
           )}
-        </SelectComponents.SingleValue>
+        </div>
       </div>
       {relationTo && hasReadPermission && (
         <DocumentDrawer onSave={onSave} />
       )}
-    </div>
+    </SelectComponents.SingleValue>
   );
 };

@@ -29,16 +29,16 @@ const connectMongoose = async (
       const { MongoMemoryServer } = require('mongodb-memory-server');
       const getPort = require('get-port');
 
-      const port = await getPort();
-      mongoMemoryServer = await MongoMemoryServer.create({
-        instance: {
-          dbName: connection.name,
-          port,
-        },
-      });
-      urlToConnect = mongoMemoryServer.getUri();
-      successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!';
-    }
+    const port = await getPort();
+    mongoMemoryServer = await MongoMemoryServer.create({
+      instance: {
+        dbName: connection.name,
+        port,
+      },
+    });
+
+    urlToConnect = mongoMemoryServer.getUri();
+    successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!';
   }
 
   try {

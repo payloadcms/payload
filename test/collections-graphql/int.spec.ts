@@ -364,6 +364,29 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }));
       });
     });
+
+    describe('relationships', () => {
+      it('should query on relationships with custom IDs', async () => {
+        const query = `query {
+          Posts(where: { title: { equals: "has custom ID relation" }}) {
+            docs {
+              id
+              title
+              relationToCustomID {
+                id
+              }
+            }
+            totalDocs
+          }
+        }`;
+
+        const response = await client.request(query);
+        const { docs, totalDocs } = response.Posts;
+
+        expect(totalDocs).toStrictEqual(1);
+        expect(docs[0].relationToCustomID.id).toStrictEqual(1);
+      });
+    });
   });
 
   describe('Error Handler', () => {
@@ -435,7 +458,7 @@ describe('collections-graphql', () => {
       expect(error.response.errors[1].message).toEqual('The following field is invalid: email');
       expect(error.response.errors[1].path[0]).toEqual('test3');
       expect(error.response.errors[1].extensions.name).toEqual('ValidationError');
-      expect(error.response.errors[1].extensions.data[0].message).toEqual('A user with the given username is already registered');
+      expect(error.response.errors[1].extensions.data[0].message).toEqual('A user with the given email is already registered');
       expect(error.response.errors[1].extensions.data[0].field).toEqual('email');
     });
   });
