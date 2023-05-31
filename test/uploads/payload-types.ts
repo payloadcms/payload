@@ -45,6 +45,22 @@ export interface Media {
       filesize?: number;
       filename?: string;
     };
+    maintainedImageSize: {
+      url?: string;
+      width?: number;
+      height?: number;
+      mimeType?: string;
+      filesize?: number;
+      filename?: string;
+    };
+    maintainedImageSizeWithNewFormat: {
+      url?: string;
+      width?: number;
+      height?: number;
+      mimeType?: string;
+      filesize?: number;
+      filename?: string;
+    };
     tablet: {
       url?: string;
       width?: number;

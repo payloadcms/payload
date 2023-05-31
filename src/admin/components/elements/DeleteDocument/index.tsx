@@ -109,20 +109,22 @@ const DeleteDocument: React.FC<Props> = (props) => {
                 </strong>
               </Trans>
             </p>
-            <Button
-              id="confirm-cancel"
-              buttonStyle="secondary"
-              type="button"
-              onClick={deleting ? undefined : () => toggleModal(modalSlug)}
-            >
-              {t('cancel')}
-            </Button>
-            <Button
-              onClick={deleting ? undefined : handleDelete}
-              id="confirm-delete"
-            >
-              {deleting ? t('deleting') : t('confirm')}
-            </Button>
+            <div className={`${baseClass}__actions`}>
+              <Button
+                id="confirm-cancel"
+                buttonStyle="secondary"
+                type="button"
+                onClick={deleting ? undefined : () => toggleModal(modalSlug)}
+              >
+                {t('cancel')}
+              </Button>
+              <Button
+                onClick={deleting ? undefined : handleDelete}
+                id="confirm-delete"
+              >
+                {deleting ? t('deleting') : t('confirm')}
+              </Button>
+            </div>
           </MinimalTemplate>
         </Modal>
       </React.Fragment>

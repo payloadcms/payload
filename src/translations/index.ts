@@ -1,3 +1,4 @@
+import ar from './ar.json';
 import cs from './cs.json';
 import de from './de.json';
 import en from './en.json';
@@ -23,6 +24,7 @@ import zh from './zh.json';
 import hu from './hu.json';
 
 export default {
+  ar,
   cs,
   de,
   en,

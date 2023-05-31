@@ -277,6 +277,33 @@ describe('fields - relationship', () => {
     await expect(documentDrawer).toBeVisible();
   });
 
+  test('should open document drawer and append newly created docs onto the parent field', async () => {
+    await page.goto(url.edit(docWithExistingRelations.id));
+
+    const field = page.locator('#field-relationshipHasMany');
+
+    // open the document drawer
+    const addNewButton = await field.locator('button.relationship-add-new__add-button.doc-drawer__toggler');
+    await addNewButton.click();
+    const documentDrawer = await page.locator('[id^=doc-drawer_relation-one_1_]');
+    await expect(documentDrawer).toBeVisible();
+
+    // fill in the field and save the document, keep the drawer open for further testing
+    const drawerField = await documentDrawer.locator('#field-name');
+    await drawerField.fill('Newly created document');
+    const saveButton = await documentDrawer.locator('#action-save');
+    await saveButton.click();
+    await expect(page.locator('.Toastify')).toContainText('successfully');
+
+    // count the number of values in the field to ensure only one was added
+    await expect(await page.locator('#field-relationshipHasMany .value-container .rs__multi-value')).toHaveCount(1);
+
+    // save the same document again to ensure the relationship field doesn't receive duplicative values
+    await saveButton.click();
+    await expect(page.locator('.Toastify')).toContainText('successfully');
+    await expect(await page.locator('#field-relationshipHasMany .value-container .rs__multi-value')).toHaveCount(1);
+  });
+
   describe('existing relationships', () => {
     test('should highlight existing relationship', async () => {
       await page.goto(url.edit(docWithExistingRelations.id));
@@ -329,13 +356,14 @@ describe('fields - relationship', () => {
     test('should show useAsTitle on relation', async () => {
       await page.goto(url.edit(docWithExistingRelations.id));
 
-      const field = page.locator('#field-relationshipWithTitle .relationship--single-value__text');
+      const field = page.locator('#field-relationshipWithTitle');
+      const value = field.locator('.relationship--single-value__text');
 
       // Check existing relationship for correct title
-      await expect(field).toHaveText(relationWithTitle.name);
+      await expect(value).toHaveText(relationWithTitle.name);
 
       await field.click({ delay: 100 });
-      const options = page.locator('.rs__option');
+      const options = field.locator('.rs__option');
 
       await expect(options).toHaveCount(2);
     });
@@ -362,25 +390,21 @@ describe('fields - relationship', () => {
     });
   });
 
-  describe('externally update field', () => {
+  describe('externally update relationship field', () => {
     beforeAll(async () => {
-      url = new AdminUrlUtil(serverURL, relationUpdatedExternallySlug);
-      await page.goto(url.create);
+      const externalRelationURL = new AdminUrlUtil(serverURL, relationUpdatedExternallySlug);
+      await page.goto(externalRelationURL.create);
     });
 
     test('has many, one collection', async () => {
-      await page.goto(url.create);
-
       await page.locator('#field-relationHasMany + .pre-populate-field-ui button').click();
       await wait(300);
-
       await expect(page.locator('#field-relationHasMany .rs__value-container > .rs__multi-value')).toHaveCount(15);
     });
 
     test('has many, many collections', async () => {
       await page.locator('#field-relationToManyHasMany + .pre-populate-field-ui button').click();
       await wait(300);
-
       await expect(page.locator('#field-relationToManyHasMany .rs__value-container > .rs__multi-value')).toHaveCount(15);
     });
   });

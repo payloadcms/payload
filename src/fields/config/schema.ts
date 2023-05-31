@@ -135,6 +135,7 @@ export const code = baseField.keys({
   ),
   admin: baseAdminFields.keys({
     language: joi.string(),
+    editorOptions: joi.object().unknown(), // Editor['options'] @monaco-editor/react
   }),
 });
 
@@ -284,6 +285,10 @@ export const upload = baseField.keys({
   name: joi.string().required(),
   maxDepth: joi.number(),
   filterOptions: joi.alternatives().try(
+    joi.object(),
+    joi.func(),
+  ),
+  defaultValue: joi.alternatives().try(
     joi.object(),
     joi.func(),
   ),

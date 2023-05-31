@@ -84,6 +84,11 @@ export default buildConfig({
           type: 'relationship',
           relationTo: relationSlug,
         },
+        {
+          name: 'relationToCustomID',
+          type: 'relationship',
+          relationTo: 'custom-ids',
+        },
         // Relation hasMany
         {
           name: 'relationHasManyField',
@@ -106,10 +111,26 @@ export default buildConfig({
         },
       ],
     },
+    {
+      slug: 'custom-ids',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'id',
+          type: 'number',
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
     collectionWithName(relationSlug),
     collectionWithName('dummy'),
   ],
-  onInit: async (payload) => {
+  onInit: async payload => {
     await payload.create({
       collection: 'users',
       data: {
@@ -119,11 +140,28 @@ export default buildConfig({
     });
 
     await payload.create({
+      collection: 'custom-ids',
+      data: {
+        id: 1,
+        title: 'hello',
+      },
+    });
+
+    await payload.create({
+      collection: slug,
+      data: {
+        title: 'has custom ID relation',
+        relationToCustomID: 1,
+      },
+    });
+
+    await payload.create({
       collection: slug,
       data: {
         title: 'post1',
       },
     });
+
     await payload.create({
       collection: slug,
       data: {

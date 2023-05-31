@@ -1,4 +1,34 @@
-import { Ref } from 'react';
+import { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from 'react-select';
+import { DocumentDrawerProps } from '../DocumentDrawer/types';
+
+type CustomSelectProps = {
+  disableMouseDown?: boolean
+  disableKeyDown?: boolean
+  droppableRef?: React.RefObject<HTMLDivElement>
+  setDrawerIsOpen?: (isOpen: boolean) => void
+  onSave?: DocumentDrawerProps['onSave']
+  draggableProps?: any
+}
+
+// augment the types for the `Select` component from `react-select`
+// this is to include the `selectProps` prop at the top-level `Select` component
+declare module 'react-select/dist/declarations/src/Select' {
+  export interface Props<
+    Option,
+    IsMulti extends boolean,
+    Group extends GroupBase<Option>
+  > {
+    customProps?: CustomSelectProps
+  }
+}
+
+// augment the types for the `CommonPropsAndClassName` from `react-select`
+// this will include the `selectProps` prop to every `react-select` component automatically
+declare module 'react-select/dist/declarations/src' {
+  export interface CommonPropsAndClassName<Option, IsMulti extends boolean, Group extends GroupBase<Option>> extends CommonProps<Option, IsMulti, Group> {
+    customProps?: ReactSelectStateManagerProps<Option, IsMulti, Group> & CustomSelectProps
+  }
+}
 
 export type Option = {
   [key: string]: unknown
@@ -22,7 +52,6 @@ export type Props = {
   isLoading?: boolean
   isOptionSelected?: any
   isSortable?: boolean,
-  isDisabled?: boolean
   onInputChange?: (val: string) => void
   onMenuScrollToBottom?: () => void
   placeholder?: string
@@ -35,9 +64,5 @@ export type Props = {
   components?: {
     [key: string]: React.FC<any>
   }
-  selectProps?: {
-    disableMouseDown?: boolean
-    disableKeyDown?: boolean
-    [key: string]: unknown
-  }
+  selectProps?: CustomSelectProps
 }

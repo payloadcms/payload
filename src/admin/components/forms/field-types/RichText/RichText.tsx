@@ -272,7 +272,7 @@ const RichText: React.FC<Props> = (props) => {
           required={required}
         />
         <Slate
-          key={JSON.stringify(initialValue)}
+          key={JSON.stringify({ initialValue, path })}
           editor={editor}
           value={valueToRender as any[]}
           onChange={handleChange}

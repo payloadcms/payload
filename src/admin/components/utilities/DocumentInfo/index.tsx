@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import qs from 'qs';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import { useConfig } from '../Config';
 import { PaginatedDocs } from '../../../../mongoose/types';
 import { ContextType, DocumentPermissions, Props, Version } from './types';
@@ -21,8 +22,12 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   children,
   global,
   collection,
-  id,
+  id: idFromProps,
+  idFromParams: getIDFromParams,
 }) => {
+  const { id: idFromParams } = useParams<{id: string}>();
+  const id = idFromProps || (getIDFromParams ? idFromParams : null);
+
   const { serverURL, routes: { api } } = useConfig();
   const { getPreference } = usePreferences();
   const { i18n } = useTranslation();
@@ -193,7 +198,12 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
 
     if (docAccessURL) {
-      const res = await fetch(`${serverURL}${api}${docAccessURL}`);
+      const res = await fetch(`${serverURL}${api}${docAccessURL}`, {
+        credentials: 'include',
+        headers: {
+          'Accept-Language': i18n.language,
+        },
+      });
       const json = await res.json();
       setDocPermissions(json);
     } else {
@@ -201,7 +211,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       // (i.e. create has no id)
       setDocPermissions(permissions[pluralType][slug]);
     }
-  }, [serverURL, api, pluralType, slug, id, permissions]);
+  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language]);
 
   useEffect(() => {
     getVersions();

@@ -3,6 +3,9 @@ import path from 'path';
 import express from 'express';
 import { v4 as uuid } from 'uuid';
 import payload from '../src';
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const [testSuiteDir] = process.argv.slice(2);
 
