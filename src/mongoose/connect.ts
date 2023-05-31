@@ -5,66 +5,60 @@ import pino from 'pino';
 import { InitOptions } from '../config/types';
 import { connection } from './testCredentials';
 
-const connect = async (
-  urlToConnectTo: string|false,
+const connectMongoose = async (
+  url: string,
   options: InitOptions['mongoOptions'],
   logger: pino.Logger,
-): Promise<void> => {
-  await _connect(logger, urlToConnectTo, options);
-  logger.info('Connected to Mongo server successfully!');
-};
+): Promise<void | any> => {
+  let urlToConnect = url;
+  let successfulConnectionMessage = 'Connected to MongoDB server successfully!';
 
-const connectInMemory = async (
-  options: InitOptions['mongoOptions'],
-  logger: pino.Logger,
-): Promise<any> => {
-  const getPort = require('get-port');
-  const port = await getPort();
-
-  const { MongoMemoryServer } = require('mongodb-memory-server');
-  const mongoMemoryServer = await MongoMemoryServer.create({
-    instance: {
-      dbName: connection.name,
-      port,
-    },
-  });
-
-  await _connect(
-    logger,
-    mongoMemoryServer.getUri(),
-    {
-      ...options,
-      dbName: 'payloadmemory',
-    },
-  );
-  logger.info('Connected to in-memory Mongo server successfully!');
-
-  return mongoMemoryServer;
-};
-
-const _connect = async (logger: pino.Logger, urlToConnectTo: string|false, options: InitOptions['mongoOptions']): Promise<void> => {
-  if (!urlToConnectTo || typeof urlToConnectTo !== 'string') {
-    throw new Error('Error: missing MongoDB connection URL.');
-  }
   const connectionOptions: ConnectOptions & { useFacet: undefined } = {
     autoIndex: true,
     ...options,
     useFacet: undefined,
   };
-  mongoose.set('strictQuery', false);
+
+  let mongoMemoryServer;
+
+  if (process.env.NODE_ENV === 'test') {
+    if (process.env.PAYLOAD_TEST_MONGO_URL) {
+      urlToConnect = process.env.PAYLOAD_TEST_MONGO_URL;
+    } else {
+      connectionOptions.dbName = 'payloadmemory';
+      const { MongoMemoryServer } = require('mongodb-memory-server');
+      const getPort = require('get-port');
+
+      const port = await getPort();
+      mongoMemoryServer = await MongoMemoryServer.create({
+        instance: {
+          dbName: connection.name,
+          port,
+        },
+      });
+      urlToConnect = mongoMemoryServer.getUri();
+      successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!';
+    }
+  }
 
   try {
-    await mongoose.connect(urlToConnectTo, connectionOptions);
+    await mongoose.connect(urlToConnect, connectionOptions);
 
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
       logger.info('---- DROPPING DATABASE ----');
       await mongoose.connection.dropDatabase();
       logger.info('---- DROPPED DATABASE ----');
     }
+    logger.info(successfulConnectionMessage);
   } catch (err) {
-    logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err);
+    logger.error(
+      `Error: cannot connect to MongoDB. Details: ${err.message}`,
+      err,
+    );
     process.exit(1);
   }
+
+  return mongoMemoryServer;
 };
 
-export default { connect, connectInMemory };
+export default connectMongoose;
