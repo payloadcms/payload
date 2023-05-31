@@ -22,9 +22,12 @@ const connectMongoose = async (
   let mongoMemoryServer;
 
   if (process.env.NODE_ENV === 'test') {
-    connectionOptions.dbName = 'payloadmemory';
-    const { MongoMemoryServer } = require('mongodb-memory-server');
-    const getPort = require('get-port');
+    if (process.env.PAYLOAD_TEST_MONGO_URL) {
+      urlToConnect = process.env.PAYLOAD_TEST_MONGO_URL;
+    } else {
+      connectionOptions.dbName = 'payloadmemory';
+      const { MongoMemoryServer } = require('mongodb-memory-server');
+      const getPort = require('get-port');
 
     const port = await getPort();
     mongoMemoryServer = await MongoMemoryServer.create({
@@ -46,10 +49,12 @@ const connectMongoose = async (
       await mongoose.connection.dropDatabase();
       logger.info('---- DROPPED DATABASE ----');
     }
-
     logger.info(successfulConnectionMessage);
   } catch (err) {
-    logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err);
+    logger.error(
+      `Error: cannot connect to MongoDB. Details: ${err.message}`,
+      err,
+    );
     process.exit(1);
   }
 

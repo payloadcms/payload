@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import express from 'express';
 import { v4 as uuid } from 'uuid';
+import * as dotenv from 'dotenv';
 import payload from '../src';
-import * as dotenv from "dotenv";
 
 dotenv.config();
 
@@ -30,7 +30,7 @@ const expressApp = express();
 const startDev = async () => {
   await payload.init({
     secret: uuid(),
-    mongoURL: process.env.MONGO_URL || 'mongodb://127.0.0.1/payload',
+    mongoURL: 'mongodb://127.0.0.1/payload',
     express: expressApp,
     email: {
       logMockCredentials: true,
