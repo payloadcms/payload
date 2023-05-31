@@ -9,6 +9,7 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
+import { validateQueryPaths } from '../../utilities/validateQueryPaths';
 
 export type Arguments = {
   collection: Collection
@@ -57,8 +58,15 @@ async function findVersions<T extends TypeWithVersion<T>>(
   }
 
   let accessResults;
+  const versionFields = buildVersionCollectionFields(collectionConfig);
 
   if (!overrideAccess) {
+    await validateQueryPaths({
+      collectionConfig,
+      versionFields,
+      where,
+      req,
+    });
     accessResults = await executeAccess({ req }, collectionConfig.access.readVersions);
   }
 
@@ -66,7 +74,6 @@ async function findVersions<T extends TypeWithVersion<T>>(
     where,
     access: accessResults,
     req,
-    overrideAccess,
   });
 
   // /////////////////////////////////////
@@ -75,7 +82,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
   const [sortProperty, sortOrder] = buildSortParam({
     sort: args.sort || '-updatedAt',
-    fields: buildVersionCollectionFields(collectionConfig),
+    fields: versionFields,
     timestamps: true,
     config: payload.config,
     locale,

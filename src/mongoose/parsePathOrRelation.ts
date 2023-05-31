@@ -5,26 +5,21 @@ import deepmerge from 'deepmerge';
 import { PayloadRequest, Where } from '../types';
 import { buildSearchParam } from './buildSearchParams';
 import { combineMerge } from '../utilities/combineMerge';
-import { EntityPolicies, validOperators } from './buildQuery';
+import { validOperators } from './buildQuery';
 import { buildAndOrConditions } from './buildAndOrConditions';
 import { Field } from '../fields/config/types';
 
+
 export async function parsePathOrRelation({
   where,
-  overrideAccess,
   collectionSlug,
-  errors,
   globalSlug,
-  policies,
   req,
   fields,
 }: {
   where: Where,
-  overrideAccess: boolean,
   collectionSlug?: string,
-  errors: {path: string}[],
   globalSlug?: string,
-  policies: EntityPolicies,
   req: PayloadRequest,
   fields: Field[],
 }): Promise<Record<string, unknown>> {
@@ -43,13 +38,10 @@ export async function parsePathOrRelation({
       if (Array.isArray(condition)) {
         const builtConditions = await buildAndOrConditions({
           collectionSlug,
-          errors,
           fields,
           globalSlug,
-          policies,
           req,
           where: condition,
-          overrideAccess,
         });
         if (builtConditions.length > 0) result[conditionOperator] = builtConditions;
       } else {
@@ -62,15 +54,12 @@ export async function parsePathOrRelation({
             if (validOperators.includes(operator)) {
               const searchParam = await buildSearchParam({
                 collectionSlug,
-                errors,
                 globalSlug,
-                policies,
                 req,
                 fields,
                 incomingPath: relationOrPath,
                 val: pathOperators[operator],
                 operator,
-                overrideAccess,
               });
 
               if (searchParam?.value && searchParam?.path) {

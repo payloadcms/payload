@@ -1,5 +1,5 @@
 import { Field, fieldAffectsData } from '../fields/config/types';
-import { EntityPolicies, PathToQuery, validOperators } from './buildQuery';
+import { PathToQuery, validOperators } from './buildQuery';
 import { operatorMap } from './operatorMap';
 import { getLocalizedPaths } from './getLocalizedPaths';
 import { sanitizeQueryValue } from './sanitizeQueryValue';
@@ -23,23 +23,17 @@ export async function buildSearchParam({
   incomingPath,
   val,
   operator,
-  overrideAccess,
   collectionSlug,
   globalSlug,
   req,
-  errors,
-  policies,
 }: {
   fields: Field[],
   incomingPath: string,
   val: unknown,
   operator: string
-  overrideAccess: boolean
   collectionSlug?: string,
   globalSlug?: string,
   req: PayloadRequest,
-  errors: {path: string}[],
-  policies: EntityPolicies,
 }): Promise<SearchParam> {
   // Replace GraphQL nested field double underscore formatting
   let sanitizedPath = incomingPath.replace(/__/gi, '.');
@@ -73,14 +67,11 @@ export async function buildSearchParam({
     });
   } else {
     paths = await getLocalizedPaths({
-      errors,
-      policies,
       req,
       collectionSlug,
       globalSlug,
       fields,
       incomingPath: sanitizedPath,
-      overrideAccess,
     });
   }
 
@@ -128,7 +119,6 @@ export async function buildSearchParam({
               },
             },
             req,
-            overrideAccess,
           });
 
           const result = await SubModel.find(subQuery, subQueryOptions);

@@ -18,6 +18,7 @@ import { AccessResult } from '../../config/types';
 import { queryDrafts } from '../../versions/drafts/queryDrafts';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
+import { validateQueryPaths } from '../../utilities/validateQueryPaths';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -86,6 +87,11 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   let accessResult: AccessResult;
 
   if (!overrideAccess) {
+    await validateQueryPaths({
+      collectionConfig,
+      where,
+      req,
+    });
     accessResult = await executeAccess({ req }, collectionConfig.access.update);
   }
 
@@ -93,7 +99,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     where,
     access: accessResult,
     req,
-    overrideAccess,
   });
 
   // /////////////////////////////////////

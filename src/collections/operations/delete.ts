@@ -10,6 +10,7 @@ import { Where } from '../../types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { validateQueryPaths } from '../../utilities/validateQueryPaths';
 
 export type Arguments = {
   depth?: number
@@ -75,6 +76,11 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   let accessResult: AccessResult;
 
   if (!overrideAccess) {
+    await validateQueryPaths({
+      collectionConfig,
+      where,
+      req,
+    });
     accessResult = await executeAccess({ req }, collectionConfig.access.delete);
   }
 
@@ -82,7 +88,6 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     where,
     access: accessResult,
     req,
-    overrideAccess,
   });
 
   // /////////////////////////////////////

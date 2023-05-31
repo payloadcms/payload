@@ -9,6 +9,7 @@ import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
 import { TypeWithVersion } from '../../versions/types';
+import { validateQueryPaths } from '../../utilities/validateQueryPaths';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -41,6 +42,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
   } = args;
 
   const VersionsModel = payload.versions[globalConfig.slug];
+  const versionFields = buildVersionGlobalFields(globalConfig);
 
   // /////////////////////////////////////
   // Access
@@ -55,11 +57,19 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
   const accessResults = !overrideAccess ? await executeAccess({ req }, globalConfig.access.readVersions) : true;
 
+  if (!overrideAccess) {
+    await validateQueryPaths({
+      globalConfig,
+      versionFields,
+      where,
+      req,
+    });
+  }
+
   const query = await VersionsModel.buildQuery({
     where,
     access: accessResults,
     req,
-    overrideAccess,
     globalSlug: globalConfig.slug,
   });
 
@@ -69,7 +79,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
   const [sortProperty, sortOrder] = buildSortParam({
     sort: args.sort || '-updatedAt',
-    fields: buildVersionGlobalFields(globalConfig),
+    fields: versionFields,
     timestamps: true,
     config: payload.config,
     locale,

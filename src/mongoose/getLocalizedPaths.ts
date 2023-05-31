@@ -1,27 +1,20 @@
 import { Field, fieldAffectsData } from '../fields/config/types';
 import flattenFields from '../utilities/flattenTopLevelFields';
-import { getEntityPolicies } from '../utilities/getEntityPolicies';
-import { EntityPolicies, PathToQuery } from './buildQuery';
+import { PathToQuery } from './buildQuery';
 import { PayloadRequest } from '../express/types';
 
 export async function getLocalizedPaths({
   req,
-  policies,
   collectionSlug,
   globalSlug,
   fields,
   incomingPath,
-  overrideAccess,
-  errors,
 }: {
   req: PayloadRequest
-  policies: EntityPolicies
   collectionSlug?: string
   globalSlug?: string
   fields: Field[]
   incomingPath: string
-  overrideAccess: boolean
-  errors: {path: string}[]
 }): Promise<PathToQuery[]> {
   const pathSegments = incomingPath.split('.');
   const localizationConfig = req.payload.config.localization;
@@ -32,55 +25,11 @@ export async function getLocalizedPaths({
       complete: false,
       field: undefined,
       fields: flattenFields(fields, false),
-      fieldPolicies: undefined,
       collectionSlug,
+      globalSlug,
+      invalid: false,
     },
   ];
-
-  if (!overrideAccess) {
-    if (collectionSlug) {
-      const collection = { ...req.payload.collections[collectionSlug].config };
-      collection.fields = fields;
-
-      if (!policies.collections[collectionSlug]) {
-        const policy = await getEntityPolicies({
-          req,
-          entity: collection,
-          operations: ['read'],
-          type: 'collection',
-        });
-
-        // eslint-disable-next-line no-param-reassign
-        policies.collections[collectionSlug] = policy;
-      }
-
-      paths[0].fieldPolicies = policies.collections[collectionSlug].fields;
-
-      if (['salt', 'hash'].includes(incomingPath) && collection.auth && !collection.auth?.disableLocalStrategy) {
-        errors.push({ path: incomingPath });
-        return [];
-      }
-    }
-
-    if (globalSlug) {
-      if (!policies.globals[globalSlug]) {
-        const global = { ...req.payload.globals.config.find(({ slug }) => slug === globalSlug) };
-        global.fields = fields;
-
-        const policy = await getEntityPolicies({
-          req,
-          entity: global,
-          operations: ['read'],
-          type: 'global',
-        });
-
-        // eslint-disable-next-line no-param-reassign
-        policies.globals[globalSlug] = policy;
-      }
-
-      paths[0].fieldPolicies = policies.globals[globalSlug].fields;
-    }
-  }
 
   for (let i = 0; i < pathSegments.length; i += 1) {
     const segment = pathSegments[i];
@@ -106,20 +55,16 @@ export async function getLocalizedPaths({
       }
 
       if (matchedField) {
-        if (!overrideAccess) {
-          const fieldAccess = lastIncompletePath.fieldPolicies[matchedField.name].read.permission;
-
-          if (!fieldAccess || ('hidden' in matchedField && matchedField.hidden)) {
-            errors.push({ path: currentPath });
-            return paths;
-          }
+        if ('hidden' in matchedField && matchedField.hidden) {
+          lastIncompletePath.invalid = true;
+          // return paths;
         }
 
         const nextSegment = pathSegments[i + 1];
         const nextSegmentIsLocale = localizationConfig && localizationConfig.locales.includes(nextSegment);
 
         if (nextSegmentIsLocale) {
-        // Skip the next iteration, because it's a locale
+          // Skip the next iteration, because it's a locale
           i += 1;
           currentPath = `${currentPath}.${nextSegment}`;
         } else if (localizationConfig && 'localized' in matchedField && matchedField.localized) {
@@ -147,7 +92,7 @@ export async function getLocalizedPaths({
                 lastIncompletePath.complete = true;
                 lastIncompletePath.path = pathSegments.join('.');
               } else {
-                errors.push({ path: currentPath });
+                lastIncompletePath.invalid = true;
                 return paths;
               }
             } else {
@@ -161,14 +106,11 @@ export async function getLocalizedPaths({
 
                 // eslint-disable-next-line no-await-in-loop
                 const remainingPaths = await getLocalizedPaths({
-                  errors,
                   req,
-                  policies,
                   globalSlug,
                   collectionSlug: relatedCollection.slug,
                   fields: relatedCollection.fields,
                   incomingPath: nestedPathToQuery,
-                  overrideAccess,
                 });
 
                 paths = [
@@ -188,16 +130,13 @@ export async function getLocalizedPaths({
               lastIncompletePath.fields = flattenFields(lastIncompletePath.field.fields, false);
             }
 
-            if (!overrideAccess && 'fields' in lastIncompletePath.fieldPolicies[lastIncompletePath.field.name]) {
-              lastIncompletePath.fieldPolicies = lastIncompletePath.fieldPolicies[lastIncompletePath.field.name].fields;
-            }
-
             if (i + 1 === pathSegments.length) lastIncompletePath.complete = true;
             lastIncompletePath.path = currentPath;
           }
         }
       } else {
-        errors.push({ path: currentPath });
+        lastIncompletePath.invalid = true;
+        lastIncompletePath.path = currentPath;
         return paths;
       }
     }
