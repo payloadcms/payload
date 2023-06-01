@@ -5,7 +5,7 @@ const isElementActive = (editor: Editor, format: string, blockType = 'type'): bo
 
   const [match] = Array.from(Editor.nodes(editor, {
     at: Editor.unhangRange(editor, editor.selection),
-    match: (n) => !Editor.isEditor(n) && Element.isElement(n) && n['blockType'] === format,
+    match: (n) => !Editor.isEditor(n) && Element.isElement(n) && n[blockType] === format,
   }));
 
   return !!match;
