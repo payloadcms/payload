@@ -150,7 +150,6 @@ export const withOperators = (field: FieldAffectingData, parentName: string): Gr
     fields: fieldOperators.reduce((objectTypeFields, operator) => {
       let gqlType = initialGqlType;
 
-      if (field.name === 'description') console.log(operator, field.name, gqlType);
       if (listOperators.includes(operator)) {
         gqlType = new GraphQLList(gqlType);
       } else if (operator === 'exists') {
