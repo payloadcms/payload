@@ -198,7 +198,12 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
 
     if (docAccessURL) {
-      const res = await fetch(`${serverURL}${api}${docAccessURL}`);
+      const res = await fetch(`${serverURL}${api}${docAccessURL}`, {
+        credentials: 'include',
+        headers: {
+          'Accept-Language': i18n.language,
+        },
+      });
       const json = await res.json();
       setDocPermissions(json);
     } else {
@@ -206,7 +211,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       // (i.e. create has no id)
       setDocPermissions(permissions[pluralType][slug]);
     }
-  }, [serverURL, api, pluralType, slug, id, permissions]);
+  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language]);
 
   useEffect(() => {
     getVersions();
