@@ -141,13 +141,16 @@ export const withOperators = (field: FieldAffectingData, parentName: string): Gr
   const fieldOperators = [...defaults[field.type].operators];
   if (!('required' in field) || !field.required) fieldOperators.push('exists');
 
-  let gqlType: GraphQLType = typeof defaults[field.type].type === 'function'
+  const initialGqlType: GraphQLType = typeof defaults[field.type].type === 'function'
     ? defaults[field.type].type(field, parentName)
     : defaults?.[field.type].type;
 
   return new GraphQLInputObjectType({
     name,
     fields: fieldOperators.reduce((objectTypeFields, operator) => {
+      let gqlType = initialGqlType;
+
+      if (field.name === 'description') console.log(operator, field.name, gqlType);
       if (listOperators.includes(operator)) {
         gqlType = new GraphQLList(gqlType);
       } else if (operator === 'exists') {
