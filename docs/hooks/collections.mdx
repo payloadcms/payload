@@ -65,18 +65,18 @@ export const ExampleHooks: CollectionConfig = {
 
 ### beforeOperation
 
-The `beforeOperation` Hook type can be used to modify the arguments that operations accept or execute side-effects that run before an operation begins.
+The `beforeOperation` hook can be used to modify the arguments that operations accept or execute side-effects that run before an operation begins.
 
-Available Collection operations include `create`, `read`, `update`, `delete`, `login`, `refresh` and `forgotPassword`.
+Available Collection operations include `create`, `read`, `update`, `delete`, `login`, `refresh`, and `forgotPassword`.
 
 ```ts
 import { CollectionBeforeOperationHook } from "payload/types";
 
 const beforeOperationHook: CollectionBeforeOperationHook = async ({
-  args, // Original arguments passed into the operation
+  args, // original arguments passed into the operation
   operation, // name of the operation
 }) => {
-  return args; // Return operation arguments as necessary
+  return args; // return modified operation arguments as necessary
 };
 ```
 
@@ -199,20 +199,20 @@ const afterDeleteHook: CollectionAfterDeleteHook = async ({
 
 ### afterOperation
 
-The `afterOperation` Hook type can be used to modify the documents that are returned from the `find` operation.
+The `afterOperation` hook can be used to modify the result of operations or execute side-effects that run after an operation has completed.
 
-The difference to using `afterRead` would be that this hook fires once and includes all `docs` where `afterRead` fires for every doc separately.
+Available Collection operations include `create`, `find`, `findByID`, `update`, `updateByID`, `delete`, `deleteByID`, `login`, `refresh`, and `forgotPassword`.
 
 ```ts
-import { CollectionAfterOperationHook } from 'payload/types';
+import { CollectionAfterOperationHook } from "payload/types";
 
 const afterOperationHook: CollectionAfterOperationHook = async ({
   args, // arguments passed into the operation
   operation, // name of the operation
-  docs; // documents returned from the operation
+  result, // the result of the operation, before modifications
 }) => {
-  return docs; // Return documents as necessary
-}
+  return result; // return modified result as necessary
+};
 ```
 
 ### beforeLogin
