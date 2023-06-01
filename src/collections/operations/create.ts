@@ -26,7 +26,9 @@ import { buildAfterOperation } from './utils';
 
 const unlinkFile = promisify(fs.unlink);
 
-export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+export type CreateUpdateType = { [field: string | number | symbol]: unknown }
+
+export type Arguments<T extends CreateUpdateType> = {
   collection: Collection
   req: PayloadRequest
   depth?: number
@@ -316,7 +318,11 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation(args, result, 'create'); // todo: or after cleaning files?
+  result = await buildAfterOperation<'create'>({
+    operation: 'create',
+    args,
+    result,
+  });
 
   // Remove temp files if enabled, as express-fileupload does not do this automatically
   if (config.upload?.useTempFiles && collectionConfig.upload) {

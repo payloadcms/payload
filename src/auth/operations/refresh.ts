@@ -105,7 +105,11 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation(args, result, 'refresh');
+  result = await buildAfterOperation({
+    operation: 'refresh',
+    args,
+    result,
+  });
 
   // /////////////////////////////////////
   // Return results

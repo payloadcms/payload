@@ -126,7 +126,11 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  token = await buildAfterOperation(args, token, 'forgotPassword'); // todo: Fix error 'Type 'string | Buffer' is not assignable to type 'string'.'
+  token = await buildAfterOperation({
+    operation: 'forgotPassword',
+    args,
+    result: token,
+  });
 
   return token;
 }

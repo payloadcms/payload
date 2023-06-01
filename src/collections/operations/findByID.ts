@@ -174,7 +174,11 @@ async function findByID<T extends TypeWithID>(
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation(args, result, 'read');
+  result = await buildAfterOperation<'findByID'>({
+    operation: 'findByID',
+    args,
+    result,
+  });
 
   // /////////////////////////////////////
   // Return results

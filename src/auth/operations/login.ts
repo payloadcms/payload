@@ -212,7 +212,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
   }, Promise.resolve());
 
 
-  let result = {
+  let result: Result & { user: GeneratedTypes['collections'][TSlug] } = {
     token,
     user,
     exp: (jwt.decode(token) as jwt.JwtPayload).exp,
@@ -222,7 +222,11 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation(args, result, 'login');
+  result = await buildAfterOperation<'login'>({
+    operation: 'login',
+    args,
+    result,
+  });
 
   // /////////////////////////////////////
   // Return results

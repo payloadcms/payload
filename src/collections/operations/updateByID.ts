@@ -331,7 +331,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation(args, result, 'update');
+  result = await buildAfterOperation<'updateByID'>({
+    operation: 'updateByID',
+    args,
+    result,
+  });
 
   await unlinkTempFiles({
     req,

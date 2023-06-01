@@ -19,8 +19,9 @@ import { queryDrafts } from '../../versions/drafts/queryDrafts';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 import { buildAfterOperation } from './utils';
+import { CreateUpdateType } from './create';
 
-export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+export type Arguments<T extends CreateUpdateType> = {
   collection: Collection
   req: PayloadRequest
   where: Where
@@ -349,7 +350,11 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation(args, result, 'update');
+  result = await buildAfterOperation<'update'>({
+    operation: 'update',
+    args,
+    result,
+  });
 
   return result;
 }

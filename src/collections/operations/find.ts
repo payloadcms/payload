@@ -225,7 +225,11 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation(args, result, 'read');
+  result = await buildAfterOperation<'find', T>({
+    operation: 'find',
+    args,
+    result,
+  });
 
   // /////////////////////////////////////
   // Return results
