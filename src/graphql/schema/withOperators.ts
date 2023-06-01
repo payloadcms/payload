@@ -87,7 +87,7 @@ const defaults: DefaultsType = {
   },
   relationship: {
     type: GraphQLString,
-    operators: [...operators.equality, ...operators.comparison],
+    operators: [...operators.equality, ...operators.contains],
   },
   upload: {
     type: GraphQLString,

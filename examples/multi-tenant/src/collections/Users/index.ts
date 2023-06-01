@@ -97,7 +97,10 @@ export const Users: CollectionConfig = {
       access: {
         create: () => false,
         read: tenantAdmins,
-        update: () => false,
+        update: superAdminFieldAccess,
+      },
+      admin: {
+        position: 'sidebar',
       },
     },
   ],

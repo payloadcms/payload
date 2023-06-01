@@ -149,7 +149,6 @@
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^7.1.2",
     "path-browserify": "^1.0.1",
-    "payload": "^1.8.2",
     "pino": "^6.4.1",
     "pino-pretty": "^9.1.1",
     "pluralize": "^8.0.0",
