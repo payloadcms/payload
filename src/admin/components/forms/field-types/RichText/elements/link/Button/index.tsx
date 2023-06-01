@@ -8,10 +8,8 @@ import LinkIcon from '../../../../../../icons/Link';
 import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues';
 import { useConfig } from '../../../../../../utilities/Config';
 import isElementActive from '../../isActive';
-import { unwrapLink } from '../utilities';
-import { getBaseFields } from '../LinkDrawer/baseFields';
+import { transformExtraFields, unwrapLink } from '../utilities';
 import { LinkDrawer } from '../LinkDrawer';
-import { Field } from '../../../../../../../../fields/config/types';
 import { Props as RichTextFieldProps } from '../../../types';
 import buildStateFromSchema from '../../../../../Form/buildStateFromSchema';
 import { useAuth } from '../../../../../../utilities/Auth';
@@ -19,6 +17,9 @@ import { Fields } from '../../../../../Form/types';
 import { useLocale } from '../../../../../../utilities/Locale';
 import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
 
+/**
+ * This function is called when an new link is created - not when an existing link is edited.
+ */
 const insertLink = (editor, fields) => {
   const isCollapsed = editor.selection && Range.isCollapsed(editor.selection);
   const data = reduceFieldsToValues(fields, true);
@@ -29,7 +30,7 @@ const insertLink = (editor, fields) => {
     url: data.url,
     doc: data.doc,
     newTab: data.newTab,
-    fields: data.fields,
+    fields: data.fields, // Any custom user-added fields are part of data.fields
     children: [],
   };
 
@@ -68,25 +69,7 @@ export const LinkButton: React.FC<{
   const config = useConfig();
 
   const [fieldSchema] = useState(() => {
-    const baseFields: Field[] = getBaseFields(config);
-
-    const fields = typeof customFieldSchema === 'function' ? customFieldSchema({ defaultFields: baseFields, config, i18n }) : baseFields;
-
-    if (Array.isArray(customFieldSchema)) {
-      fields.push({
-        name: 'fields',
-        type: 'group',
-        admin: {
-          style: {
-            margin: 0,
-            padding: 0,
-            borderTop: 0,
-            borderBottom: 0,
-          },
-        },
-        fields: customFieldSchema,
-      });
-    }
+    const fields = transformExtraFields(customFieldSchema, config, i18n);
 
     return fields;
   });
