@@ -900,36 +900,19 @@ describe('collections-rest', () => {
         });
       });
 
-      it('can query group > row > field', async () => {
-        const post = await createPost({ group: { textInRowInGroup: 'textInRowInGroup' } });
+      it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
+        const withDeeplyNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } });
 
-        const { status, result } = await client.find<Post>({
+        const { result } = await client.find<Post>({
           query: {
-            'group.textInRowInGroup': {
-              equals: 'textInRowInGroup',
+            'D1.D2.D3.D4': {
+              equals: 'nested message',
             },
           },
         });
 
-        expect(status).toEqual(200);
         expect(result.totalDocs).toEqual(1);
-        expect(result.docs).toEqual([post]);
-      });
-
-      it('can query group > collapsible > field', async () => {
-        const post = await createPost({ group: { textInCollapsibleInGroup: 'textInCollapsibleInGroup' } });
-
-        const { status, result } = await client.find<Post>({
-          query: {
-            'group.textInCollapsibleInGroup': {
-              equals: 'textInCollapsibleInGroup',
-            },
-          },
-        });
-
-        expect(status).toEqual(200);
-        expect(result.totalDocs).toEqual(1);
-        expect(result.docs).toEqual([post]);
+        expect(result.docs).toEqual([withDeeplyNestedField]);
       });
     });
   });

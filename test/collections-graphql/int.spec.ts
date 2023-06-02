@@ -364,14 +364,18 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }));
       });
 
-      it('can query group > row > field', async () => {
-        const withNestedField = await createPost({ group: { textInRowInGroup: 'textInRowInGroup' } });
+      it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
+        const withNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } });
         const query = `{
-          Posts(where: {group__textInRowInGroup: {equals: "textInRowInGroup"}}) {
+          Posts(where: { D1__D2__D3__D4: { equals: "nested message" } }) {
             docs {
               id
-              group {
-                textInRowInGroup
+              D1 {
+                D2 {
+                  D3 {
+                    D4
+                  }
+                }
               }
             }
           }
@@ -379,25 +383,7 @@ describe('collections-graphql', () => {
         const response = await client.request(query);
         const { docs } = response.Posts;
 
-        expect(docs).toContainEqual(expect.objectContaining({ id: withNestedField.id, group: { textInRowInGroup: 'textInRowInGroup' } }));
-      });
-
-      it('can query group > collapsible > field', async () => {
-        const withNestedField = await createPost({ group: { textInCollapsibleInGroup: 'textInCollapsibleInGroup' } });
-        const query = `{
-          Posts(where: {group__textInCollapsibleInGroup: {equals: "textInCollapsibleInGroup"}}) {
-            docs {
-              id
-              group  {
-                textInCollapsibleInGroup
-              }
-            }
-          }
-        }`;
-        const response = await client.request(query);
-        const { docs } = response.Posts;
-
-        expect(docs).toContainEqual(expect.objectContaining({ id: withNestedField.id, group: { textInCollapsibleInGroup: 'textInCollapsibleInGroup' } }));
+        expect(docs).toContainEqual(expect.objectContaining({ id: withNestedField.id, D1: { D2: { D3: { D4: 'nested message' } } } }));
       });
     });
 
