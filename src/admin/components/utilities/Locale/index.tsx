@@ -17,7 +17,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({
   // localization but extracts locales into string[] when an object is provided
   const unifiedLocalization = localization ? unifiedLocaleConfig(localization) : undefined;
   const { user } = useAuth();
-  const defaultLocale = localization && localization.defaultLocale
+  const defaultLocale = (localization && localization.defaultLocale)
     ? localization.defaultLocale
     : 'en';
   const searchParams = useSearchParams();
