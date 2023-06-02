@@ -220,12 +220,12 @@ export type AdminRoute = {
 export type LabeledLocale = {
   /**
    * label of supported locale
-   * @exanple "English"
+   * @example "English"
    */
   label: string;
   /**
    * value of supported locale
-   * @exanple "en"
+   * @example "en"
    */
   value: string;
   /**
@@ -237,7 +237,7 @@ export type LabeledLocale = {
 export type BaseLocalizationConfig = {
   /**
    * Locale for users that have not expressed their preference for a specific locale
-   * @exanple `"en"`
+   * @example `"en"`
    */
   defaultLocale: string;
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale` */
@@ -248,7 +248,7 @@ export type LocalizationConfigWithNoLabels = Prettify<
   BaseLocalizationConfig & {
     /**
      * List of supported locales
-     * @exanple `["en", "es", "fr", "nl", "de", "jp"]`
+     * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     locales: string[];
   }
@@ -258,7 +258,7 @@ export type LocalizationConfigWithLabels = Prettify<
   BaseLocalizationConfig & {
     /**
      * List of supported locales with labels
-     * @exanple {
+     * @example {
      *  label: 'English',
      *  value: 'en',
      *  rtl: false
