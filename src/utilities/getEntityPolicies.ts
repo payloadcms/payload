@@ -15,7 +15,7 @@ type Args = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
 }
 
-type ReturnType<T extends Args> = T['type'] extends 'global' ? [GlobalPermission, Promise<void>[]] : [CollectionPermission, Promise<void>[]]
+type ReturnType<T extends Args> = T['type'] extends 'global' ? GlobalPermission : CollectionPermission
 
 type CreateAccessPromise = (args: {
   accessLevel: 'entity' | 'field',
@@ -27,7 +27,7 @@ type CreateAccessPromise = (args: {
   disableWhere?: boolean,
 }) => Promise<void>
 
-export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
+export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
   const { req, entity, operations, id, type } = args;
   const isLoggedIn = !!(req.user);
   // ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -36,8 +36,8 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
   // ---- ---- ---- ---- ---- ---- ---- ---- ----
   const policies = {
     fields: {},
-  } as ReturnType<T>[0];
-  const promises = [] as ReturnType<T>[1];
+  } as ReturnType<T>;
+
   let docBeingAccessed;
 
   async function getEntityDoc({ where }: { where?: Where } = {}): Promise<TypeWithID & Document> {
@@ -112,24 +112,23 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
     policiesObj,
     fields,
     operation,
-    entityAccessPromise,
+    entityPermission,
   }) => {
     const mutablePolicies = policiesObj.fields;
 
-    fields.forEach(async (field) => {
+    await Promise.all(fields.map(async (field) => {
       if (field.name) {
         if (!mutablePolicies[field.name]) mutablePolicies[field.name] = {};
 
         if (field.access && typeof field.access[operation] === 'function') {
-          promises.push(createAccessPromise({
+          await createAccessPromise({
             policiesObj: mutablePolicies[field.name],
             access: field.access[operation],
             operation,
             disableWhere: true,
             accessLevel: 'field',
-          }));
+          });
         } else {
-          if (entityAccessPromise) await entityAccessPromise;
           mutablePolicies[field.name][operation] = {
             permission: policiesObj[operation]?.permission,
           };
@@ -137,44 +136,49 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
 
         if (field.fields) {
           if (!mutablePolicies[field.name].fields) mutablePolicies[field.name].fields = {};
-          executeFieldPolicies({
+          await executeFieldPolicies({
             policiesObj: mutablePolicies[field.name],
             fields: field.fields,
             operation,
-            entityAccessPromise,
+            entityPermission,
           });
         }
       } else if (field.fields) {
-        executeFieldPolicies({
+        await executeFieldPolicies({
           policiesObj,
           fields: field.fields,
           operation,
-          entityAccessPromise,
+          entityPermission,
         });
       } else if (field.type === 'tabs') {
-        field.tabs.forEach((tab) => {
+        await Promise.all(field.tabs.map(async (tab) => {
           if (tabHasName(tab)) {
-            if (!mutablePolicies[tab.name]) mutablePolicies[tab.name] = { fields: {} };
-            executeFieldPolicies({
+            if (!mutablePolicies[tab.name]) {
+              mutablePolicies[tab.name] = {
+                fields: {},
+                [operation]: { permission: entityPermission },
+              };
+            }
+            await executeFieldPolicies({
               policiesObj: mutablePolicies[tab.name],
               fields: tab.fields,
               operation,
-              entityAccessPromise,
+              entityPermission,
             });
           } else {
-            executeFieldPolicies({
+            await executeFieldPolicies({
               policiesObj,
               fields: tab.fields,
               operation,
-              entityAccessPromise,
+              entityPermission,
             });
           }
-        });
+        }));
       }
-    });
+    }));
   };
 
-  operations.forEach((operation) => {
+  await Promise.all(operations.map(async (operation) => {
     let entityAccessPromise: Promise<void>;
 
     if (typeof entity.access[operation] === 'function') {
@@ -184,20 +188,21 @@ export function getEntityPolicies<T extends Args>(args: T): ReturnType<T> {
         operation,
         accessLevel: 'entity',
       });
-      promises.push(entityAccessPromise);
     } else {
       policies[operation] = {
         permission: isLoggedIn,
       };
     }
 
-    executeFieldPolicies({
+    await entityAccessPromise;
+
+    await executeFieldPolicies({
       policiesObj: policies,
       fields: entity.fields,
       operation,
-      entityAccessPromise,
+      entityPermission: policies[operation].permission,
     });
-  });
+  }));
 
-  return [policies, promises] as ReturnType<T>;
+  return policies;
 }

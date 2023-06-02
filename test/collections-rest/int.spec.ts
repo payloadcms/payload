@@ -899,6 +899,21 @@ describe('collections-rest', () => {
           expect(result.totalDocs).toEqual(50);
         });
       });
+
+      it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
+        const withDeeplyNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } });
+
+        const { result } = await client.find<Post>({
+          query: {
+            'D1.D2.D3.D4': {
+              equals: 'nested message',
+            },
+          },
+        });
+
+        expect(result.totalDocs).toEqual(1);
+        expect(result.docs).toEqual([withDeeplyNestedField]);
+      });
     });
   });
 });
