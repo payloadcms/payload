@@ -86,8 +86,8 @@ input Collection1_testing_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
 }
 
 input Collection1_title_operator {
@@ -96,8 +96,8 @@ input Collection1_title_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
 }
 
 input Collection1_meta__title_operator {
@@ -106,8 +106,8 @@ input Collection1_meta__title_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -117,8 +117,8 @@ input Collection1_meta__description_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -128,8 +128,8 @@ input Collection1_meta__id_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -161,8 +161,8 @@ input Collection1_id_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -494,8 +494,8 @@ input Collection2_meta__title_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -505,8 +505,8 @@ input Collection2_meta__description_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -516,8 +516,8 @@ input Collection2_meta__id_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -527,8 +527,8 @@ input Collection2_nestedGroup__meta__title_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -538,8 +538,8 @@ input Collection2_nestedGroup__meta__description_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -571,8 +571,8 @@ input Collection2_id_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -864,6 +864,8 @@ type User {
   email: EmailAddress
   resetPasswordToken: String
   resetPasswordExpiration: DateTime
+  salt: String
+  hash: String
   loginAttempts: Float
   lockUntil: DateTime
   password: String!
@@ -925,8 +927,8 @@ input User_email_operator {
   like: EmailAddress
   contains: EmailAddress
   in: [EmailAddress]
-  not_in: [[EmailAddress]]
-  all: [[[EmailAddress]]]
+  not_in: [EmailAddress]
+  all: [EmailAddress]
   exists: Boolean
 }
 
@@ -936,8 +938,8 @@ input User_id_operator {
   like: String
   contains: String
   in: [String]
-  not_in: [[String]]
-  all: [[[String]]]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -1856,6 +1858,8 @@ input mutationUserInput {
   email: String
   resetPasswordToken: String
   resetPasswordExpiration: String
+  salt: String
+  hash: String
   loginAttempts: Float
   lockUntil: String
   password: String!
@@ -1867,6 +1871,8 @@ input mutationUserUpdateInput {
   email: String
   resetPasswordToken: String
   resetPasswordExpiration: String
+  salt: String
+  hash: String
   loginAttempts: Float
   lockUntil: String
   password: String
