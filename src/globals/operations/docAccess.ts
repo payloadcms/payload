@@ -21,14 +21,10 @@ export async function docAccess(args: Arguments): Promise<GlobalPermission> {
     globalOperations.push('readVersions');
   }
 
-  const [policy, promises] = getEntityPolicies({
+  return getEntityPolicies({
     type: 'global',
     req,
     entity: globalConfig,
     operations: globalOperations,
   });
-
-  await Promise.all(promises);
-
-  return policy;
 }
