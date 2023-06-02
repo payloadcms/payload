@@ -10,9 +10,9 @@ import { requests } from '../../../api';
 import { useForm, useFormModified } from '../../forms/Form/context';
 import MinimalTemplate from '../../templates/Minimal';
 import { getTranslation } from '../../../../utilities/getTranslation';
-import unifiedLocaleConfig from "../../../../utilities/unifiedLocaleConfig";
-
+import unifiedLocaleConfig from '../../../../utilities/unifiedLocaleConfig';
 import './index.scss';
+
 
 const baseClass = 'duplicate';
 

@@ -23,7 +23,7 @@ export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
   className?: string
   width?: string
   rows?: number
-  rtl?:boolean;
+  rtl?: boolean;
 }
 
 const TextareaInput: React.FC<TextAreaInputProps> = (props) => {

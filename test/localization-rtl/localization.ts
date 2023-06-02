@@ -1,15 +1,15 @@
 export const localization = {
   locales: [
     {
-      label: "English",
-      value: "en",
+      label: 'English',
+      value: 'en',
     },
     {
-      label: "Arabic",
-      value: "ar",
+      label: 'Arabic',
+      value: 'ar',
       rtl: true,
     },
   ],
-  defaultLocale: "en",
+  defaultLocale: 'en',
   fallback: true,
 };

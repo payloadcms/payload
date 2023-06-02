@@ -4,7 +4,7 @@
  * @returns {boolean}
  */
 export function isObject(item: unknown): boolean {
-  return Boolean(item && typeof item === "object" && !Array.isArray(item));
+  return Boolean(item && typeof item === 'object' && !Array.isArray(item));
 }
 
 /**
@@ -14,7 +14,7 @@ export function isObject(item: unknown): boolean {
  */
 export default function deepMerge<T extends object, R extends object>(
   target: T,
-  source: R
+  source: R,
 ): T {
   const output = { ...target };
   if (isObject(target) && isObject(source)) {
