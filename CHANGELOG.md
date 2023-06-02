@@ -1,5 +1,13 @@
 
 
+## [1.8.4-canary.3](https://github.com/payloadcms/payload/compare/v1.8.4-canary.2...v1.8.4-canary.3) (2023-06-02)
+
+
+### Bug Fixes
+
+* graphql where types on rows and collapsible's ([#2758](https://github.com/payloadcms/payload/issues/2758)) ([f978299](https://github.com/payloadcms/payload/commit/f978299868bf352e147070afdf556bf1153bac56))
+* RichText link custom fields ([#2756](https://github.com/payloadcms/payload/issues/2756)) ([23be263](https://github.com/payloadcms/payload/commit/23be263dd2e75dca448019b1c66d7f6dd3558b37))
+
 ## [1.8.4-canary.2](https://github.com/payloadcms/payload/compare/v1.8.4-canary.0...v1.8.4-canary.2) (2023-06-01)
 
 
