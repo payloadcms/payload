@@ -17,6 +17,9 @@ const localeToString = (locale: LabeledLocale | string) => {
 export const unifiedLocaleConfig = (
   localizationConfig: LocalizationConfig,
 ): LocalizationConfigWithNoLabels => {
+  if (!localizationConfig?.locales || localizationConfig.locales.length === 0) {
+    return localizationConfig as LocalizationConfigWithNoLabels;
+  }
   // clone localization config so to not break everything
   const clonedLocalizationConfig = JSON.parse(JSON.stringify(localizationConfig));
   let { locales } = clonedLocalizationConfig;
