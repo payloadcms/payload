@@ -6,7 +6,7 @@ import { textarea } from '../../../../../fields/validations';
 import { Props } from './types';
 import TextareaInput from './Input';
 import { getTranslation } from '../../../../../utilities/getTranslation';
-import { useExtendedLocale } from '../../../utilities/Locale';
+import { useLabeledLocale } from '../../../utilities/Locale';
 
 import './index.scss';
 
@@ -35,9 +35,9 @@ const Textarea: React.FC<Props> = (props) => {
   const { i18n } = useTranslation();
 
   const path = pathFromProps || name;
-  const extendedLocale = useExtendedLocale();
+  const labeledLocale = useLabeledLocale();
   // field id rtl when current locale is rtl and admin.rtl is true also
-  const isRTL = (rtl && extendedLocale && extendedLocale.rtl) || false;
+  const isRTL = (rtl && labeledLocale && labeledLocale.rtl) || false;
 
   const memoizedValidate = useCallback((value, options) => {
     return validate(value, { ...options, required, maxLength, minLength });
