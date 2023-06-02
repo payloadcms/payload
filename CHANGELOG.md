@@ -1,5 +1,7 @@
 
 
+## [1.8.4](https://github.com/payloadcms/payload/compare/v1.8.4-canary.3...v1.8.4) (2023-06-02)
+
 ## [1.8.3](https://github.com/payloadcms/payload/compare/v1.8.3-canary.2...v1.8.3) (2023-05-24)
 
 
