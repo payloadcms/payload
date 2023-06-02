@@ -1,5 +1,16 @@
 
 
+## [1.8.3](https://github.com/payloadcms/payload/compare/v1.8.3-canary.2...v1.8.3) (2023-05-24)
+
+
+### Bug Fixes
+
+* [#2662](https://github.com/payloadcms/payload/issues/2662), draft=true querying by id ([3b78ab0](https://github.com/payloadcms/payload/commit/3b78ab04c7a68e39afa9936ac692169ed2c8fb74))
+* [#2685](https://github.com/payloadcms/payload/issues/2685), graphql querying relationships with custom id ([9bb5470](https://github.com/payloadcms/payload/commit/9bb54703423b3f0fdb242a5e63f322d346323b06))
+* adds credentials to doc access request ([#2705](https://github.com/payloadcms/payload/issues/2705)) ([c716954](https://github.com/payloadcms/payload/commit/c716954e89b0aef976cbcbef9ece981ec9bab233))
+* prevents add new relationship modal from adding duplicative values to the parent doc [#2688](https://github.com/payloadcms/payload/issues/2688) ([a2a8ac9](https://github.com/payloadcms/payload/commit/a2a8ac9549bd67e6ab578772689684fd2bc64872))
+* unable to clear relationships or open relationship drawer on mobile [#2691](https://github.com/payloadcms/payload/issues/2691) [#2692](https://github.com/payloadcms/payload/issues/2692) ([782f8ca](https://github.com/payloadcms/payload/commit/782f8ca047178cadb4214702854a0e0cb2d9eaab))
+
 ## [1.8.2](https://github.com/payloadcms/payload/compare/v1.8.1...v1.8.2) (2023-05-10)
 
 
@@ -589,7 +600,7 @@ If not already defined, add the following to your `compilerOptions`:
 
 #### ✋ Versions may need to be migrated
 
-This release includes a substantial simplification / optimization of how Versions work within Payload. They are now significantly more performant and easier to understand behind-the-scenes. We've removed ~600 lines of code and have ensured that Payload can be compatible with all flavors of Mongo - including versions earlier than 4.0, Azure Cosmos MongoDB, AWS' DocumentDB and more.
+This release includes a substantial simplification / optimization of how Versions work within Payload. They are now significantly more performant and easier to understand behind-the-scenes. We've removed ~600 lines of code and have ensured that Payload can be compatible with all flavors of MongoDB - including versions earlier than 4.0, Azure Cosmos MongoDB, AWS' DocumentDB and more.
 
 But, some of your draft-enabled documents may need to be migrated.
 

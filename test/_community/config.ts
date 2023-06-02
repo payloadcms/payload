@@ -15,6 +15,9 @@ export default buildConfig({
     MenuGlobal,
     // ...add more globals here
   ],
+  graphQL: {
+    schemaOutputFile: './test/_community/schema.graphql',
+  },
 
   onInit: async (payload) => {
     await payload.create({

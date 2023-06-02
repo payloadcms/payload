@@ -511,6 +511,27 @@ describe('fields', () => {
         await expect(menu).not.toContainText('Uploads3');
       });
 
+      test('should search correct useAsTitle field after toggling collection in list drawer', async () => {
+        await navigateToRichTextFields();
+
+        // open link drawer
+        const field = await page.locator('#field-richText');
+        const button = await field.locator('button.rich-text-relationship__list-drawer-toggler.list-drawer__toggler');
+        button.click();
+
+        // check that the search is on the `name` field of the `text-fields` collection
+        const drawer = await page.locator('[id^=list-drawer_1_]');
+        await expect(await drawer.locator('.search-filter__input')).toHaveAttribute('placeholder', 'Search by Text');
+
+        // change the selected collection to `array-fields`
+        await page.locator('.list-drawer__select-collection-wrap .rs__control').click();
+        const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu');
+        await menu.locator('.rs__option').getByText('Array Field').click();
+
+        // check that `id` is now the default search field
+        await expect(await drawer.locator('.search-filter__input')).toHaveAttribute('placeholder', 'Search by ID');
+      });
+
       test('should only list RTE enabled collections in link drawer', async () => {
         await navigateToRichTextFields();
 

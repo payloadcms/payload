@@ -1,3 +1,5 @@
+import ar from './ar.json';
+import bg from './bg.json';
 import cs from './cs.json';
 import de from './de.json';
 import en from './en.json';
@@ -21,9 +23,10 @@ import ua from './ua.json';
 import vi from './vi.json';
 import zh from './zh.json';
 import hu from './hu.json';
-import ar from './ar.json';
 
 export default {
+  ar,
+  bg,
   cs,
   de,
   en,
@@ -47,5 +50,4 @@ export default {
   vi,
   zh,
   hu,
-  ar,
 };
