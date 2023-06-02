@@ -1,12 +1,24 @@
+import type { ContextType } from 'payload/dist/admin/components/utilities/DocumentInfo/types'
 import type { Field } from 'payload/dist/fields/config/types'
 
-export type GenerateTitle = <T = any>(args: { doc: T; locale?: string }) => string | Promise<string>
-export type GenerateDescription = <T = any>(args: {
-  doc: T
-  locale?: string
-}) => string | Promise<string>
-export type GenerateImage = <T = any>(args: { doc: T; locale?: string }) => string | Promise<string>
-export type GenerateURL = <T = any>(args: { doc: T; locale?: string }) => string | Promise<string>
+export type GenerateTitle = <T = any>(
+  args: ContextType & { doc: T; locale?: string },
+) => string | Promise<string>
+
+export type GenerateDescription = <T = any>(
+  args: ContextType & {
+    doc: T
+    locale?: string
+  },
+) => string | Promise<string>
+
+export type GenerateImage = <T = any>(
+  args: ContextType & { doc: T; locale?: string },
+) => string | Promise<string>
+
+export type GenerateURL = <T = any>(
+  args: ContextType & { doc: T; locale?: string },
+) => string | Promise<string>
 
 export interface PluginConfig {
   collections?: string[]

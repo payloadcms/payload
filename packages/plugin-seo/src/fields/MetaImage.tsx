@@ -2,7 +2,7 @@
 
 import React, { useCallback } from 'react'
 import { useAllFormFields, useField } from 'payload/components/forms'
-import { useConfig, useLocale } from 'payload/components/utilities'
+import { useConfig, useDocumentInfo, useLocale } from 'payload/components/utilities'
 import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/Input'
 import { Props as UploadFieldType } from 'payload/dist/admin/components/forms/field-types/Upload/types'
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
@@ -21,22 +21,26 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = props => {
 
   const field: FieldType<string> = useField(props as Options)
 
-  const [fields] = useAllFormFields()
   const locale = useLocale()
+  const [fields] = useAllFormFields()
+  const docInfo = useDocumentInfo()
 
   const { value, setValue, showError } = field
 
-  const regenerateImage = useCallback(() => {
+  const regenerateImage = useCallback(async () => {
     const { generateImage } = pluginConfig
-    const getDescription = async () => {
-      let generatedImage
-      if (typeof generateImage === 'function') {
-        generatedImage = await generateImage({ doc: { ...fields }, locale })
-      }
-      setValue(generatedImage)
+    let generatedImage
+
+    if (typeof generateImage === 'function') {
+      generatedImage = await generateImage({
+        ...docInfo,
+        doc: { ...fields },
+        locale,
+      })
     }
-    getDescription()
-  }, [fields, setValue, pluginConfig, locale])
+
+    setValue(generatedImage)
+  }, [fields, setValue, pluginConfig, locale, docInfo])
 
   const hasImage = Boolean(value)
 

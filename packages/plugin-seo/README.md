@@ -2,7 +2,7 @@
 
 [![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-seo)](https://www.npmjs.com/package/@payloadcms/plugin-seo)
 
-A plugin for [Payload CMS](https://github.com/payloadcms/payload) to auto-generate SEO meta data based on the content of your documents.
+A plugin for [Payload](https://github.com/payloadcms/payload) to auto-generate SEO meta data based on the content of your documents.
 
 Core features:
 
@@ -94,7 +94,7 @@ export default config;
   ```js
   seo({
     ...
-    generateTitle: ({ doc, locale }) => `Website.com — ${doc?.title?.value}`,
+    generateTitle: ({ ...docInfo, doc, locale }) => `Website.com — ${doc?.title?.value}`,
   })
   ```
 
@@ -105,7 +105,7 @@ export default config;
   ```js
   seo({
     ...
-    generateDescription: ({ doc, locale }) => doc?.excerpt?.value
+    generateDescription: ({ ...docInfo, doc, locale }) => doc?.excerpt?.value
   })
   ```
 
@@ -116,7 +116,7 @@ export default config;
   ```js
   seo({
    ...
-   generateImage: ({ doc, locale }) => doc?.featuredImage?.value
+   generateImage: ({ ...docInfo, doc, locale }) => doc?.featuredImage?.value
   })
   ```
 
@@ -127,7 +127,7 @@ export default config;
   ```js
   seo({
     ...
-    generateURL: ({ doc, locale }) => `https://yoursite.com/${doc?.slug?.value}`
+    generateURL: ({ ...docInfo, doc, locale }) => `https://yoursite.com/${collection?.slug}/${doc?.slug?.value}`
   })
   ```
 

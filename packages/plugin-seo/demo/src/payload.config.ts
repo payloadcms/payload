@@ -50,7 +50,7 @@ export default buildConfig({
           label: 'og:title',
         },
       ],
-      generateTitle: ({ doc }: any) => `Website.com — ${doc?.title?.value}`,
+      generateTitle: (data: any) => `Website.com — ${data?.doc?.title?.value}`,
       generateDescription: ({ doc }: any) => doc?.excerpt?.value,
       generateURL: ({ doc, locale }: any) =>
         `https://yoursite.com/${locale ? locale + '/' : ''}${doc?.slug?.value || ''}`,

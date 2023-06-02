@@ -607,11 +607,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/escape-html@^1.0.1":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@types/escape-html/-/escape-html-1.0.2.tgz#072b7b13784fb3cee9c2450c22f36405983f5e3c"
-  integrity sha512-gaBLT8pdcexFztLSPRtriHeXY/Kn4907uOCZ4Q3lncFBkheAWOuNt53ypsF8szgxbEJ513UeBzcf4utN0EzEwA==
-
 "@types/eslint-scope@^3.7.3":
   version "3.7.4"
   resolved "https://registry.yarnpkg.com/@types/eslint-scope/-/eslint-scope-3.7.4.tgz#37fc1223f0786c39627068a12e94d6e6fc61de16"

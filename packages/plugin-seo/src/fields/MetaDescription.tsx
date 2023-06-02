@@ -2,7 +2,7 @@
 
 import React, { useCallback } from 'react'
 import { useAllFormFields, useField } from 'payload/components/forms'
-import { useLocale } from 'payload/components/utilities'
+import { useDocumentInfo, useLocale } from 'payload/components/utilities'
 import TextareaInput from 'payload/dist/admin/components/forms/field-types/Textarea/Input'
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
 import { TextareaField } from 'payload/dist/fields/config/types'
@@ -27,6 +27,7 @@ export const MetaDescription: React.FC<
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
+  const docInfo = useDocumentInfo()
 
   const field: FieldType<string> = useField({
     label,
@@ -36,18 +37,20 @@ export const MetaDescription: React.FC<
 
   const { value, setValue, showError } = field
 
-  const regenerateDescription = useCallback(() => {
+  const regenerateDescription = useCallback(async () => {
     const { generateDescription } = pluginConfig
+    let generatedDescription
 
-    const getDescription = async () => {
-      let generatedDescription
-      if (typeof generateDescription === 'function') {
-        generatedDescription = await generateDescription({ doc: { ...fields }, locale })
-      }
-      setValue(generatedDescription)
+    if (typeof generateDescription === 'function') {
+      generatedDescription = await generateDescription({
+        ...docInfo,
+        doc: { ...fields },
+        locale,
+      })
     }
-    getDescription()
-  }, [fields, setValue, pluginConfig, locale])
+
+    setValue(generatedDescription)
+  }, [fields, setValue, pluginConfig, locale, docInfo])
 
   return (
     <div

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useAllFormFields } from 'payload/components/forms'
-import { useLocale } from 'payload/components/utilities'
+import { useDocumentInfo, useLocale } from 'payload/components/utilities'
 import { Field } from 'payload/dist/admin/components/forms/Form/types'
 
 import { PluginConfig } from '../types'
@@ -10,6 +10,7 @@ import { PluginConfig } from '../types'
 type PreviewFieldWithProps = Field & {
   pluginConfig: PluginConfig
 }
+
 export const Preview: React.FC<PreviewFieldWithProps | {}> = props => {
   const {
     pluginConfig: { generateURL },
@@ -17,6 +18,7 @@ export const Preview: React.FC<PreviewFieldWithProps | {}> = props => {
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
+  const docInfo = useDocumentInfo()
 
   const {
     'meta.title': { value: metaTitle } = {} as Field,
@@ -28,12 +30,17 @@ export const Preview: React.FC<PreviewFieldWithProps | {}> = props => {
   useEffect(() => {
     const getHref = async () => {
       if (typeof generateURL === 'function' && !href) {
-        const newHref = await generateURL({ doc: { fields }, locale })
+        const newHref = await generateURL({
+          ...docInfo,
+          doc: { fields },
+          locale,
+        })
+
         setHref(newHref)
       }
     }
     getHref()
-  }, [generateURL, fields, href, locale])
+  }, [generateURL, fields, href, locale, docInfo])
 
   return (
     <div>

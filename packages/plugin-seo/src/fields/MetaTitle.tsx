@@ -2,7 +2,7 @@
 
 import React, { useCallback } from 'react'
 import { useAllFormFields, useField } from 'payload/components/forms'
-import { useLocale } from 'payload/components/utilities'
+import { useDocumentInfo, useLocale } from 'payload/components/utilities'
 import TextInputField from 'payload/dist/admin/components/forms/field-types/Text/Input'
 import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types'
 import { FieldType as FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
@@ -29,21 +29,24 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = props => {
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
+  const docInfo = useDocumentInfo()
 
   const { value, setValue, showError } = field
 
-  const regenerateTitle = useCallback(() => {
+  const regenerateTitle = useCallback(async () => {
     const { generateTitle } = pluginConfig
+    let generatedTitle
 
-    const getTitle = async () => {
-      let generatedTitle
-      if (typeof generateTitle === 'function') {
-        generatedTitle = await generateTitle({ doc: { ...fields }, locale })
-      }
-      setValue(generatedTitle)
+    if (typeof generateTitle === 'function') {
+      generatedTitle = await generateTitle({
+        ...docInfo,
+        doc: { ...fields },
+        locale,
+      })
     }
-    getTitle()
-  }, [fields, setValue, pluginConfig, locale])
+
+    setValue(generatedTitle)
+  }, [fields, setValue, pluginConfig, locale, docInfo])
 
   return (
     <div
