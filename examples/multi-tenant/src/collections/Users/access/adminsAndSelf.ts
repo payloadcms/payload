@@ -5,7 +5,10 @@ import { isSuperAdmin } from '../../utilities/isSuperAdmin'
 
 export const adminsAndSelf: Access<any, User> = async ({ req: { user } }) => {
   if (user) {
-    if (isSuperAdmin(user)) {
+    const isSuper = isSuperAdmin(user)
+
+    // allow super-admins through only if they have not scoped their user via `lastLoggedInTenant`
+    if (isSuper && !user?.lastLoggedInTenant) {
       return true
     }
 
@@ -17,20 +20,34 @@ export const adminsAndSelf: Access<any, User> = async ({ req: { user } }) => {
             equals: user.id,
           },
         },
-        {
-          'tenants.tenant': {
-            in:
-              user?.tenants
-                ?.map(({ tenant, roles }) =>
-                  roles.includes('admin')
-                    ? typeof tenant === 'string'
-                      ? tenant
-                      : tenant.id
-                    : null,
-                ) // eslint-disable-line function-paren-newline
-                .filter(Boolean) || [],
-          },
-        },
+        ...(isSuper
+          ? [
+              {
+                'tenants.tenant': {
+                  in: [
+                    typeof user?.lastLoggedInTenant === 'string'
+                      ? user?.lastLoggedInTenant
+                      : user?.lastLoggedInTenant?.id,
+                  ].filter(Boolean),
+                },
+              },
+            ]
+          : [
+              {
+                'tenants.tenant': {
+                  in:
+                    user?.tenants
+                      ?.map(({ tenant, roles }) =>
+                        roles.includes('admin')
+                          ? typeof tenant === 'string'
+                            ? tenant
+                            : tenant.id
+                          : null,
+                      ) // eslint-disable-line function-paren-newline
+                      .filter(Boolean) || [],
+                },
+              },
+            ]),
       ],
     }
   }

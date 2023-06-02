@@ -6,6 +6,7 @@ import path from 'path';
 import mongoose from 'mongoose';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
+import { SendMailOptions } from 'nodemailer';
 import { BulkOperationResult, Collection, CollectionModel } from './collections/config/types';
 import { EmailOptions, InitOptions, SanitizedConfig } from './config/types';
 import { TypeWithVersion } from './versions/types';
@@ -17,7 +18,7 @@ import { ErrorHandler } from './express/middleware/errorHandler';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { decrypt, encrypt } from './auth/crypto';
-import { BuildEmailResult, Message } from './email/types';
+import { BuildEmailResult } from './email/types';
 import { Preferences } from './preferences/types';
 
 import { Options as CreateOptions } from './collections/operations/local/create';
@@ -88,7 +89,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   email: BuildEmailResult;
 
-  sendEmail: (message: Message) => Promise<unknown>;
+  sendEmail: (message: SendMailOptions) => Promise<unknown>;
 
   secret: string;
 

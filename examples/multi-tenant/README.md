@@ -53,6 +53,8 @@ This applies to each collection in the following ways:
 - `tenants`: Only super-admins and tenant-admins can read, create, update, or delete tenants. See [Tenants](#tenants) for more details.
 - `pages`: Everyone can access pages, but only super-admins and tenant-admins can create, update, or delete them.
 
+When a user logs in, a `lastLoggedInTenant` field is saved to their profile. This is done by reading the value of `req.headers.host`, querying for a tenant with a matching `domain`, and verifying that the user is a member of that tenant. This field is then used to automatically assign the tenant to any documents that the user creates, such as pages. Super-admins can also use this field to browse the admin panel as a specific tenant.
+
 > If you have versions and drafts enabled on your pages, you will need to add additional read access control condition to check the user's tenants that prevents them from accessing draft documents of other tenants.
 
 For more details on how to extend this functionality, see the [Payload Access Control](https://payloadcms.com/docs/access-control/overview#access-control) docs.
