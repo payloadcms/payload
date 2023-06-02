@@ -32,7 +32,7 @@
     <img src="https://img.shields.io/github/commit-activity/m/payloadcms/payload?style=flat-square" alt="git commit activity"/>
   </a>
   &nbsp;
-  <a href="https://discord.com/invite/r6sCXqVk3v">
+  <a href="https://discord.gg/payload">
     <img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord&color=7289da&style=flat-square" />
   </a>
   &nbsp;

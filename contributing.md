@@ -49,6 +49,12 @@ The directory split up in this way specifically to reduce friction when creating
 
 The following command will start Payload with your config: `yarn dev my-test-dir`. This command will start up Payload using your config and refresh a test database on every restart.
 
+If you wish to use to your own Mongo database for the `test` directory instead of using the in memory database, all you need to do is add the following env vars to the `test/dev.ts` file:
+
+- `process.env.NODE_ENV`
+- `process.env.PAYLOAD_TEST_MONGO_URL`
+- Simply set `process.env.NODE_ENV` to `test` and set `process.env.PAYLOAD_TEST_MONGO_URL` to your mongo url e.g. `mongodb://127.0.0.1/your-test-db`.
+
 NOTE: It is recommended to add the test credentials (located in `test/credentials.ts`) to your autofill for `localhost:3000/admin` as this will be required on every nodemon restart. The default credentials are `dev@payloadcms.com` as E-Mail and `test` as password.
 
 ## Pull Requests
