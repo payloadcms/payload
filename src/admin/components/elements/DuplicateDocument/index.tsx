@@ -22,7 +22,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
   const { toggleModal } = useModal();
   const { setModified } = useForm();
   const { serverURL, routes: { api }, localization: localization_ } = useConfig();
-  const localization = localization_ && unifiedLocaleConfig(localization_);
+  const localization = localization_ ? unifiedLocaleConfig(localization_) : undefined;
   const { routes: { admin } } = useConfig();
   const [hasClicked, setHasClicked] = useState<boolean>(false);
   const { t, i18n } = useTranslation('general');

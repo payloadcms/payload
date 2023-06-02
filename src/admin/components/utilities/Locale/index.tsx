@@ -15,7 +15,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({
 }) => {
   const { localization } = useConfig();
   // localization but extracts locales into string[] when an object is provided
-  const unifiedLocalization = localization && unifiedLocaleConfig(localization);
+  const unifiedLocalization = localization ? unifiedLocaleConfig(localization) : undefined;
   const { user } = useAuth();
   const defaultLocale = localization && localization.defaultLocale
     ? localization.defaultLocale
