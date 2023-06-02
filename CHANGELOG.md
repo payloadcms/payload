@@ -1,5 +1,12 @@
 
 
+## [1.8.4-canary.4](https://github.com/payloadcms/payload/compare/v1.8.4-canary.3...v1.8.4-canary.4) (2023-06-02)
+
+
+### Bug Fixes
+
+* group row hoisting ([#2683](https://github.com/payloadcms/payload/issues/2683)) ([1626e17](https://github.com/payloadcms/payload/commit/1626e173b7eced83c59e8eb4f70b0bb68fdb0e7a))
+
 ## [1.8.4-canary.3](https://github.com/payloadcms/payload/compare/v1.8.4-canary.2...v1.8.4-canary.3) (2023-06-02)
 
 
