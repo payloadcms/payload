@@ -8,7 +8,7 @@ keywords: headless cms, typescript, documentation, Content Management System, cm
 
 When working with GraphQL it is useful to have the schema for development of other projects that need to call on your GraphQL endpoint. In Payload the schema is controlled by your collections and globals and is made available to the developer or third parties, it is not necessary for developers using Payload to write schema types manually.
 
-### GraphQL Schema generate script
+### Schema generatation script
 
 Run the following command in a Payload project to generate your project's GraphQL schema from Payload:
 
@@ -16,9 +16,9 @@ Run the following command in a Payload project to generate your project's GraphQ
 payload generate:graphQLSchema
 ```
 
-You can run this command whenever you need to regenerate your graphQL schema and output it to a file, and then you can use the schema for writing your own graphQL elsewhere in other projects.
+You can run this command whenever you need to regenerate your GraphQL schema and output it to a file, and then you can use the schema for writing your own GraphQL elsewhere in other projects.
 
-### GraphQL schema output file
+### Custom output file path
 
 ```js
 {
@@ -29,12 +29,51 @@ You can run this command whenever you need to regenerate your graphQL schema and
 }
 ```
 
+### Custom Field Schemas
+
+For `array`, `block`, `group` and named `tab` fields, you can generate top level reusable interfaces. The following group field config:
+
+```ts
+{
+  type: 'group',
+  name: 'meta',
+  interfaceName: 'SharedMeta', <-- here!!
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+    {
+      name: 'description',
+      type: 'text',
+    },
+  ],
+}
+```
+
+will generate:
+
+```ts
+// a top level reusable type!!
+type SharedMeta {
+  title: String
+  description: String
+}
+
+// example usage inside collection schema
+type Collection1 {
+  // ...other fields
+  meta: SharedMeta
+}
+```
+
 The above example outputs all your definitions to a file relative from your payload config as `./graphql/schema.graphql`. By default, the file will be output to your current working directory as `schema.graphql`.
 
 #### Adding an NPM script
 
 <Banner type="warning">
-  <strong>Important:</strong><br/>
+  <strong>Important</strong>
+  <br />
   Payload needs to be able to find your config to generate your GraphQL schema.
 </Banner>
 
@@ -45,8 +84,8 @@ To add an NPM script to generate your types and show Payload where to find your 
 ```json
 {
   "scripts": {
-    "generate:graphQLSchema": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:graphQLSchema",
-  },
+    "generate:graphQLSchema": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:graphQLSchema"
+  }
 }
 ```
 
