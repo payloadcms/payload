@@ -40,24 +40,25 @@ const connectMongoose = async (
       urlToConnect = mongoMemoryServer.getUri();
       successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!';
     }
-
-    try {
-      await mongoose.connect(urlToConnect, connectionOptions);
-
-      if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-        logger.info('---- DROPPING DATABASE ----');
-        await mongoose.connection.dropDatabase();
-        logger.info('---- DROPPED DATABASE ----');
-      }
-      logger.info(successfulConnectionMessage);
-    } catch (err) {
-      logger.error(
-        `Error: cannot connect to MongoDB. Details: ${err.message}`,
-        err,
-      );
-      process.exit(1);
-    }
   }
+
+  try {
+    await mongoose.connect(urlToConnect, connectionOptions);
+
+    if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
+      logger.info('---- DROPPING DATABASE ----');
+      await mongoose.connection.dropDatabase();
+      logger.info('---- DROPPED DATABASE ----');
+    }
+    logger.info(successfulConnectionMessage);
+  } catch (err) {
+    logger.error(
+      `Error: cannot connect to MongoDB. Details: ${err.message}`,
+      err,
+    );
+    process.exit(1);
+  }
+
   return mongoMemoryServer;
 };
 export default connectMongoose;
