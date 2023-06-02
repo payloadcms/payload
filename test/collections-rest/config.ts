@@ -115,27 +115,59 @@ export default buildConfig({
           },
         },
         {
-          name: 'group',
-          type: 'group',
-          fields: [
+          type: 'tabs',
+          tabs: [
             {
-              type: 'row',
+              label: 'Tab1',
+              name: 'D1',
               fields: [
                 {
-                  type: 'text',
-                  name: 'textInRowInGroup',
-                  defaultValue: 'textInRowInGroup',
-                },
-              ],
-            },
-            {
-              type: 'collapsible',
-              label: 'Collapsible',
-              fields: [
-                {
-                  type: 'text',
-                  name: 'textInCollapsibleInGroup',
-                  defaultValue: 'textInCollapsibleInGroup',
+                  name: 'D2',
+                  type: 'group',
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          type: 'collapsible',
+                          label: 'Collapsible2',
+                          fields: [
+                            {
+                              type: 'tabs',
+                              tabs: [
+                                {
+                                  label: 'Tab1',
+                                  fields: [
+                                    {
+                                      name: 'D3',
+                                      type: 'group',
+                                      fields: [
+                                        {
+                                          type: 'row',
+                                          fields: [
+                                            {
+                                              type: 'collapsible',
+                                              label: 'Collapsible2',
+                                              fields: [
+                                                {
+                                                  type: 'text',
+                                                  name: 'D4',
+                                                },
+                                              ],
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
                 },
               ],
             },

@@ -9,6 +9,7 @@ export interface Config {
   collections: {
     users: User;
     posts: Post;
+    'custom-ids': CustomId;
     relation: Relation;
     dummy: Dummy;
   };
@@ -32,6 +33,7 @@ export interface Post {
   number?: number;
   min?: number;
   relationField?: string | Relation;
+  relationToCustomID?: number | CustomId;
   relationHasManyField?: string[] | Relation[];
   relationMultiRelationTo?:
     | {
@@ -63,9 +65,23 @@ export interface Post {
             relationTo: 'dummy';
           }
       )[];
-  group?: {
-    textInRowInGroup?: string;
-    textInCollapsibleInGroup?: string;
+  A1?: {
+    A2?: string;
+  };
+  B1?: {
+    B2?: string;
+  };
+  C1?: {
+    C2?: {
+      C3?: string;
+    };
+  };
+  D1: {
+    D2?: {
+      D3?: {
+        D4?: string;
+      };
+    };
   };
   updatedAt: string;
   createdAt: string;
@@ -73,6 +89,12 @@ export interface Post {
 export interface Relation {
   id: string;
   name?: string;
+  updatedAt: string;
+  createdAt: string;
+}
+export interface CustomId {
+  id: number;
+  title?: string;
   updatedAt: string;
   createdAt: string;
 }
