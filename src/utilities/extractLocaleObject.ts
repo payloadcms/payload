@@ -6,7 +6,9 @@ export const extractLocaleObject = (
   localizationConfig: LocalizationConfig,
   locale: string,
 ): LabeledLocale | undefined => {
-  if (!localizationConfig) return undefined;
+  if (!localizationConfig?.locales || localizationConfig.locales.length === 0) {
+    return undefined;
+  }
   const { locales } = localizationConfig;
   const firstLocale = locales[0];
   if (typeof firstLocale === 'string') {
