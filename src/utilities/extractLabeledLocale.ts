@@ -2,7 +2,7 @@ import { LocalizationConfig, LabeledLocale } from '../config/types';
 /*
  return the LabeledLocale for given locale string, else return null
 */
-export const extractLocaleObject = (
+export const extractLabeledLocale = (
   localizationConfig: LocalizationConfig,
   locale: string,
 ): LabeledLocale | undefined => {
@@ -20,4 +20,4 @@ export const extractLocaleObject = (
   );
 };
 
-export default extractLocaleObject;
+export default extractLabeledLocale;
