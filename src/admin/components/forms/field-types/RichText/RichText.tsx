@@ -27,7 +27,7 @@ import { useEditDepth } from '../../../utilities/EditDepth';
 
 import './index.scss';
 
-const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'indent', 'link', 'relationship', 'upload'];
+const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'textAlign', 'indent', 'link', 'relationship', 'upload'];
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
 
 const baseClass = 'rich-text';
@@ -77,13 +77,21 @@ const RichText: React.FC<Props> = (props) => {
   const drawerIsOpen = drawerDepth > 1;
 
   const renderElement = useCallback(({ attributes, children, element }) => {
-    const matchedElement = enabledElements[element?.type];
+    const matchedElement = enabledElements[element.type];
     const Element = matchedElement?.Element;
 
+    const alignment = { textAlign: element.textAlign };
+
+    let attr = { ...attributes };
+
+    if (element.textAlign) {
+      attr = { ...attr, style: { textAlign: element.textAlign } };
+    }
+
     if (Element) {
-      return (
+      const el = (
         <Element
-          attributes={attributes}
+          attributes={attr}
           element={element}
           path={path}
           fieldProps={props}
@@ -92,9 +100,18 @@ const RichText: React.FC<Props> = (props) => {
           {children}
         </Element>
       );
-    }
 
-    return <div {...attributes}>{children}</div>;
+      return el;
+    }
+    return (
+      <div
+        style={alignment}
+        {...attr}
+      >
+        {children}
+
+      </div>
+    );
   }, [enabledElements, path, props]);
 
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
@@ -163,7 +180,6 @@ const RichText: React.FC<Props> = (props) => {
     );
 
     CreatedEditor = withHTML(CreatedEditor);
-
     CreatedEditor = enablePlugins(CreatedEditor, elements);
     CreatedEditor = enablePlugins(CreatedEditor, leaves);
 

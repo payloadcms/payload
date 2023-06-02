@@ -5,12 +5,15 @@ import { isWithinListItem } from './isWithinListItem';
 
 const toggleElement = (editor: Editor, format: string, blockType = 'type'): void => {
   const isActive = isElementActive(editor, format, blockType);
-  let type = format;
+
+  const formatByBlockType = {
+    [blockType]: format,
+  };
 
   const isWithinLI = isWithinListItem(editor);
 
   if (isActive) {
-    type = undefined;
+    formatByBlockType[blockType] = undefined;
   }
 
   if (!isActive && isWithinLI) {
@@ -20,7 +23,7 @@ const toggleElement = (editor: Editor, format: string, blockType = 'type'): void
     });
   }
 
-  Transforms.setNodes(editor, { type }, {
+  Transforms.setNodes(editor, { [blockType]: formatByBlockType[blockType] }, {
     at: Editor.unhangRange(editor, editor.selection),
   });
 
