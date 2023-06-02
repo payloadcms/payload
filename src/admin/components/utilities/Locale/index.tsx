@@ -88,5 +88,9 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({
 };
 
 export const useLocale = (): string => useContext(LocaleContext);
+
+/**
+ * A hook that returns the current labeled locale. If the current locale is a normal locale and not a labeled one, this will return null.
+ */
 export const useLabeledLocale = (): LabeledLocale | null => useContext(LabeledLocaleContext);
 export default LocaleContext;
