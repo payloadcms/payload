@@ -85,6 +85,7 @@ Payload is a CMS that has been designed for developers from the ground up to del
 - Highly secure thanks to HTTP-only cookies, CSRF protection, and more
 
 <a target="_blank" href="https://github.com/payloadcms/payload/discussions"><strong>Request Feature</strong></a>
+
 ## 🚀 Quick Start
 
 Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
@@ -105,13 +106,29 @@ Check out the [Payload website](https://payloadcms.com/docs/getting-started/what
 
 If you want to add contributions to this repository, please follow the instructions in [contributing.md](./contributing.md).
 
+## 📚 Examples and Templates
+
+The examples directory is a great resource for learning how to setup Payload in a variety of different ways. There are also a number of templates to help get you going very quickly. If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
+
+- [Examples Directory](./examples)
+- [Official Templates](https://github.com/orgs/payloadcms/repositories?q=topic%3Apayload-template)
+- [Community Templates](https://github.com/topics/payload-template)
+
+## 🔌 Plugins
+
+Payload is highly extensible and allows you to install or distribute plugins that add or remove functionality. There are both officially-supported and community-supported plugins available. If you maintain your own plugin, consider adding the `payload-plugin` topic to your GitHub repository for others to find.
+
+- [Official Plugins](https://github.com/orgs/payloadcms/repositories?q=topic%3Apayload-plugin)
+- [Community Plugins](https://github.com/topics/payload-plugin)
+
 ## 🚨 Need help?
 
-There are lots of good conversations and resources in our Github Discussions board & our Discord Server. If you're struggling with something, chances are, someone's already solved what you're up against. :point_down:
+There are lots of good conversations and resources in our Github Discussions board and our Discord Server. If you're struggling with something, chances are, someone's already solved what you're up against. :point_down:
 
 - [GitHub Discussions](https://github.com/payloadcms/payload/discussions)
 - [GitHub Issues](https://github.com/payloadcms/payload/issues)
 - [Discord](https://t.co/30APlsQUPB)
+- [Community Help](https://payloadcms.com/community-help)
 
 ## ⭐ Like what we're doing? Give us a star
 

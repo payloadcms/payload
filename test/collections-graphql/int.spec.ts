@@ -363,6 +363,28 @@ describe('collections-graphql', () => {
 
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }));
       });
+
+      it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
+        const withNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } });
+        const query = `{
+          Posts(where: { D1__D2__D3__D4: { equals: "nested message" } }) {
+            docs {
+              id
+              D1 {
+                D2 {
+                  D3 {
+                    D4
+                  }
+                }
+              }
+            }
+          }
+        }`;
+        const response = await client.request(query);
+        const { docs } = response.Posts;
+
+        expect(docs).toContainEqual(expect.objectContaining({ id: withNestedField.id, D1: { D2: { D3: { D4: 'nested message' } } } }));
+      });
     });
 
     describe('relationships', () => {
