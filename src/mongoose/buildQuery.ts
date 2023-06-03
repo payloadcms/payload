@@ -381,14 +381,13 @@ export class ParamParser {
         collection.fields = fields;
 
         if (!this.policies.collections[collectionSlug]) {
-          const [policy, promises] = getEntityPolicies({
+          const policy = await getEntityPolicies({
             req: this.req,
             entity: collection,
             operations: ['read'],
             type: 'collection',
           });
 
-          await Promise.all(promises);
           this.policies.collections[collectionSlug] = policy;
         }
 
@@ -405,14 +404,13 @@ export class ParamParser {
           const global = { ...this.req.payload.globals.config.find(({ slug }) => slug === globalSlug) };
           global.fields = fields;
 
-          const [policy, promises] = getEntityPolicies({
+          const policy = await getEntityPolicies({
             req: this.req,
             entity: global,
             operations: ['read'],
             type: 'global',
           });
 
-          await Promise.all(promises);
           this.policies.globals[globalSlug] = policy;
         }
 

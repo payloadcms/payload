@@ -114,21 +114,16 @@ const RichTextFields: CollectionConfig = {
           'upload',
         ],
         link: {
-          fields: () => [
-            {
-              required: false,
-              name: 'rel',
-              label: 'Rel Attribute',
-              type: 'select',
-              hasMany: true,
-              options: [
-                'noopener', 'noreferrer', 'nofollow',
-              ],
-              admin: {
-                description: 'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+          fields: ({ defaultFields }) => {
+            return [
+              ...defaultFields,
+              {
+                label: 'Custom',
+                name: 'customLinkField',
+                type: 'text',
               },
-            },
-          ],
+            ];
+          },
         },
         upload: {
           collections: {
