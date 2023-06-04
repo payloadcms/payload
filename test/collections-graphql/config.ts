@@ -126,6 +126,10 @@ export default buildConfig({
           type: 'group',
           fields: [
             {
+              type: 'text',
+              name: 'C2Text',
+            },
+            {
               type: 'row',
               fields: [
                 {
