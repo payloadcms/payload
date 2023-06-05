@@ -10,21 +10,22 @@ import { getTranslation } from '../../../../../utilities/getTranslation';
 import './index.scss';
 
 export type TextInputProps = Omit<TextField, 'type'> & {
-  showError?: boolean
-  errorMessage?: string
-  readOnly?: boolean
-  path: string
-  required?: boolean
-  value?: string
-  description?: Description
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
-  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
-  placeholder?: Record<string, string> | string
-  style?: React.CSSProperties
-  className?: string
-  width?: string
-  inputRef?: React.MutableRefObject<HTMLInputElement>
-}
+  showError?: boolean;
+  errorMessage?: string;
+  readOnly?: boolean;
+  path: string;
+  required?: boolean;
+  value?: string;
+  description?: Description;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
+  placeholder?: Record<string, string> | string;
+  style?: React.CSSProperties;
+  className?: string;
+  width?: string;
+  inputRef?: React.MutableRefObject<HTMLInputElement>;
+  rtl?:boolean;
+};
 
 const TextInput: React.FC<TextInputProps> = (props) => {
   const {
@@ -43,6 +44,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
     className,
     width,
     inputRef,
+    rtl,
   } = props;
 
   const { i18n } = useTranslation();
@@ -82,6 +84,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
         placeholder={getTranslation(placeholder, i18n)}
         type="text"
         name={path}
+        data-rtl={rtl}
       />
       <FieldDescription
         className={`field-description-${path.replace(/\./gi, '__')}`}

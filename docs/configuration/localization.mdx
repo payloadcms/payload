@@ -33,6 +33,34 @@ export default buildConfig({
 });
 ```
 
+**Example Payload config set up for localization with labeled locales:**
+
+```ts
+import { buildConfig } from 'payload/config'
+
+export default buildConfig({
+  collections: [
+    // collections go here
+  ],
+  localization: {
+  locales: [
+    {
+      label: "English",
+      value: "en",
+    },
+    {
+      label: "Arabic",
+      value: "ar",
+      // opt-in to setting default text-alignment on Input fields to rtl when current locale is rtl
+      rtl: true,
+    },
+  ],
+  defaultLocale: "en",
+  fallback: true,
+  },
+});
+```
+
 **Here is a brief explanation of each of the options available within the `localization` property:**
 
 **`locales`**

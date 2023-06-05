@@ -341,6 +341,7 @@ type Post_B1 {
 }
 
 type Post_C1 {
+  C2Text: String
   C2: Post_C1_C2
 }
 
@@ -386,6 +387,7 @@ input Post_where {
   relationMultiRelationToHasMany: Post_relationMultiRelationToHasMany_Relation
   A1__A2: Post_A1__A2_operator
   B1__B2: Post_B1__B2_operator
+  C1__C2Text: Post_C1__C2Text_operator
   C1__C2__C3: Post_C1__C2__C3_operator
   D1__D2__D3__D4: Post_D1__D2__D3__D4_operator
   updatedAt: Post_updatedAt_operator
@@ -506,6 +508,17 @@ input Post_B1__B2_operator {
   exists: Boolean
 }
 
+input Post_C1__C2Text_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
 input Post_C1__C2__C3_operator {
   equals: String
   not_equals: String
@@ -573,6 +586,7 @@ input Post_where_or {
   relationMultiRelationToHasMany: Post_relationMultiRelationToHasMany_Relation
   A1__A2: Post_A1__A2_operator
   B1__B2: Post_B1__B2_operator
+  C1__C2Text: Post_C1__C2Text_operator
   C1__C2__C3: Post_C1__C2__C3_operator
   D1__D2__D3__D4: Post_D1__D2__D3__D4_operator
   updatedAt: Post_updatedAt_operator
@@ -592,6 +606,7 @@ input Post_where_and {
   relationMultiRelationToHasMany: Post_relationMultiRelationToHasMany_Relation
   A1__A2: Post_A1__A2_operator
   B1__B2: Post_B1__B2_operator
+  C1__C2Text: Post_C1__C2Text_operator
   C1__C2__C3: Post_C1__C2__C3_operator
   D1__D2__D3__D4: Post_D1__D2__D3__D4_operator
   updatedAt: Post_updatedAt_operator
@@ -959,7 +974,31 @@ type PostsDocAccessFields_C1_Delete {
 }
 
 type PostsDocAccessFields_C1_Fields {
+  C2Text: PostsDocAccessFields_C1_C2Text
   C2: PostsDocAccessFields_C1_C2
+}
+
+type PostsDocAccessFields_C1_C2Text {
+  create: PostsDocAccessFields_C1_C2Text_Create
+  read: PostsDocAccessFields_C1_C2Text_Read
+  update: PostsDocAccessFields_C1_C2Text_Update
+  delete: PostsDocAccessFields_C1_C2Text_Delete
+}
+
+type PostsDocAccessFields_C1_C2Text_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_C1_C2Text_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_C1_C2Text_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_C1_C2Text_Delete {
+  permission: Boolean!
 }
 
 type PostsDocAccessFields_C1_C2 {
@@ -2247,7 +2286,31 @@ type PostsFields_C1_Delete {
 }
 
 type PostsFields_C1_Fields {
+  C2Text: PostsFields_C1_C2Text
   C2: PostsFields_C1_C2
+}
+
+type PostsFields_C1_C2Text {
+  create: PostsFields_C1_C2Text_Create
+  read: PostsFields_C1_C2Text_Read
+  update: PostsFields_C1_C2Text_Update
+  delete: PostsFields_C1_C2Text_Delete
+}
+
+type PostsFields_C1_C2Text_Create {
+  permission: Boolean!
+}
+
+type PostsFields_C1_C2Text_Read {
+  permission: Boolean!
+}
+
+type PostsFields_C1_C2Text_Update {
+  permission: Boolean!
+}
+
+type PostsFields_C1_C2Text_Delete {
+  permission: Boolean!
 }
 
 type PostsFields_C1_C2 {
@@ -2897,6 +2960,7 @@ input mutationPost_B1Input {
 }
 
 input mutationPost_C1Input {
+  C2Text: String
   C2: mutationPost_C1_C2Input
 }
 
@@ -2963,6 +3027,7 @@ input mutationPostUpdate_B1Input {
 }
 
 input mutationPostUpdate_C1Input {
+  C2Text: String
   C2: mutationPostUpdate_C1_C2Input
 }
 

@@ -25,7 +25,10 @@ const recursivelyBuildNestedPaths = (parentName: string, nestedFieldName2: strin
   const nestedPaths = field.fields.reduce((nestedFields, nestedField) => {
     if (!fieldIsPresentationalOnly(nestedField)) {
       if (!fieldAffectsData(nestedField)) {
-        return recursivelyBuildNestedPaths(parentName, nestedFieldName, nestedField);
+        return [
+          ...nestedFields,
+          ...recursivelyBuildNestedPaths(parentName, nestedFieldName, nestedField),
+        ];
       }
 
       const nestedPathName = fieldAffectsData(nestedField) ? `${nestedFieldName ? `${nestedFieldName}__` : ''}${nestedField.name}` : undefined;

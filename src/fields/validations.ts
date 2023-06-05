@@ -303,13 +303,13 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
 
     const invalidRelationships = values.filter((val) => {
       let collection: string;
-      let requestedID: string | number;
+      let requestedID;
 
       if (typeof relationTo === 'string') {
         collection = relationTo;
 
         // custom id
-        if (typeof val === 'string' || typeof val === 'number') {
+        if (val) {
           requestedID = val;
         }
       }

@@ -23,6 +23,7 @@ export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
   className?: string
   width?: string
   rows?: number
+  rtl?: boolean;
 }
 
 const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
@@ -41,6 +42,7 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     errorMessage,
     onChange,
     rows,
+    rtl,
   } = props;
 
   const { i18n } = useTranslation();
@@ -88,6 +90,7 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             placeholder={getTranslation(placeholder, i18n)}
             name={path}
             rows={rows}
+            data-rtl={rtl}
           />
         </div>
       </label>

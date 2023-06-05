@@ -34,6 +34,7 @@ import {
   TextField, UnnamedTab,
   UploadField,
 } from '../fields/config/types';
+import unifiedLocaleConfig from '../utilities/unifiedLocaleConfig';
 
 export type BuildSchemaOptions = {
   options?: SchemaOptions
@@ -239,8 +240,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     let schemaToReturn: { [key: string]: any } = {};
 
     if (field.localized && config.localization) {
+      const localization = unifiedLocaleConfig(config.localization);
       schemaToReturn = {
-        type: config.localization.locales.reduce((locales, locale) => {
+        type: localization.locales.reduce((locales, locale) => {
           let localeSchema: { [key: string]: any } = {};
 
           if (hasManyRelations) {
