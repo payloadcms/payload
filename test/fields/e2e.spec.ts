@@ -511,6 +511,27 @@ describe('fields', () => {
         await expect(menu).not.toContainText('Uploads3');
       });
 
+      test('should search correct useAsTitle field after toggling collection in list drawer', async () => {
+        await navigateToRichTextFields();
+
+        // open link drawer
+        const field = await page.locator('#field-richText');
+        const button = await field.locator('button.rich-text-relationship__list-drawer-toggler.list-drawer__toggler');
+        button.click();
+
+        // check that the search is on the `name` field of the `text-fields` collection
+        const drawer = await page.locator('[id^=list-drawer_1_]');
+        await expect(await drawer.locator('.search-filter__input')).toHaveAttribute('placeholder', 'Search by Text');
+
+        // change the selected collection to `array-fields`
+        await page.locator('.list-drawer__select-collection-wrap .rs__control').click();
+        const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu');
+        await menu.locator('.rs__option').getByText('Array Field').click();
+
+        // check that `id` is now the default search field
+        await expect(await drawer.locator('.search-filter__input')).toHaveAttribute('placeholder', 'Search by ID');
+      });
+
       test('should only list RTE enabled collections in link drawer', async () => {
         await navigateToRichTextFields();
 
@@ -542,16 +563,41 @@ describe('fields', () => {
       });
 
       test('should respect customizing the default fields', async () => {
+        const linkText = 'link';
+        const value = 'test value';
         await navigateToRichTextFields();
         const field = page.locator('.rich-text', { has: page.locator('#field-richTextCustomFields') });
+        // open link drawer
         const button = await field.locator('button.rich-text__button.link');
-
         await button.click();
 
+        // fill link fields
         const linkDrawer = await page.locator('[id^=drawer_1_rich-text-link-]');
-        await expect(linkDrawer).toBeVisible();
-        const fieldCount = await linkDrawer.locator('.render-fields > .field-type').count();
-        await expect(fieldCount).toEqual(1);
+        const fields = await linkDrawer.locator('.render-fields > .field-type');
+        await fields.locator('#field-text').fill(linkText);
+        await fields.locator('#field-url').fill('https://payloadcms.com');
+        const input = await fields.locator('#field-fields__customLinkField');
+        await input.fill(value);
+
+        // submit link closing drawer
+        await linkDrawer.locator('button[type="submit"]').click();
+        const linkInEditor = field.locator(`.rich-text-link >> text="${linkText}"`);
+        await saveDocAndAssert(page);
+
+        // open modal again
+        await linkInEditor.click();
+
+        const popup = page.locator('.popup--active .rich-text-link__popup');
+        await expect(popup).toBeVisible();
+
+        await popup.locator('.rich-text-link__link-edit').click();
+
+        const linkDrawer2 = await page.locator('[id^=drawer_1_rich-text-link-]');
+        const fields2 = await linkDrawer2.locator('.render-fields > .field-type');
+        const input2 = await fields2.locator('#field-fields__customLinkField');
+
+
+        await expect(input2).toHaveValue(value);
       });
     });
 

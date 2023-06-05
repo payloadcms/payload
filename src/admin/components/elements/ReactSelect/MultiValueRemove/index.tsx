@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MultiValueRemoveProps } from 'react-select/src/components/MultiValue';
+import { MultiValueRemoveProps } from 'react-select';
 import X from '../../../icons/X';
 import Tooltip from '../../Tooltip';
 import { Option as OptionType } from '../types';
@@ -8,23 +8,33 @@ import './index.scss';
 
 const baseClass = 'multi-value-remove';
 
-export const MultiValueRemove: React.FC<MultiValueRemoveProps<OptionType>> = (props) => {
+export const MultiValueRemove: React.FC<MultiValueRemoveProps<OptionType> & {
+  innerProps: JSX.IntrinsicElements['button']
+}> = (props) => {
   const {
-    innerProps,
+    innerProps: {
+      className,
+      onClick,
+      onTouchEnd,
+    },
   } = props;
+
   const [showTooltip, setShowTooltip] = React.useState(false);
   const { t } = useTranslation('general');
 
   return (
     <button
-      {...innerProps}
       type="button"
-      className={baseClass}
+      className={[
+        baseClass,
+        className,
+      ].filter(Boolean).join(' ')}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
+      onTouchEnd={onTouchEnd}
       onClick={(e) => {
         setShowTooltip(false);
-        innerProps.onClick(e);
+        onClick(e);
       }}
       aria-label={t('remove')}
     >

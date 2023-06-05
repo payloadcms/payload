@@ -1,5 +1,47 @@
 
 
+## [1.8.5](https://github.com/payloadcms/payload/compare/v1.8.4...v1.8.5) (2023-06-03)
+
+
+### Features
+
+* allows objectid through relationship validation ([42afa6b](https://github.com/payloadcms/payload/commit/42afa6b48aa924fa0dfc9defadf08ddb029da6c1))
+
+## [1.8.4](https://github.com/payloadcms/payload/compare/v1.8.3...v1.8.4) (2023-06-02)
+
+
+### Features
+
+* Add Bulgarian translation ([#2753](https://github.com/payloadcms/payload/issues/2753)) ([51108c0](https://github.com/payloadcms/payload/commit/51108c02ea346fd41c1b94ef7c339feec8383dd1))
+
+
+### Bug Fixes
+
+* group row hoisting ([#2683](https://github.com/payloadcms/payload/issues/2683)) ([1626e17](https://github.com/payloadcms/payload/commit/1626e173b7eced83c59e8eb4f70b0bb68fdb0e7a))
+* graphql where types on rows and collapsible's ([#2758](https://github.com/payloadcms/payload/issues/2758)) ([f978299](https://github.com/payloadcms/payload/commit/f978299868bf352e147070afdf556bf1153bac56))
+* RichText link custom fields ([#2756](https://github.com/payloadcms/payload/issues/2756)) ([23be263](https://github.com/payloadcms/payload/commit/23be263dd2e75dca448019b1c66d7f6dd3558b37))
+* adds timestamps to global schemas ([#2738](https://github.com/payloadcms/payload/issues/2738)) ([0986282](https://github.com/payloadcms/payload/commit/0986282f13d8a3b5596c4a241b4da35e6fac6aa1))
+* adjusts code field joi schema to allow editorOptions ([ed136fb](https://github.com/payloadcms/payload/commit/ed136fbc5146889cd30c641d4947da58b66dfb2f))
+* fix locale popup overflow ([#2737](https://github.com/payloadcms/payload/issues/2737)) ([8ee9724](https://github.com/payloadcms/payload/commit/8ee9724277d419de78b27a8ffa22f3a599361251))
+* fix tests by hard-coding the URL in the logger ([2697974](https://github.com/payloadcms/payload/commit/2697974694112440bf1737c4ce535ba77bf4b194))
+* mongoose connection ([#2754](https://github.com/payloadcms/payload/issues/2754)) ([69b97bb](https://github.com/payloadcms/payload/commit/69b97bbc590c62fffbcd03a42f0e9737e3f7ca01))
+* removes payload dependency inception ([#2717](https://github.com/payloadcms/payload/issues/2717)) ([6125b66](https://github.com/payloadcms/payload/commit/6125b66286e5315725ca0ae365c81a04c1c1a54c))
+* searches on correct useAsTitle field in polymorphic list drawers [#2710](https://github.com/payloadcms/payload/issues/2710) ([9ec2a40](https://github.com/payloadcms/payload/commit/9ec2a40274ea9b3a32e43cb992df3897baf62e63))
+* typing of sendMail function ([e3ff4c4](https://github.com/payloadcms/payload/commit/e3ff4c46cbecf731c9a3c688682bcb33012cb234))
+* corrects relationship field schema from pr [#2696](https://github.com/payloadcms/payload/issues/2696) ([#2714](https://github.com/payloadcms/payload/issues/2714)) ([8285bac](https://github.com/payloadcms/payload/commit/8285bac2f5eb443b6af160b21726edf3f828a52f))
+
+
+## [1.8.3](https://github.com/payloadcms/payload/compare/v1.8.3...v1.8.3) (2023-05-24)
+
+
+### Bug Fixes
+
+* [#2662](https://github.com/payloadcms/payload/issues/2662), draft=true querying by id ([3b78ab0](https://github.com/payloadcms/payload/commit/3b78ab04c7a68e39afa9936ac692169ed2c8fb74))
+* [#2685](https://github.com/payloadcms/payload/issues/2685), graphql querying relationships with custom id ([9bb5470](https://github.com/payloadcms/payload/commit/9bb54703423b3f0fdb242a5e63f322d346323b06))
+* adds credentials to doc access request ([#2705](https://github.com/payloadcms/payload/issues/2705)) ([c716954](https://github.com/payloadcms/payload/commit/c716954e89b0aef976cbcbef9ece981ec9bab233))
+* prevents add new relationship modal from adding duplicative values to the parent doc [#2688](https://github.com/payloadcms/payload/issues/2688) ([a2a8ac9](https://github.com/payloadcms/payload/commit/a2a8ac9549bd67e6ab578772689684fd2bc64872))
+* unable to clear relationships or open relationship drawer on mobile [#2691](https://github.com/payloadcms/payload/issues/2691) [#2692](https://github.com/payloadcms/payload/issues/2692) ([782f8ca](https://github.com/payloadcms/payload/commit/782f8ca047178cadb4214702854a0e0cb2d9eaab))
+
 ## [1.8.2](https://github.com/payloadcms/payload/compare/v1.8.1...v1.8.2) (2023-05-10)
 
 
@@ -589,7 +631,7 @@ If not already defined, add the following to your `compilerOptions`:
 
 #### ✋ Versions may need to be migrated
 
-This release includes a substantial simplification / optimization of how Versions work within Payload. They are now significantly more performant and easier to understand behind-the-scenes. We've removed ~600 lines of code and have ensured that Payload can be compatible with all flavors of Mongo - including versions earlier than 4.0, Azure Cosmos MongoDB, AWS' DocumentDB and more.
+This release includes a substantial simplification / optimization of how Versions work within Payload. They are now significantly more performant and easier to understand behind-the-scenes. We've removed ~600 lines of code and have ensured that Payload can be compatible with all flavors of MongoDB - including versions earlier than 4.0, Azure Cosmos MongoDB, AWS' DocumentDB and more.
 
 But, some of your draft-enabled documents may need to be migrated.
 

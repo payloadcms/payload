@@ -114,6 +114,65 @@ export default buildConfig({
             read: () => false,
           },
         },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab1',
+              name: 'D1',
+              fields: [
+                {
+                  name: 'D2',
+                  type: 'group',
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          type: 'collapsible',
+                          label: 'Collapsible2',
+                          fields: [
+                            {
+                              type: 'tabs',
+                              tabs: [
+                                {
+                                  label: 'Tab1',
+                                  fields: [
+                                    {
+                                      name: 'D3',
+                                      type: 'group',
+                                      fields: [
+                                        {
+                                          type: 'row',
+                                          fields: [
+                                            {
+                                              type: 'collapsible',
+                                              label: 'Collapsible2',
+                                              fields: [
+                                                {
+                                                  type: 'text',
+                                                  name: 'D4',
+                                                },
+                                              ],
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
