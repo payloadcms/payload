@@ -2,7 +2,8 @@
 
 .localizer {
   position: relative;
-
+  padding: base(.125) base(1.5) base(.125) 0;
+  
   button {
     color: currentColor;
     padding: base(.25) 0;
