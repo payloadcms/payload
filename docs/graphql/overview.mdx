@@ -16,13 +16,13 @@ The labels you provide for your Collections and Globals are used to name the Gra
 
 At the top of your Payload config you can define all the options to manage GraphQL.
 
-| Option               | Description  |
-| -------------------- | -------------|
-| `mutations`                     | Any custom Mutations to be added in addition to what Payload provides. [More](/docs/graphql/extending) |
-| `queries`                       | Any custom Queries to be added in addition to what Payload provides. [More](/docs/graphql/extending) |
-| `maxComplexity`                 | A number used to set the maximum allowed complexity allowed by requests [More](/docs/graphql/overview#query-complexity-limits) |
-| `disablePlaygroundInProduction` | A boolean that if false will enable the graphQL playground, defaults to true. [More](/docs/graphql/overview#graphql-playground) |
-| `disable`                       | A boolean that if true will disable the graphQL entirely, defaults to false. |
+| Option                          | Description                                                                                                                                                   |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mutations`                     | Any custom Mutations to be added in addition to what Payload provides. [More](/docs/graphql/extending)                                                        |
+| `queries`                       | Any custom Queries to be added in addition to what Payload provides. [More](/docs/graphql/extending)                                                          |
+| `maxComplexity`                 | A number used to set the maximum allowed complexity allowed by requests [More](/docs/graphql/overview#query-complexity-limits)                                |
+| `disablePlaygroundInProduction` | A boolean that if false will enable the GraphQL playground, defaults to true. [More](/docs/graphql/overview#graphql-playground)                               |
+| `disable`                       | A boolean that if true will disable the GraphQL entirely, defaults to false.                                                                                  |
 | `schemaOutputFile`              | A string for the file path used by the generate schema command. Defaults to `graphql.schema` next to `payload.config.ts` [More](/docs/graphql/graphql-schema) |
 
 ## Collections
@@ -43,26 +43,26 @@ export const PublicUser: CollectionConfig = {
 
 **Payload will automatically open up the following queries:**
 
-| Query Name             | Operation    |
-| ---------------------- | -------------|
-| **`PublicUser`**       | `findByID` |
-| **`PublicUsers`**      | `find` |
-| **`mePublicUser`**     | `me` auth operation |
+| Query Name         | Operation           |
+| ------------------ | ------------------- |
+| **`PublicUser`**   | `findByID`          |
+| **`PublicUsers`**  | `find`              |
+| **`mePublicUser`** | `me` auth operation |
 
 **And the following mutations:**
 
-| Query Name                     | Operation    |
-| ------------------------------ | -------------|
-| **`createPublicUser`**         | `create` |
-| **`updatePublicUser`**         | `update` |
-| **`deletePublicUser`**         | `delete` |
+| Query Name                     | Operation                       |
+| ------------------------------ | ------------------------------- |
+| **`createPublicUser`**         | `create`                        |
+| **`updatePublicUser`**         | `update`                        |
+| **`deletePublicUser`**         | `delete`                        |
 | **`forgotPasswordPublicUser`** | `forgotPassword` auth operation |
-| **`resetPasswordPublicUser`**  | `resetPassword` auth operation |
-| **`unlockPublicUser`**         | `unlock` auth operation |
-| **`verifyPublicUser`**         | `verify` auth operation |
-| **`loginPublicUser`**          | `login` auth operation |
-| **`logoutPublicUser`**         | `logout` auth operation |
-| **`refreshTokenPublicUser`**   | `refresh` auth operation |
+| **`resetPasswordPublicUser`**  | `resetPassword` auth operation  |
+| **`unlockPublicUser`**         | `unlock` auth operation         |
+| **`verifyPublicUser`**         | `verify` auth operation         |
+| **`loginPublicUser`**          | `login` auth operation          |
+| **`logoutPublicUser`**         | `logout` auth operation         |
+| **`refreshTokenPublicUser`**   | `refresh` auth operation        |
 
 ## Globals
 
@@ -81,32 +81,32 @@ const Header: GlobalConfig = {
 
 **Payload will open the following query:**
 
-| Query Name             | Operation    |
-| ---------------------- | -------------|
-| **`Header`**           | `findOne`    |
+| Query Name   | Operation |
+| ------------ | --------- |
+| **`Header`** | `findOne` |
 
 **And the following mutation:**
 
-| Query Name             | Operation    |
-| ---------------------- | -------------|
-| **`updateHeader`**     | `update`     |
+| Query Name         | Operation |
+| ------------------ | --------- |
+| **`updateHeader`** | `update`  |
 
 ## Preferences
 
-User [preferences](/docs/admin/overview#preferences)  for the admin panel are also available to GraphQL. To query preferences you must supply an authorization token in the header and only the preferences of that user will be accessible and of the `key` argument.
+User [preferences](/docs/admin/overview#preferences) for the admin panel are also available to GraphQL. To query preferences you must supply an authorization token in the header and only the preferences of that user will be accessible and of the `key` argument.
 
 **Payload will open the following query:**
 
-| Query Name             | Operation    |
-| ---------------------- | -------------|
-| **`Preference`**       | `findOne`    |
+| Query Name       | Operation |
+| ---------------- | --------- |
+| **`Preference`** | `findOne` |
 
 **And the following mutations:**
 
-| Query Name             | Operation    |
-| ---------------------- | -------------|
-| **`updatePreference`** | `update`     |
-| **`deletePreference`** | `delete`     |
+| Query Name             | Operation |
+| ---------------------- | --------- |
+| **`updatePreference`** | `update`  |
+| **`deletePreference`** | `delete`  |
 
 ## GraphQL Playground
 
@@ -115,8 +115,16 @@ GraphQL Playground is enabled by default for development purposes, but disabled 
 You can even log in using the `login[collection-singular-label-here]` mutation to use the Playground as an authenticated user.
 
 <Banner type="success">
-  <strong>Tip:</strong><br/>
-  To see more regarding how the above queries and mutations are used, visit your GraphQL playground (by default at <a href="http://localhost:3000/api/graphql-playground">(http://localhost:3000/api/graphql-playground</a>) while your server is running. There, you can use the "Schema" and "Docs" buttons on the right to see a ton of detail about how GraphQL operates within Payload.
+  <strong>Tip:</strong>
+  <br />
+  To see more regarding how the above queries and mutations are used, visit your
+  GraphQL playground (by default at{" "}
+  <a href="http://localhost:3000/api/graphql-playground">
+    (http://localhost:3000/api/graphql-playground
+  </a>
+  ) while your server is running. There, you can use the "Schema" and "Docs"
+  buttons on the right to see a ton of detail about how GraphQL operates within
+  Payload.
 </Banner>
 
 ## Query complexity limits
