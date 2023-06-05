@@ -152,6 +152,10 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
   padding: base(.5) base(.75);
   -webkit-appearance: none;
 
+  &[data-rtl='true'] {
+    direction: rtl;
+  } 
+
   &::-webkit-input-placeholder {
     color: var(--theme-elevation-400);
     font-weight: normal;
