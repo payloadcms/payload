@@ -29,7 +29,12 @@
     display: flex;
 
     li {
-      margin-right: base(.75);
+      [dir=ltr] & {
+        margin-right: base(.75);
+      }
+      [dir=rtl] & {
+        margin-left: base(.75);
+      }  
     }
   }
 
@@ -38,20 +43,21 @@
     flex-grow: 1;
   }
 
-  [dir=rtl] &__sidebar-wrap {
-    left: 0;
-    border-right: 1px solid var(--theme-elevation-100);
-    right:auto
-  }
-
   &__sidebar-wrap {
     position: fixed;
     width: base(15);
     height: 100%;
-    top: 0;
-    right: 0;
     overflow: visible;
-    border-left: 1px solid var(--theme-elevation-100);
+    [dir=ltr] & {
+      top: 0;
+      right: 0;
+      border-left: 1px solid var(--theme-elevation-100);
+    }
+    [dir=rtl] & {
+      top: 0;
+      left: 0;
+      border-right: 1px solid var(--theme-elevation-100);
+    }
   }
 
   &__sidebar {
@@ -70,7 +76,12 @@
   &__document-actions,
   &__meta,
   &__sidebar-fields {
-    padding-left: base(1.5);
+    [dir=ltr] & {
+      padding-left: base(1.5);
+    }
+    [dir=rtl] & {
+      padding-right: base(1.5);
+    }  
   }
 
   &__document-actions {
@@ -94,11 +105,21 @@
     }
 
     >*:first-child {
-      margin-right: base(.5);
+      [dir=ltr] & {
+        margin-right: base(.5);
+      }
+      [dir=rtl] & {
+        margin-left: base(.5);
+      }  
     }
 
     >*:last-child {
-      margin-left: base(.5);
+      [dir=ltr] & {
+        margin-left: base(.5);
+      }
+      [dir=rtl] & {
+        margin-right: base(.5);
+      }  
     }
 
     .form-submit {
@@ -111,7 +132,14 @@
   }
 
   &__api-url {
-    margin-bottom: base(1.5);
+    [dir=ltr] & {
+      margin-bottom: base(1.5);
+      padding-right: base(1.5);
+    }
+    [dir=rtl] & {
+      margin-bottom: base(1.5);
+      padding-left: base(1.5);
+    }
 
     a {
       display: block;
@@ -181,10 +209,18 @@
 
     &__document-actions {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      top: auto;
+      [dir=ltr] & {
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+      }
+      [dir=rtl] & {
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+      } 
     }
 
     &__meta {
@@ -196,7 +232,12 @@
     &__document-actions,
     &__meta,
     &__sidebar-fields {
-      padding-left: var(--gutter-h);
+      [dir=ltr] & {
+        padding-left: var(--gutter-h);
+      }
+      [dir=rtl] & {
+        padding-right: var(--gutter-h);
+      }  
     }
 
     &__api-url {
