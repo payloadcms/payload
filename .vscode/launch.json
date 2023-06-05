@@ -12,17 +12,11 @@
       "cwd": "${workspaceFolder}"
     },
     {
-      "type": "node",
+      "command": "yarn run dev fields",
+      "name": "Run Dev Fields",
       "request": "launch",
-      "name": "Launch Program",
-      "runtimeArgs": [
-        "-r",
-        "ts-node/register"
-      ],
-      "args": [
-        "${workspaceFolder}/test/dev.ts",
-        "fields"
-      ]
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}"
     },
   ]
 }
