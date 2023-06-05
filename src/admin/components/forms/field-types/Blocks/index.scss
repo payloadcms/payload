@@ -15,11 +15,12 @@
     display: flex;
     align-items: flex-end;
     width: 100%;
+    justify-content: space-between;
   }
 
   &__header-actions {
     list-style: none;
-    margin: 0 0 0 auto;
+    margin: 0;
     padding: 0;
     display: flex;
   }
@@ -38,10 +39,10 @@
     display: inline-flex;
     max-width: 100%;
     overflow: hidden;
+    gap: base(.375);
   }
 
   &__block-number {
-    margin-right: base(.375);
     flex-shrink: 0;
   }
 
@@ -52,6 +53,7 @@
 
   .section-title {
     min-width: 0;
+    margin-left: 0;
   }
 
   &__row {
