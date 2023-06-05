@@ -20,11 +20,13 @@ export function isFieldRTL({
       && (localizationConfig)
       && (localizationConfig.locales)
       && (localizationConfig.locales.length > 1);
+  const isCurrentLocaleDefaultLocale = labeledLocale?.value === localizationConfig?.defaultLocale;
 
   return ((fieldRTL !== false && labeledLocale?.rtl === true)
       && (
         fieldLocalized
         || (!fieldLocalized && !hasMultipleLocales) // If there is only one locale which is also rtl, that field is rtl too
+        || (!fieldLocalized && isCurrentLocaleDefaultLocale) // If the current locale is the default locale, that field is rtl too
       ))
       || (fieldRTL === true); // If fieldRTL is true. This should be useful for when no localization is set at all in the payload config, but you still want fields to be rtl.
 }
