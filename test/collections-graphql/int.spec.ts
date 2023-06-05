@@ -472,10 +472,10 @@ describe('collections-graphql', () => {
       });
 
       expect(Array.isArray(error.response.errors)).toBe(true);
-      expect(error.response.errors[0].message).toEqual('No password was given');
+      expect(error.response.errors[0].message).toEqual('The following field is invalid: password');
       expect(Array.isArray(error.response.errors[0].locations)).toEqual(true);
       expect(error.response.errors[0].path[0]).toEqual('test2');
-      expect(error.response.errors[0].extensions.name).toEqual('MissingPasswordError');
+      expect(error.response.errors[0].extensions.name).toEqual('ValidationError');
 
       expect(error.response.errors[1].message).toEqual('The following field is invalid: email');
       expect(error.response.errors[1].path[0]).toEqual('test3');

@@ -43,351 +43,363 @@ function returnOptionEnums(options: Option[]): string[] {
   });
 }
 
-function generateFieldTypes(config: SanitizedConfig, fields: Field[]): {
+function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fieldDefinitionsMap: Map<string, JSONSchema4>): {
   properties: {
     [k: string]: JSONSchema4;
   }
   required: string[]
 } {
-  let topLevelProps = [];
-  let requiredTopLevelProps = [];
+  // required fields for a schema (could be for a nested schema)
+  const requiredFields = new Set<string>(fields.filter(propertyIsRequired).map((field) => (fieldAffectsData(field) ? field.name : '')));
 
   return {
-    properties: Object.fromEntries(
-      fields.reduce((properties, field) => {
-        let fieldSchema: JSONSchema4;
+    properties: Object.fromEntries(fields.reduce((acc, field) => {
+      let fieldSchema: JSONSchema4;
+      switch (field.type) {
+        case 'text':
+        case 'textarea':
+        case 'code':
+        case 'email':
+        case 'date': {
+          fieldSchema = { type: 'string' };
+          break;
+        }
 
-        switch (field.type) {
-          case 'text':
-          case 'textarea':
-          case 'code':
-          case 'email':
-          case 'date': {
-            fieldSchema = { type: 'string' };
-            break;
-          }
+        case 'number': {
+          fieldSchema = { type: 'number' };
+          break;
+        }
 
-          case 'number': {
-            fieldSchema = { type: 'number' };
-            break;
-          }
+        case 'checkbox': {
+          fieldSchema = { type: 'boolean' };
+          break;
+        }
 
-          case 'checkbox': {
-            fieldSchema = { type: 'boolean' };
-            break;
-          }
+        case 'json': {
+          // https://www.rfc-editor.org/rfc/rfc7159#section-3
+          fieldSchema = {
+            oneOf: [
+              { type: 'object' },
+              { type: 'array' },
+              { type: 'string' },
+              { type: 'number' },
+              { type: 'boolean' },
+              { type: 'null' },
+            ],
+          };
+          break;
+        }
 
-          case 'json': {
-            // https://www.rfc-editor.org/rfc/rfc7159#section-3
-            fieldSchema = {
-              oneOf: [
-                { type: 'object' },
-                { type: 'array' },
-                { type: 'string' },
-                { type: 'number' },
-                { type: 'boolean' },
-                { type: 'null' },
-              ],
-            };
-            break;
-          }
+        case 'richText': {
+          fieldSchema = {
+            type: 'array',
+            items: {
+              type: 'object',
+            },
+          };
 
-          case 'richText': {
+          break;
+        }
+
+        case 'radio': {
+          fieldSchema = {
+            type: 'string',
+            enum: returnOptionEnums(field.options),
+          };
+
+          break;
+        }
+
+        case 'select': {
+          const selectType: JSONSchema4 = {
+            type: 'string',
+            enum: returnOptionEnums(field.options),
+          };
+
+          if (field.hasMany) {
             fieldSchema = {
               type: 'array',
-              items: {
-                type: 'object',
+              items: selectType,
+            };
+          } else {
+            fieldSchema = selectType;
+          }
+
+          break;
+        }
+
+        case 'point': {
+          fieldSchema = {
+            type: 'array',
+            minItems: 2,
+            maxItems: 2,
+            items: [
+              {
+                type: 'number',
               },
-            };
+              {
+                type: 'number',
+              },
+            ],
+          };
+          break;
+        }
 
-            break;
-          }
-
-          case 'radio': {
-            fieldSchema = {
-              type: 'string',
-              enum: returnOptionEnums(field.options),
-            };
-
-            break;
-          }
-
-          case 'select': {
-            const selectType: JSONSchema4 = {
-              type: 'string',
-              enum: returnOptionEnums(field.options),
-            };
-
+        case 'relationship': {
+          if (Array.isArray(field.relationTo)) {
             if (field.hasMany) {
               fieldSchema = {
-                type: 'array',
-                items: selectType,
-              };
-            } else {
-              fieldSchema = selectType;
-            }
+                oneOf: [
+                  {
+                    type: 'array',
+                    items: {
+                      oneOf: field.relationTo.map((relation) => {
+                        const idFieldType = getCollectionIDType(config.collections, relation);
 
-            break;
-          }
-
-          case 'point': {
-            fieldSchema = {
-              type: 'array',
-              minItems: 2,
-              maxItems: 2,
-              items: [
-                {
-                  type: 'number',
-                },
-                {
-                  type: 'number',
-                },
-              ],
-            };
-            break;
-          }
-
-          case 'relationship': {
-            if (Array.isArray(field.relationTo)) {
-              if (field.hasMany) {
-                fieldSchema = {
-                  oneOf: [
-                    {
-                      type: 'array',
-                      items: {
-                        oneOf: field.relationTo.map((relation) => {
-                          const idFieldType = getCollectionIDType(config.collections, relation);
-
-                          return {
-                            type: 'object',
-                            additionalProperties: false,
-                            properties: {
-                              value: {
-                                type: idFieldType,
-                              },
-                              relationTo: {
-                                const: relation,
-                              },
-                            },
-                            required: ['value', 'relationTo'],
-                          };
-                        }),
-                      },
-                    },
-                    {
-                      type: 'array',
-                      items: {
-                        oneOf: field.relationTo.map((relation) => {
-                          return {
-                            type: 'object',
-                            additionalProperties: false,
-                            properties: {
-                              value: {
-                                $ref: `#/definitions/${relation}`,
-                              },
-                              relationTo: {
-                                const: relation,
-                              },
-                            },
-                            required: ['value', 'relationTo'],
-                          };
-                        }),
-                      },
-                    },
-                  ],
-                };
-              } else {
-                fieldSchema = {
-                  oneOf: field.relationTo.map((relation) => {
-                    const idFieldType = getCollectionIDType(config.collections, relation);
-
-                    return {
-                      type: 'object',
-                      additionalProperties: false,
-                      properties: {
-                        value: {
-                          oneOf: [
-                            {
+                        return {
+                          type: 'object',
+                          additionalProperties: false,
+                          properties: {
+                            value: {
                               type: idFieldType,
                             },
-                            {
+                            relationTo: {
+                              const: relation,
+                            },
+                          },
+                          required: ['value', 'relationTo'],
+                        };
+                      }),
+                    },
+                  },
+                  {
+                    type: 'array',
+                    items: {
+                      oneOf: field.relationTo.map((relation) => {
+                        return {
+                          type: 'object',
+                          additionalProperties: false,
+                          properties: {
+                            value: {
                               $ref: `#/definitions/${relation}`,
                             },
-                          ],
-                        },
-                        relationTo: {
-                          const: relation,
-                        },
-                      },
-                      required: ['value', 'relationTo'],
-                    };
-                  }),
-                };
-              }
+                            relationTo: {
+                              const: relation,
+                            },
+                          },
+                          required: ['value', 'relationTo'],
+                        };
+                      }),
+                    },
+                  },
+                ],
+              };
             } else {
-              const idFieldType = getCollectionIDType(config.collections, field.relationTo);
-
-              if (field.hasMany) {
-                fieldSchema = {
-                  oneOf: [
-                    {
-                      type: 'array',
-                      items: {
-                        type: idFieldType,
-                      },
-                    },
-                    {
-                      type: 'array',
-                      items: {
-                        $ref: `#/definitions/${field.relationTo}`,
-                      },
-                    },
-                  ],
-                };
-              } else {
-                fieldSchema = {
-                  oneOf: [
-                    {
-                      type: idFieldType,
-                    },
-                    {
-                      $ref: `#/definitions/${field.relationTo}`,
-                    },
-                  ],
-                };
-              }
-            }
-
-            break;
-          }
-
-          case 'upload': {
-            const idFieldType = getCollectionIDType(config.collections, field.relationTo);
-
-            fieldSchema = {
-              oneOf: [
-                {
-                  type: idFieldType,
-                },
-                {
-                  $ref: `#/definitions/${field.relationTo}`,
-                },
-              ],
-            };
-            break;
-          }
-
-          case 'blocks': {
-            fieldSchema = {
-              type: 'array',
-              items: {
-                oneOf: field.blocks.map((block) => {
-                  const blockSchema = generateFieldTypes(config, block.fields);
+              fieldSchema = {
+                oneOf: field.relationTo.map((relation) => {
+                  const idFieldType = getCollectionIDType(config.collections, relation);
 
                   return {
                     type: 'object',
                     additionalProperties: false,
                     properties: {
-                      ...blockSchema.properties,
-                      blockType: {
-                        const: block.slug,
+                      value: {
+                        oneOf: [
+                          {
+                            type: idFieldType,
+                          },
+                          {
+                            $ref: `#/definitions/${relation}`,
+                          },
+                        ],
+                      },
+                      relationTo: {
+                        const: relation,
                       },
                     },
-                    required: [
-                      'blockType',
-                      ...blockSchema.required,
-                    ],
+                    required: ['value', 'relationTo'],
                   };
                 }),
-              },
-            };
-            break;
-          }
+              };
+            }
+          } else {
+            const idFieldType = getCollectionIDType(config.collections, field.relationTo);
 
-          case 'array': {
-            fieldSchema = {
-              type: 'array',
-              items: {
-                type: 'object',
-                additionalProperties: false,
-                ...generateFieldTypes(config, field.fields),
-              },
-            };
-            break;
-          }
-
-          case 'row':
-          case 'collapsible': {
-            const topLevelFields = generateFieldTypes(config, field.fields);
-            requiredTopLevelProps = requiredTopLevelProps.concat(topLevelFields.required);
-            topLevelProps = topLevelProps.concat(Object.entries(topLevelFields.properties).map((prop) => prop));
-            break;
-          }
-
-          case 'tabs': {
-            field.tabs.forEach((tab) => {
-              if (tabHasName(tab)) {
-                requiredTopLevelProps.push(tab.name);
-
-                topLevelProps.push([
-                  tab.name,
+            if (field.hasMany) {
+              fieldSchema = {
+                oneOf: [
                   {
-                    type: 'object',
-                    additionalProperties: false,
-                    ...generateFieldTypes(config, tab.fields),
+                    type: 'array',
+                    items: {
+                      type: idFieldType,
+                    },
                   },
-                ]);
-              } else {
-                const topLevelFields = generateFieldTypes(config, tab.fields);
-                requiredTopLevelProps = requiredTopLevelProps.concat(topLevelFields.required);
-                topLevelProps = topLevelProps.concat(Object.entries(topLevelFields.properties).map((prop) => prop));
-              }
-            });
-            break;
+                  {
+                    type: 'array',
+                    items: {
+                      $ref: `#/definitions/${field.relationTo}`,
+                    },
+                  },
+                ],
+              };
+            } else {
+              fieldSchema = {
+                oneOf: [
+                  {
+                    type: idFieldType,
+                  },
+                  {
+                    $ref: `#/definitions/${field.relationTo}`,
+                  },
+                ],
+              };
+            }
           }
 
-          case 'group': {
-            fieldSchema = {
-              type: 'object',
-              additionalProperties: false,
-              ...generateFieldTypes(config, field.fields),
-            };
-            break;
-          }
-
-          default: {
-            break;
-          }
+          break;
         }
 
-        if (fieldSchema && fieldAffectsData(field)) {
-          return [
-            ...properties,
-            [
-              field.name,
+        case 'upload': {
+          const idFieldType = getCollectionIDType(config.collections, field.relationTo);
+
+          fieldSchema = {
+            oneOf: [
               {
-                ...fieldSchema,
+                type: idFieldType,
+              },
+              {
+                $ref: `#/definitions/${field.relationTo}`,
               },
             ],
-          ];
+          };
+          break;
         }
 
-        return [
-          ...properties,
-          ...topLevelProps,
-        ];
-      }, []),
-    ),
-    required: [
-      ...fields
-        .filter(propertyIsRequired)
-        .map((field) => (fieldAffectsData(field) ? field.name : '')),
-      ...requiredTopLevelProps,
-    ],
+        case 'blocks': {
+          fieldSchema = {
+            type: 'array',
+            items: {
+              oneOf: field.blocks.map((block) => {
+                const blockFieldSchemas = entityFieldsToJSONSchema(config, block.fields, fieldDefinitionsMap);
+
+                const blockSchema: JSONSchema4 = {
+                  type: 'object',
+                  additionalProperties: false,
+                  properties: {
+                    ...blockFieldSchemas.properties,
+                    blockType: {
+                      const: block.slug,
+                    },
+                  },
+                  required: [
+                    'blockType',
+                    ...blockFieldSchemas.required,
+                  ],
+                };
+
+                if (block.interfaceName) {
+                  fieldDefinitionsMap.set(block.interfaceName, blockSchema);
+
+                  return {
+                    $ref: `#/definitions/${block.interfaceName}`,
+                  };
+                }
+
+                return blockSchema;
+              }),
+            },
+          };
+          break;
+        }
+
+        case 'array': {
+          fieldSchema = {
+            type: 'array',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              ...entityFieldsToJSONSchema(config, field.fields, fieldDefinitionsMap),
+            },
+          };
+
+          if (field.interfaceName) {
+            fieldDefinitionsMap.set(field.interfaceName, fieldSchema);
+
+            fieldSchema = {
+              $ref: `#/definitions/${field.interfaceName}`,
+            };
+          }
+          break;
+        }
+
+        case 'row':
+        case 'collapsible': {
+          const childSchema = entityFieldsToJSONSchema(config, field.fields, fieldDefinitionsMap);
+          Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
+            acc.set(propName, propSchema);
+          });
+          childSchema.required.forEach((propName) => {
+            requiredFields.add(propName);
+          });
+          break;
+        }
+
+        case 'tabs': {
+          field.tabs.forEach((tab) => {
+            const childSchema = entityFieldsToJSONSchema(config, tab.fields, fieldDefinitionsMap);
+            if (tabHasName(tab)) {
+              // could have interface
+              acc.set(tab.name, {
+                type: 'object',
+                additionalProperties: false,
+                ...childSchema,
+              });
+              requiredFields.add(tab.name);
+            } else {
+              Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
+                acc.set(propName, propSchema);
+              });
+              childSchema.required.forEach((propName) => {
+                requiredFields.add(propName);
+              });
+            }
+          });
+          break;
+        }
+
+        case 'group': {
+          fieldSchema = {
+            type: 'object',
+            additionalProperties: false,
+            ...entityFieldsToJSONSchema(config, field.fields, fieldDefinitionsMap),
+          };
+
+          if (field.interfaceName) {
+            fieldDefinitionsMap.set(field.interfaceName, fieldSchema);
+
+            fieldSchema = {
+              $ref: `#/definitions/${field.interfaceName}`,
+            };
+          }
+          break;
+        }
+
+        default: {
+          break;
+        }
+      }
+
+      if (fieldSchema && fieldAffectsData(field)) {
+        acc.set(field.name, fieldSchema);
+      }
+
+      return acc;
+    }, new Map<string, JSONSchema4>())),
+    required: Array.from(requiredFields),
   };
 }
 
-export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig): JSONSchema4 {
+export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig, fieldDefinitionsMap: Map<string, JSONSchema4>): JSONSchema4 {
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity);
   const title = entity.typescript?.interface ? entity.typescript.interface : singular(toWords(entity.slug, true));
 
@@ -424,20 +436,23 @@ export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: Sani
     title,
     type: 'object',
     additionalProperties: false,
-    ...generateFieldTypes(config, entity.fields),
+    ...entityFieldsToJSONSchema(config, entity.fields, fieldDefinitionsMap),
   };
 }
 
-export function generateEntityObject(config: SanitizedConfig, type: 'collections' | 'globals'): JSONSchema4 {
+export function generateEntitySchemas(entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[]): JSONSchema4 {
+  const properties = [...entities].reduce((acc, { slug }) => {
+    acc[slug] = {
+      $ref: `#/definitions/${slug}`,
+    };
+
+    return acc;
+  }, {});
+
   return {
     type: 'object',
-    properties: Object.fromEntries(config[type].map(({ slug }) => [
-      slug,
-      {
-        $ref: `#/definitions/${slug}`,
-      },
-    ])),
-    required: config[type].map(({ slug }) => slug),
+    properties,
+    required: Object.keys(properties),
     additionalProperties: false,
   };
 }

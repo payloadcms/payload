@@ -6,6 +6,8 @@ import getCookieExpiration from '../../utilities/getCookieExpiration';
 import { UserDocument } from '../types';
 import { fieldAffectsData } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
+import { authenticateLocalStrategy } from '../strategies/local/authenticate';
+import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
 
 export type Result = {
   token: string
@@ -49,14 +51,20 @@ async function resetPassword(args: Arguments): Promise<Result> {
   // Reset Password
   // /////////////////////////////////////
 
-  const user = await Model.findOne({
+  let user = await Model.findOne({
     resetPasswordToken: data.token,
     resetPasswordExpiration: { $gt: Date.now() },
-  }) as UserDocument;
+  }).lean();
+
+  user = JSON.parse(JSON.stringify(user));
 
   if (!user) throw new APIError('Token is either invalid or has expired.');
 
-  await user.setPassword(data.password);
+  // TODO: replace this method
+  const { salt, hash } = await generatePasswordSaltHash({ password: data.password })
+
+  user.salt = salt;
+  user.hash = hash;
 
   user.resetPasswordExpiration = Date.now();
 
@@ -64,9 +72,11 @@ async function resetPassword(args: Arguments): Promise<Result> {
     user._verified = true;
   }
 
-  await user.save();
+  let doc = await Model.findByIdAndUpdate({ _id: user.id }, user, { new: true }).lean()
 
-  await user.authenticate(data.password);
+  doc = JSON.parse(JSON.stringify(doc))
+
+  await authenticateLocalStrategy({ password: data.password, doc });
 
   const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
     if (fieldAffectsData(field) && field.saveToJWT) {

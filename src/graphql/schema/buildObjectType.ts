@@ -48,7 +48,6 @@ import createRichTextRelationshipPromise from '../../fields/richText/richTextRel
 import formatOptions from '../utilities/formatOptions';
 import { Payload } from '../../payload';
 import buildWhereInputType from './buildWhereInputType';
-import buildBlockType from './buildBlockType';
 import isFieldNullable from './isFieldNullable';
 
 type LocaleInputType = {
@@ -427,17 +426,20 @@ function buildObjectType({
       };
     },
     array: (objectTypeConfig: ObjectTypeConfig, field: ArrayField) => {
-      const fullName = combineParentName(parentName, toWords(field.name, true));
+      const interfaceName = field?.interfaceName || combineParentName(parentName, toWords(field.name, true));
 
-      const type = buildObjectType({
-        payload,
-        name: fullName,
-        fields: field.fields,
-        parentName: fullName,
-        forceNullable: isFieldNullable(field, forceNullable),
-      });
+      if (!payload.types.arrayTypes[interfaceName]) {
+        // eslint-disable-next-line no-param-reassign
+        payload.types.arrayTypes[interfaceName] = buildObjectType({
+          payload,
+          name: interfaceName,
+          parentName: interfaceName,
+          fields: field.fields,
+          forceNullable: isFieldNullable(field, forceNullable),
+        });
+      }
 
-      const arrayType = new GraphQLList(new GraphQLNonNull(type));
+      const arrayType = new GraphQLList(new GraphQLNonNull(payload.types.arrayTypes[interfaceName]));
 
       return {
         ...objectTypeConfig,
@@ -445,27 +447,44 @@ function buildObjectType({
       };
     },
     group: (objectTypeConfig: ObjectTypeConfig, field: GroupField) => {
-      const fullName = combineParentName(parentName, toWords(field.name, true));
-      const type = buildObjectType({
-        payload,
-        name: fullName,
-        parentName: fullName,
-        fields: field.fields,
-        forceNullable: isFieldNullable(field, forceNullable),
-      });
+      const interfaceName = field?.interfaceName || combineParentName(parentName, toWords(field.name, true));
+
+      if (!payload.types.groupTypes[interfaceName]) {
+        // eslint-disable-next-line no-param-reassign
+        payload.types.groupTypes[interfaceName] = buildObjectType({
+          payload,
+          name: interfaceName,
+          parentName: interfaceName,
+          fields: field.fields,
+          forceNullable: isFieldNullable(field, forceNullable),
+        });
+      }
 
       return {
         ...objectTypeConfig,
-        [field.name]: { type },
+        [field.name]: { type: payload.types.groupTypes[interfaceName] },
       };
     },
     blocks: (objectTypeConfig: ObjectTypeConfig, field: BlockField) => {
       const blockTypes = field.blocks.map((block) => {
-        buildBlockType({
-          payload,
-          block,
-          forceNullable: isFieldNullable(field, forceNullable),
-        });
+        if (!payload.types.blockTypes[block.slug]) {
+          const interfaceName = block?.interfaceName || block?.graphQL?.singularName || toWords(block.slug, true);
+          // eslint-disable-next-line no-param-reassign
+          payload.types.blockTypes[block.slug] = buildObjectType({
+            payload,
+            name: interfaceName,
+            parentName: interfaceName,
+            fields: [
+              ...block.fields,
+              {
+                name: 'blockType',
+                type: 'text',
+              },
+            ],
+            forceNullable,
+          });
+        }
+
         return payload.types.blockTypes[block.slug];
       });
 
@@ -494,18 +513,22 @@ function buildObjectType({
     }, objectTypeConfig),
     tabs: (objectTypeConfig: ObjectTypeConfig, field: TabsField) => field.tabs.reduce((tabSchema, tab) => {
       if (tabHasName(tab)) {
-        const fullName = combineParentName(parentName, toWords(tab.name, true));
-        const type = buildObjectType({
-          payload,
-          name: fullName,
-          parentName: fullName,
-          fields: tab.fields,
-          forceNullable,
-        });
+        const interfaceName = tab?.interfaceName || combineParentName(parentName, toWords(tab.name, true));
+
+        if (!payload.types.tabTypes[interfaceName]) {
+          // eslint-disable-next-line no-param-reassign
+          payload.types.tabTypes[interfaceName] = buildObjectType({
+            payload,
+            name: interfaceName,
+            parentName: interfaceName,
+            fields: tab.fields,
+            forceNullable,
+          });
+        }
 
         return {
           ...tabSchema,
-          [tab.name]: { type },
+          [tab.name]: { type: payload.types.tabTypes[interfaceName] },
         };
       }
 

@@ -13,6 +13,7 @@ import flattenFields from '../utilities/flattenTopLevelFields';
 import { getEntityPolicies } from '../utilities/getEntityPolicies';
 import { SanitizedConfig } from '../config/types';
 import QueryError from '../errors/QueryError';
+import unifiedLocaleConfig from '../utilities/unifiedLocaleConfig';
 
 const validOperators = ['like', 'contains', 'in', 'all', 'not_in', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equals', 'equals', 'exists', 'near'];
 
@@ -462,7 +463,7 @@ export class ParamParser {
           }
 
           const nextSegment = pathSegments[i + 1];
-          const nextSegmentIsLocale = this.localizationConfig && this.localizationConfig.locales.includes(nextSegment);
+          const nextSegmentIsLocale = this.localizationConfig ? unifiedLocaleConfig(this.localizationConfig).locales.includes(nextSegment) : undefined;
 
           if (nextSegmentIsLocale) {
             // Skip the next iteration, because it's a locale
