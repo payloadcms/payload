@@ -164,6 +164,7 @@ export type TextField = FieldBase & {
   admin?: Admin & {
     placeholder?: Record<string, string> | string
     autoComplete?: string
+    rtl?: boolean
   }
 }
 
@@ -182,6 +183,7 @@ export type TextareaField = FieldBase & {
   admin?: Admin & {
     placeholder?: Record<string, string> | string
     rows?: number
+    rtl?: boolean
   }
 }
 
@@ -409,6 +411,7 @@ export type RichTextField = FieldBase & {
     link?: {
       fields?: Field[] | ((args: { defaultFields: Field[], config: SanitizedConfig, i18n: Ii18n }) => Field[]);
     }
+    rtl?: boolean
   }
 }
 

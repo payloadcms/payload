@@ -7,6 +7,7 @@ import getValueWithDefault from '../../getDefaultValue';
 import { traverseFields } from './traverseFields';
 import { getExistingRowDoc } from './getExistingRowDoc';
 import { cloneDataFromOriginalDoc } from './cloneDataFromOriginalDoc';
+import unifiedLocaleConfig from '../../../utilities/unifiedLocaleConfig';
 
 type Args = {
   data: Record<string, unknown>
@@ -147,7 +148,8 @@ export const promise = async ({
     if (field.localized) {
       mergeLocaleActions.push(() => {
         if (req.payload.config.localization) {
-          const localeData = req.payload.config.localization.locales.reduce((localizedValues, locale) => {
+          const localization_ = unifiedLocaleConfig(req.payload.config.localization);
+          const localeData = localization_.locales.reduce((localizedValues, locale) => {
             const fieldValue = locale === req.locale
               ? siblingData[field.name]
               : siblingDocWithLocales?.[field.name]?.[locale];

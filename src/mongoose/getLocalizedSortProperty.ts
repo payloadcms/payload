@@ -1,6 +1,7 @@
 import { Config } from '../config/types';
 import { Field, fieldAffectsData, fieldIsPresentationalOnly } from '../fields/config/types';
 import flattenTopLevelFields from '../utilities/flattenTopLevelFields';
+import unifiedLocaleConfig from '../utilities/unifiedLocaleConfig';
 
 type Args = {
   segments: string[]
@@ -22,6 +23,7 @@ export const getLocalizedSortProperty = ({
   if (!config.localization) {
     return incomingSegments.join('.');
   }
+  const localization = unifiedLocaleConfig(config.localization);
 
   // Flatten incoming fields (row, etc)
   const fields = flattenTopLevelFields(incomingFields);
@@ -42,7 +44,7 @@ export const getLocalizedSortProperty = ({
     if (matchedField.localized) {
       // Check to see if next segment is a locale
       if (segments.length > 0) {
-        const nextSegmentIsLocale = config.localization.locales.includes(remainingSegments[0]);
+        const nextSegmentIsLocale = localization.locales.includes(remainingSegments[0]);
 
         // If next segment is locale, remove it from remaining segments
         // and use it to localize the current segment

@@ -145,15 +145,25 @@ export default joi.object({
       disable: joi.boolean(),
       schemaOutputFile: joi.string(),
     }),
-  localization: joi.alternatives()
-    .try(
-      joi.object().keys({
-        locales: joi.array().items(joi.string()),
-        defaultLocale: joi.string(),
-        fallback: joi.boolean(),
-      }),
-      joi.boolean(),
-    ),
+  localization: joi.alternatives().try(
+    joi.object().keys({
+      locales: joi.array().items(joi.string()),
+      defaultLocale: joi.string(),
+      fallback: joi.boolean(),
+    }),
+    joi.object().keys({
+      locales: joi.array().items(
+        joi.object().keys({
+          label: joi.string(),
+          value: joi.string(),
+          rtl: joi.boolean(),
+        }),
+      ),
+      defaultLocale: joi.string(),
+      fallback: joi.boolean(),
+    }),
+    joi.boolean(),
+  ),
   hooks: joi.object().keys({
     afterError: joi.func(),
   }),

@@ -10,8 +10,9 @@ import { requests } from '../../../api';
 import { useForm, useFormModified } from '../../forms/Form/context';
 import MinimalTemplate from '../../templates/Minimal';
 import { getTranslation } from '../../../../utilities/getTranslation';
-
+import unifiedLocaleConfig from '../../../../utilities/unifiedLocaleConfig';
 import './index.scss';
+
 
 const baseClass = 'duplicate';
 
@@ -20,7 +21,8 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
   const modified = useFormModified();
   const { toggleModal } = useModal();
   const { setModified } = useForm();
-  const { serverURL, routes: { api }, localization } = useConfig();
+  const { serverURL, routes: { api }, localization: localization_ } = useConfig();
+  const localization = localization_ ? unifiedLocaleConfig(localization_) : undefined;
   const { routes: { admin } } = useConfig();
   const [hasClicked, setHasClicked] = useState<boolean>(false);
   const { t, i18n } = useTranslation('general');
