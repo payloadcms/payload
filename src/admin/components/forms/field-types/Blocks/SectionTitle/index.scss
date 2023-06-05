@@ -1,7 +1,12 @@
 @import '../../../../../scss/styles.scss';
 
 .section-title {
-  margin-left: base(.375);
+  [dir=ltr] & {
+    margin-left: base(.375);
+  }
+  [dir=rtl] & {
+    margin-right: base(.375);
+  }  
   position: relative;
 
   &:after {
