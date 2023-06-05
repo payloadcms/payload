@@ -1,4 +1,5 @@
 import { Condition, Validate } from '../../../../fields/config/types';
+import { Row } from '../field-types/rowReducer';
 
 export type Options = {
   path: string
@@ -15,4 +16,5 @@ export type FieldType<T> = {
   formProcessing: boolean
   setValue: (val: unknown, modifyForm?: boolean) => void
   initialValue?: T
+  rows?: Row[]
 }

@@ -13,7 +13,7 @@ import { UPDATE } from '../Form/types';
  *
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
-const useField = <T extends unknown>(options: Options): FieldType<T> => {
+const useField = <T, >(options: Options): FieldType<T> => {
   const {
     path,
     validate,
@@ -77,6 +77,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     formProcessing: processing,
     setValue,
     initialValue,
+    rows: field?.rows,
   }), [field, processing, setValue, showError, submitted, value, initialValue]);
 
   // Throttle the validate function

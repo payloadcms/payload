@@ -12,7 +12,7 @@ import { useLocale } from '../../utilities/Locale';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { requests } from '../../../api';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
-import fieldReducer from './fieldReducer';
+import { fieldReducer } from './fieldReducer';
 import initContextState from './initContextState';
 import reduceFieldsToValues from './reduceFieldsToValues';
 import getSiblingDataFunc from './getSiblingData';
