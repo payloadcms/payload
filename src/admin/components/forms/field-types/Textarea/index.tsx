@@ -9,6 +9,8 @@ import { getTranslation } from '../../../../../utilities/getTranslation';
 import { useLabeledLocale } from '../../../utilities/Locale';
 
 import './index.scss';
+import { useConfig } from '../../../utilities/Config';
+import { isFieldRTL } from '../shared';
 
 const Textarea: React.FC<Props> = (props) => {
   const {
@@ -18,6 +20,7 @@ const Textarea: React.FC<Props> = (props) => {
     validate = textarea,
     maxLength,
     minLength,
+    localized,
     admin: {
       readOnly,
       style,
@@ -35,10 +38,16 @@ const Textarea: React.FC<Props> = (props) => {
   const { i18n } = useTranslation();
 
   const path = pathFromProps || name;
-  const labeledLocale = useLabeledLocale();
-  // field id rtl when current locale is rtl and admin.rtl is true also
-  const isRTL = (rtl && labeledLocale && labeledLocale.rtl) || false;
 
+  const labeledLocale = useLabeledLocale();
+
+  const { localization } = useConfig();
+  const isRTL = isFieldRTL({
+    fieldRTL: rtl,
+    fieldLocalized: localized,
+    labeledLocale,
+    localizationConfig: localization || undefined,
+  });
   const memoizedValidate = useCallback((value, options) => {
     return validate(value, { ...options, required, maxLength, minLength });
   }, [validate, required, maxLength, minLength]);

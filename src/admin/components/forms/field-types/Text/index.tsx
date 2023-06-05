@@ -5,6 +5,8 @@ import { text } from '../../../../../fields/validations';
 import { Props } from './types';
 import TextInput from './Input';
 import { useLabeledLocale } from '../../../utilities/Locale';
+import { useConfig } from '../../../utilities/Config';
+import { isFieldRTL } from '../shared';
 
 const Text: React.FC<Props> = (props) => {
   const {
@@ -15,6 +17,7 @@ const Text: React.FC<Props> = (props) => {
     label,
     minLength,
     maxLength,
+    localized,
     admin: {
       placeholder,
       readOnly,
@@ -30,8 +33,15 @@ const Text: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
   const labeledLocale = useLabeledLocale();
-  // field id rtl when current locale is rtl and admin.rtl is true also
-  const isRTL = (rtl && labeledLocale && labeledLocale.rtl) || false;
+
+  const { localization } = useConfig();
+  const isRTL = isFieldRTL({
+    fieldRTL: rtl,
+    fieldLocalized: localized,
+    labeledLocale,
+    localizationConfig: localization || undefined,
+  });
+
 
   const memoizedValidate = useCallback((value, options) => {
     return validate(value, { ...options, minLength, maxLength, required });
