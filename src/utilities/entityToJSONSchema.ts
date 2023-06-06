@@ -10,7 +10,7 @@ import { SanitizedConfig } from '../config/types';
 const propertyIsRequired = (field: Field) => {
   if (fieldAffectsData(field) && (('required' in field && field.required === true))) return true;
 
-  if ('fields' in field) {
+  if ('fields' in field && field.type !== 'array') {
     if (field.admin?.condition || field.access?.read) return false;
     return field.fields.find((subField) => propertyIsRequired(subField));
   }
