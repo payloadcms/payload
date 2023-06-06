@@ -119,6 +119,7 @@ const collectionSchema = joi.object().keys({
         secure: joi.boolean(),
         sameSite: joi.string(), // TODO: add further specificity with joi.xor
         domain: joi.string(),
+        prefix: joi.string()
       }),
       forgotPassword: joi.object().keys({
         generateEmailHTML: joi.func(),

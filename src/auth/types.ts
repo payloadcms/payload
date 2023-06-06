@@ -93,6 +93,7 @@ export interface IncomingAuthType {
     secure?: boolean;
     sameSite?: boolean | 'none' | 'strict' | 'lax';
     domain?: string;
+    prefix?: string;
   }
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML,

@@ -13,13 +13,19 @@ const getExtractJWT = (config: SanitizedConfig) => (req: Request): string | null
     }
 
     const cookies = parseCookies(req);
-    const tokenCookieName = `${config.cookiePrefix}-token`;
-
-    if (cookies && cookies[tokenCookieName]) {
-      if (!origin || config.csrf.length === 0 || config.csrf.indexOf(origin) > -1) {
-        return cookies[tokenCookieName];
-      }
+    
+    if (cookies) {
+      const authCollections = config.collections.filter(collection => collection.auth); 
+      authCollections.forEach(collection => {
+        const tokenCookieName = `${collection.auth.cookies.prefix}-token`;
+        if (cookies[tokenCookieName]) {
+          if (!origin || config.csrf.length === 0 || config.csrf.indexOf(origin) > -1) {
+            return cookies[tokenCookieName];
+          }
+        }
+      });
     }
+
   }
 
   return null;

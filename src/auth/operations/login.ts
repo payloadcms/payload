@@ -165,7 +165,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
     if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
 
-    args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
+    args.res.cookie(`${collectionConfig.auth.cookies.prefix}-token`, token, cookieOptions);
   }
 
   req.user = user;

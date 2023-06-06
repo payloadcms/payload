@@ -33,7 +33,6 @@ export default joi.object({
 
       return value;
     }),
-  cookiePrefix: joi.string(),
   routes: joi.object({
     admin: joi.string(),
     api: joi.string(),
