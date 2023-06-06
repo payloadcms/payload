@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "engines": {
@@ -147,7 +147,6 @@
     "passport-headerapikey": "^1.2.2",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
-    "passport-local-mongoose": "^7.1.2",
     "path-browserify": "^1.0.1",
     "pino": "^6.4.1",
     "pino-pretty": "^9.1.1",
@@ -174,6 +173,7 @@
     "sass": "^1.57.1",
     "sass-loader": "^12.6.0",
     "scheduler": "^0.23.0",
+    "scmp": "^2.1.0",
     "sharp": "^0.31.3",
     "slate": "^0.91.4",
     "slate-history": "^0.86.0",

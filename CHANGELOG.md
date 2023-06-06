@@ -1,5 +1,12 @@
 
 
+## [1.8.5](https://github.com/payloadcms/payload/compare/v1.8.4...v1.8.5) (2023-06-03)
+
+
+### Features
+
+* allows objectid through relationship validation ([42afa6b](https://github.com/payloadcms/payload/commit/42afa6b48aa924fa0dfc9defadf08ddb029da6c1))
+
 ## [1.8.4](https://github.com/payloadcms/payload/compare/v1.8.3...v1.8.4) (2023-06-02)
 
 

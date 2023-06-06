@@ -5,17 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node",
+      "command": "yarn run dev _community",
+      "name": "Run Dev Community",
       "request": "launch",
-      "name": "Launch Program",
-      "runtimeArgs": [
-        "-r",
-        "ts-node/register"
-      ],
-      "args": [
-        "${workspaceFolder}/test/dev.ts",
-        "fields"
-      ]
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "command": "yarn run dev fields",
+      "name": "Run Dev Fields",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}"
     },
   ]
 }
