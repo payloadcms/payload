@@ -25,6 +25,7 @@ export default function initGlobalsLocal(ctx: Payload): void {
           ctx.config,
           versionGlobalFields,
           {
+            indexSortableFields: ctx.config.indexSortableFields,
             disableUnique: true,
             draftsEnabled: true,
             options: {

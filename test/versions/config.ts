@@ -21,6 +21,7 @@ export default buildConfig({
     locales: ['en', 'es'],
     defaultLocale: 'en',
   },
+  indexSortableFields: true,
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
