@@ -15,6 +15,12 @@
     }
   }
 
+  [dir=rtl] &__field,
+  &__operator {
+    margin-left: $baseline;
+    margin-right:0;
+  }
+
   &__field,
   &__operator {
     margin-right: $baseline;

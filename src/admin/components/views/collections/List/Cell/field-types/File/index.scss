@@ -13,6 +13,11 @@
 
   &__filename {
     align-self: center;
-    margin-left: base(1);
+    [dir=ltr] & {
+      margin-left: base(1);
+    }
+    [dir=rtl] & {
+      margin-right: base(1);
+    }  
   }
 }

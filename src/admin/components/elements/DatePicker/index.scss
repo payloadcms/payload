@@ -2,6 +2,14 @@
 
 $cal-icon-width: 18px;
 
+[dir=rtl] {
+  .date-time-picker {
+    .react-datepicker__input-container input {
+      padding-right: base(3.4);
+    }
+  }
+} 
+
 .date-time-picker {
 
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box,

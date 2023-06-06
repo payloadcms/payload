@@ -14,9 +14,10 @@
     display: flex;
     align-items: flex-end;
     flex-wrap: wrap;
+    gap: base(.75);
 
     h1 {
-      margin: 0 base(.75) 0 0;
+      margin: 0;
     }
 
     a {
@@ -57,8 +58,14 @@
   }
 
   &__page-info {
-    margin-right: base(1);
-    margin-left: auto;
+    [dir=ltr] & {
+      margin-right: base(1);
+      margin-left: auto;
+    }
+    [dir=rtl] & {
+      margin-left: base(1);
+      margin-right: auto;
+    }  
   }
 
   &__list-selection {

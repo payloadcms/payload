@@ -83,7 +83,12 @@
     padding-bottom: base(2);
     flex-grow: 1;
   }
-
+  [dir=rtl] &__sidebar-wrap {
+    left: 0;
+    border-right: 1px solid var(--theme-elevation-100);
+    right:auto
+  }
+  
   &__sidebar-wrap {
     position: fixed;
     width: base(15);
@@ -109,7 +114,12 @@
   &__collection-actions,
   &__meta,
   &__sidebar-fields {
-    padding-left: base(1.5);
+    [dir=ltr] & {
+      padding-left: base(1.5);
+    }
+    [dir=rtl] & {
+      padding-right: base(1.5);
+    }  
   }
 
   &__document-actions {

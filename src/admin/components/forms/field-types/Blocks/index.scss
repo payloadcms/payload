@@ -15,6 +15,7 @@
     display: flex;
     align-items: flex-end;
     width: 100%;
+    justify-content: space-between;
   }
 
   &__heading-with-error {
@@ -41,7 +42,7 @@
 
   &__header-actions {
     list-style: none;
-    margin: 0 0 0 auto;
+    margin: 0;
     padding: 0;
     display: flex;
   }
@@ -71,10 +72,6 @@
     flex-shrink: 0;
     display: block;
     line-height: unset;
-  }
-
-  .section-title {
-    min-width: 0;
   }
 
   &__row {

@@ -1,6 +1,7 @@
 @import '../../../scss/styles';
 
 .code-editor {
+  direction: ltr;
   @include formInput;
   height: auto;
   padding: 0;
