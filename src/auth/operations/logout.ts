@@ -49,7 +49,7 @@ async function logout(incomingArgs: Arguments): Promise<string> {
     })) || args;
   }, Promise.resolve());
 
-  res.clearCookie(`${incomingArgs.collection.config.auth.cookies.prefix}-token`, cookieOptions);
+  res.clearCookie(`${incomingArgs.collection.config.auth.cookies.prefix || config.cookiePrefix}-token`, cookieOptions);
 
   return req.t('authentication:loggedOutSuccessfully');
 }
