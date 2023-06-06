@@ -12,7 +12,7 @@ import GenerateConfirmation from '../../../../elements/GenerateConfirmation';
 const path = 'apiKey';
 const baseClass = 'api-key';
 
-const APIKey: React.FC = () => {
+const APIKey: React.FC<{readOnly?: boolean}> = ({ readOnly }) => {
   const [initialAPIKey, setInitialAPIKey] = useState(null);
   const [highlightedField, setHighlightedField] = useState(false);
   const { t } = useTranslation();
@@ -90,10 +90,12 @@ const APIKey: React.FC = () => {
           name="apiKey"
         />
       </div>
-      <GenerateConfirmation
-        setKey={() => setValue(uuidv4())}
-        highlightField={highlightField}
-      />
+      {!readOnly && (
+        <GenerateConfirmation
+          setKey={() => setValue(uuidv4())}
+          highlightField={highlightField}
+        />
+      )}
     </React.Fragment>
   );
 };

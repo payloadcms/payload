@@ -106,6 +106,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
                       collection={collection}
                       email={data?.email}
                       operation="update"
+                      readOnly={!hasSavePermission}
                     />
                     <RenderFields
                       permissions={permissions.fields}
