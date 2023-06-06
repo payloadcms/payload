@@ -140,7 +140,7 @@ export const CustomPreviewButton: CustomPreviewButtonProps = ({
 
 Collection.ts
 ```tsx
-import { MyComponent } from './MyComponent';
+import { MyListComponent } from './MyListComponent';
 
 
 export const MyCollection: CollectionConfig = {
@@ -148,7 +148,7 @@ export const MyCollection: CollectionConfig = {
   admin: {
     components: {
       views: {
-        List: MyComponent,
+        List: MyListComponent,
       },
     },
   },
@@ -158,12 +158,12 @@ export const MyCollection: CollectionConfig = {
 };
 ```
 
-MyComponent.tsx
+MyListComponent.tsx
 ```tsx
 import React from 'react';
 import {List, type Props} from 'payload/components/views/List' // Payload's default List view component and its props
 
-export const MyComponent: React.FC<Props> = (props) => (
+export const MyListComponent: React.FC<Props> = (props) => (
   <div>
     <p>Some text before the default list view component</p>
     <List {...props} />
