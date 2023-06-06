@@ -50,7 +50,6 @@ export const authDefaults = {
   cookies: {
     secure: false,
     sameSite: 'Lax',
-    prefix: 'payload'
   },
   verify: false,
   forgotPassword: {},

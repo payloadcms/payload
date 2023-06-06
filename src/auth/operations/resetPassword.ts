@@ -103,7 +103,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
     if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
 
-    args.res.cookie(`${collectionConfig.auth.cookies.prefix}-token`, token, cookieOptions);
+    args.res.cookie(`${collectionConfig.auth.cookies.prefix || config.cookiePrefix}-token`, token, cookieOptions);
   }
 
   const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess });

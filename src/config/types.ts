@@ -382,6 +382,12 @@ export type Config = {
    * @see https://payloadcms.com/docs/configuration/overview#options
    */
   serverURL?: string;
+  /**
+   * Prefix a string to all cookies that Payload sets. `prefix` in `collection.auth.cookie` will take precedence per collection.
+   *
+   * @default "payload"
+   */
+  cookiePrefix?: string;
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[];
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */

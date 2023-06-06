@@ -9,6 +9,7 @@ export const defaults: Config = {
   collections: [],
   globals: [],
   endpoints: [],
+  cookiePrefix: 'payload',
   csrf: [],
   cors: [],
   admin: {
