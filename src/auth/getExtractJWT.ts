@@ -12,25 +12,18 @@ const getExtractJWT = (config: SanitizedConfig) => (req: Request): string | null
       return jwtFromHeader.replace('JWT ', '');
     }
 
-    
     if (!origin || config.csrf.length === 0 || config.csrf.indexOf(origin) > -1) {
       const cookies = parseCookies(req);
       if (cookies) {
-        const authCollections = config.collections.filter(collection => collection.auth.cookies.prefix); 
-        for (const collection of authCollections) {
-          const collectionCookieName = `${collection.auth.cookies.prefix}-token`;
-          if (cookies[collectionCookieName]) {
-              return cookies[collectionCookieName];
-          }
-        };
-        const globalCookieName = `${config.cookiePrefix}-token`;
-        if (cookies[globalCookieName]) {
-          return cookies[globalCookieName];
+        const collectionPrefixes = config.collections.filter((collection) => collection.auth.cookies.prefix).map((collection) => collection.auth.cookies.prefix);
+        const prefixes = [...collectionPrefixes, config.cookiePrefix];
+        const foundPrefix = prefixes.find((prefix) => cookies[prefix]);
+
+        if (foundPrefix) {
+          return cookies[foundPrefix];
         }
       }
-
     }
-
   }
 
   return null;
