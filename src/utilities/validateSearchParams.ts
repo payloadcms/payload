@@ -89,24 +89,37 @@ export async function validateSearchParam({
         }
       }
       let fieldAccess;
+      let fieldPath = path;
       // TODO: refactor to be more understandable
+      // remove locale from end of path
+      if (path.endsWith(req.locale)) {
+        fieldPath = path.slice(0, -(req.locale.length + 1));
+      }
       if (versionFields) {
-        if (path === 'parent' || path === 'version') {
+        if (fieldPath === 'parent' || fieldPath === 'version') {
           fieldAccess = true;
         } else if (globalConfig) {
-          // TODO: this can probably replaced with a function that simplifies accessing nested permissions
-          fieldAccess = path.startsWith('version.') ? policies.globals[globalConfig.slug].fields.version.fields[field.name].read.permission : policies.globals[globalConfig.slug].fields[field.name].read.permission;
+          // TODO: this can probably be replaced with a function that simplifies accessing nested permissions
+          fieldAccess = fieldPath.startsWith('version.') ? policies.globals[globalConfig.slug].fields.version.fields[field.name].read.permission : policies.globals[globalConfig.slug].fields[field.name].read.permission;
         } else if (collectionConfig) {
           fieldAccess = policies.collections[collectionSlug].fields[field.name].read.permission;
         }
       } else if (globalConfig) {
         fieldAccess = policies.globals[globalConfig.slug].fields[field.name].read.permission;
       } else {
-        // TODO: access nested permissions
-        fieldAccess = policies.collections[collectionSlug].fields[field.name].read.permission;
+        fieldAccess = policies.collections[collectionSlug].fields;
+        const segments = fieldPath.split('.');
+        segments.forEach((segment, pathIndex) => {
+          if (pathIndex === segments.length - 1) {
+            fieldAccess = fieldAccess[segment];
+          } else {
+            fieldAccess = fieldAccess[segment].fields;
+          }
+        });
+        fieldAccess = fieldAccess.read.permission;
       }
       if (!fieldAccess) {
-        errors.push({ path });
+        errors.push({ path: fieldPath });
       }
     }
 
