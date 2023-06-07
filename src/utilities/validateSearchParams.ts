@@ -68,6 +68,7 @@ export async function validateSearchParam({
       globalSlug: globalConfig?.slug,
       fields,
       incomingPath: sanitizedPath,
+      overrideAccess,
     });
   }
 

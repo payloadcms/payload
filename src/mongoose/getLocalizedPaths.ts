@@ -9,12 +9,14 @@ export async function getLocalizedPaths({
   globalSlug,
   fields,
   incomingPath,
+  overrideAccess = false,
 }: {
   req: PayloadRequest
   collectionSlug?: string
   globalSlug?: string
   fields: Field[]
   incomingPath: string
+  overrideAccess?: boolean,
 }): Promise<PathToQuery[]> {
   const pathSegments = incomingPath.split('.');
   const localizationConfig = req.payload.config.localization;
@@ -55,9 +57,8 @@ export async function getLocalizedPaths({
       }
 
       if (matchedField) {
-        if ('hidden' in matchedField && matchedField.hidden) {
+        if ('hidden' in matchedField && matchedField.hidden && !overrideAccess) {
           lastIncompletePath.invalid = true;
-          // return paths;
         }
 
         const nextSegment = pathSegments[i + 1];
