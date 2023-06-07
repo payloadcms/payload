@@ -82,11 +82,6 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   let accessResult: AccessResult;
 
   if (!overrideAccess) {
-    await validateQueryPaths({
-      collectionConfig,
-      where,
-      req,
-    });
     accessResult = await executeAccess({ req, disableErrors }, collectionConfig.access.read);
 
     // If errors are disabled, and access returns false, return empty results
@@ -105,6 +100,14 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       };
     }
   }
+
+  await validateQueryPaths({
+    collectionConfig,
+    where,
+    req,
+    overrideAccess,
+  });
+
 
   const query = await Model.buildQuery({
     req,

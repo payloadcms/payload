@@ -76,13 +76,15 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   let accessResult: AccessResult;
 
   if (!overrideAccess) {
-    await validateQueryPaths({
-      collectionConfig,
-      where,
-      req,
-    });
     accessResult = await executeAccess({ req }, collectionConfig.access.delete);
   }
+
+  await validateQueryPaths({
+    collectionConfig,
+    where,
+    req,
+    overrideAccess,
+  });
 
   const query = await Model.buildQuery({
     where,

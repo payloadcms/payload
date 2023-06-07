@@ -8,21 +8,22 @@ import { SanitizedGlobalConfig } from '../globals/config/types';
 import { validateQueryPaths } from './validateQueryPaths';
 
 type Args = {
-  fields: Field[],
-  path: string,
-  val: unknown,
+  fields: Field[]
+  path: string
+  val: unknown
   operator: string
-  req: PayloadRequest,
-  errors: {path: string}[],
-  policies: EntityPolicies,
+  req: PayloadRequest
+  errors: {path: string}[]
+  policies: EntityPolicies
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
-  versionFields?: Field[],
+  versionFields?: Field[]
+  overrideAccess: boolean
 }
 
 
 /**
- * Convert the Payload key / value / operator into a MongoDB query
+ * Validate the Payload key / value / operator
  */
 export async function validateSearchParam({
   fields,
@@ -35,6 +36,7 @@ export async function validateSearchParam({
   errors,
   req,
   policies,
+  overrideAccess,
 }: Args): Promise<void> {
   // Replace GraphQL nested field double underscore formatting
   const sanitizedPath = incomingPath.replace(/__/gi, '.');
@@ -70,7 +72,7 @@ export async function validateSearchParam({
       return;
     }
 
-    if (fieldAffectsData(field)) {
+    if (!overrideAccess && fieldAffectsData(field)) {
       if (collectionSlug) {
         if (!policies.collections[collectionSlug]) {
           // eslint-disable-next-line no-param-reassign
@@ -87,10 +89,12 @@ export async function validateSearchParam({
         }
       }
       let fieldAccess;
+      // TODO: refactor to be more understandable
       if (versionFields) {
         if (path === 'parent' || path === 'version') {
           fieldAccess = true;
         } else if (globalConfig) {
+          // TODO: this can probably replaced with a function that simplifies accessing nested permissions
           fieldAccess = path.startsWith('version.') ? policies.globals[globalConfig.slug].fields.version.fields[field.name].read.permission : policies.globals[globalConfig.slug].fields[field.name].read.permission;
         } else if (collectionConfig) {
           fieldAccess = policies.collections[collectionSlug].fields[field.name].read.permission;
@@ -98,6 +102,7 @@ export async function validateSearchParam({
       } else if (globalConfig) {
         fieldAccess = policies.globals[globalConfig.slug].fields[field.name].read.permission;
       } else {
+        // TODO: access nested permissions
         fieldAccess = policies.collections[collectionSlug].fields[field.name].read.permission;
       }
       if (!fieldAccess) {
@@ -129,6 +134,7 @@ export async function validateSearchParam({
             errors,
             policies,
             req,
+            overrideAccess,
           });
         }
       });

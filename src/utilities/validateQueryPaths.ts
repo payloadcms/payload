@@ -30,6 +30,7 @@ type Args = {
   policies?: EntityPolicies
   req: PayloadRequest
   versionFields?: Field[]
+  overrideAccess: boolean
 } & ({
   collectionConfig: SanitizedCollectionConfig
   globalConfig?: never | undefined
@@ -48,6 +49,7 @@ export async function validateQueryPaths({
   },
   versionFields,
   req,
+  overrideAccess,
 }: Args): Promise<void> {
   const fields = flattenFields(versionFields || (globalConfig || collectionConfig).fields) as FieldAffectingData[];
   if (typeof where === 'object') {
@@ -70,6 +72,7 @@ export async function validateQueryPaths({
               path,
               val,
               operator,
+              overrideAccess,
             }));
           }
         });

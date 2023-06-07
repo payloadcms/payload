@@ -44,13 +44,12 @@ export const queryDrafts = async <T extends TypeWithID>({
     versionAccessResult = appendVersionToQueryKey(accessResult);
   }
 
-  if (!overrideAccess) {
-    await validateQueryPaths({
-      collectionConfig: collection.config,
-      where,
-      req,
-    });
-  }
+  await validateQueryPaths({
+    collectionConfig: collection.config,
+    where,
+    req,
+    overrideAccess,
+  });
 
   const versionQuery = await VersionModel.buildQuery({
     where,

@@ -57,14 +57,13 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
   const accessResults = !overrideAccess ? await executeAccess({ req }, globalConfig.access.readVersions) : true;
 
-  if (!overrideAccess) {
-    await validateQueryPaths({
-      globalConfig,
-      versionFields,
-      where,
-      req,
-    });
-  }
+  await validateQueryPaths({
+    globalConfig,
+    versionFields,
+    where,
+    req,
+    overrideAccess,
+  });
 
   const query = await VersionsModel.buildQuery({
     where,
