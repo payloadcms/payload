@@ -17,10 +17,10 @@ const getExtractJWT = (config: SanitizedConfig) => (req: Request): string | null
       if (cookies) {
         const collectionPrefixes = config.collections.filter((collection) => collection.auth.cookies.prefix).map((collection) => collection.auth.cookies.prefix);
         const prefixes = [...collectionPrefixes, config.cookiePrefix];
-        const foundPrefix = prefixes.find((prefix) => cookies[prefix]);
+        const foundPrefix = prefixes.find((prefix) => cookies[`${prefix}-token`]);
 
         if (foundPrefix) {
-          return cookies[foundPrefix];
+          return cookies[`${foundPrefix}-token`];
         }
       }
     }
