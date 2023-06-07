@@ -71,8 +71,8 @@ export async function validateSearchParam({
       overrideAccess,
     });
   }
-
-  const promises = paths.map(async ({ path, field, invalid, collectionSlug }, i) => {
+  const promises = [];
+  promises.push(...paths.map(async ({ path, field, invalid, collectionSlug }, i) => {
     if (invalid) {
       errors.push({ path });
       return;
@@ -96,28 +96,27 @@ export async function validateSearchParam({
       }
       let fieldAccess;
       let fieldPath = path;
-      // TODO: refactor to be more understandable
       // remove locale from end of path
       if (path.endsWith(req.locale)) {
         fieldPath = path.slice(0, -(req.locale.length + 1));
       }
+      // remove ".value" from ends of polymorphic relationship paths
       if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
         fieldPath = fieldPath.replace('.value', '');
       }
+      const entityType: 'collections' | 'globals' = globalConfig ? 'globals' : 'collections';
+      const entitySlug = collectionSlug || globalConfig.slug;
+      const segments = fieldPath.split('.');
+
       if (versionFields) {
         if (fieldPath === 'parent' || fieldPath === 'version') {
-          fieldAccess = true;
-        } else if (globalConfig) {
-          // TODO: this can probably be replaced with a function that simplifies accessing nested permissions
-          fieldAccess = fieldPath.startsWith('version.') ? policies.globals[globalConfig.slug].fields.version.fields[field.name].read.permission : policies.globals[globalConfig.slug].fields[field.name].read.permission;
-        } else if (collectionConfig) {
-          fieldAccess = policies.collections[collectionSlug].fields[field.name].read.permission;
+          fieldAccess = policies[entityType][entitySlug].read.permission;
+        } else if (segments[0] === 'parent' || segments[0] === 'version') {
+          fieldAccess = policies[entityType][entitySlug].read.permission;
+          segments.shift();
         }
-      } else if (globalConfig) {
-        fieldAccess = policies.globals[globalConfig.slug].fields[field.name].read.permission;
       } else {
-        fieldAccess = policies.collections[collectionSlug].fields;
-        const segments = fieldPath.split('.');
+        fieldAccess = policies[entityType][entitySlug].fields;
         segments.forEach((segment, pathIndex) => {
           if (pathIndex === segments.length - 1) {
             fieldAccess = fieldAccess[segment];
@@ -145,7 +144,7 @@ export async function validateSearchParam({
         // On the "deepest" collection,
         // validate query of the relationship
         if (pathToQueryIndex === 0) {
-          validateQueryPaths({
+          promises.push(validateQueryPaths({
             collectionConfig: req.payload.collections[pathCollectionSlug].config,
             globalConfig: undefined,
             where: {
@@ -157,10 +156,10 @@ export async function validateSearchParam({
             policies,
             req,
             overrideAccess,
-          });
+          }));
         }
       });
     }
-  });
+  }));
   await Promise.all(promises);
 }
