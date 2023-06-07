@@ -9,7 +9,7 @@ import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
 import { TypeWithVersion } from '../../versions/types';
-import { validateQueryPaths } from '../../utilities/validateQueryPaths';
+import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig

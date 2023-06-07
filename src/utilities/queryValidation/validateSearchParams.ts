@@ -1,11 +1,11 @@
-import { Field, fieldAffectsData } from '../fields/config/types';
-import { PayloadRequest } from '../express/types';
-import { getLocalizedPaths } from '../mongoose/getLocalizedPaths';
-import { EntityPolicies, PathToQuery } from '../mongoose/buildQuery';
-import { getEntityPolicies } from './getEntityPolicies';
-import { SanitizedCollectionConfig } from '../collections/config/types';
-import { SanitizedGlobalConfig } from '../globals/config/types';
+import { Field, fieldAffectsData } from '../../fields/config/types';
+import { PayloadRequest } from '../../express/types';
+import { getLocalizedPaths } from '../../mongoose/getLocalizedPaths';
+import { getEntityPolicies } from '../getEntityPolicies';
+import { SanitizedCollectionConfig } from '../../collections/config/types';
+import { SanitizedGlobalConfig } from '../../globals/config/types';
 import { validateQueryPaths } from './validateQueryPaths';
+import { EntityPolicies, PathToQuery } from './types';
 
 type Args = {
   fields: Field[]

@@ -1,14 +1,14 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-import { PayloadRequest, Where, WhereField } from '../types';
-import { EntityPolicies, validOperators } from '../mongoose/buildQuery';
-import QueryError from '../errors/QueryError';
-import { SanitizedCollectionConfig } from '../collections/config/types';
-import { SanitizedGlobalConfig } from '../globals/config/types';
-import flattenFields from './flattenTopLevelFields';
-import { Field, FieldAffectingData } from '../fields/config/types';
+import { PayloadRequest, Where, WhereField } from '../../types';
+import QueryError from '../../errors/QueryError';
+import { SanitizedCollectionConfig } from '../../collections/config/types';
+import { SanitizedGlobalConfig } from '../../globals/config/types';
+import flattenFields from '../flattenTopLevelFields';
+import { Field, FieldAffectingData } from '../../fields/config/types';
 import { validateSearchParam } from './validateSearchParams';
-import deepCopyObject from './deepCopyObject';
+import deepCopyObject from '../deepCopyObject';
+import { EntityPolicies, validOperators } from './types';
 
 const flattenWhere = (query: Where): WhereField[] => Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
   if ((key === 'and' || key === 'or') && Array.isArray(val)) {

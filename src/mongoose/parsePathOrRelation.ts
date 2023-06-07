@@ -5,9 +5,9 @@ import deepmerge from 'deepmerge';
 import { PayloadRequest, Where } from '../types';
 import { buildSearchParam } from './buildSearchParams';
 import { combineMerge } from '../utilities/combineMerge';
-import { validOperators } from './buildQuery';
 import { buildAndOrConditions } from './buildAndOrConditions';
 import { Field } from '../fields/config/types';
+import { validOperators } from '../utilities/queryValidation/types';
 
 
 export async function parsePathOrRelation({

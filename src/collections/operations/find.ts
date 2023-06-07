@@ -9,7 +9,7 @@ import { buildSortParam } from '../../mongoose/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { queryDrafts } from '../../versions/drafts/queryDrafts';
-import { validateQueryPaths } from '../../utilities/validateQueryPaths';
+import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
 
 export type Arguments = {
   collection: Collection

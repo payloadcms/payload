@@ -9,7 +9,7 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
-import { validateQueryPaths } from '../../utilities/validateQueryPaths';
+import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
 
 export type Arguments = {
   collection: Collection

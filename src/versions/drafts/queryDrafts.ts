@@ -6,7 +6,7 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { Collection, CollectionModel, TypeWithID } from '../../collections/config/types';
 import { hasWhereAccessResult } from '../../auth';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
-import { validateQueryPaths } from '../../utilities/validateQueryPaths';
+import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
 import { buildVersionCollectionFields } from '../buildCollectionFields';
 
 type AggregateVersion<T> = {

@@ -10,7 +10,7 @@ import { Where } from '../../types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
-import { validateQueryPaths } from '../../utilities/validateQueryPaths';
+import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
 
 export type Arguments = {
   depth?: number

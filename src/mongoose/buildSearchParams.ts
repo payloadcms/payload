@@ -1,9 +1,9 @@
 import { Field, fieldAffectsData } from '../fields/config/types';
-import { PathToQuery, validOperators } from './buildQuery';
 import { operatorMap } from './operatorMap';
 import { getLocalizedPaths } from './getLocalizedPaths';
 import { sanitizeQueryValue } from './sanitizeQueryValue';
 import { PayloadRequest } from '../express/types';
+import { PathToQuery, validOperators } from '../utilities/queryValidation/types';
 
 type SearchParam = {
   path?: string,
