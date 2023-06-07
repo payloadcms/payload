@@ -363,6 +363,28 @@ describe('collections-graphql', () => {
 
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }));
       });
+
+      it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
+        const withNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } });
+        const query = `{
+          Posts(where: { D1__D2__D3__D4: { equals: "nested message" } }) {
+            docs {
+              id
+              D1 {
+                D2 {
+                  D3 {
+                    D4
+                  }
+                }
+              }
+            }
+          }
+        }`;
+        const response = await client.request(query);
+        const { docs } = response.Posts;
+
+        expect(docs).toContainEqual(expect.objectContaining({ id: withNestedField.id, D1: { D2: { D3: { D4: 'nested message' } } } }));
+      });
     });
 
     describe('relationships', () => {
@@ -450,10 +472,10 @@ describe('collections-graphql', () => {
       });
 
       expect(Array.isArray(error.response.errors)).toBe(true);
-      expect(error.response.errors[0].message).toEqual('No password was given');
+      expect(error.response.errors[0].message).toEqual('The following field is invalid: password');
       expect(Array.isArray(error.response.errors[0].locations)).toEqual(true);
       expect(error.response.errors[0].path[0]).toEqual('test2');
-      expect(error.response.errors[0].extensions.name).toEqual('MissingPasswordError');
+      expect(error.response.errors[0].extensions.name).toEqual('ValidationError');
 
       expect(error.response.errors[1].message).toEqual('The following field is invalid: email');
       expect(error.response.errors[1].path[0]).toEqual('test3');

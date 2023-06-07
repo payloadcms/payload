@@ -1,6 +1,4 @@
-import React, {
-  useCallback, useEffect, useState, useReducer, useRef,
-} from 'react';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import qs from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
@@ -16,7 +14,7 @@ import { Where } from '../../../../../types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
 import { useFormProcessing } from '../../Form/context';
 import optionsReducer from './optionsReducer';
-import { Props, GetResults, Value, FilterOptionsResult } from './types';
+import { FilterOptionsResult, GetResults, Props, Value } from './types';
 import { createRelationMap } from './createRelationMap';
 import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
 import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
@@ -73,7 +71,7 @@ const Relationship: React.FC<Props> = (props) => {
   const hasMultipleRelations = Array.isArray(relationTo);
   const [options, dispatchOptions] = useReducer(optionsReducer, []);
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
-  const [lastLoadedPage, setLastLoadedPage] = useState(1);
+  const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({});
   const [errorLoading, setErrorLoading] = useState('');
   const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>();
   const [search, setSearch] = useState('');
@@ -103,7 +101,6 @@ const Relationship: React.FC<Props> = (props) => {
 
   const getResults: GetResults = useCallback(async ({
     lastFullyLoadedRelation: lastFullyLoadedRelationArg,
-    lastLoadedPage: lastLoadedPageArg,
     search: searchArg,
     value: valueArg,
     sort,
@@ -112,7 +109,6 @@ const Relationship: React.FC<Props> = (props) => {
     if (!permissions) {
       return;
     }
-    let lastLoadedPageToUse = typeof lastLoadedPageArg !== 'undefined' ? lastLoadedPageArg : 1;
     const lastFullyLoadedRelationToUse = typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1;
 
     const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
@@ -127,6 +123,7 @@ const Relationship: React.FC<Props> = (props) => {
 
     if (!errorLoading) {
       relationsToFetch.reduce(async (priorRelation, relation) => {
+        const lastLoadedPageToUse = (lastLoadedPage[relation] + 1) || 1;
         await priorRelation;
 
         if (resultsFetched < 10) {
@@ -175,6 +172,15 @@ const Relationship: React.FC<Props> = (props) => {
           if (response.ok) {
             const data: PaginatedDocs<unknown> = await response.json();
 
+            setLastLoadedPage((prevState) => ({
+              ...prevState,
+              [relation]: lastLoadedPageToUse,
+            }));
+
+            if (!data.nextPage) {
+              setLastFullyLoadedRelation(relations.indexOf(relation));
+            }
+
             if (data.docs.length > 0) {
               resultsFetched += data.docs.length;
 
@@ -186,22 +192,9 @@ const Relationship: React.FC<Props> = (props) => {
                 i18n,
                 config,
               });
-
-              setLastLoadedPage(data.page);
-
-              if (!data.nextPage) {
-                setLastFullyLoadedRelation(relations.indexOf(relation));
-
-                // If there are more relations to search, need to reset lastLoadedPage to 1
-                // both locally within function and state
-                if (relations.indexOf(relation) + 1 < relations.length) {
-                  lastLoadedPageToUse = 1;
-                }
-              }
             }
           } else if (response.status === 403) {
             setLastFullyLoadedRelation(relations.indexOf(relation));
-            lastLoadedPageToUse = 1;
             dispatchOptions({
               type: 'ADD',
               docs: [],
@@ -220,6 +213,7 @@ const Relationship: React.FC<Props> = (props) => {
       if (typeof onSuccess === 'function') onSuccess();
     }
   }, [
+    lastLoadedPage,
     permissions,
     relationTo,
     hasMany,
@@ -339,7 +333,7 @@ const Relationship: React.FC<Props> = (props) => {
 
     dispatchOptions({ type: 'CLEAR' });
     setLastFullyLoadedRelation(-1);
-    setLastLoadedPage(1);
+    setLastLoadedPage({});
     setHasLoadedFirstPage(false);
   }, [relationTo, filterOptionsResult, locale]);
 
@@ -409,7 +403,6 @@ const Relationship: React.FC<Props> = (props) => {
             onMenuScrollToBottom={() => {
               getResults({
                 lastFullyLoadedRelation,
-                lastLoadedPage: lastLoadedPage + 1,
                 search,
                 value: initialValue,
                 sort: false,

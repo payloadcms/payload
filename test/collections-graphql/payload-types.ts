@@ -7,20 +7,33 @@
 
 export interface Config {
   collections: {
+    users: User;
     posts: Post;
+    'custom-ids': CustomId;
     relation: Relation;
     dummy: Dummy;
-    users: User;
   };
   globals: {};
+}
+export interface User {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpiration?: string;
+  loginAttempts?: number;
+  lockUntil?: string;
+  password?: string;
 }
 export interface Post {
   id: string;
   title?: string;
   description?: string;
+  number?: number;
   min?: number;
-  max?: number;
   relationField?: string | Relation;
+  relationToCustomID?: number | CustomId;
   relationHasManyField?: string[] | Relation[];
   relationMultiRelationTo?:
     | {
@@ -52,29 +65,42 @@ export interface Post {
             relationTo: 'dummy';
           }
       )[];
-  createdAt: string;
+  A1?: {
+    A2?: string;
+  };
+  B1?: {
+    B2?: string;
+  };
+  C1?: {
+    C2?: {
+      C3?: string;
+    };
+  };
+  D1: {
+    D2?: {
+      D3?: {
+        D4?: string;
+      };
+    };
+  };
   updatedAt: string;
+  createdAt: string;
 }
 export interface Relation {
   id: string;
   name?: string;
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
+}
+export interface CustomId {
+  id: number;
+  title?: string;
+  updatedAt: string;
+  createdAt: string;
 }
 export interface Dummy {
   id: string;
   name?: string;
-  createdAt: string;
   updatedAt: string;
-}
-export interface User {
-  id: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
   createdAt: string;
-  updatedAt: string;
-  password?: string;
 }

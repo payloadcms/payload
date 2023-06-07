@@ -1,10 +1,10 @@
 import type { Access } from 'payload/config'
 
-import { checkUserRoles } from '../../utilities/checkUserRoles'
+import { isSuperAdmin } from '../../utilities/isSuperAdmin'
 
 // the user must be an admin of the tenant being accessed
 export const tenantAdmins: Access = ({ req: { user } }) => {
-  if (checkUserRoles(['super-admin'], user)) {
+  if (isSuperAdmin(user)) {
     return true
   }
 

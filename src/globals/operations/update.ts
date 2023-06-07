@@ -94,7 +94,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   }
 
   const originalDoc = await afterRead({
-    depth,
+    depth: 0,
     doc: globalJSON,
     entityConfig: globalConfig,
     req,

@@ -9,7 +9,15 @@ keywords: query, documents, overview, documentation, Content Management System, 
 Payload provides an extremely granular querying language through all APIs. Each API takes the same syntax and fully supports all options.
 
 <Banner>
-  <strong>Here, "querying" relates to filtering or searching through documents within a Collection.</strong> You can build queries to pass to Find operations as well as to <a href="/docs/access-control/overview">restrict which documents certain users can access</a> via access control functions.
+  <strong>
+    Here, "querying" relates to filtering or searching through documents within
+    a Collection.
+  </strong>{" "}
+  You can build queries to pass to Find operations as well as to{" "}
+  <a href="/docs/access-control/overview">
+    restrict which documents certain users can access
+  </a>{" "}
+  via access control functions.
 </Banner>
 
 ### Simple queries
@@ -17,60 +25,60 @@ Payload provides an extremely granular querying language through all APIs. Each 
 For example, say you have a collection as follows:
 
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from "payload/types";
 
 export const Post: CollectionConfig = {
-  slug: 'posts',
+  slug: "posts",
   fields: [
     {
-      name: 'color',
-      type: 'select',
-      options: [
-        'mint',
-        'dark-gray',
-        'white',
-      ],
+      name: "color",
+      type: "select",
+      options: ["mint", "dark-gray", "white"],
     },
     {
-      name: 'featured',
-      type: 'checkbox',
-    }
-  ]
-}
+      name: "featured",
+      type: "checkbox",
+    },
+  ],
+};
 ```
 
 You may eventually have a lot of documents within this Collection. If you wanted to find only documents with `color` equal to `mint`, you could write a query as follows:
 
 ```js
 const query = {
-  color: { // property name to filter on
-    equals: 'mint', // operator to use and value to compare against
+  color: {
+    // property name to filter on
+    equals: "mint", // operator to use and value to compare against
   },
-}
+};
 ```
 
 The above example demonstrates a simple query but you can get much more complex.
 
 ### Operators
 
-| Operator             | Description  |
-| -------------------- | ------------ |
-| `equals`             | The value must be exactly equal. |
-| `not_equals`         | The query will return all documents where the value is not equal. |
-| `greater_than`       | For numeric or date-based fields. |
-| `greater_than_equal` | For numeric or date-based fields. |
-| `less_than`          | For numeric or date-based fields. |
-| `less_than_equal`    | For numeric or date-based fields. |
-| `like`               | Case-insensitive string must be present. If string of words, all words must be present, in any order. |
-| `contains`           | Must contain the value entered, case-insensitive. |
-| `in`                 | The value must be found within the provided comma-delimited list of values. |
-| `not_in`             | The value must NOT be within the provided comma-delimited list of values. |
-| `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`). |
+| Operator             | Description                                                                                                                                                                       |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equals`             | The value must be exactly equal.                                                                                                                                                  |
+| `not_equals`         | The query will return all documents where the value is not equal.                                                                                                                 |
+| `greater_than`       | For numeric or date-based fields.                                                                                                                                                 |
+| `greater_than_equal` | For numeric or date-based fields.                                                                                                                                                 |
+| `less_than`          | For numeric or date-based fields.                                                                                                                                                 |
+| `less_than_equal`    | For numeric or date-based fields.                                                                                                                                                 |
+| `like`               | Case-insensitive string must be present. If string of words, all words must be present, in any order.                                                                             |
+| `contains`           | Must contain the value entered, case-insensitive.                                                                                                                                 |
+| `in`                 | The value must be found within the provided comma-delimited list of values.                                                                                                       |
+| `not_in`             | The value must NOT be within the provided comma-delimited list of values.                                                                                                         |
+| `all`                | The value must contain all values provided in the comma-delimited list.                                                                                                           |
+| `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`).                                                                                         |
 | `near`               | For distance related to a [point field](/docs/fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`. |
 
 <Banner type="success">
-  <strong>Tip</strong>:<br/>
-  If you know your users will be querying on certain fields a lot, you can add <strong>index: true</strong> to a field's config which will speed up searches using that field immensely.
+  <strong>Tip</strong>:<br />
+  If you know your users will be querying on certain fields a lot, you can add <strong>
+    index: true
+  </strong> to a field's config which will speed up searches using that field immensely.
 </Banner>
 
 ### And / Or Logic
@@ -79,28 +87,30 @@ In addition to defining simple queries, you can join multiple queries together u
 
 ```js
 const query = {
-  or: [ // array of OR conditions
+  or: [
+    // array of OR conditions
     {
       color: {
-        equals: 'mint',
+        equals: "mint",
       },
     },
     {
-      and: [ // nested array of AND conditions
+      and: [
+        // nested array of AND conditions
         {
           color: {
-            equals: 'white',
-          }
+            equals: "white",
+          },
         },
         {
           featured: {
             equals: false,
-          }
-        }
-      ]
-    }
-  ]
-}
+          },
+        },
+      ],
+    },
+  ],
+};
 ```
 
 Written in plain English, if the above query were passed to a `find` operation, it would translate to finding posts where either the `color` is `mint` OR the `color` is `white` AND `featured` is set to false.
@@ -111,10 +121,11 @@ When working with nested properties, which can happen when using relational fiel
 
 ```js
 const query = {
-  'artists.featured': { // nested property name to filter on
+  "artists.featured": {
+    // nested property name to filter on
     exists: true, // operator to use and boolean value that needs to be true
   },
-}
+};
 ```
 
 ### GraphQL Find Queries
@@ -147,24 +158,29 @@ This one isn't too bad, but more complex queries get unavoidably more difficult 
 **For example, using fetch:**
 
 ```js
-import qs from 'qs';
+import qs from "qs";
 
 const query = {
   color: {
-    equals: 'mint',
+    equals: "mint",
   },
   // This query could be much more complex
   // and QS would handle it beautifully
-}
+};
 
 const getPosts = async () => {
-  const stringifiedQuery = qs.stringify({
-    where: query // ensure that `qs` adds the `where` property, too!
-  }, { addQueryPrefix: true });
+  const stringifiedQuery = qs.stringify(
+    {
+      where: query, // ensure that `qs` adds the `where` property, too!
+    },
+    { addQueryPrefix: true }
+  );
 
-  const response = await fetch(`http://localhost:3000/api/posts${stringifiedQuery}`);
+  const response = await fetch(
+    `http://localhost:3000/api/posts${stringifiedQuery}`
+  );
   // Continue to handle the response below...
-}
+};
 ```
 
 ### Local API Queries
@@ -174,18 +190,17 @@ The Local API's `find` operation accepts an object exactly how you write it. For
 ```js
 const getPosts = async () => {
   const posts = await payload.find({
-    collection: 'posts',
+    collection: "posts",
     where: {
       color: {
-        equals: 'mint',
+        equals: "mint",
       },
     },
   });
 
   return posts;
-}
+};
 ```
-
 
 ## Sort
 
@@ -195,6 +210,7 @@ Payload `find` queries support a `sort` parameter through all APIs. Pass the `na
 **`https://localhost:3000/api/posts?sort=-createdAt`**
 
 **GraphQL example:**
+
 ```
 query {
   Posts(sort: "-createdAt") {
@@ -210,10 +226,10 @@ query {
 ```js
 const getPosts = async () => {
   const posts = await payload.find({
-    collection: 'posts',
-    sort: '-createdAt',
+    collection: "posts",
+    sort: "-createdAt",
   });
 
   return posts;
-}
+};
 ```

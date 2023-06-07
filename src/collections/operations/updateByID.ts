@@ -18,6 +18,7 @@ import { generateFileData } from '../../uploads/generateFileData';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
+import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -223,9 +224,12 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // Handle potential password update
   // /////////////////////////////////////
 
-  if (shouldSavePassword) {
-    await doc.setPassword(password);
-    await doc.save();
+  const dataToUpdate: Record<string, unknown> = { ...result }
+
+  if (shouldSavePassword && typeof password === 'string') {
+    const { hash, salt } = await generatePasswordSaltHash({ password })
+    dataToUpdate.salt = salt
+    dataToUpdate.hash = hash
     delete data.password;
     delete result.password;
   }
@@ -238,7 +242,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     try {
       result = await Model.findByIdAndUpdate(
         { _id: id },
-        result,
+        dataToUpdate,
         { new: true },
       );
     } catch (error) {
