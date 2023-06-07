@@ -7,6 +7,7 @@ import { Collection, CollectionModel, TypeWithID } from '../../collections/confi
 import { hasWhereAccessResult } from '../../auth';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
 import { validateQueryPaths } from '../../utilities/validateQueryPaths';
+import { buildVersionCollectionFields } from '../buildCollectionFields';
 
 type AggregateVersion<T> = {
   _id: string
@@ -49,6 +50,7 @@ export const queryDrafts = async <T extends TypeWithID>({
     where,
     req,
     overrideAccess,
+    versionFields: buildVersionCollectionFields(collection.config),
   });
 
   const versionQuery = await VersionModel.buildQuery({
