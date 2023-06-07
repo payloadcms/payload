@@ -95,6 +95,9 @@ export async function validateSearchParam({
       if (path.endsWith(req.locale)) {
         fieldPath = path.slice(0, -(req.locale.length + 1));
       }
+      if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+        fieldPath = fieldPath.replace('.value', '');
+      }
       if (versionFields) {
         if (fieldPath === 'parent' || fieldPath === 'version') {
           fieldAccess = true;
