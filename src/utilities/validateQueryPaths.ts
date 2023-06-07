@@ -8,6 +8,7 @@ import { SanitizedGlobalConfig } from '../globals/config/types';
 import flattenFields from './flattenTopLevelFields';
 import { Field, FieldAffectingData } from '../fields/config/types';
 import { validateSearchParam } from './validateSearchParams';
+import deepCopyObject from './deepCopyObject';
 
 const flattenWhere = (query: Where): WhereField[] => Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
   if ((key === 'and' || key === 'or') && Array.isArray(val)) {
@@ -59,8 +60,8 @@ export async function validateQueryPaths({
         Object.entries(constraint[path]).map(async ([operator, val]) => {
           if (validOperators.includes(operator)) {
             promises.push(validateSearchParam({
-              collectionConfig,
-              globalConfig,
+              collectionConfig: deepCopyObject(collectionConfig),
+              globalConfig: deepCopyObject(globalConfig),
               fields: (fields as Field[]),
               versionFields,
               errors,
