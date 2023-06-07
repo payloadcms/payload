@@ -9,15 +9,7 @@ keywords: query, documents, overview, documentation, Content Management System, 
 Payload provides an extremely granular querying language through all APIs. Each API takes the same syntax and fully supports all options.
 
 <Banner>
-  <strong>
-    Here, "querying" relates to filtering or searching through documents within
-    a Collection.
-  </strong>{" "}
-  You can build queries to pass to Find operations as well as to{" "}
-  <a href="/docs/access-control/overview">
-    restrict which documents certain users can access
-  </a>{" "}
-  via access control functions.
+  <strong>Here, "querying" relates to filtering or searching through documents within a Collection.</strong> You can build queries to pass to Find operations as well as to <a href="/docs/access-control/overview">restrict which documents certain users can access</a> via access control functions.
 </Banner>
 
 ### Simple queries
@@ -75,10 +67,8 @@ The above example demonstrates a simple query but you can get much more complex.
 | `near`               | For distance related to a [point field](/docs/fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`. |
 
 <Banner type="success">
-  <strong>Tip</strong>:<br />
-  If you know your users will be querying on certain fields a lot, you can add <strong>
-    index: true
-  </strong> to a field's config which will speed up searches using that field immensely.
+  <strong>Tip</strong>:<br/>
+  If you know your users will be querying on certain fields a lot, you can add <strong>index: true</strong> to a field's config which will speed up searches using that field immensely.
 </Banner>
 
 ### And / Or Logic
