@@ -39,7 +39,12 @@ export async function validateSearchParam({
   overrideAccess,
 }: Args): Promise<void> {
   // Replace GraphQL nested field double underscore formatting
-  const sanitizedPath = incomingPath.replace(/__/gi, '.');
+  let sanitizedPath;
+  if (incomingPath === '_id') {
+    sanitizedPath = 'id';
+  } else {
+    sanitizedPath = incomingPath.replace(/__/gi, '.');
+  }
   let paths: PathToQuery[] = [];
   const { slug } = (collectionConfig || globalConfig);
 
