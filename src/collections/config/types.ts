@@ -12,6 +12,8 @@ import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 import { BuildQueryArgs } from '../../mongoose/buildQuery';
 import { CustomPreviewButtonProps, CustomPublishButtonProps, CustomSaveButtonProps, CustomSaveDraftButtonProps } from '../../admin/components/elements/types';
+import type { Props as ListProps } from '../../admin/components/views/collections/List/types';
+import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types';
 
 type Register<T = any> = (doc: T, password: string) => T;
 
@@ -220,9 +222,13 @@ export type CollectionAdminOptions = {
       PreviewButton?: CustomPreviewButtonProps
     },
     views?: {
-      Edit?: React.ComponentType<any>
-      List?: React.ComponentType<any>
-    }
+      Edit?: React.ComponentType<EditProps>
+      List?: React.ComponentType<ListProps>
+    },
+    BeforeList?: React.ComponentType<ListProps>[],
+    BeforeListTable?: React.ComponentType<ListProps>[],
+    AfterListTable?: React.ComponentType<ListProps>[],
+    AfterList?: React.ComponentType<ListProps>[],
   };
   pagination?: {
     defaultLimit?: number
