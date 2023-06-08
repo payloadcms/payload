@@ -116,7 +116,7 @@ That's it! Now the afterChange hook will only run once, and not trigger itself a
 
 ## Typing context
 
-By default, payloadContext is untyped. However - especially for plugin development, when a plugin adds context data to the payloadContext object, it's useful to have typing for that.
+By default, payloadContext is untyped. However - especially for plugin development when a plugin adds context data to the payloadContext object - it's useful to have it typed.
 
 We can do this using "type augmentation" - a TypeScript feature which allows us to add types to existing objects. Simply put this in any .ts or .d.ts file:
 
