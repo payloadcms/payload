@@ -6,6 +6,7 @@ import { Document } from '../../../types';
 import restoreVersion from '../restoreVersion';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   slug: string
@@ -48,8 +49,8 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     fallbackLocale,
     i18n,
     t: i18n.t,
-    payloadContext: {},
   } as PayloadRequest;
+  populateDefaultRequest(req);
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 

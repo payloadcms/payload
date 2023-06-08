@@ -8,6 +8,7 @@ import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { BulkOperationResult } from '../../config/types';
+import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -62,8 +63,8 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     fallbackLocale: fallbackLocale ?? defaultLocale,
     payload,
     i18n: i18n(payload.config.i18n),
-    payloadContext: {},
   } as PayloadRequest;
+  populateDefaultRequest(req);
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

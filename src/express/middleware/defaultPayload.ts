@@ -1,8 +1,9 @@
-import { Response, NextFunction } from 'express';
-import { PayloadRequest } from '../types';
+import type { Response, NextFunction } from 'express';
+import type { PayloadRequest } from '../types';
+import { populateDefaultRequest } from '../defaultRequest';
 
 function defaultPayload(req: PayloadRequest, res: Response, next: NextFunction) {
-  req.payloadContext = req.payloadContext || {};
+  populateDefaultRequest(req);
   next();
 }
 

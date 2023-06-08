@@ -5,6 +5,7 @@ import { PayloadRequest } from '../../../express/types';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -26,6 +27,7 @@ async function localResetPassword<T extends keyof GeneratedTypes['collections']>
     overrideAccess,
     req = {} as PayloadRequest,
   } = options;
+  populateDefaultRequest(options.req);
 
   const collection = payload.collections[collectionSlug];
 

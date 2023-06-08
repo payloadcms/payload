@@ -224,12 +224,12 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // Handle potential password update
   // /////////////////////////////////////
 
-  const dataToUpdate: Record<string, unknown> = { ...result }
+  const dataToUpdate: Record<string, unknown> = { ...result };
 
   if (shouldSavePassword && typeof password === 'string') {
-    const { hash, salt } = await generatePasswordSaltHash({ password })
-    dataToUpdate.salt = salt
-    dataToUpdate.hash = hash
+    const { hash, salt } = await generatePasswordSaltHash({ password });
+    dataToUpdate.salt = salt;
+    dataToUpdate.hash = hash;
     delete data.password;
     delete result.password;
   }

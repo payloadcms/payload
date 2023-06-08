@@ -10,6 +10,7 @@ import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
@@ -45,11 +46,10 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     filePath,
     file,
     overwriteExistingFiles = false,
-    req = {
-      payloadContext: {},
-    } as PayloadRequest,
+    req = {} as PayloadRequest,
     draft,
   } = options;
+  populateDefaultRequest(req);
 
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;

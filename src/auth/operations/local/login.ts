@@ -6,6 +6,7 @@ import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
@@ -28,9 +29,7 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   const {
     collection: collectionSlug,
-    req = {
-      payloadContext: {},
-    } as PayloadRequest,
+    req = {} as PayloadRequest,
     res,
     depth,
     locale,
@@ -39,6 +38,8 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess = true,
     showHiddenFields,
   } = options;
+  populateDefaultRequest(options.req);
+
 
   const collection = payload.collections[collectionSlug];
 

@@ -5,6 +5,7 @@ import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -25,10 +26,9 @@ async function localForgotPassword<T extends keyof GeneratedTypes['collections']
     data,
     expiration,
     disableEmail,
-    req = {
-      payloadContext: {},
-    } as PayloadRequest,
+    req = {} as PayloadRequest,
   } = options;
+  populateDefaultRequest(options.req);
 
   const collection = payload.collections[collectionSlug];
 

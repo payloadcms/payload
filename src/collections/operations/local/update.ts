@@ -11,6 +11,7 @@ import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
 import updateByID from '../updateByID';
 import { BulkOperationResult } from '../../config/types';
+import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
@@ -81,8 +82,8 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     files: {
       file: file ?? await getFileByPath(filePath),
     },
-    payloadContext: {},
   } as PayloadRequest;
+  populateDefaultRequest(req);
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
