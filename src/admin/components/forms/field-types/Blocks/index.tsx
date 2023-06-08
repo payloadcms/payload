@@ -100,13 +100,14 @@ const BlocksField: React.FC<Props> = (props) => {
     path,
     validate: memoizedValidate,
     condition,
+    hasRows: true,
   });
 
   const addRow = useCallback(async (rowIndex: number, blockType: string) => {
     const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
     const preferences = await getDocPreferences();
     const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, preferences, operation, id, user, locale, t });
-    dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
+    dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
     setModified(true);
 
     setTimeout(() => {

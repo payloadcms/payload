@@ -29,6 +29,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
   const { id } = useDocumentInfo();
   const operation = useOperation();
   const field = useFormFields(([fields]) => fields[path]);
+
   const dispatchField = useFormFields(([_, dispatch]) => dispatch);
   const { t } = useTranslation();
 
@@ -94,6 +95,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
         value,
         valid: false,
         errorMessage: undefined,
+        rows: field?.rows,
       };
 
       const validateOptions = {
@@ -133,6 +135,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
     path,
     user,
     validate,
+    field?.rows,
   ]);
 
   return result;

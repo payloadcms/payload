@@ -112,11 +112,9 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'ADD_ROW': {
-      const {
-        rowIndex, path, subFieldState, blockType,
-      } = action;
+      const { rowIndex, path, subFieldState, blockType } = action;
 
-      const rowsMetadata = state[path]?.rows || [];
+      const rowsMetadata = [...state[path]?.rows || []];
       rowsMetadata.splice(
         rowIndex + 1,
         0,
@@ -143,13 +141,13 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
       const newState: Fields = {
         ...remainingFields,
+        ...flattenRows(path, rows),
         [path]: {
           ...state[path],
           value: rows.length,
           disableFormData: true,
           rows: rowsMetadata,
         },
-        ...flattenRows(path, rows),
       };
 
       return newState;
@@ -198,9 +196,19 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       // insert row copyOfMovingRow back in
       rows.splice(moveToIndex, 0, copyOfMovingRow);
 
+      // modify array/block internal row state (i.e. collapsed, blockType)
+      const rowStateCopy = [...state[path]?.rows || []];
+      const movingRowState = { ...rowStateCopy[moveFromIndex] };
+      rowStateCopy.splice(moveFromIndex, 1);
+      rowStateCopy.splice(moveToIndex, 0, movingRowState);
+
       const newState = {
         ...remainingFields,
         ...flattenRows(path, rows),
+        [path]: {
+          ...state[path],
+          rows: rowStateCopy,
+        },
       };
 
       return newState;
