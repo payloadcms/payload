@@ -38,12 +38,10 @@ const DefaultList: React.FC<Props> = (props) => {
       admin: {
         description,
         components: {
-          list: {
-            BeforeList,
-            BeforeListTable,
-            AfterListTable,
-            AfterList,
-          } = {},
+          BeforeList,
+          BeforeListTable,
+          AfterListTable,
+          AfterList,
         } = {},
       } = {},
     },

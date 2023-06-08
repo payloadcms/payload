@@ -219,16 +219,14 @@ export type CollectionAdminOptions = {
        */
       PreviewButton?: CustomPreviewButtonProps
     },
-    list?: {
-      BeforeList?: React.ComponentType<any>[],
-      BeforeListTable?: React.ComponentType<any>[],
-      AfterListTable?: React.ComponentType<any>[],
-      AfterList?: React.ComponentType<any>[],
-    },
     views?: {
       Edit?: React.ComponentType<any>
       List?: React.ComponentType<any>
-    }
+    },
+    BeforeList?: React.ComponentType<any>[],
+    BeforeListTable?: React.ComponentType<any>[],
+    AfterListTable?: React.ComponentType<any>[],
+    AfterList?: React.ComponentType<any>[],
   };
   pagination?: {
     defaultLimit?: number

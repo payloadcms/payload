@@ -69,12 +69,10 @@ const collectionSchema = joi.object().keys({
         SaveDraftButton: componentSchema,
         PreviewButton: componentSchema,
       }),
-      list: joi.object({
-        BeforeList: joi.array().items(componentSchema),
-        BeforeListTable: joi.array().items(componentSchema),
-        AfterListTable: joi.array().items(componentSchema),
-        AfterList: joi.array().items(componentSchema),
-      }),
+      BeforeList: joi.array().items(componentSchema),
+      BeforeListTable: joi.array().items(componentSchema),
+      AfterListTable: joi.array().items(componentSchema),
+      AfterList: joi.array().items(componentSchema),
     }),
     pagination: joi.object({
       defaultLimit: joi.number(),
