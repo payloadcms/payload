@@ -210,8 +210,12 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
   }, [serverURL, api, pluralType, slug, id, permissions, i18n.language]);
 
+  const getDocPreferences = useCallback(async () => {
+    return getPreference<DocumentPreferences>(preferencesKey);
+  }, [getPreference, preferencesKey]);
+
   const setDocFieldPreferences = useCallback<ContextType['setDocFieldPreferences']>(async (path, fieldPreferences) => {
-    const allPreferences = await getPreference<DocumentPreferences>(path);
+    const allPreferences = await getDocPreferences();
 
     if (preferencesKey) {
       setPreference(preferencesKey, {
@@ -225,13 +229,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
         },
       });
     }
-  }, [getPreference, setPreference, preferencesKey]);
-
-  const getDocPreferences = useCallback<ContextType['getDocPreferences']>(async () => {
-    const allPreferences = await getPreference<DocumentPreferences>(preferencesKey);
-
-    return allPreferences;
-  }, [getPreference, preferencesKey]);
+  }, [setPreference, preferencesKey, getDocPreferences]);
 
   useEffect(() => {
     getVersions();
