@@ -220,10 +220,10 @@ export type CollectionAdminOptions = {
       PreviewButton?: CustomPreviewButtonProps
     },
     list?: {
-      beforeList?: React.ComponentType<any>[],
-      afterList?: React.ComponentType<any>[],
-      beforeListTable?: React.ComponentType<any>[],
-      afterListTable?: React.ComponentType<any>[],
+      BeforeList?: React.ComponentType<any>[],
+      BeforeListTable?: React.ComponentType<any>[],
+      AfterListTable?: React.ComponentType<any>[],
+      AfterList?: React.ComponentType<any>[],
     },
     views?: {
       Edit?: React.ComponentType<any>

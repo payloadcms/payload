@@ -39,10 +39,10 @@ const DefaultList: React.FC<Props> = (props) => {
         description,
         components: {
           list: {
-            afterList,
-            afterListTable,
-            beforeList,
-            beforeListTable,
+            BeforeList,
+            BeforeListTable,
+            AfterListTable,
+            AfterList,
           },
         },
       } = {},
@@ -76,7 +76,7 @@ const DefaultList: React.FC<Props> = (props) => {
 
   return (
     <div className={baseClass}>
-      {Array.isArray(beforeList) && beforeList.map((Component, i) => <Component key={i} />)}
+      {Array.isArray(BeforeList) && BeforeList.map((Component, i) => <Component key={i} />)}
 
       <Meta
         title={getTranslation(collection.labels.plural, i18n)}
@@ -121,7 +121,7 @@ const DefaultList: React.FC<Props> = (props) => {
             handleWhereChange={handleWhereChange}
             resetParams={resetParams}
           />
-          {Array.isArray(beforeListTable) && beforeListTable.map((Component, i) => <Component key={i} />)}
+          {Array.isArray(BeforeListTable) && BeforeListTable.map((Component, i) => <Component key={i} />)}
           {!data.docs && (
             <StaggeredShimmers
               className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
@@ -148,7 +148,7 @@ const DefaultList: React.FC<Props> = (props) => {
               )}
             </div>
           )}
-          {Array.isArray(afterListTable) && afterListTable.map((Component, i) => <Component key={i} />)}
+          {Array.isArray(AfterListTable) && AfterListTable.map((Component, i) => <Component key={i} />)}
 
           <div className={`${baseClass}__page-controls`}>
             <Paginator
@@ -213,7 +213,7 @@ const DefaultList: React.FC<Props> = (props) => {
           </div>
         </Gutter>
       </SelectionProvider>
-      {Array.isArray(afterList) && afterList.map((Component, i) => <Component key={i} />)}
+      {Array.isArray(AfterList) && AfterList.map((Component, i) => <Component key={i} />)}
     </div>
   );
 };
