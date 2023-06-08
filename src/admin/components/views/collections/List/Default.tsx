@@ -37,6 +37,14 @@ const DefaultList: React.FC<Props> = (props) => {
       },
       admin: {
         description,
+        components: {
+          list: {
+            afterList,
+            afterListTable,
+            beforeList,
+            beforeListTable,
+          },
+        },
       } = {},
     },
     data,
@@ -68,6 +76,8 @@ const DefaultList: React.FC<Props> = (props) => {
 
   return (
     <div className={baseClass}>
+      {Array.isArray(beforeList) && beforeList.map((Component, i) => <Component key={i} />)}
+
       <Meta
         title={getTranslation(collection.labels.plural, i18n)}
       />
@@ -111,6 +121,7 @@ const DefaultList: React.FC<Props> = (props) => {
             handleWhereChange={handleWhereChange}
             resetParams={resetParams}
           />
+          {Array.isArray(beforeListTable) && beforeListTable.map((Component, i) => <Component key={i} />)}
           {!data.docs && (
             <StaggeredShimmers
               className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
@@ -137,6 +148,8 @@ const DefaultList: React.FC<Props> = (props) => {
               )}
             </div>
           )}
+          {Array.isArray(afterListTable) && afterListTable.map((Component, i) => <Component key={i} />)}
+
           <div className={`${baseClass}__page-controls`}>
             <Paginator
               limit={data.limit}
@@ -200,6 +213,7 @@ const DefaultList: React.FC<Props> = (props) => {
           </div>
         </Gutter>
       </SelectionProvider>
+      {Array.isArray(afterList) && afterList.map((Component, i) => <Component key={i} />)}
     </div>
   );
 };
