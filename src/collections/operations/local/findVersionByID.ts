@@ -1,7 +1,7 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Payload } from '../../../payload';
 import { Document } from '../../../types';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
 import { TypeWithVersion } from '../../../versions/types';
 import findVersionByID from '../findVersionByID';
 import { getDataLoader } from '../../dataloader';
@@ -20,6 +20,11 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   showHiddenFields?: boolean
   disableErrors?: boolean
   req?: PayloadRequest
+  draft?: boolean
+  /**
+   * context, which will then be passed to req.payloadContext, which can be read by hooks
+   */
+  context?: PayloadRequestContext,
 }
 
 export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['collections']>(
@@ -36,8 +41,9 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     disableErrors = false,
     showHiddenFields,
     req = {} as PayloadRequest,
+    context,
   } = options;
-  populateDefaultRequest(options.req);
+  populateDefaultRequest(options.req, context);
 
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
