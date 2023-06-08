@@ -47,20 +47,20 @@ const MyCollection: CollectionConfig = {
 };
 ```
 
-In this example, we calculate two values in the beforeChange hook. We set the document's field 'value' to the first value, and now we want to pass the second value (value2) to the afterChange hook, as it needs it for some expensive operation which needs value2 + the document ID (which is not available in the beforeChange hook).
+In this example, we calculate two values in the beforeChange hook - value1 and value2. We set the document's field 'value' to the first value, and now we want to pass the second value (value2) to the afterChange hook, as it needs it for some expensive operation which needs value2 + the document ID (which is not available in the beforeChange hook).
 
 As value2 is not saved in the document, we can't access it in the afterChange hook. But we can save it in the `req.payloadContext` object, which is available to every hook. We can then access it in the afterChange hook and use it for our operation.
 
 ## Example 2: Preventing infinite loops
 
-Let's say you an `afterChange` hook, in which you do some calculation (as you know the document ID in the afterChange hook, but not in the beforeChange hook) and then want to update the document again:
+Let's say you have an `afterChange` hook, in which you do some calculation (as the document ID is available in the afterChange hook, but not in the beforeChange hook) and then want to update the document again:
 
 ```ts
 const MyCollection: CollectionConfig = {
   slug: 'slug',
   hooks: {
     afterChange: [async (props) => {
-      const someValue = await someCalculation(props.doc.id);
+      const someValue = await someCalculationUsingDocID(props.doc.id);
       await payload.update({
         collection: 'slug',
         id: props.doc.id,
@@ -79,9 +79,9 @@ const MyCollection: CollectionConfig = {
 };
 ```
 
-You might not see it, but this will go horribly wrong. Since the afterChange hook updates the document its in, using `payload.update`, the afterChange hook will run again, update itself, then run again, and again - over and over. This is called an infinite loop.
+You might not see it immediately, but this will go horribly wrong. Since the afterChange hook updates the document it's in, using `payload.update`, the afterChange hook will run again, update itself, then run again, and again - over and over. An infinite loop.
 
-In order to prevent that, we need to change the afterChange hook to not run again (and thus not update itself again). We can solve that with context:
+In order to prevent that, we need to tell the afterChange hook to not run again if it performs the update (and thus not update itself again). We can solve that with context:
 
 ```ts
 const MyCollection: CollectionConfig = {
