@@ -8,6 +8,9 @@ export default buildConfig({
         {
           name: 'arrayOfFields',
           type: 'array',
+          admin: {
+            initCollapsed: true,
+          },
           fields: [
             {
               type: 'text',

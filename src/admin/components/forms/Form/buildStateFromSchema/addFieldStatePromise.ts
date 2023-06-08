@@ -105,10 +105,11 @@ export const addFieldStatePromise = async ({
             preferences,
           }));
 
-          console.log(`${path}${field.name}`, { preferences });
+          const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed;
+
           acc.rowMetadata.push({
             id: row.id,
-            collapsed: (preferences?.fields?.[`${path}${field.name}`]?.collapsed || []).includes(row.id),
+            collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
           });
 
           return acc;
@@ -116,8 +117,6 @@ export const addFieldStatePromise = async ({
           promises: [],
           rowMetadata: [],
         });
-
-        console.log(rowMetadata);
 
         await Promise.all(promises);
 
@@ -183,9 +182,11 @@ export const addFieldStatePromise = async ({
               preferences,
             }));
 
+            const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed;
+
             acc.rowMetadata.push({
               id: row.id,
-              collapsed: (preferences?.fields?.[`${path}${field.name}`]?.collapsed || []).includes(row.id),
+              collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
               blockType: row.blockType,
             });
           }

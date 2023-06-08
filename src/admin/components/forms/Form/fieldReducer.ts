@@ -228,7 +228,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         arrayState.rows[matchedIndex].collapsed = collapsed;
         setDocFieldPreferences(path, { collapsed: collapsedRowIDs });
       }
-      console.log({ collapsedRowIDs });
+
       const newState = {
         ...state,
         [path]: {
