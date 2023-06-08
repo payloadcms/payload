@@ -143,6 +143,38 @@ export const CustomPreviewButton: CustomPreviewButtonProps = ({
 };
 ```
 
+##### Custom Collection List View Example
+
+Collection.ts
+```tsx
+import { MyListComponent } from './MyListComponent';
+export const MyCollection: CollectionConfig = {
+  slug: 'mycollection',
+  admin: {
+    components: {
+      views: {
+        List: MyListComponent,
+      },
+    },
+  },
+  fields: [
+    ...
+  ],
+};
+```
+
+MyListComponent.tsx
+```tsx
+import React from 'react';
+import {List, type Props} from 'payload/components/views/List' // Payload's default List view component and its props
+export const MyListComponent: React.FC<Props> = (props) => (
+  <div>
+    <p>Some text before the default list view component. If you just want to do that, you can also use the admin.components.list.BeforeList hook</p>
+    <List {...props} />
+  </div>
+);
+```
+
 ### Globals
 
 As with Collections, You can override components on a global-by-global basis via their `admin` property.
