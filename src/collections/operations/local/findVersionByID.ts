@@ -34,7 +34,9 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     overrideAccess = true,
     disableErrors = false,
     showHiddenFields,
-    req = {} as PayloadRequest,
+    req = {
+      payloadContext: {},
+    } as PayloadRequest,
   } = options;
 
   const collection = payload.collections[collectionSlug];

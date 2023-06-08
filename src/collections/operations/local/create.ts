@@ -45,7 +45,9 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     filePath,
     file,
     overwriteExistingFiles = false,
-    req = {} as PayloadRequest,
+    req = {
+      payloadContext: {},
+    } as PayloadRequest,
     draft,
   } = options;
 

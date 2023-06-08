@@ -51,6 +51,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     payload,
     i18n,
     t: i18n.t,
+    payloadContext: {},
   } as PayloadRequest;
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

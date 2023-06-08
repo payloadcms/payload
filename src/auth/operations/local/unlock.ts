@@ -23,7 +23,9 @@ async function localUnlock<T extends keyof GeneratedTypes['collections']>(
     collection: collectionSlug,
     data,
     overrideAccess = true,
-    req = {} as PayloadRequest,
+    req = {
+      payloadContext: {},
+    } as PayloadRequest,
   } = options;
 
   const collection = payload.collections[collectionSlug];

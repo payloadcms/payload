@@ -28,6 +28,7 @@ export declare type PayloadRequest<U = any> = Request & {
   collection?: Collection;
   /** What triggered this request */
   payloadAPI?: 'REST' | 'local' | 'GraphQL';
+  payloadContext: PayloadRequestContext;
   /** Uploaded files */
   files?: {
     /**
@@ -49,3 +50,7 @@ export declare type PayloadRequest<U = any> = Request & {
     [slug: string]: (q: unknown) => Document;
   };
 };
+
+export interface PayloadRequestContext {
+  [key: string]: unknown;
+}

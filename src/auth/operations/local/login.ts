@@ -28,7 +28,9 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   const {
     collection: collectionSlug,
-    req = {} as PayloadRequest,
+    req = {
+      payloadContext: {},
+    } as PayloadRequest,
     res,
     depth,
     locale,

@@ -56,6 +56,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     fallbackLocale: fallbackLocale ?? defaultLocale,
     payload,
     i18n,
+    payloadContext: {},
   } as PayloadRequest;
 
   if (!req.t) req.t = req.i18n.t;

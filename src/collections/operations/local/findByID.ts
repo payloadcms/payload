@@ -37,7 +37,9 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
     overrideAccess = true,
     disableErrors = false,
     showHiddenFields,
-    req = {} as PayloadRequest,
+    req = {
+      payloadContext: {},
+    } as PayloadRequest,
     draft = false,
   } = options;
 

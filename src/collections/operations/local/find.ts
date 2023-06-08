@@ -47,7 +47,9 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     sort,
     draft = false,
     pagination = true,
-    req = {} as PayloadRequest,
+    req = {
+      payloadContext: {},
+    } as PayloadRequest,
   } = options;
 
   const collection = payload.collections[collectionSlug];

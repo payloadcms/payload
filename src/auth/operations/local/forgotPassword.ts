@@ -25,7 +25,9 @@ async function localForgotPassword<T extends keyof GeneratedTypes['collections']
     data,
     expiration,
     disableEmail,
-    req = {} as PayloadRequest,
+    req = {
+      payloadContext: {},
+    } as PayloadRequest,
   } = options;
 
   const collection = payload.collections[collectionSlug];
