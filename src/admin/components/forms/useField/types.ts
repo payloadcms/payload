@@ -1,11 +1,12 @@
 import { Condition, Validate } from '../../../../fields/config/types';
-import { Row } from '../field-types/rowReducer';
+import { Row } from '../Form/types';
 
 export type Options = {
   path: string
   validate?: Validate
   disableFormData?: boolean
   condition?: Condition
+  hasRows?: boolean
 }
 
 export type FieldType<T> = {

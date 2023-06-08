@@ -1,7 +1,12 @@
 import React, { Dispatch } from 'react';
 import { Condition, Field as FieldConfig, Validate } from '../../../../fields/config/types';
 import { User } from '../../../../auth/types';
-import { Row } from '../field-types/rowReducer';
+
+export type Row = {
+  id: string
+  collapsed?: boolean
+  blockType?: string
+}
 
 export type Field = {
   value: unknown
@@ -121,12 +126,14 @@ export type SET_ROW_COLLAPSED = {
   path: string
   rowID: string
   collapsed: boolean
+  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
 }
 
 export type SET_ALL_ROWS_COLLAPSED = {
   type: 'SET_ALL_ROWS_COLLAPSED'
   path: string
   collapsed: boolean
+  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
 }
 
 export type FieldAction =

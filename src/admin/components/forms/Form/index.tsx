@@ -49,7 +49,7 @@ const Form: React.FC<Props> = (props) => {
   const locale = useLocale();
   const { t, i18n } = useTranslation('general');
   const { refreshCookie, user } = useAuth();
-  const { id } = useDocumentInfo();
+  const { id, getDocPreferences } = useDocumentInfo();
   const operation = useOperation();
 
   const [modified, setModified] = useState(false);
@@ -332,11 +332,12 @@ const Form: React.FC<Props> = (props) => {
   }, [contextRef]);
 
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
-    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation, locale, t });
+    const preferences = await getDocPreferences();
+    const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, id, operation, locale, t });
     contextRef.current = { ...initContextState } as FormContextType;
     setModified(false);
     dispatchFields({ type: 'REPLACE_STATE', state });
-  }, [id, user, operation, locale, t, dispatchFields]);
+  }, [id, user, operation, locale, t, dispatchFields, getDocPreferences]);
 
   const replaceState = useCallback((state: Fields) => {
     contextRef.current = { ...initContextState } as FormContextType;

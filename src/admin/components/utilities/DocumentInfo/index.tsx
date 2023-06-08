@@ -29,7 +29,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const id = idFromProps || (getIDFromParams ? idFromParams : null);
 
   const { serverURL, routes: { api } } = useConfig();
-  const { getPreference } = usePreferences();
+  const { getPreference, setPreference } = usePreferences();
   const { i18n } = useTranslation();
   const { permissions } = useAuth();
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null);
@@ -39,20 +39,17 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
   const baseURL = `${serverURL}${api}`;
   let slug: string;
-  let type: 'global' | 'collection';
   let pluralType: 'globals' | 'collections';
   let preferencesKey: string;
 
   if (global) {
     slug = global.slug;
-    type = 'global';
     pluralType = 'globals';
     preferencesKey = `global-${slug}`;
   }
 
   if (collection) {
     slug = collection.slug;
-    type = 'collection';
     pluralType = 'collections';
 
     if (id) {
@@ -213,27 +210,39 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
   }, [serverURL, api, pluralType, slug, id, permissions, i18n.language]);
 
+  const setDocFieldPreferences = useCallback<ContextType['setDocFieldPreferences']>(async (path, fieldPreferences) => {
+    const allPreferences = await getPreference<DocumentPreferences>(path);
+
+    if (preferencesKey) {
+      setPreference(preferencesKey, {
+        ...allPreferences,
+        fields: {
+          ...(allPreferences?.fields || {}),
+          [path]: {
+            ...allPreferences?.fields?.[path],
+            ...fieldPreferences,
+          },
+        },
+      });
+    }
+  }, [getPreference, setPreference, preferencesKey]);
+
+  const getDocPreferences = useCallback<ContextType['getDocPreferences']>(async () => {
+    const allPreferences = await getPreference<DocumentPreferences>(preferencesKey);
+
+    return allPreferences;
+  }, [getPreference, preferencesKey]);
+
   useEffect(() => {
     getVersions();
   }, [getVersions]);
 
   useEffect(() => {
-    if (preferencesKey) {
-      const getDocPreferences = async () => {
-        await getPreference<DocumentPreferences>(preferencesKey);
-      };
-
-      getDocPreferences();
-    }
-  }, [getPreference, preferencesKey]);
-
-  useEffect(() => {
     getDocPermissions();
   }, [getDocPermissions]);
 
-  const value = {
+  const value: ContextType = {
     slug,
-    type,
     preferencesKey,
     global,
     collection,
@@ -244,6 +253,8 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     id,
     getDocPermissions,
     docPermissions,
+    setDocFieldPreferences,
+    getDocPreferences,
   };
 
   return (

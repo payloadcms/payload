@@ -6,7 +6,7 @@ export default buildConfig({
       slug: 'arrays',
       fields: [
         {
-          name: 'array',
+          name: 'arrayOfFields',
           type: 'array',
           fields: [
             {
@@ -17,6 +17,21 @@ export default buildConfig({
             {
               type: 'text',
               name: 'optional',
+            },
+            {
+              name: 'innerArrayOfFields',
+              type: 'array',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'required',
+                  required: true,
+                },
+                {
+                  type: 'text',
+                  name: 'optional',
+                },
+              ],
             },
           ],
         },

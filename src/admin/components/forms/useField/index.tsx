@@ -19,6 +19,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
     validate,
     disableFormData = false,
     condition,
+    hasRows,
   } = options;
 
   const submitted = useFormSubmitted();
@@ -57,7 +58,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
       type: 'UPDATE',
       path,
       value: val,
-      disableFormData,
+      disableFormData: disableFormData || (hasRows && val > 0),
     });
   }, [
     setModified,
@@ -65,6 +66,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
     path,
     dispatchField,
     disableFormData,
+    hasRows,
   ]);
 
   // Store result from hook as ref
@@ -86,7 +88,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
       const action: UPDATE = {
         type: 'UPDATE',
         path,
-        disableFormData,
+        disableFormData: disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
         validate,
         condition,
         value,

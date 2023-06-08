@@ -16,7 +16,6 @@ import { useOperation } from '../../../utilities/OperationProvider';
 import { Collapsible } from '../../../elements/Collapsible';
 import RenderFields from '../../RenderFields';
 import { Props } from './types';
-import { usePreferences } from '../../../utilities/Preferences';
 import { ArrayAction } from '../../../elements/ArrayAction';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import HiddenInput from '../HiddenInput';
@@ -49,7 +48,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       readOnly,
       description,
       condition,
-      initCollapsed,
       className,
       components,
     },
@@ -62,8 +60,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const CustomRowLabel = components?.RowLabel || undefined;
 
-  const { preferencesKey, id } = useDocumentInfo();
-  const { getPreference, setPreference } = usePreferences();
+  const { setDocFieldPreferences, id, getDocPreferences } = useDocumentInfo();
   const formContext = useForm();
   const { user } = useAuth();
   const locale = useLocale();
@@ -100,24 +97,24 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     showError,
     errorMessage,
     value,
-    rows = [],
+    rows,
   } = useField<number>({
     path,
     validate: memoizedValidate,
     condition,
-    // TODO: what does this do? How can we implement with new approach?
-    // disableFormData: rowsOLD?.length > 0,
+    hasRows: true,
   });
 
   const addRow = useCallback(async (rowIndex: number) => {
-    const subFieldState = await buildStateFromSchema({ fieldSchema: fields, operation, id, user, locale, t });
+    const preferences = await getDocPreferences();
+    const subFieldState = await buildStateFromSchema({ fieldSchema: fields, preferences, operation, id, user, locale, t });
     dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
     setModified(true);
 
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [dispatchFields, fields, id, locale, operation, path, setModified, t, user]);
+  }, [dispatchFields, fields, id, locale, operation, path, setModified, t, user, getDocPreferences]);
 
   const duplicateRow = useCallback(async (rowIndex: number) => {
     dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });
@@ -138,70 +135,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     setModified(true);
   }, [dispatchFields, path, setModified]);
 
-  const setCollapse = useCallback(
-    async (rowID: string, collapsed: boolean) => {
-      dispatchFields({ type: 'SET_ROW_COLLAPSED', path, collapsed, rowID });
-
-      if (preferencesKey) {
-        const preferencesToSet = (await getPreference(preferencesKey)) || { fields: {} };
-        let newCollapsedState: string[] = preferencesToSet?.fields?.[path]?.collapsed;
-
-        if (initCollapsed && typeof newCollapsedState === 'undefined') {
-          newCollapsedState = rows.map((row) => row.id);
-        } else if (typeof newCollapsedState === 'undefined') {
-          newCollapsedState = [];
-        }
-
-        if (!collapsed) {
-          newCollapsedState = newCollapsedState.filter((existingID) => existingID !== rowID);
-        } else {
-          newCollapsedState.push(rowID);
-        }
-
-        setPreference(preferencesKey, {
-          ...preferencesToSet,
-          fields: {
-            ...(preferencesToSet?.fields || {}),
-            [path]: {
-              ...preferencesToSet?.fields?.[path],
-              collapsed: newCollapsedState,
-            },
-          },
-        });
-      }
-    },
-    [getPreference, initCollapsed, path, preferencesKey, rows, setPreference, dispatchFields],
-  );
+  const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
+    dispatchFields({ type: 'SET_ROW_COLLAPSED', path, collapsed, rowID, setDocFieldPreferences });
+  }, [dispatchFields, path, setDocFieldPreferences]);
 
   const toggleCollapseAll = useCallback(async (collapsed: boolean) => {
-    dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, collapsed });
-
-    if (preferencesKey) {
-      const preferencesToSet = await getPreference(preferencesKey) || { fields: {} };
-
-      setPreference(preferencesKey, {
-        ...preferencesToSet,
-        fields: {
-          ...preferencesToSet?.fields || {},
-          [path]: {
-            ...preferencesToSet?.fields?.[path],
-            collapsed: collapsed ? rows.map(({ id: rowID }) => rowID) : [],
-          },
-        },
-      });
-    }
-  }, [dispatchFields, getPreference, path, preferencesKey, rows, setPreference]);
-
-  // TODO: move this to the useField/useForm hook
-  // useEffect(() => {
-  //   const initializeRowState = async () => {
-  //     const data = formContext.getDataByPath<Row[]>(path);
-  //     const preferences = (await getPreference(preferencesKey)) || { fields: {} };
-  //     dispatchRows({ type: 'SET_ALL', data: data || [], collapsedState: preferences?.fields?.[path]?.collapsed, initCollapsed });
-  //   };
-
-  //   initializeRowState();
-  // }, [formContext, path, getPreference, preferencesKey, initCollapsed]);
+    dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, collapsed, setDocFieldPreferences });
+  }, [dispatchFields, path, setDocFieldPreferences]);
 
   const hasMaxRows = maxRows && rows?.length >= maxRows;
 

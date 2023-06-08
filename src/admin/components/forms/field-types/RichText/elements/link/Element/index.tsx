@@ -16,8 +16,10 @@ import deepCopyObject from '../../../../../../../../utilities/deepCopyObject';
 import Button from '../../../../../../elements/Button';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 import { Props as RichTextFieldProps } from '../../../types';
-import './index.scss';
 import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
+import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo';
+
+import './index.scss';
 
 const baseClass = 'rich-text-link';
 
@@ -80,6 +82,7 @@ export const LinkElement: React.FC<{
   const [renderModal, setRenderModal] = useState(false);
   const [renderPopup, setRenderPopup] = useState(false);
   const [initialState, setInitialState] = useState<Fields>({});
+  const { getDocPreferences } = useDocumentInfo();
   const [fieldSchema] = useState(() => {
     const fields = transformExtraFields(customFieldSchema, config, i18n);
 
@@ -106,12 +109,13 @@ export const LinkElement: React.FC<{
         fields: deepCopyObject(element.fields),
       };
 
-      const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'update', locale, t });
+      const preferences = await getDocPreferences();
+      const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, operation: 'update', locale, t });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [renderModal, element, fieldSchema, user, locale, t]);
+  }, [renderModal, element, fieldSchema, user, locale, t, getDocPreferences]);
 
   return (
     <span

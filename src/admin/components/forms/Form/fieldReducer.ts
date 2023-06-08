@@ -207,15 +207,28 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'SET_ROW_COLLAPSED': {
-      const { rowID, path, collapsed } = action;
+      const { rowID, path, collapsed, setDocFieldPreferences } = action;
 
       const arrayState = state[path];
-      const matchedRowIndex = arrayState.rows.findIndex(({ id }) => rowID === id);
 
-      if (matchedRowIndex > -1) {
-        arrayState.rows[matchedRowIndex].collapsed = collapsed;
+      const { matchedIndex, collapsedRowIDs } = state[path].rows.reduce((acc, row, index) => {
+        const isMatchingRow = row.id === rowID;
+        if (isMatchingRow) acc.matchedIndex = index;
+
+        if (!isMatchingRow && row.collapsed) acc.collapsedRowIDs.push(row.id);
+        else if (isMatchingRow && collapsed) acc.collapsedRowIDs.push(row.id);
+
+        return acc;
+      }, {
+        matchedIndex: undefined,
+        collapsedRowIDs: [],
+      });
+
+      if (matchedIndex > -1) {
+        arrayState.rows[matchedIndex].collapsed = collapsed;
+        setDocFieldPreferences(path, { collapsed: collapsedRowIDs });
       }
-
+      console.log({ collapsedRowIDs });
       const newState = {
         ...state,
         [path]: {
@@ -227,20 +240,29 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'SET_ALL_ROWS_COLLAPSED': {
-      const { collapsed, path } = action;
+      const { collapsed, path, setDocFieldPreferences } = action;
 
-      const newRowsMetadata = state[path].rows.map((rowMetadata) => {
-        return {
-          ...rowMetadata,
+      const { rows, collapsedRowIDs } = state[path].rows.reduce((acc, row) => {
+        if (collapsed) acc.collapsedRowIDs.push(row.id);
+
+        acc.rows.push({
+          ...row,
           collapsed,
-        };
-      }, []);
+        });
+
+        return acc;
+      }, {
+        rows: [],
+        collapsedRowIDs: [],
+      });
+
+      setDocFieldPreferences(path, { collapsed: collapsedRowIDs });
 
       return {
         ...state,
         [path]: {
           ...state[path],
-          rows: newRowsMetadata,
+          rows,
         },
       };
     }
