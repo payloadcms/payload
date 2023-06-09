@@ -85,7 +85,14 @@ You can override components on a Collection-by-Collection basis via each Collect
 | **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
 | **`edit.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
 | **`edit.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
-
+| **`BeforeList`**   | Array of components to inject _before_ the built-in List view
+                                                         |
+| **`BeforeListTable`**   | Array of components to inject _before_ the built-in List view's table
+                                                         |
+| **`AfterListTable`**   | Array of components to inject _after_ the built-in List view's table
+                                                         |
+| **`AfterList`**   | Array of components to inject _after_ the built-in List view
+                                                         |
 #### Examples
 
 ```tsx
@@ -134,6 +141,38 @@ export const CustomPreviewButton: CustomPreviewButtonProps = ({
 }) => {
   return <DefaultButton label={label} disabled={disabled} preview={preview} />;
 };
+```
+
+##### Custom Collection List View Example
+
+Collection.ts
+```tsx
+import { MyListComponent } from './MyListComponent';
+export const MyCollection: CollectionConfig = {
+  slug: 'mycollection',
+  admin: {
+    components: {
+      views: {
+        List: MyListComponent,
+      },
+    },
+  },
+  fields: [
+    ...
+  ],
+};
+```
+
+MyListComponent.tsx
+```tsx
+import React from 'react';
+import {List, type Props} from 'payload/components/views/List' // Payload's default List view component and its props
+export const MyListComponent: React.FC<Props> = (props) => (
+  <div>
+    <p>Some text before the default list view component. If you just want to do that, you can also use the admin.components.list.BeforeList hook</p>
+    <List {...props} />
+  </div>
+);
 ```
 
 ### Globals

@@ -116,6 +116,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   types: {
     blockTypes: any;
     blockInputTypes: any;
+    groupTypes: any;
+    arrayTypes: any;
+    tabTypes: any;
     localeInputType?: any;
     fallbackLocaleInputType?: any;
   };
