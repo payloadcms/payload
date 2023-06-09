@@ -1,5 +1,4 @@
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { usePreferences } from '../../utilities/Preferences';
 import { ListPreferences } from '../../views/collections/List/types';
@@ -45,7 +44,6 @@ export const TableColumnsProvider: React.FC<{
   const prevCollection = useRef<SanitizedCollectionConfig['slug']>();
   const hasInitialized = useRef(false);
   const { getPreference, setPreference } = usePreferences();
-  const { t } = useTranslation();
   const [formattedFields] = useState<Field[]>(() => formatFields(collection));
 
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {

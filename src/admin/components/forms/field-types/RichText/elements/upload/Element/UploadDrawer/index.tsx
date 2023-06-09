@@ -15,6 +15,7 @@ import FormSubmit from '../../../../../../Submit';
 import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema';
 import { getTranslation } from '../../../../../../../../../utilities/getTranslation';
 import deepCopyObject from '../../../../../../../../../utilities/deepCopyObject';
+import { useDocumentInfo } from '../../../../../../../utilities/DocumentInfo';
 
 export const UploadDrawer: React.FC<ElementProps & {
   drawerSlug: string
@@ -33,6 +34,7 @@ export const UploadDrawer: React.FC<ElementProps & {
   const locale = useLocale();
   const { user } = useAuth();
   const { closeModal } = useModal();
+  const { getDocPreferences } = useDocumentInfo();
   const [initialState, setInitialState] = useState({});
   const fieldSchema = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields;
 
@@ -53,12 +55,13 @@ export const UploadDrawer: React.FC<ElementProps & {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema, data: deepCopyObject(element?.fields || {}), user, operation: 'update', locale, t });
+      const preferences = await getDocPreferences();
+      const state = await buildStateFromSchema({ fieldSchema, preferences, data: deepCopyObject(element?.fields || {}), user, operation: 'update', locale, t });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [fieldSchema, element.fields, user, locale, t]);
+  }, [fieldSchema, element.fields, user, locale, t, getDocPreferences]);
 
   return (
     <Drawer
