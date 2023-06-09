@@ -219,6 +219,7 @@ export const collapsible = baseField.keys({
 const tab = baseField.keys({
   name: joi.string().when('localized', { is: joi.exist(), then: joi.required() }),
   localized: joi.boolean(),
+  interfaceName: joi.string().when('name', { not: joi.exist(), then: joi.forbidden() }),
   label: joi.alternatives().try(
     joi.string(),
     joi.object().pattern(joi.string(), [joi.string()]),
@@ -244,6 +245,7 @@ export const group = baseField.keys({
   type: joi.string().valid('group').required(),
   name: joi.string().required(),
   fields: joi.array().items(joi.link('#field')),
+  interfaceName: joi.string(),
   defaultValue: joi.alternatives().try(
     joi.object(),
     joi.func(),
@@ -278,6 +280,7 @@ export const array = baseField.keys({
       RowLabel: componentSchema,
     }).default({}),
   }).default({}),
+  interfaceName: joi.string(),
 });
 
 export const upload = baseField.keys({
@@ -359,6 +362,7 @@ export const blocks = baseField.keys({
       slug: joi.string().required(),
       imageURL: joi.string(),
       imageAltText: joi.string(),
+      interfaceName: joi.string(),
       graphQL: joi.object().keys({
         singularName: joi.string(),
       }),

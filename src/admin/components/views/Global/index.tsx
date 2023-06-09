@@ -21,7 +21,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
   const [updatedAt, setUpdatedAt] = useState<string>();
-  const { getVersions, preferencesKey, docPermissions, getDocPermissions } = useDocumentInfo();
+  const { getVersions, preferencesKey, docPermissions, getDocPermissions, getDocPreferences } = useDocumentInfo();
   const { getPreference } = usePreferences();
   const { t } = useTranslation();
 
@@ -51,9 +51,10 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     getVersions();
     getDocPermissions();
     setUpdatedAt(json?.result?.updatedAt);
-    const state = await buildStateFromSchema({ fieldSchema: fields, data: json.result, operation: 'update', user, locale, t });
+    const preferences = await getDocPreferences();
+    const state = await buildStateFromSchema({ fieldSchema: fields, preferences, data: json.result, operation: 'update', user, locale, t });
     setInitialState(state);
-  }, [getVersions, fields, user, locale, t, getDocPermissions]);
+  }, [getVersions, fields, user, locale, t, getDocPermissions, getDocPreferences]);
 
   const [{ data, isLoading: isLoadingData }] = usePayloadAPI(
     `${serverURL}${api}/globals/${slug}`,
@@ -72,13 +73,14 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender, user, operation: 'update', locale, t });
+      const preferences = await getDocPreferences();
+      const state = await buildStateFromSchema({ fieldSchema: fields, preferences, data: dataToRender, user, operation: 'update', locale, t });
       await getPreference(preferencesKey);
       setInitialState(state);
     };
 
     if (dataToRender) awaitInitialState();
-  }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t]);
+  }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t, getDocPreferences]);
 
   const isLoading = !initialState || !docPermissions || isLoadingData;
 

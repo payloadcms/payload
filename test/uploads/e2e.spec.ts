@@ -79,7 +79,7 @@ describe('uploads', () => {
 
     const filename = page.locator('.file-field__filename');
 
-    await expect(filename).toContainText('.png');
+    await expect(filename).toHaveValue('image.png');
 
     await saveDocAndAssert(page);
   });

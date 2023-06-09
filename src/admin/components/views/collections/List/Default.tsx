@@ -37,6 +37,12 @@ const DefaultList: React.FC<Props> = (props) => {
       },
       admin: {
         description,
+        components: {
+          BeforeList,
+          BeforeListTable,
+          AfterListTable,
+          AfterList,
+        } = {},
       } = {},
     },
     data,
@@ -68,6 +74,13 @@ const DefaultList: React.FC<Props> = (props) => {
 
   return (
     <div className={baseClass}>
+      {Array.isArray(BeforeList) && BeforeList.map((Component, i) => (
+        <Component
+          key={i}
+          {...props}
+        />
+      ))}
+
       <Meta
         title={getTranslation(collection.labels.plural, i18n)}
       />
@@ -111,6 +124,12 @@ const DefaultList: React.FC<Props> = (props) => {
             handleWhereChange={handleWhereChange}
             resetParams={resetParams}
           />
+          {Array.isArray(BeforeListTable) && BeforeListTable.map((Component, i) => (
+            <Component
+              key={i}
+              {...props}
+            />
+          ))}
           {!data.docs && (
             <StaggeredShimmers
               className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
@@ -137,6 +156,13 @@ const DefaultList: React.FC<Props> = (props) => {
               )}
             </div>
           )}
+          {Array.isArray(AfterListTable) && AfterListTable.map((Component, i) => (
+            <Component
+              key={i}
+              {...props}
+            />
+          ))}
+
           <div className={`${baseClass}__page-controls`}>
             <Paginator
               limit={data.limit}
@@ -200,6 +226,12 @@ const DefaultList: React.FC<Props> = (props) => {
           </div>
         </Gutter>
       </SelectionProvider>
+      {Array.isArray(AfterList) && AfterList.map((Component, i) => (
+        <Component
+          key={i}
+          {...props}
+        />
+      ))}
     </div>
   );
 };

@@ -1,84 +1,145 @@
 import path from 'path';
-import type { CollectionConfig } from '../../src/collections/config/types';
 import { buildConfig } from '../buildConfig';
 
-export interface Relation {
-  id: string;
-  name: string;
-}
-
-const openAccess = {
-  create: () => true,
-  read: () => true,
-  update: () => true,
-  delete: () => true,
-};
-
-const collectionWithName = (collectionSlug: string): CollectionConfig => {
-  return {
-    slug: collectionSlug,
-    access: openAccess,
-    fields: [
-      {
-        name: 'name',
-        type: 'text',
-      },
-    ],
-  };
-};
-
-export const slug = 'posts';
-export const relationSlug = 'relation';
 export default buildConfig({
   graphQL: {
-    schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
+    schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
+  },
+  typescript: {
+    outputFile: path.resolve(__dirname, 'schema.ts'),
   },
   collections: [
     {
-      slug,
-      access: openAccess,
+      slug: 'collection1',
       fields: [
         {
-          name: 'title',
-          type: 'text',
+          type: 'row',
+          fields: [{ type: 'text', required: true, name: 'testing' }],
         },
         {
-          name: 'description',
-          type: 'text',
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab 1',
+              fields: [
+                {
+                  required: true,
+                  type: 'text',
+                  name: 'title',
+                },
+              ],
+            },
+          ],
         },
         {
-          name: 'number',
-          type: 'number',
+          type: 'array',
+          name: 'meta',
+          interfaceName: 'SharedMetaArray',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+            },
+            {
+              name: 'description',
+              type: 'text',
+            },
+          ],
         },
-        // Relationship
         {
-          name: 'relationField',
-          type: 'relationship',
-          relationTo: relationSlug,
-        },
-        // Relation hasMany
-        {
-          name: 'relationHasManyField',
-          type: 'relationship',
-          relationTo: relationSlug,
-          hasMany: true,
-        },
-        // Relation multiple relationTo
-        {
-          name: 'relationMultiRelationTo',
-          type: 'relationship',
-          relationTo: [relationSlug, 'dummy'],
-        },
-        // Relation multiple relationTo hasMany
-        {
-          name: 'relationMultiRelationToHasMany',
-          type: 'relationship',
-          relationTo: [relationSlug, 'dummy'],
-          hasMany: true,
+          type: 'blocks',
+          name: 'blocks',
+          required: true,
+          blocks: [
+            {
+              slug: 'block1',
+              interfaceName: 'SharedMetaBlock',
+              fields: [
+                {
+                  required: true,
+                  name: 'b1title',
+                  type: 'text',
+                },
+                {
+                  name: 'b1description',
+                  type: 'text',
+                },
+              ],
+            },
+            {
+              slug: 'block2',
+              interfaceName: 'AnotherSharedBlock',
+              fields: [
+                {
+                  name: 'b2title',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'b2description',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
         },
       ],
     },
-    collectionWithName(relationSlug),
-    collectionWithName('dummy'),
+    {
+      slug: 'collection2',
+      fields: [
+        {
+          type: 'array',
+          name: 'meta',
+          interfaceName: 'SharedMetaArray',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+            },
+            {
+              name: 'description',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: 'meta',
+          interfaceName: 'SharedMeta',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+            },
+            {
+              name: 'description',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: 'nestedGroup',
+          fields: [
+            {
+              type: 'group',
+              name: 'meta',
+              interfaceName: 'SharedMeta',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                },
+                {
+                  name: 'description',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 });
