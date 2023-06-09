@@ -198,9 +198,9 @@ const Routes: React.FC = () => {
                                       >
                                         <Edit collection={collection} />
                                       </DocumentInfoProvider>
-                                      ) : (
-                                        <Unauthorized />
-                                      )}
+                                    ) : (
+                                      <Unauthorized />
+                                    )}
                                   </Route>,
                                   <Route
                                     key={`${collection.slug}-edit`}
@@ -217,7 +217,7 @@ const Routes: React.FC = () => {
                                           collection={collection}
                                         />
                                       </DocumentInfoProvider>
-                                      ) : <Unauthorized />}
+                                    ) : <Unauthorized />}
                                   </Route>,
                                 ];
 
@@ -230,7 +230,7 @@ const Routes: React.FC = () => {
                                     >
                                       {permissions?.collections?.[collection.slug]?.readVersions?.permission ? (
                                         <Versions collection={collection} />
-                                        ) : <Unauthorized />}
+                                      ) : <Unauthorized />}
                                     </Route>,
                                   );
 
@@ -247,7 +247,7 @@ const Routes: React.FC = () => {
                                         >
                                           <Version collection={collection} />
                                         </DocumentInfoProvider>
-                                        ) : <Unauthorized />}
+                                      ) : <Unauthorized />}
                                     </Route>,
                                   );
                                 }
@@ -272,7 +272,7 @@ const Routes: React.FC = () => {
                                       >
                                         <EditGlobal global={global} />
                                       </DocumentInfoProvider>
-                                      ) : <Unauthorized />}
+                                    ) : <Unauthorized />}
                                   </Route>,
                                 ];
 
@@ -297,7 +297,7 @@ const Routes: React.FC = () => {
                                     >
                                       {permissions?.globals?.[global.slug]?.readVersions?.permission ? (
                                         <Version global={global} />
-                                          ) : <Unauthorized />}
+                                      ) : <Unauthorized />}
                                     </Route>,
                                   );
                                 }
