@@ -82,9 +82,9 @@ const NumberField: React.FC<Props> = (props) => {
       if (!selectedOption) {
         newValue = [];
       } else if (Array.isArray(selectedOption)) {
-        newValue = selectedOption.map((option) => option.value);
+        newValue = selectedOption.map((option) => Number(option.value));
       } else {
-        newValue = [selectedOption.value];
+        newValue = [Number(selectedOption.value)];
       }
 
       console.log('newValue', newValue);
