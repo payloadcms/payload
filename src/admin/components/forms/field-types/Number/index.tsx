@@ -101,7 +101,7 @@ const NumberField: React.FC<Props> = (props) => {
       setValueToRender(value.map((val, index) => {
         return {
           label: `${val}`,
-          value: val,
+          value: val, // TODO: this doesn't work for duplicate numbers. React-select automatically uses "label-value" as a key, so we will get that react duplicate key warning that way
           id: `${val}${index}`, // append index to avoid duplicate keys but allow duplicate numbers
         };
       }));
