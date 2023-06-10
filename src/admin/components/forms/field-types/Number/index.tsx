@@ -76,7 +76,6 @@ const NumberField: React.FC<Props> = (props) => {
   const [valueToRender, setValueToRender] = useState<{label: string, value: number, id: string}[]>([]); // Only for hasMany
 
   const handleHasManyChange = useCallback((selectedOption) => {
-    console.log('selectedOption', selectedOption);
     if (!readOnly) {
       let newValue;
       if (!selectedOption) {
@@ -87,7 +86,6 @@ const NumberField: React.FC<Props> = (props) => {
         newValue = [Number(selectedOption.value)];
       }
 
-      console.log('newValue', newValue);
       setValue(newValue);
     }
   }, [
