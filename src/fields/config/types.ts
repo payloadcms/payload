@@ -135,7 +135,7 @@ export type NumberField = FieldBase & {
   }
   min?: number
   max?: number
-  /** Setting hasMany to true makes this an ordered array of numbers instead of a single number */
+  /** Makes this field an ordered array of numbers instead of just a single number. */
   hasMany?: boolean
 }
 
