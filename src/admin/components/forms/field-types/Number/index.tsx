@@ -75,7 +75,7 @@ const NumberField: React.FC<Props> = (props) => {
 
   const [valueToRender, setValueToRender] = useState<{label: any, value: any}[]>([]);
 
-  const onMultiTextChange = useCallback((selectedOption) => {
+  const handleHasManyChange = useCallback((selectedOption) => {
     console.log('selectedOption', selectedOption);
     if (!readOnly) {
       let newValue;
@@ -134,12 +134,12 @@ const NumberField: React.FC<Props> = (props) => {
         <ReactSelect
           className={`field-${path.replace(/\./gi, '__')}`}
           placeholder={t('general:enterAValue')}
-          onChange={onMultiTextChange}
+          onChange={handleHasManyChange}
           value={valueToRender as Option[]}
           showError={showError}
           disabled={readOnly}
           options={[]}
-          isCreatable={false}
+          isCreatable
           isMulti
           isSortable
           isClearable
