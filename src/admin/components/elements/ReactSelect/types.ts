@@ -32,7 +32,7 @@ declare module 'react-select/dist/declarations/src' {
 
 export type Option = {
   [key: string]: unknown
-  value: unknown
+  value: string
 }
 
 export type OptionGroup = {
