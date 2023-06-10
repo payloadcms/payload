@@ -48,6 +48,20 @@ describe('collections-rest', () => {
       expect(result.docs).toEqual(expect.arrayContaining(expectedDocs));
     });
 
+    it('should find where id', async () => {
+      const post1 = await createPost();
+      await createPost();
+      const { status, result } = await client.find<Post>({
+        query: {
+          id: { equals: post1.id },
+        },
+      });
+
+      expect(status).toEqual(200);
+      expect(result.totalDocs).toEqual(1);
+      expect(result.docs[0].id).toEqual(post1.id);
+    });
+
     it('should update existing', async () => {
       const {
         id,
@@ -258,6 +272,14 @@ describe('collections-rest', () => {
           const { doc: foundDoc } = await client.findByID({ slug: customIdSlug, id: customId });
 
           expect(foundDoc.id).toEqual(doc.id);
+        });
+
+        it('should query', async () => {
+          const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
+          const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, name: 'custom-id-name' } });
+          const { result } = await client.find({ slug: customIdSlug, query: { id: { like: 'custom' } } });
+
+          expect(result.docs.map(({ id }) => id)).toContain(doc.id);
         });
 
         it('should update', async () => {
@@ -876,6 +898,21 @@ describe('collections-rest', () => {
           expect(status).toEqual(200);
           expect(result.totalDocs).toEqual(50);
         });
+      });
+
+      it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
+        const withDeeplyNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } });
+
+        const { result } = await client.find<Post>({
+          query: {
+            'D1.D2.D3.D4': {
+              equals: 'nested message',
+            },
+          },
+        });
+
+        expect(result.totalDocs).toEqual(1);
+        expect(result.docs).toEqual([withDeeplyNestedField]);
       });
     });
   });

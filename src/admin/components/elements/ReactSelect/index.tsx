@@ -2,7 +2,7 @@ import React from 'react';
 import Select from 'react-select';
 import { useTranslation } from 'react-i18next';
 import { arrayMove } from '@dnd-kit/sortable';
-import { Props } from './types';
+import { Props as ReactSelectAdapterProps } from './types';
 import Chevron from '../../icons/Chevron';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { SingleValue } from './SingleValue';
@@ -16,7 +16,7 @@ import DraggableSortable from '../DraggableSortable';
 
 import './index.scss';
 
-const SelectAdapter: React.FC<Props> = (props) => {
+const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const { t, i18n } = useTranslation();
 
   const {
@@ -33,7 +33,6 @@ const SelectAdapter: React.FC<Props> = (props) => {
     isLoading,
     onMenuOpen,
     components,
-    selectProps,
   } = props;
 
   const classes = [
@@ -50,7 +49,7 @@ const SelectAdapter: React.FC<Props> = (props) => {
       {...props}
       value={value}
       onChange={onChange}
-      disabled={disabled ? 'disabled' : undefined}
+      isDisabled={disabled}
       className={classes}
       classNamePrefix="rs"
       options={options}
@@ -59,9 +58,6 @@ const SelectAdapter: React.FC<Props> = (props) => {
       filterOption={filterOption}
       onMenuOpen={onMenuOpen}
       menuPlacement="auto"
-      selectProps={{
-        ...selectProps,
-      }}
       components={{
         ValueContainer,
         SingleValue,
@@ -77,7 +73,7 @@ const SelectAdapter: React.FC<Props> = (props) => {
   );
 };
 
-const SortableSelect: React.FC<Props> = (props) => {
+const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
   const {
     onChange,
     value,
@@ -103,7 +99,7 @@ const SortableSelect: React.FC<Props> = (props) => {
   );
 };
 
-const ReactSelect: React.FC<Props> = (props) => {
+const ReactSelect: React.FC<ReactSelectAdapterProps> = (props) => {
   const {
     isMulti,
     isSortable,

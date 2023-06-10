@@ -9,7 +9,6 @@ import { Option as OptionType } from '../types';
 import './index.scss';
 
 const baseClass = 'multi-value';
-
 export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
   const {
     className,
@@ -18,12 +17,9 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
     data: {
       value,
     },
-    selectProps: {
-      selectProps,
-      selectProps: {
-        disableMouseDown,
-      },
-    },
+    customProps: {
+      disableMouseDown,
+    } = {},
   } = props;
 
   const {
@@ -49,6 +45,8 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
       className={classes}
       innerProps={{
         ...innerProps,
+        ...attributes,
+        ...listeners,
         ref: setNodeRef,
         onMouseDown: (e) => {
           if (!disableMouseDown) {
@@ -59,14 +57,6 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
         },
         style: {
           transform,
-        },
-      }}
-      selectProps={{
-        ...selectProps,
-        // pass the draggable props through to the label so it alone acts as the draggable handle
-        draggableProps: {
-          ...attributes,
-          ...listeners,
         },
       }}
     />

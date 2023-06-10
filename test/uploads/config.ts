@@ -115,6 +115,17 @@ export default buildConfig({
             formatOptions: { format: 'jpg', options: { quality: 90 } },
           },
           {
+            name: 'maintainedImageSize',
+            width: undefined,
+            height: undefined,
+          },
+          {
+            name: 'maintainedImageSizeWithNewFormat',
+            width: undefined,
+            height: undefined,
+            formatOptions: { format: 'jpg', options: { quality: 90 } },
+          },
+          {
             name: 'tablet',
             width: 640,
             height: 480,
@@ -173,6 +184,15 @@ export default buildConfig({
       upload: {
         staticURL: '/media',
         disableLocalStorage: true,
+      },
+      fields: [],
+    },
+    {
+      slug: 'externally-served-media',
+      upload: {
+        // Either use another web server like `npx serve -l 4000` (http://localhost:4000) or use the static server from the previous collection to serve the media folder (http://localhost:3000/media)
+        staticURL: 'http://localhost:3000/media',
+        staticDir: './media',
       },
       fields: [],
     },

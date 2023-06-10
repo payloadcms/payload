@@ -6,12 +6,37 @@ import { useForm, useFormModified } from '../../forms/Form/context';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useLocale } from '../../utilities/Locale';
 import useHotkey from '../../../hooks/useHotkey';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
-import './index.scss';
 
 const baseClass = 'save-draft';
 
-const SaveDraft: React.FC = () => {
+export type CustomSaveDraftButtonProps = React.ComponentType<DefaultSaveDraftButtonProps & {
+  DefaultButton: React.ComponentType<DefaultSaveDraftButtonProps>;
+}>
+export type DefaultSaveDraftButtonProps = {
+  saveDraft: () => void;
+  disabled: boolean;
+  label: string;
+};
+const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({ disabled, saveDraft, label }) => {
+  return (
+    <FormSubmit
+      className={baseClass}
+      type="button"
+      buttonStyle="secondary"
+      onClick={saveDraft}
+      disabled={disabled}
+    >
+      {label}
+    </FormSubmit>
+  );
+};
+
+type Props = {
+  CustomComponent?: CustomSaveDraftButtonProps
+}
+export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
   const { serverURL, routes: { api } } = useConfig();
   const { submit } = useForm();
   const { collection, global, id } = useDocumentInfo();
@@ -56,17 +81,16 @@ const SaveDraft: React.FC = () => {
   }, [canSaveDraft]);
 
   return (
-    <FormSubmit
+    <RenderCustomComponent
       ref={ref}
-      className={baseClass}
-      type="button"
-      buttonStyle="secondary"
-      onClick={saveDraft}
-      disabled={!canSaveDraft}
-    >
-      {t('saveDraft')}
-    </FormSubmit>
+      CustomComponent={CustomComponent}
+      DefaultComponent={DefaultSaveDraftButton}
+      componentProps={{
+        saveDraft,
+        disabled: !canSaveDraft,
+        label: t('saveDraft'),
+        DefaultButton: DefaultSaveDraftButton,
+      }}
+    />
   );
 };
-
-export default SaveDraft;

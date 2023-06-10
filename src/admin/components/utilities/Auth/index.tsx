@@ -1,11 +1,9 @@
-import React, {
-  useState, createContext, useContext, useEffect, useCallback,
-} from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import jwtDecode from 'jwt-decode';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
-import { User, Permissions } from '../../../../auth/types';
+import { Permissions, User } from '../../../../auth/types';
 import { useConfig } from '../Config';
 import { requests } from '../../../api';
 import useDebounce from '../../../hooks/useDebounce';
@@ -92,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const json: Permissions = await request.json();
       setPermissions(json);
     } else {
-      throw new Error("Fetching permissions failed with status code " + request.status);
+      throw new Error(`Fetching permissions failed with status code ${request.status}`);
     }
   }, [serverURL, api, i18n]);
 
@@ -135,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (id) {
       refreshPermissions();
     }
-  }, [i18n, id, api, serverURL]);
+  }, [i18n, id, api, serverURL, refreshPermissions]);
 
   useEffect(() => {
     let reminder: ReturnType<typeof setTimeout>;

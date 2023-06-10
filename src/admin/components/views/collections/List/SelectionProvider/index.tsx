@@ -1,14 +1,8 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { Where } from '../../../../../../types';
+import { useLocale } from '../../../../utilities/Locale';
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',
@@ -38,6 +32,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const contextRef = useRef({} as SelectionContext);
 
   const history = useHistory();
+  const locale = useLocale();
   const [selected, setSelected] = useState<SelectionContext['selected']>({});
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None);
   const [count, setCount] = useState(0);
@@ -98,8 +93,9 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     }
     return queryString.stringify({
       where,
+      locale,
     }, { addQueryPrefix: true });
-  }, [history.location.search, selectAll, selected]);
+  }, [history.location.search, selectAll, selected, locale]);
 
   useEffect(() => {
     if (selectAll === SelectAllStatus.AllAvailable) {

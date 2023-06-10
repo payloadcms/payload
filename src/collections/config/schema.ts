@@ -56,12 +56,23 @@ const collectionSchema = joi.object().keys({
     hooks: joi.object({
       beforeDuplicate: joi.func(),
     }),
+    enableRichTextLink: joi.boolean(),
     enableRichTextRelationship: joi.boolean(),
     components: joi.object({
       views: joi.object({
         List: componentSchema,
         Edit: componentSchema,
       }),
+      edit: joi.object({
+        SaveButton: componentSchema,
+        PublishButton: componentSchema,
+        SaveDraftButton: componentSchema,
+        PreviewButton: componentSchema,
+      }),
+      BeforeList: joi.array().items(componentSchema),
+      BeforeListTable: joi.array().items(componentSchema),
+      AfterListTable: joi.array().items(componentSchema),
+      AfterList: joi.array().items(componentSchema),
     }),
     pagination: joi.object({
       defaultLimit: joi.number(),
@@ -72,6 +83,12 @@ const collectionSchema = joi.object().keys({
     hideAPIURL: joi.bool(),
   }),
   fields: joi.array(),
+  indexes: joi.array().items(
+    joi.object().keys({
+      fields: joi.object().required(),
+      options: joi.object(),
+    }),
+  ),
   hooks: joi.object({
     beforeOperation: joi.array().items(joi.func()),
     beforeValidate: joi.array().items(joi.func()),

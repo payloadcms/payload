@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDiffViewer from 'react-diff-viewer';
+import ReactDiffViewer from 'react-diff-viewer-continued';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../utilities/Config';
 import { useLocale } from '../../../../../utilities/Locale';

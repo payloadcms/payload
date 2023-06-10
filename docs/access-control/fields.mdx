@@ -20,7 +20,7 @@ Field Access Control is specified with functions inside a field's config. All fi
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Posts: CollectionConfig = {
+export const Posts: CollectionConfig = {
   slug: 'posts',
   fields: [
     {
@@ -66,6 +66,8 @@ Returns a boolean which allows or denies the ability to read a field's value. If
 ### Update
 
 Returns a boolean which allows or denies the ability to update a field's value. If `false` is returned, any passed values will be discarded.
+
+If `false` is returned and you attempt to update the field's value, the operation will **not** throw an error however the field will be omitted from the update operation and the value will remain unchanged.
 
 **Available argument properties:**
 

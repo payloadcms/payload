@@ -19,7 +19,7 @@ const AccountView: React.FC = () => {
   const { setStepNav } = useStepNav();
   const { user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
-  const { id, preferencesKey, docPermissions, getDocPermissions, slug } = useDocumentInfo();
+  const { id, preferencesKey, docPermissions, getDocPermissions, slug, getDocPreferences } = useDocumentInfo();
   const { getPreference } = usePreferences();
 
   const {
@@ -61,9 +61,10 @@ const AccountView: React.FC = () => {
 
   const onSave = React.useCallback(async (json: any) => {
     getDocPermissions();
-    const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc, user, id, operation: 'update', locale, t });
+    const preferences = await getDocPreferences();
+    const state = await buildStateFromSchema({ fieldSchema: collection.fields, preferences, data: json.doc, user, id, operation: 'update', locale, t });
     setInitialState(state);
-  }, [collection, user, id, t, locale, getDocPermissions]);
+  }, [collection, user, id, t, locale, getDocPermissions, getDocPreferences]);
 
   useEffect(() => {
     const nav = [{
@@ -75,8 +76,10 @@ const AccountView: React.FC = () => {
 
   useEffect(() => {
     const awaitInitialState = async () => {
+      const preferences = await getDocPreferences();
       const state = await buildStateFromSchema({
         fieldSchema: fields,
+        preferences,
         data: dataToRender,
         operation: 'update',
         id,
@@ -89,7 +92,7 @@ const AccountView: React.FC = () => {
     };
 
     if (dataToRender) awaitInitialState();
-  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, t]);
+  }, [dataToRender, fields, id, user, locale, preferencesKey, getPreference, t, getDocPreferences]);
 
   const isLoading = !initialState || !docPermissions || isLoadingData;
 

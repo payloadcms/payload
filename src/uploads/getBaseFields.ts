@@ -85,7 +85,10 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
         afterRead: [
           ({ data }) => {
             if (data?.filename) {
-              return `${config.serverURL}${uploadOptions.staticURL}/${data.filename}`;
+              if (uploadOptions.staticURL.startsWith('/')) {
+                return `${config.serverURL}${uploadOptions.staticURL}/${data.filename}`;
+              }
+              return `${uploadOptions.staticURL}/${data.filename}`;
             }
 
             return undefined;
@@ -129,7 +132,10 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
                     const sizeFilename = data?.sizes?.[size.name]?.filename;
 
                     if (sizeFilename) {
-                      return `${config.serverURL}${uploadOptions.staticURL}/${sizeFilename}`;
+                      if (uploadOptions.staticURL.startsWith('/')) {
+                        return `${config.serverURL}${uploadOptions.staticURL}/${sizeFilename}`;
+                      }
+                      return `${uploadOptions.staticURL}/${sizeFilename}`;
                     }
 
                     return undefined;

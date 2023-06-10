@@ -53,7 +53,6 @@ export type Action = CLEAR | ADD | UPDATE
 
 export type GetResults = (args: {
   lastFullyLoadedRelation?: number
-  lastLoadedPage?: number
   search?: string
   value?: Value | Value[]
   sort?: boolean

@@ -96,6 +96,50 @@ const RichTextFields: CollectionConfig = {
       },
     },
     {
+      name: 'richTextCustomFields',
+      type: 'richText',
+      admin: {
+        elements: [
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6',
+          'ul',
+          'ol',
+          'indent',
+          'link',
+          'relationship',
+          'upload',
+        ],
+        link: {
+          fields: ({ defaultFields }) => {
+            return [
+              ...defaultFields,
+              {
+                label: 'Custom',
+                name: 'customLinkField',
+                type: 'text',
+              },
+            ];
+          },
+        },
+        upload: {
+          collections: {
+            uploads: {
+              fields: [
+                {
+                  name: 'caption',
+                  type: 'richText',
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
+    {
       name: 'richTextReadOnly',
       type: 'richText',
       admin: {
@@ -401,6 +445,7 @@ export const richTextDoc = {
   selectHasMany: ['one', 'five'],
   richText: generateRichText(),
   richTextReadOnly: generateRichText(),
+  richTextCustomFields: generateRichText(),
 };
 
 export default RichTextFields;

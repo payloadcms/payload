@@ -13,7 +13,6 @@ import { useLocale } from '../../../utilities/Locale';
 import { IndexProps } from './types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { Fields } from '../../../forms/Form/types';
-import { usePreferences } from '../../../utilities/Preferences';
 import { EditDepthContext } from '../../../utilities/EditDepth';
 import { CollectionPermission } from '../../../../../auth';
 
@@ -43,8 +42,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [internalState, setInternalState] = useState<Fields>();
   const [updatedAt, setUpdatedAt] = useState<string>();
   const { user } = useAuth();
-  const { getVersions, preferencesKey, getDocPermissions, docPermissions } = useDocumentInfo();
-  const { getPreference } = usePreferences();
+  const { getVersions, getDocPermissions, docPermissions, getDocPreferences } = useDocumentInfo();
   const { t } = useTranslation('general');
 
   const [{ data, isLoading: isLoadingData, isError }] = usePayloadAPI(
@@ -61,23 +59,24 @@ const EditView: React.FC<IndexProps> = (props) => {
     if (!isEditing) {
       setRedirect(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
-      const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc, user, id, operation: 'update', locale, t });
+      const preferences = await getDocPreferences();
+      const state = await buildStateFromSchema({ fieldSchema: collection.fields, preferences, data: json.doc, user, id, operation: 'update', locale, t });
       setInternalState(state);
     }
-  }, [admin, collection, isEditing, getVersions, user, id, t, locale, getDocPermissions]);
+  }, [admin, collection.fields, collection.slug, getDocPreferences, getDocPermissions, getVersions, id, isEditing, locale, t, user]);
 
   const dataToRender = (locationState as Record<string, unknown>)?.data || data;
 
   useEffect(() => {
     const awaitInternalState = async () => {
       setUpdatedAt(dataToRender?.updatedAt);
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender || {}, user, operation: isEditing ? 'update' : 'create', id, locale, t });
-      await getPreference(preferencesKey);
+      const preferences = await getDocPreferences();
+      const state = await buildStateFromSchema({ fieldSchema: fields, preferences, data: dataToRender || {}, user, operation: isEditing ? 'update' : 'create', id, locale, t });
       setInternalState(state);
     };
 
     if (!isEditing || dataToRender) awaitInternalState();
-  }, [dataToRender, fields, isEditing, id, user, locale, preferencesKey, getPreference, t]);
+  }, [dataToRender, fields, isEditing, id, user, locale, t, getDocPreferences]);
 
   useEffect(() => {
     if (redirect) {

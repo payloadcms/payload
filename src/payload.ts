@@ -6,6 +6,7 @@ import path from 'path';
 import mongoose from 'mongoose';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
+import { SendMailOptions } from 'nodemailer';
 import { BulkOperationResult, Collection, CollectionModel } from './collections/config/types';
 import { EmailOptions, InitOptions, SanitizedConfig } from './config/types';
 import { TypeWithVersion } from './versions/types';
@@ -17,7 +18,7 @@ import { ErrorHandler } from './express/middleware/errorHandler';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { decrypt, encrypt } from './auth/crypto';
-import { BuildEmailResult, Message } from './email/types';
+import { BuildEmailResult } from './email/types';
 import { Preferences } from './preferences/types';
 
 import { Options as CreateOptions } from './collections/operations/local/create';
@@ -72,11 +73,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   collections: {
     [slug: string | number | symbol]: Collection;
-  } = {}
+  } = {};
 
   versions: {
     [slug: string]: CollectionModel;
-  } = {}
+  } = {};
 
   preferences: Preferences;
 
@@ -88,7 +89,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   email: BuildEmailResult;
 
-  sendEmail: (message: Message) => Promise<unknown>;
+  sendEmail: (message: SendMailOptions) => Promise<unknown>;
 
   secret: string;
 
@@ -96,7 +97,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   mongoOptions: InitOptions['mongoOptions'];
 
-  mongoMemoryServer: any
+  mongoMemoryServer: any;
 
   local: boolean;
 
@@ -108,13 +109,16 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   authenticate: PayloadAuthenticate;
 
-  express?: Express
+  express?: Express;
 
-  router?: Router
+  router?: Router;
 
   types: {
     blockTypes: any;
     blockInputTypes: any;
+    groupTypes: any;
+    arrayTypes: any;
+    tabTypes: any;
     localeInputType?: any;
     fallbackLocaleInputType?: any;
   };
@@ -210,7 +214,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     serverInitTelemetry(this);
 
-    if (options.local !== false) {
+    if (options.local !== false && this.mongoURL) {
       if (typeof options.onInit === 'function') await options.onInit(this);
       if (typeof this.config.onInit === 'function') await this.config.onInit(this);
     }
@@ -228,7 +232,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   ): Promise<TGeneratedTypes['collections'][T]> => {
     const { create } = localOperations;
     return create<T>(this, options);
-  }
+  };
 
   /**
    * @description Find documents with criteria
@@ -240,7 +244,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   ): Promise<PaginatedDocs<TGeneratedTypes['collections'][T]>> => {
     const { find } = localOperations;
     return find<T>(this, options);
-  }
+  };
 
   /**
    * @description Find document by ID
@@ -253,18 +257,18 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   ): Promise<TGeneratedTypes['collections'][T]> => {
     const { findByID } = localOperations;
     return findByID<T>(this, options);
-  }
+  };
 
   /**
    * @description Update one or more documents
    * @param options
    * @returns Updated document(s)
    */
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateByIDOptions<T>):Promise<TGeneratedTypes['collections'][T]>
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateByIDOptions<T>): Promise<TGeneratedTypes['collections'][T]>
 
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateManyOptions<T>):Promise<BulkOperationResult<T>>
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateManyOptions<T>): Promise<BulkOperationResult<T>>
 
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>):Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>): Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
     const { update } = localOperations;
     return update<T>(this, options);
   }
@@ -274,11 +278,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns Updated document(s)
    */
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteByIDOptions<T>):Promise<TGeneratedTypes['collections'][T]>
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteByIDOptions<T>): Promise<TGeneratedTypes['collections'][T]>
 
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteManyOptions<T>):Promise<BulkOperationResult<T>>
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteManyOptions<T>): Promise<BulkOperationResult<T>>
 
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>):Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>): Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
     const { deleteLocal } = localOperations;
     return deleteLocal<T>(this, options);
   }
@@ -293,7 +297,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   ): Promise<PaginatedDocs<TypeWithVersion<TGeneratedTypes['collections'][T]>>> => {
     const { findVersions } = localOperations;
     return findVersions<T>(this, options);
-  }
+  };
 
   /**
    * @description Find version by ID
@@ -305,7 +309,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   ): Promise<TypeWithVersion<TGeneratedTypes['collections'][T]>> => {
     const { findVersionByID } = localOperations;
     return findVersionByID<T>(this, options);
-  }
+  };
 
   /**
    * @description Restore version by ID
@@ -317,56 +321,56 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   ): Promise<TGeneratedTypes['collections'][T]> => {
     const { restoreVersion } = localOperations;
     return restoreVersion<T>(this, options);
-  }
+  };
 
   login = async <T extends keyof TGeneratedTypes['collections']>(
     options: LoginOptions<T>,
   ): Promise<LoginResult & { user: TGeneratedTypes['collections'][T] }> => {
     const { login } = localOperations.auth;
     return login<T>(this, options);
-  }
+  };
 
   forgotPassword = async <T extends keyof TGeneratedTypes['collections']>(
     options: ForgotPasswordOptions<T>,
   ): Promise<ForgotPasswordResult> => {
     const { forgotPassword } = localOperations.auth;
     return forgotPassword<T>(this, options);
-  }
+  };
 
   resetPassword = async <T extends keyof TGeneratedTypes['collections']>(
     options: ResetPasswordOptions<T>,
   ): Promise<ResetPasswordResult> => {
     const { resetPassword } = localOperations.auth;
     return resetPassword<T>(this, options);
-  }
+  };
 
   unlock = async <T extends keyof TGeneratedTypes['collections']>(
     options: UnlockOptions<T>,
   ): Promise<boolean> => {
     const { unlock } = localOperations.auth;
     return unlock(this, options);
-  }
+  };
 
   verifyEmail = async <T extends keyof TGeneratedTypes['collections']>(
     options: VerifyEmailOptions<T>,
   ): Promise<boolean> => {
     const { verifyEmail } = localOperations.auth;
     return verifyEmail(this, options);
-  }
+  };
 
   findGlobal = async <T extends keyof TGeneratedTypes['globals']>(
     options: FindGlobalOptions<T>,
   ): Promise<TGeneratedTypes['globals'][T]> => {
     const { findOne } = localGlobalOperations;
     return findOne<T>(this, options);
-  }
+  };
 
   updateGlobal = async <T extends keyof TGeneratedTypes['globals']>(
     options: UpdateGlobalOptions<T>,
   ): Promise<TGeneratedTypes['globals'][T]> => {
     const { update } = localGlobalOperations;
     return update<T>(this, options);
-  }
+  };
 
   /**
    * @description Find global versions with criteria
@@ -378,7 +382,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   ): Promise<PaginatedDocs<TypeWithVersion<TGeneratedTypes['globals'][T]>>> => {
     const { findVersions } = localGlobalOperations;
     return findVersions<T>(this, options);
-  }
+  };
 
   /**
    * @description Find global version by ID
@@ -390,7 +394,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   ): Promise<TypeWithVersion<TGeneratedTypes['globals'][T]>> => {
     const { findVersionByID } = localGlobalOperations;
     return findVersionByID<T>(this, options);
-  }
+  };
 
   /**
    * @description Restore global version by ID
@@ -402,7 +406,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   ): Promise<TGeneratedTypes['globals'][T]> => {
     const { restoreVersion } = localGlobalOperations;
     return restoreVersion<T>(this, options);
-  }
+  };
 }
 
 export type Payload = BasePayload<GeneratedTypes>

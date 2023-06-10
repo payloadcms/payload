@@ -71,12 +71,17 @@ export function hasTransportOptions(
   return (emailConfig as EmailTransportOptions).transportOptions !== undefined;
 }
 
+export type GraphQLExtension = (
+  graphQL: typeof GraphQL,
+  payload: Payload
+) => Record<string, unknown>;
+
 export type InitOptions = {
   /** Express app for Payload to use */
   express?: Express;
-  /** Mongo connection URL, starts with `mongo` */
+  /** MongoDB connection URL, starts with `mongo` */
   mongoURL: string | false;
-  /** Extra configuration options that will be passed to Mongo */
+  /** Extra configuration options that will be passed to MongoDB */
   mongoOptions?: ConnectOptions & {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
@@ -119,7 +124,7 @@ export type InitOptions = {
  * and then sent to the client allowing the dashboard to show accessible data and actions.
  *
  * If the result is `true`, the user has access.
- * If the result is an object, it is interpreted as a Mongo query.
+ * If the result is an object, it is interpreted as a MongoDB query.
  *
  * @example `{ createdBy: { equals: id } }`
  *
@@ -489,19 +494,13 @@ export type Config = {
      *
      * @see https://payloadcms.com/docs/access-control/overview
      */
-    mutations?: (
-      graphQL: typeof GraphQL,
-      payload: Payload
-    ) => Record<string, unknown>;
+    mutations?: GraphQLExtension;
     /**
-    * Function that returns an object containing keys to custom GraphQL queries
-    *
-    * @see https://payloadcms.com/docs/access-control/overview
-    */
-    queries?: (
-      graphQL: typeof GraphQL,
-      payload: Payload
-    ) => Record<string, unknown>;
+     * Function that returns an object containing keys to custom GraphQL queries
+     *
+     * @see https://payloadcms.com/docs/access-control/overview
+     */
+    queries?: GraphQLExtension;
     maxComplexity?: number;
     disablePlaygroundInProduction?: boolean;
     disable?: boolean;

@@ -1,6 +1,4 @@
-import { hasWhereAccessResult } from '../../auth';
 import executeAccess from '../../auth/executeAccess';
-import { Where } from '../../types';
 import { AccessResult } from '../../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
@@ -22,7 +20,6 @@ type Args = {
 async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T> {
   const {
     globalConfig,
-    locale,
     req,
     req: {
       payload,
@@ -40,28 +37,19 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
   // Retrieve and execute access
   // /////////////////////////////////////
 
-  const queryToBuild: Where = {
-    and: [
-      {
-        globalType: {
-          equals: slug,
-        },
-      },
-    ],
-  };
-
   let accessResult: AccessResult;
 
   if (!overrideAccess) {
     accessResult = await executeAccess({ req }, globalConfig.access.read);
-
-    if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.and.push(accessResult);
-    }
   }
 
   const query = await Model.buildQuery({
-    where: queryToBuild,
+    where: {
+      globalType: {
+        equals: slug,
+      },
+    },
+    access: accessResult,
     req,
     overrideAccess,
     globalSlug: slug,
