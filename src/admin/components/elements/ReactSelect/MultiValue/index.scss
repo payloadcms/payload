@@ -12,4 +12,9 @@
   &--is-dragging {
     z-index: 2;
   }
+
+  /* Is not dragging: */
+  &:not(&--is-dragging) {
+    transition: all 100ms ease-in-out;
+  }
 }
