@@ -98,11 +98,11 @@ const NumberField: React.FC<Props> = (props) => {
   // useeffect update valueToRender:
   useEffect(() => {
     if (hasMany && Array.isArray(value)) {
-      setValueToRender(value.map((val) => {
+      setValueToRender(value.map((val, index) => {
         return {
           label: `${val}`,
           value: val,
-          id: `${val}`,
+          id: `${val}${index}`, // append index to avoid duplicate keys but allow duplicate numbers
         };
       }));
     }
