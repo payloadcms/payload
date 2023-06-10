@@ -16,7 +16,7 @@ const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label }) => {
   useHotkey({ keyCodes: ['s'], cmdCtrlKey: true }, (e, deps) => {
     e.preventDefault();
     e.stopPropagation();
-    const [enableClick] = deps as [boolean]; // alias for `canSaveDraft`
+    const [enableClick] = deps as [boolean];
     if (enableClick && ref.current) {
       ref.current.click();
     }
