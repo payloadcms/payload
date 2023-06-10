@@ -28,7 +28,8 @@ export const number: Validate<unknown, unknown, NumberField> = (value: number | 
   const toValidate: number[] = Array.isArray(value) ? value : [value];
 
   // eslint-disable-next-line no-restricted-syntax
-  for (const v of toValidate) {
+  for (const val of toValidate) {
+    const v = parseFloat(val as unknown as string);
     if ((value && typeof v !== 'number') || (required && Number.isNaN(v)) || (value && Number.isNaN(v))) {
       return t('validation:enterNumber');
     }
