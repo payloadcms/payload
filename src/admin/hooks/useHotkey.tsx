@@ -80,7 +80,7 @@ const useHotkey = (options: {
     }
   }, [keyCodes, cmdCtrlKey, func, deps]);
 
-  const keyup = useCallback((e) => {
+  const keyup = useCallback((e: KeyboardEvent) => {
     removeFromKeys(e.code);
   }, []);
 
