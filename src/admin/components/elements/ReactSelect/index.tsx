@@ -85,7 +85,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     );
   }
   const handleKeyDown: KeyboardEventHandler = (event) => {
-    if (!value) return;
+    if (!value || !inputValue || inputValue.trim() === '') return;
     switch (event.key) {
       case 'Enter':
       case 'Tab':
