@@ -42,7 +42,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     isLoading,
     onMenuOpen,
     components,
-    isMultiText,
+    isCreatable,
   } = props;
 
   const classes = [
@@ -67,7 +67,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   };
 
 
-  if (!isMultiText) {
+  if (!isCreatable) {
     return (
       <Select
         isLoading={isLoading}

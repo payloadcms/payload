@@ -139,7 +139,7 @@ const NumberField: React.FC<Props> = (props) => {
           showError={showError}
           disabled={readOnly}
           options={[]}
-          isMultiText
+          isCreatable={false}
           isMulti
           isSortable
           isClearable

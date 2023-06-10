@@ -48,8 +48,10 @@ export type Props = {
   disabled?: boolean,
   showError?: boolean,
   options: Option[] | OptionGroup[]
+  /** Allows you to specify multiple values instead of just one */
   isMulti?: boolean,
-  isMultiText?: boolean,
+  /** Allows you to create own values in the UI despite them not being pre-specified */
+  isCreatable?: boolean,
   isLoading?: boolean
   isOptionSelected?: any
   isSortable?: boolean,
