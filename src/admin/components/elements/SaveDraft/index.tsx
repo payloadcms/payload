@@ -29,7 +29,7 @@ const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({ disable
     if (enableClick && ref.current) {
       ref.current.click();
     }
-  }, [disabled]);
+  }, [!disabled]);
 
   return (
     <FormSubmit
