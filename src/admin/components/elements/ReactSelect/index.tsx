@@ -27,6 +27,7 @@ const createOption = (label: string) => ({
 
 const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const { t, i18n } = useTranslation();
+  const [inputValue, setInputValue] = React.useState(''); // for creatable select
 
   const {
     className,
@@ -50,22 +51,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     'react-select',
     showError && 'react-select--error',
   ].filter(Boolean).join(' ');
-
-  const [inputValue, setInputValue] = React.useState('');
-  const handleKeyDown: KeyboardEventHandler = (event) => {
-    if (!value) return;
-    switch (event.key) {
-      case 'Enter':
-      case 'Tab':
-        onChange([...value as Option[], createOption(inputValue)]);
-        setInputValue('');
-        event.preventDefault();
-        break;
-      default:
-        break;
-    }
-  };
-
 
   if (!isCreatable) {
     return (
@@ -99,6 +84,21 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       />
     );
   }
+  const handleKeyDown: KeyboardEventHandler = (event) => {
+    if (!value) return;
+    switch (event.key) {
+      case 'Enter':
+      case 'Tab':
+        onChange([...value as Option[], createOption(inputValue)]);
+        setInputValue('');
+        event.preventDefault();
+        break;
+      default:
+        break;
+    }
+  };
+
+
   return (
     <CreatableSelect
       isLoading={isLoading}
