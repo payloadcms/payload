@@ -73,7 +73,7 @@ const NumberField: React.FC<Props> = (props) => {
     hasMany && 'has-many',
   ].filter(Boolean).join(' ');
 
-  const [valueToRender, setValueToRender] = useState<{label: string, value: string}[]>([]); // Only for hasMany
+  const [valueToRender, setValueToRender] = useState<{label: string, value: number, id: string}[]>([]); // Only for hasMany
 
   const handleHasManyChange = useCallback((selectedOption) => {
     console.log('selectedOption', selectedOption);
@@ -101,7 +101,8 @@ const NumberField: React.FC<Props> = (props) => {
       setValueToRender(value.map((val) => {
         return {
           label: `${val}`,
-          value: `${val}`,
+          value: val,
+          id: `${val}`,
         };
       }));
     }

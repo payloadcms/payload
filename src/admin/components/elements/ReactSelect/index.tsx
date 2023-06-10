@@ -140,8 +140,9 @@ const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
     value,
   } = props;
 
+
   let ids: string[] = [];
-  if (value) ids = Array.isArray(value) ? value.map((item) => item?.value) : [value?.value];
+  if (value) ids = Array.isArray(value) ? value.map((item) => item?.id ?? item?.value as string) : [value?.id || value?.value as string];
 
 
   return (
