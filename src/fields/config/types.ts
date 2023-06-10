@@ -129,11 +129,16 @@ export interface FieldBase {
 export type NumberField = FieldBase & {
   type: 'number';
   admin?: Admin & {
+    /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
+    /** Set this property to define a placeholder string for the field. */
     placeholder?: Record<string, string> | string
+    /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
   }
+  /** Minimum value accepted. Used in the default `validation` function. */
   min?: number
+  /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
   /** Makes this field an ordered array of numbers instead of just a single number. */
   hasMany?: boolean
