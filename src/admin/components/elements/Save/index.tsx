@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import FormSubmit from '../../forms/Submit';
+import useHotkey from '../../../hooks/useHotkey';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 export type CustomSaveButtonProps = React.ComponentType<DefaultSaveButtonProps & {
@@ -10,8 +11,24 @@ type DefaultSaveButtonProps = {
   label: string;
 };
 const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label }) => {
+  const ref = useRef<HTMLButtonElement>(null);
+
+  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true }, (e, deps) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const [enableClick] = deps as [boolean]; // alias for `canSaveDraft`
+    if (enableClick && ref.current) {
+      ref.current.click();
+    }
+  }, [true]);
+
   return (
-    <FormSubmit buttonId="action-save">{label}</FormSubmit>
+    <FormSubmit
+      buttonId="action-save"
+      ref={ref}
+    >
+      {label}
+    </FormSubmit>
   );
 };
 
