@@ -20,6 +20,17 @@ export type DefaultSaveDraftButtonProps = {
   label: string;
 };
 const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({ disabled, saveDraft, label }) => {
+  const ref = useRef<HTMLButtonElement>(null);
+
+  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true }, (e, deps) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const [enableClick] = deps as [boolean]; // alias for `canSaveDraft`
+    if (enableClick && ref.current) {
+      ref.current.click();
+    }
+  }, [disabled]);
+
   return (
     <FormSubmit
       className={baseClass}
@@ -27,6 +38,7 @@ const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({ disable
       buttonStyle="secondary"
       onClick={saveDraft}
       disabled={disabled}
+      ref={ref}
     >
       {label}
     </FormSubmit>
@@ -43,7 +55,6 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
   const modified = useFormModified();
   const locale = useLocale();
   const { t } = useTranslation('version');
-  const ref = useRef<HTMLButtonElement>(null);
 
   const canSaveDraft = modified;
 
@@ -71,18 +82,8 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
     });
   }, [submit, collection, global, serverURL, api, locale, id]);
 
-  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true }, (e, deps) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const [enableClick] = deps as [boolean]; // alias for `canSaveDraft`
-    if (enableClick && ref.current) {
-      ref.current.click();
-    }
-  }, [canSaveDraft]);
-
   return (
     <RenderCustomComponent
-      ref={ref}
       CustomComponent={CustomComponent}
       DefaultComponent={DefaultSaveDraftButton}
       componentProps={{
