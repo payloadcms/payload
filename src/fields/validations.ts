@@ -24,24 +24,32 @@ import canUseDOM from '../utilities/canUseDOM';
 import { isValidID } from '../utilities/isValidID';
 import { getIDType } from '../utilities/getIDType';
 
-export const number: Validate<unknown, unknown, NumberField> = (value: string, { t, required, min, max }) => {
-  const parsedValue = parseFloat(value);
+export const number: Validate<unknown, unknown, NumberField> = (value: number | number[], { t, required, min, max }) => {
+  const toValidate: number[] = Array.isArray(value) ? value : [value];
 
-  if ((value && typeof parsedValue !== 'number') || (required && Number.isNaN(parsedValue)) || (value && Number.isNaN(parsedValue))) {
-    return t('validation:enterNumber');
+  // eslint-disable-next-line no-restricted-syntax
+  for (const v of toValidate) {
+    if ((value && typeof v !== 'number') || (required && Number.isNaN(v)) || (value && Number.isNaN(v))) {
+      return t('validation:enterNumber');
+    }
+
+    if (typeof max === 'number' && v > max) {
+      return t('validation:greaterThanMax', { value, max });
+    }
+
+    if (typeof min === 'number' && v < min) {
+      return t('validation:lessThanMin', { value, min });
+    }
+
+    if (required && typeof v !== 'number') {
+      return t('validation:required');
+    }
   }
 
-  if (typeof max === 'number' && parsedValue > max) {
-    return t('validation:greaterThanMax', { value, max });
-  }
-
-  if (typeof min === 'number' && parsedValue < min) {
-    return t('validation:lessThanMin', { value, min });
-  }
-
-  if (required && typeof parsedValue !== 'number') {
+  if (required && toValidate.length === 0) {
     return t('validation:required');
   }
+
 
   return true;
 };
