@@ -57,7 +57,7 @@ const removeFromKeys = (code: string) => {
 const useHotkey = (options: {
   keyCodes: string[]
   cmdCtrlKey: boolean
-}, func: (e, deps: any[]) => void, deps: any[]): void => {
+}, func: (e: KeyboardEvent, deps: boolean[]) => void, deps: boolean[]): void => {
   const { keyCodes, cmdCtrlKey } = options;
 
   const keydown = useCallback((e: KeyboardEvent) => {
