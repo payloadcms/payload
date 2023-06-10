@@ -138,6 +138,10 @@ const NumberField: React.FC<Props> = (props) => {
           isMulti
           isSortable
           isClearable
+          filterOption={(option, rawInput) => {
+            // eslint-disable-next-line no-restricted-globals
+            return rawInput.trim() !== '' && !isNaN(Number(rawInput));
+          }}
         />
       ) : (
         <input
