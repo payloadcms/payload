@@ -73,7 +73,7 @@ const NumberField: React.FC<Props> = (props) => {
     hasMany && 'has-many',
   ].filter(Boolean).join(' ');
 
-  const [valueToRender, setValueToRender] = useState<{label: string, value: number, id: string}[]>([]); // Only for hasMany
+  const [valueToRender, setValueToRender] = useState<{label: string, value: {value: number}, id: string}[]>([]); // Only for hasMany
 
   const handleHasManyChange = useCallback((selectedOption) => {
     if (!readOnly) {
@@ -81,9 +81,9 @@ const NumberField: React.FC<Props> = (props) => {
       if (!selectedOption) {
         newValue = [];
       } else if (Array.isArray(selectedOption)) {
-        newValue = selectedOption.map((option) => Number(option.value));
+        newValue = selectedOption.map((option) => Number(option.value?.value || option.value));
       } else {
-        newValue = [Number(selectedOption.value)];
+        newValue = [Number(selectedOption.value?.value || selectedOption.value)];
       }
 
       setValue(newValue);
@@ -99,7 +99,10 @@ const NumberField: React.FC<Props> = (props) => {
       setValueToRender(value.map((val, index) => {
         return {
           label: `${val}`,
-          value: val, // TODO: this doesn't work for duplicate numbers. React-select automatically uses "label-value" as a key, so we will get that react duplicate key warning that way
+          value: {
+            value: (val as any)?.value || val,
+            toString: () => `${val}${index}`,
+          }, // You're probably wondering, why the hell is this done that way? Well, React-select automatically uses "label-value" as a key, so we will get that react duplicate key warning if we just pass in the value as multiple values can be the same. So we need to append the index to the toString() of the value to avoid that warning, as it uses that as the key.
           id: `${val}${index}`, // append index to avoid duplicate keys but allow duplicate numbers
         };
       }));
