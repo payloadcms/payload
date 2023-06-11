@@ -75,6 +75,7 @@ This plugin is configurable to work across many different Payload collections. A
 | Option                  | Type                                    | Description |
 |-------------------------|-----------------------------------------| ----------- |
 | `collections` *         | Record<string, [CollectionOptions](https://github.com/payloadcms/plugin-cloud-storage/blob/c4a492a62abc2f21b4cd6a7c97778acd8e831212/src/types.ts#L48)> | Object with keys set to the slug of collections you want to enable the plugin for, and values set to collection-specific options. |
+| `enabled`               |                                         | `boolean` to conditionally enable/disable plugin. Default: true. |
 
 **Collection-specific options:**
 
@@ -174,9 +175,9 @@ const adapter = gcsAdapter({
 
 ### Payload Access Control
 
-Payload ships with access control that runs _even on statically served files_. The same `read` access control property on your `upload`-enabled collections is used, and it allows you to restrict who can request your uploaded files.
+Payload ships with access control that runs *even on statically served files*. The same `read` access control property on your `upload`-enabled collections is used, and it allows you to restrict who can request your uploaded files.
 
-To preserve this feature, by default, this plugin _keeps all file URLs exactly the same_. Your file URLs won't be updated to point directly to your cloud storage source, as in that case, Payload's access control will be completely bypassed and you would need public readability on your cloud-hosted files.
+To preserve this feature, by default, this plugin *keeps all file URLs exactly the same*. Your file URLs won't be updated to point directly to your cloud storage source, as in that case, Payload's access control will be completely bypassed and you would need public readability on your cloud-hosted files.
 
 Instead, all uploads will still be reached from the default `/collectionSlug/staticURL/filename` path. This plugin will "pass through" all files that are hosted on your third-party cloud service—with the added benefit of keeping your existing access control in place.
 
