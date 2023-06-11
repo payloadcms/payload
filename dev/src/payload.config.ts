@@ -83,7 +83,7 @@ export default buildConfig({
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
   plugins: [
-    // @ts-expect-error
+    // @ts-expect-error Conflicting types for relative package
     cloudStorage({
       collections: {
         media: {

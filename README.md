@@ -37,6 +37,23 @@ export default buildConfig({
 });
 ```
 
+### Conditionally Enabling/Disabling
+
+The proper way to conditionally enable/disable this plugin is to use the `enabled` property.
+
+```ts
+cloudStorage({
+  enabled: process.env.MY_CONDITION === 'true',
+  collections: {
+    'my-collection-slug': {
+      adapter: theAdapterToUse, // see docs for the adapter you want to use
+    },
+  },
+}),
+```
+
+If the code is included *in any way in your config* but conditionally disabled in another fashion, you may run into issues such as `Webpack Build Error: Can't Resolve 'fs' and 'stream'` or similar because the plugin must be run at all times in order to properly extend the webpack config.
+
 ## Features
 
 **Adapter-based Implementation**

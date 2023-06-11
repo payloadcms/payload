@@ -69,5 +69,11 @@ export interface CollectionOptions {
 }
 
 export interface PluginOptions {
+  /**
+   * Whether or not to enable the plugin
+   *
+   * Default: true
+   */
+  enabled?: boolean
   collections: Record<string, CollectionOptions>
 }
