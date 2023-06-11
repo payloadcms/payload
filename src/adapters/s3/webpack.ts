@@ -14,7 +14,7 @@ export const extendWebpackConfig = (existingWebpackConfig: WebpackConfig): Webpa
         ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
         '@aws-sdk/client-s3': path.resolve(__dirname, './mock.js'),
         '@aws-sdk/lib-storage': path.resolve(__dirname, './mock.js'),
-        fs: path.resolve(__dirname, './fileStub.js'),
+        fs: path.resolve(__dirname, './fsMock.js'),
       },
     },
   }
