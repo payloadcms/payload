@@ -179,7 +179,7 @@ describe('admin', () => {
       await saveDocHotkeyAndAssert(page);
 
       await expect(page.locator('#field-title')).toHaveValue(newTitle);
-    })
+    });
 
     test('should delete existing', async () => {
       const { id, ...post } = await createPost();
