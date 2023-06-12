@@ -3,11 +3,11 @@ import { Response } from 'express';
 import { Collection } from '../../collections/config/types';
 import { APIError } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
-import { UserDocument } from '../types';
 import { fieldAffectsData } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
 import { authenticateLocalStrategy } from '../strategies/local/authenticate';
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
 export type Result = {
   token: string
@@ -57,11 +57,12 @@ async function resetPassword(args: Arguments): Promise<Result> {
   }).lean();
 
   user = JSON.parse(JSON.stringify(user));
+  user = sanitizeInternalFields(user);
 
   if (!user) throw new APIError('Token is either invalid or has expired.');
 
   // TODO: replace this method
-  const { salt, hash } = await generatePasswordSaltHash({ password: data.password })
+  const { salt, hash } = await generatePasswordSaltHash({ password: data.password });
 
   user.salt = salt;
   user.hash = hash;
@@ -72,9 +73,11 @@ async function resetPassword(args: Arguments): Promise<Result> {
     user._verified = true;
   }
 
-  let doc = await Model.findByIdAndUpdate({ _id: user.id }, user, { new: true }).lean()
 
-  doc = JSON.parse(JSON.stringify(doc))
+  let doc = await Model.findByIdAndUpdate({ _id: user.id }, user, { new: true }).lean();
+
+  doc = JSON.parse(JSON.stringify(doc));
+  doc = sanitizeInternalFields(doc);
 
   await authenticateLocalStrategy({ password: data.password, doc });
 
