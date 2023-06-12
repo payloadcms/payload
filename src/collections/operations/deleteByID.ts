@@ -1,10 +1,10 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../express/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { NotFound, Forbidden } from '../../errors';
+import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { BeforeOperationHook, Collection } from '../config/types';
-import { Document, Where } from '../../types';
+import { Document } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
@@ -87,7 +87,6 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
       },
     },
     access: accessResults,
-    overrideAccess,
   });
 
   const docToDelete = await Model.findOne(query);

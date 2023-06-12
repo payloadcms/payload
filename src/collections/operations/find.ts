@@ -9,6 +9,7 @@ import { buildSortParam } from '../../mongoose/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { queryDrafts } from '../../versions/drafts/queryDrafts';
+import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
 
 export type Arguments = {
   collection: Collection
@@ -100,10 +101,17 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     }
   }
 
+  await validateQueryPaths({
+    collectionConfig,
+    where,
+    req,
+    overrideAccess,
+  });
+
+
   const query = await Model.buildQuery({
     req,
     where,
-    overrideAccess,
     access: accessResult,
   });
 

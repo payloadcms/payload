@@ -79,7 +79,6 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     },
     access: accessResults,
     req,
-    overrideAccess,
   });
 
   const doc = await Model.findOne(query);
