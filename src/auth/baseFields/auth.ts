@@ -11,6 +11,7 @@ const baseAuthFields: Field[] = [
     type: 'email',
     validate: email,
     unique: true,
+    required: true,
     admin: {
       components: {
         Field: () => null,
@@ -36,7 +37,7 @@ const baseAuthFields: Field[] = [
     name: 'hash',
     type: 'text',
     hidden: true,
-  }
+  },
 ];
 
-export default baseAuthFields
+export default baseAuthFields;
