@@ -74,7 +74,6 @@ async function findByID<T extends TypeWithID>(
     },
     access: accessResult,
     req,
-    overrideAccess,
   });
 
   // /////////////////////////////////////

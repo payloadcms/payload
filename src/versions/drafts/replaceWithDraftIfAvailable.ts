@@ -23,7 +23,6 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   entityType,
   doc,
   req,
-  overrideAccess,
   accessResult,
 }: Arguments<T>): Promise<T> => {
   const VersionModel = payload.versions[entity.slug] as CollectionModel;
@@ -64,7 +63,6 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     where: queryToBuild,
     access: versionAccessResult,
     req,
-    overrideAccess,
     globalSlug: entityType === 'global' ? entity.slug : undefined,
   });
 

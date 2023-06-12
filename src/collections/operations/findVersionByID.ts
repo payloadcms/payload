@@ -62,7 +62,6 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     },
     access: accessResults,
     req,
-    overrideAccess,
   });
 
   // /////////////////////////////////////

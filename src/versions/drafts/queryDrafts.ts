@@ -6,6 +6,8 @@ import { PaginatedDocs } from '../../mongoose/types';
 import { Collection, CollectionModel, TypeWithID } from '../../collections/config/types';
 import { hasWhereAccessResult } from '../../auth';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
+import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
+import { buildVersionCollectionFields } from '../buildCollectionFields';
 
 type AggregateVersion<T> = {
   _id: string
@@ -43,11 +45,18 @@ export const queryDrafts = async <T extends TypeWithID>({
     versionAccessResult = appendVersionToQueryKey(accessResult);
   }
 
+  await validateQueryPaths({
+    collectionConfig: collection.config,
+    where,
+    req,
+    overrideAccess,
+    versionFields: buildVersionCollectionFields(collection.config),
+  });
+
   const versionQuery = await VersionModel.buildQuery({
     where,
     access: versionAccessResult,
     req,
-    overrideAccess,
   });
 
   const aggregate = VersionModel.aggregate<AggregateVersion<T>>([

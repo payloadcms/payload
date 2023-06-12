@@ -1,4 +1,4 @@
-import { WhereField, Where } from '../types';
+import { Where, WhereField } from '../types';
 
 // Take a where query and flatten it to all top-level operators
 const flattenWhereConstraints = (query: Where): WhereField[] => Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
