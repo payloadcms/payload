@@ -11,7 +11,6 @@ type GetBuildQueryPluginArgs = {
 export type BuildQueryArgs = {
   req: PayloadRequest
   where: Where
-  access?: Where | boolean
   globalSlug?: string
 }
 
@@ -23,7 +22,7 @@ const getBuildQueryPlugin = ({
 }: GetBuildQueryPluginArgs = {}) => {
   return function buildQueryPlugin(schema) {
     const modifiedSchema = schema;
-    async function buildQuery({ req, where, access, globalSlug }: BuildQueryArgs): Promise<Record<string, unknown>> {
+    async function buildQuery({ req, where, globalSlug }: BuildQueryArgs): Promise<Record<string, unknown>> {
       let fields = versionsFields;
       if (!fields) {
         if (globalSlug) {
@@ -38,7 +37,6 @@ const getBuildQueryPlugin = ({
       const errors = [];
       const result = await parseParams({
         collectionSlug,
-        access,
         fields,
         globalSlug,
         req,

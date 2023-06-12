@@ -1,5 +1,5 @@
 import { PayloadRequest, Where } from '../types';
-import { parsePathOrRelation } from './parsePathOrRelation';
+import { parseParams } from './parseParams';
 import { Field } from '../fields/config/types';
 
 export async function buildAndOrConditions({
@@ -20,10 +20,10 @@ export async function buildAndOrConditions({
   // Operations should come through as an array
   // eslint-disable-next-line no-restricted-syntax
   for (const condition of where) {
-  // If the operation is properly formatted as an object
+    // If the operation is properly formatted as an object
     if (typeof condition === 'object') {
       // eslint-disable-next-line no-await-in-loop
-      const result = await parsePathOrRelation({
+      const result = await parseParams({
         where: condition,
         collectionSlug,
         globalSlug,

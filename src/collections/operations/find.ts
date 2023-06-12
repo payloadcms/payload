@@ -10,6 +10,10 @@ import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { queryDrafts } from '../../versions/drafts/queryDrafts';
 import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey';
+import { hasWhereAccessResult } from '../../auth';
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
+import { combineQueries } from '../../utilities/combineQueries';
 
 export type Arguments = {
   collection: Collection
@@ -108,13 +112,6 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     overrideAccess,
   });
 
-
-  const query = await Model.buildQuery({
-    req,
-    where,
-    access: accessResult,
-  });
-
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
@@ -128,38 +125,61 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   });
 
   const usePagination = pagination && limit !== 0;
-  const limitToUse = limit ?? (usePagination ? 10 : 0);
+  const sanitizedLimit = limit ?? (usePagination ? 10 : 0);
+  const sanitizedPage = page || 1;
 
   let result: PaginatedDocs<T>;
 
-  const paginationOptions = {
-    page: page || 1,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
-    limit: limitToUse,
-    lean: true,
-    leanWithId: true,
-    useEstimatedCount,
-    pagination: usePagination,
-    useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
-    options: {
-      // limit must also be set here, it's ignored when pagination is false
-      limit: limitToUse,
-    },
-  };
-
   if (collectionConfig.versions?.drafts && draftsEnabled) {
-    result = await queryDrafts<T>({
-      accessResult,
-      collection,
+    const versionsUserWhere = appendVersionToQueryKey(where || {});
+
+    let versionAccessWhere;
+
+    if (hasWhereAccessResult(accessResult)) {
+      versionAccessWhere = appendVersionToQueryKey(accessResult);
+    }
+
+    await validateQueryPaths({
+      collectionConfig: collection.config,
+      where: versionsUserWhere,
       req,
       overrideAccess,
-      paginationOptions,
+      versionFields: buildVersionCollectionFields(collection.config),
+    });
+
+    const versionsWhere = combineQueries(versionsUserWhere, versionAccessWhere);
+
+    result = await payload.db.queryDrafts<T>({
       payload,
-      where,
+      collection: collectionConfig,
+      where: versionsWhere,
+      page: sanitizedPage,
+      limit: sanitizedLimit,
     });
   } else {
+    const query = await Model.buildQuery({
+      req,
+      where,
+      access: accessResult,
+    });
+
+    const paginationOptions = {
+      page: sanitizedPage,
+      sort: {
+        [sortProperty]: sortOrder,
+      },
+      limit: limitToUse,
+      lean: true,
+      leanWithId: true,
+      useEstimatedCount,
+      pagination: usePagination,
+      useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
+      options: {
+        // limit must also be set here, it's ignored when pagination is false
+        limit: limitToUse,
+      },
+    };
+
     result = await Model.paginate(query, paginationOptions);
   }
 
