@@ -9,6 +9,7 @@ import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import FieldDescription from '../../FieldDescription';
 import { RowLabel } from '../../RowLabel';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
+import { useWatchChildrenFields } from './useWatchChildren';
 
 import './index.scss';
 
@@ -34,6 +35,8 @@ const CollapsibleField: React.FC<Props> = (props) => {
   const { preferencesKey } = useDocumentInfo();
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>();
   const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./gi, '__')}`;
+  // TODO: hoist useWatchChildrenFields, else rerenders on every field change
+  const childErrorCount = useWatchChildrenFields({ path, childrenFields: fields });
 
   const onToggle = useCallback(async (newCollapsedState: boolean) => {
     const existingPreferences: DocumentPreferences = await getPreference(preferencesKey);

@@ -6,6 +6,7 @@ export type Row = {
   id: string
   collapsed?: boolean
   blockType?: string
+  childErrorCount?: number
 }
 
 export type Field = {
