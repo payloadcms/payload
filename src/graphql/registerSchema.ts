@@ -11,7 +11,7 @@ import initPreferences from '../preferences/graphql/init';
 import buildPoliciesType from './schema/buildPoliciesType';
 import accessResolver from '../auth/graphql/resolvers/access';
 
-export default function registerSchema(payload: Payload): void {
+export default function registerGraphQLSchema(payload: Payload): void {
   payload.types = {
     blockTypes: {},
     blockInputTypes: {},

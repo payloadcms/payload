@@ -3,6 +3,8 @@ import { InitOptions } from './config/types';
 import { initHTTP } from './initHTTP';
 import { Payload as LocalPayload, BasePayload } from './payload';
 
+export { DatabaseAdapter } from './database/types';
+
 export { getPayload } from './payload';
 
 require('isomorphic-fetch');

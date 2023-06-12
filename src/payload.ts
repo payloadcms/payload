@@ -51,10 +51,7 @@ import { Result as LoginResult } from './auth/operations/login';
 import { Options as FindGlobalOptions } from './globals/operations/local/findOne';
 import { Options as UpdateGlobalOptions } from './globals/operations/local/update';
 
-import connectMongoose from './mongoose/connect';
-import initCollections from './collections/initLocal';
-import initGlobals from './globals/initLocal';
-import registerSchema from './graphql/registerSchema';
+import registerGraphQLSchema from './graphql/registerSchema';
 import buildEmail from './email/build';
 import sendEmail from './email/sendEmail';
 
@@ -64,12 +61,16 @@ import PreferencesModel from './preferences/model';
 import findConfig from './config/find';
 
 import { defaults as emailDefaults } from './email/defaults';
+import type { DatabaseAdapter } from '.';
+import { mongooseAdapter } from './mongoose/adapter';
 
 /**
  * @description Payload
  */
 export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   config: SanitizedConfig;
+
+  database: DatabaseAdapter;
 
   collections: {
     [slug: string | number | symbol]: Collection;
@@ -97,6 +98,12 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   mongoOptions: InitOptions['mongoOptions'];
 
+  /**
+   * @deprecated
+   *
+   * This will be removed in 2.0.0 and will become the responsibility
+   * of the database adapter itself
+   */
   mongoMemoryServer: any;
 
   local: boolean;
@@ -150,11 +157,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.mongoURL = options.mongoURL;
     this.mongoOptions = options.mongoOptions;
 
-    if (this.mongoURL) {
-      mongoose.set('strictQuery', false);
-      this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, this.logger);
-    }
-
     this.logger.info('Starting Payload...');
     if (!options.secret) {
       throw new Error(
@@ -192,6 +194,23 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       this.config = await loadConfig(this.logger);
     }
 
+    // THIS BLOCK IS TEMPORARY UNTIL 2.0.0
+    // We automatically add the Mongoose adapter
+    // if there is no defined database adapter
+    if (this.mongoURL) {
+      mongoose.set('strictQuery', false);
+
+      if (!this.config.database) {
+        this.config.database = mongooseAdapter({
+          url: this.mongoURL,
+          connectOptions: options.mongoOptions,
+        });
+      }
+    }
+
+    this.database = this.config.database;
+    this.mongoMemoryServer = await this.database.connect({ payload: this, config: this.config });
+
     // Configure email service
     const emailOptions = options.email ? { ...(options.email) } : this.config.email;
     if (options.email && this.config.email) {
@@ -202,12 +221,10 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.email = buildEmail(this.emailOptions, this.logger);
     this.sendEmail = sendEmail.bind(this);
 
-    // Initialize collections & globals
-    initCollections(this);
-    initGlobals(this);
+    await this.database.init({ payload: this, config: this.config });
 
     if (!this.config.graphQL.disable) {
-      registerSchema(this);
+      registerGraphQLSchema(this);
     }
 
     this.preferences = { Model: PreferencesModel };
