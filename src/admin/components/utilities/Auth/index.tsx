@@ -106,10 +106,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (request.status === 200) {
         const json = await request.json();
 
-        setUser(json?.user || null);
-
-        if (json?.token) {
+        if (json?.user) {
+          setUser(json.user);
+        } else if (json?.token) {
           setToken(json.token);
+        } else {
+          setUser(null);
         }
       }
     };
@@ -172,6 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <Context.Provider value={{
       user,
+      setUser,
       logOut,
       refreshCookie,
       refreshPermissions,
