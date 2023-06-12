@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { ConnectOptions } from 'mongoose';
 import mongoose from 'mongoose';
-import type { Payload } from '../..';
+import type { Payload } from '..';
 
 import type { MongooseAdapter } from '.';
 

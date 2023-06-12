@@ -7,6 +7,7 @@ import { NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { combineQueries } from '../../database/combineQueries';
 
 export type Arguments = {
   collection: Collection
@@ -67,13 +68,9 @@ async function findByID<T extends TypeWithID>(
   if (accessResult === false) return null;
 
   const query = await Model.buildQuery({
-    where: {
-      _id: {
-        equals: id,
-      },
-    },
-    access: accessResult,
-    req,
+    where: combineQueries({ _id: { equals: id } }, accessResult),
+    payload,
+    locale: req.locale,
   });
 
   // /////////////////////////////////////

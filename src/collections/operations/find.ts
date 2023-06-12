@@ -5,15 +5,13 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection, TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
-import { buildSortParam } from '../../mongoose/buildSortParam';
+import { buildSortParam } from '../../mongoose/queries/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { queryDrafts } from '../../versions/drafts/queryDrafts';
-import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey';
-import { hasWhereAccessResult } from '../../auth';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
-import { combineQueries } from '../../utilities/combineQueries';
+import { combineQueries } from '../../database/combineQueries';
 
 export type Arguments = {
   collection: Collection
@@ -105,13 +103,6 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     }
   }
 
-  await validateQueryPaths({
-    collectionConfig,
-    where,
-    req,
-    overrideAccess,
-  });
-
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
@@ -130,37 +121,42 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
   let result: PaginatedDocs<T>;
 
+  let fullWhere = combineQueries(where, accessResult);
+
   if (collectionConfig.versions?.drafts && draftsEnabled) {
-    const versionsUserWhere = appendVersionToQueryKey(where || {});
-
-    let versionAccessWhere;
-
-    if (hasWhereAccessResult(accessResult)) {
-      versionAccessWhere = appendVersionToQueryKey(accessResult);
-    }
+    fullWhere = appendVersionToQueryKey(fullWhere);
 
     await validateQueryPaths({
       collectionConfig: collection.config,
-      where: versionsUserWhere,
+      where: fullWhere,
       req,
       overrideAccess,
       versionFields: buildVersionCollectionFields(collection.config),
     });
 
-    const versionsWhere = combineQueries(versionsUserWhere, versionAccessWhere);
-
     result = await payload.db.queryDrafts<T>({
       payload,
       collection: collectionConfig,
-      where: versionsWhere,
+      where: fullWhere,
       page: sanitizedPage,
       limit: sanitizedLimit,
+      sortProperty,
+      sortOrder,
+      pagination: usePagination,
+      locale,
     });
   } else {
-    const query = await Model.buildQuery({
-      req,
+    await validateQueryPaths({
+      collectionConfig,
       where,
-      access: accessResult,
+      req,
+      overrideAccess,
+    });
+
+    const query = await Model.buildQuery({
+      payload,
+      locale: req.locale,
+      where: fullWhere,
     });
 
     const paginationOptions = {
@@ -168,7 +164,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       sort: {
         [sortProperty]: sortOrder,
       },
-      limit: limitToUse,
+      limit: sanitizedLimit,
       lean: true,
       leanWithId: true,
       useEstimatedCount,
@@ -176,7 +172,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
       options: {
         // limit must also be set here, it's ignored when pagination is false
-        limit: limitToUse,
+        limit: sanitizedLimit,
       },
     };
 
@@ -204,7 +200,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef = await hook({ req, query, doc: docRef }) || docRef;
+        docRef = await hook({ req, query: fullWhere, doc: docRef }) || docRef;
       }, Promise.resolve());
 
       return docRef;
@@ -241,7 +237,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef = await hook({ req, query, doc: docRef, findMany: true }) || doc;
+        docRef = await hook({ req, query: fullWhere, doc: docRef, findMany: true }) || doc;
       }, Promise.resolve());
 
       return docRef;

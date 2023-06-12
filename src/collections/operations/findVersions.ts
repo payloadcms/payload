@@ -4,12 +4,13 @@ import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection, CollectionModel } from '../config/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
-import { buildSortParam } from '../../mongoose/buildSortParam';
+import { buildSortParam } from '../../mongoose/queries/buildSortParam';
 import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
-import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
+import { combineQueries } from '../../database/combineQueries';
 
 export type Arguments = {
   collection: Collection
@@ -58,6 +59,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
   }
 
   let accessResults;
+
   if (!overrideAccess) {
     accessResults = await executeAccess({ req }, collectionConfig.access.readVersions);
   }
@@ -73,9 +75,9 @@ async function findVersions<T extends TypeWithVersion<T>>(
   });
 
   const query = await VersionsModel.buildQuery({
-    where,
-    access: accessResults,
-    req,
+    where: combineQueries(where, accessResults),
+    payload,
+    locale,
   });
 
   // /////////////////////////////////////

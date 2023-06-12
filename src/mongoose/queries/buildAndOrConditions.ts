@@ -1,18 +1,21 @@
-import { PayloadRequest, Where } from '../types';
+import { Where } from '../../types';
 import { parseParams } from './parseParams';
-import { Field } from '../fields/config/types';
+import { Field } from '../../fields/config/types';
+import { Payload } from '../..';
 
 export async function buildAndOrConditions({
   where,
   collectionSlug,
   globalSlug,
-  req,
+  payload,
+  locale,
   fields,
 }: {
   where: Where[],
   collectionSlug?: string,
   globalSlug?: string,
-  req: PayloadRequest,
+  payload: Payload,
+  locale?: string,
   fields: Field[],
 }): Promise<Record<string, unknown>[]> {
   const completedConditions = [];
@@ -27,7 +30,8 @@ export async function buildAndOrConditions({
         where: condition,
         collectionSlug,
         globalSlug,
-        req,
+        payload,
+        locale,
         fields,
       });
       if (Object.keys(result).length > 0) {

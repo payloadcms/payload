@@ -1,9 +1,9 @@
-import { Field, fieldAffectsData } from '../fields/config/types';
+import { Field, fieldAffectsData } from '../../fields/config/types';
 import { operatorMap } from './operatorMap';
 import { getLocalizedPaths } from './getLocalizedPaths';
 import { sanitizeQueryValue } from './sanitizeQueryValue';
-import { PayloadRequest } from '../express/types';
-import { PathToQuery, validOperators } from '../utilities/queryValidation/types';
+import { PathToQuery, validOperators } from '../../database/queryValidation/types';
+import { Payload } from '../..';
 
 type SearchParam = {
   path?: string,
@@ -25,7 +25,8 @@ export async function buildSearchParam({
   operator,
   collectionSlug,
   globalSlug,
-  req,
+  payload,
+  locale,
 }: {
   fields: Field[],
   incomingPath: string,
@@ -33,7 +34,8 @@ export async function buildSearchParam({
   operator: string
   collectionSlug?: string,
   globalSlug?: string,
-  req: PayloadRequest,
+  payload: Payload,
+  locale?: string
 }): Promise<SearchParam> {
   // Replace GraphQL nested field double underscore formatting
   let sanitizedPath = incomingPath.replace(/__/gi, '.');
@@ -44,7 +46,7 @@ export async function buildSearchParam({
   let hasCustomID = false;
 
   if (sanitizedPath === '_id') {
-    const customIDfield = req.payload.collections[collectionSlug]?.config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+    const customIDfield = payload.collections[collectionSlug]?.config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
 
     let idFieldType: 'text' | 'number' = 'text';
 
@@ -67,7 +69,8 @@ export async function buildSearchParam({
     });
   } else {
     paths = await getLocalizedPaths({
-      req,
+      payload,
+      locale,
       collectionSlug,
       globalSlug,
       fields,
@@ -107,7 +110,7 @@ export async function buildSearchParam({
       }, i) => {
         const priorQueryResult = await priorQuery;
 
-        const SubModel = req.payload.collections[slug].Model;
+        const SubModel = payload.collections[slug].Model;
 
         // On the "deepest" collection,
         // Search on the value passed through the query
@@ -118,7 +121,8 @@ export async function buildSearchParam({
                 [operator]: val,
               },
             },
-            req,
+            payload,
+            locale,
           });
 
           const result = await SubModel.find(subQuery, subQueryOptions);

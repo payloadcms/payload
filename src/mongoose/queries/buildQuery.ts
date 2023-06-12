@@ -1,7 +1,8 @@
-import { PayloadRequest, Where } from '../types';
-import { Field } from '../fields/config/types';
-import QueryError from '../errors/QueryError';
+import { Where } from '../../types';
+import { Field } from '../../fields/config/types';
+import QueryError from '../../errors/QueryError';
 import { parseParams } from './parseParams';
+import { Payload } from '../..';
 
 type GetBuildQueryPluginArgs = {
   collectionSlug?: string
@@ -9,7 +10,8 @@ type GetBuildQueryPluginArgs = {
 }
 
 export type BuildQueryArgs = {
-  req: PayloadRequest
+  payload: Payload
+  locale?: string
   where: Where
   globalSlug?: string
 }
@@ -22,15 +24,15 @@ const getBuildQueryPlugin = ({
 }: GetBuildQueryPluginArgs = {}) => {
   return function buildQueryPlugin(schema) {
     const modifiedSchema = schema;
-    async function buildQuery({ req, where, globalSlug }: BuildQueryArgs): Promise<Record<string, unknown>> {
+    async function buildQuery({ payload, locale, where, globalSlug }: BuildQueryArgs): Promise<Record<string, unknown>> {
       let fields = versionsFields;
       if (!fields) {
         if (globalSlug) {
-          const globalConfig = req.payload.globals.config.find(({ slug }) => slug === globalSlug);
+          const globalConfig = payload.globals.config.find(({ slug }) => slug === globalSlug);
           fields = globalConfig.fields;
         }
         if (collectionSlug) {
-          const collectionConfig = req.payload.collections[collectionSlug].config;
+          const collectionConfig = payload.collections[collectionSlug].config;
           fields = collectionConfig.fields;
         }
       }
@@ -39,7 +41,8 @@ const getBuildQueryPlugin = ({
         collectionSlug,
         fields,
         globalSlug,
-        req,
+        payload,
+        locale,
         where,
       });
 

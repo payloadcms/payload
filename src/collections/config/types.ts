@@ -10,7 +10,7 @@ import { PayloadRequest } from '../../express/types';
 import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
-import { BuildQueryArgs } from '../../mongoose/buildQuery';
+import { BuildQueryArgs } from '../../mongoose/queries/buildQuery';
 import { CustomPreviewButtonProps, CustomPublishButtonProps, CustomSaveButtonProps, CustomSaveDraftButtonProps } from '../../admin/components/elements/types';
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types';
 import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types';

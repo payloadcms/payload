@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
 import { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose';
-import { SanitizedConfig } from '../config/types';
+import { SanitizedConfig } from '../../config/types';
 import {
   ArrayField,
   Block,
@@ -35,7 +35,7 @@ import {
   TextField,
   UnnamedTab,
   UploadField,
-} from '../fields/config/types';
+} from '../../fields/config/types';
 
 export type BuildSchemaOptions = {
   options?: SchemaOptions

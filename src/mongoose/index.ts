@@ -1,9 +1,11 @@
-import type { ConnectOptions, Model } from 'mongoose';
-import type { DatabaseAdapter } from '../../database/types';
+import type { ConnectOptions } from 'mongoose';
+import type { DatabaseAdapter } from '../database/types';
 import { connect } from './connect';
 import { init } from './init';
 import { webpack } from './webpack';
-import { CollectionModel } from '../../collections/config/types';
+import { CollectionModel } from '../collections/config/types';
+import { queryDrafts } from './queryDrafts';
+import { GlobalModel } from '../globals/config/types';
 
 export interface Args {
   /** The URL to connect to MongoDB */
@@ -20,15 +22,18 @@ export type MongooseAdapter = DatabaseAdapter &
     collections: {
       [slug: string]: CollectionModel
     }
-    globals: CollectionModel
+    globals: GlobalModel
     versions: {
       [slug: string]: CollectionModel
     }
   }
 
-export function mongooseAdapter(adapterArgs: Args): MongooseAdapter {
+export function mongooseAdapter({ url, connectOptions }: Args): MongooseAdapter {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   return {
-    ...adapterArgs,
+    url,
+    connectOptions: connectOptions || {},
     connect,
     init,
     webpack,
@@ -42,6 +47,6 @@ export function mongooseAdapter(adapterArgs: Args): MongooseAdapter {
     beginTransaction: async () => true,
     rollbackTransaction: async () => true,
     commitTransaction: async () => true,
-    queryDrafts: async () => true,
+    queryDrafts,
   };
 }

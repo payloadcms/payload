@@ -1,7 +1,7 @@
 import { Field, fieldAffectsData } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
-import { getLocalizedPaths } from '../../mongoose/getLocalizedPaths';
-import { getEntityPolicies } from '../getEntityPolicies';
+import { getLocalizedPaths } from '../../mongoose/queries/getLocalizedPaths';
+import { getEntityPolicies } from '../../utilities/getEntityPolicies';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
 import { validateQueryPaths } from './validateQueryPaths';
@@ -13,7 +13,7 @@ type Args = {
   val: unknown
   operator: string
   req: PayloadRequest
-  errors: {path: string}[]
+  errors: { path: string }[]
   policies: EntityPolicies
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
@@ -63,7 +63,8 @@ export async function validateSearchParam({
 
   if (sanitizedPath !== 'id') {
     paths = await getLocalizedPaths({
-      req,
+      payload: req.payload,
+      locale: req.locale,
       collectionSlug: collectionConfig?.slug,
       globalSlug: globalConfig?.slug,
       fields,

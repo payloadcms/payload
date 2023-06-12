@@ -1,17 +1,19 @@
-import { Field, fieldAffectsData } from '../fields/config/types';
-import flattenFields from '../utilities/flattenTopLevelFields';
-import { PayloadRequest } from '../express/types';
-import { PathToQuery } from '../utilities/queryValidation/types';
+import { Field, fieldAffectsData } from '../../fields/config/types';
+import flattenFields from '../../utilities/flattenTopLevelFields';
+import { PathToQuery } from '../../database/queryValidation/types';
+import { Payload } from '../..';
 
 export async function getLocalizedPaths({
-  req,
+  payload,
+  locale,
   collectionSlug,
   globalSlug,
   fields,
   incomingPath,
   overrideAccess = false,
 }: {
-  req: PayloadRequest
+  payload: Payload
+  locale?: string
   collectionSlug?: string
   globalSlug?: string
   fields: Field[]
@@ -19,7 +21,7 @@ export async function getLocalizedPaths({
   overrideAccess?: boolean,
 }): Promise<PathToQuery[]> {
   const pathSegments = incomingPath.split('.');
-  const localizationConfig = req.payload.config.localization;
+  const localizationConfig = payload.config.localization;
 
   let paths: PathToQuery[] = [
     {
@@ -69,7 +71,7 @@ export async function getLocalizedPaths({
           i += 1;
           currentPath = `${currentPath}.${nextSegment}`;
         } else if (localizationConfig && 'localized' in matchedField && matchedField.localized) {
-          currentPath = `${currentPath}.${req.locale}`;
+          currentPath = `${currentPath}.${locale}`;
         }
 
         switch (matchedField.type) {
@@ -84,8 +86,8 @@ export async function getLocalizedPaths({
 
           case 'relationship':
           case 'upload': {
-          // If this is a polymorphic relation,
-          // We only support querying directly (no nested querying)
+            // If this is a polymorphic relation,
+            // We only support querying directly (no nested querying)
             if (typeof matchedField.relationTo !== 'string') {
               const lastSegmentIsValid = ['value', 'relationTo'].includes(pathSegments[pathSegments.length - 1]);
 
@@ -103,11 +105,12 @@ export async function getLocalizedPaths({
               const nestedPathToQuery = pathSegments.slice(nextSegmentIsLocale ? i + 2 : i + 1).join('.');
 
               if (nestedPathToQuery) {
-                const relatedCollection = req.payload.collections[matchedField.relationTo as string].config;
+                const relatedCollection = payload.collections[matchedField.relationTo as string].config;
 
                 // eslint-disable-next-line no-await-in-loop
                 const remainingPaths = await getLocalizedPaths({
-                  req,
+                  payload,
+                  locale,
                   globalSlug,
                   collectionSlug: relatedCollection.slug,
                   fields: relatedCollection.fields,

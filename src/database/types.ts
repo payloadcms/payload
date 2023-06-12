@@ -125,7 +125,9 @@ export type QueryDraftsArgs = {
   where?: Where
   page?: number
   limit?: number
-  sort?: string
+  pagination?: boolean
+  sortProperty?: string
+  sortOrder?: string
   locale?: string
 }
 

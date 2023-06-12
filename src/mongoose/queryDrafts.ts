@@ -1,6 +1,7 @@
 import type { MongooseAdapter } from '.';
-import { PaginatedDocs } from '../types';
-import { QueryDraftsArgs } from '../../database/types';
+import { PaginatedDocs } from './types';
+import { QueryDraftsArgs } from '../database/types';
+import flattenWhereConstraints from '../utilities/flattenWhereConstraints';
 
 type AggregateVersion<T> = {
   _id: string
@@ -9,9 +10,9 @@ type AggregateVersion<T> = {
   createdAt: string
 }
 
-export async function queryDrafts<T = any>(
+export async function queryDrafts<T = unknown>(
   this: MongooseAdapter,
-  { payload, collection, where, page, limit, sort, locale }: QueryDraftsArgs,
+  { payload, collection, where, page, limit, sortProperty, sortOrder, locale, pagination }: QueryDraftsArgs,
 ): Promise<PaginatedDocs<T>> {
   const VersionModel = this.versions[collection.slug];
 
@@ -41,23 +42,37 @@ export async function queryDrafts<T = any>(
 
   let result;
 
-  if (paginationOptions) {
+  if (pagination) {
+    let useEstimatedCount;
+
+    if (where) {
+      const constraints = flattenWhereConstraints(where);
+      useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    }
+
+    let sanitizedSortProperty = sortProperty;
+    const sanitizedSortOrder = sortOrder === 'asc' ? 1 : -1;
+
+    if (!['createdAt', 'updatedAt', '_id'].includes(sortProperty)) {
+      sanitizedSortProperty = `version.${sortProperty}`;
+    }
+
     const aggregatePaginateOptions = {
-      ...paginationOptions,
-      useFacet: payload.mongoOptions?.useFacet,
-      sort: Object.entries(sort)
-        .reduce((acc, [incomingSortKey, order]) => {
-          let key = incomingSortKey;
+      page,
+      limit,
+      lean: true,
+      leanWithId: true,
+      useEstimatedCount,
+      pagination,
+      useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
+      useFacet: this.connectOptions.useFacet,
+      options: {
+        limit,
+      },
 
-          if (!['createdAt', 'updatedAt', '_id'].includes(incomingSortKey)) {
-            key = `version.${incomingSortKey}`;
-          }
-
-          return {
-            ...acc,
-            [key]: order === 'asc' ? 1 : -1,
-          };
-        }, {}),
+      sort: {
+        [sanitizedSortProperty]: sanitizedSortOrder,
+      },
     };
 
     result = await VersionModel.aggregatePaginate(aggregate, aggregatePaginateOptions);

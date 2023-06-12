@@ -5,6 +5,7 @@ import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftI
 import { afterRead } from '../../fields/hooks/afterRead';
 import { SanitizedGlobalConfig } from '../config/types';
 import { PayloadRequest } from '../../express/types';
+import { combineQueries } from '../../database/combineQueries';
 
 type Args = {
   globalConfig: SanitizedGlobalConfig
@@ -23,6 +24,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     req,
     req: {
       payload,
+      locale,
     },
     slug,
     depth,
@@ -44,13 +46,9 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
   }
 
   const query = await Model.buildQuery({
-    where: {
-      globalType: {
-        equals: slug,
-      },
-    },
-    access: accessResult,
-    req,
+    where: combineQueries({ globalType: { equals: slug } }, accessResult),
+    payload,
+    locale,
     overrideAccess,
     globalSlug: slug,
   });

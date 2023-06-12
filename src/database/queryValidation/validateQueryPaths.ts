@@ -4,10 +4,10 @@ import { PayloadRequest, Where, WhereField } from '../../types';
 import QueryError from '../../errors/QueryError';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
-import flattenFields from '../flattenTopLevelFields';
+import flattenFields from '../../utilities/flattenTopLevelFields';
 import { Field, FieldAffectingData } from '../../fields/config/types';
 import { validateSearchParam } from './validateSearchParams';
-import deepCopyObject from '../deepCopyObject';
+import deepCopyObject from '../../utilities/deepCopyObject';
 import { EntityPolicies, validOperators } from './types';
 
 const flattenWhere = (query: Where): WhereField[] => Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
@@ -26,7 +26,7 @@ const flattenWhere = (query: Where): WhereField[] => Object.entries(query).reduc
 
 type Args = {
   where: Where
-  errors?: {path: string}[]
+  errors?: { path: string }[]
   policies?: EntityPolicies
   req: PayloadRequest
   versionFields?: Field[]

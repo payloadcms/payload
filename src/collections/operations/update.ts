@@ -15,10 +15,12 @@ import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { AccessResult } from '../../config/types';
-import { queryDrafts } from '../../versions/drafts/queryDrafts';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
-import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
+import { combineQueries } from '../../database/combineQueries';
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey';
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -96,27 +98,38 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess,
   });
 
-  const query = await Model.buildQuery({
-    where,
-    access: accessResult,
-    req,
-  });
-
   // /////////////////////////////////////
   // Retrieve documents
   // /////////////////////////////////////
+
+  const fullWhere = combineQueries(where, accessResult);
+
   let docs;
 
   if (collectionConfig.versions?.drafts && shouldSaveDraft) {
-    docs = await queryDrafts<GeneratedTypes['collections'][TSlug]>({
-      accessResult,
-      collection,
+    const versionsWhere = appendVersionToQueryKey(fullWhere);
+
+    await validateQueryPaths({
+      collectionConfig: collection.config,
+      where: versionsWhere,
       req,
       overrideAccess,
+      versionFields: buildVersionCollectionFields(collection.config),
+    });
+
+    docs = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
       payload,
-      where: query,
+      collection: collectionConfig,
+      where: versionsWhere,
+      locale,
     });
   } else {
+    const query = await Model.buildQuery({
+      where: combineQueries(where, accessResult),
+      payload,
+      locale,
+    });
+
     docs = await Model.find(query, {}, { lean: true });
   }
 

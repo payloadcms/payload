@@ -2,24 +2,27 @@
 /* eslint-disable no-await-in-loop */
 import { FilterQuery } from 'mongoose';
 import deepmerge from 'deepmerge';
-import { PayloadRequest, Where } from '../types';
+import { Where } from '../../types';
 import { buildSearchParam } from './buildSearchParams';
-import { combineMerge } from '../utilities/combineMerge';
+import { combineMerge } from '../../utilities/combineMerge';
 import { buildAndOrConditions } from './buildAndOrConditions';
-import { Field } from '../fields/config/types';
-import { validOperators } from '../utilities/queryValidation/types';
+import { Field } from '../../fields/config/types';
+import { validOperators } from '../../database/queryValidation/types';
+import { Payload } from '../..';
 
 export async function parseParams({
   where,
   collectionSlug,
   globalSlug,
-  req,
+  payload,
+  locale,
   fields,
 }: {
   where: Where,
   collectionSlug?: string,
   globalSlug?: string,
-  req: PayloadRequest,
+  payload: Payload,
+  locale: string,
   fields: Field[],
 }): Promise<Record<string, unknown>> {
   let result = {} as FilterQuery<any>;
@@ -39,7 +42,8 @@ export async function parseParams({
           collectionSlug,
           fields,
           globalSlug,
-          req,
+          payload,
+          locale,
           where: condition,
         });
         if (builtConditions.length > 0) result[conditionOperator] = builtConditions;
@@ -54,7 +58,8 @@ export async function parseParams({
               const searchParam = await buildSearchParam({
                 collectionSlug,
                 globalSlug,
-                req,
+                payload,
+                locale,
                 fields,
                 incomingPath: relationOrPath,
                 val: pathOperators[operator],

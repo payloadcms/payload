@@ -10,7 +10,8 @@ import { Where } from '../../types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
-import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
+import { combineQueries } from '../../database/combineQueries';
 
 export type Arguments = {
   depth?: number
@@ -87,9 +88,9 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   });
 
   const query = await Model.buildQuery({
-    where,
-    access: accessResult,
-    req,
+    where: combineQueries(where, accessResult),
+    payload,
+    locale: req.locale,
   });
 
   // /////////////////////////////////////

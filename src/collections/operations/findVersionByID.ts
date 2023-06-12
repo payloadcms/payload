@@ -7,6 +7,7 @@ import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { combineQueries } from '../../database/combineQueries';
 
 export type Arguments = {
   collection: Collection
@@ -55,13 +56,9 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
   const hasWhereAccess = typeof accessResults === 'object';
 
   const query = await VersionsModel.buildQuery({
-    where: {
-      _id: {
-        equals: id,
-      },
-    },
-    access: accessResults,
-    req,
+    where: combineQueries({ _id: { equals: id } }, accessResults),
+    payload,
+    locale: req.locale,
   });
 
   // /////////////////////////////////////

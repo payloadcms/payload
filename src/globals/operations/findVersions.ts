@@ -4,12 +4,13 @@ import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { PaginatedDocs } from '../../mongoose/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
-import { buildSortParam } from '../../mongoose/buildSortParam';
+import { buildSortParam } from '../../mongoose/queries/buildSortParam';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
 import { TypeWithVersion } from '../../versions/types';
-import { validateQueryPaths } from '../../utilities/queryValidation/validateQueryPaths';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
+import { combineQueries } from '../../database/combineQueries';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -66,9 +67,9 @@ async function findVersions<T extends TypeWithVersion<T>>(
   });
 
   const query = await VersionsModel.buildQuery({
-    where,
-    access: accessResults,
-    req,
+    where: combineQueries(where, accessResults),
+    payload,
+    locale,
     globalSlug: globalConfig.slug,
   });
 

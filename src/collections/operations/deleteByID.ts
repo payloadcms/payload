@@ -9,6 +9,7 @@ import { hasWhereAccessResult } from '../../auth/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { combineQueries } from '../../database/combineQueries';
 
 export type Arguments = {
   depth?: number
@@ -80,13 +81,9 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   // /////////////////////////////////////
 
   const query = await Model.buildQuery({
-    req,
-    where: {
-      id: {
-        equals: id,
-      },
-    },
-    access: accessResults,
+    payload,
+    locale: req.locale,
+    where: combineQueries({ id: { equals: id } }, accessResults),
   });
 
   const docToDelete = await Model.findOne(query);

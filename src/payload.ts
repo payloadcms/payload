@@ -62,7 +62,7 @@ import findConfig from './config/find';
 
 import { defaults as emailDefaults } from './email/defaults';
 import type { DatabaseAdapter } from '.';
-import { mongooseAdapter } from './mongoose/adapter';
+import { mongooseAdapter } from './mongoose';
 
 /**
  * @description Payload
