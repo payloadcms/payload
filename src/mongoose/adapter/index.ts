@@ -1,4 +1,4 @@
-import type { ConnectOptions } from 'mongoose';
+import type { ConnectOptions, Model } from 'mongoose';
 import type { DatabaseAdapter } from '../../database/types';
 import { connect } from './connect';
 import { init } from './init';
@@ -16,6 +16,13 @@ export interface Args {
 export type MongooseAdapter = DatabaseAdapter &
   Args & {
     mongoMemoryServer: any
+    collections: {
+      [slug: string]: Model<unknown>
+    }
+    globals: Model<unknown>
+    versions: {
+      [slug: string]: Model<unknown>
+    }
   }
 
 export function mongooseAdapter(adapterArgs: Args): MongooseAdapter {

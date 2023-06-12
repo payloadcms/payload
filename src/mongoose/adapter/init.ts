@@ -56,19 +56,26 @@ export async function init(
         versionSchema.plugin(mongooseAggregatePaginate);
       }
 
-      payload.versions[collection.slug] = mongoose.model(versionModelName, versionSchema) as CollectionModel;
+      const model = mongoose.model(versionModelName, versionSchema) as CollectionModel;
+      payload.versions[collection.slug] = model;
+      this.versions[collection.slug] = model;
     }
 
+    const model = mongoose.model(collection.slug, schema) as CollectionModel;
+    this.collections[collection.slug] = model;
 
     payload.collections[collection.slug] = {
-      Model: mongoose.model(collection.slug, schema) as CollectionModel,
+      Model: model,
       config: collection,
     };
   });
 
   if (payload.config.globals) {
+    const model = buildGlobalModel(payload.config);
+    this.globals = model;
+
     payload.globals = {
-      Model: buildGlobalModel(payload.config),
+      Model: model,
       config: payload.config.globals,
     };
 
@@ -95,7 +102,10 @@ export async function init(
         versionSchema.plugin(paginate, { useEstimatedCount: true })
           .plugin(getBuildQueryPlugin({ versionsFields: versionGlobalFields }));
 
-        payload.versions[global.slug] = mongoose.model(versionModelName, versionSchema) as CollectionModel;
+        const versionsModel = mongoose.model(versionModelName, versionSchema) as CollectionModel;
+        this.versions[global.slug] = versionsModel;
+
+        payload.versions[global.slug] = versionsModel;
       }
     });
   }

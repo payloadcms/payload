@@ -121,7 +121,7 @@ export interface DatabaseAdapter {
 
 type QueryDrafts<T> = (args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>
 
-type QueryDraftsArgs = {
+export type QueryDraftsArgs = {
   payload: Payload
   collection: SanitizedCollectionConfig
   where?: Where

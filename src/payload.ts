@@ -70,7 +70,7 @@ import { mongooseAdapter } from './mongoose/adapter';
 export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   config: SanitizedConfig;
 
-  database: DatabaseAdapter;
+  db: DatabaseAdapter;
 
   collections: {
     [slug: string | number | symbol]: Collection;
@@ -200,16 +200,16 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     if (this.mongoURL) {
       mongoose.set('strictQuery', false);
 
-      if (!this.config.database) {
-        this.config.database = mongooseAdapter({
+      if (!this.config.db) {
+        this.config.db = mongooseAdapter({
           url: this.mongoURL,
           connectOptions: options.mongoOptions,
         });
       }
     }
 
-    this.database = this.config.database;
-    this.mongoMemoryServer = await this.database.connect({ payload: this, config: this.config });
+    this.db = this.config.db;
+    this.mongoMemoryServer = await this.db.connect({ payload: this, config: this.config });
 
     // Configure email service
     const emailOptions = options.email ? { ...(options.email) } : this.config.email;
@@ -221,7 +221,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.email = buildEmail(this.emailOptions, this.logger);
     this.sendEmail = sendEmail.bind(this);
 
-    await this.database.init({ payload: this, config: this.config });
+    await this.db.init({ payload: this, config: this.config });
 
     if (!this.config.graphQL.disable) {
       registerGraphQLSchema(this);
