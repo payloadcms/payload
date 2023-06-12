@@ -3,6 +3,7 @@ import type { DatabaseAdapter } from '../../database/types';
 import { connect } from './connect';
 import { init } from './init';
 import { webpack } from './webpack';
+import { CollectionModel } from '../../collections/config/types';
 
 export interface Args {
   /** The URL to connect to MongoDB */
@@ -17,11 +18,11 @@ export type MongooseAdapter = DatabaseAdapter &
   Args & {
     mongoMemoryServer: any
     collections: {
-      [slug: string]: Model<unknown>
+      [slug: string]: CollectionModel
     }
-    globals: Model<unknown>
+    globals: CollectionModel
     versions: {
-      [slug: string]: Model<unknown>
+      [slug: string]: CollectionModel
     }
   }
 

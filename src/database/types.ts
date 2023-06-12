@@ -107,7 +107,7 @@ export interface DatabaseAdapter {
   commitTransaction?: ({ payload }: { payload: Payload }) => Promise<boolean>
 
   // versions
-  queryDrafts: QueryDrafts<unknown>
+  queryDrafts: <T>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>
 
   // operations
   find: Find
@@ -118,8 +118,6 @@ export interface DatabaseAdapter {
   deleteOne: DeleteOne
   deleteMany: DeleteMany
 }
-
-type QueryDrafts<T> = (args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>
 
 export type QueryDraftsArgs = {
   payload: Payload
