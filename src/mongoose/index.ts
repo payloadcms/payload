@@ -37,6 +37,8 @@ export function mongooseAdapter({ url, connectOptions }: Args): MongooseAdapter 
   return {
     url,
     connectOptions: connectOptions || {},
+    collections: {},
+    versions: {},
     connect,
     init,
     webpack,

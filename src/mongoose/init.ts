@@ -17,9 +17,6 @@ export async function init(
   this: MongooseAdapter,
   { payload }: { payload: Payload },
 ): Promise<void> {
-  this.collections = {};
-  this.versions = {};
-
   payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const schema = buildCollectionSchema(collection, payload.config);
 
