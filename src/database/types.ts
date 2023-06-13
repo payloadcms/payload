@@ -27,6 +27,7 @@ import {
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { Payload } from '../payload';
 import { Document, Where } from '../types';
+import { SanitizedGlobalConfig } from '../globals/config/types';
 
 export interface DatabaseAdapter {
   /**
@@ -111,6 +112,8 @@ export interface DatabaseAdapter {
 
   // operations
   find: <T>(args: FindArgs) => Promise<PaginatedDocs<T>>
+  findVersions: <T>(args: FindVersionArgs) => Promise<PaginatedDocs<T>>
+  findGlobalVersions: <T>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<T>>
   findOne: FindOne
   create: Create
   update: Update
@@ -136,6 +139,36 @@ export type FindArgs = {
   collection: SanitizedCollectionConfig
   where?: Where
   page?: number
+  skip?: number
+  versions?: boolean
+  limit?: number
+  pagination?: boolean
+  sortProperty?: string
+  sortOrder?: string
+  locale?: string
+}
+
+export type FindVersionArgs = {
+  payload: Payload
+  collection: SanitizedCollectionConfig
+  where?: Where
+  page?: number
+  skip?: number
+  versions?: boolean
+  limit?: number
+  pagination?: boolean
+  sortProperty?: string
+  sortOrder?: string
+  locale?: string
+}
+
+export type FindGlobalVersionArgs = {
+  payload: Payload
+  global: SanitizedGlobalConfig
+  where?: Where
+  page?: number
+  skip?: number
+  versions?: boolean
   limit?: number
   pagination?: boolean
   sortProperty?: string

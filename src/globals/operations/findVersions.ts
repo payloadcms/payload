@@ -3,7 +3,6 @@ import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { PaginatedDocs } from '../../mongoose/types';
-import flattenWhereToOperators from '../../database/flattenWhereToOperators';
 import { buildSortParam } from '../../mongoose/queries/buildSortParam';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
@@ -42,19 +41,11 @@ async function findVersions<T extends TypeWithVersion<T>>(
     showHiddenFields,
   } = args;
 
-  const VersionsModel = payload.versions[globalConfig.slug];
   const versionFields = buildVersionGlobalFields(globalConfig);
 
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
-
-  let useEstimatedCount = false;
-
-  if (where) {
-    const constraints = flattenWhereToOperators(where);
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
-  }
 
   const accessResults = !overrideAccess ? await executeAccess({ req }, globalConfig.access.readVersions) : true;
 
@@ -66,12 +57,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     overrideAccess,
   });
 
-  const query = await VersionsModel.buildQuery({
-    where: combineQueries(where, accessResults),
-    payload,
-    locale,
-    globalSlug: globalConfig.slug,
-  });
+  const fullWhere = combineQueries(where, accessResults);
 
   // /////////////////////////////////////
   // Find
@@ -85,15 +71,15 @@ async function findVersions<T extends TypeWithVersion<T>>(
     locale,
   });
 
-  const paginatedDocs = await VersionsModel.paginate(query, {
+  const paginatedDocs = await payload.db.findGlobalVersions<T>({
+    payload,
+    where: fullWhere,
     page: page || 1,
     limit: limit ?? 10,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
-    lean: true,
-    leanWithId: true,
-    useEstimatedCount,
+    sortProperty,
+    sortOrder,
+    global: globalConfig,
+    locale,
   });
 
   // /////////////////////////////////////
@@ -128,7 +114,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
       await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef.version = await hook({ req, query, doc: doc.version, findMany: true }) || doc.version;
+        docRef.version = await hook({ req, query: fullWhere, doc: doc.version, findMany: true }) || doc.version;
       }, Promise.resolve());
 
       return docRef;

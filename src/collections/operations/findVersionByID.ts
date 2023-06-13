@@ -31,6 +31,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     req: {
       t,
       payload,
+      locale,
     },
     disableErrors,
     currentDepth,
@@ -41,8 +42,6 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
   if (!id) {
     throw new APIError('Missing ID of version.', httpStatus.BAD_REQUEST);
   }
-
-  const VersionsModel = (payload.versions[collectionConfig.slug]) as CollectionModel;
 
   // /////////////////////////////////////
   // Access
@@ -55,19 +54,22 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
   const hasWhereAccess = typeof accessResults === 'object';
 
-  const query = await VersionsModel.buildQuery({
-    where: combineQueries({ _id: { equals: id } }, accessResults),
-    payload,
-    locale: req.locale,
-  });
+  const fullWhere = combineQueries({ _id: { equals: id } }, accessResults);
 
   // /////////////////////////////////////
   // Find by ID
   // /////////////////////////////////////
 
-  if (!query.$and[0]._id) throw new NotFound(t);
+  const versionsQuery = await payload.db.findVersions<T>({
+    payload,
+    locale,
+    collection: collectionConfig,
+    limit: 1,
+    pagination: false,
+    where: fullWhere,
+  });
 
-  let result = await VersionsModel.findOne(query, {}).lean();
+  const result = versionsQuery.docs[0];
 
   if (!result) {
     if (!disableErrors) {
@@ -78,11 +80,6 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     return null;
   }
 
-  // Clone the result - it may have come back memoized
-  result = JSON.parse(JSON.stringify(result));
-
-  result = sanitizeInternalFields(result);
-
   // /////////////////////////////////////
   // beforeRead - Collection
   // /////////////////////////////////////
@@ -92,7 +89,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
     result.version = await hook({
       req,
-      query,
+      query: fullWhere,
       doc: result.version,
     }) || result.version;
   }, Promise.resolve());
@@ -120,7 +117,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
     result.version = await hook({
       req,
-      query,
+      query: fullWhere,
       doc: result.version,
     }) || result.version;
   }, Promise.resolve());

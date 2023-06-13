@@ -7,6 +7,8 @@ import { CollectionModel } from '../collections/config/types';
 import { queryDrafts } from './queryDrafts';
 import { GlobalModel } from '../globals/config/types';
 import { find } from './find';
+import { findVersions } from './findVersions';
+import { findGlobalVersions } from './findGlobalVersions';
 
 export interface Args {
   /** The URL to connect to MongoDB */
@@ -50,5 +52,7 @@ export function mongooseAdapter({ url, connectOptions }: Args): MongooseAdapter 
     commitTransaction: async () => true,
     queryDrafts,
     find,
+    findVersions,
+    findGlobalVersions,
   };
 }

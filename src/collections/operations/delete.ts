@@ -57,6 +57,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     req: {
       t,
       payload,
+      locale,
       payload: {
         config,
         preferences,
@@ -87,29 +88,19 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     overrideAccess,
   });
 
-  const query = await Model.buildQuery({
-    where: combineQueries(where, accessResult),
-    payload,
-    locale: req.locale,
-  });
+  const fullWhere = combineQueries(where, accessResult);
 
   // /////////////////////////////////////
   // Retrieve documents
   // /////////////////////////////////////
 
-  const docs = await Model.find(query, {}, { lean: true });
+  const { docs } = await payload.db.find<GeneratedTypes['collections'][TSlug]>({ payload, locale, where: fullWhere, collection: collectionConfig });
 
   const errors = [];
 
   /* eslint-disable no-param-reassign */
   const promises = docs.map(async (doc) => {
     let result;
-
-    // custom id type reset
-    doc.id = doc._id;
-    doc = JSON.stringify(doc);
-    doc = JSON.parse(doc);
-    doc = sanitizeInternalFields(doc);
 
     const { id } = doc;
 

@@ -1,14 +1,14 @@
 import type { MongooseAdapter } from '.';
 import { PaginatedDocs } from './types';
-import { FindArgs } from '../database/types';
+import { FindVersionArgs } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 
-export async function find<T = unknown>(
+export async function findVersions<T = unknown>(
   this: MongooseAdapter,
-  { payload, collection, where, page, limit, sortProperty, sortOrder, locale, pagination }: FindArgs,
+  { payload, collection, where, page, limit, sortProperty, sortOrder, locale, pagination, skip }: FindVersionArgs,
 ): Promise<PaginatedDocs<T>> {
-  const Model = this.collections[collection.slug];
+  const Model = this.versions[collection.slug];
 
   let useEstimatedCount = false;
 
@@ -31,11 +31,13 @@ export async function find<T = unknown>(
     limit,
     lean: true,
     leanWithId: true,
-    useEstimatedCount,
     pagination,
+    offset: skip,
+    useEstimatedCount,
     options: {
       // limit must also be set here, it's ignored when pagination is false
       limit,
+      skip,
     },
   };
 

@@ -2,8 +2,7 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Collection, CollectionModel } from '../config/types';
-import flattenWhereToOperators from '../../database/flattenWhereToOperators';
+import { Collection } from '../config/types';
 import { buildSortParam } from '../../mongoose/queries/buildSortParam';
 import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithVersion } from '../../versions/types';
@@ -44,19 +43,9 @@ async function findVersions<T extends TypeWithVersion<T>>(
     showHiddenFields,
   } = args;
 
-  const VersionsModel = payload.versions[collectionConfig.slug] as CollectionModel;
-
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
-
-  let useEstimatedCount = false;
-
-  if (where) {
-    const constraints = flattenWhereToOperators(where);
-
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
-  }
 
   let accessResults;
 
@@ -74,11 +63,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     overrideAccess,
   });
 
-  const query = await VersionsModel.buildQuery({
-    where: combineQueries(where, accessResults),
-    payload,
-    locale,
-  });
+  const fullWhere = combineQueries(where, accessResults);
 
   // /////////////////////////////////////
   // Find
@@ -92,15 +77,15 @@ async function findVersions<T extends TypeWithVersion<T>>(
     locale,
   });
 
-  const paginatedDocs = await VersionsModel.paginate(query, {
+  const paginatedDocs = await payload.db.findVersions<T>({
+    payload,
+    where: fullWhere,
     page: page || 1,
     limit: limit ?? 10,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
-    lean: true,
-    leanWithId: true,
-    useEstimatedCount,
+    collection: collectionConfig,
+    sortProperty,
+    sortOrder,
+    locale,
   });
 
   // /////////////////////////////////////
@@ -110,13 +95,11 @@ async function findVersions<T extends TypeWithVersion<T>>(
   let result = {
     ...paginatedDocs,
     docs: await Promise.all(paginatedDocs.docs.map(async (doc) => {
-      const docString = JSON.stringify(doc);
-      const docRef = JSON.parse(docString);
-
+      const docRef = doc;
       await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef.version = await hook({ req, query, doc: docRef.version }) || docRef.version;
+        docRef.version = await hook({ req, query: fullWhere, doc: docRef.version }) || docRef.version;
       }, Promise.resolve());
 
       return docRef;
@@ -155,7 +138,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef.version = await hook({ req, query, doc: doc.version, findMany: true }) || doc.version;
+        docRef.version = await hook({ req, query: fullWhere, doc: doc.version, findMany: true }) || doc.version;
       }, Promise.resolve());
 
       return docRef;
