@@ -87,13 +87,13 @@ type CollectionConfigType<TSlug extends CollectionSlug> = {
      * Access control
      */
     access?: {
-      create?: Access;
-      read?: Access;
-      readVersions?: Access;
-      update?: Access;
-      delete?: Access;
+      create?: Access<Collections[TSlug]>;
+      read?: Access<Collections[TSlug]>;
+      readVersions?: Access<Collections[TSlug]>;
+      update?: Access<Collections[TSlug]>;
+      delete?: Access<Collections[TSlug]>;
       admin?: (args?: any) => boolean | Promise<boolean>;
-      unlock?: Access;
+      unlock?: Access<Collections[TSlug]>;
     };
     /**
      * Collection login options
