@@ -1,10 +1,8 @@
 import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection, TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
-import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/queries/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
@@ -56,7 +54,6 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     draft: draftsEnabled,
     collection,
     collection: {
-      Model,
       config: collectionConfig,
     },
     req,
@@ -73,13 +70,6 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
-
-  let useEstimatedCount = false;
-
-  if (where) {
-    const constraints = flattenWhereConstraints(where);
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
-  }
 
   let accessResult: AccessResult;
 
@@ -153,40 +143,18 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       overrideAccess,
     });
 
-    const query = await Model.buildQuery({
+    result = await payload.db.find<T>({
       payload,
-      locale: req.locale,
+      collection: collectionConfig,
       where: fullWhere,
-    });
-
-    const paginationOptions = {
       page: sanitizedPage,
-      sort: {
-        [sortProperty]: sortOrder,
-      },
       limit: sanitizedLimit,
-      lean: true,
-      leanWithId: true,
-      useEstimatedCount,
-      pagination: usePagination,
-      useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
-      options: {
-        // limit must also be set here, it's ignored when pagination is false
-        limit: sanitizedLimit,
-      },
-    };
-
-    result = await Model.paginate(query, paginationOptions);
+      sortProperty,
+      sortOrder,
+      locale,
+      pagination,
+    });
   }
-
-  result = {
-    ...result,
-    docs: result.docs.map((doc) => {
-      const sanitizedDoc = JSON.parse(JSON.stringify(doc));
-      sanitizedDoc.id = sanitizedDoc._id;
-      return sanitizeInternalFields(sanitizedDoc);
-    }),
-  };
 
   // /////////////////////////////////////
   // beforeRead - Collection

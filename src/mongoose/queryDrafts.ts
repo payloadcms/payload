@@ -1,7 +1,8 @@
 import type { MongooseAdapter } from '.';
 import { PaginatedDocs } from './types';
 import { QueryDraftsArgs } from '../database/types';
-import flattenWhereConstraints from '../utilities/flattenWhereConstraints';
+import flattenWhereToOperators from '../database/flattenWhereToOperators';
+import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 type AggregateVersion<T> = {
   _id: string
@@ -46,7 +47,7 @@ export async function queryDrafts<T = unknown>(
     let useEstimatedCount;
 
     if (where) {
-      const constraints = flattenWhereConstraints(where);
+      const constraints = flattenWhereToOperators(where);
       useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
     }
 
@@ -82,11 +83,17 @@ export async function queryDrafts<T = unknown>(
 
   return {
     ...result,
-    docs: result.docs.map((doc) => ({
-      _id: doc._id,
-      ...doc.version,
-      updatedAt: doc.updatedAt,
-      createdAt: doc.createdAt,
-    })),
+    docs: result.docs.map((doc) => {
+      let sanitizedDoc = {
+        _id: doc._id,
+        ...doc.version,
+        updatedAt: doc.updatedAt,
+        createdAt: doc.createdAt,
+      };
+
+      sanitizedDoc = JSON.parse(JSON.stringify(sanitizedDoc));
+      sanitizedDoc.id = sanitizedDoc._id;
+      return sanitizeInternalFields(sanitizedDoc);
+    }),
   };
 }

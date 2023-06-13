@@ -110,7 +110,7 @@ export interface DatabaseAdapter {
   queryDrafts: <T>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>
 
   // operations
-  find: Find
+  find: <T>(args: FindArgs) => Promise<PaginatedDocs<T>>
   findOne: FindOne
   create: Create
   update: Update
@@ -131,19 +131,19 @@ export type QueryDraftsArgs = {
   locale?: string
 }
 
-type FindArgs = {
+export type FindArgs = {
   payload: Payload
   collection: SanitizedCollectionConfig
   where?: Where
   page?: number
   limit?: number
-  sort?: string
+  pagination?: boolean
+  sortProperty?: string
+  sortOrder?: string
   locale?: string
 }
 
-type Find = (args: FindArgs) => Promise<PaginatedDocs>
-
-type FindOneArgs = {
+export type FindOneArgs = {
   payload: Payload
   collection: SanitizedCollectionConfig
   where: Where

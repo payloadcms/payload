@@ -3,7 +3,7 @@ import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { PaginatedDocs } from '../../mongoose/types';
-import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
+import flattenWhereToOperators from '../../database/flattenWhereToOperators';
 import { buildSortParam } from '../../mongoose/queries/buildSortParam';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
@@ -52,7 +52,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
   let useEstimatedCount = false;
 
   if (where) {
-    const constraints = flattenWhereConstraints(where);
+    const constraints = flattenWhereToOperators(where);
     useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 

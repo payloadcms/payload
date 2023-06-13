@@ -6,6 +6,7 @@ import { webpack } from './webpack';
 import { CollectionModel } from '../collections/config/types';
 import { queryDrafts } from './queryDrafts';
 import { GlobalModel } from '../globals/config/types';
+import { find } from './find';
 
 export interface Args {
   /** The URL to connect to MongoDB */
@@ -48,5 +49,6 @@ export function mongooseAdapter({ url, connectOptions }: Args): MongooseAdapter 
     rollbackTransaction: async () => true,
     commitTransaction: async () => true,
     queryDrafts,
+    find,
   };
 }
