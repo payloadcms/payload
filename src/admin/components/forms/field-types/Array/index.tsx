@@ -26,6 +26,7 @@ import { useConfig } from '../../../utilities/Config';
 import { NullifyLocaleField } from '../../NullifyField';
 import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
+import { TrackSubFieldErrorCount } from '../TrackSubFieldErrorCount';
 
 import './index.scss';
 
@@ -67,6 +68,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const operation = useOperation();
   const { t, i18n } = useTranslation('fields');
   const { localization } = useConfig();
+
+  const [errorCount, setErrorCount] = React.useState(undefined);
 
   const checkSkipValidation = useCallback((value) => {
     const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
@@ -199,6 +202,11 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         localized={localized}
         path={path}
         fieldValue={value}
+      />
+
+      <TrackSubFieldErrorCount
+        path={path}
+        setErrorCount={setErrorCount}
       />
 
       <DraggableSortable
