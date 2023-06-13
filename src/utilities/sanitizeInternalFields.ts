@@ -1,4 +1,4 @@
-const internalFields = ['__v', 'salt', 'hash'];
+const internalFields = ['__v'];
 
 const sanitizeInternalFields = <T extends Record<string, unknown>>(incomingDoc: T): T => Object.entries(incomingDoc).reduce((newDoc, [key, val]): T => {
   if (key === '_id') {

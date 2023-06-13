@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import { Document } from 'mongoose';
 import { APIError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { Collection } from '../../collections/config/types';
@@ -39,7 +38,6 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
 
   const {
     collection: {
-      Model,
       config: collectionConfig,
     },
     data,
@@ -47,6 +45,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     expiration,
     req: {
       t,
+      payload,
       payload: {
         config,
         sendEmail: email,
@@ -63,21 +62,31 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
   let token: string | Buffer = crypto.randomBytes(20);
   token = token.toString('hex');
 
-  type UserDoc = Document & {
+  type UserDoc = {
+    id: string | number
     resetPasswordToken?: string,
-    resetPasswordExpiration?: number | Date,
+    resetPasswordExpiration?: Date,
   }
 
-  const user: UserDoc = await Model.findOne({ email: (data.email as string).toLowerCase() });
+  const { docs } = await payload.db.find<UserDoc>({
+    payload,
+    collection: collectionConfig,
+    where: { email: { equals: (data.email as string).toLowerCase() } },
+    limit: 1,
+  });
+
+  let [user] = docs;
 
   if (!user) return null;
 
   user.resetPasswordToken = token;
-  user.resetPasswordExpiration = expiration || Date.now() + 3600000; // 1 hour
+  user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000); // 1 hour
 
-  await user.save();
-
-  const userJSON = user.toJSON({ virtuals: true });
+  user = await payload.update({
+    collection: collectionConfig.slug,
+    id: user.id,
+    data: user,
+  });
 
   if (!disableEmail) {
     let html = `${t('authentication:youAreReceivingResetPassword')}
@@ -90,7 +99,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
       html = await collectionConfig.auth.forgotPassword.generateEmailHTML({
         req,
         token,
-        user: userJSON,
+        user,
       });
     }
 
@@ -100,7 +109,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
       subject = await collectionConfig.auth.forgotPassword.generateEmailSubject({
         req,
         token,
-        user: userJSON,
+        user,
       });
     }
 

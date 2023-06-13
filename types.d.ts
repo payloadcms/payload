@@ -5,6 +5,8 @@ export {
   Access,
 } from './dist/config/types';
 
+export { DatabaseAdapter } from './dist/database/types';
+
 export {
   CollectionConfig,
   SanitizedCollectionConfig,

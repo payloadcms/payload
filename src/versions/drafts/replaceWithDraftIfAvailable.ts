@@ -6,6 +6,7 @@ import { CollectionModel, SanitizedCollectionConfig, TypeWithID } from '../../co
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
+import { combineQueries } from '../../database/combineQueries';
 
 type Arguments<T> = {
   payload: Payload
@@ -23,7 +24,6 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   entityType,
   doc,
   req,
-  overrideAccess,
   accessResult,
 }: Arguments<T>): Promise<T> => {
   const VersionModel = payload.versions[entity.slug] as CollectionModel;
@@ -61,10 +61,9 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   }
 
   const query = await VersionModel.buildQuery({
-    where: queryToBuild,
-    access: versionAccessResult,
-    req,
-    overrideAccess,
+    where: combineQueries(queryToBuild, versionAccessResult),
+    payload,
+    locale: req.locale,
     globalSlug: entityType === 'global' ? entity.slug : undefined,
   });
 

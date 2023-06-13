@@ -1,21 +1,20 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable global-require */
-import mongoose, { ConnectOptions } from 'mongoose';
-import pino from 'pino';
-import { InitOptions } from '../config/types';
-import { connection } from './testCredentials';
+import type { ConnectOptions } from 'mongoose';
+import mongoose from 'mongoose';
+import type { Payload } from '..';
 
-const connectMongoose = async (
-  url: string,
-  options: InitOptions['mongoOptions'],
-  logger: pino.Logger,
-): Promise<void | any> => {
-  let urlToConnect = url;
+import type { MongooseAdapter } from '.';
+
+export async function connect(
+  this: MongooseAdapter,
+  { payload }: { payload: Payload },
+): Promise<void> {
+  let urlToConnect = this.url;
   let successfulConnectionMessage = 'Connected to MongoDB server successfully!';
 
   const connectionOptions: ConnectOptions & { useFacet: undefined } = {
     autoIndex: true,
-    ...options,
+    ...this.connectOptions,
     useFacet: undefined,
   };
 
@@ -32,7 +31,7 @@ const connectMongoose = async (
       const port = await getPort();
       mongoMemoryServer = await MongoMemoryServer.create({
         instance: {
-          dbName: connection.name,
+          dbName: 'payloadmemory',
           port,
         },
       });
@@ -46,19 +45,20 @@ const connectMongoose = async (
     await mongoose.connect(urlToConnect, connectionOptions);
 
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      logger.info('---- DROPPING DATABASE ----');
+      payload.logger.info('---- DROPPING DATABASE ----');
       await mongoose.connection.dropDatabase();
-      logger.info('---- DROPPED DATABASE ----');
+      payload.logger.info('---- DROPPED DATABASE ----');
     }
-    logger.info(successfulConnectionMessage);
+    payload.logger.info(successfulConnectionMessage);
   } catch (err) {
-    logger.error(
+    payload.logger.error(
       `Error: cannot connect to MongoDB. Details: ${err.message}`,
       err,
     );
     process.exit(1);
   }
 
+  this.mongoMemoryServer = mongoMemoryServer;
+
   return mongoMemoryServer;
-};
-export default connectMongoose;
+}

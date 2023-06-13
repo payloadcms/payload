@@ -1,13 +1,15 @@
 import { FilterQuery } from 'mongoose';
 import { Payload } from '../payload';
-import { CollectionModel } from '../collections/config/types';
+import { CollectionModel, SanitizedCollectionConfig } from '../collections/config/types';
+import { Where } from '../types';
+import { SanitizedGlobalConfig } from '../globals/config/types';
 
 type Args = {
   payload: Payload
   Model: CollectionModel
   max: number
-  slug: string
-  entityType: 'global' | 'collection'
+  collection?: SanitizedCollectionConfig
+  global?: SanitizedGlobalConfig
   id?: string | number
 }
 
@@ -15,25 +17,54 @@ export const enforceMaxVersions = async ({
   payload,
   Model,
   max,
-  slug,
-  entityType,
+  collection,
+  global,
   id,
 }: Args): Promise<void> => {
+  const entityType = collection ? 'collection' : 'global';
+  const slug = collection ? collection.slug : global?.slug;
+
   try {
-    const query: { parent?: string | number } = {};
+    const where: Where = {};
+    let oldestAllowedDoc;
 
-    if (entityType === 'collection') query.parent = id;
+    if (collection) {
+      where.parent = {
+        equals: id,
+      };
 
-    const oldestAllowedDoc = await Model.find(query).limit(1).skip(max).sort({ updatedAt: -1 });
+      const query = await payload.db.findVersions({
+        payload,
+        where,
+        collection,
+        skip: max,
+        sortProperty: 'updatedAt',
+        sortOrder: 'desc',
+        pagination: false,
+      });
 
-    if (oldestAllowedDoc?.[0]?.updatedAt) {
+      [oldestAllowedDoc] = query.docs;
+    } else if (global) {
+      const query = await payload.db.findGlobalVersions({
+        payload,
+        where,
+        global,
+        skip: max,
+        sortProperty: 'updatedAt',
+        sortOrder: 'desc',
+      });
+
+      [oldestAllowedDoc] = query.docs;
+    }
+
+    if (oldestAllowedDoc?.updatedAt) {
       const deleteQuery: FilterQuery<unknown> = {
         updatedAt: {
-          $lte: oldestAllowedDoc[0].updatedAt,
+          $lte: oldestAllowedDoc.updatedAt,
         },
       };
 
-      if (entityType === 'collection') deleteQuery.parent = id;
+      if (collection) deleteQuery.parent = id;
 
       await Model.deleteMany(deleteQuery);
     }

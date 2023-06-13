@@ -19,6 +19,7 @@ import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types';
 import { Where } from '../types';
 import { User } from '../auth/types';
+import { DatabaseAdapter } from '../database/types';
 
 type Email = {
   fromName: string;
@@ -530,15 +531,18 @@ export type Config = {
   onInit?: (payload: Payload) => Promise<void> | void;
   /** Extension  point to add your custom data. */
   custom?: Record<string, any>;
+  /** Pass in a database adapter for use on this project. */
+  db?: DatabaseAdapter
 };
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'globals' | 'endpoint'
+  'collections' | 'globals' | 'endpoint' | 'db'
 > & {
   collections: SanitizedCollectionConfig[];
   globals: SanitizedGlobalConfig[];
   endpoints: Endpoint[];
+  db: DatabaseAdapter
   paths: {
     configDir: string
     config: string

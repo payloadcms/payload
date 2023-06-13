@@ -18,5 +18,12 @@
       "type": "node-terminal",
       "cwd": "${workspaceFolder}"
     },
+    {
+      "command": "yarn run dev versions",
+      "name": "Run Dev Versions",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}"
+    },
   ]
 }

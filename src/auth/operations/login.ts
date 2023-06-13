@@ -58,6 +58,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     },
     data,
     req: {
+      payload,
       payload: {
         secret,
         config,
@@ -79,15 +80,20 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore Improper typing in library, additional args should be optional
-  const userDoc = await Model.findOne({ email }).lean();
+  const { docs } = await payload.db.find<any>({
+    payload,
+    collection: collectionConfig,
+    where: { email: { equals: email.toLowerCase() } },
+    limit: 1,
+  });
 
-  let user = JSON.parse(JSON.stringify(userDoc));
+  let [user] = docs;
 
-  if (!userDoc || (args.collection.config.auth.verify && userDoc._verified === false)) {
+  if (!user || (args.collection.config.auth.verify && user._verified === false)) {
     throw new AuthenticationError(req.t);
   }
 
-  if (userDoc && isLocked(userDoc.lockUntil)) {
+  if (user && isLocked(user.lockUntil)) {
     throw new LockedAuth(req.t);
   }
 

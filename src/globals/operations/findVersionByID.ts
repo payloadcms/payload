@@ -6,6 +6,7 @@ import executeAccess from '../../auth/executeAccess';
 import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { combineQueries } from '../../database/combineQueries';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -27,6 +28,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     req: {
       t,
       payload,
+      locale,
     },
     disableErrors,
     currentDepth,
@@ -48,14 +50,9 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
   const hasWhereAccess = typeof accessResults === 'object';
 
   const query = await VersionsModel.buildQuery({
-    where: {
-      _id: {
-        equals: id,
-      },
-    },
-    access: accessResults,
-    req,
-    overrideAccess,
+    where: combineQueries({ _id: { equals: id } }, accessResults),
+    payload,
+    locale,
     globalSlug: globalConfig.slug,
   });
 

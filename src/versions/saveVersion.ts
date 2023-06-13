@@ -28,16 +28,13 @@ export const saveVersion = async ({
 }: Args): Promise<TypeWithID> => {
   let result;
   let entityConfig;
-  let entityType: 'global' | 'collection';
 
   if (collection) {
     entityConfig = collection;
-    entityType = 'collection';
   }
 
   if (global) {
     entityConfig = global;
-    entityType = 'global';
   }
 
   const VersionModel = payload.versions[entityConfig.slug];
@@ -104,8 +101,8 @@ export const saveVersion = async ({
       id,
       payload,
       Model: VersionModel,
-      slug: entityConfig.slug,
-      entityType,
+      collection,
+      global,
       max,
     });
   }

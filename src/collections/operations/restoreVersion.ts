@@ -9,6 +9,7 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
+import { combineQueries } from '../../database/combineQueries';
 
 export type Arguments = {
   collection: Collection
@@ -34,6 +35,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     req: {
       t,
       payload,
+      locale,
     },
     req,
   } = args;
@@ -72,14 +74,9 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // /////////////////////////////////////
 
   const query = await Model.buildQuery({
-    where: {
-      id: {
-        equals: parentDocID,
-      },
-    },
-    access: accessResults,
-    req,
-    overrideAccess,
+    where: combineQueries({ id: { equals: parentDocID } }, accessResults),
+    payload,
+    locale,
   });
 
   const doc = await Model.findOne(query);

@@ -1,6 +1,6 @@
-import { Config } from '../config/types';
-import { Field, fieldAffectsData, fieldIsPresentationalOnly } from '../fields/config/types';
-import flattenTopLevelFields from '../utilities/flattenTopLevelFields';
+import { Config } from '../../config/types';
+import { Field, fieldAffectsData, fieldIsPresentationalOnly } from '../../fields/config/types';
+import flattenTopLevelFields from '../../utilities/flattenTopLevelFields';
 
 type Args = {
   segments: string[]

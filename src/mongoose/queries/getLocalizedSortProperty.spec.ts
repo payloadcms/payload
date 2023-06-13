@@ -1,4 +1,4 @@
-import { Config } from '../config/types';
+import { Config } from '../../config/types';
 import { getLocalizedSortProperty } from './getLocalizedSortProperty';
 
 const config = {

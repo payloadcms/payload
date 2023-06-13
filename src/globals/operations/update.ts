@@ -10,6 +10,7 @@ import { PayloadRequest } from '../../express/types';
 import { saveVersion } from '../../versions/saveVersion';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion';
+import { combineQueries } from '../../database/combineQueries';
 
 type Args<T extends { [field: string | number | symbol]: unknown }> = {
   globalConfig: SanitizedGlobalConfig
@@ -32,6 +33,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     req,
     req: {
       payload,
+      locale,
       payload: {
         globals: {
           Model,
@@ -60,13 +62,9 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // /////////////////////////////////////
 
   const query = await Model.buildQuery({
-    where: {
-      globalType: {
-        equals: slug,
-      },
-    },
-    access: accessResults,
-    req,
+    where: combineQueries({ globalType: { equals: slug } }, accessResults),
+    payload,
+    locale,
     overrideAccess,
     globalSlug: slug,
   });

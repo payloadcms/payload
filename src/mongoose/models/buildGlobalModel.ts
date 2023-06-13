@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
-import buildSchema from '../mongoose/buildSchema';
-import { SanitizedConfig } from '../config/types';
-import getBuildQueryPlugin from '../mongoose/buildQuery';
-import { GlobalModel } from './config/types';
+import buildSchema from './buildSchema';
+import { SanitizedConfig } from '../../config/types';
+import getBuildQueryPlugin from '../queries/buildQuery';
+import { GlobalModel } from '../../globals/config/types';
 
-const buildModel = (config: SanitizedConfig): GlobalModel | null => {
+export const buildGlobalModel = (config: SanitizedConfig): GlobalModel | null => {
   if (config.globals && config.globals.length > 0) {
     const globalsSchema = new mongoose.Schema({}, { discriminatorKey: 'globalType', timestamps: true, minimize: false });
 
@@ -30,5 +30,3 @@ const buildModel = (config: SanitizedConfig): GlobalModel | null => {
 
   return null;
 };
-
-export default buildModel;

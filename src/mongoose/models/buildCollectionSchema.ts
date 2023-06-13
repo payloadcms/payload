@@ -1,9 +1,9 @@
 import paginate from 'mongoose-paginate-v2';
 import { Schema } from 'mongoose';
-import { SanitizedConfig } from '../config/types';
-import getBuildQueryPlugin from '../mongoose/buildQuery';
-import buildSchema from '../mongoose/buildSchema';
-import { SanitizedCollectionConfig } from './config/types';
+import { SanitizedConfig } from '../../config/types';
+import getBuildQueryPlugin from '../queries/buildQuery';
+import buildSchema from './buildSchema';
+import { SanitizedCollectionConfig } from '../../collections/config/types';
 
 const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: SanitizedConfig, schemaOptions = {}): Schema => {
   const schema = buildSchema(

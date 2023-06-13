@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import { createArrayFromCommaDelineated } from './createArrayFromCommaDelineated';
-import wordBoundariesRegex from '../utilities/wordBoundariesRegex';
-import { Field, TabAsField } from '../fields/config/types';
+import { createArrayFromCommaDelineated } from '../../utilities/createArrayFromCommaDelineated';
+import wordBoundariesRegex from '../../utilities/wordBoundariesRegex';
+import { Field, TabAsField } from '../../fields/config/types';
 
 type SanitizeQueryValueArgs = {
   field: Field | TabAsField

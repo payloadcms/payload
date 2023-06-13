@@ -2,7 +2,6 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 import httpStatus from 'http-status';
 import { AccessResult } from '../../config/types';
 import { PayloadRequest } from '../../express/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { APIError } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { BeforeOperationHook, Collection } from '../config/types';
@@ -11,6 +10,8 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
+import { combineQueries } from '../../database/combineQueries';
 
 export type Arguments = {
   depth?: number
@@ -56,6 +57,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     req: {
       t,
       payload,
+      locale,
       payload: {
         config,
       },
@@ -78,30 +80,26 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     accessResult = await executeAccess({ req }, collectionConfig.access.delete);
   }
 
-  const query = await Model.buildQuery({
+  await validateQueryPaths({
+    collectionConfig,
     where,
-    access: accessResult,
     req,
     overrideAccess,
   });
+
+  const fullWhere = combineQueries(where, accessResult);
 
   // /////////////////////////////////////
   // Retrieve documents
   // /////////////////////////////////////
 
-  const docs = await Model.find(query, {}, { lean: true });
+  const { docs } = await payload.db.find<GeneratedTypes['collections'][TSlug]>({ payload, locale, where: fullWhere, collection: collectionConfig });
 
   const errors = [];
 
   /* eslint-disable no-param-reassign */
   const promises = docs.map(async (doc) => {
     let result;
-
-    // custom id type reset
-    doc.id = doc._id;
-    doc = JSON.stringify(doc);
-    doc = JSON.parse(doc);
-    doc = sanitizeInternalFields(doc);
 
     const { id } = doc;
 

@@ -5,7 +5,7 @@ import { Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
-import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
+import { APIError, Forbidden, NotFound, ValidationError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { saveVersion } from '../../versions/saveVersion';
@@ -19,6 +19,7 @@ import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVe
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
+import { combineQueries } from '../../database/combineQueries';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -98,14 +99,9 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // /////////////////////////////////////
 
   const query = await Model.buildQuery({
-    where: {
-      id: {
-        equals: id,
-      },
-    },
-    access: accessResults,
-    req,
-    overrideAccess,
+    where: combineQueries({ id: { equals: id } }, accessResults),
+    payload,
+    locale,
   });
 
   const doc = await getLatestCollectionVersion({
@@ -224,12 +220,12 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // Handle potential password update
   // /////////////////////////////////////
 
-  const dataToUpdate: Record<string, unknown> = { ...result }
+  const dataToUpdate: Record<string, unknown> = { ...result };
 
   if (shouldSavePassword && typeof password === 'string') {
-    const { hash, salt } = await generatePasswordSaltHash({ password })
-    dataToUpdate.salt = salt
-    dataToUpdate.hash = hash
+    const { hash, salt } = await generatePasswordSaltHash({ password });
+    dataToUpdate.salt = salt;
+    dataToUpdate.hash = hash;
     delete data.password;
     delete result.password;
   }

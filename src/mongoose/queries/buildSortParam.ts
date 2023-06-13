@@ -1,6 +1,6 @@
-import { Config } from '../config/types';
+import { Config } from '../../config/types';
 import { getLocalizedSortProperty } from './getLocalizedSortProperty';
-import { Field } from '../fields/config/types';
+import { Field } from '../../fields/config/types';
 
 type Args = {
   sort: string
