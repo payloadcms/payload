@@ -132,13 +132,13 @@ export interface FieldBaseType<TSlug extends CollectionSlug, TFieldName extends 
   custom?: Record<string, any>;
 }
 
-type FieldBases<TSlug extends CollectionSlug> = {
+type FieldBases<TSlug extends CollectionSlug = any> = {
   [K in FieldName<TSlug>]: FieldBaseType<TSlug, K>;
 }
 
-export type FieldBase<TSlug extends CollectionSlug> = FieldBases<TSlug>[FieldName<TSlug>];
+export type FieldBase<TSlug extends CollectionSlug = any> = FieldBases<TSlug>[FieldName<TSlug>];
 
-export type NumberField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type NumberField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'number';
   admin?: Admin & {
     autoComplete?: string
@@ -149,7 +149,7 @@ export type NumberField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
   max?: number
 }
 
-export type TextField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type TextField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'text';
   maxLength?: number
   minLength?: number
@@ -159,7 +159,7 @@ export type TextField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
   }
 }
 
-export type EmailField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type EmailField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'email';
   admin?: Admin & {
     placeholder?: Record<string, string> | string
@@ -167,7 +167,7 @@ export type EmailField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
   }
 }
 
-export type TextareaField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type TextareaField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'textarea';
   maxLength?: number
   minLength?: number
@@ -177,11 +177,11 @@ export type TextareaField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
   }
 }
 
-export type CheckboxField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type CheckboxField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'checkbox';
 }
 
-export type DateField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type DateField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'date';
   admin?: Admin & {
     placeholder?: Record<string, string> | string
@@ -189,7 +189,7 @@ export type DateField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
   }
 }
 
-export type GroupField<TSlug extends CollectionSlug> = Omit<FieldBase<TSlug>, 'required' | 'validation'> & {
+export type GroupField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'required' | 'validation'> & {
   type: 'group';
   fields: Field<TSlug>[];
   admin?: Admin & {
@@ -206,13 +206,13 @@ export type GroupField<TSlug extends CollectionSlug> = Omit<FieldBase<TSlug>, 'r
 
 export type RowAdmin = Omit<Admin, 'description'>;
 
-export type RowField<TSlug extends CollectionSlug> = Omit<FieldBase<TSlug>, 'admin' | 'name' | 'label'> & {
+export type RowField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'admin' | 'name' | 'label'> & {
   admin?: RowAdmin;
   type: 'row';
   fields: Field<TSlug>[];
 }
 
-export type CollapsibleField<TSlug extends CollectionSlug> = Omit<FieldBase<TSlug>, 'name' | 'label'> & {
+export type CollapsibleField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'name' | 'label'> & {
   type: 'collapsible';
   label: RowLabel
   fields: Field<TSlug>[];
@@ -223,13 +223,13 @@ export type CollapsibleField<TSlug extends CollectionSlug> = Omit<FieldBase<TSlu
 
 export type TabsAdmin = Omit<Admin, 'description'>;
 
-type TabBase<TSlug extends CollectionSlug> = Omit<FieldBase<TSlug>, 'required' | 'validation'> & {
+type TabBase<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'required' | 'validation'> & {
   fields: Field<TSlug>[]
   description?: Description
   interfaceName?: string
 }
 
-export type NamedTab<TSlug extends CollectionSlug> = TabBase<TSlug> & {
+export type NamedTab<TSlug extends CollectionSlug = any> = TabBase<TSlug> & {
   /** Customize generated GraphQL and Typescript schema names.
    * The slug is used by default.
    *
@@ -239,21 +239,21 @@ export type NamedTab<TSlug extends CollectionSlug> = TabBase<TSlug> & {
   interfaceName?: string
 }
 
-export type UnnamedTab<TSlug extends CollectionSlug> = Omit<TabBase<TSlug>, 'name'> & {
+export type UnnamedTab<TSlug extends CollectionSlug = any> = Omit<TabBase<TSlug>, 'name'> & {
   label: Record<string, string> | string
   localized?: never
   interfaceName?: never
 }
 
-export type Tab<TSlug extends CollectionSlug> = NamedTab<TSlug> | UnnamedTab<TSlug>
+export type Tab<TSlug extends CollectionSlug = any> = NamedTab<TSlug> | UnnamedTab<TSlug>
 
-export type TabsField<TSlug extends CollectionSlug> = Omit<FieldBase<TSlug>, 'admin' | 'name' | 'localized'> & {
+export type TabsField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'admin' | 'name' | 'localized'> & {
   type: 'tabs';
   tabs: Tab<TSlug>[]
   admin?: TabsAdmin
 }
 
-export type TabAsField<TSlug extends CollectionSlug> = Tab<TSlug> & {
+export type TabAsField<TSlug extends CollectionSlug = any> = Tab<TSlug> & {
   type: 'tab'
   name?: string
 };
@@ -277,7 +277,7 @@ export type UIField = {
   custom?: Record<string, any>;
 }
 
-export type UploadField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type UploadField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'upload'
   relationTo: string
   maxDepth?: number
@@ -289,7 +289,7 @@ type CodeAdmin = Admin & {
   editorOptions?: EditorProps['options'];
 }
 
-export type CodeField<TSlug extends CollectionSlug> = Omit<FieldBase<TSlug>, 'admin'> & {
+export type CodeField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'admin'> & {
   admin?: CodeAdmin
   minLength?: number
   maxLength?: number
@@ -300,12 +300,12 @@ type JSONAdmin = Admin & {
   editorOptions?: EditorProps['options'];
 }
 
-export type JSONField<TSlug extends CollectionSlug> = Omit<FieldBase<TSlug>, 'admin'> & {
+export type JSONField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'admin'> & {
   admin?: JSONAdmin
   type: 'json';
 }
 
-export type SelectField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type SelectField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'select'
   options: Option[]
   hasMany?: boolean
@@ -315,7 +315,7 @@ export type SelectField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
   }
 }
 
-export type RelationshipField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type RelationshipField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'relationship';
   relationTo: string | string[];
   hasMany?: boolean;
@@ -368,7 +368,7 @@ export type RichTextCustomLeaf = {
 export type RichTextElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link' | 'relationship' | 'upload' | 'indent' | RichTextCustomElement;
 export type RichTextLeaf = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'code' | RichTextCustomLeaf;
 
-export type RichTextField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type RichTextField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'richText';
   admin?: Admin & {
     placeholder?: Record<string, string> | string
@@ -388,7 +388,7 @@ export type RichTextField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
   }
 }
 
-export type ArrayField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type ArrayField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'array';
   minRows?: number;
   maxRows?: number;
@@ -409,7 +409,7 @@ export type ArrayField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
   interfaceName?: string
 };
 
-export type RadioField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type RadioField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'radio';
   options: Option[]
   admin?: Admin & {
@@ -417,7 +417,7 @@ export type RadioField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
   }
 }
 
-export type Block<TSlug extends CollectionSlug> = {
+export type Block<TSlug extends CollectionSlug = any> = {
   slug: string;
   labels?: Labels;
   fields: Field<TSlug>[];
@@ -436,7 +436,7 @@ export type Block<TSlug extends CollectionSlug> = {
   interfaceName?: string
 }
 
-export type BlockField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type BlockField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'blocks';
   minRows?: number;
   maxRows?: number;
@@ -449,11 +449,11 @@ export type BlockField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
 
 }
 
-export type PointField<TSlug extends CollectionSlug> = FieldBase<TSlug> & {
+export type PointField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'point',
 }
 
-export type Field<TSlug extends CollectionSlug> =
+export type Field<TSlug extends CollectionSlug = any> =
   TextField<TSlug>
   | NumberField<TSlug>
   | EmailField<TSlug>
@@ -476,7 +476,7 @@ export type Field<TSlug extends CollectionSlug> =
   | TabsField<TSlug>
   | UIField;
 
-export type FieldAffectingData<TSlug extends CollectionSlug> =
+export type FieldAffectingData<TSlug extends CollectionSlug = any> =
   TextField<TSlug>
   | NumberField<TSlug>
   | EmailField<TSlug>
@@ -496,7 +496,7 @@ export type FieldAffectingData<TSlug extends CollectionSlug> =
   | PointField<TSlug>
   | TabAsField<TSlug>
 
-export type NonPresentationalField<TSlug extends CollectionSlug> =
+export type NonPresentationalField<TSlug extends CollectionSlug = any> =
   TextField<TSlug>
   | NumberField<TSlug>
   | EmailField<TSlug>
@@ -518,11 +518,11 @@ export type NonPresentationalField<TSlug extends CollectionSlug> =
   | TabsField<TSlug>
   | CollapsibleField<TSlug>;
 
-export type FieldWithPath<TSlug extends CollectionSlug> = Field<TSlug> & {
+export type FieldWithPath<TSlug extends CollectionSlug = any> = Field<TSlug> & {
   path?: string
 }
 
-export type FieldWithSubFields<TSlug extends CollectionSlug> =
+export type FieldWithSubFields<TSlug extends CollectionSlug = any> =
   GroupField<TSlug>
   | ArrayField<TSlug>
   | RowField<TSlug>
@@ -531,11 +531,11 @@ export type FieldWithSubFields<TSlug extends CollectionSlug> =
 export type FieldPresentationalOnly =
   UIField;
 
-export type FieldWithMany<TSlug extends CollectionSlug> =
+export type FieldWithMany<TSlug extends CollectionSlug = any> =
   SelectField<TSlug>
   | RelationshipField<TSlug>
 
-export type FieldWithMaxDepth<TSlug extends CollectionSlug> =
+export type FieldWithMaxDepth<TSlug extends CollectionSlug = any> =
   UploadField<TSlug>
   | RelationshipField<TSlug>
 

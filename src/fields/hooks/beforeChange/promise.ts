@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import merge from 'deepmerge';
-import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
+import { Field, fieldAffectsData, FieldHook, TabAsField, tabHasName } from '../../config/types';
 import { Operation } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import getValueWithDefault from '../../getDefaultValue';
@@ -86,7 +86,7 @@ export const promise = async ({
 
     // Execute hooks
     if (field.hooks?.beforeChange) {
-      await field.hooks.beforeChange.reduce(async (priorHook, currentHook) => {
+      await field.hooks.beforeChange.reduce(async (priorHook, currentHook: FieldHook) => {
         await priorHook;
 
         const hookedValue = await currentHook({
