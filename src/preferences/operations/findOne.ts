@@ -1,40 +1,33 @@
-import { Preference, PreferenceRequest } from '../types';
-import executeAccess from '../../auth/executeAccess';
-import defaultAccess from '../../auth/defaultAccess';
-import UnauthorizedError from '../../errors/UnathorizedError';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { PreferenceRequest } from '../types';
+import { Where } from '../../types';
 
-async function findOne(args: PreferenceRequest): Promise<Preference> {
+async function findOne(args: PreferenceRequest): Promise<GeneratedTypes['collections']['_preference']> {
   const {
-    overrideAccess,
-    req,
     req: {
-      payload: {
-        preferences: { Model },
-      },
+      payload,
     },
     user,
     key,
   } = args;
 
-  if (!user) {
-    throw new UnauthorizedError(req.t);
-  }
-
-  if (!overrideAccess) {
-    await executeAccess({ req }, defaultAccess);
-  }
-
-  const filter = {
-    key,
-    user: user.id,
-    userCollection: user.collection,
+  const where: Where = {
+    and: [
+      { key: { equals: key } },
+      { 'user.value': { equals: user.id } },
+      { 'user.relationTo': { equals: user.collection } },
+    ],
   };
 
-  const doc = await Model.findOne(filter);
+  const { docs } = await payload.find({
+    collection: '_preferences',
+    where,
+    depth: 0,
+  });
 
-  if (!doc) return null;
+  if (docs.length === 0) return null;
 
-  return doc;
+  return docs[0];
 }
 
 export default findOne;

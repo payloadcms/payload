@@ -7,6 +7,7 @@ import { InvalidConfiguration } from '../errors';
 import sanitizeGlobals from '../globals/config/sanitize';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
 import { defaults } from './defaults';
+import getPreferencesCollection from '../preferences/preferencesCollection';
 
 const sanitizeConfig = (config: Config): SanitizedConfig => {
   const sanitizedConfig = merge(defaults, config, {
@@ -25,6 +26,8 @@ const sanitizeConfig = (config: Config): SanitizedConfig => {
   } else if (!sanitizedConfig.collections.find((c) => c.slug === sanitizedConfig.admin.user)) {
     throw new InvalidConfiguration(`${sanitizedConfig.admin.user} is not a valid admin user collection`);
   }
+
+  sanitizedConfig.collections.push(getPreferencesCollection(sanitizedConfig));
 
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig, collection));
   checkDuplicateCollections(sanitizedConfig.collections);

@@ -10,6 +10,7 @@ import { Where } from '../../types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { deleteUserPreferences } from '../../preferences/deleteUserPreferences';
 
 export type Arguments = {
   depth?: number
@@ -57,7 +58,6 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
       payload,
       payload: {
         config,
-        preferences,
       },
     },
     overrideAccess,
@@ -119,7 +119,13 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         });
       }, Promise.resolve());
 
-      await deleteAssociatedFiles({ config, collectionConfig, doc, t, overrideDelete: true });
+      await deleteAssociatedFiles({
+        config,
+        collectionConfig,
+        doc,
+        t,
+        overrideDelete: true,
+      });
 
       // /////////////////////////////////////
       // Delete document
@@ -199,13 +205,11 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   // Delete Preferences
   // /////////////////////////////////////
 
-  if (collectionConfig.auth) {
-    preferences.Model.deleteMany({
-      user: { in: docs.map(({ id }) => id) },
-      userCollection: collectionConfig.slug,
-    });
-  }
-  preferences.Model.deleteMany({ key: { in: docs.map(({ id }) => `collection-${collectionConfig.slug}-${id}`) } });
+  deleteUserPreferences({
+    payload,
+    collectionConfig,
+    ids: docs.map(({ id }) => id),
+  });
 
   return {
     docs: awaitedDocs.filter(Boolean),

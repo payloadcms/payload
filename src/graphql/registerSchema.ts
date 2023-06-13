@@ -7,7 +7,6 @@ import buildLocaleInputType from './schema/buildLocaleInputType';
 import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType';
 import initCollections from '../collections/graphql/init';
 import initGlobals from '../globals/graphql/init';
-import initPreferences from '../preferences/graphql/init';
 import buildPoliciesType from './schema/buildPoliciesType';
 import accessResolver from '../auth/graphql/resolvers/access';
 
@@ -37,7 +36,7 @@ export default function registerSchema(payload: Payload): void {
 
   initCollections(payload);
   initGlobals(payload);
-  initPreferences(payload);
+  // initPreferences(payload);
 
   payload.Query.fields.Access = {
     type: buildPoliciesType(payload),

@@ -1,14 +1,15 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../express/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { NotFound, Forbidden } from '../../errors';
+import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { BeforeOperationHook, Collection } from '../config/types';
-import { Document, Where } from '../../types';
+import { Document } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { deleteUserPreferences } from '../../preferences/deleteUserPreferences';
 
 export type Arguments = {
   depth?: number
@@ -48,7 +49,6 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
       payload,
       payload: {
         config,
-        preferences,
       },
     },
     overrideAccess,
@@ -117,10 +117,11 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   // Delete Preferences
   // /////////////////////////////////////
 
-  if (collectionConfig.auth) {
-    await preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug });
-  }
-  await preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
+  deleteUserPreferences({
+    payload,
+    collectionConfig,
+    ids: [id],
+  });
 
   // /////////////////////////////////////
   // Delete versions

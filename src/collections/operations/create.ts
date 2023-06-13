@@ -203,7 +203,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       doc: resultWithLocales,
       payload: req.payload,
       password: data.password as string,
-    })
+    });
   } else {
     try {
       doc = await Model.create(resultWithLocales);

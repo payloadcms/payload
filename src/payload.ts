@@ -19,7 +19,6 @@ import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { decrypt, encrypt } from './auth/crypto';
 import { BuildEmailResult } from './email/types';
-import { Preferences } from './preferences/types';
 
 import { Options as CreateOptions } from './collections/operations/local/create';
 import { Options as FindOptions } from './collections/operations/local/find';
@@ -60,7 +59,6 @@ import sendEmail from './email/sendEmail';
 
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit';
 import Logger from './utilities/logger';
-import PreferencesModel from './preferences/model';
 import findConfig from './config/find';
 
 import { defaults as emailDefaults } from './email/defaults';
@@ -78,8 +76,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   versions: {
     [slug: string]: CollectionModel;
   } = {};
-
-  preferences: Preferences;
 
   globals: Globals;
 
@@ -209,8 +205,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     if (!this.config.graphQL.disable) {
       registerSchema(this);
     }
-
-    this.preferences = { Model: PreferencesModel };
 
     serverInitTelemetry(this);
 
