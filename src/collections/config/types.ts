@@ -3,7 +3,7 @@ import { DeepPartial, DeepRequired } from 'ts-essentials';
 import { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
-import { Config as GeneratedTypes } from 'payload/generated-types';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
@@ -50,7 +50,7 @@ type CollectionConfigType<TSlug extends CollectionSlug> = {
        */
       interface?: string
     }
-    fields: Field[];
+    fields: Field<TSlug>[];
     /**
      * Array of database indexes to create, including compound indexes that have multiple fields
      */
@@ -361,7 +361,7 @@ export type CollectionAdminOptions = {
 export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions' | 'endpoints'> {
   auth: Auth;
   upload: Upload;
-  fields: Field[];
+  fields: Field<any>[]; // Can I make this generic more specific? Or rather: should I?
   versions: SanitizedCollectionVersions;
   endpoints: Omit<Endpoint, 'root'>[];
 }
