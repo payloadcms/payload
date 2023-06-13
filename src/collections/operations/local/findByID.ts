@@ -6,8 +6,9 @@ import { Payload } from '../../../payload';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { CollectionSlug } from '../../config/types';
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
+export type Options<T extends CollectionSlug> = {
   collection: T
   id: string | number
   depth?: number
@@ -22,7 +23,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   draft?: boolean
 }
 
-export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(
+export default async function findByIDLocal<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<GeneratedTypes['collections'][T]> {

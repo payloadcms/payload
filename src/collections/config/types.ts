@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeepRequired } from 'ts-essentials';
+import { DeepPartial, DeepRequired } from 'ts-essentials';
 import { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
@@ -17,11 +17,11 @@ import type { Props as EditProps } from '../../admin/components/views/collection
 
 
 type StringKeys<T> = Extract<keyof T, string>;
-type CollectionKey = StringKeys<Collections>;
-type Collections = GeneratedTypes['collections'];
+export type Collections = GeneratedTypes['collections'];
+export type CollectionSlug = StringKeys<Collections>;
 
 
-type CollectionConfigType<TSlug extends CollectionKey> = {
+type CollectionConfigType<TSlug extends CollectionSlug> = {
   slug: TSlug;
     /**
    * Label configuration
@@ -124,11 +124,11 @@ type CollectionConfigType<TSlug extends CollectionKey> = {
 }
 
 type CollectionConfigs = {
-  [K in CollectionKey]: CollectionConfigType<K>;
+  [K in CollectionSlug]: CollectionConfigType<K>;
 }
 
 /** Manage all aspects of a data collection */
-export type CollectionConfig = CollectionConfigs[CollectionKey];
+export type CollectionConfig = CollectionConfigs[CollectionSlug];
 
 type Register<T = any> = (doc: T, password: string) => T;
 
@@ -167,7 +167,7 @@ export type BeforeOperationHook = (args: {
 }) => any;
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
-  data?: Partial<T>;
+  data?: DeepPartial<T>;
   req?: PayloadRequest;
   /**
    * Hook operation being performed
@@ -179,10 +179,10 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T;
-}) => Partial<T> | Promise<Partial<T>>;
+}) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
-  data: Partial<T>;
+  data: DeepPartial<T>;
   req: PayloadRequest;
   /**
    * Hook operation being performed
@@ -194,7 +194,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T;
-}) => Partial<T> | Promise<Partial<T>>;
+}) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   doc: T;
@@ -204,20 +204,20 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    * Hook operation being performed
    */
   operation: CreateOrUpdateOperation;
-}) => Partial<T> | Promise<Partial<T>>;
+}) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
 export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   query: { [key: string]: any };
-}) => Partial<T> | Promise<Partial<T>>;
+}) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
 export type AfterReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   query?: { [key: string]: any };
   findMany?: boolean
-}) => Partial<T> | Promise<Partial<T>>;
+}) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
 export type BeforeDeleteHook = (args: {
   req: PayloadRequest;
@@ -228,7 +228,7 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   id: string | number;
-}) => Partial<T> | Promise<Partial<T>>;
+}) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
 export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
 
@@ -241,24 +241,24 @@ export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   user: T;
   token: string;
-}) => Partial<T> | Promise<Partial<T>>;
+}) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
 export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   res: Response;
-}) => Partial<T> | Promise<Partial<T>>;
+}) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   response: unknown;
-}) => Partial<T> | Promise<Partial<T>>;
+}) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   res: Response;
   token: string;
   exp: number;
-}) => Partial<T> | Promise<Partial<T>>;
+}) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
 export type AfterForgotPasswordHook = (args: {
   args?: any;
@@ -380,7 +380,7 @@ export type Collection = {
   }
 };
 
-export type BulkOperationResult<TSlug extends keyof GeneratedTypes['collections']> = {
+export type BulkOperationResult<TSlug extends CollectionSlug> = {
   docs: GeneratedTypes['collections'][TSlug][],
   errors: {
     message: string

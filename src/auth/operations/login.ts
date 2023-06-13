@@ -8,7 +8,7 @@ import isLocked from '../isLocked';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Field, fieldHasSubFields, fieldAffectsData } from '../../fields/config/types';
 import { User } from '../types';
-import { Collection } from '../../collections/config/types';
+import { Collection, CollectionSlug } from '../../collections/config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import unlock from './unlock';
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts';
@@ -33,7 +33,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function login<TSlug extends keyof GeneratedTypes['collections']>(
+async function login<TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   let args = incomingArgs;

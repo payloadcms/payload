@@ -2,7 +2,7 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Collection, CollectionModel } from '../config/types';
+import { AfterReadHook, Collection, CollectionModel } from '../config/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { PaginatedDocs } from '../../mongoose/types';
@@ -141,7 +141,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     docs: await Promise.all(result.docs.map(async (doc) => {
       const docRef = doc;
 
-      await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook: AfterReadHook) => { // TODO: Improve typing (missing generic)
         await priorHook;
 
         docRef.version = await hook({ req, query, doc: doc.version, findMany: true }) || doc.version;

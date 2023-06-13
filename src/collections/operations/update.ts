@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
 import { Document, Where } from '../../types';
-import { BulkOperationResult, Collection } from '../config/types';
+import { AfterChangeHook, AfterReadHook, BeforeChangeHook, BeforeValidateHook, BulkOperationResult, Collection, CollectionSlug, Collections } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { APIError, ValidationError } from '../../errors';
@@ -31,7 +31,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   overwriteExistingFiles?: boolean
   draft?: boolean
 }
-async function update<TSlug extends keyof GeneratedTypes['collections']>(
+async function update<TSlug extends CollectionSlug>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<BulkOperationResult<TSlug>> {
   let args = incomingArgs;
@@ -170,7 +170,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       // beforeValidate - Collection
       // /////////////////////////////////////
 
-      await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+      await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook: BeforeValidateHook<Collections[TSlug]>) => {
         await priorHook;
 
         data = (await hook({
@@ -193,7 +193,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       // beforeChange - Collection
       // /////////////////////////////////////
 
-      await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+      await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook: BeforeChangeHook<Collections[TSlug]>) => {
         await priorHook;
 
         data = (await hook({
@@ -280,7 +280,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       // afterRead - Collection
       // /////////////////////////////////////
 
-      await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook: AfterReadHook) => { // TODO: Improve typing
         await priorHook;
 
         result = await hook({
@@ -306,7 +306,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       // afterChange - Collection
       // /////////////////////////////////////
 
-      await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+      await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook: AfterChangeHook) => { // TODO: Improve typing
         await priorHook;
 
         result = await hook({

@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
 import { Document } from '../../types';
-import { Collection } from '../config/types';
+import { AfterChangeHook, AfterReadHook, BeforeChangeHook, BeforeValidateHook, Collection, CollectionSlug, Collections } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
@@ -20,23 +20,23 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
 
-export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
-  collection: Collection
-  req: PayloadRequest
-  id: string | number
-  data: DeepPartial<T>
-  depth?: number
-  disableVerificationEmail?: boolean
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
-  overwriteExistingFiles?: boolean
-  draft?: boolean
-  autosave?: boolean
-}
+type UpdateByIDArgs<TSlug extends CollectionSlug> = {
+  collection: Collection;
+  req: PayloadRequest;
+  id: string | number;
+  data: DeepPartial<Collections[TSlug]>;
+  depth?: number;
+  disableVerificationEmail?: boolean;
+  overrideAccess?: boolean;
+  showHiddenFields?: boolean;
+  overwriteExistingFiles?: boolean;
+  draft?: boolean;
+  autosave?: boolean;
+};
 
-async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
-  incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
-): Promise<GeneratedTypes['collections'][TSlug]> {
+async function updateByID<TSlug extends CollectionSlug>(
+  incomingArgs: UpdateByIDArgs<TSlug>,
+): Promise<Collections[TSlug]> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -170,16 +170,18 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // /////////////////////////////////////
   // beforeValidate - Collection
   // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook: BeforeValidateHook<Collections[TSlug]>) => {
     await priorHook;
 
-    data = (await hook({
+    const result = await hook({
       data,
       req,
       operation: 'update',
       originalDoc,
-    })) || data;
+    });
+
+    // The result of the hook might be undefined, so we fall back to data
+    data = result ?? data;
   }, Promise.resolve());
 
   // /////////////////////////////////////
@@ -194,7 +196,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // beforeChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook: BeforeChangeHook<Collections[TSlug]>) => {
     await priorHook;
 
     data = (await hook({
@@ -224,12 +226,12 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // Handle potential password update
   // /////////////////////////////////////
 
-  const dataToUpdate: Record<string, unknown> = { ...result }
+  const dataToUpdate: Record<string, unknown> = { ...result };
 
   if (shouldSavePassword && typeof password === 'string') {
-    const { hash, salt } = await generatePasswordSaltHash({ password })
-    dataToUpdate.salt = salt
-    dataToUpdate.hash = hash
+    const { hash, salt } = await generatePasswordSaltHash({ password });
+    dataToUpdate.salt = salt;
+    dataToUpdate.hash = hash;
     delete data.password;
     delete result.password;
   }
@@ -287,13 +289,13 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     overrideAccess,
     showHiddenFields,
-  });
+  }) as Collections[TSlug];
 
   // /////////////////////////////////////
   // afterRead - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook: AfterReadHook) => { // TODO: Improve typing
     await priorHook;
 
     result = await hook({
@@ -319,7 +321,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // afterChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook: AfterChangeHook) => { // TODO: Improve typing
     await priorHook;
 
     result = await hook({

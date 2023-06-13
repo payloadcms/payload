@@ -10,8 +10,9 @@ import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { CollectionSlug } from '../../config/types';
 
-export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
+export type Options<TSlug extends CollectionSlug> = {
   collection: TSlug
   data: MarkOptional<GeneratedTypes['collections'][TSlug], 'id' | 'updatedAt' | 'createdAt' | 'sizes'>
   depth?: number
@@ -28,7 +29,7 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   draft?: boolean
 }
 
-export default async function createLocal<TSlug extends keyof GeneratedTypes['collections']>(
+export default async function createLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
