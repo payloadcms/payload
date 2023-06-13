@@ -16,9 +16,12 @@ import type { Props as ListProps } from '../../admin/components/views/collection
 import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types';
 
 
+type StringKeys<T> = Extract<keyof T, string>;
+type CollectionKey = StringKeys<Collections>;
 type Collections = GeneratedTypes['collections'];
 
-type CollectionConfigType<TSlug extends keyof Collections> = {
+
+type CollectionConfigType<TSlug extends CollectionKey> = {
   slug: TSlug;
     /**
    * Label configuration
@@ -121,12 +124,11 @@ type CollectionConfigType<TSlug extends keyof Collections> = {
 }
 
 type CollectionConfigs = {
-  [K in keyof Collections]: CollectionConfigType<K>;
+  [K in CollectionKey]: CollectionConfigType<K>;
 }
 
 /** Manage all aspects of a data collection */
-export type CollectionConfig = CollectionConfigs[keyof CollectionConfigs];
-
+export type CollectionConfig = CollectionConfigs[CollectionKey];
 
 type Register<T = any> = (doc: T, password: string) => T;
 
