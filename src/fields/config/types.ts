@@ -106,12 +106,12 @@ export type OptionObject = {
 export type Option = OptionObject | string
 
 export interface FieldBaseType<TSlug extends CollectionSlug, TFieldName extends FieldName<TSlug>> {
-  name: string;
+  name: TFieldName;
   label?: Record<string, string> | string | false;
   required?: boolean;
   unique?: boolean;
   index?: boolean;
-  defaultValue?: any;
+  defaultValue?: Fields<TSlug>[TFieldName];
   hidden?: boolean;
   saveToJWT?: boolean
   localized?: boolean;
@@ -120,13 +120,13 @@ export interface FieldBaseType<TSlug extends CollectionSlug, TFieldName extends 
     beforeValidate?: FieldHook<Fields<TSlug>, Fields<TSlug>[TFieldName]>[];
     beforeChange?: FieldHook<Fields<TSlug>, Fields<TSlug>[TFieldName]>[];
     afterChange?: FieldHook<Fields<TSlug>, Fields<TSlug>[TFieldName]>[];
-    afterRead?: FieldHook<Fields<TSlug>>[];
+    afterRead?: FieldHook<Fields<TSlug>, Fields<TSlug>[TFieldName]>[]
   }
   admin?: Admin;
   access?: {
-    create?: FieldAccess;
-    read?: FieldAccess;
-    update?: FieldAccess;
+    create?: FieldAccess<Fields<TSlug>>;
+    read?: FieldAccess<Fields<TSlug>>;
+    update?: FieldAccess<Fields<TSlug>>;
   };
   /** Extension  point to add your custom data. */
   custom?: Record<string, any>;
