@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
-import { Document, Where } from '../../types';
+import { Where } from '../../types';
 import { BulkOperationResult, Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
@@ -117,20 +117,25 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       versionFields: buildVersionCollectionFields(collection.config),
     });
 
-    docs = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
+    const query = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
       payload,
       collection: collectionConfig,
       where: versionsWhere,
       locale,
     });
+
+    docs = query.docs;
   } else {
-    const query = await Model.buildQuery({
-      where: combineQueries(where, accessResult),
+    const query = await payload.db.find({
       payload,
       locale,
+      collection: collectionConfig,
+      where: fullWhere,
+      pagination: false,
+      limit: 0,
     });
 
-    docs = await Model.find(query, {}, { lean: true });
+    docs = query.docs;
   }
 
   // /////////////////////////////////////
@@ -154,22 +159,19 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   const errors = [];
 
   const promises = docs.map(async (doc) => {
-    let docWithLocales: Document = JSON.stringify(doc);
-    docWithLocales = JSON.parse(docWithLocales);
-
-    const id = docWithLocales._id;
+    const { id } = doc;
 
     try {
       const originalDoc = await afterRead({
         depth: 0,
-        doc: docWithLocales,
+        doc,
         entityConfig: collectionConfig,
         req,
         overrideAccess: true,
         showHiddenFields: true,
       });
 
-      await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc: docWithLocales, t, overrideDelete: false });
+      await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc, t, overrideDelete: false });
 
       // /////////////////////////////////////
       // beforeValidate - Fields
@@ -230,7 +232,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
         data,
         doc: originalDoc,
-        docWithLocales,
+        docWithLocales: doc,
         entityConfig: collectionConfig,
         id,
         operation: 'update',
@@ -275,7 +277,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           req,
           docWithLocales: {
             ...result,
-            createdAt: docWithLocales.createdAt,
+            createdAt: doc.createdAt,
           },
           id,
           draft: shouldSaveDraft,
