@@ -95,6 +95,8 @@ export const number = baseField.keys({
     step: joi.number(),
   }),
   hasMany: joi.boolean().default(false),
+  minRows: joi.number().when('hasMany', { is: true, then: joi.optional(), otherwise: joi.forbidden() }),
+  maxRows: joi.number().when('hasMany', { is: true, then: joi.optional(), otherwise: joi.forbidden() }),
 });
 
 export const textarea = baseField.keys({

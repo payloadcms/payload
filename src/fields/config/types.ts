@@ -140,9 +140,22 @@ export type NumberField = FieldBase & {
   min?: number
   /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
+} & ({
   /** Makes this field an ordered array of numbers instead of just a single number. */
-  hasMany?: boolean
-}
+  hasMany: true
+  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+  minRows?: number
+  /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+  maxRows?: number
+} | {
+  /** Makes this field an ordered array of numbers instead of just a single number. */
+  hasMany?: false | undefined
+  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+  minRows?: undefined
+  /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+  maxRows?: undefined
+})
+
 
 export type TextField = FieldBase & {
   type: 'text';

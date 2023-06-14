@@ -23,6 +23,8 @@ const NumberField: React.FC<Props> = (props) => {
     max,
     min,
     hasMany,
+    minRows,
+    maxRows,
     admin: {
       readOnly,
       style,
