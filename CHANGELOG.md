@@ -6,8 +6,6 @@
 ### Bug Fixes
 
 * [#2821](https://github.com/payloadcms/payload/issues/2821) i18n ui field label ([#2823](https://github.com/payloadcms/payload/issues/2823)) ([63cd7fb](https://github.com/payloadcms/payload/commit/63cd7fbd0c91bbf5120e95fd33388a38e593b341))
-* adds async await to payload.init example ([25e9c1a](https://github.com/payloadcms/payload/commit/25e9c1a50a8b8012c377de56533046f8915dfe07))
-* adds async await to payload.init example ([d601cdd](https://github.com/payloadcms/payload/commit/d601cdd29ee04ba6a2f6882eacdb3e2337bf1312))
 * adds missing dark-mode styles for version differences view ([#2812](https://github.com/payloadcms/payload/issues/2812)) ([346a48f](https://github.com/payloadcms/payload/commit/346a48f871e09a3d5e25b7ff9e45689a104b0f9f))
 * sanitize reset password result - [#2805](https://github.com/payloadcms/payload/issues/2805) ([#2808](https://github.com/payloadcms/payload/issues/2808)) ([46a5f41](https://github.com/payloadcms/payload/commit/46a5f417217313b049f4b412abb3319634f27262))
 * user can be created without having to specify an email - [#2801](https://github.com/payloadcms/payload/issues/2801) ([abe3852](https://github.com/payloadcms/payload/commit/abe38520aaaefdfaea4c47130eea04a42a82627b))
