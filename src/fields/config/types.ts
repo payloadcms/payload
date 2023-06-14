@@ -335,8 +335,8 @@ export type RelationshipField = FieldBase & {
    * @deprecated Use 'maxRows' instead
    */
   max?: undefined
-  minRows?: number
-  maxRows?: number
+  minRows?: undefined
+  maxRows?: undefined
 })
 
 export type ValueWithRelation = {
