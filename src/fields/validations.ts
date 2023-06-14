@@ -35,11 +35,11 @@ export const number: Validate<unknown, unknown, NumberField> = (value: number | 
     }
 
     if (typeof max === 'number' && floatValue > max) {
-      return t('validation:greaterThanMax', { value, max });
+      return t('validation:greaterThanMax', { value, max, label: t('value') });
     }
 
     if (typeof min === 'number' && floatValue < min) {
-      return t('validation:lessThanMin', { value, min });
+      return t('validation:lessThanMin', { value, min, label: t('value') });
     }
 
     if (required && typeof floatValue !== 'number') {
@@ -54,11 +54,11 @@ export const number: Validate<unknown, unknown, NumberField> = (value: number | 
 
   if (hasMany === true) {
     if (minRows && toValidate.length < minRows) {
-      return t('validation:lessThanMin', { count: minRows, label: t('rows') });
+      return t('validation:lessThanMin', { value: toValidate.length, min: minRows, label: t('rows') });
     }
 
     if (maxRows && toValidate.length > maxRows) {
-      return t('validation:greaterThanMax', { count: maxRows, label: t('rows') });
+      return t('validation:greaterThanMax', { value: toValidate.length, max: maxRows, label: t('rows') });
     }
   }
 
@@ -310,11 +310,11 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
 
   if (Array.isArray(value)) {
     if (min && value.length < min) {
-      return t('validation:lessThanMin', { count: min, label: t('rows') });
+      return t('validation:lessThanMin', { value: value.length, min, label: t('rows') });
     }
 
     if (max && value.length > max) {
-      return t('validation:greaterThanMax', { count: max, label: t('rows') });
+      return t('validation:greaterThanMax', { value: value.length, max, label: t('rows') });
     }
   }
 
