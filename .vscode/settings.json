@@ -1,11 +1,12 @@
 {
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "[typescript][typescriptreact]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.formatOnSave": true
   },
   "[json][jsonc]": {
-    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+    "editor.formatOnSave": true
   },
-  "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file"
 }
