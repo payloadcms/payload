@@ -145,6 +145,7 @@ const NumberField: React.FC<Props> = (props) => {
             const notANumber = rawInput.trim() === '' || isNaN(Number(rawInput));
             return !notANumber && (validate ? validate(Number(rawInput), { t, min, max, required }) === true : true);
           }}
+          numberOnly
         />
       ) : (
         <input

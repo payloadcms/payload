@@ -40,6 +40,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     isSearchable = true,
     isClearable = true,
     filterOption = undefined,
+    numberOnly = false,
     isLoading,
     onMenuOpen,
     components,
@@ -85,6 +86,16 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     );
   }
   const handleKeyDown: KeyboardEventHandler = (event) => {
+    // eslint-disable-next-line no-restricted-globals
+    if (numberOnly === true) {
+      const acceptableKeys = ['Tab', 'Escape', 'Backspace', 'Enter', 'ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'];
+      const isNumber = !/[^0-9]/.test(event.key);
+      const isActionKey = acceptableKeys.includes(event.key);
+      if (!isNumber && !isActionKey) {
+        event.preventDefault();
+        return;
+      }
+    }
     if (!value || !inputValue || inputValue.trim() === '') return;
     if (filterOption && !filterOption(null, inputValue)) {
       return;

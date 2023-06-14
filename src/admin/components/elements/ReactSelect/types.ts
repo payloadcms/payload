@@ -66,6 +66,7 @@ export type Props = {
   filterOption?:
   | (({ label, value, data }: { label: string, value: string, data: Option }, search: string) => boolean)
   | undefined,
+  numberOnly?: boolean,
   components?: {
     [key: string]: React.FC<any>
   }
