@@ -460,7 +460,10 @@ export const date = baseField.keys({
 
 export const ui = joi.object().keys({
   name: joi.string().required(),
-  label: joi.string(),
+  label: joi.alternatives().try(
+    joi.string(),
+    joi.object().pattern(joi.string(), [joi.string()]),
+  ),
   type: joi.string().valid('ui').required(),
   admin: joi.object().keys({
     position: joi.string().valid('sidebar'),
