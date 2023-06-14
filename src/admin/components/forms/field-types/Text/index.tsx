@@ -43,6 +43,8 @@ const Text: React.FC<Props> = (props) => {
     condition,
   });
 
+  // console.log(`text: ${path} value: ${value}`);
+
   return (
     <TextInput
       path={path}

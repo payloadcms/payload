@@ -13,7 +13,7 @@ import { usePreferences } from '../../../utilities/Preferences';
 import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
-import { TrackSubFieldErrorCount } from '../TrackSubFieldErrorCount';
+import { TrackSubFieldErrorCount } from '../../TrackSubFieldErrorCount';
 
 import './index.scss';
 

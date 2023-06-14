@@ -9,7 +9,7 @@ import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import FieldDescription from '../../FieldDescription';
 import { RowLabel } from '../../RowLabel';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
-import { TrackSubFieldErrorCount } from '../TrackSubFieldErrorCount';
+import { TrackSubFieldErrorCount } from '../../TrackSubFieldErrorCount';
 
 import './index.scss';
 

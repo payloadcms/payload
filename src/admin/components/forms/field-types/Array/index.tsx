@@ -26,7 +26,7 @@ import { useConfig } from '../../../utilities/Config';
 import { NullifyLocaleField } from '../../NullifyField';
 import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
-import { TrackSubFieldErrorCount } from '../TrackSubFieldErrorCount';
+import { TrackSubFieldErrorCount } from '../../TrackSubFieldErrorCount';
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types';
 import type { Row } from '../../Form/types';
 import type { RowLabel as RowLabelType } from '../../RowLabel/types';

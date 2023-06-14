@@ -33,7 +33,7 @@ import { DrawerToggler } from '../../../elements/Drawer';
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types';
 import type { Row } from '../../Form/types';
 import type { Block } from '../../../../../fields/config/types';
-import { TrackSubFieldErrorCount } from '../TrackSubFieldErrorCount';
+import { TrackSubFieldErrorCount } from '../../TrackSubFieldErrorCount';
 
 import './index.scss';
 
