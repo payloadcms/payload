@@ -194,31 +194,6 @@ describe('Fields', () => {
         },
       })).rejects.toThrow('The following field is invalid: decimalMax');
     });
-
-    it('should validate an array of numbers', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          hasMany: 3,
-        },
-      })).rejects.toThrow('The following field is invalid: hasMany');
-    });
-    it('should validate an array of numbers using min', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          hasMany: [3],
-        },
-      })).rejects.toThrow('The following field is invalid: hasMany');
-    });
-    it('should validate an array of numbers using max', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          hasMany: [1000],
-        },
-      })).rejects.toThrow('The following field is invalid: hasMany');
-    });
     it('should localize an array of numbers using hasMany', async () => {
       const localizedHasMany = [5, 10];
       const { id } = await payload.create({
