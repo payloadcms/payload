@@ -8,5 +8,8 @@
       },
     "editor.formatOnSave": true,
     "editor.formatOnSaveMode": "file",
+    "[jsonc]": {
+        "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+    },
     
 }

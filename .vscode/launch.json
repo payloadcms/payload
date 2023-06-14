@@ -17,6 +17,6 @@
       "request": "launch",
       "type": "node-terminal",
       "cwd": "${workspaceFolder}"
-    },
+    }
   ]
 }
