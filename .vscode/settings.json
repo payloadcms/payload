@@ -3,9 +3,9 @@
   "[typescript][typescriptreact]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
-  "editor.formatOnSave": true,
-  "editor.formatOnSaveMode": "file",
   "[json][jsonc]": {
     "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
-  }
+  },
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file"
 }
