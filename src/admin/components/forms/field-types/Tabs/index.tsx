@@ -52,6 +52,7 @@ const Tab: React.FC<TabProps> = ({ tab, isActive, setIsActive, parentPath }) => 
         {tab.label ? getTranslation(tab.label, i18n) : (tabHasName(tab) && tab.name)}
         {(typeof errorCount === 'number' && errorCount > 0) && (
           <code>
+            {' - '}
             Errors:
             {' '}
             {errorCount}

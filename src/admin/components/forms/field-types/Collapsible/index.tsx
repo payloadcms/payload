@@ -35,7 +35,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
   const { preferencesKey } = useDocumentInfo();
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>();
   const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./gi, '__')}`;
-  const [errorCount, setErrorCount] = useState(undefined);
+  const [errorCount, setErrorCount] = useState(0);
 
   const onToggle = useCallback(async (newCollapsedState: boolean) => {
     const existingPreferences: DocumentPreferences = await getPreference(preferencesKey);

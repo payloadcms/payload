@@ -29,9 +29,8 @@ const useField = <T, >(options: Options): FieldType<T> => {
   const { id } = useDocumentInfo();
   const operation = useOperation();
   const field = useFormFields(([fields]) => fields[path]);
-
-  const dispatchField = useFormFields(([_, dispatch]) => dispatch);
   const { t } = useTranslation();
+  const dispatchField = useFormFields(([_, dispatch]) => dispatch);
 
   const { getData, getSiblingData, setModified } = useForm();
 
@@ -81,7 +80,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
     setValue,
     initialValue,
     rows: field?.rows,
-  }), [field, processing, setValue, showError, submitted, value, initialValue]);
+  }), [field?.errorMessage, field?.rows, processing, setValue, showError, submitted, value, initialValue]);
 
   // Throttle the validate function
   useThrottledEffect(() => {

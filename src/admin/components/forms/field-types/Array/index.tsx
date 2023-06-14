@@ -27,10 +27,123 @@ import { NullifyLocaleField } from '../../NullifyField';
 import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
 import { TrackSubFieldErrorCount } from '../TrackSubFieldErrorCount';
+import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types';
+import type { Row } from '../../Form/types';
+import type { RowLabel as RowLabelType } from '../../RowLabel/types';
 
 import './index.scss';
 
 const baseClass = 'array-field';
+
+type ArrayRowProps = UseDraggableSortableReturn & Pick<Props, 'fields' | 'path' | 'indexPath' | 'fieldTypes' | 'permissions' | 'labels'> & {
+  addRow: (rowIndex: number) => void
+  duplicateRow: (rowIndex: number) => void
+  removeRow: (rowIndex: number) => void
+  moveRow: (fromIndex: number, toIndex: number) => void
+  setCollapse: (rowID: string, collapsed: boolean) => void
+  rowCount: number
+  rowIndex: number
+  row: Row
+  CustomRowLabel?: RowLabelType
+  readOnly?: boolean
+}
+const ArrayRow: React.FC<ArrayRowProps> = ({
+  path: parentPath,
+  attributes,
+  listeners,
+  transform,
+  setNodeRef,
+  addRow,
+  removeRow,
+  duplicateRow,
+  moveRow,
+  setCollapse,
+  rowCount,
+  rowIndex,
+  row,
+  CustomRowLabel,
+  fields,
+  indexPath,
+  readOnly,
+  permissions,
+  fieldTypes,
+  labels,
+}) => {
+  const path = `${parentPath}.${rowIndex}`;
+  const { i18n } = useTranslation();
+  const [errorCount, setErrorCount] = React.useState(0);
+
+  const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(2, '0')}`;
+
+  return (
+    <div
+      id={`${path}-row-${rowIndex}`}
+      ref={setNodeRef}
+      style={{
+        transform,
+      }}
+    >
+      <TrackSubFieldErrorCount
+        path={path}
+        subFields={fields}
+        setErrorCount={setErrorCount}
+      />
+
+      <Collapsible
+        collapsed={row.collapsed}
+        onToggle={(collapsed) => setCollapse(row.id, collapsed)}
+        className={`${baseClass}__row`}
+        key={row.id}
+        dragHandleProps={{
+          id: row.id,
+          attributes,
+          listeners,
+        }}
+        header={(
+          <React.Fragment>
+            <RowLabel
+              path={path}
+              label={CustomRowLabel || fallbackLabel}
+              rowNumber={rowIndex + 1}
+            />
+            <code>
+              {' - '}
+              Errors:
+              {' '}
+              {errorCount}
+            </code>
+          </React.Fragment>
+        )}
+        actions={!readOnly ? (
+          <ArrayAction
+            rowCount={rowCount}
+            duplicateRow={duplicateRow}
+            addRow={addRow}
+            moveRow={moveRow}
+            removeRow={removeRow}
+            index={rowIndex}
+          />
+        ) : undefined}
+      >
+        <HiddenInput
+          name={`${path}.id`}
+          value={row.id}
+        />
+        <RenderFields
+          className={`${baseClass}__fields`}
+          readOnly={readOnly}
+          fieldTypes={fieldTypes}
+          permissions={permissions?.fields}
+          indexPath={indexPath}
+          fieldSchema={fields.map((field) => ({
+            ...field,
+            path: createNestedFieldPath(path, field),
+          }))}
+        />
+      </Collapsible>
+    </div>
+  );
+};
 
 const ArrayFieldType: React.FC<Props> = (props) => {
   const {
@@ -62,14 +175,14 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const CustomRowLabel = components?.RowLabel || undefined;
 
   const { setDocFieldPreferences, id, getDocPreferences } = useDocumentInfo();
-  const formContext = useForm();
+  const { dispatchFields, setModified } = useForm();
   const { user } = useAuth();
   const locale = useLocale();
   const operation = useOperation();
   const { t, i18n } = useTranslation('fields');
   const { localization } = useConfig();
 
-  const [errorCount, setErrorCount] = React.useState(undefined);
+  const [errorCount, setErrorCount] = React.useState(0);
 
   const checkSkipValidation = useCallback((value) => {
     const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
@@ -88,8 +201,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   };
 
   const labels = getLabels(props);
-
-  const { dispatchFields, setModified } = formContext;
 
   const memoizedValidate = useCallback((value, options) => {
     if (checkSkipValidation(value)) return true;
@@ -138,12 +249,12 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     setModified(true);
   }, [dispatchFields, path, setModified]);
 
-  const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
-    dispatchFields({ type: 'SET_ROW_COLLAPSED', path, collapsed, rowID, setDocFieldPreferences });
-  }, [dispatchFields, path, setDocFieldPreferences]);
-
   const toggleCollapseAll = useCallback(async (collapsed: boolean) => {
     dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, collapsed, setDocFieldPreferences });
+  }, [dispatchFields, path, setDocFieldPreferences]);
+
+  const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
+    dispatchFields({ type: 'SET_ROW_COLLAPSED', path, collapsed, rowID, setDocFieldPreferences });
   }, [dispatchFields, path, setDocFieldPreferences]);
 
   const hasMaxRows = maxRows && rows?.length >= maxRows;
@@ -170,6 +281,12 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <h3>{getTranslation(label || name, i18n)}</h3>
+          <code>
+            {' - '}
+            Errors:
+            {' '}
+            {errorCount}
+          </code>
           <ul className={`${baseClass}__header-actions`}>
             <li>
               <button
@@ -214,70 +331,33 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
       >
         {rows.length > 0 && rows.map((row, i) => {
-          const rowNumber = i + 1;
-          const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowNumber).padStart(2, '0')}`;
-
           return (
             <DraggableSortableItem
               key={row.id}
               id={row.id}
               disabled={readOnly}
             >
-              {({ setNodeRef, transform, attributes, listeners }) => (
-                <div
-                  id={`${path}-row-${i}`}
+              {(draggableSortableItemProps) => (
+                <ArrayRow
                   key={`${path}-row-${i}`}
-                  ref={setNodeRef}
-                  style={{
-                    transform,
-                  }}
-                >
-                  <Collapsible
-                    collapsed={row.collapsed}
-                    onToggle={(collapsed) => setCollapse(row.id, collapsed)}
-                    className={`${baseClass}__row`}
-                    key={row.id}
-                    dragHandleProps={{
-                      id: row.id,
-                      attributes,
-                      listeners,
-                    }}
-                    header={(
-                      <RowLabel
-                        path={`${path}.${i}`}
-                        label={CustomRowLabel || fallbackLabel}
-                        rowNumber={rowNumber}
-                      />
-                    )}
-                    actions={!readOnly ? (
-                      <ArrayAction
-                        rowCount={rows.length}
-                        duplicateRow={duplicateRow}
-                        addRow={addRow}
-                        moveRow={moveRow}
-                        removeRow={removeRow}
-                        index={i}
-                      />
-                    ) : undefined}
-                  >
-                    <HiddenInput
-                      name={`${path}.${i}.id`}
-                      value={row.id}
-                    />
-                    <RenderFields
-                      className={`${baseClass}__fields`}
-                      readOnly={readOnly}
-                      fieldTypes={fieldTypes}
-                      permissions={permissions?.fields}
-                      indexPath={indexPath}
-                      fieldSchema={fields.map((field) => ({
-                        ...field,
-                        path: createNestedFieldPath(`${path}.${i}`, field),
-                      }))}
-                    />
-
-                  </Collapsible>
-                </div>
+                  {...draggableSortableItemProps}
+                  row={row}
+                  addRow={addRow}
+                  duplicateRow={duplicateRow}
+                  removeRow={removeRow}
+                  setCollapse={setCollapse}
+                  path={path}
+                  fieldTypes={fieldTypes}
+                  fields={fields}
+                  moveRow={moveRow}
+                  readOnly={readOnly}
+                  rowCount={rows.length}
+                  permissions={permissions}
+                  CustomRowLabel={CustomRowLabel}
+                  rowIndex={i}
+                  indexPath={indexPath}
+                  labels={labels}
+                />
               )}
             </DraggableSortableItem>
           );
