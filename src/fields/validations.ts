@@ -28,21 +28,21 @@ export const number: Validate<unknown, unknown, NumberField> = (value: number | 
   const toValidate: number[] = Array.isArray(value) ? value : [value];
 
   // eslint-disable-next-line no-restricted-syntax
-  for (const val of toValidate) {
-    const v = parseFloat(val as unknown as string);
-    if ((value && typeof v !== 'number') || (required && Number.isNaN(v)) || (value && Number.isNaN(v))) {
+  for (const valueToValidate of toValidate) {
+    const floatValue = parseFloat(valueToValidate as unknown as string);
+    if ((value && typeof floatValue !== 'number') || (required && Number.isNaN(floatValue)) || (value && Number.isNaN(floatValue))) {
       return t('validation:enterNumber');
     }
 
-    if (typeof max === 'number' && v > max) {
+    if (typeof max === 'number' && floatValue > max) {
       return t('validation:greaterThanMax', { value, max });
     }
 
-    if (typeof min === 'number' && v < min) {
+    if (typeof min === 'number' && floatValue < min) {
       return t('validation:lessThanMin', { value, min });
     }
 
-    if (required && typeof v !== 'number') {
+    if (required && typeof floatValue !== 'number') {
       return t('validation:required');
     }
   }
