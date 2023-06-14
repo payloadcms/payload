@@ -32,15 +32,15 @@ This API is used significantly for internal operations of the Admin panel, as me
 
 Payload automatically creates an internally used `payload-preferences` collection that stores user preferences. Each document in the `payload-preferences` collection contains the following shape:
 
-| Key               | Value  |
-|-------------------| -------------|
-| `id`              | A unique ID for each preference stored. |
-| `key`             | A unique `key` that corresponds to the preference. |
-| `user.value`      | The ID of the `user` that is storing its preference. |
-| `user.relationTo` | The `slug` of the collection that the `user` is logged in as. |
+| Key               | Value                                                             |
+|-------------------|-------------------------------------------------------------------|
+| `id`              | A unique ID for each preference stored.                           |
+| `key`             | A unique `key` that corresponds to the preference.                |
+| `user.value`      | The ID of the `user` that is storing its preference.              |
+| `user.relationTo` | The `slug` of the collection that the `user` is logged in as.     |
 | `value`           | The value of the preference. Can be any data shape that you need. |
-| `createdAt`       | A timestamp of when the preference was created. |
-| `updatedAt`       | A timestamp set to the last time the preference was updated.
+| `createdAt`       | A timestamp of when the preference was created.                   |
+| `updatedAt`       | A timestamp set to the last time the preference was updated.      |
 
 ### APIs
 
