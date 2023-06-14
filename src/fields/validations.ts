@@ -24,7 +24,7 @@ import canUseDOM from '../utilities/canUseDOM';
 import { isValidID } from '../utilities/isValidID';
 import { getIDType } from '../utilities/getIDType';
 
-export const number: Validate<unknown, unknown, NumberField> = (value: number | number[], { t, required, min, max }) => {
+export const number: Validate<unknown, unknown, NumberField> = (value: number | number[], { t, required, min, max, minRows, maxRows, hasMany }) => {
   const toValidate: number[] = Array.isArray(value) ? value : [value];
 
   // eslint-disable-next-line no-restricted-syntax
@@ -49,6 +49,17 @@ export const number: Validate<unknown, unknown, NumberField> = (value: number | 
 
   if (required && toValidate.length === 0) {
     return t('validation:required');
+  }
+
+
+  if (hasMany === true) {
+    if (minRows && toValidate.length < minRows) {
+      return t('validation:lessThanMin', { count: minRows, label: t('rows') });
+    }
+
+    if (maxRows && toValidate.length > maxRows) {
+      return t('validation:greaterThanMax', { count: maxRows, label: t('rows') });
+    }
   }
 
 
