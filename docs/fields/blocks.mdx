@@ -24,22 +24,22 @@ _Admin panel screenshot of a Blocks field type with Call to Action and Number bl
 
 ### Field config
 
-| Option             | Description                                                                                                                                                                                                                                                                        |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | -------------- | ----------------------------------- |
-| **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                             |
-| **`label`**        | Text used as the heading in the Admin panel or an object with keys for each language. Auto-generated from name if not defined.                                                                                                                                                     |
-| **`blocks`** \*    | Array of [block configs](/docs/fields/blocks#block-configs) to be made available to this field.                                                                                                                                                                                    |
-| **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                                                                                                       |
-| **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                                                                                                      |
-| **`hooks`**        | Provide field-level hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                                                                                                         |
-| **`access`**       | Provide field-level access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                                                                                                            |
-| **`hidden`**       | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API response or the Admin panel.                                                                                                                          |
-| **`defaultValue`** | Provide an array of block data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                                                                                             |
-| **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. If enabled, a separate, localized set of all data within this field will be kept, so there is no need to specify each nested field as `localized`. |     | **`required`** | Require this field to have a value. |
-| **`unique`**       | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                                                                                                       |
-| **`labels`**       | Customize the block row labels appearing in the Admin dashboard.                                                                                                                                                                                                                   |
-| **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                                                                                                          |
-| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                          |
+| Option                  | Description                                                                                                                                                                                                                                                                        |
+|-------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`name`** *            | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                             |
+| **`label`**             | Text used as the heading in the Admin panel or an object with keys for each language. Auto-generated from name if not defined.                                                                                                                                                     |
+| **`blocks`** *          | Array of [block configs](/docs/fields/blocks#block-configs) to be made available to this field.                                                                                                                                                                                    |
+| **`validate`**          | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                                                                                                       |
+| **`saveToJWT`**         | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                                                                                                      |
+| **`hooks`**             | Provide field-level hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                                                                                                         |
+| **`access`**            | Provide field-level access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                                                                                                            |
+| **`hidden`**            | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API response or the Admin panel.                                                                                                                          |
+| **`defaultValue`**      | Provide an array of block data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                                                                                             |
+| **`localized`**         | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. If enabled, a separate, localized set of all data within this field will be kept, so there is no need to specify each nested field as `localized`. |
+| **`unique`**            | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                                                                                                       |
+| **`labels`**            | Customize the block row labels appearing in the Admin dashboard.                                                                                                                                                                                                                   |
+| **`admin`**             | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                                                                                                          |
+| **`custom`**            | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                          |
 
 _\* An asterisk denotes that a property is required._
 
@@ -93,33 +93,33 @@ The Admin panel provides each block with a `blockName` field which optionally al
 `collections/ExampleCollection.js`
 
 ```ts
-import { Block, CollectionConfig } from "payload/types";
+import { Block, CollectionConfig } from 'payload/types';
 
 const QuoteBlock: Block = {
-  slug: "Quote", // required
-  imageURL: "https://google.com/path/to/image.jpg",
-  imageAltText: "A nice thumbnail image to show what this block looks like",
-  interfaceName: "QuoteBlock", // optional
+  slug: 'Quote', // required
+  imageURL: 'https://google.com/path/to/image.jpg',
+  imageAltText: 'A nice thumbnail image to show what this block looks like',
+  interfaceName: 'QuoteBlock', // optional
   fields: [
     // required
     {
-      name: "quoteHeader",
-      type: "text",
+      name: 'quoteHeader',
+      type: 'text',
       required: true,
     },
     {
-      name: "quoteText",
-      type: "text",
+      name: 'quoteText',
+      type: 'text',
     },
   ],
 };
 
 export const ExampleCollection: CollectionConfig = {
-  slug: "example-collection",
+  slug: 'example-collection',
   fields: [
     {
-      name: "layout", // required
-      type: "blocks", // required
+      name: 'layout', // required
+      type: 'blocks', // required
       minRows: 1,
       maxRows: 20,
       blocks: [
@@ -136,5 +136,5 @@ export const ExampleCollection: CollectionConfig = {
 As you build your own Block configs, you might want to store them in separate files but retain typing accordingly. To do so, you can import and use Payload's `Block` type:
 
 ```ts
-import type { Block } from "payload/types";
+import type { Block } from 'payload/types';
 ```
