@@ -43,6 +43,9 @@ function returnOptionEnums(options: Option[]): string[] {
   });
 }
 
+/**
+ * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
+ */
 function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fieldDefinitionsMap: Map<string, JSONSchema4>): {
   properties: {
     [k: string]: JSONSchema4;
@@ -66,7 +69,11 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
         }
 
         case 'number': {
-          fieldSchema = { type: 'number' };
+          if (field.hasMany === true) {
+            fieldSchema = { type: 'array', items: { type: 'number' } };
+          } else {
+            fieldSchema = { type: 'number' };
+          }
           break;
         }
 
