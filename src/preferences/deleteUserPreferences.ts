@@ -1,5 +1,4 @@
 import type { Payload } from '../index';
-import type { Where } from '../types';
 import type { SanitizedCollectionConfig } from '../collections/config/types';
 
 type Args = {
@@ -11,34 +10,11 @@ type Args = {
   collectionConfig: SanitizedCollectionConfig
 }
 export const deleteUserPreferences = ({ payload, ids, collectionConfig }: Args) => {
-  const deletePreferencesWhere: Where = {
-    or: [{
-      key: {
-        in: ids.map(
-          (id) => `collection-${collectionConfig.slug}-${id}`,
-        ),
-      },
-    }],
-  };
-
   if (collectionConfig.auth) {
-    deletePreferencesWhere.or.push({
-      and: [
-        {
-          'user.value': {
-            in: ids,
-          },
-        },
-        {
-          'user.relationTo': { equals: collectionConfig.slug },
-        },
-      ],
+    payload.collections._preferences.Model.deleteMany({
+      user: { in: ids },
+      userCollection: collectionConfig.slug,
     });
   }
-
-  payload.delete({
-    collection: '_preferences',
-    where: deletePreferencesWhere,
-    overrideAccess: true,
-  });
+  payload.collections._preferences.Model.deleteMany({ key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) } });
 };

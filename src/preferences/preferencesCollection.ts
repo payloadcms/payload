@@ -17,7 +17,6 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
   },
   access: {
     read: preferenceAccess,
-    update: preferenceAccess,
     delete: preferenceAccess,
   },
   fields: [
@@ -27,14 +26,24 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
       relationTo: config.collections
         .filter((collectionConfig) => collectionConfig.auth)
         .map((collectionConfig) => collectionConfig.slug),
-      validate: ({ value }, { user, t }) => {
-        return value === user.id || t('validation:invalidSelection');
+      required: true,
+      hooks: {
+        beforeValidate: [
+          (({ req }) => {
+            if (!req?.user) {
+              return null;
+            }
+            return {
+              value: req?.user.id,
+              relationTo: req?.user.collection,
+            };
+          }),
+        ],
       },
     },
     {
       name: 'key',
       type: 'text',
-      index: true,
     },
     {
       name: 'value',
