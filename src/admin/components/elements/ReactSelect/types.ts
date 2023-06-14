@@ -33,7 +33,7 @@ declare module 'react-select/dist/declarations/src' {
 export type Option = {
   [key: string]: unknown
   value: unknown
-  //* The ID is used to identify the option in the UI. If it doesn't exist and value is no string, sorting won't work */
+  //* The ID is used to identify the option in the UI. If it doesn't exist and value cannot be transformed into a string, sorting won't work */
   id?: string
 }
 

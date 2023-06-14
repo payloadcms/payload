@@ -10,7 +10,7 @@ export type Props = Omit<RelationshipField, 'type'> & {
 
 export type Option = {
   label: string
-  value: string
+  value: string | number
   relationTo?: string
   options?: Option[]
 }
