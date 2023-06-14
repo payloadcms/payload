@@ -20,9 +20,10 @@ async function findOne(args: PreferenceRequest): Promise<GeneratedTypes['collect
   };
 
   const { docs } = await payload.find({
-    collection: '_preferences',
+    collection: 'payload-preferences',
     where,
     depth: 0,
+    user,
   });
 
   if (docs.length === 0) return null;

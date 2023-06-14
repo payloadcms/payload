@@ -36,7 +36,6 @@ export default function registerGraphQLSchema(payload: Payload): void {
 
   initCollections(payload);
   initGlobals(payload);
-  // initPreferences(payload);
 
   payload.Query.fields.Access = {
     type: buildPoliciesType(payload),

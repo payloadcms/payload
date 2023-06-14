@@ -33,9 +33,10 @@ async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   };
 
   const result = await payload.delete({
-    collection: '_preferences',
+    collection: 'payload-preferences',
     where,
     depth: 0,
+    user,
   });
 
   if (result.docs.length === 1) {

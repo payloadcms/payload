@@ -11,10 +11,10 @@ type Args = {
 }
 export const deleteUserPreferences = ({ payload, ids, collectionConfig }: Args) => {
   if (collectionConfig.auth) {
-    payload.collections._preferences.Model.deleteMany({
+    payload.collections['payload-preferences'].Model.deleteMany({
       user: { in: ids },
       userCollection: collectionConfig.slug,
     });
   }
-  payload.collections._preferences.Model.deleteMany({ key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) } });
+  payload.collections['payload-preferences'].Model.deleteMany({ key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) } });
 };

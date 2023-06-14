@@ -15,7 +15,7 @@ async function update(args: PreferenceUpdateRequest) {
     value,
   } = args;
 
-  const collection = '_preferences';
+  const collection = 'payload-preferences';
 
   const filter = {
     key,

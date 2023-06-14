@@ -11,7 +11,7 @@ const preferenceAccess: Access = ({ req }) => ({
 });
 
 const getPreferencesCollection = (config: Config): CollectionConfig => ({
-  slug: '_preferences',
+  slug: 'payload-preferences',
   admin: {
     hidden: true,
   },
