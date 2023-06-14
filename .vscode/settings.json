@@ -1,15 +1,11 @@
 {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-    "[typescript]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    },
-    "[typescriptreact]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-      },
-    "editor.formatOnSave": true,
-    "editor.formatOnSaveMode": "file",
-    "[jsonc]": {
-        "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
-    },
-    
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "[typescript][typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "[json][jsonc]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  }
 }
