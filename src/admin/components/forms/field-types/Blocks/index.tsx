@@ -52,24 +52,24 @@ type BlockFieldProps = UseDraggableSortableReturn & Pick<Props, 'path' | 'labels
   blockToRender: Block
 }
 const BlockRow: React.FC<BlockFieldProps> = ({
+  path: parentPath,
   addRow,
-  duplicateRow,
   removeRow,
   moveRow,
+  duplicateRow,
   setCollapse,
-  path: parentPath,
-  setNodeRef,
   transform,
-  attributes,
   listeners,
-  rowIndex,
+  attributes,
+  setNodeRef,
   row,
+  rowIndex,
+  rowCount,
+  indexPath,
   readOnly,
   labels,
   fieldTypes,
-  indexPath,
   permissions,
-  rowCount,
   blocks,
   blockToRender,
 }) => {
@@ -128,13 +128,13 @@ const BlockRow: React.FC<BlockFieldProps> = ({
           <RowActions
             addRow={addRow}
             removeRow={removeRow}
-            duplicateRow={duplicateRow}
             moveRow={moveRow}
+            duplicateRow={duplicateRow}
             rowCount={rowCount}
+            rowIndex={rowIndex}
             blockType={row.blockType}
             blocks={blocks}
             labels={labels}
-            rowIndex={rowIndex}
           />
         ) : undefined}
       >
@@ -403,8 +403,8 @@ const BlocksField: React.FC<Props> = (props) => {
               el="span"
               icon="plus"
               buttonStyle="icon-label"
-              iconPosition="left"
               iconStyle="with-border"
+              iconPosition="left"
             >
               {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
             </Button>

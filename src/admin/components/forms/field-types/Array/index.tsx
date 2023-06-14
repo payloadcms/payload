@@ -49,25 +49,25 @@ type ArrayRowProps = UseDraggableSortableReturn & Pick<Props, 'fields' | 'path' 
 }
 const ArrayRow: React.FC<ArrayRowProps> = ({
   path: parentPath,
-  attributes,
-  listeners,
-  transform,
-  setNodeRef,
   addRow,
   removeRow,
-  duplicateRow,
   moveRow,
+  duplicateRow,
   setCollapse,
-  rowCount,
-  rowIndex,
+  transform,
+  listeners,
+  attributes,
+  setNodeRef,
   row,
-  CustomRowLabel,
-  fields,
+  rowIndex,
+  rowCount,
   indexPath,
   readOnly,
-  permissions,
-  fieldTypes,
   labels,
+  fieldTypes,
+  permissions,
+  CustomRowLabel,
+  fields,
 }) => {
   const path = `${parentPath}.${rowIndex}`;
   const { i18n } = useTranslation();
@@ -116,11 +116,11 @@ const ArrayRow: React.FC<ArrayRowProps> = ({
         )}
         actions={!readOnly ? (
           <ArrayAction
-            rowCount={rowCount}
-            duplicateRow={duplicateRow}
             addRow={addRow}
-            moveRow={moveRow}
             removeRow={removeRow}
+            moveRow={moveRow}
+            duplicateRow={duplicateRow}
+            rowCount={rowCount}
             index={rowIndex}
           />
         ) : undefined}
@@ -384,11 +384,11 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       {(!readOnly && !hasMaxRows) && (
         <div className={`${baseClass}__add-button-wrap`}>
           <Button
-            onClick={() => addRow(value as number)}
-            buttonStyle="icon-label"
             icon="plus"
+            buttonStyle="icon-label"
             iconStyle="with-border"
             iconPosition="left"
+            onClick={() => addRow(value as number)}
           >
             {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
           </Button>
