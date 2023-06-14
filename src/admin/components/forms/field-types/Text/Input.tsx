@@ -55,8 +55,6 @@ const TextInput: React.FC<TextInputProps> = (props) => {
     readOnly && 'read-only',
   ].filter(Boolean).join(' ');
 
-  console.log(`text-input: ${path} value: ${value}`);
-
   return (
     <div
       className={classes}
