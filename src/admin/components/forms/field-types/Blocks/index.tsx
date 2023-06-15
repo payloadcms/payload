@@ -33,7 +33,7 @@ import { DrawerToggler } from '../../../elements/Drawer';
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types';
 import type { Row } from '../../Form/types';
 import type { Block } from '../../../../../fields/config/types';
-import { TrackSubFieldErrorCount } from '../../TrackSubFieldErrorCount';
+import { TrackSubSchemaErrorCount } from '../../TrackSubSchemaErrorCount';
 
 import './index.scss';
 
@@ -85,7 +85,7 @@ const BlockRow: React.FC<BlockFieldProps> = ({
         transform,
       }}
     >
-      <TrackSubFieldErrorCount
+      <TrackSubSchemaErrorCount
         path={path}
         setErrorCount={setErrorCount}
       />
@@ -327,7 +327,7 @@ const BlocksField: React.FC<Props> = (props) => {
         fieldValue={value}
       />
 
-      <TrackSubFieldErrorCount
+      <TrackSubSchemaErrorCount
         path={path}
         setErrorCount={setErrorCount}
       />

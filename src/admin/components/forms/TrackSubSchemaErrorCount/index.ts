@@ -30,7 +30,7 @@ const buildPathSegments = (parentPath: string, fieldSchema: Field[]): string[] =
   return pathNames;
 };
 
-type TrackSubFieldErrorCountProps = {
+type TrackSubSchemaErrorCountProps = {
   /**
    * Only for rows, collapsibles, and unnamed-tabs
    */
@@ -38,7 +38,7 @@ type TrackSubFieldErrorCountProps = {
   path: string;
   setErrorCount: (count: number) => void;
 }
-export const TrackSubFieldErrorCount: React.FC<TrackSubFieldErrorCountProps> = ({ path, fieldSchema, setErrorCount }) => {
+export const TrackSubSchemaErrorCount: React.FC<TrackSubSchemaErrorCountProps> = ({ path, fieldSchema, setErrorCount }) => {
   const [fields] = useAllFormFields();
   const hasSubmitted = useFormSubmitted();
   const [pathSegments] = React.useState(() => {

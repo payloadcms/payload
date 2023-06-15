@@ -9,7 +9,7 @@ import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import FieldDescription from '../../FieldDescription';
 import { RowLabel } from '../../RowLabel';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
-import { TrackSubFieldErrorCount } from '../../TrackSubFieldErrorCount';
+import { TrackSubSchemaErrorCount } from '../../TrackSubSchemaErrorCount';
 
 import './index.scss';
 
@@ -80,7 +80,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
 
   return (
     <div id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./gi, '__')}` : ''}`}>
-      <TrackSubFieldErrorCount
+      <TrackSubSchemaErrorCount
         setErrorCount={setErrorCount}
         path={path}
         fieldSchema={fields}

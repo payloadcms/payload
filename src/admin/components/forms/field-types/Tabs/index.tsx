@@ -13,7 +13,7 @@ import { usePreferences } from '../../../utilities/Preferences';
 import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
-import { TrackSubFieldErrorCount } from '../../TrackSubFieldErrorCount';
+import { TrackSubSchemaErrorCount } from '../../TrackSubSchemaErrorCount';
 
 import './index.scss';
 
@@ -37,7 +37,7 @@ const Tab: React.FC<TabProps> = ({ tab, isActive, setIsActive, parentPath }) => 
 
   return (
     <React.Fragment>
-      <TrackSubFieldErrorCount
+      <TrackSubSchemaErrorCount
         setErrorCount={setErrorCount}
         path={path}
         fieldSchema={hasName ? undefined : tab.fields}
