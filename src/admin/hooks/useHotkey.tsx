@@ -7,21 +7,23 @@ import { setsAreEqual } from '../utilities/setsAreEqual';
 const pressedKeys = new Set<string>([]);
 
 const map = {
-  MetaLeft: 'meta',
-  MetaRight: 'meta',
-  OSLeft: 'meta',
-  OSRight: 'meta',
-  ShiftLeft: 'shift',
-  ShiftRight: 'shift',
-  CtrlLeft: 'ctrl',
-  CtrlRight: 'ctrl',
-  AltLeft: 'alt',
-  AltRight: 'alt',
-  Escape: 'esc',
+  metaleft: 'meta',
+  metaright: 'meta',
+  osleft: 'meta',
+  osright: 'meta',
+  shiftleft: 'shift',
+  shiftright: 'shift',
+  ctrlleft: 'ctrl',
+  ctrlright: 'ctrl',
+  controlleft: 'ctrl',
+  controlright: 'ctrl',
+  altleft: 'alt',
+  altright: 'alt',
+  escape: 'esc',
 };
 
 const stripKey = (key: string) => {
-  return (map[key] || key).trim()
+  return (map[key.toLowerCase()] || key).trim()
     .toLowerCase()
     .replace('key', '');
 };
