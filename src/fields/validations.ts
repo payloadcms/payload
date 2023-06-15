@@ -277,8 +277,6 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
 export const relationship: Validate<unknown, unknown, RelationshipField> = async (value: RelationshipValue, options) => {
   const {
     required,
-    min,
-    max,
     minRows,
     maxRows,
     relationTo,
@@ -286,26 +284,17 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
     t,
   } = options;
 
-  const minToUse = minRows || min;
-  const maxToUse = maxRows || max;
-  if (min && !minRows) {
-    console.warn(`The "min" property is deprecated for the Relationship field "${options.name}". Please use "minRows" instead.`);
-  }
-  if (max && !maxRows) {
-    console.warn(`The "max" property is deprecated for the Relationship field "${options.name}". Please use "maxRows" instead.`);
-  }
-
   if ((!value || (Array.isArray(value) && value.length === 0)) && required) {
     return options.t('validation:required');
   }
 
   if (Array.isArray(value)) {
-    if (minToUse && value.length < minToUse) {
-      return t('validation:lessThanMin', { count: minToUse, label: t('rows') });
+    if (minRows && value.length < minRows) {
+      return t('validation:lessThanMin', { count: minRows, label: t('rows') });
     }
 
-    if (maxToUse && value.length > maxToUse) {
-      return t('validation:greaterThanMax', { count: maxToUse, label: t('rows') });
+    if (maxRows && value.length > maxRows) {
+      return t('validation:greaterThanMax', { count: maxRows, label: t('rows') });
     }
   }
 
