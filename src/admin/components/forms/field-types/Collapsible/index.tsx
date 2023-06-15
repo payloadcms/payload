@@ -83,7 +83,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
       <TrackSubFieldErrorCount
         setErrorCount={setErrorCount}
         path={path}
-        subFields={fields}
+        fieldSchema={fields}
       />
       <Collapsible
         initCollapsed={collapsedOnMount}

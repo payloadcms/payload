@@ -85,7 +85,6 @@ const ArrayRow: React.FC<ArrayRowProps> = ({
     >
       <TrackSubFieldErrorCount
         path={path}
-        subFields={fields}
         setErrorCount={setErrorCount}
       />
 

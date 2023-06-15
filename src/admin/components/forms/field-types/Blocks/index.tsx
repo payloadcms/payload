@@ -87,7 +87,6 @@ const BlockRow: React.FC<BlockFieldProps> = ({
     >
       <TrackSubFieldErrorCount
         path={path}
-        subFields={blockToRender.fields}
         setErrorCount={setErrorCount}
       />
 

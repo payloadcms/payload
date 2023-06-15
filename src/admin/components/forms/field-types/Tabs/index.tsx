@@ -28,10 +28,11 @@ type TabProps = {
 const Tab: React.FC<TabProps> = ({ tab, isActive, setIsActive, parentPath }) => {
   const { i18n } = useTranslation();
   const [errorCount, setErrorCount] = useState(undefined);
+  const hasName = tabHasName(tab);
 
   const pathSegments = [];
   if (parentPath) pathSegments.push(parentPath);
-  if (tabHasName(tab)) pathSegments.push(tab.name);
+  if (hasName) pathSegments.push(tab.name);
   const path = pathSegments.join('.');
 
   return (
@@ -39,7 +40,7 @@ const Tab: React.FC<TabProps> = ({ tab, isActive, setIsActive, parentPath }) => 
       <TrackSubFieldErrorCount
         setErrorCount={setErrorCount}
         path={path}
-        subFields={tab.fields}
+        fieldSchema={hasName ? undefined : tab.fields}
       />
       <button
         type="button"
@@ -49,7 +50,7 @@ const Tab: React.FC<TabProps> = ({ tab, isActive, setIsActive, parentPath }) => 
         ].filter(Boolean).join(' ')}
         onClick={setIsActive}
       >
-        {tab.label ? getTranslation(tab.label, i18n) : (tabHasName(tab) && tab.name)}
+        {tab.label ? getTranslation(tab.label, i18n) : (hasName && tab.name)}
         {(typeof errorCount === 'number' && errorCount > 0) && (
           <code>
             {' - '}
