@@ -14,7 +14,7 @@ Say you have a beforeChange and an afterChange hook. What if you wanted to make 
 
 Of course, you could create a hidden field in your collection and store the data there, but that's not very elegant. Context makes it much easier to pass data between hooks.
 
-Simply write or read data into the `req.payloadContext` object which is available to every hook. This data will persist throughout the entire lifecycle.
+Simply write or read data into the `context` object which is available to every hook. This data will persist throughout the entire lifecycle. You can also find the context in every request object: `req.payloadContext`.
 
 Let's see some examples which show why this is so useful.
 
@@ -24,17 +24,17 @@ Let's see some examples which show why this is so useful.
 const MyCollection: CollectionConfig = {
   slug: 'slug',
   hooks: {
-    beforeChange: [(props) => {
+    beforeChange: [({ context, data }) => {
       const {value1, value2} = await someCalculation();
-      props.req.payloadContext.myCalculatedValue2 = value2;
+      context.myCalculatedValue2 = value2;
       return {
-        ...props.data,
+        ....data,
         value: value1,
       };
     }],
-    afterChange: [async (props) => {
-      const documentID = props.doc.id;
-      const value2 = props.req.payloadContext.myCalculatedValue2;
+    afterChange: [async ({ context, doc }) => {
+      const documentID = doc.id;
+      const value2 = context.myCalculatedValue2;
       await someExpensiveOperationWithDocumentIDAndValue2(documentID, value2);
     }],
   },
@@ -49,7 +49,7 @@ const MyCollection: CollectionConfig = {
 
 In this example, we calculate two values in the beforeChange hook - value1 and value2. We set the document's field 'value' to the first value, and now we want to pass the second value (value2) to the afterChange hook, as it needs it for some expensive operation which needs value2 + the document ID (which is not available in the beforeChange hook).
 
-As value2 is not saved in the document, we can't access it in the afterChange hook. But we can save it in the `req.payloadContext` object, which is available to every hook. We can then access it in the afterChange hook and use it for our operation.
+As value2 is not saved in the document, we can't access it in the afterChange hook. But we can save it in the `context` object, which is available to every hook. We can then access it in the afterChange hook and use it for our operation.
 
 ## Example 2: Preventing infinite loops
 
@@ -59,13 +59,13 @@ Let's say you have an `afterChange` hook, in which you do some calculation (as t
 const MyCollection: CollectionConfig = {
   slug: 'slug',
   hooks: {
-    afterChange: [async (props) => {
-      const someValue = await someCalculationUsingDocID(props.doc.id);
+    afterChange: [async ({ doc }) => {
+      const someValue = await someCalculationUsingDocID(doc.id);
       await payload.update({
         collection: 'slug',
-        id: props.doc.id,
+        id: doc.id,
         data: {
-          value: props.doc.value + someValue,
+          value: doc.value + someValue,
         },
       });
     }],
@@ -87,15 +87,15 @@ In order to prevent that, we need to tell the afterChange hook to not run again 
 const MyCollection: CollectionConfig = {
   slug: 'slug',
   hooks: {
-    afterChange: [async (props) => {
-      if (props.req.payloadContext.triggerAfterChange === false) { // Make sure we don't trigger afterChange again and again in an infinite loop
+    afterChange: [async ({ context, doc }) => {
+      if (context.triggerAfterChange === false) { // Make sure we don't trigger afterChange again and again in an infinite loop
         return;
       }
       await payload.update({
         collection: contextHooksSlug,
-        id: props.doc.id,
+        id: doc.id,
         data: {
-          value: props.req.payloadContext.secretValue ?? '',
+          value: context.secretValue ?? '',
         },
         context: {
           triggerAfterChange: false, // Make sure we don't trigger afterChange again and again in an infinite loop.
