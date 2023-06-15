@@ -194,6 +194,15 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       this.config = await loadConfig(this.logger);
     }
 
+    this.globals = {
+      config: this.config.globals,
+    };
+    this.config.collections.forEach((collection) => {
+      this.collections[collection.slug] = {
+        config: collection,
+      };
+    });
+
     // THIS BLOCK IS TEMPORARY UNTIL 2.0.0
     // We automatically add the Mongoose adapter
     // if there is no defined database adapter
@@ -209,7 +218,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     }
 
     this.db = this.config.db;
-    this.mongoMemoryServer = await this.db.connect({ payload: this, config: this.config });
+    if (this.db?.connect) {
+      this.mongoMemoryServer = await this.db.connect({ payload: this, config: this.config });
+    }
 
     // Configure email service
     const emailOptions = options.email ? { ...(options.email) } : this.config.email;
@@ -221,12 +232,13 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.email = buildEmail(this.emailOptions, this.logger);
     this.sendEmail = sendEmail.bind(this);
 
-    await this.db.init({ payload: this, config: this.config });
-
     if (!this.config.graphQL.disable) {
       registerGraphQLSchema(this);
     }
 
+    if (this.db.init) {
+      await this.db?.init({ payload: this, config: this.config });
+    }
     this.preferences = { Model: PreferencesModel };
 
     serverInitTelemetry(this);

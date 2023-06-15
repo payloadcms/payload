@@ -41,16 +41,23 @@ export async function init(
       if (collection.indexes) {
         collection.indexes.forEach((index) => {
           // prefix 'version.' to each field in the index
-          const versionIndex = { fields: {}, options: index.options };
-          Object.entries(index.fields).forEach(([key, value]) => {
-            versionIndex.fields[`version.${key}`] = value;
-          });
+          const versionIndex = {
+            fields: {},
+            options: index.options,
+          };
+          Object.entries(index.fields)
+            .forEach(([key, value]) => {
+              versionIndex.fields[`version.${key}`] = value;
+            });
           versionSchema.index(versionIndex.fields, versionIndex.options);
         });
       }
 
       versionSchema.plugin(paginate, { useEstimatedCount: true })
-        .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug, versionsFields: versionCollectionFields }));
+        .plugin(getBuildQueryPlugin({
+          collectionSlug: collection.slug,
+          versionsFields: versionCollectionFields,
+        }));
 
       if (collection.versions?.drafts) {
         versionSchema.plugin(mongooseAggregatePaginate);
@@ -70,43 +77,38 @@ export async function init(
     };
   });
 
-  if (payload.config.globals) {
-    const model = buildGlobalModel(payload.config);
-    this.globals = model;
+  const model = buildGlobalModel(payload.config);
+  this.globals = model;
 
-    payload.globals = {
-      Model: model,
-      config: payload.config.globals,
-    };
+  payload.globals.Model = model;
 
-    payload.config.globals.forEach((global) => {
-      if (global.versions) {
-        const versionModelName = getVersionsModelName(global);
+  payload.config.globals.forEach((global) => {
+    if (global.versions) {
+      const versionModelName = getVersionsModelName(global);
 
-        const versionGlobalFields = buildVersionGlobalFields(global);
+      const versionGlobalFields = buildVersionGlobalFields(global);
 
-        const versionSchema = buildSchema(
-          payload.config,
-          versionGlobalFields,
-          {
-            indexSortableFields: payload.config.indexSortableFields,
-            disableUnique: true,
-            draftsEnabled: true,
-            options: {
-              timestamps: false,
-              minimize: false,
-            },
+      const versionSchema = buildSchema(
+        payload.config,
+        versionGlobalFields,
+        {
+          indexSortableFields: payload.config.indexSortableFields,
+          disableUnique: true,
+          draftsEnabled: true,
+          options: {
+            timestamps: false,
+            minimize: false,
           },
-        );
+        },
+      );
 
-        versionSchema.plugin(paginate, { useEstimatedCount: true })
-          .plugin(getBuildQueryPlugin({ versionsFields: versionGlobalFields }));
+      versionSchema.plugin(paginate, { useEstimatedCount: true })
+        .plugin(getBuildQueryPlugin({ versionsFields: versionGlobalFields }));
 
-        const versionsModel = mongoose.model(versionModelName, versionSchema) as CollectionModel;
-        this.versions[global.slug] = versionsModel;
+      const versionsModel = mongoose.model(versionModelName, versionSchema) as CollectionModel;
+      this.versions[global.slug] = versionsModel;
 
-        payload.versions[global.slug] = versionsModel;
-      }
-    });
-  }
+      payload.versions[global.slug] = versionsModel;
+    }
+  });
 }
