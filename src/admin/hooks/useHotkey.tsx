@@ -69,12 +69,11 @@ const useHotkey = (options: {
 
     // Check for Mac and iPad
     const hasCmd = window.navigator.userAgent.includes('Mac OS X');
-    const pressedWithoutMeta = [...pressedKeys].filter((key) => key !== 'meta');
     const pressedWithoutModifier = [...pressedKeys].filter((key) => key !== 'meta' && key !== 'ctrl' && key !== 'alt' && key !== 'shift');
 
     // Check whether arrays contain the same values (regardless of number of occurrences)
     if (
-      setsAreEqual(new Set(pressedWithoutMeta), new Set(keyCodes))
+      setsAreEqual(new Set(pressedWithoutModifier), new Set(keyCodes))
       && (!cmdCtrlKey || (hasCmd && pressedKeys.has('meta')) || (!hasCmd && e.ctrlKey))
     ) {
       func(e, deps);
