@@ -153,7 +153,7 @@ describe('Hooks', () => {
       expect(retrievedDocs[0].text).toEqual('ok!!');
     });
 
-    it('should pass req.payloadContext from beforeChange to afterChange', async () => {
+    it('should pass context from beforeChange to afterChange', async () => {
       const document = await payload.create({
         collection: contextHooksSlug,
         data: {
