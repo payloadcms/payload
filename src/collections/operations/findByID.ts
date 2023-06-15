@@ -35,6 +35,7 @@ async function findByID<T extends TypeWithID>(
     args = (await hook({
       args,
       operation: 'read',
+      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -138,6 +139,7 @@ async function findByID<T extends TypeWithID>(
       req,
       query,
       doc: result,
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 
@@ -166,6 +168,7 @@ async function findByID<T extends TypeWithID>(
       req,
       query,
       doc: result,
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 

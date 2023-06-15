@@ -54,6 +54,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'create',
+      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -143,6 +144,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       data,
       req,
       operation: 'create',
+      context: req.payloadContext,
     })) || data;
   }, Promise.resolve());
 
@@ -165,6 +167,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       data,
       req,
       operation: 'create',
+      context: req.payloadContext,
     })) || data;
   }, Promise.resolve());
 
@@ -278,6 +281,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     result = await hook({
       req,
       doc: result,
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 
@@ -306,6 +310,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       previousDoc: {},
       req: args.req,
       operation: 'create',
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 

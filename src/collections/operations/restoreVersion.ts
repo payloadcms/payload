@@ -155,6 +155,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     result = await hook({
       req,
       doc: result,
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 
@@ -183,6 +184,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       req,
       previousDoc: prevDocWithLocales,
       operation: 'update',
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 

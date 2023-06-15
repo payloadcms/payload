@@ -105,7 +105,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
       await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef.version = await hook({ req, query, doc: docRef.version }) || docRef.version;
+        docRef.version = await hook({ req, query, doc: docRef.version, context: req.payloadContext }) || docRef.version;
       }, Promise.resolve());
 
       return docRef;
@@ -144,7 +144,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef.version = await hook({ req, query, doc: doc.version, findMany: true }) || doc.version;
+        docRef.version = await hook({ req, query, doc: doc.version, findMany: true, context: req.payloadContext }) || doc.version;
       }, Promise.resolve());
 
       return docRef;

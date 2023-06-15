@@ -41,6 +41,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     args = (await hook({
       args,
       operation: 'delete',
+      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -116,6 +117,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         return hook({
           req,
           id,
+          context: req.payloadContext,
         });
       }, Promise.resolve());
 
@@ -162,6 +164,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         result = await hook({
           req,
           doc: result || doc,
+          context: req.payloadContext,
         }) || result;
       }, Promise.resolve());
 
@@ -176,6 +179,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           req,
           id,
           doc: result,
+          context: req.payloadContext,
         }) || result;
       }, Promise.resolve());
 
