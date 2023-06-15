@@ -147,6 +147,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////

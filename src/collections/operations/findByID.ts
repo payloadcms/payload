@@ -155,6 +155,7 @@ async function findByID<T extends TypeWithID>(
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////

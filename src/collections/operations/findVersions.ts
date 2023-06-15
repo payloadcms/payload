@@ -128,6 +128,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
         req,
         showHiddenFields,
         findMany: true,
+        context: req.payloadContext,
       }),
     }))),
   };

@@ -131,6 +131,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'create',
     overrideAccess,
     req,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -183,6 +184,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'create',
     req,
     skipValidation: shouldSaveDraft,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -269,6 +271,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -296,6 +299,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     entityConfig: collectionConfig,
     operation: 'create',
     req,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////

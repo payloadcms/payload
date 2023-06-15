@@ -199,6 +199,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       req,
       showHiddenFields,
       findMany: true,
+      context: req.payloadContext,
     }))),
   };
 

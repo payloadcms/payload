@@ -6,7 +6,7 @@ import type { EditorProps } from '@monaco-editor/react';
 import { Operation, Where } from '../../types';
 import { SanitizedConfig } from '../../config/types';
 import { TypeWithID } from '../../collections/config/types';
-import { PayloadRequest } from '../../express/types';
+import { PayloadRequest, PayloadRequestContext } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
@@ -33,6 +33,7 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The value of the field. */
   value?: P,
   previousValue?: P,
+  context: PayloadRequestContext
 }
 
 export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;

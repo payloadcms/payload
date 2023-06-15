@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
 import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
 import { traverseFields } from './traverseFields';
 
@@ -13,6 +13,7 @@ type Args = {
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
+  context: PayloadRequestContext
 }
 
 // This function is responsible for the following actions, in order:
@@ -28,6 +29,7 @@ export const promise = async ({
   req,
   siblingData,
   siblingDoc,
+  context,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
     // Execute hooks
@@ -45,6 +47,7 @@ export const promise = async ({
           siblingData,
           operation,
           req,
+          context,
         });
 
         if (hookedValue !== undefined) {
@@ -67,6 +70,7 @@ export const promise = async ({
         req,
         siblingData: siblingData?.[field.name] as Record<string, unknown> || {},
         siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
+        context,
       });
 
       break;
@@ -88,6 +92,7 @@ export const promise = async ({
             req,
             siblingData: siblingData?.[field.name]?.[i] || {},
             siblingDoc: { ...row } || {},
+            context,
           }));
         });
         await Promise.all(promises);
@@ -114,6 +119,7 @@ export const promise = async ({
               req,
               siblingData: siblingData?.[field.name]?.[i] || {},
               siblingDoc: { ...row } || {},
+              context,
             }));
           }
         });
@@ -135,6 +141,7 @@ export const promise = async ({
         req,
         siblingData: siblingData || {},
         siblingDoc: { ...siblingDoc },
+        context,
       });
 
       break;
@@ -161,6 +168,7 @@ export const promise = async ({
         previousDoc,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
+        context,
       });
 
       break;
@@ -177,6 +185,7 @@ export const promise = async ({
         req,
         siblingData: siblingData || {},
         siblingDoc: { ...siblingDoc },
+        context,
       });
       break;
     }
