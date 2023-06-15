@@ -7,7 +7,12 @@ import { PayloadRequest } from '../../express/types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types';
-import { CustomSaveButtonProps, CustomSaveDraftButtonProps, CustomPublishButtonProps, CustomPreviewButtonProps } from '../../admin/components/elements/types';
+import {
+  CustomPreviewButtonProps,
+  CustomPublishButtonProps,
+  CustomSaveButtonProps,
+  CustomSaveDraftButtonProps,
+} from '../../admin/components/elements/types';
 
 export type TypeWithID = {
   id: string | number
@@ -143,7 +148,7 @@ export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 
 }
 
 export type Globals = {
-  Model: GlobalModel
+  Model?: GlobalModel
   config: SanitizedGlobalConfig[]
   graphQL?: {
     [slug: string]: {
