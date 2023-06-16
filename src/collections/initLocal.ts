@@ -56,7 +56,7 @@ export default function initCollectionsLocal(ctx: Payload): void {
 
 
     ctx.collections[formattedCollection.slug] = {
-      Model: mongoose.model(formattedCollection.slug, schema) as CollectionModel,
+      Model: mongoose.model(formattedCollection.slug, schema, formattedCollection.slug) as CollectionModel,
       config: formattedCollection,
     };
 
