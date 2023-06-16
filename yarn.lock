@@ -2090,15 +2090,6 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-2.0.0.tgz#f544a148d3ab35801c1f633a7441fd87c2e484bf"
   integrity sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==
 
-"@trbl/eslint-config@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@trbl/eslint-config/-/eslint-config-3.0.1.tgz#d9eca69b92aeb6ed4c5e91ab510cfe56f7399595"
-  integrity sha512-O90IxO6j11SmHvTqjTnJEw+GinwZDU0mZwOiSkpE9OAYHGXt7BQ9aVexq9G5OxSkiylRjX/UmgEU/R0hvkXo9Q==
-  dependencies:
-    confusing-browser-globals "^1.0.9"
-    object.assign "^4.1.0"
-    object.entries "^1.1.1"
-
 "@trysound/sax@0.2.0":
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/@trysound/sax/-/sax-0.2.0.tgz#cccaab758af56761eb7bf37af6f03f326dd798ad"
