@@ -294,7 +294,16 @@ export class ParamParser {
 
             const result = await SubModel.find(subQuery, subQueryOptions);
 
-            const $in = result.map((doc) => doc._id.toString());
+            const $in: unknown[] = [];
+
+            result.forEach((doc) => {
+              const stringID = doc._id.toString();
+              $in.push(stringID);
+
+              if (mongoose.Types.ObjectId.isValid(stringID)) {
+                $in.push(doc._id);
+              }
+            });
 
             if (pathsToQuery.length === 1) return { path, value: { $in } };
 
