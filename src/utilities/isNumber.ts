@@ -1,6 +1,7 @@
 export function isNumber(value: unknown): boolean {
-  if (typeof value === 'string') {
-    return value.trim() !== '' && !Number.isNaN(Number(value));
+  if (typeof value === 'string' && value.trim() === ''){
+    return false
   }
+
   return !Number.isNaN(Number(value));
 }
