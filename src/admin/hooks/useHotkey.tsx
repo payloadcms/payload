@@ -2,6 +2,9 @@
 import { useCallback, useEffect } from 'react';
 import { setsAreEqual } from '../utilities/setsAreEqual';
 
+// Store the callback functions with their associated edit depths
+const hotkeyCallbacks: { [editDepth: number]: (e: KeyboardEvent, deps: boolean[]) => void } = {};
+
 // Required to be outside of hook, else debounce would be necessary
 // and then one could not prevent the default behaviour.
 const pressedKeys = new Set<string>([]);
@@ -54,13 +57,27 @@ const removeFromKeys = (code: string) => {
  * Hook function to work with hotkeys.
  * @param param0.keyCode {string[]} The keys to listen for (`Event.code` without `'Key'` and lowercased)
  * @param param0.cmdCtrlKey {boolean} Whether Ctrl on windows or Cmd on mac must be pressed
+ * @param param0.editDepth {boolean} This ensures that the hotkey is only triggered for the most top-level drawer in case there are nested drawers
  * @param func The callback function
  */
 const useHotkey = (options: {
   keyCodes: string[]
   cmdCtrlKey: boolean
+  editDepth: number
 }, func: (e: KeyboardEvent, deps: boolean[]) => void, deps: boolean[]): void => {
-  const { keyCodes, cmdCtrlKey } = options;
+  const { keyCodes, cmdCtrlKey, editDepth } = options;
+
+
+  // on mounting of the component, add the callback function to the callbacks object
+  useEffect(() => {
+    hotkeyCallbacks[editDepth] = func;
+
+    return () => {
+      // on unmounting of the component, remove the callback function from the callbacks object
+      delete hotkeyCallbacks[editDepth];
+    };
+  }, [func, editDepth]);
+
 
   const keydown = useCallback((e: KeyboardEvent) => {
     if (e.key === undefined) {
@@ -78,9 +95,15 @@ const useHotkey = (options: {
       setsAreEqual(new Set(pressedWithoutModifier), new Set(keyCodes))
       && (!cmdCtrlKey || (hasCmd && pressedKeys.has('meta')) || (!hasCmd && e.ctrlKey))
     ) {
-      func(e, deps);
+      // get the maximum edit depth
+      const maxEditDepth = Math.max(...Object.keys(hotkeyCallbacks).map(Number));
+
+      // execute the function associated with the maximum edit depth
+      if (hotkeyCallbacks[maxEditDepth]) {
+        hotkeyCallbacks[maxEditDepth](e, deps);
+      }
     }
-  }, [keyCodes, cmdCtrlKey, func, deps]);
+  }, [keyCodes, cmdCtrlKey, deps]);
 
   const keyup = useCallback((e: KeyboardEvent) => {
     removeFromKeys(e.code);

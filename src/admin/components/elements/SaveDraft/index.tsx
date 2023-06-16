@@ -7,6 +7,7 @@ import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useLocale } from '../../utilities/Locale';
 import useHotkey from '../../../hooks/useHotkey';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import { useEditDepth } from '../../utilities/EditDepth';
 
 
 const baseClass = 'save-draft';
@@ -21,8 +22,9 @@ export type DefaultSaveDraftButtonProps = {
 };
 const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({ disabled, saveDraft, label }) => {
   const ref = useRef<HTMLButtonElement>(null);
+  const editDepth = useEditDepth();
 
-  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true }, (e, deps) => {
+  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true, editDepth }, (e, deps) => {
     e.preventDefault();
     e.stopPropagation();
     const [enableClick] = deps as [boolean]; // alias for `disabled`

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import FormSubmit from '../../forms/Submit';
 import useHotkey from '../../../hooks/useHotkey';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import { useEditDepth } from '../../utilities/EditDepth';
 
 export type CustomSaveButtonProps = React.ComponentType<DefaultSaveButtonProps & {
   DefaultButton: React.ComponentType<DefaultSaveButtonProps>;
@@ -12,8 +13,9 @@ type DefaultSaveButtonProps = {
 };
 const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label }) => {
   const ref = useRef<HTMLButtonElement>(null);
+  const editDepth = useEditDepth();
 
-  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true }, (e, deps) => {
+  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true, editDepth }, (e, deps) => {
     e.preventDefault();
     e.stopPropagation();
     const [enableClick] = deps as [boolean];
