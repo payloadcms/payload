@@ -12,6 +12,7 @@ import { Option } from '../../../elements/ReactSelect/types';
 import ReactSelect from '../../../elements/ReactSelect';
 
 import './index.scss';
+import { isNumber } from '../../../../../utilities/isNumber';
 
 const NumberField: React.FC<Props> = (props) => {
   const {
@@ -144,8 +145,7 @@ const NumberField: React.FC<Props> = (props) => {
           isClearable
           filterOption={(option, rawInput) => {
             // eslint-disable-next-line no-restricted-globals
-            const notANumber = rawInput.trim() === '' || isNaN(Number(rawInput));
-            return !notANumber && (validate ? validate([Number(rawInput)], { t, min, max, required, minRows: undefined, maxRows, hasMany }) === true : true);
+            return isNumber(rawInput)
           }}
           numberOnly
         />
