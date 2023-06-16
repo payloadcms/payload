@@ -3,8 +3,9 @@ import crypto from 'crypto';
 import { PayloadRequest } from '../../express/types';
 import { Payload } from '../../payload';
 import find from '../../collections/operations/find';
+import { SanitizedCollectionConfig } from '../../collections/config/types';
 
-export default (payload: Payload, { Model, config }): PassportAPIKey => {
+export default (payload: Payload, config: SanitizedCollectionConfig): PassportAPIKey => {
   const { secret } = payload;
   const opts = {
     header: 'Authorization',
@@ -40,7 +41,6 @@ export default (payload: Payload, { Model, config }): PassportAPIKey => {
       const userQuery = await find({
         where,
         collection: {
-          Model,
           config,
         },
         req: req as PayloadRequest,

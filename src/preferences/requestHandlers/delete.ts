@@ -4,7 +4,7 @@ import { PayloadRequest } from '../../express/types';
 import formatSuccessResponse from '../../express/responses/formatSuccess';
 import deleteOperation from '../operations/delete';
 
-export default async function deleteHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<any> | void> {
+export default async function deleteHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<{message: string}> | void> {
   try {
     await deleteOperation({
       req,

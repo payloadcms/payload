@@ -8,7 +8,6 @@ import initAdmin from './express/admin';
 import initAuth from './auth/init';
 import access from './auth/requestHandlers/access';
 import initCollectionsHTTP from './collections/initHTTP';
-import initPreferences from './preferences/init';
 import initGlobalsHTTP from './globals/initHTTP';
 import initGraphQLPlayground from './graphql/initPlayground';
 import initStatic from './express/static';
@@ -49,7 +48,6 @@ export const initHTTP = async (options: InitOptions): Promise<Payload> => {
     }
 
     initAdmin(payload);
-    initPreferences(payload);
 
     payload.router.get('/access', access);
 

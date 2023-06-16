@@ -1,19 +1,16 @@
 import executeAccess from '../../auth/executeAccess';
 import defaultAccess from '../../auth/defaultAccess';
-import { Document } from '../../types';
+import { Document, Where } from '../../types';
 import UnauthorizedError from '../../errors/UnathorizedError';
 import { PreferenceRequest } from '../types';
+import NotFound from '../../errors/NotFound';
 
 async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   const {
     overrideAccess,
     req,
     req: {
-      payload: {
-        preferences: {
-          Model,
-        },
-      },
+      payload,
     },
     user,
     key,
@@ -27,15 +24,25 @@ async function deleteOperation(args: PreferenceRequest): Promise<Document> {
     await executeAccess({ req }, defaultAccess);
   }
 
-  const filter = {
-    key,
-    user: user.id,
-    userCollection: user.collection,
+  const where: Where = {
+    and: [
+      { key: { equals: key } },
+      { 'user.value': { equals: user.id } },
+      { 'user.relationTo': { equals: user.collection } },
+    ],
   };
 
-  const result = await Model.findOneAndDelete(filter);
+  const result = await payload.delete({
+    collection: 'payload-preferences',
+    where,
+    depth: 0,
+    user,
+  });
 
-  return result;
+  if (result.docs.length === 1) {
+    return result.docs[0];
+  }
+  throw new NotFound();
 }
 
 export default deleteOperation;

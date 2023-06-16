@@ -10,6 +10,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { combineQueries } from '../../database/combineQueries';
+import { deleteUserPreferences } from '../../preferences/deleteUserPreferences';
 
 export type Arguments = {
   depth?: number
@@ -49,7 +50,6 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
       payload,
       payload: {
         config,
-        preferences,
       },
     },
     overrideAccess,
@@ -113,10 +113,11 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   // Delete Preferences
   // /////////////////////////////////////
 
-  if (collectionConfig.auth) {
-    await preferences.Model.deleteMany({ user: id, userCollection: collectionConfig.slug });
-  }
-  await preferences.Model.deleteMany({ key: `collection-${collectionConfig.slug}-${id}` });
+  deleteUserPreferences({
+    payload,
+    collectionConfig,
+    ids: [id],
+  });
 
   // /////////////////////////////////////
   // Delete versions
