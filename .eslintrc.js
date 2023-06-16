@@ -12,6 +12,7 @@ module.exports = {
   ],
   extends: [
     './eslint-config',
+    "prettier", // or: "eslint-config-prettier". This is to disable eslint rules POTENTIALLY conflicting with prettier.
   ],
   settings: {
     'import/resolver': {

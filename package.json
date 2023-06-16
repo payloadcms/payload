@@ -256,6 +256,7 @@
 		"copyfiles": "^2.4.1",
 		"cross-env": "^7.0.3",
 		"eslint": "^8.39.0",
+		"eslint-config-prettier": "^8.8.0",
 		"eslint-plugin-import": "^2.27.5",
 		"eslint-plugin-jest": "^27.2.1",
 		"eslint-plugin-jest-dom": "^4.0.3",
