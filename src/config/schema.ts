@@ -164,4 +164,5 @@ export default joi.object({
   onInit: joi.func(),
   debug: joi.boolean(),
   custom: joi.object().pattern(joi.string(), joi.any()),
+  pluralizeSlugs: joi.boolean().optional().default(true),
 });

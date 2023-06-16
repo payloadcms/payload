@@ -530,6 +530,12 @@ export type Config = {
   onInit?: (payload: Payload) => Promise<void> | void;
   /** Extension  point to add your custom data. */
   custom?: Record<string, any>;
+  /**
+   * By default, mongoose will pluralize all singular slugs so that they are saved as plural in the database.
+   *
+   * @default true
+   */
+  pluralizeSlugs?: boolean;
 };
 
 export type SanitizedConfig = Omit<
