@@ -1,5 +1,12 @@
 
 
+## [1.9.4](https://github.com/payloadcms/payload/compare/v1.9.3...v1.9.4) (2023-06-16)
+
+
+### Bug Fixes
+
+* incorrectly return totalDocs=1 instead of the correct count when pagination=false ([2e73938](https://github.com/payloadcms/payload/commit/2e7393853447d2da41ddef79f73e9026719a674b))
+
 ## [1.9.3](https://github.com/payloadcms/payload/compare/v1.9.2...v1.9.3) (2023-06-16)
 
 
