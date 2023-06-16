@@ -1,5 +1,13 @@
 
 
+## [1.9.3](https://github.com/payloadcms/payload/compare/v1.9.2...v1.9.3) (2023-06-16)
+
+
+### Bug Fixes
+
+* adds custom property to ui field in joi validation ([#2835](https://github.com/payloadcms/payload/issues/2835)) ([56d7745](https://github.com/payloadcms/payload/commit/56d7745139e31c5d42c5191477f409f12589a952))
+* ensures relations to object ids can be queried on ([c3d6e1b](https://github.com/payloadcms/payload/commit/c3d6e1b490a69f0aadb00e54e46a8774732e6658))
+
 ## [1.9.2](https://github.com/payloadcms/payload/compare/v1.9.1...v1.9.2) (2023-06-14)
 
 
