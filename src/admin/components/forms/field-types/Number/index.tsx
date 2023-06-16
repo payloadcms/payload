@@ -145,7 +145,7 @@ const NumberField: React.FC<Props> = (props) => {
           filterOption={(option, rawInput) => {
             // eslint-disable-next-line no-restricted-globals
             const notANumber = rawInput.trim() === '' || isNaN(Number(rawInput));
-            return !notANumber && (validate ? validate(Number(rawInput), { t, min, max, required, minRows: undefined, maxRows, hasMany }) === true : true);
+            return !notANumber && (validate ? validate([Number(rawInput)], { t, min, max, required, minRows: undefined, maxRows, hasMany }) === true : true);
           }}
           numberOnly
         />
