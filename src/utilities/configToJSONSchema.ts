@@ -22,17 +22,6 @@ const propertyIsRequired = (field: Field) => {
   return false;
 };
 
-function getCollectionIDType(collections: SanitizedCollectionConfig[], slug: string): 'string' | 'number' {
-  const matchedCollection = collections.find((collection) => collection.slug === slug);
-  const customIdField = matchedCollection.fields.find((field) => 'name' in field && field.name === 'id');
-
-  if (customIdField && customIdField.type === 'number') {
-    return 'number';
-  }
-
-  return 'string';
-}
-
 function returnOptionEnums(options: Option[]): string[] {
   return options.map((option) => {
     if (typeof option === 'object' && 'value' in option) {
@@ -46,7 +35,24 @@ function returnOptionEnums(options: Option[]): string[] {
 /**
  * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
  */
-function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fieldDefinitionsMap: Map<string, JSONSchema4>): {
+function generateEntitySchemas(entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[]): JSONSchema4 {
+  const properties = [...entities].reduce((acc, { slug }) => {
+    acc[slug] = {
+      $ref: `#/definitions/${slug}`,
+    };
+
+    return acc;
+  }, {});
+
+  return {
+    type: 'object',
+    properties,
+    required: Object.keys(properties),
+    additionalProperties: false,
+  };
+}
+
+function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 'number' }, fields: Field[], interfaceNameDefinitions: Map<string, JSONSchema4>): {
   properties: {
     [k: string]: JSONSchema4;
   }
@@ -56,7 +62,7 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
   const requiredFields = new Set<string>(fields.filter(propertyIsRequired).map((field) => (fieldAffectsData(field) ? field.name : '')));
 
   return {
-    properties: Object.fromEntries(fields.reduce((acc, field) => {
+    properties: Object.fromEntries(fields.reduce((fieldSchemas, field) => {
       let fieldSchema: JSONSchema4;
       switch (field.type) {
         case 'text':
@@ -161,14 +167,12 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
                     type: 'array',
                     items: {
                       oneOf: field.relationTo.map((relation) => {
-                        const idFieldType = getCollectionIDType(config.collections, relation);
-
                         return {
                           type: 'object',
                           additionalProperties: false,
                           properties: {
                             value: {
-                              type: idFieldType,
+                              type: collectionIDFieldTypes[relation],
                             },
                             relationTo: {
                               const: relation,
@@ -204,8 +208,6 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
             } else {
               fieldSchema = {
                 oneOf: field.relationTo.map((relation) => {
-                  const idFieldType = getCollectionIDType(config.collections, relation);
-
                   return {
                     type: 'object',
                     additionalProperties: false,
@@ -213,7 +215,7 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
                       value: {
                         oneOf: [
                           {
-                            type: idFieldType,
+                            type: collectionIDFieldTypes[relation],
                           },
                           {
                             $ref: `#/definitions/${relation}`,
@@ -229,50 +231,44 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
                 }),
               };
             }
-          } else {
-            const idFieldType = getCollectionIDType(config.collections, field.relationTo);
-
-            if (field.hasMany) {
-              fieldSchema = {
-                oneOf: [
-                  {
-                    type: 'array',
-                    items: {
-                      type: idFieldType,
-                    },
+          } else if (field.hasMany) {
+            fieldSchema = {
+              oneOf: [
+                {
+                  type: 'array',
+                  items: {
+                    type: collectionIDFieldTypes[field.relationTo],
                   },
-                  {
-                    type: 'array',
-                    items: {
-                      $ref: `#/definitions/${field.relationTo}`,
-                    },
-                  },
-                ],
-              };
-            } else {
-              fieldSchema = {
-                oneOf: [
-                  {
-                    type: idFieldType,
-                  },
-                  {
+                },
+                {
+                  type: 'array',
+                  items: {
                     $ref: `#/definitions/${field.relationTo}`,
                   },
-                ],
-              };
-            }
+                },
+              ],
+            };
+          } else {
+            fieldSchema = {
+              oneOf: [
+                {
+                  type: collectionIDFieldTypes[field.relationTo],
+                },
+                {
+                  $ref: `#/definitions/${field.relationTo}`,
+                },
+              ],
+            };
           }
 
           break;
         }
 
         case 'upload': {
-          const idFieldType = getCollectionIDType(config.collections, field.relationTo);
-
           fieldSchema = {
             oneOf: [
               {
-                type: idFieldType,
+                type: collectionIDFieldTypes[field.relationTo],
               },
               {
                 $ref: `#/definitions/${field.relationTo}`,
@@ -287,7 +283,7 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
             type: 'array',
             items: {
               oneOf: field.blocks.map((block) => {
-                const blockFieldSchemas = entityFieldsToJSONSchema(config, block.fields, fieldDefinitionsMap);
+                const blockFieldSchemas = fieldsToJSONSchema(collectionIDFieldTypes, block.fields, interfaceNameDefinitions);
 
                 const blockSchema: JSONSchema4 = {
                   type: 'object',
@@ -305,7 +301,7 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
                 };
 
                 if (block.interfaceName) {
-                  fieldDefinitionsMap.set(block.interfaceName, blockSchema);
+                  interfaceNameDefinitions.set(block.interfaceName, blockSchema);
 
                   return {
                     $ref: `#/definitions/${block.interfaceName}`,
@@ -325,12 +321,12 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
             items: {
               type: 'object',
               additionalProperties: false,
-              ...entityFieldsToJSONSchema(config, field.fields, fieldDefinitionsMap),
+              ...fieldsToJSONSchema(collectionIDFieldTypes, field.fields, interfaceNameDefinitions),
             },
           };
 
           if (field.interfaceName) {
-            fieldDefinitionsMap.set(field.interfaceName, fieldSchema);
+            interfaceNameDefinitions.set(field.interfaceName, fieldSchema);
 
             fieldSchema = {
               $ref: `#/definitions/${field.interfaceName}`,
@@ -341,9 +337,9 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
 
         case 'row':
         case 'collapsible': {
-          const childSchema = entityFieldsToJSONSchema(config, field.fields, fieldDefinitionsMap);
+          const childSchema = fieldsToJSONSchema(collectionIDFieldTypes, field.fields, interfaceNameDefinitions);
           Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
-            acc.set(propName, propSchema);
+            fieldSchemas.set(propName, propSchema);
           });
           childSchema.required.forEach((propName) => {
             requiredFields.add(propName);
@@ -353,10 +349,10 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
 
         case 'tabs': {
           field.tabs.forEach((tab) => {
-            const childSchema = entityFieldsToJSONSchema(config, tab.fields, fieldDefinitionsMap);
+            const childSchema = fieldsToJSONSchema(collectionIDFieldTypes, tab.fields, interfaceNameDefinitions);
             if (tabHasName(tab)) {
               // could have interface
-              acc.set(tab.name, {
+              fieldSchemas.set(tab.name, {
                 type: 'object',
                 additionalProperties: false,
                 ...childSchema,
@@ -364,7 +360,7 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
               requiredFields.add(tab.name);
             } else {
               Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
-                acc.set(propName, propSchema);
+                fieldSchemas.set(propName, propSchema);
               });
               childSchema.required.forEach((propName) => {
                 requiredFields.add(propName);
@@ -378,11 +374,11 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
           fieldSchema = {
             type: 'object',
             additionalProperties: false,
-            ...entityFieldsToJSONSchema(config, field.fields, fieldDefinitionsMap),
+            ...fieldsToJSONSchema(collectionIDFieldTypes, field.fields, interfaceNameDefinitions),
           };
 
           if (field.interfaceName) {
-            fieldDefinitionsMap.set(field.interfaceName, fieldSchema);
+            interfaceNameDefinitions.set(field.interfaceName, fieldSchema);
 
             fieldSchema = {
               $ref: `#/definitions/${field.interfaceName}`,
@@ -397,16 +393,16 @@ function entityFieldsToJSONSchema(config: SanitizedConfig, fields: Field[], fiel
       }
 
       if (fieldSchema && fieldAffectsData(field)) {
-        acc.set(field.name, fieldSchema);
+        fieldSchemas.set(field.name, fieldSchema);
       }
 
-      return acc;
+      return fieldSchemas;
     }, new Map<string, JSONSchema4>())),
     required: Array.from(requiredFields),
   };
 }
 
-export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig, fieldDefinitionsMap: Map<string, JSONSchema4>): JSONSchema4 {
+function entityToJSONSchema(config: SanitizedConfig, incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig, interfaceNameDefinitions: Map<string, JSONSchema4>): JSONSchema4 {
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity);
   const title = entity.typescript?.interface ? entity.typescript.interface : singular(toWords(entity.slug, true));
 
@@ -439,27 +435,42 @@ export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: Sani
     });
   }
 
-  return {
-    title,
-    type: 'object',
-    additionalProperties: false,
-    ...entityFieldsToJSONSchema(config, entity.fields, fieldDefinitionsMap),
-  };
-}
+  // used for relationship fields, to determine whether to use a string or number type for the ID
+  const collectionIDFieldTypes: { [key: string]: 'string' | 'number' } = config.collections.reduce((acc, collection) => {
+    const customCollectionIdField = collection.fields.find((field) => 'name' in field && field.name === 'id');
 
-export function generateEntitySchemas(entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[]): JSONSchema4 {
-  const properties = [...entities].reduce((acc, { slug }) => {
-    acc[slug] = {
-      $ref: `#/definitions/${slug}`,
-    };
+    acc[collection.slug] = customCollectionIdField?.type === 'number'
+      ? 'number'
+      : 'string';
 
     return acc;
   }, {});
 
   return {
+    title,
     type: 'object',
-    properties,
-    required: Object.keys(properties),
     additionalProperties: false,
+    ...fieldsToJSONSchema(collectionIDFieldTypes, entity.fields, interfaceNameDefinitions),
+  };
+}
+
+export function configToJSONSchema(config: SanitizedConfig): JSONSchema4 {
+  // a mutable Map to store custom top-level `interfaceName` types
+  const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map();
+  const entityDefinitions: { [k: string]: JSONSchema4 } = [...config.globals, ...config.collections].reduce((acc, entity) => {
+    acc[entity.slug] = entityToJSONSchema(config, entity, interfaceNameDefinitions);
+    return acc;
+  }, {});
+
+  return {
+    title: 'Config',
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      collections: generateEntitySchemas(config.collections),
+      globals: generateEntitySchemas(config.globals),
+    },
+    required: ['collections', 'globals'],
+    definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
   };
 }
