@@ -1,0 +1,9 @@
+**/.git
+**/.svn
+**/.hg
+**/node_modules
+build
+/dist*/
+**/.yarn/**
+**/.pnp.*
+.tmp
