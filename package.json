@@ -277,6 +277,7 @@
     "object.assign": "^4.1.0",
     "object.entries": "^1.1.1",
     "passport-strategy": "^1.0.0",
+    "prettier": "^2.8.8",
     "release-it": "^15.10.1",
     "rimraf": "^3.0.2",
     "serve-static": "^1.15.0",
