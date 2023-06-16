@@ -474,6 +474,7 @@ export const ui = joi.object().keys({
       Field: componentSchema,
     }).default({}),
   }).default(),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 });
 
 const fieldSchema = joi.alternatives()
