@@ -14,12 +14,22 @@ const getTSConfigPaths = (): { srcPath: string, outPath: string } => {
     return { srcPath: process.cwd(), outPath: process.cwd() };
   }
 
-  const tsConfig = JSON.parse(fs.readFileSync(tsConfigPath, 'utf-8'));
+  try {
+    // Read the file as a string and remove trailing commas
+    const rawTsConfig = fs.readFileSync(tsConfigPath, 'utf-8')
+      .replace(/,\s*]/g, ']')
+      .replace(/,\s*}/g, '}');
 
-  const srcPath = tsConfig.compilerOptions?.rootDir || process.cwd();
-  const outPath = tsConfig.compilerOptions?.outDir || process.cwd();
+    const tsConfig = JSON.parse(rawTsConfig);
 
-  return { srcPath, outPath };
+    const srcPath = tsConfig.compilerOptions?.rootDir || process.cwd();
+    const outPath = tsConfig.compilerOptions?.outDir || process.cwd();
+
+    return { srcPath, outPath };
+  } catch (error) {
+    console.error(`Error parsing tsconfig.json: ${error}`); // Do not throw the error, as we can still continue with the other config path finding methods
+    return { srcPath: process.cwd(), outPath: process.cwd() };
+  }
 };
 
 
