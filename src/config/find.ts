@@ -68,6 +68,18 @@ const findConfig = (): string => {
     }
   }
 
+  // If no config file is found in the directories defined by tsconfig.json,
+  // try searching in the 'src' and 'dist' directory as a last resort, as they are most commonly used
+  if (process.env.NODE_ENV === 'production') {
+    const distConfigPath = findUp.sync(['payload.config.js', 'payload.config.ts'], { cwd: path.resolve(process.cwd(), 'dist') });
+
+    if (distConfigPath) return distConfigPath;
+  } else {
+    const srcConfigPath = findUp.sync(['payload.config.js', 'payload.config.ts'], { cwd: path.resolve(process.cwd(), 'src') });
+
+    if (srcConfigPath) return srcConfigPath;
+  }
+
   throw new Error('Error: cannot find Payload config. Please create a configuration file located at the root of your current working directory called "payload.config.js" or "payload.config.ts".');
 };
 
