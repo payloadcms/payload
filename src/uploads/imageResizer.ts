@@ -6,44 +6,147 @@ import sharp from 'sharp';
 import { SanitizedCollectionConfig } from '../collections/config/types';
 import { PayloadRequest } from '../express/types';
 import fileExists from './fileExists';
-import { FileSizes, FileToSave, ImageSize } from './types';
+import { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types';
 
-type Dimensions = { width?: number, height?: number }
+type ResizeArgs = {
+  req: PayloadRequest;
+  file: UploadedFile;
+  dimensions: ProbedImageSize;
+  staticPath: string;
+  config: SanitizedCollectionConfig;
+  savedFilename: string;
+  mimeType: string;
+};
 
-type Args = {
-  req: PayloadRequest
-  file: UploadedFile
-  dimensions: Dimensions
-  staticPath: string
-  config: SanitizedCollectionConfig
-  savedFilename: string
-  mimeType: string
-}
+type ResizeResult = {
+  sizeData: FileSizes;
+  sizesToSave: FileToSave[];
+};
 
-type OutputImage = {
-  name: string,
-  extension: string,
-  width: number,
-  height: number
-}
+type SanitizedImageData = {
+  name: string;
+  ext: string;
+};
 
-type Result = Promise<{
-  sizeData: FileSizes
-  sizesToSave: FileToSave[]
-}>
-
-function getOutputImage(sourceImage: string, size: ImageSize): OutputImage {
+/**
+ * Sanitize the image name and extract the extension from the source image
+ *
+ * @param sourceImage - the source image
+ * @returns the sanitized name and extension
+ */
+const getSanitizedImageData = (sourceImage: string): SanitizedImageData => {
   const extension = sourceImage.split('.').pop();
   const name = sanitize(sourceImage.substring(0, sourceImage.lastIndexOf('.')) || sourceImage);
+  return { name, ext: extension! };
+};
 
-  return {
-    name,
-    extension,
-    width: size.width,
-    height: size.height,
-  };
-}
+/**
+ * Create a new image name based on the output image name, the dimensions and
+ * the extension.
+ *
+ * Prevent duplicate names for different sizes, could happen if the there is one
+ * size with `width AND height` and one with only `height OR width`. The aspect
+ * ratio could lead to duplicates.
+ *
+ * @param sanitizedImage - the sanitized image name
+ * @param bufferInfo - the buffer info
+ * @param extension - the extension to use
+ * @param takenOutputNames - the taken output names
+ * @returns the new image name that is not taken
+ */
+const createImageName = (
+  name: string,
+  { width, height }: sharp.OutputInfo,
+  extension: string,
+  takenOutputNames: string[],
+) => {
+  let tryCount = 0;
+  let imageNameWithDimensions: string;
+  do {
+    const outputImageName = `${name}${tryCount ? `-${tryCount}` : ''}`;
+    imageNameWithDimensions = `${outputImageName}-${width}x${height}.${extension}`;
+    tryCount += 1;
+  } while (takenOutputNames.includes(imageNameWithDimensions));
 
+  takenOutputNames.push(imageNameWithDimensions);
+
+  return imageNameWithDimensions;
+};
+
+/**
+ * Create the result object for the image resize operation based on the
+ * provided parameters. If the name is not provided, an empty result object
+ * is returned.
+ *
+ * @param name - the name of the image
+ * @param filename - the filename of the image
+ * @param width - the width of the image
+ * @param height - the height of the image
+ * @param filesize - the filesize of the image
+ * @param mimeType - the mime type of the image
+ * @param sizesToSave - the sizes to save
+ * @returns the result object
+ */
+const createResult = (
+  name: string,
+  filename: FileSize['filename'] = null,
+  width: FileSize['width'] = null,
+  height: FileSize['height'] = null,
+  filesize: FileSize['filesize'] = null,
+  mimeType: FileSize['mimeType'] = null,
+  sizesToSave: FileToSave[] = [],
+): ResizeResult => ({
+  sizesToSave,
+  sizeData: {
+    [name]: {
+      width,
+      height,
+      filename,
+      filesize,
+      mimeType,
+    },
+  },
+});
+
+/**
+ * Check if the image needs to be resized according to the requested dimensions
+ * and the original image size. If the resize options are provided, the image
+ * will be resized regardless of the requested dimensions, given that the
+ * width or height to be resized is provided.
+ *
+ * @param requestedDimensions - the requested dimensions
+ * @param original - the original image size
+ * @param resizeOptions - the resize options
+ * @returns true if the image needs to be resized, false otherwise
+ */
+const needsResize = (
+  { width, height, withoutEnlargement, withoutReduction }: ImageSize,
+  original: ProbedImageSize,
+): boolean => {
+  // allow enlargement or prevent reduction (our default is to prevent
+  // enlargement and allow reduction)
+  if (withoutEnlargement === false || withoutReduction) {
+    return true;
+  }
+
+  const isWidthOrHeightDefined = !!height || !!width;
+  const hasInsufficientWidth = !!width && width <= original.width;
+  const hasInsufficientHeight = !!height && height <= original.height;
+
+  // If with and height are not defined, it means there is a format conversion
+  // and the image needs to be "resized" (transformed).
+  return !isWidthOrHeightDefined || hasInsufficientWidth || hasInsufficientHeight;
+};
+
+/**
+ * Resize the image and provide the resize buffer. The image will be resized
+ * according to the provided resize config. If no image sizes are requested,
+ * the resolved data will be empty. For every image that dos not need to be
+ * resized, an result object will `null` parameters will be returned.
+ *
+ * @param resizeConfig - the resize config
+ * @returns the result of the resize operation(s)
+ */
 export default async function resizeAndSave({
   req,
   file,
@@ -51,83 +154,79 @@ export default async function resizeAndSave({
   staticPath,
   config,
   savedFilename,
-}: Args): Promise<Result> {
+  mimeType,
+}: ResizeArgs): Promise<ResizeResult> {
   const { imageSizes } = config.upload;
-  const sizesToSave: FileToSave[] = [];
-  const sizeData = {};
+
+  // Noting to resize here so return as early as possible
+  if (!imageSizes) return { sizeData: {}, sizesToSave: [] };
 
   const sharpBase = sharp(file.tempFilePath || file.data);
+  const takenOutputNames: string[] = [];
 
-  const promises = imageSizes
-    .map(async (desiredSize) => {
-      if (!needsResize(desiredSize, dimensions)) {
-        sizeData[desiredSize.name] = {
-          url: null,
-          width: null,
-          height: null,
-          filename: null,
-          filesize: null,
-          mimeType: null,
-        };
-        return;
-      }
-      let resized = sharpBase.clone().resize(desiredSize);
-
-      if (desiredSize.formatOptions) {
-        resized = resized.toFormat(desiredSize.formatOptions.format, desiredSize.formatOptions.options);
+  const results: ResizeResult[] = await Promise.all(
+    imageSizes.map(async (imageResizeConfig): Promise<ResizeResult> => {
+      if (!needsResize(imageResizeConfig, dimensions)) {
+        return createResult(imageResizeConfig.name);
       }
 
-      if (desiredSize.trimOptions) {
-        resized = resized.trim(desiredSize.trimOptions);
+      let resized = sharpBase.clone().resize(imageResizeConfig);
+
+      if (imageResizeConfig.formatOptions) {
+        resized = resized.toFormat(
+          imageResizeConfig.formatOptions.format,
+          imageResizeConfig.formatOptions.options,
+        );
       }
 
-      const bufferObject = await resized.toBuffer({
+      if (imageResizeConfig.trimOptions) {
+        resized = resized.trim(imageResizeConfig.trimOptions);
+      }
+
+      const { data: bufferData, info: bufferInfo } = await resized.toBuffer({
         resolveWithObject: true,
       });
 
-      req.payloadUploadSizes[desiredSize.name] = bufferObject.data;
+      const sanitizedImage = getSanitizedImageData(savedFilename);
 
-      const mimeType = (await fromBuffer(bufferObject.data));
-      const outputImage = getOutputImage(savedFilename, desiredSize);
-      const imageNameWithDimensions = createImageName(outputImage, bufferObject, mimeType.ext);
+      if (req.payloadUploadSizes) {
+        req.payloadUploadSizes[imageResizeConfig.name] = bufferData;
+      }
+
+      const mimeInfo = await fromBuffer(bufferData);
+
+      const imageNameWithDimensions = createImageName(
+        sanitizedImage.name,
+        bufferInfo,
+        mimeInfo?.ext || sanitizedImage.ext,
+        takenOutputNames,
+      );
+
       const imagePath = `${staticPath}/${imageNameWithDimensions}`;
-      const fileAlreadyExists = await fileExists(imagePath);
 
-      if (fileAlreadyExists) {
+      if (await fileExists(imagePath)) {
         fs.unlinkSync(imagePath);
       }
 
-      sizesToSave.push({
-        path: imagePath,
-        buffer: bufferObject.data,
-      });
+      const { width, height, size } = bufferInfo;
+      return createResult(
+        imageResizeConfig.name,
+        imageNameWithDimensions,
+        width,
+        height,
+        size,
+        mimeInfo?.mime || mimeType,
+        [{ path: imagePath, buffer: bufferData }],
+      );
+    }),
+  );
 
-      sizeData[desiredSize.name] = {
-        width: bufferObject.info.width,
-        height: bufferObject.info.height,
-        filename: imageNameWithDimensions,
-        filesize: bufferObject.info.size,
-        mimeType: mimeType.mime,
-      };
-    });
-
-  await Promise.all(promises);
-
-  return {
-    sizeData,
-    sizesToSave,
-  };
-}
-function createImageName(
-  outputImage: OutputImage,
-  bufferObject: { data: Buffer; info: sharp.OutputInfo },
-  extension: string,
-): string {
-  return `${outputImage.name}-${bufferObject.info.width}x${bufferObject.info.height}.${extension}`;
-}
-
-function needsResize(desiredSize: ImageSize, dimensions: Dimensions): boolean {
-  return (typeof desiredSize.width === 'number' && desiredSize.width <= dimensions.width)
-    || (typeof desiredSize.height === 'number' && desiredSize.height <= dimensions.height)
-    || (!desiredSize.height && !desiredSize.width);
+  return results.reduce(
+    (acc, result) => {
+      Object.assign(acc.sizeData, result.sizeData);
+      acc.sizesToSave.push(...result.sizesToSave);
+      return acc;
+    },
+    { sizeData: {}, sizesToSave: [] },
+  );
 }
