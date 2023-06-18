@@ -137,6 +137,11 @@ export default buildConfig({
             formatOptions: { format: 'jpg', options: { quality: 90 } },
           },
           {
+            name: 'accidentalSameSize',
+            width: 320,
+            height: 80,
+          },
+          {
             name: 'tablet',
             width: 640,
             height: 480,

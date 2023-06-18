@@ -44,9 +44,9 @@ const getSanitizedImageData = (sourceImage: string): SanitizedImageData => {
  * Create a new image name based on the output image name, the dimensions and
  * the extension.
  *
- * Prevent duplicate names for different sizes, could happen if the there is one
- * size with `width AND height` and one with only `height OR width`. The aspect
- * ratio could lead to duplicates.
+ * Ignore the fact that duplicate names could happen if the there is one
+ * size with `width AND height` and one with only `height OR width`. Because
+ * space is expensive, we will reuse the same image for both sizes.
  *
  * @param sanitizedImage - the sanitized image name
  * @param bufferInfo - the buffer info
@@ -55,23 +55,10 @@ const getSanitizedImageData = (sourceImage: string): SanitizedImageData => {
  * @returns the new image name that is not taken
  */
 const createImageName = (
-  name: string,
+  outputImageName: string,
   { width, height }: sharp.OutputInfo,
   extension: string,
-  takenOutputNames: string[],
-) => {
-  let tryCount = 0;
-  let imageNameWithDimensions: string;
-  do {
-    const outputImageName = `${name}${tryCount ? `-${tryCount}` : ''}`;
-    imageNameWithDimensions = `${outputImageName}-${width}x${height}.${extension}`;
-    tryCount += 1;
-  } while (takenOutputNames.includes(imageNameWithDimensions));
-
-  takenOutputNames.push(imageNameWithDimensions);
-
-  return imageNameWithDimensions;
-};
+) => `${outputImageName}-${width}x${height}.${extension}`;
 
 /**
  * Create the result object for the image resize operation based on the
@@ -162,7 +149,6 @@ export default async function resizeAndSave({
   if (!imageSizes) return { sizeData: {}, sizesToSave: [] };
 
   const sharpBase = sharp(file.tempFilePath || file.data);
-  const takenOutputNames: string[] = [];
 
   const results: ResizeResult[] = await Promise.all(
     imageSizes.map(async (imageResizeConfig): Promise<ResizeResult> => {
@@ -199,7 +185,6 @@ export default async function resizeAndSave({
         sanitizedImage.name,
         bufferInfo,
         mimeInfo?.ext || sanitizedImage.ext,
-        takenOutputNames,
       );
 
       const imagePath = `${staticPath}/${imageNameWithDimensions}`;

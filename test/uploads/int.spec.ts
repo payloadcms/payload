@@ -228,7 +228,7 @@ describe('Collections - Uploads', () => {
       expect(sizes.resizedLarger.filename).toBeNull();
 
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png');
-      expect(sizes.resizedSmaller.filename).toBe('small-1-320x80.png');
+      expect(sizes.resizedSmaller.filename).toBe('small-320x80.png');
 
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png');
       expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png');
