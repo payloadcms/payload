@@ -343,7 +343,8 @@ export const relationship = baseField.keys({
     .warning('deprecated', { message: 'Use maxRows instead.' }),
   minRows: joi.number()
     .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
-  maxRows: joi.number(),
+  maxRows: joi.number()
+    .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
 });
 
 export const blocks = baseField.keys({
