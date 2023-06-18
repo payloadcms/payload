@@ -2,13 +2,14 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 import { APIError } from '../../../errors';
 import { Payload } from '../../../payload';
 import verifyEmail from '../verifyEmail';
+import { CollectionSlug } from '../../../collections/config/types';
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
+export type Options<T extends CollectionSlug> = {
   token: string,
   collection: T
 }
 
-async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
+async function localVerifyEmail<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<boolean> {

@@ -5,8 +5,9 @@ import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { CollectionSlug } from '../../../collections/config/types';
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
+export type Options<T extends CollectionSlug> = {
   collection: T
   data: {
     email: string
@@ -16,7 +17,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   req?: PayloadRequest
 }
 
-async function localForgotPassword<T extends keyof GeneratedTypes['collections']>(
+async function localForgotPassword<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<Result> {
