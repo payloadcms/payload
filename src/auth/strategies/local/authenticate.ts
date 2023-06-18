@@ -1,7 +1,6 @@
-import crypto from 'crypto'
-import scmp from 'scmp'
-import { TypeWithID } from "../../../collections/config/types"
-import { AuthenticationError } from "../../../errors"
+import crypto from 'crypto';
+import scmp from 'scmp';
+import { TypeWithID } from '../../../collections/config/types';
 
 type Doc = TypeWithID & Record<string, unknown>
 
@@ -15,27 +14,26 @@ export const authenticateLocalStrategy = async ({
   password,
 }: Args): Promise<Doc | null> => {
   try {
-    const salt = doc.salt
-    const hash = doc.hash
+    const { salt, hash } = doc;
 
     if (typeof salt === 'string' && typeof hash === 'string') {
       const res = await new Promise<Doc | null>((resolve, reject) => {
         crypto.pbkdf2(password, salt, 25000, 512, 'sha256', (e, hashBuffer) => {
-          if (e) reject(null)
+          if (e) reject(null);
 
           if (scmp(hashBuffer, Buffer.from(hash, 'hex'))) {
-            resolve(doc)
+            resolve(doc);
           } else {
-            reject(null)
+            reject(null);
           }
         });
-      })
+      });
 
-      return res
+      return res;
     }
 
-    return null
+    return null;
   } catch (err) {
-    return null
+    return null;
   }
-}
+};
