@@ -7,9 +7,10 @@ import findVersionByID from '../findVersionByID';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { CollectionSlug } from '../../config/types';
 import { populateDefaultRequest } from '../../../express/defaultRequest';
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
+export type Options<T extends CollectionSlug> = {
   collection: T
   id: string
   depth?: number
@@ -27,7 +28,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   context?: PayloadRequestContext,
 }
 
-export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['collections']>(
+export default async function findVersionByIDLocal<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<TypeWithVersion<GeneratedTypes['collections'][T]>> {

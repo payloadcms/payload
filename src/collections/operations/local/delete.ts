@@ -7,10 +7,11 @@ import deleteByID from '../deleteByID';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
-import { BulkOperationResult } from '../../config/types';
+import { BulkOperationResult, CollectionSlug } from '../../config/types';
+
 import { populateDefaultRequest } from '../../../express/defaultRequest';
 
-export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
+export type BaseOptions<T extends CollectionSlug> = {
   collection: T
   depth?: number
   locale?: string
@@ -24,22 +25,22 @@ export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   context?: PayloadRequestContext
 }
 
-export type ByIDOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {
+export type ByIDOptions<T extends CollectionSlug> = BaseOptions<T> & {
   id: string | number
   where?: never
 }
 
-export type ManyOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {
+export type ManyOptions<T extends CollectionSlug> = BaseOptions<T> & {
   where: Where
   id?: never
 }
 
-export type Options<TSlug extends keyof GeneratedTypes['collections']> = ByIDOptions<TSlug> | ManyOptions<TSlug>
+export type Options<TSlug extends CollectionSlug> = ByIDOptions<TSlug> | ManyOptions<TSlug>
 
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ByIDOptions<TSlug>): Promise<GeneratedTypes['collections'][TSlug]>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ManyOptions<TSlug>): Promise<BulkOperationResult<TSlug>>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>> {
+async function deleteLocal<TSlug extends CollectionSlug>(payload: Payload, options: ByIDOptions<TSlug>): Promise<GeneratedTypes['collections'][TSlug]>
+async function deleteLocal<TSlug extends CollectionSlug>(payload: Payload, options: ManyOptions<TSlug>): Promise<BulkOperationResult<TSlug>>
+async function deleteLocal<TSlug extends CollectionSlug>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>>
+async function deleteLocal<TSlug extends CollectionSlug>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>> {
   const {
     collection: collectionSlug,
     depth,

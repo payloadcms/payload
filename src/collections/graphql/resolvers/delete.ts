@@ -2,10 +2,10 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Response } from 'express';
 import { PayloadRequest } from '../../../express/types';
-import { Collection } from '../../config/types';
+import { Collection, CollectionSlug } from '../../config/types';
 import deleteByID from '../../operations/deleteByID';
 
-export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
+export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
     locale?: string
@@ -17,7 +17,7 @@ export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   }
 ) => Promise<GeneratedTypes['collections'][TSlug]>
 
-export default function getDeleteResolver<TSlug extends keyof GeneratedTypes['collections']>(
+export default function getDeleteResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
   async function resolver(_, args, context) {

@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
+import { Field, fieldAffectsData, FieldHook, TabAsField, tabHasName, valueIsValueWithRelation } from '../../config/types';
 import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
-import { Field, fieldAffectsData, TabAsField, tabHasName, valueIsValueWithRelation } from '../../config/types';
 import { traverseFields } from './traverseFields';
 
 type Args<T> = {
@@ -162,7 +162,7 @@ export const promise = async <T>({
 
     // Execute hooks
     if (field.hooks?.beforeValidate) {
-      await field.hooks.beforeValidate.reduce(async (priorHook, currentHook) => {
+      await field.hooks.beforeValidate.reduce(async (priorHook, currentHook: FieldHook) => {
         await priorHook;
 
         const hookedValue = await currentHook({
@@ -183,7 +183,7 @@ export const promise = async <T>({
 
     // Execute access control
     if (field.access && field.access[operation]) {
-      const result = overrideAccess ? true : await field.access[operation]({ req, id, siblingData, data, doc });
+      const result = overrideAccess ? true : await field.access[operation]({ req, id, siblingData, data: data as any, doc: doc as any }); // TODO: This can be better typed. Might need to add or omit id from FieldWithID somewhere
 
       if (!result) {
         delete siblingData[field.name];
