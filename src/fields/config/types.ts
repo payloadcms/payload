@@ -192,7 +192,7 @@ export type DateField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
 
 export type GroupField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'required' | 'validation'> & {
   type: 'group';
-  fields: Field<TSlug>[];
+  fields: Field<any>[]; // TODO: Find a way to type this
   admin?: Admin & {
     hideGutter?: boolean
   }
@@ -210,13 +210,13 @@ export type RowAdmin = Omit<Admin, 'description'>;
 export type RowField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'admin' | 'name' | 'label'> & {
   admin?: RowAdmin;
   type: 'row';
-  fields: Field<TSlug>[];
+  fields: Field<any>[]; // TODO: Find a way to type this
 }
 
 export type CollapsibleField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'name' | 'label'> & {
   type: 'collapsible';
   label: RowLabel
-  fields: Field<TSlug>[];
+  fields: Field<any>[]; // TODO: Find a way to type this
   admin?: Admin & {
     initCollapsed?: boolean | false;
   }
@@ -225,7 +225,7 @@ export type CollapsibleField<TSlug extends CollectionSlug = any> = Omit<FieldBas
 export type TabsAdmin = Omit<Admin, 'description'>;
 
 type TabBase<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'required' | 'validation'> & {
-  fields: Field<TSlug>[]
+  fields: Field<any>[] // TODO: Find a way to type this
   description?: Description
   interfaceName?: string
 }
@@ -395,12 +395,12 @@ export type RichTextField<TSlug extends CollectionSlug = any> = FieldBase<TSlug>
     upload?: {
       collections: {
         [collection: string]: {
-          fields: Field<TSlug>[];
+          fields: Field<any>[]; // TODO: Find a way to type this
         }
       }
     }
     link?: {
-      fields?: Field<TSlug>[] | ((args: { defaultFields: Field<TSlug>[], config: SanitizedConfig, i18n: Ii18n }) => Field<TSlug>[]);
+      fields?: Field<TSlug>[] | ((args: { defaultFields: Field<any>[], config: SanitizedConfig, i18n: Ii18n }) => Field<TSlug>[]); // TODO: Find a way to type this
     }
   }
 }
@@ -410,7 +410,7 @@ export type ArrayField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & 
   minRows?: number;
   maxRows?: number;
   labels?: Labels;
-  fields: Field<TSlug>[];
+  fields: Field<any>[]; // TODO: Find a way to type this
   admin?: Admin & {
     initCollapsed?: boolean | false;
     components?: {
@@ -437,7 +437,7 @@ export type RadioField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & 
 export type Block<TSlug extends CollectionSlug = any> = {
   slug: string;
   labels?: Labels;
-  fields: Field<TSlug>[];
+  fields: Field<any>[] // TODO: Find a way to type this
   imageURL?: string;
   imageAltText?: string;
   /** @deprecated - please migrate to the interfaceName property instead. */
