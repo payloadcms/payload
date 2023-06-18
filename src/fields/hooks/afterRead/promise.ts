@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
+import { Field, fieldAffectsData, FieldHook, TabAsField, tabHasName } from '../../config/types';
 import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise';
@@ -147,7 +147,7 @@ export const promise = async ({
   if (fieldAffectsData(field)) {
     // Execute hooks
     if (field.hooks?.afterRead) {
-      await field.hooks.afterRead.reduce(async (priorHook, currentHook) => {
+      await field.hooks.afterRead.reduce(async (priorHook, currentHook: FieldHook) => {
         await priorHook;
 
         const shouldRunHookOnAllLocales = field.localized
@@ -193,7 +193,7 @@ export const promise = async ({
 
     // Execute access control
     if (field.access && field.access.read) {
-      const result = overrideAccess ? true : await field.access.read({ req, id: doc.id as string | number, siblingData: siblingDoc, data: doc, doc });
+      const result = overrideAccess ? true : await field.access.read({ req, id: doc.id as string | number, siblingData: siblingDoc, data: doc, doc: doc as any }); // TODO: This can be better typed. Might need to add or omit id from FieldWithID somewhere
 
       if (!result) {
         delete siblingDoc[field.name];

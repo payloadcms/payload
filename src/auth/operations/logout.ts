@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import { Response } from 'express';
 import { PayloadRequest } from '../../express/types';
 import { APIError } from '../../errors';
-import { Collection } from '../../collections/config/types';
+import { AfterLogoutHook, Collection } from '../../collections/config/types';
 
 export type Arguments = {
   req: PayloadRequest
@@ -40,7 +40,7 @@ async function logout(incomingArgs: Arguments): Promise<string> {
 
   if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
 
-  await collection.config.hooks.afterLogout.reduce(async (priorHook, hook) => {
+  await collection.config.hooks.afterLogout.reduce(async (priorHook, hook: AfterLogoutHook) => { // TODO: Improve typing
     await priorHook;
 
     args = (await hook({
