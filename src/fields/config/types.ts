@@ -332,15 +332,31 @@ export type RelationshipField = FieldBase & {
   admin?: Admin & {
     isSortable?: boolean;
     allowCreate?: boolean;
-  }
+  },
 } & ({
   hasMany: true
+  /**
+   * @deprecated Use 'minRows' instead
+   */
   min?: number
+  /**
+   * @deprecated Use 'maxRows' instead
+   */
   max?: number
+  minRows?: number
+  maxRows?: number
 } | {
   hasMany?: false | undefined
+  /**
+   * @deprecated Use 'minRows' instead
+   */
   min?: undefined
+  /**
+   * @deprecated Use 'maxRows' instead
+   */
   max?: undefined
+  minRows?: undefined
+  maxRows?: undefined
 })
 
 export type ValueWithRelation = {

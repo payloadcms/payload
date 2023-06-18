@@ -223,7 +223,7 @@ describe('Field Validations', () => {
       const minOptions = {
         ...relationshipOptions,
         hasMany: true,
-        min: 2,
+        minRows: 2,
       };
 
       const val = ['a'];
@@ -237,7 +237,7 @@ describe('Field Validations', () => {
     it('should enforce hasMany max', async () => {
       const maxOptions = {
         ...relationshipOptions,
-        max: 2,
+        maxRows: 2,
         hasMany: true,
       };
       let val = ['a', 'b', 'c'];

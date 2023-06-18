@@ -297,8 +297,8 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
 export const relationship: Validate<unknown, unknown, RelationshipField> = async (value: RelationshipValue, options) => {
   const {
     required,
-    min,
-    max,
+    minRows,
+    maxRows,
     relationTo,
     payload,
     t,
@@ -309,12 +309,12 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
   }
 
   if (Array.isArray(value)) {
-    if (min && value.length < min) {
-      return t('validation:lessThanMin', { value: value.length, min, label: t('rows') });
+    if (minRows && value.length < minRows) {
+      return t('validation:lessThanMin', { value: value.length, min: minRows, label: t('rows') });
     }
 
-    if (max && value.length > max) {
-      return t('validation:greaterThanMax', { value: value.length, max, label: t('rows') });
+    if (maxRows && value.length > maxRows) {
+      return t('validation:greaterThanMax', { value: value.length, max: maxRows, label: t('rows') });
     }
   }
 

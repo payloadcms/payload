@@ -134,7 +134,6 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     leanWithId: true,
     useEstimatedCount,
     pagination: usePagination,
-    useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
     options: {
       // limit must also be set here, it's ignored when pagination is false
       limit: limitToUse,

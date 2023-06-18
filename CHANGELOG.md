@@ -1,5 +1,22 @@
 
 
+## [1.9.5](https://github.com/payloadcms/payload/compare/v1.9.4...v1.9.5) (2023-06-16)
+
+## [1.9.4](https://github.com/payloadcms/payload/compare/v1.9.3...v1.9.4) (2023-06-16)
+
+
+### Bug Fixes
+
+* incorrectly return totalDocs=1 instead of the correct count when pagination=false ([2e73938](https://github.com/payloadcms/payload/commit/2e7393853447d2da41ddef79f73e9026719a674b))
+
+## [1.9.3](https://github.com/payloadcms/payload/compare/v1.9.2...v1.9.3) (2023-06-16)
+
+
+### Bug Fixes
+
+* adds custom property to ui field in joi validation ([#2835](https://github.com/payloadcms/payload/issues/2835)) ([56d7745](https://github.com/payloadcms/payload/commit/56d7745139e31c5d42c5191477f409f12589a952))
+* ensures relations to object ids can be queried on ([c3d6e1b](https://github.com/payloadcms/payload/commit/c3d6e1b490a69f0aadb00e54e46a8774732e6658))
+
 ## [1.9.2](https://github.com/payloadcms/payload/compare/v1.9.1...v1.9.2) (2023-06-14)
 
 
