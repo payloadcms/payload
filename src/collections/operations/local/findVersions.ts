@@ -3,11 +3,12 @@ import { Payload } from '../../../payload';
 import { Document, Where } from '../../../types';
 import { PaginatedDocs } from '../../../mongoose/types';
 import { TypeWithVersion } from '../../../versions/types';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
 import findVersions from '../findVersions';
 import { getDataLoader } from '../../dataloader';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -21,6 +22,11 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   showHiddenFields?: boolean
   sort?: string
   where?: Where
+  draft?: boolean
+  /**
+   * context, which will then be passed to req.payloadContext, which can be read by hooks
+   */
+  context?: PayloadRequestContext,
 }
 
 export default async function findVersionsLocal<T extends keyof GeneratedTypes['collections']>(
@@ -39,6 +45,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     overrideAccess = true,
     showHiddenFields,
     sort,
+    context,
   } = options;
 
   const collection = payload.collections[collectionSlug];
@@ -57,6 +64,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     payload,
     i18n,
   } as PayloadRequest;
+  populateDefaultRequest(req, context);
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

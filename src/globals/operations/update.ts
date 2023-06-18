@@ -100,6 +100,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     req,
     overrideAccess: true,
     showHiddenFields,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -113,6 +114,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     operation: 'update',
     overrideAccess,
     req,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -155,6 +157,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     operation: 'update',
     req,
     skipValidation: shouldSaveDraft,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -207,6 +210,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     req,
     overrideAccess,
     showHiddenFields,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -232,6 +236,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     previousDoc: originalDoc,
     entityConfig: globalConfig,
     operation: 'update',
+    context: req.payloadContext,
     req,
   });
 

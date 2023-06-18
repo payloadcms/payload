@@ -1,11 +1,12 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Payload } from '../../../payload';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
 import { Document } from '../../../types';
 import { getDataLoader } from '../../dataloader';
 import restoreVersion from '../restoreVersion';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -16,6 +17,11 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   user?: Document
   overrideAccess?: boolean
   showHiddenFields?: boolean
+  draft?: boolean
+  /**
+   * context, which will then be passed to req.payloadContext, which can be read by hooks
+   */
+  context?: PayloadRequestContext,
 }
 
 export default async function restoreVersionLocal<T extends keyof GeneratedTypes['collections']>(
@@ -31,6 +37,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     user,
     overrideAccess = true,
     showHiddenFields,
+    context,
   } = options;
 
   const collection = payload.collections[collectionSlug];
@@ -49,6 +56,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     i18n,
     t: i18n.t,
   } as PayloadRequest;
+  populateDefaultRequest(req, context);
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 

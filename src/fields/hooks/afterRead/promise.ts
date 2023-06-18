@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise';
 import relationshipPopulationPromise from './relationshipPopulationPromise';
@@ -18,6 +18,7 @@ type Args = {
   overrideAccess: boolean
   siblingDoc: Record<string, unknown>
   showHiddenFields: boolean
+  context: PayloadRequestContext
 }
 
 // This function is responsible for the following actions, in order:
@@ -41,6 +42,7 @@ export const promise = async ({
   req,
   siblingDoc,
   showHiddenFields,
+  context,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field) && field.hidden && typeof siblingDoc[field.name] !== 'undefined' && !showHiddenFields) {
     delete siblingDoc[field.name];
@@ -161,6 +163,7 @@ export const promise = async ({
               siblingData: siblingDoc,
               operation: 'read',
               req,
+              context,
             });
 
             if (hookedValue !== undefined) {
@@ -178,6 +181,7 @@ export const promise = async ({
             siblingData: siblingDoc,
             req,
             value: siblingDoc[field.name],
+            context,
           });
 
           if (hookedValue !== undefined) {
@@ -227,6 +231,7 @@ export const promise = async ({
         req,
         siblingDoc: groupDoc,
         showHiddenFields,
+        context,
       });
 
       break;
@@ -250,6 +255,7 @@ export const promise = async ({
             req,
             siblingDoc: row || {},
             showHiddenFields,
+            context,
           });
         });
       }
@@ -277,6 +283,7 @@ export const promise = async ({
               req,
               siblingDoc: row || {},
               showHiddenFields,
+              context,
             });
           }
         });
@@ -300,6 +307,7 @@ export const promise = async ({
         req,
         siblingDoc,
         showHiddenFields,
+        context,
       });
 
       break;
@@ -325,6 +333,7 @@ export const promise = async ({
         req,
         siblingDoc: tabDoc,
         showHiddenFields,
+        context,
       });
 
       break;
@@ -344,6 +353,7 @@ export const promise = async ({
         req,
         siblingDoc,
         showHiddenFields,
+        context,
       });
       break;
     }

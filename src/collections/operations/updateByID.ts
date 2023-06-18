@@ -49,6 +49,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'update',
+      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -130,6 +131,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     overrideAccess: true,
     showHiddenFields: true,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -165,6 +167,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'update',
     overrideAccess,
     req,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -179,6 +182,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       req,
       operation: 'update',
       originalDoc,
+      context: req.payloadContext,
     })) || data;
   }, Promise.resolve());
 
@@ -202,6 +206,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       req,
       originalDoc,
       operation: 'update',
+      context: req.payloadContext,
     })) || data;
   }, Promise.resolve());
 
@@ -218,18 +223,19 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'update',
     req,
     skipValidation: shouldSaveDraft || data._status === 'draft',
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
   // Handle potential password update
   // /////////////////////////////////////
 
-  const dataToUpdate: Record<string, unknown> = { ...result }
+  const dataToUpdate: Record<string, unknown> = { ...result };
 
   if (shouldSavePassword && typeof password === 'string') {
-    const { hash, salt } = await generatePasswordSaltHash({ password })
-    dataToUpdate.salt = salt
-    dataToUpdate.hash = hash
+    const { hash, salt } = await generatePasswordSaltHash({ password });
+    dataToUpdate.salt = salt;
+    dataToUpdate.hash = hash;
     delete data.password;
     delete result.password;
   }
@@ -287,6 +293,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     overrideAccess,
     showHiddenFields,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -299,6 +306,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     result = await hook({
       req,
       doc: result,
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 
@@ -313,6 +321,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     entityConfig: collectionConfig,
     operation: 'update',
     req,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -327,6 +336,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       previousDoc: originalDoc,
       req,
       operation: 'update',
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 

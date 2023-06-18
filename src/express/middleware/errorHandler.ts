@@ -21,11 +21,11 @@ const errorHandler = (config: SanitizedConfig, logger: Logger) => async (err: AP
   }
 
   if (req.collection && typeof req.collection.config.hooks.afterError === 'function') {
-    ({ response, status } = await req.collection.config.hooks.afterError(err, response) || { response, status });
+    ({ response, status } = await req.collection.config.hooks.afterError(err, response, req.payloadContext) || { response, status });
   }
 
   if (typeof config.hooks.afterError === 'function') {
-    ({ response, status } = await config.hooks.afterError(err, response) || { response, status });
+    ({ response, status } = await config.hooks.afterError(err, response, req.payloadContext) || { response, status });
   }
 
   res.status(status).send(response);

@@ -1,7 +1,7 @@
 import { SanitizedCollectionConfig } from '../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../globals/config/types';
 import { Operation } from '../../../types';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import { ValidationError } from '../../../errors';
 import deepCopyObject from '../../../utilities/deepCopyObject';
@@ -15,6 +15,7 @@ type Args<T> = {
   operation: Operation
   req: PayloadRequest
   skipValidation?: boolean
+  context: PayloadRequestContext
 }
 
 export const beforeChange = async <T extends Record<string, unknown>>({
@@ -26,6 +27,7 @@ export const beforeChange = async <T extends Record<string, unknown>>({
   operation,
   req,
   skipValidation,
+  context,
 }: Args<T>): Promise<T> => {
   const data = deepCopyObject(incomingData);
   const mergeLocaleActions = [];
@@ -46,6 +48,7 @@ export const beforeChange = async <T extends Record<string, unknown>>({
     siblingDocWithLocales: docWithLocales,
     fields: entityConfig.fields,
     skipValidation,
+    context,
   });
 
   if (errors.length > 0) {
