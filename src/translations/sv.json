@@ -241,6 +241,7 @@
     "uploading": "Uppladdning",
     "user": "Användare",
     "users": "Användare",
+    "value": "Värde",
     "welcome": "Välkommen"
   },
   "operators": {
@@ -274,11 +275,11 @@
     "emailAddress": "Vänligen ange en giltig e-postadress.",
     "enterNumber": "Vänligen skriv in ett giltigt nummer.",
     "fieldHasNo": "Detta fält har ingen {{label}}",
-    "greaterThanMax": "\"{{value}}\" är större än det högsta tillåtna värdet på {{max}}.",
+    "greaterThanMax": "{{value}} är större än den maximalt tillåtna {{label}} av {{max}}.",
     "invalidInput": "Det här fältet har en ogiltig inmatning.",
     "invalidSelection": "Det här fältet har ett ogiltigt urval.",
     "invalidSelections": "Det här fältet har följande ogiltiga val:",
-    "lessThanMin": "\"{{value}}\" är mindre än det lägsta tillåtna värdet på {{min}}.",
+    "lessThanMin": "{{value}} är mindre än den minst tillåtna {{label}} av {{min}}.",
     "longerThanMin": "Detta värde måste vara längre än minimilängden på {{minLength}} tecken.",
     "notValidDate": "\"{{value}}\" är inte ett giltigt datum.",
     "required": "Detta fält är obligatoriskt.",

@@ -241,6 +241,7 @@
     "uploading": "Opplasting",
     "user": "Bruker",
     "users": "Brukere",
+    "value": "Verdi",
     "welcome": "Velkommen"
   },
   "operators": {
@@ -274,11 +275,11 @@
     "emailAddress": "Vennligst skriv inn en gyldig e-postadresse.",
     "enterNumber": "Vennligst skriv inn et gyldig tall.",
     "fieldHasNo": "Dette feltet har ingen {{label}}",
-    "greaterThanMax": "\"{{value}}\" er større enn det maksimale tillatte verdien av {{max}}.",
+    "greaterThanMax": "{{value}} er større enn den tillatte maksimale {{label}} på {{max}}.",
     "invalidInput": "Dette feltet har en ugyldig inndata.",
     "invalidSelection": "Dette feltet har en ugyldig utvalg.",
     "invalidSelections": "Dette feltet har følgende ugyldige utvalg:",
-    "lessThanMin": "\"{{value}}\" er mindre enn det minste tillatte verdien av {{min}}.",
+    "lessThanMin": "{{value}} er mindre enn den tillatte minimale {{label}} på {{min}}.",
     "longerThanMin": "Denne verdien må være lengre enn minimumslengden på {{minLength}} tegn.",
     "notValidDate": "\"{{value}}\" er ikke en gyldig dato.",
     "required": "Dette feltet er påkrevd.",

@@ -48,6 +48,7 @@ async function login<TSlug extends CollectionSlug>(
     args = (await hook({
       args,
       operation: 'login',
+      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -151,6 +152,7 @@ async function login<TSlug extends CollectionSlug>(
     user = (await hook({
       user,
       req: args.req,
+      context: req.payloadContext,
     })) || user;
   }, Promise.resolve());
 
@@ -190,6 +192,7 @@ async function login<TSlug extends CollectionSlug>(
       user,
       req: args.req,
       token,
+      context: req.payloadContext,
     }) || user;
   }, Promise.resolve());
 
@@ -204,6 +207,7 @@ async function login<TSlug extends CollectionSlug>(
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -216,6 +220,7 @@ async function login<TSlug extends CollectionSlug>(
     user = await hook({
       req,
       doc: user,
+      context: req.payloadContext,
     }) || user;
   }, Promise.resolve());
 

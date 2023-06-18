@@ -49,6 +49,7 @@ async function updateByID<TSlug extends CollectionSlug>(
     args = (await hook({
       args,
       operation: 'update',
+      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -130,6 +131,7 @@ async function updateByID<TSlug extends CollectionSlug>(
     req,
     overrideAccess: true,
     showHiddenFields: true,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -165,6 +167,7 @@ async function updateByID<TSlug extends CollectionSlug>(
     operation: 'update',
     overrideAccess,
     req,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -178,6 +181,7 @@ async function updateByID<TSlug extends CollectionSlug>(
       req,
       operation: 'update',
       originalDoc,
+      context: req.payloadContext,
     });
 
     // The result of the hook might be undefined, so we fall back to data
@@ -204,6 +208,7 @@ async function updateByID<TSlug extends CollectionSlug>(
       req,
       originalDoc,
       operation: 'update',
+      context: req.payloadContext,
     })) || data;
   }, Promise.resolve());
 
@@ -220,6 +225,7 @@ async function updateByID<TSlug extends CollectionSlug>(
     operation: 'update',
     req,
     skipValidation: shouldSaveDraft || data._status === 'draft',
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -289,7 +295,9 @@ async function updateByID<TSlug extends CollectionSlug>(
     req,
     overrideAccess,
     showHiddenFields,
+    context: req.payloadContext,
   }) as Collections[TSlug];
+
 
   // /////////////////////////////////////
   // afterRead - Collection
@@ -301,6 +309,7 @@ async function updateByID<TSlug extends CollectionSlug>(
     result = await hook({
       req,
       doc: result,
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 
@@ -315,6 +324,7 @@ async function updateByID<TSlug extends CollectionSlug>(
     entityConfig: collectionConfig,
     operation: 'update',
     req,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -329,6 +339,7 @@ async function updateByID<TSlug extends CollectionSlug>(
       previousDoc: originalDoc,
       req,
       operation: 'update',
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 

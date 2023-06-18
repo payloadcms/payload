@@ -7,6 +7,7 @@ import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { CollectionSlug } from '../../../collections/config/types';
+import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type Options<TSlug extends CollectionSlug> = {
   collection: TSlug
@@ -38,6 +39,8 @@ async function localLogin<TSlug extends CollectionSlug>(
     overrideAccess = true,
     showHiddenFields,
   } = options;
+  populateDefaultRequest(options.req);
+
 
   const collection = payload.collections[collectionSlug];
 

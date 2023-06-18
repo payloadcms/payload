@@ -98,6 +98,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
       req,
       query,
       doc: result.version,
+      context: req.payloadContext,
     }) || result.version;
   }, Promise.resolve());
 
@@ -113,6 +114,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -126,6 +128,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
       req,
       query,
       doc: result.version,
+      context: req.payloadContext,
     }) || result.version;
   }, Promise.resolve());
 

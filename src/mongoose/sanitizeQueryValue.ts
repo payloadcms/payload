@@ -50,6 +50,10 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
     }
   }
 
+  if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
+    formattedValue = createArrayFromCommaDelineated(formattedValue);
+  }
+
   if (['relationship', 'upload'].includes(field.type)) {
     if (val === 'null') {
       formattedValue = null;
@@ -97,10 +101,6 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
       if (maxDistance) formattedValue.$maxDistance = parseFloat(maxDistance);
       if (minDistance) formattedValue.$minDistance = parseFloat(minDistance);
     }
-  }
-
-  if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
-    formattedValue = createArrayFromCommaDelineated(formattedValue);
   }
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
