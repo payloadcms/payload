@@ -336,9 +336,14 @@ export const relationship = baseField.keys({
     allowCreate: joi.boolean().default(true),
   }),
   min: joi.number()
-    .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
+    .when('hasMany', { is: joi.not(true), then: joi.forbidden() })
+    .warning('deprecated', { message: 'Use minRows instead.' }),
   max: joi.number()
+    .when('hasMany', { is: joi.not(true), then: joi.forbidden() })
+    .warning('deprecated', { message: 'Use maxRows instead.' }),
+  minRows: joi.number()
     .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
+  maxRows: joi.number(),
 });
 
 export const blocks = baseField.keys({
