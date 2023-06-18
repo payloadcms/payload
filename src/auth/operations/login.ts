@@ -8,7 +8,7 @@ import isLocked from '../isLocked';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Field, fieldHasSubFields, fieldAffectsData } from '../../fields/config/types';
 import { User } from '../types';
-import { Collection } from '../../collections/config/types';
+import { Collection, CollectionSlug } from '../../collections/config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import unlock from './unlock';
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts';
@@ -33,7 +33,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function login<TSlug extends keyof GeneratedTypes['collections']>(
+async function login<TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   let args = incomingArgs;
@@ -48,6 +48,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'login',
+      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -151,6 +152,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     user = (await hook({
       user,
       req: args.req,
+      context: req.payloadContext,
     })) || user;
   }, Promise.resolve());
 
@@ -190,6 +192,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       user,
       req: args.req,
       token,
+      context: req.payloadContext,
     }) || user;
   }, Promise.resolve());
 
@@ -204,6 +207,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -216,6 +220,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     user = await hook({
       req,
       doc: user,
+      context: req.payloadContext,
     }) || user;
   }, Promise.resolve());
 

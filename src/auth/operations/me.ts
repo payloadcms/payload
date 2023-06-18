@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { PayloadRequest } from '../../express/types';
 import getExtractJWT from '../getExtractJWT';
 import { User } from '../types';
-import { Collection } from '../../collections/config/types';
+import { AfterMeHook, Collection } from '../../collections/config/types';
 
 export type Result = {
   user?: User,
@@ -54,12 +54,13 @@ async function me({
   // After Me - Collection
   // /////////////////////////////////////
 
-  await collection.config.hooks.afterMe.reduce(async (priorHook, hook) => {
+  await collection.config.hooks.afterMe.reduce(async (priorHook, hook: AfterMeHook) => { // TODO: Improve typing
     await priorHook;
 
     response = await hook({
       req,
       response,
+      context: req.payloadContext,
     }) || response;
   }, Promise.resolve());
 

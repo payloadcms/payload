@@ -61,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(json.user);
         } else {
           setUser(null);
-          push(`${admin}${logoutInactivityRoute}`);
+          push(`${admin}${logoutInactivityRoute}?originalUrl=${encodeURIComponent(window.location.pathname)}`);
         }
       }, 1000);
     }
@@ -159,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
         setUser(null);
-        push(`${admin}${logoutInactivityRoute}`);
+        push(`${admin}${logoutInactivityRoute}?originalUrl=${encodeURIComponent(window.location.pathname)}`);
         closeAllModals();
       }, Math.min(remainingTime * 1000, maxTimeoutTime));
     }

@@ -3,46 +3,53 @@ import { CSSProperties } from 'react';
 import { Editor } from 'slate';
 import type { TFunction, i18n as Ii18n } from 'i18next';
 import type { EditorProps } from '@monaco-editor/react';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
 import { Operation, Where } from '../../types';
 import { SanitizedConfig } from '../../config/types';
-import { TypeWithID } from '../../collections/config/types';
-import { PayloadRequest } from '../../express/types';
+import { CollectionSlug, TypeWithID } from '../../collections/config/types';
+import { PayloadRequest, PayloadRequestContext } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
 import { Payload } from '../../payload';
 import { RowLabel } from '../../admin/components/forms/RowLabel/types';
 
-export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
+type StringKeys<T> = Extract<keyof T, string>;
+export type Fields<TSlug extends CollectionSlug> = GeneratedTypes['collections'][TSlug];
+export type FieldName<TSlug extends CollectionSlug> = StringKeys<Fields<TSlug>>;
+
+
+export type FieldHookArgs<TCollection extends TypeWithID = any, TField = any, TSibling = any> = {
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
-  data?: Partial<T>,
+  data?: Partial<TCollection>,
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany?: boolean
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
-  originalDoc?: T,
+  originalDoc?: TCollection,
   /** The document before changes were applied, only in `afterChange` hooks. */
-  previousDoc?: T,
+  previousDoc?: TCollection,
   /** The sibling data from the previous document in `afterChange` hook. */
-  previousSiblingDoc?: T,
+  previousSiblingDoc?: TCollection,
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'read' | 'update' | 'delete',
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
   /** The sibling data passed to a field that the hook is running against. */
-  siblingData: Partial<S>
+  siblingData: Partial<TSibling>
   /** The value of the field. */
-  value?: P,
-  previousValue?: P,
+  value?: TField,
+  previousValue?: TField,
+  context: PayloadRequestContext
 }
 
-export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;
+export type FieldHook<TCollection extends TypeWithID = any, TField = any, TSibling = any> = (args: FieldHookArgs<TCollection, TField, TSibling>) => Promise<TField> | TField;
 
-export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
+export type FieldAccess<TCollection extends TypeWithID = any, P = any, U = any> = (args: {
   req: PayloadRequest<U>
   id?: string | number
-  data?: Partial<T>
+  data?: Partial<TCollection>
   siblingData?: Partial<P>
-  doc?: T
+  doc?: TCollection
 }) => Promise<boolean> | boolean;
 
 export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>, { user }: { user: User }) => boolean;
@@ -99,45 +106,71 @@ export type OptionObject = {
 
 export type Option = OptionObject | string
 
-export interface FieldBase {
-  name: string;
+export interface FieldBaseType<TSlug extends CollectionSlug, TFieldName extends FieldName<TSlug>> {
+  name: TFieldName;
   label?: Record<string, string> | string | false;
   required?: boolean;
   unique?: boolean;
   index?: boolean;
-  defaultValue?: any;
+  defaultValue?: Fields<TSlug>[TFieldName];
   hidden?: boolean;
   saveToJWT?: boolean
   localized?: boolean;
   validate?: Validate;
   hooks?: {
-    beforeValidate?: FieldHook[];
-    beforeChange?: FieldHook[];
-    afterChange?: FieldHook[];
-    afterRead?: FieldHook[];
+    beforeValidate?: FieldHook<Fields<TSlug>, Fields<TSlug>[TFieldName]>[];
+    beforeChange?: FieldHook<Fields<TSlug>, Fields<TSlug>[TFieldName]>[];
+    afterChange?: FieldHook<Fields<TSlug>, Fields<TSlug>[TFieldName]>[];
+    afterRead?: FieldHook<Fields<TSlug>, Fields<TSlug>[TFieldName]>[]
   }
   admin?: Admin;
   access?: {
-    create?: FieldAccess;
-    read?: FieldAccess;
-    update?: FieldAccess;
+    create?: FieldAccess<Fields<TSlug>>;
+    read?: FieldAccess<Fields<TSlug>>;
+    update?: FieldAccess<Fields<TSlug>>;
   };
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
 }
 
-export type NumberField = FieldBase & {
-  type: 'number';
-  admin?: Admin & {
-    autoComplete?: string
-    placeholder?: Record<string, string> | string
-    step?: number
-  }
-  min?: number
-  max?: number
+type FieldBases<TSlug extends CollectionSlug = any> = {
+  [K in FieldName<TSlug>]: FieldBaseType<TSlug, K>;
 }
 
-export type TextField = FieldBase & {
+export type FieldBase<TSlug extends CollectionSlug = any> = FieldBases<TSlug>[FieldName<TSlug>];
+
+export type NumberField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
+  type: 'number';
+  admin?: Admin & {
+    /** Set this property to a string that will be used for browser autocomplete. */
+    autoComplete?: string
+    /** Set this property to define a placeholder string for the field. */
+    placeholder?: Record<string, string> | string
+    /** Set a value for the number field to increment / decrement using browser controls. */
+    step?: number
+  }
+  /** Minimum value accepted. Used in the default `validation` function. */
+  min?: number
+  /** Maximum value accepted. Used in the default `validation` function. */
+  max?: number
+} & ({
+  /** Makes this field an ordered array of numbers instead of just a single number. */
+  hasMany: true
+  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+  minRows?: number
+  /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+  maxRows?: number
+} | {
+  /** Makes this field an ordered array of numbers instead of just a single number. */
+  hasMany?: false | undefined
+  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+  minRows?: undefined
+  /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+  maxRows?: undefined
+})
+
+
+export type TextField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'text';
   maxLength?: number
   minLength?: number
@@ -147,7 +180,7 @@ export type TextField = FieldBase & {
   }
 }
 
-export type EmailField = FieldBase & {
+export type EmailField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'email';
   admin?: Admin & {
     placeholder?: Record<string, string> | string
@@ -155,7 +188,7 @@ export type EmailField = FieldBase & {
   }
 }
 
-export type TextareaField = FieldBase & {
+export type TextareaField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'textarea';
   maxLength?: number
   minLength?: number
@@ -165,11 +198,11 @@ export type TextareaField = FieldBase & {
   }
 }
 
-export type CheckboxField = FieldBase & {
+export type CheckboxField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'checkbox';
 }
 
-export type DateField = FieldBase & {
+export type DateField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'date';
   admin?: Admin & {
     placeholder?: Record<string, string> | string
@@ -177,9 +210,9 @@ export type DateField = FieldBase & {
   }
 }
 
-export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
+export type GroupField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'required' | 'validation'> & {
   type: 'group';
-  fields: Field[];
+  fields: Field<TSlug>[];
   admin?: Admin & {
     hideGutter?: boolean
   }
@@ -194,16 +227,16 @@ export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
 
 export type RowAdmin = Omit<Admin, 'description'>;
 
-export type RowField = Omit<FieldBase, 'admin' | 'name' | 'label'> & {
+export type RowField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'admin' | 'name' | 'label'> & {
   admin?: RowAdmin;
   type: 'row';
-  fields: Field[];
+  fields: Field<TSlug>[];
 }
 
-export type CollapsibleField = Omit<FieldBase, 'name' | 'label'> & {
+export type CollapsibleField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'name' | 'label'> & {
   type: 'collapsible';
   label: RowLabel
-  fields: Field[];
+  fields: Field<TSlug>[];
   admin?: Admin & {
     initCollapsed?: boolean | false;
   }
@@ -211,13 +244,13 @@ export type CollapsibleField = Omit<FieldBase, 'name' | 'label'> & {
 
 export type TabsAdmin = Omit<Admin, 'description'>;
 
-type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
-  fields: Field[]
+type TabBase<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'required' | 'validation'> & {
+  fields: Field<TSlug>[]
   description?: Description
   interfaceName?: string
 }
 
-export type NamedTab = TabBase & {
+export type NamedTab<TSlug extends CollectionSlug = any> = TabBase<TSlug> & {
   /** Customize generated GraphQL and Typescript schema names.
    * The slug is used by default.
    *
@@ -227,21 +260,21 @@ export type NamedTab = TabBase & {
   interfaceName?: string
 }
 
-export type UnnamedTab = Omit<TabBase, 'name'> & {
+export type UnnamedTab<TSlug extends CollectionSlug = any> = Omit<TabBase<TSlug>, 'name'> & {
   label: Record<string, string> | string
   localized?: never
   interfaceName?: never
 }
 
-export type Tab = NamedTab | UnnamedTab
+export type Tab<TSlug extends CollectionSlug = any> = NamedTab<TSlug> | UnnamedTab<TSlug>
 
-export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized'> & {
+export type TabsField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'admin' | 'name' | 'localized'> & {
   type: 'tabs';
-  tabs: Tab[]
+  tabs: Tab<TSlug>[]
   admin?: TabsAdmin
 }
 
-export type TabAsField = Tab & {
+export type TabAsField<TSlug extends CollectionSlug = any> = Tab<TSlug> & {
   type: 'tab'
   name?: string
 };
@@ -261,11 +294,11 @@ export type UIField = {
     }
   }
   type: 'ui';
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
 }
 
-export type UploadField = FieldBase & {
+export type UploadField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'upload'
   relationTo: string
   maxDepth?: number
@@ -277,7 +310,7 @@ type CodeAdmin = Admin & {
   editorOptions?: EditorProps['options'];
 }
 
-export type CodeField = Omit<FieldBase, 'admin'> & {
+export type CodeField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'admin'> & {
   admin?: CodeAdmin
   minLength?: number
   maxLength?: number
@@ -288,12 +321,12 @@ type JSONAdmin = Admin & {
   editorOptions?: EditorProps['options'];
 }
 
-export type JSONField = Omit<FieldBase, 'admin'> & {
+export type JSONField<TSlug extends CollectionSlug = any> = Omit<FieldBase<TSlug>, 'admin'> & {
   admin?: JSONAdmin
   type: 'json';
 }
 
-export type SelectField = FieldBase & {
+export type SelectField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'select'
   options: Option[]
   hasMany?: boolean
@@ -303,7 +336,7 @@ export type SelectField = FieldBase & {
   }
 }
 
-export type RelationshipField = FieldBase & {
+export type RelationshipField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'relationship';
   relationTo: string | string[];
   hasMany?: boolean;
@@ -312,15 +345,31 @@ export type RelationshipField = FieldBase & {
   admin?: Admin & {
     isSortable?: boolean;
     allowCreate?: boolean;
-  }
+  },
 } & ({
   hasMany: true
+  /**
+   * @deprecated Use 'minRows' instead
+   */
   min?: number
+  /**
+   * @deprecated Use 'maxRows' instead
+   */
   max?: number
+  minRows?: number
+  maxRows?: number
 } | {
   hasMany?: false | undefined
+  /**
+   * @deprecated Use 'minRows' instead
+   */
   min?: undefined
+  /**
+   * @deprecated Use 'maxRows' instead
+   */
   max?: undefined
+  minRows?: undefined
+  maxRows?: undefined
 })
 
 export type ValueWithRelation = {
@@ -356,7 +405,7 @@ export type RichTextCustomLeaf = {
 export type RichTextElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link' | 'relationship' | 'upload' | 'indent' | RichTextCustomElement;
 export type RichTextLeaf = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'code' | RichTextCustomLeaf;
 
-export type RichTextField = FieldBase & {
+export type RichTextField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'richText';
   admin?: Admin & {
     placeholder?: Record<string, string> | string
@@ -366,22 +415,22 @@ export type RichTextField = FieldBase & {
     upload?: {
       collections: {
         [collection: string]: {
-          fields: Field[];
+          fields: Field<TSlug>[];
         }
       }
     }
     link?: {
-      fields?: Field[] | ((args: { defaultFields: Field[], config: SanitizedConfig, i18n: Ii18n }) => Field[]);
+      fields?: Field<TSlug>[] | ((args: { defaultFields: Field<TSlug>[], config: SanitizedConfig, i18n: Ii18n }) => Field<TSlug>[]);
     }
   }
 }
 
-export type ArrayField = FieldBase & {
+export type ArrayField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'array';
   minRows?: number;
   maxRows?: number;
   labels?: Labels;
-  fields: Field[];
+  fields: Field<TSlug>[];
   admin?: Admin & {
     initCollapsed?: boolean | false;
     components?: {
@@ -397,7 +446,7 @@ export type ArrayField = FieldBase & {
   interfaceName?: string
 };
 
-export type RadioField = FieldBase & {
+export type RadioField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'radio';
   options: Option[]
   admin?: Admin & {
@@ -405,10 +454,10 @@ export type RadioField = FieldBase & {
   }
 }
 
-export type Block = {
+export type Block<TSlug extends CollectionSlug = any> = {
   slug: string;
   labels?: Labels;
-  fields: Field[];
+  fields: Field<TSlug>[];
   imageURL?: string;
   imageAltText?: string;
   /** @deprecated - please migrate to the interfaceName property instead. */
@@ -424,11 +473,11 @@ export type Block = {
   interfaceName?: string
 }
 
-export type BlockField = FieldBase & {
+export type BlockField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'blocks';
   minRows?: number;
   maxRows?: number;
-  blocks: Block[];
+  blocks: Block<TSlug>[];
   defaultValue?: unknown
   labels?: Labels
   admin?: Admin & {
@@ -437,105 +486,105 @@ export type BlockField = FieldBase & {
 
 }
 
-export type PointField = FieldBase & {
+export type PointField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'point',
 }
 
-export type Field =
-  TextField
-  | NumberField
-  | EmailField
-  | TextareaField
-  | CheckboxField
-  | DateField
-  | BlockField
-  | GroupField
-  | RadioField
-  | RelationshipField
-  | ArrayField
-  | RichTextField
-  | SelectField
-  | UploadField
-  | CodeField
-  | JSONField
-  | PointField
-  | RowField
-  | CollapsibleField
-  | TabsField
+export type Field<TSlug extends CollectionSlug = any> =
+  TextField<TSlug>
+  | NumberField<TSlug>
+  | EmailField<TSlug>
+  | TextareaField<TSlug>
+  | CheckboxField<TSlug>
+  | DateField<TSlug>
+  | BlockField<TSlug>
+  | GroupField<TSlug>
+  | RadioField<TSlug>
+  | RelationshipField<TSlug>
+  | ArrayField<TSlug>
+  | RichTextField<TSlug>
+  | SelectField<TSlug>
+  | UploadField<TSlug>
+  | CodeField<TSlug>
+  | JSONField<TSlug>
+  | PointField<TSlug>
+  | RowField<TSlug>
+  | CollapsibleField<TSlug>
+  | TabsField<TSlug>
   | UIField;
 
-export type FieldAffectingData =
-  TextField
-  | NumberField
-  | EmailField
-  | TextareaField
-  | CheckboxField
-  | DateField
-  | BlockField
-  | GroupField
-  | RadioField
-  | RelationshipField
-  | ArrayField
-  | RichTextField
-  | SelectField
-  | UploadField
-  | CodeField
-  | JSONField
-  | PointField
-  | TabAsField
+export type FieldAffectingData<TSlug extends CollectionSlug = any> =
+  TextField<TSlug>
+  | NumberField<TSlug>
+  | EmailField<TSlug>
+  | TextareaField<TSlug>
+  | CheckboxField<TSlug>
+  | DateField<TSlug>
+  | BlockField<TSlug>
+  | GroupField<TSlug>
+  | RadioField<TSlug>
+  | RelationshipField<TSlug>
+  | ArrayField<TSlug>
+  | RichTextField<TSlug>
+  | SelectField<TSlug>
+  | UploadField<TSlug>
+  | CodeField<TSlug>
+  | JSONField<TSlug>
+  | PointField<TSlug>
+  | TabAsField<TSlug>
 
-export type NonPresentationalField =
-  TextField
-  | NumberField
-  | EmailField
-  | TextareaField
-  | CheckboxField
-  | DateField
-  | BlockField
-  | GroupField
-  | RadioField
-  | RelationshipField
-  | ArrayField
-  | RichTextField
-  | SelectField
-  | UploadField
-  | CodeField
-  | JSONField
-  | PointField
-  | RowField
-  | TabsField
-  | CollapsibleField;
+export type NonPresentationalField<TSlug extends CollectionSlug = any> =
+  TextField<TSlug>
+  | NumberField<TSlug>
+  | EmailField<TSlug>
+  | TextareaField<TSlug>
+  | CheckboxField<TSlug>
+  | DateField<TSlug>
+  | BlockField<TSlug>
+  | GroupField<TSlug>
+  | RadioField<TSlug>
+  | RelationshipField<TSlug>
+  | ArrayField<TSlug>
+  | RichTextField<TSlug>
+  | SelectField<TSlug>
+  | UploadField<TSlug>
+  | CodeField<TSlug>
+  | JSONField<TSlug>
+  | PointField<TSlug>
+  | RowField<TSlug>
+  | TabsField<TSlug>
+  | CollapsibleField<TSlug>;
 
-export type FieldWithPath = Field & {
+export type FieldWithPath<TSlug extends CollectionSlug = any> = Field<TSlug> & {
   path?: string
 }
 
-export type FieldWithSubFields =
-  GroupField
-  | ArrayField
-  | RowField
-  | CollapsibleField;
+export type FieldWithSubFields<TSlug extends CollectionSlug = any> =
+  GroupField<TSlug>
+  | ArrayField<TSlug>
+  | RowField<TSlug>
+  | CollapsibleField<TSlug>;
 
 export type FieldPresentationalOnly =
   UIField;
 
-export type FieldWithMany =
-  SelectField
-  | RelationshipField
+export type FieldWithMany<TSlug extends CollectionSlug = any> =
+  SelectField<TSlug>
+  | RelationshipField<TSlug>
 
-export type FieldWithMaxDepth =
-  UploadField
-  | RelationshipField
+export type FieldWithMaxDepth<TSlug extends CollectionSlug = any> =
+  UploadField<TSlug>
+  | RelationshipField<TSlug>
 
-export function fieldHasSubFields(field: Field): field is FieldWithSubFields {
+export function fieldHasSubFields(field: Field<any>): field is FieldWithSubFields<any> {
   return (field.type === 'group' || field.type === 'array' || field.type === 'row' || field.type === 'collapsible');
 }
 
-export function fieldIsArrayType(field: Field): field is ArrayField {
+export function fieldIsArrayType(field: Field<any>): field is ArrayField<any> {
   return field.type === 'array';
 }
 
-export function fieldIsBlockType(field: Field): field is BlockField {
+export function fieldIsBlockType(field: Field<any>): field is BlockField<any> {
   return field.type === 'blocks';
 }
 
@@ -551,27 +600,27 @@ export function optionIsValue(option: Option): option is string {
   return typeof option === 'string';
 }
 
-export function fieldSupportsMany(field: Field): field is FieldWithMany {
+export function fieldSupportsMany(field: Field<any>): field is FieldWithMany<any> {
   return field.type === 'select' || field.type === 'relationship';
 }
 
-export function fieldHasMaxDepth(field: Field): field is FieldWithMaxDepth {
+export function fieldHasMaxDepth(field: Field<any>): field is FieldWithMaxDepth<any> {
   return (field.type === 'upload' || field.type === 'relationship') && typeof field.maxDepth === 'number';
 }
 
-export function fieldIsPresentationalOnly(field: Field | TabAsField): field is UIField {
+export function fieldIsPresentationalOnly(field: Field<any> | TabAsField<any>): field is UIField {
   return field.type === 'ui';
 }
 
-export function fieldAffectsData(field: Field | TabAsField): field is FieldAffectingData {
+export function fieldAffectsData(field: Field<any> | TabAsField<any>): field is FieldAffectingData<any> {
   return 'name' in field && !fieldIsPresentationalOnly(field);
 }
 
-export function tabHasName(tab: Tab): tab is NamedTab {
+export function tabHasName(tab: Tab<any>): tab is NamedTab<any> {
   return 'name' in tab;
 }
 
-export function fieldIsLocalized(field: Field | Tab): boolean {
+export function fieldIsLocalized(field: Field<any> | Tab<any>): boolean {
   return 'localized' in field && field.localized;
 }
 

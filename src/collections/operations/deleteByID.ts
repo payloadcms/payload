@@ -3,7 +3,7 @@ import { PayloadRequest } from '../../express/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound, Forbidden } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import { BeforeOperationHook, Collection } from '../config/types';
+import { BeforeOperationHook, Collection, CollectionSlug } from '../config/types';
 import { Document, Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { afterRead } from '../../fields/hooks/afterRead';
@@ -19,7 +19,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(incomingArgs: Arguments): Promise<Document> {
+async function deleteByID<TSlug extends CollectionSlug>(incomingArgs: Arguments): Promise<Document> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -32,6 +32,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     args = (await hook({
       args,
       operation: 'delete',
+      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -72,6 +73,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     return hook({
       req,
       id,
+      context: req.payloadContext,
     });
   }, Promise.resolve());
 
@@ -145,6 +147,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -157,6 +160,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     result = await hook({
       req,
       doc: result,
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 
@@ -167,7 +171,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    result = await hook({ req, id, doc: result }) || result;
+    result = await hook({ req, id, doc: result, context: req.payloadContext }) || result;
   }, Promise.resolve());
 
   // /////////////////////////////////////

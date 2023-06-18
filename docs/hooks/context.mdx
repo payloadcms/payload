@@ -1,0 +1,135 @@
+---
+title: Context
+label: Context
+order: 50
+desc: Context allows you to pass in extra data which can be shared between hooks
+keywords: hooks, context, payload context, payloadcontext, data, extra data, shared data, shared, extra
+---
+
+<Banner type="info">
+	Context is a useful way to pass extra data between hooks
+</Banner>
+
+Say you have a beforeChange and an afterChange hook. What if you wanted to make variables from the beforeChange hook available in the afterChange hook?
+
+Of course, you could create a hidden field in your collection and store the data there, but that's not very elegant. Context makes it much easier to pass data between hooks.
+
+Simply write or read data into the `context` object which is available to every hook. This data will persist throughout the entire lifecycle. You can also find the context in every request object: `req.payloadContext`.
+
+Let's see some examples which show why this is so useful.
+
+## Example 1: Passing data between hooks
+
+```ts
+const MyCollection: CollectionConfig = {
+  slug: 'slug',
+  hooks: {
+    beforeChange: [({ context, data }) => {
+      const {value1, value2} = await someCalculation();
+      context.myCalculatedValue2 = value2;
+      return {
+        ....data,
+        value: value1,
+      };
+    }],
+    afterChange: [async ({ context, doc }) => {
+      const documentID = doc.id;
+      const value2 = context.myCalculatedValue2;
+      await someExpensiveOperationWithDocumentIDAndValue2(documentID, value2);
+    }],
+  },
+  fields: [
+    {
+      name: 'value',
+      type: 'text',
+    },
+  ],
+};
+```
+
+In this example, we calculate two values in the beforeChange hook - value1 and value2. We set the document's field 'value' to the first value, and now we want to pass the second value (value2) to the afterChange hook, as it needs it for some expensive operation which needs value2 + the document ID (which is not available in the beforeChange hook).
+
+As value2 is not saved in the document, we can't access it in the afterChange hook. But we can save it in the `context` object, which is available to every hook. We can then access it in the afterChange hook and use it for our operation.
+
+## Example 2: Preventing infinite loops
+
+Let's say you have an `afterChange` hook, in which you do some calculation (as the document ID is available in the afterChange hook, but not in the beforeChange hook) and then want to update the document again:
+
+```ts
+const MyCollection: CollectionConfig = {
+  slug: 'slug',
+  hooks: {
+    afterChange: [async ({ doc }) => {
+      const someValue = await someCalculationUsingDocID(doc.id);
+      await payload.update({
+        collection: 'slug',
+        id: doc.id,
+        data: {
+          value: doc.value + someValue,
+        },
+      });
+    }],
+  },
+  fields: [
+    {
+      name: 'value',
+      type: 'text',
+    },
+  ],
+};
+```
+
+You might not see it immediately, but this will go horribly wrong. Since the afterChange hook updates the document it's in, using `payload.update`, the afterChange hook will run again, update itself, then run again, and again - over and over. An infinite loop.
+
+In order to prevent that, we need to tell the afterChange hook to not run again if it performs the update (and thus not update itself again). We can solve that with context:
+
+```ts
+const MyCollection: CollectionConfig = {
+  slug: 'slug',
+  hooks: {
+    afterChange: [async ({ context, doc }) => {
+      if (context.triggerAfterChange === false) { // Make sure we don't trigger afterChange again and again in an infinite loop
+        return;
+      }
+      await payload.update({
+        collection: contextHooksSlug,
+        id: doc.id,
+        data: {
+          value: context.secretValue ?? '',
+        },
+        context: {
+          triggerAfterChange: false, // Make sure we don't trigger afterChange again and again in an infinite loop.
+        },
+      });
+    }],
+  },
+  fields: [
+    {
+      name: 'value',
+      type: 'text',
+    },
+  ],
+};
+```
+
+That's it! Now the afterChange hook will only run once, and not trigger itself again and again. Previously, we'd have to use a hidden checkbox field to do that - context makes it much easier.
+
+## Typing context
+
+By default, payloadContext is untyped. However - especially for plugin development when a plugin adds context data to the payloadContext object - it's useful to have it typed.
+
+We can do this using "type augmentation" - a TypeScript feature which allows us to add types to existing objects. Simply put this in any .ts or .d.ts file:
+
+```ts
+import { PayloadRequestContext as OriginalPayloadRequestContext } from 'payload';
+
+declare module 'payload' {
+  // Create a new interface that merges your additional fields with the original one
+  export interface PayloadRequestContext extends OriginalPayloadRequestContext {
+    myobject?: string;
+    // ...
+  }
+}
+```
+
+this will add a fully-typed myobject of type string to every payloadContext object. Make sure to follow this example correctly, as type augmentation can mess up your types if you do it wrong.

@@ -10,7 +10,7 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { ValidationError } from '../../errors';
 
 import sendVerificationEmail from '../../auth/sendVerificationEmail';
-import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } from '../config/types';
+import { AfterChangeHook, BeforeChangeHook, BeforeOperationHook, BeforeValidateHook, Collection, CollectionSlug, Collections } from '../config/types';
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
 import { fieldAffectsData } from '../../fields/config/types';
@@ -39,7 +39,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   autosave?: boolean
 }
 
-async function create<TSlug extends keyof GeneratedTypes['collections']>(
+async function create<TSlug extends CollectionSlug>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs;
@@ -54,6 +54,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'create',
+      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -130,6 +131,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'create',
     overrideAccess,
     req,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -143,6 +145,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       data,
       req,
       operation: 'create',
+      context: req.payloadContext,
     })) || data;
   }, Promise.resolve());
 
@@ -158,13 +161,14 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
   // beforeChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook: BeforeChangeHook) => { // TODO: Improve typing (missing generic)
     await priorHook;
 
     data = (await hook({
       data,
       req,
       operation: 'create',
+      context: req.payloadContext,
     })) || data;
   }, Promise.resolve());
 
@@ -180,6 +184,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'create',
     req,
     skipValidation: shouldSaveDraft,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -203,7 +208,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       doc: resultWithLocales,
       payload: req.payload,
       password: data.password as string,
-    })
+    });
   } else {
     try {
       doc = await Model.create(resultWithLocales);
@@ -266,6 +271,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -278,6 +284,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     result = await hook({
       req,
       doc: result,
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 
@@ -292,6 +299,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     entityConfig: collectionConfig,
     operation: 'create',
     req,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -306,6 +314,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       previousDoc: {},
       req: args.req,
       operation: 'create',
+      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 

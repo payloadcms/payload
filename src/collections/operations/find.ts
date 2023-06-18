@@ -2,7 +2,7 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Collection, TypeWithID } from '../config/types';
+import { BeforeReadHook, Collection, TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
@@ -41,6 +41,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     args = (await hook({
       args,
       operation: 'read',
+      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -172,10 +173,10 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     docs: await Promise.all(result.docs.map(async (doc) => {
       let docRef = doc;
 
-      await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
+      await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook: BeforeReadHook) => { // TODO: Improve typing (missing generic)
         await priorHook;
 
-        docRef = await hook({ req, query, doc: docRef }) || docRef;
+        docRef = await hook({ req, query, doc: docRef, context: req.payloadContext }) || docRef;
       }, Promise.resolve());
 
       return docRef;
@@ -197,6 +198,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       req,
       showHiddenFields,
       findMany: true,
+      context: req.payloadContext,
     }))),
   };
 
@@ -212,7 +214,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef = await hook({ req, query, doc: docRef, findMany: true }) || doc;
+        docRef = await hook({ req, query, doc: docRef, findMany: true, context: req.payloadContext }) as any || doc as any; // TODO: Fix typing
       }, Promise.resolve());
 
       return docRef;

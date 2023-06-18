@@ -5,7 +5,7 @@ import { PayloadRequest } from '../../express/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { APIError } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import { BeforeOperationHook, Collection } from '../config/types';
+import { BeforeOperationHook, Collection, CollectionSlug } from '../config/types';
 import { Where } from '../../types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
@@ -20,7 +20,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']>(
+async function deleteOperation<TSlug extends CollectionSlug>(
   incomingArgs: Arguments,
 ): Promise<{
   docs: GeneratedTypes['collections'][TSlug][],
@@ -41,6 +41,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     args = (await hook({
       args,
       operation: 'delete',
+      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -116,6 +117,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         return hook({
           req,
           id,
+          context: req.payloadContext,
         });
       }, Promise.resolve());
 
@@ -150,6 +152,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         overrideAccess,
         req,
         showHiddenFields,
+        context: req.payloadContext,
       });
 
       // /////////////////////////////////////
@@ -162,6 +165,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         result = await hook({
           req,
           doc: result || doc,
+          context: req.payloadContext,
         }) || result;
       }, Promise.resolve());
 
@@ -176,6 +180,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           req,
           id,
           doc: result,
+          context: req.payloadContext,
         }) || result;
       }, Promise.resolve());
 
