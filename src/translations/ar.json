@@ -241,7 +241,6 @@
     "uploading": "جار الرفع",
     "user": "المستخدم",
     "users": "المستخدمين",
-    "value": "القيمة",
     "welcome": "مرحبًا"
   },
   "operators": {
@@ -275,11 +274,11 @@
     "emailAddress": "يرجى إدخال عنوان بريد إلكتروني صحيح.",
     "enterNumber": "يرجى إدخال رقم صحيح.",
     "fieldHasNo": "هذا الحقل ليس لديه {{label}}",
-    "greaterThanMax": "{{value}} أكبر من الحد الأقصى المسموح به {{label}} الذي يبلغ {{max}}.",
+    "greaterThanMax": "\"{{value}}\" أكبر من الحد الأقصى المسموح به {{max}}.",
     "invalidInput": "هذا الحقل لديه إدخال غير صالح.",
     "invalidSelection": "هذا الحقل لديه اختيار غير صالح.",
     "invalidSelections": "هذا الحقل لديه الاختيارات الغير صالحة التالية:",
-    "lessThanMin": "{{value}} أقل من الحد الأدنى المسموح به {{label}} الذي يبلغ {{min}}.",
+    "lessThanMin": "\"{{value}}\" أقل من الحد الأدنى المسموح به {{min}}.",
     "longerThanMin": "يجب أن يكون هذا القيمة أطول من الحد الأدنى للطول الذي هو {{minLength}} أحرف.",
     "notValidDate": "\"{{value}}\" ليس تاريخا صالحا.",
     "required": "هذا الحقل مطلوب.",

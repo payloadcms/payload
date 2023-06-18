@@ -134,7 +134,7 @@ export type InitOptions = {
  */
 export type AccessResult = boolean | Where;
 
-export type AccessArgs<TData = any, U = any> = {
+export type AccessArgs<T = any, U = any> = {
   /** The original request that requires an access check */
   req: PayloadRequest<U>;
   /** ID of the resource being accessed */
@@ -144,7 +144,7 @@ export type AccessArgs<TData = any, U = any> = {
    *
    * `data` is null when a list is requested
    */
-  data?: TData;
+  data?: T;
 };
 
 /**
@@ -153,8 +153,8 @@ export type AccessArgs<TData = any, U = any> = {
  *
  * @see https://payloadcms.com/docs/access-control/overview
  */
-export type Access<TData = any, U = any> = (
-  args: AccessArgs<TData, U>
+export type Access<T = any, U = any> = (
+  args: AccessArgs<T, U>
 ) => AccessResult | Promise<AccessResult>;
 
 /** Equivalent to express middleware, but with an enhanced request object */
@@ -181,7 +181,8 @@ export type Endpoint = {
   | 'patch'
   | 'delete'
   | 'connect'
-  | 'options';
+  | 'options'
+  | string;
   /**
    * Middleware that will be called when the path/method matches
    *
@@ -193,7 +194,7 @@ export type Endpoint = {
    * @default false
    */
   root?: boolean;
-  /** Extension point to add your custom data. */
+  /** Extension  point to add your custom data. */
   custom?: Record<string, any>;
 };
 
@@ -527,7 +528,7 @@ export type Config = {
   telemetry?: boolean;
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void;
-  /** Extension point to add your custom data. */
+  /** Extension  point to add your custom data. */
   custom?: Record<string, any>;
 };
 

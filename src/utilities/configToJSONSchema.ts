@@ -32,10 +32,7 @@ function returnOptionEnums(options: Option[]): string[] {
   });
 }
 
-/**
- * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
- */
-function generateEntitySchemas(entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[]): JSONSchema4 {
+export function generateEntitySchemas(entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[]): JSONSchema4 {
   const properties = [...entities].reduce((acc, { slug }) => {
     acc[slug] = {
       $ref: `#/definitions/${slug}`,
@@ -75,11 +72,7 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
         }
 
         case 'number': {
-          if (field.hasMany === true) {
-            fieldSchema = { type: 'array', items: { type: 'number' } };
-          } else {
-            fieldSchema = { type: 'number' };
-          }
+          fieldSchema = { type: 'number' };
           break;
         }
 

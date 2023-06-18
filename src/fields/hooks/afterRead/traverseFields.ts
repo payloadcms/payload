@@ -1,6 +1,6 @@
 import { Field, TabAsField } from '../../config/types';
 import { promise } from './promise';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest } from '../../../express/types';
 
 type Args = {
   currentDepth: number
@@ -15,7 +15,6 @@ type Args = {
   overrideAccess: boolean
   siblingDoc: Record<string, unknown>
   showHiddenFields: boolean
-  context: PayloadRequestContext
 }
 
 export const traverseFields = ({
@@ -31,7 +30,6 @@ export const traverseFields = ({
   req,
   siblingDoc,
   showHiddenFields,
-  context,
 }: Args): void => {
   fields.forEach((field) => {
     fieldPromises.push(promise({
@@ -47,7 +45,6 @@ export const traverseFields = ({
       req,
       siblingDoc,
       showHiddenFields,
-      context,
     }));
   });
 };

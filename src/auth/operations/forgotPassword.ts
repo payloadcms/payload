@@ -34,7 +34,6 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     args = (await hook({
       args,
       operation: 'forgotPassword',
-      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -119,7 +118,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
 
   await collectionConfig.hooks.afterForgotPassword.reduce(async (priorHook, hook) => {
     await priorHook;
-    await hook({ args, context: req.payloadContext });
+    await hook({ args });
   }, Promise.resolve());
 
   return token;

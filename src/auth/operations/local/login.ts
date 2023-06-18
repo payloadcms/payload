@@ -6,10 +6,8 @@ import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
-import { CollectionSlug } from '../../../collections/config/types';
-import { populateDefaultRequest } from '../../../express/defaultRequest';
 
-export type Options<TSlug extends CollectionSlug> = {
+export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
   data: {
     email: string
@@ -24,7 +22,7 @@ export type Options<TSlug extends CollectionSlug> = {
   showHiddenFields?: boolean
 }
 
-async function localLogin<TSlug extends CollectionSlug>(
+async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
@@ -39,8 +37,6 @@ async function localLogin<TSlug extends CollectionSlug>(
     overrideAccess = true,
     showHiddenFields,
   } = options;
-  populateDefaultRequest(options.req);
-
 
   const collection = payload.collections[collectionSlug];
 

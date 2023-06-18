@@ -106,7 +106,6 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     req,
     overrideAccess,
     showHiddenFields,
-    context: req.payloadContext,
   });
 
   // /////////////////////////////////////

@@ -35,15 +35,13 @@ export interface Config {
 export interface User {
   id: string;
   canViewConditionalField?: boolean;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
+  email?: string;
   resetPasswordToken?: string;
   resetPasswordExpiration?: string;
-  salt?: string;
-  hash?: string;
   loginAttempts?: number;
   lockUntil?: string;
+  createdAt: string;
+  updatedAt: string;
   password?: string;
 }
 export interface ArrayField {
@@ -52,7 +50,7 @@ export interface ArrayField {
     text: string;
     id?: string;
   }[];
-  collapsedArray?: {
+  collapsedArray: {
     text: string;
     id?: string;
   }[];
@@ -76,8 +74,8 @@ export interface ArrayField {
     title?: string;
     id?: string;
   }[];
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface BlockField {
   id: string;
@@ -216,8 +214,8 @@ export interface BlockField {
     blockName?: string;
     blockType: 'text';
   }[];
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface CodeField {
   id: string;
@@ -226,8 +224,8 @@ export interface CodeField {
   json?: string;
   html?: string;
   css?: string;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface CollapsibleField {
   id: string;
@@ -246,8 +244,8 @@ export interface CollapsibleField {
     innerCollapsible?: string;
     id?: string;
   }[];
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface ConditionalLogic {
   id: string;
@@ -255,8 +253,8 @@ export interface ConditionalLogic {
   toggleField?: boolean;
   fieldToToggle: string;
   userConditional?: string;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface DateField {
   id: string;
@@ -265,14 +263,14 @@ export interface DateField {
   dayOnly?: string;
   dayAndTime?: string;
   monthOnly?: string;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface RadioField {
   id: string;
   radio?: 'one' | 'two' | 'three';
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface GroupField {
   id: string;
@@ -302,27 +300,14 @@ export interface GroupField {
       nestedField?: string;
     };
   };
-  groups: {
-    groupInRow?: {
-      field?: string;
-      secondField?: string;
-      thirdField?: string;
-    };
-    secondGroupInRow?: {
-      field?: string;
-      nestedGroup?: {
-        nestedField?: string;
-      };
-    };
-  };
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface RowField {
   id: string;
   title: string;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface IndexedField {
   id: string;
@@ -345,8 +330,8 @@ export interface IndexedField {
   collapsibleTextUnique?: string;
   partOne?: string;
   partTwo?: string;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface JsonField {
   id: string;
@@ -359,8 +344,8 @@ export interface JsonField {
     | number
     | boolean
     | null;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface NumberField {
   id: string;
@@ -372,11 +357,8 @@ export interface NumberField {
   decimalMin?: number;
   decimalMax?: number;
   defaultNumber?: number;
-  hasMany?: number[];
-  validatesHasMany?: number[];
-  localizedHasMany?: number[];
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface PointField {
   id: string;
@@ -397,8 +379,8 @@ export interface PointField {
      */
     point?: [number, number];
   };
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface RelationshipField {
   id: string;
@@ -420,8 +402,8 @@ export interface RelationshipField {
   };
   relationshipWithMin?: string[] | TextField[];
   relationshipWithMax?: string[] | TextField[];
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface TextField {
   id: string;
@@ -431,8 +413,8 @@ export interface TextField {
   defaultFunction?: string;
   defaultAsync?: string;
   overrideLength?: string;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface RichTextField {
   id: string;
@@ -441,14 +423,11 @@ export interface RichTextField {
   richText: {
     [k: string]: unknown;
   }[];
-  richTextCustomFields?: {
-    [k: string]: unknown;
-  }[];
   richTextReadOnly?: {
     [k: string]: unknown;
   }[];
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface SelectField {
   id: string;
@@ -458,8 +437,8 @@ export interface SelectField {
   selectHasManyLocalized?: ('one' | 'two')[];
   selectI18n?: 'one' | 'two' | 'three';
   simple?: 'One' | 'Two' | 'Three';
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface TabsField {
   id: string;
@@ -543,8 +522,8 @@ export interface TabsField {
   nestedTab: {
     text?: string;
   };
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 export interface Upload {
   id: string;
@@ -553,27 +532,27 @@ export interface Upload {
   richText?: {
     [k: string]: unknown;
   }[];
-  updatedAt: string;
-  createdAt: string;
   url?: string;
   filename?: string;
   mimeType?: string;
   filesize?: number;
   width?: number;
   height?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 export interface Uploads2 {
   id: string;
   text?: string;
   media?: string | Uploads2;
-  updatedAt: string;
-  createdAt: string;
   url?: string;
   filename?: string;
   mimeType?: string;
   filesize?: number;
   width?: number;
   height?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 export interface Uploads3 {
   id: string;
@@ -581,12 +560,12 @@ export interface Uploads3 {
   richText?: {
     [k: string]: unknown;
   }[];
-  updatedAt: string;
-  createdAt: string;
   url?: string;
   filename?: string;
   mimeType?: string;
   filesize?: number;
   width?: number;
   height?: number;
+  createdAt: string;
+  updatedAt: string;
 }

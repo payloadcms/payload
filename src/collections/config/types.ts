@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeepPartial, DeepRequired } from 'ts-essentials';
+import { DeepRequired } from 'ts-essentials';
 import { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
-import type { Config as GeneratedTypes } from 'payload/generated-types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
-import { PayloadRequest, PayloadRequestContext } from '../../express/types';
+import { PayloadRequest } from '../../express/types';
 import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
@@ -14,121 +14,6 @@ import { BuildQueryArgs } from '../../mongoose/buildQuery';
 import { CustomPreviewButtonProps, CustomPublishButtonProps, CustomSaveButtonProps, CustomSaveDraftButtonProps } from '../../admin/components/elements/types';
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types';
 import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types';
-
-
-type StringKeys<T> = Extract<keyof T, string>;
-export type Collections = GeneratedTypes['collections'];
-export type CollectionSlug = StringKeys<Collections>;
-
-
-type CollectionConfigType<TSlug extends CollectionSlug> = {
-  slug: TSlug;
-    /**
-   * Label configuration
-   */
-    labels?: {
-      singular?: Record<string, string> | string;
-      plural?: Record<string, string> | string;
-    };
-    /**
-     * Default field to sort by in collection list view
-     */
-    defaultSort?: string;
-    /**
-     * GraphQL configuration
-     */
-    graphQL?: {
-      singularName?: string
-      pluralName?: string
-    }
-    /**
-     * Options used in typescript generation
-     */
-    typescript?: {
-      /**
-       * Typescript generation name given to the interface type
-       */
-      interface?: string
-    }
-    fields: Field<TSlug>[];
-    /**
-     * Array of database indexes to create, including compound indexes that have multiple fields
-     */
-    indexes?: TypeOfIndex[];
-    /**
-     * Collection admin options
-     */
-    admin?: CollectionAdminOptions;
-    /**
-     * Hooks to modify Payload functionality
-     */
-    hooks?: {
-      beforeOperation?: BeforeOperationHook[];
-      beforeValidate?: BeforeValidateHook<Collections[TSlug]>[];
-      beforeChange?: BeforeChangeHook<Collections[TSlug]>[];
-      afterChange?: AfterChangeHook<Collections[TSlug]>[];
-      beforeRead?: BeforeReadHook<Collections[TSlug]>[];
-      afterRead?: AfterReadHook<Collections[TSlug]>[];
-      beforeDelete?: BeforeDeleteHook[];
-      afterDelete?: AfterDeleteHook<Collections[TSlug]>[];
-      afterError?: AfterErrorHook;
-      beforeLogin?: BeforeLoginHook<Collections[TSlug]>[];
-      afterLogin?: AfterLoginHook<Collections[TSlug]>[];
-      afterLogout?: AfterLogoutHook<Collections[TSlug]>[];
-      afterMe?: AfterMeHook<Collections[TSlug]>[];
-      afterRefresh?: AfterRefreshHook<Collections[TSlug]>[];
-      afterForgotPassword?: AfterForgotPasswordHook[];
-    };
-    /**
-     * Custom rest api endpoints
-     */
-    endpoints?: Omit<Endpoint, 'root'>[]
-    /**
-     * Access control
-     */
-    access?: {
-      create?: Access<Collections[TSlug]>;
-      read?: Access<Collections[TSlug]>;
-      readVersions?: Access<Collections[TSlug]>;
-      update?: Access<Collections[TSlug]>;
-      delete?: Access<Collections[TSlug]>;
-      admin?: (args?: any) => boolean | Promise<boolean>;
-      unlock?: Access<Collections[TSlug]>;
-    };
-    /**
-     * Collection login options
-     *
-     * Use `true` to enable with default options
-     */
-    auth?: IncomingAuthType | boolean;
-    /**
-     * Customize the handling of incoming file uploads
-     *
-     * @default false // disable uploads
-     */
-    upload?: IncomingUploadType | boolean;
-    /**
-     * Customize the handling of incoming file uploads
-     *
-     * @default false // disable versioning
-     */
-    versions?: IncomingCollectionVersions | boolean;
-    /**
-     * Add `createdAt` and `updatedAt` fields
-     *
-     * @default true
-     */
-    timestamps?: boolean
-    /** Extension  point to add your custom data. */
-    custom?: Record<string, any>;
-}
-
-type CollectionConfigs = {
-  [K in CollectionSlug]: CollectionConfigType<K>;
-}
-
-/** Manage all aspects of a data collection */
-export type CollectionConfig = CollectionConfigs[CollectionSlug];
 
 type Register<T = any> = (doc: T, password: string) => T;
 
@@ -164,11 +49,10 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType;
-  context: PayloadRequestContext;
 }) => any;
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
-  data?: DeepPartial<T>;
+  data?: Partial<T>;
   req?: PayloadRequest;
   /**
    * Hook operation being performed
@@ -180,11 +64,10 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T;
-  context: PayloadRequestContext;
-}) => DeepPartial<T> | Promise<DeepPartial<T>>;
+}) => any;
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
-  data: DeepPartial<T>;
+  data: Partial<T>;
   req: PayloadRequest;
   /**
    * Hook operation being performed
@@ -196,9 +79,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T;
-  context: PayloadRequestContext;
-}) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
+}) => any;
 
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   doc: T;
@@ -208,82 +89,64 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    * Hook operation being performed
    */
   operation: CreateOrUpdateOperation;
-  context: PayloadRequestContext;
-}) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
+}) => any;
 
 export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   query: { [key: string]: any };
-  context: PayloadRequestContext;
-}) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
+}) => any;
 
 export type AfterReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   query?: { [key: string]: any };
   findMany?: boolean
-  context: PayloadRequestContext;
-}) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
+}) => any;
 
 export type BeforeDeleteHook = (args: {
   req: PayloadRequest;
   id: string | number;
-  context: PayloadRequestContext;
 }) => any;
 
 export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   id: string | number;
-  context: PayloadRequestContext;
-}) => DeepPartial<T> | Promise<DeepPartial<T>>;
+}) => any;
 
-
-export type AfterErrorHook = (err: Error, res: unknown, context: PayloadRequestContext) => { response: any, status: number } | void;
+export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
-  user: T;
-  context: PayloadRequestContext;
+  user: T
 }) => any;
 
 export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   user: T;
   token: string;
-  context: PayloadRequestContext;
-}) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
+}) => any;
 
 export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   res: Response;
-  context: PayloadRequestContext;
-}) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
+}) => any;
 
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   response: unknown;
-  context: PayloadRequestContext;
-}) => DeepPartial<T> | Promise<DeepPartial<T>>;
+}) => any;
 
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   res: Response;
   token: string;
   exp: number;
-  context: PayloadRequestContext;
-}) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
+}) => any;
 
 export type AfterForgotPasswordHook = (args: {
   args?: any;
-  context: PayloadRequestContext;
 }) => any;
 
 type BeforeDuplicateArgs<T> = {
@@ -379,10 +242,113 @@ export type CollectionAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
+/** Manage all aspects of a data collection */
+export type CollectionConfig = {
+  slug: string;
+  /**
+   * Label configuration
+   */
+  labels?: {
+    singular?: Record<string, string> | string;
+    plural?: Record<string, string> | string;
+  };
+  /**
+   * Default field to sort by in collection list view
+   */
+  defaultSort?: string;
+  /**
+   * GraphQL configuration
+   */
+  graphQL?: {
+    singularName?: string
+    pluralName?: string
+  }
+  /**
+   * Options used in typescript generation
+   */
+  typescript?: {
+    /**
+     * Typescript generation name given to the interface type
+     */
+    interface?: string
+  }
+  fields: Field[];
+  /**
+   * Array of database indexes to create, including compound indexes that have multiple fields
+   */
+  indexes?: TypeOfIndex[];
+  /**
+   * Collection admin options
+   */
+  admin?: CollectionAdminOptions;
+  /**
+   * Hooks to modify Payload functionality
+   */
+  hooks?: {
+    beforeOperation?: BeforeOperationHook[];
+    beforeValidate?: BeforeValidateHook[];
+    beforeChange?: BeforeChangeHook[];
+    afterChange?: AfterChangeHook[];
+    beforeRead?: BeforeReadHook[];
+    afterRead?: AfterReadHook[];
+    beforeDelete?: BeforeDeleteHook[];
+    afterDelete?: AfterDeleteHook[];
+    afterError?: AfterErrorHook;
+    beforeLogin?: BeforeLoginHook[];
+    afterLogin?: AfterLoginHook[];
+    afterLogout?: AfterLogoutHook[];
+    afterMe?: AfterMeHook[];
+    afterRefresh?: AfterRefreshHook[];
+    afterForgotPassword?: AfterForgotPasswordHook[];
+  };
+  /**
+   * Custom rest api endpoints
+   */
+  endpoints?: Omit<Endpoint, 'root'>[]
+  /**
+   * Access control
+   */
+  access?: {
+    create?: Access;
+    read?: Access;
+    readVersions?: Access;
+    update?: Access;
+    delete?: Access;
+    admin?: (args?: any) => boolean | Promise<boolean>;
+    unlock?: Access;
+  };
+  /**
+   * Collection login options
+   *
+   * Use `true` to enable with default options
+   */
+  auth?: IncomingAuthType | boolean;
+  /**
+   * Customize the handling of incoming file uploads
+   *
+   * @default false // disable uploads
+   */
+  upload?: IncomingUploadType | boolean;
+  /**
+   * Customize the handling of incoming file uploads
+   *
+   * @default false // disable versioning
+   */
+  versions?: IncomingCollectionVersions | boolean;
+  /**
+   * Add `createdAt` and `updatedAt` fields
+   *
+   * @default true
+   */
+  timestamps?: boolean
+  /** Extension  point to add your custom data. */
+  custom?: Record<string, any>;
+};
+
 export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions' | 'endpoints'> {
   auth: Auth;
   upload: Upload;
-  fields: Field<any>[]; // Can I make this generic more specific? Or rather: should I?
+  fields: Field[];
   versions: SanitizedCollectionVersions;
   endpoints: Omit<Endpoint, 'root'>[];
 }
@@ -401,7 +367,7 @@ export type Collection = {
   }
 };
 
-export type BulkOperationResult<TSlug extends CollectionSlug> = {
+export type BulkOperationResult<TSlug extends keyof GeneratedTypes['collections']> = {
   docs: GeneratedTypes['collections'][TSlug][],
   errors: {
     message: string

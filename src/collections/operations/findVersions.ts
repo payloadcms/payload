@@ -2,7 +2,7 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { AfterReadHook, Collection, CollectionModel } from '../config/types';
+import { Collection, CollectionModel } from '../config/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { PaginatedDocs } from '../../mongoose/types';
@@ -105,7 +105,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
       await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef.version = await hook({ req, query, doc: docRef.version, context: req.payloadContext }) || docRef.version;
+        docRef.version = await hook({ req, query, doc: docRef.version }) || docRef.version;
       }, Promise.resolve());
 
       return docRef;
@@ -128,7 +128,6 @@ async function findVersions<T extends TypeWithVersion<T>>(
         req,
         showHiddenFields,
         findMany: true,
-        context: req.payloadContext,
       }),
     }))),
   };
@@ -142,10 +141,10 @@ async function findVersions<T extends TypeWithVersion<T>>(
     docs: await Promise.all(result.docs.map(async (doc) => {
       const docRef = doc;
 
-      await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook: AfterReadHook) => { // TODO: Improve typing (missing generic)
+      await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef.version = await hook({ req, query, doc: doc.version, findMany: true, context: req.payloadContext }) || doc.version;
+        docRef.version = await hook({ req, query, doc: doc.version, findMany: true }) || doc.version;
       }, Promise.resolve());
 
       return docRef;

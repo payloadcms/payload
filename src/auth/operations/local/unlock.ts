@@ -5,10 +5,8 @@ import unlock from '../unlock';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
-import { CollectionSlug } from '../../../collections/config/types';
-import { populateDefaultRequest } from '../../../express/defaultRequest';
 
-export type Options<T extends CollectionSlug> = {
+export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
   data: {
     email
@@ -17,7 +15,7 @@ export type Options<T extends CollectionSlug> = {
   overrideAccess: boolean
 }
 
-async function localUnlock<T extends CollectionSlug>(
+async function localUnlock<T extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<T>,
 ): Promise<boolean> {
@@ -27,7 +25,6 @@ async function localUnlock<T extends CollectionSlug>(
     overrideAccess = true,
     req = {} as PayloadRequest,
   } = options;
-  populateDefaultRequest(options.req);
 
   const collection = payload.collections[collectionSlug];
 

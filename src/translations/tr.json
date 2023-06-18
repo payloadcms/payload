@@ -241,7 +241,6 @@
     "uploading": "Yükleniyor",
     "user": "kullanıcı",
     "users": "kullanıcı",
-    "value": "Değer",
     "welcome": "Hoşgeldiniz"
   },
   "operators": {
@@ -275,11 +274,11 @@
     "emailAddress": "Lütfen geçerli bir e-posta adresi girin.",
     "enterNumber": "Lütfen geçerli bir sayı girin.",
     "fieldHasNo": "Bu alanda {{label}} girili değil.",
-    "greaterThanMax": "{{value}} izin verilen maksimum {{label}} değerinden daha büyük.",
+    "greaterThanMax": "\"{{value}}\", izin verilen maksimum değerden ({{max}}) fazla.",
     "invalidInput": "Bu alanda geçersiz bir giriş mevcut.",
     "invalidSelection": "Bu alanda geçersiz bir seçim mevcut.",
     "invalidSelections": "'Bu alan şu geçersiz seçimlere sahip:'",
-    "lessThanMin": "{{value}} izin verilen minimum {{label}} değerinden daha küçük.",
+    "lessThanMin": "\"{{value}}\", belirlenen minimum değerden ({{min}}) az.",
     "longerThanMin": "Bu değer minimum {{minLength}} karakterden uzun olmalıdır.",
     "notValidDate": "\"{{value}}\" geçerli bir tarih değil.",
     "required": "Bu alan gereklidir.",

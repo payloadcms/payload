@@ -12,7 +12,6 @@ import type { NestedAfterReadHook } from './payload-types';
 import { hooksUsersSlug } from './collections/Users';
 import { devUser, regularUser } from '../credentials';
 import { AuthenticationError } from '../../src/errors';
-import { contextHooksSlug } from './collections/ContextHooks';
 
 let client: RESTClient;
 
@@ -151,22 +150,6 @@ describe('Hooks', () => {
       });
 
       expect(retrievedDocs[0].text).toEqual('ok!!');
-    });
-
-    it('should pass context from beforeChange to afterChange', async () => {
-      const document = await payload.create({
-        collection: contextHooksSlug,
-        data: {
-          value: 'wrongvalue',
-        },
-      });
-
-      const retrievedDoc = await payload.findByID({
-        collection: contextHooksSlug,
-        id: document.id,
-      });
-
-      expect(retrievedDoc.value).toEqual('secret');
     });
   });
 

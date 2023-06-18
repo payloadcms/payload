@@ -1,6 +1,6 @@
 import React from 'react';
 import { components as SelectComponents, MultiValueProps } from 'react-select';
-import type { Option } from '../types';
+import { Option } from '../../../forms/field-types/Relationship/types';
 import './index.scss';
 
 const baseClass = 'multi-value-label';

@@ -2,7 +2,7 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 import { UploadedFile } from 'express-fileupload';
 import { MarkOptional } from 'ts-essentials';
 import { Payload } from '../../../payload';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import create from '../create';
@@ -10,10 +10,8 @@ import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
-import { CollectionSlug } from '../../config/types';
-import { populateDefaultRequest } from '../../../express/defaultRequest';
 
-export type Options<TSlug extends CollectionSlug> = {
+export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
   data: MarkOptional<GeneratedTypes['collections'][TSlug], 'id' | 'updatedAt' | 'createdAt' | 'sizes'>
   depth?: number
@@ -28,13 +26,9 @@ export type Options<TSlug extends CollectionSlug> = {
   overwriteExistingFiles?: boolean
   req?: PayloadRequest
   draft?: boolean
-  /**
-   * context, which will then be passed to req.payloadContext, which can be read by hooks
-   */
-  context?: PayloadRequestContext
 }
 
-export default async function createLocal<TSlug extends CollectionSlug>(
+export default async function createLocal<TSlug extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
@@ -53,9 +47,7 @@ export default async function createLocal<TSlug extends CollectionSlug>(
     overwriteExistingFiles = false,
     req = {} as PayloadRequest,
     draft,
-    context,
   } = options;
-  populateDefaultRequest(req, context);
 
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;

@@ -1,7 +1,7 @@
 import { Field, TabAsField } from '../../config/types';
 import { promise } from './promise';
 import { Operation } from '../../../types';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest } from '../../../express/types';
 
 type Args = {
   data: Record<string, unknown>
@@ -18,7 +18,6 @@ type Args = {
   siblingDoc: Record<string, unknown>
   siblingDocWithLocales: Record<string, unknown>
   skipValidation?: boolean
-  context: PayloadRequestContext
 }
 
 export const traverseFields = async ({
@@ -36,7 +35,6 @@ export const traverseFields = async ({
   siblingDoc,
   siblingDocWithLocales,
   skipValidation,
-  context,
 }: Args): Promise<void> => {
   const promises = [];
 
@@ -56,7 +54,6 @@ export const traverseFields = async ({
       siblingDoc,
       siblingDocWithLocales,
       skipValidation,
-      context,
     }));
   });
 

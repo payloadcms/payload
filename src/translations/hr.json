@@ -241,7 +241,6 @@
     "uploading": "Prijenos",
     "user": "Korisnik",
     "users": "Korisnici",
-    "value": "Attribute",
     "welcome": "Dobrodošli"
   },
   "operators": {
@@ -275,11 +274,11 @@
     "emailAddress": "Molim unestie valjanu email adresu.",
     "enterNumber": "Molim unesite valjani broj.",
     "fieldHasNo": "Ovo polje nema {{label}}",
-    "greaterThanMax": "{{value}} exceeds the maximum allowable {{label}} limit of {{max}}.",
+    "greaterThanMax": "\"{{value}}\" je veće od maksimalne dopuštene vrijednosti od {{max}}.",
     "invalidInput": "Ovo polje ima nevaljan unos.",
     "invalidSelection": "Ovo polje ima nevaljan odabir.",
     "invalidSelections": "Ovo polje ima sljedeće nevaljane odabire:",
-    "lessThanMin": "{{value}} is below the minimum allowable {{label}} limit of {{min}}.",
+    "lessThanMin": "\"{{value}}\" je manja od minimalne dopuštene vrijednost od {{min}}.",
     "longerThanMin": "Ova vrijednost mora biti duža od minimalne dužine od {{minLength}} znakova",
     "notValidDate": "\"{{value}}\" nije valjan datum.",
     "required": "Ovo polje je obvezno.",

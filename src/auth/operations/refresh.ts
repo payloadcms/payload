@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { Response } from 'express';
-import { Collection, BeforeOperationHook, AfterRefreshHook } from '../../collections/config/types';
+import { Collection, BeforeOperationHook } from '../../collections/config/types';
 import { Forbidden } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import { Document } from '../../types';
@@ -32,7 +32,6 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     args = (await hook({
       args,
       operation: 'refresh',
-      context: args.req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -83,7 +82,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
   // After Refresh - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterRefresh.reduce(async (priorHook, hook: AfterRefreshHook) => { // TODO: Improve typing (generics)
+  await collectionConfig.hooks.afterRefresh.reduce(async (priorHook, hook) => {
     await priorHook;
 
     args = (await hook({
@@ -91,7 +90,6 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
       res: args.res,
       exp,
       token: refreshedToken,
-      context: args.req.payloadContext,
     })) || args;
   }, Promise.resolve());
 

@@ -84,13 +84,10 @@ function buildObjectType({
   forceNullable,
 }: Args): GraphQLObjectType {
   const fieldToSchemaMap = {
-    number: (objectTypeConfig: ObjectTypeConfig, field: NumberField) => {
-      const type = field?.name === 'id' ? GraphQLInt : GraphQLFloat;
-      return ({
-        ...objectTypeConfig,
-        [field.name]: { type: withNullableType(field, field?.hasMany === true ? new GraphQLList(type) : type, forceNullable) },
-      });
-    },
+    number: (objectTypeConfig: ObjectTypeConfig, field: NumberField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, GraphQLFloat, forceNullable) },
+    }),
     text: (objectTypeConfig: ObjectTypeConfig, field: TextField) => ({
       ...objectTypeConfig,
       [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },

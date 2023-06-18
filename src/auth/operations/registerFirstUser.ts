@@ -3,7 +3,7 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 import { MarkOptional } from 'ts-essentials';
 import { Forbidden } from '../../errors';
 import { PayloadRequest } from '../../express/types';
-import { Collection, CollectionSlug } from '../../collections/config/types';
+import { Collection } from '../../collections/config/types';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -20,7 +20,7 @@ export type Result<T> = {
   user: T
 }
 
-async function registerFirstUser<TSlug extends CollectionSlug>(
+async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections']>(
   args: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<Result<GeneratedTypes['collections'][TSlug]>> {
   const {
