@@ -241,6 +241,7 @@
     "uploading": "در حال بارگذاری",
     "user": "کاربر",
     "users": "کاربران",
+    "value": "مقدار",
     "welcome": "خوش‌آمدید"
   },
   "operators": {
@@ -274,11 +275,11 @@
     "emailAddress": "لطفاً یک نشانی رایانامه معتبر وارد کنید.",
     "enterNumber": "لطفاً یک شماره درست وارد کنید.",
     "fieldHasNo": "این کادر شامل هیچ {{label}} نمی‌شود",
-    "greaterThanMax": "\"{{value}}\" بیش‌تر از حد مجاز است {{max}}.",
+    "greaterThanMax": "{{value}} بیشتر از حداکثر مجاز برای {{label}} است که {{max}} است.",
     "invalidInput": "این کادر دارای ورودی نامعتبر است.",
     "invalidSelection": "این کادر دارای یک انتخاب نامعتبر است.",
     "invalidSelections": "این کادر دارای انتخاب‌های نامعتبر زیر است:",
-    "lessThanMin": "\"{{value}}\" کم‌تر از مقدار مجاز است {{min}}.",
+    "lessThanMin": "{{value}} کمتر از حداقل مجاز برای {{label}} است که {{min}} است.",
     "longerThanMin": "ورودی باید بیش از حداقل {{minLength}} واژه باشد.",
     "notValidDate": "\"{{value}}\" یک تاریخ معتبر نیست.",
     "required": "این کادر اجباری است.",

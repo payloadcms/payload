@@ -1,6 +1,6 @@
 import { EmailOptions } from '../config/types';
 
 export const defaults: EmailOptions = {
-  fromName: 'Payload CMS',
+  fromName: 'Payload',
   fromAddress: 'info@payloadcms.com',
 };

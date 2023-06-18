@@ -1,6 +1,6 @@
 import { Config as GeneratedTypes } from '../../../generated-types';
 import { Document, Where } from '../../../types';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
 import { Payload } from '../../../payload';
 import deleteOperation from '../delete';
 import deleteByID from '../deleteByID';
@@ -8,6 +8,8 @@ import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { BulkOperationResult, CollectionSlug } from '../../config/types';
+
+import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type BaseOptions<T extends CollectionSlug> = {
   collection: T
@@ -17,6 +19,10 @@ export type BaseOptions<T extends CollectionSlug> = {
   user?: Document
   overrideAccess?: boolean
   showHiddenFields?: boolean
+  /**
+   * context, which will then be passed to req.payloadContext, which can be read by hooks
+   */
+  context?: PayloadRequestContext
 }
 
 export type ByIDOptions<T extends CollectionSlug> = BaseOptions<T> & {
@@ -45,6 +51,7 @@ async function deleteLocal<TSlug extends CollectionSlug>(payload: Payload, optio
     user,
     overrideAccess = true,
     showHiddenFields,
+    context,
   } = options;
 
   const collection = payload.collections[collectionSlug];
@@ -63,6 +70,7 @@ async function deleteLocal<TSlug extends CollectionSlug>(payload: Payload, optio
     payload,
     i18n: i18n(payload.config.i18n),
   } as PayloadRequest;
+  populateDefaultRequest(req, context);
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

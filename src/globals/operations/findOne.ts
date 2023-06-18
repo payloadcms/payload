@@ -112,6 +112,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     req,
     overrideAccess,
     showHiddenFields,
+    context: req.payloadContext,
   });
 
   // /////////////////////////////////////

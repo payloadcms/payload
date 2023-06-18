@@ -4,12 +4,12 @@ import {
   components as SelectComponents,
 } from 'react-select';
 import { useDraggableSortable } from '../../DraggableSortable/useDraggableSortable';
-import { Option as OptionType } from '../types';
+import type { Option } from '../types';
 
 import './index.scss';
 
 const baseClass = 'multi-value';
-export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
+export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
   const {
     className,
     isDisabled,
@@ -51,7 +51,6 @@ export const MultiValue: React.FC<MultiValueProps<OptionType>> = (props) => {
         onMouseDown: (e) => {
           if (!disableMouseDown) {
             // we need to prevent the dropdown from opening when clicking on the drag handle, but not when a modal is open (i.e. the 'Relationship' field component)
-            e.preventDefault();
             e.stopPropagation();
           }
         },
