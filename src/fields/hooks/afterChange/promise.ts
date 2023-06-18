@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-import { Field, fieldAffectsData, FieldHook, TabAsField, tabHasName } from '../../config/types';
 import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
 import { traverseFields } from './traverseFields';
 
 type Args = {
@@ -34,7 +34,7 @@ export const promise = async ({
   if (fieldAffectsData(field)) {
     // Execute hooks
     if (field.hooks?.afterChange) {
-      await field.hooks.afterChange.reduce(async (priorHook, currentHook: FieldHook) => {
+      await field.hooks.afterChange.reduce(async (priorHook, currentHook) => {
         await priorHook;
 
         const hookedValue = await currentHook({

@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
 import { Document } from '../../types';
-import { AfterChangeHook, AfterReadHook, BeforeChangeHook, BeforeValidateHook, Collection, CollectionSlug, Collections } from '../config/types';
+import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { NotFound, Forbidden, APIError, ValidationError } from '../../errors';
@@ -20,23 +20,23 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
 
-type UpdateByIDArgs<TSlug extends CollectionSlug> = {
-  collection: Collection;
-  req: PayloadRequest;
-  id: string | number;
-  data: DeepPartial<Collections[TSlug]>;
-  depth?: number;
-  disableVerificationEmail?: boolean;
-  overrideAccess?: boolean;
-  showHiddenFields?: boolean;
-  overwriteExistingFiles?: boolean;
-  draft?: boolean;
-  autosave?: boolean;
-};
+export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+  collection: Collection
+  req: PayloadRequest
+  id: string | number
+  data: DeepPartial<T>
+  depth?: number
+  disableVerificationEmail?: boolean
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+  overwriteExistingFiles?: boolean
+  draft?: boolean
+  autosave?: boolean
+}
 
-async function updateByID<TSlug extends CollectionSlug>(
-  incomingArgs: UpdateByIDArgs<TSlug>,
-): Promise<Collections[TSlug]> {
+async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
+  incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
+): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -173,19 +173,17 @@ async function updateByID<TSlug extends CollectionSlug>(
   // /////////////////////////////////////
   // beforeValidate - Collection
   // /////////////////////////////////////
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook: BeforeValidateHook<Collections[TSlug]>) => {
+
+  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    const result = await hook({
+    data = (await hook({
       data,
       req,
       operation: 'update',
       originalDoc,
       context: req.payloadContext,
-    });
-
-    // The result of the hook might be undefined, so we fall back to data
-    data = result ?? data;
+    })) || data;
   }, Promise.resolve());
 
   // /////////////////////////////////////
@@ -200,7 +198,7 @@ async function updateByID<TSlug extends CollectionSlug>(
   // beforeChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook: BeforeChangeHook<Collections[TSlug]>) => {
+  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
     data = (await hook({
@@ -296,14 +294,13 @@ async function updateByID<TSlug extends CollectionSlug>(
     overrideAccess,
     showHiddenFields,
     context: req.payloadContext,
-  }) as Collections[TSlug];
-
+  });
 
   // /////////////////////////////////////
   // afterRead - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook: AfterReadHook) => { // TODO: Improve typing
+  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
     await priorHook;
 
     result = await hook({
@@ -331,7 +328,7 @@ async function updateByID<TSlug extends CollectionSlug>(
   // afterChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook: AfterChangeHook) => { // TODO: Improve typing
+  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
     result = await hook({

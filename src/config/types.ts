@@ -134,7 +134,7 @@ export type InitOptions = {
  */
 export type AccessResult = boolean | Where;
 
-export type AccessArgs<TData = any, U = any> = {
+export type AccessArgs<T = any, U = any> = {
   /** The original request that requires an access check */
   req: PayloadRequest<U>;
   /** ID of the resource being accessed */
@@ -144,7 +144,7 @@ export type AccessArgs<TData = any, U = any> = {
    *
    * `data` is null when a list is requested
    */
-  data?: TData;
+  data?: T;
 };
 
 /**
@@ -153,8 +153,8 @@ export type AccessArgs<TData = any, U = any> = {
  *
  * @see https://payloadcms.com/docs/access-control/overview
  */
-export type Access<TData = any, U = any> = (
-  args: AccessArgs<TData, U>
+export type Access<T = any, U = any> = (
+  args: AccessArgs<T, U>
 ) => AccessResult | Promise<AccessResult>;
 
 /** Equivalent to express middleware, but with an enhanced request object */

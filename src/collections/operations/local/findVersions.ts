@@ -8,10 +8,9 @@ import findVersions from '../findVersions';
 import { getDataLoader } from '../../dataloader';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
-import { CollectionSlug } from '../../config/types';
 import { populateDefaultRequest } from '../../../express/defaultRequest';
 
-export type Options<T extends CollectionSlug> = {
+export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
   depth?: number
   page?: number
@@ -30,7 +29,7 @@ export type Options<T extends CollectionSlug> = {
   context?: PayloadRequestContext,
 }
 
-export default async function findVersionsLocal<T extends CollectionSlug>(
+export default async function findVersionsLocal<T extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<T>,
 ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['collections'][T]>>> {

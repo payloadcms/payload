@@ -5,7 +5,7 @@ import { PayloadRequest } from '../../express/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { APIError } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import { BeforeOperationHook, Collection, CollectionSlug } from '../config/types';
+import { BeforeOperationHook, Collection } from '../config/types';
 import { Where } from '../../types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
@@ -20,7 +20,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function deleteOperation<TSlug extends CollectionSlug>(
+async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments,
 ): Promise<{
   docs: GeneratedTypes['collections'][TSlug][],

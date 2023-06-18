@@ -10,7 +10,7 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { ValidationError } from '../../errors';
 
 import sendVerificationEmail from '../../auth/sendVerificationEmail';
-import { AfterChangeHook, BeforeChangeHook, BeforeOperationHook, BeforeValidateHook, Collection, CollectionSlug, Collections } from '../config/types';
+import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } from '../config/types';
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
 import { fieldAffectsData } from '../../fields/config/types';
@@ -39,7 +39,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
   autosave?: boolean
 }
 
-async function create<TSlug extends CollectionSlug>(
+async function create<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs;
@@ -161,7 +161,7 @@ async function create<TSlug extends CollectionSlug>(
   // beforeChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook: BeforeChangeHook) => { // TODO: Improve typing (missing generic)
+  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
     await priorHook;
 
     data = (await hook({

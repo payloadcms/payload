@@ -6,10 +6,9 @@ import { getDataLoader } from '../../dataloader';
 import restoreVersion from '../restoreVersion';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
-import { CollectionSlug } from '../../config/types';
 import { populateDefaultRequest } from '../../../express/defaultRequest';
 
-export type Options<T extends CollectionSlug> = {
+export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
   id: string
   depth?: number
@@ -25,7 +24,7 @@ export type Options<T extends CollectionSlug> = {
   context?: PayloadRequestContext,
 }
 
-export default async function restoreVersionLocal<T extends CollectionSlug>(
+export default async function restoreVersionLocal<T extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<T>,
 ): Promise<GeneratedTypes['collections'][T]> {
