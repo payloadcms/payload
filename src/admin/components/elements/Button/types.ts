@@ -10,7 +10,7 @@ export type Props = {
   children?: React.ReactNode,
   onClick?: (event: MouseEvent) => void,
   disabled?: boolean,
-  icon?: React.ReactNode | ['chevron' | 'x' | 'plus' | 'edit'],
+  icon?: React.ReactNode | ['chevron' | 'x' | 'plus' | 'edit' | 'eye-open' | 'eye-close'],
   iconStyle?: 'with-border' | 'without-border' | 'none',
   buttonStyle?: 'primary' | 'secondary' | 'transparent' | 'error' | 'none' | 'icon-label',
   buttonId?: string,

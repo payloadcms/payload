@@ -9,6 +9,7 @@ import { Props } from './types';
 import { FileSizes, Upload } from '../../../../uploads/types';
 
 import './index.scss';
+import { useConfig } from '../../utilities/Config';
 
 const baseClass = 'file-details';
 
@@ -51,7 +52,10 @@ const FileDetails: React.FC<Props> = (props) => {
     url,
   } = doc;
 
+  const { serverURL } = useConfig();
+
   const [orderedSizes, setOrderedSizes] = useState<FileSizes>(() => sortSizes(sizes, imageSizes));
+  const [isRevealPreviews, setIsRevealPreviews] = useState(false);
 
   useEffect(() => {
     setOrderedSizes(sortSizes(sizes, imageSizes));
@@ -117,18 +121,38 @@ const FileDetails: React.FC<Props> = (props) => {
           height={moreInfoOpen ? 'auto' : 0}
         >
           <ul className={`${baseClass}__sizes`}>
+            <div className={`${baseClass}__size-reveal`}>
+              <Button
+                icon={!isRevealPreviews ? 'eye-open' : 'eye-close'}
+                round
+                buttonStyle="icon-label"
+                iconStyle="with-border"
+                onClick={() => setIsRevealPreviews(!isRevealPreviews)}
+              />
+            </div>
             {Object.entries(orderedSizes).map(([key, val]) => {
               if (val?.filename) {
                 return (
-                  <li key={key}>
-                    <div className={`${baseClass}__size-label`}>
-                      {key}
+                  <li
+                    key={key}
+                    className={isRevealPreviews ? 'revealed' : ''}
+                  >
+                    <div>
+                      <div className={`${baseClass}__size-label`}>{key}</div>
+                      <Meta
+                        {...val}
+                        mimeType={val.mimeType}
+                        staticURL={staticURL}
+                      />
                     </div>
-                    <Meta
-                      {...val}
-                      mimeType={val.mimeType}
-                      staticURL={staticURL}
-                    />
+
+                    {isRevealPreviews && (
+                      <img
+                        className={`${baseClass}__size-preview`}
+                        src={`${serverURL}${staticURL}/${val.filename}`}
+                        alt={val.filename}
+                      />
+                    )}
                   </li>
                 );
               }
@@ -138,7 +162,6 @@ const FileDetails: React.FC<Props> = (props) => {
           </ul>
         </AnimateHeight>
       )}
-
     </div>
   );
 };

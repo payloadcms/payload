@@ -8,6 +8,8 @@ import chevron from '../../icons/Chevron';
 import edit from '../../icons/Edit';
 import swap from '../../icons/Swap';
 import linkIcon from '../../icons/Link';
+import eyeOpen from '../../icons/EyeOpen';
+import eyeClose from '../../icons/EyeClose';
 import Tooltip from '../Tooltip';
 
 import './index.scss';
@@ -19,6 +21,8 @@ const icons = {
   edit,
   swap,
   link: linkIcon,
+  'eye-open': eyeOpen,
+  'eye-close': eyeClose,
 };
 
 const baseClass = 'btn';
