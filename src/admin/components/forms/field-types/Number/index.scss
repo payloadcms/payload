@@ -4,10 +4,8 @@
   position: relative;
   margin-bottom: $baseline;
 
-  &:not(.has-many) {
-    input {
-      @include formInput;
-    }
+  input {
+    @include formInput;
   }
 
   &.error {

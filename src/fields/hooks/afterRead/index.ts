@@ -1,6 +1,6 @@
 import { SanitizedCollectionConfig } from '../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../globals/config/types';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import deepCopyObject from '../../../utilities/deepCopyObject';
 
@@ -14,7 +14,6 @@ type Args = {
   req: PayloadRequest
   overrideAccess: boolean
   showHiddenFields: boolean
-  context: PayloadRequestContext
 }
 
 export async function afterRead<T = any>(args: Args): Promise<T> {
@@ -28,7 +27,6 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     req,
     overrideAccess,
     showHiddenFields,
-    context,
   } = args;
 
   const doc = deepCopyObject(incomingDoc);
@@ -58,7 +56,6 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     req,
     siblingDoc: doc,
     showHiddenFields,
-    context,
   });
 
   await Promise.all(fieldPromises);

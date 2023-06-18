@@ -22,7 +22,7 @@ const errorHandler = async (
   };
 
   if (afterErrorHook) {
-    ({ response } = await afterErrorHook(err, response, null) || { response });
+    ({ response } = await afterErrorHook(err, response) || { response });
   }
 
   return response;

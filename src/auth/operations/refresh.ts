@@ -32,7 +32,6 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     args = (await hook({
       args,
       operation: 'refresh',
-      context: args.req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -91,7 +90,6 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
       res: args.res,
       exp,
       token: refreshedToken,
-      context: args.req.payloadContext,
     })) || args;
   }, Promise.resolve());
 

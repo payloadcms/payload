@@ -4,14 +4,13 @@ import { Payload } from '../../../payload';
 import { Document, Where } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import update from '../update';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest } from '../../../express/types';
 import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
 import updateByID from '../updateByID';
 import { BulkOperationResult, CollectionSlug } from '../../config/types';
-import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type BaseOptions<TSlug extends CollectionSlug> = {
   collection: TSlug
@@ -27,10 +26,6 @@ export type BaseOptions<TSlug extends CollectionSlug> = {
   overwriteExistingFiles?: boolean
   draft?: boolean
   autosave?: boolean
-  /**
-   * context, which will then be passed to req.payloadContext, which can be read by hooks
-   */
-  context?: PayloadRequestContext
 }
 
 export type ByIDOptions<TSlug extends CollectionSlug> = BaseOptions<TSlug> & {
@@ -65,7 +60,6 @@ async function updateLocal<TSlug extends CollectionSlug>(payload: Payload, optio
     autosave,
     id,
     where,
-    context,
   } = options;
 
   const collection = payload.collections[collectionSlug];
@@ -88,7 +82,6 @@ async function updateLocal<TSlug extends CollectionSlug>(payload: Payload, optio
       file: file ?? await getFileByPath(filePath),
     },
   } as PayloadRequest;
-  populateDefaultRequest(req, context);
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

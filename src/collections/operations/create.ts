@@ -54,7 +54,6 @@ async function create<TSlug extends CollectionSlug>(
     args = (await hook({
       args,
       operation: 'create',
-      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -131,7 +130,6 @@ async function create<TSlug extends CollectionSlug>(
     operation: 'create',
     overrideAccess,
     req,
-    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -145,7 +143,6 @@ async function create<TSlug extends CollectionSlug>(
       data,
       req,
       operation: 'create',
-      context: req.payloadContext,
     })) || data;
   }, Promise.resolve());
 
@@ -168,7 +165,6 @@ async function create<TSlug extends CollectionSlug>(
       data,
       req,
       operation: 'create',
-      context: req.payloadContext,
     })) || data;
   }, Promise.resolve());
 
@@ -184,7 +180,6 @@ async function create<TSlug extends CollectionSlug>(
     operation: 'create',
     req,
     skipValidation: shouldSaveDraft,
-    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -271,7 +266,6 @@ async function create<TSlug extends CollectionSlug>(
     overrideAccess,
     req,
     showHiddenFields,
-    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -284,7 +278,6 @@ async function create<TSlug extends CollectionSlug>(
     result = await hook({
       req,
       doc: result,
-      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 
@@ -299,7 +292,6 @@ async function create<TSlug extends CollectionSlug>(
     entityConfig: collectionConfig,
     operation: 'create',
     req,
-    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -314,7 +306,6 @@ async function create<TSlug extends CollectionSlug>(
       previousDoc: {},
       req: args.req,
       operation: 'create',
-      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 

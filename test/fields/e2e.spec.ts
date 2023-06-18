@@ -12,7 +12,6 @@ import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
 import { jsonDoc } from './collections/JSON';
-import { numberDoc } from './collections/Number';
 
 const { beforeAll, describe } = test;
 
@@ -65,42 +64,6 @@ describe('fields', () => {
       await page.goto(url.create);
       const description = page.locator('.field-description-i18nText');
       await expect(description).toHaveText('en description');
-    });
-  });
-
-  describe('number', () => {
-    let url: AdminUrlUtil;
-    beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, 'number-fields');
-    });
-
-    test('should display field in list view', async () => {
-      await page.goto(url.list);
-      const textCell = page.locator('.row-1 .cell-number');
-      await expect(textCell)
-        .toHaveText(String(numberDoc.number));
-    });
-
-    test('should create', async () => {
-      const input = 5;
-
-      await page.goto(url.create);
-      const field = page.locator('#field-number');
-      await field.fill(String(input));
-      await saveDocAndAssert(page);
-      await expect(await field.inputValue()).toEqual(String(input));
-    });
-
-    test('should create hasMany', async () => {
-      const input = 5;
-
-      await page.goto(url.create);
-      const field = page.locator('.field-hasMany');
-      await field.click();
-      await page.keyboard.type(String(input));
-      await page.keyboard.press('Enter');
-      await saveDocAndAssert(page);
-      await expect(field.locator('.rs__value-container')).toContainText(String(input));
     });
   });
 
@@ -874,70 +837,6 @@ describe('fields', () => {
       await page.keyboard.type('seeded');
       await page.locator('.rs__option:has-text("Seeded text document")').click();
       await saveDocAndAssert(page);
-    });
-
-
-    // Related issue: https://github.com/payloadcms/payload/issues/2815
-    test("should create hasMany relationship, open the drawer and modify a relation document's field", async () => {
-      await page.goto(url.create);
-
-      // First fill out the relationship field, as it's required
-      {
-        const button = page.locator('#relationship-add-new .relationship-add-new__add-button');
-        await button.click();
-        await page.locator('#field-relationship .relationship-add-new__relation-button--text-fields').click();
-
-        const textField = page.locator('#field-text');
-        const textValue = 'hello';
-
-        await textField.fill(textValue);
-
-        await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click();
-        await expect(page.locator('.Toastify')).toContainText('successfully');
-        await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
-        await page.locator('#action-save').click();
-        await expect(page.locator('.Toastify')).toContainText('successfully');
-      }
-
-      // Now the relationshipHasMany field
-      {
-        const button = page.locator('#relationshipHasMany-add-new').getByRole('button', { name: 'Add new Text Field' });
-        await button.click();
-
-        const textField = page.getByLabel('Text*');
-        const textValue = 'hello';
-
-        await textField.fill(textValue);
-
-        await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click();
-        await expect(page.locator('.Toastify')).toContainText('successfully');
-        await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
-        await page.locator('#action-save').click();
-        await expect(page.locator('.Toastify')).toContainText('successfully');
-      }
-
-      await page.reload();
-
-      // Now edit it
-      const textValue2 = '123';
-      {
-        const hasManyField = await page.locator('#field-relationshipHasMany > .relationship__wrap > .react-select-container > .react-select > .rs__control');
-        const editButton = await hasManyField.getByText('Edit Edit');
-        await editButton.click();
-        const textField2 = page.getByLabel('Text*');
-        await textField2.click();
-        await page.keyboard.down('1');
-        await page.keyboard.down('2');
-        await page.keyboard.down('3');
-        await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click();
-        await expect(page.locator('.Toastify')).toContainText('successfully');
-        await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
-        await page.locator('#action-save').click();
-        await expect(page.locator('.Toastify')).toContainText('successfully');
-      }
-
-      await page.reload();
-      await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toContainText(textValue2);
     });
   });
 

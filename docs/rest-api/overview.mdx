@@ -99,7 +99,6 @@ Note: Collection slugs must be formatted in kebab-case
       example: {
         slug: "createDocument",
         req: {
-          credentials: true,
           headers: true,
           body: {
             title: "New page",
@@ -127,7 +126,6 @@ Note: Collection slugs must be formatted in kebab-case
       example: {
         slug: "updateDocument",
         req: {
-          credentials: true,
           query: true,
           headers: true,
           body: {
@@ -157,7 +155,6 @@ Note: Collection slugs must be formatted in kebab-case
       example: {
         slug: "updateDocumentByID",
         req: {
-          credentials: true,
           headers: true,
           body: {
             title: "I have been updated by ID!",
@@ -202,7 +199,6 @@ Note: Collection slugs must be formatted in kebab-case
       example: {
         slug: "deleteDocuments",
         req: {
-          credentials: true,
           query: true,
           headers: true,
         },
@@ -229,7 +225,6 @@ Note: Collection slugs must be formatted in kebab-case
       example: {
         slug: "deleteByID",
         req: {
-          credentials: true,
           headers: true,
         },
         res: {
@@ -260,7 +255,6 @@ Auth enabled collections are also given the following endpoints:
       example: {
         slug: "login",
         req: {
-          credentials: true,
           headers: true,
           body: {
             email: "dev@payloadcms.com",
@@ -290,7 +284,6 @@ Auth enabled collections are also given the following endpoints:
         slug: "logout",
         req: {
           headers: true,
-          credentials: true,
         },
         res: {
           message: "You have been logged out successfully.",
@@ -305,7 +298,6 @@ Auth enabled collections are also given the following endpoints:
       example: {
         slug: "unlockCollection",
         req: {
-          credentials: true,
           headers: true,
           body: {
             email: "dev@payloadcms.com",
@@ -324,7 +316,6 @@ Auth enabled collections are also given the following endpoints:
       example: {
         slug: "refreshToken",
         req: {
-          credentials: true,
           headers: true,
         },
         res: {
@@ -347,7 +338,7 @@ Auth enabled collections are also given the following endpoints:
       example: {
         slug: "verifyUser",
         req: {
-          credentials: true,
+          prop: "token: string, user-collection: string",
           headers: true,
         },
         res: {
@@ -363,7 +354,6 @@ Auth enabled collections are also given the following endpoints:
       example: {
         slug: "currentUser",
         req: {
-          credentials: true,
           headers: true,
         },
         res: {
@@ -390,7 +380,6 @@ Auth enabled collections are also given the following endpoints:
         slug: "forgotPassword",
         req: {
           headers: true,
-          credentials: true,
           body: {
             email: "dev@payloadcms.com",
           },
@@ -408,7 +397,6 @@ Auth enabled collections are also given the following endpoints:
       example: {
         slug: "resetPassword",
         req: {
-          credentials: true,
           headers: true,
           body: {
             token: "7eac3830ffcfc7f9f66c00315dabeb11575dba91",
@@ -446,7 +434,6 @@ Globals cannot be created or deleted, so there are only two REST endpoints opene
       example: {
         slug: "getGlobal",
         req: {
-          credentials: true,
           headers: true,
         },
         res: {
@@ -467,7 +454,6 @@ Globals cannot be created or deleted, so there are only two REST endpoints opene
         slug: "updateGlobal",
         req: {
           headers: true,
-          credentials: true,
           body: {
             announcement: "Paging Doctor Scrunt",
           },
@@ -499,7 +485,6 @@ In addition to the dynamically generated endpoints above Payload also has REST e
         slug: "getPreference",
         req: {
           headers: true,
-          credentials: true,
         },
         res: {
           _id: "644bb7a8307b3d363c6edf2c",
@@ -522,7 +507,6 @@ In addition to the dynamically generated endpoints above Payload also has REST e
         slug: "createPreference",
         req: {
           headers: true,
-          credentials: true,
           body: {
             value: "Europe/London",
           },

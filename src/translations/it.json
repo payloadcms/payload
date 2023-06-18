@@ -241,7 +241,6 @@
     "uploading": "Caricamento",
     "user": "Utente",
     "users": "Utenti",
-    "value": "Valore",
     "welcome": "Benvenuto"
   },
   "operators": {
@@ -275,11 +274,11 @@
     "emailAddress": "Si prega di inserire un indirizzo email valido.",
     "enterNumber": "Si prega di inserire un numero valido.",
     "fieldHasNo": "Questo campo non ha {{label}}",
-    "greaterThanMax": "{{value}} è superiore al massimo consentito {{label}} di {{max}}.",
+    "greaterThanMax": "\"{{value}}\" è maggiore del valore massimo consentito di {{max}}.",
     "invalidInput": "Questo campo ha un input non valido.",
     "invalidSelection": "Questo campo ha una selezione non valida.",
     "invalidSelections": "'In questo campo sono presenti le seguenti selezioni non valide:'",
-    "lessThanMin": "{{value}} è inferiore al minimo consentito {{label}} di {{min}}.",
+    "lessThanMin": "\"{{value}}\" è inferiore al valore minimo consentito di {{min}}.",
     "longerThanMin": "Questo valore deve essere più lungo della lunghezza minima di {{minLength}} caratteri.",
     "notValidDate": "\"{{value}}\" non è una data valida.",
     "required": "Questo campo è obbligatorio.",

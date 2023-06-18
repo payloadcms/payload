@@ -41,7 +41,6 @@ async function deleteOperation<TSlug extends CollectionSlug>(
     args = (await hook({
       args,
       operation: 'delete',
-      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -117,7 +116,6 @@ async function deleteOperation<TSlug extends CollectionSlug>(
         return hook({
           req,
           id,
-          context: req.payloadContext,
         });
       }, Promise.resolve());
 
@@ -152,7 +150,6 @@ async function deleteOperation<TSlug extends CollectionSlug>(
         overrideAccess,
         req,
         showHiddenFields,
-        context: req.payloadContext,
       });
 
       // /////////////////////////////////////
@@ -165,7 +162,6 @@ async function deleteOperation<TSlug extends CollectionSlug>(
         result = await hook({
           req,
           doc: result || doc,
-          context: req.payloadContext,
         }) || result;
       }, Promise.resolve());
 
@@ -180,7 +176,6 @@ async function deleteOperation<TSlug extends CollectionSlug>(
           req,
           id,
           doc: result,
-          context: req.payloadContext,
         }) || result;
       }, Promise.resolve());
 

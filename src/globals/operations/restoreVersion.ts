@@ -106,7 +106,6 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     req,
     overrideAccess,
     showHiddenFields,
-    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -133,7 +132,6 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     entityConfig: globalConfig,
     operation: 'update',
     req,
-    context: req.payloadContext,
   });
 
   // /////////////////////////////////////

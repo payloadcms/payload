@@ -2,8 +2,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import deepmerge from 'deepmerge';
-import objectID from 'bson-objectid';
-import mongoose, { FilterQuery } from 'mongoose';
+import { FilterQuery } from 'mongoose';
 import { combineMerge } from '../utilities/combineMerge';
 import { operatorMap } from './operatorMap';
 import { sanitizeQueryValue } from './sanitizeQueryValue';
@@ -233,13 +232,12 @@ export class ParamParser {
         hasCustomID = true;
       }
 
-
       paths.push({
         path: '_id',
         field: {
           name: 'id',
           type: idFieldType,
-        } as Field, // With the hasMany union type stuff for the number field, typescript gets confused if we remove the `as Field` here
+        },
         complete: true,
         collectionSlug: this.collectionSlug,
       });
@@ -295,16 +293,7 @@ export class ParamParser {
 
             const result = await SubModel.find(subQuery, subQueryOptions);
 
-            const $in: unknown[] = [];
-
-            result.forEach((doc) => {
-              const stringID = doc._id.toString();
-              $in.push(stringID);
-
-              if (mongoose.Types.ObjectId.isValid(stringID)) {
-                $in.push(doc._id);
-              }
-            });
+            const $in = result.map((doc) => doc._id.toString());
 
             if (pathsToQuery.length === 1) return { path, value: { $in } };
 
@@ -338,40 +327,6 @@ export class ParamParser {
 
       if (operator && validOperators.includes(operator)) {
         const operatorKey = operatorMap[operator];
-
-        if (field.type === 'relationship' || field.type === 'upload') {
-          let hasNumberIDRelation;
-
-          const result = {
-            value: {
-              $or: [
-                { [path]: { [operatorKey]: formattedValue } },
-              ],
-            },
-          };
-
-          if (typeof formattedValue === 'string') {
-            if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-              result.value.$or.push({ [path]: { [operatorKey]: objectID(formattedValue) } });
-            } else {
-              (Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach((relationTo) => {
-                const isRelatedToCustomNumberID = this.req.payload.collections[relationTo]?.config?.fields.find((relatedField) => {
-                  return fieldAffectsData(relatedField) && relatedField.name === 'id' && relatedField.type === 'number';
-                });
-
-                if (isRelatedToCustomNumberID) {
-                  if (isRelatedToCustomNumberID.type === 'number') hasNumberIDRelation = true;
-                }
-              });
-
-              if (hasNumberIDRelation) result.value.$or.push({ [path]: { [operatorKey]: parseFloat(formattedValue) } });
-            }
-          }
-
-          if (result.value.$or.length > 1) {
-            return result;
-          }
-        }
 
         // Some operators like 'near' need to define a full query
         // so if there is no operator key, just return the value

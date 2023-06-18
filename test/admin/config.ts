@@ -128,7 +128,7 @@ export default buildConfig({
         {
           type: 'ui',
           name: 'demoUIField',
-          label: { en: 'Demo UI Field', de: 'Demo UI Field de' },
+          label: 'Demo UI Field',
           admin: {
             components: {
               Field: DemoUIFieldField,

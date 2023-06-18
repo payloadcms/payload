@@ -23,7 +23,7 @@ import docAccessRequestHandler from './requestHandlers/docAccess';
 import deleteByID from './requestHandlers/deleteByID';
 
 const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
-  const { endpoints } = collection;
+  let { endpoints } = collection;
 
   if (collection.auth) {
     if (!collection.auth.disableLocalStrategy) {
@@ -43,7 +43,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         });
       }
 
-      endpoints.push(
+      endpoints = endpoints.concat([
         {
           path: '/login',
           method: 'post',
@@ -64,10 +64,10 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
           method: 'post',
           handler: resetPassword,
         },
-      );
+      ]);
     }
 
-    endpoints.push(
+    endpoints = endpoints.concat([
       {
         path: '/init',
         method: 'get',
@@ -88,11 +88,11 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         method: 'post',
         handler: refreshHandler,
       },
-    );
+    ]);
   }
 
   if (collection.versions) {
-    endpoints.push(
+    endpoints = endpoints.concat([
       {
         path: '/versions',
         method: 'get',
@@ -108,7 +108,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         method: 'post',
         handler: restoreVersion,
       },
-    );
+    ]);
   }
 
   return endpoints.concat([

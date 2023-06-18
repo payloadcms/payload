@@ -6,7 +6,7 @@ import { Response } from 'express';
 import type { Config as GeneratedTypes } from 'payload/generated-types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
-import { PayloadRequest, PayloadRequestContext } from '../../express/types';
+import { PayloadRequest } from '../../express/types';
 import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
@@ -164,7 +164,6 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType;
-  context: PayloadRequestContext;
 }) => any;
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
@@ -180,7 +179,6 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T;
-  context: PayloadRequestContext;
 }) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
@@ -196,9 +194,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T;
-  context: PayloadRequestContext;
 }) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
 
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   doc: T;
@@ -208,68 +204,53 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    * Hook operation being performed
    */
   operation: CreateOrUpdateOperation;
-  context: PayloadRequestContext;
 }) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
 
 export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   query: { [key: string]: any };
-  context: PayloadRequestContext;
 }) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
 
 export type AfterReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   query?: { [key: string]: any };
   findMany?: boolean
-  context: PayloadRequestContext;
 }) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
 
 export type BeforeDeleteHook = (args: {
   req: PayloadRequest;
   id: string | number;
-  context: PayloadRequestContext;
 }) => any;
 
 export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   id: string | number;
-  context: PayloadRequestContext;
 }) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
-
-export type AfterErrorHook = (err: Error, res: unknown, context: PayloadRequestContext) => { response: any, status: number } | void;
+export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
-  user: T;
-  context: PayloadRequestContext;
+  user: T
 }) => any;
 
 export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   user: T;
   token: string;
-  context: PayloadRequestContext;
 }) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
 
 export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   res: Response;
-  context: PayloadRequestContext;
 }) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
 
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   response: unknown;
-  context: PayloadRequestContext;
 }) => DeepPartial<T> | Promise<DeepPartial<T>>;
 
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
@@ -277,13 +258,10 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   res: Response;
   token: string;
   exp: number;
-  context: PayloadRequestContext;
 }) => DeepPartial<T> | Promise<DeepPartial<T>>;
-
 
 export type AfterForgotPasswordHook = (args: {
   args?: any;
-  context: PayloadRequestContext;
 }) => any;
 
 type BeforeDuplicateArgs<T> = {
@@ -378,6 +356,7 @@ export type CollectionAdminOptions = {
    */
   preview?: GeneratePreviewURL
 }
+
 
 export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions' | 'endpoints'> {
   auth: Auth;

@@ -62,22 +62,6 @@ describe('collections-rest', () => {
       expect(result.docs[0].id).toEqual(post1.id);
     });
 
-    it('should find with pagination false', async () => {
-      const post1 = await createPost();
-      const post2 = await createPost();
-
-      const { docs, totalDocs } = await payload.find({
-        collection: slug,
-        pagination: false,
-      });
-
-      const expectedDocs = [post1, post2];
-      expect(docs).toHaveLength(expectedDocs.length);
-      expect(docs).toEqual(expect.arrayContaining(expectedDocs));
-
-      expect(totalDocs).toEqual(2);
-    });
-
     it('should update existing', async () => {
       const {
         id,

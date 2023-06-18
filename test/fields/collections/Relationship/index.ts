@@ -44,20 +44,14 @@ const RelationshipFields: CollectionConfig = {
       type: 'relationship',
       relationTo: 'text-fields',
       hasMany: true,
-      minRows: 2,
+      min: 2,
     },
     {
       name: 'relationshipWithMax',
       type: 'relationship',
       relationTo: 'text-fields',
       hasMany: true,
-      maxRows: 2,
-    },
-    {
-      name: 'relationshipHasMany',
-      type: 'relationship',
-      relationTo: 'text-fields',
-      hasMany: true,
+      max: 2,
     },
   ],
 };

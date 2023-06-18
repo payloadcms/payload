@@ -143,7 +143,6 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     req,
     overrideAccess,
     showHiddenFields,
-    context: req.payloadContext,
   });
 
   // /////////////////////////////////////
@@ -156,7 +155,6 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     result = await hook({
       req,
       doc: result,
-      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 
@@ -170,7 +168,6 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     previousDoc: prevDocWithLocales,
     entityConfig: collectionConfig,
     operation: 'update',
-    context: req.payloadContext,
     req,
   });
 
@@ -186,7 +183,6 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       req,
       previousDoc: prevDocWithLocales,
       operation: 'update',
-      context: req.payloadContext,
     }) || result;
   }, Promise.resolve());
 

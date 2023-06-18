@@ -31,8 +31,8 @@ const Default: React.FC<Props> = ({ children, className }) => {
     <div className={classes}>
       <Meta
         title={t('dashboard')}
-        description={`${t('dashboard')} Payload`}
-        keywords={`${t('dashboard')}, Payload`}
+        description={`${t('dashboard')} Payload CMS`}
+        keywords={`${t('dashboard')}, Payload CMS`}
       />
       <RenderCustomComponent
         DefaultComponent={DefaultNav}

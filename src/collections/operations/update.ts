@@ -46,7 +46,6 @@ async function update<TSlug extends CollectionSlug>(
     args = (await hook({
       args,
       operation: 'update',
-      context: req.payloadContext,
     })) || args;
   }, Promise.resolve());
 
@@ -149,7 +148,6 @@ async function update<TSlug extends CollectionSlug>(
         req,
         overrideAccess: true,
         showHiddenFields: true,
-        context: req.payloadContext,
       });
 
       await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc: docWithLocales, t, overrideDelete: false });
@@ -166,7 +164,6 @@ async function update<TSlug extends CollectionSlug>(
         operation: 'update',
         overrideAccess,
         req,
-        context: req.payloadContext,
       });
 
       // /////////////////////////////////////
@@ -181,7 +178,6 @@ async function update<TSlug extends CollectionSlug>(
           req,
           operation: 'update',
           originalDoc,
-          context: req.payloadContext,
         })) || data;
       }, Promise.resolve());
 
@@ -205,7 +201,6 @@ async function update<TSlug extends CollectionSlug>(
           req,
           originalDoc,
           operation: 'update',
-          context: req.payloadContext,
         })) || data;
       }, Promise.resolve());
 
@@ -222,7 +217,6 @@ async function update<TSlug extends CollectionSlug>(
         operation: 'update',
         req,
         skipValidation: shouldSaveDraft || data._status === 'draft',
-        context: req.payloadContext,
       });
 
       // /////////////////////////////////////
@@ -280,7 +274,6 @@ async function update<TSlug extends CollectionSlug>(
         req,
         overrideAccess,
         showHiddenFields,
-        context: req.payloadContext,
       });
 
       // /////////////////////////////////////
@@ -293,7 +286,6 @@ async function update<TSlug extends CollectionSlug>(
         result = await hook({
           req,
           doc: result,
-          context: req.payloadContext,
         }) || result;
       }, Promise.resolve());
 
@@ -308,7 +300,6 @@ async function update<TSlug extends CollectionSlug>(
         entityConfig: collectionConfig,
         operation: 'update',
         req,
-        context: req.payloadContext,
       });
 
       // /////////////////////////////////////
@@ -323,7 +314,6 @@ async function update<TSlug extends CollectionSlug>(
           previousDoc: originalDoc,
           req,
           operation: 'update',
-          context: req.payloadContext,
         }) || result;
       }, Promise.resolve());
 

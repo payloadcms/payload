@@ -6,7 +6,6 @@ import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { CollectionSlug } from '../../../collections/config/types';
-import { populateDefaultRequest } from '../../../express/defaultRequest';
 
 export type Options<T extends CollectionSlug> = {
   collection: T
@@ -27,7 +26,6 @@ async function localUnlock<T extends CollectionSlug>(
     overrideAccess = true,
     req = {} as PayloadRequest,
   } = options;
-  populateDefaultRequest(options.req);
 
   const collection = payload.collections[collectionSlug];
 

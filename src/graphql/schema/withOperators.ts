@@ -1,8 +1,8 @@
-import { GraphQLBoolean, GraphQLInputObjectType, GraphQLString, GraphQLList, GraphQLFloat, GraphQLEnumType, GraphQLInt } from 'graphql';
+import { GraphQLBoolean, GraphQLInputObjectType, GraphQLString, GraphQLList, GraphQLFloat, GraphQLEnumType } from 'graphql';
 import type { GraphQLType } from 'graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { FieldAffectingData, NumberField, RadioField, RelationshipField, SelectField, optionIsObject } from '../../fields/config/types';
+import { FieldAffectingData, RadioField, SelectField, optionIsObject } from '../../fields/config/types';
 import combineParentName from '../utilities/combineParentName';
 import formatName from '../utilities/formatName';
 import operators from './operators';
@@ -27,10 +27,7 @@ type DefaultsType = {
 
 const defaults: DefaultsType = {
   number: {
-    type: (field: NumberField): GraphQLType => {
-      const type = field?.name === 'id' ? GraphQLInt : GraphQLFloat;
-      return field?.hasMany === true ? new GraphQLList(type) : type;
-    },
+    type: GraphQLFloat,
     operators: [...operators.equality, ...operators.comparison],
   },
   text: {
@@ -89,9 +86,7 @@ const defaults: DefaultsType = {
     operators: [...operators.equality, ...operators.comparison, ...operators.geo],
   },
   relationship: {
-    type: (field: RelationshipField): GraphQLType => {
-      return field?.hasMany === true ? new GraphQLList(GraphQLString) : GraphQLString;
-    },
+    type: GraphQLString,
     operators: [...operators.equality, ...operators.contains],
   },
   upload: {

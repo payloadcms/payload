@@ -1,6 +1,6 @@
-# Contributing to Payload
+# Contributing to Payload CMS
 
-Below you'll find a set of guidelines for how to contribute to Payload.
+Below you'll find a set of guidelines for how to contribute to Payload CMS.
 
 ## Opening issues
 

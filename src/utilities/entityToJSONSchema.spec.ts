@@ -1,8 +1,8 @@
 import sanitizeConfig from '../config/sanitize';
 import { Config } from '../config/types';
-import { configToJSONSchema } from './configToJSONSchema';
+import { entityToJSONSchema } from './entityToJSONSchema';
 
-describe('configToJSONSchema', () => {
+describe('entityToJSONSchema', () => {
   it('should handle optional arrays with required fields', () => {
     const config: Config = {
       collections: [
@@ -27,8 +27,9 @@ describe('configToJSONSchema', () => {
     };
 
     const sanitizedConfig = sanitizeConfig(config);
-    const schema = configToJSONSchema(sanitizedConfig);
-    expect(schema?.definitions?.test).toStrictEqual({
+    const schema = entityToJSONSchema(sanitizedConfig, sanitizedConfig.collections[0]);
+
+    expect(schema).toStrictEqual({
       title: 'Test',
       type: 'object',
       additionalProperties: false,

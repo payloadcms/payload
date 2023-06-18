@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
+import { PayloadRequest } from '../../../express/types';
 import { Field, fieldAffectsData, FieldHook, TabAsField, tabHasName, valueIsValueWithRelation } from '../../config/types';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 
 type Args<T> = {
@@ -13,7 +13,6 @@ type Args<T> = {
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
-  context: PayloadRequestContext
 }
 
 // This function is responsible for the following actions, in order:
@@ -31,7 +30,6 @@ export const promise = async <T>({
   req,
   siblingData,
   siblingDoc,
-  context,
 }: Args<T>): Promise<void> => {
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
@@ -172,7 +170,6 @@ export const promise = async <T>({
           siblingData,
           operation,
           req,
-          context,
         });
 
         if (hookedValue !== undefined) {
@@ -210,7 +207,6 @@ export const promise = async <T>({
         req,
         siblingData: groupData,
         siblingDoc: groupDoc,
-        context,
       });
 
       break;
@@ -232,7 +228,6 @@ export const promise = async <T>({
             req,
             siblingData: row,
             siblingDoc: siblingDoc[field.name]?.[i] || {},
-            context,
           }));
         });
         await Promise.all(promises);
@@ -259,7 +254,6 @@ export const promise = async <T>({
               req,
               siblingData: row,
               siblingDoc: siblingDoc[field.name]?.[i] || {},
-              context,
             }));
           }
         });
@@ -281,7 +275,6 @@ export const promise = async <T>({
         req,
         siblingData,
         siblingDoc,
-        context,
       });
 
       break;
@@ -308,7 +301,6 @@ export const promise = async <T>({
         req,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
-        context,
       });
 
       break;
@@ -325,7 +317,6 @@ export const promise = async <T>({
         req,
         siblingData,
         siblingDoc,
-        context,
       });
 
       break;

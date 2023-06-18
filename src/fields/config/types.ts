@@ -7,7 +7,7 @@ import type { Config as GeneratedTypes } from 'payload/generated-types';
 import { Operation, Where } from '../../types';
 import { SanitizedConfig } from '../../config/types';
 import { CollectionSlug, TypeWithID } from '../../collections/config/types';
-import { PayloadRequest, PayloadRequestContext } from '../../express/types';
+import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
@@ -39,7 +39,6 @@ export type FieldHookArgs<TCollection extends TypeWithID = any, TField = any, TS
   /** The value of the field. */
   value?: TField,
   previousValue?: TField,
-  context: PayloadRequestContext
 }
 
 export type FieldHook<TCollection extends TypeWithID = any, TField = any, TSibling = any> = (args: FieldHookArgs<TCollection, TField, TSibling>) => Promise<TField> | TField;
@@ -129,7 +128,7 @@ export interface FieldBaseType<TSlug extends CollectionSlug, TFieldName extends 
     read?: FieldAccess<Fields<TSlug>>;
     update?: FieldAccess<Fields<TSlug>>;
   };
-  /** Extension point to add your custom data. */
+  /** Extension  point to add your custom data. */
   custom?: Record<string, any>;
 }
 
@@ -142,33 +141,13 @@ export type FieldBase<TSlug extends CollectionSlug = any> = FieldBases<TSlug>[Fi
 export type NumberField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'number';
   admin?: Admin & {
-    /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
-    /** Set this property to define a placeholder string for the field. */
     placeholder?: Record<string, string> | string
-    /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
   }
-  /** Minimum value accepted. Used in the default `validation` function. */
   min?: number
-  /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
-} & ({
-  /** Makes this field an ordered array of numbers instead of just a single number. */
-  hasMany: true
-  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
-  minRows?: number
-  /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
-  maxRows?: number
-} | {
-  /** Makes this field an ordered array of numbers instead of just a single number. */
-  hasMany?: false | undefined
-  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
-  minRows?: undefined
-  /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
-  maxRows?: undefined
-})
-
+}
 
 export type TextField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'text';
@@ -294,7 +273,7 @@ export type UIField = {
     }
   }
   type: 'ui';
-  /** Extension point to add your custom data. */
+  /** Extension  point to add your custom data. */
   custom?: Record<string, any>;
 }
 
@@ -345,31 +324,15 @@ export type RelationshipField<TSlug extends CollectionSlug = any> = FieldBase<TS
   admin?: Admin & {
     isSortable?: boolean;
     allowCreate?: boolean;
-  },
+  }
 } & ({
   hasMany: true
-  /**
-   * @deprecated Use 'minRows' instead
-   */
   min?: number
-  /**
-   * @deprecated Use 'maxRows' instead
-   */
   max?: number
-  minRows?: number
-  maxRows?: number
 } | {
   hasMany?: false | undefined
-  /**
-   * @deprecated Use 'minRows' instead
-   */
   min?: undefined
-  /**
-   * @deprecated Use 'maxRows' instead
-   */
   max?: undefined
-  minRows?: undefined
-  maxRows?: undefined
 })
 
 export type ValueWithRelation = {
