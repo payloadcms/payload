@@ -318,7 +318,7 @@ export type SelectField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> &
 
 export type RelationshipField<TSlug extends CollectionSlug = any> = FieldBase<TSlug> & {
   type: 'relationship';
-  relationTo: string | string[];
+  relationTo: CollectionSlug | CollectionSlug[];
   hasMany?: boolean;
   maxDepth?: number;
   filterOptions?: FilterOptions;
