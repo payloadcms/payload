@@ -6,7 +6,7 @@ import { PayloadRequest } from '../../express/types';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import isLocked from '../isLocked';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Field, fieldHasSubFields, fieldAffectsData } from '../../fields/config/types';
+import { Field, fieldAffectsData, fieldHasSubFields } from '../../fields/config/types';
 import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
@@ -53,7 +53,6 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
   const {
     collection: {
-      Model,
       config: collectionConfig,
     },
     data,
@@ -118,7 +117,6 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
   if (maxLoginAttemptsEnabled) {
     await unlock({
       collection: {
-        Model,
         config: collectionConfig,
       },
       req,

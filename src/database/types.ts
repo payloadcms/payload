@@ -24,7 +24,7 @@ import {
   TextField,
   UploadField,
 } from '../fields/config/types';
-import { SanitizedCollectionConfig } from '../collections/config/types';
+import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
 import { Payload } from '../payload';
 import { Document, Where } from '../types';
 import { SanitizedGlobalConfig } from '../globals/config/types';
@@ -108,12 +108,12 @@ export interface DatabaseAdapter {
   commitTransaction?: ({ payload }: { payload: Payload }) => Promise<boolean>
 
   // versions
-  queryDrafts: <T>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>
+  queryDrafts: <T = TypeWithID>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>
 
   // operations
-  find: <T>(args: FindArgs) => Promise<PaginatedDocs<T>>
-  findVersions: <T>(args: FindVersionArgs) => Promise<PaginatedDocs<T>>
-  findGlobalVersions: <T>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<T>>
+  find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
+  findVersions: <T = TypeWithID>(args: FindVersionArgs) => Promise<PaginatedDocs<T>>
+  findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<T>>
   findOne: FindOne
   create: Create
   update: Update

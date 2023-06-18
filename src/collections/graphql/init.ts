@@ -317,7 +317,7 @@ function initCollectionsGraphQL(payload: Payload): void {
 
       payload.Query.fields[`initialized${singularName}`] = {
         type: GraphQLBoolean,
-        resolve: init(collection),
+        resolve: init(collection.config.slug),
       };
 
       payload.Mutation.fields[`refreshToken${singularName}`] = {

@@ -20,10 +20,12 @@ async function unlock(args: Args): Promise<boolean> {
 
   const {
     collection: {
-      Model,
       config: collectionConfig,
     },
     req,
+    req: {
+      payload,
+    },
     overrideAccess,
   } = args;
 
@@ -43,7 +45,14 @@ async function unlock(args: Args): Promise<boolean> {
   // Unlock
   // /////////////////////////////////////
 
-  const user = await Model.findOne({ email: data.email.toLowerCase() });
+  const { docs } = await req.payload.db.find({
+    payload,
+    collection: collectionConfig,
+    where: { email: { equals: data.email.toLowerCase() } },
+    limit: 1,
+  });
+
+  const [user] = docs;
 
   if (!user) return null;
 

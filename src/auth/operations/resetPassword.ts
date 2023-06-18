@@ -33,7 +33,6 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
   const {
     collection: {
-      Model,
       config: collectionConfig,
     },
     req: {
@@ -77,11 +76,16 @@ async function resetPassword(args: Arguments): Promise<Result> {
     user._verified = true;
   }
 
+  const { updatedDocs } = await payload.db.update({
+    payload,
+    collection: collectionConfig,
+    where: {
+      id: { equals: user.id },
+    },
+    data: user,
+  });
 
-  let doc = await Model.findByIdAndUpdate({ _id: user.id }, user, { new: true }).lean();
-
-  doc = JSON.parse(JSON.stringify(doc));
-  doc = sanitizeInternalFields(doc);
+  const doc = sanitizeInternalFields(updatedDocs[0]);
 
   await authenticateLocalStrategy({ password: data.password, doc });
 

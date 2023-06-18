@@ -25,7 +25,7 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
 ): Promise<Result<GeneratedTypes['collections'][TSlug]>> {
   const {
     collection: {
-      Model,
+      config,
       config: {
         slug,
         auth: {
@@ -40,9 +40,14 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     data,
   } = args;
 
-  const count = await Model.countDocuments({});
+  const { docs } = await payload.db.find({
+    payload,
+    collection: config,
+    limit: 1,
+    pagination: false,
+  });
 
-  if (count >= 1) throw new Forbidden(req.t);
+  if (docs.length === 1) throw new Forbidden(req.t);
 
   // /////////////////////////////////////
   // Register first user
