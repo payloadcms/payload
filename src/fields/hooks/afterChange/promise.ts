@@ -32,7 +32,7 @@ export const promise = async ({
   if (fieldAffectsData(field)) {
     // Execute hooks
     if (field.hooks?.afterChange) {
-      await field.hooks.afterRead.reduce(async (priorHook, currentHook: FieldHook) => {
+      await field.hooks.afterChange.reduce(async (priorHook, currentHook: FieldHook) => {
         await priorHook;
 
         const hookedValue = await currentHook({
