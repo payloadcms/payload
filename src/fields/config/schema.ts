@@ -94,6 +94,11 @@ export const number = baseField.keys({
     autoComplete: joi.string(),
     step: joi.number(),
   }),
+  hasMany: joi.boolean().default(false),
+  minRows: joi.number()
+    .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
+  maxRows: joi.number()
+    .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
 });
 
 export const textarea = baseField.keys({

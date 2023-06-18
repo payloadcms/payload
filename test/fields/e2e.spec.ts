@@ -12,6 +12,7 @@ import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
 import { jsonDoc } from './collections/JSON';
+import { numberDoc } from './collections/Number';
 
 const { beforeAll, describe } = test;
 
@@ -64,6 +65,42 @@ describe('fields', () => {
       await page.goto(url.create);
       const description = page.locator('.field-description-i18nText');
       await expect(description).toHaveText('en description');
+    });
+  });
+
+  describe('number', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'number-fields');
+    });
+
+    test('should display field in list view', async () => {
+      await page.goto(url.list);
+      const textCell = page.locator('.row-1 .cell-number');
+      await expect(textCell)
+        .toHaveText(String(numberDoc.number));
+    });
+
+    test('should create', async () => {
+      const input = 5;
+
+      await page.goto(url.create);
+      const field = page.locator('#field-number');
+      await field.fill(String(input));
+      await saveDocAndAssert(page);
+      await expect(await field.inputValue()).toEqual(String(input));
+    });
+
+    test('should create hasMany', async () => {
+      const input = 5;
+
+      await page.goto(url.create);
+      const field = page.locator('.field-hasMany');
+      await field.click();
+      await page.keyboard.type(String(input));
+      await page.keyboard.press('Enter');
+      await saveDocAndAssert(page);
+      await expect(field.locator('.rs__value-container')).toContainText(String(input));
     });
   });
 
