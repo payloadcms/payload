@@ -44,7 +44,7 @@ export const WatchCondition: React.FC<Props> = ({
         dispatchFields({ type: 'MODIFY_CONDITION', path, result: false, user });
       }
     }
-  }, [currentlyPassesCondition, existingConditionPasses, dispatchFields, path, hasCondition, user]);
+  }, [currentlyPassesCondition, existingConditionPasses, dispatchFields, path, hasCondition, user, fields]);
 
   return null;
 };
