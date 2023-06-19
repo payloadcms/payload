@@ -41,16 +41,16 @@ const Login: React.FC = () => {
 
   const collection = collections.find(({ slug }) => slug === userSlug);
 
-  // Fetch 'originalUrl' from the query string which denotes the URL the user originally tried to visit. This is set in the Routes.tsx file when a user tries to access a protected route and is redirected to the login screen.
+  // Fetch 'redirect' from the query string which denotes the URL the user originally tried to visit. This is set in the Routes.tsx file when a user tries to access a protected route and is redirected to the login screen.
   const query = new URLSearchParams(useLocation().search);
-  const originalUrl = query.get('originalUrl');
+  const redirect = query.get('redirect');
 
 
   const onSuccess = (data) => {
     if (data.token) {
       setToken(data.token);
 
-      history.push(originalUrl || admin);
+      history.push(redirect || admin);
     }
   };
 

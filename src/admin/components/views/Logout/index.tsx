@@ -18,9 +18,9 @@ const Logout: React.FC<{inactivity?: boolean}> = (props) => {
   const { routes: { admin } } = useConfig();
   const { t } = useTranslation('authentication');
 
-  // Fetch 'originalUrl' from the query string which denotes the URL the user originally tried to visit. This is set in the Routes.tsx file when a user tries to access a protected route and is redirected to the login screen.
+  // Fetch 'redirect' from the query string which denotes the URL the user originally tried to visit. This is set in the Routes.tsx file when a user tries to access a protected route and is redirected to the login screen.
   const query = new URLSearchParams(useLocation().search);
-  const originalUrl = query.get('originalUrl');
+  const redirect = query.get('redirect');
 
   useEffect(() => {
     logOut();
@@ -44,7 +44,7 @@ const Logout: React.FC<{inactivity?: boolean}> = (props) => {
         <Button
           el="anchor"
           buttonStyle="secondary"
-          url={`${admin}/login${originalUrl && originalUrl.length > 0 ? `?originalUrl=${encodeURIComponent(originalUrl)}` : ''}`}
+          url={`${admin}/login${redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}
         >
           {t('logBackIn')}
         </Button>
