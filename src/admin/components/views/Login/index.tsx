@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
@@ -41,10 +41,16 @@ const Login: React.FC = () => {
 
   const collection = collections.find(({ slug }) => slug === userSlug);
 
+  // Fetch 'redirect' from the query string which denotes the URL the user originally tried to visit. This is set in the Routes.tsx file when a user tries to access a protected route and is redirected to the login screen.
+  const query = new URLSearchParams(useLocation().search);
+  const redirect = query.get('redirect');
+
+
   const onSuccess = (data) => {
     if (data.token) {
       setToken(data.token);
-      history.push(admin);
+
+      history.push(redirect || admin);
     }
   };
 
