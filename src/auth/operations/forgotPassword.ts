@@ -56,6 +56,9 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     req,
   } = args;
 
+  // @TODO This does not work when is called from local api
+  const serverURL = req.hostname;
+
   // /////////////////////////////////////
   // Forget password
   // /////////////////////////////////////
@@ -81,8 +84,8 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
 
   if (!disableEmail) {
     let html = `${t('authentication:youAreReceivingResetPassword')}
-    <a href="${config.serverURL}${config.routes.admin}/reset/${token}">
-     ${config.serverURL}${config.routes.admin}/reset/${token}
+    <a href="${serverURL}${config.routes.admin}/reset/${token}">
+     ${serverURL}${config.routes.admin}/reset/${token}
     </a>
     ${t('authentication:youDidNotRequestPassword')}`;
 

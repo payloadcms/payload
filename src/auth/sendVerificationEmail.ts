@@ -31,10 +31,13 @@ async function sendVerificationEmail(args: Args): Promise<void> {
     token,
   } = args;
 
-  if (!disableEmail) {
-    const verificationURL = `${config.serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`;
+  // @TODO This does not work when is called from local api
+  const serverURL = req.hostname;
 
-    let html = `${req.t('authentication:newAccountCreated', { interpolation: { escapeValue: false }, serverURL: config.serverURL, verificationURL })}`;
+  if (!disableEmail) {
+    const verificationURL = `${serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`;
+
+    let html = `${req.t('authentication:newAccountCreated', { interpolation: { escapeValue: false }, serverURL: serverURL, verificationURL })}`;
 
     const verify = collectionConfig.auth.verify as VerifyConfig;
 
