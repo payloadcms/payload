@@ -31,7 +31,6 @@ const Login: React.FC = () => {
         afterLogin,
       } = {},
     },
-    serverURL,
     routes: {
       admin,
       api,
@@ -102,7 +101,7 @@ const Login: React.FC = () => {
               waitForAutocomplete
               onSuccess={onSuccess}
               method="post"
-              action={`${serverURL}${api}/${userSlug}/login`}
+              action={`${api}/${userSlug}/login`}
             >
               <FormLoadingOverlayToggle
                 action="loading"

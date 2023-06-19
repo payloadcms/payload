@@ -73,7 +73,7 @@ const getEnvID = (): string => {
 };
 
 const getProjectID = (payload: Payload, packageJSON: PackageJSON): string => {
-  const projectID = getGitID(payload) || getPackageJSONID(payload, packageJSON) || payload.config.serverURL || process.cwd();
+  const projectID = getGitID(payload) || getPackageJSONID(payload, packageJSON) || process.cwd();
   return oneWayHash(projectID, payload.secret);
 };
 

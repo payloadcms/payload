@@ -20,7 +20,7 @@ import './index.scss';
 
 const baseClass = 'edit-many';
 
-const Submit: React.FC<{disabled: boolean, action: string}> = ({ action, disabled }) => {
+const Submit: React.FC<{ disabled: boolean, action: string }> = ({ action, disabled }) => {
   const { submit } = useForm();
   const { t } = useTranslation('general');
 
@@ -42,7 +42,7 @@ const Submit: React.FC<{disabled: boolean, action: string}> = ({ action, disable
     </FormSubmit>
   );
 };
-const Publish: React.FC<{disabled: boolean, action: string}> = ({ action, disabled }) => {
+const Publish: React.FC<{ disabled: boolean, action: string }> = ({ action, disabled }) => {
   const { submit } = useForm();
   const { t } = useTranslation('version');
 
@@ -67,7 +67,7 @@ const Publish: React.FC<{disabled: boolean, action: string}> = ({ action, disabl
     </FormSubmit>
   );
 };
-const SaveDraft: React.FC<{disabled: boolean, action: string}> = ({ action, disabled }) => {
+const SaveDraft: React.FC<{ disabled: boolean, action: string }> = ({ action, disabled }) => {
   const { submit } = useForm();
   const { t } = useTranslation('version');
 
@@ -107,7 +107,7 @@ const EditMany: React.FC<Props> = (props) => {
 
   const { permissions } = useAuth();
   const { closeModal } = useModal();
-  const { serverURL, routes: { api } } = useConfig();
+  const { routes: { api } } = useConfig();
   const { selectAll, count, getQueryParams } = useSelection();
   const { t, i18n } = useTranslation('general');
   const [selected, setSelected] = useState([]);
@@ -174,17 +174,17 @@ const EditMany: React.FC<Props> = (props) => {
                   <div className={`${baseClass}__sidebar-sticky-wrap`}>
                     <div className={`${baseClass}__document-actions`}>
                       <Submit
-                        action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                        action={`${api}/${slug}${getQueryParams()}`}
                         disabled={selected.length === 0}
                       />
-                      { collection.versions && (
+                      {collection.versions && (
                         <React.Fragment>
                           <Publish
-                            action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                            action={`${api}/${slug}${getQueryParams()}`}
                             disabled={selected.length === 0}
                           />
                           <SaveDraft
-                            action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                            action={`${api}/${slug}${getQueryParams()}`}
                             disabled={selected.length === 0}
                           />
                         </React.Fragment>

@@ -27,7 +27,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   customHeader,
   onSave,
 }) => {
-  const { serverURL, routes: { api } } = useConfig();
+  const { routes: { api } } = useConfig();
   const { toggleModal, modalState, closeModal } = useModal();
   const locale = useLocale();
   const { permissions, user } = useAuth();
@@ -43,7 +43,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   // no need to an additional requests when creating new documents
   const initialID = useRef(id);
   const [{ data, isLoading: isLoadingDocument, isError }] = usePayloadAPI(
-    (initialID.current ? `${serverURL}${api}/${collectionSlug}/${initialID.current}` : null),
+    (initialID.current ? `${api}/${collectionSlug}/${initialID.current}` : null),
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
   );
 
@@ -89,8 +89,8 @@ const Content: React.FC<DocumentDrawerProps> = ({
   if (isError) return null;
 
   const isEditing = Boolean(id);
-  const apiURL = id ? `${serverURL}${api}/${collectionSlug}/${id}` : null;
-  const action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
+  const apiURL = id ? `${api}/${collectionSlug}/${id}` : null;
+  const action = `${api}/${collectionSlug}${id ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
   const hasSavePermission = (isEditing && docPermissions?.update?.permission) || (!isEditing && (docPermissions as CollectionPermission)?.create?.permission);
   const isLoading = !internalState || !docPermissions || isLoadingDocument;
 

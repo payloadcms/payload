@@ -18,7 +18,6 @@ const RelationshipField: React.FC<Props> = (props) => {
   const { onChange, value, relationTo, hasMany, admin: { isSortable } = {} } = props;
 
   const {
-    serverURL,
     routes: {
       api,
     },
@@ -62,7 +61,7 @@ const RelationshipField: React.FC<Props> = (props) => {
           const fieldToSearch = collection?.admin?.useAsTitle || 'id';
           const searchParam = searchArg ? `&where[${fieldToSearch}][like]=${searchArg}` : '';
 
-          const response = await fetch(`${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`, {
+          const response = await fetch(`${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`, {
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
@@ -92,7 +91,7 @@ const RelationshipField: React.FC<Props> = (props) => {
         }
       }, Promise.resolve());
     }
-  }, [i18n, relationTo, errorLoading, collections, serverURL, api, addOptions, t]);
+  }, [i18n, relationTo, errorLoading, collections, api, addOptions, t]);
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
@@ -159,7 +158,7 @@ const RelationshipField: React.FC<Props> = (props) => {
 
   const addOptionByID = useCallback(async (id, relation) => {
     if (!errorLoading && id !== 'null') {
-      const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`, {
+      const response = await fetch(`${api}/${relation}/${id}?depth=0`, {
         credentials: 'include',
         headers: {
           'Accept-Language': i18n.language,
@@ -173,7 +172,7 @@ const RelationshipField: React.FC<Props> = (props) => {
         console.error(t('error:loadingDocument', { id }));
       }
     }
-  }, [i18n, addOptions, api, errorLoading, serverURL, t]);
+  }, [i18n, addOptions, api, errorLoading, t]);
 
   // ///////////////////////////
   // Get results when search input changes

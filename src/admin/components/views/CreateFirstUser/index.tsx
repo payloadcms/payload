@@ -19,7 +19,7 @@ const CreateFirstUser: React.FC<Props> = (props) => {
   const { setInitialized } = props;
   const { setToken } = useAuth();
   const {
-    admin: { user: userSlug }, collections, serverURL, routes: { admin, api },
+    admin: { user: userSlug }, collections, routes: { admin, api },
   } = useConfig();
   const { t } = useTranslation('authentication');
 
@@ -65,7 +65,7 @@ const CreateFirstUser: React.FC<Props> = (props) => {
         onSuccess={onSuccess}
         method="post"
         redirect={admin}
-        action={`${serverURL}${api}/${userSlug}/first-register`}
+        action={`${api}/${userSlug}/first-register`}
         validationOperation="create"
       >
         <RenderFields

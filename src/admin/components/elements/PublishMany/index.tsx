@@ -28,7 +28,7 @@ const PublishMany: React.FC<Props> = (props) => {
     } = {},
   } = props;
 
-  const { serverURL, routes: { api } } = useConfig();
+  const { routes: { api } } = useConfig();
   const { permissions } = useAuth();
   const { toggleModal } = useModal();
   const { t, i18n } = useTranslation('version');
@@ -46,7 +46,7 @@ const PublishMany: React.FC<Props> = (props) => {
 
   const handlePublish = useCallback(() => {
     setSubmitted(true);
-    requests.patch(`${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'published' } })}`, {
+    requests.patch(`${api}/${slug}${getQueryParams({ _status: { not_equals: 'published' } })}`, {
       body: JSON.stringify({
         _status: 'published',
       }),
@@ -74,7 +74,7 @@ const PublishMany: React.FC<Props> = (props) => {
         return addDefaultError();
       }
     });
-  }, [addDefaultError, api, getQueryParams, i18n.language, modalSlug, resetParams, selectAll, serverURL, slug, t, toggleModal]);
+  }, [addDefaultError, api, getQueryParams, i18n.language, modalSlug, resetParams, selectAll, slug, t, toggleModal]);
 
   if (!(versions?.drafts) || (selectAll === SelectAllStatus.None || !hasPermission)) {
     return null;

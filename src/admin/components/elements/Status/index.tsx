@@ -26,10 +26,7 @@ const Status: React.FC = () => {
     docPermissions,
   } = useDocumentInfo();
   const { toggleModal } = useModal();
-  const {
-    serverURL,
-    routes: { api },
-  } = useConfig();
+  const { routes: { api } } = useConfig();
   const [processing, setProcessing] = useState(false);
   const { reset: resetForm } = useForm();
   const locale = useLocale();
@@ -66,11 +63,11 @@ const Status: React.FC = () => {
     }
 
     if (collection) {
-      url = `${serverURL}${api}/${collection.slug}/${id}?depth=0&locale=${locale}&fallback-locale=null`;
+      url = `${api}/${collection.slug}/${id}?depth=0&locale=${locale}&fallback-locale=null`;
       method = 'patch';
     }
     if (global) {
-      url = `${serverURL}${api}/globals/${global.slug}?depth=0&locale=${locale}&fallback-locale=null`;
+      url = `${api}/globals/${global.slug}?depth=0&locale=${locale}&fallback-locale=null`;
       method = 'post';
     }
 
@@ -112,7 +109,7 @@ const Status: React.FC = () => {
     if (action === 'unpublish') {
       toggleModal(unPublishModalSlug);
     }
-  }, [collection, global, publishedDoc, serverURL, api, id, i18n, locale, resetForm, getVersions, t, toggleModal, revertModalSlug, unPublishModalSlug]);
+  }, [collection, global, publishedDoc, api, id, i18n, locale, resetForm, getVersions, t, toggleModal, revertModalSlug, unPublishModalSlug]);
 
   const canUpdate = docPermissions?.update?.permission;
 

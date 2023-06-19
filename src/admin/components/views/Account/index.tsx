@@ -23,7 +23,6 @@ const AccountView: React.FC = () => {
   const { getPreference } = usePreferences();
 
   const {
-    serverURL,
     routes: { api },
     collections,
     admin: {
@@ -43,7 +42,7 @@ const AccountView: React.FC = () => {
   const { fields } = collection;
 
   const [{ data, isLoading: isLoadingData }] = usePayloadAPI(
-    `${serverURL}${api}/${slug}/${id}`,
+    `${api}/${slug}/${id}`,
     {
       initialParams: {
         'fallback-locale': 'null',
@@ -55,9 +54,9 @@ const AccountView: React.FC = () => {
 
   const hasSavePermission = docPermissions?.update?.permission;
   const dataToRender = locationState?.data || data;
-  const apiURL = `${serverURL}${api}/${slug}/${data?.id}`;
+  const apiURL = `${api}/${slug}/${data?.id}`;
 
-  const action = `${serverURL}${api}/${slug}/${data?.id}?locale=${locale}&depth=0`;
+  const action = `${api}/${slug}/${data?.id}?locale=${locale}&depth=0`;
 
   const onSave = React.useCallback(async (json: any) => {
     getDocPermissions();

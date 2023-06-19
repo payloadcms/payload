@@ -137,9 +137,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   validationRules: (args: OperationArgs<any>) => ValidationRule[];
 
-  getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`;
+  getAdminURL = (): string => `${this.config.routes.admin}`;
 
-  getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`;
+  getAPIURL = (): string => `${this.config.routes.api}`;
 
   /**
    * @description Initializes Payload

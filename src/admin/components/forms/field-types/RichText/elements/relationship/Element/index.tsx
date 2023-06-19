@@ -37,7 +37,7 @@ const Element: React.FC<Props> = (props) => {
     fieldProps,
   } = props;
 
-  const { collections, serverURL, routes: { api } } = useConfig();
+  const { collections, routes: { api } } = useConfig();
   const [enabledCollectionSlugs] = useState(() => collections.filter(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship).map(({ slug }) => slug));
   const [relatedCollection, setRelatedCollection] = useState(() => collections.find((coll) => coll.slug === relationTo));
   const selected = useSelected();
@@ -46,7 +46,7 @@ const Element: React.FC<Props> = (props) => {
   const editor = useSlateStatic();
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
+    `${api}/${relatedCollection.slug}/${value?.id}`,
     { initialParams },
   );
 

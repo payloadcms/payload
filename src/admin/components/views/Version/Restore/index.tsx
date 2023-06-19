@@ -15,13 +15,13 @@ const baseClass = 'restore-version';
 const modalSlug = 'restore-version';
 
 const Restore: React.FC<Props> = ({ collection, global, className, versionID, originalDocID, versionDate }) => {
-  const { serverURL, routes: { api, admin } } = useConfig();
+  const { routes: { api, admin } } = useConfig();
   const history = useHistory();
   const { toggleModal } = useModal();
   const [processing, setProcessing] = useState(false);
   const { t, i18n } = useTranslation('version');
 
-  let fetchURL = `${serverURL}${api}`;
+  let fetchURL = `${api}`;
   let redirectURL: string;
   let restoreMessage: string;
 

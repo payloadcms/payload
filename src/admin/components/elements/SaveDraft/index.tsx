@@ -36,7 +36,7 @@ type Props = {
   CustomComponent?: CustomSaveDraftButtonProps
 }
 export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
-  const { serverURL, routes: { api } } = useConfig();
+  const { routes: { api } } = useConfig();
   const { submit } = useForm();
   const { collection, global, id } = useDocumentInfo();
   const modified = useFormModified();
@@ -51,12 +51,12 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
     let method = 'POST';
 
     if (collection) {
-      action = `${serverURL}${api}/${collection.slug}${id ? `/${id}` : ''}${search}`;
+      action = `${api}/${collection.slug}${id ? `/${id}` : ''}${search}`;
       if (id) method = 'PATCH';
     }
 
     if (global) {
-      action = `${serverURL}${api}/globals/${global.slug}${search}`;
+      action = `${api}/globals/${global.slug}${search}`;
     }
 
     submit({
@@ -67,7 +67,7 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
         _status: 'draft',
       },
     });
-  }, [submit, collection, global, serverURL, api, locale, id]);
+  }, [submit, collection, global, api, locale, id]);
 
   return (
     <RenderCustomComponent

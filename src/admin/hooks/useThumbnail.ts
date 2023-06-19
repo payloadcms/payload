@@ -1,4 +1,3 @@
-import { useConfig } from '../components/utilities/Config';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import isImage from '../../uploads/isImage';
 
@@ -20,8 +19,6 @@ const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string,
     url,
   } = doc;
 
-  const { serverURL } = useConfig();
-
   if (isImage(mimeType as string)) {
     if (typeof adminThumbnail === 'undefined' && url) {
       return url as string;
@@ -34,7 +31,7 @@ const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string,
         return thumbnailURL;
       }
 
-      return `${serverURL}${thumbnailURL}`;
+      return thumbnailURL;
     }
 
     if (sizes?.[adminThumbnail]?.url) {
@@ -42,10 +39,10 @@ const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string,
     }
 
     if (sizes?.[adminThumbnail]?.filename) {
-      return `${serverURL}${staticURL}/${sizes[adminThumbnail].filename}`;
+      return `${staticURL}/${sizes[adminThumbnail].filename}`;
     }
 
-    return `${serverURL}${staticURL}/${filename}`;
+    return `${staticURL}/${filename}`;
   }
 
   return false;

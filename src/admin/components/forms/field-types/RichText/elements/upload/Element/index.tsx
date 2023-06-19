@@ -46,7 +46,7 @@ const Element: React.FC<ElementProps> = (props) => {
     enabledCollectionSlugs,
   } = props;
 
-  const { collections, serverURL, routes: { api } } = useConfig();
+  const { collections, routes: { api } } = useConfig();
   const { t, i18n } = useTranslation('fields');
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
   const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
@@ -81,7 +81,7 @@ const Element: React.FC<ElementProps> = (props) => {
 
   // Get the referenced document
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
+    `${api}/${relatedCollection.slug}/${value?.id}`,
     { initialParams },
   );
 

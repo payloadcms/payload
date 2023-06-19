@@ -37,7 +37,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     },
   } = props;
 
-  const { serverURL, routes: { api, admin } } = useConfig();
+  const { routes: { api, admin } } = useConfig();
   const preferenceKey = `${collection.slug}-list`;
   const { permissions } = useAuth();
   const { setStepNav } = useStepNav();
@@ -86,9 +86,9 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     // Performance enhancement
     // Setting the Fetch URL this way
     // prevents a double-fetch
-    setFetchURL(`${serverURL}${api}/${slug}`);
+    setFetchURL(`${api}/${slug}`);
     resetParams();
-  }, [api, resetParams, serverURL, slug]);
+  }, [api, resetParams, slug]);
 
   // /////////////////////////////////////
   // Fetch preferences on first load

@@ -45,7 +45,7 @@ const PreviewButton: React.FC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const locale = useLocale();
   const { token } = useAuth();
-  const { serverURL, routes: { api } } = useConfig();
+  const { routes: { api } } = useConfig();
   const { t } = useTranslation('version');
   const isGeneratingPreviewURL = useRef(false);
 
@@ -59,7 +59,7 @@ const PreviewButton: React.FC<Props> = ({
     try {
       setIsLoading(true);
 
-      let url = `${serverURL}${api}`;
+      let url = `${api}`;
       if (collection) url = `${url}/${collection.slug}/${id}`;
       if (global) url = `${url}/globals/${global.slug}`;
 
@@ -74,7 +74,7 @@ const PreviewButton: React.FC<Props> = ({
       isGeneratingPreviewURL.current = false;
       toast.error(t('error:previewing'));
     }
-  }, [serverURL, api, collection, global, id, generatePreviewURL, locale, token, t]);
+  }, [api, collection, global, id, generatePreviewURL, locale, token, t]);
 
   return (
     <RenderCustomComponent

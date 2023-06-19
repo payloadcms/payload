@@ -35,7 +35,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [redirect, setRedirect] = useState<string>();
 
   const locale = useLocale();
-  const { serverURL, routes: { admin, api } } = useConfig();
+  const { routes: { admin, api } } = useConfig();
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>();
   const { state: locationState } = useLocation();
   const history = useHistory();
@@ -46,7 +46,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { t } = useTranslation('general');
 
   const [{ data, isLoading: isLoadingData, isError }] = usePayloadAPI(
-    (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
+    (isEditing ? `${api}/${slug}/${id}` : null),
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' }, initialData: null },
   );
 
@@ -90,8 +90,8 @@ const EditView: React.FC<IndexProps> = (props) => {
     );
   }
 
-  const apiURL = `${serverURL}${api}/${slug}/${id}${collection.versions.drafts ? '?draft=true' : ''}`;
-  const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
+  const apiURL = `${api}/${slug}/${id}${collection.versions.drafts ? '?draft=true' : ''}`;
+  const action = `${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
   const hasSavePermission = (isEditing && docPermissions?.update?.permission) || (!isEditing && (docPermissions as CollectionPermission)?.create?.permission);
   const isLoading = !internalState || !docPermissions || isLoadingData;
 

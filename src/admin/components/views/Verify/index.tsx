@@ -18,8 +18,8 @@ const Verify: React.FC<{ collection: SanitizedCollectionConfig }> = ({ collectio
   const { slug: collectionSlug } = collection;
 
   const { user } = useAuth();
-  const { token } = useParams<{token?: string}>();
-  const { serverURL, routes: { admin: adminRoute }, admin: { user: adminUser } } = useConfig();
+  const { token } = useParams<{ token?: string }>();
+  const { routes: { admin: adminRoute }, admin: { user: adminUser } } = useConfig();
   const { t, i18n } = useTranslation('authentication');
 
   const isAdminUser = collectionSlug === adminUser;
@@ -27,7 +27,7 @@ const Verify: React.FC<{ collection: SanitizedCollectionConfig }> = ({ collectio
 
   useEffect(() => {
     async function verifyToken() {
-      const result = await fetch(`${serverURL}/api/${collectionSlug}/verify/${token}`, {
+      const result = await fetch(`/api/${collectionSlug}/verify/${token}`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -37,7 +37,7 @@ const Verify: React.FC<{ collection: SanitizedCollectionConfig }> = ({ collectio
       setVerifyResult(result);
     }
     verifyToken();
-  }, [setVerifyResult, collectionSlug, serverURL, token, i18n]);
+  }, [setVerifyResult, collectionSlug, token, i18n]);
 
   if (user) {
     return <Login />;

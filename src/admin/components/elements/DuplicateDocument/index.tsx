@@ -20,7 +20,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
   const modified = useFormModified();
   const { toggleModal } = useModal();
   const { setModified } = useForm();
-  const { serverURL, routes: { api }, localization } = useConfig();
+  const { routes: { api }, localization } = useConfig();
   const { routes: { admin } } = useConfig();
   const [hasClicked, setHasClicked] = useState<boolean>(false);
   const { t, i18n } = useTranslation('general');
@@ -36,7 +36,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
     }
 
     const create = async (locale = ''): Promise<string | null> => {
-      const response = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
+      const response = await requests.get(`${api}/${slug}/${id}`, {
         params: {
           locale,
           depth: 0,
@@ -57,7 +57,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         });
       }
 
-      const result = await requests.post(`${serverURL}${api}/${slug}`, {
+      const result = await requests.post(`${api}/${slug}`, {
         headers: {
           'Content-Type': 'application/json',
           'Accept-Language': i18n.language,
@@ -81,7 +81,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         .filter((locale) => locale !== localization.defaultLocale)
         .forEach(async (locale) => {
           if (!abort) {
-            const res = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
+            const res = await requests.get(`${api}/${slug}/${id}`, {
               params: {
                 locale,
                 depth: 0,
@@ -99,7 +99,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
               });
             }
 
-            const patchResult = await requests.patch(`${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`, {
+            const patchResult = await requests.patch(`${api}/${slug}/${duplicateID}?locale=${locale}`, {
               headers: {
                 'Content-Type': 'application/json',
                 'Accept-Language': i18n.language,
@@ -115,7 +115,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         });
       if (abort) {
         // delete the duplicate doc to prevent incomplete
-        await requests.delete(`${serverURL}${api}/${slug}/${id}`, {
+        await requests.delete(`${api}/${slug}/${id}`, {
           headers: {
             'Accept-Language': i18n.language,
           },
@@ -135,7 +135,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         pathname: `${admin}/collections/${slug}/${duplicateID}`,
       });
     }, 10);
-  }, [modified, localization, t, i18n, collection, setModified, toggleModal, modalSlug, serverURL, api, slug, id, push, admin]);
+  }, [modified, localization, t, i18n, collection, setModified, toggleModal, modalSlug, api, slug, id, push, admin]);
 
   const confirm = useCallback(async () => {
     setHasClicked(false);

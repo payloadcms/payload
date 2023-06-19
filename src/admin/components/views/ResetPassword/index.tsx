@@ -20,7 +20,7 @@ const baseClass = 'reset-password';
 
 const ResetPassword: React.FC = () => {
   const config = useConfig();
-  const { admin: { user: userSlug, logoutRoute }, serverURL, routes: { admin, api } } = config;
+  const { admin: { user: userSlug, logoutRoute }, routes: { admin, api } } = config;
   const { token } = useParams<{ token?: string }>();
   const history = useHistory();
   const { user, setToken } = useAuth();
@@ -75,7 +75,7 @@ const ResetPassword: React.FC = () => {
         <Form
           onSuccess={onSuccess}
           method="post"
-          action={`${serverURL}${api}/${userSlug}/reset-password`}
+          action={`${api}/${userSlug}/reset-password`}
           redirect={admin}
         >
           <Password

@@ -24,12 +24,7 @@ const Auth: React.FC<Props> = (props) => {
   const modified = useFormModified();
   const { t, i18n } = useTranslation('authentication');
 
-  const {
-    serverURL,
-    routes: {
-      api,
-    },
-  } = useConfig();
+  const { routes: { api } } = useConfig();
 
   const handleChangePassword = useCallback(async (state: boolean) => {
     if (!state) {
@@ -41,7 +36,7 @@ const Auth: React.FC<Props> = (props) => {
   }, [dispatchFields]);
 
   const unlock = useCallback(async () => {
-    const url = `${serverURL}${api}/${slug}/unlock`;
+    const url = `${api}/${slug}/unlock`;
     const response = await fetch(url, {
       credentials: 'include',
       headers: {
@@ -59,7 +54,7 @@ const Auth: React.FC<Props> = (props) => {
     } else {
       toast.error(t('failedToUnlock'));
     }
-  }, [i18n, serverURL, api, slug, email, t]);
+  }, [i18n, api, slug, email, t]);
 
   useEffect(() => {
     if (!modified) {
@@ -73,7 +68,7 @@ const Auth: React.FC<Props> = (props) => {
 
   return (
     <div className={baseClass}>
-      { !collection.auth.disableLocalStrategy && (
+      {!collection.auth.disableLocalStrategy && (
         <React.Fragment>
           <Email
             required

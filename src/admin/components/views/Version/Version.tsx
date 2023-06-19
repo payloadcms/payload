@@ -28,7 +28,7 @@ import './index.scss';
 const baseClass = 'view-version';
 
 const VersionView: React.FC<Props> = ({ collection, global }) => {
-  const { serverURL, routes: { admin, api }, admin: { dateFormat }, localization } = useConfig();
+  const { routes: { admin, api }, admin: { dateFormat }, localization } = useConfig();
   const { setStepNav } = useStepNav();
   const { params: { id, versionID } } = useRouteMatch<{ id?: string, versionID: string }>();
   const [compareValue, setCompareValue] = useState<CompareOption>(mostRecentVersionOption);
@@ -50,9 +50,9 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
   if (collection) {
     ({ slug } = collection);
-    originalDocFetchURL = `${serverURL}${api}/${slug}/${id}`;
-    versionFetchURL = `${serverURL}${api}/${slug}/versions/${versionID}`;
-    compareBaseURL = `${serverURL}${api}/${slug}/versions`;
+    originalDocFetchURL = `${api}/${slug}/${id}`;
+    versionFetchURL = `${api}/${slug}/versions/${versionID}`;
+    compareBaseURL = `${api}/${slug}/versions`;
     entityLabel = getTranslation(collection.labels.singular, i18n);
     parentID = id;
     fields = collection.fields;
@@ -61,9 +61,9 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
   if (global) {
     ({ slug } = global);
-    originalDocFetchURL = `${serverURL}${api}/globals/${slug}`;
-    versionFetchURL = `${serverURL}${api}/globals/${slug}/versions/${versionID}`;
-    compareBaseURL = `${serverURL}${api}/globals/${slug}/versions`;
+    originalDocFetchURL = `${api}/globals/${slug}`;
+    versionFetchURL = `${api}/globals/${slug}/versions/${versionID}`;
+    compareBaseURL = `${api}/globals/${slug}/versions`;
     entityLabel = getTranslation(global.label, i18n);
     fields = global.fields;
     fieldPermissions = permissions.globals[global.slug].fields;

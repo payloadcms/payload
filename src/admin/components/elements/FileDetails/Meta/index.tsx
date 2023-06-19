@@ -1,5 +1,4 @@
 import React from 'react';
-import { useConfig } from '../../../utilities/Config';
 import CopyToClipboard from '../../CopyToClipboard';
 import formatFilesize from '../../../../../uploads/formatFilesize';
 import { Props } from './types';
@@ -13,9 +12,7 @@ const Meta: React.FC<Props> = (props) => {
     filename, filesize, width, height, mimeType, staticURL, url,
   } = props;
 
-  const { serverURL } = useConfig();
-
-  const fileURL = url || `${serverURL}${staticURL}/${filename}`;
+  const fileURL = url || `${staticURL}/${filename}`;
 
   return (
     <div className={baseClass}>

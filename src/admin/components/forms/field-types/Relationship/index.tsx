@@ -57,7 +57,6 @@ const Relationship: React.FC<Props> = (props) => {
   const config = useConfig();
 
   const {
-    serverURL,
     routes: {
       api,
     },
@@ -162,7 +161,7 @@ const Relationship: React.FC<Props> = (props) => {
             query.where.and.push(filterOptionsResult[relation]);
           }
 
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+          const response = await fetch(`${api}/${relation}?${qs.stringify(query)}`, {
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
@@ -220,7 +219,6 @@ const Relationship: React.FC<Props> = (props) => {
     errorLoading,
     collections,
     filterOptionsResult,
-    serverURL,
     api,
     t,
     i18n,
@@ -270,7 +268,7 @@ const Relationship: React.FC<Props> = (props) => {
         };
 
         if (!errorLoading) {
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+          const response = await fetch(`${api}/${relation}?${qs.stringify(query)}`, {
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
@@ -304,7 +302,6 @@ const Relationship: React.FC<Props> = (props) => {
     errorLoading,
     collections,
     hasMultipleRelations,
-    serverURL,
     api,
     i18n,
     relationTo,

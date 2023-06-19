@@ -25,10 +25,10 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   id: idFromProps,
   idFromParams: getIDFromParams,
 }) => {
-  const { id: idFromParams } = useParams<{id: string}>();
+  const { id: idFromParams } = useParams<{ id: string }>();
   const id = idFromProps || (getIDFromParams ? idFromParams : null);
 
-  const { serverURL, routes: { api } } = useConfig();
+  const { routes: { api } } = useConfig();
   const { getPreference, setPreference } = usePreferences();
   const { i18n } = useTranslation();
   const { permissions } = useAuth();
@@ -37,7 +37,6 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null);
   const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null);
 
-  const baseURL = `${serverURL}${api}`;
   let slug: string;
   let pluralType: 'globals' | 'collections';
   let preferencesKey: string;
@@ -98,14 +97,14 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     if (global) {
       draftsEnabled = Boolean(global?.versions?.drafts);
       shouldFetchVersions = Boolean(global?.versions);
-      versionFetchURL = `${baseURL}/globals/${global.slug}/versions`;
-      publishedFetchURL = `${baseURL}/globals/${global.slug}?${qs.stringify(publishedVersionParams)}`;
+      versionFetchURL = `${api}/globals/${global.slug}/versions`;
+      publishedFetchURL = `${api}/globals/${global.slug}?${qs.stringify(publishedVersionParams)}`;
     }
 
     if (collection) {
       draftsEnabled = Boolean(collection?.versions?.drafts);
       shouldFetchVersions = Boolean(collection?.versions);
-      versionFetchURL = `${baseURL}/${collection.slug}/versions`;
+      versionFetchURL = `${api}/${collection.slug}/versions`;
 
       publishedVersionParams.where.and.push({
         id: {
@@ -113,7 +112,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
         },
       });
 
-      publishedFetchURL = `${baseURL}/${collection.slug}?${qs.stringify(publishedVersionParams)}`;
+      publishedFetchURL = `${api}/${collection.slug}?${qs.stringify(publishedVersionParams)}`;
 
       if (!id) {
         shouldFetch = false;
@@ -184,7 +183,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       setVersions(versionJSON);
       setUnpublishedVersions(unpublishedVersionJSON);
     }
-  }, [i18n, global, collection, id, baseURL]);
+  }, [i18n, global, collection, id, api]);
 
   const getDocPermissions = React.useCallback(async () => {
     let docAccessURL: string;
@@ -195,7 +194,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
 
     if (docAccessURL) {
-      const res = await fetch(`${serverURL}${api}${docAccessURL}`, {
+      const res = await fetch(`${api}${docAccessURL}`, {
         credentials: 'include',
         headers: {
           'Accept-Language': i18n.language,
@@ -208,7 +207,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       // (i.e. create has no id)
       setDocPermissions(permissions[pluralType][slug]);
     }
-  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language]);
+  }, [api, pluralType, slug, id, permissions, i18n.language]);
 
   const getDocPreferences = useCallback(async () => {
     return getPreference<DocumentPreferences>(preferencesKey);

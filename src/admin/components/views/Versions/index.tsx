@@ -23,7 +23,7 @@ import './index.scss';
 const baseClass = 'versions';
 
 const Versions: React.FC<Props> = ({ collection, global }) => {
-  const { serverURL, routes: { admin, api } } = useConfig();
+  const { routes: { admin, api } } = useConfig();
   const { setStepNav } = useStepNav();
   const { params: { id } } = useRouteMatch<{ id: string }>();
   const { t, i18n } = useTranslation('version');
@@ -37,14 +37,14 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
 
   if (collection) {
     ({ slug } = collection);
-    docURL = `${serverURL}${api}/${slug}/${id}`;
+    docURL = `${api}/${slug}/${id}`;
     entityLabel = getTranslation(collection.labels.singular, i18n);
     editURL = `${admin}/collections/${collection.slug}/${id}`;
   }
 
   if (global) {
     ({ slug } = global);
-    docURL = `${serverURL}${api}/globals/${slug}`;
+    docURL = `${api}/globals/${slug}`;
     entityLabel = getTranslation(global.label, i18n);
     editURL = `${admin}/globals/${global.slug}`;
   }
@@ -116,7 +116,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     let fetchURLToSet: string;
 
     if (collection) {
-      fetchURLToSet = `${serverURL}${api}/${collection.slug}/versions`;
+      fetchURLToSet = `${api}/${collection.slug}/versions`;
       params.where = {
         parent: {
           equals: id,
@@ -125,7 +125,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     }
 
     if (global) {
-      fetchURLToSet = `${serverURL}${api}/globals/${global.slug}/versions`;
+      fetchURLToSet = `${api}/globals/${global.slug}/versions`;
     }
 
     // Performance enhancement
@@ -135,7 +135,7 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     setFetchURL(fetchURLToSet);
 
     setParams(params);
-  }, [setParams, page, sort, limit, serverURL, api, id, global, collection]);
+  }, [setParams, page, sort, limit, api, id, global, collection]);
 
   let useIDLabel = doc[useAsTitle] === doc?.id;
   let heading: string;

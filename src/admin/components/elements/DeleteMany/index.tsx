@@ -28,7 +28,7 @@ const DeleteMany: React.FC<Props> = (props) => {
   } = props;
 
   const { permissions } = useAuth();
-  const { serverURL, routes: { api } } = useConfig();
+  const { routes: { api } } = useConfig();
   const { toggleModal } = useModal();
   const { selectAll, count, getQueryParams, toggleAll } = useSelection();
   const { t, i18n } = useTranslation('general');
@@ -45,7 +45,7 @@ const DeleteMany: React.FC<Props> = (props) => {
 
   const handleDelete = useCallback(() => {
     setDeleting(true);
-    requests.delete(`${serverURL}${api}/${slug}${getQueryParams()}`, {
+    requests.delete(`${api}/${slug}${getQueryParams()}`, {
       headers: {
         'Content-Type': 'application/json',
         'Accept-Language': i18n.language,
@@ -71,7 +71,7 @@ const DeleteMany: React.FC<Props> = (props) => {
         return addDefaultError();
       }
     });
-  }, [addDefaultError, api, getQueryParams, i18n.language, modalSlug, resetParams, selectAll, serverURL, slug, t, toggleAll, toggleModal]);
+  }, [addDefaultError, api, getQueryParams, i18n.language, modalSlug, resetParams, selectAll, slug, t, toggleAll, toggleModal]);
 
   if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
     return null;

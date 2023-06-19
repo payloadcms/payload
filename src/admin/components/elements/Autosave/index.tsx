@@ -15,7 +15,7 @@ import './index.scss';
 const baseClass = 'autosave';
 
 const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdatedAt }) => {
-  const { serverURL, routes: { api, admin } } = useConfig();
+  const { routes: { api, admin } } = useConfig();
   const { versions, getVersions } = useDocumentInfo();
   const [fields] = useAllFormFields();
   const modified = useFormModified();
@@ -44,7 +44,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   modifiedRef.current = modified;
 
   const createCollectionDoc = useCallback(async () => {
-    const res = await fetch(`${serverURL}${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&draft=true&autosave=true`, {
+    const res = await fetch(`${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&draft=true&autosave=true`, {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -64,7 +64,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
     } else {
       toast.error(t('error:autosaving'));
     }
-  }, [i18n, serverURL, api, collection, locale, replace, admin, t]);
+  }, [i18n, api, collection, locale, replace, admin, t]);
 
   useEffect(() => {
     // If no ID, but this is used for a collection doc,
@@ -85,12 +85,12 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
         let method: string;
 
         if (collection && id) {
-          url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true&locale=${locale}`;
+          url = `${api}/${collection.slug}/${id}?draft=true&autosave=true&locale=${locale}`;
           method = 'PATCH';
         }
 
         if (global) {
-          url = `${serverURL}${api}/globals/${global.slug}?draft=true&autosave=true&locale=${locale}`;
+          url = `${api}/globals/${global.slug}?draft=true&autosave=true&locale=${locale}`;
           method = 'POST';
         }
 
@@ -125,7 +125,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
     };
 
     autosave();
-  }, [i18n, debouncedFields, modified, serverURL, api, collection, global, id, getVersions, locale, modifiedRef]);
+  }, [i18n, debouncedFields, modified, api, collection, global, id, getVersions, locale, modifiedRef]);
 
   useEffect(() => {
     if (versions?.docs?.[0]) {

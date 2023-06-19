@@ -38,7 +38,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [sort, setSort] = useState(null);
   const [page, setPage] = useState(1);
   const [where, setWhere] = useState(null);
-  const { serverURL, routes: { api }, collections } = useConfig();
+  const { routes: { api }, collections } = useConfig();
 
   const enabledCollectionConfigs = collections.filter(({ slug }) => {
     return collectionSlugs.includes(slug);
@@ -89,7 +89,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   // If modal is open, get active page of upload gallery
   const isOpen = isModalOpen(drawerSlug);
-  const apiURL = isOpen ? `${serverURL}${api}/${selectedCollectionConfig.slug}` : null;
+  const apiURL = isOpen ? `${api}/${selectedCollectionConfig.slug}` : null;
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0); // used to force a re-fetch even when apiURL is unchanged
   const [{ data, isError }, { setParams }] = usePayloadAPI(apiURL, {});
   const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1;

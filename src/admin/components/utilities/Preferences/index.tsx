@@ -20,13 +20,13 @@ const requestOptions = (value, language) => ({
   },
 });
 
-export const PreferencesProvider: React.FC<{children?: React.ReactNode}> = ({ children }) => {
+export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const contextRef = useRef({} as PreferencesContext);
   const preferencesRef = useRef({});
   const config = useConfig();
   const { user } = useAuth();
   const { i18n } = useTranslation();
-  const { serverURL, routes: { api } } = config;
+  const { routes: { api } } = config;
 
   useEffect(() => {
     if (!user) {
@@ -40,7 +40,7 @@ export const PreferencesProvider: React.FC<{children?: React.ReactNode}> = ({ ch
     if (typeof prefs[key] !== 'undefined') return prefs[key];
     const promise = new Promise((resolve: (value: T) => void) => {
       (async () => {
-        const request = await requests.get(`${serverURL}${api}/_preferences/${key}`, {
+        const request = await requests.get(`${api}/_preferences/${key}`, {
           headers: {
             'Accept-Language': i18n.language,
           },
@@ -56,12 +56,12 @@ export const PreferencesProvider: React.FC<{children?: React.ReactNode}> = ({ ch
     });
     prefs[key] = promise;
     return promise;
-  }, [i18n.language, api, preferencesRef, serverURL]);
+  }, [i18n.language, api, preferencesRef]);
 
   const setPreference = useCallback(async (key: string, value: unknown): Promise<void> => {
     preferencesRef.current[key] = value;
-    await requests.post(`${serverURL}${api}/_preferences/${key}`, requestOptions(value, i18n.language));
-  }, [api, i18n.language, serverURL]);
+    await requests.post(`${api}/_preferences/${key}`, requestOptions(value, i18n.language));
+  }, [api, i18n.language]);
 
   contextRef.current.getPreference = getPreference;
   contextRef.current.setPreference = setPreference;

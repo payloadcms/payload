@@ -25,12 +25,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { getPreference } = usePreferences();
   const { t } = useTranslation();
 
-  const {
-    serverURL,
-    routes: {
-      api,
-    },
-  } = useConfig();
+  const { routes: { api } } = useConfig();
 
   const { global } = props;
 
@@ -57,7 +52,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   }, [getVersions, fields, user, locale, t, getDocPermissions, getDocPreferences]);
 
   const [{ data, isLoading: isLoadingData }] = usePayloadAPI(
-    `${serverURL}${api}/globals/${slug}`,
+    `${api}/globals/${slug}`,
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' }, initialData: null },
   );
 
@@ -95,8 +90,8 @@ const GlobalView: React.FC<IndexProps> = (props) => {
         initialState,
         global,
         onSave,
-        apiURL: `${serverURL}${api}/globals/${slug}${global.versions?.drafts ? '?draft=true' : ''}`,
-        action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
+        apiURL: `${api}/globals/${slug}${global.versions?.drafts ? '?draft=true' : ''}`,
+        action: `${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
         updatedAt: updatedAt || dataToRender?.updatedAt,
       }}
     />

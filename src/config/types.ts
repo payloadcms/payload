@@ -376,13 +376,6 @@ export type Config = {
    */
   i18n?: i18nInitOptions;
   /**
-   * Define the absolute URL of your app including the protocol, for example `https://example.org`.
-   * No paths allowed, only protocol, domain and (optionally) port.
-   *
-   * @see https://payloadcms.com/docs/configuration/overview#options
-   */
-  serverURL?: string;
-  /**
    * Prefix a string to all cookies that Payload sets.
    *
    * @default "payload"

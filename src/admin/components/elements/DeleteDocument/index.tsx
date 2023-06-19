@@ -30,7 +30,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
     } = {},
   } = props;
 
-  const { serverURL, routes: { api, admin } } = useConfig();
+  const { routes: { api, admin } } = useConfig();
   const { setModified } = useForm();
   const [deleting, setDeleting] = useState(false);
   const { toggleModal } = useModal();
@@ -48,7 +48,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const handleDelete = useCallback(() => {
     setDeleting(true);
     setModified(false);
-    requests.delete(`${serverURL}${api}/${slug}/${id}`, {
+    requests.delete(`${api}/${slug}/${id}`, {
       headers: {
         'Content-Type': 'application/json',
         'Accept-Language': i18n.language,
@@ -74,7 +74,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
         return addDefaultError();
       }
     });
-  }, [setModified, serverURL, api, slug, id, toggleModal, modalSlug, t, singular, i18n, title, history, admin, addDefaultError]);
+  }, [setModified, api, slug, id, toggleModal, modalSlug, t, singular, i18n, title, history, admin, addDefaultError]);
 
   if (id) {
     return (

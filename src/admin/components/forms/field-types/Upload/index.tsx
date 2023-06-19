@@ -11,7 +11,6 @@ import './index.scss';
 const Upload: React.FC<Props> = (props) => {
   const {
     collections,
-    serverURL,
     routes: {
       api,
     },
@@ -72,7 +71,6 @@ const Upload: React.FC<Props> = (props) => {
         label={label}
         required={required}
         showError={showError}
-        serverURL={serverURL}
         api={api}
         errorMessage={errorMessage}
         readOnly={readOnly}

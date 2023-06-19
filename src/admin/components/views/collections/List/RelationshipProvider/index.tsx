@@ -34,10 +34,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
   const locale = useLocale();
   const prevLocale = useRef(locale);
 
-  const {
-    serverURL,
-    routes: { api },
-  } = config;
+  const { routes: { api } } = config;
 
   const loadRelationshipDocs = useCallback(async (reloadAll = false) => {
     Object.entries(debouncedDocuments).forEach(async ([slug, docs]) => {
@@ -51,7 +48,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
 
 
       if (idsToLoad.length > 0) {
-        const url = `${serverURL}${api}/${slug}`;
+        const url = `${api}/${slug}`;
         const params = {
           depth: 0,
           'where[id][in]': idsToLoad,
@@ -77,7 +74,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
         }
       }
     });
-  }, [debouncedDocuments, serverURL, api, i18n, locale]);
+  }, [debouncedDocuments, api, i18n, locale]);
 
   useEffect(() => {
     loadRelationshipDocs(locale && prevLocale.current !== locale);

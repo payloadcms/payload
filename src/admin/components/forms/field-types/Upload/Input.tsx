@@ -36,7 +36,6 @@ export type UploadInputProps = Omit<UploadField, 'type'> & {
   width?: string
   fieldTypes?: FieldTypes
   collection?: SanitizedCollectionConfig
-  serverURL?: string
   api?: string
   filterOptions: FilterOptions
 }
@@ -55,7 +54,6 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     value,
     onChange,
     showError,
-    serverURL = 'http://localhost:3000',
     api = '/api',
     collection,
     errorMessage,
@@ -101,7 +99,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   useEffect(() => {
     if (typeof value === 'string' && value !== '') {
       const fetchFile = async () => {
-        const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`, {
+        const response = await fetch(`${api}/${relationTo}/${value}`, {
           credentials: 'include',
           headers: {
             'Accept-Language': i18n.language,
@@ -124,7 +122,6 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     value,
     relationTo,
     api,
-    serverURL,
     i18n,
   ]);
 

@@ -17,22 +17,6 @@ export const endpointsSchema = joi.array().items(joi.object({
 }));
 
 export default joi.object({
-  serverURL: joi.string()
-    .uri()
-    .allow('')
-    .custom((value, helper) => {
-      const urlWithoutProtocol = value.split('//')[1];
-
-      if (!urlWithoutProtocol) {
-        return helper.message({ custom: 'You need to include either "https://" or "http://" in your serverURL.' });
-      }
-
-      if (urlWithoutProtocol.indexOf('/') > -1) {
-        return helper.message({ custom: 'Your serverURL cannot have a path. It can only contain a protocol, a domain, and an optional port.' });
-      }
-
-      return value;
-    }),
   cookiePrefix: joi.string(),
   routes: joi.object({
     admin: joi.string(),

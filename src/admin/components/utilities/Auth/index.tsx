@@ -26,7 +26,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user: userSlug,
       inactivityRoute: logoutInactivityRoute,
     },
-    serverURL,
     routes: {
       admin,
       api,
@@ -50,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (exp && remainingTime < 120) {
       setTimeout(async () => {
-        const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
+        const request = await requests.post(`${api}/${userSlug}/refresh-token`, {
           headers: {
             'Accept-Language': i18n.language,
           },
@@ -65,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }, 1000);
     }
-  }, [exp, serverURL, api, userSlug, push, admin, logoutInactivityRoute, i18n]);
+  }, [exp, api, userSlug, push, admin, logoutInactivityRoute, i18n]);
 
   const setToken = useCallback((token: string) => {
     const decoded = jwtDecode<User>(token);
@@ -76,11 +75,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logOut = useCallback(() => {
     setUser(null);
     setTokenInMemory(undefined);
-    requests.post(`${serverURL}${api}/${userSlug}/logout`);
-  }, [serverURL, api, userSlug]);
+    requests.post(`${api}/${userSlug}/logout`);
+  }, [api, userSlug]);
 
   const refreshPermissions = useCallback(async () => {
-    const request = await requests.get(`${serverURL}${api}/access`, {
+    const request = await requests.get(`${api}/access`, {
       headers: {
         'Accept-Language': i18n.language,
       },
@@ -92,12 +91,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       throw new Error(`Fetching permissions failed with status code ${request.status}`);
     }
-  }, [serverURL, api, i18n]);
+  }, [api, i18n]);
 
   // On mount, get user and set
   useEffect(() => {
     const fetchMe = async () => {
-      const request = await requests.get(`${serverURL}${api}/${userSlug}/me`, {
+      console.log(10, 'onMount effect', `${api}/${userSlug}/me`);
+
+      const request = await requests.get(`${api}/${userSlug}/me`, {
         headers: {
           'Accept-Language': i18n.language,
         },
@@ -115,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     fetchMe();
-  }, [i18n, setToken, api, serverURL, userSlug]);
+  }, [i18n, setToken, api, userSlug]);
 
   // When location changes, refresh cookie
   useEffect(() => {
@@ -133,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (id) {
       refreshPermissions();
     }
-  }, [i18n, id, api, serverURL, refreshPermissions]);
+  }, [i18n, id, api, refreshPermissions]);
 
   useEffect(() => {
     let reminder: ReturnType<typeof setTimeout>;

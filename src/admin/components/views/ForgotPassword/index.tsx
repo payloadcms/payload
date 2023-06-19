@@ -22,7 +22,6 @@ const ForgotPassword: React.FC = () => {
   const { t } = useTranslation('authentication');
   const {
     admin: { user: userSlug },
-    serverURL,
     routes: {
       admin,
       api,
@@ -84,7 +83,7 @@ const ForgotPassword: React.FC = () => {
       <Form
         handleResponse={handleResponse}
         method="post"
-        action={`${serverURL}${api}/${userSlug}/forgot-password`}
+        action={`${api}/${userSlug}/forgot-password`}
       >
         <h1>{t('forgotPassword')}</h1>
         <p>{t('forgotPasswordEmailInstructions')}</p>
