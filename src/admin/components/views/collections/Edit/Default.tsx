@@ -30,17 +30,16 @@ import { SetStepNav } from './SetStepNav';
 import { FormLoadingOverlayToggle } from '../../../elements/Loading';
 import { formatDate } from '../../../../utilities/formatDate';
 import { useAuth } from '../../../utilities/Auth';
-import { requests } from '../../../../api';
 
 import './index.scss';
 
 const baseClass = 'collection-edit';
 
 const DefaultEditView: React.FC<Props> = (props) => {
-  const { serverURL, routes: { api }, admin: { dateFormat }, routes: { admin } } = useConfig();
+  const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { publishedDoc } = useDocumentInfo();
   const { t, i18n } = useTranslation('general');
-  const { setUser, user } = useAuth();
+  const { user, refreshCookieAsync } = useAuth();
 
   const {
     collection,
@@ -82,28 +81,17 @@ const DefaultEditView: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   const onSave = useCallback(async (json) => {
+    if (auth && id === user.id) {
+      await refreshCookieAsync();
+    }
+
     if (typeof onSaveFromProps === 'function') {
-      if (auth && id === user.id) {
-        const request = await requests.post(`${serverURL}${api}/${collection.slug}/refresh-token`, {
-          headers: {
-            'Accept-Language': i18n.language,
-          },
-        });
-
-        if (request.status === 200) {
-          const userRes = await request.json();
-          setUser(userRes.user);
-        } else {
-          setUser(null);
-        }
-      }
-
       onSaveFromProps({
         ...json,
         operation: id ? 'update' : 'create',
       });
     }
-  }, [id, onSaveFromProps, auth, setUser, serverURL, api, collection, i18n.language, user]);
+  }, [id, onSaveFromProps, auth, user, refreshCookieAsync]);
 
   const operation = isEditing ? 'update' : 'create';
 

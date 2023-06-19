@@ -44,11 +44,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const id = user?.id;
 
-  const refreshCookie = useCallback(() => {
+  const refreshCookie = useCallback((forceRefresh?: boolean) => {
     const now = Math.round((new Date()).getTime() / 1000);
     const remainingTime = (exp as number || 0) - now;
 
-    if (exp && remainingTime < 120) {
+    if (forceRefresh || (exp && remainingTime < 120)) {
       setTimeout(async () => {
         const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
           headers: {
@@ -66,6 +66,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }, 1000);
     }
   }, [exp, serverURL, api, userSlug, push, admin, logoutInactivityRoute, i18n]);
+
+  const refreshCookieAsync = useCallback(async (skipSetUser?: boolean): Promise<User> => {
+    const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
+      headers: {
+        'Accept-Language': i18n.language,
+      },
+    });
+
+    if (request.status === 200) {
+      const json = await request.json();
+      if (!skipSetUser) setUser(json.user);
+      return json.user;
+    }
+
+    setUser(null);
+    push(`${admin}${logoutInactivityRoute}`);
+    return null;
+  }, [serverURL, api, userSlug, push, admin, logoutInactivityRoute, i18n]);
 
   const setToken = useCallback((token: string) => {
     const decoded = jwtDecode<User>(token);
@@ -177,6 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser,
       logOut,
       refreshCookie,
+      refreshCookieAsync,
       refreshPermissions,
       permissions,
       setToken,
