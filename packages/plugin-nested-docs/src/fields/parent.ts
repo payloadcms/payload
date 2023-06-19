@@ -1,7 +1,13 @@
 import type { RelationshipField } from 'payload/dist/fields/config/types'
-import type { Field } from 'payload/types'
 
-const createParentField = (relationTo: string, overrides?: Partial<RelationshipField>): Field => ({
+const createParentField = (
+  relationTo: string,
+  overrides?: Partial<
+    RelationshipField & {
+      hasMany: false
+    }
+  >,
+): RelationshipField => ({
   name: 'parent',
   relationTo,
   type: 'relationship',
