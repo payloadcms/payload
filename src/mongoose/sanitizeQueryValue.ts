@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { createArrayFromCommaDelineated } from './createArrayFromCommaDelineated';
-import wordBoundariesRegex from '../utilities/wordBoundariesRegex';
 import { Field, TabAsField } from '../fields/config/types';
 
 type SanitizeQueryValueArgs = {
@@ -106,11 +105,6 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains') {
       formattedValue = { $regex: formattedValue, $options: 'i' };
-    }
-
-    if (operator === 'like' && typeof formattedValue === 'string') {
-      const $regex = wordBoundariesRegex(formattedValue);
-      formattedValue = { $regex };
     }
   }
 
