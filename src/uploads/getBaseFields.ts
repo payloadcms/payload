@@ -86,7 +86,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
           ({ data }) => {
             if (data?.filename) {
               if (uploadOptions.staticURL.startsWith('/')) {
-                return `${config.serverURL}${uploadOptions.staticURL}/${data.filename}`;
+                return `${uploadOptions.staticURL}/${data.filename}`;
               }
               return `${uploadOptions.staticURL}/${data.filename}`;
             }
@@ -133,7 +133,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
 
                     if (sizeFilename) {
                       if (uploadOptions.staticURL.startsWith('/')) {
-                        return `${config.serverURL}${uploadOptions.staticURL}/${sizeFilename}`;
+                        return `${uploadOptions.staticURL}/${sizeFilename}`;
                       }
                       return `${uploadOptions.staticURL}/${sizeFilename}`;
                     }
