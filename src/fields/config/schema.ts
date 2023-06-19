@@ -336,8 +336,14 @@ export const relationship = baseField.keys({
     allowCreate: joi.boolean().default(true),
   }),
   min: joi.number()
-    .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
+    .when('hasMany', { is: joi.not(true), then: joi.forbidden() })
+    .warning('deprecated', { message: 'Use minRows instead.' }),
   max: joi.number()
+    .when('hasMany', { is: joi.not(true), then: joi.forbidden() })
+    .warning('deprecated', { message: 'Use maxRows instead.' }),
+  minRows: joi.number()
+    .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
+  maxRows: joi.number()
     .when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
 });
 
@@ -455,7 +461,10 @@ export const date = baseField.keys({
 
 export const ui = joi.object().keys({
   name: joi.string().required(),
-  label: joi.string(),
+  label: joi.alternatives().try(
+    joi.string(),
+    joi.object().pattern(joi.string(), [joi.string()]),
+  ),
   type: joi.string().valid('ui').required(),
   admin: joi.object().keys({
     position: joi.string().valid('sidebar'),
@@ -466,6 +475,7 @@ export const ui = joi.object().keys({
       Field: componentSchema,
     }).default({}),
   }).default(),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 });
 
 const fieldSchema = joi.alternatives()

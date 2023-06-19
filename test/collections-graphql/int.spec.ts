@@ -86,6 +86,26 @@ describe('collections-graphql', () => {
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }));
     });
 
+    it('should retain payload api', async () => {
+      const query = `
+        query {
+          PayloadApiTestTwos {
+            docs {
+              payloadAPI
+              relation {
+                payloadAPI
+              }
+            }
+          }
+        }      
+      `;
+
+      const response = await client.request(query);
+      const res = response.PayloadApiTestTwos;
+
+      expect(res.docs[0].relation.payloadAPI).toStrictEqual('GraphQL');
+    });
+
     it('should update existing', async () => {
       const updatedTitle = 'updated title';
 
