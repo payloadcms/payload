@@ -93,20 +93,7 @@ const Header: GlobalConfig = {
 
 ## Preferences
 
-User [preferences](/docs/admin/overview#preferences) for the admin panel are also available to GraphQL. To query preferences you must supply an authorization token in the header and only the preferences of that user will be accessible and of the `key` argument.
-
-**Payload will open the following query:**
-
-| Query Name       | Operation |
-| ---------------- | --------- |
-| **`Preference`** | `findOne` |
-
-**And the following mutations:**
-
-| Query Name             | Operation |
-| ---------------------- | --------- |
-| **`updatePreference`** | `update`  |
-| **`deletePreference`** | `delete`  |
+User [preferences](/docs/admin/overview#preferences) for the admin panel are also available to GraphQL the same way as other collection schemas are generated. To query preferences you must supply an authorization token in the header and only the preferences of that user will be accessible.
 
 ## GraphQL Playground
 
