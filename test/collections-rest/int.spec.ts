@@ -829,6 +829,38 @@ describe('collections-rest', () => {
           expect(status).toEqual(200);
           expect(result.docs).toHaveLength(0);
         });
+
+        it('should sort find results by nearest distance', async () => {
+          // creating twice as many records as we are querying to get a random sample
+          await mapAsync([...Array(10)], async () => {
+            // setTimeout used to randomize the creation timestamp
+            setTimeout(async () => {
+              await payload.create({
+                collection: pointSlug,
+                data: {
+                  // only randomize longitude to make distance comparison easy
+                  point: [Math.random(), 0],
+                },
+              });
+            }, Math.random());
+          });
+
+          const { result } = await client.find({
+            slug: pointSlug,
+            query: {
+              // querying large enough range to include all docs
+              point: { near: '0, 0, 100000, 0' },
+            },
+            limit: 5,
+          });
+          const { docs } = result;
+          let previous = 0;
+          docs.forEach((({ point: coordinates }) => {
+            // the next document point should always be greater than the one before
+            expect(previous).toBeLessThanOrEqual(coordinates[0]);
+            [previous] = coordinates;
+          }));
+        });
       });
 
       it('or', async () => {
