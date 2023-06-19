@@ -38,7 +38,15 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
     if (val.toLowerCase() === 'false') formattedValue = false;
   }
 
-  if (field.type === 'number' && typeof val === 'string') {
+  if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
+    formattedValue = createArrayFromCommaDelineated(formattedValue);
+
+    if (field.type === 'number') {
+      formattedValue = formattedValue.map((arrayVal) => parseFloat(arrayVal));
+    }
+  }
+
+  if (field.type === 'number' && typeof formattedValue === 'string') {
     formattedValue = Number(val);
   }
 
@@ -49,9 +57,6 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
     }
   }
 
-  if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
-    formattedValue = createArrayFromCommaDelineated(formattedValue);
-  }
 
   if (['relationship', 'upload'].includes(field.type)) {
     if (val === 'null') {
