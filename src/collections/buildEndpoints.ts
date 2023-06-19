@@ -25,6 +25,10 @@ import deleteByID from './requestHandlers/deleteByID';
 const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
   let { endpoints } = collection;
 
+  if (endpoints === false) {
+    return [];
+  }
+
   if (collection.auth) {
     if (!collection.auth.disableLocalStrategy) {
       if (collection.auth.verify) {

@@ -25,9 +25,14 @@ function initGlobalsGraphQL(payload: Payload): void {
     const {
       fields,
       versions,
+      graphQL,
     } = global;
 
-    const formattedName = global.graphQL?.name ? global.graphQL.name : singular(toWords(global.slug, true));
+    if (graphQL === false) {
+      return;
+    }
+
+    const formattedName = graphQL?.name ? graphQL.name : singular(toWords(global.slug, true));
 
     const forceNullableObjectType = Boolean(versions?.drafts);
 

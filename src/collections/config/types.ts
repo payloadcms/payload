@@ -267,7 +267,7 @@ export type CollectionConfig = {
   graphQL?: {
     singularName?: string
     pluralName?: string
-  }
+  } | false;
   /**
    * Options used in typescript generation
    */
@@ -307,9 +307,9 @@ export type CollectionConfig = {
     afterForgotPassword?: AfterForgotPasswordHook[];
   };
   /**
-   * Custom rest api endpoints
+   * Custom rest api endpoints, set false to disable all rest endpoints for this collection.
    */
-  endpoints?: Omit<Endpoint, 'root'>[]
+  endpoints?: Omit<Endpoint, 'root'>[] | false;
   /**
    * Access control
    */
@@ -355,7 +355,7 @@ export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionC
   upload: Upload;
   fields: Field[];
   versions: SanitizedCollectionVersions;
-  endpoints: Omit<Endpoint, 'root'>[];
+  endpoints: Omit<Endpoint, 'root'>[] | false;
 }
 
 export type Collection = {

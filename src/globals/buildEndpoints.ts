@@ -10,6 +10,10 @@ import docAccessRequestHandler from './requestHandlers/docAccess';
 const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
   const { endpoints, slug } = global;
 
+  if (endpoints === false) {
+    return [];
+  }
+
   if (global.versions) {
     endpoints.push(...[
       {
