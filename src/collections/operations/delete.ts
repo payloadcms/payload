@@ -93,7 +93,11 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   // Retrieve documents
   // /////////////////////////////////////
 
-  const { docs } = await payload.db.find<GeneratedTypes['collections'][TSlug]>({ payload, locale, where: fullWhere, collection: collectionConfig });
+  const { docs } = await payload.db.find<GeneratedTypes['collections'][TSlug]>({
+    locale,
+    where: fullWhere,
+    collection: collectionConfig.slug,
+  });
 
   const errors = [];
 

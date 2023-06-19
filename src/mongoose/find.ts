@@ -6,9 +6,9 @@ import flattenWhereToOperators from '../database/flattenWhereToOperators';
 
 export async function find<T = unknown>(
   this: MongooseAdapter,
-  { payload, collection, where, page, limit, sortProperty, sortOrder, locale, pagination }: FindArgs,
+  { collection, where, page, limit, sortProperty, sortOrder, locale, pagination }: FindArgs,
 ): Promise<PaginatedDocs<T>> {
-  const Model = this.collections[collection.slug];
+  const Model = this.collections[collection];
 
   let useEstimatedCount = false;
 
@@ -18,7 +18,7 @@ export async function find<T = unknown>(
   }
 
   const query = await Model.buildQuery({
-    payload,
+    payload: this.payload,
     locale,
     where,
   });

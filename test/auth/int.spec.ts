@@ -185,7 +185,6 @@ describe('Auth', () => {
         // const db = client.db(mongoDBName);
         const { db } = mongoose.connection;
         const userResult = await db.collection('public-users').findOne({ email: emailToVerify });
-        // @ts-expect-error trust
         const { _verified, _verificationToken } = userResult;
 
         expect(_verified).toBe(false);

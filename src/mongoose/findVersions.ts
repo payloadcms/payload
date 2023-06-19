@@ -6,9 +6,9 @@ import flattenWhereToOperators from '../database/flattenWhereToOperators';
 
 export async function findVersions<T = unknown>(
   this: MongooseAdapter,
-  { payload, collection, where, page, limit, sortProperty, sortOrder, locale, pagination, skip }: FindVersionArgs,
+  { collection, where, page, limit, sortProperty, sortOrder, locale, pagination, skip }: FindVersionArgs,
 ): Promise<PaginatedDocs<T>> {
-  const Model = this.versions[collection.slug];
+  const Model = this.versions[collection];
 
   let useEstimatedCount = false;
 
@@ -18,7 +18,7 @@ export async function findVersions<T = unknown>(
   }
 
   const query = await Model.buildQuery({
-    payload,
+    payload: this.payload,
     locale,
     where,
   });

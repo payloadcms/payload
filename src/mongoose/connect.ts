@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { ConnectOptions } from 'mongoose';
 import mongoose from 'mongoose';
-import type { Payload } from '..';
 
+import { SanitizedConfig } from 'payload/config';
 import type { MongooseAdapter } from '.';
 
 export async function connect(
   this: MongooseAdapter,
-  { payload }: { payload: Payload },
+  { config }: { config: SanitizedConfig },
 ): Promise<void> {
   let urlToConnect = this.url;
   let successfulConnectionMessage = 'Connected to MongoDB server successfully!';
@@ -45,13 +45,13 @@ export async function connect(
     await mongoose.connect(urlToConnect, connectionOptions);
 
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      payload.logger.info('---- DROPPING DATABASE ----');
+      this.payload.logger.info('---- DROPPING DATABASE ----');
       await mongoose.connection.dropDatabase();
-      payload.logger.info('---- DROPPED DATABASE ----');
+      this.payload.logger.info('---- DROPPED DATABASE ----');
     }
-    payload.logger.info(successfulConnectionMessage);
+    this.payload.logger.info(successfulConnectionMessage);
   } catch (err) {
-    payload.logger.error(
+    this.payload.logger.error(
       `Error: cannot connect to MongoDB. Details: ${err.message}`,
       err,
     );

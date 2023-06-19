@@ -72,13 +72,12 @@ async function findVersions<T extends TypeWithVersion<T>>(
   });
 
   const paginatedDocs = await payload.db.findGlobalVersions<T>({
-    payload,
     where: fullWhere,
     page: page || 1,
     limit: limit ?? 10,
     sortProperty,
     sortOrder,
-    global: globalConfig,
+    global: globalConfig.slug,
     locale,
   });
 

@@ -1,8 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
-import { Collection, CollectionModel } from '../config/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
+import { Collection } from '../config/types';
 import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { TypeWithVersion } from '../../versions/types';
@@ -61,9 +60,8 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
   // /////////////////////////////////////
 
   const versionsQuery = await payload.db.findVersions<T>({
-    payload,
     locale,
-    collection: collectionConfig,
+    collection: collectionConfig.slug,
     limit: 1,
     pagination: false,
     where: fullWhere,

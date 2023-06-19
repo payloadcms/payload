@@ -46,8 +46,7 @@ async function unlock(args: Args): Promise<boolean> {
   // /////////////////////////////////////
 
   const { docs } = await req.payload.db.find({
-    payload,
-    collection: collectionConfig,
+    collection: collectionConfig.slug,
     where: { email: { equals: data.email.toLowerCase() } },
     limit: 1,
   });

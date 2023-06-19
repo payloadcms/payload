@@ -41,8 +41,7 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
   } = args;
 
   const { docs } = await payload.db.find({
-    payload,
-    collection: config,
+    collection: config.slug,
     limit: 1,
     pagination: false,
   });

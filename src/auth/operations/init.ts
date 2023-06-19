@@ -9,8 +9,7 @@ async function init(args: { req: PayloadRequest, collection: string }): Promise<
   const collection = payload.collections[slug].config;
 
   const { docs } = await payload.db.find({
-    payload,
-    collection,
+    collection: slug,
     limit: 1,
     pagination: false,
   });

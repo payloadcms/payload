@@ -2,23 +2,23 @@
 import mongoose from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
+import { SanitizedConfig } from 'payload/config';
 import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
 import getBuildQueryPlugin from './queries/buildQuery';
 import buildCollectionSchema from './models/buildCollectionSchema';
 import buildSchema from './models/buildSchema';
 import { CollectionModel, SanitizedCollectionConfig } from '../collections/config/types';
 import { getVersionsModelName } from '../versions/getVersionsModelName';
-import type { Payload } from '..';
 import type { MongooseAdapter } from '.';
 import { buildGlobalModel } from './models/buildGlobalModel';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 
 export async function init(
   this: MongooseAdapter,
-  { payload }: { payload: Payload },
+  { config }: { config: SanitizedConfig },
 ): Promise<void> {
-  payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const schema = buildCollectionSchema(collection, payload.config);
+  this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
+    const schema = buildCollectionSchema(collection, this.payload.config);
 
     if (collection.versions) {
       const versionModelName = getVersionsModelName(collection);
@@ -26,7 +26,7 @@ export async function init(
       const versionCollectionFields = buildVersionCollectionFields(collection);
 
       const versionSchema = buildSchema(
-        payload.config,
+        this.payload.config,
         versionCollectionFields,
         {
           disableUnique: true,
@@ -64,35 +64,35 @@ export async function init(
       }
 
       const model = mongoose.model(versionModelName, versionSchema) as CollectionModel;
-      payload.versions[collection.slug] = model;
+      this.payload.versions[collection.slug] = model;
       this.versions[collection.slug] = model;
     }
 
     const model = mongoose.model(collection.slug, schema) as CollectionModel;
     this.collections[collection.slug] = model;
 
-    payload.collections[collection.slug] = {
+    this.payload.collections[collection.slug] = {
       Model: model,
       config: collection,
     };
   });
 
-  const model = buildGlobalModel(payload.config);
+  const model = buildGlobalModel(this.payload.config);
   this.globals = model;
 
-  payload.globals.Model = model;
+  this.payload.globals.Model = model;
 
-  payload.config.globals.forEach((global) => {
+  this.payload.config.globals.forEach((global) => {
     if (global.versions) {
       const versionModelName = getVersionsModelName(global);
 
       const versionGlobalFields = buildVersionGlobalFields(global);
 
       const versionSchema = buildSchema(
-        payload.config,
+        this.payload.config,
         versionGlobalFields,
         {
-          indexSortableFields: payload.config.indexSortableFields,
+          indexSortableFields: this.payload.config.indexSortableFields,
           disableUnique: true,
           draftsEnabled: true,
           options: {
@@ -108,7 +108,7 @@ export async function init(
       const versionsModel = mongoose.model(versionModelName, versionSchema) as CollectionModel;
       this.versions[global.slug] = versionsModel;
 
-      payload.versions[global.slug] = versionsModel;
+      this.payload.versions[global.slug] = versionsModel;
     }
   });
 }

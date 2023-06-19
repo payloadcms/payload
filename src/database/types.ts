@@ -1,7 +1,7 @@
 import type { SchemaOptions } from 'mongoose';
-import { Configuration } from 'webpack';
+import type { Configuration } from 'webpack';
 import type { Config, SanitizedConfig } from '../config/types';
-import {
+import type {
   ArrayField,
   BlockField,
   CheckboxField,
@@ -24,107 +24,109 @@ import {
   TextField,
   UploadField,
 } from '../fields/config/types';
-import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
-import { Payload } from '../payload';
-import { Document, Where } from '../types';
-import { SanitizedGlobalConfig } from '../globals/config/types';
+import type { TypeWithID } from '../collections/config/types';
+import type { Payload } from '../payload';
+import type { Document, Where } from '../types';
 
 export interface DatabaseAdapter {
   /**
+   * reference to the instance of payload
+   */
+  payload: Payload;
+  /**
    * Open the connection to the database
    */
-  connect?: ({ payload, config }: { payload: Payload, config: SanitizedConfig }) => Promise<void>
+  connect?: ({ config }: { config: SanitizedConfig }) => Promise<void>;
 
   /**
    * Perform startup tasks required to interact with the database such as building Schema and models
    */
-  init?: ({ payload, config }: { payload: Payload, config: SanitizedConfig }) => Promise<void>
+  init?: ({ config }: { config: SanitizedConfig }) => Promise<void>;
 
   /**
    * Terminate the connection with the database
    */
-  destroy?: () => Promise<void>
+  destroy?: () => Promise<void>;
 
   /**
    * Used to alias server only modules or make other changes to webpack configuration
    */
-  webpack?: (config: Configuration) => Configuration
+  webpack?: (config: Configuration) => Configuration;
 
   // migrations
   /**
    * Output a migration file
    */
-  createMigration: ({ payload }: { payload: Payload }) => Promise<void>
+  createMigration: () => Promise<void>;
 
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: ({ payload }: { payload: Payload }) => Promise<void>
+  migrate: () => Promise<void>;
 
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
-  migrateStatus: ({ payload }: { payload: Payload }) => Promise<void>
+  migrateStatus: () => Promise<void>;
 
   /**
    * Run any migration down functions that have been performed
    */
-  migrateDown: ({ payload }: { payload: Payload }) => Promise<void>
+  migrateDown: () => Promise<void>;
 
   /**
    * Run all migration down functions before running up
    */
-  migrateRefresh: ({ payload }: { payload: Payload }) => Promise<void>
+  migrateRefresh: () => Promise<void>;
 
   /**
    * Run all migrate down functions
    */
-  migrateReset: ({ payload }: { payload: Payload }) => Promise<void>
+  migrateReset: () => Promise<void>;
 
   /**
    * Drop the current database and run all migrate up functions
    */
-  migrateFresh: ({ payload }: { payload: Payload }) => Promise<void>
+  migrateFresh: () => Promise<void>;
 
   // transactions
   /**
    * Perform many database interactions in a single, all-or-nothing operation.
    */
-  transaction?: ({ payload }: { payload: Payload }) => Promise<boolean>
+  transaction?: () => Promise<boolean>;
 
   /**
    * Start a transaction, requiring commit() to be called for any changes to be made.
    */
-  beginTransaction?: ({ payload }: { payload: Payload }) => Promise<boolean>
+  beginTransaction?: () => Promise<boolean>;
 
   /**
    * Cancel any changes since the beginning of the transaction.
    */
-  rollbackTransaction?: ({ payload }: { payload: Payload }) => Promise<boolean>
+  rollbackTransaction?: () => Promise<boolean>;
 
   /**
    * Instruct the database to complete the changes made in the transaction.
    */
-  commitTransaction?: ({ payload }: { payload: Payload }) => Promise<boolean>
+  commitTransaction?: () => Promise<boolean>;
 
   // versions
-  queryDrafts: <T = TypeWithID>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>
+  queryDrafts: <T = TypeWithID>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>;
 
   // operations
-  find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
-  findVersions: <T = TypeWithID>(args: FindVersionArgs) => Promise<PaginatedDocs<T>>
-  findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<T>>
-  findOne: FindOne
-  create: Create
-  update: Update
-  updateOne: UpdateOne
-  deleteOne: DeleteOne
-  deleteMany: DeleteMany
+  find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>;
+  findVersions: <T = TypeWithID>(args: FindVersionArgs) => Promise<PaginatedDocs<T>>;
+  findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<T>>;
+  findOne: FindOne;
+  create: Create;
+  update: Update;
+  updateOne: UpdateOne;
+  deleteOne: DeleteOne;
+  deleteMany: DeleteMany;
 }
 
 export type QueryDraftsArgs = {
-  payload: Payload
-  collection: SanitizedCollectionConfig
+  collection: string
   where?: Where
   page?: number
   limit?: number
@@ -135,8 +137,7 @@ export type QueryDraftsArgs = {
 }
 
 export type FindArgs = {
-  payload: Payload
-  collection: SanitizedCollectionConfig
+  collection: string
   where?: Where
   page?: number
   skip?: number
@@ -149,8 +150,7 @@ export type FindArgs = {
 }
 
 export type FindVersionArgs = {
-  payload: Payload
-  collection: SanitizedCollectionConfig
+  collection: string
   where?: Where
   page?: number
   skip?: number
@@ -163,8 +163,7 @@ export type FindVersionArgs = {
 }
 
 export type FindGlobalVersionArgs = {
-  payload: Payload
-  global: SanitizedGlobalConfig
+  global: string
   where?: Where
   page?: number
   skip?: number
@@ -177,8 +176,7 @@ export type FindGlobalVersionArgs = {
 }
 
 export type FindOneArgs = {
-  payload: Payload
-  collection: SanitizedCollectionConfig
+  collection: string
   where: Where
   locale?: string
   sort?: {
@@ -189,8 +187,7 @@ export type FindOneArgs = {
 type FindOne = (args: FindOneArgs) => Promise<PaginatedDocs>
 
 type CreateArgs = {
-  payload: Payload
-  collection: SanitizedCollectionConfig
+  collection: string
   data: Record<string, unknown>
   draft?: boolean
   locale?: string
@@ -199,8 +196,7 @@ type CreateArgs = {
 type Create = (args: CreateArgs) => Promise<Document>
 
 type UpdateArgs = {
-  payload: Payload
-  collection: SanitizedCollectionConfig
+  collection: string
   data: Record<string, unknown>
   where: Where
   draft?: boolean
@@ -210,8 +206,7 @@ type UpdateArgs = {
 type Update = (args: UpdateArgs) => Promise<Document>
 
 type UpdateOneArgs = {
-  payload: Payload,
-  collection: SanitizedCollectionConfig,
+  collection: string,
   data: Record<string, unknown>,
   where: Where,
   draft?: boolean
@@ -221,8 +216,7 @@ type UpdateOneArgs = {
 type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
 type DeleteOneArgs = {
-  payload: Payload,
-  collection: SanitizedCollectionConfig,
+  collection: string,
   data: Record<string, unknown>,
   where: Where,
 }
@@ -230,8 +224,7 @@ type DeleteOneArgs = {
 type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 
 type DeleteManyArgs = {
-  payload: Payload,
-  collection: SanitizedCollectionConfig,
+  collection: string,
   where: Where,
 }
 

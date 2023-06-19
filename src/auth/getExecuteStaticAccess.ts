@@ -43,8 +43,7 @@ const getExecuteStaticAccess = (config: SanitizedCollectionConfig) => async (req
         }
 
         const { docs } = await req.payload.db.find({
-          payload: req.payload,
-          collection: config,
+          collection: config.slug,
           where: queryToBuild,
           limit: 1,
         });

@@ -118,8 +118,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     });
 
     const query = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
-      payload,
-      collection: collectionConfig,
+      collection: collectionConfig.slug,
       where: versionsWhere,
       locale,
     });
@@ -127,9 +126,8 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     docs = query.docs;
   } else {
     const query = await payload.db.find({
-      payload,
       locale,
-      collection: collectionConfig,
+      collection: collectionConfig.slug,
       where: fullWhere,
       pagination: false,
       limit: 0,

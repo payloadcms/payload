@@ -34,9 +34,8 @@ export const enforceMaxVersions = async ({
       };
 
       const query = await payload.db.findVersions({
-        payload,
         where,
-        collection,
+        collection: collection.slug,
         skip: max,
         sortProperty: 'updatedAt',
         sortOrder: 'desc',
@@ -46,9 +45,8 @@ export const enforceMaxVersions = async ({
       [oldestAllowedDoc] = query.docs;
     } else if (global) {
       const query = await payload.db.findGlobalVersions({
-        payload,
         where,
-        global,
+        global: global.slug,
         skip: max,
         sortProperty: 'updatedAt',
         sortOrder: 'desc',

@@ -207,6 +207,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
       if (!this.config.db) {
         this.config.db = mongooseAdapter({
+          payload: this,
           url: this.mongoURL,
           connectOptions: options.mongoOptions,
         });
@@ -215,7 +216,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     this.db = this.config.db;
     if (this.db?.connect) {
-      this.mongoMemoryServer = await this.db.connect({ payload: this, config: this.config });
+      this.mongoMemoryServer = await this.db.connect({ config: this.config });
     }
 
     // Configure email service
@@ -233,7 +234,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     }
 
     if (this.db.init) {
-      await this.db?.init({ payload: this, config: this.config });
+      await this.db?.init({ config: this.config });
     }
 
     serverInitTelemetry(this);

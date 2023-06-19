@@ -9,8 +9,10 @@ import { GlobalModel } from '../globals/config/types';
 import { find } from './find';
 import { findVersions } from './findVersions';
 import { findGlobalVersions } from './findGlobalVersions';
+import type { Payload } from '../index';
 
 export interface Args {
+  payload: Payload,
   /** The URL to connect to MongoDB */
   url: string
   connectOptions?: ConnectOptions & {
@@ -31,10 +33,11 @@ export type MongooseAdapter = DatabaseAdapter &
     }
   }
 
-export function mongooseAdapter({ url, connectOptions }: Args): MongooseAdapter {
+export function mongooseAdapter({ payload, url, connectOptions }: Args): MongooseAdapter {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   return {
+    payload,
     url,
     connectOptions: connectOptions || {},
     collections: {},

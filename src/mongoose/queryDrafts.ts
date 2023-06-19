@@ -13,14 +13,14 @@ type AggregateVersion<T> = {
 
 export async function queryDrafts<T = unknown>(
   this: MongooseAdapter,
-  { payload, collection, where, page, limit, sortProperty, sortOrder, locale, pagination }: QueryDraftsArgs,
+  { collection, where, page, limit, sortProperty, sortOrder, locale, pagination }: QueryDraftsArgs,
 ): Promise<PaginatedDocs<T>> {
-  const VersionModel = this.versions[collection.slug];
+  const VersionModel = this.versions[collection];
 
   const versionQuery = await VersionModel.buildQuery({
     where,
     locale,
-    payload,
+    payload: this.payload,
   });
 
   const aggregate = VersionModel.aggregate<AggregateVersion<T>>([

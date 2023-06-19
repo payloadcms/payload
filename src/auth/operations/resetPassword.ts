@@ -51,8 +51,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
   // /////////////////////////////////////
 
   const { docs } = await payload.db.find<any>({
-    payload,
-    collection: collectionConfig,
+    collection: collectionConfig.slug,
     limit: 1,
     where: {
       resetPasswordToken: { equals: data.token },
@@ -77,8 +76,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
   }
 
   const { updatedDocs } = await payload.db.update({
-    payload,
-    collection: collectionConfig,
+    collection: collectionConfig.slug,
     where: {
       id: { equals: user.id },
     },

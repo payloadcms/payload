@@ -12,9 +12,6 @@ export type Args = {
 async function verifyEmail(args: Args): Promise<boolean> {
   const {
     req,
-    req: {
-      payload,
-    },
     token,
     collection,
   } = args;
@@ -23,8 +20,7 @@ async function verifyEmail(args: Args): Promise<boolean> {
   }
 
   const { docs } = await req.payload.db.find<any>({
-    payload,
-    collection: collection.config,
+    collection: collection.config.slug,
     limit: 1,
     where: {
       _verificationToken: { equals: token },
@@ -37,8 +33,7 @@ async function verifyEmail(args: Args): Promise<boolean> {
   if (user && user._verified === true) throw new APIError('This account has already been activated.', httpStatus.ACCEPTED);
 
   await req.payload.db.update({
-    payload,
-    collection: collection.config,
+    collection: collection.config.slug,
     where: {
       id: user.id,
     },

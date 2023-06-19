@@ -125,8 +125,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     });
 
     result = await payload.db.queryDrafts<T>({
-      payload,
-      collection: collectionConfig,
+      collection: collectionConfig.slug,
       where: fullWhere,
       page: sanitizedPage,
       limit: sanitizedLimit,
@@ -144,8 +143,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     });
 
     result = await payload.db.find<T>({
-      payload,
-      collection: collectionConfig,
+      collection: collectionConfig.slug,
       where: fullWhere,
       page: sanitizedPage,
       limit: sanitizedLimit,

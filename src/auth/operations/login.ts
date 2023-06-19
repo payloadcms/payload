@@ -80,8 +80,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore Improper typing in library, additional args should be optional
   const { docs } = await payload.db.find<any>({
-    payload,
-    collection: collectionConfig,
+    collection: collectionConfig.slug,
     where: { email: { equals: email.toLowerCase() } },
     limit: 1,
   });
