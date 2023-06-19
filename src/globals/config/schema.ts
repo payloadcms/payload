@@ -38,9 +38,12 @@ const globalSchema = joi.object().keys({
   typescript: joi.object().keys({
     interface: joi.string(),
   }),
-  graphQL: joi.object().keys({
-    name: joi.string(),
-  }),
+  graphQL: joi.alternatives().try(
+    joi.object().keys({
+      name: joi.string(),
+    }),
+    joi.boolean(),
+  ),
   hooks: joi.object({
     beforeValidate: joi.array().items(joi.func()),
     beforeChange: joi.array().items(joi.func()),

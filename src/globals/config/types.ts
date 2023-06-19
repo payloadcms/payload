@@ -111,7 +111,7 @@ export type GlobalConfig = {
   label?: Record<string, string> | string
   graphQL?: {
     name?: string
-  }
+  } | false
   /**
    * Options used in typescript generation
    */
@@ -129,7 +129,7 @@ export type GlobalConfig = {
     beforeRead?: BeforeReadHook[]
     afterRead?: AfterReadHook[]
   }
-  endpoints?: Omit<Endpoint, 'root'>[],
+  endpoints?: Omit<Endpoint, 'root'>[] | false
   access?: {
     read?: Access;
     readDrafts?: Access;
@@ -144,7 +144,7 @@ export type GlobalConfig = {
 
 export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions' | 'endpoints'> {
   fields: Field[]
-  endpoints: Omit<Endpoint, 'root'>[],
+  endpoints: Omit<Endpoint, 'root'>[] | false
   versions: SanitizedGlobalVersions
 }
 
@@ -157,5 +157,5 @@ export type Globals = {
       mutationInputType: GraphQLNonNull<any>
       versionType?: GraphQLObjectType
     }
-  }
+  } | false
 }

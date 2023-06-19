@@ -232,7 +232,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.email = buildEmail(this.emailOptions, this.logger);
     this.sendEmail = sendEmail.bind(this);
 
-    if (!this.config.graphQL.disable && !this.config.graphQL) {
+    if (!this.config.graphQL.disable) {
       registerGraphQLSchema(this);
     }
 
