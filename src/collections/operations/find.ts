@@ -126,7 +126,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
   const paginationOptions = {
     page: page || 1,
-    sort: {
+    sort: useEstimatedCount ? undefined :{
       [sortProperty]: sortOrder,
     },
     limit: limitToUse,
@@ -134,6 +134,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     leanWithId: true,
     useEstimatedCount,
     pagination: usePagination,
+    forceCountFn: useEstimatedCount,
     options: {
       // limit must also be set here, it's ignored when pagination is false
       limit: limitToUse,
