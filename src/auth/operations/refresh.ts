@@ -114,7 +114,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
       res: args.res,
       exp,
       token: refreshedToken,
-    })) || args;
+    })) || response;
   }, Promise.resolve());
 
   // /////////////////////////////////////
