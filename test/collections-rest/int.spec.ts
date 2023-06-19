@@ -326,6 +326,22 @@ describe('collections-rest', () => {
           const { doc: updatedDoc } = await client.update({ slug: customIdNumberSlug, id: doc.id, data: { name: 'updated' } });
           expect(updatedDoc.name).toEqual('updated');
         });
+
+        it('should allow querying by in', async () => {
+          const id = 98234698237;
+          await client.create({ slug: customIdNumberSlug, data: { id, name: 'query using in operator' } });
+
+          const { result: { docs } } = await client.find({
+            slug: customIdNumberSlug,
+            query: {
+              id: {
+                in: `${id}, ${2349856723948764}`,
+              },
+            },
+          });
+
+          expect(docs).toHaveLength(1);
+        });
       });
     });
 
