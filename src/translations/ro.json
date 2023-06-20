@@ -241,6 +241,7 @@
     "uploading": "Încărcare",
     "user": "Utilizator",
     "users": "Utilizatori",
+    "value": "Valoare",
     "welcome": "Bine ați venit"
   },
   "operators": {
@@ -274,11 +275,11 @@
     "emailAddress": "Vă rugăm să introduceți o adresă de email validă.",
     "enterNumber": "Vă rugăm să introduceți un număr valid.",
     "fieldHasNo": "Acest câmp nu are un {{label}}",
-    "greaterThanMax": "\"{{value}}\" este mai mare decât valoarea maximă permisă de {{max}}.",
+    "greaterThanMax": "{{value}} este mai mare decât valoarea maximă permisă pentru {{label}} de {{max}}.",
     "invalidInput": "Acest câmp are o intrare invalidă.",
     "invalidSelection": "Acest câmp are o selecție invalidă.",
     "invalidSelections": "Acest câmp are următoarele selecții invalide:",
-    "lessThanMin": "\"{{value}}\" este mai mică decât valoarea minimă permisă de {{min}}.",
+    "lessThanMin": "{{value}} este mai mic decât valoarea minimă permisă pentru {{label}} de {{min}}.",
     "longerThanMin": "Această valoare trebuie să fie mai mare decât lungimea minimă de {{minLength}} caractere.",
     "notValidDate": "\"{{value}}\" nu este o dată valabilă.",
     "required": "Acest câmp este obligatoriu.",
