@@ -373,6 +373,23 @@ export class ParamParser {
           }
         }
 
+        if (operator === 'like' && typeof formattedValue === 'string') {
+          const words = formattedValue.split(' ');
+
+          const result = {
+            value: {
+              $and: words.map((word) => ({
+                [path]: {
+                  $regex: word.replace(/[\\^$*+?\\.()|[\]{}]/g, '\\$&'),
+                  $options: 'i',
+                },
+              })),
+            },
+          };
+
+          return result;
+        }
+
         // Some operators like 'near' need to define a full query
         // so if there is no operator key, just return the value
         if (!operatorKey) {

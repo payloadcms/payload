@@ -6,9 +6,11 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
   const {
     children,
     innerProps,
-    customProps: {
-      disableMouseDown,
-      disableKeyDown,
+    selectProps: {
+      customProps: {
+        disableMouseDown,
+        disableKeyDown,
+      } = {},
     } = {},
   } = props;
 

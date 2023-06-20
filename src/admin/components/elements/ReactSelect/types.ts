@@ -71,4 +71,5 @@ export type Props = {
     [key: string]: React.FC<any>
   }
   selectProps?: CustomSelectProps
+  backspaceRemovesValue?: boolean
 }

@@ -17,8 +17,10 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
     data: {
       value,
     },
-    customProps: {
-      disableMouseDown,
+    selectProps: {
+      customProps: {
+        disableMouseDown,
+      } = {},
     } = {},
   } = props;
 

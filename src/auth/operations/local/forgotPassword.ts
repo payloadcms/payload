@@ -34,7 +34,7 @@ async function localForgotPassword<T extends keyof GeneratedTypes['collections']
     throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
-  req.payloadAPI = 'local';
+  req.payloadAPI = req.payloadAPI || 'local';
   req.payload = payload;
   req.i18n = i18n(payload.config.i18n);
 
