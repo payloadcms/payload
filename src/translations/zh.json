@@ -239,6 +239,7 @@
     "updatedSuccessfully": "更新成功。",
     "user": "用户",
     "users": "用户",
+    "value": "值",
     "welcome": "欢迎"
   },
   "operators": {
@@ -272,11 +273,11 @@
     "emailAddress": "请输入一个有效的电子邮件地址。",
     "enterNumber": "请输入一个有效的号码。",
     "fieldHasNo": "这个字段没有{{label}}",
-    "greaterThanMax": "\"{{value}}\"大于{{max}}的最大允许值",
+    "greaterThanMax": "{{value}}超过了允许的最大{{label}}，该最大值为{{max}}。",
     "invalidInput": "这个字段有一个无效的输入。",
     "invalidSelection": "这个字段有一个无效的选择。",
     "invalidSelections": "这个字段有以下无效的选择：",
-    "lessThanMin": "{{value}}小于{{min}}的最小允许值",
+    "lessThanMin": "{{value}}小于允许的最小{{label}}，该最小值为{{min}}。",
     "longerThanMin": "该值必须大于{{minLength}}字符的最小长度",
     "notValidDate": "\"{{value}}\"不是一个有效的日期。",
     "required": "该字段为必填项目。",

@@ -34,7 +34,7 @@ async function localResetPassword<T extends keyof GeneratedTypes['collections']>
   }
 
   req.payload = payload;
-  req.payloadAPI = 'local';
+  req.payloadAPI = req.payloadAPI || 'local';
   req.i18n = i18n(payload.config.i18n);
 
   if (!req.t) req.t = req.i18n.t;
