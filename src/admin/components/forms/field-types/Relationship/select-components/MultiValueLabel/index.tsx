@@ -17,10 +17,12 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
       relationTo,
       label,
     },
-    customProps: {
-      setDrawerIsOpen,
-      draggableProps,
-      onSave,
+    selectProps: {
+      customProps: {
+        setDrawerIsOpen,
+        draggableProps,
+        onSave,
+      } = {},
     } = {},
   } = props;
 
