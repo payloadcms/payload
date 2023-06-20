@@ -241,6 +241,7 @@
     "uploading": "Uploaden",
     "user": "Gebruiker",
     "users": "Gebruikers",
+    "value": "Waarde",
     "welcome": "Welkom"
   },
   "operators": {
@@ -274,11 +275,11 @@
     "emailAddress": "Voer een geldig e-mailadres in.",
     "enterNumber": "Voer een geldig nummer in.",
     "fieldHasNo": "Dit veld heeft geen {{label}}",
-    "greaterThanMax": "\"{{value}}\" is groter dan de maximaal toegestane waarde van {{max}}.",
+    "greaterThanMax": "{{value}} is groter dan de maximaal toegestane {{label}} van {{max}}.",
     "invalidInput": "Dit veld heeft een ongeldige invoer.",
     "invalidSelection": "Dit veld heeft een ongeldige selectie.",
     "invalidSelections": "Dit veld heeft de volgende ongeldige selecties:",
-    "lessThanMin": "\"{{value}}\" is kleiner dan de minimaal toegestande waarde van {{min}}.",
+    "lessThanMin": "{{value}} is kleiner dan de minimaal toegestane {{label}} van {{min}}.",
     "longerThanMin": "Deze waarde moet langer zijn dan de minimale lengte van {{minLength}} tekens.",
     "notValidDate": "\"{{value}}\" is geen geldige datum.",
     "required": "Dit veld is verplicht.",
