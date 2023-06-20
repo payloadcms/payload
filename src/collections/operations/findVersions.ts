@@ -48,12 +48,12 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // Access
   // /////////////////////////////////////
 
-  let useEstimatedCount = false;
+  let hasNearConstraint = false;
 
   if (where) {
     const constraints = flattenWhereConstraints(where);
 
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
   let accessResults;
@@ -73,23 +73,28 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam({
-    sort: args.sort || '-updatedAt',
-    fields: buildVersionCollectionFields(collectionConfig),
-    timestamps: true,
-    config: payload.config,
-    locale,
-  });
+  let sort;
+  if (!hasNearConstraint) {
+    const [sortProperty, sortOrder] = buildSortParam({
+      sort: args.sort || '-updatedAt',
+      fields: buildVersionCollectionFields(collectionConfig),
+      timestamps: true,
+      config: payload.config,
+      locale,
+    });
+    sort = {
+      [sortProperty]: sortOrder,
+    };
+  }
 
   const paginatedDocs = await VersionsModel.paginate(query, {
     page: page || 1,
     limit: limit ?? 10,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
+    sort,
     lean: true,
     leanWithId: true,
-    useEstimatedCount,
+    useEstimatedCount: hasNearConstraint,
+    forceCountFn: hasNearConstraint,
   });
 
   // /////////////////////////////////////

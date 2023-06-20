@@ -57,7 +57,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
-  req.payloadAPI = 'local';
+  req.payloadAPI = req.payloadAPI || 'local';
   req.locale = locale ?? req?.locale ?? defaultLocale;
   req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
   req.i18n = i18n(payload.config.i18n);

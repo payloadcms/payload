@@ -117,7 +117,7 @@ It is also possible to limit the depth for specific `relation` and `upload` fiel
 }
 ```
 
-If you were to query the Posts endpoint at, say, `http://localhost:3000/api/posts?depth=1`, you will retrieve Posts with populations one level deep. A returned result may look like the following:
+If you were to query the Posts endpoint at, say, `http://localhost:3000/api/posts?depth=1`, you will retrieve Posts with populations one level deep. This depth parameter can be thought of as N, where N is the number of levels you want to populate. To populate one level further, you would simply specify N+1 as the depth. A returned result may look like the following:
 
 ```
 // ?depth=1
