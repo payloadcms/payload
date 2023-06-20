@@ -53,6 +53,12 @@ const RelationshipFields: CollectionConfig = {
       hasMany: true,
       maxRows: 2,
     },
+    {
+      name: 'relationshipHasMany',
+      type: 'relationship',
+      relationTo: 'text-fields',
+      hasMany: true,
+    },
   ],
 };
 
