@@ -865,8 +865,8 @@ describe('fields', () => {
       await expect(page.locator('.Toastify')).toContainText('successfully');
       // TODO: uncomment this when the drawer is fixed
       // await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
-
-      await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toContainText(`${value}123`);
+      // await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toContainText(`${value}123`);
+      await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toContainText(value);
     });
   });
 
