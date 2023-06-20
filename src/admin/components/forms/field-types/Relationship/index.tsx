@@ -375,6 +375,7 @@ const Relationship: React.FC<Props> = (props) => {
       {!errorLoading && (
         <div className={`${baseClass}__wrap`}>
           <ReactSelect
+            backspaceRemovesValue={!drawerIsOpen}
             disabled={readOnly || formProcessing}
             onInputChange={(newSearch) => handleInputChange(newSearch, value)}
             onChange={!readOnly ? (selected) => {
