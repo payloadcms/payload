@@ -99,142 +99,162 @@ const Relationship: React.FC<Props> = (props) => {
 
   const [drawerIsOpen, setDrawerIsOpen] = useState(false);
 
-  const getResults: GetResults = useCallback(async ({
-    lastFullyLoadedRelation: lastFullyLoadedRelationArg,
-    search: searchArg,
-    value: valueArg,
-    sort,
-    onSuccess,
-  }) => {
-    if (!permissions) {
-      return;
-    }
-    const lastFullyLoadedRelationToUse = typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1;
-
-    const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
-    const relationsToFetch = lastFullyLoadedRelationToUse === -1 ? relations : relations.slice(lastFullyLoadedRelationToUse + 1);
-
-    let resultsFetched = 0;
-    const relationMap = createRelationMap({
-      hasMany,
-      relationTo,
+  const getResults: GetResults = useCallback(
+    async ({
+      lastFullyLoadedRelation: lastFullyLoadedRelationArg,
+      search: searchArg,
       value: valueArg,
-    });
+      sort,
+      onSuccess,
+    }) => {
+      if (!permissions) {
+        return;
+      }
+      const lastFullyLoadedRelationToUse = typeof lastFullyLoadedRelationArg !== 'undefined'
+        ? lastFullyLoadedRelationArg
+        : -1;
 
-    if (!errorLoading) {
-      relationsToFetch.reduce(async (priorRelation, relation) => {
-        const lastLoadedPageToUse = (lastLoadedPage[relation] + 1) || 1;
-        await priorRelation;
+      const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
+      const relationsToFetch = lastFullyLoadedRelationToUse === -1
+        ? relations
+        : relations.slice(lastFullyLoadedRelationToUse + 1);
 
-        if (resultsFetched < 10) {
-          const collection = collections.find((coll) => coll.slug === relation);
-          const fieldToSearch = collection?.admin?.useAsTitle || 'id';
+      let resultsFetched = 0;
+      const relationMap = createRelationMap({
+        hasMany,
+        relationTo,
+        value: valueArg,
+      });
 
-          const query: {
-            [key: string]: unknown
-            where: Where
-          } = {
-            where: {
-              and: [
-                {
-                  id: {
-                    not_in: relationMap[relation],
+      if (!errorLoading) {
+        relationsToFetch.reduce(async (priorRelation, relation) => {
+          let lastLoadedPageToUse;
+          if (search !== searchArg) {
+            lastLoadedPageToUse = 1;
+          } else {
+            lastLoadedPageToUse = lastLoadedPage[relation] + 1;
+          }
+          await priorRelation;
+
+          if (resultsFetched < 10) {
+            const collection = collections.find(
+              (coll) => coll.slug === relation,
+            );
+            const fieldToSearch = collection?.admin?.useAsTitle || 'id';
+
+            const query: {
+              [key: string]: unknown;
+              where: Where;
+            } = {
+              where: {
+                and: [
+                  {
+                    id: {
+                      not_in: relationMap[relation],
+                    },
                   },
-                },
-              ],
-            },
-            limit: maxResultsPerRequest,
-            page: lastLoadedPageToUse,
-            sort: fieldToSearch,
-            locale,
-            depth: 0,
-          };
-
-          if (searchArg) {
-            query.where.and.push({
-              [fieldToSearch]: {
-                like: searchArg,
+                ],
               },
-            });
-          }
+              limit: maxResultsPerRequest,
+              page: lastLoadedPageToUse,
+              sort: fieldToSearch,
+              locale,
+              depth: 0,
+            };
 
-          if (filterOptionsResult?.[relation]) {
-            query.where.and.push(filterOptionsResult[relation]);
-          }
-
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
-            },
-          });
-
-          if (response.ok) {
-            const data: PaginatedDocs<unknown> = await response.json();
-
-            setLastLoadedPage((prevState) => ({
-              ...prevState,
-              [relation]: lastLoadedPageToUse,
-            }));
-
-            if (!data.nextPage) {
-              setLastFullyLoadedRelation(relations.indexOf(relation));
+            if (searchArg) {
+              query.where.and.push({
+                [fieldToSearch]: {
+                  like: searchArg,
+                },
+              });
             }
 
-            if (data.docs.length > 0) {
-              resultsFetched += data.docs.length;
+            if (filterOptionsResult?.[relation]) {
+              query.where.and.push(filterOptionsResult[relation]);
+            }
 
+            const response = await fetch(
+              `${serverURL}${api}/${relation}?${qs.stringify(query)}`,
+              {
+                credentials: 'include',
+                headers: {
+                  'Accept-Language': i18n.language,
+                },
+              },
+            );
+
+            if (response.ok) {
+              const data: PaginatedDocs<unknown> = await response.json();
+              setLastLoadedPage((prevState) => {
+                return {
+                  ...prevState,
+                  [relation]: lastLoadedPageToUse,
+                };
+              });
+
+              if (!data.nextPage) {
+                setLastFullyLoadedRelation(relations.indexOf(relation));
+              }
+
+              if (data.docs.length > 0) {
+                resultsFetched += data.docs.length;
+
+                dispatchOptions({
+                  type: 'ADD',
+                  docs: data.docs,
+                  collection,
+                  sort,
+                  i18n,
+                  config,
+                });
+              }
+            } else if (response.status === 403) {
+              setLastFullyLoadedRelation(relations.indexOf(relation));
               dispatchOptions({
                 type: 'ADD',
-                docs: data.docs,
+                docs: [],
                 collection,
                 sort,
+                ids: relationMap[relation],
                 i18n,
                 config,
               });
+            } else {
+              setErrorLoading(t('error:unspecific'));
             }
-          } else if (response.status === 403) {
-            setLastFullyLoadedRelation(relations.indexOf(relation));
-            dispatchOptions({
-              type: 'ADD',
-              docs: [],
-              collection,
-              sort,
-              ids: relationMap[relation],
-              i18n,
-              config,
-            });
-          } else {
-            setErrorLoading(t('error:unspecific'));
           }
-        }
-      }, Promise.resolve());
+        }, Promise.resolve());
 
-      if (typeof onSuccess === 'function') onSuccess();
-    }
-  }, [
-    lastLoadedPage,
-    permissions,
-    relationTo,
-    hasMany,
-    errorLoading,
-    collections,
-    filterOptionsResult,
-    serverURL,
-    api,
-    t,
-    i18n,
-    locale,
-    config,
-  ]);
+        if (typeof onSuccess === 'function') onSuccess();
+      }
+    },
+    [
+      permissions,
+      relationTo,
+      hasMany,
+      errorLoading,
+      search,
+      lastLoadedPage,
+      collections,
+      locale,
+      filterOptionsResult,
+      serverURL,
+      api,
+      i18n,
+      config,
+      t,
+    ],
+  );
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
     getResults({ search: searchArg, value: valueArg, sort: true });
     setSearch(searchArg);
-  }, [getResults]);
+  }, 300);
 
   const handleInputChange = useCallback((searchArg: string, valueArg: Value | Value[]) => {
     if (search !== searchArg) {
+      setLastLoadedPage({});
       updateSearch(searchArg, valueArg);
     }
   }, [search, updateSearch]);
