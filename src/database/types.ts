@@ -144,7 +144,7 @@ export type FindArgs = {
   page?: number
   skip?: number
   versions?: boolean
-  /** Setting limit to 1 is equal to the previous Model.findOne() */
+  /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number
   pagination?: boolean
   sortProperty?: string
