@@ -135,7 +135,7 @@ export type QueryDraftsArgs = {
   limit?: number
   pagination?: boolean
   sortProperty?: string
-  sortOrder?: string
+  sortOrder?: 'asc' | 'desc'
   locale?: string
 }
 
@@ -149,7 +149,7 @@ export type FindArgs = {
   limit?: number
   pagination?: boolean
   sortProperty?: string
-  sortOrder?: string
+  sortOrder?: 'asc' | 'desc'
   locale?: string
 }
 
@@ -162,7 +162,7 @@ export type FindVersionArgs = {
   limit?: number
   pagination?: boolean
   sortProperty?: string
-  sortOrder?: string
+  sortOrder?: 'asc' | 'desc'
   locale?: string
 }
 
@@ -175,7 +175,7 @@ export type FindGlobalVersionArgs = {
   limit?: number
   pagination?: boolean
   sortProperty?: string
-  sortOrder?: string
+  sortOrder?: 'asc' | 'desc'
   locale?: string
 }
 
@@ -256,7 +256,7 @@ export type BuildSortParam = (args: {
   locale: string
 }) => {
   sortProperty: string
-  sortOrder: string
+  sortOrder: 'asc' | 'desc'
 }
 
 export type PaginatedDocs<T = any> = {
