@@ -49,7 +49,6 @@ async function findByID<T extends TypeWithID>(
     req,
     req: {
       t,
-      payload,
     },
     disableErrors,
     currentDepth,
