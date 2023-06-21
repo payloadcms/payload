@@ -49,6 +49,7 @@ async function unlock(args: Args): Promise<boolean> {
     collection: collectionConfig.slug,
     where: { email: { equals: data.email.toLowerCase() } },
     limit: 1,
+    locale: req.locale,
   });
 
   const [user] = docs;
