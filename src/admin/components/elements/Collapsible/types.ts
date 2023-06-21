@@ -10,4 +10,5 @@ export type Props = {
   onToggle?: (collapsed: boolean) => void
   initCollapsed?: boolean
   dragHandleProps?: DragHandleProps
+  collapsibleStyle?: 'default' | 'error'
 }
