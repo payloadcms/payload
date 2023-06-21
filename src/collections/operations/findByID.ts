@@ -79,7 +79,7 @@ async function findByID<T extends TypeWithID>(
   // Find by ID
   // /////////////////////////////////////
 
-  // if (!findArgs.where?.$and[0].id) throw new NotFound(t); // TODO: doesn't work. Previously, it was if (!query.$and[0]._id) throw new NotFound(t);
+  if (!findArgs.where.and[0].id) throw new NotFound(t);
 
   if (!req.findByID) req.findByID = {};
 
