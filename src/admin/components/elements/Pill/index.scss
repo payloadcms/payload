@@ -15,6 +15,12 @@
   padding: 0 base(.25);
   align-items: center;
 
+  &--rounded {
+    border-radius: var(--style-radius-l);
+    line-height: 18px;
+    font-size: 12px;
+  }
+
   &:active,
   &:focus {
     outline: none;
@@ -76,6 +82,11 @@
 
   &--style-warning {
     background: var(--theme-warning-500);
+  }
+
+  &--style-error {
+    background: var(--theme-error-500);
+    color: var(--color-base-1000)
   }
 
   &--style-success {
