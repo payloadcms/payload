@@ -7,6 +7,7 @@ import { CollectionModel } from '../collections/config/types';
 import { queryDrafts } from './queryDrafts';
 import { GlobalModel } from '../globals/config/types';
 import { find } from './find';
+import { create } from './create';
 import { findVersions } from './findVersions';
 import { findGlobalVersions } from './findGlobalVersions';
 import type { Payload } from '../index';
@@ -59,5 +60,6 @@ export function mongooseAdapter({ payload, url, connectOptions }: Args): Mongoos
     find,
     findVersions,
     findGlobalVersions,
+    create,
   };
 }
