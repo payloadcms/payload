@@ -135,7 +135,7 @@ export type QueryDraftsArgs = {
   limit?: number
   pagination?: boolean
   sortProperty?: string
-  sortOrder?: 'asc' | 'desc'
+  sortOrder?: SortArgs
   locale?: string
 }
 
@@ -149,7 +149,7 @@ export type FindArgs = {
   limit?: number
   pagination?: boolean
   sortProperty?: string
-  sortOrder?: 'asc' | 'desc'
+  sortOrder?: SortArgs
   locale?: string
 }
 
@@ -162,7 +162,7 @@ export type FindVersionArgs = {
   limit?: number
   pagination?: boolean
   sortProperty?: string
-  sortOrder?: 'asc' | 'desc'
+  sortOrder?: SortArgs
   locale?: string
 }
 
@@ -175,7 +175,7 @@ export type FindGlobalVersionArgs = {
   limit?: number
   pagination?: boolean
   sortProperty?: string
-  sortOrder?: 'asc' | 'desc'
+  sortOrder?: SortArgs
   locale?: string
 }
 
@@ -256,7 +256,7 @@ export type BuildSortParam = (args: {
   locale: string
 }) => {
   sortProperty: string
-  sortOrder: 'asc' | 'desc'
+  sortOrder: SortArgs
 }
 
 export type PaginatedDocs<T = any> = {
@@ -330,3 +330,5 @@ export type FieldGenerator<TSchema, TField> = {
   config: SanitizedConfig,
   options: BuildSchemaOptions,
 }
+
+export type SortArgs = 'asc' | 'desc';
