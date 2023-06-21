@@ -27,6 +27,7 @@ import type {
 import type { TypeWithID } from '../collections/config/types';
 import type { Payload } from '../payload';
 import type { Document, Where } from '../types';
+import type { TypeWithVersion } from '../versions/types';
 
 export interface DatabaseAdapter {
   /**
@@ -117,8 +118,8 @@ export interface DatabaseAdapter {
   find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>;
 
   // TODO: ADD findGlobal method
-  findVersions: <T = TypeWithID>(args: FindVersionArgs) => Promise<PaginatedDocs<T>>;
-  findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<T>>;
+  findVersions: <T = TypeWithID>(args: FindVersionArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
+  findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
   findOne: FindOne;
   create: Create;
   update: Update;

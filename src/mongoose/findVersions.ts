@@ -3,11 +3,12 @@ import { PaginatedDocs } from './types';
 import { FindVersionArgs } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
+import type { TypeWithVersion } from '../versions/types';
 
 export async function findVersions<T = unknown>(
   this: MongooseAdapter,
   { collection, where, page, limit, sortProperty, sortOrder, locale, pagination, skip }: FindVersionArgs,
-): Promise<PaginatedDocs<T>> {
+): Promise<PaginatedDocs<TypeWithVersion<T>>> {
   const Model = this.versions[collection];
 
   let useEstimatedCount = false;
