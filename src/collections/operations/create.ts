@@ -60,7 +60,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
   const {
     collection,
     collection: {
-      Model,
       config: collectionConfig,
     },
     req,
@@ -206,7 +205,10 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     });
   } else {
     try {
-      doc = await Model.create(resultWithLocales);
+      doc = await payload.db.create({
+        collection: collectionConfig.slug,
+        data: resultWithLocales,
+      });
     } catch (error) {
       // Handle uniqueness error from MongoDB
       throw error.code === 11000 && error.keyValue
@@ -215,13 +217,8 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     }
   }
 
-  let result: Document = doc.toJSON({ virtuals: true });
-  const verificationToken = result._verificationToken;
-
-  // custom id type reset
-  result.id = result._id;
-  result = JSON.parse(JSON.stringify(result));
-  result = sanitizeInternalFields(result);
+  const verificationToken = doc._verificationToken;
+  let result: Document = sanitizeInternalFields(doc);
 
   // /////////////////////////////////////
   // Create version
@@ -247,7 +244,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       emailOptions,
       config: payload.config,
       sendEmail: payload.sendEmail,
-      collection: { config: collectionConfig, Model },
+      collection: { config: collectionConfig },
       user: result,
       token: verificationToken,
       req,

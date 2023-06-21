@@ -6,8 +6,6 @@ async function init(args: { req: PayloadRequest, collection: string }): Promise<
     collection: slug,
   } = args;
 
-  const collection = payload.collections[slug].config;
-
   const { docs } = await payload.db.find({
     collection: slug,
     limit: 1,
