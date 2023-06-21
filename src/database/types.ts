@@ -115,6 +115,8 @@ export interface DatabaseAdapter {
 
   // operations
   find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>;
+
+  // TODO: ADD findGlobal method
   findVersions: <T = TypeWithID>(args: FindVersionArgs) => Promise<PaginatedDocs<T>>;
   findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<T>>;
   findOne: FindOne;
