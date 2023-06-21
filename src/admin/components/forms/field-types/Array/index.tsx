@@ -26,12 +26,12 @@ import { useConfig } from '../../../utilities/Config';
 import { NullifyLocaleField } from '../../NullifyField';
 import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
+import Pill from '../../../elements/Pill';
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types';
 import type { Row } from '../../Form/types';
 import type { RowLabel as RowLabelType } from '../../RowLabel/types';
 
 import './index.scss';
-import Pill from '../../../elements/Pill';
 
 const baseClass = 'array-field';
 
@@ -256,9 +256,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   }, [dispatchFields, path, setDocFieldPreferences]);
 
   const hasMaxRows = maxRows && rows?.length >= maxRows;
-  const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0);
+  const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0) + (valid ? 0 : 1);
   // TODO: change submitted var
-  const fieldHasErrors = !submitted && fieldErrorCount + (valid ? 0 : 1) > 0;
+  const fieldHasErrors = !submitted && fieldErrorCount > 0;
 
   const classes = [
     'field-type',

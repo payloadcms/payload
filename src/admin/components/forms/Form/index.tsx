@@ -25,9 +25,7 @@ import { Fields, Context as FormContextType, FormField, GetDataByPath, Props, Su
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
-import { isNumber } from '../../../../utilities/isNumber';
 import { WatchFormErrors } from './WatchFormErrors';
-import { areSetsEqual } from '../../../../utilities/areSetsEqual';
 
 /**
   Turns: 'arrayField.0.group123field.arrayField.0.textField'
@@ -85,36 +83,36 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.dispatchFields = dispatchFields;
 
   const calculateNestedErrorPaths = useCallback(() => {
-    const arrayFieldsOnly: { [key: string]: FormField } = {};
-    Object.entries(fields).forEach(([path, field]) => {
-      const keySegments = splitPathByArrayFields(path);
+    const copyOfFields = { ...fields };
+    const pathErrorCountsMap = new Map();
+    const newArrayFieldsState: { [key: string]: FormField } = {};
 
-      for (let i = keySegments.length - 1; i >= 0; i -= 1) {
-        const possibleRowIndex = keySegments[i];
+    Object.entries(copyOfFields).forEach(([path, field]) => {
+      const pathSegments = splitPathByArrayFields(path);
 
-        if (isNumber(possibleRowIndex)) {
-          const arrayPath = keySegments.slice(0, i).join('.');
-          const fieldPath = keySegments.slice(i + 1).join('.');
-          const arrayField = fields[arrayPath];
+      for (let i = 0; i < pathSegments.length; i += 1) {
+        const fieldPath = pathSegments.slice(0, i + 1).join('.');
+        const arrayField = { ...copyOfFields[fieldPath] };
 
-          /*
-            field name could be a number, so we need to
-            check for `rows` to ensure it is an array field
-          */
-          if ('rows' in arrayField) {
-            if (!arrayFieldsOnly[arrayPath]) {
-              // reset childErrorPaths
-              arrayFieldsOnly[arrayPath] = {
-                ...arrayField,
-                rows: arrayField.rows.map((row) => ({
-                  ...row,
-                  childErrorPaths: new Set(),
-                })),
-              };
-            }
+        if (arrayField && arrayField?.rows) {
+          const rowIndex = pathSegments[i + 1];
+          const childFieldPath = pathSegments.slice(i + 1).join('.');
 
-            if ('valid' in field && !field.valid) {
-              arrayFieldsOnly[arrayPath].rows[possibleRowIndex].childErrorPaths.add(fieldPath);
+          // copy the array field
+          if (!newArrayFieldsState[fieldPath]) {
+            newArrayFieldsState[fieldPath] = { ...arrayField };
+          }
+
+          if ('valid' in field && childFieldPath) {
+            const { rowErrorCount } = newArrayFieldsState[fieldPath];
+            const { childErrorPaths } = newArrayFieldsState[fieldPath].rows[rowIndex];
+
+            if (!field.valid && !childErrorPaths.has(childFieldPath)) {
+              childErrorPaths.add(childFieldPath);
+              pathErrorCountsMap.set(fieldPath, Math.max(0, (rowErrorCount || 0) + 1));
+            } else if (field.valid && childErrorPaths.has(childFieldPath)) {
+              childErrorPaths.delete(childFieldPath);
+              pathErrorCountsMap.set(fieldPath, Math.max(0, (rowErrorCount || 0) - 1));
             }
           }
         }
@@ -123,33 +121,13 @@ const Form: React.FC<Props> = (props) => {
 
     // We cannot do this in 1 loop over `fields`
     // Need to ensure stale paths are removed, i.e. when a row is removed
-    Object.entries(arrayFieldsOnly).forEach(([path, arrayField]) => {
-      let rowsHaveChanged = false;
-      let rowErrorCount = 0;
-      const newRows = arrayField.rows.map((row, rowIndex) => {
-        const { childErrorPaths } = row;
-        const { childErrorPaths: prevChildErrorPaths } = fields[path].rows[rowIndex];
-
-        if (!areSetsEqual(prevChildErrorPaths, childErrorPaths)) {
-          rowsHaveChanged = true;
-          rowErrorCount += childErrorPaths?.size || 0;
-
-          return {
-            ...row,
-            childErrorPaths,
-          };
-        }
-
-
-        return row;
-      });
-
-      if (rowsHaveChanged) {
+    Object.entries(newArrayFieldsState).forEach(([path, newArrayField]) => {
+      if (pathErrorCountsMap.has(path)) {
         dispatchFields({
           type: 'UPDATE',
           path,
-          rows: newRows,
-          rowErrorCount,
+          rows: newArrayField.rows,
+          rowErrorCount: pathErrorCountsMap.get(path),
         });
       }
     });

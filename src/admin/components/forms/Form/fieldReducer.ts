@@ -96,15 +96,6 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       rows.splice(rowIndex, 1);
       rowsMetadata.splice(rowIndex, 1);
 
-      // TODO: split path and loop upwards
-      // state looks like
-      // outerArray.0.innerArray.0.text
-      // outerArray.0.innerArray.1.text
-      //
-      // `path=outerArray.0.innerArray`
-      // remove all paths starting with `${path}.${rowIndex}` from `outerArray.rows[index].childErrorPaths`
-      // adjust the newState that is returned below
-
       const newState: Fields = {
         ...remainingFields,
         [path]: {
@@ -131,6 +122,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           id: new ObjectID().toHexString(),
           collapsed: false,
           blockType: blockType || undefined,
+          childErrorPaths: new Set(),
         },
       );
 
@@ -155,6 +147,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           value: rows.length,
           disableFormData: true,
           rows: rowsMetadata,
+          rowErrorCount: 0,
         },
       };
 
