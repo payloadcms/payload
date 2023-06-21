@@ -42,6 +42,7 @@ export const startSentry = (pluginOptions: PluginOptions): any => {
       }) as express.ErrorRequestHandler,
     )
 
+    // Should type these properly from Express package
     app.use(function onError(err, req, res, next) {
       res.statusCode = 500
       res.end(res.sentry + '\n')
