@@ -31,7 +31,7 @@ export const sentry =
 
     startSentry({
       dsn: pluginOptions.dsn,
-      options: pluginOptions?.options,
+      options: pluginOptions.options || {},
     })
 
     return config
