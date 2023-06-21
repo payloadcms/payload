@@ -76,7 +76,6 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
 
   if (globalConfig.versions?.drafts && draftEnabled) {
     doc = await replaceWithDraftIfAvailable({
-      payload,
       entity: globalConfig,
       entityType: 'global',
       doc,
