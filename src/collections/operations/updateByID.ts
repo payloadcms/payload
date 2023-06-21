@@ -119,7 +119,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   if (!doc && !hasWherePolicy) throw new NotFound(t);
   if (!doc && hasWherePolicy) throw new Forbidden(t);
 
-  let docWithLocales: Document = JSON.stringify(lean ? doc : doc.toJSON({ virtuals: true }));
+  let docWithLocales: Document = JSON.stringify(lean ? doc : doc.toJSON({ virtuals: true })); // TODO: migrate this doc.toJSON
   docWithLocales = JSON.parse(docWithLocales);
 
   const originalDoc = await afterRead({
