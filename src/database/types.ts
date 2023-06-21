@@ -188,11 +188,9 @@ export type FindOneArgs = {
 
 type FindOne = (args: FindOneArgs) => Promise<PaginatedDocs>
 
-type CreateArgs = {
+export type CreateArgs = {
   collection: string
   data: Record<string, unknown>
-  draft?: boolean
-  locale?: string
 }
 
 type Create = (args: CreateArgs) => Promise<Document>
