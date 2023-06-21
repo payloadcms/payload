@@ -15,6 +15,7 @@
     "generate:graphQLSchema": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:graphQLSchema"
   },
   "dependencies": {
+    "@sentry/react": "^7.56.0",
     "dotenv": "^8.2.0",
     "eslint": "^8.42.0",
     "express": "^4.17.1",

@@ -33,7 +33,7 @@ export default buildConfig({
           serverName: false,
         },
         captureErrors: [400, 403, 404],
-      }
+      },
     }),
   ],
 })

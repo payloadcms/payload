@@ -1,7 +1,5 @@
 import React from 'react'
 import * as Sentry from '@sentry/react'
-
-import { badComponent } from './badComponent'
 export const testErrors = () => {
   const notFound = async () => {
     const req = await fetch('http://localhost:3000/api/users/notFound', {
