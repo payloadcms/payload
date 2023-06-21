@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev:s3": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
+    "dev": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
     "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload build",
     "build:server": "tsc",
     "build": "yarn build:payload && yarn build:server",
