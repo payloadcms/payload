@@ -8,6 +8,7 @@ import executeAccess from '../../auth/executeAccess';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { combineQueries } from '../../database/combineQueries';
+import { FindArgs } from '../../database/types';
 
 export type Arguments = {
   collection: Collection
@@ -42,7 +43,6 @@ async function findByID<T extends TypeWithID>(
   const {
     depth,
     collection: {
-      Model,
       config: collectionConfig,
     },
     id,
@@ -67,22 +67,25 @@ async function findByID<T extends TypeWithID>(
   // If errors are disabled, and access returns false, return null
   if (accessResult === false) return null;
 
-  const query = await Model.buildQuery({
+
+  const findArgs: FindArgs = {
+    collection: collectionConfig.slug,
     where: combineQueries({ _id: { equals: id } }, accessResult),
-    payload,
     locale: req.locale,
-  });
+    limit: 1,
+  };
 
   // /////////////////////////////////////
   // Find by ID
   // /////////////////////////////////////
 
-  if (!query.$and[0]._id) throw new NotFound(t);
+  // if (!findArgs.where?.$and[0]._id) throw new NotFound(t); // TODO: doesn't work. Previously, it was if (!query.$and[0]._id) throw new NotFound(t);
 
   if (!req.findByID) req.findByID = {};
 
   if (!req.findByID[collectionConfig.slug]) {
-    const nonMemoizedFindByID = async (q) => Model.findOne(q, {}).lean();
+    const nonMemoizedFindByID = async (q: FindArgs) => req.payload.db.find(q);
+
     req.findByID[collectionConfig.slug] = memoize(nonMemoizedFindByID, {
       isPromise: true,
       maxSize: 100,
@@ -92,7 +95,8 @@ async function findByID<T extends TypeWithID>(
     });
   }
 
-  let result = await req.findByID[collectionConfig.slug](query);
+  const { docs } = await req.findByID[collectionConfig.slug](findArgs);
+  let [result] = docs;
 
   if (!result) {
     if (!disableErrors) {
@@ -132,7 +136,7 @@ async function findByID<T extends TypeWithID>(
 
     result = await hook({
       req,
-      query,
+      query: findArgs.where,
       doc: result,
     }) || result;
   }, Promise.resolve());
@@ -160,7 +164,7 @@ async function findByID<T extends TypeWithID>(
 
     result = await hook({
       req,
-      query,
+      query: findArgs.where,
       doc: result,
     }) || result;
   }, Promise.resolve());
