@@ -21,10 +21,23 @@ import wait from '../../../../utilities/wait';
 import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Fields, Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types';
+import { Fields, Context as FormContextType, FormField, GetDataByPath, Props, SubmitOptions } from './types';
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
+import { isNumber } from '../../../../utilities/isNumber';
+import { WatchFormErrors } from './WatchFormErrors';
+import { areSetsEqual } from '../../../../utilities/areSetsEqual';
+
+/**
+  Turns: 'arrayField.0.group123field.arrayField.0.textField'
+
+  Into: ['arrayField', '0', 'group123field.arrayField', '0', 'textField']
+*/
+function splitPathByArrayFields(str) {
+  const regex = /\.(\d+)\./g;
+  return str.split(regex).filter(Boolean);
+}
 
 const baseClass = 'form';
 
@@ -70,6 +83,77 @@ const Form: React.FC<Props> = (props) => {
 
   contextRef.current.fields = fields;
   contextRef.current.dispatchFields = dispatchFields;
+
+  const calculateNestedErrorPaths = useCallback(() => {
+    const arrayFieldsOnly: { [key: string]: FormField } = {};
+    Object.entries(fields).forEach(([path, field]) => {
+      const keySegments = splitPathByArrayFields(path);
+
+      for (let i = keySegments.length - 1; i >= 0; i -= 1) {
+        const possibleRowIndex = keySegments[i];
+
+        if (isNumber(possibleRowIndex)) {
+          const arrayPath = keySegments.slice(0, i).join('.');
+          const fieldPath = keySegments.slice(i + 1).join('.');
+          const arrayField = fields[arrayPath];
+
+          /*
+            field name could be a number, so we need to
+            check for `rows` to ensure it is an array field
+          */
+          if ('rows' in arrayField) {
+            if (!arrayFieldsOnly[arrayPath]) {
+              // reset childErrorPaths
+              arrayFieldsOnly[arrayPath] = {
+                ...arrayField,
+                rows: arrayField.rows.map((row) => ({
+                  ...row,
+                  childErrorPaths: new Set(),
+                })),
+              };
+            }
+
+            if ('valid' in field && !field.valid) {
+              arrayFieldsOnly[arrayPath].rows[possibleRowIndex].childErrorPaths.add(fieldPath);
+            }
+          }
+        }
+      }
+    });
+
+    // We cannot do this in 1 loop over `fields`
+    // Need to ensure stale paths are removed, i.e. when a row is removed
+    Object.entries(arrayFieldsOnly).forEach(([path, arrayField]) => {
+      let rowsHaveChanged = false;
+      let rowErrorCount = 0;
+      const newRows = arrayField.rows.map((row, rowIndex) => {
+        const { childErrorPaths } = row;
+        const { childErrorPaths: prevChildErrorPaths } = fields[path].rows[rowIndex];
+
+        if (!areSetsEqual(prevChildErrorPaths, childErrorPaths)) {
+          rowsHaveChanged = true;
+          rowErrorCount += childErrorPaths?.size || 0;
+
+          return {
+            ...row,
+            childErrorPaths,
+          };
+        }
+
+
+        return row;
+      });
+
+      if (rowsHaveChanged) {
+        dispatchFields({
+          type: 'UPDATE',
+          path,
+          rows: newRows,
+          rowErrorCount,
+        });
+      }
+    });
+  }, [fields, dispatchFields]);
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {};
@@ -140,6 +224,7 @@ const Form: React.FC<Props> = (props) => {
     if (waitForAutocomplete) await wait(100);
 
     const isValid = skipValidation ? true : await contextRef.current.validateForm();
+    contextRef.current.calculateNestedErrorPaths();
 
     if (!skipValidation) setSubmitted(true);
 
@@ -360,6 +445,7 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.formRef = formRef;
   contextRef.current.reset = reset;
   contextRef.current.replaceState = replaceState;
+  contextRef.current.calculateNestedErrorPaths = calculateNestedErrorPaths;
 
   useEffect(() => {
     if (initialState) {
@@ -410,6 +496,7 @@ const Form: React.FC<Props> = (props) => {
             <ProcessingContext.Provider value={processing}>
               <ModifiedContext.Provider value={modified}>
                 <FormFieldsContext.Provider value={fieldsReducer}>
+                  <WatchFormErrors calculateNestedErrorPaths={calculateNestedErrorPaths} />
                   {children}
                 </FormFieldsContext.Provider>
               </ModifiedContext.Provider>

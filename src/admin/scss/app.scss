@@ -20,6 +20,10 @@
   --font-mono: monospace;
   --font-serif: 'Merriweather', serif;
 
+  --style-radius-s: #{$style-radius-s};
+  --style-radius-m: #{$style-radius-m};
+  --style-radius-l: #{$style-radius-l};
+
   --z-popup: 10;
   --z-nav: 20;
   --z-modal: 30;

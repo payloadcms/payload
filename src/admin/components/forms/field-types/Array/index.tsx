@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
-import { useForm } from '../../Form/context';
+import { useForm, useFormSubmitted } from '../../Form/context';
 import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import useField from '../../useField';
 import { useLocale } from '../../../utilities/Locale';
@@ -26,12 +26,12 @@ import { useConfig } from '../../../utilities/Config';
 import { NullifyLocaleField } from '../../NullifyField';
 import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
-import { TrackSubSchemaErrorCount } from '../../TrackSubSchemaErrorCount';
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types';
 import type { Row } from '../../Form/types';
 import type { RowLabel as RowLabelType } from '../../RowLabel/types';
 
 import './index.scss';
+import Pill from '../../../elements/Pill';
 
 const baseClass = 'array-field';
 
@@ -46,6 +46,7 @@ type ArrayRowProps = UseDraggableSortableReturn & Pick<Props, 'fields' | 'path' 
   row: Row
   CustomRowLabel?: RowLabelType
   readOnly?: boolean
+  rowErrorCount: number
 }
 const ArrayRow: React.FC<ArrayRowProps> = ({
   path: parentPath,
@@ -68,31 +69,32 @@ const ArrayRow: React.FC<ArrayRowProps> = ({
   permissions,
   CustomRowLabel,
   fields,
+  rowErrorCount = 0,
 }) => {
   const path = `${parentPath}.${rowIndex}`;
   const { i18n } = useTranslation();
-  const [errorCount, setErrorCount] = React.useState(0);
 
   const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(2, '0')}`;
 
+  const classNames = [
+    `${baseClass}__row`,
+    rowErrorCount > 0 ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+  ].filter(Boolean).join(' ');
+
   return (
     <div
+      key={`${path}-row-${rowIndex}`}
       id={`${path}-row-${rowIndex}`}
       ref={setNodeRef}
       style={{
         transform,
       }}
     >
-      <TrackSubSchemaErrorCount
-        path={path}
-        setErrorCount={setErrorCount}
-      />
-
       <Collapsible
         collapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
-        className={`${baseClass}__row`}
-        key={row.id}
+        className={classNames}
+        collapsibleStyle={rowErrorCount > 0 ? 'error' : 'default'}
         dragHandleProps={{
           id: row.id,
           attributes,
@@ -105,12 +107,6 @@ const ArrayRow: React.FC<ArrayRowProps> = ({
               label={CustomRowLabel || fallbackLabel}
               rowNumber={rowIndex + 1}
             />
-            <code>
-              {' - '}
-              Errors:
-              {' '}
-              {errorCount}
-            </code>
           </React.Fragment>
         )}
         actions={!readOnly ? (
@@ -175,22 +171,21 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const { setDocFieldPreferences, id, getDocPreferences } = useDocumentInfo();
   const { dispatchFields, setModified } = useForm();
+  const submitted = useFormSubmitted();
   const { user } = useAuth();
   const locale = useLocale();
   const operation = useOperation();
   const { t, i18n } = useTranslation('fields');
   const { localization } = useConfig();
 
-  const [errorCount, setErrorCount] = React.useState(0);
+  const editingDefaultLocale = (() => {
+    if (localization && localization.fallback) {
+      const defaultLocale = localization.defaultLocale || 'en';
+      return locale === defaultLocale;
+    }
 
-  const checkSkipValidation = useCallback((value) => {
-    const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
-    const isEditingDefaultLocale = locale === defaultLocale;
-    const fallbackEnabled = (localization && localization.fallback);
-
-    if (value === null && !isEditingDefaultLocale && fallbackEnabled) return true;
-    return false;
-  }, [locale, localization]);
+    return true;
+  })();
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
   const getLabels = (p: Props) => {
@@ -202,15 +197,19 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const labels = getLabels(props);
 
   const memoizedValidate = useCallback((value, options) => {
-    if (checkSkipValidation(value)) return true;
+    // alternative locales can be null
+    if (!editingDefaultLocale && value === null) {
+      return true;
+    }
     return validate(value, { ...options, minRows, maxRows, required });
-  }, [maxRows, minRows, required, validate, checkSkipValidation]);
+  }, [maxRows, minRows, required, validate, editingDefaultLocale]);
 
   const {
     showError,
     errorMessage,
     value,
     rows,
+    valid,
   } = useField<number>({
     path,
     validate: memoizedValidate,
@@ -257,11 +256,15 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   }, [dispatchFields, path, setDocFieldPreferences]);
 
   const hasMaxRows = maxRows && rows?.length >= maxRows;
+  const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0);
+  // TODO: change submitted var
+  const fieldHasErrors = !submitted && fieldErrorCount + (valid ? 0 : 1) > 0;
 
   const classes = [
     'field-type',
     baseClass,
     className,
+    fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
   ].filter(Boolean).join(' ');
 
   if (!rows) return null;
@@ -279,13 +282,21 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       </div>
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
-          <h3>{getTranslation(label || name, i18n)}</h3>
-          <code>
-            {' - '}
-            Errors:
-            {' '}
-            {errorCount}
-          </code>
+          <div className={`${baseClass}__heading-with-error`}>
+            <h3>
+              {getTranslation(label || name, i18n)}
+            </h3>
+
+            {fieldHasErrors && fieldErrorCount > 0 && (
+              <Pill
+                pillStyle="error"
+                rounded
+                className={`${baseClass}__error-pill`}
+              >
+                {`${fieldErrorCount} ${fieldErrorCount > 1 ? t('error:plural') : t('error:singular')}`}
+              </Pill>
+            )}
+          </div>
           <ul className={`${baseClass}__header-actions`}>
             <li>
               <button
@@ -320,60 +331,55 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         fieldValue={value}
       />
 
-      <TrackSubSchemaErrorCount
-        path={path}
-        setErrorCount={setErrorCount}
-      />
-
       <DraggableSortable
         ids={rows.map((row) => row.id)}
         onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
       >
-        {rows.length > 0 && rows.map((row, i) => {
-          return (
-            <DraggableSortableItem
-              key={row.id}
-              id={row.id}
-              disabled={readOnly}
-            >
-              {(draggableSortableItemProps) => (
-                <ArrayRow
-                  key={`${path}-row-${i}`}
-                  {...draggableSortableItemProps}
-                  row={row}
-                  addRow={addRow}
-                  duplicateRow={duplicateRow}
-                  removeRow={removeRow}
-                  setCollapse={setCollapse}
-                  path={path}
-                  fieldTypes={fieldTypes}
-                  fields={fields}
-                  moveRow={moveRow}
-                  readOnly={readOnly}
-                  rowCount={rows.length}
-                  permissions={permissions}
-                  CustomRowLabel={CustomRowLabel}
-                  rowIndex={i}
-                  indexPath={indexPath}
-                  labels={labels}
-                />
-              )}
-            </DraggableSortableItem>
-          );
-        })}
-        {!checkSkipValidation(value) && (
+        {rows.length > 0 && rows.map((row, i) => (
+          <DraggableSortableItem
+            key={row.id}
+            id={row.id}
+            disabled={readOnly}
+          >
+            {(draggableSortableItemProps) => (
+              <ArrayRow
+                {...draggableSortableItemProps}
+                row={row}
+                addRow={addRow}
+                duplicateRow={duplicateRow}
+                removeRow={removeRow}
+                setCollapse={setCollapse}
+                path={path}
+                fieldTypes={fieldTypes}
+                fields={fields}
+                moveRow={moveRow}
+                readOnly={readOnly}
+                rowCount={rows.length}
+                permissions={permissions}
+                CustomRowLabel={CustomRowLabel}
+                rowIndex={i}
+                indexPath={indexPath}
+                labels={labels}
+                rowErrorCount={row.childErrorPaths?.size || 0}
+              />
+            )}
+          </DraggableSortableItem>
+        ))}
+
+        {!valid && (
           <React.Fragment>
+            {readOnly && (rows.length === 0) && (
+              <Banner>
+                {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
+              </Banner>
+            )}
+
             {(rows.length < minRows || (required && rows.length === 0)) && (
               <Banner type="error">
                 {t('validation:requiresAtLeast', {
                   count: minRows,
                   label: getTranslation(minRows ? labels.plural : labels.singular, i18n) || t(minRows > 1 ? 'general:row' : 'general:rows'),
                 })}
-              </Banner>
-            )}
-            {(rows.length === 0 && readOnly) && (
-              <Banner>
-                {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
               </Banner>
             )}
           </React.Fragment>
@@ -393,7 +399,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
           </Button>
         </div>
       )}
-
     </div>
   );
 };

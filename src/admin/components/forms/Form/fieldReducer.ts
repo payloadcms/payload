@@ -2,7 +2,7 @@ import equal from 'deep-equal';
 import ObjectID from 'bson-objectid';
 import getSiblingData from './getSiblingData';
 import reduceFieldsToValues from './reduceFieldsToValues';
-import { Field, FieldAction, Fields } from './types';
+import { FormField, FieldAction, Fields } from './types';
 import deepCopyObject from '../../../../utilities/deepCopyObject';
 import { flattenRows, separateRows } from './rows';
 
@@ -72,7 +72,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
     case 'UPDATE': {
       const newField = Object.entries(action).reduce((field, [key, value]) => {
-        if (['value', 'valid', 'errorMessage', 'disableFormData', 'initialValue', 'validate', 'condition', 'passesCondition'].includes(key)) {
+        if (['value', 'valid', 'errorMessage', 'disableFormData', 'initialValue', 'validate', 'condition', 'passesCondition', 'rows', 'rowErrorCount'].includes(key)) {
           return {
             ...field,
             [key]: value,
@@ -80,7 +80,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         }
 
         return field;
-      }, state[action.path] || {} as Field);
+      }, state[action.path] || {} as FormField);
 
       return {
         ...state,
@@ -91,11 +91,19 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     case 'REMOVE_ROW': {
       const { rowIndex, path } = action;
       const { remainingFields, rows } = separateRows(path, state);
-      const rowsMetadata = state[path]?.rows || [];
+      const rowsMetadata = [...state[path]?.rows || []];
 
       rows.splice(rowIndex, 1);
       rowsMetadata.splice(rowIndex, 1);
 
+      // TODO: split path and loop upwards
+      // state looks like
+      // outerArray.0.innerArray.0.text
+      // outerArray.0.innerArray.1.text
+      //
+      // `path=outerArray.0.innerArray`
+      // remove all paths starting with `${path}.${rowIndex}` from `outerArray.rows[index].childErrorPaths`
+      // adjust the newState that is returned below
 
       const newState: Fields = {
         ...remainingFields,

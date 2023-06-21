@@ -71,7 +71,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
 
   // Store result from hook as ref
   // to prevent unnecessary rerenders
-  const result = useMemo(() => ({
+  const result: FieldType<T> = useMemo(() => ({
     showError,
     errorMessage: field?.errorMessage,
     value,
@@ -80,7 +80,20 @@ const useField = <T, >(options: Options): FieldType<T> => {
     setValue,
     initialValue,
     rows: field?.rows,
-  }), [field?.errorMessage, field?.rows, processing, setValue, showError, submitted, value, initialValue]);
+    rowErrorCount: field?.rowErrorCount || 0,
+    valid: field?.valid,
+  }), [
+    field?.errorMessage,
+    field?.rows,
+    field?.rowErrorCount,
+    field?.valid,
+    processing,
+    setValue,
+    showError,
+    submitted,
+    value,
+    initialValue,
+  ]);
 
   // Throttle the validate function
   useThrottledEffect(() => {
