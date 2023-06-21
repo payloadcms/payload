@@ -80,20 +80,20 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   // Retrieve document
   // /////////////////////////////////////
 
-  const query = await Model.buildQuery({
-    payload,
-    locale: req.locale,
+  const { docs } = await req.payload.db.find({
+    collection: collectionConfig.slug,
     where: combineQueries({ id: { equals: id } }, accessResults),
+    locale: req.locale,
+    limit: 1,
   });
 
-  const docToDelete = await Model.findOne(query);
+  const [docToDelete] = docs;
 
   if (!docToDelete && !hasWhereAccess) throw new NotFound(t);
   if (!docToDelete && hasWhereAccess) throw new Forbidden(t);
 
-  const resultToDelete = docToDelete.toJSON({ virtuals: true });
 
-  await deleteAssociatedFiles({ config, collectionConfig, doc: resultToDelete, t, overrideDelete: true });
+  await deleteAssociatedFiles({ config, collectionConfig, doc: docToDelete, t, overrideDelete: true });
 
   // /////////////////////////////////////
   // Delete document
