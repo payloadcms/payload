@@ -76,12 +76,12 @@ const config = buildConfig({
         init: {
           debug: true,
           environment: 'development',
-          traceSampleRate: 1.0,
-        }
+          tracesSampleRate: 1.0,
+        },
         requestHandler: {
           serverName: false,
           user: ["email"],
-        }
+        },
         captureErrors: [400, 403, 404],
       }
     }),
