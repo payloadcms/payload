@@ -17,19 +17,19 @@ export async function getValidTemplates(): Promise<ProjectTemplate[]> {
       name: 'blank',
       type: 'static',
       description: 'Blank',
-      directory: 'ts-blank',
+      directory: 'blank',
     },
     {
       name: 'todo',
       type: 'static',
       description: 'Todo list',
-      directory: 'ts-todo',
+      directory: 'todo',
     },
     {
       name: 'blog',
       type: 'static',
       description: 'Blog',
-      directory: 'ts-blog',
+      directory: 'blog',
     },
   ]
 
