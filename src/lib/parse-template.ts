@@ -12,15 +12,17 @@ export async function parseTemplate(
     return template
   }
 
-  const filteredTemplates = validTemplates.map(t => t.name)
-
   const response = await prompts(
     {
       type: 'select',
       name: 'value',
       message: 'Choose project template',
-      choices: filteredTemplates.map(p => {
-        return { title: p, value: p }
+      choices: validTemplates.map(p => {
+        return {
+          title: p.name,
+          value: p.name,
+          description: p.description,
+        }
       }),
       validate: (value: string) => !!value.length,
     },

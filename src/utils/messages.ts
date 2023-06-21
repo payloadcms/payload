@@ -2,6 +2,7 @@ import chalk from 'chalk'
 import figures from 'figures'
 import terminalLink from 'terminal-link'
 import { getValidTemplates } from '../lib/templates'
+import type { ProjectTemplate } from '../types'
 
 const header = (message: string): string =>
   `${chalk.yellow(figures.star)} ${chalk.bold(message)}`
@@ -10,24 +11,34 @@ export const welcomeMessage = chalk`
   {green Welcome to Payload. Let's create a project! }
 `
 
+const spacer = ' '.repeat(8)
+
 export async function helpMessage(): Promise<string> {
   const validTemplates = await getValidTemplates()
   return chalk`
   {bold USAGE}
 
       {dim $} {bold npx create-payload-app}
+      {dim $} {bold npx create-payload-app} my-project
+      {dim $} {bold npx create-payload-app} -n my-project -t blog
 
   {bold OPTIONS}
 
-      --name {underline my-payload-app}              Set project name
-      --template {underline template_name}           Choose specific template
+      -n     {underline my-payload-app}       Set project name
+      -t     {underline template_name}        Choose specific template
 
-        {dim Available templates: ${validTemplates.map(t => t.name).join(', ')}}
+        {dim Available templates: ${formatTemplates(validTemplates)}}
 
       --use-npm                          Use npm to install dependencies
       --no-deps                          Do not install any dependencies
-      --help                             Show help
+      -h                                 Show help
 `
+}
+
+function formatTemplates(templates: ProjectTemplate[]) {
+  return `\n\n${spacer}${templates
+    .map(t => `${t.name}${' '.repeat(18 - t.name.length)}${t.description}`)
+    .join(`\n${spacer}`)}`
 }
 
 export function successMessage(projectDir: string, packageManager: string): string {

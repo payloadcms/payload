@@ -86,7 +86,6 @@ export async function createProject(
   packageManager: string,
 ): Promise<void> {
   await createOrFindProjectDir(projectDir)
-  const templateDir = path.resolve(__dirname, `../templates/${template.name}`)
 
   console.log(
     `\n  Creating a new Payload app in ${chalk.green(path.resolve(projectDir))}\n`,
@@ -97,6 +96,10 @@ export async function createProject(
     await emitter.clone(projectDir)
   } else {
     try {
+      const templateDir = path.resolve(
+        __dirname,
+        `../templates/${template.directory}`,
+      )
       await fse.copy(templateDir, projectDir, { recursive: true })
       await writeCommonFiles(projectDir, template, packageManager)
 
@@ -105,15 +108,17 @@ export async function createProject(
       const msg =
         'Unable to copy template files. Please check template name or directory permissions.'
       error(msg)
-      if (err instanceof Error) {
-        console.error({ err })
-      }
+      console.error({ err })
       process.exit(1)
     }
   }
 
   const spinner = ora('Checking latest Payload version...').start()
-  await updatePayloadVersion(projectDir, args['--beta'])
+
+  // Only use latest Payoad version if a brand new static template is being used
+  if (template.type === 'static') {
+    await updatePayloadVersion(projectDir, args['--beta'])
+  }
 
   spinner.text = 'Installing dependencies...'
   const result = await installDeps(args, projectDir, packageManager)

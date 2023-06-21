@@ -1,33 +1,70 @@
-import path from 'path'
-import fs from 'fs'
 import { error, info } from '../utils/log'
-import type { ProjectTemplate } from '../types'
+import type { GitTemplate, ProjectTemplate } from '../types'
 
 export async function validateTemplate(templateName: string): Promise<boolean> {
   const validTemplates = await getValidTemplates()
   if (!validTemplates.map(t => t.name).includes(templateName)) {
     error(`'${templateName}' is not a valid template.`)
-    info(`Valid templates: ${validTemplates.join(', ')}`)
+    info(`Valid templates: ${validTemplates.map(t => t.name).join(', ')}`)
     return false
   }
   return true
 }
 
 export async function getValidTemplates(): Promise<ProjectTemplate[]> {
-  const templateDir = path.resolve(__dirname, '../templates')
-  const dirs = getDirectories(templateDir)
-
-  const templates: ProjectTemplate[] = dirs.map(name => {
-    return {
-      name,
+  const templates: ProjectTemplate[] = [
+    {
+      name: 'blank',
       type: 'static',
-    }
-  })
-  return templates
-}
+      description: 'Blank',
+      directory: 'ts-blank',
+    },
+    {
+      name: 'todo',
+      type: 'static',
+      description: 'Todo list',
+      directory: 'ts-todo',
+    },
+    {
+      name: 'blog',
+      type: 'static',
+      description: 'Blog',
+      directory: 'ts-blog',
+    },
+  ]
 
-function getDirectories(dir: string): string[] {
-  return fs.readdirSync(dir).filter(file => {
-    return fs.statSync(`${dir}/${file}`).isDirectory()
-  })
+  const starters: GitTemplate[] = [
+    {
+      name: 'payload-demo',
+      type: 'starter',
+      url: 'https://github.com/payloadcms/public-demo',
+      description: 'Payload demo site at https://demo.payloadcms.com',
+    },
+    {
+      name: 'payload-website',
+      type: 'starter',
+      url: 'https://github.com/payloadcms/website-cms',
+      description: 'Payload website CMS at https://payloadcms.com',
+    },
+    {
+      name: 'cloud-template-blank',
+      type: 'starter',
+      url: 'https://github.com/payloadcms/template-blank',
+      description: 'Blank template for Payload Cloud',
+    },
+    {
+      name: 'cloud-template-website',
+      type: 'starter',
+      url: 'https://github.com/payloadcms/template-website',
+      description: 'Website template for Payload Cloud',
+    },
+    {
+      name: 'cloud-template-ecommerce',
+      type: 'starter',
+      url: 'https://github.com/payloadcms/template-ecommerce',
+      description: 'E-commerce template for Payload Cloud',
+    },
+  ]
+
+  return [...templates, ...starters]
 }

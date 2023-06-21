@@ -21,6 +21,7 @@ export type ProjectTemplate = StaticTemplate | GitTemplate
 
 export interface StaticTemplate extends Template {
   type: 'static'
+  directory: string
 }
 
 export interface GitTemplate extends Template {
@@ -31,4 +32,5 @@ export interface GitTemplate extends Template {
 interface Template {
   name: string
   type: 'static' | 'starter'
+  description?: string
 }

@@ -64,7 +64,12 @@ export class Main {
 
       if (!this.args['--dry-run']) {
         await createProject(this.args, projectDir, template, packageManager)
-        await writeEnvFile(projectName, databaseUri, payloadSecret)
+        await writeEnvFile({
+          databaseUri,
+          payloadSecret,
+          template,
+          projectDir,
+        })
       }
 
       success('Payload project successfully created')

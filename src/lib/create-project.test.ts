@@ -35,6 +35,7 @@ describe('createProject', () => {
       const template: ProjectTemplate = {
         name: templateName,
         type: 'static',
+        directory: 'todo',
       }
       await createProject(args, projectDir, template, packageManager)
 
