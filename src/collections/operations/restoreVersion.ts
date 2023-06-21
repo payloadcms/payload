@@ -10,6 +10,7 @@ import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 import { combineQueries } from '../../database/combineQueries';
+import { FindArgs } from '../../database/types';
 
 export type Arguments = {
   collection: Collection
@@ -50,15 +51,19 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   const VersionModel = payload.versions[collectionConfig.slug];
 
-  let rawVersion = await VersionModel.findOne({
-    _id: id,
+
+  const { docs: versionDocs } = await req.payload.db.findVersions({
+    collection: collectionConfig.slug,
+    where: { id: { equals: id } },
+    locale: req.locale,
+    limit: 1,
   });
+
+  const [rawVersion] = versionDocs;
 
   if (!rawVersion) {
     throw new NotFound(t);
   }
-
-  rawVersion = rawVersion.toJSON({ virtuals: true });
 
   const parentDocID = rawVersion.parent;
 
@@ -73,13 +78,16 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // Retrieve document
   // /////////////////////////////////////
 
-  const query = await Model.buildQuery({
+  const findArgs: FindArgs = {
+    collection: collectionConfig.slug,
     where: combineQueries({ id: { equals: parentDocID } }, accessResults),
-    payload,
-    locale,
-  });
+    locale: req.locale,
+    limit: 1,
+  };
 
-  const doc = await Model.findOne(query);
+  const { docs } = await req.payload.db.find(findArgs);
+
+  const [doc] = docs;
 
   if (!doc && !hasWherePolicy) throw new NotFound(t);
   if (!doc && hasWherePolicy) throw new Forbidden(t);
@@ -91,7 +99,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   const prevDocWithLocales = await getLatestCollectionVersion({
     payload,
     id: parentDocID,
-    query,
+    query: findArgs,
     Model,
     config: collectionConfig,
   });

@@ -20,6 +20,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
 import { combineQueries } from '../../database/combineQueries';
+import { FindArgs } from '../../database/types';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -98,18 +99,20 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // Retrieve document
   // /////////////////////////////////////
 
-  const query = await Model.buildQuery({
+
+  const findArgs: FindArgs = {
+    collection: collectionConfig.slug,
     where: combineQueries({ id: { equals: id } }, accessResults),
-    payload,
-    locale,
-  });
+    locale: req.locale,
+    limit: 1,
+  };
 
   const doc = await getLatestCollectionVersion({
     payload,
     Model,
     config: collectionConfig,
     id,
-    query,
+    query: findArgs,
     lean,
   });
 
