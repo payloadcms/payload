@@ -6,6 +6,11 @@ import { FormField, FieldAction, Fields } from './types';
 import deepCopyObject from '../../../../utilities/deepCopyObject';
 import { flattenRows, separateRows } from './rows';
 
+function splitPathByArrayFields(str) {
+  const regex = /\.(\d+)\./g;
+  return str.split(regex).filter(Boolean);
+}
+
 export function fieldReducer(state: Fields, action: FieldAction): Fields {
   switch (action.type) {
     case 'REPLACE_STATE': {
@@ -96,6 +101,24 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       rows.splice(rowIndex, 1);
       rowsMetadata.splice(rowIndex, 1);
 
+      const pathSegments = splitPathByArrayFields(path);
+      for (let i = 0; i < pathSegments.length; i += 1) {
+        const fieldPath = pathSegments.slice(0, i + 1).join('.');
+        const arrayField = remainingFields?.[fieldPath];
+
+        if (arrayField && 'rows' in arrayField) {
+          const segmentRowIndex = pathSegments[i + 1] ?? rowIndex;
+          const { childErrorPaths: parentChildErrorPaths } = arrayField.rows[segmentRowIndex];
+
+          parentChildErrorPaths.forEach((childPath) => {
+            if (childPath.startsWith(`${path}.${rowIndex}`)) {
+              arrayField.rows[segmentRowIndex].childErrorPaths.delete(childPath);
+              arrayField.rowErrorCount = Math.max(0, arrayField.rowErrorCount - 1);
+            }
+          });
+        }
+      }
+
       const newState: Fields = {
         ...remainingFields,
         [path]: {
@@ -158,12 +181,13 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       const { rowIndex, path } = action;
       const { remainingFields, rows } = separateRows(path, state);
       const rowsMetadata = state[path]?.rows || [];
+      const rowErrorCount = state[path]?.rowErrorCount || 0;
 
       const duplicateRowMetadata = deepCopyObject(rowsMetadata[rowIndex]);
-      if (duplicateRowMetadata.id) delete duplicateRowMetadata.id;
+      if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectID().toHexString();
 
       const duplicateRowState = deepCopyObject(rows[rowIndex]);
-      if (duplicateRowState.id) delete duplicateRowState.id;
+      if (duplicateRowState.id) duplicateRowState.id = new ObjectID().toHexString();
 
       // If there are subfields
       if (Object.keys(duplicateRowState).length > 0) {
@@ -179,6 +203,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           value: rows.length,
           disableFormData: true,
           rows: rowsMetadata,
+          rowErrorCount,
         },
         ...flattenRows(path, rows),
       };

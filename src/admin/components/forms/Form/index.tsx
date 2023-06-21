@@ -82,17 +82,17 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.fields = fields;
   contextRef.current.dispatchFields = dispatchFields;
 
+  // loops over all flattened field state
   const calculateNestedErrorPaths = useCallback(() => {
-    const copyOfFields = { ...fields };
     const pathErrorCountsMap = new Map();
     const newArrayFieldsState: { [key: string]: FormField } = {};
 
-    Object.entries(copyOfFields).forEach(([path, field]) => {
+    Object.entries(fields).forEach(([path, field]) => {
       const pathSegments = splitPathByArrayFields(path);
 
       for (let i = 0; i < pathSegments.length; i += 1) {
         const fieldPath = pathSegments.slice(0, i + 1).join('.');
-        const arrayField = { ...copyOfFields[fieldPath] };
+        const arrayField = { ...fields[fieldPath] };
 
         if (arrayField && arrayField?.rows) {
           const rowIndex = pathSegments[i + 1];
@@ -107,11 +107,11 @@ const Form: React.FC<Props> = (props) => {
             const { rowErrorCount } = newArrayFieldsState[fieldPath];
             const { childErrorPaths } = newArrayFieldsState[fieldPath].rows[rowIndex];
 
-            if (!field.valid && !childErrorPaths.has(childFieldPath)) {
-              childErrorPaths.add(childFieldPath);
+            if (!field.valid && !childErrorPaths.has(path)) {
+              childErrorPaths.add(path);
               pathErrorCountsMap.set(fieldPath, Math.max(0, (rowErrorCount || 0) + 1));
-            } else if (field.valid && childErrorPaths.has(childFieldPath)) {
-              childErrorPaths.delete(childFieldPath);
+            } else if (field.valid && childErrorPaths.has(path)) {
+              childErrorPaths.delete(path);
               pathErrorCountsMap.set(fieldPath, Math.max(0, (rowErrorCount || 0) - 1));
             }
           }

@@ -148,6 +148,8 @@ const useField = <T, >(options: Options): FieldType<T> => {
     user,
     validate,
     field?.rows,
+    field?.rowErrorCount,
+    field?.valid,
   ]);
 
   return result;
