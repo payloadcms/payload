@@ -84,7 +84,7 @@ async function findByID<T extends TypeWithID>(
   if (!req.findByID) req.findByID = {};
 
   if (!req.findByID[collectionConfig.slug]) {
-    const nonMemoizedFindByID = async (q: FindArgs) => req.payload.db.find(q);
+    const nonMemoizedFindByID = async (q: FindArgs) => (await req.payload.db.find(q)).docs[0];
 
     req.findByID[collectionConfig.slug] = memoize(nonMemoizedFindByID, {
       isPromise: true,
@@ -95,8 +95,7 @@ async function findByID<T extends TypeWithID>(
     });
   }
 
-  const { docs } = await req.findByID[collectionConfig.slug](findArgs);
-  let [result] = docs;
+  let result = await req.findByID[collectionConfig.slug](findArgs) as T;
 
   if (!result) {
     if (!disableErrors) {
