@@ -49,7 +49,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           // Besides those who still fail their own conditions
 
           if (passesCondition && field.condition) {
-            passesCondition = field.condition(reduceFieldsToValues(state), getSiblingData(state, path), { user });
+            passesCondition = field.condition(reduceFieldsToValues(state, true), getSiblingData(state, path), { user });
           }
 
           return {
