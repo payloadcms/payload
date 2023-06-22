@@ -32,6 +32,25 @@ const ConditionalLogic: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'parentGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'toggleSiblingField',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
+          name: 'siblingField',
+          type: 'text',
+          admin: {
+            description: 'This conditional field ensures it can rely on nested fields inside `data` i.e. `data.parentGroup.toggleSiblingField`.',
+            condition: ({ parentGroup }) => parentGroup?.toggleSiblingField,
+          },
+        },
+      ],
+    },
   ],
 };
 
