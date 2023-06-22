@@ -1045,18 +1045,28 @@ describe('fields', () => {
       await expect(userConditional).toBeVisible();
     });
 
-    test('should allow conditional fields to rely on unflattened form data', async () => {
+    test('should show conditional field based on fields nested within data', async () => {
       await page.goto(url.create);
 
       const parentGroupFields = page.locator('div#field-parentGroup > .group-field__wrap > .render-fields');
       await expect(parentGroupFields).toHaveCount(1);
 
-      const toggleSiblingFieldWithinParentGroup = page.locator('label[for=field-parentGroup__toggleSiblingField]');
-      await toggleSiblingFieldWithinParentGroup.click();
+      const toggle = page.locator('label[for=field-parentGroup__enableParentGroupFields]');
+      await toggle.click();
 
       const toggledField = page.locator('input#field-parentGroup__siblingField');
 
       await expect(toggledField).toBeVisible();
+    });
+
+    test('should show conditional field based on fields nested within siblingData', async () => {
+      await page.goto(url.create);
+
+      const toggle = page.locator('label[for=field-parentGroup__enableParentGroupFields]');
+      await toggle.click();
+
+      const fieldRelyingOnSiblingData = page.locator('input#field-reliesOnParentGroup');
+      await expect(fieldRelyingOnSiblingData).toBeVisible();
     });
   });
 });

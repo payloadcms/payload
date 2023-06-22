@@ -37,7 +37,7 @@ const ConditionalLogic: CollectionConfig = {
       type: 'group',
       fields: [
         {
-          name: 'toggleSiblingField',
+          name: 'enableParentGroupFields',
           type: 'checkbox',
           defaultValue: false,
         },
@@ -45,11 +45,53 @@ const ConditionalLogic: CollectionConfig = {
           name: 'siblingField',
           type: 'text',
           admin: {
-            description: 'This conditional field ensures it can rely on nested fields inside `data` i.e. `data.parentGroup.toggleSiblingField`.',
-            condition: ({ parentGroup }) => parentGroup?.toggleSiblingField,
+            description: 'Ensures we can rely on nested fields within `data`.',
+            condition: ({ parentGroup }) => Boolean(parentGroup?.enableParentGroupFields),
           },
         },
       ],
+    },
+    {
+      name: 'reliesOnParentGroup',
+      type: 'text',
+      admin: {
+        description: 'Ensures we can rely on nested fields within `siblingsData`.',
+        condition: (_, { parentGroup }) => Boolean(parentGroup?.enableParentGroupFields),
+      },
+    },
+    {
+      name: 'groupSelection',
+      type: 'select',
+      options: [
+        'group1',
+        'group2',
+      ],
+    },
+    {
+      name: 'group1',
+      type: 'group',
+      fields: [
+        {
+          name: 'group1Field',
+          type: 'text',
+        },
+      ],
+      admin: {
+        condition: ({ groupSelection }) => groupSelection === 'group1',
+      },
+    },
+    {
+      name: 'group2',
+      type: 'group',
+      fields: [
+        {
+          name: 'group2Field',
+          type: 'text',
+        },
+      ],
+      admin: {
+        condition: ({ groupSelection }) => groupSelection === 'group2',
+      },
     },
   ],
 };
