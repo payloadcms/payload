@@ -80,12 +80,10 @@ const useField = <T, >(options: Options): FieldType<T> => {
     setValue,
     initialValue,
     rows: field?.rows,
-    rowErrorCount: field?.rowErrorCount || 0,
     valid: field?.valid,
   }), [
     field?.errorMessage,
     field?.rows,
-    field?.rowErrorCount,
     field?.valid,
     processing,
     setValue,
@@ -108,6 +106,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
         valid: false,
         errorMessage: undefined,
         rows: field?.rows,
+        rowErrorCount: field?.rowErrorCount || 0,
       };
 
       const validateOptions = {
@@ -149,7 +148,6 @@ const useField = <T, >(options: Options): FieldType<T> => {
     validate,
     field?.rows,
     field?.rowErrorCount,
-    field?.valid,
   ]);
 
   return result;
