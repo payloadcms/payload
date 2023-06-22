@@ -402,7 +402,8 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
   };
 }
 
-function entityToJSONSchema(config: SanitizedConfig, incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig, interfaceNameDefinitions: Map<string, JSONSchema4>): JSONSchema4 {
+// This function is part of the public API and is exported through payload/utilities
+export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig, interfaceNameDefinitions: Map<string, JSONSchema4>): JSONSchema4 {
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity);
   const title = entity.typescript?.interface ? entity.typescript.interface : singular(toWords(entity.slug, true));
 
