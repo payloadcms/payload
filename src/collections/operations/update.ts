@@ -56,7 +56,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     depth,
     collection,
     collection: {
-      Model,
       config: collectionConfig,
     },
     where,
