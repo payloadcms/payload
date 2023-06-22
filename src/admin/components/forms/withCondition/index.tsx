@@ -3,7 +3,6 @@
 import React from 'react';
 import { FieldBase } from '../../../../fields/config/types';
 import { WatchCondition } from './WatchCondition';
-import { useFormFields } from '../Form/context';
 
 const withCondition = <P extends Record<string, unknown>>(Field: React.ComponentType<P>): React.FC<P> => {
   const CheckForCondition: React.FC<P> = (props) => {
@@ -31,15 +30,16 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
       path?: string
     };
 
-    const passesCondition = useFormFields(([fields]) => fields[path]?.passesCondition);
+    const [showField, setShowField] = React.useState(false);
 
-    if (passesCondition) {
+    if (showField) {
       return (
         <React.Fragment>
           <WatchCondition
             path={path}
             name={name}
             condition={condition}
+            setShowField={setShowField}
           />
           <Field {...props} />
         </React.Fragment>
@@ -51,6 +51,7 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
         path={path}
         name={name}
         condition={condition}
+        setShowField={setShowField}
       />
     );
   };

@@ -1039,10 +1039,34 @@ describe('fields', () => {
       await expect(fieldToToggle).toBeVisible();
     });
 
-    test('should show conditionl field based on user data', async () => {
+    test('should show conditional field based on user data', async () => {
       await page.goto(url.create);
       const userConditional = page.locator('input#field-userConditional');
       await expect(userConditional).toBeVisible();
+    });
+
+    test('should show conditional field based on fields nested within data', async () => {
+      await page.goto(url.create);
+
+      const parentGroupFields = page.locator('div#field-parentGroup > .group-field__wrap > .render-fields');
+      await expect(parentGroupFields).toHaveCount(1);
+
+      const toggle = page.locator('label[for=field-parentGroup__enableParentGroupFields]');
+      await toggle.click();
+
+      const toggledField = page.locator('input#field-parentGroup__siblingField');
+
+      await expect(toggledField).toBeVisible();
+    });
+
+    test('should show conditional field based on fields nested within siblingData', async () => {
+      await page.goto(url.create);
+
+      const toggle = page.locator('label[for=field-parentGroup__enableParentGroupFields]');
+      await toggle.click();
+
+      const fieldRelyingOnSiblingData = page.locator('input#field-reliesOnParentGroup');
+      await expect(fieldRelyingOnSiblingData).toBeVisible();
     });
   });
 });
