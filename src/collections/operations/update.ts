@@ -242,7 +242,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       // /////////////////////////////////////
 
       if (!shouldSaveDraft) {
-        await req.payload.db.updateOne({
+        result = await req.payload.db.updateOne({
           collection: collectionConfig.slug,
           locale,
           id,

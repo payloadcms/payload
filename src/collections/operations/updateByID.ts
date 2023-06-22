@@ -238,18 +238,12 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // /////////////////////////////////////
 
   if (!shouldSaveDraft) {
-    try {
-      result = await Model.findByIdAndUpdate(
-        { _id: id },
-        dataToUpdate,
-        { new: true },
-      );
-    } catch (error) {
-      // Handle uniqueness error from MongoDB
-      throw error.code === 11000 && error.keyValue
-        ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }], t)
-        : error;
-    }
+    result = await req.payload.db.updateOne({
+      collection: collectionConfig.slug,
+      locale,
+      id: `${id}`,
+      data: dataToUpdate,
+    });
   }
 
   result = JSON.parse(JSON.stringify(result));
