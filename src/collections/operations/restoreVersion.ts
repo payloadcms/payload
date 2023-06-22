@@ -100,7 +100,6 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     payload,
     id: parentDocID,
     query: findArgs,
-    Model,
     config: collectionConfig,
   });
 

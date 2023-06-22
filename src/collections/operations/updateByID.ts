@@ -58,7 +58,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     depth,
     collection,
     collection: {
-      Model,
       config: collectionConfig,
     },
     id,
@@ -109,11 +108,9 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
   const doc = await getLatestCollectionVersion({
     payload,
-    Model,
     config: collectionConfig,
     id,
     query: findArgs,
-    lean,
   });
 
   if (!doc && !hasWherePolicy) throw new NotFound(t);

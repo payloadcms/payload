@@ -1,25 +1,21 @@
-import { Where, docHasTimestamps } from '../types';
+import { docHasTimestamps } from '../types';
 import { Payload } from '../payload';
-import { CollectionModel, SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
+import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
 import { TypeWithVersion } from './types';
 import { FindArgs } from '../database/types';
 
 type Args = {
   payload: Payload
   query: FindArgs
-  lean?: boolean
   id: string | number
-  Model: CollectionModel
   config: SanitizedCollectionConfig
 }
 
 export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   payload,
   config,
-  Model,
   query,
   id,
-  lean = true,
 }: Args): Promise<T> => {
   let latestVersion: TypeWithVersion<T>;
 
