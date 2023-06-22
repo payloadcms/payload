@@ -194,6 +194,25 @@ describe('Fields', () => {
         },
       })).rejects.toThrow('The following field is invalid: decimalMax');
     });
+    it('should localize an array of numbers using hasMany', async () => {
+      const localizedHasMany = [5, 10];
+      const { id } = await payload.create({
+        collection: 'number-fields',
+        locale: 'en',
+        data: {
+          localizedHasMany,
+        },
+      });
+      const localizedDoc = await payload.findByID({
+        collection: 'number-fields',
+        locale: 'all',
+        id,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany);
+    });
   });
 
   describe('indexes', () => {

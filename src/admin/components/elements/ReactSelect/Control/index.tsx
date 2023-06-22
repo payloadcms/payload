@@ -1,14 +1,16 @@
 import React from 'react';
 import { components as SelectComponents, ControlProps } from 'react-select';
-import { Option } from '../../../forms/field-types/Relationship/types';
+import type { Option } from '../types';
 
 export const Control: React.FC<ControlProps<Option, any>> = (props) => {
   const {
     children,
     innerProps,
-    customProps: {
-      disableMouseDown,
-      disableKeyDown,
+    selectProps: {
+      customProps: {
+        disableMouseDown,
+        disableKeyDown,
+      } = {},
     } = {},
   } = props;
 
