@@ -2,7 +2,6 @@ import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
 import { Collection } from '../config/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { APIError, Forbidden, NotFound } from '../../errors';
 import { PayloadRequest } from '../../express/types';

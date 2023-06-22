@@ -5,7 +5,6 @@ import { Collection, TypeWithID } from '../config/types';
 import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { hasWhereAccessResult } from '../../auth/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
@@ -26,7 +25,6 @@ export type Arguments = {
 async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
   const {
     collection: {
-      Model,
       config: collectionConfig,
     },
     id,
@@ -55,7 +53,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   const { docs: versionDocs } = await req.payload.db.findVersions({
     collection: collectionConfig.slug,
     where: { id: { equals: id } },
-    locale: req.locale,
+    locale,
     limit: 1,
   });
 
@@ -107,18 +105,12 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // Update
   // /////////////////////////////////////
 
-  let result = await Model.findByIdAndUpdate(
-    { _id: parentDocID },
-    rawVersion.version,
-    { new: true },
-  );
+  let result = await req.payload.db.updateOne({
+    collection: collectionConfig.slug,
+    id: `${parentDocID}`,
+    data: rawVersion.version,
 
-  result = result.toJSON({ virtuals: true });
-
-  // custom id type reset
-  result.id = result._id;
-  result = JSON.parse(JSON.stringify(result));
-  result = sanitizeInternalFields(result);
+  });
 
   // /////////////////////////////////////
   // Save `previousDoc` as a version after restoring
