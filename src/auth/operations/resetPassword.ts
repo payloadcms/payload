@@ -75,11 +75,9 @@ async function resetPassword(args: Arguments): Promise<Result> {
     user._verified = true;
   }
 
-  const { updatedDocs } = await payload.db.update({
+  const { updatedDocs } = await payload.db.updateOne({
     collection: collectionConfig.slug,
-    where: {
-      id: { equals: user.id },
-    },
+    id: user.id,
     data: user,
   });
 
