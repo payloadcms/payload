@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import * as Sentry from '@sentry/node'
+import type { NextFunction, Request, Response } from 'express'
 import express from 'express'
 
 import type { PluginOptions } from './types'
 
-export const startSentry = (pluginOptions: PluginOptions): any => {
+export const startSentry = (pluginOptions: PluginOptions): void => {
   const { dsn, options } = pluginOptions
 
   try {
@@ -42,8 +44,12 @@ export const startSentry = (pluginOptions: PluginOptions): any => {
       }) as express.ErrorRequestHandler,
     )
 
-    // Should type these properly from Express package
-    app.use(function onError(err, req, res, next) {
+    app.use(function onError(
+      _err: unknown,
+      _req: Request,
+      res: Response & { sentry?: string },
+      _next: NextFunction,
+    ) {
       res.statusCode = 500
       res.end(res.sentry + '\n')
     })

@@ -10,9 +10,9 @@
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint src",
-    "lint:fix": "eslint --fix --ext .ts,.tsx src"
-    // Add clean and prepublishOnly scripts.
-    // Example: https://github.com/payloadcms/plugin-cloud/blob/main/package.json#L14-L15
+    "lint:fix": "eslint --fix --ext .ts,.tsx src",
+    "clean": "rimraf dist && rimraf dev/yarn.lock",
+    "prepublishOnly": "yarn clean && yarn build && yarn test"
   },
   "keywords": [
     "payload",
