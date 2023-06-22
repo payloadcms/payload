@@ -122,7 +122,6 @@ export interface DatabaseAdapter {
   findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
   findOne: FindOne;
   create: Create;
-  update: Update;
   updateOne: UpdateOne;
   deleteOne: DeleteOne;
   deleteMany: DeleteMany;
@@ -197,21 +196,10 @@ export type CreateArgs = {
 
 type Create = (args: CreateArgs) => Promise<Document>
 
-type UpdateArgs = {
-  collection: string
-  data: Record<string, unknown>
-  where: Where
-  draft?: boolean
-  locale?: string
-}
-
-type Update = (args: UpdateArgs) => Promise<Document>
-
-type UpdateOneArgs = {
+export type UpdateOneArgs = {
   collection: string,
   data: Record<string, unknown>,
-  where: Where,
-  draft?: boolean
+  id: string,
   locale?: string
 }
 
