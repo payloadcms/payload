@@ -234,6 +234,7 @@ const validateFilterOptions: Validate = async (value, { t, filterOptions, id, us
       const result = await payload.find({
         collection,
         depth: 0,
+        limit: 0,
         where: {
           and: [
             { id: { in: valueIDs } },
