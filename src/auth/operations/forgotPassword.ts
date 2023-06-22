@@ -23,6 +23,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
 
   let args = incomingArgs;
 
+
   // /////////////////////////////////////
   // beforeOperation - Collection
   // /////////////////////////////////////
@@ -74,9 +75,11 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     limit: 1,
   });
 
+
   let [user] = docs;
 
   if (!user) return null;
+
 
   user.resetPasswordToken = token;
   user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000); // 1 hour

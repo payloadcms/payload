@@ -1,7 +1,6 @@
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
-import { Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
@@ -85,7 +84,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   const { password } = data;
   const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
   const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft);
-  const lean = !shouldSavePassword;
 
   // /////////////////////////////////////
   // Access
@@ -106,18 +104,16 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     limit: 1,
   };
 
-  const doc = await getLatestCollectionVersion({
+  const docWithLocales = await getLatestCollectionVersion({
     payload,
     config: collectionConfig,
     id,
     query: findArgs,
   });
 
-  if (!doc && !hasWherePolicy) throw new NotFound(t);
-  if (!doc && hasWherePolicy) throw new Forbidden(t);
+  if (!docWithLocales && !hasWherePolicy) throw new NotFound(t);
+  if (!docWithLocales && hasWherePolicy) throw new Forbidden(t);
 
-  let docWithLocales: Document = JSON.stringify(lean ? doc : doc.toJSON({ virtuals: true })); // TODO: migrate this doc.toJSON
-  docWithLocales = JSON.parse(docWithLocales);
 
   const originalDoc = await afterRead({
     depth: 0,
@@ -147,7 +143,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // Delete any associated files
   // /////////////////////////////////////
 
-  await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc, t, overrideDelete: false });
+  await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc: docWithLocales, t, overrideDelete: false });
 
   // /////////////////////////////////////
   // beforeValidate - Fields
