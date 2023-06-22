@@ -205,10 +205,9 @@ export type UpdateOneArgs = {
 
 type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
-type DeleteOneArgs = {
+export type DeleteOneArgs = {
   collection: string,
-  data: Record<string, unknown>,
-  where: Where,
+  id: string,
 }
 
 type DeleteOne = (args: DeleteOneArgs) => Promise<Document>

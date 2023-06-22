@@ -1,6 +1,5 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../express/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { BeforeOperationHook, Collection } from '../config/types';
@@ -40,7 +39,6 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   const {
     depth,
     collection: {
-      Model,
       config: collectionConfig,
     },
     id,
@@ -99,15 +97,12 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   // Delete document
   // /////////////////////////////////////
 
-  const doc = await Model.findOneAndDelete({ _id: id });
 
-  let result: Document = doc.toJSON({ virtuals: true });
+  let result = await req.payload.db.deleteOne({
+    collection: collectionConfig.slug,
+    id: `${id}`,
+  });
 
-  // custom id type reset
-  result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
-  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // Delete Preferences
