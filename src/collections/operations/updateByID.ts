@@ -239,10 +239,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     });
   }
 
-  result = JSON.parse(JSON.stringify(result));
-  result.id = result._id as string | number;
-  result = sanitizeInternalFields(result);
-
   // /////////////////////////////////////
   // Create version
   // /////////////////////////////////////

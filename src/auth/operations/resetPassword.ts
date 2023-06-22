@@ -75,13 +75,12 @@ async function resetPassword(args: Arguments): Promise<Result> {
     user._verified = true;
   }
 
-  const { updatedDocs } = await payload.db.updateOne({
+  const doc = await payload.db.updateOne({
     collection: collectionConfig.slug,
     id: user.id,
     data: user,
   });
 
-  const doc = sanitizeInternalFields(updatedDocs[0]);
 
   await authenticateLocalStrategy({ password: data.password, doc });
 
