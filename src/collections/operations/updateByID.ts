@@ -5,7 +5,7 @@ import { Document } from '../../types';
 import { Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
-import { APIError, Forbidden, NotFound, ValidationError } from '../../errors';
+import { APIError, Forbidden, NotFound } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { saveVersion } from '../../versions/saveVersion';

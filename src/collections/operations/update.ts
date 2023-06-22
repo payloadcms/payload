@@ -5,7 +5,7 @@ import { Where } from '../../types';
 import { BulkOperationResult, Collection } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
-import { APIError, ValidationError } from '../../errors';
+import { APIError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { saveVersion } from '../../versions/saveVersion';
 import { uploadFiles } from '../../uploads/uploadFiles';
