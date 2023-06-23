@@ -7,7 +7,17 @@ import { getHandleUpload } from './handleUpload'
 import { extendWebpackConfig } from './webpack'
 
 export interface Args {
+  /**
+   * AWS S3 client configuration. Highly dependent on your AWS setup.
+   *
+   * [AWS.S3ClientConfig Docs](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html)
+   */
   config: AWS.S3ClientConfig
+  /**
+   * Bucket name to upload files to.
+   *
+   * Must follow [AWS S3 bucket naming conventions](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html).
+   */
   bucket: string
   acl?: 'private' | 'public-read'
 }
