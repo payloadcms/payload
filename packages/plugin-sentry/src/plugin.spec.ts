@@ -22,15 +22,22 @@ describe('plugin', () => {
     assertPluginRan(config)
   })
 
+  it('should default enable: true', () => {
+    const plugin = sentry({ dsn: 'asdf' })
+    const config = plugin(createConfig())
+
+    assertPluginRan(config)
+  })
+
   it('should not run if dsn is not provided', () => {
-    const plugin = sentry({ enabled: true, dsn: undefined })
+    const plugin = sentry({ enabled: true, dsn: null })
     const config = plugin(createConfig())
 
     assertPluginDidNotRun(config)
   })
 
   it('should respect enabled: false', () => {
-    const plugin = sentry({ enabled: false })
+    const plugin = sentry({ enabled: false, dsn: null })
     const config = plugin(createConfig())
 
     assertPluginDidNotRun(config)
