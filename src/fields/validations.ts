@@ -24,24 +24,44 @@ import canUseDOM from '../utilities/canUseDOM';
 import { isValidID } from '../utilities/isValidID';
 import { getIDType } from '../utilities/getIDType';
 
-export const number: Validate<unknown, unknown, NumberField> = (value: string, { t, required, min, max }) => {
-  const parsedValue = parseFloat(value);
+export const number: Validate<unknown, unknown, NumberField> = (value: number | number[], { t, required, min, max, minRows, maxRows, hasMany }) => {
+  const toValidate: number[] = Array.isArray(value) ? value : [value];
 
-  if ((value && typeof parsedValue !== 'number') || (required && Number.isNaN(parsedValue)) || (value && Number.isNaN(parsedValue))) {
-    return t('validation:enterNumber');
+  // eslint-disable-next-line no-restricted-syntax
+  for (const valueToValidate of toValidate) {
+    const floatValue = parseFloat(valueToValidate as unknown as string);
+    if ((value && typeof floatValue !== 'number') || (required && Number.isNaN(floatValue)) || (value && Number.isNaN(floatValue))) {
+      return t('validation:enterNumber');
+    }
+
+    if (typeof max === 'number' && floatValue > max) {
+      return t('validation:greaterThanMax', { value, max, label: t('value') });
+    }
+
+    if (typeof min === 'number' && floatValue < min) {
+      return t('validation:lessThanMin', { value, min, label: t('value') });
+    }
+
+    if (required && typeof floatValue !== 'number') {
+      return t('validation:required');
+    }
   }
 
-  if (typeof max === 'number' && parsedValue > max) {
-    return t('validation:greaterThanMax', { value, max });
-  }
-
-  if (typeof min === 'number' && parsedValue < min) {
-    return t('validation:lessThanMin', { value, min });
-  }
-
-  if (required && typeof parsedValue !== 'number') {
+  if (required && toValidate.length === 0) {
     return t('validation:required');
   }
+
+
+  if (hasMany === true) {
+    if (minRows && toValidate.length < minRows) {
+      return t('validation:lessThanMin', { value: toValidate.length, min: minRows, label: t('rows') });
+    }
+
+    if (maxRows && toValidate.length > maxRows) {
+      return t('validation:greaterThanMax', { value: toValidate.length, max: maxRows, label: t('rows') });
+    }
+  }
+
 
   return true;
 };
@@ -214,6 +234,7 @@ const validateFilterOptions: Validate = async (value, { t, filterOptions, id, us
       const result = await payload.find({
         collection,
         depth: 0,
+        limit: 0,
         where: {
           and: [
             { id: { in: valueIDs } },
@@ -277,8 +298,8 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
 export const relationship: Validate<unknown, unknown, RelationshipField> = async (value: RelationshipValue, options) => {
   const {
     required,
-    min,
-    max,
+    minRows,
+    maxRows,
     relationTo,
     payload,
     t,
@@ -289,12 +310,12 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
   }
 
   if (Array.isArray(value)) {
-    if (min && value.length < min) {
-      return t('validation:lessThanMin', { count: min, label: t('rows') });
+    if (minRows && value.length < minRows) {
+      return t('validation:lessThanMin', { value: value.length, min: minRows, label: t('rows') });
     }
 
-    if (max && value.length > max) {
-      return t('validation:greaterThanMax', { count: max, label: t('rows') });
+    if (maxRows && value.length > maxRows) {
+      return t('validation:greaterThanMax', { value: value.length, max: maxRows, label: t('rows') });
     }
   }
 

@@ -8,7 +8,9 @@ const baseClass = 'value-container';
 
 export const ValueContainer: React.FC<ValueContainerProps<Option, any>> = (props) => {
   const {
-    customProps,
+    selectProps: {
+      customProps,
+    } = {},
   } = props;
 
   return (
