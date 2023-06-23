@@ -13,7 +13,7 @@ export interface Args {
 }
 
 export const s3Adapter =
-  ({ config, bucket, acl }: Args): Adapter =>
+  ({ config = {}, bucket, acl }: Args): Adapter =>
   ({ collection, prefix }): GeneratedAdapter => {
     let storageClient: AWS.S3 | null = null
     const getStorageClient: () => AWS.S3 = () => {
