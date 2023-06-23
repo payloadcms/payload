@@ -130,6 +130,7 @@ const adapter = s3Adapter({
 
 // Now you can pass this adapter to the plugin
 ```
+Note that the credentials option does not have to be used when you are using PayloadCMS on an EC2 instance that has been configured with an IAM Role with necessary permissions.
 
 Other S3 Client configuration is documented [here](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html).
 
