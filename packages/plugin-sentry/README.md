@@ -40,7 +40,7 @@ export default config;
 
 ### Data Source Name (DSN) and where to find it
 
-- `dsn` : string[] | required
+- `dsn` : string | required
 
   Sentry automatically assigns a DSN when you create a project, the unique DSN informs Sentry where to send events so they are associated with the correct project.
 
