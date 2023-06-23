@@ -7,7 +7,7 @@ import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
 import { ConnectOptions } from 'mongoose';
 import React from 'react';
-import { LoggerOptions } from 'pino';
+import { DestinationStream, LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
 import { Payload } from '../payload';
 import {
@@ -116,6 +116,8 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions;
+  destinationStream?: DestinationStream;
+
   config?: Promise<SanitizedConfig>
 };
 
