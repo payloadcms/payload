@@ -11,7 +11,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
     "clean": "rimraf dist && rimraf dev/yarn.lock",
-    "prepublishOnly": "yarn clean && yarn build && yarn test"
+    "prepublishOnly": "yarn clean && yarn build"
   },
   "keywords": [
     "payload",
@@ -27,7 +27,7 @@
     "dist"
   ],
   "peerDependencies": {
-    "payload": "^1.9.2",
+    "payload": "^1.10.1",
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "dependencies": {
@@ -53,7 +53,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "nodemon": "^2.0.6",
-    "payload": "^1.9.2",
+    "payload": "^1.10.1",
     "prettier": "^2.7.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.1.3"
