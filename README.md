@@ -165,7 +165,7 @@ const adapter = gcsAdapter({
     // you can choose any method for authentication, and authorization which is being provided by `@google-cloud/storage`
     keyFilename: './gcs-credentials.json',
     //OR
-    credentials: JSON.parse(process.env.GCS_CREDENTIALS) // this env variable will have stringify version of your credentials.json file
+    credentials: JSON.parse(process.env.GCS_CREDENTIALS || "{}") // this env variable will have stringify version of your credentials.json file
   },
   bucket: process.env.GCS_BUCKET,
 })
