@@ -189,7 +189,7 @@ For instructions regarding how to develop with this plugin locally, [click here]
 
 ## Questions
 
-Please contact [Payload](dev@payloadcms.com) with any questions about using this plugin.
+Please contact [Payload](mailto:dev@payloadcms.com) with any questions about using this plugin.
 
 ## Credit
 
