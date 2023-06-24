@@ -2,7 +2,6 @@
 import mongoose from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
-import { SanitizedConfig } from 'payload/config';
 import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
 import getBuildQueryPlugin from './queries/buildQuery';
 import buildCollectionSchema from './models/buildCollectionSchema';
@@ -12,6 +11,8 @@ import { getVersionsModelName } from '../versions/getVersionsModelName';
 import type { MongooseAdapter } from '.';
 import { buildGlobalModel } from './models/buildGlobalModel';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
+import type { SanitizedConfig } from '../config/types';
+
 
 export async function init(
   this: MongooseAdapter,
