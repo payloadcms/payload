@@ -10,7 +10,7 @@ if (testConfigDir) {
   setPaths(testDir);
   generateGraphQLSchema();
 } else {
-  // Generate types for entire directory
+  // Generate graphql schema for entire directory
   testDir = __dirname;
 
   fs.readdirSync(__dirname, { withFileTypes: true })
